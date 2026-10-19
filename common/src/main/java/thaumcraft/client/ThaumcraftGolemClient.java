@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import thaumcraft.client.gui.GuiGolem;
 import thaumcraft.client.gui.GuiTravelingTrunk;
+import thaumcraft.client.renderers.entity.RenderDart;
 import thaumcraft.client.renderers.entity.RenderGolemBase;
 import thaumcraft.client.renderers.entity.RenderGolemBobber;
 import thaumcraft.client.renderers.entity.RenderTravelingTrunk;
@@ -34,6 +35,7 @@ public final class ThaumcraftGolemClient {
         EntityRendererRegistry.register(ThaumcraftGolems.GOLEM, RenderGolemBase::new);
         EntityRendererRegistry.register(ThaumcraftGolems.GOLEM_BOBBER, RenderGolemBobber::new);
         EntityRendererRegistry.register(ThaumcraftGolems.TRUNK, RenderTravelingTrunk::new);
+        EntityRendererRegistry.register(ThaumcraftGolems.DART, RenderDart::new);
         MenuRegistry.registerScreenFactory(ThaumcraftGolems.GOLEM_MENU.get(), GuiGolem::new);
         MenuRegistry.registerScreenFactory(ThaumcraftGolems.TRUNK_MENU.get(), GuiTravelingTrunk::new);
         for (var placer : ThaumcraftGolems.placerItems()) ItemPropertiesRegistry.register(placer, HAS_CORE,

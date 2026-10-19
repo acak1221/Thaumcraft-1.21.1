@@ -4,6 +4,16 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально19.10 (двенадцатая группа: дротикомёт голема `R`, Claude): реализовано, собрано, game-tested 160/160
+
+Контракт и реализация: [golem-dart](analysis/2026-10-19-golem-dart.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemDartRules`, `EntityDart` (родная стрела, сущность `thaumcraft:dart`), цель `Dart` в `GuardGolemGoals` (приоритет 2, только при `R`), `EntityGolemBase.shootDart` и левая рука (`LEFT_ARM`), перестройка целей при установке `R`, предмет `golem_decoration_dart` с аркан-рецептом, `RenderDart`, lang en/ru, подсказки Air/Water.
+**Built / game-tested:** `:common:test` **447 JUnit** (+10: `GolemDartRulesTest` 7, `GolemDartAssetsTest` 3), `:fabric:remapJar`, `:fabric:runGameTest` **160/160** (+`golemDartLauncherShootsAtItsIntervalAndHurtsWhatItHits`: пять настоящих големов на дорожках), JAR SHA-256 `391e9031…faa8`.
+**Находки:** сервер падал бы при сохранении мира с летящим дротиком (`AbstractArrow` с пустым стеком) — исправлено; Guard берёт БЛИЖАЙШУЮ цель, поэтому дорожки GameTest нужно разносить; широкая область очистки ломает соседний тест (Fetter).
+**Мутации:** 42 (19 JUnit + 23 GameTest) запрошены у GitHub; ожидаемые выжившие — `shoots-without-sight`, `spread-ignores-water`.
+**Seen:** нет. **Не проверено:** вид дротика и позы руки, Butcher с дротиком, стрельба через препятствия, статистика разброса, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** горящий предмет улова (`EntityItem.setFire(2)` при Fire; нужен `fireTicks` в `DeferredItemDrops.Pending`), затем M01 R10–R16, M03/M08, M07 enchant-инфузия, Thaumatorium.
+
 ### Актуально19.10 (одиннадцатая группа: Traveling Trunk, Claude): реализовано, собрано, game-tested 159/159
 
 Контракт и реализация: [traveling-trunk](analysis/2026-10-19-traveling-trunk.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

@@ -9,12 +9,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
+import thaumcraft.common.items.golems.GolemDartRules;
 import thaumcraft.common.items.golems.GolemData;
+import thaumcraft.common.items.golems.GolemDecorations;
+import thaumcraft.common.items.golems.GolemUpgrade;
 
-/** Shared ordinary melee, with SEPARATE Guard4 hostile and Butcher9 surplus policies. */
+/** Shared ordinary melee (and the dart launcher's ranged attack), with SEPARATE Guard4 hostile and Butcher9 surplus policies. */
 final class GuardGolemGoals {
     private final EntityGolemBase golem;
     private final Melee melee = new Melee();
+    private final Dart dart = new Dart();
     private final Retaliate retaliate = new Retaliate();
     private final Nearest nearest = new Nearest();
     private final OldestButcher oldest = new OldestButcher();
@@ -28,6 +32,7 @@ final class GuardGolemGoals {
     void install() {
         int core = golem.getGolemCore();
         if (core != GolemData.GUARD && core != GolemData.BUTCHER) return;
+        if (GolemDecorations.has(golem.getDecoration(), GolemDecorations.DART)) golem.addWorkGoal(2, dart); // Original AIDartAttack, priority 2.
         golem.addWorkGoal(3, melee);
         if (core == GolemData.GUARD) {
             golem.addTargetGoal(1, retaliate);
@@ -48,11 +53,12 @@ final class GuardGolemGoals {
     }
     void reset() {
         boolean ours = golem.getGolemCore() == GolemData.GUARD || golem.getGolemCore() == GolemData.BUTCHER
-                || melee.running || retaliate.chosen != null || nearest.chosen != null || oldest.chosen != null;
+                || melee.running || dart.running || retaliate.chosen != null || nearest.chosen != null || oldest.chosen != null;
         attempting = false;
         strikeTarget = null;
         strikeCore = GolemData.NO_CORE;
         melee.stop();
+        dart.stop();
         retaliate.chosen = nearest.chosen = oldest.chosen = null;
         if (ours && golem.level() instanceof ServerLevel && golem.getTarget() != null) golem.setTarget(null);
     }
@@ -62,10 +68,12 @@ final class GuardGolemGoals {
         if (target != null && !targetPolicy(target)) {
             golem.setTarget(null);
             melee.stop();
+            dart.stop();
         }
     }
     boolean hasCombatRoute() {
         LivingEntity target = golem.getTarget();
+        if (working() && dart.running && dart.chosen == target && targetPolicy(target) && !golem.getNavigation().isDone()) return true;
         return working() && melee.running && targetPolicy(target) && melee.running && melee.victim == target
                 && golem.getTarget() == target && !golem.getNavigation().isDone();
     }
@@ -138,6 +146,60 @@ final class GuardGolemGoals {
             }
             if (attackCooldown == 0 && running && victim == target && golem.getTarget() == target
                     && golem.isWithinGuardReach(target) && golem.hasLineOfSight(target)) strike(target);
+        }
+    }
+
+    /**
+     * Original AIDartAttack: a target at least three blocks away is chased and shot at, one dart per interval (30 ticks, 8 fewer for every Air
+     * upgrade), only while it is in sight and within 80% of the golem's range. The wait survives a stop only as half an interval. Nearer than
+     * three blocks the melee goal (lower priority) takes over. Like the original it continues only while the golem has a path.
+     */
+    private final class Dart extends Goal {
+        private LivingEntity chosen;
+        private boolean running;
+        private int wait;
+
+        Dart() { setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK)); }
+        private int interval() { return GolemDartRules.interval(golem.getUpgradeAmount(GolemUpgrade.AIR)); }
+        private double distanceSq(LivingEntity target) { return golem.distanceToSqr(target.getX(), target.getBoundingBox().minY, target.getZ()); }
+
+        @Override public boolean requiresUpdateEveryTick() { return true; }
+        @Override public boolean canUse() {
+            LivingEntity target = golem.getTarget();
+            if (target == null || !working()) return false;
+            if (!targetPolicy(target)) {
+                golem.setTarget(null); // Original: not a valid target any more, forget it.
+                return false;
+            }
+            if (GolemDartRules.tooClose(distanceSq(target))) return false;
+            chosen = target;
+            return true;
+        }
+        @Override public boolean canContinueToUse() { return running && canUse() && !golem.getNavigation().isDone(); }
+        @Override public void start() {
+            running = true;
+            wait = GolemDartRules.firstDelay(interval());
+        }
+        @Override public void stop() {
+            boolean wasRunning = running;
+            running = false;
+            chosen = null;
+            wait = GolemDartRules.firstDelay(interval());
+            if (wasRunning) golem.getNavigation().stop();
+        }
+        @Override public void tick() {
+            LivingEntity target = chosen;
+            if (!running || target == null || !working() || golem.getTarget() != target || !golem.loadedNavigationArea(target.blockPosition())) return;
+            double distance = distanceSq(target);
+            boolean sees = golem.getSensing().hasLineOfSight(target);
+            golem.getNavigation().moveTo(target, 1);
+            if (!sees) return;
+            golem.getLookControl().setLookAt(target, 30, 30);
+            wait = GolemDartRules.wait(wait);
+            if (wait <= 0 && GolemDartRules.inReach(distance, golem.getRange())) {
+                golem.shootDart(target);
+                wait = interval();
+            }
         }
     }
 

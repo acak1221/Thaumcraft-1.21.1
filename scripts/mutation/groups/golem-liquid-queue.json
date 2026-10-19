@@ -1,0 +1,178 @@
+{
+ "description": "Entropy queue of the Decanting (Liquid) golem (docs/analysis/2026-10-19-golem-liquid-queue.md)",
+ "watch": {
+  "junit": [
+   "GolemLiquidQueueTest"
+  ],
+  "gametests": [
+   "entropyQueuesTheFarthestConnectedWaterForLiquidGolems"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.golems.*"
+ ],
+ "mutants": [
+  {
+   "id": "nearest-first",
+   "name": "nearest first",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "Comparator.reverseOrder()",
+   "new": "Comparator.naturalOrder()"
+  },
+  {
+   "id": "six-neighbours-only",
+   "name": "six neighbours only",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "if (dx == 0 && dy == 0 && dz == 0) continue;",
+   "new": "if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) != 1) continue;"
+  },
+  {
+   "id": "range-exclusive",
+   "name": "range exclusive",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "return (float) origin.distSqr(cell) <= range * range;",
+   "new": "return (float) origin.distSqr(cell) < range * range;"
+  },
+  {
+   "id": "walk-ignores-the-range",
+   "name": "walk ignores the range",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "if (!inRange(start, cell, range) || !connects.test(cell)) continue;",
+   "new": "if (!connects.test(cell)) continue;"
+  },
+  {
+   "id": "walk-ignores-connectivity",
+   "name": "walk ignores connectivity",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "if (!inRange(start, cell, range) || !connects.test(cell)) continue;",
+   "new": "if (!inRange(start, cell, range)) continue;"
+  },
+  {
+   "id": "flowing-cells-are-queued",
+   "name": "flowing cells are queued",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "if (source.test(cell)) found.putIfAbsent",
+   "new": "if (true) found.putIfAbsent"
+  },
+  {
+   "id": "no-cap",
+   "name": "no cap",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "if (fresh && visited.size() >= MAX_VISITED) break search;",
+   "new": ""
+  },
+  {
+   "id": "z-loop-runs-backwards",
+   "name": "z loop runs backwards",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "dz = index % 3 - 1;",
+   "new": "dz = 1 - index % 3;"
+  },
+  {
+   "id": "distance-from-the-visiting-cell",
+   "name": "distance from the visiting cell",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemLiquidQueue.java",
+   "old": "found.putIfAbsent(cell, (long) start.distSqr(cell));",
+   "new": "found.putIfAbsent(cell, (long) frame.pos.distSqr(cell));"
+  },
+  {
+   "id": "queue-never-used",
+   "name": "queue never used",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java",
+   "old": "if (golem.getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0) return anchor;",
+   "new": "if (true) return anchor;"
+  },
+  {
+   "id": "queue-used-without-entropy",
+   "name": "queue used without Entropy",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java",
+   "old": "if (golem.getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0) return anchor;",
+   "new": "",
+   "expect": "survives",
+   "reason": "the entity-level gate refuses every queued target that is not the marked block, so a golem without Entropy only wastes pulses until the marked block itself comes up; the outcome is the same"
+  },
+  {
+   "id": "collection-checks-the-distance-to-the-source",
+   "name": "collection checks the distance to the source",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "&& getNavigation().isDone() && waterAnchorIntent != null\n                && distanceToSqr(waterAnchorIntent.getX() + .5, waterAnchorIntent.getY() + .5, waterAnchorIntent.getZ() + .5) < 4",
+   "new": "&& getNavigation().isDone() && waterAnchorIntent != null\n                && distanceToSqr(source.getX() + .5, source.getY() + .5, source.getZ() + .5) < 4"
+  },
+  {
+   "id": "anchor-never-recorded",
+   "name": "anchor never recorded",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "waterAnchorIntent = anchor.immutable();",
+   "new": ""
+  },
+  {
+   "id": "walk-passes-through-anything",
+   "name": "walk passes through anything",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java",
+   "old": "pos -> loaded(server, pos) && server.getBlockState(pos).is(Blocks.WATER),",
+   "new": "pos -> loaded(server, pos),"
+  },
+  {
+   "id": "queue-built-with-a-tiny-range",
+   "name": "queue built with a tiny range",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java",
+   "old": "queue = new ArrayDeque<>(GolemLiquidQueue.build(anchor.pos(), range,",
+   "new": "queue = new ArrayDeque<>(GolemLiquidQueue.build(anchor.pos(), 1f,"
+  },
+  {
+   "id": "entity-drops-the-entropy-gate",
+   "name": "entity drops the Entropy gate",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "if (getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0 || !GolemLiquidQueue.inRange(waterAnchorIntent, source, getRange())",
+   "new": "if (!GolemLiquidQueue.inRange(waterAnchorIntent, source, getRange())",
+   "expect": "survives",
+   "reason": "the queue is never offered without Entropy (LiquidGolemGoals.nextTarget returns the marked block), so the entity-level gate is a second, redundant guard"
+  },
+  {
+   "id": "entity-drops-the-range-gate",
+   "name": "entity drops the range gate",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "|| !GolemLiquidQueue.inRange(waterAnchorIntent, source, getRange())\n                        || !LiquidGolemGoals.sourceWater(waterWorkLevel, waterAnchorIntent, anchorState)) return false;",
+   "new": "|| !LiquidGolemGoals.sourceWater(waterWorkLevel, waterAnchorIntent, anchorState)) return false;",
+   "expect": "survives",
+   "reason": "the queue is built within the range and every entry is checked against it again in nextTarget, so the entity-level range gate is a second, redundant guard"
+  },
+  {
+   "id": "entries-are-not-re-validated",
+   "name": "entries are not re-validated",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java",
+   "old": "if (sourceWater(server, pos, state)) return new Source(pos.immutable(), state);",
+   "new": "return new Source(pos.immutable(), state);",
+   "expect": "survives",
+   "reason": "a stale entry is refused by the entity-level source check and only costs one pulse; the outcome is the same"
+  },
+  {
+   "id": "entries-beyond-the-range-are-used",
+   "name": "entries beyond the range are used",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java",
+   "old": "if (!loaded(server, pos) || !GolemLiquidQueue.inRange(anchor.pos(), pos, range)) continue;",
+   "new": "if (!loaded(server, pos)) continue;",
+   "expect": "survives",
+   "reason": "the queue is built within the range and the entity-level range gate refuses anything beyond it, so this check in nextTarget only saves a pulse"
+  }
+ ]
+}

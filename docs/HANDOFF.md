@@ -4,6 +4,17 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально19.10 (седьмая группа: аксессуары голема, Claude): реализовано, собрано, game-tested 154/154
+
+Контракт и реализация: [golem-decorations](analysis/2026-10-19-golem-decorations.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemDecorations` (чистые правила), `GolemData.decoration` (JSON/сеть: бит 0x20 + строка/NBT), семь предметов `golem_decoration_*` и аркан-рецептов, установка ПКМ, эффекты (здоровье, броня, скорость, урон, радиус, ремонт, пометка опыта у забрала),
+NBT `Decoration`, подсказка плейсера, сохранение при обычной отдаче колокольчиком (приседающая разборка теряет), псевдонимы книги `Tiny*`, иконки, lang en/ru, запись `lastHurtByPlayerTime` в accesswidener.
+**Built / game-tested:** `:common:test` **403 JUnit** (+10 `GolemDecorationsTest`), `:fabric:remapJar`, `:fabric:runGameTest` **154/154** (+`golemAccessoriesInstallChangeStatsAndSurviveTheBell`), JAR SHA-256 `9668a7c3…1fc40`.
+Асинхронные дорожки: настоящий Guard с забралом убил паука — 5 опыта (без забрала 0); ремонт феской 50 тиков против 76.
+**Мутации:** 25 по одной, все ловятся (11 чистых правил — JUnit; 14 проводок — GameTest/JUnit). Урок: скрипт читал только исключения синхронных тестов и «пропустил» две асинхронные мутации; после правки диагностики обе ловятся.
+**Seen:** нет. **Не проверено:** модель/накладки на голема, значок плейсера, дротик `R` (не перенесён), сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** нечёткое сравнение предметов Entropy ([контракт](analysis/2026-10-19-golem-item-match.md)), очередь Liquid, дротик `R`, Traveling Trunk.
+
 ### Актуально19.10 (шестая группа: продвинутый голем, Claude): реализовано, собрано, game-tested 153/153
 
 Контракт и реализация: [golem-advanced](analysis/2026-10-19-golem-advanced.md); аудит и независимая проверка сборки в контейнере: [full-project-audit](analysis/2026-10-19-full-project-audit.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`, не публиковалось.

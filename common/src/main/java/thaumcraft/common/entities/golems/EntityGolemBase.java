@@ -80,6 +80,7 @@ import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemGuardTargets;
 import thaumcraft.common.items.golems.GolemItemMatch;
+import thaumcraft.common.items.golems.GolemLiquidQueue;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUpgrades;
@@ -185,7 +186,7 @@ public class EntityGolemBase extends AbstractGolem {
     private boolean checkingButcherPosition, checkingButcherPopulation;
     private BlockPos throwTarget; // Non-null only during the private worker's queue publication.
     private ServerLevel waterWorkLevel;
-    private BlockPos waterSourceIntent, waterHomePosition;
+    private BlockPos waterSourceIntent, waterHomePosition, waterAnchorIntent;
     private BlockState waterSourceState;
     private Direction waterHomeFace;
     private TileCrucible waterHomeIntent;
@@ -1533,12 +1534,21 @@ public class EntityGolemBase extends AbstractGolem {
                 && waterHomePosition.equals(getHomePosition()) && waterHomeFace == getHomeFacing()
                 && currentWaterHome(waterHomeIntent);
     }
+    /**
+     * The source is either a marked block itself or, with Entropy, ordinary source water within the golem's range of a marked block
+     * that is itself still ordinary source water (the anchor the queue grows from, original AILiquidGather:225-262).
+     */
     private boolean markedSourceState(BlockPos source, BlockState expected) {
-        if (waterWorkLevel == null || source == null || expected == null || !LiquidGolemGoals.loaded(waterWorkLevel, source)) return false;
+        if (waterWorkLevel == null || source == null || expected == null || waterAnchorIntent == null
+                || !LiquidGolemGoals.loaded(waterWorkLevel, source) || !LiquidGolemGoals.loaded(waterWorkLevel, waterAnchorIntent)) return false;
         for (GolemMarker marker : markers) {
-            if (marker.dimension().equals(waterWorkLevel.dimension().location()) && marker.pos().equals(source)) {
-                return waterWorkLevel.getBlockState(source) == expected && LiquidGolemGoals.sourceWater(waterWorkLevel, source, expected);
+            if (!marker.dimension().equals(waterWorkLevel.dimension().location()) || !marker.pos().equals(waterAnchorIntent)) continue;
+            if (!waterAnchorIntent.equals(source)) {
+                BlockState anchorState = waterWorkLevel.getBlockState(waterAnchorIntent);
+                if (getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0 || !GolemLiquidQueue.inRange(waterAnchorIntent, source, getRange())
+                        || !LiquidGolemGoals.sourceWater(waterWorkLevel, waterAnchorIntent, anchorState)) return false;
             }
+            return waterWorkLevel.getBlockState(source) == expected && LiquidGolemGoals.sourceWater(waterWorkLevel, source, expected);
         }
         return false;
     }
@@ -1546,7 +1556,8 @@ public class EntityGolemBase extends AbstractGolem {
     public boolean canCollectSourceWater(BlockPos source, BlockState expected) {
         return waterSourceIntent != null && waterSourceIntent.equals(source) && waterSourceState == expected
                 && waterBindingCurrent() && liquid.ownsCollectionAttempt(source, expected)
-                && getNavigation().isDone() && distanceToSqr(source.getX() + .5, source.getY() + .5, source.getZ() + .5) < 4
+                && getNavigation().isDone() && waterAnchorIntent != null
+                && distanceToSqr(waterAnchorIntent.getX() + .5, waterAnchorIntent.getY() + .5, waterAnchorIntent.getZ() + .5) < 4
                 && waterSpace() >= GolemWaterCargo.BUCKET && markedSourceState(source, expected);
     }
     /** AFTER root's confirmed removal: do NOT require the old source/home to remain present. */
@@ -1568,14 +1579,17 @@ public class EntityGolemBase extends AbstractGolem {
         waterMb = expectedAmountMb - accepted;
         return true; // Root raw-adds to this exact crucible NEXT, before any feedback callback.
     }
-    boolean collectMarkedSourceWater(BlockPos source, BlockState state) {
-        if (busy || !liquidReady() || !liquid.ownsCollectionAttempt(source, state) || !(level() instanceof ServerLevel server)) return false;
+    boolean collectMarkedSourceWater(BlockPos source, BlockState state) { return collectMarkedSourceWater(source, source, state); }
+    /** {@code anchor} is the marked block next to the golem; {@code source} is the block drained, the anchor itself unless Entropy queued another. */
+    boolean collectMarkedSourceWater(BlockPos anchor, BlockPos source, BlockState state) {
+        if (busy || !liquidReady() || !liquid.ownsCollectionAttempt(anchor, source, state) || !(level() instanceof ServerLevel server)) return false;
         int before = waterMb;
         busy = true;
         try {
             TileCrucible home = findWaterHome();
             if (home == null) { liquid.reset(); return false; }
             bindWaterWork(server, home, source, state);
+            waterAnchorIntent = anchor.immutable();
             if (!GolemHarvestPlatform.mayInteract(this, home.getBlockPos()) || !currentWaterHome(home)) { liquid.reset(); return false; }
             if (!GolemHarvestPlatform.mayInteract(this, source)) return false;
             waterPermissionReady = true;
@@ -1605,7 +1619,7 @@ public class EntityGolemBase extends AbstractGolem {
     }
     private void finishWaterWork(ServerLevel server, int before) {
         waterWorkLevel = null;
-        waterSourceIntent = waterHomePosition = null;
+        waterSourceIntent = waterHomePosition = waterAnchorIntent = null;
         waterSourceState = null;
         waterHomeFace = null;
         waterHomeIntent = null;

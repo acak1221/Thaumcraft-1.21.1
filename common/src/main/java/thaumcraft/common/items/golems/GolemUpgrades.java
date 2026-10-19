@@ -119,8 +119,15 @@ public final class GolemUpgrades {
     public static float speed(float materialSpeed, int air) { return speed(materialSpeed, air, false); }
 
     /** Original E:376-383: Air first, then {@code ×1.1f} for an advanced golem (float products, in this order). */
-    public static float speed(float materialSpeed, int air, boolean advanced) {
-        float speed = materialSpeed;
+    public static float speed(float materialSpeed, int air, boolean advanced) { return speed(materialSpeed, air, advanced, ""); }
+
+    /**
+     * Original E:329-335: the material speed, then the bowtie's 1.1 and the plating's 0.88 (E:329-331), then Air, then the
+     * advanced golem's 1.1 (float products, in this order). An empty decoration multiplies by exactly 1.0f, so the result
+     * is bit-for-bit the undecorated one.
+     */
+    public static float speed(float materialSpeed, int air, boolean advanced, String decoration) {
+        float speed = materialSpeed * GolemDecorations.speedFactor(decoration);
         speed *= 1.0f + (float) air * 0.15f;
         if (advanced) speed *= 1.1f;
         return speed;
@@ -140,6 +147,11 @@ public final class GolemUpgrades {
      * already includes Earth. Preserved, not "fixed".
      */
     public static float meleeDamage(int materialStrength, int earth) { return 2 + strength(materialStrength, earth) + earth; }
+
+    /** Original E:210-216: the mace adds two on top of the Earth-doubled strength damage. */
+    public static float meleeDamage(int materialStrength, int earth, String decoration) {
+        return meleeDamage(materialStrength, earth) + GolemDecorations.meleeDamageBonus(decoration);
+    }
 
     /**
      * Original E:355-362: {@code carry + min(16, max(4, carry)) * Earth}, with {@code carry} the material's own
@@ -162,11 +174,18 @@ public final class GolemUpgrades {
     public static float range(int water) { return range(water, false); }
 
     /**
-     * Original E:460-469 with the advanced golem's addition and still without the decoration's: after {@code 16 + 4n}
+     * Original E:460-469 with the advanced golem's addition and without the spectacles' (see the overload): after {@code 16 + 4n}
      * an advanced golem adds {@code max(range * 0.2f, 2.0f)} (float arithmetic, 16 -> 19.2, 24 -> 28.8).
      */
-    public static float range(int water, boolean advanced) {
+    public static float range(int water, boolean advanced) { return range(water, advanced, ""); }
+
+    /**
+     * Original E:417-427 complete: {@code 16 + 4n}, plus the spectacles' {@code max(range * 0.1f, 1.0f)}, then the advanced
+     * golem's {@code max(range * 0.2f, 2.0f)} on the already enlarged value (float arithmetic, in this order).
+     */
+    public static float range(int water, boolean advanced, String decoration) {
         float range = 16 + water * 4;
+        range += GolemDecorations.rangeBonus(range, decoration);
         if (advanced) range += Math.max(range * 0.2f, 2.0f);
         return range;
     }

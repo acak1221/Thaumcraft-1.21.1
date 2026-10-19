@@ -229,6 +229,16 @@ public final class ItemGolemPlacer extends Item {
             }));
             // Original ItemGolemPlacer:113: the "advanced" line sits between the core and the upgrades.
             if (data.advanced()) tooltip.add(Component.translatable("tc.adv"));
+            if (!data.decoration().isEmpty()) {
+                // Original ItemGolemPlacer:140-165: the installed accessories in dark green, in letter order H G B F R V P M.
+                MutableComponent accessories = Component.empty().withStyle(ChatFormatting.DARK_GREEN);
+                for (char letter : GolemDecorations.ALL.toCharArray()) {
+                    if (!GolemDecorations.has(data.decoration(), letter)) continue;
+                    var item = ThaumcraftGolems.decorationItem(letter);
+                    if (item != null) accessories.append(item.getDescription()).append(" ");
+                }
+                tooltip.add(accessories);
+            }
             if (!data.upgrades().isEmpty()) {
                 // Original ItemGolemPlacer:114-121: installed upgrades listed in blue, empty slots skipped.
                 MutableComponent line = Component.empty().withStyle(ChatFormatting.BLUE);

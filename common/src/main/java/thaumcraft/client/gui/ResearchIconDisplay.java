@@ -17,7 +17,7 @@ import thaumcraft.common.items.wands.WandData;
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemBell|itemZombieBrain)"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemZombieBrain)"
             + "|ConfigBlocks\\.(?:blockTable|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCustomOre|blockChestHungry|blockTaint))"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
 
@@ -155,6 +155,18 @@ final class ResearchIconDisplay {
                 case 3 -> "golem_upgrade_water";
                 case 4 -> "golem_upgrade_order";
                 case 5 -> "golem_upgrade_entropy";
+                default -> null;
+            };
+            // Original ItemGolemDecoration damage 0..7 (hat, spectacles, bowtie, fez, dart, visor, plating, mace); the dart
+            // launcher has no native item yet, so its icon stays on the book fallback.
+            case "ConfigItems.itemGolemDecoration" -> switch (metadata) {
+                case 0 -> "golem_decoration_tophat";
+                case 1 -> "golem_decoration_glasses";
+                case 2 -> "golem_decoration_bowtie";
+                case 3 -> "golem_decoration_fez";
+                case 5 -> "golem_decoration_visor";
+                case 6 -> "golem_decoration_armor";
+                case 7 -> "golem_decoration_mace";
                 default -> null;
             };
             case "ConfigItems.itemGolemBell" -> metadata == 0 ? "golem_bell" : null;

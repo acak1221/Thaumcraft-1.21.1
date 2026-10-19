@@ -29,10 +29,12 @@ import net.minecraft.world.item.Items;
  * decides how many slots may actually be used. {@code guardTargets} is the Order Guard's target mask
  * ({@link GolemGuardTargets}); it is omitted from every serialised form while it has the default value.
  * {@code advanced} marks the advanced golem (original placer tag {@code advanced}): one more upgrade slot, a faster and
- * further-seeing worker. It too is omitted while false, so every earlier stack keeps its exact serialised form. */
+ * further-seeing worker. It too is omitted while false, so every earlier stack keeps its exact serialised form.
+ * {@code decoration} is the golem's accessory letters in installation order ({@link GolemDecorations}); empty by default
+ * and then omitted from every serialised form. */
 public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedCounts,
                         boolean fillAnyAmount, List<GolemMarker> markers, GolemUseOptions useOptions,
-                        List<Integer> upgrades, List<Integer> colors, int guardTargets, boolean advanced) {
+                        List<Integer> upgrades, List<Integer> colors, int guardTargets, boolean advanced, String decoration) {
     public static final int NO_CORE = -1;
     public static final int FILL = 0;
     public static final int EMPTY_CORE = 1;
@@ -52,7 +54,7 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
     public static final int MAX_WANTED = 256;
     public static final int MAX_MARKERS = 64;
     public static final GolemData EMPTY = new GolemData(NO_CORE, Collections.nCopies(FILTER_SLOTS, ItemStack.EMPTY));
-    private static final Set<String> FIELD_NAMES = Set.of("core", "filters", "wanted_counts", "fill_any_amount", "markers", "use_options", "upgrades", "colors", "guard_targets", "advanced");
+    private static final Set<String> FIELD_NAMES = Set.of("core", "filters", "wanted_counts", "fill_any_amount", "markers", "use_options", "upgrades", "colors", "guard_targets", "advanced", "decoration");
     public static final int NO_COLOR = GolemMarker.ANY;
 
     private static final Codec<GolemData> FIELDS = RecordCodecBuilder.create(instance -> instance.group(
@@ -71,9 +73,11 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
             // Omitted at the default (hostiles only), so a plain Guard and every earlier stack keep their serialised form.
             Codec.intRange(0, GolemGuardTargets.ALL).optionalFieldOf("guard_targets", GolemGuardTargets.DEFAULT).forGetter(GolemData::guardTargets),
             // Omitted while false, like the other optional configuration.
-            Codec.BOOL.optionalFieldOf("advanced", false).forGetter(GolemData::advanced)
-    ).apply(instance, (core, filters, wantedCounts, anyAmount, markers, useOptions, upgrades, colors, guardTargets, advanced) ->
-            new GolemData(core, filters, wantedCounts.orElseGet(() -> defaultWantedCounts(core, filters)), anyAmount, markers, useOptions, upgrades, colors, guardTargets, advanced)));
+            Codec.BOOL.optionalFieldOf("advanced", false).forGetter(GolemData::advanced),
+            // Omitted while empty; a non-empty value must be a sequence the installation rules could have produced.
+            Codec.STRING.optionalFieldOf("decoration", "").forGetter(GolemData::decoration)
+    ).apply(instance, (core, filters, wantedCounts, anyAmount, markers, useOptions, upgrades, colors, guardTargets, advanced, decoration) ->
+            new GolemData(core, filters, wantedCounts.orElseGet(() -> defaultWantedCounts(core, filters)), anyAmount, markers, useOptions, upgrades, colors, guardTargets, advanced, decoration)));
 
     /** Native stack codecs carry every component, including explicit EMPTY slots.
      * Reject unknown future fields and partial lists instead of decoding a smaller,
@@ -153,6 +157,9 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
                 if (keys.contains("advanced") && Codec.BOOL.parse(ops, map.get("advanced")).error().isPresent()) {
                     throw new IllegalArgumentException("Invalid advanced golem flag");
                 }
+                if (keys.contains("decoration") && Codec.STRING.parse(ops, map.get("decoration")).error().isPresent()) {
+                    throw new IllegalArgumentException("Invalid golem decoration");
+                }
                 var result = FIELDS.decode(ops, input);
                 if (result.error().isPresent()) return DataResult.error(() -> result.error().orElseThrow().message());
                 return result;
@@ -199,12 +206,15 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
                 if (!pagedSize(colorCount)) throw new DecoderException("Invalid golem slot colour count");
                 var colors = new ArrayList<Integer>(colorCount);
                 for (int slot = 0; slot < colorCount; slot++) colors.add((int) buffer.readByte());
-                // One trailing byte: the Guard mask in the low bits, the advanced flag in bit 4.
+                // One trailing byte: the Guard mask in the low bits, the advanced flag in bit 4 and, in bit 5, a following
+                // decoration string. A plain golem therefore ends with exactly the byte it always did.
                 int tail = buffer.readUnsignedByte();
                 int guardTargets = tail & GolemGuardTargets.ALL;
-                if ((tail & ~(GolemGuardTargets.ALL | ADVANCED_BIT)) != 0) throw new DecoderException("Invalid Guard target mask");
+                if ((tail & ~(GolemGuardTargets.ALL | ADVANCED_BIT | DECORATION_BIT)) != 0) throw new DecoderException("Invalid Guard target mask");
+                String decoration = (tail & DECORATION_BIT) != 0 ? buffer.readUtf(MAX_DECORATION_LENGTH) : "";
+                if ((tail & DECORATION_BIT) != 0 && decoration.isEmpty()) throw new DecoderException("Empty decoration marker");
                 return new GolemData(core, filters, wantedCounts, anyAmount, markers, useOptions, upgrades, colors, guardTargets,
-                        (tail & ADVANCED_BIT) != 0);
+                        (tail & ADVANCED_BIT) != 0, decoration);
             } catch (IllegalArgumentException invalid) {
                 throw new DecoderException("Invalid golem configuration", invalid);
             }
@@ -230,12 +240,16 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
             for (int upgrade : data.upgrades) buffer.writeByte(upgrade);
             ByteBufCodecs.VAR_INT.encode(buffer, data.colors.size());
             for (int color : data.colors) buffer.writeByte(color);
-            buffer.writeByte(data.guardTargets | (data.advanced ? ADVANCED_BIT : 0));
+            buffer.writeByte(data.guardTargets | (data.advanced ? ADVANCED_BIT : 0) | (data.decoration.isEmpty() ? 0 : DECORATION_BIT));
+            if (!data.decoration.isEmpty()) buffer.writeUtf(data.decoration, MAX_DECORATION_LENGTH);
         }
     };
 
     /** The advanced flag shares the stream codec's trailing byte with the Guard mask (bits 0..3). */
     private static final int ADVANCED_BIT = 0x10;
+    /** Bit 5 of that byte: a decoration string follows. */
+    private static final int DECORATION_BIT = 0x20;
+    private static final int MAX_DECORATION_LENGTH = GolemDecorations.SUPPORTED.length();
 
     /** Existing callers/default components retain six whitelist-only exemplars. */
     public GolemData(int core, List<ItemStack> filters) {
@@ -273,10 +287,23 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
         this(core, filters, wantedCounts, fillAnyAmount, markers, useOptions, upgrades, colors, guardTargets, false);
     }
 
+    /** Every caller before the accessories: an undecorated golem. */
+    public GolemData(int core, List<ItemStack> filters, List<Integer> wantedCounts,
+                     boolean fillAnyAmount, List<GolemMarker> markers, GolemUseOptions useOptions,
+                     List<Integer> upgrades, List<Integer> colors, int guardTargets, boolean advanced) {
+        this(core, filters, wantedCounts, fillAnyAmount, markers, useOptions, upgrades, colors, guardTargets, advanced, "");
+    }
+
+    /** The same configuration with another accessory string; it must be one the installation rules could produce. */
+    public GolemData withDecoration(String value) {
+        return value.equals(decoration) ? this : new GolemData(core, filters, wantedCounts, fillAnyAmount, markers, useOptions,
+                upgrades, colors, guardTargets, advanced, value);
+    }
+
     /** The same configuration with the advanced flag set or cleared; everything else is carried over verbatim. */
     public GolemData withAdvanced(boolean value) {
         return value == advanced ? this : new GolemData(core, filters, wantedCounts, fillAnyAmount, markers, useOptions,
-                upgrades, colors, guardTargets, value);
+                upgrades, colors, guardTargets, value, decoration);
     }
 
     /** Slot colours exist only where the colour is a routing rule: Fill, Empty and Use, and only with an Order upgrade. */
@@ -390,6 +417,7 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
         if (!GolemGuardTargets.acceptable(guardTargets, core, orderCount(upgrades))) {
             throw new IllegalArgumentException("Guard target switches need an Order upgrade on a Guard core and a mask of 0..15");
         }
+        if (!GolemDecorations.valid(decoration)) throw new IllegalArgumentException("Invalid golem decoration: " + decoration);
         var copy = new ArrayList<ItemStack>(expectedSlots);
         for (int slot = 0; slot < expectedSlots; slot++) {
             ItemStack filter = filters.get(slot);
@@ -436,7 +464,8 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
         if (!(other instanceof GolemData data) || core != data.core || fillAnyAmount != data.fillAnyAmount
                 || !wantedCounts.equals(data.wantedCounts) || !markers.equals(data.markers)
                 || !useOptions.equals(data.useOptions) || !upgrades.equals(data.upgrades) || !colors.equals(data.colors)
-                || guardTargets != data.guardTargets || advanced != data.advanced || filters.size() != data.filters.size()) return false;
+                || guardTargets != data.guardTargets || advanced != data.advanced || !decoration.equals(data.decoration)
+                || filters.size() != data.filters.size()) return false;
         for (int slot = 0; slot < filters.size(); slot++) {
             if (!ItemStack.matches(filters.get(slot), data.filters.get(slot))) return false;
         }
@@ -456,6 +485,7 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
         hash = 31 * hash + upgrades.hashCode();
         hash = 31 * hash + colors.hashCode();
         hash = 31 * hash + guardTargets;
-        return 31 * hash + Boolean.hashCode(advanced);
+        hash = 31 * hash + Boolean.hashCode(advanced);
+        return 31 * hash + decoration.hashCode();
     }
 }

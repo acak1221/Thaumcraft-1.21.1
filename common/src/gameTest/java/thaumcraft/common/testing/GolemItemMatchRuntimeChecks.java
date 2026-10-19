@@ -48,7 +48,8 @@ import thaumcraft.common.items.golems.GolemUseOptions;
 /**
  * Entropy's three item-comparison switches on real content. A real connected player, the real menu (buttons 55..57), real golems,
  * real chests and real item stacks are explicit INPUTS; which stack a golem fetches, how many, and whether it keeps working are
- * decided by the golems, never supplied. Ten golems run side by side in five matched pairs (the positive and the negative member
+ * decided by the golems, never supplied. Ten golems run on ten stacked platforms (the neighbouring GameTests wipe the ground around their own structures, so the fixture
+ * stays on one small footprint and grows upwards) in five matched pairs (the positive and the negative member
  * differ only in the switch under test, or in the Entropy upgrade): Fill with the damage switch, Fill with the components switch,
  * Fill with the tag switch, Empty (tag widening from Entropy alone) and Sorting (the seed probe). The negative golems must leave
  * every chest untouched for the whole run. NOT the Use core's comparison (needs a use target), not a client/GUI, network or visual
@@ -56,7 +57,7 @@ import thaumcraft.common.items.golems.GolemUseOptions;
  */
 public final class GolemItemMatchRuntimeChecks {
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
-    private static final int TALLOW = 2, DEADLINE = 1800, SETTLE = 120, COLUMN = 4, ROW = 8;
+    private static final int TALLOW = 2, DEADLINE = 1800, SETTLE = 120, LAYER = 6, LANES = 10;
     private static final int ENTROPY = GolemUpgrade.ENTROPY.id, ORDER = GolemUpgrade.ORDER.id;
     private static final ResourceLocation OVERWORLD = ResourceLocation.withDefaultNamespace("overworld");
     private static final List<ItemStack> NO_FILTERS = Collections.nCopies(GolemData.FILTER_SLOTS, ItemStack.EMPTY);
@@ -128,7 +129,7 @@ public final class GolemItemMatchRuntimeChecks {
             this.test = test;
             level = test.getLevel();
             base = test.absolutePos(new BlockPos(3, 3, 3));
-            for (BlockPos mutable : BlockPos.betweenClosed(base.offset(-4, -2, -6), base.offset(4 * COLUMN + 4, 5, 2 * ROW + 6))) {
+            for (BlockPos mutable : BlockPos.betweenClosed(base.offset(-2, -2, -2), base.offset(3, LAYER * LANES + 4, 5))) {
                 original.put(mutable.immutable(), level.getBlockState(mutable));
             }
             var profile = new GameProfile(UUID.randomUUID(), "match-" + UUID.randomUUID().toString().substring(0, 8));
@@ -144,12 +145,13 @@ public final class GolemItemMatchRuntimeChecks {
             player.setGameMode(GameType.SURVIVAL);
             touched = true;
             var center = new ChunkPos(base);
-            for (int dx = -2; dx <= 5; dx++) for (int dz = -2; dz <= 3; dz++) {
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
                 var chunk = new ChunkPos(center.x + dx, center.z + dz);
                 if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
             }
             for (BlockPos mutable : original.keySet()) {
-                level.setBlock(mutable, mutable.getY() == base.getY() - 1 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET);
+                level.setBlock(mutable, (mutable.getY() - (base.getY() - 1)) % LAYER == 0 && mutable.getY() >= base.getY() - 1
+                        ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET);
             }
             test.assertTrue(level.mayInteract(player, base), "fixture is not under unrelated spawn protection");
         }
@@ -169,8 +171,8 @@ public final class GolemItemMatchRuntimeChecks {
             return golem;
         }
 
-        /** Bench golems stand in a grid south of the lanes, one block apart; they only exist to be configured and are discarded before the lanes run. */
-        private BlockPos benchPos(int index) { return base.offset(-3 + index % 8, 0, 2 * ROW + 2 + index / 8); }
+        /** Bench golems stand in a grid on a platform above the lanes, one block apart; they only exist to be configured and are discarded before the lanes run. */
+        private BlockPos benchPos(int index) { return base.offset(-2 + index % 6, LAYER * LANES, -1 + index / 6); }
 
         private EntityGolemBase bench(int core, List<Integer> upgrades, int index) {
             return golem(core, upgrades, benchPos(index), Direction.UP, NO_FILTERS, NO_COUNTS, List.of(), List.of(), 0);
@@ -387,19 +389,18 @@ public final class GolemItemMatchRuntimeChecks {
             return stack;
         }
 
-        private Lane lane(String name, boolean positive, int column, int core, List<Integer> upgrades, int match, ItemStack filter, int wanted,
+        private Lane lane(String name, boolean positive, int core, List<Integer> upgrades, int match, ItemStack filter, int wanted,
                           ItemStack[] homeItems, ItemStack[] otherItems) {
             var lane = new Lane(name, positive);
-            int x = column * COLUMN, z = positive ? 0 : ROW;
-            var at = base.offset(x, 0, z);
+            var at = base.offset(1, LAYER * lanes.size(), 0); // golem; its home chest is west of it, the marked chest three blocks south
             lane.home = chest(at.west(), homeItems);
-            lane.other = chest(at.north(3), otherItems);
+            lane.other = chest(at.south(3), otherItems);
             lane.homeBefore = snapshot(lane.home);
             lane.otherBefore = snapshot(lane.other);
             var filters = new ArrayList<>(NO_FILTERS);
             var counts = new ArrayList<>(NO_COUNTS);
             if (!filter.isEmpty()) { filters.set(0, filter); counts.set(0, wanted); }
-            lane.golem = golem(core, upgrades, at, Direction.EAST, filters, counts, List.of(marker(lane.other.getBlockPos(), Direction.SOUTH)), List.of(), match);
+            lane.golem = golem(core, upgrades, at, Direction.EAST, filters, counts, List.of(marker(lane.other.getBlockPos(), Direction.NORTH)), List.of(), match);
             lanes.add(lane);
             return lane;
         }
@@ -421,7 +422,7 @@ public final class GolemItemMatchRuntimeChecks {
             // Damage: the filter is a fresh pickaxe, the source holds three worn ones. The golem fetches the worn ones, two of them,
             // and stops: the home chest's stock counts under the same switch (otherwise it would empty the source).
             var pickaxes = new ItemStack[] {worn(Items.IRON_PICKAXE, 10), worn(Items.IRON_PICKAXE, 20), worn(Items.IRON_PICKAXE, 30)};
-            var damage = lane("fill/damage on", true, 0, GolemData.FILL, oneEntropy, GolemItemMatch.IGNORE_DAMAGE, new ItemStack(Items.IRON_PICKAXE), 2,
+            var damage = lane("fill/damage on", true, GolemData.FILL, oneEntropy, GolemItemMatch.IGNORE_DAMAGE, new ItemStack(Items.IRON_PICKAXE), 2,
                     new ItemStack[0], pickaxes);
             damage.invariant = () -> {
                 test.assertTrue(count(damage.home, Items.IRON_PICKAXE) + count(damage.other, Items.IRON_PICKAXE) + damage.golem.getCarriedItem().getCount() == 3,
@@ -436,13 +437,13 @@ public final class GolemItemMatchRuntimeChecks {
                 }
                 test.assertTrue(count(damage.other, Items.IRON_PICKAXE) == 1, "one worn pickaxe stays in the source");
             };
-            mustStayIdle(lane("fill/damage off", false, 0, GolemData.FILL, oneEntropy, 0, new ItemStack(Items.IRON_PICKAXE), 2, new ItemStack[0], pickaxes));
+            mustStayIdle(lane("fill/damage off", false, GolemData.FILL, oneEntropy, 0, new ItemStack(Items.IRON_PICKAXE), 2, new ItemStack[0], pickaxes));
 
             // Components: a renamed, worn sword is the same sword only with the components switch; the damage switch alone is not enough.
             var renamed = new ItemStack(Items.IRON_SWORD);
             renamed.setDamageValue(5);
             renamed.set(DataComponents.CUSTOM_NAME, Component.literal("Renamed"));
-            var components = lane("fill/components on", true, 1, GolemData.FILL, oneEntropy, GolemItemMatch.IGNORE_COMPONENTS, new ItemStack(Items.IRON_SWORD), 1,
+            var components = lane("fill/components on", true, GolemData.FILL, oneEntropy, GolemItemMatch.IGNORE_COMPONENTS, new ItemStack(Items.IRON_SWORD), 1,
                     new ItemStack[0], new ItemStack[] {renamed.copy()});
             components.invariant = () -> test.assertTrue(count(components.home, Items.IRON_SWORD) + count(components.other, Items.IRON_SWORD)
                     + components.golem.getCarriedItem().getCount() == 1, "no sword is lost or made");
@@ -453,11 +454,11 @@ public final class GolemItemMatchRuntimeChecks {
                         "the golem delivers the stock stack with its name and damage, not the exemplar: " + arrived);
                 test.assertTrue(count(components.other, Items.IRON_SWORD) == 0, "the source gave it up");
             };
-            mustStayIdle(lane("fill/components off (damage only)", false, 1, GolemData.FILL, oneEntropy, GolemItemMatch.IGNORE_DAMAGE, new ItemStack(Items.IRON_SWORD), 1,
+            mustStayIdle(lane("fill/components off (damage only)", false, GolemData.FILL, oneEntropy, GolemItemMatch.IGNORE_DAMAGE, new ItemStack(Items.IRON_SWORD), 1,
                     new ItemStack[0], new ItemStack[] {renamed.copy()}));
 
             // Tags: birch planks stand for oak planks only with the tag switch.
-            var tags = lane("fill/tags on", true, 2, GolemData.FILL, oneEntropy, GolemItemMatch.TAGS, new ItemStack(Items.OAK_PLANKS), 8,
+            var tags = lane("fill/tags on", true, GolemData.FILL, oneEntropy, GolemItemMatch.TAGS, new ItemStack(Items.OAK_PLANKS), 8,
                     new ItemStack[0], new ItemStack[] {new ItemStack(Items.BIRCH_PLANKS, 16)});
             tags.invariant = () -> {
                 test.assertTrue(count(tags.home, Items.BIRCH_PLANKS) + count(tags.other, Items.BIRCH_PLANKS) + tags.golem.getCarriedItem().getCount() == 16,
@@ -467,27 +468,27 @@ public final class GolemItemMatchRuntimeChecks {
             tags.done = () -> count(tags.home, Items.BIRCH_PLANKS) == 8 && tags.golem.getCarriedItem().isEmpty();
             tags.verdict = () -> test.assertTrue(count(tags.other, Items.BIRCH_PLANKS) == 8 && count(tags.home, Items.OAK_PLANKS) == 0,
                     "eight birch planks moved, none were conjured as oak");
-            mustStayIdle(lane("fill/tags off", false, 2, GolemData.FILL, oneEntropy, 0, new ItemStack(Items.OAK_PLANKS), 8, new ItemStack[0],
+            mustStayIdle(lane("fill/tags off", false, GolemData.FILL, oneEntropy, 0, new ItemStack(Items.OAK_PLANKS), 8, new ItemStack[0],
                     new ItemStack[] {new ItemStack(Items.BIRCH_PLANKS, 16)}));
 
             // Empty: Entropy alone widens the wanted oak planks to every plank, with no switch set (original getItemsNeeded(Entropy > 0)).
-            var empty = lane("empty/entropy", true, 3, GolemData.EMPTY_CORE, oneEntropy, 0, new ItemStack(Items.OAK_PLANKS), 1,
+            var empty = lane("empty/entropy", true, GolemData.EMPTY_CORE, oneEntropy, 0, new ItemStack(Items.OAK_PLANKS), 1,
                     new ItemStack[] {new ItemStack(Items.BIRCH_PLANKS, 12)}, new ItemStack[0]);
             empty.invariant = () -> test.assertTrue(count(empty.home, Items.BIRCH_PLANKS) + count(empty.other, Items.BIRCH_PLANKS) + empty.golem.getCarriedItem().getCount() == 12,
                     "no plank is lost or made");
             empty.done = () -> count(empty.other, Items.BIRCH_PLANKS) == 12;
             empty.verdict = () -> test.assertTrue(count(empty.home, Items.BIRCH_PLANKS) == 0, "the home chest is emptied of the look-alike");
-            mustStayIdle(lane("empty/no entropy", false, 3, GolemData.EMPTY_CORE, List.of(), 0, new ItemStack(Items.OAK_PLANKS), 1,
+            mustStayIdle(lane("empty/no entropy", false, GolemData.EMPTY_CORE, List.of(), 0, new ItemStack(Items.OAK_PLANKS), 1,
                     new ItemStack[] {new ItemStack(Items.BIRCH_PLANKS, 12)}, new ItemStack[0]));
 
             // Sorting: the seed in the destination may be a look-alike under the tag switch (strict room, fuzzy seed).
-            var sorting = lane("sorting/tags on", true, 4, GolemData.SORTING, oneEntropy, GolemItemMatch.TAGS, ItemStack.EMPTY, 0,
+            var sorting = lane("sorting/tags on", true, GolemData.SORTING, oneEntropy, GolemItemMatch.TAGS, ItemStack.EMPTY, 0,
                     new ItemStack[] {new ItemStack(Items.BIRCH_PLANKS, 8)}, new ItemStack[] {new ItemStack(Items.OAK_PLANKS, 1)});
             sorting.invariant = () -> test.assertTrue(count(sorting.home, Items.BIRCH_PLANKS) + count(sorting.other, Items.BIRCH_PLANKS) + sorting.golem.getCarriedItem().getCount() == 8
                     && count(sorting.other, Items.OAK_PLANKS) == 1, "no plank is lost or made, and the seed stays");
             sorting.done = () -> count(sorting.other, Items.BIRCH_PLANKS) == 8;
             sorting.verdict = () -> test.assertTrue(count(sorting.home, Items.BIRCH_PLANKS) == 0, "everything that could be sorted was");
-            mustStayIdle(lane("sorting/tags off", false, 4, GolemData.SORTING, oneEntropy, 0, ItemStack.EMPTY, 0,
+            mustStayIdle(lane("sorting/tags off", false, GolemData.SORTING, oneEntropy, 0, ItemStack.EMPTY, 0,
                     new ItemStack[] {new ItemStack(Items.BIRCH_PLANKS, 8)}, new ItemStack[] {new ItemStack(Items.OAK_PLANKS, 1)}));
             test.assertTrue(lanes.size() == 10, "ten lanes");
         }

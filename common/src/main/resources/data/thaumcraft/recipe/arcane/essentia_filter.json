@@ -1,0 +1,7 @@
+{
+  "type": "thaumcraft:arcane_shapeless",
+  "research": "TUBEFILTER",
+  "ingredients": [{"item": "thaumcraft:essentia_tube"}, {"item": "thaumcraft:vis_filter"}],
+  "result": {"id": "thaumcraft:essentia_filter", "count": 1},
+  "vis": {"aqua": 5, "ordo": 16}
+}

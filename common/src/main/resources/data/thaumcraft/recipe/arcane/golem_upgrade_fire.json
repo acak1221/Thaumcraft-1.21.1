@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "UPGRADEFIRE",
+  "pattern": ["NNN", "NCN", "NNN"],
+  "key": {
+    "N": {"item": "minecraft:gold_nugget"},
+    "C": {"item": "thaumcraft:fire_shard"}
+  },
+  "result": {"id": "thaumcraft:golem_upgrade_fire", "count": 1},
+  "vis": {"ignis": 10}
+}

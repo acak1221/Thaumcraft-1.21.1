@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "GOLEMTALLOW", "source_order": 166,
+  "catalyst": {"item": "thaumcraft:tallow_block"},
+  "result": {"id": "thaumcraft:golem_tallow", "count": 1},
+  "aspects": {"humanus": 8, "motus": 8, "spiritus": 8}
+}

@@ -1,0 +1,17 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "BASICARTIFACE",
+  "pattern": ["123", "ISI", "456"],
+  "key": {
+    "1": {"item": "thaumcraft:air_shard"},
+    "2": {"item": "thaumcraft:fire_shard"},
+    "3": {"item": "thaumcraft:water_shard"},
+    "4": {"item": "thaumcraft:earth_shard"},
+    "5": {"item": "thaumcraft:order_shard"},
+    "6": {"item": "thaumcraft:entropy_shard"},
+    "I": {"item": "minecraft:gold_ingot"},
+    "S": {"item": "thaumcraft:balance_shard"}
+  },
+  "result": {"id": "thaumcraft:primal_charm", "count": 1},
+  "vis": {"aer": 25, "terra": 25, "ignis": 25, "aqua": 25, "ordo": 25, "perditio": 25}
+}

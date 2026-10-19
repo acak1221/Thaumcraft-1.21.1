@@ -1,0 +1,15 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "COREFISHING",
+  "input": {"item": "thaumcraft:golem_core_harvest"},
+  "components": [
+    {"item": "minecraft:fishing_rod"},
+    {"item": "minecraft:cod"},
+    {"item": "minecraft:pufferfish"},
+    {"item": "minecraft:salmon"}
+  ],
+  "component_predicates": [{"component": 0, "damage": 0}],
+  "aspects": {"aqua": 16, "meto": 16, "bestia": 16},
+  "instability": 3,
+  "result": {"id": "thaumcraft:golem_core_fishing", "count": 1}
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "thaumcraft",
+  "version": "${version}",
+  "name": "Thaumcraft 4.2 FOREVA",
+  "description": "Unofficial TC4.2 port; Minecraft 1.21.1 migration in progress.",
+  "authors": [
+    "Azanor (original Thaumcraft)",
+    "FOREVA contributors"
+  ],
+  "environment": "*",
+  "accessWidener": "thaumcraft.accesswidener",
+  "entrypoints": {
+    "main": [
+      "thaumcraft.fabric.ThaumcraftFabric"
+    ],
+    "client": [
+      "thaumcraft.fabric.ThaumcraftFabricClient"
+    ]
+  },
+  "mixins": [
+    "thaumcraft-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "architectury": ">=13.0.11",
+    "fabric-api": "*"
+  },
+  "license": "See THIRD_PARTY_NOTICES.md"
+}

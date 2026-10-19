@@ -1,0 +1,27 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "thaumcraft:items/golem_clay"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "thaumcraft:core": 1.0
+      },
+      "model": "thaumcraft:item/itemgolemplacer_clay_core"
+    },
+    {
+      "predicate": {
+        "thaumcraft:advanced": 1.0
+      },
+      "model": "thaumcraft:item/itemgolemplacer_clay_advanced"
+    },
+    {
+      "predicate": {
+        "thaumcraft:core": 1.0,
+        "thaumcraft:advanced": 1.0
+      },
+      "model": "thaumcraft:item/itemgolemplacer_clay_advanced_core"
+    }
+  ]
+}

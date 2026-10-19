@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "COREBUTCHER", "source_order": 177,
+  "catalyst": {"item": "thaumcraft:golem_core_guard"},
+  "result": {"id": "thaumcraft:golem_core_butcher", "count": 1},
+  "aspects": {"corpus": 5, "bestia": 5}
+}

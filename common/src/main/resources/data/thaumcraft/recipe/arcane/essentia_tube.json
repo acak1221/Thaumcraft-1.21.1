@@ -1,0 +1,13 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "TUBES",
+  "pattern": [" Q ", "IGI", " B "],
+  "key": {
+    "Q": {"item": "thaumcraft:quicksilver_drop"},
+    "I": {"item": "minecraft:iron_ingot"},
+    "G": {"item": "minecraft:glass"},
+    "B": {"item": "minecraft:gold_nugget"}
+  },
+  "result": {"id": "thaumcraft:essentia_tube", "count": 8},
+  "vis": {"aqua": 5, "ordo": 5}
+}

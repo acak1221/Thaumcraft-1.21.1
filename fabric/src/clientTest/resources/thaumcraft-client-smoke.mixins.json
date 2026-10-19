@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "thaumcraft.fabric.clienttest.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["FocalXpPickupObserverMixin", "FocalInheritedLifecycleMixin", "FocalLaterMobMixin",
+    "BoreServerHeartbeatMixin", "BoreMachineTickObserverMixin", "BoreAlchemyTickObserverMixin",
+    "BoreInfusionStartObserverMixin", "BoreItemTouchObserverMixin", "BoreXpTouchObserverMixin",
+    "BoreEntityLifecycleObserverMixin", "BoreMobLifecycleObserverMixin",
+    "BoreOrdinaryNodeTickObserverMixin", "BoreNormalStopObserverMixin", "BoreMobileTickObserverMixin",
+    "BoreInheritedItemTickObserverMixin", "BoreCustodyMenuObserverMixin",
+    "BoreAmbientDeathLootObserverMixin", "BoreAmbientSpawnObserverMixin", "BoreItemManagerLifecycleObserverMixin"],
+  "client": ["FocalInputIsolationMixin", "BoreClientHeartbeatMixin", "BoreInputIsolationMixin"],
+  "injectors": {"defaultRequire": 1}
+}

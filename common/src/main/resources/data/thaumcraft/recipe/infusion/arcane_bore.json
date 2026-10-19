@@ -1,0 +1,22 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "ARCANEBORE",
+  "input": {"item": "minecraft:piston"},
+  "components": [
+    {"item": "thaumcraft:greatwood_planks"},
+    {"item": "thaumcraft:greatwood_planks"},
+    {"item": "minecraft:gold_ingot"},
+    {"item": "minecraft:gold_ingot"},
+    {"item": "minecraft:diamond_pickaxe"},
+    {"item": "minecraft:diamond_shovel"},
+    {"item": "thaumcraft:air_shard"},
+    {"item": "thaumcraft:earth_shard"}
+  ],
+  "component_predicates": [
+    {"component": 4, "damage": 0},
+    {"component": 5, "damage": 0}
+  ],
+  "aspects": {"potentia": 16, "perfodio": 32, "machina": 32, "vacuos": 16, "motus": 16},
+  "instability": 4,
+  "result": {"id": "thaumcraft:arcane_bore", "count": 1}
+}

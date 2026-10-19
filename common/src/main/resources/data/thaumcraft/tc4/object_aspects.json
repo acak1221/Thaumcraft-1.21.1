@@ -1,0 +1,6114 @@
+{
+  "schema_version": 1,
+  "source": "Audited native Forge 1.12.2 direct ConfigAspects registrations",
+  "source_hash_policy": "Java source decoded as UTF-8 without BOM; CRLF and lone CR normalized to LF; other characters and final newline preserved",
+  "source_sha256": "332cbb05a49b0a2238fd3f584bed449a210188b209fb0134bf4a86e1f8cdb58c",
+  "source_commit": "4bc68454b1063cdc1255f833dd537e0fd4fc341d",
+  "policy": "Only resolved literal aspect lists may be used. Check mapped ids in the target registry. Unmapped or dynamic expressions are not guessed.",
+  "bindings": [
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.STONE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:stone"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2)",
+      "target_expression": "new ItemStack(Blocks.STONE)",
+      "conditions": [],
+      "source_line": 30
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.COBBLESTONE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:cobblestone"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2)",
+      "target_expression": "new ItemStack(Blocks.COBBLESTONE)",
+      "conditions": [],
+      "source_line": 31
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.GRASS",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:grass_block"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 1,
+        "herba": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "herba": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.PLANT, 1)",
+      "target_expression": "new ItemStack(Blocks.GRASS)",
+      "conditions": [],
+      "source_line": 32
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.DIRT",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:dirt"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2)",
+      "target_expression": "new ItemStack(Blocks.DIRT)",
+      "conditions": [],
+      "source_line": 33
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.SAND",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:sand"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 1,
+        "aer": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "aer": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.AIR, 1)",
+      "target_expression": "new ItemStack(Blocks.SAND)",
+      "conditions": [],
+      "source_line": 34
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.GRAVEL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:gravel"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2)",
+      "target_expression": "new ItemStack(Blocks.GRAVEL)",
+      "conditions": [],
+      "source_line": 35
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.STONE",
+      "legacy_meta": 1,
+      "modern_ids": [
+        "minecraft:granite"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 3,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 3,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 3).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(Blocks.STONE, 1, 1)",
+      "conditions": [],
+      "source_line": 38
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.STONE",
+      "legacy_meta": 3,
+      "modern_ids": [
+        "minecraft:diorite"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 3,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 3,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 3).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(Blocks.STONE, 1, 3)",
+      "conditions": [],
+      "source_line": 39
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.STONE",
+      "legacy_meta": 5,
+      "modern_ids": [
+        "minecraft:andesite"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 3)",
+      "target_expression": "new ItemStack(Blocks.STONE, 1, 5)",
+      "conditions": [],
+      "source_line": 40
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.LOG",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:oak_log"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "arbor": 4
+      },
+      "literal_partial_aspects": {
+        "arbor": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 4)",
+      "target_expression": "new ItemStack(Blocks.LOG)",
+      "conditions": [],
+      "source_line": 43
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.LOG2",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 4
+      },
+      "literal_partial_aspects": {
+        "arbor": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 4)",
+      "target_expression": "new ItemStack(Blocks.LOG2)",
+      "conditions": [],
+      "source_line": 44
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.PLANKS",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:oak_planks"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "arbor": 2
+      },
+      "literal_partial_aspects": {
+        "arbor": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 2)",
+      "target_expression": "new ItemStack(Blocks.PLANKS)",
+      "conditions": [],
+      "source_line": 45
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.LEAVES",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:oak_leaves"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "aer": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "aer": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.AIR, 1)",
+      "target_expression": "new ItemStack(Blocks.LEAVES)",
+      "conditions": [],
+      "source_line": 46
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.LEAVES2",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "aer": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "aer": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.AIR, 1)",
+      "target_expression": "new ItemStack(Blocks.LEAVES2)",
+      "conditions": [],
+      "source_line": 47
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.SAPLING",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:oak_sapling"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "arbor": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "arbor": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.TREE, 1)",
+      "target_expression": "new ItemStack(Blocks.SAPLING)",
+      "conditions": [],
+      "source_line": 48
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.IRON_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:iron_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "metallum": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "metallum": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.METAL, 3)",
+      "target_expression": "new ItemStack(Blocks.IRON_ORE)",
+      "conditions": [],
+      "source_line": 51
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.GOLD_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:gold_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "metallum": 5
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "metallum": 5
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.METAL, 5)",
+      "target_expression": "new ItemStack(Blocks.GOLD_ORE)",
+      "conditions": [],
+      "source_line": 52
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.DIAMOND_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:diamond_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "vitreus": 6
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "vitreus": 6
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.CRYSTAL, 6)",
+      "target_expression": "new ItemStack(Blocks.DIAMOND_ORE)",
+      "conditions": [],
+      "source_line": 53
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.REDSTONE_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:redstone_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "potentia": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "potentia": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.ENERGY, 3)",
+      "target_expression": "new ItemStack(Blocks.REDSTONE_ORE)",
+      "conditions": [],
+      "source_line": 54
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.COAL_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:coal_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "potentia": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "potentia": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.ENERGY, 2)",
+      "target_expression": "new ItemStack(Blocks.COAL_ORE)",
+      "conditions": [],
+      "source_line": 55
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.LAPIS_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:lapis_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "vitreus": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "vitreus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.CRYSTAL, 3)",
+      "target_expression": "new ItemStack(Blocks.LAPIS_ORE)",
+      "conditions": [],
+      "source_line": 56
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.EMERALD_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:emerald_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "vitreus": 5
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "vitreus": 5
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.CRYSTAL, 5)",
+      "target_expression": "new ItemStack(Blocks.EMERALD_ORE)",
+      "conditions": [],
+      "source_line": 57
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.QUARTZ_ORE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:nether_quartz_ore"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 2,
+        "vitreus": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 2,
+        "vitreus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2).add(Aspect.CRYSTAL, 3)",
+      "target_expression": "new ItemStack(Blocks.QUARTZ_ORE)",
+      "conditions": [],
+      "source_line": 58
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.OBSIDIAN",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:obsidian"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 4,
+        "ignis": 2,
+        "tenebrae": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 4,
+        "ignis": 2,
+        "tenebrae": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 4).add(Aspect.FIRE, 2).add(Aspect.DARKNESS, 2)",
+      "target_expression": "new ItemStack(Blocks.OBSIDIAN)",
+      "conditions": [],
+      "source_line": 61
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.GLOWSTONE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:glowstone"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "lux": 4,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "lux": 4,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.LIGHT, 4).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(Blocks.GLOWSTONE)",
+      "conditions": [],
+      "source_line": 62
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.ICE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:ice"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "aqua": 2,
+        "gelum": 3
+      },
+      "literal_partial_aspects": {
+        "aqua": 2,
+        "gelum": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WATER, 2).add(Aspect.COLD, 3)",
+      "target_expression": "new ItemStack(Blocks.ICE)",
+      "conditions": [],
+      "source_line": 63
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.SNOW",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:snow_block"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "aqua": 1,
+        "gelum": 2
+      },
+      "literal_partial_aspects": {
+        "aqua": 1,
+        "gelum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WATER, 1).add(Aspect.COLD, 2)",
+      "target_expression": "new ItemStack(Blocks.SNOW)",
+      "conditions": [],
+      "source_line": 64
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.CLAY",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:clay"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 1,
+        "aqua": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "aqua": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.WATER, 1)",
+      "target_expression": "new ItemStack(Blocks.CLAY)",
+      "conditions": [],
+      "source_line": 65
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.WATER",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "aqua": 4
+      },
+      "literal_partial_aspects": {
+        "aqua": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WATER, 4)",
+      "target_expression": "new ItemStack(Blocks.WATER)",
+      "conditions": [],
+      "source_line": 68
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.FLOWING_WATER",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "aqua": 2
+      },
+      "literal_partial_aspects": {
+        "aqua": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WATER, 2)",
+      "target_expression": "new ItemStack(Blocks.FLOWING_WATER)",
+      "conditions": [],
+      "source_line": 69
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.LAVA",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ignis": 3,
+        "terra": 1
+      },
+      "literal_partial_aspects": {
+        "ignis": 3,
+        "terra": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FIRE, 3).add(Aspect.EARTH, 1)",
+      "target_expression": "new ItemStack(Blocks.LAVA)",
+      "conditions": [],
+      "source_line": 70
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.FLOWING_LAVA",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ignis": 2
+      },
+      "literal_partial_aspects": {
+        "ignis": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FIRE, 2)",
+      "target_expression": "new ItemStack(Blocks.FLOWING_LAVA)",
+      "conditions": [],
+      "source_line": 71
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.WOOL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:white_wool"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 1,
+        "instrumentum": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1,
+        "instrumentum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1).add(Aspect.TOOL, 1)",
+      "target_expression": "new ItemStack(Blocks.WOOL)",
+      "conditions": [],
+      "source_line": 74
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.CACTUS",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:cactus"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "aqua": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "aqua": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.WATER, 1)",
+      "target_expression": "new ItemStack(Blocks.CACTUS)",
+      "conditions": [],
+      "source_line": 75
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.PUMPKIN",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:pumpkin"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.LIFE, 1)",
+      "target_expression": "new ItemStack(Blocks.PUMPKIN)",
+      "conditions": [],
+      "source_line": 76
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.MELON_BLOCK",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:melon"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.LIFE, 1)",
+      "target_expression": "new ItemStack(Blocks.MELON_BLOCK)",
+      "conditions": [],
+      "source_line": 77
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.VINE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:vine"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "motus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "motus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.MOTION, 1)",
+      "target_expression": "new ItemStack(Blocks.VINE)",
+      "conditions": [],
+      "source_line": 78
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.WATERLILY",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:lily_pad"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "aqua": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "aqua": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.WATER, 1)",
+      "target_expression": "new ItemStack(Blocks.WATERLILY)",
+      "conditions": [],
+      "source_line": 79
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.NETHERRACK",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:netherrack"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 1,
+        "ignis": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "ignis": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.FIRE, 2)",
+      "target_expression": "new ItemStack(Blocks.NETHERRACK)",
+      "conditions": [],
+      "source_line": 82
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.SOUL_SAND",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:soul_sand"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 1,
+        "spiritus": 2,
+        "mortuus": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "spiritus": 2,
+        "mortuus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.SOUL, 2).add(Aspect.DEATH, 1)",
+      "target_expression": "new ItemStack(Blocks.SOUL_SAND)",
+      "conditions": [],
+      "source_line": 83
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.DRAGON_EGG",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:dragon_egg"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "alienis": 8,
+        "bestia": 8,
+        "praecantatio": 8
+      },
+      "literal_partial_aspects": {
+        "alienis": 8,
+        "bestia": 8,
+        "praecantatio": 8
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ELDRITCH, 8).add(Aspect.BEAST, 8).add(Aspect.MAGIC, 8)",
+      "target_expression": "new ItemStack(Blocks.DRAGON_EGG)",
+      "conditions": [],
+      "source_line": 86
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.END_PORTAL_FRAME",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:end_portal_frame"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "alienis": 4,
+        "machina": 4,
+        "iter": 4
+      },
+      "literal_partial_aspects": {
+        "alienis": 4,
+        "machina": 4,
+        "iter": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ELDRITCH, 4).add(Aspect.MECHANISM, 4).add(Aspect.TRAVEL, 4)",
+      "target_expression": "new ItemStack(Blocks.END_PORTAL_FRAME, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 88
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.TALLGRASS",
+      "legacy_meta": 1,
+      "modern_ids": [
+        "minecraft:short_grass",
+        "minecraft:fern"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 1,
+        "terra": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1,
+        "terra": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1).add(Aspect.EARTH, 1)",
+      "target_expression": "new ItemStack(Blocks.TALLGRASS, 1, 1)",
+      "conditions": [],
+      "source_line": 92
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.YELLOW_FLOWER",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:dandelion"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.LIFE, 1)",
+      "target_expression": "new ItemStack(Blocks.YELLOW_FLOWER, 1, 0)",
+      "conditions": [],
+      "source_line": 98
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.RED_FLOWER",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:poppy",
+        "minecraft:blue_orchid",
+        "minecraft:allium",
+        "minecraft:azure_bluet",
+        "minecraft:red_tulip",
+        "minecraft:orange_tulip",
+        "minecraft:white_tulip",
+        "minecraft:pink_tulip",
+        "minecraft:oxeye_daisy"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.LIFE, 1)",
+      "target_expression": "new ItemStack(Blocks.RED_FLOWER, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 102
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.BROWN_MUSHROOM",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:brown_mushroom"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 1,
+        "tenebrae": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1,
+        "tenebrae": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1).add(Aspect.DARKNESS, 1)",
+      "target_expression": "new ItemStack(Blocks.BROWN_MUSHROOM)",
+      "conditions": [],
+      "source_line": 107
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.RED_MUSHROOM",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:red_mushroom"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 1,
+        "venenum": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1,
+        "venenum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1).add(Aspect.POISON, 1)",
+      "target_expression": "new ItemStack(Blocks.RED_MUSHROOM)",
+      "conditions": [],
+      "source_line": 110
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.BROWN_MUSHROOM_BLOCK",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:brown_mushroom_block"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 3,
+        "tenebrae": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 3,
+        "tenebrae": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 3).add(Aspect.DARKNESS, 2)",
+      "target_expression": "new ItemStack(Blocks.BROWN_MUSHROOM_BLOCK)",
+      "conditions": [],
+      "source_line": 115
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.RED_MUSHROOM_BLOCK",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:red_mushroom_block"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 3,
+        "venenum": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 3,
+        "venenum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 3).add(Aspect.POISON, 2)",
+      "target_expression": "new ItemStack(Blocks.RED_MUSHROOM_BLOCK)",
+      "conditions": [],
+      "source_line": 118
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.DEADBUSH",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:dead_bush"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 1,
+        "mortuus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1,
+        "mortuus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1).add(Aspect.DEATH, 1)",
+      "target_expression": "new ItemStack(Blocks.DEADBUSH)",
+      "conditions": [],
+      "source_line": 123
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.DOUBLE_PLANT",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:sunflower",
+        "minecraft:lilac",
+        "minecraft:tall_grass",
+        "minecraft:large_fern",
+        "minecraft:rose_bush",
+        "minecraft:peony"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 3,
+        "victus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 3,
+        "victus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 3).add(Aspect.LIFE, 1)",
+      "target_expression": "new ItemStack(Blocks.DOUBLE_PLANT, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 128
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.IRON_PICKAXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:iron_pickaxe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 3,
+        "metallum": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 3,
+        "metallum": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 3).add(Aspect.METAL, 3)",
+      "target_expression": "new ItemStack(Items.IRON_PICKAXE)",
+      "conditions": [],
+      "source_line": 135
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.IRON_AXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:iron_axe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 3,
+        "metallum": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 3,
+        "metallum": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 3).add(Aspect.METAL, 3)",
+      "target_expression": "new ItemStack(Items.IRON_AXE)",
+      "conditions": [],
+      "source_line": 136
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.IRON_SHOVEL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:iron_shovel"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "metallum": 2
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "metallum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.METAL, 2)",
+      "target_expression": "new ItemStack(Items.IRON_SHOVEL)",
+      "conditions": [],
+      "source_line": 137
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.IRON_SWORD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:iron_sword"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 3,
+        "telum": 3,
+        "metallum": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 3,
+        "telum": 3,
+        "metallum": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 3).add(Aspect.WEAPON, 3).add(Aspect.METAL, 3)",
+      "target_expression": "new ItemStack(Items.IRON_SWORD)",
+      "conditions": [],
+      "source_line": 138
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.IRON_HOE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:iron_hoe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "metallum": 2,
+        "meto": 1
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "metallum": 2,
+        "meto": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.METAL, 2).add(Aspect.HARVEST, 1)",
+      "target_expression": "new ItemStack(Items.IRON_HOE)",
+      "conditions": [],
+      "source_line": 139
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.DIAMOND_PICKAXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:diamond_pickaxe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 4,
+        "vitreus": 5
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 4,
+        "vitreus": 5
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 4).add(Aspect.CRYSTAL, 5)",
+      "target_expression": "new ItemStack(Items.DIAMOND_PICKAXE)",
+      "conditions": [],
+      "source_line": 141
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.DIAMOND_SWORD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:diamond_sword"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 4,
+        "telum": 4,
+        "vitreus": 4
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 4,
+        "telum": 4,
+        "vitreus": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 4).add(Aspect.WEAPON, 4).add(Aspect.CRYSTAL, 4)",
+      "target_expression": "new ItemStack(Items.DIAMOND_SWORD)",
+      "conditions": [],
+      "source_line": 142
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.DIAMOND_AXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:diamond_axe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 4,
+        "vitreus": 4
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 4,
+        "vitreus": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 4).add(Aspect.CRYSTAL, 4)",
+      "target_expression": "new ItemStack(Items.DIAMOND_AXE)",
+      "conditions": [],
+      "source_line": 143
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.DIAMOND_SHOVEL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:diamond_shovel"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 3,
+        "vitreus": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 3,
+        "vitreus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 3).add(Aspect.CRYSTAL, 3)",
+      "target_expression": "new ItemStack(Items.DIAMOND_SHOVEL)",
+      "conditions": [],
+      "source_line": 144
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.DIAMOND_HOE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:diamond_hoe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 3,
+        "vitreus": 3,
+        "meto": 2
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 3,
+        "vitreus": 3,
+        "meto": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 3).add(Aspect.CRYSTAL, 3).add(Aspect.HARVEST, 2)",
+      "target_expression": "new ItemStack(Items.DIAMOND_HOE)",
+      "conditions": [],
+      "source_line": 145
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLDEN_PICKAXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:golden_pickaxe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "metallum": 4
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "metallum": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.METAL, 4)",
+      "target_expression": "new ItemStack(Items.GOLDEN_PICKAXE)",
+      "conditions": [],
+      "source_line": 147
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLDEN_SWORD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:golden_sword"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "telum": 2,
+        "metallum": 4
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "telum": 2,
+        "metallum": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.WEAPON, 2).add(Aspect.METAL, 4)",
+      "target_expression": "new ItemStack(Items.GOLDEN_SWORD)",
+      "conditions": [],
+      "source_line": 148
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLDEN_AXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:golden_axe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "metallum": 4
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "metallum": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.METAL, 4)",
+      "target_expression": "new ItemStack(Items.GOLDEN_AXE)",
+      "conditions": [],
+      "source_line": 149
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLDEN_SHOVEL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:golden_shovel"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "metallum": 4
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "metallum": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.METAL, 4)",
+      "target_expression": "new ItemStack(Items.GOLDEN_SHOVEL)",
+      "conditions": [],
+      "source_line": 150
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLDEN_HOE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:golden_hoe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "metallum": 4,
+        "meto": 1
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "metallum": 4,
+        "meto": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.METAL, 4).add(Aspect.HARVEST, 1)",
+      "target_expression": "new ItemStack(Items.GOLDEN_HOE)",
+      "conditions": [],
+      "source_line": 151
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.STONE_PICKAXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:stone_pickaxe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "terra": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "terra": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.EARTH, 3)",
+      "target_expression": "new ItemStack(Items.STONE_PICKAXE)",
+      "conditions": [],
+      "source_line": 153
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.STONE_SWORD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:stone_sword"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "telum": 2,
+        "terra": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "telum": 2,
+        "terra": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.WEAPON, 2).add(Aspect.EARTH, 3)",
+      "target_expression": "new ItemStack(Items.STONE_SWORD)",
+      "conditions": [],
+      "source_line": 154
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.STONE_AXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:stone_axe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 2,
+        "terra": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 2,
+        "terra": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 2).add(Aspect.EARTH, 3)",
+      "target_expression": "new ItemStack(Items.STONE_AXE)",
+      "conditions": [],
+      "source_line": 155
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.STONE_SHOVEL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:stone_shovel"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "terra": 2
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "terra": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.EARTH, 2)",
+      "target_expression": "new ItemStack(Items.STONE_SHOVEL)",
+      "conditions": [],
+      "source_line": 156
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.STONE_HOE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:stone_hoe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "terra": 2,
+        "meto": 1
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "terra": 2,
+        "meto": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.EARTH, 2).add(Aspect.HARVEST, 1)",
+      "target_expression": "new ItemStack(Items.STONE_HOE)",
+      "conditions": [],
+      "source_line": 157
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.WOODEN_PICKAXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:wooden_pickaxe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "arbor": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "arbor": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.TREE, 3)",
+      "target_expression": "new ItemStack(Items.WOODEN_PICKAXE)",
+      "conditions": [],
+      "source_line": 159
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.WOODEN_SWORD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:wooden_sword"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "telum": 1,
+        "arbor": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "telum": 1,
+        "arbor": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.WEAPON, 1).add(Aspect.TREE, 3)",
+      "target_expression": "new ItemStack(Items.WOODEN_SWORD)",
+      "conditions": [],
+      "source_line": 160
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.WOODEN_AXE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:wooden_axe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "arbor": 3
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "arbor": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.TREE, 3)",
+      "target_expression": "new ItemStack(Items.WOODEN_AXE)",
+      "conditions": [],
+      "source_line": 161
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.WOODEN_SHOVEL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:wooden_shovel"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "arbor": 2
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "arbor": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.TREE, 2)",
+      "target_expression": "new ItemStack(Items.WOODEN_SHOVEL)",
+      "conditions": [],
+      "source_line": 162
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.WOODEN_HOE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:wooden_hoe"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "instrumentum": 1,
+        "arbor": 2,
+        "meto": 1
+      },
+      "literal_partial_aspects": {
+        "instrumentum": 1,
+        "arbor": 2,
+        "meto": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TOOL, 1).add(Aspect.TREE, 2).add(Aspect.HARVEST, 1)",
+      "target_expression": "new ItemStack(Items.WOODEN_HOE)",
+      "conditions": [],
+      "source_line": 163
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.APPLE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:apple"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "victus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.LIFE, 1)",
+      "target_expression": "new ItemStack(Items.APPLE)",
+      "conditions": [],
+      "source_line": 166
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.BREAD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:bread"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "victus": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "victus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.LIFE, 2)",
+      "target_expression": "new ItemStack(Items.BREAD)",
+      "conditions": [],
+      "source_line": 167
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.COOKED_BEEF",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:cooked_beef"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 2,
+        "victus": 3
+      },
+      "literal_partial_aspects": {
+        "bestia": 2,
+        "victus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 2).add(Aspect.LIFE, 3)",
+      "target_expression": "new ItemStack(Items.COOKED_BEEF)",
+      "conditions": [],
+      "source_line": 168
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.COOKED_PORKCHOP",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:cooked_porkchop"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 2,
+        "victus": 3
+      },
+      "literal_partial_aspects": {
+        "bestia": 2,
+        "victus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 2).add(Aspect.LIFE, 3)",
+      "target_expression": "new ItemStack(Items.COOKED_PORKCHOP)",
+      "conditions": [],
+      "source_line": 169
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.COOKED_CHICKEN",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:cooked_chicken"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 2,
+        "victus": 2,
+        "volatus": 1
+      },
+      "literal_partial_aspects": {
+        "bestia": 2,
+        "victus": 2,
+        "volatus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 2).add(Aspect.LIFE, 2).add(Aspect.FLIGHT, 1)",
+      "target_expression": "new ItemStack(Items.COOKED_CHICKEN)",
+      "conditions": [],
+      "source_line": 170
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.COOKED_FISH",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:cooked_cod"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 2,
+        "victus": 2,
+        "aqua": 1
+      },
+      "literal_partial_aspects": {
+        "bestia": 2,
+        "victus": 2,
+        "aqua": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 2).add(Aspect.LIFE, 2).add(Aspect.WATER, 1)",
+      "target_expression": "new ItemStack(Items.COOKED_FISH)",
+      "conditions": [],
+      "source_line": 171
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.IRON_INGOT",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:iron_ingot"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "metallum": 4
+      },
+      "literal_partial_aspects": {
+        "metallum": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 4)",
+      "target_expression": "new ItemStack(Items.IRON_INGOT)",
+      "conditions": [],
+      "source_line": 174
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLD_INGOT",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:gold_ingot"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "metallum": 3,
+        "lucrum": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "lucrum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.GREED, 2)",
+      "target_expression": "new ItemStack(Items.GOLD_INGOT)",
+      "conditions": [],
+      "source_line": 175
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLD_NUGGET",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:gold_nugget"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "new ItemStack(Items.GOLD_NUGGET)",
+      "conditions": [],
+      "source_line": 176
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.DIAMOND",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:diamond"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "vitreus": 8
+      },
+      "literal_partial_aspects": {
+        "vitreus": 8
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRYSTAL, 8)",
+      "target_expression": "new ItemStack(Items.DIAMOND)",
+      "conditions": [],
+      "source_line": 177
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.EMERALD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:emerald"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "vitreus": 6,
+        "permutatio": 2
+      },
+      "literal_partial_aspects": {
+        "vitreus": 6,
+        "permutatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRYSTAL, 6).add(Aspect.EXCHANGE, 2)",
+      "target_expression": "new ItemStack(Items.EMERALD)",
+      "conditions": [],
+      "source_line": 178
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.REDSTONE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:redstone"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "potentia": 3
+      },
+      "literal_partial_aspects": {
+        "potentia": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ENERGY, 3)",
+      "target_expression": "new ItemStack(Items.REDSTONE)",
+      "conditions": [],
+      "source_line": 179
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.COAL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:coal"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "potentia": 2
+      },
+      "literal_partial_aspects": {
+        "potentia": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ENERGY, 2)",
+      "target_expression": "new ItemStack(Items.COAL)",
+      "conditions": [],
+      "source_line": 180
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.STICK",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:stick"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "arbor": 1
+      },
+      "literal_partial_aspects": {
+        "arbor": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 1)",
+      "target_expression": "new ItemStack(Items.STICK)",
+      "conditions": [],
+      "source_line": 181
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.STRING",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:string"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 1,
+        "instrumentum": 1
+      },
+      "literal_partial_aspects": {
+        "bestia": 1,
+        "instrumentum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 1).add(Aspect.TOOL, 1)",
+      "target_expression": "new ItemStack(Items.STRING)",
+      "conditions": [],
+      "source_line": 182
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.FEATHER",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:feather"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 1,
+        "volatus": 2
+      },
+      "literal_partial_aspects": {
+        "bestia": 1,
+        "volatus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 1).add(Aspect.FLIGHT, 2)",
+      "target_expression": "new ItemStack(Items.FEATHER)",
+      "conditions": [],
+      "source_line": 183
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.LEATHER",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:leather"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 2,
+        "corpus": 1
+      },
+      "literal_partial_aspects": {
+        "bestia": 2,
+        "corpus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 2).add(Aspect.FLESH, 1)",
+      "target_expression": "new ItemStack(Items.LEATHER)",
+      "conditions": [],
+      "source_line": 184
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.BONE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:bone"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "exanimis": 2,
+        "terra": 1
+      },
+      "literal_partial_aspects": {
+        "exanimis": 2,
+        "terra": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.UNDEAD, 2).add(Aspect.EARTH, 1)",
+      "target_expression": "new ItemStack(Items.BONE)",
+      "conditions": [],
+      "source_line": 185
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GUNPOWDER",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:gunpowder"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "ignis": 2,
+        "potentia": 2,
+        "perditio": 1
+      },
+      "literal_partial_aspects": {
+        "ignis": 2,
+        "potentia": 2,
+        "perditio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FIRE, 2).add(Aspect.ENERGY, 2).add(Aspect.ENTROPY, 1)",
+      "target_expression": "new ItemStack(Items.GUNPOWDER)",
+      "conditions": [],
+      "source_line": 186
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.ENDER_PEARL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:ender_pearl"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "alienis": 4,
+        "praecantatio": 2,
+        "iter": 4
+      },
+      "literal_partial_aspects": {
+        "alienis": 4,
+        "praecantatio": 2,
+        "iter": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ELDRITCH, 4).add(Aspect.MAGIC, 2).add(Aspect.TRAVEL, 4)",
+      "target_expression": "new ItemStack(Items.ENDER_PEARL)",
+      "conditions": [],
+      "source_line": 187
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.ROTTEN_FLESH",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:rotten_flesh"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "exanimis": 2,
+        "corpus": 2,
+        "mortuus": 1
+      },
+      "literal_partial_aspects": {
+        "exanimis": 2,
+        "corpus": 2,
+        "mortuus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.UNDEAD, 2).add(Aspect.FLESH, 2).add(Aspect.DEATH, 1)",
+      "target_expression": "new ItemStack(Items.ROTTEN_FLESH)",
+      "conditions": [],
+      "source_line": 191
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.SPIDER_EYE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:spider_eye"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "bestia": 2,
+        "venenum": 3,
+        "sensus": 1
+      },
+      "literal_partial_aspects": {
+        "bestia": 2,
+        "venenum": 3,
+        "sensus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 2).add(Aspect.POISON, 3).add(Aspect.SENSES, 1)",
+      "target_expression": "new ItemStack(Items.SPIDER_EYE)",
+      "conditions": [],
+      "source_line": 192
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.BLAZE_ROD",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:blaze_rod"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "ignis": 4,
+        "potentia": 2,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "ignis": 4,
+        "potentia": 2,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FIRE, 4).add(Aspect.ENERGY, 2).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(Items.BLAZE_ROD)",
+      "conditions": [],
+      "source_line": 193
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GHAST_TEAR",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:ghast_tear"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "spiritus": 4,
+        "ignis": 2,
+        "sensus": 1
+      },
+      "literal_partial_aspects": {
+        "spiritus": 4,
+        "ignis": 2,
+        "sensus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SOUL, 4).add(Aspect.FIRE, 2).add(Aspect.SENSES, 1)",
+      "target_expression": "new ItemStack(Items.GHAST_TEAR)",
+      "conditions": [],
+      "source_line": 194
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.MAGMA_CREAM",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:magma_cream"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "ignis": 3,
+        "limus": 2
+      },
+      "literal_partial_aspects": {
+        "ignis": 3,
+        "limus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FIRE, 3).add(Aspect.SLIME, 2)",
+      "target_expression": "new ItemStack(Items.MAGMA_CREAM)",
+      "conditions": [],
+      "source_line": 195
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.SLIME_BALL",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:slime_ball"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "limus": 3,
+        "victus": 1
+      },
+      "literal_partial_aspects": {
+        "limus": 3,
+        "victus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SLIME, 3).add(Aspect.LIFE, 1)",
+      "target_expression": "new ItemStack(Items.SLIME_BALL)",
+      "conditions": [],
+      "source_line": 196
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GLASS_BOTTLE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:glass_bottle"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "vitreus": 1,
+        "vacuos": 1
+      },
+      "literal_partial_aspects": {
+        "vitreus": 1,
+        "vacuos": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRYSTAL, 1).add(Aspect.VOID, 1)",
+      "target_expression": "new ItemStack(Items.GLASS_BOTTLE)",
+      "conditions": [],
+      "source_line": 199
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.NETHER_WART",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:nether_wart"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "praecantatio": 2,
+        "ignis": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "praecantatio": 2,
+        "ignis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.MAGIC, 2).add(Aspect.FIRE, 1)",
+      "target_expression": "new ItemStack(Items.NETHER_WART)",
+      "conditions": [],
+      "source_line": 200
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.GOLDEN_CARROT",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:golden_carrot"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "metallum": 4,
+        "sensus": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "metallum": 4,
+        "sensus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.METAL, 4).add(Aspect.SENSES, 2)",
+      "target_expression": "new ItemStack(Items.GOLDEN_CARROT)",
+      "conditions": [],
+      "source_line": 201
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.SPECKLED_MELON",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:glistering_melon_slice"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "herba": 2,
+        "metallum": 4,
+        "sano": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "metallum": 4,
+        "sano": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.METAL, 4).add(Aspect.HEAL, 2)",
+      "target_expression": "new ItemStack(Items.SPECKLED_MELON)",
+      "conditions": [],
+      "source_line": 202
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.BOOK",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:book"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "arbor": 2,
+        "cognitio": 2
+      },
+      "literal_partial_aspects": {
+        "arbor": 2,
+        "cognitio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 2).add(Aspect.MIND, 2)",
+      "target_expression": "new ItemStack(Items.BOOK)",
+      "conditions": [],
+      "source_line": 205
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.PAPER",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:paper"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "arbor": 1,
+        "cognitio": 1
+      },
+      "literal_partial_aspects": {
+        "arbor": 1,
+        "cognitio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 1).add(Aspect.MIND, 1)",
+      "target_expression": "new ItemStack(Items.PAPER)",
+      "conditions": [],
+      "source_line": 206
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.FLINT",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:flint"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "terra": 1,
+        "instrumentum": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "instrumentum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.TOOL, 1)",
+      "target_expression": "new ItemStack(Items.FLINT)",
+      "conditions": [],
+      "source_line": 207
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.BUCKET",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:bucket"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "metallum": 8,
+        "vacuos": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "vacuos": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.VOID, 1)",
+      "target_expression": "new ItemStack(Items.BUCKET)",
+      "conditions": [],
+      "source_line": 208
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.RECORD_FAR",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:music_disc_far"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "alienis": 4,
+        "lucrum": 4
+      },
+      "literal_partial_aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "alienis": 4,
+        "lucrum": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.ELDRITCH, 4).add(Aspect.GREED, 4)",
+      "target_expression": "new ItemStack(Items.RECORD_FAR)",
+      "conditions": [],
+      "source_line": 209
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.NETHER_STAR",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:nether_star"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "alienis": 8,
+        "praecantatio": 8,
+        "ordo": 8,
+        "lux": 8
+      },
+      "literal_partial_aspects": {
+        "alienis": 8,
+        "praecantatio": 8,
+        "ordo": 8,
+        "lux": 8
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ELDRITCH, 8).add(Aspect.MAGIC, 8).add(Aspect.ORDER, 8).add(Aspect.LIGHT, 8)",
+      "target_expression": "new ItemStack(Items.NETHER_STAR)",
+      "conditions": [],
+      "source_line": 211
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.WATER_BUCKET",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:water_bucket"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "metallum": 8,
+        "vacuos": 1,
+        "aqua": 4
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "vacuos": 1,
+        "aqua": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.VOID, 1).add(Aspect.WATER, 4)",
+      "target_expression": "new ItemStack(Items.WATER_BUCKET)",
+      "conditions": [],
+      "source_line": 215
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Items.LAVA_BUCKET",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:lava_bucket"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "metallum": 8,
+        "vacuos": 1,
+        "ignis": 4,
+        "terra": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "vacuos": 1,
+        "ignis": 4,
+        "terra": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.VOID, 1).add(Aspect.FIRE, 4).add(Aspect.EARTH, 1)",
+      "target_expression": "new ItemStack(Items.LAVA_BUCKET)",
+      "conditions": [],
+      "source_line": 218
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Items.BOW",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:bow"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "telum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WEAPON, 1)",
+      "target_expression": "new ItemStack(Items.BOW)",
+      "conditions": [],
+      "source_line": 225
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Items.CAKE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:cake"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "fabrico": 2,
+        "aqua": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRAFT, 2).add(Aspect.WATER, 2)",
+      "target_expression": "new ItemStack(Items.CAKE)",
+      "conditions": [],
+      "source_line": 226
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Items.MINECART",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:minecart"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 2,
+        "iter": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MECHANISM, 2).add(Aspect.TRAVEL, 4)",
+      "target_expression": "new ItemStack(Items.MINECART)",
+      "conditions": [],
+      "source_line": 227
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Items.BOAT",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:boat"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "aqua": 4,
+        "iter": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WATER, 4).add(Aspect.TRAVEL, 4)",
+      "target_expression": "new ItemStack(Items.BOAT)",
+      "conditions": [],
+      "source_line": 228
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Items.REPEATER",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:repeater"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MECHANISM, 2)",
+      "target_expression": "new ItemStack(Items.REPEATER)",
+      "conditions": [],
+      "source_line": 229
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Items.COMPASS",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:compass"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "sensus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 2)",
+      "target_expression": "new ItemStack(Items.COMPASS)",
+      "conditions": [],
+      "source_line": 230
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Items.CLOCK",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:clock"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "sensus": 4,
+        "aer": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4)",
+      "target_expression": "new ItemStack(Items.CLOCK)",
+      "conditions": [],
+      "source_line": 231
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.DISPENSER",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:dispenser"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MECHANISM, 1)",
+      "target_expression": "new ItemStack(Blocks.DISPENSER)",
+      "conditions": [],
+      "source_line": 234
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.RAIL",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:rail"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "metallum": 1,
+        "iter": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1).add(Aspect.TRAVEL, 1)",
+      "target_expression": "new ItemStack(Blocks.RAIL, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 235
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.DAYLIGHT_DETECTOR",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:daylight_detector"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "sensus": 4,
+        "machina": 2,
+        "aer": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 4).add(Aspect.MECHANISM, 2).add(Aspect.AIR, 4)",
+      "target_expression": "new ItemStack(Blocks.DAYLIGHT_DETECTOR)",
+      "conditions": [],
+      "source_line": 237
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.REDSTONE_TORCH",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:redstone_torch"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 1,
+        "potentia": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.ENERGY, 1)",
+      "target_expression": "new ItemStack(Blocks.REDSTONE_TORCH, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 238
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.REDSTONE_LAMP",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:redstone_lamp"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "sensus": 2,
+        "lux": 3,
+        "machina": 3
+      },
+      "aspect_expression": "new AspectList().merge(Aspect.SENSES, 2).merge(Aspect.LIGHT, 3).merge(Aspect.MECHANISM, 3)",
+      "target_expression": "new ItemStack(Blocks.REDSTONE_LAMP, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 240
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.TORCH",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:torch"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "lux": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.LIGHT, 1)",
+      "target_expression": "new ItemStack(Blocks.TORCH, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 242
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.FIRE",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:fire"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "ignis": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FIRE, 4)",
+      "target_expression": "new ItemStack(Blocks.FIRE, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 243
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.CRAFTING_TABLE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:crafting_table"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "fabrico": 4
+      },
+      "literal_partial_aspects": {
+        "fabrico": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRAFT, 4)",
+      "target_expression": "new ItemStack(Blocks.CRAFTING_TABLE)",
+      "conditions": [],
+      "source_line": 244
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.ENCHANTING_TABLE",
+      "legacy_meta": 0,
+      "modern_ids": [
+        "minecraft:enchanting_table"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "auram": 2,
+        "praecantatio": 2,
+        "permutatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.AURA, 2).add(Aspect.MAGIC, 2).add(Aspect.EXCHANGE, 2)",
+      "target_expression": "new ItemStack(Blocks.ENCHANTING_TABLE)",
+      "conditions": [],
+      "source_line": 245
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.ANVIL",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:anvil"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "metallum": 64,
+        "fabrico": 2,
+        "instrumentum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 64).add(Aspect.CRAFT, 2).add(Aspect.TOOL, 2)",
+      "target_expression": "new ItemStack(Blocks.ANVIL, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 246
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.PISTON",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:piston"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 2,
+        "motus": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MECHANISM, 2).add(Aspect.MOTION, 4)",
+      "target_expression": "new ItemStack(Blocks.PISTON, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 248
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.STICKY_PISTON",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:sticky_piston"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 2,
+        "motus": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MECHANISM, 2).add(Aspect.MOTION, 4)",
+      "target_expression": "new ItemStack(Blocks.STICKY_PISTON, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 250
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.ENDER_CHEST",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:ender_chest"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "permutatio": 2,
+        "iter": 2,
+        "vacuos": 4
+      },
+      "aspect_expression": "new AspectList().merge(Aspect.EXCHANGE, 2).merge(Aspect.TRAVEL, 2).merge(Aspect.VOID, 4)",
+      "target_expression": "new ItemStack(Blocks.ENDER_CHEST, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 252
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.HOPPER",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:hopper"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 1,
+        "permutatio": 1,
+        "vacuos": 1
+      },
+      "aspect_expression": "new AspectList().merge(Aspect.MECHANISM, 1).merge(Aspect.EXCHANGE, 1).merge(Aspect.VOID, 1)",
+      "target_expression": "new ItemStack(Blocks.HOPPER, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 254
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.DROPPER",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:dropper"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 1,
+        "permutatio": 1,
+        "vacuos": 1
+      },
+      "aspect_expression": "new AspectList().merge(Aspect.MECHANISM, 1).merge(Aspect.EXCHANGE, 1).merge(Aspect.VOID, 1)",
+      "target_expression": "new ItemStack(Blocks.DROPPER, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 256
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "Blocks.TRAPPED_CHEST",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:trapped_chest"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "machina": 1,
+        "permutatio": 1,
+        "vacuos": 1
+      },
+      "aspect_expression": "new AspectList().merge(Aspect.MECHANISM, 1).merge(Aspect.EXCHANGE, 1).merge(Aspect.VOID, 1)",
+      "target_expression": "new ItemStack(Blocks.TRAPPED_CHEST, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 258
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "Blocks.BEACON",
+      "legacy_meta": "wildcard",
+      "modern_ids": [
+        "minecraft:beacon"
+      ],
+      "id_validation": "requires_target_registry_check",
+      "aspects": {
+        "sensus": 2,
+        "lux": 3,
+        "machina": 3
+      },
+      "literal_partial_aspects": {
+        "sensus": 2,
+        "lux": 3,
+        "machina": 3
+      },
+      "aspect_expression": "new AspectList().merge(Aspect.SENSES, 2).merge(Aspect.LIGHT, 3).merge(Aspect.MECHANISM, 3)",
+      "target_expression": "new ItemStack(Blocks.BEACON, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 260
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"nuggetCopper\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "\"nuggetCopper\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundCopperIngot)"
+      ],
+      "source_line": 267
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"ingotCopper\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "permutatio": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "permutatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.EXCHANGE, 1)",
+      "target_expression": "\"ingotCopper\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundCopperIngot)"
+      ],
+      "source_line": 268
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustCopper\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "permutatio": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "permutatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 2).add(Aspect.ENTROPY, 1).add(Aspect.EXCHANGE, 1)",
+      "target_expression": "\"dustCopper\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundCopperIngot)"
+      ],
+      "source_line": 269
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreCopper\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 2,
+        "terra": 1,
+        "permutatio": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 2,
+        "terra": 1,
+        "permutatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 2).add(Aspect.EARTH, 1).add(Aspect.EXCHANGE, 1)",
+      "target_expression": "\"oreCopper\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundCopperIngot)"
+      ],
+      "source_line": 270
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 17,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "permutatio": 2
+      },
+      "literal_partial_aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "permutatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ORDER, 1).add(Aspect.METAL, 5).add(Aspect.EARTH, 1).add(Aspect.EXCHANGE, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 17)",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundCopperIngot)"
+      ],
+      "source_line": 271
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"nuggetTin\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "\"nuggetTin\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundTinIngot)"
+      ],
+      "source_line": 275
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"ingotTin\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "\"ingotTin\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundTinIngot)"
+      ],
+      "source_line": 276
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustTin\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 2).add(Aspect.ENTROPY, 1).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "\"dustTin\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundTinIngot)"
+      ],
+      "source_line": 277
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreTin\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "perditio": 1,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "perditio": 1,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.ENTROPY, 1).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "\"oreTin\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundTinIngot)"
+      ],
+      "source_line": 278
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 18,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ORDER, 1).add(Aspect.METAL, 5).add(Aspect.EARTH, 1).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 18)",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundTinIngot)"
+      ],
+      "source_line": 279
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"nuggetSilver\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "\"nuggetSilver\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundSilverIngot)"
+      ],
+      "source_line": 283
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"ingotSilver\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "lucrum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "lucrum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.GREED, 1)",
+      "target_expression": "\"ingotSilver\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundSilverIngot)"
+      ],
+      "source_line": 284
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustSilver\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "lucrum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "lucrum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 2).add(Aspect.ENTROPY, 1).add(Aspect.GREED, 1)",
+      "target_expression": "\"dustSilver\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundSilverIngot)"
+      ],
+      "source_line": 285
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreSilver\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "perditio": 1,
+        "lucrum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "perditio": 1,
+        "lucrum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.ENTROPY, 1).add(Aspect.GREED, 1)",
+      "target_expression": "\"oreSilver\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundSilverIngot)"
+      ],
+      "source_line": 286
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 19,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "lucrum": 2
+      },
+      "literal_partial_aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "lucrum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ORDER, 1).add(Aspect.METAL, 5).add(Aspect.EARTH, 1).add(Aspect.GREED, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 19)",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundSilverIngot)"
+      ],
+      "source_line": 287
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"nuggetLead\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "\"nuggetLead\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundLeadIngot)"
+      ],
+      "source_line": 291
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"ingotLead\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "ordo": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "ordo": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.ORDER, 1)",
+      "target_expression": "\"ingotLead\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundLeadIngot)"
+      ],
+      "source_line": 292
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustLead\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "ordo": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "ordo": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 2).add(Aspect.ENTROPY, 1).add(Aspect.ORDER, 1)",
+      "target_expression": "\"dustLead\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundLeadIngot)"
+      ],
+      "source_line": 293
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreLead\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "perditio": 1,
+        "ordo": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "perditio": 1,
+        "ordo": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.ENTROPY, 1).add(Aspect.ORDER, 1)",
+      "target_expression": "\"oreLead\"",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundLeadIngot)"
+      ],
+      "source_line": 294
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 20,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ordo": 3,
+        "metallum": 5,
+        "terra": 1
+      },
+      "literal_partial_aspects": {
+        "ordo": 3,
+        "metallum": 5,
+        "terra": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ORDER, 1).add(Aspect.METAL, 5).add(Aspect.EARTH, 1).add(Aspect.ORDER, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 20)",
+      "conditions": [
+        "if (thaumcraft.common.config.Config.foundLeadIngot)"
+      ],
+      "source_line": 295
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"stone\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 2)",
+      "target_expression": "\"stone\"",
+      "conditions": [],
+      "source_line": 299
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"cobblestone\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "perditio": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "perditio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.ENTROPY, 1)",
+      "target_expression": "\"cobblestone\"",
+      "conditions": [],
+      "source_line": 300
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"nuggetIron\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "\"nuggetIron\"",
+      "conditions": [],
+      "source_line": 301
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreIron\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "metallum": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "metallum": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.METAL, 3)",
+      "target_expression": "\"oreIron\"",
+      "conditions": [],
+      "source_line": 302
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustIron\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "perditio": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "perditio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.ENTROPY, 1)",
+      "target_expression": "\"dustIron\"",
+      "conditions": [],
+      "source_line": 303
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreGold\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "lucrum": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "lucrum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.METAL, 2).add(Aspect.GREED, 1)",
+      "target_expression": "\"oreGold\"",
+      "conditions": [],
+      "source_line": 304
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustGold\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "lucrum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 2,
+        "perditio": 1,
+        "lucrum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 2).add(Aspect.ENTROPY, 1).add(Aspect.GREED, 1)",
+      "target_expression": "\"dustGold\"",
+      "conditions": [],
+      "source_line": 305
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreLapis\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "sensus": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "sensus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.SENSES, 3)",
+      "target_expression": "\"oreLapis\"",
+      "conditions": [],
+      "source_line": 306
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreDiamond\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "lucrum": 3,
+        "vitreus": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "lucrum": 3,
+        "vitreus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.GREED, 3).add(Aspect.CRYSTAL, 3)",
+      "target_expression": "\"oreDiamond\"",
+      "conditions": [],
+      "source_line": 307
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"gemDiamond\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vitreus": 4,
+        "lucrum": 4
+      },
+      "literal_partial_aspects": {
+        "vitreus": 4,
+        "lucrum": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRYSTAL, 4).add(Aspect.GREED, 4)",
+      "target_expression": "\"gemDiamond\"",
+      "conditions": [],
+      "source_line": 308
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreRedstone\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "potentia": 2,
+        "machina": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "potentia": 2,
+        "machina": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.ENERGY, 2).add(Aspect.MECHANISM, 2)",
+      "target_expression": "\"oreRedstone\"",
+      "conditions": [],
+      "source_line": 309
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreEmerald\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "lucrum": 4,
+        "vitreus": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "lucrum": 4,
+        "vitreus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.GREED, 4).add(Aspect.CRYSTAL, 3)",
+      "target_expression": "\"oreEmerald\"",
+      "conditions": [],
+      "source_line": 310
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"gemEmerald\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vitreus": 4,
+        "lucrum": 5
+      },
+      "literal_partial_aspects": {
+        "vitreus": 4,
+        "lucrum": 5
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRYSTAL, 4).add(Aspect.GREED, 5)",
+      "target_expression": "\"gemEmerald\"",
+      "conditions": [],
+      "source_line": 311
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"oreQuartz\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "vitreus": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "vitreus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.CRYSTAL, 3)",
+      "target_expression": "\"oreQuartz\"",
+      "conditions": [],
+      "source_line": 312
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustRedstone\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "potentia": 2,
+        "machina": 1
+      },
+      "literal_partial_aspects": {
+        "potentia": 2,
+        "machina": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ENERGY, 2).add(Aspect.MECHANISM, 1)",
+      "target_expression": "\"dustRedstone\"",
+      "conditions": [],
+      "source_line": 313
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"dustGlowstone\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "sensus": 1,
+        "lux": 2
+      },
+      "literal_partial_aspects": {
+        "sensus": 1,
+        "lux": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 1).add(Aspect.LIGHT, 2)",
+      "target_expression": "\"dustGlowstone\"",
+      "conditions": [],
+      "source_line": 314
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"treeSapling\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "arbor": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "arbor": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.TREE, 1)",
+      "target_expression": "\"treeSapling\"",
+      "conditions": [],
+      "source_line": 317
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"treeLeaves\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "aer": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "aer": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.AIR, 1)",
+      "target_expression": "\"treeLeaves\"",
+      "conditions": [],
+      "source_line": 318
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"logWood\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 4
+      },
+      "literal_partial_aspects": {
+        "arbor": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 4)",
+      "target_expression": "\"logWood\"",
+      "conditions": [],
+      "source_line": 319
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"plankWood\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 2
+      },
+      "literal_partial_aspects": {
+        "arbor": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 2)",
+      "target_expression": "\"plankWood\"",
+      "conditions": [],
+      "source_line": 320
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"slabWood\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 1
+      },
+      "literal_partial_aspects": {
+        "arbor": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 1)",
+      "target_expression": "\"slabWood\"",
+      "conditions": [],
+      "source_line": 321
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"stairWood\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 1
+      },
+      "literal_partial_aspects": {
+        "arbor": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 1)",
+      "target_expression": "\"stairWood\"",
+      "conditions": [],
+      "source_line": 322
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"stickWood\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 1
+      },
+      "literal_partial_aspects": {
+        "arbor": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 1)",
+      "target_expression": "\"stickWood\"",
+      "conditions": [],
+      "source_line": 323
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"blockGlass\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRYSTAL, 2)",
+      "target_expression": "\"blockGlass\"",
+      "conditions": [],
+      "source_line": 324
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"paneGlass\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.CRYSTAL, 1)",
+      "target_expression": "\"paneGlass\"",
+      "conditions": [],
+      "source_line": 325
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "\"blockWool\"",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "instrumentum": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "instrumentum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.TOOL, 1)",
+      "target_expression": "\"blockWool\"",
+      "conditions": [],
+      "source_line": 326
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "dye",
+      "legacy_meta": null,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "sensus": 1
+      },
+      "literal_partial_aspects": {
+        "sensus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 1)",
+      "target_expression": "dye",
+      "conditions": [
+        "for (String dye : DYES)"
+      ],
+      "source_line": 329
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShard",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 1,
+        "aer": 2,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 1,
+        "aer": 2,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 1).add(Aspect.AIR, 2).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemShard, 1, 0)",
+      "conditions": [],
+      "source_line": 334
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShard",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 1,
+        "ignis": 2,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 1,
+        "ignis": 2,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 1).add(Aspect.FIRE, 2).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemShard, 1, 1)",
+      "conditions": [],
+      "source_line": 335
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShard",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 1,
+        "aqua": 2,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 1,
+        "aqua": 2,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 1).add(Aspect.WATER, 2).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemShard, 1, 2)",
+      "conditions": [],
+      "source_line": 336
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShard",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 1,
+        "terra": 2,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 1,
+        "terra": 2,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 1).add(Aspect.EARTH, 2).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemShard, 1, 3)",
+      "conditions": [],
+      "source_line": 337
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShard",
+      "legacy_meta": 4,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 1,
+        "ordo": 2,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 1,
+        "ordo": 2,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 1).add(Aspect.ORDER, 2).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemShard, 1, 4)",
+      "conditions": [],
+      "source_line": 338
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShard",
+      "legacy_meta": 5,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 1,
+        "perditio": 2,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 1,
+        "perditio": 2,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 1).add(Aspect.ENTROPY, 2).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemShard, 1, 5)",
+      "conditions": [],
+      "source_line": 339
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShard",
+      "legacy_meta": 6,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "aer": 2,
+        "ignis": 2,
+        "aqua": 2,
+        "terra": 2,
+        "ordo": 2,
+        "perditio": 2,
+        "vitreus": 1
+      },
+      "literal_partial_aspects": {
+        "aer": 2,
+        "ignis": 2,
+        "aqua": 2,
+        "terra": 2,
+        "ordo": 2,
+        "perditio": 2,
+        "vitreus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.AIR, 2).add(Aspect.FIRE, 2).add(Aspect.WATER, 2).add(Aspect.EARTH, 2).add(Aspect.ORDER, 2).add(Aspect.ENTROPY, 2).add(Aspect.CRYSTAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemShard, 1, 6)",
+      "conditions": [],
+      "source_line": 340
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemResource",
+      "legacy_meta": 14,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList(new ItemStack(ConfigItems.itemShard, 1, 6)).add(Aspect.MAGIC, 2).remove(Aspect.CRYSTAL)",
+      "target_expression": "new ItemStack(ConfigItems.itemResource, 1, 14)",
+      "conditions": [],
+      "source_line": 342
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 5,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 5)",
+      "conditions": [],
+      "source_line": 345
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 6,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 6)",
+      "conditions": [],
+      "source_line": 346
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 16,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ordo": 1,
+        "metallum": 6,
+        "terra": 1
+      },
+      "literal_partial_aspects": {
+        "ordo": 1,
+        "metallum": 6,
+        "terra": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ORDER, 1).add(Aspect.METAL, 6).add(Aspect.EARTH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 16)",
+      "conditions": [],
+      "source_line": 347
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 31,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "lucrum": 2
+      },
+      "literal_partial_aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "lucrum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ORDER, 1).add(Aspect.METAL, 4).add(Aspect.EARTH, 1).add(Aspect.GREED, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 31)",
+      "conditions": [],
+      "source_line": 348
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNugget",
+      "legacy_meta": 21,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "permutatio": 4,
+        "venenum": 2
+      },
+      "literal_partial_aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "permutatio": 4,
+        "venenum": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ORDER, 1).add(Aspect.METAL, 4).add(Aspect.EARTH, 1).add(Aspect.EXCHANGE, 4).add(Aspect.POISON, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemNugget, 1, 21)",
+      "conditions": [],
+      "source_line": 349
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNuggetBeef",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "fames": 1
+      },
+      "literal_partial_aspects": {
+        "fames": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.HUNGER, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemNuggetBeef, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 350
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNuggetChicken",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "fames": 1
+      },
+      "literal_partial_aspects": {
+        "fames": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.HUNGER, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemNuggetChicken, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 351
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNuggetPork",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "fames": 1
+      },
+      "literal_partial_aspects": {
+        "fames": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.HUNGER, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemNuggetPork, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 352
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemNuggetFish",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "fames": 1
+      },
+      "literal_partial_aspects": {
+        "fames": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.HUNGER, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemNuggetFish, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 353
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "ConfigItems.itemTripleMeatTreat",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "sano": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.HEAL, 1).remove(Aspect.HUNGER, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemTripleMeatTreat, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 354
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "permutatio": 2,
+        "venenum": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "permutatio": 2,
+        "venenum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.METAL, 2).add(Aspect.EXCHANGE, 2).add(Aspect.POISON, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 0)",
+      "conditions": [],
+      "source_line": 358
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "aer": 3,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "aer": 3,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.AIR, 3).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 1)",
+      "conditions": [],
+      "source_line": 359
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "ignis": 3,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "ignis": 3,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.FIRE, 3).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 2)",
+      "conditions": [],
+      "source_line": 360
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "aqua": 3,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "aqua": 3,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.WATER, 3).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 3)",
+      "conditions": [],
+      "source_line": 361
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 4,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 4,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 4,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.EARTH, 3).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 4)",
+      "conditions": [],
+      "source_line": 362
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 5,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "ordo": 3,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "ordo": 3,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.ORDER, 3).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 5)",
+      "conditions": [],
+      "source_line": 363
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 6,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "perditio": 3,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "perditio": 3,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.ENTROPY, 3).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 6)",
+      "conditions": [],
+      "source_line": 364
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomOre",
+      "legacy_meta": 7,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "vinculum": 3,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "vinculum": 3,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.TRAP, 3).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomOre, 1, 7)",
+      "conditions": [],
+      "source_line": 365
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTaint",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 1,
+        "vitium": 3
+      },
+      "literal_partial_aspects": {
+        "arbor": 1,
+        "vitium": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 1).add(Aspect.TAINT, 3)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTaint, 1, 0)",
+      "conditions": [],
+      "source_line": 367
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTaint",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "vitium": 3
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "vitium": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.TAINT, 3)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTaint, 1, 1)",
+      "conditions": [],
+      "source_line": 368
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTaintFibres",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "victus": 1,
+        "vitium": 2
+      },
+      "literal_partial_aspects": {
+        "victus": 1,
+        "vitium": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.LIFE, 1).add(Aspect.TAINT, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTaintFibres, 1, 0)",
+      "conditions": [],
+      "source_line": 369
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTaintFibres",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 1,
+        "vitium": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1,
+        "vitium": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1).add(Aspect.TAINT, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTaintFibres, 1, 1)",
+      "conditions": [],
+      "source_line": 370
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTaintFibres",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 1,
+        "vitium": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1,
+        "vitium": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1).add(Aspect.TAINT, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTaintFibres, 1, 2)",
+      "conditions": [],
+      "source_line": 371
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTaintFibres",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      },
+      "literal_partial_aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 1).add(Aspect.PLANT, 1).add(Aspect.TAINT, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTaintFibres, 1, 3)",
+      "conditions": [],
+      "source_line": 372
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTaintFibres",
+      "legacy_meta": 4,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      },
+      "literal_partial_aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.BEAST, 1).add(Aspect.PLANT, 1).add(Aspect.TAINT, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTaintFibres, 1, 4)",
+      "conditions": [],
+      "source_line": 373
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCosmeticSolid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 4,
+        "tenebrae": 2,
+        "alienis": 2
+      },
+      "literal_partial_aspects": {
+        "terra": 4,
+        "tenebrae": 2,
+        "alienis": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 4).add(Aspect.DARKNESS, 2).add(Aspect.ELDRITCH, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCosmeticSolid)",
+      "conditions": [],
+      "source_line": 374
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockMagicalLog",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 3,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "arbor": 3,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 3).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockMagicalLog, 1, 0)",
+      "conditions": [],
+      "source_line": 375
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockMagicalLog",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 3,
+        "praecantatio": 1,
+        "ordo": 1
+      },
+      "literal_partial_aspects": {
+        "arbor": 3,
+        "praecantatio": 1,
+        "ordo": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 3).add(Aspect.MAGIC, 1).add(Aspect.ORDER, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockMagicalLog, 1, 1)",
+      "conditions": [],
+      "source_line": 376
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockMagicalLeaves",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockMagicalLeaves, 1, 0)",
+      "conditions": [],
+      "source_line": 377
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockMagicalLeaves",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockMagicalLeaves, 1, 1)",
+      "conditions": [],
+      "source_line": 378
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCosmeticSolid",
+      "legacy_meta": 6,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCosmeticSolid, 1, 6)",
+      "conditions": [],
+      "source_line": 379
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCosmeticSolid",
+      "legacy_meta": 7,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCosmeticSolid, 1, 7)",
+      "conditions": [],
+      "source_line": 380
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockMetalDevice",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 4,
+        "fabrico": 4,
+        "praecantatio": 4
+      },
+      "literal_partial_aspects": {
+        "metallum": 4,
+        "fabrico": 4,
+        "praecantatio": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 4).add(Aspect.CRAFT, 4).add(Aspect.MAGIC, 4)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockMetalDevice)",
+      "conditions": [],
+      "source_line": 381
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCandle",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lux": 2,
+        "corpus": 1,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "lux": 2,
+        "corpus": 1,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.LIGHT, 2).add(Aspect.FLESH, 1).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCandle)",
+      "conditions": [],
+      "source_line": 382
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockAiry",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lux": 1
+      },
+      "literal_partial_aspects": {
+        "lux": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.LIGHT, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockAiry, 1, 2)",
+      "conditions": [],
+      "source_line": 383
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockAiry",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lux": 1
+      },
+      "literal_partial_aspects": {
+        "lux": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.LIGHT, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockAiry, 1, 3)",
+      "conditions": [],
+      "source_line": 384
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockArcaneFurnace",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 8,
+        "aqua": 8,
+        "fabrico": 8
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 8,
+        "aqua": 8,
+        "fabrico": 8
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 8).add(Aspect.WATER, 8).add(Aspect.CRAFT, 8)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockArcaneFurnace, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 385
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomPlant",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.TREE, 1).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomPlant, 1, 0)",
+      "conditions": [],
+      "source_line": 387
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomPlant",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.TREE, 1).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomPlant, 1, 1)",
+      "conditions": [],
+      "source_line": 388
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomPlant",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "permutatio": 2,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "permutatio": 2,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.EXCHANGE, 2).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomPlant, 1, 2)",
+      "conditions": [],
+      "source_line": 389
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomPlant",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "ignis": 2,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "ignis": 2,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.FIRE, 2).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomPlant, 1, 3)",
+      "conditions": [],
+      "source_line": 390
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCustomPlant",
+      "legacy_meta": 5,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "herba": 2,
+        "venenum": 1,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "herba": 2,
+        "venenum": 1,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.PLANT, 2).add(Aspect.POISON, 1).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCustomPlant, 1, 5)",
+      "conditions": [],
+      "source_line": 391
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemEssence",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vacuos": 1
+      },
+      "literal_partial_aspects": {
+        "vacuos": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.VOID, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemEssence, 1, 0)",
+      "conditions": [],
+      "source_line": 393
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemEssence",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {},
+      "literal_partial_aspects": {},
+      "aspect_expression": "new AspectList()",
+      "target_expression": "new ItemStack(ConfigItems.itemEssence, 1, 1)",
+      "conditions": [],
+      "source_line": 394
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemWispEssence",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "auram": 2
+      },
+      "literal_partial_aspects": {
+        "auram": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.AURA, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemWispEssence, 1, 0)",
+      "conditions": [],
+      "source_line": 395
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemCrystalEssence",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {},
+      "literal_partial_aspects": {},
+      "aspect_expression": "new AspectList()",
+      "target_expression": "new ItemStack(ConfigItems.itemCrystalEssence, 1, 0)",
+      "conditions": [],
+      "source_line": 396
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemThaumonomicon",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 2,
+        "cognitio": 4,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "arbor": 2,
+        "cognitio": 4,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 2).add(Aspect.MIND, 4).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemThaumonomicon, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 397
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemResource",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "venenum": 1,
+        "permutatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "venenum": 1,
+        "permutatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.POISON, 1).add(Aspect.EXCHANGE, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemResource, 1, 3)",
+      "conditions": [],
+      "source_line": 399
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemResource",
+      "legacy_meta": 6,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vinculum": 2,
+        "vitreus": 2
+      },
+      "literal_partial_aspects": {
+        "vinculum": 2,
+        "vitreus": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TRAP, 2).add(Aspect.CRYSTAL, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemResource, 1, 6)",
+      "conditions": [],
+      "source_line": 400
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemResource",
+      "legacy_meta": 9,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "cognitio": 8
+      },
+      "literal_partial_aspects": {
+        "cognitio": 8
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MIND, 8)",
+      "target_expression": "new ItemStack(ConfigItems.itemResource, 1, 9)",
+      "conditions": [],
+      "source_line": 401
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemResource",
+      "legacy_meta": 11,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vitium": 3,
+        "limus": 1
+      },
+      "literal_partial_aspects": {
+        "vitium": 3,
+        "limus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TAINT, 3).add(Aspect.SLIME, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemResource, 1, 11)",
+      "conditions": [],
+      "source_line": 402
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemResource",
+      "legacy_meta": 12,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vitium": 2,
+        "lucrum": 1,
+        "fames": 1
+      },
+      "literal_partial_aspects": {
+        "vitium": 2,
+        "lucrum": 1,
+        "fames": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TAINT, 2).add(Aspect.GREED, 1).add(Aspect.HUNGER, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemResource, 1, 12)",
+      "conditions": [],
+      "source_line": 403
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemResource",
+      "legacy_meta": 18,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lucrum": 1
+      },
+      "literal_partial_aspects": {
+        "lucrum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.GREED, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemResource, 1, 18)",
+      "conditions": [],
+      "source_line": 404
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemZombieBrain",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "corpus": 2,
+        "cognitio": 4,
+        "exanimis": 2
+      },
+      "literal_partial_aspects": {
+        "corpus": 2,
+        "cognitio": 4,
+        "exanimis": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FLESH, 2).add(Aspect.MIND, 4).add(Aspect.UNDEAD, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemZombieBrain)",
+      "conditions": [],
+      "source_line": 405
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLootBag",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lucrum": 8
+      },
+      "literal_partial_aspects": {
+        "lucrum": 8
+      },
+      "aspect_expression": "new AspectList().add(Aspect.GREED, 8)",
+      "target_expression": "new ItemStack(ConfigItems.itemLootBag, 1, 0)",
+      "conditions": [],
+      "source_line": 406
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLootBag",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lucrum": 16
+      },
+      "literal_partial_aspects": {
+        "lucrum": 16
+      },
+      "aspect_expression": "new AspectList().add(Aspect.GREED, 16)",
+      "target_expression": "new ItemStack(ConfigItems.itemLootBag, 1, 1)",
+      "conditions": [],
+      "source_line": 407
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLootBag",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lucrum": 32
+      },
+      "literal_partial_aspects": {
+        "lucrum": 32
+      },
+      "aspect_expression": "new AspectList().add(Aspect.GREED, 32)",
+      "target_expression": "new ItemStack(ConfigItems.itemLootBag, 1, 2)",
+      "conditions": [],
+      "source_line": 408
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockTable",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "arbor": 4,
+        "fabrico": 2
+      },
+      "literal_partial_aspects": {
+        "arbor": 4,
+        "fabrico": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TREE, 4).add(Aspect.CRAFT, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockTable)",
+      "conditions": [],
+      "source_line": 410
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemInkwell",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "aqua": 1,
+        "tenebrae": 1,
+        "instrumentum": 1
+      },
+      "literal_partial_aspects": {
+        "aqua": 1,
+        "tenebrae": 1,
+        "instrumentum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WATER, 1).add(Aspect.DARKNESS, 1).add(Aspect.TOOL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemInkwell)",
+      "conditions": [],
+      "source_line": 411
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemThaumometer",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "sensus": 3,
+        "metallum": 2,
+        "vitreus": 1,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "sensus": 3,
+        "metallum": 2,
+        "vitreus": 1,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 3).add(Aspect.METAL, 2).add(Aspect.CRYSTAL, 1).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemThaumometer)",
+      "conditions": [],
+      "source_line": 412
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemBaubleBlanks",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 2,
+        "metallum": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 2,
+        "metallum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 2).add(Aspect.METAL, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemBaubleBlanks, 1, 0)",
+      "conditions": [],
+      "source_line": 413
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemBaubleBlanks",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 2,
+        "lucrum": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 2,
+        "lucrum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 2).add(Aspect.GREED, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemBaubleBlanks, 1, 1)",
+      "conditions": [],
+      "source_line": 414
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemBaubleBlanks",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 2,
+        "humanus": 1
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 2,
+        "humanus": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 2).add(Aspect.MAN, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemBaubleBlanks, 1, 2)",
+      "conditions": [],
+      "source_line": 415
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemBaubleBlanks",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 5
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 5
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 5)",
+      "target_expression": "new ItemStack(ConfigItems.itemBaubleBlanks, 1, 3)",
+      "conditions": [],
+      "source_line": 416
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCosmeticSolid",
+      "legacy_meta": 4,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 8,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCosmeticSolid, 1, 4)",
+      "conditions": [],
+      "source_line": 417
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCosmeticSolid",
+      "legacy_meta": 5,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "corpus": 4,
+        "lux": 1,
+        "praecantatio": 1
+      },
+      "literal_partial_aspects": {
+        "corpus": 4,
+        "lux": 1,
+        "praecantatio": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.FLESH, 4).add(Aspect.LIGHT, 1).add(Aspect.MAGIC, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCosmeticSolid, 1, 5)",
+      "conditions": [],
+      "source_line": 418
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCosmeticSolid",
+      "legacy_meta": 11,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCosmeticSolid, 1, 11)",
+      "conditions": [],
+      "source_line": 419
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockCosmeticSolid",
+      "legacy_meta": 12,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "terra": 1,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "terra": 1,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.EARTH, 1).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockCosmeticSolid, 1, 12)",
+      "conditions": [],
+      "source_line": 420
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "ConfigItems.itemPrimalArrow",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "telum": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.WEAPON, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemPrimalArrow)",
+      "conditions": [],
+      "source_line": 421
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "ConfigItems.itemGoggles",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "sensus": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 4)",
+      "target_expression": "new ItemStack(ConfigItems.itemGoggles, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 422
+    },
+    {
+      "registration": "registerComplexObjectTag",
+      "legacy_target": "ConfigBlocks.blockWoodenDevice",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {
+        "sensus": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.SENSES, 4)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockWoodenDevice, 1, 1)",
+      "conditions": [],
+      "source_line": 423
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.focusPech",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "praecantatio": 5,
+        "venenum": 5,
+        "perditio": 5,
+        "alienis": 5,
+        "telum": 5
+      },
+      "literal_partial_aspects": {
+        "praecantatio": 5,
+        "venenum": 5,
+        "perditio": 5,
+        "alienis": 5,
+        "telum": 5
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5).add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5)",
+      "target_expression": "new ItemStack(ConfigItems.focusPech)",
+      "conditions": [],
+      "source_line": 424
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemHelmetCultistPlate",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemHelmetCultistPlate, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 426
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemCultistPlate",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemCultistPlate, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 428
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLegsCultistPlate",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemLegsCultistPlate, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 430
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemHelmetCultistRobe",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.CLOTH, 2).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemHelmetCultistRobe, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 432
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemCultistRobe",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.CLOTH, 2).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemCultistRobe, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 434
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLegsCultistRobe",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 3).add(Aspect.CLOTH, 2).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemLegsCultistRobe, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 436
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemHelmetCultistLeader",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemHelmetCultistLeader, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 438
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemCultistLeader",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemCultistLeader, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 440
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLegsCultistLeader",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemLegsCultistLeader, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 442
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemCultistBoots",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 4,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 4,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 4).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemCultistBoots, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 444
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockWoodenDevice",
+      "legacy_meta": 8,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "alienis": 1,
+        "arbor": 2,
+        "pannus": 3
+      },
+      "literal_partial_aspects": {
+        "alienis": 1,
+        "arbor": 2,
+        "pannus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ELDRITCH, 1).add(Aspect.TREE, 2).add(Aspect.CLOTH, 3)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockWoodenDevice, 1, 8)",
+      "conditions": [],
+      "source_line": 446
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemEldritchObject",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "alienis": 5,
+        "auram": 3,
+        "praecantatio": 3,
+        "sensus": 3,
+        "spiritus": 3
+      },
+      "literal_partial_aspects": {
+        "alienis": 5,
+        "auram": 3,
+        "praecantatio": 3,
+        "sensus": 3,
+        "spiritus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.ELDRITCH, 5).add(Aspect.AURA, 3).add(Aspect.MAGIC, 3).add(Aspect.SENSES, 3).add(Aspect.SOUL, 3)",
+      "target_expression": "new ItemStack(ConfigItems.itemEldritchObject, 1, 0)",
+      "conditions": [],
+      "source_line": 448
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemEldritchObject",
+      "legacy_meta": 1,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "cognitio": 5,
+        "praecantatio": 3,
+        "alienis": 3,
+        "spiritus": 3
+      },
+      "literal_partial_aspects": {
+        "cognitio": 5,
+        "praecantatio": 3,
+        "alienis": 3,
+        "spiritus": 3
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MIND, 5).add(Aspect.MAGIC, 3).add(Aspect.ELDRITCH, 3).add(Aspect.SOUL, 3)",
+      "target_expression": "new ItemStack(ConfigItems.itemEldritchObject, 1, 1)",
+      "conditions": [],
+      "source_line": 450
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemEldritchObject",
+      "legacy_meta": 2,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vinculum": 4,
+        "cognitio": 4,
+        "machina": 4
+      },
+      "literal_partial_aspects": {
+        "vinculum": 4,
+        "cognitio": 4,
+        "machina": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.TRAP, 4).add(Aspect.MIND, 4).add(Aspect.MECHANISM, 4)",
+      "target_expression": "new ItemStack(ConfigItems.itemEldritchObject, 1, 2)",
+      "conditions": [],
+      "source_line": 452
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemEldritchObject",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "aer": 16,
+        "terra": 16,
+        "ignis": 16,
+        "aqua": 16,
+        "ordo": 16,
+        "perditio": 16
+      },
+      "literal_partial_aspects": {
+        "aer": 16,
+        "terra": 16,
+        "ignis": 16,
+        "aqua": 16,
+        "ordo": 16,
+        "perditio": 16
+      },
+      "aspect_expression": "new AspectList().add(Aspect.AIR, 16).add(Aspect.EARTH, 16).add(Aspect.FIRE, 16).add(Aspect.WATER, 16).add(Aspect.ORDER, 16).add(Aspect.ENTROPY, 16)",
+      "target_expression": "new ItemStack(ConfigItems.itemEldritchObject, 1, 3)",
+      "conditions": [],
+      "source_line": 454
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockEldritch",
+      "legacy_meta": "wildcard",
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vacuos": 8,
+        "alienis": 8,
+        "sensus": 4
+      },
+      "literal_partial_aspects": {
+        "vacuos": 8,
+        "alienis": 8,
+        "sensus": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.VOID, 8).add(Aspect.ELDRITCH, 8).add(Aspect.SENSES, 4)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockEldritch, 1, OreDictionary.WILDCARD_VALUE)",
+      "conditions": [],
+      "source_line": 456
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockEldritchPortal",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vacuos": 8,
+        "alienis": 8,
+        "iter": 8
+      },
+      "literal_partial_aspects": {
+        "vacuos": 8,
+        "alienis": 8,
+        "iter": 8
+      },
+      "aspect_expression": "new AspectList().add(Aspect.VOID, 8).add(Aspect.ELDRITCH, 8).add(Aspect.TRAVEL, 8)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockEldritchPortal)",
+      "conditions": [],
+      "source_line": 458
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockEldritch",
+      "legacy_meta": 3,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "vacuos": 4,
+        "alienis": 4
+      },
+      "literal_partial_aspects": {
+        "vacuos": 4,
+        "alienis": 4
+      },
+      "aspect_expression": "new AspectList().add(Aspect.VOID, 4).add(Aspect.ELDRITCH, 4)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockEldritch, 1, 3)",
+      "conditions": [],
+      "source_line": 460
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockEldritch",
+      "legacy_meta": 4,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "lux": 1,
+        "terra": 1,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "lux": 1,
+        "terra": 1,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.LIGHT, 1).add(Aspect.EARTH, 1).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockEldritch, 1, 4)",
+      "conditions": [],
+      "source_line": 462
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockEldritch",
+      "legacy_meta": 5,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "cognitio": 2,
+        "terra": 1,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "cognitio": 2,
+        "terra": 1,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.MIND, 2).add(Aspect.EARTH, 1).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockEldritch, 1, 5)",
+      "conditions": [],
+      "source_line": 464
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigBlocks.blockEldritch",
+      "legacy_meta": 6,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 2,
+        "machina": 2,
+        "alienis": 1
+      },
+      "literal_partial_aspects": {
+        "metallum": 2,
+        "machina": 2,
+        "alienis": 1
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 2).add(Aspect.MECHANISM, 2).add(Aspect.ELDRITCH, 1)",
+      "target_expression": "new ItemStack(ConfigBlocks.blockEldritch, 1, 6)",
+      "conditions": [],
+      "source_line": 466
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemHelmThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 10,
+        "tutamen": 6,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 10,
+        "tutamen": 6,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 10).add(Aspect.ARMOR, 6).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemHelmThaumium)",
+      "conditions": [],
+      "source_line": 469
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemChestThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 14,
+        "tutamen": 8,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 14,
+        "tutamen": 8,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 14).add(Aspect.ARMOR, 8).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemChestThaumium)",
+      "conditions": [],
+      "source_line": 470
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLegsThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 12,
+        "tutamen": 7,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 12,
+        "tutamen": 7,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 12).add(Aspect.ARMOR, 7).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemLegsThaumium)",
+      "conditions": [],
+      "source_line": 471
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemBootsThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 8,
+        "tutamen": 5,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "tutamen": 5,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.ARMOR, 5).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemBootsThaumium)",
+      "conditions": [],
+      "source_line": 472
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemSwordThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 8,
+        "telum": 5,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "telum": 5,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.WEAPON, 5).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemSwordThaumium)",
+      "conditions": [],
+      "source_line": 473
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemPickThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 8,
+        "instrumentum": 5,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "instrumentum": 5,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.TOOL, 5).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemPickThaumium)",
+      "conditions": [],
+      "source_line": 474
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemAxeThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 8,
+        "instrumentum": 5,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 8,
+        "instrumentum": 5,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 8).add(Aspect.TOOL, 5).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemAxeThaumium)",
+      "conditions": [],
+      "source_line": 475
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShovelThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 6,
+        "instrumentum": 4,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 6,
+        "instrumentum": 4,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 6).add(Aspect.TOOL, 4).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemShovelThaumium)",
+      "conditions": [],
+      "source_line": 476
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemHoeThaumium",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": {
+        "metallum": 6,
+        "instrumentum": 4,
+        "praecantatio": 2
+      },
+      "literal_partial_aspects": {
+        "metallum": 6,
+        "instrumentum": 4,
+        "praecantatio": 2
+      },
+      "aspect_expression": "new AspectList().add(Aspect.METAL, 6).add(Aspect.TOOL, 4).add(Aspect.MAGIC, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemHoeThaumium)",
+      "conditions": [],
+      "source_line": 477
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemHelmVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(5, 0)",
+      "target_expression": "new ItemStack(ConfigItems.itemHelmVoid)",
+      "conditions": [],
+      "source_line": 479
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemChestVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(8, 0)",
+      "target_expression": "new ItemStack(ConfigItems.itemChestVoid)",
+      "conditions": [],
+      "source_line": 480
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemLegsVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(7, 0)",
+      "target_expression": "new ItemStack(ConfigItems.itemLegsVoid)",
+      "conditions": [],
+      "source_line": 481
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemBootsVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(4, 0)",
+      "target_expression": "new ItemStack(ConfigItems.itemBootsVoid)",
+      "conditions": [],
+      "source_line": 482
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemSwordVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(2, 1)",
+      "target_expression": "new ItemStack(ConfigItems.itemSwordVoid)",
+      "conditions": [],
+      "source_line": 483
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemPickVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(3, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemPickVoid)",
+      "conditions": [],
+      "source_line": 484
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemAxeVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(3, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemAxeVoid)",
+      "conditions": [],
+      "source_line": 485
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemShovelVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(1, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemShovelVoid)",
+      "conditions": [],
+      "source_line": 486
+    },
+    {
+      "registration": "registerObjectTag",
+      "legacy_target": "ConfigItems.itemHoeVoid",
+      "legacy_meta": 0,
+      "modern_ids": [],
+      "id_validation": "unmapped",
+      "aspects": null,
+      "literal_partial_aspects": {},
+      "aspect_expression": "getVoidEquipmentRecipeTags(2, 2)",
+      "target_expression": "new ItemStack(ConfigItems.itemHoeVoid)",
+      "conditions": [],
+      "source_line": 487
+    }
+  ]
+}

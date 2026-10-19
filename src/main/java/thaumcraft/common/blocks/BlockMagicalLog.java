@@ -1,0 +1,174 @@
+package thaumcraft.common.blocks;
+
+import net.minecraft.block.BlockLog;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import javax.annotation.Nullable;
+import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.nodes.INode;
+import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.config.ConfigItems;
+import thaumcraft.common.items.ItemWispEssence;
+import thaumcraft.common.lib.TCSounds;
+import thaumcraft.common.tiles.TileNode;
+
+public class BlockMagicalLog extends BlockLog {
+
+    public static final String[] woodType = new String[]{"greatwood", "silverwood"};
+    public static final PropertyInteger TYPE = PropertyInteger.create("type", 0, 3);
+
+    public BlockMagicalLog() {
+        this.setHardness(2.5f);
+        this.setSoundType(SoundType.WOOD);
+        this.setCreativeTab(Thaumcraft.tabTC);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(TYPE, 0).withProperty(LOG_AXIS, BlockLog.EnumAxis.Y));
+    }
+
+    @Override
+    public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
+        list.add(new ItemStack(this, 1, 0)); // greatwood
+        list.add(new ItemStack(this, 1, 1)); // silverwood
+    }
+
+    @Override
+    public int damageDropped(IBlockState state) {
+        int type = state.getValue(TYPE);
+        if (type == 2 || type == 3) return 1; // silverwood knot/legacy alias -> silverwood
+        return type;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean addDestroyEffects(World world, BlockPos pos, ParticleManager manager) {
+        IBlockState state = world.getBlockState(pos);
+        if (state.getBlock() == this && state.getValue(TYPE) == 2) {
+            Thaumcraft.proxy.burst(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 1.0F);
+            world.playSound(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D,
+                    TCSounds.CRAFTFAIL, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+        }
+        return super.addDestroyEffects(world, pos, manager);
+    }
+
+    @Override
+    public boolean hasTileEntity(IBlockState state) {
+        return state.getValue(TYPE) == 2; // silverwood knot has node
+    }
+
+    @Override
+    public TileEntity createTileEntity(World world, IBlockState state) {
+        if (state.getValue(TYPE) == 2) {
+            return new TileNode();
+        }
+        return null;
+    }
+
+    @Override
+    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
+        int type = state.getValue(TYPE);
+        return (type & 2) == 2 ? 7 : super.getLightValue(state, world, pos);
+    }
+
+    @Override
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state,
+            @Nullable TileEntity tile, ItemStack tool) {
+        if (state.getValue(TYPE) == 2 && !world.isRemote
+                && tile instanceof INode && ConfigItems.itemWispEssence != null) {
+            AspectList aspects = ((INode) tile).getAspects();
+            if (aspects != null && aspects.size() > 0) {
+                for (Aspect aspect : aspects.getAspects()) {
+                    if (aspect == null || aspects.getAmount(aspect) < 5) continue;
+                    for (int count = 0; count < BlockAiry.getNodeEssenceDropCount(aspects.getAmount(aspect)); count++) {
+                        ItemStack essence = new ItemStack(ConfigItems.itemWispEssence);
+                        ((ItemWispEssence) essence.getItem()).setAspects(essence,
+                                new AspectList().add(aspect, 2));
+                        spawnAsEntity(world, pos, essence);
+                    }
+                }
+            }
+        }
+        super.harvestBlock(world, player, pos, state, tile, tool);
+    }
+
+    @Override
+    public boolean canSustainLeaves(IBlockState state, IBlockAccess world, net.minecraft.util.math.BlockPos pos) {
+        return true;
+    }
+
+    @Override
+    public boolean isWood(IBlockAccess world, net.minecraft.util.math.BlockPos pos) {
+        return true;
+    }
+
+    @Override
+    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        return 5;
+    }
+
+    @Override
+    public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        return 5;
+    }
+
+    @Override
+    protected BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, TYPE, LOG_AXIS);
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta) {
+        int type = meta & 3;
+        int axisBits = (meta >> 2) & 3;
+        IBlockState state = this.getDefaultState().withProperty(TYPE, type);
+        switch (axisBits) {
+            case 0: state = state.withProperty(LOG_AXIS, BlockLog.EnumAxis.Y); break;
+            case 1: state = state.withProperty(LOG_AXIS, BlockLog.EnumAxis.X); break;
+            case 2: state = state.withProperty(LOG_AXIS, BlockLog.EnumAxis.Z); break;
+            case 3: state = state.withProperty(LOG_AXIS, BlockLog.EnumAxis.NONE); break;
+        }
+        return state;
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state) {
+        int meta = state.getValue(TYPE) & 3;
+        switch (state.getValue(LOG_AXIS)) {
+            case X: meta |= 1 << 2; break;
+            case Z: meta |= 2 << 2; break;
+            case NONE: meta |= 3 << 2; break;
+            default: break;
+        }
+        return meta;
+    }
+
+    @Override
+    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
+        IBlockState state = this.getDefaultState().withProperty(TYPE, MathHelper.clamp(meta, 0, 3));
+        EnumFacing.Axis axis = placer.getHorizontalFacing().getAxis();
+        switch (axis) {
+            case X: state = state.withProperty(LOG_AXIS, BlockLog.EnumAxis.X); break;
+            case Z: state = state.withProperty(LOG_AXIS, BlockLog.EnumAxis.Z); break;
+            default: state = state.withProperty(LOG_AXIS, BlockLog.EnumAxis.Y); break;
+        }
+        return state;
+    }
+}

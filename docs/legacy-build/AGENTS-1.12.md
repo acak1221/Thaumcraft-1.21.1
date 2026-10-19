@@ -1,0 +1,183 @@
+# Agent Instructions — Thaumcraft 4.2.3.5 -> Forge 1.12.2 Port
+
+This repository is a work-in-progress Java 8 Minecraft Forge 1.12.2 port of Thaumcraft 4.2.3.5 from Minecraft 1.7.10.
+
+## Sources of truth
+
+Read these files before changing code:
+
+- `AGENTS.md`
+- `build.gradle`
+- `Dockerfile`
+
+If `.opencode/goal.md` exists, read it completely and check its `Status` before starting or resuming work. When the status is `active`, use it as the durable task anchor, reconciled with the latest user instructions and live Git state; do not treat a completed or stale goal as active work.
+
+Use `thaumcraft_src/**` and `Thaumcraft-1.7.10-4.2.3.5.jar` as read-only original 1.7.10 reference material. Use `Thaumcraft-1.12.2-6.1.BETA26.jar` as a read-only Thaumcraft 6 (1.12.2) donor reference for display transforms, model conventions, and positioning values.
+
+The original 1.7.10 material is a behavioral and asset reference only. It does not define a save-migration or backward-compatibility requirement.
+
+## Parity baseline
+
+Reproduce TC4 behavior by default. A deviation is allowed only when supported by at least one of these conditions:
+
+- a reproducible bug in the original;
+- a conflict with shipped research text or a gameplay invariant;
+- a direct port is impossible because of the Minecraft or Forge 1.12 API.
+
+Asset origin: assets (textures, sounds, models, lang, shaders, etc.) for the port can be copied from `thaumcraft_src/assets/` into `src/main/resources/assets/thaumcraft/`. This is the source of truth for all ported assets — do not recreate assets from scratch when a working original exists in `thaumcraft_src/assets/`.
+
+## Hard rules
+
+- Do not edit `thaumcraft_src/**`.
+- Do not edit `Thaumcraft-1.7.10-4.2.3.5.jar`.
+- Do not edit `Thaumcraft-1.12.2-6.1.BETA26.jar`.
+- Do not change public `thaumcraft.api.*` signatures unless there is no Forge 1.12.2-compatible alternative.
+- Do not rename packages away from original Thaumcraft package boundaries.
+- Do not change mod id, registry names, NBT keys, config keys, packet ids, GUI ids, or dimension ids silently.
+- Do not upgrade Forge, Gradle, Java, Baubles, or bundled CodeChicken code unless the final report documents a hard blocker.
+- Do not perform broad formatting-only cleanup.
+- Do not make unrelated dependency changes.
+- Do not claim parity based on compile success alone.
+- Preserve existing behavior unless the current task explicitly authorizes a behavior change.
+
+## Save compatibility baseline
+
+- This port supports fresh Forge 1.12.2 worlds only.
+- Worlds, player data, entity or tile NBT, inventories, research data, and configuration data created by the original Thaumcraft 4.2.3.5 on Minecraft 1.7.10 are unsupported inputs. There is no supported in-place upgrade or migration path from 1.7.10.
+- Do not add, audit, test, or treat legacy 1.7.10 save/NBT migration as parity work unless the user explicitly requests it.
+- Save compatibility requirements apply only to data created by this Forge 1.12.2 port.
+
+## Project stack
+
+- Language: Java.
+- Runtime target: Minecraft Forge 1.12.2.
+- Java target: Java 8.
+- Build system: Gradle wrapper with ForgeGradle 2.3.
+- Forge version: `1.12.2-14.23.5.2847`.
+- MCP mappings: `stable_39`.
+- Hard dependency: Baubles via CurseMaven.
+- Bundled library: `thaumcraft.codechicken.*`.
+- Public addon API boundary: `thaumcraft.api.*`.
+
+## Architecture boundaries
+
+- `thaumcraft.api.*`: public addon API and API jar output. Keep stable.
+- `thaumcraft.common.*`: server/common gameplay, registration, config, blocks, items, tiles, entities, worldgen, research, crafting, network.
+- `thaumcraft.client.*`: client-only GUI, rendering, models, particles, shaders, keybinds, client event handlers.
+- `thaumcraft.codechicken.*`: bundled CCL-style rendering/math helpers.
+- `truetyper.*`: font rendering support.
+- `src/main/resources/assets/thaumcraft/**`: assets, sounds, textures, models, recipes, lang, GUI resources.
+- `thaumcraft_src/**`: read-only original reference.
+
+## Commit policy
+
+Use commit messages in this format (example):
+
+```text
+feat(sources): add bybit proof of reserves source
+
+    Changes:
+    - Add Bybit proof-of-reserves source using the official frontend reserve ratio JSON endpoint
+    - Normalize target asset reserve ratio and missing-asset transparency candidates with source-local tests
+    - Wire scheduled checks and refresh source docs
+```
+
+Each final report must include:
+
+- commit hash if a commit was created;
+- files included in the commit;
+- validation commands run before the commit;
+- whether runtime smoke validation was required, run, passed, failed, or skipped with a concrete reason;
+- known limitations after the commit.
+
+## Required workflow
+
+1. Start with `git status --short`.
+2. Read the relevant docs and code before editing.
+3. For every gameplay-critical class, inspect the original 1.7.10 behavior first:
+   - read matching source if present under `thaumcraft_src/**`;
+   - or decompile with CFR from the original class.
+4. Make small reversible changes.
+5. Run focused validation after each checkpoint.
+6. If validation fails, fix the failure before expanding scope.
+7. Keep the final diff scoped and reviewable.
+8. If code was changed, rebuild (`./scripts/dev.sh build`) as the final step to ensure the jar is up to date.
+9. End with a final report listing exact commands and results.
+
+## Development practices
+
+- Put all temporary files and disposable artifacts in the workspace-root `.tmp/` directory.
+- Keep original package names.
+- Prefer original field/method names when practical for traceability.
+- Prefer porting original behavior over inventing new behavior.
+- Prefer existing project conventions over new abstractions.
+- Use small helpers only when they remove real duplication across multiple callers.
+- Do not introduce speculative abstraction.
+- Do not use ad-hoc regex fixes for broken Java signatures.
+- If a generated or transformed file has corrupted method signatures, stop and regenerate from the original source or manually port the file.
+
+## Validation commands
+
+Use Docker unless the local environment is already known to be Java 8 Forge-compatible.
+
+Use the project wrapper instead of repeating long Docker commands. For routine validation, use one quiet entrypoint:
+
+    ./scripts/dev.sh image
+    ./scripts/dev.sh validate
+    ./scripts/dev.sh validate --smoke
+    ./scripts/dev.sh build
+
+`./scripts/dev.sh validate` runs a stop-on-first-failure sequence: git status summary, `compileJava`, non-GUI tests, `jar`, and MCP jar leak summary. It keeps stdout quiet on success and writes detailed logs under `run/validate/`. On failure, it prints the failed stage and log path. Use `./scripts/dev.sh validate --verbose` only when the failure tail is needed in stdout.
+
+Use `./scripts/dev.sh validate --smoke` when server/runtime smoke validation is required; this adds the dedicated server smoke stage while keeping stdout compact.
+
+Common tasks have dedicated shortcuts (quiet, logs to `run/validate/`):
+
+    ./scripts/dev.sh compileJava        # quiet compile-only check
+    ./scripts/dev.sh build
+    ./scripts/dev.sh test
+    ./scripts/dev.sh check-jar
+    ./scripts/dev.sh validate [--smoke] # multi-step pipeline
+
+For arbitrary Gradle tasks (passthrough, verbose):
+
+    ./scripts/dev.sh gradle <task> [args...]
+
+Use the passthrough only when a dedicated shortcut above does not exist or when verbose Gradle output is needed for debugging.
+
+## Runtime smoke validation
+
+CFR located here: `/usr/local/bin/cfr`
+
+Compile success is not enough for parity or checkpoint completion.
+
+Run runtime smoke validation for common/server changes that can affect mod loading, registries, config, items, blocks, materials, recipes, entities, dimensions, networking, proxies, or lifecycle handlers.
+
+Do not run automated client smoke as routine validation. For client-only GUI, renderer, model, shader, or asset changes, run focused tests and `./scripts/dev.sh build`; report any manual in-game visual validation separately.
+
+For common/server-side changes, run the dedicated server smoke test first:
+
+    ./scripts/dev.sh validate --smoke
+
+Use `./scripts/dev.sh smoke-server` directly only when isolating or debugging the server smoke stage.
+
+A server smoke test passes only when Forge reaches normal ready state, for example a log line containing `Done (`, and no crash markers are present.
+
+A runtime smoke test fails if `crash-reports/` contains a new crash report, or logs contain crash markers such as `LoaderException`, `LoaderExceptionModCrash`, `Game crashed`, `Caught exception`, `NoClassDefFoundError`, `ClassNotFoundException`, `NoSuchMethodError`, `NoSuchFieldError`, `ExceptionInInitializerError`, `Repair material has already been set`, or any Forge/FML fatal loading error.
+
+Do not mark common/server runtime-affecting checkpoints complete based only on `compileJava`, `build`, `apiJar`, or `devJar`. Do not claim visual parity without manual in-game evidence. Documentation-only diffs do not require runtime smoke.
+
+## Addon compatibility smoke workflow
+
+For issues caused by another mod loading with Thaumcraft, use a targeted modset smoke before editing code and again after the fix.
+
+- Keep third-party jars local in `.smoke/`; do not commit them.
+- Commit only smoke manifests, scripts, docs, code, and tests.
+- Start with RECON: identify the root crash marker and the smallest required mod/dependency set.
+- Record each reusable modset under `scripts/smoke-modsets/<name>.txt` with jar name, sha256, and source URL/note.
+- Prepare and run the targeted smoke with `./scripts/dev.sh smoke-modset <name>`.
+- If Baubles is already on the Gradle classpath, do not also copy a Baubles jar into `run/mods`; duplicate mod ids cause false smoke failures.
+- For Thaumcraft 6 addon API gaps, inspect `Thaumcraft-1.12.2-6.1.BETA26.jar` as the donor reference, add the smallest compatible shim, and update `docs/compatibility/tc6-shim-coverage.md`.
+- Keep production shim comments generic to the TC6 contract; keep addon-specific evidence in guard tests, smoke manifests, and the coverage doc.
+- Add a static guard test for every compatibility shim class, method, field, or lifecycle event that prevented the crash.
+- Final validation for a compatibility fix is: `./scripts/dev.sh validate`, `./scripts/dev.sh smoke-modset <name>`, then `./scripts/dev.sh build`.

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["S", "T", "T"],
+  "key": {"S": {"item": "minecraft:string"}, "T": {"item": "thaumcraft:magic_tallow"}},
+  "result": {"id": "thaumcraft:tallow_candle", "count": 3}
+}

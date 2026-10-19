@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [{"item": "thaumcraft:inkwell"}, {"tag": "thaumcraft:black_dyes"}],
+  "result": {"id": "thaumcraft:inkwell", "count": 1}
+}

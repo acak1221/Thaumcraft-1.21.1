@@ -1,0 +1,94 @@
+{
+  "minecraft_target": "1.21.1",
+  "oracle": "Thaumcraft-1.7.10-4.2.3.5.jar (read-only CFR 0.152)",
+  "source": "thaumcraft/common/config/ConfigRecipes.java initializeNormalRecipes",
+  "recipes": [
+    {
+      "id": "thaumcraft:wand_cap_iron",
+      "oracle_line": 430,
+      "pattern": [
+        "NNN",
+        "N N"
+      ],
+      "ingredients": {
+        "N": "nuggetIron"
+      },
+      "output_count": 1,
+      "native_mapping": "thaumcraft:iron_nuggets includes vanilla minecraft:iron_nugget and optional c:nuggets/iron",
+      "gate": "ordinary crafting; no research or vis"
+    },
+    {
+      "id": "thaumcraft:wand_wood_iron",
+      "oracle_line": 429,
+      "pattern": [
+        "  I",
+        " S ",
+        "I  "
+      ],
+      "ingredients": {
+        "I": "itemWandCap metadata 0",
+        "S": "stickWood"
+      },
+      "output_count": 1,
+      "native_mapping": "wand_cap_iron plus wooden_sticks tag; result's registered default WandData supplies wood/iron and empty vis",
+      "gate": "ordinary crafting; basic wood/iron is excluded from ArcaneWandRecipe results",
+      "wood_rod": "Original ConfigItems.java:306 defines WAND_ROD_WOOD with vanilla Items.stick; no separate wood rod item is added"
+    },
+    {
+      "id": "thaumcraft:thaumometer",
+      "oracle_line": 458,
+      "pattern": [
+        " S ",
+        "IGI",
+        " S "
+      ],
+      "ingredients": {
+        "S": "itemShard wildcard metadata",
+        "I": "minecraft:gold_ingot",
+        "G": "minecraft:glass"
+      },
+      "output_count": 1,
+      "native_mapping": "thaumcraft:shards includes all seven metadata variants, including balance; ItemShard creative listing is 0 through 6",
+      "gate": "ordinary crafting; no research or vis",
+      "survival_limitation": "Native shard world-generation and acquisition are pending; the exact recipe does not invent a replacement source"
+    },
+    {
+      "id": "thaumcraft:phial_empty",
+      "oracle_line": 453,
+      "pattern": [
+        " C ",
+        "G G",
+        " G "
+      ],
+      "ingredients": {
+        "C": "minecraft:clay_ball",
+        "G": "minecraft:glass"
+      },
+      "output_count": 8,
+      "gate": "ordinary crafting; no research or vis"
+    },
+    {
+      "id": "thaumcraft:table",
+      "oracle_line": 454,
+      "pattern": [
+        "SSS",
+        "W W"
+      ],
+      "ingredients": {
+        "S": "slabWood",
+        "W": "plankWood"
+      },
+      "output_count": 1,
+      "native_mapping": "minecraft:wooden_slabs and minecraft:planks tags; research table is assembled from two placed ordinary tables using actual inkwell early interaction",
+      "gate": "ordinary crafting; no research or vis"
+    }
+  ],
+  "format_notes": "Minecraft 1.21.1 uses singular data/namespace/recipe and tags/item directories; result uses id, not the old item field.",
+  "validation": "Historical first-four entry recipes plus R07 table. Actual 1.21.1 recipe matching is checked by loader runtime; records are provenance, not proof of a successful run.",
+  "pending": [
+    "arcane recipes and gates",
+    "survival shard acquisition",
+    "wand assembly for other rod/cap combinations",
+    "full original wand renderer"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "ROD_greatwood",
+  "pattern": [" G", "G "],
+  "key": {"G": {"item": "thaumcraft:greatwood_log"}},
+  "result": {"id": "thaumcraft:wand_rod_greatwood", "count": 1},
+  "vis": {"perditio": 3}
+}

@@ -1,0 +1,1533 @@
+{
+  "schema_version": 1,
+  "captured_utc": "2026-10-16T06:40:33.910891+00:00",
+  "run_id": "client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d",
+  "status": "SCRIPT_PASSED",
+  "log": ".tmp/fire-client5.log",
+  "raw_report": ".tmp/fire-client5-raw-report.json",
+  "raw_report_sha256": "e57a14b65e768b8928e96baa8fb047eba9fbdcb0e14b43f15621383960015fbf",
+  "build_input_snapshot": ".tmp/fire-validate7-inputs.json",
+  "build_input_snapshot_sha256": "833278a7d88f0b62d636fd32b97405c65f856a1cbc1be3fa84759fbb0dd52264",
+  "all_build_inputs_match_at_recording": true,
+  "source_fingerprints_lf": {
+    "common/src/main/java/thaumcraft/api/IScribeTools.java": "ef44a60a6068ac5417836e5a7e6165531d5e608141f1018a7a6f319bc1c2413a",
+    "common/src/main/java/thaumcraft/api/aspects/Aspect.java": "c2a12b6faf6dc646c2cb71e359d07b9bf2bfc53cc28a8f23373265cc5005e157",
+    "common/src/main/java/thaumcraft/api/aspects/AspectList.java": "83abbf51b541128685390031cebeddef95c283089365b9004827c62eac906dfc",
+    "common/src/main/java/thaumcraft/api/aspects/IAspectContainer.java": "b8ffc6a30338728d026a6095085d5c498ccd2b7561e64786889b209ddf9787cf",
+    "common/src/main/java/thaumcraft/api/aspects/IEssentiaTransport.java": "507651b7d062857c4e641601b4ad1a1e1ea2fe3017b81cbcab4252bdf4d48aad",
+    "common/src/main/java/thaumcraft/api/entities/ITaintedMob.java": "5235ba19aa1a9cdc66c7ea624772568e7261cbb7cfd19bc995484b40063bc220",
+    "common/src/main/java/thaumcraft/api/wands/ItemFocusBasic.java": "49da6c0d03b71942a2dbfd35cceba3ef6ff33b252971c3c317ebd824505866dc",
+    "common/src/main/java/thaumcraft/client/ClientSetup.java": "adb29f1ae7055b5c21e7fe2c6ceaa2950371ae4582dc73addf19a9abe6d8fef1",
+    "common/src/main/java/thaumcraft/client/ThaumcraftAlchemyClient.java": "df90c6ac78a7e168bcbb3c003936bbdd25c7d748cf99ad65dbe15fcfec5efec3",
+    "common/src/main/java/thaumcraft/client/ThaumcraftAlembicClient.java": "636186a692c62d62b46c1d2a009d332660939d713d318465beb61f5f942ca815",
+    "common/src/main/java/thaumcraft/client/ThaumcraftArcaneClient.java": "eb80b2f3379080f88ce0e78df238845a31b92d2da60998aecd3ef2f19667d632",
+    "common/src/main/java/thaumcraft/client/ThaumcraftBellowsClient.java": "6e5ca25f09c7a3d453c9caf3a9baca39abe0b82b9c7ee05812ff1ba072e2d1d9",
+    "common/src/main/java/thaumcraft/client/ThaumcraftDistillationClient.java": "957213c088a0bc633fd8b233cbf55c4a593e4af70f9f510e462ed08c0f619c66",
+    "common/src/main/java/thaumcraft/client/ThaumcraftEmberClient.java": "d34449b4e89db07264c20027ebc364bcbdf1f1fbd1a9b49d1ac018e4bad43cf8",
+    "common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java": "b70efbb9c483068e69703aa2109fb1fe8519121f262c3c70aa27d2321856eea6",
+    "common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java": "b851942be9adaaab78980ea12ab13a1e39b299e785556194b1bb9b306414912c",
+    "common/src/main/java/thaumcraft/client/ThaumcraftNaturalClient.java": "9b11fd9b87d94acc7d4c273a4634dfd914479cd34dfba37763f288c87710d7d2",
+    "common/src/main/java/thaumcraft/client/ThaumcraftNodeClient.java": "715b555e14ad1b4875e0497d4f3185a6cf9d0634e5888d9dda3763c932ce18f0",
+    "common/src/main/java/thaumcraft/client/ThaumcraftPlantClient.java": "60265251f038b59b8aa3e068ae6ec8e8ec804c5a22e021df69295973b434213b",
+    "common/src/main/java/thaumcraft/client/ThaumcraftResourceClient.java": "11e85720d50b1f30faf0f1024d95d0577d19d60e846961a637846dce3d0bfc8b",
+    "common/src/main/java/thaumcraft/client/ThaumcraftWandClient.java": "0fa6958624bef23a69eb7dff6fc1bd3eabce7cc924b1d2dde19c9556e751a09d",
+    "common/src/main/java/thaumcraft/client/fx/particles/ResourceParticle.java": "cbe1b236ee22b2430a513b2107a854d9ff9509c53d6b224a2feb96e7e6b59108",
+    "common/src/main/java/thaumcraft/client/gui/GuiAlchemyFurnace.java": "41e03af195b8247365e19a96d550330737a7b3dd7856cd6b9f2d8dff0498b286",
+    "common/src/main/java/thaumcraft/client/gui/GuiArcaneWorkbench.java": "c8c6427a578a033bce2a3313bd44a47258c7607da6215a3a712ca29805e2c0c1",
+    "common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java": "cc3cd22bf98857cf9a1427e534c31cd21e4a2b708e002fe575f5891f34934988",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": "81ed3992b123fb8dc3a1adde2d823ad7d05b2443f6eab1eb3f4c4c7cbf82fc04",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java": "d8803bb81cf41aefec01df829fe6e5ba09db9d7e82bef516c1d5236d7eccc803",
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java": "c818ba72d74eccb1e48b014beaee25235c5583b092cafe72dbb05069ed31b494",
+    "common/src/main/java/thaumcraft/client/gui/ResearchIconDisplay.java": "1da991859adfb802c4b6514b7f222c8b5606872c404fbd6296102992a96f3838",
+    "common/src/main/java/thaumcraft/client/gui/ResearchText.java": "faa4aa10366e1acc98f1e3fb07a0993114bc1899add213562252f319d001e620",
+    "common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java": "5518b777cec4a65082528f5dc05a19f296588d1ddfd18951ba86afa6de076d57",
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderAlumentum.java": "559a41232a110a6fc06c5a968f662ae3d829310ed44c5af97e614481e72b85fb",
+    "common/src/main/java/thaumcraft/client/renderers/entity/RenderEmber.java": "be024816dd8f1e9080d087a6a7ddb88e8507b0955f50c23b3fc7987279339750",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelAlembic.java": "481ed108e44aa474769e42759da5c20562a675a1fe2614dd4ebc30ecffdfd285",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelArcaneWorkbench.java": "df29e686c673573ba4740d2e69137713b981af2816aab2f9716b8f5da94b5b04",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelBellows.java": "038df417261c4447429ba231c0134572b521498e56374e0ae536965187004ed7",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelResearchTable.java": "2ec1b0df83c8ccb92cb86efae6593533c70a271dc9e5133ca1115161cb98dec0",
+    "common/src/main/java/thaumcraft/client/renderers/models/ModelTable.java": "758c96240afb7884af359f4b137306e5bda8821c2281899cfb64631b18845e31",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileAlembicRenderer.java": "e4dbdbd86f8848a86492a45f1df0a1cf4ac99ed53cdec56b6c7292d97fd68c2a",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileArcaneWorkbenchRenderer.java": "968694c6650264f1d45c7703d6a44f1f5a833e9ee0df6024dbd5aa273423ace2",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileBellowsRenderer.java": "21f1fc538ea50e1bc99a069e0d268f405699a61c7ea3928c2464d1410e4d2de3",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileCrucibleRenderer.java": "19ce8e1970b3ef6a084aa0d6a590663fb1ec0ba6b9c8daf1f80d10ee71d5b3bf",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java": "e91722faa057d942e3ccccf0ff8199c21c132a4cc05f90daf9f6fab760695525",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java": "e6b2df6cbb45466d8312643a9d00ba114404b80764cb70e6be75392225aee6ad",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java": "f7192be82abe11f3ca809981db5fdd4121e04f57a7ea9e1fe41987e2461a0fe9",
+    "common/src/main/java/thaumcraft/client/renderers/tile/TileTableRenderer.java": "151dea0680016dc23ccde517e61b23473806ec1dfb8e95af9dc801ed570160e1",
+    "common/src/main/java/thaumcraft/common/Thaumcraft.java": "49328a937a6f432ee04b2b7bce1673719c41aaac66e316706482602fb5cb8849",
+    "common/src/main/java/thaumcraft/common/blocks/BlockAlchemyFurnace.java": "18ce3f1431d60d31063e6a38e4997948f447d9e147c91c569341377f360abc98",
+    "common/src/main/java/thaumcraft/common/blocks/BlockAlembic.java": "f237e104407900ed8ae506be33b0d629e65a4a7ffb61f5f69238849f5da983f7",
+    "common/src/main/java/thaumcraft/common/blocks/BlockArcaneStoneSlab.java": "dd6f182e25bae6121f8e40675c90255b5122be578a215d9965390e6cf81838d4",
+    "common/src/main/java/thaumcraft/common/blocks/BlockArcaneStoneStairs.java": "a54020faf8b62ccea21d2cd241fc7f86a5efa99eca2c4eab1448b13001efd5a0",
+    "common/src/main/java/thaumcraft/common/blocks/BlockArcaneWorkbench.java": "fe93e1fe337af4fa286ba34e336435d81ab332c0b798e0c2ee73d408e9a065f4",
+    "common/src/main/java/thaumcraft/common/blocks/BlockAuraNode.java": "dda1046f47d169f98802ecb75e5d8eaf2d08f73ebf909cfe567bda6eaa49d7df",
+    "common/src/main/java/thaumcraft/common/blocks/BlockBellows.java": "c4e529b7dfdafcceadc26555e3f12ce7b37a296345e09b8ef4157c4037c8d4d7",
+    "common/src/main/java/thaumcraft/common/blocks/BlockCrucible.java": "7d66df8139a2e22cff04812839feb6cc51fd3c267f5136e0ece0018676292dd4",
+    "common/src/main/java/thaumcraft/common/blocks/BlockCustomOre.java": "53dc28d2aa4d13ad0bfce8606c862c463d2ed599184a39040a060c588ebe5568",
+    "common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java": "11786a422575fcf18a1f86c9bcef144758bc68663f413002687b83e9c7104c3f",
+    "common/src/main/java/thaumcraft/common/blocks/BlockFluxGas.java": "84938a4cd315e5e05f515059ae9b715451c4643917697ab4f882e5c8ad842734",
+    "common/src/main/java/thaumcraft/common/blocks/BlockFluxGoo.java": "c78d214b3de12e4ab8951e3d6bcd7218f76d6c215dddb8aa75888def726dc5f8",
+    "common/src/main/java/thaumcraft/common/blocks/BlockJar.java": "0fa349352ac5b8a33532dc9c1b281c1ff1a47daaa6af7f1409ec94d693f1c2ba",
+    "common/src/main/java/thaumcraft/common/blocks/BlockMagicalLeaves.java": "b8c94e67d52d7b47f1d30203b4e449e03b7c6979b8c206d4137332a63fc852f2",
+    "common/src/main/java/thaumcraft/common/blocks/BlockMagicalLog.java": "a25492a6355617dc9c3919382a912b981432b8657c0187ee8d87eef67536f448",
+    "common/src/main/java/thaumcraft/common/blocks/BlockMagicalSapling.java": "19245f58249d48f2d89ede9cbeded0c8efdd331e919cda147fd0bb8ff0f8141a",
+    "common/src/main/java/thaumcraft/common/blocks/BlockNitor.java": "f412a80a9f8ee10fdfe662f75264056d695de27299f931f1ff2b547b90507f42",
+    "common/src/main/java/thaumcraft/common/blocks/BlockTable.java": "83d9079a33e14d6853192322a99e25cf77f77eb0ba1e52cab51e86d092b326c9",
+    "common/src/main/java/thaumcraft/common/blocks/FluxFiniteBlock.java": "7509f8d8e6e057063375c03a94d772c1f4b0d8cd7bf0ceade7f5c7000a1fb5e3",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java": "88498346f0002f7a68f9f2d8617e145c9b92c527df578789a9afd4f7242a0bce",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftAlembics.java": "30476468427052ac812e2d0713c793378a6281ab726df29b7c6b77978cce2156",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftArcane.java": "0ab097d2c015faf10d1c35c418e6287dffea070f10bc720c600730c35521acbd",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java": "5757b6221dfe1376f73063718843bea8d2dcbfcbded6cd561732e0af4ea28b2c",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java": "7ba275289136cac2d7ef469705a6a3db61dd904f35a430aeb622689ec7e481ce",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftDistillation.java": "e5c26caf4eccac3df810a9006eb3b7d8e6e9feedc1b52f1c060b5abe82656706",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftEmbers.java": "92d3f8a270fe40e31acf4399eb0966b2e670f2b58992327434e6ae88d361b93d",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java": "66c1df80b8869993913f853514bfa330ae710d8ec5e57af4a7ea5b24a11571db",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftFoci.java": "2d1ebfd9ea36d872837b220330cb806be69542bcf9f6c405255579f92eeb1f8e",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftLabels.java": "6f589c951b5aa7332fab86e3b1ee0c9bbfcccd4c21bccbfd1387ccf19b6a3e4e",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java": "f7d14be7d2cf8da1ccf15c0d2c9c1a0621d9dc1e6ddce2472c27a3d3037f83bb",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java": "3012fcddc3ca1394dc6f55bef6b045ec7c78ac2d417c8647b27f3c87b4459542",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftNodes.java": "40c2509c1f93044e7c2adc94328c8b5a2aca13753a6006f2d87bc500ba312d0e",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java": "242010e238fcbb88e16f08b4b34ae25b7ec5a5964ea04c8d9e49f74230e7514e",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java": "295a7e0917c1db9ef560de2de4592a2ce6798a1740324dcf1b1f98160b41ff71",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java": "d8e49c83383c968c6505bcf12ca63ebb1a0d4cea531be45396cbab08a245c16d",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java": "672aee0a8d74e274b0fd23a388720131fafc03df3c850ecbd265b38edb71d585",
+    "common/src/main/java/thaumcraft/common/config/ThaumcraftWorldgen.java": "92ddc37f54d320729aa537fe7d883b9b7f43dbf73f4c2e1d0c9d1024dece71fe",
+    "common/src/main/java/thaumcraft/common/container/ContainerAlchemyFurnace.java": "a6c3bab87f966e493009ad9badde9746b5008419c9caab288a2ef10b8e9668e3",
+    "common/src/main/java/thaumcraft/common/container/ContainerArcaneWorkbench.java": "cea5204fcd8b40e733b5f21c23f2d3a5ff4ab23c1e59be190c1df9e55f6f2662",
+    "common/src/main/java/thaumcraft/common/container/ContainerResearchTable.java": "500b78d344b155fd7f9bca70fb3c18d2bde9b31ca86ca1f6aec0428fc84f14fd",
+    "common/src/main/java/thaumcraft/common/crafting/ArcaneCrafting.java": "0e340f0550e7b523257d63402249130878db8a29307522e7e78dc6e216849c45",
+    "common/src/main/java/thaumcraft/common/crafting/ArcaneRecipeInput.java": "61666fa2536300f63b5ec4f0e0a4c187ed25e462cb293e441f38e9ce5eee6a3f",
+    "common/src/main/java/thaumcraft/common/crafting/ArcaneShapedRecipe.java": "e00db09ed2d3dd8a35a6bf2aca2850801f285cb46cc17f9f82b2a7b4e18dadd2",
+    "common/src/main/java/thaumcraft/common/crafting/ArcaneVis.java": "8a8c3f73d52d2bcb27b054535f7d2f045394d030f6e191d6fc52252826b000c6",
+    "common/src/main/java/thaumcraft/common/crafting/ArcaneWandRecipe.java": "2a058b121e2fe0f981beb86fcd0f7d64c62090eb20a80c89e73568f481614fb8",
+    "common/src/main/java/thaumcraft/common/crafting/CrucibleCrafting.java": "d3b9ad2a28ac1ee315781afcf8bcef156c625f476f6a30ed8cc52dae2c97e866",
+    "common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java": "4d80760738292ff84c76683208669ed00eaf9917fe47d20a250a9c66a4ea1392",
+    "common/src/main/java/thaumcraft/common/crafting/CrucibleRecipeInput.java": "029c38705b5f4d7a09947eb50d98c07175ffb52647c3b966aba7ba72a5ed4d83",
+    "common/src/main/java/thaumcraft/common/crafting/NativeArcaneRecipe.java": "498e19ef642517d5983eef771ecd2bb945655398f24cc1da0a98a7e2bbb9bece",
+    "common/src/main/java/thaumcraft/common/entities/EntityInventoryItem.java": "97dbc269083a36881ee7044279c17eb47de01f1e3d6385eceb55d20b438721a2",
+    "common/src/main/java/thaumcraft/common/entities/EntitySpecialItem.java": "0658a6cea398db51622064a52ff383a9045b9ee4e8436443eafae1e5ea2b66b0",
+    "common/src/main/java/thaumcraft/common/entities/projectile/EntityAlumentum.java": "159ae09d9adf453cb85c08d4c0a97fb9c5c6ac6acbc00da585d4d3b7656eded3",
+    "common/src/main/java/thaumcraft/common/entities/projectile/EntityEmber.java": "59bd3930d39ef68808e9d0694cb4bd757ad9f87c93c1ec83d46c292634a72cfc",
+    "common/src/main/java/thaumcraft/common/items/ItemAlumentum.java": "0a677191411e5b9ecb7f9794a5585bf2e7d6b6c0b68a5784b23c3acbcbbb10a7",
+    "common/src/main/java/thaumcraft/common/items/ItemEssence.java": "3b4649025f02ddc925227cb0075cf7fbeaeb8706028a2317bfee701339bac097",
+    "common/src/main/java/thaumcraft/common/items/ItemInkwell.java": "708c414069fcbe662f0bf07854890dee8bf375fb6ffffde7deba3c9cb201817a",
+    "common/src/main/java/thaumcraft/common/items/ItemJarLabel.java": "912375fc1f70c797b5c42c2e3b746a422501a89c4188499ccdd1f31ec89a3bd7",
+    "common/src/main/java/thaumcraft/common/items/ItemNitor.java": "58a2692b332416ddb6176406580b3cd70474062913f1c667d9db53d3a5c0e221",
+    "common/src/main/java/thaumcraft/common/items/ItemResearchNotes.java": "2b7376f3b318472b258e203db364b3c564561fecba8e48e94368276fa06bca59",
+    "common/src/main/java/thaumcraft/common/items/JarLabelData.java": "a4216c5022469aca8bf48c8a5df700440b79a46b69a1b362d9f83e8a474ee315",
+    "common/src/main/java/thaumcraft/common/items/PhialData.java": "e79808a5493f60e3980d35f8ca7888726ce78053113930fb0f99db91ef7ed639",
+    "common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java": "a146201229228234bb777f72dada7ddfa28fafe77d838b7b39c3837330546866",
+    "common/src/main/java/thaumcraft/common/items/relics/ItemThaumonomicon.java": "c2be633fda7aac17309d682e12f3b80ae8a868d81ca17d1a145427551efdc7ac",
+    "common/src/main/java/thaumcraft/common/items/relics/ScanSession.java": "596d502137a331a3644e83f5072cbc1516fe06190847c32ac0d608bc968f196b",
+    "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java": "f4e4e8a4e8c869e23e4bffd9d5539f360a5b92f08ae1ff1e8e18900aa772ee8a",
+    "common/src/main/java/thaumcraft/common/items/wands/WandData.java": "1eda1382dca216363d649d098040d6e0eed12881e7aea31f3a35053a901a5b40",
+    "common/src/main/java/thaumcraft/common/items/wands/WandManager.java": "4d4e7b1df8f57b5af28ad6ed835129db2b64fd8f1a8613db39307acdff051a2d",
+    "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java": "de09b6bc52f5cc4bd797b06d100ad252ede078d0523fc25469423ff9a63f087c",
+    "common/src/main/java/thaumcraft/common/items/wands/foci/FocusData.java": "4498fc713a2560fc9f5a18a2b838e4cdd63528baa925553803a2d3871def852d",
+    "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java": "7df41296760715f22753ab222bf44fbbe3123a8c5cddc2f1c3a206e717e20129",
+    "common/src/main/java/thaumcraft/common/items/wands/foci/WandFocusActions.java": "a0102263d32439c964e55c8bea041ca9d0bbdb4ebcbe56ddf580253304320c2c",
+    "common/src/main/java/thaumcraft/common/lib/capabilities/KnowledgeAccess.java": "cbc16958e4a55ed55abac50f7eb61b4fe903e622b0b749d383422fc309c7e449",
+    "common/src/main/java/thaumcraft/common/lib/capabilities/PlayerKnowledgeHolder.java": "09abea9aa2d257047b3ce072d93bd3c2266d29792244de9ee9ee0e5037cc110e",
+    "common/src/main/java/thaumcraft/common/lib/events/ThaumcraftCommands.java": "03e68df2a3d812ba847d93956e744a7cd75a2f7c2c191930d001ac744f9d6cc7",
+    "common/src/main/java/thaumcraft/common/lib/loot/OreDropCount.java": "3e3c4426bc07dcda1580608f866b8245703f6fa023ad22302498b5f17071bd04",
+    "common/src/main/java/thaumcraft/common/lib/network/FocusSelectionNetworking.java": "7eddc2ff1478dd23f027ce150d75d6dbb22bf7d8ad3c06c2cedc1e98e1396678",
+    "common/src/main/java/thaumcraft/common/lib/network/FocusSelectionPayload.java": "777045ceaa7099647b2b53fbc690fbc8f9735684ac4c8fad7a89973fe08e4de8",
+    "common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java": "c48af19640e7a1d1c11501683aad74657aa5eeb3a7b3c92d5fbcbb9e3eecde06",
+    "common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java": "846e6370b56e7a2a48749eacc646171de6c8387c58a74a9b6f478e5d86afaa27",
+    "common/src/main/java/thaumcraft/common/lib/network/OpenThaumonomiconPayload.java": "7073148b21d1c9a6cb46a197734578da2974de8de99977ed0a55530753d42572",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchNoteRequestNetworking.java": "6a32984c6ed68f02ded11e6883d8dfe8543218a47bf353fb402cbad13aad0f01",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchNoteRequestPayload.java": "7e874f30cb9bfc279e7c6bbe293dbe4352271f02b8bef266f9fcb29add62de92",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchPurchaseNetworking.java": "bff537f4b3261d204c58796c8aac37fd7e86c67316978f2bf181c24bd5d627a4",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchPurchasePayload.java": "c283cfd845411fd4ed5e1879e57ce5fe6384b3e62d93181b46122a237ec2c292",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchTableCombineNetworking.java": "5152f75633f2060fec0437c4b7f5afe8710c9c41a46c4f8f6d7a1e5322fcf8a4",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchTableCombinePayload.java": "f7b5c0ea98c5251c67053df52008bc5e40add2638572d414cb513dd759fd9a97",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchTableEditNetworking.java": "3fd79e8fbd42f3d08c58c3bbb7af7f0d0d71534858f905b1df20a611c2a5eee5",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchTableEditPayload.java": "d8f8c93d9a981e52560381698200f637d7e5bb8f7c94d7f0622a7b7a7a763917",
+    "common/src/main/java/thaumcraft/common/lib/network/ResearchTableStatePayload.java": "d28e19667355fa6ed6f697aa13241c77790dba7944df4f03bb4647b8613f92a2",
+    "common/src/main/java/thaumcraft/common/lib/potions/FluxEffectAccess.java": "80f68a6acba6b18b2dd4f5a03e4e7331de252c6eb6870a2124f17a8ac6ba8fa1",
+    "common/src/main/java/thaumcraft/common/lib/potions/FluxEffects.java": "9b40bdef25bc3070bc93508d29b9596606cdb25ee0506c4173f767d945247f90",
+    "common/src/main/java/thaumcraft/common/lib/potions/PotionInfectiousVisExhaust.java": "497a5412350f7e74d32ce3fa3ec2adff817ff56b6d70ff43b0facedd47bd7447",
+    "common/src/main/java/thaumcraft/common/lib/potions/PotionVisExhaust.java": "d60330cda3169d78154c2c167ad2be6be5203e40bbd766eaa992fc19b0ae19d3",
+    "common/src/main/java/thaumcraft/common/lib/research/EarlyObjectAspectBindings.java": "45cb86d5e8207d2e01cce5c782a6159054315a5121ef1411554d6648dbd5390d",
+    "common/src/main/java/thaumcraft/common/lib/research/ObjectAspectCatalog.java": "4cc9e93b154b17a1db0326a2bea659a6e46ac92bd6f70de43f428d5de6072326",
+    "common/src/main/java/thaumcraft/common/lib/research/ObjectAspectResolver.java": "d0de960005c01d85f3db51f5ba5cba28e707a93a154f481bf148209b2252296f",
+    "common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java": "d38d3f22777b8271a39675666e6d8259efaff4862d0a45686b952b57c7e151bb",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchAspectCombination.java": "c9082527dcd867eed8c9e2c0ed98b7bc87cfa876d231ccbe458b31fea91b8727",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java": "fb9c348b88cbb7199391c283a6480a791192e8c5adffe58e30f2cdacd0a227be",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java": "7db53939d80aefd1f9b1ba67fbf7c178d975579cefad5adacd5ca594e5ce017e",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchCompletion.java": "425f877ab2684efbeacc98c646374003b5c20880d039d6e0015dc4b34de65070",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchDefinition.java": "703fc9e5c791cb901276eb29a497d28e4883b8f1600a39e962c11eb5bf1431c1",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchNoteData.java": "e4d0ca589e30c65ef84356201214141a0cd1038874c49440e85a837540e74dc7",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java": "337d20ee3d11b93a61cb76455df8f8d11f8f3e18ed4480bfeea1106fc22aa901",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchNoteGenerator.java": "2453453f819bc305c8732809438fbd37a09f0c58d4f2aee6237ae1bcca5f2ca7",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchNoteIssuance.java": "383a00d317af9dcfcf034aa05887329942a9439497071cc91d4c7241423e15d2",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchNoteLearning.java": "1760f80d28dc80cefef8a6a922b0b36a48229a491f3cda4110915d22b2218305",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchNotePuzzle.java": "efcffcb69655116a64b6e56a8967080b0af008fe1faf1f75457c686d1c19c3e2",
+    "common/src/main/java/thaumcraft/common/lib/research/ResearchPurchase.java": "29b86764890e1d82e8dd71945704e15bd2b7675e4b9e5ee292ccd9ebcbc47c81",
+    "common/src/main/java/thaumcraft/common/lib/research/ScanManager.java": "52fe74be8210209dcb92d5c0a2ccfb59e928b08026b1ebefd0e00c3c8268c361",
+    "common/src/main/java/thaumcraft/common/lib/research/ScribingInk.java": "e71c0d89b2e88370c56faf640e18a60886400b524069b1fb864907aa346254bb",
+    "common/src/main/java/thaumcraft/common/lib/research/TableTopology.java": "1c21383263409dc533fb60140ec65b86913164794feed458716aa3df23a64fb2",
+    "common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java": "6131c287df9d51aab08a8e31d1ef94e4cea3483644a414f67e83084f239f3eae",
+    "common/src/main/java/thaumcraft/common/lib/utils/HexUtils.java": "e59665f14da58a44950217274346c1fb3144947a468fb4744ecfd982e2f62bb5",
+    "common/src/main/java/thaumcraft/common/lib/utils/RejectedEntitySpawn.java": "3188d33defbc8f4184865146720cd10be5943fc6a48034ee5731baa900486d8a",
+    "common/src/main/java/thaumcraft/common/lib/world/MagicalTreeBiomeAdapter.java": "f0f2bec59942fa4c22b004a0bc5341fc1f8d70ad4def1b71215c54dc2364435d",
+    "common/src/main/java/thaumcraft/common/lib/world/MagicalTreePlacement.java": "568b932205062252eb460f93d10a7e9da728a731b9a99817510458d526c1d637",
+    "common/src/main/java/thaumcraft/common/lib/world/NormalNodeBiomeAdapter.java": "587b2ab1d49b64d18143da41711a52c4af1f9f5bfcbce10d9641600b47028f23",
+    "common/src/main/java/thaumcraft/common/lib/world/ThaumcraftNormalNodeFeature.java": "877f50228c4ce77aa328bae711899c28c2a53f0545e79df3dfad328201f69a21",
+    "common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java": "3774ee87320c0113816ee8adf3c6c9089234b8fe48650832dfba54085f04d385",
+    "common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTreeFeature.java": "15c1f9ebb1d09c0ac36c663204e631639ef064ae42233b00b0e7f1d535162bb3",
+    "common/src/main/java/thaumcraft/common/lib/world/WorldGenCustomFlowers.java": "c7eb4a427a080125e606fe828f824e56c0d2f5987d14bcbeee8b0a79490896eb",
+    "common/src/main/java/thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java": "716dfffb9b33671b3a4b1bf11abcacf6b0f5309b594d06c7fe8a16e64654b070",
+    "common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java": "3026a493a7602868dbe8b6c3974fddb3055ddef31215d8caa2ecfec70d658dc0",
+    "common/src/main/java/thaumcraft/common/mixin/EntityLevelCallbackAccess.java": "605574be0c7a23260ae81dfa9c2c77bf7352c40b0ff4f7471ad0c44f4adbea7d",
+    "common/src/main/java/thaumcraft/common/mixin/FluxEffectInstanceMixin.java": "f244e7dc869dbc38909c648b9919fb47cd26a9552440c9f5b4cce25ed8dd71d3",
+    "common/src/main/java/thaumcraft/common/mixin/PersistentEntitySectionManagerAccess.java": "3379c02000b22d136a71e0dc6ace01586be7820d00ed25c5c2554d0e65e56521",
+    "common/src/main/java/thaumcraft/common/mixin/PlayerKnowledgeMixin.java": "85067910c7b414173d7bea342454f876d900ff257ecdd4fd5604f9a2ce0d54fe",
+    "common/src/main/java/thaumcraft/common/mixin/ScopedFluxMilkBucketMixin.java": "a01f2966c7a9dc7745601f7378900d3b9c1db052048dd2f1f7509dd4080137b9",
+    "common/src/main/java/thaumcraft/common/mixin/ServerLevelEntityManagerAccess.java": "5b19f585dc4f84cd35e06fb2059b2f4688fb1a06183c85edaa5390d49b4ef0e8",
+    "common/src/main/java/thaumcraft/common/mixin/VanillaFurnaceBellowsAccess.java": "8fd9c15637bb739dd433f59a772455ab8ffd026dbe1bbfab8104e50fc9aa27c0",
+    "common/src/main/java/thaumcraft/common/mixin/client/TableOutlineMixin.java": "fc1a870da182d14b53244ccb37c63cfa946472a83c959c86f3995414b46ca6cb",
+    "common/src/main/java/thaumcraft/common/mixin/client/WandFocusKeyMixin.java": "889dcfd659c609ba629ac867d74a8958d80b1067ea50826977032c0996ec6bca",
+    "common/src/main/java/thaumcraft/common/tiles/JarContents.java": "e82e5ca6d44b9f214401dd4e6461e89877db55f5e4c01238371b24ddb6238ce4",
+    "common/src/main/java/thaumcraft/common/tiles/TileAlchemyFurnace.java": "1264d60d354cf6c1abb3c3651b2cd61015625374e9a7173b315a2b231be3e600",
+    "common/src/main/java/thaumcraft/common/tiles/TileAlembic.java": "23e46c197e9c16be0c61cfd795a9a884c45ac7bf781368ed944927d48a2dd17c",
+    "common/src/main/java/thaumcraft/common/tiles/TileArcaneWorkbench.java": "a0f56bfe90acdcdb49f9065bbc33811b6b66590f1fc89777f38abfe5c323b4e9",
+    "common/src/main/java/thaumcraft/common/tiles/TileBellows.java": "13f60f54c4d13310d924c868292bd4777ef2f4dd96cd08243ba18a5877305b6d",
+    "common/src/main/java/thaumcraft/common/tiles/TileCrucible.java": "2c9afd22ab1baacb9dc31acf1816912349d8773224fe092e0ecea61e79951703",
+    "common/src/main/java/thaumcraft/common/tiles/TileJar.java": "3a811462479c91be9e86ecfdc70299a409f19107fa4aa23315a71e5e5635c8a1",
+    "common/src/main/java/thaumcraft/common/tiles/TileNitor.java": "0f6729e8e033122379a91cb6a3d495e04abee669be72c34c1814428e463b27aa",
+    "common/src/main/java/thaumcraft/common/tiles/TileNode.java": "9b50cb84ce4afe92c21f44765bc7064da0bdd4aa306d6e399b4c15bcb705411c",
+    "common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java": "05e99f0df66eff7becadd1374ebcf967d090c8e6dbfe0b55d307fede69af1b4e",
+    "common/src/main/java/thaumcraft/common/tiles/TileTable.java": "141f79d0488c33822bb74424f85131594ad84f9c474d5f1254923eef5711f35a",
+    "common/src/main/resources/assets/minecraft/atlases/blocks.json": "5874c34911aa9ad58d8115a651f10dcbb23fad1b72cfead470fd7b9e1ee15913",
+    "common/src/main/resources/data/thaumcraft/tc4/early_object_aspects.json": "0aef72769e2fda4b9446dfc4e32ed0a6a56b48c59ac34b34ba42c77bc698ce8c",
+    "common/src/main/resources/thaumcraft-common.mixins.json": "9e433046854a9fc387c33068f304483cb46a3a6e85061c81318c9a5c8be1c134",
+    "fabric/src/clientTest/java/thaumcraft/fabric/clienttest/AlchemyClientSequence.java": "43a9e1d466b1389fc2138907cf7e4783ee251e798d13dab15c948394b8a5ae59",
+    "fabric/src/clientTest/java/thaumcraft/fabric/clienttest/BookClientSmoke.java": "aace6bd0507083526c9b9709d2c1689eaa7e39c39f0c46f1dae3890e96eedb8e",
+    "fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocusClientSequence.java": "8001e8e491e54cc0b8a7c2757e09da881519d2b14087af38b8f2890c2b9e2d2b",
+    "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java": "6d0cb23dcd86dbc09faeef964d35406bf138341220b0fd21864f28f6bb9c5951",
+    "neoforge/src/main/resources/data/thaumcraft/neoforge/biome_modifier/tc4_magical_trees.json": "c5bdc62511b31069ee1af8760b3e59e6e96da91ba31b64bbddc1655ce1de5885"
+  },
+  "script_screenshots": 46,
+  "root_inspected_screenshots": [
+    41,
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "window_fixture": "The sole owned Minecraft test window was restored/foregrounded once through the OS; no keyboard/mouse events or Minecraft active-window flags were modified.",
+  "focus": {
+    "boundary": "The actual scene39 greatwood/gold wand and all four returned phials are retained. Supplied INPUT top-up sets that wand to4000 ignis/3000 perditio centivis; other primals/components are preserved. Supplied four fire shards, four quartz, one fire charge, FOCUSFIRE research, empty workbench, offhand apple, bounded flat patch, four planted block fixtures and one ordinary no-AI named cow. Actor effects are cleared. No focus item/output/component, ember, target damage/fire, flower item drop, quicksilver or blaze powder is injected.",
+    "input_boundary": "No OS input. Native KeyMapping held states/clicks, native screen mouse/key handlers, native useItem/releaseUsingItem, survival destroy-block packets and native inventory-slot clicks. Shared-F dispatch fixtures may briefly unbind either competing mapping to exercise one-mapping delivery and a competing vanilla click, restoring both F bindings before any tick; they never edit click counters or focus state.",
+    "plant_boundary": "Two decorative species are supplied as real native blocks: one surviving display and one survival-harvest input per species. Placement/generation, biome frequency and full survival/research acquisition are NOT claimed. Particles must arise from ordinary client animate ticks, never an effect callback invoked by this harness.",
+    "not_covered": [
+      "focus upgrades",
+      "other foci",
+      "focus pouches",
+      "natural plant distribution",
+      "survival material/research acquisition",
+      "visual parity before PNG inspection"
+    ],
+    "native_focus_book": {
+      "opened_by_book_and_browser_click": true,
+      "recipe": "thaumcraft:arcane/focus_fire",
+      "research": "FOCUSFIRE",
+      "pattern": [
+        "CQC",
+        "Q#Q",
+        "CQC"
+      ],
+      "page_index": 2,
+      "base_vis": {
+        "perditio": 10,
+        "ignis": 20
+      }
+    },
+    "native_focus_assembly_menu": {
+      "recipe": "thaumcraft:arcane/focus_fire",
+      "shards": 4,
+      "result_is_preview_only": true,
+      "server_verified": true,
+      "prices_centivis": {
+        "perditio": 1000,
+        "ignis": 2000
+      },
+      "wand": "retained scene39 greatwood/gold",
+      "matrix": [
+        "CQC",
+        "Q#Q",
+        "CQC"
+      ],
+      "quartz": 4,
+      "fire_charge": 1
+    },
+    "native_focus_craft": {
+      "table_and_cursor_empty": true,
+      "wand_vis_after": {
+        "terra": 600,
+        "ignis": 2000,
+        "ordo": 100,
+        "aqua": 600,
+        "aer": 400,
+        "perditio": 2000
+      },
+      "inputs_remaining": 0,
+      "server_verified": true,
+      "ignis_debit_centivis": 2000,
+      "perditio_debit_centivis": 1000,
+      "empty_phials_retained": 4,
+      "focus_outputs": 1
+    },
+    "native_radial_cancel": {
+      "opened_by_held_F": true,
+      "selection_packets": 0,
+      "offhand_swap_packets": 0,
+      "closed_by_native_escape": true
+    },
+    "native_radial_input": {
+      "focus_binding": "key.keyboard.f",
+      "offhand_binding": "key.keyboard.f",
+      "focus_inventory_slot": 8,
+      "competing_native_click_queued": true,
+      "isolated_duplicate_key_dispatch_fixture": false,
+      "button_x": 320,
+      "button_y": 162,
+      "pauses_world": false,
+      "offhand_swap_packets": 0
+    },
+    "native_focus_equip": {
+      "wand_vis_unchanged": true,
+      "offhand_swap_packets": 0,
+      "same_server_wand_instance": true,
+      "source_slot": 8,
+      "server_verified": true,
+      "loose_focus_after": 0,
+      "offhand_apple_unchanged": true,
+      "selection_packets": [
+        8
+      ]
+    },
+    "native_live_fire_capture": {
+      "client_live_embers": 4,
+      "paid_ticks_at_observation": 5,
+      "target_health_client": 8.0,
+      "native_use_animation": "BOW",
+      "ignis_debit_centivis": 50,
+      "target_health_server": 8.0,
+      "server_live_embers": 4,
+      "target_health_before": 10.0,
+      "ember_renderer": "thaumcraft.client.renderers.entity.RenderEmber",
+      "target_burning": true
+    },
+    "native_fire_cast": {
+      "server_verified": true,
+      "entry": "native C2S useItem -> ItemWandCasting.onUseTick -> ItemFocusFire",
+      "release": "native C2S RELEASE_USE_ITEM; two observed stable server ticks afterwards",
+      "paid_ticks": 6,
+      "paid_ticks_from_vis_delta": 6,
+      "independent_native_elapsed_use_ticks": 6,
+      "per_tick_centivis": 10,
+      "ignis_before": 2000,
+      "ignis_after": 1940,
+      "exact_ignis_debit": 60,
+      "other_primals_unchanged": true,
+      "observed_native_ember_add_callbacks": 12,
+      "add_callback_boundary": "passive real ADD/spawn-attempt observer; not a claim that cancelled spawns would be refunded",
+      "peak_live_server_embers": 4,
+      "actual_payments": [
+        {
+          "after": 1990,
+          "native_elapsed_use_ticks": 1,
+          "before": 2000,
+          "server_game_time": 34524,
+          "paid_tick": 1
+        },
+        {
+          "after": 1980,
+          "native_elapsed_use_ticks": 2,
+          "before": 1990,
+          "server_game_time": 34525,
+          "paid_tick": 2
+        },
+        {
+          "after": 1970,
+          "native_elapsed_use_ticks": 3,
+          "before": 1980,
+          "server_game_time": 34526,
+          "paid_tick": 3
+        },
+        {
+          "after": 1960,
+          "native_elapsed_use_ticks": 4,
+          "before": 1970,
+          "server_game_time": 34527,
+          "paid_tick": 4
+        },
+        {
+          "after": 1950,
+          "native_elapsed_use_ticks": 5,
+          "before": 1960,
+          "server_game_time": 34528,
+          "paid_tick": 5
+        },
+        {
+          "after": 1940,
+          "native_elapsed_use_ticks": 6,
+          "before": 1950,
+          "server_game_time": 34529,
+          "paid_tick": 6
+        }
+      ],
+      "target": {
+        "type": "minecraft:cow",
+        "remaining_fire_ticks": 55,
+        "health_after": 8.0,
+        "damage_or_fire_injected": false,
+        "no_ai_fixture": true,
+        "health_before": 10.0,
+        "uuid": "f89dcca4-bc60-441b-9241-76c59fe76584"
+      }
+    },
+    "native_focus_removal": {
+      "focus_component_absent": true,
+      "final_vis": {
+        "terra": 600,
+        "ignis": 1940,
+        "ordo": 100,
+        "aqua": 600,
+        "aer": 400,
+        "perditio": 2000
+      },
+      "key_path": "held Shift+F",
+      "same_server_wand_instance": true,
+      "offhand_apple_unchanged": true,
+      "selection_slots_on_wire": [
+        8,
+        -1
+      ],
+      "returned_focus_count": 1,
+      "offhand_swap_packets": 0,
+      "returned_inventory_slot": 0,
+      "server_verified": true
+    },
+    "native_flower_harvest": {
+      "action": "native survival block destruction and physical item pickup",
+      "start_destroy_block_packets": 2,
+      "shimmerleaf": 1,
+      "cinderpearl": 1
+    },
+    "native_flower_resource_crafting": {
+      "remaining_display_plants": 2,
+      "menu": "native survival InventoryMenu2x2",
+      "outputs": {
+        "minecraft:blaze_powder": 1,
+        "thaumcraft:quick_silver": 1
+      },
+      "server_verified": true,
+      "recipes": [
+        "thaumcraft:quick_silver_from_shimmerleaf",
+        "thaumcraft:blaze_powder_from_cinderpearl"
+      ],
+      "harvested_plants_consumed": 2,
+      "empty_phials_retained": 4,
+      "natural_generation_claimed": false
+    },
+    "native_flower_world": {
+      "models": {
+        "shimmerleaf": {
+          "cross_quads": 4,
+          "light": 8,
+          "textures": [
+            "thaumcraft:blocks/shimmerleaf"
+          ],
+          "block": "thaumcraft:shimmerleaf"
+        },
+        "cinderpearl": {
+          "cross_quads": 4,
+          "light": 8,
+          "textures": [
+            "thaumcraft:blocks/cinderpearl"
+          ],
+          "block": "thaumcraft:cinderpearl"
+        }
+      },
+      "naturally_ticked_live_particles_at_observation": {
+        "cinderpearl_smoke": 1,
+        "shimmerleaf_wisps": 3,
+        "cinderpearl_flame": 1
+      },
+      "shimmerleaf": "582, 144, 278",
+      "cinderpearl": "584, 144, 278",
+      "particle_callbacks_invoked_by_harness": false,
+      "held_item": "retained unfocused greatwood/gold wand"
+    },
+    "native_non_wand_offhand_passthrough": {
+      "one_mapping_dispatch_exercised": true,
+      "both_hands_restored": true,
+      "native_swap_packets": 2,
+      "binding": "F",
+      "focus_intents_unchanged": true
+    }
+  },
+  "distillation": {
+    "boundary": "Supplied empty machines, 1 Alumentum, 8 coal, 4 empty phials, book, research, two gold caps, greatwood rod, charged wood/iron crafting wand and a normal-node charging fixture. Server teleports/flat patches are camera fixtures, not survival progression. No furnace/alembic/jar essentia or crafted wand output is injected.",
+    "tree_boundary": "Fixed native sapling-growth seeds (greatwood 0, silverwood 7) on a supplied flat patch, not natural chunk frequency, PURE-knot ecology, shimmerleaf or spider-dungeon evidence.",
+    "not_covered": [
+      "jar labels",
+      "full survival material/research acquisition",
+      "natural ore/tree/node distribution",
+      "other wand materials/foci/staves"
+    ],
+    "native_furnace_menu": {
+      "cook_time_at_capture": 4,
+      "input_supplied": 8,
+      "fuel_supplied": "thaumcraft:alumentum x1",
+      "real_slots": 2,
+      "fuel_action": "C2S native QUICK_MOVE",
+      "bellows": 1,
+      "fuel_duration": 6400,
+      "smelt_time": 35,
+      "input_action": "C2S native SWAP",
+      "input_remaining_at_capture": 8
+    },
+    "native_distillation": {
+      "coal_consumed": 8,
+      "alumentum_consumed": 1,
+      "server_verified": true,
+      "alembics": {
+        "potentia": 16,
+        "ignis": 16
+      },
+      "furnace_capacity": 50,
+      "speed_boost": true,
+      "furnace_buffer_after": 0,
+      "each_alembic_capacity": 32,
+      "furnace": "513, 144, 258"
+    },
+    "bellows_animation": {
+      "inflation_after": 0.9289986,
+      "facing": "east",
+      "inflation_before": 0.9039986,
+      "powered": false
+    },
+    "native_phial_withdrawal": {
+      "empty_phials_after": 0,
+      "filled_phials": {
+        "potentia": 2,
+        "ignis": 2
+      },
+      "action": "four native useItemOn packets",
+      "total_essentia": 32,
+      "server_verified": true,
+      "alembics_after": 0,
+      "each_phial_amount": 8
+    },
+    "native_phial_to_jar": {
+      "total_essentia_before": 32,
+      "filled_phials_remaining": 0,
+      "total_essentia_after": 32,
+      "furnace_buffer_remaining": 0,
+      "action": "four native filled-phial useItemOn packets",
+      "empty_phials_returned": 4,
+      "alembic_contents_remaining": 0,
+      "server_verified": true,
+      "jars": {
+        "potentia": 16,
+        "ignis": 16
+      },
+      "each_jar_capacity": 64
+    },
+    "native_distillation_book": {
+      "page_index": 0,
+      "research": "DISTILESSENTIA",
+      "recipe": "thaumcraft:arcane/alchemy_furnace"
+    },
+    "native_growth_and_masonry_fixture": {
+      "growth_entry": "BlockMagicalSapling.grow(ServerLevel, BlockPos, RandomSource)",
+      "placed_palette_blocks": [
+        "thaumcraft:greatwood_log",
+        "thaumcraft:greatwood_planks",
+        "thaumcraft:silverwood_log",
+        "thaumcraft:silverwood_planks",
+        "thaumcraft:arcane_stone",
+        "thaumcraft:arcane_stone_bricks",
+        "thaumcraft:arcane_stone_brick_stairs",
+        "thaumcraft:arcane_stone_brick_slab"
+      ],
+      "separate_sapling_samples": 2,
+      "server_verified": true,
+      "silverwood_seed": 7,
+      "natural_frequency_claimed": false,
+      "native_tree_geometry": {
+        "silverwood": {
+          "logs": 60,
+          "nonpersistent_leaves": 275,
+          "horizontal_logs": 8,
+          "leaves": 275
+        },
+        "greatwood": {
+          "logs": 100,
+          "nonpersistent_leaves": 713,
+          "horizontal_logs": 35,
+          "leaves": 713
+        }
+      },
+      "greatwood_seed": 0,
+      "tree_origins": [
+        "537, 144, 261",
+        "557, 144, 261"
+      ]
+    },
+    "native_wand_assembly_menu": {
+      "crafting_wand": "wood/iron",
+      "recipe": "thaumcraft:arcane/wand_assembly",
+      "each_primal_before": 2500,
+      "base_each_primal": 9,
+      "result_is_preview_only": true,
+      "matrix_slots": [
+        2,
+        4,
+        6
+      ],
+      "each_primal_price": 990,
+      "inputs": "2 gold caps + 1 greatwood rod"
+    },
+    "native_wand_recipe_id_server_verified": "thaumcraft:arcane/wand_assembly",
+    "native_wand_assembly": {
+      "rod": "greatwood",
+      "cap": "gold",
+      "craft_cost_component": 9,
+      "output_count": 1,
+      "recipe": "thaumcraft:arcane/wand_assembly",
+      "capacity_centivis": 5000,
+      "each_primal_debit": 990,
+      "gold_modifier": 1.0,
+      "server_verified": true,
+      "each_primal_remaining_in_original_wand": 1510
+    },
+    "native_crafted_wand_charging": {
+      "crafted_wand_vis_centivis": {
+        "perditio": 300,
+        "ignis": 800,
+        "ordo": 100,
+        "aqua": 600,
+        "aer": 400,
+        "terra": 600
+      },
+      "returned_empty_phials_retained": 4,
+      "node_boundary": "supplied native NORMAL node, default25 per primal; not natural generation",
+      "capacity_centivis": 5000,
+      "node_current_vis": {
+        "aer": 21,
+        "terra": 19,
+        "ignis": 17,
+        "aqua": 19,
+        "ordo": 24,
+        "perditio": 22
+      },
+      "server_verified": true
+    },
+    "native_crafted_wand_presentation": {
+      "model_textures": [
+        "thaumcraft:models/wand_rod_greatwood",
+        "thaumcraft:models/wand_cap_gold"
+      ],
+      "tint_argb": -1,
+      "tooltip": [
+        "Gold Banded Greatwood Wand",
+        "Capacity 50",
+        "Base vis cost: 100%",
+        "Aer: 4/50",
+        "Terra: 6/50",
+        "Ignis: 8/50",
+        "Aqua: 6/50",
+        "Ordo: 1/50",
+        "Perditio: 3/50"
+      ],
+      "capacity_centivis": 5000
+    },
+    "native_material_browser_icons": {
+      "ROD_greatwood": {
+        "x": 277,
+        "y": 179,
+        "item": "thaumcraft:wand_rod_greatwood",
+        "fully_visible": true
+      },
+      "CAP_gold": {
+        "x": 469,
+        "y": 179,
+        "item": "thaumcraft:wand_cap_gold",
+        "fully_visible": true
+      }
+    },
+    "native_material_book_navigation": {
+      "opened_by_browser_click": true,
+      "research": "ROD_greatwood",
+      "recipe": "thaumcraft:arcane/wand_rod_greatwood"
+    }
+  },
+  "alchemy": {
+    "boundary": "Supplied vanilla materials and NITOR research; server teleports are camera fixtures, not a full survival run. No aspects/heat/results are injected.",
+    "wand_and_bucket": "Native useItemOn converted a cauldron, retained the empty wand, consumed water bucket, then natural heat crossed150",
+    "physical_dissolution": {
+      "potentia": 4,
+      "ignis": 4,
+      "lux": 3,
+      "torches": 3,
+      "coal": 2,
+      "water": 1000
+    },
+    "physical_nitor": {
+      "entity_type": "thaumcraft:special_item",
+      "potentia_after": 1,
+      "thrower_checked": true,
+      "water_after": 950,
+      "result_count": 1,
+      "ignis_after": 1
+    },
+    "crafted_nitor_placed": {
+      "light_emission": 15,
+      "item_consumed": true,
+      "below_crucible": true
+    },
+    "native_nitor_recipe_page_visible": true,
+    "flux_visual_fixture": "Supplied full eight-quanta gas/goo in separate sealed glass cells; runtime tests, not this picture, check spill/exposure/finite movement"
+  },
+  "screenshots": [
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-01-browser-en.png",
+      "bytes": 499031,
+      "screen": "thaumcraft.client.gui.GuiResearchBrowser",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "65e389595245a641e048a59cc4c16a4331efaaf7c7862606d16e8dd7d04646a5",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-02-thaumonomicon-en.png",
+      "bytes": 737232,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 0,
+      "sha256": "cb7694e830afe9299056520b33651abd42a0e5877011e8cbe2e95c8482c400e6",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-03-research-en.png",
+      "bytes": 743359,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 0,
+      "sha256": "795bf837899a7bedaddbf3b5ce279687add7c2575e4ea070aaf98795f95a8af9",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-04-research-illustrated-en.png",
+      "bytes": 837190,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 2,
+      "sha256": "c7390f43e7b76b05be165f763222f819843c022e3517773115bcfb9a1b2f0d54",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-05-research-previous-en.png",
+      "bytes": 736653,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 0,
+      "sha256": "76afbdad46b032cc6671d0f8150fa079c2bd6c08f86913f75e795307f19398bd",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-06-browser-ru-small.png",
+      "bytes": 273247,
+      "screen": "thaumcraft.client.gui.GuiResearchBrowser",
+      "gui_width": 427,
+      "gui_height": 240,
+      "language": "ru_ru",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "96e3dbf5dd9b13237666993869129ffa228960bc8cfa1752333a2bd053cd6778",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-07-thaumonomicon-ru-small.png",
+      "bytes": 737046,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 427,
+      "gui_height": 240,
+      "language": "ru_ru",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 0,
+      "sha256": "83a888dc28c65e0cac350dcea0c63402f0c0c1ffd5c568fa8f03573315624047",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-08-thaumonomicon-ru-small-next.png",
+      "bytes": 735887,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 427,
+      "gui_height": 240,
+      "language": "ru_ru",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 2,
+      "sha256": "4c6770caf4fae119d2914b8ed1e594ca47894910a069e12eda69d176469526fe",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-09-secondary-unaffordable-en.png",
+      "bytes": 407030,
+      "screen": "thaumcraft.client.gui.GuiResearchBrowser",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "research_purchase": {
+        "key": "ENCHFABRIC",
+        "pannus": 3,
+        "complete": false,
+        "praecantatio": 2
+      },
+      "sha256": "a8c9000d06e05e2993152a40aaaae62d20b4e7a86d70d915422917b58551a672",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-10-secondary-purchased-entry-en.png",
+      "bytes": 765548,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "research_purchase": {
+        "key": "ENCHFABRIC",
+        "pannus": 3,
+        "complete": true,
+        "praecantatio": 3
+      },
+      "first_page_index": 0,
+      "sha256": "abee0bf3a602a1b0c7756811598f76ee96e2c4e8f7d73d09551de194e1d2d9f6",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-11-note-tooltip-en.png",
+      "bytes": 116875,
+      "screen": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "research_note": {
+        "key": "NITOR",
+        "complete": false,
+        "inventory": [
+          {
+            "slot": 0,
+            "item": "thaumcraft:research_note",
+            "count": 1,
+            "damage": 0,
+            "note_key": "NITOR",
+            "note_complete": false,
+            "note_cells": 19,
+            "note_color": 16774755
+          },
+          {
+            "slot": 1,
+            "item": "thaumcraft:discovery",
+            "count": 1,
+            "damage": 0,
+            "note_key": "NITOR",
+            "note_complete": true,
+            "note_cells": 6,
+            "note_color": 16774755
+          },
+          {
+            "slot": 2,
+            "item": "thaumcraft:inkwell",
+            "count": 1,
+            "damage": 99
+          }
+        ],
+        "warp": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pools": {
+          "aer": 0,
+          "terra": 17,
+          "ignis": 2,
+          "aqua": 0,
+          "ordo": 18,
+          "perditio": 15,
+          "pannus": 3,
+          "praecantatio": 3,
+          "lux": 0,
+          "potentia": 0,
+          "tempestas": 3
+        }
+      },
+      "hovered_inventory_slot": 0,
+      "sha256": "fc83afb9baecefd8bb8765a31a146f49088c42739216aebef526df3bae839dc6",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-12-discovery-tooltip-en.png",
+      "bytes": 117024,
+      "screen": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "research_note": {
+        "key": "NITOR",
+        "complete": false,
+        "inventory": [
+          {
+            "slot": 0,
+            "item": "thaumcraft:research_note",
+            "count": 1,
+            "damage": 0,
+            "note_key": "NITOR",
+            "note_complete": false,
+            "note_cells": 19,
+            "note_color": 16774755
+          },
+          {
+            "slot": 1,
+            "item": "thaumcraft:discovery",
+            "count": 1,
+            "damage": 0,
+            "note_key": "NITOR",
+            "note_complete": true,
+            "note_cells": 6,
+            "note_color": 16774755
+          },
+          {
+            "slot": 2,
+            "item": "thaumcraft:inkwell",
+            "count": 1,
+            "damage": 99
+          }
+        ],
+        "warp": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "pools": {
+          "aer": 0,
+          "terra": 17,
+          "ignis": 2,
+          "aqua": 0,
+          "ordo": 18,
+          "perditio": 15,
+          "pannus": 3,
+          "praecantatio": 3,
+          "lux": 0,
+          "potentia": 0,
+          "tempestas": 3
+        }
+      },
+      "hovered_inventory_slot": 1,
+      "sha256": "b52f97708a79012a9d6cb738a79e8755295e88c49fcf220de5c74281977142d0",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-13-primary-note-missing-materials-en.png",
+      "bytes": 365150,
+      "screen": "thaumcraft.client.gui.GuiResearchBrowser",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "research_note_issuance": {
+        "key": "NITOR",
+        "complete": false,
+        "pools": {
+          "aer": 0,
+          "terra": 17,
+          "ignis": 2,
+          "aqua": 0,
+          "ordo": 18,
+          "perditio": 15,
+          "pannus": 3,
+          "praecantatio": 3,
+          "lux": 0,
+          "potentia": 0,
+          "tempestas": 3
+        },
+        "warp": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "paper": 0,
+        "ink_count": 0,
+        "ink_damage": 0,
+        "note_count": 0,
+        "request_packets": 0,
+        "note_slot": -1
+      },
+      "sha256": "16c4d80c78ad2b7300d5d36d87c372e9ae3dc180e25bbd337afbba28171ab611",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-14-primary-note-issued-inventory-en.png",
+      "bytes": 98636,
+      "screen": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "research_note_issuance": {
+        "key": "NITOR",
+        "complete": false,
+        "pools": {
+          "aer": 0,
+          "terra": 17,
+          "ignis": 2,
+          "aqua": 0,
+          "ordo": 18,
+          "perditio": 15,
+          "pannus": 3,
+          "praecantatio": 3,
+          "lux": 0,
+          "potentia": 0,
+          "tempestas": 3
+        },
+        "warp": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "paper": 1,
+        "ink_count": 1,
+        "ink_damage": 100,
+        "note_count": 1,
+        "request_packets": 1,
+        "note_slot": 0,
+        "note_complete": false,
+        "note_cells": 19,
+        "note_copies": 0,
+        "note_color": 16774755
+      },
+      "hovered_inventory_slot": 0,
+      "sha256": "76cc05d5b4e18333e2ac58f761f3cfe46721de8c39d09310aee16fe0a9455ce9",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-15-two-base-tables-world-en.png",
+      "bytes": 354972,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "research_table": {
+        "main": "495, 144, 258",
+        "secondary": "496, 144, 258",
+        "main_variant": 0,
+        "secondary_variant": 0,
+        "held_item": "minecraft:air",
+        "preview_base_inventory_count": 0,
+        "preview_research_inventory_count": 0
+      },
+      "sha256": "d727ab0d2f3ea71457f215191adeeb3fa0547ce17331f3a983745a11dca6a293",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-16-research-table-filled-world-en.png",
+      "bytes": 362160,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "research_table": {
+        "main": "495, 144, 258",
+        "secondary": "496, 144, 258",
+        "main_variant": 5,
+        "secondary_variant": 8,
+        "tool_count": 1,
+        "ink_damage": 100,
+        "note_key": "NITOR",
+        "note_cells": 19,
+        "note_color": 16774755,
+        "note_complete": false,
+        "held_item": "minecraft:air",
+        "preview_base_inventory_count": 0,
+        "preview_research_inventory_count": 0
+      },
+      "sha256": "39ca51f7e3e5682390c580abd3aa199ff00d43dc6da9d4d30f68f729bd74658d",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-17-research-table-menu-note-en.png",
+      "bytes": 362442,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "research_table": {
+        "main": "495, 144, 258",
+        "secondary": "496, 144, 258",
+        "main_variant": 5,
+        "secondary_variant": 8,
+        "tool_count": 1,
+        "ink_damage": 100,
+        "note_key": "NITOR",
+        "note_cells": 19,
+        "note_color": 16774755,
+        "note_complete": false,
+        "held_item": "minecraft:air",
+        "preview_base_inventory_count": 0,
+        "preview_research_inventory_count": 0
+      },
+      "sha256": "5129ee265a6ab41e4cce7549419664c96b3c4e13c64611ac3960844b0bfd870e",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-18-table-item-previews-inventory-en.png",
+      "bytes": 158409,
+      "screen": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "research_table": {
+        "main": "495, 144, 258",
+        "secondary": "496, 144, 258",
+        "main_variant": 5,
+        "secondary_variant": 8,
+        "tool_count": 1,
+        "ink_damage": 100,
+        "note_key": "NITOR",
+        "note_cells": 19,
+        "note_color": 16774755,
+        "note_complete": false,
+        "held_item": "thaumcraft:research_table",
+        "preview_base_inventory_count": 1,
+        "preview_research_inventory_count": 1
+      },
+      "sha256": "ce655f2ed3c36396913a6f5226673c1aa8f4f54acd1005fd4a6163c86154b05b",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-19-table-research-hand-base-dropped-world-en.png",
+      "bytes": 374092,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "research_table": {
+        "main": "495, 144, 258",
+        "secondary": "496, 144, 258",
+        "main_variant": 5,
+        "secondary_variant": 8,
+        "tool_count": 1,
+        "ink_damage": 100,
+        "note_key": "NITOR",
+        "note_cells": 19,
+        "note_color": 16774755,
+        "note_complete": false,
+        "held_item": "thaumcraft:research_table",
+        "preview_base_inventory_count": 0,
+        "preview_research_inventory_count": 1,
+        "base_item_entity": {
+          "uuid": "5d2af8a5-389a-4cbd-954b-ed4f6a4efa1c",
+          "x": 496.40852703121305,
+          "y": 144.0,
+          "z": 259.125,
+          "count": 1
+        }
+      },
+      "sha256": "3360e807223f5553375b945970e4ca45f1a86873c70eaf7e619879b66beb0234",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-20-research-table-player-solved-en.png",
+      "bytes": 312353,
+      "screen": "thaumcraft.client.gui.GuiResearchTable",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "96125e37ac9602ad00373f6f27309c45b7e22479b2ca805d8aafd81eff226758",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-21-combine-primal-and-table-bonus-en.png",
+      "bytes": 284267,
+      "screen": "thaumcraft.client.gui.GuiResearchTable",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "9e0dfb742ec39f83fc3d03a230480d82aecf9f7fa00693d446501d881c26e873",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-22-combined-new-compound-en.png",
+      "bytes": 278229,
+      "screen": "thaumcraft.client.gui.GuiResearchTable",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "1370e32fe18a1cbc5827d40cfa4a3c89977f2a07d0de86535650b107382951ed",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-23-arcane-workbench-insufficient-vis-en.png",
+      "bytes": 180448,
+      "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "35208a3bfdedfdeb25c72a8f7ca33135502d98ef71b15874b378525f1226536f",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-24-ores-node-and-arcane-workbench-world-en.png",
+      "bytes": 231137,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "f02349290ef8a6270664210e2c1ff84f7ad687b3d83f9d373e55c1745cc1e85d",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-25-arcane-workbench-charged-recipe-en.png",
+      "bytes": 158559,
+      "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "d56ddfa64d60d3158fae97463e03c703496945ac11e7074ef5fdeb136d20f61c",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-26-arcane-recipe-book-en.png",
+      "bytes": 756746,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 0,
+      "sha256": "8141ea2a49604928c0d70b4a552466a44c72e09802babbc42276d3066aab04d9",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-27-crucible-boiling-clean-water-en.png",
+      "bytes": 151496,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "539128e6d07d343ee21bddd2aa0bf983c9dd9b810951c45baf1d2be2e92af036",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-28-crucible-dissolved-coal-and-torches-en.png",
+      "bytes": 179668,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "442c5fcb208180b54ad19da989067e2cadfc4b2c42aec67c07a9ca3ceeaf4321",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-29-crucible-physical-floating-nitor-en.png",
+      "bytes": 159217,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "5d59cc70182466785dcb060a23b515cfbe8942707756a58daec397ca87cf1bc0",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-30-crafted-nitor-heats-crucible-world-en.png",
+      "bytes": 183983,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "f6605455e9e97aacc2f462c98fde6d740df54dc70b946463c83be98a4443fad6",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-31-nitor-crucible-recipe-book-en.png",
+      "bytes": 686509,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 0,
+      "sha256": "2c39c1ca3f151a4f106891cd45cf232f7060b4202f4a847ade97b73a397af64e",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-32-flux-gas-and-goo-native-world-en.png",
+      "bytes": 145108,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "4fe19e2ac66be45575bedc7314487fd471fdef5b2532748825851b3a423d5bd5",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-33-alchemy-furnace-native-fuel-and-coal-progress-en.png",
+      "bytes": 98341,
+      "screen": "thaumcraft.client.gui.GuiAlchemyFurnace",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "45ba71e0b5c8448624282bf4e626dbf1f768d63f6bdf3b771e412c9c613f2ff2",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-34-distilled-alembics-burning-furnace-and-bellows-world-en.png",
+      "bytes": 187046,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "ae3f974ce768834040fa39f3551f07f6129ab0b742f02007fafd54035748b022",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-35-native-phial-transfers-fill-two-jars-world-en.png",
+      "bytes": 219840,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "64d99dc810c8106f2cbfea4cce47303c5b24859f854f026ddaa15fd8668e0786",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-36-distillation-native-furnace-recipe-book-en.png",
+      "bytes": 751663,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 0,
+      "sha256": "b8715c66023cb07bcedbd81e9faf20c4c71e98dc813102f1555549898c2c6a56",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-37-native-greatwood-silverwood-and-masonry-world-en.png",
+      "bytes": 529554,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "39f73e0b82f4f35ad7d094b085e46a5cf29127641dee5b9edce41bf2bdf3757e",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-38-native-greatwood-gold-wand-assembly-menu-en.png",
+      "bytes": 246305,
+      "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "2be0e726d4959de0fff80cd054c487fd90e8fabfec58090843936cea4760e8a2",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-39-crafted-greatwood-gold-wand-native-charging-world-en.png",
+      "bytes": 563363,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "59c7918b7b75337f17339083b8952c683e60e457882006e3d899b225b3bb074c",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-40-native-thaumaturgy-gold-cap-and-greatwood-rod-icons-en.png",
+      "bytes": 476321,
+      "screen": "thaumcraft.client.gui.GuiResearchBrowser",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "0c3a494acd17329f368a3a44cd35e20e7595bb6c23c90b1496936ef11f7aee96",
+      "visual_inspection": "not visually inspected in this run",
+      "observation": null
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-41-native-fire-focus-recipe-book-en.png",
+      "bytes": 692613,
+      "screen": "thaumcraft.client.gui.GuiResearchRecipe",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "first_page_index": 2,
+      "sha256": "5591c21be4a82d436ca61e379cce5959f42b12791fd2bcdd55dfc5d2e89dbc7d",
+      "visual_inspection": "root inspected exact PNG",
+      "observation": "Native book shows the actual Fire Focus recipe: four fire shards, four quartz, central fire charge, original orange focus output and base ignis20/perditio10. The last odd page leaves the right page blank; no missing recipe textures or aspect icons."
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-42-native-fire-focus-arcane-assembly-menu-en.png",
+      "bytes": 169068,
+      "screen": "thaumcraft.client.gui.GuiArcaneWorkbench",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "d24107ce96386eb9a5859205a213af0f4df2c060f84fe5252fe3fdd6665c541a",
+      "visual_inspection": "root inspected exact PNG",
+      "observation": "The real arcane-workbench menu contains CQC/Q#Q/CQC, displays20/10vis and the orange focus result preview. Four retained empty phials and the book are visible. Exact one-time input/vis debit is separately server/script evidence, not inferred from pixels."
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-43-native-held-F-focus-selection-radial-en.png",
+      "bytes": 159389,
+      "screen": "thaumcraft.client.gui.GuiFocusSelect",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "b6024414244c1c67d83996bd9fb70fa57aec2733bbfc6af5c481e9147626b41d",
+      "visual_inspection": "root inspected exact PNG",
+      "observation": "The real held-F radial has a sharp title/current-focus line and readable Fire tooltip with0.1vis per tick; the world and radial are no longer blurred. Cancel/remove controls and the purple original radial art are present. The lower help text still overlaps the vanilla HUD/selected-item label: explicitly not complete UI-layout parity."
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-44-native-fire-focus-live-embers-damage-and-ignition-world-en.png",
+      "bytes": 116162,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "4a3429fa01ba2d5b7227f04f6bde8bfe78e6f26dc48256d799c4771d16848f36",
+      "visual_inspection": "root inspected exact PNG",
+      "observation": "Native world combat visibly shows the cow's red hurt frame and ignition, four glowing orange/white Ember billboards, and the orange equipped focus head above the gold cap of the held wand. The offhand apple is retained. Exact damage, six paid ticks/60centivis and12native spawn attempts are established by script/server observations, not the image alone."
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-45-native-Shift-F-removal-returned-focus-inventory-en.png",
+      "bytes": 82109,
+      "screen": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+      "gui_width": 640,
+      "gui_height": 360,
+      "language": "en_us",
+      "capture_phase": "ScreenEvents.afterRender + GuiGraphics.flush",
+      "sha256": "1e25e1251c55483206c1cbf84642a0cc16ae23cde735f0b691b3faef12af7a2f",
+      "visual_inspection": "root inspected exact PNG",
+      "observation": "The native survival inventory visibly contains the returned orange Fire Focus with its tooltip, retained book and unfocused greatwood/gold wand; the offhand apple remains. Script/server separately verifies exactly one returned original focus/component removal and unchanged paid vis."
+    },
+    {
+      "path": "fabric/run-clienttest/screenshots/client-smoke-c1af70f4-508c-42b3-9790-fc8c3da7613d-46-native-shimmerleaf-cinderpearl-models-and-particles-world-en.png",
+      "bytes": 258383,
+      "screen": "none",
+      "gui_width": 0,
+      "gui_height": 0,
+      "language": "en_us",
+      "capture_phase": "HudRenderCallback.afterHud + GuiGraphics.flush",
+      "sha256": "e9b4497ff8993d3733f452c297ba32d322d35d97c301e60a9ed3759b1cf6951e",
+      "visual_inspection": "root inspected exact PNG",
+      "observation": "Both original crossed plant sprites are visible: pale shimmerleaf on grass and bright cinderpearl on sand, with visible fire and a faint wisp. Quicksilver, blaze powder, the returned focus, four phials and retained wand appear in the hotbar. Passive particle counts/physical harvest and real2x2 recipe outputs are script evidence; this supplied patch is not natural-generation evidence."
+    }
+  ],
+  "full_visual_parity_validated": false,
+  "limitations": [
+    "Only six exact current PNGs inspected, not all46.",
+    "No OS input: native key mappings/screen handlers/useItem/RELEASE_USE_ITEM and survival inventory/block-break packets are driven by the harness.",
+    "Supplied crafting inputs, vis top-up, research, empty workbench, offhand apple, no-AI target and planted block fixtures; not full survival acquisition.",
+    "Focus output/equipped component, native ember damage/fire, physical flower drops and their crafted resources were not supplied.",
+    "Earlier distillation, node, ore, seeded-tree and camera fixtures retain their explicitly supplied boundaries; no natural distribution verdict.",
+    "Only basic Fire is implemented, not other foci/upgrades/pouches/staves/sceptres or full public focus API.",
+    "Held head geometry/lighting, native BOW animation and radial accessibility are bounded adaptations, not full legacy animation/HUD/FX parity.",
+    "The radial footer/help still overlaps the vanilla HUD/selected-item label; title, focus tooltip and selection/removal are readable and functional, but layout polish remains.",
+    "NeoForge client, ordinary packaged/dedicated launch, remote multiplayer and full survival remain unverified.",
+    "Donor audits were read-only; no donor runtime result or copying permission is inferred from this run."
+  ]
+}

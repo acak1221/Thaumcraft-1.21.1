@@ -1,0 +1,4 @@
+{
+  "parent": "thaumcraft:block/alchemy_furnace",
+  "textures": {"side": "thaumcraft:blocks/al_furnace_front_on"}
+}

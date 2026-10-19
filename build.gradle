@@ -1,0 +1,27 @@
+plugins {
+ id 'dev.architectury.loom' version '1.11.458' apply false
+ id 'architectury-plugin' version '3.4.162'
+ id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+}
+architectury { minecraft = minecraft_version }
+allprojects { group = rootProject.maven_group; version = rootProject.mod_version }
+subprojects {
+ apply plugin: 'dev.architectury.loom'
+ apply plugin: 'architectury-plugin'
+ apply plugin: 'maven-publish'
+ base { archivesName = rootProject.archives_name + '-' + project.name }
+ repositories {
+  mavenCentral()
+  maven { url = 'https://maven.architectury.dev/' }
+  maven { url = 'https://maven.fabricmc.net/' }
+  maven { url = 'https://maven.neoforged.net/releases/' }
+ }
+ dependencies {
+  minecraft "com.mojang:minecraft:$rootProject.minecraft_version"
+  mappings loom.officialMojangMappings()
+ }
+ java { toolchain { languageVersion = JavaLanguageVersion.of(21) }; withSourcesJar() }
+ tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+ tasks.withType(Test).configureEach { useJUnitPlatform() }
+}
+tasks.register('build') { group = 'build'; dependsOn ':common:build', ':fabric:build', ':neoforge:build' }

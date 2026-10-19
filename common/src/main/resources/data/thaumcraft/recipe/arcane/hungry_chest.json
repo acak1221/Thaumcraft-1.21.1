@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "HUNGRYCHEST",
+  "pattern": ["WTW", "W W", "WWW"],
+  "key": {
+    "W": {"tag": "minecraft:planks"},
+    "T": {"item": "minecraft:oak_trapdoor"}
+  },
+  "result": {"id": "thaumcraft:hungry_chest", "count": 1},
+  "vis": {"aer": 5, "ordo": 3, "perditio": 3}
+}

@@ -1,0 +1,204 @@
+architectury { common rootProject.enabled_platforms.split(',') }
+loom { accessWidenerPath = file('src/main/resources/thaumcraft.accesswidener') }
+
+// Shared native runtime assertions are opt-in inputs to loader GameTest runs only.
+// Do not add this output to namedElements or either production transform.
+sourceSets {
+ gameTest {
+  compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+  runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+ }
+}
+
+dependencies {
+ modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+ modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+ // WrapMethod gives protected spell harvesting a finally-unwound invocation
+ // boundary. Fabric Loader0.16.14 supplies the0.4.1 runtime; do not shade it.
+ compileOnly 'io.github.llamalad7:mixinextras-fabric:0.4.1'
+ annotationProcessor 'io.github.llamalad7:mixinextras-fabric:0.4.1'
+ testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+ testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Keep the attribution referenced by both loader metadata files in every output.
+processResources {
+ filteringCharset = 'UTF-8'
+ from(rootProject.projectDir) {
+  include 'THIRD_PARTY_NOTICES.md', 'LICENSE'
+  filter(org.apache.tools.ant.filters.FixCrLfFilter,
+    eol: org.apache.tools.ant.filters.FixCrLfFilter.CrLf.newInstance('lf'), fixlast: true)
+ }
+}
+
+// Shared machine gates, applied by both loader projects. Checking the final
+// remapped archive (including nested JARs) also catches stale compiler outputs.
+def harnessMarkers = [
+ 'thaumcraft/common/testing/', 'thaumcraft/fabric/testing/', 'thaumcraft/neoforge/testing/',
+ 'thaumcraft/fabric/clienttest/', 'thaumcraft/neoforge/clienttest/',
+ 'thaumcraft_gametest', 'thaumcraft_client_smoke', 'thaumcraft/clientsmoke', 'thaumcraft/gametest/',
+ 'net/minecraft/gametest/', 'net/fabricmc/fabric/api/gametest/',
+ 'net/neoforged/neoforge/gametest/', 'net/neoforged/neoforge/event/registergametestsevent',
+ 'fabric-gametest', 'fabric-api/gametest', 'data/thaumcraft/structure/empty/nbt'
+]
+def containsHarnessMarker = { String text ->
+ def normalized = text.replace('\\', '/').replace('.', '/').toLowerCase(java.util.Locale.ROOT)
+ harnessMarkers.any { normalized.contains(it) }
+}
+def isHarnessOutput = { File path ->
+ def normalized = path.path.replace('\\', '/').toLowerCase(java.util.Locale.ROOT)
+ normalized.tokenize('/').any { it in ['gametest', 'clienttest'] }
+}
+def scanProductionEntry = { String name, byte[] bytes, String archive ->
+ if (containsHarnessMarker(name) || isHarnessOutput(new File(name))) {
+  throw new GradleException("Test harness entry leaked into $archive: $name")
+ }
+ if (name.endsWith('.class') || name.endsWith('.json') || name.endsWith('.toml') || name.endsWith('.MF')) {
+  if (containsHarnessMarker(new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1))) {
+   throw new GradleException("Test harness reference/registration leaked into $archive: $name")
+  }
+ }
+}
+def scanProductionZip
+scanProductionZip = { InputStream input, String archive ->
+ new java.util.zip.ZipInputStream(input).withCloseable { zip ->
+  java.util.zip.ZipEntry entry
+  while ((entry = zip.nextEntry) != null) {
+   if (!entry.directory) {
+    def bytes = zip.readAllBytes()
+    scanProductionEntry(entry.name, bytes, archive)
+    if (entry.name.endsWith('.jar')) {
+     scanProductionZip(new ByteArrayInputStream(bytes), "$archive!/${entry.name}")
+    }
+   }
+  }
+ }
+}
+ext.verifyProductionArchive = { File archive ->
+ archive.withInputStream { scanProductionZip(it, archive.path) }
+}
+
+ext.configureTestIsolation = { Project loader, Map<String, String> isolatedRuns ->
+ def commonProject = project
+ def verifyScopes = loader.tasks.register('verifyTestIsolation') {
+  group = 'verification'
+  description = 'Reject test mod roots/classes/registrations in global and normal-run scopes.'
+  doLast {
+   def rejectOutputs = { files, String scope ->
+    files.each { path ->
+     if (isHarnessOutput(path)) {
+      throw new GradleException("Test harness output leaked into $scope: $path")
+     }
+    }
+   }
+   def rejectMods = { mods, String scope ->
+    mods.each { mod ->
+     if (containsHarnessMarker(mod.name)) {
+      throw new GradleException("Test mod leaked into $scope: ${mod.name}")
+     }
+     mod.modSourceSets.get().each { reference ->
+      if (reference.sourceSet().name in ['gameTest', 'clientTest']) {
+       throw new GradleException("Test source set leaked into $scope: $reference")
+      }
+     }
+     rejectOutputs(mod.modFiles.files, scope)
+    }
+   }
+   rejectMods(loader.loom.mods, "${loader.path} global loom.mods")
+   [commonProject, loader].each { owner ->
+    rejectOutputs(owner.sourceSets.main.compileClasspath.files, "${owner.path} main compile classpath")
+    rejectOutputs(owner.sourceSets.main.runtimeClasspath.files, "${owner.path} main runtime classpath")
+    owner.sourceSets.main.resources.files.findAll {
+     it.name in ['fabric.mod.json', 'neoforge.mods.toml']
+    }.each { metadata -> scanProductionEntry(metadata.name, metadata.bytes, "${owner.path} main metadata") }
+   }
+   loader.loom.runs.each { run ->
+    run.evaluateNow()
+    def source = run.getSource(loader)
+    def neoModRoots = []
+    if (loader.loom.isNeoForge()) {
+     // Inspect the emitted userdev roots, not just ModSettings. Common main is
+     // already an Architectury-transformed dependency module, never a raw root.
+     def rawCommonMain = commonProject.sourceSets.main.output.files.collect { it.canonicalFile }.toSet()
+     neoModRoots = (run.environmentVariables['MOD_CLASSES']?.toString() ?: '')
+       .split(java.util.regex.Pattern.quote(File.pathSeparator)).findAll { !it.empty }.collect { entry ->
+      def parts = entry.split('%%', 2)
+      if (parts.length != 2) throw new GradleException("Malformed MOD_CLASSES root in ${loader.path}:${run.name}: $entry")
+      [parts[0], new File(parts[1]).canonicalFile]
+     }
+     if (neoModRoots.any { rawCommonMain.contains(it[1]) }
+         || source.runtimeClasspath.files.any { rawCommonMain.contains(it.canonicalFile) }) {
+      throw new GradleException("Raw common main duplicates Architectury's transformed module in ${loader.path}:${run.name}")
+     }
+     def commonArtifacts = loader.configurations.common.files
+     if (commonArtifacts.empty || !source.runtimeClasspath.files.containsAll(commonArtifacts)) {
+      throw new GradleException("Architectury common dependency is missing from ${loader.path}:${run.name}")
+     }
+    }
+    if (isolatedRuns.containsKey(run.name)) {
+     def expected = loader.sourceSets.getByName(isolatedRuns[run.name])
+     if (source != expected) {
+      throw new GradleException("${loader.path}:${run.name} must use ${expected.name}, not ${source.name}")
+     }
+     def requiredRoots = new LinkedHashSet(expected.output.files)
+     if (expected.name == 'gameTest') requiredRoots.addAll(commonProject.sourceSets.gameTest.output.files)
+     if (!source.runtimeClasspath.files.containsAll(requiredRoots)) {
+      throw new GradleException("Missing isolated test roots in ${loader.path}:${run.name}")
+     }
+     if (loader.loom.isForgeLike()) {
+      def testMod = run.mods.findByName('thaumcraft_gametest')
+      def references = testMod?.modSourceSets?.get() ?: []
+      if (!references.any { it.project() == loader && it.sourceSet() == expected }
+          || !references.any { it.project() == commonProject && it.sourceSet() == commonProject.sourceSets.gameTest }) {
+       throw new GradleException("Missing run-scoped loader/common GameTest mod roots in ${loader.path}:${run.name}")
+      }
+      if (loader.loom.isNeoForge()) {
+       def mainReferences = run.mods.findByName('thaumcraft')?.modSourceSets?.get() ?: []
+       if (mainReferences.size() != 1 || mainReferences[0].project() != loader
+           || mainReferences[0].sourceSet() != loader.sourceSets.main) {
+        throw new GradleException("NeoForge production mod roots must contain only loader main in ${loader.path}:${run.name}")
+       }
+       def expectedModRoots = new LinkedHashSet()
+       loader.sourceSets.main.output.files.each { expectedModRoots.add(['thaumcraft', it.canonicalFile]) }
+       requiredRoots.each { expectedModRoots.add(['thaumcraft_gametest', it.canonicalFile]) }
+       if (neoModRoots.toSet() != expectedModRoots) {
+        throw new GradleException("Unexpected emitted NeoForge MOD_CLASSES ownership in ${loader.path}:${run.name}: $neoModRoots")
+       }
+      }
+     } else {
+      def groups = run.vmArgs.findAll { it.startsWith('-Dfabric.classPathGroups=') }
+      if (groups.size() != 1 || !requiredRoots.every { groups[0].contains(it.absolutePath) }) {
+       throw new GradleException("Missing run-scoped Fabric classPathGroups in ${loader.path}:${run.name}")
+      }
+     }
+    } else {
+     if (source.name in ['gameTest', 'clientTest']) {
+      throw new GradleException("Normal run ${loader.path}:${run.name} uses test source set ${source.name}")
+     }
+     rejectOutputs(source.runtimeClasspath.files, "${loader.path}:${run.name} runtime classpath")
+     if (loader.loom.isNeoForge()) rejectOutputs(neoModRoots.collect { it[1] }, "${loader.path}:${run.name} emitted MOD_CLASSES")
+     if (containsHarnessMarker(run.vmArgs.toString()) || containsHarnessMarker(run.environmentVariables.toString())) {
+      throw new GradleException("Test harness launch registration leaked into ${loader.path}:${run.name}")
+     }
+     if (loader.loom.isForgeLike()) rejectMods(run.mods, "${loader.path}:${run.name} mods")
+    }
+   }
+   logger.lifecycle("${loader.path}: test roots are isolated from production and normal runs.")
+  }
+ }
+ def remappedJar = loader.tasks.named('remapJar')
+ remappedJar.configure {
+  doLast { commonProject.verifyProductionArchive(archiveFile.get().asFile) }
+ }
+ def verifyJar = loader.tasks.register('verifyProductionIsolation') {
+  group = 'verification'
+  description = 'Scan the final remapped production JAR for test classes, references, metadata and templates.'
+  dependsOn remappedJar, verifyScopes
+  doLast {
+   commonProject.verifyProductionArchive(remappedJar.get().archiveFile.get().asFile)
+   logger.lifecycle("${loader.path}: final remapped production JAR contains no test harness.")
+  }
+ }
+ loader.tasks.named('check') { dependsOn verifyJar }
+ loader.tasks.withType(net.fabricmc.loom.task.AbstractRunTask).configureEach { dependsOn verifyScopes }
+}

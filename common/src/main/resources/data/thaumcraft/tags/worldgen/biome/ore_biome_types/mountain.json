@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["#minecraft:is_mountain", {"id": "#c:is_mountain", "required": false}]
+}

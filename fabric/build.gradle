@@ -1,0 +1,435 @@
+plugins { id 'com.github.johnrengelman.shadow' }
+architectury { platformSetupLoomIde(); fabric() }
+loom { accessWidenerPath = project(':common').loom.accessWidenerPath }
+configurations {
+ common { canBeResolved = true; canBeConsumed = false }
+ compileClasspath.extendsFrom common
+ runtimeClasspath.extendsFrom common
+ developmentFabric.extendsFrom common
+ shadowBundle { canBeResolved = true; canBeConsumed = false }
+}
+dependencies {
+ modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+ modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+ modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
+ common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+ shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+}
+processResources {
+  // Loader reads AW from THIS mod's roots during dev startup, not an arbitrary
+  // common dependency's resources. Keep one authored file in common.
+  from(project(':common').loom.accessWidenerPath)
+  inputs.property 'version', project.version
+ filesMatching('fabric.mod.json') { expand version: project.version }
+}
+shadowJar {
+  configurations = [project.configurations.shadowBundle]; archiveClassifier = 'dev-shadow'
+  // Fabric resources and the shared production bundle carry the SAME canonical
+  // AW. Deduplicate only that path, never mask unrelated resource collisions.
+  filesMatching('thaumcraft.accesswidener') { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+}
+remapJar { inputFile.set shadowJar.archiveFile }
+
+// Opt-in harnesses. Neither output is included by jar/shadowJar or normal runs.
+sourceSets {
+ gameTest {
+  compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + project(':common').sourceSets.gameTest.output
+  runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + project(':common').sourceSets.gameTest.output
+ }
+ clientTest {
+  compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+  runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+ }
+}
+// Loom 1.11's runs.mods is Forge-only. Fabric's equivalent grouping must be a
+// run VM property, not loom.mods (which writes into the shared launch.cfg).
+def gameTestModRoots = files(sourceSets.gameTest.output, project(':common').sourceSets.gameTest.output)
+def clientSmokeScope = providers.gradleProperty('clientSmokeScope').getOrElse('full')
+if (!(clientSmokeScope in ['full', 'equipment', 'caps', 'goggles', 'clothing', 'excavation', 'frost', 'voidjar', 'valve', 'tubefilter', 'buffer', 'centrifuge', 'crystallizer', 'stabilizer', 'visnet', 'focal', 'bore'])) throw new GradleException('Unknown clientSmokeScope: ' + clientSmokeScope)
+def clientSmokeWorld = clientSmokeScope != 'full' ? clientSmokeScope + '-smoke-' + java.util.UUID.randomUUID().toString() : 'book-smoke'
+def clientSmokeEquipmentOrigin = ''
+def clientSmokeInfusionCenter = ''
+def clientSmokeSourceWorld = file(clientSmokeScope == 'full' ? 'run/saves/New World' : 'run-clienttest/saves/book-smoke').toPath().toAbsolutePath().normalize()
+if (clientSmokeScope != 'full') {
+ def accepted = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/infusion-client.json'), 'UTF-8')
+ if (accepted.status != 'SCRIPT_PASSED') throw new GradleException('Focused equipment requires the accepted infusion save/input record')
+ def origin = (accepted.infusion.coordinates.workbench as String).split(',').collect { it.trim().toInteger() }
+ clientSmokeEquipmentOrigin = [origin[0] + (clientSmokeScope == 'caps' ? 96 : 64), origin[1], origin[2]].join(',')
+ clientSmokeInfusionCenter = (accepted.infusion.coordinates.center as String).replace(' ', '')
+ if (clientSmokeScope == 'goggles') {
+  def caps = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/caps-client.json'), 'UTF-8')
+  if (caps.status != 'SCRIPT_PASSED' || caps.scope != 'caps' || !caps.saved_world) {
+   throw new GradleException('Focused goggles require the actual accepted stopped caps world')
+  }
+  clientSmokeSourceWorld = rootProject.file(caps.saved_world as String).toPath().toAbsolutePath().normalize()
+  if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+   throw new GradleException('The accepted caps save must stay inside the owned isolated saves directory')
+  }
+  def capsOrigin = (caps.caps.coordinates.workbench as String).split(',').collect { it.trim().toInteger() }
+  clientSmokeEquipmentOrigin = [capsOrigin[0] + 32, capsOrigin[1], capsOrigin[2]].join(',')
+  clientSmokeInfusionCenter = (caps.caps.coordinates.existing_center as String).replace(' ', '')
+ }
+ if (clientSmokeScope == 'clothing') {
+  def goggles = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/goggles-client.json'), 'UTF-8')
+  if (goggles.status != 'SCRIPT_PASSED' || goggles.scope != 'goggles' || !goggles.saved_world) {
+   throw new GradleException('Focused clothing requires the actual accepted stopped goggles world')
+  }
+  clientSmokeSourceWorld = rootProject.file(goggles.saved_world as String).toPath().toAbsolutePath().normalize()
+  if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+   throw new GradleException('The accepted goggles save must stay inside the owned isolated saves directory')
+  }
+  def gogglesOrigin = (goggles.goggles.coordinates.workbench as String).split(',').collect { it.trim().toInteger() }
+  clientSmokeEquipmentOrigin = [gogglesOrigin[0] + 32, gogglesOrigin[1], gogglesOrigin[2]].join(',')
+  clientSmokeInfusionCenter = (goggles.goggles.coordinates.existing_center as String).replace(' ', '')
+ }
+ if (clientSmokeScope == 'excavation') {
+  def clothing = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/clothing-client.json'), 'UTF-8')
+  if (clothing.status != 'SCRIPT_PASSED' || clothing.scope != 'clothing' || !clothing.saved_world) {
+   throw new GradleException('Focused Excavation requires the actual accepted stopped clothing/Shock world')
+  }
+  clientSmokeSourceWorld = rootProject.file(clothing.saved_world as String).toPath().toAbsolutePath().normalize()
+  if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+   throw new GradleException('The accepted clothing save must stay inside the owned isolated saves directory')
+  }
+  def clothingOrigin = (clothing.clothing.coordinates.workbench as String).split(',').collect { it.trim().toInteger() }
+  clientSmokeEquipmentOrigin = [clothingOrigin[0] + 32, clothingOrigin[1], clothingOrigin[2]].join(',')
+  clientSmokeInfusionCenter = (clothing.clothing.coordinates.existing_center as String).replace(' ', '')
+ }
+  if (clientSmokeScope == 'frost') {
+  def excavation = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/excavation-client.json'), 'UTF-8')
+  if (excavation.status != 'SCRIPT_PASSED' || excavation.scope != 'excavation' || !excavation.saved_world) {
+   throw new GradleException('Focused Frost requires the actual accepted stopped Excavation world')
+  }
+  clientSmokeSourceWorld = rootProject.file(excavation.saved_world as String).toPath().toAbsolutePath().normalize()
+  if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+   throw new GradleException('The accepted Excavation save must stay inside the owned isolated saves directory')
+  }
+  def excavationOrigin = (excavation.excavation.coordinates.workbench as String).split(',').collect { it.trim().toInteger() }
+  clientSmokeEquipmentOrigin = [excavationOrigin[0] + 32, excavationOrigin[1], excavationOrigin[2]].join(',')
+   clientSmokeInfusionCenter = (excavation.excavation.coordinates.existing_center as String).replace(' ', '')
+  }
+  if (clientSmokeScope == 'voidjar') {
+   def frost = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/frost-client.json'), 'UTF-8')
+   if (frost.status != 'SCRIPT_PASSED' || frost.scope != 'frost' || !frost.saved_world) {
+    throw new GradleException('Focused void jars require the actual accepted stopped Frost world')
+   }
+   clientSmokeSourceWorld = rootProject.file(frost.saved_world as String).toPath().toAbsolutePath().normalize()
+   if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+    throw new GradleException('The accepted Frost save must stay inside the owned isolated saves directory')
+   }
+   def frostOrigin = (frost.frost.coordinates.workbench as String).split(',').collect { it.trim().toInteger() }
+   clientSmokeEquipmentOrigin = [frostOrigin[0] + 32, frostOrigin[1], frostOrigin[2]].join(',')
+   clientSmokeInfusionCenter = (frost.frost.coordinates.existing_center as String).replace(' ', '')
+   }
+   if (clientSmokeScope == 'valve') {
+    def jars = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/voidjar-client.json'), 'UTF-8')
+    if (jars.status != 'SCRIPT_PASSED' || jars.scope != 'voidjar' || !jars.saved_world) {
+     throw new GradleException('Focused valves require the actual accepted stopped void-jar world')
+    }
+    clientSmokeSourceWorld = rootProject.file(jars.saved_world as String).toPath().toAbsolutePath().normalize()
+    if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+     throw new GradleException('The accepted void-jar save must stay inside the owned isolated saves directory')
+    }
+    def jarOrigin = (jars.voidjar.coordinates.bench as String).split(',').collect { it.trim().toInteger() }
+    clientSmokeEquipmentOrigin = [jarOrigin[0] + 32, jarOrigin[1], jarOrigin[2]].join(',')
+     clientSmokeInfusionCenter = (jars.voidjar.coordinates.old_center as String).replace(' ', '')
+    }
+    if (clientSmokeScope == 'tubefilter') {
+     def valves = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/valve-client.json'), 'UTF-8')
+     if (valves.status != 'SCRIPT_PASSED' || valves.scope != 'valve' || !valves.saved_world) {
+      throw new GradleException('Focused tube variants require the actual accepted stopped valve world')
+     }
+     clientSmokeSourceWorld = rootProject.file(valves.saved_world as String).toPath().toAbsolutePath().normalize()
+     if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+      throw new GradleException('The accepted valve save must stay inside the owned isolated saves directory')
+     }
+     def valveOrigin = (valves.valve.coordinates.bench as String).split(',').collect { it.trim().toInteger() }
+     clientSmokeEquipmentOrigin = [valveOrigin[0] + 32, valveOrigin[1], valveOrigin[2]].join(',')
+     clientSmokeInfusionCenter = (valves.valve.coordinates.old_center as String).replace(' ', '')
+    }
+    if (clientSmokeScope == 'buffer') {
+     def tubes = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/tubefilter-client.json'), 'UTF-8')
+     if (tubes.status != 'SCRIPT_PASSED' || tubes.scope != 'tubefilter' || !tubes.saved_world) {
+      throw new GradleException('Focused buffer requires the actual accepted stopped tube-filter world')
+     }
+     clientSmokeSourceWorld = rootProject.file(tubes.saved_world as String).toPath().toAbsolutePath().normalize()
+     if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+      throw new GradleException('The accepted tube-filter save must stay inside the owned isolated saves directory')
+     }
+     def tubeOrigin = (tubes.tubefilter.coordinates.bench as String).split(',').collect { it.trim().toInteger() }
+     clientSmokeEquipmentOrigin = [tubeOrigin[0] + 32, tubeOrigin[1], tubeOrigin[2]].join(',')
+     clientSmokeInfusionCenter = (tubes.tubefilter.coordinates.old_center as String).replace(' ', '')
+    }
+    if (clientSmokeScope == 'centrifuge') {
+     def buffers = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/buffer-client.json'), 'UTF-8')
+     if (buffers.status != 'SCRIPT_PASSED' || buffers.scope != 'buffer' || !buffers.saved_world) {
+      throw new GradleException('Focused centrifuge requires the actual accepted stopped buffer world')
+     }
+     clientSmokeSourceWorld = rootProject.file(buffers.saved_world as String).toPath().toAbsolutePath().normalize()
+     if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+      throw new GradleException('The accepted buffer save must stay inside the owned isolated saves directory')
+     }
+     def bufferOrigin = (buffers.buffer.coordinates.bench as String).split(',').collect { it.trim().toInteger() }
+     clientSmokeEquipmentOrigin = [bufferOrigin[0] + 32, bufferOrigin[1], bufferOrigin[2]].join(',')
+     clientSmokeInfusionCenter = (buffers.buffer.coordinates.old_center as String).replace(' ', '')
+    }
+    if (clientSmokeScope == 'crystallizer') {
+     def centrifuges = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/centrifuge-client.json'), 'UTF-8')
+     if (centrifuges.status != 'SCRIPT_PASSED' || centrifuges.scope != 'centrifuge' || !centrifuges.saved_world) {
+      throw new GradleException('Focused crystallizer requires the actual accepted stopped centrifuge world')
+     }
+     clientSmokeSourceWorld = rootProject.file(centrifuges.saved_world as String).toPath().toAbsolutePath().normalize()
+     if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+      throw new GradleException('The accepted centrifuge save must stay inside the owned isolated saves directory')
+     }
+     def centrifugeOrigin = (centrifuges.centrifuge.coordinates.bench as String).split(',').collect { it.trim().toInteger() }
+     clientSmokeEquipmentOrigin = [centrifugeOrigin[0] + 32, centrifugeOrigin[1], centrifugeOrigin[2]].join(',')
+     clientSmokeInfusionCenter = (centrifuges.centrifuge.coordinates.old_center as String).replace(' ', '')
+    }
+    if (clientSmokeScope == 'stabilizer') {
+     def crystals = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/crystallizer-client.json'), 'UTF-8')
+     if (crystals.status != 'SCRIPT_PASSED' || crystals.scope != 'crystallizer' || !crystals.saved_world) {
+      throw new GradleException('Focused stabilizer requires the actual accepted stopped crystallizer world')
+     }
+     clientSmokeSourceWorld = rootProject.file(crystals.saved_world as String).toPath().toAbsolutePath().normalize()
+     if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+      throw new GradleException('The accepted crystallizer save must stay inside the owned isolated saves directory')
+     }
+     def crystallizerOrigin = (crystals.crystallizer.coordinates.bench as String).split(',').collect { it.trim().toInteger() }
+     clientSmokeEquipmentOrigin = [crystallizerOrigin[0] + 32, crystallizerOrigin[1], crystallizerOrigin[2]].join(',')
+     clientSmokeInfusionCenter = (crystals.crystallizer.coordinates.old_center as String).replace(' ', '')
+    }
+    if (clientSmokeScope == 'visnet') {
+     def stabilizers = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/stabilizer-client.json'), 'UTF-8')
+     if (stabilizers.status != 'SCRIPT_PASSED' || stabilizers.scope != 'stabilizer' || !stabilizers.saved_world) {
+      throw new GradleException('Focused VisNet requires the actual accepted stopped stabilizer world')
+     }
+     clientSmokeSourceWorld = rootProject.file(stabilizers.saved_world as String).toPath().toAbsolutePath().normalize()
+     if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+      throw new GradleException('The accepted stabilizer save must stay inside the owned isolated saves directory')
+     }
+     def stabilizerOrigin = (stabilizers.stabilizer.coordinates.bench as String).split(',').collect { it.trim().toInteger() }
+     clientSmokeEquipmentOrigin = [stabilizerOrigin[0] + 32, stabilizerOrigin[1], stabilizerOrigin[2]].join(',')
+     clientSmokeInfusionCenter = (stabilizers.stabilizer.coordinates.old_center as String).replace(' ', '')
+     }
+      if (clientSmokeScope == 'focal') {
+      def visnet = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/visnet-client.json'), 'UTF-8')
+      if (visnet.status != 'SCRIPT_PASSED' || visnet.scope != 'visnet' || !visnet.saved_world) {
+       throw new GradleException('Focused focal check requires the actual accepted stopped M09b world')
+      }
+       clientSmokeSourceWorld = rootProject.file(visnet.saved_world as String).toPath().toAbsolutePath().normalize()
+      if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+        throw new GradleException('Accepted M09b parent must stay inside the isolated saves directory')
+       }
+      }
+      if (clientSmokeScope == 'bore') {
+       def focal = new groovy.json.JsonSlurper().parse(rootProject.file('docs/porting/focal-client.json'), 'UTF-8')
+       if (focal.status != 'SCRIPT_PASSED' || focal.scope != 'focal' || !focal.saved_world) {
+        throw new GradleException('Bore requires the accepted stopped focal world, never an intermediate/failed retry world')
+       }
+       clientSmokeSourceWorld = rootProject.file(focal.saved_world as String).toPath().toAbsolutePath().normalize()
+       if (!clientSmokeSourceWorld.startsWith(file('run-clienttest/saves').toPath().toAbsolutePath().normalize())) {
+        throw new GradleException('Accepted focal parent must stay inside the owned isolated saves directory')
+       }
+      }
+}
+def clientTestModRoots = files(sourceSets.clientTest.output)
+loom.runs {
+ gameTest {
+  server()
+  source sourceSets.gameTest
+  name 'Thaumcraft 1.21.1 GameTests'
+  vmArg "-Dfabric.classPathGroups=${gameTestModRoots.asPath}"
+  vmArg '-Dfabric-api.gametest'
+  vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file('gametest-results.xml').get().asFile.absolutePath}"
+  runDir 'run-gametest'
+ }
+ clientSmoke {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft isolated book client smoke'
+  runDir 'run-clienttest'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.clientSmoke=true'
+  vmArg "-Dthaumcraft.clientSmokeScope=$clientSmokeScope"
+  vmArg "-Dthaumcraft.clientSmokeEquipmentOrigin=$clientSmokeEquipmentOrigin"
+  vmArg "-Dthaumcraft.clientSmokeInfusionCenter=$clientSmokeInfusionCenter"
+   programArgs '--quickPlaySingleplayer', clientSmokeWorld, '--width', '1280', '--height', '720'
+   if (clientSmokeScope == 'bore') {
+    programArgs '--username', 'Player653', '--uuid', '13848433-7be7-350d-8b4a-c038819c2260'
+   }
+ }
+}
+tasks.named('runGameTest') {
+ dependsOn tasks.named('gameTestClasses'), project(':common').tasks.named('gameTestClasses')
+}
+// Bore checks immutable parent/prelaunch evidence, never equality after play.
+def clientSmokeTargetWorld = file('run-clienttest/saves/' + clientSmokeWorld).toPath().toAbsolutePath().normalize()
+def boreAcceptedManifestPath = rootProject.file('.tmp/bore-accepted-parent-before-client.json').toPath().toAbsolutePath().normalize()
+def boreAcceptedManifestSha256 = 'cbcb22db9beb7056d0a61d08852bfb5bd5df38d22c58e78baa4d7de24ba58fd3'
+def boreInitialCopyProofPath = file("run-clienttest/bore-initial-copy-${clientSmokeWorld}.json").toPath().toAbsolutePath().normalize()
+def boreInitialCopyProofSha256 = null
+def boreDigest = { byte[] bytes -> java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance('SHA-256').digest(bytes)) }
+def borePayloadHashes = { java.nio.file.Path world ->
+ def lock = world.resolve('session.lock')
+ if (java.nio.file.Files.exists(lock) && !java.util.Arrays.equals(java.nio.file.Files.readAllBytes(lock), '☃'.getBytes(java.nio.charset.StandardCharsets.UTF_8))) throw new GradleException('Unexpected native root session.lock bytes')
+ def paths = java.nio.file.Files.walk(world)
+ def payload = new TreeMap()
+ try {
+   paths.filter { java.nio.file.Files.isRegularFile(it) && it != lock }.forEach { path ->
+   payload[world.relativize(path).toString().replace('\\', '/')] = boreDigest(java.nio.file.Files.readAllBytes(path))
+  }
+ } finally { paths.close() }
+ payload
+}
+def boreAcceptedPayload = {
+ if (!java.nio.file.Files.isRegularFile(boreAcceptedManifestPath)) throw new GradleException('Missing accepted focal payload manifest; do not invent another source')
+ def manifestBytes = java.nio.file.Files.readAllBytes(boreAcceptedManifestPath)
+ if (boreDigest(manifestBytes) != boreAcceptedManifestSha256) throw new GradleException('Changed accepted focal payload manifest; do not invent another source')
+ def manifest = new groovy.json.JsonSlurper().parseText(new String(manifestBytes, java.nio.charset.StandardCharsets.UTF_8))
+ if (!(manifest.source_save instanceof String) || rootProject.file(manifest.source_save).toPath().toAbsolutePath().normalize() != clientSmokeSourceWorld
+     || !(manifest.source_save_files_sha256 instanceof Map) || manifest.source_save_files_sha256.size() != 191) throw new GradleException('Wrong Bore source-save binding')
+ def expected = new TreeMap()
+ manifest.source_save_files_sha256.each { name, hash ->
+  def original = rootProject.file(name as String).toPath().toAbsolutePath().normalize()
+  if (!original.startsWith(clientSmokeSourceWorld) || original == clientSmokeSourceWorld || original.fileName.toString() == 'session.lock'
+      || !(hash instanceof String) || !(hash ==~ /[0-9a-f]{64}/)) throw new GradleException('Invalid accepted parent payload entry: ' + name)
+  expected[clientSmokeSourceWorld.relativize(original).toString().replace('\\', '/')] = hash
+ }
+ if (expected.size() != 191 || borePayloadHashes(clientSmokeSourceWorld) != expected) throw new GradleException('Accepted parent changed bytes or gained/lost payload files')
+ expected
+}
+def boreCopyRecord = { Map payload ->
+ [schema: 'bore-initial-copy-v1', scope: 'bore', client_smoke_world: clientSmokeWorld,
+  source_save: clientSmokeSourceWorld.toString().replace('\\', '/'), target_save: clientSmokeTargetWorld.toString().replace('\\', '/'),
+  accepted_manifest: boreAcceptedManifestPath.toString().replace('\\', '/'), accepted_manifest_sha256: boreAcceptedManifestSha256,
+  payload_count: payload.size(), payload_files_sha256: payload]
+}
+tasks.register('prepareClientSmokeWorld') {
+ group = 'verification'
+ description = 'Copy the existing 1.21.1 test world into the isolated client smoke directory once.'
+ doLast {
+   // Focused checks copy the real accepted save, including its actual earned
+   // inventory, into a fresh owned world. Never overwrite/replay that source.
+    def sourceWorld = clientSmokeSourceWorld
+    def boreExpectedPayload = clientSmokeScope == 'bore' ? boreAcceptedPayload() : null
+  def isolatedRoot = file('run-clienttest').toPath().toAbsolutePath().normalize()
+   def targetWorld = clientSmokeTargetWorld
+   if (!targetWorld.startsWith(isolatedRoot) || targetWorld == sourceWorld) {
+    throw new GradleException('Client smoke world must stay inside fabric/run-clienttest')
+   }
+   if (clientSmokeScope == 'bore' && java.nio.file.Files.exists(targetWorld)) {
+    throw new GradleException('Bore always requires a NEW private copy, never an existing or failed attempt: ' + targetWorld)
+   }
+  if (!java.nio.file.Files.isRegularFile(targetWorld.resolve('level.dat'))) {
+   if (java.nio.file.Files.exists(targetWorld)) {
+    throw new GradleException("Refusing to overwrite an incomplete smoke world: $targetWorld")
+   }
+   if (!java.nio.file.Files.isRegularFile(sourceWorld.resolve('level.dat'))) {
+    throw new GradleException("The private 1.21.1 fixture world is absent: $sourceWorld")
+   }
+    copy {
+    from sourceWorld.toFile()
+    into targetWorld.toFile()
+     exclude '**/session.lock', 'session.lock'
+    }
+    if (clientSmokeScope == 'bore') {
+     def copiedPayload = borePayloadHashes(targetWorld)
+     if (copiedPayload != boreExpectedPayload) throw new GradleException('Fresh Bore copy does not match the exact accepted 191-file payload')
+     def proofBytes = (groovy.json.JsonOutput.toJson(boreCopyRecord(copiedPayload)) + '\n').getBytes(java.nio.charset.StandardCharsets.UTF_8)
+     java.nio.file.Files.write(boreInitialCopyProofPath, proofBytes, java.nio.file.StandardOpenOption.CREATE_NEW, java.nio.file.StandardOpenOption.WRITE)
+     boreInitialCopyProofSha256 = boreDigest(proofBytes)
+    }
+  }
+  def optionsFile = isolatedRoot.resolve('options.txt').toFile()
+  // This is an owned test directory: reset the locale/viewport on every run.
+     // Old stock jars span chunks91..115 while the action route spans91..101.
+     // Normal finite radius26 leaves a two-chunk margin; observers still require
+     // actual availability/ticking and never load/ticket missing chunks.
+     def ownedRadius = clientSmokeScope == 'bore' ? 'renderDistance:26\nsimulationDistance:26\n' : clientSmokeScope == 'focal' ? 'renderDistance:8\nsimulationDistance:8\n' : 'renderDistance:4\nsimulationDistance:5\n'
+   optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\n' + ownedRadius + 'maxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
+ }
+}
+tasks.named('runClientSmoke') {
+ dependsOn tasks.named('prepareClientSmokeWorld'), tasks.named('clientTestClasses')
+ doFirst {
+  def smokeRunId = 'client-smoke-' + java.util.UUID.randomUUID().toString()
+  extensions.extraProperties.set('clientSmokeRunId', smokeRunId)
+   systemProperty 'thaumcraft.clientSmokeRunId', smokeRunId
+   systemProperty 'thaumcraft.clientSmokeScope', clientSmokeScope
+  file('run-clienttest/client-smoke-result.json').setText(groovy.json.JsonOutput.toJson([
+    status: 'LAUNCHING', run_id: smokeRunId, visual_inspection: 'pending'
+  ]) + '\n', 'UTF-8')
+ }
+ doLast {
+  def resultFile = file('run-clienttest/client-smoke-result.json')
+  def result = new groovy.json.JsonSlurper().parse(resultFile, 'UTF-8')
+   if (result.run_id != extensions.extraProperties.get('clientSmokeRunId') || result.status != 'SCRIPT_PASSED' || result.scope != clientSmokeScope) {
+   throw new GradleException("Client smoke failed or did not produce fresh evidence; inspect $resultFile")
+  }
+         def expectedCaptures = clientSmokeScope in ['visnet', 'focal', 'bore'] ? 10 : clientSmokeScope in ['tubefilter', 'buffer', 'centrifuge', 'crystallizer', 'stabilizer'] ? 8 : clientSmokeScope in ['voidjar', 'valve'] ? 7 : clientSmokeScope == 'frost' ? 5 : clientSmokeScope == 'excavation' ? 6 : clientSmokeScope == 'clothing' ? 8 : clientSmokeScope in ['caps', 'goggles'] ? 7 : clientSmokeScope == 'equipment' ? 6 : 66
+   if (!(result.screenshots instanceof List) || result.screenshots.size() != expectedCaptures) {
+    throw new GradleException("Client $clientSmokeScope check did not produce $expectedCaptures screenshots; inspect $resultFile")
+  }
+  def screenshotRoot = file('run-clienttest/screenshots').toPath().toAbsolutePath().normalize()
+   result.screenshots.each { screenshot ->
+   def screenshotPath = java.nio.file.Path.of(screenshot.path as String).toAbsolutePath().normalize()
+   if (!screenshotPath.startsWith(screenshotRoot) || !java.nio.file.Files.isRegularFile(screenshotPath)
+       || java.nio.file.Files.size(screenshotPath) != (screenshot.bytes as long)) {
+    throw new GradleException("Missing or changed native client screenshot: $screenshotPath")
+    }
+   }
+   if (clientSmokeScope == 'bore') {
+    def expectedPayload = boreAcceptedPayload()
+    if (boreInitialCopyProofSha256 == null || !java.nio.file.Files.isRegularFile(boreInitialCopyProofPath)) throw new GradleException('Missing bound Bore prelaunch copy proof')
+    def proofBytes = java.nio.file.Files.readAllBytes(boreInitialCopyProofPath)
+    if (boreDigest(proofBytes) != boreInitialCopyProofSha256
+        || new groovy.json.JsonSlurper().parseText(new String(proofBytes, java.nio.charset.StandardCharsets.UTF_8)) != boreCopyRecord(expectedPayload)) {
+     throw new GradleException('Changed/misbound Bore prelaunch copy proof; never compare or restore the played candidate')
+    }
+   }
+    if (clientSmokeScope == 'bore') {
+     def tailFile = file("run-clienttest/bore-tail-${result.run_id}.json")
+     if (!tailFile.isFile()) throw new GradleException('Missing independent normal-stop Bore tail: ' + tailFile)
+     def tail = new groovy.json.JsonSlurper().parse(tailFile, 'UTF-8')
+     if (tail.run_id != result.run_id || tail.status != 'STOPPED_UNINSPECTED' || tail.story_complete != true || tail.error != 'NONE') {
+      throw new GradleException('Bore native stop failed/incomplete; script result is not accepted evidence')
+     }
+     def captures = tail.report?.capture_names
+     if (!(captures instanceof List) || captures.size() != 10 || captures.toSet().size() != 10) throw new GradleException('Missing exact Bore capture contract')
+     captures.each { name ->
+      if (result.screenshots.count { java.nio.file.Path.of(it.path as String).fileName.toString() == result.run_id + '-' + name } != 1) {
+       throw new GradleException('Missing or repeated exact Bore capture: ' + name)
+      }
+     }
+    }
+    if (clientSmokeScope == 'visnet') {
+    def tailFile = file("run-clienttest/visnet-tail-${result.run_id}.json")
+    if (!tailFile.isFile()) throw new GradleException("Missing independent normal-stop VisNet tail: $tailFile")
+    def tail = new groovy.json.JsonSlurper().parse(tailFile, 'UTF-8')
+    def last = tail.last_actual_live_POST
+    def base = last?.actual_BASE
+    def primalTags = ['aer', 'aqua', 'ignis', 'ordo', 'perditio', 'terra'] as Set
+    if (tail.run_id != result.run_id || tail.status != 'STOPPED' || !tail.saw_actual_energized || !tail.saw_actual_reversion
+        || last?.kind != 'ORDINARY' || last.actual_count >= 1200 || last.actual_type != 'NORMAL' || last.actual_modifier != 'NONE'
+        || !(base instanceof List) || base.size() != 6 || (base.collect { it.tag } as Set) != primalTags || base.any { it.amount != 80 }) {
+     throw new GradleException("VisNet live tail did not retain its promised pre-prune BASE80 handoff; no clocks/refunds/waivers. Inspect $tailFile and stopped NBT")
+    }
+   }
+    if (clientSmokeScope == 'focal') {
+     def tailFile = file("run-clienttest/focal-tail-${result.run_id}.json")
+     if (!tailFile.isFile()) throw new GradleException("Missing independent normal-stop focal tail: $tailFile")
+     def tail = new groovy.json.JsonSlurper().parse(tailFile, 'UTF-8')
+     def finalState = tail.report?.final_native_finite_state
+     if (tail.run_id != result.run_id || tail.status != 'STOPPED_UNINSPECTED' || !tail.story_complete
+         || tail.error != 'NONE' || tail.report?.INERT_observation_failure
+         || tail.last_native_SERVER_POST < tail.first_native_SERVER_POST
+         || !finalState || finalState.actual_XP_credited != 112 || finalState.gold_retained != 108
+         || finalState.actual_all6_CV_grants != [aer:200, terra:600, ignis:400, aqua:600, ordo:400, perditio:200]) {
+      throw new GradleException("Focal tail lacks actual finite XP/payment/normal-stop proof; inspect $tailFile and stopped NBT")
+     }
+    }
+     logger.lifecycle("Client $clientSmokeScope check passed: $expectedCaptures screenshots; visual inspection is still required.")
+ }
+}
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest'])

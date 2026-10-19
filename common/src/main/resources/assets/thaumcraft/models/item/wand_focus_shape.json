@@ -1,0 +1,49 @@
+{
+  "parent": "thaumcraft:item/wand_shape",
+  "elements": [
+    {
+      "from": [7.25, 1.5, 7.25], "to": [8.75, 14.5, 8.75],
+      "faces": {
+        "down": {"uv": [2, 4, 3, 5], "texture": "#rod"},
+        "up": {"uv": [1, 4, 2, 5], "texture": "#rod"},
+        "north": {"uv": [1, 5, 2, 14], "texture": "#rod"},
+        "east": {"uv": [0, 5, 1, 14], "texture": "#rod"},
+        "south": {"uv": [3, 5, 4, 14], "texture": "#rod"},
+        "west": {"uv": [2, 5, 3, 14], "texture": "#rod"}
+      }
+    },
+    {
+      "from": [7, 0, 7], "to": [9, 1.5, 9],
+      "faces": {
+        "down": {"uv": [2, 0, 3, 1], "texture": "#cap"},
+        "up": {"uv": [1, 0, 2, 1], "texture": "#cap"},
+        "north": {"uv": [1, 1, 2, 2], "texture": "#cap"},
+        "east": {"uv": [0, 1, 1, 2], "texture": "#cap"},
+        "south": {"uv": [3, 1, 4, 2], "texture": "#cap"},
+        "west": {"uv": [2, 1, 3, 2], "texture": "#cap"}
+      }
+    },
+    {
+      "from": [7, 14.5, 7], "to": [9, 16, 9],
+      "faces": {
+        "down": {"uv": [2, 0, 3, 1], "texture": "#cap"},
+        "up": {"uv": [1, 0, 2, 1], "texture": "#cap"},
+        "north": {"uv": [1, 1, 2, 2], "texture": "#cap"},
+        "east": {"uv": [0, 1, 1, 2], "texture": "#cap"},
+        "south": {"uv": [3, 1, 4, 2], "texture": "#cap"},
+        "west": {"uv": [2, 1, 3, 2], "texture": "#cap"}
+      }
+    },
+    {
+      "from": [6.9, 15.5, 6.9], "to": [9.1, 17.7, 9.1],
+      "faces": {
+        "down": {"uv": [6, 0, 9, 3], "texture": "#focus", "tintindex": 0},
+        "up": {"uv": [3, 0, 6, 3], "texture": "#focus", "tintindex": 0},
+        "north": {"uv": [3, 3, 6, 6], "texture": "#focus", "tintindex": 0},
+        "east": {"uv": [0, 3, 3, 6], "texture": "#focus", "tintindex": 0},
+        "south": {"uv": [9, 3, 12, 6], "texture": "#focus", "tintindex": 0},
+        "west": {"uv": [6, 3, 9, 6], "texture": "#focus", "tintindex": 0}
+      }
+    }
+  ]
+}

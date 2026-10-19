@@ -1,0 +1,15 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "ESSENTIACRYSTAL",
+  "pattern": ["IDI", "QCQ", "WTW"],
+  "key": {
+    "I": {"tag": "thaumcraft:iron_ingots"},
+    "D": {"item": "minecraft:dispenser"},
+    "Q": {"item": "thaumcraft:balance_shard"},
+    "C": {"item": "thaumcraft:alchemical_construct"},
+    "W": {"tag": "minecraft:planks"},
+    "T": {"item": "thaumcraft:essentia_tube"}
+  },
+  "result": {"id": "thaumcraft:essentia_crystallizer", "count": 1},
+  "vis": {"aqua": 5, "terra": 15, "ordo": 5}
+}

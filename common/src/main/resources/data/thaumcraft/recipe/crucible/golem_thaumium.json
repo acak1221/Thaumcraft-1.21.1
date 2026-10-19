@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "GOLEMTHAUMIUM", "source_order": 171,
+  "catalyst": {"item": "thaumcraft:thaumium_block"},
+  "result": {"id": "thaumcraft:golem_thaumium", "count": 1},
+  "aspects": {"humanus": 8, "motus": 8, "spiritus": 8}
+}

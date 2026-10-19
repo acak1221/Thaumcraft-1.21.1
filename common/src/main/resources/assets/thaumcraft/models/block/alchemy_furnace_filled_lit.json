@@ -1,0 +1,4 @@
+{
+  "parent": "thaumcraft:block/alchemy_furnace_lit",
+  "textures": {"top": "thaumcraft:blocks/al_furnace_top_filled"}
+}

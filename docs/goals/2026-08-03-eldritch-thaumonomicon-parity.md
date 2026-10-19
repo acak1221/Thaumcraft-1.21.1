@@ -1,0 +1,159 @@
+# Goal: Eldritch Thaumonomicon parity restoration
+
+Status: complete
+Source: User instructions dated 2026-08-03 and the completed Eldritch RECON against Thaumcraft 4.2.3.5
+Last updated: 2026-08-03
+
+## Objective
+
+Restore the audited Eldritch Thaumonomicon gameplay surface to the original Thaumcraft 4.2.3.5 behavior on Forge 1.12.2, close every confirmed in-scope P0/P1 regression recorded by the RECON, preserve the already exact research graph/recipes/resources, and leave the work in tested, runtime-smoked, reviewable commits.
+
+## Execution Directive
+
+Complete the frozen Required Outcomes using the listed Change Envelope and Primary Evidence. Work on the smallest unresolved outcome. Do not add requirements from reviews, tests, tools, speculative risks, or optional source text. Finish when every required outcome is resolved and affected constraints remain satisfied.
+
+## Frozen Contract
+
+### Required Outcomes
+
+- R1: Restore Eldritch research runtime semantics.
+  - Source: RECON findings for research engine/UI and the user instruction to implement the audit from beginning to end.
+  - Acceptance: All supported `researchDifficulty` values choose the same purchase/note path as the TC4 GUI/server contract; clue and normal completion restore their original client feedback; matching and persisted completion membership no longer retain the audited TC4-incompatible states.
+  - Primary evidence: Focused `PacketPlayerComplete*`, `ResearchManager*`, and client notification tests pass for difficulties `-1`, `0`, and positive values, followed by `./scripts/dev.sh validate --smoke` for the checkpoint.
+  - Status: verified
+  - Evidence: Difficulty-aware packet workflow is covered for `-1`, `0`, and positive values. Incremental packets restore clue notification/sound, non-virtual completion popup/highlights, and live browser refresh. Matching at difficulty `-1`, unknown-key queries, and TC4 save filters are covered. All focused tests and `./scripts/dev.sh validate --smoke` passed on 2026-08-03.
+
+- R2: Restore Primal Focus and Primal Orb behavior.
+  - Source: RECON findings for `FocusPrimal` and `EntityPrimalOrb`.
+  - Acceptance: A cast launches the orb at the original velocity; normal and underwater impacts, special-effect probability and eligibility, node/taint placement, hand animation, focus color, and original trail/impact feedback match the TC4 behavior except for documented Forge 1.12 representation changes.
+  - Primary evidence: Focused projectile/focus runtime and static parity tests pass, including launch motion, water impact, probability boundary, negative-coordinate placement, hand routing, color, and FX dispatch; checkpoint server smoke passes.
+  - Status: verified
+  - Evidence: Shooter construction now launches at `0.5F`; runtime coverage verifies motion and ownership. Water boost is block-impact-only, the inclusive special roll and entity-impact node fallback are restored, taint placement matches TC4 truncation/gating, focus color/hand routing are corrected, and trail/impact wisp feedback is wired through the proxy. Focused tests, `./scripts/dev.sh validate --smoke`, and `./scripts/dev.sh build` passed on 2026-08-03.
+
+- R3: Restore Primal Crusher harvesting behavior.
+  - Source: RECON findings for `ItemPrimalCrusher`.
+  - Acceptance: The original effective-block matrix, 3x3 plane, player-aware secondary harvesting, Silk Touch/Fortune/XP callbacks, following drops, and durability accounting are preserved through a Forge 1.12-compatible path.
+  - Primary evidence: Focused Crusher runtime tests prove effective and excluded blocks, enchanted secondary harvest, drops/XP callbacks, and wear; checkpoint server smoke passes.
+  - Status: verified
+  - Evidence: The exact TC4 effective block set and material-speed rules are restored. Secondary blocks now use the Forge-safe player harvest path with the held enchanted tool, convert fresh drops into target-following entities, and charge durability before each eligible harvest without adding superclass wear. Focused runtime/static tests and `./scripts/dev.sh validate --smoke` passed on 2026-08-03.
+
+- R4: Restore Outer Lands void and portal behavior.
+  - Source: RECON findings for `BlockEldritchNothing` and `TeleporterThaumcraft`.
+  - Acceptance: Eldritch Nothing remains a non-air, unbreakable, no-collision Outer void block with original exposure state and delayed void damage without allocating one TileEntity per generated cell; repeated portal transfers reuse the original long-lived destination cache semantics.
+  - Primary evidence: Focused block/world and teleporter tests prove material/air identity, hardness/resistance/light, exposure state, collision, damage cadence, absence of mass TileEntities, and cache reuse; checkpoint server smoke passes.
+  - Status: verified
+  - Evidence: Eldritch Nothing is again a non-air, unbreakable rock-material block with original light/resistance intent, inset selection, empty collision, exposure metadata, boundary-only render tiles, and eight-point post-age-20 void damage. Outer transfers reuse one teleporter and inherited destination cache per live target world. Focused block/teleporter tests and `./scripts/dev.sh validate --smoke` passed on 2026-08-03.
+
+- R5: Restore Outer progression entity and drop behavior.
+  - Source: RECON findings for Eldritch Guardians, protected boss drops, Eldritch Crabs, altar spawning, and Warden room ownership.
+  - Acceptance: Eldritch Eyes use the original rare-drop path; Primordial Pearls use the original explosion-immune special drops with normal item lifetime; Guardian ward regeneration and altar spawn gates, Crab attachment/combat/drop behavior, and Warden room home match TC4.
+  - Primary evidence: Focused entity runtime/static parity tests cover rare Eye drops, protected Pearl entities, ward regeneration, altar population/light checks, Crab phases and drops, and post-spawn Warden home; checkpoint server smoke passes.
+  - Status: verified
+  - Evidence: Guardian Eyes use the TC4 rare-drop roll, Outer Guardians retain base health with a regenerating 25-point absorption ward and original light/population gates, and all Primordial Pearl boss routes create explosion-immune `EntitySpecialItem` drops with normal item lifetime. Crab attachment, mounted attacks, helmet-break rendering, spider-eye loot, creature/potion traits, and Warden post-spawn room home are restored. Focused runtime/static tests and `./scripts/dev.sh validate --smoke` passed on 2026-08-03.
+
+- R6: Restore Void equipment behavior and balance.
+  - Source: RECON findings for Void tools, Void armor, Fortress armor, Void robes, and `CAP_void` consumers.
+  - Acceptance: Void tools apply Weakness with original duration, use original durability/enchantability/attack intent and repair ingredients; Void robes use the original material; armor protection is remapped correctly for 1.12 slot ordering; the audited creative/self-repair and robe NBT deltas no longer alter valid TC4 gameplay state.
+  - Primary evidence: Focused item and armor tests prove potion identity, material tuples, attack modifiers, repair inputs, per-slot durability/protection, robe vis/warp behavior, and repair cadence; checkpoint server smoke passes.
+  - Status: verified
+  - Evidence: Void tools now reuse the TC4 API material tuple (`4/150/8/3/10`), apply Weakness for the original durations, accept charm rather than a port-only void-ingot material repair, and retain a Forge 1.12 attack-speed mapping with the Void axe restored to the original six-point attack intent. Void robes reuse `armorMatVoid`; Void and Fortress protection arrays are remapped to Forge's feet-to-head slot order; living-only self-repair uses the original negative durability path and does not repair creative stacks. Focused equipment/armor tests and `./scripts/dev.sh validate --smoke` passed on 2026-08-03.
+
+- R7: Restore Eldritch aspects and player-facing localization.
+  - Source: RECON findings for `ConfigAspects`, aspect display keys, advanced furnace naming, Focus Primal, and Void equipment names.
+  - Acceptance: Ender Pearl, Far, Nether Star, Dragon Egg, End Portal, and End Portal Frame expose the TC4 Eldritch scan aspects; port-only direct tags are retained only where final resolved object aspects match the original recipe-derived result; missing aspect/block display keys and audited item names resolve to the canonical English values.
+  - Primary evidence: Focused aspect registry tests compare final resolved tags and metadata to a checked TC4 fixture, localization tests resolve every audited key, and checkpoint server smoke passes.
+  - Status: verified
+  - Evidence: Ender Pearl, Far record, Nether Star, Dragon Egg, and End Portal Frame now register the exact TC4 aspect lists; the itemless End Portal uses the existing phenomena scan path with `alienis 4 + iter 4`. Direct Void equipment bases reproduce TC4 recipe derivation and resolve through the original armor/tool bonuses, including the sword damage mapping. The audited aspect, advanced furnace, Primal Focus, Void tool, armor, and robe English values are canonical. Focused registry/scan/localization tests, `./scripts/dev.sh validate --smoke`, and `./scripts/dev.sh build` passed on 2026-08-03.
+
+- R8: Restore Essentia Reservoir and Sanity Checker parity.
+  - Source: RECON findings for `TileEssentiaReservoir`, `BlockEssentiaReservoir`, wand interaction, and `ItemSanityChecker`.
+  - Acceptance: Reservoir aspect assignment copies caller state, extraction contracts, destruction spill/explosion/retry behavior, and wand callback count match TC4; the Sanity Checker does not emit an immediately overwritten extra actionbar message. Existing valid 1.12 sync and finite-fluid adaptations remain intact.
+  - Primary evidence: Focused reservoir runtime tests cover aliasing, extraction, spill counts/explosion, retries, and single wand callback; Sanity Checker interaction tests pass; checkpoint server smoke passes.
+  - Status: verified
+  - Evidence: Reservoir assignment copies caller state; bulk removal remains unsupported, transport extraction is all-or-nothing, and acceptance remains type-agnostic as in TC4. Destruction now applies the 16-essentia threshold, non-terrain strength-one explosion, up-to-50 retry loop, and original successful spill count while retaining the Forge finite-fluid default-state mapping. Wand routing invokes the tile once, and Sanity Checker emits one total-warp actionbar message instead of immediately overwriting it. Focused Reservoir/Sanity tests and `./scripts/dev.sh validate --smoke` passed on 2026-08-03.
+
+- R9: Preserve the already exact Thaumonomicon declarations and close the full objective.
+  - Source: RECON results: 16/16 research entries, 24/24 recipe handles/definitions, 55/55 English research keys, and 9/9 referenced PNG files match the original.
+  - Acceptance: Those four parity corpora remain exact after R1-R8; all focused tests, the repository validation pipeline, dedicated-server smoke, and final jar build pass; every implementation checkpoint is committed with the repository message format.
+  - Primary evidence: Existing graph/recipe/resource guards, `./scripts/dev.sh validate --smoke`, and final `./scripts/dev.sh build` pass on a clean worktree except for the active goal update.
+  - Status: verified
+  - Evidence: The research graph/fingerprint and recipe handle/key/type preservation suite passed, retaining the audited 16 Eldritch entries, 24 recipe handles/definitions, and 55 English research keys. Direct binary comparison confirmed all 9 referenced PNG assets still match TC4. `./scripts/dev.sh validate --smoke` and the final `./scripts/dev.sh build` passed on 2026-08-03 after all R1-R8 implementation commits.
+
+### Constraints
+
+- C1: `thaumcraft_src/**`, `Thaumcraft-1.7.10-4.2.3.5.jar`, and `Thaumcraft-1.12.2-6.1.BETA26.jar` remain read-only.
+- C2: Preserve Java 8, Forge 1.12.2, MCP `stable_39`, dependencies, mod id, registry names, packet ids, config keys, NBT keys, GUI ids, and dimension id.
+- C3: Do not change public `thaumcraft.api.*` signatures when a Forge 1.12-compatible implementation change is available.
+- C4: Compare gameplay semantics to TC4 4.2.3.5; use the TC6 jar only for 1.12 rendering/model conventions, never as the gameplay oracle.
+- C5: Keep valid 1.12 adaptations identified by RECON, including server-authoritative mutation, synchronous maze generation, safe portal arrival, finite-fluid level translation, thread scheduling, and explicit block/tile synchronization.
+- C6: Common/server runtime checkpoints require `./scripts/dev.sh validate --smoke`; compile success alone is insufficient.
+- C7: Make small reversible commits using the repository commit-message format; do not combine independent research, Primal, Outer, equipment, aspect, and device changes in one commit.
+
+### Non-goals
+
+- Auditing or fixing Thaumonomicon categories outside Eldritch.
+- Rewriting the research graph, the 24 exact recipes, or the byte-identical research PNG assets.
+- Restoring unsafe TC4 implementation details such as client-side authoritative NBT mutation, background world-generation threads, forced adjacent chunk loads, or original null-pointer behavior.
+- Reverting safe 1.12 combat, hand, registry, packet-wire, pathfinding, or capability adaptations unless an R1-R8 acceptance condition explicitly requires a semantic correction.
+- Adding translations for the 21 original non-English locale files.
+- Fixing RECON unknowns or benign deltas that were not included in R1-R8.
+
+## Change Envelope
+
+- Target: Confirmed Eldritch runtime, progression, equipment, aspect, localization, and device regressions from the completed RECON.
+- Expected paths, symbols, and direct consumers:
+  - Research: `GuiResearchBrowser`, `ResearchManager`, `PacketPlayerCompleteToServer`, `PacketResearchComplete`, player knowledge persistence, and focused tests.
+  - Primal: `FocusPrimal`, `EntityPrimalOrb`, `ItemPrimalCrusher`, directly required harvest/FX helpers, and focused tests.
+  - Outer: `BlockEldritchNothing`, its state/model/tile routing as needed, `TeleporterThaumcraft`, Eldritch Guardian/Crab/Warden, altar spawn logic, special-drop helpers, and focused tests.
+  - Equipment: `ConfigItems`, Void tool/armor/robe classes, armor material definitions and direct consumers, and focused tests.
+  - Aspects/resources: `ConfigAspects`, `ThaumcraftCraftingManager` bonus resolution, the minimal `ItemThaumometer`/`ScanManager` fallback for the itemless End Portal block, `en_us.lang`, final-tag fixtures/tests, and only directly affected localization consumers.
+  - Devices: Essentia Reservoir block/tile/item interaction, Sanity Checker interaction, and focused tests.
+  - Goal state: this document.
+- Allowed artifacts: Java source, lang/blockstate/model resources when required by an accepted behavior, focused tests/fixtures, and this goal document.
+- Forbidden artifacts: edits to reference binaries/source, dependency or platform upgrades, broad formatting, generated build/log output, unrelated category fixes, or a second gameplay state system.
+- User or harness budget: No fixed file/time budget. Each checkpoint must close one R-item or a tightly coupled part and end in a reviewable commit after focused validation and required smoke.
+
+## Current Checkpoint
+
+- Closes: None; the closure check passed.
+- Smallest next action: Stop. The frozen objective is complete.
+- Expected evidence: No further evidence is required for this objective.
+- Stop or replan if: A new authoritative instruction creates a separate objective.
+
+## Current State
+
+- Resolved: R1-R9 are verified; the frozen Eldritch parity objective is complete.
+- Last relevant evidence: Preservation guards, 9/9 PNG binary comparisons, `./scripts/dev.sh validate --smoke`, and `./scripts/dev.sh build` passed on 2026-08-03.
+- Blocker: None.
+- Next: None.
+
+## Material Decisions
+
+- 2026-08-03: The gameplay oracle is TC4 4.2.3.5; TC6 BETA26 is not accepted as Eldritch behavior evidence.
+- 2026-08-03: Work is bounded to confirmed P0/P1 findings summarized after RECON plus the directly listed low-cost parity corrections inside R1-R8; unknowns and benign adaptations cannot expand the goal.
+- 2026-08-03: Existing tests that assert an audited regression, notably Wither on Void tools and static primary/secondary packet gating, must be replaced with behavioral parity evidence rather than preserved.
+- 2026-08-03: Commits are required and remain checkpoint-scoped.
+- 2026-08-03: Direct CFR of `EntitySpecialItem` corrected the RECON wording: Primordial Pearls are explosion-immune special drops but retain normal `EntityItem` despawn lifetime; only key-room tablets use `EntityPermanentItem`.
+- 2026-08-03: Forge 1.12 exposes no `ItemBlock` for `Blocks.END_PORTAL`, so the TC4 End Portal object tag cannot pass through the item-only scan path. R7 minimally expands to an existing type-3 phenomena fallback in `ItemThaumometer`/`ScanManager`; this is limited to the canonical End Portal aspect list and does not create a second registry.
+
+## Checkpoint History
+
+- 2026-08-03: SEARCH PROBE located the Forge 1.12.2 port and TC4 4.2.3.5 binary/resource baseline. Nine atomic audits completed with no workspace edits and produced the frozen R1-R9 scope.
+- 2026-08-03: R1 difficulty workflow checkpoint passed focused packet tests and `./scripts/dev.sh validate --smoke`; valid `-1`, `0`, and positive difficulty paths now follow the same effective workflow as `GuiResearchBrowser`.
+- 2026-08-03: R1 feedback checkpoint restored the TC4 clue notification/sound, queued research-complete overlay, Thaumonomicon highlights, and live browser refresh. Focused guards and `./scripts/dev.sh build` passed; manual in-game overlay inspection remains part of final client limitations rather than a semantic blocker.
+- 2026-08-03: R1 verified after restoring exact `findMatchingResearch` difficulty precedence, rejecting unknown plain completion keys, and filtering unknown, auto-unlock, and redundant clue keys from persisted capability state. Focused tests and `./scripts/dev.sh validate --smoke` passed.
+- 2026-08-03: R2 verified. Primal Orb launch, impact/water/special-effect semantics, taint placement, focus color/hand animation, and TC4 wisp feedback were restored. Focused tests, server smoke, and build passed; manual visual inspection was not run.
+- 2026-08-03: R3 verified. Primal Crusher now uses the exact TC4 effective matrix, Forge-safe player harvesting, following drops, and original wear accounting. Focused tests and `./scripts/dev.sh validate --smoke` passed.
+- 2026-08-03: R4 verified. Eldritch Nothing recovered TC4 block identity, exposure/render-tile sparsity, and void damage; portal transfers now retain their destination cache per live world. Focused tests and `./scripts/dev.sh validate --smoke` passed.
+- 2026-08-03: R5 verified. Guardian Eye rarity and Outer ward/spawn gates, explosion-immune Pearl drops, Crab attachment/combat/drop behavior, and Warden room home ordering were restored. Focused entity tests and `./scripts/dev.sh validate --smoke` passed.
+- 2026-08-03: R6 verified. Void tool material/effect/repair behavior, Void robe material, Forge slot-mapped Void/Fortress protection, and original living/creative self-repair semantics were restored. Focused item/armor tests and `./scripts/dev.sh validate --smoke` passed.
+- 2026-08-03: R7 verified. Exact vanilla Eldritch scan tags, the itemless End Portal phenomena fallback, TC4-derived final Void equipment tags, and canonical audited English display values were restored. Focused tests, server smoke, and build passed.
+- 2026-08-03: R8 verified. Reservoir copy/extraction/spill/explosion/wand-routing semantics and the single Sanity Checker actionbar message were restored while preserving 1.12 sync and finite-fluid adaptations. Focused tests and `./scripts/dev.sh validate --smoke` passed.
+- 2026-08-03: R9 verified and closure passed. Research graph/recipe/resource guards, direct 9/9 PNG comparison, final validation/server smoke, and distributable build all passed after the R1-R8 commits.
+
+## Completion
+
+- Resolved outcomes: R1-R9 verified. Research runtime, Primal mechanics, Outer progression, Void equipment, Eldritch aspects/localization, Reservoir/Sanity behavior, and preservation of the exact Thaumonomicon declarations all meet the frozen acceptance criteria.
+- Commands and artifacts: Checkpoint-focused JUnit suites; repeated `./scripts/dev.sh validate --smoke`; client/final `./scripts/dev.sh build`; final graph/fingerprint/recipe preservation suite; direct `cmp` of the 9 referenced PNG pairs.
+- Constraint and diff-scope check: Reference classes/resources and both jars remained unmodified; Java/Forge/dependency and public API constraints were preserved; accepted 1.12 adaptations remained intact; commits stayed grouped by frozen checkpoint.
+- Final status: complete on 2026-08-03.

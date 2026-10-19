@@ -1,0 +1,465 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-10-15",
+  "baseline_commit": "1509b3192910aaca0af8bba1b55d189a675010bf",
+  "observed_upstream_commit": "3a836a39c416a4449e825c519dacd50a5fc9eb32",
+  "checked_out_commit_unchanged": "1509b3192910aaca0af8bba1b55d189a675010bf",
+  "baseline_policy": "source-lock remains pinned; this is a separately reviewed upstream snapshot",
+  "commits": [
+    "3a836a39c416a4449e825c519dacd50a5fc9eb32 2026-10-15T14:25:20+08:00 fixed invalid resourcelocation can cause server oom in packet decode.(without a mouse)",
+    "db1062fa0dfe11043277fad121e19518872180f4 2026-10-15T06:34:02+08:00 i want to wait until i got my mouse"
+  ],
+  "shortstat": "45 files changed, 443 insertions(+), 733 deletions(-)",
+  "changes": [
+    {
+      "status": "M",
+      "path": "build.gradle"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/AbstractArcaneRecipeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/ChampionModifierResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/ClueResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/CrucibleRecipeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/FocusUpgradeTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/InfusionRecipeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/NodeIDResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/NodeLockResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/NodeModifierResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/NodeTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/ResearchCategoryResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/ResearchItemResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/RunicShieldTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/ScannedTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/VisNetNodeTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/WandConsumptionTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/WandSpellEventTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/codeGenTemplate/variedresourcelocations/WandWaveAnimationResourceLocation.java"
+    },
+    {
+      "status": "R096",
+      "old_path": "common/src/main/java/com/linearity/opentc4/utils/FurthestBlockFinder.java",
+      "new_path": "common/src/main/java/com/linearity/opentc4/utils/HighestFurthestBlockFinder.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/api/aspects/Aspect.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/items/equipment/elemental/ElementalAxeItem.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/PacketAspectCombinationC2S.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/PacketAspectPlaceC2S.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/PacketPlayerCreateResearchNoteC2S.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/scan/PacketScannedItemStackC2S.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/AbstractArcaneRecipeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/AspectResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ChampionModifierResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ClueResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/CrucibleRecipeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/FocusUpgradeTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/InfusionRecipeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeIDResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeLockResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeModifierResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ResearchCategoryResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ResearchItemResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/RunicShieldTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ScannedTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/VisNetNodeTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/WandConsumptionTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/WandSpellEventTypeResourceLocation.java"
+    },
+    {
+      "status": "M",
+      "path": "common/src/main/java/thaumcraft/common/lib/resourcelocations/WandWaveAnimationResourceLocation.java"
+    }
+  ],
+  "line_changes": [
+    {
+      "insertions": 3,
+      "deletions": 3,
+      "path_display": "build.gradle"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/AbstractArcaneRecipeResourceLocation.java"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/ChampionModifierResourceLocation.java"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/ClueResourceLocation.java"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/CrucibleRecipeResourceLocation.java"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/FocusUpgradeTypeResourceLocation.java"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/InfusionRecipeResourceLocation.java"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/NodeIDResourceLocation.java"
+    },
+    {
+      "insertions": 0,
+      "deletions": 1,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/NodeLockResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 49,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/NodeModifierResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 50,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/NodeTypeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 50,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/ResearchCategoryResourceLocation.java"
+    },
+    {
+      "insertions": 4,
+      "deletions": 62,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/ResearchItemResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 49,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/RunicShieldTypeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 58,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/ScannedTypeResourceLocation.java"
+    },
+    {
+      "insertions": 4,
+      "deletions": 44,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/VisNetNodeTypeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 57,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/WandConsumptionTypeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 58,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/WandSpellEventTypeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 58,
+      "path_display": "common/src/main/codeGenTemplate/variedresourcelocations/WandWaveAnimationResourceLocation.java"
+    },
+    {
+      "insertions": 5,
+      "deletions": 3,
+      "path_display": "common/src/main/java/com/linearity/opentc4/utils/{FurthestBlockFinder.java => HighestFurthestBlockFinder.java}"
+    },
+    {
+      "insertions": 1,
+      "deletions": 1,
+      "path_display": "common/src/main/java/thaumcraft/api/aspects/Aspect.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 2,
+      "path_display": "common/src/main/java/thaumcraft/common/items/equipment/elemental/ElementalAxeItem.java"
+    },
+    {
+      "insertions": 5,
+      "deletions": 2,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/PacketAspectCombinationC2S.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 1,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/PacketAspectPlaceC2S.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 1,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/PacketPlayerCreateResearchNoteC2S.java"
+    },
+    {
+      "insertions": 1,
+      "deletions": 0,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/network/toserveraction/scan/PacketScannedItemStackC2S.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/AbstractArcaneRecipeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 2,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/AspectResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ChampionModifierResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ClueResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/CrucibleRecipeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/FocusUpgradeTypeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/InfusionRecipeResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeIDResourceLocation.java"
+    },
+    {
+      "insertions": 2,
+      "deletions": 3,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeLockResourceLocation.java"
+    },
+    {
+      "insertions": 42,
+      "deletions": 15,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeModifierResourceLocation.java"
+    },
+    {
+      "insertions": 41,
+      "deletions": 15,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/NodeTypeResourceLocation.java"
+    },
+    {
+      "insertions": 46,
+      "deletions": 20,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ResearchCategoryResourceLocation.java"
+    },
+    {
+      "insertions": 37,
+      "deletions": 21,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ResearchItemResourceLocation.java"
+    },
+    {
+      "insertions": 43,
+      "deletions": 16,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/RunicShieldTypeResourceLocation.java"
+    },
+    {
+      "insertions": 31,
+      "deletions": 13,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/ScannedTypeResourceLocation.java"
+    },
+    {
+      "insertions": 47,
+      "deletions": 13,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/VisNetNodeTypeResourceLocation.java"
+    },
+    {
+      "insertions": 31,
+      "deletions": 12,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/WandConsumptionTypeResourceLocation.java"
+    },
+    {
+      "insertions": 31,
+      "deletions": 13,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/WandSpellEventTypeResourceLocation.java"
+    },
+    {
+      "insertions": 31,
+      "deletions": 13,
+      "path_display": "common/src/main/java/thaumcraft/common/lib/resourcelocations/WandWaveAnimationResourceLocation.java"
+    }
+  ],
+  "unchanged_key_file_blobs": {
+    "common/src/main/java/thaumcraft/api/research/ThaumcraftResearches.java": [
+      "0b77307ced1cf67455d979fb97f0b759eeb96599",
+      "0b77307ced1cf67455d979fb97f0b759eeb96599"
+    ],
+    "common/src/main/java/thaumcraft/common/items/misc/ThaumonomiconItem.java": [
+      "64c43e7ff02d5421913f23c02bffebc78a2acbfd",
+      "64c43e7ff02d5421913f23c02bffebc78a2acbfd"
+    ],
+    "common/src/main/java/thaumcraft/api/research/client/ResearchPage.java": [
+      "8e904b3858d544e683a7243e75f7b66b326cb3b8",
+      "8e904b3858d544e683a7243e75f7b66b326cb3b8"
+    ],
+    "common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java": [
+      "153396546f5fea4ebbae12a369ff750c29cb1c4b",
+      "153396546f5fea4ebbae12a369ff750c29cb1c4b"
+    ],
+    "common/src/main/java/thaumcraft/common/menu/menu/ResearchTableMenu.java": [
+      "70e30241184e817ecc1191e0d10dceb12f4ec83f",
+      "70e30241184e817ecc1191e0d10dceb12f4ec83f"
+    ],
+    "gradle.properties": [
+      "b66e295f8d96df0b1c7fb14b19a066522feda130",
+      "b66e295f8d96df0b1c7fb14b19a066522feda130"
+    ],
+    "settings.gradle": [
+      "69a1b24412306991ee826f02b1f17943194993ad",
+      "69a1b24412306991ee826f02b1f17943194993ad"
+    ],
+    "common/build.gradle": [
+      "cafbef7b7d8cd003908ac6a9445c8a5627577d4c",
+      "cafbef7b7d8cd003908ac6a9445c8a5627577d4c"
+    ],
+    "fabric/build.gradle": [
+      "a6e030a4a3d202036ec3a46622b646a461ca62fc",
+      "a6e030a4a3d202036ec3a46622b646a461ca62fc"
+    ],
+    "forge/build.gradle": [
+      "67ed19ed5e754732b5ad5df08c6753a30feae56f",
+      "67ed19ed5e754732b5ad5df08c6753a30feae56f"
+    ]
+  }
+}

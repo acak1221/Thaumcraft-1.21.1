@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["###", "###", "###"],
+  "key": {"#": {"item": "thaumcraft:quicksilver_drop"}},
+  "result": {"id": "thaumcraft:quick_silver", "count": 1}
+}

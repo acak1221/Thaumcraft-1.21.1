@@ -1,0 +1,105 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:directory",
+      "source": "items",
+      "prefix": "items/"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "blocks",
+      "prefix": "blocks/"
+    },
+    {
+      "type": "minecraft:filter",
+      "pattern": {
+        "namespace": "thaumcraft",
+        "path": "items/lightningringv"
+      }
+    },
+    {
+      "type": "minecraft:filter",
+      "pattern": {
+        "namespace": "thaumcraft",
+        "path": "items/focus_pech_depth"
+      }
+    },
+    {
+      "type": "minecraft:filter",
+      "pattern": {
+        "namespace": "thaumcraft",
+        "path": "items/focus_portablehole_depth"
+      }
+    },
+    {
+      "type": "minecraft:filter",
+      "pattern": {
+        "namespace": "thaumcraft",
+        "path": "items/focus_primal_depth"
+      }
+    },
+    {
+      "type": "minecraft:filter",
+      "pattern": {
+        "namespace": "thaumcraft",
+        "path": "items/focus_warding_depth"
+      }
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/table"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/restable"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/worktable"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/bellows"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_wood"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_greatwood"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_cap_iron"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_cap_gold"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/alembic"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_silverwood"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/infuser"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_cap_thaumium"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wandtable"
+    }
+  ]
+}

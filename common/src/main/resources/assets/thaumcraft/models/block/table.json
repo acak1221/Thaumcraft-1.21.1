@@ -1,0 +1,281 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "thaumcraft:models/table",
+    "table": "thaumcraft:models/table"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        12,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#table",
+          "uv": [
+            8.0,
+            8.0,
+            12.0,
+            0.0
+          ]
+        },
+        "up": {
+          "texture": "#table",
+          "uv": [
+            4.0,
+            0.0,
+            8.0,
+            8.0
+          ]
+        },
+        "west": {
+          "texture": "#table",
+          "uv": [
+            0.0,
+            8.0,
+            4.0,
+            10.0
+          ]
+        },
+        "east": {
+          "texture": "#table",
+          "uv": [
+            8.0,
+            8.0,
+            12.0,
+            10.0
+          ]
+        },
+        "south": {
+          "texture": "#table",
+          "uv": [
+            4.0,
+            8.0,
+            8.0,
+            10.0
+          ]
+        },
+        "north": {
+          "texture": "#table",
+          "uv": [
+            12.0,
+            8.0,
+            16.0,
+            10.0
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        10,
+        4,
+        6
+      ],
+      "to": [
+        14,
+        12,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#table",
+          "uv": [
+            2.0,
+            12.0,
+            3.0,
+            10.0
+          ]
+        },
+        "up": {
+          "texture": "#table",
+          "uv": [
+            1.0,
+            10.0,
+            2.0,
+            12.0
+          ]
+        },
+        "west": {
+          "texture": "#table",
+          "uv": [
+            0.0,
+            12.0,
+            1.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#table",
+          "uv": [
+            2.0,
+            12.0,
+            3.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#table",
+          "uv": [
+            1.0,
+            12.0,
+            2.0,
+            16.0
+          ]
+        },
+        "north": {
+          "texture": "#table",
+          "uv": [
+            3.0,
+            12.0,
+            4.0,
+            16.0
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        4,
+        6
+      ],
+      "to": [
+        6,
+        12,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#table",
+          "uv": [
+            2.0,
+            12.0,
+            3.0,
+            10.0
+          ]
+        },
+        "up": {
+          "texture": "#table",
+          "uv": [
+            1.0,
+            10.0,
+            2.0,
+            12.0
+          ]
+        },
+        "west": {
+          "texture": "#table",
+          "uv": [
+            0.0,
+            12.0,
+            1.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#table",
+          "uv": [
+            2.0,
+            12.0,
+            3.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#table",
+          "uv": [
+            1.0,
+            12.0,
+            2.0,
+            16.0
+          ]
+        },
+        "north": {
+          "texture": "#table",
+          "uv": [
+            3.0,
+            12.0,
+            4.0,
+            16.0
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        4
+      ],
+      "to": [
+        16,
+        4,
+        12
+      ],
+      "faces": {
+        "down": {
+          "texture": "#table",
+          "uv": [
+            10.0,
+            14.0,
+            14.0,
+            10.0
+          ]
+        },
+        "up": {
+          "texture": "#table",
+          "uv": [
+            6.0,
+            10.0,
+            10.0,
+            14.0
+          ]
+        },
+        "west": {
+          "texture": "#table",
+          "uv": [
+            4.0,
+            14.0,
+            6.0,
+            16.0
+          ]
+        },
+        "east": {
+          "texture": "#table",
+          "uv": [
+            10.0,
+            14.0,
+            12.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#table",
+          "uv": [
+            6.0,
+            14.0,
+            10.0,
+            16.0
+          ]
+        },
+        "north": {
+          "texture": "#table",
+          "uv": [
+            12.0,
+            14.0,
+            16.0,
+            16.0
+          ]
+        }
+      }
+    }
+  ]
+}

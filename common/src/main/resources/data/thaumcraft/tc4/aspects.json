@@ -1,0 +1,633 @@
+{
+  "source": "Thaumcraft-1.7.10-4.2.3.5.jar CFR source",
+  "schema_version": 1,
+  "source_hash_policy": "Java source decoded as UTF-8 without BOM; CRLF and lone CR normalized to LF; other characters and final newline preserved",
+  "source_sha256": {
+    "Aspect.java": "42f06b303e575d5d4b18da1dc74dac64cd618801b46c31867c87132598d533a0",
+    "ConfigResearch.java": "588bf9a773e6f8a1695a6c4cd90cb1a1c710672690d974e03e6bdca2d37269ce"
+  },
+  "native_reference_commit": "4bc68454b1063cdc1255f833dd537e0fd4fc341d",
+  "native_corpus_checked": true,
+  "native_metadata_fields_checked": [
+    "category",
+    "column",
+    "row",
+    "complexity",
+    "aspect_cost",
+    "flags",
+    "parents",
+    "parents_hidden",
+    "siblings",
+    "aspect_triggers",
+    "entity_triggers",
+    "warp"
+  ],
+  "aspects": [
+    {
+      "symbol": "AIR",
+      "tag": "aer",
+      "color": 16777086,
+      "components": [],
+      "chatcolor": "e",
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/aer.png",
+      "source_line": 26
+    },
+    {
+      "symbol": "EARTH",
+      "tag": "terra",
+      "color": 5685248,
+      "components": [],
+      "chatcolor": "2",
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/terra.png",
+      "source_line": 27
+    },
+    {
+      "symbol": "FIRE",
+      "tag": "ignis",
+      "color": 16734721,
+      "components": [],
+      "chatcolor": "c",
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/ignis.png",
+      "source_line": 28
+    },
+    {
+      "symbol": "WATER",
+      "tag": "aqua",
+      "color": 3986684,
+      "components": [],
+      "chatcolor": "3",
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/aqua.png",
+      "source_line": 29
+    },
+    {
+      "symbol": "ORDER",
+      "tag": "ordo",
+      "color": 14013676,
+      "components": [],
+      "chatcolor": "7",
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/ordo.png",
+      "source_line": 30
+    },
+    {
+      "symbol": "ENTROPY",
+      "tag": "perditio",
+      "color": 4210752,
+      "components": [],
+      "chatcolor": "8",
+      "blend": 771,
+      "image": "thaumcraft:textures/aspects/perditio.png",
+      "source_line": 31
+    },
+    {
+      "symbol": "VOID",
+      "tag": "vacuos",
+      "color": 8947848,
+      "components": [
+        "AIR",
+        "ENTROPY"
+      ],
+      "chatcolor": null,
+      "blend": 771,
+      "image": "thaumcraft:textures/aspects/vacuos.png",
+      "source_line": 32
+    },
+    {
+      "symbol": "LIGHT",
+      "tag": "lux",
+      "color": 16774755,
+      "components": [
+        "AIR",
+        "FIRE"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/lux.png",
+      "source_line": 33
+    },
+    {
+      "symbol": "WEATHER",
+      "tag": "tempestas",
+      "color": 16777215,
+      "components": [
+        "AIR",
+        "WATER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/tempestas.png",
+      "source_line": 34
+    },
+    {
+      "symbol": "MOTION",
+      "tag": "motus",
+      "color": 13487348,
+      "components": [
+        "AIR",
+        "ORDER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/motus.png",
+      "source_line": 35
+    },
+    {
+      "symbol": "COLD",
+      "tag": "gelum",
+      "color": 14811135,
+      "components": [
+        "FIRE",
+        "ENTROPY"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/gelum.png",
+      "source_line": 36
+    },
+    {
+      "symbol": "CRYSTAL",
+      "tag": "vitreus",
+      "color": 8454143,
+      "components": [
+        "EARTH",
+        "ORDER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/vitreus.png",
+      "source_line": 37
+    },
+    {
+      "symbol": "LIFE",
+      "tag": "victus",
+      "color": 14548997,
+      "components": [
+        "WATER",
+        "EARTH"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/victus.png",
+      "source_line": 38
+    },
+    {
+      "symbol": "POISON",
+      "tag": "venenum",
+      "color": 9039872,
+      "components": [
+        "WATER",
+        "ENTROPY"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/venenum.png",
+      "source_line": 39
+    },
+    {
+      "symbol": "ENERGY",
+      "tag": "potentia",
+      "color": 12648447,
+      "components": [
+        "ORDER",
+        "FIRE"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/potentia.png",
+      "source_line": 40
+    },
+    {
+      "symbol": "EXCHANGE",
+      "tag": "permutatio",
+      "color": 5735255,
+      "components": [
+        "ENTROPY",
+        "ORDER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/permutatio.png",
+      "source_line": 41
+    },
+    {
+      "symbol": "METAL",
+      "tag": "metallum",
+      "color": 11908557,
+      "components": [
+        "EARTH",
+        "CRYSTAL"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/metallum.png",
+      "source_line": 42
+    },
+    {
+      "symbol": "DEATH",
+      "tag": "mortuus",
+      "color": 8943496,
+      "components": [
+        "LIFE",
+        "ENTROPY"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/mortuus.png",
+      "source_line": 43
+    },
+    {
+      "symbol": "FLIGHT",
+      "tag": "volatus",
+      "color": 15198167,
+      "components": [
+        "AIR",
+        "MOTION"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/volatus.png",
+      "source_line": 44
+    },
+    {
+      "symbol": "DARKNESS",
+      "tag": "tenebrae",
+      "color": 2236962,
+      "components": [
+        "VOID",
+        "LIGHT"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/tenebrae.png",
+      "source_line": 45
+    },
+    {
+      "symbol": "SOUL",
+      "tag": "spiritus",
+      "color": 15461371,
+      "components": [
+        "LIFE",
+        "DEATH"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/spiritus.png",
+      "source_line": 46
+    },
+    {
+      "symbol": "HEAL",
+      "tag": "sano",
+      "color": 16723764,
+      "components": [
+        "LIFE",
+        "ORDER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/sano.png",
+      "source_line": 47
+    },
+    {
+      "symbol": "TRAVEL",
+      "tag": "iter",
+      "color": 14702683,
+      "components": [
+        "MOTION",
+        "EARTH"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/iter.png",
+      "source_line": 48
+    },
+    {
+      "symbol": "ELDRITCH",
+      "tag": "alienis",
+      "color": 8409216,
+      "components": [
+        "VOID",
+        "DARKNESS"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/alienis.png",
+      "source_line": 49
+    },
+    {
+      "symbol": "MAGIC",
+      "tag": "praecantatio",
+      "color": 9896128,
+      "components": [
+        "VOID",
+        "ENERGY"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/praecantatio.png",
+      "source_line": 50
+    },
+    {
+      "symbol": "AURA",
+      "tag": "auram",
+      "color": 16761087,
+      "components": [
+        "MAGIC",
+        "AIR"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/auram.png",
+      "source_line": 51
+    },
+    {
+      "symbol": "TAINT",
+      "tag": "vitium",
+      "color": 8388736,
+      "components": [
+        "MAGIC",
+        "ENTROPY"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/vitium.png",
+      "source_line": 52
+    },
+    {
+      "symbol": "SLIME",
+      "tag": "limus",
+      "color": 129024,
+      "components": [
+        "LIFE",
+        "WATER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/limus.png",
+      "source_line": 53
+    },
+    {
+      "symbol": "PLANT",
+      "tag": "herba",
+      "color": 109568,
+      "components": [
+        "LIFE",
+        "EARTH"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/herba.png",
+      "source_line": 54
+    },
+    {
+      "symbol": "TREE",
+      "tag": "arbor",
+      "color": 8873265,
+      "components": [
+        "AIR",
+        "PLANT"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/arbor.png",
+      "source_line": 55
+    },
+    {
+      "symbol": "BEAST",
+      "tag": "bestia",
+      "color": 10445833,
+      "components": [
+        "MOTION",
+        "LIFE"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/bestia.png",
+      "source_line": 56
+    },
+    {
+      "symbol": "FLESH",
+      "tag": "corpus",
+      "color": 15615885,
+      "components": [
+        "DEATH",
+        "BEAST"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/corpus.png",
+      "source_line": 57
+    },
+    {
+      "symbol": "UNDEAD",
+      "tag": "exanimis",
+      "color": 3817472,
+      "components": [
+        "MOTION",
+        "DEATH"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/exanimis.png",
+      "source_line": 58
+    },
+    {
+      "symbol": "MIND",
+      "tag": "cognitio",
+      "color": 16761523,
+      "components": [
+        "FIRE",
+        "SOUL"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/cognitio.png",
+      "source_line": 59
+    },
+    {
+      "symbol": "SENSES",
+      "tag": "sensus",
+      "color": 1038847,
+      "components": [
+        "AIR",
+        "SOUL"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/sensus.png",
+      "source_line": 60
+    },
+    {
+      "symbol": "MAN",
+      "tag": "humanus",
+      "color": 16766912,
+      "components": [
+        "BEAST",
+        "MIND"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/humanus.png",
+      "source_line": 61
+    },
+    {
+      "symbol": "CROP",
+      "tag": "messis",
+      "color": 14791537,
+      "components": [
+        "PLANT",
+        "MAN"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/messis.png",
+      "source_line": 62
+    },
+    {
+      "symbol": "MINE",
+      "tag": "perfodio",
+      "color": 14471896,
+      "components": [
+        "MAN",
+        "EARTH"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/perfodio.png",
+      "source_line": 63
+    },
+    {
+      "symbol": "TOOL",
+      "tag": "instrumentum",
+      "color": 4210926,
+      "components": [
+        "MAN",
+        "ORDER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/instrumentum.png",
+      "source_line": 64
+    },
+    {
+      "symbol": "HARVEST",
+      "tag": "meto",
+      "color": 15641986,
+      "components": [
+        "CROP",
+        "TOOL"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/meto.png",
+      "source_line": 65
+    },
+    {
+      "symbol": "WEAPON",
+      "tag": "telum",
+      "color": 12603472,
+      "components": [
+        "TOOL",
+        "FIRE"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/telum.png",
+      "source_line": 66
+    },
+    {
+      "symbol": "ARMOR",
+      "tag": "tutamen",
+      "color": 49344,
+      "components": [
+        "TOOL",
+        "EARTH"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/tutamen.png",
+      "source_line": 67
+    },
+    {
+      "symbol": "HUNGER",
+      "tag": "fames",
+      "color": 10093317,
+      "components": [
+        "LIFE",
+        "VOID"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/fames.png",
+      "source_line": 68
+    },
+    {
+      "symbol": "GREED",
+      "tag": "lucrum",
+      "color": 15121988,
+      "components": [
+        "MAN",
+        "HUNGER"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/lucrum.png",
+      "source_line": 69
+    },
+    {
+      "symbol": "CRAFT",
+      "tag": "fabrico",
+      "color": 8428928,
+      "components": [
+        "MAN",
+        "TOOL"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/fabrico.png",
+      "source_line": 70
+    },
+    {
+      "symbol": "CLOTH",
+      "tag": "pannus",
+      "color": 15395522,
+      "components": [
+        "TOOL",
+        "BEAST"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/pannus.png",
+      "source_line": 71
+    },
+    {
+      "symbol": "MECHANISM",
+      "tag": "machina",
+      "color": 8421536,
+      "components": [
+        "MOTION",
+        "TOOL"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/machina.png",
+      "source_line": 72
+    },
+    {
+      "symbol": "TRAP",
+      "tag": "vinculum",
+      "color": 10125440,
+      "components": [
+        "MOTION",
+        "ENTROPY"
+      ],
+      "chatcolor": null,
+      "blend": 1,
+      "image": "thaumcraft:textures/aspects/vinculum.png",
+      "source_line": 73
+    }
+  ]
+}

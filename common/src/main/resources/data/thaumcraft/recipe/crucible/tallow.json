@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "TALLOW",
+  "source_order": 11,
+  "catalyst": {"item": "minecraft:rotten_flesh"},
+  "result": {"id": "thaumcraft:magic_tallow", "count": 1},
+  "aspects": {"praecantatio": 2}
+}

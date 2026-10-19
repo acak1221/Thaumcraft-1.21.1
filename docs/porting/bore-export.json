@@ -1,0 +1,27 @@
+{
+  "status": "PROVISIONAL_EXPORT_FINAL_VALIDATION_DEFERRED_BY_USER",
+  "date": "2026-10-18",
+  "loader": "fabric",
+  "minecraft": "1.21.1",
+  "exported_jar": "../Thaumcraft-Fabric-1.21.1/mods/Thaumcraft-fabric-0.1.0-alpha.1.jar",
+  "bytes": 10841529,
+  "sha256": "f70b32f4c1698bf3247afd1bb1525f69cdc341e045ff605d4b3ed6db8196fa8f",
+  "build": ":fabric:packageFrozenBoreExport via .tmp/bore-content-export1.init.gradle",
+  "build_result": "BUILD SUCCESSFUL in 45s; production isolation verified",
+  "frozen_production_inputs": 2045,
+  "source_snapshot": ".tmp/bore-custody-integration-check13-inputs.json",
+  "build_receipt": ".tmp/bore-content-export1-build.json",
+  "hungry_chest_work_included": false,
+  "new_game_or_smoke_run": false,
+  "final_stopped_save_audit": "DEFERRED_NOT_PASSED",
+  "rejected_native_runs_promoted": false,
+  "previous_accepted_backup": "../Thaumcraft-Fabric-1.21.1/backups/focal-fabric-validate7/",
+  "previous_accepted_sha256": "0104dc3756199192b56af2956a6f544702b2c6bb5848fc725d96ba4f051e3f10",
+  "dependencies_changed": false,
+  "worlds_changed": false,
+  "scope_limits": [
+    "No container routing or loose-item vacuum",
+    "No Repair, native clusters or Silk/Dowsing support",
+    "Full original FX/audio and final conservation validation remain pending"
+  ]
+}

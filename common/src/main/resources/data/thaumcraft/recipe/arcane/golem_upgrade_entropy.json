@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "UPGRADEENTROPY",
+  "pattern": ["NNN", "NCN", "NNN"],
+  "key": {
+    "N": {"item": "minecraft:gold_nugget"},
+    "C": {"item": "thaumcraft:entropy_shard"}
+  },
+  "result": {"id": "thaumcraft:golem_upgrade_entropy", "count": 1},
+  "vis": {"perditio": 10}
+}

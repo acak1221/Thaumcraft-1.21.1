@@ -96,7 +96,7 @@ final class InventoryGolemGoals {
         if (golem.isFillAnyAmount()) return golem.getCarryLimit();
         // A positively eligible world home has zero logical inventory stock;
         // null caused by unloading/unknown providers never authorizes a fetch.
-        long present = home == null ? 0 : home.countVisible(exemplar, golem.getHomeFacing());
+        long present = home == null ? 0 : home.countVisible(exemplar, golem.getHomeFacing(), golem.itemMatchFlags());
         return (int) Math.max(0L, (long) wanted - present);
     }
 
@@ -126,7 +126,7 @@ final class InventoryGolemGoals {
         if (golem.tickCount % 5 != 0) return;
         if (target != null && !watched.isEmpty() && fillRequest(watched) > 0) {
             GolemHomeInventory.Destination source = golem.markedInventory(target);
-            if (source != null && source.firstExtractable(watched, target.face()) >= 0) return;
+            if (source != null && source.firstExtractable(watched, target.face(), golem.itemMatchFlags()) >= 0) return;
         }
         clearRoute();
         for (int row = 0; row < golem.getSlotCount(); row++) {
@@ -152,7 +152,7 @@ final class InventoryGolemGoals {
         for (GolemMarker marker : golem.getMarkers()) {
             if (!golem.markerAccepts(marker, exemplar)) continue;
             GolemHomeInventory.Destination source = golem.markedInventory(marker);
-            if (source == null || source.firstExtractable(exemplar, marker.face()) < 0) continue;
+            if (source == null || source.firstExtractable(exemplar, marker.face(), golem.itemMatchFlags()) < 0) continue;
             double distance = golem.distanceToMarkerSqr(marker);
             if (distance < nearest) { nearest = distance; result = marker; }
         }
@@ -191,7 +191,7 @@ final class InventoryGolemGoals {
             ItemStack exemplar = golem.getFilter(row);
             if (exemplar.isEmpty()) continue;
             filtered = true;
-            int slot = home.firstExtractable(exemplar, golem.getHomeFacing());
+            int slot = home.firstExtractable(exemplar, golem.getHomeFacing(), golem.itemMatchFlags());
             if (slot < 0 || !canDeliver(home.container().getItem(slot))) continue;
             if (golem.takeFromInventory(home, golem.getHomeFacing(), exemplar, golem.carrySpace()) > 0) progressed();
             return;
@@ -276,7 +276,7 @@ final class InventoryGolemGoals {
     }
     private boolean sortingInventoryAccepts(GolemMarker marker, ItemStack stack) {
         GolemHomeInventory.Destination destination = golem.markedSortingInventory(marker);
-        return destination != null && destination.hasSeedAndRoom(stack, marker.face());
+        return destination != null && destination.hasSeedAndRoom(stack, marker.face(), golem.itemMatchFlags());
     }
     private GolemMarker findDestination(ItemStack stack) {
         GolemMarker result = null;

@@ -172,7 +172,7 @@ class GolemDecorationsTest {
         assertEquals(2, bytes[plain.length]);
         assertEquals('H', bytes[plain.length + 1]);
         assertEquals('M', bytes[plain.length + 2]);
-        for (int bad : new int[] {0x40, 0x60, 0x80, 0xFF}) {
+        for (int bad : new int[] {0x80, 0xA0, 0xFF}) {
             byte[] corrupt = bytes.clone();
             corrupt[plain.length - 1] = (byte) bad;
             assertThrows(DecoderException.class, () -> GolemData.STREAM_CODEC.decode(

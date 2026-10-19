@@ -4,6 +4,17 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально19.10 (девятая группа: очередь Liquid у Entropy, Claude): реализовано, собрано, game-tested 156/156
+
+Контракт и реализация: [golem-liquid-queue](analysis/2026-10-19-golem-liquid-queue.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemLiquidQueue` (обход в глубину по 26 соседям, дальние первыми, маркер последним), якорь добычи в `EntityGolemBase`/`LiquidGolemGoals`, перепроверка записей, предел 65536.
+**Built / game-tested:** `:common:test` **424 JUnit** (+10), `:fabric:remapJar`, `:fabric:runGameTest` **156/156** (+`entropyQueuesTheFarthestConnectedWaterForLiquidGolems`: три настоящих голема с тиглями), JAR SHA-256 `cef678ad…c892c`.
+**Мутации:** 19, пойманы 14; пять не пойманы — дублирующие защитные слои (см. контракт).
+**CI на GitHub:** обычная проверка (`build.yml`) уже идёт на каждый пуш; в ней почти всегда красен старый `frostFocusCraftsSelectsAndPays` (жёсткий лимит 10 с реального времени на медленном раннере, чинится отдельно).
+Мутационный workflow `mutation.yml` (скрипт `scripts/mutation/mutate.py`, группы `scripts/mutation/groups/*.json`) запускается пушем файла-заявки `scripts/mutation/run-request.txt` или вручную; пробный запуск на двух мутантах зелёный.
+**Seen:** нет. **Не проверено:** вид откачки, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** дротик `R`, горящий предмет улова, Traveling Trunk.
+
 ### Актуально19.10 (восьмая группа: нечёткое сравнение предметов Entropy, Claude): реализовано, собрано, game-tested 155/155
 
 Контракт и реализация: [golem-item-match](analysis/2026-10-19-golem-item-match.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

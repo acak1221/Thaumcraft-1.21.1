@@ -38,6 +38,7 @@ import thaumcraft.common.lib.utils.RejectedEntitySpawn;
 final class FishingGolemGoals extends Goal {
     private static final String PENDING = "FishingCatch";
     private static final Set<String> PENDING_KEYS = Set.of("Dimension", "Water", "Motion", "Stack");
+    private static final Set<String> BURNING_PENDING_KEYS = Set.of("Dimension", "Water", "Motion", "Stack", "Fire");
     private static final Set<String> STACK_KEYS = Set.of("id", "count", "components");
     private static final List<Direction> SIDES = List.of(Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST);
     private final EntityGolemBase golem;
@@ -62,7 +63,8 @@ final class FishingGolemGoals extends Goal {
     private record Cell(BlockPos pos, BlockState state) {}
     private record Sky(BlockPos pos, boolean visible) {}
     private record PondSample(GolemFishingLoot.Pond pond, List<Cell> cells, List<Sky> sky) {}
-    private record Catch(ResourceLocation dimension, BlockPos water, Vec3 motion, ItemStack stack) {}
+    /** {@code fireTicks}: the flame the delivered item will carry, decided when the catch was paid (Fire at that moment). */
+    private record Catch(ResourceLocation dimension, BlockPos water, Vec3 motion, ItemStack stack, int fireTicks) {}
 
     FishingGolemGoals(EntityGolemBase golem) {
         this.golem = golem;
@@ -272,7 +274,7 @@ final class FishingGolemGoals extends Goal {
                 double dz = golem.getZ() + (double) server.random.nextFloat() - (double) server.random.nextFloat() - selected.getZ() + .5;
                 double length = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
                 Vec3 motion = new Vec3(.1 * dx, .1 * dy + .08 * (double) (float) Math.sqrt(length), .1 * dz);
-                pending = new Catch(server.dimension().location(), selected, motion, result);
+                pending = new Catch(server.dimension().location(), selected, motion, result, GolemFishingSmelting.burningTicks(golem));
                 Catch paid = pending;
                 if (!publishPending(server)) { cancelCast(); return; } // The kept result is retried by the idle tick.
                 if (caught == catches - 1) finishFeedback(server, paid);
@@ -292,7 +294,7 @@ final class FishingGolemGoals extends Goal {
         ServerLevel source = current.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, owned.dimension()));
         if (source == null) return false;
         try {
-            DeferredItemDrops.enqueueGolemFishingCatch(source, owned.water(), owned.motion(), owned.stack());
+            DeferredItemDrops.enqueueGolemFishingCatch(source, owned.water(), owned.motion(), owned.stack(), owned.fireTicks());
             pending = null; // FIRST work after normal return: no feedback/removal/callback before raw detach.
             return true;
         } catch (RuntimeException failure) {
@@ -358,6 +360,7 @@ final class FishingGolemGoals extends Goal {
         motion.add(DoubleTag.valueOf(pending.motion().x)); motion.add(DoubleTag.valueOf(pending.motion().y)); motion.add(DoubleTag.valueOf(pending.motion().z));
         encoded.put("Motion", motion);
         encoded.put("Stack", pending.stack().save(golem.registryAccess()));
+        if (pending.fireTicks() != 0) encoded.putInt("Fire", pending.fireTicks()); // Absent in saves from before the burning catch.
         tag.put(PENDING, encoded);
     }
     boolean loadPending(CompoundTag tag) {
@@ -366,7 +369,7 @@ final class FishingGolemGoals extends Goal {
         if (!tag.contains(PENDING)) return true;
         Tag raw = tag.get(PENDING);
         try {
-            if (!(raw instanceof CompoundTag data) || !data.getAllKeys().equals(PENDING_KEYS)
+            if (!(raw instanceof CompoundTag data) || !data.getAllKeys().equals(PENDING_KEYS) && !data.getAllKeys().equals(BURNING_PENDING_KEYS)
                     || !data.contains("Dimension", Tag.TAG_STRING) || !data.contains("Water", Tag.TAG_INT_ARRAY)
                     || !data.contains("Motion", Tag.TAG_LIST) || !data.contains("Stack", Tag.TAG_COMPOUND)) throw new IllegalArgumentException("Catch shape");
             ResourceLocation dimension = ResourceLocation.parse(data.getString("Dimension"));
@@ -379,7 +382,9 @@ final class FishingGolemGoals extends Goal {
             ItemStack stack = ItemStack.CODEC.parse(golem.registryAccess().createSerializationContext(NbtOps.INSTANCE), stackTag).result().orElse(ItemStack.EMPTY);
             if (!finite(velocity) || !STACK_KEYS.containsAll(stackTag.getAllKeys()) || stack.isEmpty() || stack.getCount() > stack.getMaxStackSize()
                     || !stack.save(golem.registryAccess()).equals(stackTag)) throw new IllegalArgumentException("Catch stack");
-            pending = new Catch(dimension, new BlockPos(pos[0], pos[1], pos[2]), velocity, stack);
+            int fireTicks = data.contains("Fire") ? data.getInt("Fire") : 0;
+            if (data.contains("Fire") && (!data.contains("Fire", Tag.TAG_INT) || fireTicks != GolemFishingSmelting.BURNING_TICKS)) throw new IllegalArgumentException("Catch flame");
+            pending = new Catch(dimension, new BlockPos(pos[0], pos[1], pos[2]), velocity, stack, fireTicks);
             return true;
         } catch (RuntimeException invalid) {
             unreadPending = raw.copy();

@@ -1,3 +1,3 @@
-golem-dart
+golem-fishing-burn
 
-# request 5: the whole dart launcher group (the trunk run of request 4 is still being read)
+# request 6: the burning catch of a Fire fishing golem (dart run 5 and trunk run 4 are still being read)

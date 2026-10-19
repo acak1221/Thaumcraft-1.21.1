@@ -4,6 +4,15 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально19.10 (тринадцатая группа: горящий улов Fire-голема Fishing, Claude): реализовано, собрано, game-tested 161/161
+
+Контракт и реализация: [golem-fishing-burn](analysis/2026-10-19-golem-fishing-burn.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemFishingSmelting.burningTicks` (40 тиков при Fire), `Catch.fireTicks` в `FishingGolemGoals` (решение при вылове, необязательный ключ `Fire` в NBT неопубликованного улова), поле `fireTicks` записи очереди `DeferredItemDrops.Pending` (необязательный ключ `Fire`, границы 0..600, только рыбацкая запись, карантин для невозможных), `ItemEntity.setRemainingFireTicks` при выбросе.
+**Built / game-tested:** `:common:test` **447 JUnit**, `:fabric:remapJar`, `:fabric:runGameTest` **161/161** (+`fireGolemCatchesAreDeliveredAlightForTwoSeconds`; дополнены `fireUpgradeCooksTheFishingGolemsCatch` и живой `realFishingGolemsCastIntoPondsAndDeliverCooksAndExtraCatches`: улов Fire-голема горит, остальных — нет), JAR SHA-256 `0064e584…804abe`.
+**Мутации:** 11 у GitHub; ожидаемый выживший — сохранение неопубликованного улова с огнём.
+**Seen:** нет. **Не проверено:** вид огня, гашение в воде, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** остаток M10 (оригинальный рендер предмета-плейсера сундука `ItemTrunkSpawnerRenderer`, Butcher с дротиком), затем M01 R10–R16, M03/M08, M07 enchant-инфузия, Thaumatorium.
+
 ### Актуально19.10 (двенадцатая группа: дротикомёт голема `R`, Claude): реализовано, собрано, game-tested 160/160
 
 Контракт и реализация: [golem-dart](analysis/2026-10-19-golem-dart.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

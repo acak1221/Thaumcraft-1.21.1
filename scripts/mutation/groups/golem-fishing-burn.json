@@ -1,0 +1,106 @@
+{
+  "description": "The flame of a Fire golem's fishing catch (docs/analysis/2026-10-19-golem-fishing-burn.md)",
+  "watch": {
+    "junit": [],
+    "gametests": [
+      "fireGolemCatchesAreDeliveredAlightForTwoSeconds",
+      "realFishingGolemsCastIntoPondsAndDeliverCooksAndExtraCatches",
+      "fireUpgradeCooksTheFishingGolemsCatch"
+    ]
+  },
+  "junit_tests": [
+    "thaumcraft.golems.GolemFishing*"
+  ],
+  "mutants": [
+    {
+      "id": "every-catch-burns",
+      "name": "every golem's catch burns",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GolemFishingSmelting.java",
+      "old": "return golem != null && golem.getUpgradeAmount(GolemUpgrade.FIRE) > 0 ? BURNING_TICKS : 0;",
+      "new": "return golem != null ? BURNING_TICKS : 0;"
+    },
+    {
+      "id": "no-catch-burns",
+      "name": "no catch burns",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GolemFishingSmelting.java",
+      "old": "return golem != null && golem.getUpgradeAmount(GolemUpgrade.FIRE) > 0 ? BURNING_TICKS : 0;",
+      "new": "return 0;"
+    },
+    {
+      "id": "flame-lasts-one-second",
+      "name": "the flame lasts one second",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GolemFishingSmelting.java",
+      "old": "BURNING_TICKS = 40;",
+      "new": "BURNING_TICKS = 20;"
+    },
+    {
+      "id": "delivery-ignores-the-flame",
+      "name": "the delivered item is not set alight",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java",
+      "old": "                if (entry.fireTicks > 0) output.setRemainingFireTicks(entry.fireTicks);\n",
+      "new": ""
+    },
+    {
+      "id": "flame-not-saved",
+      "name": "the flame is not written with the row",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java",
+      "old": "        if (entry.fireTicks != 0) row.putInt(\"Fire\", entry.fireTicks);\n",
+      "new": ""
+    },
+    {
+      "id": "flame-allowed-on-any-row",
+      "name": "a flame is accepted on any saved row",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java",
+      "old": "                        || pickupDelay != 20 || row.contains(\"CrystalFace\")",
+      "new": "                        || row.contains(\"CrystalFace\")"
+    },
+    {
+      "id": "flame-without-cap",
+      "name": "a saved flame has no cap",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java",
+      "old": "fireTicks <= 0 || fireTicks > MAX_FIRE_TICKS\n",
+      "new": "fireTicks <= 0\n"
+    },
+    {
+      "id": "queue-takes-any-flame",
+      "name": "the queue takes any flame time",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java",
+      "old": "        if (fireTicks < 0 || fireTicks > MAX_FIRE_TICKS) throw new IllegalArgumentException(\"Fishing output cannot burn for \" + fireTicks + \" ticks\");\n",
+      "new": ""
+    },
+    {
+      "id": "catch-roll-forgets-fire",
+      "name": "the rolled catch does not remember Fire",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/FishingGolemGoals.java",
+      "old": "result, GolemFishingSmelting.burningTicks(golem));",
+      "new": "result, 0);"
+    },
+    {
+      "id": "publication-drops-the-flame",
+      "name": "publication passes no flame",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/FishingGolemGoals.java",
+      "old": "owned.stack(), owned.fireTicks());",
+      "new": "owned.stack(), 0);"
+    },
+    {
+      "id": "pending-flame-not-saved",
+      "name": "an unpublished catch is saved without its flame",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/FishingGolemGoals.java",
+      "old": "        if (pending.fireTicks() != 0) encoded.putInt(\"Fire\", pending.fireTicks()); // Absent in saves from before the burning catch.\n",
+      "new": "",
+      "expect": "survives",
+      "reason": "the golem saves an unpublished catch only when its publication failed or it is saved in the same tick; no check forces that, and the queue row (the usual path) is covered"
+    }
+  ]
+}

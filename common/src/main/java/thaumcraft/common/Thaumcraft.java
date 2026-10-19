@@ -108,6 +108,7 @@ public final class Thaumcraft {
         ShockFxNetworking.initServer();
         ExcavationFxNetworking.initServer();
         VisNetFxNetworking.initServer();
+        VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.
         PlayerEvent.PLAYER_QUIT.register(ItemFocusExcavation::clearPlayer);

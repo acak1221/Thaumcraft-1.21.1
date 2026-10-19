@@ -19,3 +19,20 @@
 - Голем: поле `fettered`, пересчитывается в `aiStep` на обеих сторонах из мира (не сохраняется, не синхронизируется — как `inactive` оригинала); эффект — `isImmobile() = true` (ИИ не тикает, движение обнуляется) и `canWork() = false` (ни одна цель не рабо­тает). `isNoAi()` не трогаем: оно пишется в NBT (`NoAI`) и «заморозило» бы голема навсегда после сохранения.
 - Рендер: `ModelGolem.setInactive(entity.isFettered())`.
 - Только Fabric; вид позы и сеть не смотрели.
+
+## Реализация (коммит `09e59c8`)
+
+- `BlockGolemFetter` (`common/.../blocks`): `BooleanProperty ACTIVE`; `neighborChanged` на сервере сравнивает `hasNeighborSignal` с состоянием и при расхождении ставит `UPDATE_ALL`; проверки при установке нет (как в оригинале —
+  блок, поставленный рядом с уже включённым источником, остаётся выключенным до первого изменения соседа). Статический `holds(level, feet)` — единственное место, где «блок под ногами — включённый фиксатор».
+- `ThaumcraftMasonry.GOLEM_FETTER` (камень, твёрдость 2, взрывостойкость 6, кирка), модели `golem_fetter` / `golem_fetter_active`, предмет, лут `golem_fetter` (одно и то же для обоих состояний), запись в `mineable/pickaxe`, арканный рецепт `golem_fetter` (`SSS/IRI/BBB`, terra 5 + ordo 5, исследование `GOLEMFETTER`), lang en/ru, псевдоним книги, иконка исследования.
+- `EntityGolemBase`: поле `fettered` пересчитывается в `aiStep` (обе стороны, из мира, не сохраняется), `isImmobile()` возвращает его (ИИ и навигация не тикают, но `NoAI` не пишется в NBT), `canWork()` ложно; `RenderGolemBase` подаёт его в `ModelGolem.setInactive`.
+- Отклонения: один блок со свойством вместо двух метаданных; побочный эффект ориг. «активный фиксатор не выпадает отдельным предметом» сохранён тем, что предмет один.
+
+## Проверка
+
+- **Implemented / built / game-tested:** `GolemFetterAssetsTest` (3 JUnit: модели/текстуры обоих состояний, лут, рецепт и имена) и GameTest `golemFetterHoldsGolemsWhileItsRedstoneSignalLasts` (блок и его сигнал, выпадение, рецепт, три настоящих Fill-голема: удержанный, свободный, остановленный на пути).
+  Локально на этом входе: `:common:test` 427, `:fabric:runGameTest` 157/157.
+- **Мутации (16, `scripts/mutation/groups/golem-fetter.json`, GitHub-прогон):** 13 пойманы; три выживших разобраны —
+  `the-client-side-toggles-too` (охрана `!level.isClientSide`: выделенный сервер не ведёт клиентского мира, а клиент всё равно получает состояние от сервера),
+  `fettered-golem-may-still-work` и `fettered-golem-still-moves` (`isImmobile()` и `canWork()` — два перекрывающихся слоя: любой один уже удерживает голема). Это не дефекты, а избыточная защита.
+- **Seen:** нет. **Не проверено:** поза неактивного голема на экране (`setInactive`), редстоун-схемы с поршнями/сильными сигналами в игре, сеть/два игрока, save/reload мира, NeoForge.

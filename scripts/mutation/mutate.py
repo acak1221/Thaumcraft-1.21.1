@@ -151,11 +151,10 @@ def command_check(group, _args):
 
 
 def selected(group, args):
-    chosen = [m for m in group["mutants"] if (not args.ids or m["id"] in args.ids) and (not args.tier or m["tier"] == args.tier)]
-    missing = set(args.ids or []) - {m["id"] for m in chosen}
+    missing = set(args.ids or []) - {m["id"] for m in group["mutants"]}
     if missing:
-        sys.exit(f"unknown mutant ids (or other tier): {sorted(missing)}")
-    return chosen
+        sys.exit(f"unknown mutant ids: {sorted(missing)}")
+    return [m for m in group["mutants"] if (not args.ids or m["id"] in args.ids) and (not args.tier or m["tier"] == args.tier)]
 
 
 def command_list(group, args):

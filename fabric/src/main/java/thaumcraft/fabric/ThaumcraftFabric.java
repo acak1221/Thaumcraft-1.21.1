@@ -22,6 +22,9 @@ public final class ThaumcraftFabric implements ModInitializer {
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftGolems.GOLEM.get(),
                 thaumcraft.common.entities.golems.EntityGolemBase.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftGolems.TRUNK.get(),
+                thaumcraft.common.entities.golems.EntityTravelingTrunk.createAttributes());
         thaumcraft.fabric.bore.FabricBorePlatform.init();
         thaumcraft.fabric.golems.FabricGolemHarvestPlatform.init();
         thaumcraft.fabric.golems.FabricGolemUsePlatform.init();

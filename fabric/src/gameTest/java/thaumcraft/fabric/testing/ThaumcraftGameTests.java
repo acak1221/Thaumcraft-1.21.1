@@ -843,6 +843,16 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.GolemFetterRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    public void travelingTrunkItemUpgradesMenuBellDamageAndSaving(GameTestHelper test) {
+        thaumcraft.common.testing.TravelingTrunkRuntimeChecks.basics(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600)
+    public void travelingTrunkFollowsTeleportsDefendsAndPullsItems(GameTestHelper test) {
+        thaumcraft.common.testing.TravelingTrunkRuntimeChecks.behavior(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void crystalBlocksDropSixOwnShards(GameTestHelper test) {
         thaumcraft.common.testing.CrystalDropRuntimeChecks.run(test);

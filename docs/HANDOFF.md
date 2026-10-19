@@ -4,6 +4,17 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально19.10 (восьмая группа: нечёткое сравнение предметов Entropy, Claude): реализовано, собрано, game-tested 155/155
+
+Контракт и реализация: [golem-item-match](analysis/2026-10-19-golem-item-match.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemItemMatch` (теги / без урона / без компонентов), `GolemData.itemMatch` (JSON `item_match`, сеть: бит 0x40 + байт, NBT `ItemMatch`), нечёткие поиск/счёт склада и пробы Fill/Empty/Sorting,
+расширение Empty/Use по тегам одним Entropy, цвета слотов, кнопки меню 55–57 и три флажка `GuiGolem`, lang en/ru.
+**Built / game-tested:** `:common:test` **414 JUnit** (+11), `:fabric:remapJar`, `:fabric:runGameTest` **155/155** (+`entropySwitchesChangeWhatRealGolemsFetchEmptyAndSort`: десять настоящих големов в пяти парах), JAR SHA-256 `811a950b…eb55c`.
+**Мутации:** 41, пойманы 37; не пойманы два эквивалентных, строгая проба `fillTick` (перезапуск маршрута) и ядро Use (нет игрового стенда — подключено, не проверено).
+**Уроки:** GameTest с настоящими тегами поймал правило групп `c:tools/pickaxe` (JUnit не видит тегов); соседний GameTest стирает блоки вокруг своей структуры — линии стоят этажами на одном пятачке.
+**Seen:** нет. **Не проверено:** флажки/подписи GUI, Use в игре, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** очередь Liquid у Entropy, дротик `R`, горящий предмет улова, Traveling Trunk.
+
 ### Актуально19.10 (седьмая группа: аксессуары голема, Claude): реализовано, собрано, game-tested 154/154
 
 Контракт и реализация: [golem-decorations](analysis/2026-10-19-golem-decorations.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

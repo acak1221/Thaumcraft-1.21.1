@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.core.BlockPos;
@@ -25,16 +26,22 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import thaumcraft.api.WorldCoordinates;
 import thaumcraft.api.aspects.Aspect;
-import thaumcraft.common.Thaumcraft;
-import thaumcraft.common.lib.network.VisNetFxNetworking;
 
 /** Original root-biased attachment and one-nearest-node-per-root consumption.
  * Raw network amounts are NOT multiplied by100. No graph selection uses RNG.
  * All persistent static references to worlds/nodes are weak; root lifecycle hooks
  * still explicitly clear the complete level/server lifetime. */
 public final class VisNetHandler {
+    /** Server-side post-debit beam effect. The packet sender lives in common and is registered at startup,
+     * so this public API class carries no dependency on thaumcraft.common. */
+    @FunctionalInterface public interface EffectSink { void send(ServerLevel level, BlockPos consumer, BlockPos selectedNode, Aspect aspect); }
+    private static final Logger LOG = LoggerFactory.getLogger("Thaumcraft");
+    private static volatile EffectSink effectSink = (level, consumer, node, aspect) -> {};
+    public static void setEffectSink(EffectSink sink) { effectSink = Objects.requireNonNull(sink, "sink"); }
     private static final List<Network> NETWORKS = new ArrayList<>();
     private static final AtomicLong LIFETIMES = new AtomicLong();
     private static final ThreadLocal<Set<Level>> VALIDATING = ThreadLocal.withInitial(VisNetHandler::identities);
@@ -310,7 +317,7 @@ public final class VisNetHandler {
     }
     private static void notifyNode(TileVisNode node) {
         try { node.notifyLinkChange(); }
-        catch (RuntimeException failure) { Thaumcraft.LOG.warn("VisNet link notification failed at {}", node.getBlockPos(), failure); }
+        catch (RuntimeException failure) { LOG.warn("VisNet link notification failed at {}", node.getBlockPos(), failure); }
     }
     private static void sweep(Network net) {
         ServerLevel world = net.world.get();
@@ -510,11 +517,11 @@ public final class VisNetHandler {
                 int grant;
                 try { grant = root.debit(aspect, remaining); }
                 catch (RuntimeException failure) {
-                    Thaumcraft.LOG.warn("VisNet source debit violated its callback-free contract at {}", root.getBlockPos(), failure);
+                    LOG.warn("VisNet source debit violated its callback-free contract at {}", root.getBlockPos(), failure);
                     break; // Cannot infer/rollback arbitrary addon stock from a thrown callback.
                 }
                 if (grant < 0 || grant > remaining) {
-                    Thaumcraft.LOG.warn("Refused malformed VisNet provider grant {} for {} at {}", grant, remaining, root.getBlockPos());
+                    LOG.warn("Refused malformed VisNet provider grant {} for {} at {}", grant, remaining, root.getBlockPos());
                     break; // Never clamp an invalid grant into a usable subset.
                 }
                 actual += grant; // COMMIT readback before ANY pulse/network callbacks.
@@ -522,23 +529,23 @@ public final class VisNetHandler {
                 for (int i = route.steps.size() - 1; i >= 0; --i) {
                     Step step = route.steps.get(i); // Original recursive forwarding unwinds parent -> child.
                     try { if (isCurrent(step.node)) step.node.triggerConsumeEffect(aspect); }
-                    catch (RuntimeException failure) { Thaumcraft.LOG.warn("VisNet post-debit pulse failed at {}", step.node.getBlockPos(), failure); }
+                    catch (RuntimeException failure) { LOG.warn("VisNet post-debit pulse failed at {}", step.node.getBlockPos(), failure); }
                 }
                 if (consumer != null) {
                     try { generateVisEffect(level, consumer.pos, node.getBlockPos(), aspect); }
-                    catch (RuntimeException failure) { Thaumcraft.LOG.warn("VisNet post-debit FX failed at {}", consumer.pos, failure); }
+                    catch (RuntimeException failure) { LOG.warn("VisNet post-debit FX failed at {}", consumer.pos, failure); }
                 }
             }
         } catch (RuntimeException failure) {
             // Later identity/provider observations are also post-commit call-outs.
             // Previously reported actual debits remain actual, never a refund0.
-            Thaumcraft.LOG.warn("VisNet frame stopped after {} committed raw vis", actual, failure);
+            LOG.warn("VisNet frame stopped after {} committed raw vis", actual, failure);
         }
         return (int) actual; // Bounded by the original positive int request using wide arithmetic.
     }
     public static void generateVisEffect(ServerLevel level, BlockPos consumer, BlockPos selectedNode, Aspect aspect) {
         // Root-owned actual packet/local-Random throttle; no world RNG here.
-        VisNetFxNetworking.send(level, consumer, selectedNode, aspect);
+        effectSink.send(level, consumer, selectedNode, aspect);
     }
 
     public static void clearLevel(ServerLevel level) {

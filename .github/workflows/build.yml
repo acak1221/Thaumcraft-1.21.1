@@ -34,6 +34,23 @@ jobs:
         run: |
           ./scripts/dev.sh validate --rerun-tasks 2>&1 | tee .tmp/ci-validate.log
           python -c 'from pathlib import Path; Path(".tmp/ci-exit.json").write_text("{\"code\":0}\n", encoding="utf-8")'
+      - name: Show failed game tests with their messages
+        if: always()
+        run: |
+          python -B - <<'PY'
+          import re
+          from pathlib import Path
+          report = Path("fabric/build/gametest-results.xml")
+          if not report.exists():
+              print("no game-test report:", report)
+          else:
+              text = report.read_text(encoding="utf-8")
+              failed = re.findall(r'<testcase[^>]*name="([^"]+)"[^>]*time="([^"]+)"[^>]*>\s*<(failure|error)([^>]*)>(.*?)</\3>', text, re.S)
+              print(len(failed), "failed game tests in the report")
+              for name, seconds, kind, attributes, body in failed:
+                  print("-", name, seconds + "s", kind, attributes[:600].strip())
+                  print("   ", " ".join(body.split())[:1500])
+          PY
       - name: Verify fresh results, required cases and packaged attribution
         run: >-
           python -B scripts/porting/record_verification.py

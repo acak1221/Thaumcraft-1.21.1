@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["#minecraft:is_jungle", "minecraft:lush_caves", {"id": "#c:is_lush", "required": false}]
+}

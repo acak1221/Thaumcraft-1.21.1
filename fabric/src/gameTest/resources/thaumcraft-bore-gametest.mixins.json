@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "package": "thaumcraft.fabric.testing.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": ["BoreNativeGameEventMixin", "BoreRemovalObserverMixin"],
+  "injectors": {"defaultRequire": 1}
+}

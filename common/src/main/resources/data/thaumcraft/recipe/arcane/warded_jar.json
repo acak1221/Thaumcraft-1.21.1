@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "DISTILESSENTIA",
+  "pattern": ["GWG", "G G", "GGG"],
+  "key": {
+    "G": {"item": "minecraft:glass_pane"},
+    "W": {"tag": "minecraft:wooden_slabs"}
+  },
+  "result": {"id": "thaumcraft:jar", "count": 1},
+  "vis": {"aqua": 1}
+}

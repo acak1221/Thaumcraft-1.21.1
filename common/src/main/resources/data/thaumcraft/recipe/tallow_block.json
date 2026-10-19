@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": ["KKK", "KKK", "KKK"],
+  "key": {"K": {"item": "thaumcraft:magic_tallow"}},
+  "result": {"id": "thaumcraft:tallow_block", "count": 1}
+}

@@ -1,0 +1,48 @@
+# Flesh material4 — original contract / bounded proposal, FINAL 2026-10-19
+
+Read-only content review, **not implementation, M10 completion or native acceptance**. Authority below is `O=../work/thaumcraft-4.2.3.5-oracle/thaumcraft/` and the original JAR's `assets/thaumcraft/lang/en_US.lang`. Original Entity references mean **O**, never current Entity/UseGoal/UsePlatform WIP; none of that WIP was read. Only finalized native `common/config/ThaumcraftGolemMaterials.java` was read.
+
+## Exact missing content / acquisition
+
+- **Block of Flesh = `ConfigBlocks.blockTaint`, metadata2**, registered as `blockTaint` with `BlockTaintItem` (`ConfigBlocks:281,315`; item metadata/name forwarding `BlockTaintItem:23-28`). Texture `thaumcraft:fleshblock`; name `tile.blockTaint.2.name`. **Not `BlockCosmeticOpaque`** (amber/warded glass, `:64-91`), nor a standalone original `BlockFlesh` class: **`BlockFlesh` is the recipe key**. This block really exists in TC4.2.3.5; a 1.12 class name is not its identity.
+- `ConfigRecipes:438`: ordinary **ungated shaped crafting**, `RRR/RRR/RRR`, R=vanilla **rotten flesh** (`Items.field_151078_bh`), yields **one blockTaint:2**. **No zombie brain, tallow, mundane-flesh item, vis or new mob-kill/drop hook**. The brain's acquisition is not a prerequisite. No reverse crafting recipe is registered: block recovery is the breaking behavior below, not a made-up craft9↔1 recipe.
+- `ConfigRecipes:168`: **GolemFlesh / GOLEMFLESH**, **crucible**, one blockTaint:2 catalyst + **humanus8 / motus8 / spiritus8** → **one ItemGolemPlacer:4**, ordinary/coreless. No existing golem, brain, core, advanced flag, arcane-grid vis, infusion Matrix or instability cost.
+- `ConfigResearch:318-324`: **GOLEMFLESH**, GOLEMANCY, concealed **primary**, difficulty2, position(4,4); sole direct parent **GOLEMWOOD** (chain HUNGRYCHEST→GOLEMSTRAW→GOLEMWOOD). Research aspects **spiritus7/motus7/corpus6/permutatio3**; pages prose, BlockFlesh, GolemFlesh. Not gated by GOLEMCLAY/TALLOW/INFUSION/ADVANCEDGOLEM. Source declares **research warp3** and **placer:4 item warp1** separately (`:323-324`); retain both declarations through the appropriate existing systems, not a Flesh kill hook.
+- Tools: ordinary crafting table, genuine water-filled **heated crucible**, and actual aspect supplies. Basic casting wand converts a vanilla cauldron without vis (`ConfigRecipes:87-88`, `items/wands/WandManager:121-130`); item processing requires heat>150 and water (`BlockMetalDevice:247-249`), consumes50mB per successful recipe (`TileCrucible:248-265`), and checks the thrower's research (`ThaumcraftCraftingManager:127-136`). No special axe, brain tool or advanced wand required.
+
+## Actual flesh-block behavior, not crusted-taint behavior
+
+- `BlockTaint:69-75,248-259`: constructor hardness2 is **overridden to0.2 for metadata2**. `setResistance(10)` means stored30 / vanilla getter5 = **effective explosion resistance6**, not10. Sound **`thaumcraft:gore`, volume0.5/pitch0.8** (`CustomSoundType:13-22`), ordinary full collision cube, all sides solid (`:351-352`), no block entity.
+- Material **Config.taintMaterial / MaterialTaint**, not rock: non-liquid, material non-solid/non-opaque but movement-blocking; piston mobility**1 (destroy)** (`MaterialTaint:17-49`). Its required-tool setter is a no-op; no harvest class/tier or fire registration is assigned in BlockTaint/ConfigBlocks. **Hand harvest allowed; no pickaxe/tier-gated drops or invented tool tag; default flammability/spread0**. Preserve block cube/solid-side behavior despite the unusual material flags.
+- `BlockTaint:222-245`: normal break drops **exactly9 vanilla rotten flesh**, unaffected by fortune; Silk Touch permits **the actual metadata2 block**; pick-block likewise returns metadata2. This is genuine survival storage/acquisition, not a decorative stand-in with unrelated loot.
+- Random ticking is enabled, but **metadata2 returns before taint spread, falling, goo conversion or spore spawning** (`:152-219`). Contact likewise returns before taint-poison code (`:312-324`); dripping particles are metadata0 only (`:333-338`). **No flesh-block regeneration, healing aura, mob spawning or contact damage/effect** is implemented here.
+- External boundary: `BlockTaintFibres:225-246` counts shared blockTaint identity as adjacent taint and accepts taintMaterial neighbors, without excluding metadata2. A flattened flesh-only block must record this deferred **external taint adjacency** integration; do not import metadata0/1's active effects or claim full taint parity.
+
+## Ordinary material table — preserve every original slot
+
+`entities/golems/EnumGolemType:9-26,36-51`; health/armor are points, speed is the source movement value, repair is raw regenDelay, strength is the material contribution (not total attack damage).
+
+| Material ID | Health | Armor | Speed | Fire resistant | Upgrade slots | Carry | Repair delay | Strength |
+|---|---:|---:|---:|:---:|---:|---:|---:|---:|
+| Straw0 | 10 | 0 | .38 | no | 1 | 1 | 75 | 0 |
+| Wood1 | 20 | 6 | .35 | no | 1 | 4 | 75 | 1 |
+| Tallow2 | 20 | 9 | .33 | no | 2 | 8 | 75 | 2 |
+| Clay3 | 25 | 9 | .33 | yes | 1 | 8 | 100 | 2 |
+| **Flesh4** | **15** | **6** | **.35** | **no** | **2** | **4** | **40** | **1** |
+| Stone5 | 30 | 12 | .32 | yes | 1 | 16 | 100 | 3 |
+| Iron6 | 35 | 15 | .31 | yes | 1 | 32 | 125 | 4 |
+| Thaumium7 | 40 | 15 | .32 | yes | 2 | 32 | 100 | 4 |
+
+- `EntityGolemBase:188-195,235-264,355-383`: **not advanced-only**; Flesh uses ordinary golem AI/core behavior, fire vulnerability and swimming policy, no zombie-specific controller. Its special advantages are the table's fast repair and two slots. Undecorated/unupgraded attack =2+strength=**3**; Earth upgrades affect strength/carry through existing formulas. Advanced is a separate generic upgrade (+one slot, ×1.1 speed), not a Flesh prerequisite; do not unlock unported upgrades by merely exposing slots.
+- `EntityGolemBase:426-437`: server heals **1 health point**, resets timer to40 then decrements; steady recurrence is **41 ticks**, not a 40-tick modulo (initial timer0). Decoration F multiplies delay by0.66 with integer truncation. It needs **no flesh/brain fuel**, special block below, food or advanced status. Regen timer is not separately saved in original `:581-623`.
+- Shared cookie interaction `EntityGolemBase:944-961`: consumes **one real cookie**, heals**5**, hearts/eating sound; **not Flesh-exclusive**. SpeedI application is **client-only**, inside three iterations each starting at600 ticks with conditional duration stacking (`:947-959`), not an authoritative server boost. Any correction must be explicit, not silently attributed to Flesh regeneration.
+- Original item icon `golem_flesh`, separate display name **Flesh Golem** (`ItemGolemPlacer:60-68,102-104`; JAR `item.ItemGolemPlacer.4.name`); entity skin **textures/models/golem_flesh.png** (`RenderGolemBase:79,305-306`). Same active **models/entities/ModelGolem**, cargo arms at−1rad when carrying unless action/arm timers override (`:133-163`), normal damage/core/cargo layers; **no special zombie carried pose**. Ambient/hurt/death sounds remain **thaumcraft:cameraclack**, not zombie/gore (`EntityGolemBase:1194-1203`); gore belongs to the block.
+
+## Smallest useful native unit — ROOT later, not authorized implementation here
+
+1. Assigned current gap: eight source enum positions but **FLESH4 unsupported / seven material types registered**, real flesh block missing. Finalized native `ThaumcraftGolemMaterials:22-33` only supplies Thaumium/Tallow blocks. Add genuine flesh Block+BlockItem, original block/item textures, gore sound and correct survival recipe/loot/properties above; then GOLEMFLESH research/book/crucible output. No taint biome/mob implementation is needed for metadata2's own handlers; external adjacency remains expressly deferred.
+2. Register/map the eighth **material-specific placer/entity identity**, with this exact table row, fire/repair/upgrade-capacity policy, renderer skin and display names; leave all seven others unchanged. **Material4 and Guard core4 are independent namespaces**. Do not use material4 as `GolemData.core`, renumber slots, enable any unported core or make Flesh a cosmetic skin over Wood stats.
+3. Retain existing placement/ownership/home/face/name protection, normal configuration and all strict data/component rules (including independent Use options), ghost filters versus real cargo, and the finalized save/recall cargo rules. Original saves **GolemType** separately from **Core** (`EntityGolemBase:581-623,626-668`); placement restores material/core/name/upgrades/markers/inventory (`ItemGolemPlacer:189-238`). Normal **non-sneak bell recall** returns matching material placer plus configuration and separately drops cargo (`ItemGolemBell:284-335`), not a reset Wood item, confiscated stock or ghost duplication. No new journal/provider/token machinery.
+4. First useful loop: obtain nine real rotten flesh → craft block → research-gated crucible Flesh placer → place and install a **separately acquired existing Gather2 core**, then use existing gathering with carry4 and fast repair → save/reload and normal recall/re-place retaining material/configuration and real-resource ownership. **No new AI or dependency on active Use8 authors**; root performs integration/validation after their FINALs. Advanced infusion/extra upgrade gameplay and broader taint parity stay separate, not prerequisites or completion claims.
+
+Only this new note was written. No production/other-document edits, builds, Java/game/tests/Python/worlds/agents or audit/source-pin tooling; native behavior, visuals, protection, round trips and gameplay remain **unexecuted/unaccepted**.

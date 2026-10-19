@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": [{"id": "thaumcraft:magical_forest", "required": false}, {"id": "thaumcraft:taint", "required": false}]
+}

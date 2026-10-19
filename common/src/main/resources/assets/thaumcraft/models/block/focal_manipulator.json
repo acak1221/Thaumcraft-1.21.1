@@ -1,0 +1,7 @@
+{
+  "parent": "thaumcraft:block/arcane_workbench",
+  "textures": {
+    "particle": "thaumcraft:blocks/pedestal_top",
+    "table": "thaumcraft:models/wandtable"
+  }
+}

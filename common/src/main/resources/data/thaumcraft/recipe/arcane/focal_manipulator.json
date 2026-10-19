@@ -1,0 +1,15 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "FOCALMANIPULATION",
+  "pattern": ["IQI", "SPS", "GTG"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "Q": {"item": "thaumcraft:arcane_stone_brick_slab"},
+    "S": {"item": "thaumcraft:arcane_stone"},
+    "P": {"item": "thaumcraft:primal_charm"},
+    "G": {"item": "minecraft:gold_ingot"},
+    "T": {"item": "thaumcraft:table"}
+  },
+  "result": {"id": "thaumcraft:focal_manipulator", "count": 1},
+  "vis": {"aer": 32, "terra": 32, "ignis": 32, "aqua": 32, "ordo": 32, "perditio": 32}
+}

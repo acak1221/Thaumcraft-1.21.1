@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["minecraft:desert", "#minecraft:is_badlands", "#minecraft:is_jungle", "#minecraft:is_savanna", {"id": "#c:is_hot/overworld", "required": false}]
+}

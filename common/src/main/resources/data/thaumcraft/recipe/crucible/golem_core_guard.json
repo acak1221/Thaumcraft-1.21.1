@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "COREGUARD", "source_order": 176,
+  "catalyst": {"item": "thaumcraft:golem_core_blank"},
+  "result": {"id": "thaumcraft:golem_core_guard", "count": 1},
+  "aspects": {"telum": 5, "vinculum": 5}
+}

@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=1": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=2": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=3": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=4": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=5": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=6": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=7": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=8": {
+      "model": "thaumcraft:block/table_empty"
+    },
+    "variant=9": {
+      "model": "thaumcraft:block/table_empty"
+    }
+  }
+}

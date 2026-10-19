@@ -1,0 +1,57 @@
+plugins { id 'com.github.johnrengelman.shadow' }
+architectury { platformSetupLoomIde(); neoForge() }
+configurations {
+ common { canBeResolved = true; canBeConsumed = false }
+ compileClasspath.extendsFrom common
+ runtimeClasspath.extendsFrom common
+ developmentNeoForge.extendsFrom common
+ shadowBundle { canBeResolved = true; canBeConsumed = false }
+}
+dependencies {
+ neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
+ modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
+ common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+ shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
+}
+processResources {
+ inputs.property 'version', project.version
+ filesMatching('META-INF/neoforge.mods.toml') { expand version: project.version }
+}
+shadowJar { configurations = [project.configurations.shadowBundle]; archiveClassifier = 'dev-shadow' }
+remapJar { inputFile.set shadowJar.archiveFile }
+
+sourceSets {
+ gameTest {
+  compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + project(':common').sourceSets.gameTest.output
+  runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + project(':common').sourceSets.gameTest.output
+ }
+}
+
+loom.runs {
+ gameTest {
+  server()
+  source sourceSets.gameTest
+  // Common main is supplied by Architectury's transformed dependency JAR.
+  // Registering its raw output here would duplicate that generated JPMS module.
+  mods {
+   thaumcraft {
+    sourceSet sourceSets.main
+   }
+   thaumcraft_gametest {
+    sourceSet sourceSets.gameTest
+    sourceSet project(':common').sourceSets.gameTest, project(':common')
+   }
+  }
+  name 'Thaumcraft 1.21.1 NeoForge GameTests'
+  vmArg '-Dneoforge.enableGameTest=true'
+  vmArg '-Dneoforge.gameTestServer=true'
+  vmArg '-Dneoforge.enabledGameTestNamespaces=thaumcraft'
+  vmArg "-Dthaumcraft.gametest.report-file=${layout.buildDirectory.file('gametest-results.xml').get().asFile.absolutePath}"
+  runDir 'run-gametest'
+ }
+}
+tasks.named('runGameTest') {
+ dependsOn tasks.named('gameTestClasses'), project(':common').tasks.named('gameTestClasses')
+}
+
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest'])

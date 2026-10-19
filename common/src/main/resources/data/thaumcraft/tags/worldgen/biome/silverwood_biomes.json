@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["minecraft:forest", "minecraft:birch_forest", "#thaumcraft:ore_biome_types/magical"]
+}

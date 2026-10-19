@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "NITOR",
+  "source_order": 7,
+  "catalyst": [{"item": "minecraft:glowstone_dust"}, {"tag": "c:dusts/glowstone"}],
+  "result": {"id": "thaumcraft:nitor", "count": 1},
+  "aspects": {"potentia": 3, "ignis": 3, "lux": 3}
+}

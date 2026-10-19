@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["minecraft:dark_forest", {"id": "#c:is_spooky", "required": false}]
+}

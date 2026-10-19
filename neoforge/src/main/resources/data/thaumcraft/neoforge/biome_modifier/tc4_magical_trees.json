@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#thaumcraft:magical_tree_biomes",
+  "features": "thaumcraft:tc4_magical_trees",
+  "step": "vegetal_decoration"
+}

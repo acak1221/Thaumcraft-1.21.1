@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "GOLEMIRON", "source_order": 170,
+  "catalyst": {"item": "minecraft:iron_block"},
+  "result": {"id": "thaumcraft:golem_iron", "count": 1},
+  "aspects": {"humanus": 4, "motus": 4, "spiritus": 4}
+}

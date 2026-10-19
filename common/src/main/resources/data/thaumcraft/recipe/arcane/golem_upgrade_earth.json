@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "UPGRADEEARTH",
+  "pattern": ["NNN", "NCN", "NNN"],
+  "key": {
+    "N": {"item": "minecraft:gold_nugget"},
+    "C": {"item": "thaumcraft:earth_shard"}
+  },
+  "result": {"id": "thaumcraft:golem_upgrade_earth", "count": 1},
+  "vis": {"terra": 10}
+}

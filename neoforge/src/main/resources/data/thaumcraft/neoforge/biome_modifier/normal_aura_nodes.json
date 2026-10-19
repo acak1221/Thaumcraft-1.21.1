@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#thaumcraft:normal_aura_node_biomes",
+  "features": "thaumcraft:normal_aura_nodes",
+  "step": "top_layer_modification"
+}

@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "GOLEMFLESH", "source_order": 168,
+  "catalyst": {"item": "thaumcraft:flesh_block"},
+  "result": {"id": "thaumcraft:golem_flesh", "count": 1},
+  "aspects": {"humanus": 8, "motus": 8, "spiritus": 8}
+}

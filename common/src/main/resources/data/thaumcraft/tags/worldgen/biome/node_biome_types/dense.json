@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["minecraft:dark_forest", "minecraft:jungle", "minecraft:bamboo_jungle", {"id": "#c:is_dense", "required": false}, {"id": "#c:is_dense/overworld", "required": false}]
+}

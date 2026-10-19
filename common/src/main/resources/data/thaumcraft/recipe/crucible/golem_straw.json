@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "GOLEMSTRAW",
+  "source_order": 164,
+  "catalyst": {"item": "minecraft:hay_block"},
+  "result": {"id": "thaumcraft:golem_straw", "count": 1},
+  "aspects": {"humanus": 4, "motus": 4, "spiritus": 4}
+}

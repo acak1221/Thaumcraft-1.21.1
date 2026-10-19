@@ -1,0 +1,41 @@
+{
+  "commit": "4bc68454b1063cdc1255f833dd537e0fd4fc341d",
+  "tracked_files": 4345,
+  "java_files": 1464,
+  "java_lines": 198729,
+  "groups": {
+    "api": {
+      "files": 89,
+      "lines": 5510,
+      "bytes": 192856
+    },
+    "client": {
+      "files": 258,
+      "lines": 42866,
+      "bytes": 1921327
+    },
+    "codechicken": {
+      "files": 40,
+      "lines": 5353,
+      "bytes": 175855
+    },
+    "common": {
+      "files": 543,
+      "lines": 89300,
+      "bytes": 3784392
+    },
+    "test": {
+      "files": 530,
+      "lines": 55153,
+      "bytes": 2750349
+    },
+    "truetyper": {
+      "files": 4,
+      "lines": 547,
+      "bytes": 21976
+    }
+  },
+  "test_annotations": 1199,
+  "main_resource_paths": 1676,
+  "original_decompiled_files": 859
+}

@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": [{"id": "#c:is_magical", "required": false}, {"id": "thaumcraft:magical_forest", "required": false}, {"id": "thaumcraft:taint", "required": false}, {"id": "thaumcraft:eerie", "required": false}, {"id": "thaumcraft:eldritch_lands", "required": false}]
+}

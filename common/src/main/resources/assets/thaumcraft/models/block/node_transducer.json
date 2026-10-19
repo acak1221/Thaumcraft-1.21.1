@@ -1,0 +1,5 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {"particle": "thaumcraft:blocks/al_furnace_side"},
+  "elements": []
+}

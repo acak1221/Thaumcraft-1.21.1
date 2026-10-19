@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:cinnabar_ore",
+    "thaumcraft:air_infused_stone",
+    "thaumcraft:fire_infused_stone",
+    "thaumcraft:water_infused_stone",
+    "thaumcraft:earth_infused_stone",
+    "thaumcraft:order_infused_stone",
+    "thaumcraft:entropy_infused_stone",
+    "thaumcraft:amber_ore",
+    "#thaumcraft:arcane_stone_masonry",
+    "thaumcraft:alchemy_furnace",
+    "thaumcraft:alembic",
+    "thaumcraft:essentia_tube",
+    "thaumcraft:essentia_valve",
+    "thaumcraft:essentia_filter",
+    "thaumcraft:essentia_restrict",
+    "thaumcraft:essentia_oneway",
+    "thaumcraft:essentia_buffer",
+    "thaumcraft:centrifuge",
+    "thaumcraft:essentia_crystallizer",
+    "thaumcraft:node_stabilizer",
+    "thaumcraft:node_transducer",
+    "thaumcraft:vis_relay",
+    "thaumcraft:alchemical_construct",
+    "thaumcraft:infusion_matrix",
+    "thaumcraft:arcane_pedestal",
+    "thaumcraft:infusion_pillar",
+    "thaumcraft:thaumium_block",
+    "thaumcraft:tallow_block"
+  ]
+}

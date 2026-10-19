@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "GOLEMSTONE", "source_order": 169,
+  "catalyst": {"item": "minecraft:stone_bricks"},
+  "result": {"id": "thaumcraft:golem_stone", "count": 1},
+  "aspects": {"humanus": 4, "motus": 4, "spiritus": 4}
+}

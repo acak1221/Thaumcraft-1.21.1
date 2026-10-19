@@ -1,0 +1,20 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "CORELUMBER",
+  "input": {"item": "thaumcraft:golem_core_harvest"},
+  "components": [
+    {"item": "thaumcraft:elemental_axe"},
+    {"item": "minecraft:iron_axe"},
+    {"item": "minecraft:iron_axe"},
+    {"item": "minecraft:iron_axe"}
+  ],
+  "component_predicates": [
+    {"component": 0, "damage": 0},
+    {"component": 1, "damage": 0},
+    {"component": 2, "damage": 0},
+    {"component": 3, "damage": 0}
+  ],
+  "aspects": {"instrumentum": 16, "arbor": 16, "meto": 16},
+  "instability": 2,
+  "result": {"id": "thaumcraft:golem_core_lumber", "count": 1}
+}

@@ -1,0 +1,57 @@
+# Compiled Java bytecode (derived from JAR)
+*.class
+logs
+
+# Gradle / Forge workspace
+.gradle/
+.gradle_home/
+build/
+out/
+run/
+eclipse/
+*.launch
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+!.tmp/
+.tmp/*
+!.tmp/.gitkeep
+.smoke/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+_p4_ref/
+cfr.jar
+
+.decompile_out/
+# Track modern Windows wrapper.
+
+.gradle21/
+common/build/
+fabric/build/
+neoforge/build/
+common/run/
+fabric/run/
+neoforge/run/
+**/run-gametest/
+**/run-clienttest/
+%SystemDrive%/

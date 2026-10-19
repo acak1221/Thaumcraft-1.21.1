@@ -1,0 +1,5 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {"layer0": "thaumcraft:items/golem_straw"},
+  "overrides": [{"predicate": {"thaumcraft:has_core": 1}, "model": "thaumcraft:item/golem_straw_core"}]
+}

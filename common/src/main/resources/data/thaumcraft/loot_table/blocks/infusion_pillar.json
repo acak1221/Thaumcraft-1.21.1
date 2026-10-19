@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {"rolls":1,"entries":[{"type":"minecraft:item","name":"thaumcraft:arcane_stone_bricks"}],"conditions":[{"condition":"minecraft:block_state_property","block":"thaumcraft:infusion_pillar","properties":{"half":"lower"}},{"condition":"minecraft:survives_explosion"}]},
+    {"rolls":1,"entries":[{"type":"minecraft:item","name":"thaumcraft:arcane_stone"}],"conditions":[{"condition":"minecraft:block_state_property","block":"thaumcraft:infusion_pillar","properties":{"half":"upper"}},{"condition":"minecraft:survives_explosion"}]}
+  ]
+}

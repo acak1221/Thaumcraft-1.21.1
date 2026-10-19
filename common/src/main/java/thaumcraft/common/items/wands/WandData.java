@@ -1,0 +1,67 @@
+package thaumcraft.common.items.wands;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/** Immutable, persistent/synchronized item component. Amounts are TC4 centivis. */
+public record WandData(String rod, String cap, Map<String, Integer> vis) {
+    public static final List<String> PRIMALS = List.of("aer", "terra", "ignis", "aqua", "ordo", "perditio");
+    public static final WandData EMPTY = new WandData("wood", "iron", Map.of());
+    private static final Codec<String> ROD_CODEC = Codec.STRING.comapFlatMap(
+            value -> WandMaterials.supportsRod(value) ? DataResult.success(value)
+                    : DataResult.error(() -> "Unsupported wand rod: " + value), value -> value);
+    private static final Codec<String> CAP_CODEC = Codec.STRING.comapFlatMap(
+            value -> WandMaterials.supportsCap(value) ? DataResult.success(value)
+                    : DataResult.error(() -> "Unsupported wand cap: " + value), value -> value);
+    private static final Codec<String> ASPECT_CODEC = Codec.STRING.comapFlatMap(
+            value -> PRIMALS.contains(value) ? DataResult.success(value)
+                    : DataResult.error(() -> "Non-primal wand aspect: " + value), value -> value);
+    // Decode cross-field capacity errors as DataResults, not constructor exceptions
+    // escaping an ItemStack/NBT/network decoder. Old wood/iron saves keep their defaults.
+    private record Encoded(String rod, String cap, Map<String, Integer> vis) {}
+    private static final Codec<Encoded> ENCODED_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ROD_CODEC.optionalFieldOf("rod", "wood").forGetter(Encoded::rod),
+            CAP_CODEC.optionalFieldOf("cap", "iron").forGetter(Encoded::cap),
+            Codec.unboundedMap(ASPECT_CODEC, Codec.intRange(0, 10000)).optionalFieldOf("vis", Map.of()).forGetter(Encoded::vis)
+    ).apply(instance, Encoded::new));
+    public static final Codec<WandData> CODEC = ENCODED_CODEC.flatXmap(encoded -> {
+        int capacity = WandMaterials.capacity(encoded.rod());
+        if (encoded.vis().values().stream().anyMatch(amount -> amount > capacity)) {
+            return DataResult.error(() -> "Wand vis exceeds " + encoded.rod() + " capacity: " + capacity);
+        }
+        return DataResult.success(new WandData(encoded.rod(), encoded.cap(), encoded.vis()));
+    }, data -> DataResult.success(new Encoded(data.rod(), data.cap(), data.vis())));
+    public static final StreamCodec<ByteBuf, WandData> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
+
+    public WandData {
+        int capacity = WandMaterials.capacity(rod);
+        WandMaterials.cap(cap);
+        Objects.requireNonNull(vis, "vis");
+        LinkedHashMap<String, Integer> copy = new LinkedHashMap<>();
+        vis.forEach((tag, amount) -> {
+            if (tag == null || amount == null || !PRIMALS.contains(tag) || amount < 0 || amount > capacity) {
+                throw new IllegalArgumentException("Invalid wand vis: " + tag);
+            }
+            copy.put(tag, amount);
+        });
+        vis = Map.copyOf(copy);
+    }
+
+    public int amount(String tag) { return vis.getOrDefault(tag, 0); }
+    public int capacity() { return WandMaterials.capacity(rod); }
+
+    public WandData withAmount(String tag, int amount) {
+        if (!PRIMALS.contains(tag)) throw new IllegalArgumentException("Non-primal aspect " + tag);
+        LinkedHashMap<String, Integer> values = new LinkedHashMap<>(vis);
+        values.put(tag, Math.max(0, Math.min(amount, capacity())));
+        return new WandData(rod, cap, values);
+    }
+}

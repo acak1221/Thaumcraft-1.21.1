@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [" S ", "IGI", " S "],
+  "key": {
+    "I": {"item": "minecraft:gold_ingot"},
+    "G": {"item": "minecraft:glass"},
+    "S": {"tag": "thaumcraft:shards"}
+  },
+  "result": {"id": "thaumcraft:thaumometer", "count": 1}
+}

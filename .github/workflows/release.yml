@@ -1,0 +1,11 @@
+name: Validate 1.21.1 checkpoint manually
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: ./.github/workflows/build.yml

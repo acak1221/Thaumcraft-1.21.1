@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "full_height=true": {"model": "thaumcraft:block/flux_gas_full"},
+    "full_height=false,level=0": {"model": "thaumcraft:block/flux_gas_0", "x": 180},
+    "full_height=false,level=1": {"model": "thaumcraft:block/flux_gas_1", "x": 180},
+    "full_height=false,level=2": {"model": "thaumcraft:block/flux_gas_2", "x": 180},
+    "full_height=false,level=3": {"model": "thaumcraft:block/flux_gas_3", "x": 180},
+    "full_height=false,level=4": {"model": "thaumcraft:block/flux_gas_4", "x": 180},
+    "full_height=false,level=5": {"model": "thaumcraft:block/flux_gas_5", "x": 180},
+    "full_height=false,level=6": {"model": "thaumcraft:block/flux_gas_6", "x": 180},
+    "full_height=false,level=7": {"model": "thaumcraft:block/flux_gas_7", "x": 180},
+    "full_height=false,level=8": {"model": "thaumcraft:block/flux_gas_8", "x": 180}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:doors",
+    "#minecraft:all_signs",
+    "minecraft:sugar_cane",
+    "minecraft:nether_portal",
+    "minecraft:end_portal",
+    "minecraft:end_gateway"
+  ]
+}

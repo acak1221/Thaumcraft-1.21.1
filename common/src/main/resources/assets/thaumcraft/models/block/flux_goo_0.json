@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/block", "ambientocclusion": false,
+  "textures": {"particle": "#all", "all": "thaumcraft:blocks/fluxgoo"},
+  "elements": [{"from": [0, 0, 0], "to": [16, 1.75, 16], "faces": {
+    "down": {"texture": "#all", "cullface": "down"}, "up": {"texture": "#all"},
+    "north": {"texture": "#all", "uv": [0, 7.125, 8, 8], "cullface": "north"},
+    "south": {"texture": "#all", "uv": [0, 7.125, 8, 8], "cullface": "south"},
+    "west": {"texture": "#all", "uv": [0, 7.125, 8, 8], "cullface": "west"},
+    "east": {"texture": "#all", "uv": [0, 7.125, 8, 8], "cullface": "east"}
+  }}]
+}

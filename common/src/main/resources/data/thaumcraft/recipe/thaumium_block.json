@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": ["KKK", "KKK", "KKK"],
+  "key": {"K": {"tag": "c:ingots/thaumium"}},
+  "result": {"id": "thaumcraft:thaumium_block", "count": 1}
+}

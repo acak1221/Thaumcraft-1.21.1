@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "CORELIQUID", "source_order": 178,
+  "catalyst": {"item": "thaumcraft:golem_core_blank"},
+  "result": {"id": "thaumcraft:golem_core_liquid", "count": 1},
+  "aspects": {"aqua": 5, "vacuos": 5}
+}

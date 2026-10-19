@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "thaumcraft:taint_fibres", "required": false}
+  ]
+}

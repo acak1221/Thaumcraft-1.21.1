@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "CRUCIBLE",
+  "source_order": 0,
+  "catalyst": {"item": "thaumcraft:air_shard"},
+  "result": {"id": "thaumcraft:balance_shard", "count": 1},
+  "aspects": {"ignis": 2, "aqua": 2, "terra": 2, "ordo": 2, "perditio": 2}
+}

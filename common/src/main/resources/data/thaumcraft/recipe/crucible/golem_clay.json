@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "GOLEMCLAY", "source_order": 167,
+  "catalyst": {"item": "minecraft:clay"},
+  "result": {"id": "thaumcraft:golem_clay", "count": 1},
+  "aspects": {"humanus": 4, "motus": 4, "spiritus": 4}
+}

@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["#minecraft:is_taiga", "minecraft:grove", {"id": "#c:is_tree/coniferous", "required": false}]
+}

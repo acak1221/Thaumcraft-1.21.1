@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_overworld",
+    "#thaumcraft:ore_biome_types/coniferous", "#thaumcraft:ore_biome_types/forest",
+    "#thaumcraft:ore_biome_types/savanna", "#thaumcraft:ore_biome_types/plains",
+    "#thaumcraft:ore_biome_types/swamp", "#thaumcraft:ore_biome_types/lush", "#thaumcraft:ore_biome_types/magical"
+  ]
+}

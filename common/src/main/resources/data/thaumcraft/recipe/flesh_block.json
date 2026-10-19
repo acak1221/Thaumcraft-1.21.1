@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": ["RRR", "RRR", "RRR"],
+  "key": {"R": {"item": "minecraft:rotten_flesh"}},
+  "result": {"id": "thaumcraft:flesh_block", "count": 1}
+}

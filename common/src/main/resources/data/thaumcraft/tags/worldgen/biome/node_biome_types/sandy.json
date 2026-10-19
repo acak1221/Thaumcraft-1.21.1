@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["minecraft:desert", "minecraft:beach", "minecraft:snowy_beach", "#minecraft:is_badlands", {"id": "#c:is_sandy", "required": false}]
+}

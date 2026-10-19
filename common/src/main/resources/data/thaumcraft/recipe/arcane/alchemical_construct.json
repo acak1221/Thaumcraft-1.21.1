@@ -1,0 +1,13 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "DISTILESSENTIA",
+  "pattern": ["VTF", "TWT", "FTV"],
+  "key": {
+    "V": {"item": "thaumcraft:essentia_valve"},
+    "T": {"item": "thaumcraft:essentia_tube"},
+    "F": {"item": "thaumcraft:vis_filter"},
+    "W": {"item": "thaumcraft:greatwood_planks"}
+  },
+  "result": {"id": "thaumcraft:alchemical_construct", "count": 1},
+  "vis": {"aqua": 5, "ordo": 5}
+}

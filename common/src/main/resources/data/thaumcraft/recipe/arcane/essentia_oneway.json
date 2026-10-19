@@ -1,0 +1,10 @@
+{
+  "type": "thaumcraft:arcane_shapeless",
+  "research": "TUBEFILTER",
+  "ingredients": [
+    {"item": "thaumcraft:essentia_tube"},
+    [{"tag": "thaumcraft:blue_dyes"}, {"tag": "c:dyes/blue"}]
+  ],
+  "result": {"id": "thaumcraft:essentia_oneway", "count": 1},
+  "vis": {"aqua": 5, "ordo": 8, "perditio": 8}
+}

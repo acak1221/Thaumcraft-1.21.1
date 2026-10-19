@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shaped", "category": "building",
+  "pattern": ["W"], "key": {"W": {"item": "thaumcraft:silverwood_log"}},
+  "result": {"id": "thaumcraft:silverwood_planks", "count": 4}
+}

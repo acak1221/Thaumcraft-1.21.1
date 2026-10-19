@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "full_height=true": {"model": "thaumcraft:block/flux_goo_full"},
+    "full_height=false,level=0": {"model": "thaumcraft:block/flux_goo_0"},
+    "full_height=false,level=1": {"model": "thaumcraft:block/flux_goo_1"},
+    "full_height=false,level=2": {"model": "thaumcraft:block/flux_goo_2"},
+    "full_height=false,level=3": {"model": "thaumcraft:block/flux_goo_3"},
+    "full_height=false,level=4": {"model": "thaumcraft:block/flux_goo_4"},
+    "full_height=false,level=5": {"model": "thaumcraft:block/flux_goo_5"},
+    "full_height=false,level=6": {"model": "thaumcraft:block/flux_goo_6"},
+    "full_height=false,level=7": {"model": "thaumcraft:block/flux_goo_7"},
+    "full_height=false,level=8": {"model": "thaumcraft:block/flux_goo_8"}
+  }
+}

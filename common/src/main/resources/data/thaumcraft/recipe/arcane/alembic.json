@@ -1,0 +1,13 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "DISTILESSENTIA",
+  "pattern": ["FIG", "IBI", "I I"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "B": {"item": "minecraft:bucket"},
+    "G": {"item": "minecraft:gold_ingot"},
+    "F": {"item": "thaumcraft:vis_filter"}
+  },
+  "result": {"id": "thaumcraft:alembic", "count": 1},
+  "vis": {"aer": 5, "aqua": 5}
+}

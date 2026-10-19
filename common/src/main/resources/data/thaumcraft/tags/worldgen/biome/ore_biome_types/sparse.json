@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["#minecraft:is_savanna", "#minecraft:is_hill", "minecraft:wooded_badlands", "minecraft:sparse_jungle", "minecraft:windswept_forest", "minecraft:snowy_slopes", "minecraft:jagged_peaks", "minecraft:frozen_peaks", {"id": "#c:is_sparse_vegetation/overworld", "required": false}]
+}

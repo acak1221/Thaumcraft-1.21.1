@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["#c:ores/cinnabar", "#c:ores/amber", "#c:ores/infused_air", "#c:ores/infused_fire", "#c:ores/infused_water", "#c:ores/infused_earth", "#c:ores/infused_order", "#c:ores/infused_entropy"]
+}

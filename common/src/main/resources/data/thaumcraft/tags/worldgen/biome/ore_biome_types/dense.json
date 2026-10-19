@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["minecraft:dark_forest", "minecraft:old_growth_birch_forest", "minecraft:old_growth_spruce_taiga", "minecraft:jungle", "minecraft:bamboo_jungle", "minecraft:mangrove_swamp", {"id": "#c:is_dense_vegetation/overworld", "required": false}]
+}

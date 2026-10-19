@@ -1,0 +1,17 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "ROD_silverwood",
+  "input": {"item": "thaumcraft:silverwood_log"},
+  "components": [
+    {"item": "thaumcraft:balance_shard"},
+    {"item": "thaumcraft:air_shard"},
+    {"item": "thaumcraft:fire_shard"},
+    {"item": "thaumcraft:water_shard"},
+    {"item": "thaumcraft:earth_shard"},
+    {"item": "thaumcraft:order_shard"},
+    {"item": "thaumcraft:entropy_shard"}
+  ],
+  "aspects": {"aer": 9, "ignis": 9, "aqua": 9, "terra": 9, "ordo": 9, "perditio": 9, "praecantatio": 9},
+  "instability": 5,
+  "result": {"id": "thaumcraft:wand_rod_silverwood", "count": 1}
+}

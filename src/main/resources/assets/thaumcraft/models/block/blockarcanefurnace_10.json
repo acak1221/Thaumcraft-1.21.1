@@ -1,0 +1,39 @@
+{
+  "comment": "Meta 10 is the former iron-bars nozzle. FACING points toward the lava core, so this north-core base uses SOUTH faces toward the exterior. Keep the TC4 depth order grate (10/16), grin (0.8), then fire (0.9); reversing the faces makes all three sheets backface-culled in Forge 1.12.",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "thaumcraft:blocks/furnace13",
+    "grate": "thaumcraft:blocks/furnace13",
+    "grin": "thaumcraft:blocks/furnace15",
+    "fire": "minecraft:blocks/fire_layer_0"
+  },
+  "elements": [
+    {
+      "comment": "Outermost grate at z=6/16 for a core to the north",
+      "from": [0, 0, 5],
+      "to": [16, 16, 6],
+      "shade": false,
+      "faces": {
+        "south": { "texture": "#grate" }
+      }
+    },
+    {
+      "comment": "Grinning trim behind the grate at z=3.2/16",
+      "from": [0, 0, 2.2],
+      "to": [16, 16, 3.2],
+      "shade": false,
+      "faces": {
+        "south": { "texture": "#grin" }
+      }
+    },
+    {
+      "comment": "Animated fire deepest at z=1.6/16 and 1.5 blocks tall, as in TC4",
+      "from": [0, 0, 0.6],
+      "to": [16, 24, 1.6],
+      "shade": false,
+      "faces": {
+        "south": { "texture": "#fire" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "target": {
+    "minecraft": "1.21.1",
+    "java": 21,
+    "gradle": "8.12.1",
+    "architectury": "13.0.11",
+    "fabricLoader": "0.16.14",
+    "fabricApi": "0.116.17+1.21.1",
+    "neoforge": "21.1.259"
+  },
+  "baseline": {
+    "url": "https://github.com/0FL01/Thaumcraft-4.2-FOREVA",
+    "commit": "4bc68454b1063cdc1255f833dd537e0fd4fc341d"
+  },
+  "original": {
+    "version": "Thaumcraft 4.2.3.5",
+    "file": "Thaumcraft-1.7.10-4.2.3.5.jar",
+    "sha1": "3f51b473f9ef7a94d1a9e01f6784af1cfd811649",
+    "sha256": "3dba9786966974701578a658d1bb369bf35bdf5f363079f5ac9c4910a39113be",
+    "oracle": "../work/thaumcraft-4.2.3.5-oracle",
+    "decompiler": "CFR 0.152"
+  },
+  "references": [
+    {
+      "url": "https://github.com/IgnoreLicensesCN/OpenTC4-Architectury",
+      "commit": "1509b3192910aaca0af8bba1b55d189a675010bf",
+      "minecraft": "1.20.1",
+      "role": "platform patterns only; incomplete",
+      "upstream_checked_date": "2026-10-15",
+      "upstream_head_at_check": "3a836a39c416a4449e825c519dacd50a5fc9eb32",
+      "upstream_check_scope": "Pinned reference retained; current upstream delta and separate inventory documented in docs/analysis/2026-10-15-reference-comparison-ru.md"
+    },
+    {
+      "url": "https://github.com/IgnoreLicensesCN/OpenTC4",
+      "commit": "80aac29c52543ef51766c4b0788fba782abb3b0b",
+      "minecraft": "1.7.10",
+      "role": "modified historical 1.7.10 reference only; not the original gameplay specification",
+      "upstream_checked_date": "2026-10-15",
+      "upstream_head_at_check": "80aac29c52543ef51766c4b0788fba782abb3b0b",
+      "upstream_check_scope": "Pinned reference retained; current upstream delta and separate inventory documented in docs/analysis/2026-10-15-reference-comparison-ru.md"
+    },
+    {
+      "url": "https://github.com/EugeneHeisst/thaumcraft-port",
+      "commit": "a9b7a613c9c3e5a4418f30e0cf38553ac328b1e6",
+      "ref": "v0.17.169",
+      "role": "selective modern-API reference only; incomplete, no donor gameplay code/assets copied",
+      "upstream_checked_date": "2026-10-16",
+      "upstream_check_scope": "docs/analysis/2026-10-16-eugene-reference.md; attribution is not a licence for original Thaumcraft material"
+    },
+    {
+      "url": "https://github.com/notlikethiss/thaumcraft-4-reforged",
+      "commit": "d1e64cc527a8fa0c99ae738cc9c0bd0370d4bd7e",
+      "ref": "mc/1.21.1",
+      "minecraft": "1.21.1",
+      "java": 21,
+      "loader": "NeoForge 21.1.256; no Fabric/Architectury",
+      "role": "read-only platform/implementation reference for tubes, infusion and rendering; TC4 oracle remains the gameplay specification",
+      "license_observed": "All Rights Reserved; README personal-use restriction; copying/distribution permission not established",
+      "upstream_checked_date": "2026-10-16",
+      "upstream_check_scope": "Code paths and upstream build CI inspected, no donor build/game run and no donor code/assets copied"
+    },
+    {
+      "url": "https://github.com/notlikethiss/thaumcraft-4-reforged",
+      "commit": "15c4ac0e9198049228a1d102137fd07fce44c5eb",
+      "ref": "main",
+      "minecraft": "26.3",
+      "java": 25,
+      "loader": "NeoForge 26.3.0.57-beta",
+      "role": "read-only later-module reference, notably golems; not the target branch or a drop-in 1.21.1 implementation",
+      "license_observed": "All Rights Reserved; README personal-use restriction; copying/distribution permission not established",
+      "upstream_checked_date": "2026-10-16",
+      "upstream_check_scope": "Actual source inspected separately from mc/1.21.1; no donor build/game run or code/assets copied"
+    },
+    {
+      "url": "https://github.com/DJDMM/Thaumcraft-6-1.20.1-port",
+      "commit": "3ee6ed6ec5a55520cc9f599a944e46f89ac3ba74",
+      "ref": "main",
+      "minecraft": "1.20.1",
+      "java": 17,
+      "loader": "Forge 47.4.10; no Fabric/NeoForge module",
+      "role": "read-only modern rendering/transport API reference; TC6 gameplay is not the TC4 specification",
+      "license_observed": "All rights reserved in mods.toml; translation-only MIT does not license code/assets; copying permission not established",
+      "upstream_checked_date": "2026-10-16",
+      "upstream_check_scope": "Actual HEAD source inspected; old v0.10.0-dev JAR inspected without execution and does not prove current HEAD; no donor build/game run or code/assets copied"
+    }
+  ],
+  "worldCompatibility": "fresh 1.21.1 worlds only; no legacy world migration",
+  "buildToolChecksums": {
+    "gradleWrapperJarSha256": "2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046",
+    "gradleDistributionSha256": "8d97a97984f6cbd2b85fe4c60a743440a347544bf18818048e611f5288d46c94",
+    "gradleWrapperVerifiedAgainst": "https://raw.githubusercontent.com/gradle/gradle/v8.12.1/gradle/wrapper/gradle-wrapper.jar"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "type": "thaumcraft:crucible", "research": "GOLEMWOOD", "source_order": 165,
+  "catalyst": {"item": "thaumcraft:greatwood_log"},
+  "result": {"id": "thaumcraft:golem_wood", "count": 1},
+  "aspects": {"humanus": 4, "motus": 4, "spiritus": 4}
+}

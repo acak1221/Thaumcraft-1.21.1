@@ -1,0 +1,54 @@
+{
+  "ambientocclusion": false,
+  "textures": {"particle": "thaumcraft:blocks/woodplain", "table": "thaumcraft:models/worktable"},
+  "elements": [
+    {"from": [0, 8, 0], "to": [16, 16, 16], "faces": {
+      "down": {"texture": "#table", "uv": [4, 4, 6, 0]},
+      "up": {"texture": "#table", "uv": [2, 0, 4, 4]},
+      "west": {"texture": "#table", "uv": [0, 4, 2, 6]},
+      "east": {"texture": "#table", "uv": [4, 4, 6, 6]},
+      "south": {"texture": "#table", "uv": [2, 4, 4, 6]},
+      "north": {"texture": "#table", "uv": [6, 4, 8, 6]}
+    }},
+    {"from": [0, 0, 0], "to": [16, 4, 16], "faces": {
+      "down": {"texture": "#table", "uv": [4, 12, 6, 8]},
+      "up": {"texture": "#table", "uv": [2, 8, 4, 12]},
+      "west": {"texture": "#table", "uv": [0, 12, 2, 13]},
+      "east": {"texture": "#table", "uv": [4, 12, 6, 13]},
+      "south": {"texture": "#table", "uv": [2, 12, 4, 13]},
+      "north": {"texture": "#table", "uv": [6, 12, 8, 13]}
+    }},
+    {"from": [11, 4, 11], "to": [15, 8, 15], "faces": {
+      "down": {"texture": "#table", "uv": [10, 1, 10.5, 0]},
+      "up": {"texture": "#table", "uv": [9.5, 0, 10, 1]},
+      "west": {"texture": "#table", "uv": [9, 1, 9.5, 2]},
+      "east": {"texture": "#table", "uv": [10, 1, 10.5, 2]},
+      "south": {"texture": "#table", "uv": [9.5, 1, 10, 2]},
+      "north": {"texture": "#table", "uv": [10.5, 1, 11, 2]}
+    }},
+    {"from": [1, 4, 1], "to": [5, 8, 5], "faces": {
+      "down": {"texture": "#table", "uv": [10, 1, 10.5, 0]},
+      "up": {"texture": "#table", "uv": [9.5, 0, 10, 1]},
+      "west": {"texture": "#table", "uv": [9, 1, 9.5, 2]},
+      "east": {"texture": "#table", "uv": [10, 1, 10.5, 2]},
+      "south": {"texture": "#table", "uv": [9.5, 1, 10, 2]},
+      "north": {"texture": "#table", "uv": [10.5, 1, 11, 2]}
+    }},
+    {"from": [1, 4, 11], "to": [5, 8, 15], "faces": {
+      "down": {"texture": "#table", "uv": [10, 1, 10.5, 0]},
+      "up": {"texture": "#table", "uv": [9.5, 0, 10, 1]},
+      "west": {"texture": "#table", "uv": [9, 1, 9.5, 2]},
+      "east": {"texture": "#table", "uv": [10, 1, 10.5, 2]},
+      "south": {"texture": "#table", "uv": [9.5, 1, 10, 2]},
+      "north": {"texture": "#table", "uv": [10.5, 1, 11, 2]}
+    }},
+    {"from": [11, 4, 1], "to": [15, 8, 5], "faces": {
+      "down": {"texture": "#table", "uv": [10, 1, 10.5, 0]},
+      "up": {"texture": "#table", "uv": [9.5, 0, 10, 1]},
+      "west": {"texture": "#table", "uv": [9, 1, 9.5, 2]},
+      "east": {"texture": "#table", "uv": [10, 1, 10.5, 2]},
+      "south": {"texture": "#table", "uv": [9.5, 1, 10, 2]},
+      "north": {"texture": "#table", "uv": [10.5, 1, 11, 2]}
+    }}
+  ]
+}

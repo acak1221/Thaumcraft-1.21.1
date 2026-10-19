@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["#thaumcraft:ore_biome_types/snowy", "#minecraft:is_taiga", "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_shore", "minecraft:cold_ocean", "minecraft:deep_cold_ocean", "minecraft:frozen_ocean", "minecraft:deep_frozen_ocean", "minecraft:frozen_river", {"id": "#c:is_cold/overworld", "required": false}]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {"wax":"thaumcraft:blocks/candle","wick":"thaumcraft:blocks/candlestub","particle":"thaumcraft:blocks/candle"},
+  "elements": [
+    {"from":[6,0,6],"to":[10,8,10],"faces":{"down":{"texture":"#wax"},"up":{"texture":"#wax"},"north":{"texture":"#wax"},"south":{"texture":"#wax"},"west":{"texture":"#wax"},"east":{"texture":"#wax"}}},
+    {"from":[7.6,8,7.6],"to":[8.4,10,8.4],"faces":{"down":{"texture":"#wick"},"up":{"texture":"#wick"},"north":{"texture":"#wick"},"south":{"texture":"#wick"},"west":{"texture":"#wick"},"east":{"texture":"#wick"}}}
+  ]
+}

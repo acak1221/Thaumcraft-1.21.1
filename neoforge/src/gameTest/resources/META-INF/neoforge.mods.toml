@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="See THIRD_PARTY_NOTICES.md in the production mod"
+[[mods]]
+modId="thaumcraft_gametest"
+version="1.0.0"
+displayName="Thaumcraft isolated GameTest harness"
+description='''Opt-in test-only bootstrap; never included in a production mod or normal run.'''
+[[dependencies.thaumcraft_gametest]]
+modId="thaumcraft"
+type="required"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+[[dependencies.thaumcraft_gametest]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.259,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.thaumcraft_gametest]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"

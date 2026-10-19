@@ -124,6 +124,13 @@ public final class ThaumcraftRecipeDisplay {
             alias("CoreButcher", "crucible/golem_core_butcher"), // 177, actual Guard catalyst / Corpus5 Bestia5
             alias("CoreUse", "infusion/golem_core_use"), // 374, Empty center / damage0 flint and steel + shears
             alias("AdvancedGolem", "infusion/golem_advanced"), // 326, any golem placer patched with advanced / redstone, glowstone dust, gunpowder, empty jar, zombie brain
+            alias("TinyHat", "arcane/golem_decoration_tophat"), // 252, black wool / gold ingot
+            alias("TinyFez", "arcane/golem_decoration_fez"), // 253, red wool / string
+            alias("TinyBowtie", "arcane/golem_decoration_bowtie"), // 254, black wool / string
+            alias("TinyGlasses", "arcane/golem_decoration_glasses"), // 255, glass / iron ingot
+            alias("TinyVisor", "arcane/golem_decoration_visor"), // 257, iron ingots / any leather helmet
+            alias("TinyArmor", "arcane/golem_decoration_armor"), // 258, iron ingots / any leather tunic
+            alias("TinyHammer", "arcane/golem_decoration_mace"), // 259, seven iron ingots; TinyDart (256) waits for the launcher
             alias("GolemBell", "arcane/golem_bell"), // 263, quartz items / stickWood
             alias("UpgradeAir", "arcane/golem_upgrade_air"), // 265, eight gold nuggets around the air shard (damage 0)
             alias("UpgradeEarth", "arcane/golem_upgrade_earth"), // 266, earth shard is damage 3, not 1

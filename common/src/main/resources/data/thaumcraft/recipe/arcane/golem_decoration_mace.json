@@ -1,0 +1,22 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "TINYHAMMER",
+  "pattern": [
+    "III",
+    "III",
+    " I "
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:golem_decoration_mace",
+    "count": 1
+  },
+  "vis": {
+    "terra": 4,
+    "ignis": 4
+  }
+}

@@ -76,6 +76,7 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.container.ContainerGolem;
 import thaumcraft.common.items.golems.GolemData;
+import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemGuardTargets;
 import thaumcraft.common.items.golems.GolemMarker;
@@ -86,6 +87,7 @@ import thaumcraft.common.items.golems.GolemWaterCargo;
 import thaumcraft.common.items.golems.ItemGolemPlacer;
 import thaumcraft.common.items.golems.ItemGolemBell;
 import thaumcraft.common.items.golems.ItemGolemCore;
+import thaumcraft.common.items.golems.ItemGolemDecoration;
 import thaumcraft.common.items.golems.ItemGolemUpgrade;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
@@ -126,6 +128,8 @@ public class EntityGolemBase extends AbstractGolem {
     private static final EntityDataAccessor<Integer> UPGRADES = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
     // Advanced golem (original placer/entity tag "advanced"): the client needs it only for the number of upgrade slots.
     private static final EntityDataAccessor<Boolean> ADVANCED = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.BOOLEAN);
+    // Accessory letters in installation order (GolemDecorations); the client renders them, the server derives every effect.
+    private static final EntityDataAccessor<String> DECORATION = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.STRING);
     private static final Codec<List<GolemMarker>> MARKER_CODEC = GolemMarker.CODEC.listOf();
     private static final SoundEvent UPGRADE = sound("upgrade"), ZAP = sound("zap"), CLACK = sound("cameraclack");
     private static final List<String> CONFIG_KEYS = List.of("GolemType", "GolemCore", "Core", "HomeFacing",
@@ -169,6 +173,7 @@ public class EntityGolemBase extends AbstractGolem {
     // Order Guard target switches (GolemGuardTargets); server-only, the menu mirrors them. Default: hostile monsters only.
     private int guardTargets = GolemGuardTargets.DEFAULT;
     private boolean advanced;
+    private String decoration = "";
     private int core = GolemData.NO_CORE;
     private int material;
     private int regenTimer;
@@ -246,6 +251,7 @@ public class EntityGolemBase extends AbstractGolem {
         builder.define(FILL_ANY, false);
         builder.define(UPGRADES, 0);
         builder.define(ADVANCED, false);
+        builder.define(DECORATION, "");
     }
     @Override public void checkDespawn() { /* Original placed golems never naturally despawn. */ }
     @Override protected SoundEvent getAmbientSound() { return CLACK; }
@@ -272,6 +278,8 @@ public class EntityGolemBase extends AbstractGolem {
         material = value;
         advanced = false; // A fresh golem is ordinary; applyConfiguration may make it advanced.
         entityData.set(ADVANCED, false);
+        decoration = "";
+        entityData.set(DECORATION, "");
         upgradeSlots = GolemUpgrades.empty(EnumGolemType.getType(value).upgrades);
         entityData.set(UPGRADES, 0);
         applyMaterialAttributes(EnumGolemType.getType(value));
@@ -282,10 +290,10 @@ public class EntityGolemBase extends AbstractGolem {
         // Keep native modifiers and every unrelated saved attribute. Only the
         // four canonical material BASE values are selected here, with the Air
         // speed factor and the Earth damage (original E:255, :376) on top.
-        getAttribute(Attributes.MAX_HEALTH).setBaseValue(type.health);
-        getAttribute(Attributes.ARMOR).setBaseValue(type.armor);
-        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(GolemUpgrades.speed(type.speed, GolemUpgrades.count(upgradeSlots, GolemUpgrade.AIR), advanced));
-        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(GolemUpgrades.meleeDamage(type.strength, GolemUpgrades.count(upgradeSlots, GolemUpgrade.EARTH)));
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(type.health + GolemDecorations.maxHealthBonus(decoration));
+        getAttribute(Attributes.ARMOR).setBaseValue(GolemDecorations.armor(type.armor, decoration));
+        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(GolemUpgrades.speed(type.speed, GolemUpgrades.count(upgradeSlots, GolemUpgrade.AIR), advanced, decoration));
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(GolemUpgrades.meleeDamage(type.strength, GolemUpgrades.count(upgradeSlots, GolemUpgrade.EARTH), decoration));
     }
     @Override public boolean fireImmune() {
         EnumGolemType type = EnumGolemType.getType(getGolemMaterial());
@@ -320,9 +328,11 @@ public class EntityGolemBase extends AbstractGolem {
     /** Original E:255: Earth is counted twice, once inside the strength and once more here. */
     public float getMeleeDamage() {
         EnumGolemType type = EnumGolemType.getType(getGolemMaterial());
-        return type == null ? 0 : GolemUpgrades.meleeDamage(type.strength, getUpgradeAmount(GolemUpgrade.EARTH));
+        return type == null ? 0 : GolemUpgrades.meleeDamage(type.strength, getUpgradeAmount(GolemUpgrade.EARTH), getDecoration());
     }
     public boolean isAdvanced() { return level().isClientSide ? entityData.get(ADVANCED) : advanced; }
+    /** The accessory letters in installation order (original E:112, 819-825); empty when undecorated. */
+    public String getDecoration() { return level().isClientSide ? entityData.get(DECORATION) : decoration; }
     /** The material's upgrade slots plus the advanced golem's extra one (original E:149, 625). */
     public int getUpgradeSlotCount() {
         EnumGolemType type = EnumGolemType.getType(getGolemMaterial());
@@ -340,6 +350,11 @@ public class EntityGolemBase extends AbstractGolem {
     private void syncUpgrades() { entityData.set(UPGRADES, GolemUpgrades.pack(upgradeSlots)); }
     /** Original E:1148: 20 ticks, 18 for an advanced golem. */
     public int getAttackSpeed() { return GolemUpgrades.attackSpeed(isAdvanced()); }
+    /** Ticks between two repairs: the material's delay, two thirds of it with a fez (original E:386-389). */
+    public int getRegenDelay() {
+        EnumGolemType type = EnumGolemType.getType(getGolemMaterial());
+        return type == null ? 0 : GolemDecorations.regenDelay(type.regenDelay, getDecoration());
+    }
     /** Material capacity plus min(16, max(4, capacity)) per Earth upgrade (original E:355-362). */
     public int getCarryLimit() {
         EnumGolemType type = EnumGolemType.getType(getGolemMaterial());
@@ -347,8 +362,8 @@ public class EntityGolemBase extends AbstractGolem {
     }
     /** Water in millibuckets: floor(sqrt(carry limit)) buckets (original E:364-366). */
     public int getFluidCarryLimit() { return GolemUpgrades.fluidLimitMb(getCarryLimit()); }
-    /** Work radius {@code 16 + 4n} for n Water upgrades, +20% (at least 2) when advanced (original E:460-469; no decoration yet). */
-    public float getRange() { return GolemUpgrades.range(getUpgradeAmount(GolemUpgrade.WATER), isAdvanced()); }
+    /** Work radius {@code 16 + 4n} for n Water upgrades, +10% (at least 1) with spectacles, +20% (at least 2) when advanced (original E:417-427). */
+    public float getRange() { return GolemUpgrades.range(getUpgradeAmount(GolemUpgrade.WATER), isAdvanced(), getDecoration()); }
     /** The original's {@code dmod * dmod}: float arithmetic, shared by every squared home/marker/target bound. */
     double rangeSqr() {
         float range = getRange();
@@ -595,7 +610,7 @@ public class EntityGolemBase extends AbstractGolem {
         int slots = getSlotCount();
         return new GolemData(getGolemCore(), FILTERS.subList(0, slots).stream().map(filter -> entityData.get(filter).copy()).toList(),
                 WANTED.subList(0, slots).stream().map(entityData::get).toList(), isFillAnyAmount(), getMarkers(), getUseOptions(),
-                GolemUpgrades.toList(upgradeSlots), COLORS.subList(0, slots).stream().map(entityData::get).toList(), guardTargets, advanced);
+                GolemUpgrades.toList(upgradeSlots), COLORS.subList(0, slots).stream().map(entityData::get).toList(), guardTargets, advanced, decoration);
     }
     public void applyConfiguration(GolemData data) {
         requireServerThread();
@@ -639,9 +654,12 @@ public class EntityGolemBase extends AbstractGolem {
         useOptions = data.useOptions();
         advanced = data.advanced();
         entityData.set(ADVANCED, advanced);
+        decoration = data.decoration();
+        entityData.set(DECORATION, decoration);
         upgradeSlots = fittedUpgrades;
         syncUpgrades();
         applyMaterialAttributes(EnumGolemType.getType(material));
+        setHealth(getMaxHealth()); // A fresh placement starts at full health, including a top hat's five.
         for (int slot = 0; slot < slots; slot++) {
             if (core == GolemData.LIQUID || core == GolemData.USE) entityData.set(FILTERS.get(slot), filters.get(slot).copy());
             else if (requiresEmptyControls(core)) entityData.set(FILTERS.get(slot), ItemStack.EMPTY); // Validated empty, not payload normalization.
@@ -824,7 +842,7 @@ public class EntityGolemBase extends AbstractGolem {
         if (EnumGolemType.isSupported(material) && !unsupported) {
             if (regenTimer > 0) --regenTimer;
             else {
-                regenTimer = EnumGolemType.getType(material).regenDelay;
+                regenTimer = getRegenDelay();
                 if (getHealth() < getMaxHealth()) {
                     heal(1);
                     entityData.set(HEALING, 5);
@@ -1131,6 +1149,8 @@ public class EntityGolemBase extends AbstractGolem {
             // Fire (original E:1120-1122): only a hit that actually landed sets the victim alight, 4 s per upgrade.
             int fire = getUpgradeAmount(GolemUpgrade.FIRE);
             if (hurt && fire > 0) victim.igniteForSeconds(GolemUpgrades.igniteSeconds(fire));
+            // Visor (original E:1068-1071): the victim counts as recently struck by a player, so it drops experience.
+            if (hurt && GolemDecorations.marksRecentHit(decoration)) victim.lastHurtByPlayerTime = GolemDecorations.RECENT_HIT_TICKS;
             return hurt;
         } finally { busy = false; }
     }
@@ -2053,6 +2073,13 @@ public class EntityGolemBase extends AbstractGolem {
             installCore(player, hand, held, coreItem.getCore());
             return InteractionResult.CONSUME;
         }
+        if (held.getItem() instanceof ItemGolemDecoration decorationItem) {
+            // Original customInteraction:896-899: any golem, even a coreless one; refused repeats and partners pay nothing.
+            if (!GolemDecorations.canAdd(getDecoration(), decorationItem.letter())) return InteractionResult.PASS;
+            if (level().isClientSide) return InteractionResult.SUCCESS;
+            installDecoration(player, hand, held, decorationItem.letter());
+            return InteractionResult.CONSUME;
+        }
         if (held.getItem() instanceof ItemGolemUpgrade upgradeItem) {
             // Original E:991-1006 follows core installation. No free slot (or a third of one type)
             // means no payment AND no menu while an upgrade is held. Works on a coreless golem too.
@@ -2110,6 +2137,23 @@ public class EntityGolemBase extends AbstractGolem {
             syncUpgrades();
             applyMaterialAttributes(EnumGolemType.getType(material));
             playSound(UPGRADE, .5F, 1);
+            player.getInventory().setChanged();
+        } finally { busy = false; }
+    }
+    private void installDecoration(Player player, InteractionHand hand, ItemStack held, char letter) {
+        requireServerThread();
+        busy = true;
+        try {
+            if (player.getItemInHand(hand) != held || !(held.getItem() instanceof ItemGolemDecoration item) || item.letter() != letter
+                    || essentiaMutationActive() || !canInteract(player, held) || !GolemDecorations.canAdd(decoration, letter)) return;
+            decoration = decoration + letter; // The installation precedes its one-item payment, like the core and upgrades.
+            if (!player.getAbilities().instabuild) {
+                held.shrink(1);
+                if (held.isEmpty()) player.setItemInHand(hand, ItemStack.EMPTY);
+            }
+            entityData.set(DECORATION, decoration);
+            applyMaterialAttributes(EnumGolemType.getType(material));
+            playSound(CLACK, 1, 1);
             player.getInventory().setChanged();
         } finally { busy = false; }
     }
@@ -2305,6 +2349,7 @@ public class EntityGolemBase extends AbstractGolem {
         tag.put("Markers", MARKER_CODEC.encodeStart(NbtOps.INSTANCE, markers).getOrThrow());
         tag.putByteArray("upgrades", GolemUpgrades.toBytes(upgradeSlots)); // Original key; -1 is an empty slot.
         if (advanced) tag.putBoolean("advanced", true); // Original key; omitted while false so earlier saves keep their form.
+        if (!decoration.isEmpty()) tag.putString("Decoration", decoration); // Original key; omitted while empty.
         if (retainedConfiguration != null) for (String key : retainedConfiguration.getAllKeys()) {
             tag.put(key, retainedConfiguration.get(key).copy());
         }
@@ -2342,6 +2387,8 @@ public class EntityGolemBase extends AbstractGolem {
         upgradeSlots = new int[0];
         advanced = !unsupported && tag.getBoolean("advanced");
         entityData.set(ADVANCED, advanced);
+        decoration = !unsupported ? tag.getString("Decoration") : "";
+        entityData.set(DECORATION, decoration);
         if (!unsupported) {
             int[] stored = GolemUpgrades.fromBytes(tag.getByteArray("upgrades"), GolemUpgrades.slotCount(EnumGolemType.getType(material).upgrades, advanced));
             if (stored == null) unsupported = true;
@@ -2495,7 +2542,8 @@ public class EntityGolemBase extends AbstractGolem {
                 || tag.contains("colors") && !tag.contains("colors", Tag.TAG_BYTE_ARRAY)
                 || tag.contains("GuardTargets") && !tag.contains("GuardTargets", Tag.TAG_BYTE)) return true;
         if (tag.contains("advanced") && (!tag.contains("advanced", Tag.TAG_BYTE) || tag.getByte("advanced") < 0 || tag.getByte("advanced") > 1)
-                || !tag.getString("Decoration").isEmpty() || !tag.getString("deco").isEmpty()
+                || tag.contains("Decoration") && (!tag.contains("Decoration", Tag.TAG_STRING) || !GolemDecorations.valid(tag.getString("Decoration")))
+                || !tag.getString("deco").isEmpty()
                 || tag.getByte("toggles") != 0) return true;
         if (tag.contains("Core") && tag.contains("GolemCore") && tag.getInt("Core") != tag.getInt("GolemCore")) return true;
         return false;

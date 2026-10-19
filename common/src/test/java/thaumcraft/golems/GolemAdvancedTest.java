@@ -111,8 +111,8 @@ class GolemAdvancedTest {
         assertEquals(guard, decoded);
         assertEquals(GolemGuardTargets.ANIMALS | GolemGuardTargets.PLAYERS, decoded.guardTargets());
         assertTrue(decoded.advanced());
-        // Any other bit of that byte is corrupt, never a silently ignored flag.
-        bytes[bytes.length - 1] |= 0x20;
+        // Any other bit of that byte is corrupt, never a silently ignored flag (bit 5 announces a decoration string).
+        bytes[bytes.length - 1] |= 0x40;
         assertThrows(DecoderException.class, () -> GolemData.STREAM_CODEC.decode(
                 new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(bytes), RegistryAccess.EMPTY)));
     }

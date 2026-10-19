@@ -1,0 +1,355 @@
+{
+ "description": "Entropy's item-comparison switches for golems (docs/analysis/2026-10-19-golem-item-match.md)",
+ "watch": {
+  "junit": [
+   "GolemItemMatchTest",
+   "GolemGuardTargetsTest",
+   "GolemAdvancedTest",
+   "GolemDecorationsTest"
+  ],
+  "gametests": [
+   "entropySwitchesChangeWhatRealGolemsFetchEmptyAndSort"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.golems.*"
+ ],
+ "mutants": [
+  {
+   "id": "no-switch-compares-loosely",
+   "name": "no switch compares loosely",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "if (flags == 0) return ItemStack.isSameItemSameComponents(stock, wanted);",
+   "new": "if (flags == 0) return ItemStack.isSameItem(stock, wanted);"
+  },
+  {
+   "id": "tag-switch-does-nothing",
+   "name": "tag switch does nothing",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "if ((flags & TAGS) != 0 && sharesGroup(stock, wanted)) return true;",
+   "new": ""
+  },
+  {
+   "id": "components-switch-does-nothing",
+   "name": "components switch does nothing",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "if ((flags & IGNORE_COMPONENTS) != 0) return true;",
+   "new": ""
+  },
+  {
+   "id": "damage-switch-keeps-the-damage",
+   "name": "damage switch keeps the damage",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "copy.remove(DataComponents.DAMAGE);",
+   "new": ""
+  },
+  {
+   "id": "entropy-no-longer-widens-empty-and-use",
+   "name": "Entropy no longer widens Empty and Use",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "return (core == GolemData.EMPTY_CORE || core == GolemData.USE) && entropyUpgrades > 0 ? flags | TAGS : flags;",
+   "new": "return flags;"
+  },
+  {
+   "id": "harvest-gets-the-switches",
+   "name": "Harvest gets the switches",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "return core == GolemData.FILL ||",
+   "new": "return core == GolemData.HARVEST || core == GolemData.FILL ||"
+  },
+  {
+   "id": "switches-need-no-entropy",
+   "name": "switches need no Entropy",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "return valid(flags) && (flags == 0 || configurable(core, entropyUpgrades));",
+   "new": "return valid(flags);"
+  },
+  {
+   "id": "button-range-is-one-too-wide",
+   "name": "button range is one too wide",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "button < FIRST_BUTTON + BUTTON_COUNT ? 1",
+   "new": "button <= FIRST_BUTTON + BUTTON_COUNT ? 1"
+  },
+  {
+   "id": "an-empty-stock-matches-a-wanted-stack",
+   "name": "an empty stock matches a wanted stack",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "return stock.isEmpty() && wanted.isEmpty();",
+   "new": "return stock.isEmpty() || wanted.isEmpty();"
+  },
+  {
+   "id": "toggle-accepts-several-bits-at-once",
+   "name": "toggle accepts several bits at once",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "return Integer.bitCount(flag) == 1 && (flag & ALL) == flag ? flags ^ flag : flags;",
+   "new": "return (flag & ALL) == flag ? flags ^ flag : flags;"
+  },
+  {
+   "id": "broad-c-tags-count-as-groups",
+   "name": "broad c: tags count as groups",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "return slash > 0 && slash < id.getPath().length() - 1 && MATERIAL_ROOTS.contains(id.getPath().substring(0, slash));",
+   "new": "return slash > 0;"
+  },
+  {
+   "id": "c-material-root-list-is-empty",
+   "name": "c: material root list is empty",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java",
+   "old": "Set.of(\"ingots\", \"nuggets\", \"ores\",",
+   "new": "Set.of(\"never\", \"nuggets\", \"ores\","
+  },
+  {
+   "id": "the-wire-omits-the-bit",
+   "name": "the wire omits the bit",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "| (data.itemMatch == 0 ? 0 : ITEM_MATCH_BIT));",
+   "new": "| 0);"
+  },
+  {
+   "id": "the-wire-omits-the-byte",
+   "name": "the wire omits the byte",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "if (data.itemMatch != 0) buffer.writeByte(data.itemMatch);",
+   "new": ""
+  },
+  {
+   "id": "the-wire-reader-ignores-the-byte",
+   "name": "the wire reader ignores the byte",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "int itemMatch = (tail & ITEM_MATCH_BIT) != 0 ? buffer.readUnsignedByte() : 0;",
+   "new": "int itemMatch = 0;"
+  },
+  {
+   "id": "the-wire-mask-forbids-the-bit",
+   "name": "the wire mask forbids the bit",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "DECORATION_BIT | ITEM_MATCH_BIT)) != 0) throw",
+   "new": "DECORATION_BIT)) != 0) throw"
+  },
+  {
+   "id": "the-wire-accepts-a-zero-byte",
+   "name": "the wire accepts a zero byte",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "(itemMatch == 0 || !GolemItemMatch.valid(itemMatch))",
+   "new": "(!GolemItemMatch.valid(itemMatch))"
+  },
+  {
+   "id": "the-wire-accepts-a-byte-over-the-three-bits",
+   "name": "the wire accepts a byte over the three bits",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "(itemMatch == 0 || !GolemItemMatch.valid(itemMatch))",
+   "new": "(itemMatch == 0)",
+   "expect": "survives",
+   "reason": "the record constructor refuses the same value and the decoder wraps it, so the wire check is redundant defence"
+  },
+  {
+   "id": "the-record-accepts-switches-without-entropy",
+   "name": "the record accepts switches without Entropy",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "if (!GolemItemMatch.acceptable(itemMatch, core, entropyCount(upgrades))) {",
+   "new": "if (false) {"
+  },
+  {
+   "id": "the-json-range-is-wider",
+   "name": "the json range is wider",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/GolemData.java",
+   "old": "Codec.intRange(0, GolemItemMatch.ALL).optionalFieldOf(\"item_match\", 0)",
+   "new": "Codec.intRange(0, 255).optionalFieldOf(\"item_match\", 0)",
+   "expect": "survives",
+   "reason": "the pre-check in the codec (exactInt + valid) rejects the same values before the field codec runs"
+  },
+  {
+   "id": "slot-search-ignores-the-switches",
+   "name": "slot search ignores the switches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/GolemHomeInventory.java",
+   "old": "|| GolemItemMatch.matches(actual, exemplar, match))) return slot;",
+   "new": "|| ItemStack.isSameItemSameComponents(actual, exemplar))) return slot;"
+  },
+  {
+   "id": "stock-count-ignores-the-switches",
+   "name": "stock count ignores the switches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/GolemHomeInventory.java",
+   "old": "if (!actual.isEmpty() && GolemItemMatch.matches(actual, exemplar, match)) count += actual.getCount();",
+   "new": "if (!actual.isEmpty() && ItemStack.isSameItemSameComponents(actual, exemplar)) count += actual.getCount();"
+  },
+  {
+   "id": "sorting-seed-probe-is-exact",
+   "name": "sorting seed probe is exact",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/GolemHomeInventory.java",
+   "old": "&& firstExtractable(exemplar, face, match) >= 0;",
+   "new": "&& firstExtractable(exemplar, face, 0) >= 0;"
+  },
+  {
+   "id": "taking-guard-is-exact",
+   "name": "taking guard is exact",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "|| !GolemItemMatch.matches(actual, exemplar, match)\n",
+   "new": "|| !ItemStack.isSameItemSameComponents(actual, exemplar)\n"
+  },
+  {
+   "id": "taking-searches-exactly",
+   "name": "taking searches exactly",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "int slot = source.firstExtractable(exemplar, face, match);",
+   "new": "int slot = source.firstExtractable(exemplar, face);"
+  },
+  {
+   "id": "entropy-no-longer-widens-in-the-entity",
+   "name": "Entropy no longer widens in the entity",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "int itemMatchFlags() { return GolemItemMatch.effective(itemMatch, core, GolemUpgrades.count(upgradeSlots, GolemUpgrade.ENTROPY)); }",
+   "new": "int itemMatchFlags() { return itemMatch; }"
+  },
+  {
+   "id": "slot-colours-compare-exactly",
+   "name": "slot colours compare exactly",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "GolemItemMatch.matches(stack, exemplar, itemMatch);",
+   "new": "ItemStack.isSameItemSameComponents(exemplar, stack);"
+  },
+  {
+   "id": "entity-never-saves-the-switches",
+   "name": "entity never saves the switches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "if (itemMatch != 0) tag.putByte(\"ItemMatch\", (byte) itemMatch);",
+   "new": ""
+  },
+  {
+   "id": "entity-never-loads-the-switches",
+   "name": "entity never loads the switches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "else itemMatch = stored;",
+   "new": "else itemMatch = 0;"
+  },
+  {
+   "id": "placer-data-forgets-the-switches",
+   "name": "placer data forgets the switches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "guardTargets, advanced, decoration, itemMatch);",
+   "new": "guardTargets, advanced, decoration, 0);"
+  },
+  {
+   "id": "applying-data-forgets-the-switches",
+   "name": "applying data forgets the switches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "itemMatch = data.itemMatch(); //",
+   "new": "itemMatch = 0; //"
+  },
+  {
+   "id": "the-entity-switches-without-entropy",
+   "name": "the entity switches without Entropy",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "|| !canSwitchItemMatch() || !GolemItemMatch.valid(flags)) return false;",
+   "new": "|| !GolemItemMatch.valid(flags)) return false;"
+  },
+  {
+   "id": "fill-request-counts-exactly",
+   "name": "fill request counts exactly",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java",
+   "old": "home.countVisible(exemplar, golem.getHomeFacing(), golem.itemMatchFlags())",
+   "new": "home.countVisible(exemplar, golem.getHomeFacing())"
+  },
+  {
+   "id": "fill-route-probe-is-exact",
+   "name": "fill route probe is exact",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java",
+   "old": "source.firstExtractable(exemplar, marker.face(), golem.itemMatchFlags()) < 0",
+   "new": "source.firstExtractable(exemplar, marker.face()) < 0"
+  },
+  {
+   "id": "fill-watch-probe-is-exact",
+   "name": "fill watch probe is exact",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java",
+   "old": "source.firstExtractable(watched, target.face(), golem.itemMatchFlags()) >= 0",
+   "new": "source.firstExtractable(watched, target.face()) >= 0",
+   "expect": "survives",
+   "reason": "the strict probe only clears and immediately re-selects the same route; visible as a navigation restart, not as an outcome"
+  },
+  {
+   "id": "empty-home-search-is-exact",
+   "name": "empty home search is exact",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java",
+   "old": "home.firstExtractable(exemplar, golem.getHomeFacing(), golem.itemMatchFlags())",
+   "new": "home.firstExtractable(exemplar, golem.getHomeFacing())"
+  },
+  {
+   "id": "sorting-destination-probe-is-exact",
+   "name": "sorting destination probe is exact",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java",
+   "old": "destination.hasSeedAndRoom(stack, marker.face(), golem.itemMatchFlags())",
+   "new": "destination.hasSeedAndRoom(stack, marker.face())"
+  },
+  {
+   "id": "menu-click-accepted-on-any-golem",
+   "name": "menu click accepted on any golem",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/container/ContainerGolem.java",
+   "old": "|| !serverGolem.toggleItemMatch(flag)) return false;",
+   "new": "|| !(serverGolem.toggleItemMatch(flag) || true)) return false;"
+  },
+  {
+   "id": "menu-does-not-mirror-the-switches",
+   "name": "menu does not mirror the switches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/container/ContainerGolem.java",
+   "old": ": index == 19 ? golem.getItemMatch()",
+   "new": ": index == 19 ? 0"
+  },
+  {
+   "id": "menu-button-branch-is-gone",
+   "name": "menu button branch is gone",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/container/ContainerGolem.java",
+   "old": "if (flag != 0) {",
+   "new": "if (false) {"
+  },
+  {
+   "id": "use-core-compares-exactly",
+   "name": "Use core compares exactly",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "if (GolemItemMatch.matches(actual, ghost, itemMatchFlags())) return true;",
+   "new": "if (ItemStack.isSameItemSameComponents(ghost, actual)) return true;",
+   "expect": "survives",
+   "reason": "no in-game stand for the Use core exists (needs a use target); the wiring is one line and unverified in game"
+  }
+ ]
+}

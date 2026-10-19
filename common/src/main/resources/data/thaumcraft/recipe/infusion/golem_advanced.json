@@ -1,0 +1,28 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "ADVANCEDGOLEM",
+  "input": [
+    {"item": "thaumcraft:golem_straw"},
+    {"item": "thaumcraft:golem_wood"},
+    {"item": "thaumcraft:golem_tallow"},
+    {"item": "thaumcraft:golem_clay"},
+    {"item": "thaumcraft:golem_flesh"},
+    {"item": "thaumcraft:golem_stone"},
+    {"item": "thaumcraft:golem_iron"},
+    {"item": "thaumcraft:golem_thaumium"}
+  ],
+  "components": [
+    {"item": "minecraft:redstone"},
+    {"item": "minecraft:glowstone_dust"},
+    {"item": "minecraft:gunpowder"},
+    {"item": "thaumcraft:jar"},
+    {"item": "thaumcraft:zombie_brain"}
+  ],
+  "component_predicates": [
+    {"component": 3, "empty_jar": true}
+  ],
+  "aspects": {"cognitio": 8, "sensus": 8, "victus": 8},
+  "instability": 3,
+  "result": {"id": "thaumcraft:golem_straw", "count": 1},
+  "result_patch": "advanced_golem"
+}

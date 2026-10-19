@@ -123,6 +123,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("CoreAlchemy", "infusion/golem_core_alchemy"), // 370, Decanting center / empty jar + three real water potions
             alias("CoreButcher", "crucible/golem_core_butcher"), // 177, actual Guard catalyst / Corpus5 Bestia5
             alias("CoreUse", "infusion/golem_core_use"), // 374, Empty center / damage0 flint and steel + shears
+            alias("AdvancedGolem", "infusion/golem_advanced"), // 326, any golem placer patched with advanced / redstone, glowstone dust, gunpowder, empty jar, zombie brain
             alias("GolemBell", "arcane/golem_bell"), // 263, quartz items / stickWood
             alias("UpgradeAir", "arcane/golem_upgrade_air"), // 265, eight gold nuggets around the air shard (damage 0)
             alias("UpgradeEarth", "arcane/golem_upgrade_earth"), // 266, earth shard is damage 3, not 1

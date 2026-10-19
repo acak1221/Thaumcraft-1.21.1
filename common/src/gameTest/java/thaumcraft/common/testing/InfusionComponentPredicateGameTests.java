@@ -329,11 +329,13 @@ public final class InfusionComponentPredicateGameTests {
         wire.writeVarInt(recipe.instability()); ItemStack.STREAM_CODEC.encode(wire, recipe.result());
         wire.writeVarInt(count);
         // Current native layout: four fields per predicate (water-potion and empty-jar flags
-        // were appended by the Alchemy core), then the optional central input_damage marker.
+        // were appended by the Alchemy core), then the optional central input_damage marker
+        // and the optional result-patch marker (ADVANCEDGOLEM).
         for (var declaration : declarations) {
             wire.writeVarInt(declaration.component()); wire.writeVarInt(declaration.damage());
             wire.writeBoolean(declaration.waterPotion()); wire.writeBoolean(declaration.emptyJar());
         }
+        wire.writeBoolean(false);
         wire.writeBoolean(false);
         return wire;
     }

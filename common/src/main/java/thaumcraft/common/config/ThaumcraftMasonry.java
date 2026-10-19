@@ -15,8 +15,9 @@ import net.minecraft.world.level.material.MapColor;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockArcaneStoneSlab;
 import thaumcraft.common.blocks.BlockArcaneStoneStairs;
+import thaumcraft.common.blocks.BlockGolemFetter;
 
-/** Original cosmetic-solid metadata 6/7 and their ordinary stone stairs/slab. */
+/** Original cosmetic-solid metadata 6/7 and their ordinary stone stairs/slab, and metadata 9/10, the Golem Fetter. */
 public final class ThaumcraftMasonry {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
@@ -32,6 +33,10 @@ public final class ThaumcraftMasonry {
     // ConfigBlocks:299/301 supplies these values for BOTH original slab halves/doubles.
     public static final RegistrySupplier<BlockArcaneStoneSlab> SLAB = block("arcane_stone_brick_slab",
             () -> new BlockArcaneStoneSlab(stone(2.0F, 6.0F)));
+
+    // BlockCosmeticSolid base values (hardness 2, resistance 10 = explosion resistance 6 in today's units); metadata 9/10 override neither.
+    public static final RegistrySupplier<BlockGolemFetter> GOLEM_FETTER = block("golem_fetter",
+            () -> new BlockGolemFetter(stone(2.0F, 6.0F)));
 
     private ThaumcraftMasonry() {}
 
@@ -56,5 +61,6 @@ public final class ThaumcraftMasonry {
         CreativeTabRegistry.appendStack(ThaumcraftContent.TAB, () -> new ItemStack(ARCANE_STONE_BRICKS.get()));
         CreativeTabRegistry.appendStack(ThaumcraftContent.TAB, () -> new ItemStack(STAIRS.get()));
         CreativeTabRegistry.appendStack(ThaumcraftContent.TAB, () -> new ItemStack(SLAB.get()));
+        CreativeTabRegistry.appendStack(ThaumcraftContent.TAB, () -> new ItemStack(GOLEM_FETTER.get()));
     }
 }

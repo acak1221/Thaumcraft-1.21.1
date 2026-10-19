@@ -1,0 +1,273 @@
+{
+ "description": "Traveling Trunk (docs/analysis/2026-10-19-traveling-trunk.md)",
+ "watch": {
+  "junit": [
+   "TrunkRulesTest"
+  ],
+  "gametests": [
+   "travelingTrunkItemUpgradesMenuBellDamageAndSaving",
+   "travelingTrunkFollowsTeleportsDefendsAndPullsItems"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.golems.*"
+ ],
+ "mutants": [
+  {
+   "id": "rows-come-from-air",
+   "name": "rows come from Air",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "public static int rows(int upgrade) { return upgrade == EARTH ? 4 : 3; }",
+   "new": "public static int rows(int upgrade) { return upgrade == AIR ? 4 : 3; }"
+  },
+  {
+   "id": "a-fitted-upgrade-can-be-replaced",
+   "name": "a fitted upgrade can be replaced",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "return current == NO_UPGRADE && offered >= AIR && offered <= ENTROPY;",
+   "new": "return offered >= AIR && offered <= ENTROPY;"
+  },
+  {
+   "id": "order-makes-it-invulnerable",
+   "name": "order makes it invulnerable",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "public static boolean invulnerable(int upgrade) { return upgrade == WATER; }",
+   "new": "public static boolean invulnerable(int upgrade) { return upgrade == ORDER; }"
+  },
+  {
+   "id": "water-does-not-heal-every-tick",
+   "name": "water does not heal every tick",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "return upgrade == WATER || age % 50 == 0;",
+   "new": "return age % 50 == 0;"
+  },
+  {
+   "id": "anyone-may-open",
+   "name": "anyone may open",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "return upgrade != WATER || isOwner;",
+   "new": "return true;"
+  },
+  {
+   "id": "air-and-the-rest-swap-acceleration",
+   "name": "air and the rest swap acceleration",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "return fast(upgrade) ? 0.04F : 0.03F;",
+   "new": "return fast(upgrade) ? 0.03F : 0.04F;"
+  },
+  {
+   "id": "hop-delay-divides-by-two",
+   "name": "hop delay divides by two",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "return (roll + 5) / 3;",
+   "new": "return (roll + 5) / 2;"
+  },
+  {
+   "id": "attack-cooldown-is-shorter",
+   "name": "attack cooldown is shorter",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "return 10 + roll;",
+   "new": "return 5 + roll;"
+  },
+  {
+   "id": "water-defends-the-owner",
+   "name": "water defends the owner",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "public static boolean defendsOwner(int upgrade) { return upgrade == FIRE; }",
+   "new": "public static boolean defendsOwner(int upgrade) { return upgrade == WATER; }"
+  },
+  {
+   "id": "order-pulls-items",
+   "name": "order pulls items",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "public static boolean pullsItems(int upgrade) { return upgrade == ENTROPY; }",
+   "new": "public static boolean pullsItems(int upgrade) { return upgrade == ORDER; }"
+  },
+  {
+   "id": "health-is-70",
+   "name": "health is 70",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "public static final float MAX_HEALTH = 75F",
+   "new": "public static final float MAX_HEALTH = 70F"
+  },
+  {
+   "id": "a-cactus-hurts",
+   "name": "a cactus hurts",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (source.is(DamageTypes.CACTUS) || TrunkRules.invulnerable(getUpgrade())) return false;",
+   "new": "if (TrunkRules.invulnerable(getUpgrade())) return false;"
+  },
+  {
+   "id": "water-can-be-hurt",
+   "name": "water can be hurt",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (source.is(DamageTypes.CACTUS) || TrunkRules.invulnerable(getUpgrade())) return false;",
+   "new": "if (source.is(DamageTypes.CACTUS)) return false;"
+  },
+  {
+   "id": "order-recall-loses-the-contents",
+   "name": "order recall loses the contents",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (upgrade == TrunkRules.ORDER) dropped.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(inventory.contents()));",
+   "new": ""
+  },
+  {
+   "id": "recall-keeps-the-contents-without-order",
+   "name": "recall keeps the contents without order",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (upgrade != TrunkRules.ORDER || dismantle) inventory.dropAll();",
+   "new": "if (dismantle) inventory.dropAll();"
+  },
+  {
+   "id": "a-stranger-may-recall",
+   "name": "a stranger may recall",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (!isAlive() || !TrunkRules.mayOpen(upgrade, isOwner(player))) return false;",
+   "new": "if (!isAlive()) return false;"
+  },
+  {
+   "id": "dismantling-always-returns-the-upgrade",
+   "name": "dismantling always returns the upgrade",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "random.nextBoolean()) spawnAtLocation(new ItemStack(ThaumcraftGolems.upgradeItem",
+   "new": "true) spawnAtLocation(new ItemStack(ThaumcraftGolems.upgradeItem"
+  },
+  {
+   "id": "a-second-upgrade-replaces-the-first",
+   "name": "a second upgrade replaces the first",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (getUpgrade() == TrunkRules.NO_UPGRADE && stack.getItem() instanceof ItemGolemUpgrade upgrade) {",
+   "new": "if (stack.getItem() instanceof ItemGolemUpgrade upgrade) {"
+  },
+  {
+   "id": "food-heals-one-point",
+   "name": "food heals one point",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "heal(food.nutrition());",
+   "new": "heal(1);"
+  },
+  {
+   "id": "a-stranger-opens-a-water-trunk",
+   "name": "a stranger opens a water trunk",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (!TrunkRules.mayOpen(getUpgrade(), isOwner(player))) return InteractionResult.CONSUME;\n        if (player instanceof ServerPlayer",
+   "new": "if (player instanceof ServerPlayer"
+  },
+  {
+   "id": "the-owner-is-not-saved",
+   "name": "the owner is not saved",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (getOwnerUUID() != null) tag.putUUID(\"OwnerUUID\", getOwnerUUID());",
+   "new": ""
+  },
+  {
+   "id": "the-upgrade-is-not-saved",
+   "name": "the upgrade is not saved",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "tag.putByte(\"upgrade\", (byte) getUpgrade());",
+   "new": ""
+  },
+  {
+   "id": "the-stay-button-only-stays",
+   "name": "the stay button only stays",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/container/ContainerTravelingTrunk.java",
+   "old": "trunk.setStay(!trunk.getStay());",
+   "new": "trunk.setStay(true);"
+  },
+  {
+   "id": "the-slot-rows-are-packed-closer",
+   "name": "the slot rows are packed closer",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/container/ContainerTravelingTrunk.java",
+   "old": "15 + row * 23",
+   "new": "15 + row * 18"
+  },
+  {
+   "id": "it-follows-even-when-told-to-stay",
+   "name": "it follows even when told to stay",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (distanceTo(owner) > TrunkRules.FOLLOW_DISTANCE && getAnger() == 0 && !getStay()) {",
+   "new": "if (distanceTo(owner) > TrunkRules.FOLLOW_DISTANCE && getAnger() == 0) {"
+  },
+  {
+   "id": "it-never-teleports",
+   "name": "it never teleports",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (!getStay() && distanceTo(owner) > TrunkRules.TELEPORT_DISTANCE && teleportNextTo(owner)) {",
+   "new": "if (false) {"
+  },
+  {
+   "id": "every-trunk-defends",
+   "name": "every trunk defends",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (!getStay() && TrunkRules.defendsOwner(getUpgrade()) && getAnger() == 0",
+   "new": "if (!getStay() && getAnger() == 0"
+  },
+  {
+   "id": "every-trunk-pulls-items",
+   "name": "every trunk pulls items",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityTravelingTrunk.java",
+   "old": "if (TrunkRules.pullsItems(getUpgrade())) pullItems();",
+   "new": "pullItems();"
+  },
+  {
+   "id": "the-pull-reaches-far",
+   "name": "the pull reaches far",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java",
+   "old": "PULL_RADIUS = 3.0",
+   "new": "PULL_RADIUS = 9.0"
+  },
+  {
+   "id": "the-spawner-is-never-used-up",
+   "name": "the spawner is never used up",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java",
+   "old": "if (!player.getAbilities().instabuild) stack.shrink(1);",
+   "new": ""
+  },
+  {
+   "id": "the-spawner-forgets-the-owner",
+   "name": "the spawner forgets the owner",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java",
+   "old": "trunk.setOwner(player);",
+   "new": ""
+  },
+  {
+   "id": "the-spawner-drops-the-contents",
+   "name": "the spawner drops the contents",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java",
+   "old": "trunk.inventory.setItem(slot++, kept.copy());",
+   "new": ""
+  }
+ ]
+}

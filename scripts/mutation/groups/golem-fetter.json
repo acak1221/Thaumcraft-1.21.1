@@ -132,7 +132,9 @@
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
    "old": "&& hasHome && !fettered && EnumGolemType.isSupported(material)",
-   "new": "&& hasHome && EnumGolemType.isSupported(material)"
+   "new": "&& hasHome && EnumGolemType.isSupported(material)",
+   "expect": "survives",
+   "reason": "isImmobile() stops every goal from ticking, so the canWork() gate is an overlapping second layer; either one holds the tested golems"
   },
   {
    "id": "fettered-golem-still-moves",
@@ -140,7 +142,9 @@
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
    "old": "return super.isImmobile() || fettered;",
-   "new": "return super.isImmobile();"
+   "new": "return super.isImmobile();",
+   "expect": "survives",
+   "reason": "canWork() is false on a fetter, so no work goal runs and the held golem's navigation stays idle; isImmobile() is an overlapping second layer and either one stops the tested golems"
   }
  ]
 }

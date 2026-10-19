@@ -108,6 +108,8 @@
   "entity.thaumcraft.ember.name": "Ember",
   "entity.thaumcraft.golem.name": "Golem",
   "entity.thaumcraft.travelingtrunk.name": "Traveling Trunk",
+  "entity.thaumcraft.traveling_trunk": "Traveling Trunk",
+  "item.thaumcraft.trunk_spawner": "Traveling Trunk",
   "entity.thaumcraft.brainyzombie.name": "Angry Zombie",
   "entity.thaumcraft.giantbrainyzombie.name": "Furious Zombie",
   "entity.thaumcraft.wisp.name": "Wisp",

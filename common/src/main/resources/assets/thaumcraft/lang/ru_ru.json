@@ -108,6 +108,8 @@
   "entity.thaumcraft.ember.name": "Уголёк",
   "entity.thaumcraft.golem.name": "Голем",
   "entity.thaumcraft.travelingtrunk.name": "Ходячий сундук",
+  "entity.thaumcraft.traveling_trunk": "Ходячий сундук",
+  "item.thaumcraft.trunk_spawner": "Ходячий сундук",
   "entity.thaumcraft.brainyzombie.name": "Злой зомби",
   "entity.thaumcraft.giantbrainyzombie.name": "Яростный зомби",
   "entity.thaumcraft.wisp.name": "Висп",

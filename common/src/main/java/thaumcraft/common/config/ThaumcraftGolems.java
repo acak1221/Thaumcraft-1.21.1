@@ -14,8 +14,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.container.ContainerGolem;
+import thaumcraft.common.container.ContainerTravelingTrunk;
 import thaumcraft.common.entities.golems.EntityGolemBase;
 import thaumcraft.common.entities.golems.EntityGolemBobber;
+import thaumcraft.common.entities.golems.EntityTravelingTrunk;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemUpgrade;
@@ -23,6 +25,8 @@ import thaumcraft.common.items.golems.ItemGolemBell;
 import thaumcraft.common.items.golems.ItemGolemCore;
 import thaumcraft.common.items.golems.ItemGolemDecoration;
 import thaumcraft.common.items.golems.ItemGolemPlacer;
+import thaumcraft.common.items.golems.ItemTrunkSpawner;
+import thaumcraft.common.items.golems.TrunkRules;
 import thaumcraft.common.items.golems.ItemGolemUpgrade;
 
 /** Ordinary living workers; materials and cores require their actual content prerequisites. */
@@ -37,6 +41,12 @@ public final class ThaumcraftGolems {
     public static final RegistrySupplier<EntityType<EntityGolemBase>> GOLEM = ENTITIES.register("golem",
             () -> EntityType.Builder.<EntityGolemBase>of(EntityGolemBase::new, MobCategory.MISC)
                     .sized(.4F, .95F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:golem"));
+    public static final RegistrySupplier<EntityType<EntityTravelingTrunk>> TRUNK = ENTITIES.register("traveling_trunk",
+            () -> EntityType.Builder.<EntityTravelingTrunk>of(EntityTravelingTrunk::new, MobCategory.MISC)
+                    .sized(.8F, .8F).fireImmune().clientTrackingRange(4).updateInterval(3).build("thaumcraft:traveling_trunk"));
+    public static final RegistrySupplier<DataComponentType<Integer>> TRUNK_UPGRADE = COMPONENTS.register("trunk_upgrade",
+            () -> DataComponentType.<Integer>builder().persistent(com.mojang.serialization.Codec.intRange(TrunkRules.NO_UPGRADE, TrunkRules.ENTROPY))
+                    .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT).build());
     public static final RegistrySupplier<EntityType<EntityGolemBobber>> GOLEM_BOBBER = ENTITIES.register("golem_bobber",
             () -> EntityType.Builder.<EntityGolemBobber>of(EntityGolemBobber::new, MobCategory.MISC)
                     .sized(.25F, .25F).noSave().clientTrackingRange(4).updateInterval(5).build("thaumcraft:golem_bobber"));
@@ -91,6 +101,10 @@ public final class ThaumcraftGolems {
     public static final RegistrySupplier<Item> DECORATION_MACE = decoration("golem_decoration_mace", GolemDecorations.MACE);
     public static final RegistrySupplier<Item> GOLEM_BELL = ITEMS.register("golem_bell",
             () -> new ItemGolemBell(new Item.Properties().stacksTo(1)));
+    public static final RegistrySupplier<Item> TRUNK_SPAWNER = ITEMS.register("trunk_spawner",
+            () -> new ItemTrunkSpawner(new Item.Properties().stacksTo(1)));
+    public static final RegistrySupplier<MenuType<ContainerTravelingTrunk>> TRUNK_MENU = MENUS.register("traveling_trunk",
+            () -> MenuRegistry.ofExtended(ContainerTravelingTrunk::new));
     public static final RegistrySupplier<MenuType<ContainerGolem>> GOLEM_MENU = MENUS.register("golem",
             () -> MenuRegistry.ofExtended(ContainerGolem::new));
 
@@ -174,8 +188,9 @@ public final class ThaumcraftGolems {
 
     public static void register() {
         COMPONENTS.register(); ENTITIES.register(); ITEMS.register(); MENUS.register();
+        dev.architectury.event.events.common.PlayerEvent.CHANGE_DIMENSION.register(EntityTravelingTrunk::ownerChangedDimension);
         CreativeTabRegistry.append(ThaumcraftContent.TAB, GOLEM_STRAW, GOLEM_WOOD, GOLEM_TALLOW, GOLEM_CLAY, GOLEM_FLESH, GOLEM_STONE, GOLEM_IRON, GOLEM_THAUMIUM,
                 CORE_BLANK, CORE_FILL, CORE_EMPTY, CORE_GATHER, CORE_HARVEST, CORE_LUMBER, CORE_GUARD, CORE_LIQUID, CORE_ALCHEMY, CORE_USE, CORE_BUTCHER, CORE_SORTING, CORE_FISHING, UPGRADE_AIR, UPGRADE_EARTH, UPGRADE_FIRE, UPGRADE_WATER, UPGRADE_ORDER, UPGRADE_ENTROPY,
-                DECORATION_TOPHAT, DECORATION_GLASSES, DECORATION_BOWTIE, DECORATION_FEZ, DECORATION_VISOR, DECORATION_ARMOR, DECORATION_MACE, GOLEM_BELL);
+                DECORATION_TOPHAT, DECORATION_GLASSES, DECORATION_BOWTIE, DECORATION_FEZ, DECORATION_VISOR, DECORATION_ARMOR, DECORATION_MACE, GOLEM_BELL, TRUNK_SPAWNER);
     }
 }

@@ -50,11 +50,13 @@ def load(name):
 
 
 def read(path):
-    return (ROOT / path).read_text(encoding="utf-8", newline="")
+    with open(ROOT / path, encoding="utf-8", newline="") as handle:  # Path.read_text(newline=) needs Python 3.13; CI has 3.12
+        return handle.read()
 
 
 def write(path, text):
-    (ROOT / path).write_text(text, encoding="utf-8", newline="")
+    with open(ROOT / path, "w", encoding="utf-8", newline="") as handle:
+        handle.write(text)
 
 
 def sha(path):

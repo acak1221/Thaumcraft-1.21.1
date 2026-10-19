@@ -5,8 +5,9 @@ package thaumcraft.common.items.golems;
  * 1047-1052, 1068-1071). A golem's decoration is the string of its accessory letters, in installation order, exactly as the
  * original keeps it in the entity's {@code Decoration} tag; every effect is a lookup of one letter in it.
  *
- * <p>Only letters whose effect exists in this port can be installed or stored: the dart launcher ({@link #DART}, needs the
- * ranged attack goal and a projectile) is deliberately absent from {@link #SUPPORTED}, so no accessory ever lacks its effect.
+ * <p>Only letters whose effect exists in this port can be installed or stored, so no accessory ever lacks its effect. The dart
+ * launcher ({@link #DART}) acts only on a Guard or Butcher golem (the ranged attack goal of {@code GuardGolemGoals}); on any other core
+ * it is installed and stored, as the original allowed, and does nothing.
  */
 public final class GolemDecorations {
     /** Top hat: +5 maximum health. */
@@ -17,7 +18,7 @@ public final class GolemDecorations {
     public static final char BOWTIE = 'B';
     /** Fez: repairs itself at two thirds of the delay. */
     public static final char FEZ = 'F';
-    /** Dart launcher: a ranged attack for combat golems (not yet ported). */
+    /** Dart launcher: a ranged attack for combat golems (Guard and Butcher). */
     public static final char DART = 'R';
     /** Visor: +1 armour and the victims drop experience as if a player had struck them. */
     public static final char VISOR = 'V';
@@ -29,7 +30,7 @@ public final class GolemDecorations {
     /** The original item damage order 0..7 ({@code ItemGolemDecoration.getDecoChar}). */
     public static final String ALL = "HGBFRVPM";
     /** The letters this port honours, in item damage order. */
-    public static final String SUPPORTED = "HGBFVPM";
+    public static final String SUPPORTED = "HGBFRVPM";
     public static final int MAX_ARMOR = 20;
 
     private GolemDecorations() {}

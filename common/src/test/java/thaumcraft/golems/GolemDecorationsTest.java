@@ -53,7 +53,8 @@ class GolemDecorationsTest {
         assertEquals('M', GolemDecorations.letterOfDamage(7));
         assertEquals(0, GolemDecorations.letterOfDamage(8));
         assertEquals(0, GolemDecorations.letterOfDamage(-1));
-        assertTrue(GolemDecorations.ALL.indexOf('R') == 4 && !GolemDecorations.isSupported('R'), "the dart launcher waits for its attack goal");
+        assertTrue(GolemDecorations.ALL.indexOf('R') == 4 && GolemDecorations.isSupported('R'), "the dart launcher has its attack goal");
+        assertEquals(GolemDecorations.ALL, GolemDecorations.SUPPORTED, "every original letter is honoured now");
         for (char letter : GolemDecorations.SUPPORTED.toCharArray()) assertTrue(GolemDecorations.isSupported(letter), "" + letter);
         assertFalse(GolemDecorations.isSupported('X'));
     }
@@ -69,18 +70,20 @@ class GolemDecorationsTest {
         assertEquals("HGBM", GolemDecorations.add(GolemDecorations.add(GolemDecorations.add(GolemDecorations.add("", 'H'), 'G'), 'B'), 'M'));
         assertEquals("MBGH", GolemDecorations.add(GolemDecorations.add(GolemDecorations.add(GolemDecorations.add("", 'M'), 'B'), 'G'), 'H'));
         assertEquals("FVP", GolemDecorations.add(GolemDecorations.add(GolemDecorations.add("", 'F'), 'V'), 'P'));
-        assertNull(GolemDecorations.add("", 'R'), "the dart launcher cannot be installed yet");
+        assertEquals("R", GolemDecorations.add("", 'R'), "the dart launcher installs like any other letter");
+        assertNull(GolemDecorations.add("R", 'R'), "once");
+        assertEquals("HRM", GolemDecorations.add(GolemDecorations.add(GolemDecorations.add("", 'H'), 'R'), 'M'), "and has no partner");
         assertNull(GolemDecorations.add("", 'X'));
     }
 
     @Test void onlySequencesTheInstallationRulesCouldProduceAreValid() {
-        for (String good : List.of("", "H", "HGBM", "FVP", "MPV", "BVFM")) assertTrue(GolemDecorations.valid(good), good);
-        for (String bad : List.of("HH", "HF", "FH", "GV", "BP", "R", "HR", "X", "h", "HGBFVPMM", " ")) assertFalse(GolemDecorations.valid(bad), bad);
+        for (String good : List.of("", "H", "HGBM", "FVP", "MPV", "BVFM", "R", "HRM")) assertTrue(GolemDecorations.valid(good), good);
+        for (String bad : List.of("HH", "HF", "FH", "GV", "BP", "RR", "HRR", "X", "h", "HGBFVPMM", " ")) assertFalse(GolemDecorations.valid(bad), bad);
         assertFalse(GolemDecorations.valid(null));
-        // The longest honest decoration uses one of each pair plus the mace: at most four letters.
+        // The longest honest decoration uses one of each pair plus the dart launcher and the mace: at most five letters.
         String longest = "";
-        for (char letter : "HGBFVPM".toCharArray()) { String next = GolemDecorations.add(longest, letter); if (next != null) longest = next; }
-        assertEquals("HGBM", longest);
+        for (char letter : "HGBFRVPM".toCharArray()) { String next = GolemDecorations.add(longest, letter); if (next != null) longest = next; }
+        assertEquals("HGBRM", longest);
     }
 
     @Test void effectsAreSingleLetterLookups() {
@@ -191,7 +194,7 @@ class GolemDecorationsTest {
     }
 
     @Test void impossibleDecorationsAreRefusedEverywhereNotDefaulted() {
-        for (String bad : List.of("HF", "R", "HH", "GV", "x")) {
+        for (String bad : List.of("HF", "RR", "HH", "GV", "x")) {
             assertThrows(IllegalArgumentException.class, () -> GolemData.EMPTY.withDecoration(bad), bad);
             JsonObject json = GolemData.CODEC.encodeStart(JsonOps.INSTANCE, GolemData.EMPTY).getOrThrow().getAsJsonObject();
             json.addProperty("decoration", bad);

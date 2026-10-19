@@ -62,7 +62,7 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
  * armour, speed, damage, range decided by a real Guard for real spiders, the fez's repair cadence measured over real ticks), the
  * visor's experience from a real Guard's real kill, entity NBT, bell recall (kept) and dismantling (lost) and the placer text.
  * Players, golems and spiders are explicit inputs; the letters, effects, payment and drops are never supplied. NOT the dart
- * launcher (not ported), a client, network, multiplayer or visual check.
+ * launcher (GolemDartRuntimeChecks), a client, network, multiplayer or visual check.
  */
 public final class GolemDecorationsRuntimeChecks {
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
@@ -168,10 +168,7 @@ public final class GolemDecorationsRuntimeChecks {
             worn.setDamageValue(30);
             test.assertTrue(visor.key().get("H").test(worn) && !visor.key().get("H").test(new ItemStack(net.minecraft.world.item.Items.IRON_HELMET)),
                     "a worn leather helmet is accepted, an iron helmet is not");
-            // The launcher has no item or recipe until its attack goal exists.
-            test.assertTrue(!BuiltInRegistries.ITEM.containsKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "golem_decoration_dart"))
-                            && level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/golem_decoration_dart")).isEmpty(),
-                    "no dart launcher item or recipe exists yet");
+            // The launcher's own recipe and item are checked with the launcher itself (GolemDartRuntimeChecks).
         }
 
         // ---- real golems and a real player -------------------------------------------------------------------------
@@ -360,7 +357,7 @@ public final class GolemDecorationsRuntimeChecks {
             loaded.discard();
             test.assertTrue(!save(golem(TALLOW, GolemData.NO_CORE, "")).contains("Decoration"), "an undecorated golem writes no key: earlier saves keep their form");
 
-            for (String bad : List.of("HF", "GV", "BP", "HH", "R", "X")) {
+            for (String bad : List.of("HF", "GV", "BP", "HH", "RR", "X")) {
                 var broken = tag.copy();
                 broken.putString("Decoration", bad);
                 var unsupported = load(broken);

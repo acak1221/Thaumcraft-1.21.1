@@ -130,7 +130,8 @@ public final class ThaumcraftRecipeDisplay {
             alias("TinyGlasses", "arcane/golem_decoration_glasses"), // 255, glass / iron ingot
             alias("TinyVisor", "arcane/golem_decoration_visor"), // 257, iron ingots / any leather helmet
             alias("TinyArmor", "arcane/golem_decoration_armor"), // 258, iron ingots / any leather tunic
-            alias("TinyHammer", "arcane/golem_decoration_mace"), // 259, seven iron ingots; TinyDart (256) waits for the launcher
+            alias("TinyDart", "arcane/golem_decoration_dart"), // 256, arrows around a dispenser
+            alias("TinyHammer", "arcane/golem_decoration_mace"), // 259, seven iron ingots
             alias("TravelTrunk", "infusion/traveling_trunk"), // hungry chest / iron ingot, greatwood planks, wooden golem placer, greatwood planks
             alias("GolemFetter", "arcane/golem_fetter"), // arcane stone / iron ingot / arcane stone bricks / redstone block
             alias("GolemBell", "arcane/golem_bell"), // 263, quartz items / stickWood

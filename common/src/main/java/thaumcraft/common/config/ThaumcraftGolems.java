@@ -18,6 +18,7 @@ import thaumcraft.common.container.ContainerTravelingTrunk;
 import thaumcraft.common.entities.golems.EntityGolemBase;
 import thaumcraft.common.entities.golems.EntityGolemBobber;
 import thaumcraft.common.entities.golems.EntityTravelingTrunk;
+import thaumcraft.common.entities.projectile.EntityDart;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemUpgrade;
@@ -44,6 +45,9 @@ public final class ThaumcraftGolems {
     public static final RegistrySupplier<EntityType<EntityTravelingTrunk>> TRUNK = ENTITIES.register("traveling_trunk",
             () -> EntityType.Builder.<EntityTravelingTrunk>of(EntityTravelingTrunk::new, MobCategory.MISC)
                     .sized(.8F, .8F).fireImmune().clientTrackingRange(4).updateInterval(3).build("thaumcraft:traveling_trunk"));
+    public static final RegistrySupplier<EntityType<EntityDart>> DART = ENTITIES.register("dart",
+            () -> EntityType.Builder.<EntityDart>of(EntityDart::new, MobCategory.MISC)
+                    .sized(.5F, .5F).clientTrackingRange(4).updateInterval(20).build("thaumcraft:dart"));
     public static final RegistrySupplier<DataComponentType<Integer>> TRUNK_UPGRADE = COMPONENTS.register("trunk_upgrade",
             () -> DataComponentType.<Integer>builder().persistent(com.mojang.serialization.Codec.intRange(TrunkRules.NO_UPGRADE, TrunkRules.ENTROPY))
                     .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT).build());
@@ -91,11 +95,12 @@ public final class ThaumcraftGolems {
     public static final RegistrySupplier<Item> UPGRADE_WATER = upgrade("golem_upgrade_water", GolemUpgrade.WATER);
     public static final RegistrySupplier<Item> UPGRADE_ORDER = upgrade("golem_upgrade_order", GolemUpgrade.ORDER);
     public static final RegistrySupplier<Item> UPGRADE_ENTROPY = upgrade("golem_upgrade_entropy", GolemUpgrade.ENTROPY);
-    // Original ItemGolemDecoration damage 0..7 (H G B F R V P M); the dart launcher (R) waits for its attack goal.
+    // Original ItemGolemDecoration damage 0..7 (H G B F R V P M).
     public static final RegistrySupplier<Item> DECORATION_TOPHAT = decoration("golem_decoration_tophat", GolemDecorations.HAT);
     public static final RegistrySupplier<Item> DECORATION_GLASSES = decoration("golem_decoration_glasses", GolemDecorations.GLASSES);
     public static final RegistrySupplier<Item> DECORATION_BOWTIE = decoration("golem_decoration_bowtie", GolemDecorations.BOWTIE);
     public static final RegistrySupplier<Item> DECORATION_FEZ = decoration("golem_decoration_fez", GolemDecorations.FEZ);
+    public static final RegistrySupplier<Item> DECORATION_DART = decoration("golem_decoration_dart", GolemDecorations.DART);
     public static final RegistrySupplier<Item> DECORATION_VISOR = decoration("golem_decoration_visor", GolemDecorations.VISOR);
     public static final RegistrySupplier<Item> DECORATION_ARMOR = decoration("golem_decoration_armor", GolemDecorations.ARMOR);
     public static final RegistrySupplier<Item> DECORATION_MACE = decoration("golem_decoration_mace", GolemDecorations.MACE);
@@ -125,6 +130,7 @@ public final class ThaumcraftGolems {
             case GolemDecorations.GLASSES -> DECORATION_GLASSES.get();
             case GolemDecorations.BOWTIE -> DECORATION_BOWTIE.get();
             case GolemDecorations.FEZ -> DECORATION_FEZ.get();
+            case GolemDecorations.DART -> DECORATION_DART.get();
             case GolemDecorations.VISOR -> DECORATION_VISOR.get();
             case GolemDecorations.ARMOR -> DECORATION_ARMOR.get();
             case GolemDecorations.MACE -> DECORATION_MACE.get();
@@ -191,6 +197,6 @@ public final class ThaumcraftGolems {
         dev.architectury.event.events.common.PlayerEvent.CHANGE_DIMENSION.register(EntityTravelingTrunk::ownerChangedDimension);
         CreativeTabRegistry.append(ThaumcraftContent.TAB, GOLEM_STRAW, GOLEM_WOOD, GOLEM_TALLOW, GOLEM_CLAY, GOLEM_FLESH, GOLEM_STONE, GOLEM_IRON, GOLEM_THAUMIUM,
                 CORE_BLANK, CORE_FILL, CORE_EMPTY, CORE_GATHER, CORE_HARVEST, CORE_LUMBER, CORE_GUARD, CORE_LIQUID, CORE_ALCHEMY, CORE_USE, CORE_BUTCHER, CORE_SORTING, CORE_FISHING, UPGRADE_AIR, UPGRADE_EARTH, UPGRADE_FIRE, UPGRADE_WATER, UPGRADE_ORDER, UPGRADE_ENTROPY,
-                DECORATION_TOPHAT, DECORATION_GLASSES, DECORATION_BOWTIE, DECORATION_FEZ, DECORATION_VISOR, DECORATION_ARMOR, DECORATION_MACE, GOLEM_BELL, TRUNK_SPAWNER);
+                DECORATION_TOPHAT, DECORATION_GLASSES, DECORATION_BOWTIE, DECORATION_FEZ, DECORATION_DART, DECORATION_VISOR, DECORATION_ARMOR, DECORATION_MACE, GOLEM_BELL, TRUNK_SPAWNER);
     }
 }

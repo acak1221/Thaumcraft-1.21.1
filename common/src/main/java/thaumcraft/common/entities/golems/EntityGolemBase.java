@@ -75,6 +75,8 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.container.ContainerGolem;
+import thaumcraft.common.entities.projectile.EntityDart;
+import thaumcraft.common.items.golems.GolemDartRules;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemAspectCargo;
@@ -114,6 +116,7 @@ public class EntityGolemBase extends AbstractGolem {
     private static final EntityDataAccessor<Integer> HEALING = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> ACTION = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> RIGHT_ARM = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> LEFT_ARM = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> FISHING_BOBBER_ID = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Optional<UUID>> FISHING_BOBBER_UUID = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.OPTIONAL_UUID);
     // Eighteen ghost accessors cover six slots plus two Fire pages; only getSlotCount() of them are meaningful.
@@ -134,7 +137,7 @@ public class EntityGolemBase extends AbstractGolem {
     // Accessory letters in installation order (GolemDecorations); the client renders them, the server derives every effect.
     private static final EntityDataAccessor<String> DECORATION = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.STRING);
     private static final Codec<List<GolemMarker>> MARKER_CODEC = GolemMarker.CODEC.listOf();
-    private static final SoundEvent UPGRADE = sound("upgrade"), ZAP = sound("zap"), CLACK = sound("cameraclack");
+    private static final SoundEvent UPGRADE = sound("upgrade"), ZAP = sound("zap"), CLACK = sound("cameraclack"), DART_SHOT = sound("golemironshoot");
     private static final List<String> CONFIG_KEYS = List.of("GolemType", "GolemCore", "Core", "HomeFacing",
             "advanced", "Decoration", "deco", "upgrades", "colors", "toggles", "GuardTargets", "ItemMatch", "Markers", "Inventory", "WantedCounts", "FillAny", "UseOptions");
     private static final Set<String> GHOST_STACK_KEYS = Set.of("Slot", "id", "count", "components");
@@ -250,6 +253,7 @@ public class EntityGolemBase extends AbstractGolem {
         builder.define(HEALING, 0);
         builder.define(ACTION, 0);
         builder.define(RIGHT_ARM, 0);
+        builder.define(LEFT_ARM, 0);
         builder.define(FISHING_BOBBER_ID, -1);
         builder.define(FISHING_BOBBER_UUID, Optional.empty());
         for (EntityDataAccessor<ItemStack> filter : FILTERS) builder.define(filter, ItemStack.EMPTY);
@@ -413,7 +417,25 @@ public class EntityGolemBase extends AbstractGolem {
     }
     // Fishing uses the independent raw right arm, not Guard/Harvest's shaped action.
     public int getRightArmTimer() { return entityData.get(RIGHT_ARM); }
-    public int getLeftArmTimer() { return 0; }
+    // The raw left arm, raised for a moment by a dart (original startLeftArmTimer: five ticks).
+    public int getLeftArmTimer() { return entityData.get(LEFT_ARM); }
+    void startLeftArm() {
+        requireServerThread();
+        if (level() instanceof ServerLevel && isAlive() && current() && entityData.get(LEFT_ARM) == 0) entityData.set(LEFT_ARM, 5);
+    }
+    /**
+     * Original attackEntityWithRangedAttack: a dart at the launcher's speed whose spread narrows with every Water upgrade, doing 0.4 of
+     * the golem's attack attribute; the shot clicks like iron and lifts the left arm.
+     */
+    void shootDart(LivingEntity target) {
+        requireServerThread();
+        if (!(level() instanceof ServerLevel) || !isAlive()) return;
+        EntityDart dart = new EntityDart(level(), this, target, GolemDartRules.SPEED, GolemDartRules.inaccuracy(getUpgradeAmount(GolemUpgrade.WATER)));
+        dart.setBaseDamage(GolemDartRules.damage((float) getAttributeValue(Attributes.ATTACK_DAMAGE)));
+        playSound(DART_SHOT, 0.5F, 1.0F / (getRandom().nextFloat() * 0.4F + 0.6F));
+        level().addFreshEntity(dart);
+        startLeftArm();
+    }
     void startFishingArm() {
         requireServerThread();
         if (level() instanceof ServerLevel server && core == GolemData.FISHING && isAlive() && current() && entityData.get(RIGHT_ARM) == 0) {
@@ -869,6 +891,8 @@ public class EntityGolemBase extends AbstractGolem {
         if (action > 0) entityData.set(ACTION, action - 1);
         int arm = entityData.get(RIGHT_ARM);
         if (arm > 0) entityData.set(RIGHT_ARM, arm - 1);
+        int leftArm = entityData.get(LEFT_ARM);
+        if (leftArm > 0) entityData.set(LEFT_ARM, leftArm - 1);
         int healing = entityData.get(HEALING);
         if (healing > 0) entityData.set(HEALING, healing - 1);
         float boot = entityData.get(BOOTUP);
@@ -2201,6 +2225,7 @@ public class EntityGolemBase extends AbstractGolem {
             }
             entityData.set(DECORATION, decoration);
             applyMaterialAttributes(EnumGolemType.getType(material));
+            if (letter == GolemDecorations.DART) rebuildGoals(); // Original addDecoration ends with setupGolem(): the launcher adds a goal.
             playSound(CLACK, 1, 1);
             player.getInventory().setChanged();
         } finally { busy = false; }

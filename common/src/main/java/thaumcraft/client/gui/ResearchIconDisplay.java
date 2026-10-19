@@ -157,13 +157,13 @@ final class ResearchIconDisplay {
                 case 5 -> "golem_upgrade_entropy";
                 default -> null;
             };
-            // Original ItemGolemDecoration damage 0..7 (hat, spectacles, bowtie, fez, dart, visor, plating, mace); the dart
-            // launcher has no native item yet, so its icon stays on the book fallback.
+            // Original ItemGolemDecoration damage 0..7 (hat, spectacles, bowtie, fez, dart, visor, plating, mace).
             case "ConfigItems.itemGolemDecoration" -> switch (metadata) {
                 case 0 -> "golem_decoration_tophat";
                 case 1 -> "golem_decoration_glasses";
                 case 2 -> "golem_decoration_bowtie";
                 case 3 -> "golem_decoration_fez";
+                case 4 -> "golem_decoration_dart";
                 case 5 -> "golem_decoration_visor";
                 case 6 -> "golem_decoration_armor";
                 case 7 -> "golem_decoration_mace";

@@ -9,6 +9,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.config.ThaumcraftGolems;
+import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.wands.WandData;
 
 /** Client-only, explicit aliases for original icons whose native items exist. */
@@ -30,6 +32,10 @@ final class ResearchIconDisplay {
     // Native ThaumcraftOres keeps original blockCustomOre metadata 0..7 in this order.
     private static final List<String> ORES = List.of("cinnabar_ore", "air_infused_stone", "fire_infused_stone",
             "water_infused_stone", "earth_infused_stone", "order_infused_stone", "entropy_infused_stone", "amber_ore");
+
+    // ConfigItems itemGolemPlacer damage 0..7 (the wildcard of ConfigResearch:344-345 cycles through every material).
+    private static final List<String> PLACERS = List.of("golem_straw", "golem_wood", "golem_tallow", "golem_clay",
+            "golem_flesh", "golem_stone", "golem_iron", "golem_thaumium");
 
     private ResearchIconDisplay() {}
 
@@ -55,6 +61,12 @@ final class ResearchIconDisplay {
         if (expression.equals("wand")) {
             ItemStack stack = registered("wand", 1);
             if (!stack.isEmpty()) stack.set(ThaumcraftContent.WAND_DATA.get(), WandData.EMPTY);
+            return stack;
+        }
+        // ConfigResearch:344-345: the ADVANCEDGOLEM icon is the placer wildcard tagged advanced = 1.
+        if (expression.equals("ag")) {
+            ItemStack stack = registered(PLACERS.get((int) (System.currentTimeMillis() / 1000L % PLACERS.size())), 1);
+            if (!stack.isEmpty()) stack.set(ThaumcraftGolems.GOLEM_DATA.get(), GolemData.EMPTY.withAdvanced(true));
             return stack;
         }
         // ConfigResearch:374 and InventoryUtils.cycleItemStack:481-488. Only

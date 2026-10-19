@@ -189,7 +189,7 @@ public final class ItemGolemPlacer extends Item {
         }
         if (data.core() == GolemData.USE && !data.useOptions().supportsDefaultBaseline()) return null;
         // Never the original's silent truncation: more upgrades than this material has slots is invalid.
-        int[] fitted = GolemUpgrades.fit(data.upgrades(), EnumGolemType.getType(material).upgrades);
+        int[] fitted = GolemUpgrades.fit(data.upgrades(), GolemUpgrades.slotCount(EnumGolemType.getType(material).upgrades, data.advanced()));
         if (fitted == null) return null;
         // Capacity is material + the placer's own Earth upgrades (original getCarryLimit/getFluidCarryLimit).
         int earth = GolemUpgrades.count(fitted, GolemUpgrade.EARTH);
@@ -227,6 +227,8 @@ public final class ItemGolemPlacer extends Item {
                 case GolemData.FISHING -> "tooltip.thaumcraft.golem.core_fishing";
                 default -> "tooltip.thaumcraft.golem.coreless";
             }));
+            // Original ItemGolemPlacer:113: the "advanced" line sits between the core and the upgrades.
+            if (data.advanced()) tooltip.add(Component.translatable("tc.adv"));
             if (!data.upgrades().isEmpty()) {
                 // Original ItemGolemPlacer:114-121: installed upgrades listed in blue, empty slots skipped.
                 MutableComponent line = Component.empty().withStyle(ChatFormatting.BLUE);

@@ -179,7 +179,8 @@ class GolemGuardTargetsTest {
         GolemData.STREAM_CODEC.encode(wire, guard(List.of(ORDER), A));
         int last = wire.writerIndex() - 1;
         assertEquals(A, wire.getUnsignedByte(last), "the mask is the final byte");
-        for (int bad : new int[] {16, 31, 128, 255}) {
+        // Bit 4 (16) is the advanced-golem flag now; only the bits above it are corrupt.
+        for (int bad : new int[] {32, 48, 128, 255}) {
             var corrupt = buffer();
             corrupt.writeBytes(wire, 0, last);
             corrupt.writeByte(bad);

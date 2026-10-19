@@ -434,6 +434,7 @@ public final class TravelingTrunkRuntimeChecks {
 
         private Entity current;
         private EntityTravelingTrunk follower, high, defender, puller;
+        private Vec3 coalStart;
         private Zombie target;
         private Vec3 stayStart;
         private final List<ItemEntity> bait = new ArrayList<>();
@@ -511,10 +512,16 @@ public final class TravelingTrunkRuntimeChecks {
                     && puller.inventory.contents().stream().anyMatch(stack -> stack.is(Items.EMERALD) && stack.getCount() == 3)));
             phases.add(new Phase("entropy leaves far items", () -> {
                 test.assertTrue(!bait.get(2).isRemoved() && puller.inventory.contents().stream().noneMatch(stack -> stack.is(Items.COAL)), "an item beyond three blocks is left alone");
+                coalStart = bait.get(2).position();
+            }, () -> {
+                // The pull is a drift, not a snap: an item inside the radius would creep towards the trunk over these ticks.
+                test.assertTrue(!bait.get(2).isRemoved() && bait.get(2).position().distanceTo(coalStart) < 0.5 && puller.inventory.contents().stream().noneMatch(stack -> stack.is(Items.COAL)),
+                        "the item seven blocks away does not drift towards the trunk: from " + coalStart + " to " + bait.get(2).position());
+                return test.getTick() - phaseStart > 60;
+            }));
+            phases.add(new Phase("no pull without Entropy", () -> {
                 puller.discard();
                 bait.forEach(Entity::discard);
-            }, () -> true));
-            phases.add(new Phase("no pull without Entropy", () -> {
                 puller = trunk(base.offset(4, 0, 1), TrunkRules.NO_UPGRADE, owner);
                 puller.setStay(true);
                 bait.clear();

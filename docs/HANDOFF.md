@@ -29,7 +29,7 @@
 **Implemented:** `TrunkRules`, `EntityTravelingTrunk` (прыжки за владельцем, телепорт, защита Fire, втягивание Entropy, лечение, смерть, колокольчик с Order, переход в измерение владельца), `InventoryTrunk`, `ContainerTravelingTrunk`, `ItemTrunkSpawner`, рецепт `traveling_trunk`;
 клиент — `ModelTrunk`, `RenderTravelingTrunk` (масштаб/крышка по формулам оригинала, злая текстура, значок улучшения), `GuiTravelingTrunk`.
 **Built / game-tested:** `:common:test` **437 JUnit** (+13 с записи Liquid, 424: 3 `GolemFetterAssetsTest`, 6 `TrunkRulesTest`, 4 `TravelingTrunkClientAssetsTest`), `:fabric:remapJar`, `:fabric:runGameTest` **159/159**, JAR SHA-256 `e58263e8…450d1`.
-**Мутации:** 32, прогон у GitHub (`mutation.yml`, заявка `scripts/mutation/run-request.txt`); итог пишется в документ группы.
+**Мутации:** 32 у GitHub (`mutation.yml`): 31 поймана, выжил `the-pull-reaches-far` (предмет за радиусом проверялся слишком рано) — тест усилен, локально пойман.
 **CI:** найден и исправлен хрупкий реальный лимит 10 с у `frostFocusCraftsSelectsAndPays` и `shockFocus…` (теперь 60 с, тиковый предел прежний) — на раннере GitHub тест давал 10,02 с.
 **Seen:** нет. **Не проверено:** вид модели/значка/экрана, переход вслед за владельцем в другое измерение (в GameTest не исполняется), сеть/два игрока, save/reload мира, NeoForge. Плейсер `trunk_spawner` пока с плоской моделью.
 **Следующее:** дротик `R` (`AIDartAttack`, снаряд, рендер), горящий предмет улова.

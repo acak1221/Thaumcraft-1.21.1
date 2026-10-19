@@ -79,6 +79,7 @@ import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemGuardTargets;
+import thaumcraft.common.items.golems.GolemItemMatch;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUpgrades;
@@ -133,7 +134,7 @@ public class EntityGolemBase extends AbstractGolem {
     private static final Codec<List<GolemMarker>> MARKER_CODEC = GolemMarker.CODEC.listOf();
     private static final SoundEvent UPGRADE = sound("upgrade"), ZAP = sound("zap"), CLACK = sound("cameraclack");
     private static final List<String> CONFIG_KEYS = List.of("GolemType", "GolemCore", "Core", "HomeFacing",
-            "advanced", "Decoration", "deco", "upgrades", "colors", "toggles", "GuardTargets", "Markers", "Inventory", "WantedCounts", "FillAny", "UseOptions");
+            "advanced", "Decoration", "deco", "upgrades", "colors", "toggles", "GuardTargets", "ItemMatch", "Markers", "Inventory", "WantedCounts", "FillAny", "UseOptions");
     private static final Set<String> GHOST_STACK_KEYS = Set.of("Slot", "id", "count", "components");
     private static final Set<String> USE_STACK_KEYS = Set.of("id", "count", "components");
     private static final int MAX_USE_REMAINDERS = 41; // 40 non-selected native inventory slots + at most one carried/menu stack.
@@ -174,6 +175,8 @@ public class EntityGolemBase extends AbstractGolem {
     private int guardTargets = GolemGuardTargets.DEFAULT;
     private boolean advanced;
     private String decoration = "";
+    // Entropy's item-comparison switches (GolemItemMatch); server-only, the menu mirrors them.
+    private int itemMatch;
     private int core = GolemData.NO_CORE;
     private int material;
     private int regenTimer;
@@ -443,6 +446,27 @@ public class EntityGolemBase extends AbstractGolem {
     public boolean canSwitchGuardTargets() { return GolemGuardTargets.configurable(getGolemCore(), getUpgradeAmount(GolemUpgrade.ORDER)); }
     /** The server's authoritative mask; without Order it is always the default (hostile monsters only). */
     public int getGuardTargets() { return guardTargets; }
+    /** Entropy's switches exist on Fill, Empty, Gather, Use and Sorting golems that carry an Entropy upgrade (original GuiGolem:214). */
+    public boolean canSwitchItemMatch() { return GolemItemMatch.configurable(getGolemCore(), getUpgradeAmount(GolemUpgrade.ENTROPY)); }
+    /** The three switches as the owner set them. */
+    public int getItemMatch() { return itemMatch; }
+    /** What the golem compares with: the switches, widened to tag-equivalents for Empty and Use whenever Entropy is fitted. */
+    int itemMatchFlags() { return GolemItemMatch.effective(itemMatch, core, GolemUpgrades.count(upgradeSlots, GolemUpgrade.ENTROPY)); }
+    public boolean setItemMatch(int flags) {
+        requireServerThread();
+        if (level().isClientSide || unsupported || retiring || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()
+                || !canSwitchItemMatch() || !GolemItemMatch.valid(flags)) return false;
+        if (itemMatch == flags) return true;
+        itemMatch = flags;
+        use.reset();
+        inventories.configurationChanged();
+        return true;
+    }
+    /** Flips one switch (GolemItemMatch.TAGS ... IGNORE_COMPONENTS); false when the switch does not exist. */
+    public boolean toggleItemMatch(int flag) {
+        int next = GolemItemMatch.toggle(itemMatch, flag);
+        return next != itemMatch && setItemMatch(next);
+    }
     public boolean setGuardTargets(int mask) {
         requireServerThread();
         if (level().isClientSide || unsupported || retiring || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()
@@ -473,7 +497,7 @@ public class EntityGolemBase extends AbstractGolem {
     /**
      * Original getColorsMatching: the colours of the ghost slots that match {@code stack} (an empty hand matches the empty
      * slots); when no slot holds an exemplar at all, every slot's colour. Cores without colourable slots, and every golem
-     * without Order, answer a single "any" so ordinary routing is unchanged. Matching is exact; fuzzy matching is Entropy's.
+     * without Order, answer a single "any" so ordinary routing is unchanged. Matching follows Entropy's switches (exact without them).
      */
     public List<Integer> colorsMatching(ItemStack stack) {
         if (!canColorSlots()) return List.of(GolemData.NO_COLOR);
@@ -483,7 +507,7 @@ public class EntityGolemBase extends AbstractGolem {
         for (int slot = 0; slot < slots; slot++) {
             ItemStack exemplar = entityData.get(FILTERS.get(slot));
             if (!exemplar.isEmpty()) anyFilter = true;
-            boolean same = stack == null || stack.isEmpty() ? exemplar.isEmpty() : !exemplar.isEmpty() && ItemStack.isSameItemSameComponents(exemplar, stack);
+            boolean same = stack == null || stack.isEmpty() ? exemplar.isEmpty() : !exemplar.isEmpty() && GolemItemMatch.matches(stack, exemplar, itemMatch);
             if (same) matching.add(entityData.get(COLORS.get(slot)));
         }
         if (!anyFilter) {
@@ -610,7 +634,7 @@ public class EntityGolemBase extends AbstractGolem {
         int slots = getSlotCount();
         return new GolemData(getGolemCore(), FILTERS.subList(0, slots).stream().map(filter -> entityData.get(filter).copy()).toList(),
                 WANTED.subList(0, slots).stream().map(entityData::get).toList(), isFillAnyAmount(), getMarkers(), getUseOptions(),
-                GolemUpgrades.toList(upgradeSlots), COLORS.subList(0, slots).stream().map(entityData::get).toList(), guardTargets, advanced, decoration);
+                GolemUpgrades.toList(upgradeSlots), COLORS.subList(0, slots).stream().map(entityData::get).toList(), guardTargets, advanced, decoration, itemMatch);
     }
     public void applyConfiguration(GolemData data) {
         requireServerThread();
@@ -656,6 +680,7 @@ public class EntityGolemBase extends AbstractGolem {
         entityData.set(ADVANCED, advanced);
         decoration = data.decoration();
         entityData.set(DECORATION, decoration);
+        itemMatch = data.itemMatch(); // GolemData already refused non-zero switches without an Entropy upgrade on a core that has them.
         upgradeSlots = fittedUpgrades;
         syncUpgrades();
         applyMaterialAttributes(EnumGolemType.getType(material));
@@ -1243,7 +1268,7 @@ public class EntityGolemBase extends AbstractGolem {
             ItemStack ghost = entityData.get(FILTERS.get(slot));
             if (ghost.isEmpty()) continue;
             filtered = true;
-            if (ItemStack.isSameItemSameComponents(ghost, actual)) return true;
+            if (GolemItemMatch.matches(actual, ghost, itemMatchFlags())) return true;
         }
         return !filtered;
     }
@@ -1946,7 +1971,8 @@ public class EntityGolemBase extends AbstractGolem {
         try {
             UseGolemGoals.Target useTarget = useTransfer ? use.findTarget(exemplar) : null;
             if (useTransfer && (useTarget == null || !permitUseHomeTransfer(source, face, useTarget, exemplar))) return 0;
-            int slot = source.firstExtractable(exemplar, face);
+            int match = itemMatchFlags();
+            int slot = source.firstExtractable(exemplar, face, match);
             if (slot < 0) return 0;
             Container inventory = source.container();
             ItemStack actual = inventory.getItem(slot);
@@ -1955,7 +1981,7 @@ public class EntityGolemBase extends AbstractGolem {
             int amount = Math.min(wanted, Math.min(before, Math.min(carrySpace(), actual.getMaxStackSize())));
             if (amount <= 0 || !canWork() || hasCargo() || !source.current() || inventory.getItem(slot) != actual
                     || actual.getCount() != before || !source.extracts(slot, actual, face)
-                    || !ItemStack.isSameItemSameComponents(actual, exemplar)
+                    || !GolemItemMatch.matches(actual, exemplar, match)
                     || (core == GolemData.EMPTY_CORE || core == GolemData.SORTING) && !inventories.canDeliver(actual)) return 0;
             if (useTransfer && (!useReady() || !use.ownsTake(source, exemplar) || !UseGolemGoals.seed(actual)
                     || !use.current(useTarget, actual) || !source.pos().equals(homeInventoryPosition()) || face != getHomeFacing())) return 0;
@@ -2036,7 +2062,7 @@ public class EntityGolemBase extends AbstractGolem {
                 if (amount <= 0) continue;
                 // Re-probe the SAME face's real extractable seed at EVERY paid
                 // commit, not just when the route or preview was selected.
-                if (core == GolemData.SORTING && marker != null && !target.hasSeedAndRoom(source, face)) return moved;
+                if (core == GolemData.SORTING && marker != null && !target.hasSeedAndRoom(source, face, itemMatchFlags())) return moved;
                 if (!target.current() || carried != source || inventory.getItem(slot) != old
                         || old.getCount() != oldCount || !canWork()) continue;
                 if (useTransfer && (!useReady() || !use.ownsReturn() || !target.pos().equals(homeInventoryPosition()) || face != getHomeFacing())) return moved;
@@ -2350,6 +2376,8 @@ public class EntityGolemBase extends AbstractGolem {
         tag.putByteArray("upgrades", GolemUpgrades.toBytes(upgradeSlots)); // Original key; -1 is an empty slot.
         if (advanced) tag.putBoolean("advanced", true); // Original key; omitted while false so earlier saves keep their form.
         if (!decoration.isEmpty()) tag.putString("Decoration", decoration); // Original key; omitted while empty.
+        // Not the original "toggles" byte: its bits 5..7 mean the same, but its bits 1..4 are the Guard's inverted switches.
+        if (itemMatch != 0) tag.putByte("ItemMatch", (byte) itemMatch);
         if (retainedConfiguration != null) for (String key : retainedConfiguration.getAllKeys()) {
             tag.put(key, retainedConfiguration.get(key).copy());
         }
@@ -2491,6 +2519,12 @@ public class EntityGolemBase extends AbstractGolem {
             if (!GolemGuardTargets.acceptable(stored, core, getUpgradeAmount(GolemUpgrade.ORDER))) unsupported = true; // Kept raw below.
             else guardTargets = stored;
         }
+        itemMatch = 0;
+        if (tag.contains("ItemMatch")) {
+            int stored = tag.getByte("ItemMatch") & 0xFF; // The tag type was checked in unsupportedExtras.
+            if (!GolemItemMatch.acceptable(stored, core, getUpgradeAmount(GolemUpgrade.ENTROPY))) unsupported = true; // Kept raw below.
+            else itemMatch = stored;
+        }
         entityData.set(FILL_ANY, tag.getBoolean("FillAny"));
         if (requiresEmptyControls(core) && !baselineEmptyControls()) unsupported = true;
         if (core == GolemData.LIQUID && !liquidControls()) unsupported = true;
@@ -2540,7 +2574,8 @@ public class EntityGolemBase extends AbstractGolem {
                 || tag.contains("FillAny") && (!tag.contains("FillAny", Tag.TAG_BYTE) || tag.getByte("FillAny") < 0 || tag.getByte("FillAny") > 1)
                 || tag.contains("upgrades") && !tag.contains("upgrades", Tag.TAG_BYTE_ARRAY)
                 || tag.contains("colors") && !tag.contains("colors", Tag.TAG_BYTE_ARRAY)
-                || tag.contains("GuardTargets") && !tag.contains("GuardTargets", Tag.TAG_BYTE)) return true;
+                || tag.contains("GuardTargets") && !tag.contains("GuardTargets", Tag.TAG_BYTE)
+                || tag.contains("ItemMatch") && !tag.contains("ItemMatch", Tag.TAG_BYTE)) return true;
         if (tag.contains("advanced") && (!tag.contains("advanced", Tag.TAG_BYTE) || tag.getByte("advanced") < 0 || tag.getByte("advanced") > 1)
                 || tag.contains("Decoration") && (!tag.contains("Decoration", Tag.TAG_STRING) || !GolemDecorations.valid(tag.getString("Decoration")))
                 || !tag.getString("deco").isEmpty()

@@ -4,6 +4,17 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально19.10 (шестая группа: продвинутый голем, Claude): реализовано, собрано, game-tested 153/153
+
+Контракт и реализация: [golem-advanced](analysis/2026-10-19-golem-advanced.md); аудит и независимая проверка сборки в контейнере: [full-project-audit](analysis/2026-10-19-full-project-audit.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`, не публиковалось.
+**Implemented:** `GolemData.advanced` (JSON/NBT/сеть: бит 0x10 последнего байта), слот улучшений `материал + 1`, скорость ×1,1 после Air, радиус `+max(20 %, 2)`, атака 18 тиков, подсказка `tc.adv`, колокольчик сохраняет флаг даже в голом плейсере,
+`InfusionResultPatches` + `result_patch` рецепта (центр копируется и патчится), рецепт `infusion/golem_advanced`, псевдоним книги `AdvancedGolem`, иконка исследования `ag`.
+**Built / game-tested:** `:common:test` 393 JUnit (+8 `GolemAdvancedTest`, +1 `CrystalLootTableTest` до этого), `:fabric:remapJar`, `:fabric:runGameTest` **153/153** (+`advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag`, +`crystalBlocksDropSixOwnShards`); JAR SHA-256 `769b2d4b…60c3`.
+Исправлены два устаревших теста: `rawRecipeWire` (маркер патча) и `GolemGuardTargetsTest` (бит 16 — флаг advanced, повреждены только старшие биты).
+**Мутации (по одной, затем побайтное восстановление, sha256 сверен):** слоты, скорость, радиус, задержка атаки, NBT-сохранение, голый плейсер при разборке, патч центра, ёмкость плейсера — ловятся GameTest-ом (и частью JUnit); бит в проводе — JUnit; избыточная проверка `canApply` в `matches` вначале **не ловилась** (ингредиент уже ограничивает центр), после добавления прямого теста с «свободным» ингредиентом — ловится.
+**Seen:** нет. **Не проверено:** значок плейсера/вид голема, полный ритуал алтаря с этим рецептом, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** декорации ([контракт](analysis/2026-10-19-golem-decorations.md): H G B F V P M сразу, дротик R вместе с `AIDartAttack`), затем остаток Entropy и Traveling Trunk.
+
 ### Актуально19.10 (пятая группа: переключатели целей Guard (Order), улов Fishing (Order/Entropy/Air), Claude): реализовано, собрано, game-tested 151/151
 
 Реализация, отклонения, мутации и точные формулировки: раздел «Пятая группа» в [golem-upgrades-implementation](analysis/2026-10-19-golem-upgrades-implementation.md); контракт — [§5a](analysis/2026-10-19-golem-upgrades.md). Ничего не закоммичено и не опубликовано; только Fabric/common, NeoForge не запускался.

@@ -131,6 +131,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("TinyVisor", "arcane/golem_decoration_visor"), // 257, iron ingots / any leather helmet
             alias("TinyArmor", "arcane/golem_decoration_armor"), // 258, iron ingots / any leather tunic
             alias("TinyHammer", "arcane/golem_decoration_mace"), // 259, seven iron ingots; TinyDart (256) waits for the launcher
+            alias("GolemFetter", "arcane/golem_fetter"), // arcane stone / iron ingot / arcane stone bricks / redstone block
             alias("GolemBell", "arcane/golem_bell"), // 263, quartz items / stickWood
             alias("UpgradeAir", "arcane/golem_upgrade_air"), // 265, eight gold nuggets around the air shard (damage 0)
             alias("UpgradeEarth", "arcane/golem_upgrade_earth"), // 266, earth shard is damage 3, not 1

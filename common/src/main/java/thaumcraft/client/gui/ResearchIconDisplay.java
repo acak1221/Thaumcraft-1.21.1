@@ -185,6 +185,7 @@ final class ResearchIconDisplay {
                 case 5 -> "tallow_block";
                 case 6 -> "arcane_stone";
                 case 7 -> "arcane_stone_bricks";
+                case 9 -> "golem_fetter";
                 default -> null;
             };
             case "ConfigBlocks.blockMetalDevice" -> switch (metadata) {

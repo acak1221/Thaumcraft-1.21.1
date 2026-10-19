@@ -79,6 +79,7 @@ import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemGuardTargets;
+import thaumcraft.common.blocks.BlockGolemFetter;
 import thaumcraft.common.items.golems.GolemItemMatch;
 import thaumcraft.common.items.golems.GolemLiquidQueue;
 import thaumcraft.common.items.golems.GolemMarker;
@@ -175,6 +176,8 @@ public class EntityGolemBase extends AbstractGolem {
     // Order Guard target switches (GolemGuardTargets); server-only, the menu mirrors them. Default: hostile monsters only.
     private int guardTargets = GolemGuardTargets.DEFAULT;
     private boolean advanced;
+    // Standing on an active Golem Fetter (original `inactive`): recomputed from the world on both sides every tick, never saved or synced.
+    private boolean fettered;
     private String decoration = "";
     // Entropy's item-comparison switches (GolemItemMatch); server-only, the menu mirrors them.
     private int itemMatch;
@@ -743,7 +746,7 @@ public class EntityGolemBase extends AbstractGolem {
     }
     boolean canWork() {
         return !level().isClientSide && !ItemGolemPlacer.isPlacementInProgress()
-                && isAlive() && current() && hasHome && EnumGolemType.isSupported(material) && !unsupported && !retiring
+                && isAlive() && current() && hasHome && !fettered && EnumGolemType.isSupported(material) && !unsupported && !retiring
                 && unreadCarried == null && unreadWater == null && unreadAspect == null
                 && !hasUseRemainders()
                 && (!useWorkScope || useInvoking)
@@ -849,8 +852,13 @@ public class EntityGolemBase extends AbstractGolem {
             setXxa(0);
         }
     }
+    /** A golem on an active Golem Fetter is held: no goals, no movement, nothing worked (original EntityGolemBase:326, 362, 382). */
+    public boolean isFettered() { return fettered; }
+    @Override protected boolean isImmobile() { return super.isImmobile() || fettered; }
+
     @Override public void aiStep() {
         super.aiStep();
+        fettered = BlockGolemFetter.holds(level(), blockPosition());
         settleUseCustody();
         if (isNoAi() && core == GolemData.USE) use.reset();
         if (isNoAi() && (core == GolemData.GUARD || core == GolemData.BUTCHER)) guard.reset();

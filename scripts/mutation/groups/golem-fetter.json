@@ -1,0 +1,146 @@
+{
+ "description": "Golem Fetter (docs/analysis/2026-10-19-golem-fetter.md)",
+ "watch": {
+  "junit": [
+   "GolemFetterAssetsTest"
+  ],
+  "gametests": [
+   "golemFetterHoldsGolemsWhileItsRedstoneSignalLasts"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.assets.*"
+ ],
+ "mutants": [
+  {
+   "id": "active-state-uses-the-idle-model",
+   "name": "active state uses the idle model",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/blockstates/golem_fetter.json",
+   "old": "\"active=true\": {\"model\": \"thaumcraft:block/golem_fetter_active\"}",
+   "new": "\"active=true\": {\"model\": \"thaumcraft:block/golem_fetter\"}"
+  },
+  {
+   "id": "active-top-texture-is-the-idle-one",
+   "name": "active top texture is the idle one",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/block/golem_fetter_active.json",
+   "old": "\"top\": \"thaumcraft:blocks/golem_stone_top_active\"",
+   "new": "\"top\": \"thaumcraft:blocks/golem_stone_top\""
+  },
+  {
+   "id": "loot-drops-arcane-stone",
+   "name": "loot drops arcane stone",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/loot_table/blocks/golem_fetter.json",
+   "old": "\"name\": \"thaumcraft:golem_fetter\"",
+   "new": "\"name\": \"thaumcraft:arcane_stone\""
+  },
+  {
+   "id": "recipe-middle-row-is-wrong",
+   "name": "recipe middle row is wrong",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/golem_fetter.json",
+   "old": "\"IRI\"",
+   "new": "\"IRR\""
+  },
+  {
+   "id": "russian-name-is-missing",
+   "name": "russian name is missing",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"block.thaumcraft.golem_fetter\": \"Голем-деактиватор\"",
+   "new": "\"block.thaumcraft.golem_fetter_x\": \"Голем-деактиватор\""
+  },
+  {
+   "id": "not-a-pickaxe-block",
+   "name": "not a pickaxe block",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/block/mineable/pickaxe.json",
+   "old": "    \"thaumcraft:golem_fetter\",\n",
+   "new": ""
+  },
+  {
+   "id": "fetter-never-activates",
+   "name": "fetter never activates",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockGolemFetter.java",
+   "old": "boolean powered = level.hasNeighborSignal(pos);",
+   "new": "boolean powered = false;"
+  },
+  {
+   "id": "fetter-is-always-active-after-a-change",
+   "name": "fetter is always active after a change",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockGolemFetter.java",
+   "old": "boolean powered = level.hasNeighborSignal(pos);",
+   "new": "boolean powered = true;"
+  },
+  {
+   "id": "fetter-never-switches-off",
+   "name": "fetter never switches off",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockGolemFetter.java",
+   "old": "if (state.getValue(ACTIVE) != powered) level.setBlock",
+   "new": "if (powered && !state.getValue(ACTIVE)) level.setBlock"
+  },
+  {
+   "id": "the-client-side-toggles-too",
+   "name": "the client side toggles too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockGolemFetter.java",
+   "old": "if (!level.isClientSide) {",
+   "new": "if (true) {",
+   "expect": "survives",
+   "reason": "the dedicated-server tests never run a client level; the guard only keeps a client from setting a state the server owns"
+  },
+  {
+   "id": "holds-ignores-the-active-flag",
+   "name": "holds ignores the active flag",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockGolemFetter.java",
+   "old": "return state.getBlock() instanceof BlockGolemFetter && state.getValue(ACTIVE);",
+   "new": "return state.getBlock() instanceof BlockGolemFetter;"
+  },
+  {
+   "id": "holds-looks-at-the-own-cell",
+   "name": "holds looks at the own cell",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockGolemFetter.java",
+   "old": "BlockPos under = feet.below();",
+   "new": "BlockPos under = feet;"
+  },
+  {
+   "id": "hardness-changed",
+   "name": "hardness changed",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftMasonry.java",
+   "old": "() -> new BlockGolemFetter(stone(2.0F, 6.0F)));",
+   "new": "() -> new BlockGolemFetter(stone(2.0F, 20.0F)));"
+  },
+  {
+   "id": "entity-is-never-fettered",
+   "name": "entity is never fettered",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "fettered = BlockGolemFetter.holds(level(), blockPosition());",
+   "new": "fettered = false;"
+  },
+  {
+   "id": "fettered-golem-may-still-work",
+   "name": "fettered golem may still work",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "&& hasHome && !fettered && EnumGolemType.isSupported(material)",
+   "new": "&& hasHome && EnumGolemType.isSupported(material)"
+  },
+  {
+   "id": "fettered-golem-still-moves",
+   "name": "fettered golem still moves",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+   "old": "return super.isImmobile() || fettered;",
+   "new": "return super.isImmobile();"
+  }
+ ]
+}

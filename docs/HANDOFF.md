@@ -4,6 +4,25 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально19.10 (одиннадцатая группа: Traveling Trunk, Claude): реализовано, собрано, game-tested 159/159
+
+Контракт и реализация: [traveling-trunk](analysis/2026-10-19-traveling-trunk.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `TrunkRules`, `EntityTravelingTrunk` (прыжки за владельцем, телепорт, защита Fire, втягивание Entropy, лечение, смерть, колокольчик с Order, переход в измерение владельца), `InventoryTrunk`, `ContainerTravelingTrunk`, `ItemTrunkSpawner`, рецепт `traveling_trunk`;
+клиент — `ModelTrunk`, `RenderTravelingTrunk` (масштаб/крышка по формулам оригинала, злая текстура, значок улучшения), `GuiTravelingTrunk`.
+**Built / game-tested:** `:common:test` **437 JUnit** (+13 с записи Liquid, 424: 3 `GolemFetterAssetsTest`, 6 `TrunkRulesTest`, 4 `TravelingTrunkClientAssetsTest`), `:fabric:remapJar`, `:fabric:runGameTest` **159/159**, JAR SHA-256 `e58263e8…450d1`.
+**Мутации:** 32, прогон у GitHub (`mutation.yml`, заявка `scripts/mutation/run-request.txt`); итог пишется в документ группы.
+**CI:** найден и исправлен хрупкий реальный лимит 10 с у `frostFocusCraftsSelectsAndPays` и `shockFocus…` (теперь 60 с, тиковый предел прежний) — на раннере GitHub тест давал 10,02 с.
+**Seen:** нет. **Не проверено:** вид модели/значка/экрана, переход вслед за владельцем в другое измерение (в GameTest не исполняется), сеть/два игрока, save/reload мира, NeoForge. Плейсер `trunk_spawner` пока с плоской моделью.
+**Следующее:** дротик `R` (`AIDartAttack`, снаряд, рендер), горящий предмет улова.
+
+### Актуально19.10 (десятая группа: Golem Fetter, Claude): реализовано, собрано, game-tested 157/157
+
+Контракт и реализация: [golem-fetter](analysis/2026-10-19-golem-fetter.md).
+**Implemented:** блок `golem_fetter` со свойством `active` (вместо метаданных 9/10), `BlockGolemFetter.neighborChanged` по редстоуну (как оригинал — только при смене соседа), `holds()` под ногами голема, `EntityGolemBase.fettered` → `isImmobile()` и `canWork()`, поза `setInactive`, рецепт `SSS/IRI/BBB`, лут, lang.
+**Built / game-tested:** `:common:test` **427 JUnit** (+3 `GolemFetterAssetsTest`), `:fabric:runGameTest` **157/157** (+`golemFetterHoldsGolemsWhileItsRedstoneSignalLasts`: три настоящих Fill-голема).
+**Мутации:** 16 у GitHub, пойманы 13; три выживших объяснены (клиентская охрана; `isImmobile` и `canWork` перекрываются).
+**Seen:** нет. **Не проверено:** поза неактивного голема на экране, сложные редстоун-схемы, сеть/два игрока, save/reload мира, NeoForge.
+
 ### Актуально19.10 (девятая группа: очередь Liquid у Entropy, Claude): реализовано, собрано, game-tested 156/156
 
 Контракт и реализация: [golem-liquid-queue](analysis/2026-10-19-golem-liquid-queue.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

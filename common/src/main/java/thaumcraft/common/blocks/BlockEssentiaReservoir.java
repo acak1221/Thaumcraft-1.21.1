@@ -37,7 +37,7 @@ public final class BlockEssentiaReservoir extends BaseEntityBlock {
     public BlockEssentiaReservoir(Properties properties) { super(properties); }
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileEssentiaReservoir(pos, state); }
-    /** INTERIM: a plain translucent cube until the original tile renderer (the vessel and its coloured contents) is ported. */
+    /** The vessel is still the plain translucent block model; the original's coloured contents are drawn by the tile renderer. */
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override protected boolean hasAnalogOutputSignal(BlockState state) { return true; }
     @Override protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {

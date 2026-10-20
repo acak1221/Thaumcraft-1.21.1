@@ -331,7 +331,23 @@ public final class ThaumcraftRecipeDisplay {
         return Map.entry(original, ResourceLocation.fromNamespaceAndPath("thaumcraft", nativeId));
     }
 
-    public static Map<String, ResourceLocation> aliases() { return ALIASES; }
+    /**
+     * The original recipe key to native recipe id map. The bundled coverage map is the
+     * authority: it carries every original key the corpus references, including the five
+     * research pages that had no recipe at all before the catalogue was closed.
+     */
+    private static final Map<String, ResourceLocation> RESOLVED = resolveAliases();
+
+    private static Map<String, ResourceLocation> resolveAliases() {
+        var merged = new java.util.LinkedHashMap<String, ResourceLocation>(ALIASES);
+        for (var entry : thaumcraft.common.lib.research.ResearchRecipeCoverage.nativeRecipeIds().entrySet()) {
+            var id = ResourceLocation.tryParse(entry.getValue());
+            if (id != null) merged.put(entry.getKey(), id);
+        }
+        return Map.copyOf(merged);
+    }
+
+    public static Map<String, ResourceLocation> aliases() { return RESOLVED; }
     public RecipeHolder<?> recipe() { return recipe; }
     public boolean sameRecipes(ThaumcraftRecipeDisplay other) {
         if (recipe != other.recipe || infusionAltar != other.infusionAltar || thaumatorium != other.thaumatorium || alternatives.size() != other.alternatives.size()) return false;
@@ -386,7 +402,7 @@ public final class ThaumcraftRecipeDisplay {
                     && !construct.value().getResultItem(level.registryAccess()).isEmpty()
                     ? new ThaumcraftRecipeDisplay(construct, false, true) : null;
         }
-        ResourceLocation id = ALIASES.get(page.recipeKey());
+        ResourceLocation id = RESOLVED.get(page.recipeKey());
         if (id == null) return null;
         RecipeHolder<?> holder = level.getRecipeManager().byKey(id).orElse(null);
         if (holder == null) return null;

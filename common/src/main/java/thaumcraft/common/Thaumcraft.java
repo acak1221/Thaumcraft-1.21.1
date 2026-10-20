@@ -73,9 +73,13 @@ public final class Thaumcraft {
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();
         ThaumcraftContent.register();
+        thaumcraft.common.config.ThaumcraftDeviceMenus.register();
+        thaumcraft.common.config.ThaumcraftLegacyTiles.register();
+        thaumcraft.common.config.ThaumcraftProjectiles.register();
         thaumcraft.common.config.ThaumcraftCrystalClusters.register();
         thaumcraft.common.config.ThaumcraftRunic.register();
         thaumcraft.common.config.ThaumcraftBaubles.register();
+        thaumcraft.common.config.ThaumcraftRunicBaubles.register();
         thaumcraft.common.config.ThaumcraftTravelGear.register();
         thaumcraft.common.lib.network.HoverNetworking.init();
         thaumcraft.common.config.ThaumcraftLoot.register();
@@ -90,10 +94,13 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftUnknownKnowledge.register();
         thaumcraft.common.config.ThaumcraftGolemMaterials.register();
         thaumcraft.common.config.ThaumcraftTaint.register();
+        thaumcraft.common.config.ThaumcraftTaintAnimals.register();
         thaumcraft.common.config.ThaumcraftPrimalFoci.register();
         thaumcraft.common.config.ThaumcraftBiomes.register();
         ThaumcraftOres.register();
         ThaumcraftWorldgen.register();
+        thaumcraft.common.config.ThaumcraftVillages.register();
+        thaumcraft.common.config.ThaumcraftOuterLands.register();
         ThaumcraftNodes.register();
         ThaumcraftNodeDevices.register();
         ThaumcraftArcane.register();
@@ -109,6 +116,7 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftAdvancedFurnace.register();
         ThaumcraftAlembics.register();
         ThaumcraftWands.register();
+        thaumcraft.common.config.ThaumcraftWandEnchantments.register();
         ThaumcraftBellows.register();
         ThaumcraftFoci.register();
         ThaumcraftFocalManipulation.register();
@@ -125,6 +133,8 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftArchitect.register();
         thaumcraft.common.config.ThaumcraftWarp.register();
         thaumcraft.common.config.ThaumcraftMonsters.register();
+        thaumcraft.common.config.ThaumcraftEldritchMobs.register();
+        thaumcraft.common.config.ThaumcraftCultists.register();
         thaumcraft.common.config.ThaumcraftWarp.enableEvents();
         thaumcraft.common.config.ThaumcraftSpa.register();
         thaumcraft.common.config.ThaumcraftEldritchItems.register();

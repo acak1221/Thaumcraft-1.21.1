@@ -21,7 +21,7 @@ import net.minecraft.world.level.biome.Biome;
 public final class OuterLandsBiomes {
     /** The single Eldritch biome of the Outer Lands. */
     public static final ResourceKey<Biome> ELDRITCH = ResourceKey.create(Registries.BIOME,
-            ResourceLocation.fromNamespaceAndPath("thaumcraft", "eldritch"));
+            ResourceLocation.fromNamespaceAndPath("thaumcraft", "eldritch_lands"));
     /** Every biome that belongs to the Outer Lands dimension. */
     public static final TagKey<Biome> OUTER_LANDS_BIOMES = TagKey.create(Registries.BIOME,
             ResourceLocation.fromNamespaceAndPath("thaumcraft", "outer_lands_biomes"));

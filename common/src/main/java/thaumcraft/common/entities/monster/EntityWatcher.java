@@ -85,7 +85,7 @@ public class EntityWatcher extends Monster {
     public boolean isElder() { return (entityData.get(FLAGS)&FLAG_ELDER)!=0; }
     public int getGazeDuration() { return EldritchMobRules.watcherGazeDuration(isElder()); }
     public boolean hasTargetedEntity() { return entityData.get(TARGET_ID)!=0; }
-    public void setTargetId(int id) { entityData.set(TARGET_ID,id); }
+    public void setTargetId(int id) { entityData.set(TARGET_ID,id); if(id==0)gazeCounter=0; }
     public LivingEntity getTargetedEntity() {
         if(!hasTargetedEntity())return null;
         if(level().isClientSide) {
@@ -120,11 +120,49 @@ public class EntityWatcher extends Monster {
         return super.hurt(source,amount);
     }
 
+    @Override public void tick() {
+        super.tick();
+        if(level().isClientSide)clientPresentationTick();
+    }
+
     /** Original watcher floats with a sine driven motion instead of walking. */
     @Override public void travel(Vec3 input) {
         moveRelative((float)input.x,input);
         move(MoverType.SELF,getDeltaMovement());
         setDeltaMovement(getDeltaMovement().multiply(.9D,1D,.9D));
+    }
+
+    // ---- Original client presentation state (EntityWatcher fields 175482_b..175486_bm) ----
+    private float tailSwing;
+    private float tailSwingPrev;
+    private float tailSwingSpeed;
+    private float spikeExtension;
+    private float spikeExtensionPrev;
+    private int gazeCounter;
+
+    /** Original EntityWatcher.func_175471_a: the interpolated tail swing. */
+    public float getTailSwing(float partialTick) { return tailSwingPrev+(tailSwing-tailSwingPrev)*partialTick; }
+    /** Original EntityWatcher.func_175469_o: the interpolated spine extension (1 = spread, 0 = retracted). */
+    public float getSpikeExtension(float partialTick) { return spikeExtensionPrev+(spikeExtension-spikeExtensionPrev)*partialTick; }
+    /** Original EntityWatcher.func_175474_cn: the watcher currently gazes at a target. */
+    public boolean isTargeting() { return isGazing(); }
+    /** Original EntityWatcher.func_175477_p: the beam charge progress between 0 and 1. */
+    public float getBeamCharge(float partialTick) {
+        int duration=getGazeDuration();
+        return duration<=0?0F:(gazeCounter+partialTick)/(float)duration;
+    }
+
+    /** Original EntityWatcher.func_70636_d: the client side tail, spine and gaze bookkeeping. */
+    private void clientPresentationTick() {
+        tailSwingPrev=tailSwing;
+        if(isGazing()) {
+            if(tailSwingSpeed<.5F)tailSwingSpeed=4F;
+            else tailSwingSpeed+=(.5F-tailSwingSpeed)*.1F;
+        } else tailSwingSpeed+=(.125F-tailSwingSpeed)*.2F;
+        tailSwing+=tailSwingSpeed;
+        spikeExtensionPrev=spikeExtension;
+        if(isGazing())spikeExtension+=(0F-spikeExtension)*.25F;
+        else spikeExtension+=(1F-spikeExtension)*.06F;
     }
 
     @Override protected SoundEvent getAmbientSound() { return SoundEvents.GUARDIAN_AMBIENT_LAND; }
@@ -208,6 +246,8 @@ public class EntityWatcher extends Monster {
                 target.hurt(watcher.damageSources().mobAttack(watcher),(float)watcher.getAttributeValue(Attributes.ATTACK_DAMAGE));
                 watcher.setTarget(null);
             }
+            // Original EntityWatcher counts the gaze preparation ticks for the beam charge.
+            if(watcher.gazeCounter<watcher.getGazeDuration())++watcher.gazeCounter;
         }
     }
 

@@ -73,6 +73,22 @@ public final class ThaumcraftTaintAnimals {
         EntityEvent.LIVING_DEATH.register(ThaumcraftTaintAnimals::onLivingDeath);
     }
 
+    /**
+     * Loader hook: the tainted animal attribute suppliers. The loader owns the registry,
+     * so the common module only publishes the suppliers.
+     */
+    public static void registerAttributes(java.util.function.BiConsumer<EntityType<?>,
+            net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder> registrar) {
+        registrar.accept(TAINT_CHICKEN.get(), thaumcraft.common.entities.monster.EntityTaintChicken.createAttributes());
+        registrar.accept(TAINT_COW.get(), thaumcraft.common.entities.monster.EntityTaintCow.createAttributes());
+        registrar.accept(TAINT_PIG.get(), thaumcraft.common.entities.monster.EntityTaintPig.createAttributes());
+        registrar.accept(TAINT_SHEEP.get(), thaumcraft.common.entities.monster.EntityTaintSheep.createAttributes());
+        registrar.accept(TAINT_VILLAGER.get(), thaumcraft.common.entities.monster.EntityTaintVillager.createAttributes());
+        registrar.accept(TAINT_CRAWLER.get(), thaumcraft.common.entities.monster.EntityTaintCrawler.createAttributes());
+        registrar.accept(TAINT_SEED.get(), thaumcraft.common.entities.monster.EntityTaintSeed.createAttributes());
+        registrar.accept(TAINT_SEED_PRIME.get(), thaumcraft.common.entities.monster.EntityTaintSeedPrime.createAttributes());
+    }
+
     /** Original1.7 LivingDeathEvent: a flux tainted animal dies and its tainted twin takes its place. */
     private static EventResult onLivingDeath(Entity entity,DamageSource source) {
         if(!(entity instanceof LivingEntity living))return EventResult.pass();

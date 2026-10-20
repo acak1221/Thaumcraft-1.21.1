@@ -1,6 +1,7 @@
 package thaumcraft.common.entities.monster;
 
 import net.minecraft.core.BlockPos;
+import thaumcraft.common.entities.projectile.EntityGolemOrb;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -195,7 +196,7 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
     @Override public void performRangedAttack(LivingEntity target,float distanceFactor) {
         if(!hasLineOfSight(target)||chargingBeam||beamCharge<=0)return;
         beamCharge=EldritchMobRules.golemBeamDrain(beamCharge,level().random.nextInt(5));
-        var blast=new GolemOrb(level(),this,target,false);
+        var blast=new EntityGolemOrb(level(),this,target,false);
         Vec3 look=getLookAngle();
         blast.setPos(blast.getX()+look.x,blast.getY(),blast.getZ()+look.z);
         double dx=target.getX()+target.getDeltaMovement().x-getX();
@@ -248,58 +249,4 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
      * Original TC4 Golem Orb: zero gravity, a homing pull of 0.2 over the squared distance, a component
      * clamp of 0.25, a 160 or 240 tick lifetime and a hit damage of one or 0.6 times the owner attack.
      */
-    public static final class GolemOrb extends ThrowableProjectile {
-        private static final EntityDataAccessor<Boolean> RED=SynchedEntityData.defineId(GolemOrb.class,EntityDataSerializers.BOOLEAN);
-        private int targetId;
-        private LivingEntity target;
-
-        public GolemOrb(EntityType<? extends GolemOrb> type,Level level) { super(type,level); }
-        public GolemOrb(Level level,LivingEntity owner,LivingEntity target,boolean red) {
-            this(ThaumcraftEldritchMobs.GOLEM_ORB.get(),level);
-            setOwner(owner);
-            this.target=target;
-            this.targetId=target==null?0:target.getId();
-            entityData.set(RED,red);
-            setPos(owner.getX(),owner.getEyeY()-.1D,owner.getZ());
-        }
-        public boolean isRed() { return entityData.get(RED); }
-        @Override protected void defineSynchedData(SynchedEntityData.Builder builder) { builder.define(RED,false); }
-        @Override protected double getDefaultGravity() { return 0; }
-        @Override public void tick() {
-            super.tick();
-            if(tickCount>(isRed()?240:160))discard();
-            LivingEntity pursued=target;
-            if(pursued==null&&targetId!=0) {
-                var found=level().getEntity(targetId);
-                if(found instanceof LivingEntity living)pursued=living;
-            }
-            if(pursued==null||!pursued.isAlive())return;
-            double distance=distanceToSqr(pursued);
-            if(distance<=0)return;
-            double dx=pursued.getX()-getX();
-            double dy=pursued.getY()+pursued.getBbHeight()*.6D-getY();
-            double dz=pursued.getZ()-getZ();
-            double root=Math.sqrt(distance);
-            double acceleration=.2D;
-            setDeltaMovement(getDeltaMovement().x+dx/root*acceleration,getDeltaMovement().y+dy/root*acceleration,getDeltaMovement().z+dz/root*acceleration);
-            setDeltaMovement(Mth.clamp((float)getDeltaMovement().x,-.25F,.25F),Mth.clamp((float)getDeltaMovement().y,-.25F,.25F),Mth.clamp((float)getDeltaMovement().z,-.25F,.25F));
-        }
-        @Override protected void onHit(HitResult hit) {
-            if(!level().isClientSide&&hit instanceof EntityHitResult entityHit&&entityHit.getEntity() instanceof LivingEntity victim
-                    &&getOwner() instanceof LivingEntity thrower) {
-                float damage=(float)thrower.getAttributeValue(Attributes.ATTACK_DAMAGE)*(isRed()?1.0F:.6F);
-                victim.hurt(damageSources().indirectMagic(this,thrower),damage);
-            }
-            level().playSound(null,getX(),getY(),getZ(),sound("shock"),SoundSource.HOSTILE,1.0F,1.0F+random.nextFloat()*.2F);
-            discard();
-        }
-        @Override public boolean hurt(DamageSource source,float amount) {
-            if(isInvulnerableTo(source))return false;
-            if(source.getEntity()==null)return false;
-            Vec3 look=source.getEntity().getLookAngle();
-            setDeltaMovement(look.x*.9D,look.y*.9D,look.z*.9D);
-            playSound(sound("zap"),1.0F,1.0F+random.nextFloat()*.2F);
-            return true;
-        }
-    }
 }

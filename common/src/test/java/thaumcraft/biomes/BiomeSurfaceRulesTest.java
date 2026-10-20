@@ -192,7 +192,7 @@ class BiomeSurfaceRulesTest {
         assertEquals(1,BiomeGenEldritch.spawnRows().get(0).weight());
         assertEquals(1,BiomeGenEldritch.spawnRows().get(0).min());
         assertEquals(1,BiomeGenEldritch.spawnRows().get(0).max());
-        assertEquals(List.of("thaumcraft:eldritch_guardian"),
+        assertEquals(List.of("thaumcraft:inhabited_zombie","thaumcraft:eldritch_guardian"),
             BiomeGenEldritch.encodableSpawnRows().stream().map(row->row.entity()).toList());
     }
 
@@ -247,8 +247,9 @@ class BiomeSurfaceRulesTest {
             JsonObject spawners=document.getAsJsonObject("spawners");
             int monsters=spawners.getAsJsonArray("monster").size();
             if(generator==Generator.ELDRITCH) {
-                assertEquals(1,monsters,"only the guardian row can be encoded before the inhabited zombie entity exists");
-                assertEquals("thaumcraft:eldritch_guardian",spawners.getAsJsonArray("monster").get(0).getAsJsonObject().get("type").getAsString());
+                assertEquals(2,monsters,"both original cleared monster rows are encoded");
+                assertEquals("thaumcraft:inhabited_zombie",spawners.getAsJsonArray("monster").get(0).getAsJsonObject().get("type").getAsString());
+                assertEquals("thaumcraft:eldritch_guardian",spawners.getAsJsonArray("monster").get(1).getAsJsonObject().get("type").getAsString());
                 assertEquals(0,spawners.getAsJsonArray("creature").size());
                 assertEquals(0,spawners.getAsJsonArray("water_creature").size());
                 assertEquals(0,spawners.getAsJsonArray("ambient").size());

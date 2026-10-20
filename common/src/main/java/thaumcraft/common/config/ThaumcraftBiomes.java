@@ -29,6 +29,8 @@ public final class ThaumcraftBiomes {
     public static final ResourceKey<Biome> MAGICAL_FOREST=biome("magical_forest");
     public static final ResourceKey<Biome> EERIE=biome("eerie");
     public static final ResourceKey<Biome> TAINT=biome("taint");
+    /** The Outer Lands biome of the original: the single biome of the eldritch dimension. */
+    public static final ResourceKey<Biome> ELDRITCH_LANDS=biome("eldritch_lands");
     private static final DeferredRegister<Block> BLOCKS=DeferredRegister.create(Thaumcraft.MODID,Registries.BLOCK);
     private static final DeferredRegister<Item> ITEMS=DeferredRegister.create(Thaumcraft.MODID,Registries.ITEM);
     private static final DeferredRegister<Feature<?>> FEATURES=DeferredRegister.create(Thaumcraft.MODID,Registries.FEATURE);

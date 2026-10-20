@@ -39,6 +39,11 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock {
     /** BlockCosmeticOpaque:216 - only the warded glass carries the owned block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         if (!EldritchBlockRules.cosmeticOpaqueHasTile(state.getValue(VARIANT))) return null;
-        return new TileOwned(pos, state);
+        // The warded glass and the eldritch opaque block are different blocks with different
+        // owned tile types; the state tells which one is placed.
+        var type = state.is(thaumcraft.common.config.ThaumcraftEldritchBlocks.COSMETIC_OPAQUE.get())
+                ? thaumcraft.common.config.ThaumcraftEldritchBlocks.OWNED_TILE.get()
+                : thaumcraft.common.config.ThaumcraftLegacyTiles.COSMETIC_OPAQUE_BLOCK_ENTITY.get();
+        return new TileOwned(type, pos, state);
     }
 }

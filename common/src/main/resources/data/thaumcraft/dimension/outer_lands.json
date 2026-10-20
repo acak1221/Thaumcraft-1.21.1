@@ -3,7 +3,7 @@
   "generator": {
     "type": "minecraft:flat",
     "settings": {
-      "biome": "thaumcraft:eldritch",
+      "biome": "thaumcraft:eldritch_lands",
       "features": true,
       "lakes": false,
       "layers": [

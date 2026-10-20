@@ -35,6 +35,20 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     VisNetClientEffects.setShader(shader);
                 }));
         ClientSetup.init();
+        // The original wand, the void robes and the fortress armour use the TC4 models, not the
+        // vanilla baked item and armour models.
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftContent.WAND.get(),
+                thaumcraft.client.ThaumcraftGearModelsClient::renderWand);
+        net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer.register(
+                thaumcraft.client.ThaumcraftGearModelsClient::renderRobe,
+                thaumcraft.common.config.ThaumcraftEquipment.VOID_ROBE_HELMET.get(),
+                thaumcraft.common.config.ThaumcraftEquipment.VOID_ROBE_CHESTPLATE.get(),
+                thaumcraft.common.config.ThaumcraftEquipment.VOID_ROBE_LEGGINGS.get());
+        net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer.register(
+                thaumcraft.client.ThaumcraftGearModelsClient::renderFortressArmor,
+                thaumcraft.common.config.ThaumcraftEquipment.FORTRESS_HELMET.get(),
+                thaumcraft.common.config.ThaumcraftEquipment.FORTRESS_CHESTPLATE.get(),
+                thaumcraft.common.config.ThaumcraftEquipment.FORTRESS_LEGGINGS.get());
         thaumcraft.fabric.client.FabricSpaClient.init();
         thaumcraft.fabric.client.FabricTaintFibresModel.init();
         thaumcraft.fabric.client.FabricTravelGearClient.init();

@@ -133,8 +133,11 @@ public final class ClientSetup {
             // Supplier FIRST, consumer SECOND; no client source/vis query.
             VisNetClientEffects.drain(client.level, payload.target(), payload.origin(), payload.rgb());
         });
-        EntityRendererRegistry.register(ThaumcraftContent.SPECIAL_ITEM, ItemEntityRenderer::new);
+        EntityRendererRegistry.register(ThaumcraftContent.SPECIAL_ITEM, thaumcraft.client.renderers.entity.RenderSpecialItem::new);
         EntityRendererRegistry.register(ThaumcraftContent.INVENTORY_ITEM, ItemEntityRenderer::new);
+        thaumcraft.client.ThaumcraftEldritchClient.init();
+        thaumcraft.client.ThaumcraftDeviceGuiClient.init();
+        thaumcraft.client.ThaumcraftGearModelsClient.init();
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OpenThaumonomiconPayload.TYPE,
                 OpenThaumonomiconPayload.STREAM_CODEC, (payload, context) -> context.queue(() -> {
                     var minecraft = Minecraft.getInstance();

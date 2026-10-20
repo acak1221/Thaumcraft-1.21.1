@@ -2,6 +2,7 @@ package thaumcraft.common.entities.monster;
 
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
+import thaumcraft.common.entities.projectile.EntityGolemOrb;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -69,6 +70,10 @@ public class EntityCultistCleric extends EntityCultist implements RangedAttackMo
     }
 
     public boolean getIsRitualist() { return entityData.get(RITUALIST); }
+    /** Original EntityCultistCleric.getIsRitualist, under the renderer facing name. */
+    public boolean isRitualist() { return getIsRitualist(); }
+    /** Original EntityCultistCleric.func_110172_bL: the altar the ritualist focuses on. */
+    public net.minecraft.core.BlockPos getRitualTarget() { return getRestrictCenter(); }
 
     public void setIsRitualist(boolean value) { entityData.set(RITUALIST, value); }
 
@@ -93,7 +98,7 @@ public class EntityCultistCleric extends EntityCultist implements RangedAttackMo
         double dz = target.getZ() - getZ();
         swing(InteractionHand.MAIN_HAND);
         if (CultistRules.clericFiresOrb(random.nextFloat())) {
-            GolemOrb blast = new GolemOrb(level(), this, target, true);
+            EntityGolemOrb blast = new EntityGolemOrb(level(), this, target, true);
             originalShoot(blast, dx, dy + 2.0, dz, 0.66F, 3.0F);
             playSound(sound("egattack"), 1.0F, 1.0F + random.nextFloat() * 0.1F);
             level().addFreshEntity(blast);

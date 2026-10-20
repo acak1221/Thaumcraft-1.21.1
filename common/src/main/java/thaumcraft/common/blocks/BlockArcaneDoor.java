@@ -60,7 +60,7 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
 
     /** BlockArcaneDoor:340-357 - the door always carries the owned block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new TileOwned(pos, state);
+        return new TileOwned(thaumcraft.common.config.ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state);
     }
 
     /** BlockArcaneDoor:104-152 - the closed door is a thin plate, the open one stands aside. */

@@ -82,6 +82,16 @@ public final class ThaumcraftFabric implements ModInitializer {
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftWarp.ELDRITCH_GUARDIAN.get(),
                 thaumcraft.common.entities.monster.EntityEldritchGuardian.createAttributes());
+        // The eldritch bestiary owns its attributes in common; the loader owns the registry.
+        thaumcraft.common.config.ThaumcraftEldritchMobs.registerAttributes(
+                (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                        (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));
+        thaumcraft.common.config.ThaumcraftCultists.registerAttributes(
+                (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                        (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));
+        thaumcraft.common.config.ThaumcraftTaintAnimals.registerAttributes(
+                (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                        (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));
         thaumcraft.common.lib.world.TradeSwaps.install((level, player, pos, before, after) -> {
             var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false);
             return UseBlockCallback.EVENT.invoker().interact(player, level, net.minecraft.world.InteractionHand.MAIN_HAND, hit) == InteractionResult.PASS

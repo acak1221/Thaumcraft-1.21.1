@@ -39,7 +39,7 @@ public final class BlockMagicBox extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof TileMagicBox box)) return InteractionResult.PASS;
         if (!box.stillValid(player)) return InteractionResult.PASS;
         player.openMenu(new net.minecraft.world.SimpleMenuProvider(
-                (menuId, inventory, viewer) -> new thaumcraft.common.container.ContainerMagicBox(menuId, inventory, box),
+                (menuId, inventory, viewer) -> new thaumcraft.common.container.ContainerMagicBox(menuId, inventory, box, pos, box.getContainerSize()),
                 Component.translatable("container.thaumcraft.magic_box")));
         return InteractionResult.CONSUME;
     }

@@ -59,6 +59,23 @@ public class EntityThaumicSlime extends Monster implements ITaintedMob {
 
     public int getSlimeSize() { return entityData.get(SIZE); }
 
+    // Original EntitySlime squash bookkeeping (the original thaumic slime extends EntitySlime).
+    /** The squash target of the body, exactly like the vanilla slime. */
+    public float targetSquish;
+    /** The current squash of the body. */
+    public float squish;
+    /** The previous squash of the body, interpolated by the renderer. */
+    public float oSquish;
+
+    /** Original EntitySlime.decreaseSquish: the body recovers after a hit. */
+    protected void decreaseSquish() { targetSquish=0F; }
+
+    @Override public boolean hurt(net.minecraft.world.damagesource.DamageSource source,float amount) {
+        boolean hit=super.hurt(source,amount);
+        if(hit) { targetSquish=.5F; squish=.5F; }
+        return hit;
+    }
+
     /** Original slime size drives the body size, the health and the dropped experience. */
     public void setSlimeSize(int size) {
         entityData.set(SIZE,size);
@@ -89,6 +106,10 @@ public class EntityThaumicSlime extends Monster implements ITaintedMob {
             return;
         }
         boolean wasOnGround=onGround();
+        // Original EntitySlime.tick squash interpolation.
+        oSquish=squish;
+        squish+=(targetSquish-squish)*.2F;
+        if(targetSquish>0F)targetSquish-=.05F;
         super.tick();
         if(launched>0)--launched;
         if(onGround()&&!wasOnGround&&makesSoundOnLand())

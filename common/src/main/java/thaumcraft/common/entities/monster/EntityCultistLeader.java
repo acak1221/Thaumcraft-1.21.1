@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
+import thaumcraft.common.entities.projectile.EntityGolemOrb;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -337,7 +338,7 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
         double dx = target.getX() - getX();
         double dy = target.getBoundingBox().minY + target.getBbHeight() / 2.0 - (getY() + getBbHeight() / 2.0);
         double dz = target.getZ() - getZ();
-        EntityCultist.GolemOrb blast = new EntityCultist.GolemOrb(level(), this, target, true);
+        EntityGolemOrb blast = new EntityGolemOrb(level(), this, target, true);
         EntityCultist.originalShoot(blast, dx, dy + 2.0, dz, 0.66F, 3.0F);
         playSound(EntityCultist.sound("egattack"), 1.0F, 1.0F + random.nextFloat() * 0.1F);
         level().addFreshEntity(blast);

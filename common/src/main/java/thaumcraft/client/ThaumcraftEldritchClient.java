@@ -15,7 +15,7 @@ import thaumcraft.client.renderers.entity.RenderTaintVillager;
 import thaumcraft.client.renderers.entity.RenderThaumicSlime;
 import thaumcraft.client.renderers.entity.RenderWatcher;
 import thaumcraft.common.config.ThaumcraftCultists;
-import thaumcraft.common.config.ThaumcraftEldritch;
+import thaumcraft.common.config.ThaumcraftEldritchMobs;
 import thaumcraft.common.config.ThaumcraftTaintAnimals;
 
 /**
@@ -30,13 +30,12 @@ public final class ThaumcraftEldritchClient {
     public static void init() {
         if (initialized) return;
         initialized = true;
-        EntityRendererRegistry.register(ThaumcraftEldritch.ELDRITCH_WARDEN, RenderEldritchWarden::new);
-        EntityRendererRegistry.register(ThaumcraftEldritch.ELDRITCH_GOLEM, RenderEldritchGolem::new);
-        EntityRendererRegistry.register(ThaumcraftEldritch.ELDRITCH_CRAB, RenderEldritchCrab::new);
-        EntityRendererRegistry.register(ThaumcraftEldritch.INHABITED_ZOMBIE, RenderInhabitedZombie::new);
-        EntityRendererRegistry.register(ThaumcraftEldritch.WATCHER, RenderWatcher::new);
-        EntityRendererRegistry.register(ThaumcraftEldritch.THAUMIC_SLIME, RenderThaumicSlime::new);
-        EntityRendererRegistry.register(ThaumcraftCultists.CULTIST, RenderCultist::new);
+        EntityRendererRegistry.register(ThaumcraftEldritchMobs.ELDRITCH_WARDEN, RenderEldritchWarden::new);
+        EntityRendererRegistry.register(ThaumcraftEldritchMobs.ELDRITCH_GOLEM, RenderEldritchGolem::new);
+        EntityRendererRegistry.register(ThaumcraftEldritchMobs.ELDRITCH_CRAB, RenderEldritchCrab::new);
+        EntityRendererRegistry.register(ThaumcraftEldritchMobs.INHABITED_ZOMBIE, RenderInhabitedZombie::new);
+        EntityRendererRegistry.register(ThaumcraftEldritchMobs.WATCHER, RenderWatcher::new);
+        EntityRendererRegistry.register(ThaumcraftEldritchMobs.THAUMIC_SLIME, RenderThaumicSlime::new);
         EntityRendererRegistry.register(ThaumcraftCultists.CULTIST_CLERIC, RenderCultist::new);
         EntityRendererRegistry.register(ThaumcraftCultists.CULTIST_KNIGHT, RenderCultist::new);
         EntityRendererRegistry.register(ThaumcraftCultists.CULTIST_LEADER, RenderCultist::new);

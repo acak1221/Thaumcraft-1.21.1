@@ -45,9 +45,6 @@ public final class ThaumcraftEldritchMobs {
     public static final RegistrySupplier<EntityType<EntityTaintacleGiant>> TAINTACLE_GIANT=ENTITIES.register("taintacle_giant",()->
             EntityType.Builder.<EntityTaintacleGiant>of(EntityTaintacleGiant::new,MobCategory.MONSTER).sized(1.1F,6F)
                     .clientTrackingRange(4).updateInterval(3).build("thaumcraft:taintacle_giant"));
-    public static final RegistrySupplier<EntityType<EntityEldritchGolem.GolemOrb>> GOLEM_ORB=ENTITIES.register("golem_orb",()->
-            EntityType.Builder.<EntityEldritchGolem.GolemOrb>of(EntityEldritchGolem.GolemOrb::new,MobCategory.MISC).sized(.25F,.25F)
-                    .clientTrackingRange(4).updateInterval(3).build("thaumcraft:golem_orb"));
     public static final RegistrySupplier<SpawnEggItem> ELDRITCH_WARDEN_EGG=ITEMS.register("eldritch_warden_spawn_egg",()->
             new SpawnEggItem(ELDRITCH_WARDEN.get(),0x555555,0x404040,new Item.Properties()));
     public static final RegistrySupplier<SpawnEggItem> ELDRITCH_GOLEM_EGG=ITEMS.register("eldritch_golem_spawn_egg",()->

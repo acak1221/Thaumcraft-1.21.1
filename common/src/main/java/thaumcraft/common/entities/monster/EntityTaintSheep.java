@@ -39,6 +39,15 @@ import thaumcraft.common.lib.world.BiomeColumns;
  * that turns dead bush and grass into taint fibres, and the original sheep
  * ambient, hurt and death sounds. */
 public final class EntityTaintSheep extends Sheep implements ITaintedMob {
+    /**
+     * Original EntityLivingBase.getHeadRotationPointY: the interpolated head yaw.
+     * The 1.21.1 base entity dropped the partial variants, so the interpolation is explicit.
+     */
+    public float getHeadRotationPointY(float partialTick) { return getViewYRot(partialTick); }
+
+    /** Original EntityLivingBase.getHeadRotationAngleX: the interpolated head pitch. */
+    public float getHeadRotationAngleX(float partialTick) { return getViewXRot(partialTick); }
+
     private int sheepTimer;
     private int grassTimer;
     public EntityTaintSheep(EntityType<? extends EntityTaintSheep> type,Level level) {

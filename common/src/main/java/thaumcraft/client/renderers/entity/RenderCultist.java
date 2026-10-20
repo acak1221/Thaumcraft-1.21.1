@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import thaumcraft.common.entities.monster.EntityCultist;
 import thaumcraft.common.entities.monster.EntityCultistCleric;
 import thaumcraft.common.entities.monster.EntityCultistLeader;
 
@@ -21,7 +20,7 @@ import thaumcraft.common.entities.monster.EntityCultistLeader;
  * The original link line was a scrolling wispy.png ribbon drawn by the 1.7 FX engine; the
  * native port draws the same line as a native vertex coloured polyline instead.
  */
-public final class RenderCultist<T extends EntityCultist> extends MobRenderer<T, HumanoidModel<T>> {
+public final class RenderCultist<T extends net.minecraft.world.entity.Mob> extends MobRenderer<T, HumanoidModel<T>> {
     private static final ResourceLocation SKIN = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/cultist.png");
     /** Original link line colour 0x110011 with the original 0.8 alpha. */
     private static final int LINK_COLOR = 0x110011;
@@ -58,7 +57,7 @@ public final class RenderCultist<T extends EntityCultist> extends MobRenderer<T,
      * Native approximation of the original drawFloatyLine: the same endpoints and the
      * same tint, drawn as a native polyline instead of a scrolling textured ribbon.
      */
-    private static void drawLink(EntityCultist cleric, EntityCultistCleric source, float bob, float partial,
+    private static void drawLink(net.minecraft.world.entity.Mob cleric, EntityCultistCleric source, float bob, float partial,
                                   PoseStack pose, MultiBufferSource buffers) {
         var target = source.getRitualTarget();
         if (target == null) return;

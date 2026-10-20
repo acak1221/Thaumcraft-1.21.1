@@ -84,10 +84,13 @@ public final class BiomeGenEldritch {
     public static List<Row> spawnRows() {return List.of(new Row(INHABITED_ZOMBIE,1,1,1),new Row(ELDRITCH_GUARDIAN,1,1,1));}
 
     /**
-     * The original rows that the native biome document can carry today. The inhabited
-     * zombie row waits for the entity unit that owns {@code thaumcraft:inhabitedzombie}.
+     * The original rows that the native biome document carries. The inhabited zombie
+     * entity exists natively since the eldritch bestiary landed, so both original
+     * rows are encoded; the native registry flattened the original id.
      */
-    public static List<Row> encodableSpawnRows() {return List.of(new Row(ELDRITCH_GUARDIAN,1,1,1));}
+    public static List<Row> encodableSpawnRows() {
+        return List.of(new Row("thaumcraft:inhabited_zombie",1,1,1),new Row(ELDRITCH_GUARDIAN,1,1,1));
+    }
 
     /** The original dictionary membership of the Eldritch biome, {@code Config.registerBiomes}. */
     public static List<String> dictionaryTypes() {return BiomeHandler.dictionaryTypes(GENERATOR);}

@@ -19,51 +19,45 @@ import thaumcraft.api.aspects.AspectList;
  * written for the original 1.7.10 signature still compiles.</p>
  */
 public interface IInternalMethodHandler {
-    void generateVisEffect(ServerLevel level, int x, int y, int z, int x2, int y2, int z2, int color);
+    default void generateVisEffect(ServerLevel level, int x, int y, int z, int x2, int y2, int z2, int color) {}
 
-    boolean isResearchComplete(Player player, String researchKey);
+    default boolean isResearchComplete(Player player, String researchKey) { return false; }
 
-    boolean hasDiscoveredAspect(Player player, Aspect aspect);
+    default boolean hasDiscoveredAspect(Player player, Aspect aspect) { return false; }
 
-    AspectList getDiscoveredAspects(Player player);
+    default AspectList getDiscoveredAspects(Player player) { return null; }
 
-    ItemStack getStackInRowAndColumn(Object instance, int row, int column);
+    default ItemStack getStackInRowAndColumn(Object instance, int row, int column) { return net.minecraft.world.item.ItemStack.EMPTY; }
 
-    AspectList getObjectAspects(Level level, ItemStack stack);
+    default AspectList getObjectAspects(Level level, ItemStack stack) { return null; }
 
-    AspectList getBonusObjectTags(Level level, ItemStack stack, AspectList bonus);
+    default AspectList getBonusObjectTags(Level level, ItemStack stack, AspectList bonus) { return null; }
 
-    AspectList generateTags(Level level, Item item, int metadata);
+    default AspectList generateTags(Level level, Item item, int metadata) { return null; }
 
-    boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting);
+    default boolean consumeVisFromWand(ItemStack wand, Player player, AspectList cost, boolean doit, boolean crafting) { return false; }
 
-    boolean consumeVisFromWandCrafting(ItemStack wand, Player player, AspectList cost, boolean doit);
+    default boolean consumeVisFromWandCrafting(ItemStack wand, Player player, AspectList cost, boolean doit) { return false; }
 
-    boolean consumeVisFromInventory(Player player, AspectList cost);
+    default boolean consumeVisFromInventory(Player player, AspectList cost) { return false; }
 
-    void addWarpToPlayer(Player player, int amount, boolean temporary);
+    default void addWarpToPlayer(Player player, int amount, boolean temporary) {}
 
-    void addStickyWarpToPlayer(Player player, int amount);
+    default void addStickyWarpToPlayer(Player player, int amount) {}
 
-    void generateVisEffect(int dim, int x, int y, int z, int x2, int y2, int z2, int color);
+    default void generateVisEffect(int dim, int x, int y, int z, int x2, int y2, int z2, int color) {}
 
-    boolean isResearchComplete(String username, String researchkey);
+    default boolean isResearchComplete(String username, String researchkey) { return false; }
 
-    AspectList getObjectAspects(ItemStack is);
+    default AspectList getObjectAspects(ItemStack is) { return null; }
 
-    AspectList getBonusObjectTags(ItemStack is, AspectList ot);
+    default AspectList getBonusObjectTags(ItemStack is, AspectList ot) { return null; }
 
-    AspectList generateTags(Item item, int meta);
+    default AspectList generateTags(Item item, int meta) { return null; }
 
-    boolean hasDiscoveredAspect(String username, Aspect aspect);
+    default boolean hasDiscoveredAspect(String username, Aspect aspect) { return false; }
 
-    AspectList getDiscoveredAspects(String username);
-
-    /** Original dimension-encoded effect request. The native port resolves the level from the running server. */
-    default void generateVisEffect(int dim,int x,int y,int z,int x2,int y2,int z2,int color) {}
-
-    /** Native 1.21.1 overload: the dimension is a level, not an integer index. */
-    default void generateVisEffect(net.minecraft.server.level.ServerLevel level,int x,int y,int z,int x2,int y2,int z2,int color) {}
+    default AspectList getDiscoveredAspects(String username) { return null; }
 
     /** Native 1.21.1 overload with block positions. */
     default void generateVisEffect(net.minecraft.world.level.Level level,net.minecraft.core.BlockPos from,net.minecraft.core.BlockPos to,thaumcraft.api.aspects.Aspect aspect) {}

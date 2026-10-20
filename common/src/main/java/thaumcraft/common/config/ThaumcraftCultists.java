@@ -46,10 +46,6 @@ public final class ThaumcraftCultists {
             () -> EntityType.Builder.<EntityCultistPortalGreater>of(EntityCultistPortalGreater::new, MobCategory.MONSTER)
                     .sized(1.5F, 3.0F).eyeHeight(0.0F).clientTrackingRange(4).updateInterval(20).fireImmune()
                     .build("thaumcraft:cultist_portal_greater"));
-    public static final RegistrySupplier<EntityType<EntityCultist.GolemOrb>> GOLEM_ORB = ENTITIES.register("golem_orb",
-            () -> EntityType.Builder.<EntityCultist.GolemOrb>of(EntityCultist.GolemOrb::new, MobCategory.MISC)
-                    .sized(0.25F, 0.25F).eyeHeight(0.25F).clientTrackingRange(4).updateInterval(3)
-                    .build("thaumcraft:golem_orb"));
 
     public static final RegistrySupplier<SpawnEggItem> KNIGHT_EGG = ITEMS.register("cultist_knight_spawn_egg",
             () -> new SpawnEggItem(CULTIST_KNIGHT.get(), 0xFF5055, 0x000080, new Item.Properties()));
@@ -68,5 +64,18 @@ public final class ThaumcraftCultists {
         ENTITIES.register();
         ITEMS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB, KNIGHT_EGG, CLERIC_EGG, LEADER_EGG);
+    }
+
+    /**
+     * Loader hook: the cultist attribute suppliers. The loader owns the registry,
+     * so the common module only publishes the suppliers.
+     */
+    public static void registerAttributes(java.util.function.BiConsumer<EntityType<?>,
+            net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder> registrar) {
+        registrar.accept(CULTIST_KNIGHT.get(), thaumcraft.common.entities.monster.EntityCultistKnight.createAttributes());
+        registrar.accept(CULTIST_CLERIC.get(), thaumcraft.common.entities.monster.EntityCultistCleric.createAttributes());
+        registrar.accept(CULTIST_LEADER.get(), thaumcraft.common.entities.monster.EntityCultistLeader.createAttributes());
+        registrar.accept(CULTIST_PORTAL.get(), thaumcraft.common.entities.monster.EntityCultistPortal.createAttributes());
+        registrar.accept(CULTIST_PORTAL_GREATER.get(), thaumcraft.common.entities.monster.EntityCultistPortal.createAttributes());
     }
 }

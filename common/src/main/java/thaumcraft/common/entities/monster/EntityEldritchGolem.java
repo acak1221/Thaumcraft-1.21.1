@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import thaumcraft.common.entities.projectile.EntityGolemOrb;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -46,6 +47,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.entities.IEldritchMob;
 import thaumcraft.common.config.ThaumcraftEldritchMobs;
+import thaumcraft.common.lib.mods.ChampionHooks;
+import thaumcraft.common.lib.mods.ChampionModifier;
 import thaumcraft.common.lib.world.EldritchMobRules;
 
 /**
@@ -236,6 +239,20 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
 
     public int getAttackTimer() { return attackTimer; }
     public int getBeamCharge() { return beamCharge; }
+
+    /**
+     * Original EntityEldritchGolem.generateName: the name of its champion modifier. The 1.7
+     * original read the champion modifier out of the champion attribute of the mob, the
+     * native port reads it out of the champion field.
+     */
+    @Override public void generateName() {
+        int modifier = ChampionHooks.championId(this);
+        if (modifier < 0) return;
+        ChampionModifier champion = ChampionModifier.byId(modifier);
+        if (champion == null) return;
+        setCustomName(Component.translatable("entity.thaumcraft.eldritchgolem.champion.name",
+                Component.translatable(champion.localizationKey())));
+    }
 
     /** Original golem step sound. */
     @Override protected void playStepSound(BlockPos pos,BlockState state) { playSound(sound("mob.irongolem.walk"),1.0F,1.0F); }

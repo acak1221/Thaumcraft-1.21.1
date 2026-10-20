@@ -2321,5 +2321,8 @@
   "tag.item.c.ores.infused_entropy": "Infused Entropy Ores",
   "tag.item.c.ores.infused_fire": "Infused Fire Ores",
   "tag.item.c.ores.infused_order": "Infused Order Ores",
-  "tag.item.c.ores.infused_water": "Infused Water Ores"
+  "tag.item.c.ores.infused_water": "Infused Water Ores",
+  "item.thaumcraft.paving_stone_travel": "Paving Stone of Travel",
+  "item.thaumcraft.paving_stone_warding": "Paving Stone of Warding",
+  "item.thaumcraft.warded_glass": "Warded Glass"
 }

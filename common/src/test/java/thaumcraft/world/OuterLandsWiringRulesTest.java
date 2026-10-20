@@ -50,7 +50,7 @@ class OuterLandsWiringRulesTest {
         // Oracle BlockCosmeticSolid:213-253 - the obsidian tiles are thirty hard, the thaumium
         // stones four, the rest two.
         assertEquals("thaumcraft:cosmetic_solid_tough", OuterLandsWiringRules.cosmeticSolidBlock(0));
-        assertEquals("thaumcraft:cosmetic_solid", OuterLandsWiringRules.cosmeticSolidBlock(1));
+        assertEquals("thaumcraft:cosmetic_solid_tough", OuterLandsWiringRules.cosmeticSolidBlock(1));
         assertEquals("thaumcraft:cosmetic_solid", OuterLandsWiringRules.cosmeticSolidBlock(3));
         assertEquals("thaumcraft:cosmetic_solid_thaumium", OuterLandsWiringRules.cosmeticSolidBlock(4));
         assertEquals("thaumcraft:cosmetic_solid_thaumium", OuterLandsWiringRules.cosmeticSolidBlock(6));
@@ -61,8 +61,9 @@ class OuterLandsWiringRulesTest {
     }
 
     @Test void theRoomsOnlyUseCosmeticSolidsOfTheOrdinaryBlock() {
-        // The labyrinth uses the metadata one, eleven, twelve, thirteen, fourteen and fifteen.
-        for (int variant : new int[] {1, 11, 12, 13, 14, 15}) {
+        // The labyrinth uses the metadata eleven, twelve, thirteen, fourteen and fifteen.
+        // The metadata one is thirty hard in the oracle, so it lives on the tough group.
+        for (int variant : new int[] {11, 12, 13, 14, 15}) {
             assertEquals("thaumcraft:cosmetic_solid", OuterLandsWiringRules.cosmeticSolidBlock(variant),
                     "the metadata " + variant + " must stay on the ordinary cosmetic solid");
         }

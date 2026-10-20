@@ -2321,5 +2321,8 @@
   "tag.item.c.ores.infused_entropy": "Руды зачарованной энтропии",
   "tag.item.c.ores.infused_fire": "Руды зачарованного огня",
   "tag.item.c.ores.infused_order": "Руды зачарованного порядка",
-  "tag.item.c.ores.infused_water": "Руды зачарованной воды"
+  "tag.item.c.ores.infused_water": "Руды зачарованной воды",
+  "item.thaumcraft.paving_stone_travel": "Камень путешественника",
+  "item.thaumcraft.paving_stone_warding": "Камень сдерживания",
+  "item.thaumcraft.warded_glass": "Усиленное стекло"
 }

@@ -270,6 +270,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("WandRodBoneStaff", "arcane/staff_rod_bone"), // 227
             alias("WandRodPrimalStaff", "infusion/staff_rod_primal"), // 318
             alias("TallowCandle", "tallow_candle"),            // 477
+            alias("Grate", "item_grate"),                      // 433, iron bars over a wooden trapdoor
             alias("Clusters0", "clusters/air"),
             alias("Clusters1", "clusters/fire"),
             alias("Clusters2", "clusters/water"),

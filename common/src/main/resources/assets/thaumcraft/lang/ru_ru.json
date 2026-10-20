@@ -2161,5 +2161,10 @@
   "item.thaumcraft.sanity_soap": "Лечащее мыло",
   "item.thaumcraft.crimson_rites": "Багровые ритуалы",
   "block.thaumcraft.purifying_fluid": "Очищающая жидкость",
-  "item.thaumcraft.bucket_pure": "Ведро очищающей жидкости"
+  "item.thaumcraft.bucket_pure": "Ведро очищающей жидкости",
+  "block.thaumcraft.item_grate": "Железная решетка",
+  "block.thaumcraft.greatwood_stairs": "Лестница из великого дерева",
+  "block.thaumcraft.silverwood_stairs": "Лестница из серебряного дерева",
+  "block.thaumcraft.greatwood_slab": "Плита из великого дерева",
+  "block.thaumcraft.silverwood_slab": "Плита из серебряного дерева"
 }

@@ -1429,4 +1429,9 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.AlchemyLeftoversRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "m09_item_grate")
+    public void itemGrateFeedsDropsAndStopsLikeTheOriginalAndWoodStairsPlaceAndDrop(GameTestHelper test) {
+        thaumcraft.common.testing.GrateRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
 }

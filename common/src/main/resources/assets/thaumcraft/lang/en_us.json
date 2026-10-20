@@ -2161,5 +2161,10 @@
   "item.thaumcraft.sanity_soap": "Sanity Soap",
   "item.thaumcraft.crimson_rites": "Crimson Rites",
   "block.thaumcraft.purifying_fluid": "Purifying Fluid",
-  "item.thaumcraft.bucket_pure": "Bucket of Purity"
+  "item.thaumcraft.bucket_pure": "Bucket of Purity",
+  "block.thaumcraft.item_grate": "Item Grate",
+  "block.thaumcraft.greatwood_stairs": "Greatwood Stairs",
+  "block.thaumcraft.silverwood_stairs": "Silverwood Stairs",
+  "block.thaumcraft.greatwood_slab": "Greatwood Slab",
+  "block.thaumcraft.silverwood_slab": "Silverwood Slab"
 }

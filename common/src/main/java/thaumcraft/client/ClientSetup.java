@@ -110,6 +110,7 @@ public final class ClientSetup {
         ItemJar.setTooltipViewer(() -> Minecraft.getInstance().player);
         thaumcraft.common.items.ItemCrystalEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftInfusion.TALLOW_CANDLE.get());
+        RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftGrate.ITEM_GRATE.get());
         MenuRegistry.registerScreenFactory(ThaumcraftContent.RESEARCH_TABLE_MENU.get(), GuiResearchTable::new);
         MenuRegistry.registerScreenFactory(thaumcraft.common.config.ThaumcraftDeconstruction.MENU.get(), thaumcraft.client.gui.GuiDeconstructionTable::new);
         BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftDeconstruction.TILE.get(), thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer::new);

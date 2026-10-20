@@ -103,6 +103,8 @@ public final class Thaumcraft {
         ThaumcraftNaturals.register();
         ThaumcraftPlants.register();
         ThaumcraftMasonry.register();
+        thaumcraft.common.config.ThaumcraftGrate.register();
+        thaumcraft.common.config.ThaumcraftCosmeticWood.register();
         ThaumcraftDistillation.register();
         thaumcraft.common.config.ThaumcraftAdvancedFurnace.register();
         ThaumcraftAlembics.register();

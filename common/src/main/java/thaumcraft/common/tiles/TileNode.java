@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.api.WorldCoordinates;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
@@ -57,6 +58,10 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     private NodeModifier nodeModifier;
     private boolean natural;
     private int count;
+    /** The ticks of the client, the dark node reports itself to the compass stone with them. */
+    private int clientCount;
+    /** Original TileNode.func_145845_h: a dark node reports itself every fifty ticks. */
+    public static final int DARK_NODE_REPORT_PERIOD = 50;
     private byte nodeLock;
     private int regeneration = -1;
     private int rechargeWait;
@@ -399,6 +404,11 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     private static volatile java.util.function.Consumer<TileNode> hungryClientTick = node -> {};
     public static void setHungryClientTick(java.util.function.Consumer<TileNode> handler) { hungryClientTick = java.util.Objects.requireNonNull(handler); }
     public static void clientTick(Level world, BlockPos pos, BlockState state, TileNode node) {
+        // Original TileNode.func_145845_h: a dark node tells the compass stone where it is, every fifty ticks of the client.
+        if (world.isClientSide && node.nodeType == NodeType.DARK && node.clientCount++ % DARK_NODE_REPORT_PERIOD == 0
+                && Level.isInSpawnableBounds(pos)) {
+            thaumcraft.common.items.ItemCompassStone.registerSinisterNode(new WorldCoordinates(world.dimension(), pos));
+        }
         if (!world.isClientSide || node.nodeType != NodeType.HUNGRY || node.ticking || node.notifying || node.transducing || node.pearlPlanning
                 || node.level != world || !node.worldPosition.equals(pos) || node.getBlockState() != state || !node.current()) return;
         node.ticking = true; node.tickingLevel = world; node.tickingState = state;

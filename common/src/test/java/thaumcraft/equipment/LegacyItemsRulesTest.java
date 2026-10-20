@@ -149,6 +149,7 @@ class LegacyItemsRulesTest {
 
     @Test void keyRemembersTheDoorItWasLinkedTo() {
         assertEquals("12,64,-7", EquipmentRules.keyLocation(12, 64, -7));
+        // Original ItemKey.onItemUseFirst: the access entry is the metadata of the key followed by the name of the player.
         assertEquals("0Steve", EquipmentRules.keyAccessEntry(EquipmentRules.KEY_IRON, "Steve"));
         assertEquals("1Steve", EquipmentRules.keyAccessEntry(EquipmentRules.KEY_GOLD, "Steve"));
         assertTrue(EquipmentRules.keyMayLink(true, false, EquipmentRules.KEY_GOLD));

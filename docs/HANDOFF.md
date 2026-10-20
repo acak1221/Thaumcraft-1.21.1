@@ -4,13 +4,24 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально20.10 (восемнадцатая группа: самородные кластеры железа/золота/киновари, Claude): реализовано, собрано, game-tested 166/166
+
+Контракт и реализация: [native-clusters](analysis/2026-10-20-native-clusters.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** предметы `cluster_iron/gold/cinnabar`, четыре рецепта тигля (`PUREIRON`, `PUREGOLD` — руда и сырая руда в кластер; `TRANSIRON`, `TRANSGOLD` — самородок в три), три печных рецепта «кластер → два слитка», аспекты `ConfigAspects:360-362`, псевдонимы книги и значки исследований.
+Новый тип `thaumcraft:stack_smelting` (`StackSmeltingRecipe`, остаётся `RecipeType.SMELTING`): `minecraft:smelting` 1.21.1 молча теряет количество результата, а оригинал платит два слитка.
+**Built / game-tested:** `:common:test` **470 JUnit** (+2 `ClusterAssetsTest`; `EarlyObjectAspectBindingsTest` обновлён под три новые строки), `:fabric:remapJar`, `:fabric:runGameTest` **166/166** (+`nativeClustersPurifyTripleAndMelt`: рецепты, аспекты и три настоящие ванильные печи), JAR SHA-256 `a658954e…8d44`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `native-clusters` (24): JUnit 15/15 пойманы локально, 9 GameTest у GitHub. `void-cap` (20) на GitHub — все как ожидалось; `void-gear` (27) ещё идёт.
+**Seen:** нет. **Не проверено:** значки кластеров, настоящая варка в котле, особая добыча.
+**Не перенесено:** особая добыча кластеров (Elemental Pickaxe, Primal Crusher, Excavation с Dowsing, Arcane Bore: `Utils.findSpecialMiningResult`, шанс `0,2 + удача × 0,075`) — придёт вместе с группой Elemental-инструментов; выпадение у Пеха и торговля волшебников (мобы M11); бонус Продвинутой алхимической печи.
+**Следующее:** Elemental Pickaxe/Hoe/Sword/Shovel вместе с перехватом выпадения блока (особая добыча, Primal Crusher, Dowsing), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
 ### Актуально20.10 (семнадцатая группа: Void-инструменты и броня, Claude): реализовано, собрано, game-tested 165/165
 
 Контракт и реализация: [void-gear](analysis/2026-10-20-void-gear.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
 **Implemented:** девять предметов из Void metal (меч, кирка, топор, лопата, мотыга, шлем, кираса, поножи, ботинки) с оригинальными числами (прочность 150 / 110–160, скорость 8, урон, защита 3/7/6/3), верстачные рецепты, самолечение раз в 20 тиков носителя (надетая деталь — дважды; творческий режим не чинится),
 иссушение при ударе (меч 3 с, остальные 4 с; правило PvP), `IWarpingGear` у всех девяти и сумма `WarpGear.fromGear` (рука + четыре слота брони), оригинальная особенность ремонта инструментов Primal Charm'ом, слои брони, теги, имена.
 **Built / game-tested:** `:common:test` **468 JUnit** (+3), `:fabric:remapJar`, `:fabric:runGameTest` **165/165** (+`voidMetalGearMendsWithersAndWarps`), JAR SHA-256 `d3a4dd8f…8571`; три команды шага CI с ресурсами зелёные.
-**Мутации:** `void-gear` (27): JUnit 4/4 локально, 23 GameTest у GitHub. `staff-rods` (36) на GitHub — все как ожидалось; `void-cap` (20) ещё идёт.
+**Мутации:** `void-gear` (27): JUnit 4/4 локально, 23 GameTest у GitHub. `staff-rods` (36) на GitHub — все как ожидалось; `void-cap` (20) на GitHub — все как ожидалось.
 **Seen:** нет. **Не проверено:** вид иконок и слоёв брони, сами события варпа (M11), Void-мантии (`ARMORVOIDFORTRESS`), сеть/два игрока, NeoForge.
 **Следующее:** M01 R10–R16 (копирование, unknown scrolls, clues, режимы сложности, deconstruction), M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium; варп (M11) — когда дойдёт очередь.
 

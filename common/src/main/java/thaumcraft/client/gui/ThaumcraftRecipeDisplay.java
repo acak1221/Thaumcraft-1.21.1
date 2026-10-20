@@ -114,6 +114,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("AlchemicalConstruct", "arcane/alchemical_construct"), // 290, FOUR basic tubes
             alias("Centrifuge", "arcane/centrifuge"),         // 292, no advanced-construct substitution
             alias("EssentiaCrystalizer", "arcane/essentia_crystallizer"), // 293, dispenser/balanced shards
+            alias("EssentiaReservoir", "infusion/essentia_reservoir"), // 372, buffer centre, two void ingots and four jars
             alias("NodeStabilizer", "arcane/node_stabilizer"), // 199, quartz BLOCK / stone BRICKS / Nitor ITEM
             alias("NodeTransducer", "arcane/node_transducer"), // 200, literal iron/redstone BLOCK/comparator
             alias("NodeRelay", "arcane/vis_relay"), // 201, balanced shard, TWO relays

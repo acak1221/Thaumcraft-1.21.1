@@ -124,6 +124,8 @@ public final class ItemWandCasting extends Item {
         if (tube != InteractionResult.PASS) return tube;
         InteractionResult buffer = thaumcraft.common.blocks.BlockTubeBuffer.tryWandInteraction(context);
         if (buffer != InteractionResult.PASS) return buffer;
+        InteractionResult reservoir = thaumcraft.common.blocks.BlockEssentiaReservoir.tryWandInteraction(context);
+        if (reservoir != InteractionResult.PASS) return reservoir;
         InteractionResult alembic = thaumcraft.common.blocks.BlockAlembic.tryWandInteraction(context);
         if (alembic != InteractionResult.PASS) return alembic;
         InteractionResult crucible = thaumcraft.common.blocks.BlockCrucible.tryCreate(context);

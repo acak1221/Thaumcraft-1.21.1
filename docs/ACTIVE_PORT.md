@@ -44,3 +44,8 @@ recipes/engine, Warding/Architect, Trade, Lamp/Amber/VisChargeRelay, Warp dispat
 два сценария исправлены в тестовых fixtures (native connection tick и cached source discovery),
 финальный общий серверный результат ещё ожидается в CI. Клиент не осматривался.
 Новые R11, Repair/Haste, Deconstructor, lamps и Ward completion пока только .tmp drafts.
+
+CI `d508ada` завершён SUCCESS: 582 JUnit,186/186 GameTest,78 Python; fresh-result/attribution gates passed.
+Run: https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39398016295; first cold Gradle execution 7m6s, server56.67s. Agents worked on the next source window during this run.
+Active next groups: R11/R12, Repair/Haste+BoreRepair, Ward completion+Excavation specials,
+Growth/Fertility, Deconstruction, Brainy/Giant zombies, root R13 settings.

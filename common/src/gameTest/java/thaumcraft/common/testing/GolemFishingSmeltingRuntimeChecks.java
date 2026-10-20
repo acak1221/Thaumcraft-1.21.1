@@ -54,6 +54,9 @@ public final class GolemFishingSmeltingRuntimeChecks {
                 ItemStack result = GolemFishingSmelting.apply(level, fire, rolled);
                 test.assertTrue(result.is(item) && result.getCount() == 1, "Fire leaves " + item + " alone: " + result);
             }
+            // The flame of the delivered catch (original setFire(2)): two seconds with Fire, none without, and none without a golem.
+            test.assertTrue(GolemFishingSmelting.burningTicks(fire) == 40 && GolemFishingSmelting.burningTicks(plain) == 0 && GolemFishingSmelting.burningTicks(null) == 0,
+                    "a Fire golem's catch burns for 40 ticks, a plain golem's and a missing golem's not at all");
             ItemStack empty = GolemFishingSmelting.apply(level, fire, ItemStack.EMPTY);
             test.assertTrue(empty.isEmpty(), "nothing caught stays nothing");
             test.assertTrue(GolemFishingSmelting.apply(level, null, new ItemStack(Items.COD)).is(Items.COD), "without a golem nothing is smelted");

@@ -1,0 +1,103 @@
+name: Mutation check of a content group
+
+# Started by hand (workflow_dispatch) or by a push that changes scripts/mutation/run-request.txt: its first line is the group file
+# name, an optional second line lists mutant ids to run (empty = all). One small wrong edit at a time is applied to the sources and
+# the group's own tests must notice it (scripts/mutation/mutate.py, groups in scripts/mutation/groups/). Cheap JUnit-only mutants run
+# in one job, every mutant that needs the Fabric GameTest server gets a job of its own. Each job prints a VERDICT line and writes the
+# step summary; a job is red when a mutant that is expected to be caught survives or does not compile.
+
+on:
+  workflow_dispatch:
+    inputs:
+      group:
+        description: Group file name (without .json) in scripts/mutation/groups
+        required: true
+        default: golem-item-match
+      ids:
+        description: Optional space-separated mutant ids (empty = all)
+        required: false
+        default: ""
+  push:
+    paths:
+      - scripts/mutation/run-request.txt
+
+permissions:
+  contents: read
+
+env:
+  GRADLE_USER_HOME: ${{ github.workspace }}/.gradle21
+  PYTHONDONTWRITEBYTECODE: 1
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      group: ${{ steps.plan.outputs.group }}
+      ids: ${{ steps.plan.outputs.ids }}
+      gametest: ${{ steps.plan.outputs.gametest }}
+      has_gametest: ${{ steps.plan.outputs.has_gametest }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Check the anchors and list the game-test mutants
+        id: plan
+        env:
+          INPUT_GROUP: ${{ inputs.group }}
+          INPUT_IDS: ${{ inputs.ids }}
+        run: |
+          if [ -n "$INPUT_GROUP" ]; then GROUP="$INPUT_GROUP"; IDS="$INPUT_IDS"
+          else GROUP="$(sed -n 1p scripts/mutation/run-request.txt)"; IDS="$(sed -n 2p scripts/mutation/run-request.txt)"; fi
+          GROUP="$(printf '%s' "$GROUP" | tr -cd 'a-z0-9-')"
+          IDS="$(printf '%s' "$IDS" | tr -cd 'a-z0-9 -')"
+          echo "group=$GROUP" >> "$GITHUB_OUTPUT"
+          echo "ids=$IDS" >> "$GITHUB_OUTPUT"
+          python -B scripts/mutation/mutate.py check "$GROUP"
+          ids="$(python -B scripts/mutation/mutate.py list "$GROUP" --tier gametest $IDS)"
+          echo "gametest=$ids" >> "$GITHUB_OUTPUT"
+          if [ "$ids" = "[]" ]; then echo "has_gametest=false" >> "$GITHUB_OUTPUT"; else echo "has_gametest=true" >> "$GITHUB_OUTPUT"; fi
+
+  junit:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Run the JUnit-only mutants one after the other
+        env:
+          GROUP: ${{ needs.plan.outputs.group }}
+          IDS: ${{ needs.plan.outputs.ids }}
+        run: python -B scripts/mutation/mutate.py run "$GROUP" --tier junit $IDS
+
+  gametest:
+    needs: plan
+    if: needs.plan.outputs.has_gametest == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        id: ${{ fromJson(needs.plan.outputs.gametest) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Run one mutant against JUnit and the GameTest server
+        env:
+          GROUP: ${{ needs.plan.outputs.group }}
+        run: python -B scripts/mutation/mutate.py run "$GROUP" "${{ matrix.id }}"

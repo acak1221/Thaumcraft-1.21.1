@@ -5,3 +5,5 @@ accessWidener v2 named
 accessible method net/minecraft/world/entity/projectile/Projectile <init> (Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V
 # Original Gather accepts pickupDelay < 5, not only fully expired player delay.
 accessible field net/minecraft/world/entity/item/ItemEntity pickupDelay I
+# The golem visor marks its victim as recently struck (original EntityUtils.setRecentlyHit(victim, 100)).
+accessible field net/minecraft/world/entity/LivingEntity lastHurtByPlayerTime I

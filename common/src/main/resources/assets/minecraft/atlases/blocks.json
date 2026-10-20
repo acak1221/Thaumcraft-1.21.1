@@ -100,6 +100,42 @@
     {
       "type": "minecraft:single",
       "resource": "thaumcraft:models/wandtable"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_obsidian"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_blaze"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_ice"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_quartz"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_bone"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_reed"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_rod_primal"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/trunk"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_cap_void"
     }
   ]
 }

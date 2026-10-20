@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "PUREGOLD",
+  "source_order": 23,
+  "catalyst": [{"tag": "c:ores/gold"}, {"tag": "c:raw_materials/gold"}],
+  "result": {"id": "thaumcraft:cluster_gold", "count": 1},
+  "aspects": {"metallum": 1, "ordo": 1}
+}

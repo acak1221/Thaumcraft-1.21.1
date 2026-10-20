@@ -1,6 +1,7 @@
 package thaumcraft.aspects;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -122,7 +123,7 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(113, direct.size(), "all previous direct item bindings plus original wheat");
+        assertEquals(116, direct.size(), "all previous direct item bindings plus original wheat and the three native clusters");
         assertEquals(9, complex.size(), "seven existing complex bindings plus piston and wooden trapdoor");
         assertFalse(direct.containsKey(id("minecraft:piston")), "a raw addition must not suppress the recipe base");
         assertEquals(List.of(Aspect.MECHANISM, Aspect.MOTION), new ArrayList<>(complex.get(id("minecraft:piston")).aspects.keySet()));
@@ -130,13 +131,20 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(93, rows.size());
+            assertEquals(96, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
             int wheat = 0;
+            Map<Integer, JsonObject> clusters = new java.util.TreeMap<>();
             for (int index = 0; index < rows.size(); index++) {
                 var row = rows.get(index).getAsJsonObject();
+                int sourceLine = row.get("original_source_line").getAsInt();
+                if (sourceLine >= 360 && sourceLine <= 362) {
+                    // Native iron, gold and cinnabar clusters (ConfigAspects:360-362), added after the ALL90 snapshot; checked on their own below.
+                    clusters.put(sourceLine, row);
+                    continue;
+                }
                 if (row.get("original_source_line").getAsInt() == 224) {
                     ++wheat;
                     assertEquals("direct", row.get("registration").getAsString());
@@ -169,12 +177,25 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(1, added);
             assertEquals(1, trapdoors);
             assertEquals(1, wheat);
+            assertEquals(3, clusters.size());
+            assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
+            assertCluster(clusters.get(361), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");
+            assertCluster(clusters.get(362), 21, "thaumcraft:cluster_cinnabar", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"permutatio\":4,\"venenum\":2}");
             // Pre-change compact JSON of ALL90 rows, not merely family counts.
             // This pins their exact targets, metadata, values, source anchors and order.
             String digest = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
                     .digest(previous.toString().getBytes(StandardCharsets.UTF_8)));
             assertEquals("ba57886bc6e16a03fce05b37ecf8cd9ea4ba8207b32d2d0f6c3f20200f6cb1b6", digest);
         }
+    }
+
+    private static void assertCluster(JsonObject row, int metadata, String modernId, String aspects) {
+        assertNotNull(row, modernId);
+        assertEquals("direct", row.get("registration").getAsString());
+        assertEquals("ConfigItems.itemNugget", row.get("original_target").getAsString());
+        assertEquals(metadata, row.get("original_metadata").getAsInt());
+        assertEquals(JsonParser.parseString("[\"" + modernId + "\"]"), row.get("modern_ids"));
+        assertEquals(JsonParser.parseString(aspects), row.get("aspects"));
     }
 
     private static void assertAspects(Map<ResourceLocation, AspectList> bindings, String name, AspectList expected) {

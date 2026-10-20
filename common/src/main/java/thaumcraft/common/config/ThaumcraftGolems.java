@@ -14,13 +14,20 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.container.ContainerGolem;
+import thaumcraft.common.container.ContainerTravelingTrunk;
 import thaumcraft.common.entities.golems.EntityGolemBase;
 import thaumcraft.common.entities.golems.EntityGolemBobber;
+import thaumcraft.common.entities.golems.EntityTravelingTrunk;
+import thaumcraft.common.entities.projectile.EntityDart;
 import thaumcraft.common.items.golems.GolemData;
+import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.ItemGolemBell;
 import thaumcraft.common.items.golems.ItemGolemCore;
+import thaumcraft.common.items.golems.ItemGolemDecoration;
 import thaumcraft.common.items.golems.ItemGolemPlacer;
+import thaumcraft.common.items.golems.ItemTrunkSpawner;
+import thaumcraft.common.items.golems.TrunkRules;
 import thaumcraft.common.items.golems.ItemGolemUpgrade;
 
 /** Ordinary living workers; materials and cores require their actual content prerequisites. */
@@ -35,6 +42,15 @@ public final class ThaumcraftGolems {
     public static final RegistrySupplier<EntityType<EntityGolemBase>> GOLEM = ENTITIES.register("golem",
             () -> EntityType.Builder.<EntityGolemBase>of(EntityGolemBase::new, MobCategory.MISC)
                     .sized(.4F, .95F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:golem"));
+    public static final RegistrySupplier<EntityType<EntityTravelingTrunk>> TRUNK = ENTITIES.register("traveling_trunk",
+            () -> EntityType.Builder.<EntityTravelingTrunk>of(EntityTravelingTrunk::new, MobCategory.MISC)
+                    .sized(.8F, .8F).fireImmune().clientTrackingRange(4).updateInterval(3).build("thaumcraft:traveling_trunk"));
+    public static final RegistrySupplier<EntityType<EntityDart>> DART = ENTITIES.register("dart",
+            () -> EntityType.Builder.<EntityDart>of(EntityDart::new, MobCategory.MISC)
+                    .sized(.5F, .5F).clientTrackingRange(4).updateInterval(20).build("thaumcraft:dart"));
+    public static final RegistrySupplier<DataComponentType<Integer>> TRUNK_UPGRADE = COMPONENTS.register("trunk_upgrade",
+            () -> DataComponentType.<Integer>builder().persistent(com.mojang.serialization.Codec.intRange(TrunkRules.NO_UPGRADE, TrunkRules.ENTROPY))
+                    .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT).build());
     public static final RegistrySupplier<EntityType<EntityGolemBobber>> GOLEM_BOBBER = ENTITIES.register("golem_bobber",
             () -> EntityType.Builder.<EntityGolemBobber>of(EntityGolemBobber::new, MobCategory.MISC)
                     .sized(.25F, .25F).noSave().clientTrackingRange(4).updateInterval(5).build("thaumcraft:golem_bobber"));
@@ -79,8 +95,21 @@ public final class ThaumcraftGolems {
     public static final RegistrySupplier<Item> UPGRADE_WATER = upgrade("golem_upgrade_water", GolemUpgrade.WATER);
     public static final RegistrySupplier<Item> UPGRADE_ORDER = upgrade("golem_upgrade_order", GolemUpgrade.ORDER);
     public static final RegistrySupplier<Item> UPGRADE_ENTROPY = upgrade("golem_upgrade_entropy", GolemUpgrade.ENTROPY);
+    // Original ItemGolemDecoration damage 0..7 (H G B F R V P M).
+    public static final RegistrySupplier<Item> DECORATION_TOPHAT = decoration("golem_decoration_tophat", GolemDecorations.HAT);
+    public static final RegistrySupplier<Item> DECORATION_GLASSES = decoration("golem_decoration_glasses", GolemDecorations.GLASSES);
+    public static final RegistrySupplier<Item> DECORATION_BOWTIE = decoration("golem_decoration_bowtie", GolemDecorations.BOWTIE);
+    public static final RegistrySupplier<Item> DECORATION_FEZ = decoration("golem_decoration_fez", GolemDecorations.FEZ);
+    public static final RegistrySupplier<Item> DECORATION_DART = decoration("golem_decoration_dart", GolemDecorations.DART);
+    public static final RegistrySupplier<Item> DECORATION_VISOR = decoration("golem_decoration_visor", GolemDecorations.VISOR);
+    public static final RegistrySupplier<Item> DECORATION_ARMOR = decoration("golem_decoration_armor", GolemDecorations.ARMOR);
+    public static final RegistrySupplier<Item> DECORATION_MACE = decoration("golem_decoration_mace", GolemDecorations.MACE);
     public static final RegistrySupplier<Item> GOLEM_BELL = ITEMS.register("golem_bell",
             () -> new ItemGolemBell(new Item.Properties().stacksTo(1)));
+    public static final RegistrySupplier<Item> TRUNK_SPAWNER = ITEMS.register("trunk_spawner",
+            () -> new ItemTrunkSpawner(new Item.Properties().stacksTo(1)));
+    public static final RegistrySupplier<MenuType<ContainerTravelingTrunk>> TRUNK_MENU = MENUS.register("traveling_trunk",
+            () -> MenuRegistry.ofExtended(ContainerTravelingTrunk::new));
     public static final RegistrySupplier<MenuType<ContainerGolem>> GOLEM_MENU = MENUS.register("golem",
             () -> MenuRegistry.ofExtended(ContainerGolem::new));
 
@@ -88,6 +117,25 @@ public final class ThaumcraftGolems {
 
     private static RegistrySupplier<Item> upgrade(String id, GolemUpgrade kind) {
         return ITEMS.register(id, () -> new ItemGolemUpgrade(new Item.Properties().rarity(Rarity.UNCOMMON), kind));
+    }
+
+    private static RegistrySupplier<Item> decoration(String id, char letter) {
+        return ITEMS.register(id, () -> new ItemGolemDecoration(new Item.Properties(), letter));
+    }
+
+    /** The item of an accessory letter, or null for a letter this port does not honour. */
+    public static Item decorationItem(char letter) {
+        return switch (letter) {
+            case GolemDecorations.HAT -> DECORATION_TOPHAT.get();
+            case GolemDecorations.GLASSES -> DECORATION_GLASSES.get();
+            case GolemDecorations.BOWTIE -> DECORATION_BOWTIE.get();
+            case GolemDecorations.FEZ -> DECORATION_FEZ.get();
+            case GolemDecorations.DART -> DECORATION_DART.get();
+            case GolemDecorations.VISOR -> DECORATION_VISOR.get();
+            case GolemDecorations.ARMOR -> DECORATION_ARMOR.get();
+            case GolemDecorations.MACE -> DECORATION_MACE.get();
+            default -> null;
+        };
     }
 
     /** The item of an upgrade type. Every original type has one now. */
@@ -146,7 +194,9 @@ public final class ThaumcraftGolems {
 
     public static void register() {
         COMPONENTS.register(); ENTITIES.register(); ITEMS.register(); MENUS.register();
+        dev.architectury.event.events.common.PlayerEvent.CHANGE_DIMENSION.register(EntityTravelingTrunk::ownerChangedDimension);
         CreativeTabRegistry.append(ThaumcraftContent.TAB, GOLEM_STRAW, GOLEM_WOOD, GOLEM_TALLOW, GOLEM_CLAY, GOLEM_FLESH, GOLEM_STONE, GOLEM_IRON, GOLEM_THAUMIUM,
-                CORE_BLANK, CORE_FILL, CORE_EMPTY, CORE_GATHER, CORE_HARVEST, CORE_LUMBER, CORE_GUARD, CORE_LIQUID, CORE_ALCHEMY, CORE_USE, CORE_BUTCHER, CORE_SORTING, CORE_FISHING, UPGRADE_AIR, UPGRADE_EARTH, UPGRADE_FIRE, UPGRADE_WATER, UPGRADE_ORDER, UPGRADE_ENTROPY, GOLEM_BELL);
+                CORE_BLANK, CORE_FILL, CORE_EMPTY, CORE_GATHER, CORE_HARVEST, CORE_LUMBER, CORE_GUARD, CORE_LIQUID, CORE_ALCHEMY, CORE_USE, CORE_BUTCHER, CORE_SORTING, CORE_FISHING, UPGRADE_AIR, UPGRADE_EARTH, UPGRADE_FIRE, UPGRADE_WATER, UPGRADE_ORDER, UPGRADE_ENTROPY,
+                DECORATION_TOPHAT, DECORATION_GLASSES, DECORATION_BOWTIE, DECORATION_FEZ, DECORATION_DART, DECORATION_VISOR, DECORATION_ARMOR, DECORATION_MACE, GOLEM_BELL, TRUNK_SPAWNER);
     }
 }

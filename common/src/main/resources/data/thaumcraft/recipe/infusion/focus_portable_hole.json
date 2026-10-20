@@ -1,0 +1,38 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "FOCUSPORTABLEHOLE",
+  "input": {
+    "item": "minecraft:ender_pearl"
+  },
+  "components": [
+    {
+      "item": "minecraft:quartz"
+    },
+    {
+      "item": "thaumcraft:earth_shard"
+    },
+    {
+      "item": "minecraft:quartz"
+    },
+    {
+      "item": "thaumcraft:air_shard"
+    },
+    {
+      "item": "minecraft:quartz"
+    },
+    {
+      "item": "thaumcraft:entropy_shard"
+    }
+  ],
+  "aspects": {
+    "iter": 25,
+    "alienis": 10,
+    "permutatio": 10,
+    "perditio": 25
+  },
+  "instability": 3,
+  "result": {
+    "id": "thaumcraft:focus_portable_hole",
+    "count": 1
+  }
+}

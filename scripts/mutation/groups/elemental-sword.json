@@ -1,0 +1,308 @@
+{
+ "description": "Sword of the Zephyr: numbers, infusion, the hold (lift, slowed fall, wind, wear) and the sweep of the blow (docs/analysis/2026-10-20-elemental-sword.md)",
+ "watch": {
+  "junit": [
+   "ElementalSwordRulesTest",
+   "ElementalSwordAssetsTest"
+  ],
+  "gametests": [
+   "swordOfTheZephyrLiftsBlowsAndSweeps"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.ElementalSwordRulesTest",
+  "thaumcraft.assets.ElementalSwordAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "lift-tenth",
+   "name": "the lift is a tenth per tick",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "LIFT = 0.08F",
+   "new": "LIFT = 0.1F"
+  },
+  {
+   "id": "ceiling-six",
+   "name": "the speed ceiling is 0.6",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "LIFT_CEILING = 0.5",
+   "new": "LIFT_CEILING = 0.6"
+  },
+  {
+   "id": "reset-three",
+   "name": "the speed is reset to 0.3",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "LIFT_RESET = 0.2F",
+   "new": "LIFT_RESET = 0.3F"
+  },
+  {
+   "id": "damping-one-five",
+   "name": "a fall is damped by 1.5",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "DAMPING = 1.2F",
+   "new": "DAMPING = 1.5F"
+  },
+  {
+   "id": "reach-three",
+   "name": "the wind reaches 3 blocks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "REACH = 2.5",
+   "new": "REACH = 3.0"
+  },
+  {
+   "id": "period-ten",
+   "name": "a use is worn every tenth tick",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "PERIOD = 20",
+   "new": "PERIOD = 10"
+  },
+  {
+   "id": "duration-short",
+   "name": "the hold lasts 7200 ticks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "USE_DURATION = 72000",
+   "new": "USE_DURATION = 7200"
+  },
+  {
+   "id": "sweep-x-one",
+   "name": "the sweep spans 1.0 along x",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "SWEEP_X = 1.2",
+   "new": "SWEEP_X = 1.0"
+  },
+  {
+   "id": "sweep-y-one",
+   "name": "the sweep spans 1.0 along y",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "SWEEP_Y = 1.1",
+   "new": "SWEEP_Y = 1.0"
+  },
+  {
+   "id": "fall-always",
+   "name": "a fall distance is always damped",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "return speed < 0 ? distance / DAMPING : distance;",
+   "new": "return distance / DAMPING;"
+  },
+  {
+   "id": "push-no-offset",
+   "name": "the push has no distance offset",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "user.distanceTo(entity) + 0.1",
+   "new": "user.distanceTo(entity)"
+  },
+  {
+   "id": "push-towards",
+   "name": "the wind blows towards the user",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java",
+   "old": "Vec3 away = entity.subtract(user);",
+   "new": "Vec3 away = user.subtract(entity);"
+  },
+  {
+   "id": "recipe-instability-two",
+   "name": "the infusion is unstable by 2",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_sword.json",
+   "old": "\"instability\": 1",
+   "new": "\"instability\": 2"
+  },
+  {
+   "id": "recipe-fire-shard",
+   "name": "the infusion takes a fire shard",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_sword.json",
+   "old": "{\"item\": \"thaumcraft:air_shard\"},\n    {\"item\": \"thaumcraft:air_shard\"}",
+   "new": "{\"item\": \"thaumcraft:air_shard\"},\n    {\"item\": \"thaumcraft:fire_shard\"}"
+  },
+  {
+   "id": "recipe-research-axe",
+   "name": "the infusion needs the axe research",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_sword.json",
+   "old": "\"research\": \"ELEMENTALSWORD\"",
+   "new": "\"research\": \"ELEMENTALAXE\""
+  },
+  {
+   "id": "recipe-less-energy",
+   "name": "the infusion takes 4 energy",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_sword.json",
+   "old": "\"potentia\": 8",
+   "new": "\"potentia\": 4"
+  },
+  {
+   "id": "model-icon-axe",
+   "name": "the sword shows the axe icon",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/elemental_sword.json",
+   "old": "items/elementalsword",
+   "new": "items/elementalaxe"
+  },
+  {
+   "id": "lang-ru-axe",
+   "name": "the Russian sword is named after the axe",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"item.thaumcraft.elemental_sword\": \"Меч Бури\"",
+   "new": "\"item.thaumcraft.elemental_sword\": \"Топор Потока\""
+  },
+  {
+   "id": "not-a-sword",
+   "name": "the sword leaves the swords tag",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/item/swords.json",
+   "old": "\"thaumcraft:elemental_sword\",",
+   "new": ""
+  },
+  {
+   "id": "sweep-hook-unregistered",
+   "name": "the sweep hook is not registered",
+   "tier": "junit",
+   "file": "common/src/main/resources/thaumcraft-common.mixins.json",
+   "old": "    \"PlayerAttackSweepMixin\"\n",
+   "new": ""
+  },
+  {
+   "id": "block-pose",
+   "name": "the sword is held like a shield",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "return UseAnim.BOW;",
+   "new": "return UseAnim.BLOCK;"
+  },
+  {
+   "id": "players-blown",
+   "name": "bystanding players are blown away too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "if (other instanceof Player || !other.isAlive() || player.getVehicle() == other) continue;",
+   "new": "if (!other.isAlive() || player.getVehicle() == other) continue;"
+  },
+  {
+   "id": "no-fall-damping",
+   "name": "the fall distance is left alone",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "        player.fallDistance = ElementalSwordRules.fall(player.fallDistance, motion.y);\n",
+   "new": ""
+  },
+  {
+   "id": "hover-count-kept",
+   "name": "the hover count is not wiped",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "            ((ServerGamePacketListenerFloatAccess) serverPlayer.connection).thaumcraft$setAboveGroundTickCount(0);\n",
+   "new": ""
+  },
+  {
+   "id": "no-wear",
+   "name": "the hold costs no uses",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "            stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(player.getUsedItemHand()));\n",
+   "new": ""
+  },
+  {
+   "id": "first-tick-free",
+   "name": "the first tick of the hold is free",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "if (ticks % ElementalSwordRules.PERIOD == 0) {",
+   "new": "if (ticks > 0 && ticks % ElementalSwordRules.PERIOD == 0) {"
+  },
+  {
+   "id": "damage-base-three",
+   "name": "the base damage is 3",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "createAttributes(tier, 4, -2.4F)",
+   "new": "createAttributes(tier, 3, -2.4F)"
+  },
+  {
+   "id": "rarity-epic",
+   "name": "the sword is epic",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+   "old": "Rarity.RARE",
+   "new": "Rarity.EPIC"
+  },
+  {
+   "id": "golem-struck",
+   "name": "the player's own golems are struck",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "                || other instanceof EntityGolemBase golem && golem.getOwnerName().equals(player.getGameProfile().getName())\n",
+   "new": ""
+  },
+  {
+   "id": "pet-struck",
+   "name": "the player's tame animals are struck",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "                || other instanceof OwnableEntity owned && player.getUUID().equals(owned.getOwnerUUID());",
+   "new": "                ;"
+  },
+  {
+   "id": "non-mobs-struck",
+   "name": "armor stands and the like are struck",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "return !(other instanceof Mob) || !other.isAlive()",
+   "new": "return !other.isAlive()"
+  },
+  {
+   "id": "any-sword-sweeps",
+   "name": "any weapon sweeps",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "if (!(player.getMainHandItem().getItem() instanceof ItemElementalSword) || !target.isAlive()) return;",
+   "new": "if (!target.isAlive()) return;",
+   "expect": "survives",
+   "reason": "equivalent: the loop in ElementalSwordSweep.before opens with the same held-item check (it also ends the sweep when the sword breaks), so a weapon other than the sword strikes nobody; the check at the head only saves building the list"
+  },
+  {
+   "id": "cooldown-spent",
+   "name": "each sweep blow spends the cooldown",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "                player.attack(other);\n                cooldown.thaumcraft$setAttackStrengthTicker(ticker);\n",
+   "new": "                player.attack(other);\n"
+  },
+  {
+   "id": "sweep-recurses",
+   "name": "a sweep blow sweeps again",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "if (!(player.level() instanceof ServerLevel level) || ACTIVE.get() != null) return;",
+   "new": "if (!(player.level() instanceof ServerLevel level)) return;"
+  },
+  {
+   "id": "sweep-too-wide",
+   "name": "the sweep reaches 4 blocks",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "target.getBoundingBox().inflate(ElementalSwordRules.SWEEP_X, ElementalSwordRules.SWEEP_Y, ElementalSwordRules.SWEEP_Z)",
+   "new": "target.getBoundingBox().inflate(4.0)"
+  },
+  {
+   "id": "broken-sword-sweeps",
+   "name": "the sweep goes on after the sword breaks",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
+   "old": "if (!(held.getItem() instanceof ItemElementalSword) || !other.isAlive()) break;",
+   "new": "if (!other.isAlive()) break;"
+  }
+ ]
+}

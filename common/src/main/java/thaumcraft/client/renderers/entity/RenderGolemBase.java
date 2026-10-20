@@ -57,7 +57,7 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
         model.setHealingTimer(healing ? entity.getHealingTimer() : 0);
         model.setCombatTimer(entity.getActionTimer());
         model.setArmTimers(entity.getLeftArmTimer(), entity.getRightArmTimer());
-        model.setInactive(false); // No runtime pause getter is part of this slice.
+        model.setInactive(entity.isFettered()); // Standing on an active Golem Fetter; the open-menu pause has no getter in this slice.
     }
 
     @Override public void render(EntityGolemBase entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {

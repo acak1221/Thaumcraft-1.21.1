@@ -114,6 +114,11 @@ public final class ThaumcraftContent {
         // Original ItemNugget metadata5 / ConfigRecipes:283,404-405. This is
         // one ninth of a resource quicksilver, not a whole-quicksilver alias.
         MATERIALS.put("quicksilver_drop", ITEMS.register("quicksilver_drop", () -> new Item(new Item.Properties())));
+        // Original ItemNugget metadata 16 (iron), 31 (gold) and 21 (cinnabar): the "Native Clusters" that purified ore becomes
+        // (ConfigRecipes:112-113) and that a furnace melts into two ingots (ConfigRecipes:469-471).
+        for (String id : new String[]{"cluster_iron", "cluster_gold", "cluster_cinnabar"}) {
+            MATERIALS.put(id, ITEMS.register(id, () -> new Item(new Item.Properties())));
+        }
         ITEMS.register("jar", () -> new ItemJar(JAR.get(), new Item.Properties()));
         ITEMS.register("jar_void", () -> new ItemJar(VOID_JAR.get(), new Item.Properties()));
         ITEMS.register("aura_node", () -> new BlockItem(AURA_NODE.get(), new Item.Properties()));

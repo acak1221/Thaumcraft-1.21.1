@@ -19,16 +19,19 @@ import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.entities.golems.EntityGolemBase;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemGuardTargets;
+import thaumcraft.common.items.golems.GolemItemMatch;
 
 /** Item cores show six ghosts per page (every Fire upgrade adds a page), Decanting one, Sorting/Guard none. Ghosts own no stock.
  * Paging is a server menu button (60 previous, 61 next); the page and slot count reach the client as menu data. */
 public final class ContainerGolem extends AbstractContainerMenu {
-    public static final int IMAGE_WIDTH = 176, IMAGE_HEIGHT = 166, GHOSTS = 6, DATA = 19;
+    public static final int IMAGE_WIDTH = 176, IMAGE_HEIGHT = 166, GHOSTS = 6, DATA = 21;
     public static final int PREVIOUS_PAGE = 60, NEXT_PAGE = 61;
     /** Menu button 100 + i cycles the Order colour of the i-th ghost on the current page: any, 0 .. 15, any. */
     public static final int COLOR_BUTTON = 100;
     /** Order Guard target switches keep the original ids 51 (Monsters), 52 (Animals), 53 (Players), 54 (Creepers); see GolemGuardTargets. */
     public static final int GUARD_BUTTON = GolemGuardTargets.FIRST_BUTTON;
+    /** Entropy's item-comparison switches keep the original ids 55 (tags), 56 (damage), 57 (components); see GolemItemMatch. */
+    public static final int ITEM_MATCH_BUTTON = GolemItemMatch.FIRST_BUTTON;
     private final EntityGolemBase serverGolem;
     private final int entityId;
     private final UUID entityUuid;
@@ -79,7 +82,8 @@ public final class ContainerGolem extends AbstractContainerMenu {
                         : index == 8 ? page[0] : index == 9 ? golem.getSlotCount()
                         : index >= 10 && index < 10 + GHOSTS ? golem.getSlotColor(page[0] * GHOSTS + index - 10)
                         : index == 16 ? (golem.canColorSlots() ? 1 : 0)
-                        : index == 17 ? golem.getGuardTargets() : index == 18 ? (golem.canSwitchGuardTargets() ? 1 : 0) : 0;
+                        : index == 17 ? golem.getGuardTargets() : index == 18 ? (golem.canSwitchGuardTargets() ? 1 : 0)
+                        : index == 19 ? golem.getItemMatch() : index == 20 ? (golem.canSwitchItemMatch() ? 1 : 0) : 0;
             }
             @Override public void set(int index, int value) {} // Display sync, never a C2S configuration setter.
             @Override public int getCount() { return DATA; }
@@ -95,6 +99,9 @@ public final class ContainerGolem extends AbstractContainerMenu {
     /** The Guard's target mask (GolemGuardTargets) as the server last synced it, and whether the switches exist at all. */
     public int guardTargets() { return configuration.get(17); }
     public boolean canSwitchGuardTargets() { return openingCore == GolemData.GUARD && configuration.get(18) != 0; }
+    /** Entropy's switches (GolemItemMatch bits) as the server last synced them, and whether the golem has them at all. */
+    public int itemMatch() { return configuration.get(19); }
+    public boolean canSwitchItemMatch() { return GolemItemMatch.appliesTo(openingCore) && configuration.get(20) != 0; }
     public int pageCount() { return openingCore == GolemData.LIQUID || ghostSlots == 0 ? 1 : Math.max(1, (configuration.get(9) + GHOSTS - 1) / GHOSTS); }
     private int base() { return serverPage == null ? 0 : serverPage[0] * GHOSTS; }
     public boolean isFillAnyAmount() { return configuration.get(6) != 0; }
@@ -211,6 +218,13 @@ public final class ContainerGolem extends AbstractContainerMenu {
         if (category != 0) {
             // Server-side gate: only a Guard that carries Order has switches, whatever a client sends.
             if (openingCore != GolemData.GUARD || serverGolem.getGolemCore() != GolemData.GUARD || !serverGolem.toggleGuardTarget(category)) return false;
+            broadcastChanges();
+            return true;
+        }
+        int flag = GolemItemMatch.flagOfButton(button);
+        if (flag != 0) {
+            // Server-side gate: only a Fill/Empty/Gather/Use/Sorting golem carrying Entropy has switches, whatever a client sends.
+            if (!GolemItemMatch.appliesTo(openingCore) || serverGolem.getGolemCore() != openingCore || !serverGolem.toggleItemMatch(flag)) return false;
             broadcastChanges();
             return true;
         }

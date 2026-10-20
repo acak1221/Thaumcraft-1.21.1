@@ -73,15 +73,20 @@ public final class DeferredItemDrops extends SavedData {
     private long retryAfter;
 
     private record BoreDrop(UUID transaction, BlockPos target, int nozzle, int attachment, boolean evacuation, int member, int segment) {}
-    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore) {
+    /** The longest a catch may be saved as burning (a Fishing golem sets two seconds); anything above is a malformed row. */
+    private static final int MAX_FIRE_TICKS = 600;
+    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks) {
+        private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore) {
+            this(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, routing, bore, 0);
+        }
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack) {
             this(id, source, position, motion, stack, 0, Long.MIN_VALUE, -1, false, null);
         }
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter) {
             this(id, source, position, motion, stack, pickupDelay, retryAfter, -1, false, null);
         }
-        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore); }
-        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore); }
+        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore, fireTicks); }
+        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore, fireTicks); }
     }
 
     private static final class Attempt {
@@ -450,10 +455,13 @@ public final class DeferredItemDrops extends SavedData {
 
     /** The live Fishing goal already owns this one rolled result and sampled
      * trajectory. No RNG, callbacks or delivery occur during its publication;
-     * caller clears its unpublished result immediately after normal return. */
-    public static void enqueueGolemFishingCatch(ServerLevel level, BlockPos water, Vec3 motion, ItemStack actualResult) {
+     * caller clears its unpublished result immediately after normal return.
+     * {@code fireTicks} is the flame the delivered item carries (a Fire golem's catch burns for two seconds); it is kept with the
+     * paid row and set on the entity at admission, and a row that is retried or saved keeps it. */
+    public static void enqueueGolemFishingCatch(ServerLevel level, BlockPos water, Vec3 motion, ItemStack actualResult, int fireTicks) {
         if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
             throw new IllegalStateException("Fishing output requires the canonical server level and thread");
+        if (fireTicks < 0 || fireTicks > MAX_FIRE_TICKS) throw new IllegalArgumentException("Fishing output cannot burn for " + fireTicks + " ticks");
         if (water == null || motion == null || actualResult == null || actualResult.isEmpty()
                 || !Double.isFinite(motion.x) || !Double.isFinite(motion.y) || !Double.isFinite(motion.z))
             throw new IllegalArgumentException("Fishing output requires its actual catch and finite sampled trajectory");
@@ -461,7 +469,7 @@ public final class DeferredItemDrops extends SavedData {
         BlockPos source = water.immutable();
         Pending entry = new Pending(UUID.randomUUID(), source,
                 new Vec3(source.getX() + .5, source.getY() + 1, source.getZ() + .5),
-                motion, actualResult.copy(), 20, Long.MIN_VALUE);
+                motion, actualResult.copy(), 20, Long.MIN_VALUE, -1, false, null, fireTicks);
         data.pending.addLast(entry);
         data.deliveryRequested = true;
         data.setDirty();
@@ -584,6 +592,7 @@ public final class DeferredItemDrops extends SavedData {
                 attempt.entity = output;
                 output.setDeltaMovement(entry.motion);
                 output.setPickUpDelay(entry.pickupDelay);
+                if (entry.fireTicks > 0) output.setRemainingFireTicks(entry.fireTicks);
                 beforeSpawn = RejectedEntitySpawn.snapshotBefore(level, output);
             } catch (RuntimeException exception) {
                 pending.addLast(entry.retryAt(level.getGameTime() + RETRY_DELAY));
@@ -722,6 +731,10 @@ public final class DeferredItemDrops extends SavedData {
                 Vec3 position = vector(row, "X", "Y", "Z");
                 Vec3 motion = vector(row, "DX", "DY", "DZ");
                 int crystalFace = row.contains("CrystalFace") ? row.getInt("CrystalFace") : -1;
+                int fireTicks = row.contains("Fire") ? row.getInt("Fire") : 0; // Only a Fire golem's fishing catch is ever saved alight.
+                if (row.contains("Fire") && (!row.contains("Fire", Tag.TAG_INT) || fireTicks <= 0 || fireTicks > MAX_FIRE_TICKS
+                        || pickupDelay != 20 || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
+                    throw new IllegalArgumentException("Invalid burning flag on a pending drop");
                 if (count <= 0 || pickupDelay < 0 || pickupDelay > 32767 || stack.isEmpty() || data.pending.stream().anyMatch(entry -> entry.id.equals(id))) {
                     throw new IllegalArgumentException("Invalid pending stack/count/duplicate ID");
                 }
@@ -754,7 +767,7 @@ public final class DeferredItemDrops extends SavedData {
                 } else if (row.contains("Routing")) throw new IllegalArgumentException("Routing without a paid crystal");
                 // Saved ROUTING/IN_FLIGHT never replays inventory. The same paid
                 // UUID becomes a residual physical delivery, unless acknowledged.
-                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore));
+                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore, fireTicks));
             } catch (RuntimeException exception) {
                 data.quarantined.add(row.copy());
                 Thaumcraft.LOG.error("Invalid pending inventory drop retained in quarantine", exception);
@@ -865,6 +878,7 @@ public final class DeferredItemDrops extends SavedData {
         Tag encoded = entry.stack.copyWithCount(1).save(registries);
         row.put("Stack", entry.bore == null ? encoded : encoded.copy()); row.putInt("Count", entry.stack.getCount());
         if (entry.pickupDelay != 0) row.putInt("PickupDelay", entry.pickupDelay);
+        if (entry.fireTicks != 0) row.putInt("Fire", entry.fireTicks);
         row.putDouble("X", entry.position.x); row.putDouble("Y", entry.position.y); row.putDouble("Z", entry.position.z);
         row.putDouble("DX", entry.motion.x); row.putDouble("DY", entry.motion.y); row.putDouble("DZ", entry.motion.z);
         if (entry.crystalFace >= 0) { row.putInt("CrystalFace", entry.crystalFace); if (entry.routing) row.putBoolean("Routing", true); }

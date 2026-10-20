@@ -1,0 +1,218 @@
+{
+ "description": "Hoe of Growth: numbers, infusion, 3 x 3 tilling, bone meal and magical sapling growth by uses (docs/analysis/2026-10-20-elemental-hoe.md)",
+ "watch": {
+  "junit": [
+   "ElementalHoeRulesTest",
+   "ElementalHoeAssetsTest"
+  ],
+  "gametests": [
+   "hoeOfGrowthTillsFertilisesAndGrowsSaplings"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.ElementalHoeRulesTest",
+  "thaumcraft.assets.ElementalHoeAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "great-margin-nineteen",
+   "name": "a greatwood sapling needs 19 uses left",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java",
+   "old": "GREATWOOD_MARGIN = 20",
+   "new": "GREATWOOD_MARGIN = 19"
+  },
+  {
+   "id": "great-wear-four",
+   "name": "a greatwood tree costs 4 uses",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java",
+   "old": "GREATWOOD_WEAR = 5",
+   "new": "GREATWOOD_WEAR = 4"
+  },
+  {
+   "id": "silver-margin-100",
+   "name": "a silverwood sapling needs only 100 uses left",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java",
+   "old": "SILVERWOOD_MARGIN = 150",
+   "new": "SILVERWOOD_MARGIN = 100"
+  },
+  {
+   "id": "silver-wear-20",
+   "name": "a silverwood tree costs 20 uses",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java",
+   "old": "SILVERWOOD_WEAR = 25",
+   "new": "SILVERWOOD_WEAR = 20"
+  },
+  {
+   "id": "margin-strict",
+   "name": "the margin may not be used up exactly",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java",
+   "old": "damage + margin(silverwood) <= maxDamage",
+   "new": "damage + margin(silverwood) < maxDamage"
+  },
+  {
+   "id": "bonemeal-wear-two",
+   "name": "bone meal costs 2 uses",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java",
+   "old": "BONEMEAL_WEAR = 1",
+   "new": "BONEMEAL_WEAR = 2"
+  },
+  {
+   "id": "till-radius-two",
+   "name": "tilling reaches 5 x 5",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java",
+   "old": "TILL_RADIUS = 1",
+   "new": "TILL_RADIUS = 2"
+  },
+  {
+   "id": "recipe-instability-two",
+   "name": "the infusion is unstable by 2",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_hoe.json",
+   "old": "\"instability\": 1",
+   "new": "\"instability\": 2"
+  },
+  {
+   "id": "recipe-no-entropy",
+   "name": "the infusion takes a second order shard",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_hoe.json",
+   "old": "{\"item\": \"thaumcraft:entropy_shard\"}",
+   "new": "{\"item\": \"thaumcraft:order_shard\"}"
+  },
+  {
+   "id": "recipe-research-pick",
+   "name": "the infusion needs the pickaxe research",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_hoe.json",
+   "old": "\"research\": \"ELEMENTALHOE\"",
+   "new": "\"research\": \"ELEMENTALPICK\""
+  },
+  {
+   "id": "recipe-less-earth",
+   "name": "the infusion takes 6 earth",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_hoe.json",
+   "old": "\"terra\": 8",
+   "new": "\"terra\": 6"
+  },
+  {
+   "id": "model-icon-pick",
+   "name": "the hoe shows the pickaxe icon",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/elemental_hoe.json",
+   "old": "items/elementalhoe",
+   "new": "items/elementalpick"
+  },
+  {
+   "id": "lang-ru-pick",
+   "name": "the Russian hoe is named after the pickaxe",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"item.thaumcraft.elemental_hoe\": \"Мотыга Роста\"",
+   "new": "\"item.thaumcraft.elemental_hoe\": \"Кирка Огня\""
+  },
+  {
+   "id": "not-a-hoe",
+   "name": "the hoe leaves the hoes tag",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/item/hoes.json",
+   "old": "\"thaumcraft:elemental_hoe\",",
+   "new": ""
+  },
+  {
+   "id": "sneak-ignored",
+   "name": "sneaking still tills nine",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "if (player == null || player.isShiftKeyDown()) return super.useOn(context);",
+   "new": "if (player == null) return super.useOn(context);"
+  },
+  {
+   "id": "no-bonemeal",
+   "name": "the hoe never fertilises",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "if (bonemeal(level, pos)) {",
+   "new": "if (false) {"
+  },
+  {
+   "id": "sapling-pays-one",
+   "name": "a sapling costs one use",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "ElementalHoeRules.wear(sapling.isSilverwood())",
+   "new": "ElementalHoeRules.BONEMEAL_WEAR"
+  },
+  {
+   "id": "sapling-never-grows",
+   "name": "a sapling is paid for and never grows",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "if (level instanceof ServerLevel server) sapling.grow(server, pos, level.random);",
+   "new": "if (level instanceof ServerLevel) { }"
+  },
+  {
+   "id": "always-pass",
+   "name": "a successful click reports a failure",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "return did ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;",
+   "new": "return InteractionResult.PASS;"
+  },
+  {
+   "id": "hit-costs-uses",
+   "name": "a hit spends the hoe",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "@Override public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {}\n",
+   "new": ""
+  },
+  {
+   "id": "enchantability-eighteen",
+   "name": "the hoe takes the tier enchantability",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "public int getEnchantmentValue() { return 5; }",
+   "new": "public int getEnchantmentValue() { return 18; }"
+  },
+  {
+   "id": "rarity-epic",
+   "name": "the hoe is epic",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "Rarity.RARE",
+   "new": "Rarity.EPIC"
+  },
+  {
+   "id": "edit-check-removed",
+   "name": "the hoe ignores where an adventure player may edit",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "if (!player.mayUseItemAt(cell, face, stack)) continue;\n",
+   "new": ""
+  },
+  {
+   "id": "only-clicked-layer",
+   "name": "tilling reaches the layer above too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "BlockPos cell = pos.offset(x, 0, z);",
+   "new": "BlockPos cell = pos.offset(x, x == 1 ? 1 : 0, z);"
+  },
+  {
+   "id": "bonemeal-grown-pays",
+   "name": "a grown crop still costs a use",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java",
+   "old": "if (!(state.getBlock() instanceof BonemealableBlock growable) || !growable.isValidBonemealTarget(level, pos, state)) return false;",
+   "new": "if (!(state.getBlock() instanceof BonemealableBlock growable)) return false;"
+  }
+ ]
+}

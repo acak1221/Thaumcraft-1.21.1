@@ -1,0 +1,4 @@
+levitator
+range-stops-at-solid-air powered-lifts fall-kept nobody-sneaks power-change-ignored soft-resistance stone-sound
+
+# request 22: the 7 levitator game-test mutants not run locally (17 JUnit and 6 game-test mutants were caught locally); essentia-reservoir (run 21) is read: 18 of 19 as expected, one anchor fixed

@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "VOIDMETAL",
+  "source_order": 9,
+  "catalyst": {"item": "thaumcraft:void_seed"},
+  "result": {"id": "thaumcraft:void_ingot", "count": 1},
+  "aspects": {"metallum": 8}
+}

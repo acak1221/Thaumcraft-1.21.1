@@ -1,9 +1,12 @@
 package thaumcraft.common.entities.golems;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -14,11 +17,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.items.golems.GolemLiquidQueue;
 import thaumcraft.common.items.golems.GolemMarker;
+import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemWaterCargo;
 import thaumcraft.common.tiles.TileCrucible;
 
-/** Ordinary marked source water -> separate mB stock -> attached crucible only. */
+/**
+ * Ordinary marked source water -> separate mB stock -> attached crucible only. With an Entropy upgrade the golem drains, one bucket per
+ * pulse, the queue {@link GolemLiquidQueue} builds from the marked block instead of the marked block itself.
+ */
 final class LiquidGolemGoals {
     private final EntityGolemBase golem;
     private TileCrucible home;
@@ -28,8 +36,10 @@ final class LiquidGolemGoals {
     private boolean watched, moving, gathering, emptying;
     private boolean gotoReady, gatherReady, emptyReady, nudged;
     private int pathCount, gatherCount;
-    private BlockPos attemptSource;
+    private BlockPos attemptSource, attemptAnchor;
     private BlockState attemptState;
+    // Per marked block: the sources still to drain (Entropy). Rebuilt when empty; targets are re-validated at every pulse.
+    private final Map<BlockPos, ArrayDeque<BlockPos>> queues = new HashMap<>();
     private TileCrucible deliveryAttempt;
 
     private record Source(BlockPos pos, BlockState state) {}
@@ -43,6 +53,9 @@ final class LiquidGolemGoals {
     boolean hasRoute() { return watched || route != null || moving || gathering || emptying; }
     boolean ownsCollectionAttempt(BlockPos pos, BlockState state) {
         return gathering && watched && attemptSource != null && attemptSource.equals(pos) && attemptState == state;
+    }
+    boolean ownsCollectionAttempt(BlockPos anchor, BlockPos pos, BlockState state) {
+        return ownsCollectionAttempt(pos, state) && attemptAnchor != null && attemptAnchor.equals(anchor);
     }
     boolean ownsDeliveryAttempt(TileCrucible actualHome) { return emptying && deliveryAttempt == actualHome && actualHome != null; }
     static boolean loaded(ServerLevel level, BlockPos pos) {
@@ -86,6 +99,32 @@ final class LiquidGolemGoals {
             if (candidate != null) { best = candidate; nearest = distance; }
         }
         return best; // Inclusive actor range, strict-nearer tie; no home radius or unmarked search.
+    }
+    /**
+     * What the next pulse drains for a marked block that is next to the golem: the marked block itself, or with Entropy the head of its
+     * queue (original AILiquidGather:225-262). Entries that are no longer ordinary source water or no longer in range are skipped; when
+     * the queue is spent the marked block is the target.
+     */
+    private Source nextTarget(ServerLevel server, Source anchor) {
+        if (golem.getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0) return anchor;
+        Set<BlockPos> marked = new HashSet<>();
+        for (GolemMarker marker : golem.getMarkers()) marked.add(marker.pos());
+        queues.keySet().removeIf(pos -> !marked.contains(pos));
+        float range = golem.getRange();
+        ArrayDeque<BlockPos> queue = queues.get(anchor.pos());
+        if (queue == null || queue.isEmpty()) {
+            queue = new ArrayDeque<>(GolemLiquidQueue.build(anchor.pos(), range,
+                    pos -> loaded(server, pos) && server.getBlockState(pos).is(Blocks.WATER),
+                    pos -> loaded(server, pos) && sourceWater(server, pos, server.getBlockState(pos))));
+            queues.put(anchor.pos(), queue);
+        }
+        while (!queue.isEmpty()) {
+            BlockPos pos = queue.poll();
+            if (!loaded(server, pos) || !GolemLiquidQueue.inRange(anchor.pos(), pos, range)) continue;
+            BlockState state = server.getBlockState(pos);
+            if (sourceWater(server, pos, state)) return new Source(pos.immutable(), state);
+        }
+        return anchor;
     }
     private BlockPos approach(ServerLevel server, BlockPos selected) {
         BlockPos best = selected;
@@ -161,8 +200,9 @@ final class LiquidGolemGoals {
         clearSource(); // Never touches actual waterMb, native item cargo or paid fishing output.
         home = deliveryAttempt = null;
         emptying = emptyReady = false;
-        attemptSource = null;
+        attemptSource = attemptAnchor = null;
         attemptState = null;
+        queues.clear();
     }
     private abstract class LiquidGoal extends Goal {
         LiquidGoal() { setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK)); }
@@ -200,10 +240,12 @@ final class LiquidGolemGoals {
             for (Source candidate : nearbySources()) {
                 if (!gathering || !watched || !ready() || !room()) return;
                 int before = golem.getWaterAmountMb();
-                attemptSource = candidate.pos();
-                attemptState = candidate.state();
-                try { golem.collectMarkedSourceWater(candidate.pos(), candidate.state()); }
-                finally { attemptSource = null; attemptState = null; }
+                Source target = nextTarget((ServerLevel) golem.level(), candidate);
+                attemptAnchor = candidate.pos();
+                attemptSource = target.pos();
+                attemptState = target.state();
+                try { golem.collectMarkedSourceWater(candidate.pos(), target.pos(), target.state()); }
+                finally { attemptSource = attemptAnchor = null; attemptState = null; }
                 if (golem.getWaterAmountMb() != before) {
                     gatherCount = 0;
                     if (!room()) clearSource();

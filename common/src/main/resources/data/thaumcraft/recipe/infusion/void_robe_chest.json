@@ -1,0 +1,47 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "ARMORVOIDFORTRESS",
+  "input": {
+    "item": "thaumcraft:void_chestplate"
+  },
+  "input_damage": 0,
+  "components": [
+    {
+      "item": "thaumcraft:robe_chestplate"
+    },
+    {
+      "item": "thaumcraft:void_ingot"
+    },
+    {
+      "item": "thaumcraft:thaumium_ingot"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    },
+    {
+      "item": "thaumcraft:enchanted_fabric"
+    },
+    {
+      "item": "minecraft:leather"
+    }
+  ],
+  "component_predicates": [
+    {
+      "component": 0,
+      "damage": 0
+    }
+  ],
+  "aspects": {
+    "metallum": 24,
+    "tutamen": 24,
+    "pannus": 24,
+    "praecantatio": 16,
+    "alienis": 16,
+    "vacuos": 24
+  },
+  "instability": 6,
+  "result": {
+    "id": "thaumcraft:void_robe_chestplate",
+    "count": 1
+  }
+}

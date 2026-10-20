@@ -76,7 +76,8 @@ import thaumcraft.common.tiles.TileArcaneWorkbench;
  * creative mock. Native RMB/doTick, arcane output/payment, four-focus codecs and
  * real ADD cancellation are exercised; projectile combat belongs to its own case.
  * No sleep, fake clock, RNG seed, damage/iframe resets or synthetic FX. The caller
- * needs >=36000 timeoutTicks: internal bounds are30000 accelerated ticks/10 wall s. */
+ * needs >=36000 timeoutTicks: internal bounds are30000 accelerated ticks/60 wall s (the wall bound
+ * only catches a hang: it was 10 s and the test failed on a loaded 2-core CI runner at phase 5 of 8 after 10.02 s, while it takes 3.9 s on one local core). */
 public final class FrostFocusRuntimeChecks {
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
     private FrostFocusRuntimeChecks() {}
@@ -118,14 +119,14 @@ public final class FrostFocusRuntimeChecks {
             }
             var profile = new GameProfile(UUID.randomUUID(), "frost-" + UUID.randomUUID().toString().substring(0, 8));
             player = new ServerPlayer(level.getServer(), level, profile, ClientInformation.createDefault());
-            tickDeadline = test.getTick() + 30000; wallDeadline = System.nanoTime() + 10_000_000_000L;
+            tickDeadline = test.getTick() + 30000; wallDeadline = System.nanoTime() + 60_000_000_000L;
         }
 
         private void guard(Runnable action) {
             if (closed) return;
             try {
                 test.assertTrue(test.getTick() < tickDeadline && System.nanoTime() < wallDeadline,
-                        "Frost sequence stays within30000 accelerated ticks/ten real seconds; phase=" + phase);
+                        "Frost sequence stays within30000 accelerated ticks/sixty real seconds; phase=" + phase);
                 action.run();
             } catch (RuntimeException | Error failure) {
                 try { close(); } catch (RuntimeException | Error cleanupFailure) { failure.addSuppressed(cleanupFailure); }

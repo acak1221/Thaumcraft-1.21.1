@@ -13,7 +13,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import thaumcraft.common.config.ThaumcraftWearables;
 
-/** Original RecipesRobeArmorDyes:29-111, adapted to a native special recipe.
+/** Original RecipesRobeArmorDyes:29-111 and its identical RecipesVoidRobeArmorDyes (one recipe serves both robe families), adapted to a native special recipe.
  * OpenTC4 supplies readable names only; the original JAR defines the calculation. */
 public final class RecipesRobeArmorDyes extends CustomRecipe {
     private static final List<Item> VANILLA_DYES = List.of(Items.WHITE_DYE, Items.ORANGE_DYE, Items.MAGENTA_DYE, Items.LIGHT_BLUE_DYE,
@@ -43,7 +43,7 @@ public final class RecipesRobeArmorDyes extends CustomRecipe {
         for (int slot = 0; slot < input.size(); slot++) {
             ItemStack stack = input.getItem(slot);
             if (stack.isEmpty()) continue;
-            if (stack.getItem() instanceof ItemRobeArmor) {
+            if (stack.getItem() instanceof DyedRobe) {
                 if (robe >= 0) return -1;
                 robe = slot;
             } else if (dyeIndex(stack) >= 0) dye = true;

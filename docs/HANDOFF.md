@@ -4,6 +4,229 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально20.10 (двадцать седьмая группа: Магический подъёмник, Claude): реализовано, собрано, game-tested 175/175
+
+Контракт и реализация: [arcane-levitator](analysis/2026-10-20-arcane-levitator.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** блок `thaumcraft:levitator` и плитка `TileLevitator` (на обеих сторонах, как оригинал): дальность 10 + 10 за каждый не питаемый подъёмник прямо под ним (счёт по просьбе блока и на каждом сотом тике), столб в один блок до первого непрозрачного блока; предметы, толкаемые сущности и лошади получают +0,1 вверх (до 0,35), приседающий держит 90 % падения, падение сбрасывается; сигнал на блоке или **над** ним останавливает; блок помечает подъёмники **под** изменившимся (направление оригинала); арканный рецепт `LEVITATOR` (`WEW/BNB/WAW`, `aer 10`, `terra 5`).
+**Built / game-tested:** `:common:test` **542 JUnit** (+9: 8 подъёмника и 1 резервуара), `:fabric:remapJar`, `:fabric:runGameTest` **175/175** (+`arcaneLevitatorLiftsItemsAndCreaturesAndStacks`: настоящие игрок, предметы, вагонетка, свинья, лошадь, редстоун), JAR SHA-256 `86c7dd75…13bd`; три команды шага CI с ресурсами зелёные.
+**Исправления по пути:** (1) **резервуар эссенции** — слизь вспышки могла лечь в собственную клетку блока, и добыча игроком не выбрасывала предмет (в оригинале блок ещё стоял); теперь клетка пропускается (`ReservoirRules.burstTarget`, JUnit и мутант); (2) тест Портативной дыры зависел от билетов соседних тестов и порой не доводил туннель до конца — теперь принуждает свои чанки сам; (3) якорь мутанта `placed-clicked-face` резервуара не собирался (полное имя класса) — исправлен, мутант пойман.
+**Мутации:** `levitator` (30: 17 JUnit + 13 GameTest): JUnit 17/17 и шесть GameTest-мутантов пойманы локально, остальные 7 GameTest у GitHub (запрос в `run-request.txt`). GitHub: `fortress` (прогон 20, `c2895b2`) — зелёный; `essentia-reservoir` (прогон 21, `4fa6164`) — 18 из 19 GameTest как ожидалось, `placed-clicked-face` «invalid» (якорь, исправлен).
+**Seen:** нет. **Не проверено:** искры и свечение (не портированы), клиентский подъём игрока, провод редстоуна к боковым граням.
+**Замечание для отдельной проверки:** у алембика `strength(3, 17)` — сопротивление взято как 17, а по правилу порта для оригинального `setResistance(17)` (×3, отдаётся /5) выходит 10,2 (резервуар сделан так); остальные блоки с `setResistance` стоит сверить.
+**Следующее:** Warding / Trade фокусы, Бур с Киркой Огня, големы с резервуарами, остальные устройства M09 (лампы, Ear, Vis Charge Relay и др.), M01 R10–R16, M07 enchant-инфузия, Thaumatorium; варп (M11).
+
+### Актуально20.10 (двадцать шестая группа: Резервуар эссенции, Claude): реализовано, собрано, game-tested 174/174
+
+Контракт и реализация: [essentia-reservoir](analysis/2026-10-20-essentia-reservoir.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** блок `thaumcraft:essentia_reservoir` и плитка `TileEssentiaReservoir` (смесь до 256 единиц суммарно, один порт на стороне `facing`, притяжение 24 пока не полон, забор по единице раз в 5 тиков через **новый профиль `RESERVOIR`** общего исполнителя `EssentiaTransfers`, сторонний запрос типа пуст, неуказанный — первый аспект), компаратор `floor(объём/256·14)+1`, поворот жезлом (приседание — на сторону клика, иначе противоположную), размещение (отверстие к кликнутому блоку), слом с объёмом ≥ 16 — взрыв и `объём/16 + 1` блоков слизи/газа уровня 8, **беспроводной забор инфузии** из резервуара, сохранение (объём выше 256 — пусто, испорченные данные закрывают резервуар и хранятся дословно), инфузия `ESSENTIARESERVOIR` (буфер + 2 слитка пустоты + 4 баночки, нестабильность 6).
+**Built / game-tested:** `:common:test` **533 JUnit** (+12), `:fabric:remapJar`, `:fabric:runGameTest` **174/174** (+`essentiaReservoirHoldsMixedEssentiaPullsAndBursts`: настоящие игрок, буфер, труба, жезл, кирка, матрица), JAR SHA-256 `0050bef5…a66a`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `essentia-reservoir` (52: 25 JUnit + 27 GameTest): JUnit 25/25 и девять GameTest-мутантов пойманы локально, остальные 18 GameTest прогнал GitHub (прогон 21) как ожидалось. GitHub-прогон `fortress` (20, c2895b2) зелёный.
+**Seen:** нет. **Не проверено:** вид (рендера нет — временный полупрозрачный куб), скрип на клиенте, големы эссенции с резервуарами (ветки `AIEssentiaGather` / `AIEssentiaEmpty` не перенесены).
+**Следующее:** Warding / Trade фокусы, Бур с Киркой Огня, големы с резервуарами, M01 R10–R16, M07 enchant-инфузия, Thaumatorium; варп (M11); Focus Pouch / баублы (нужно решение по контракту аксессуаров).
+
+### Актуально20.10 (двадцать пятая группа: боевая таумиевая броня Fortress, Claude): реализовано, собрано, game-tested 173/173
+
+Контракт и реализация: [fortress-armor](analysis/2026-10-20-fortress-armor.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `fortress_helmet` / `fortress_chestplate` / `fortress_leggings` (защита 3/7/6, прочность 440/640/600, зачаровываемость 25, rare, ремонт слитком таумия), **обобщённая магическая защита** `MagicWard` (интерфейс `MagicWardGear`: `wardsFire`, `wardFactor`; магия `защита / 35`, огонь и взрывы `защита / 20` у Fortress, множитель набора игрока `0,875 + 0,125 за вещь + 0,05 за маску`) со второй обёрткой миксина вокруг `CombatRules.getDamageAfterAbsorb` (значение брони: вещи с долей первого прохода вычитаются, обычная броня игрока умножается на набор), очки как компонент `fortress_goggles`, три маски как компонент `fortress_mask` (Sipping Fiend лечит 1 с шансом `урон / 12`; Angry Ghost иссушает нападающего на 80 тиков с шансом `урон / 10`; Grinning Devil только ставится — варп-событий ещё нет), шесть инфузий (3 брони + очки + 3 маски как именованные патчи `InfusionResultPatches`).
+**Built / game-tested:** `:common:test` **521 JUnit** (+7), `:fabric:remapJar`, `:fabric:runGameTest` **173/173** (+`thaumiumFortressWardsSetsAndMasks`: настоящий подключённый игрок, настоящие свиньи с 500 здоровья), JAR SHA-256 `5875e199…a891`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `fortress` (40: 17 JUnit + 23 GameTest): JUnit 17/17 и семь GameTest-мутантов пойманы локально, остальные 16 GameTest у GitHub (запрос в `run-request.txt`). GitHub: `portable-hole` (прогон 18, `05e6df1`) — 34 из 34 как ожидалось; `void-robe` `wash-keeps-level` (прогон 19, `1b3007a`) в повторе **пойман** (первый выживший в 48 с остаётся необъяснённым сбоем задания), `build.yml` на `05e6df1` и `1b3007a` зелёный.
+**Seen:** нет. **Не проверено:** надетый вид и рисунки масок (`ModelFortressArmor` не перенесена — временно слои таумиевой брони), Grinning Devil (варп M11), двойной износ игрока ванильным `hurtArmor` (задокументированное отклонение), клиентские значки/подсказки.
+**Следующее:** Warding / Trade фокусы, Бур с Киркой Огня, Essentia Reservoir, M01 R10–R16, M07 enchant-инфузия, Thaumatorium; варп (M11); Focus Pouch / баублы (нужно решение по контракту аксессуаров).
+
+### Актуально20.10 (двадцать четвёртая группа: фокус «Портативная дыра», Claude): реализовано, собрано, game-tested 172/172
+
+Контракт и реализация: [portable-hole](analysis/2026-10-20-portable-hole.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `focus_portable_hole` (10 энтропии + 10 воздуха центивис за блок глубины, минимум одна единица, апгрейды Frugal / Enlarge / Extend — **новый** `FocusUpgradeType.extend`, id 7), измерение глубины (33 + 8 за Enlarge), цепочка из глубина + 1 блоков с кольцом 3 × 3, блок `thaumcraft:hole` (`BlockHole`, неразрушимый, свет 10, без коллизии и предмета, жидкость не пускает) и тайл `TileHole` (запоминает состояние блока, 120 + 60 за Extend тиков, возвращает блок и ставит обновление через 2 тика), чёрный список тегом `thaumcraft:portable_hole_blacklist`, инфузия `FOCUSPORTABLEHOLE`.
+**Built / game-tested:** `:common:test` **514 JUnit** (+10), `:fabric:remapJar`, `:fabric:runGameTest` **172/172** (+`portableHoleCutsTunnelsAndGivesBlocksBack`: настоящий подключённый игрок и жезл, 10 стен: 108 дыр, оплата, достижение, остановки, возврат состояний), JAR SHA-256 `1c4811aa…5553b`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `portable-hole` (34): JUnit 18/18 и шесть GameTest-мутантов пойманы локально, остальные 10 GameTest прогнал GitHub (прогон 18) — 34 из 34 как ожидалось. `void-robe` (39): GitHub (прогон 17 на `f5dd37a`) — 38 из 39 как ожидалось, `wash-keeps-level` выжил в 48-секундном задании без сообщений GameTest; в повторе (прогон 19) пойман за 5 минут, причина первого выжившего не установлена.
+**Seen:** нет. **Не проверено:** вид отверстия и искры (не портированы — пустая полость), звуки, защита территории (добавлена проверка `mayInteract` на кликнутом блоке — отклонение), Внешние Земли (нет измерения).
+**Следующее:** Fortress-броня (ARMORFORTRESS, маски и очки как патчи инфузии, доли /20 для огня и взрыва — обобщить `MagicWard`), Warding / Trade фокусы, Бур с Киркой Огня, Essentia Reservoir, M01 R10–R16, M07 enchant-инфузия, Thaumatorium; варп (M11).
+
+### Актуально20.10 (двадцать третья группа: Пустотные одеяния тауматурга, Claude): реализовано, собрано, game-tested 171/171
+
+Контракт и реализация: [void-robes](analysis/2026-10-20-void-robes.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `void_robe_helmet` / `void_robe_chestplate` / `void_robe_leggings` (материал Void: защита 3/7/6, прочность 110/160/150, зачаровываемость 10, epic, ремонт слитком пустоты), самолечение (общая `VoidMetal.armorTick`: тик инвентаря + тик брони для надетой вещи), скидка вис-стоимости 5 % и варп 2 за вещь, очки (узлы и подсказки) у капюшона, **магическая защита** `защита / 35` за надетую вещь (`MagicWard` + миксин `LivingEntityMagicWardMixin` вокруг `getDamageAfterArmorAbsorb`, тег `thaumcraft:is_magic`), краска и смывание в котле общие с обычными мантиями (маркер `DyedRobe`), три инфузии `ARMORVOIDFORTRESS` (нестабильность 6, центр — Void-броня без износа, очки и мантии без износа).
+**Built / game-tested:** `:common:test` **504 JUnit** (+7), `:fabric:remapJar`, `:fabric:runGameTest` **171/171** (+`voidThaumaturgeRobesMendWardAndDye`: настоящий подключённый игрок, настоящий урон и тики), JAR SHA-256 `a098d8c9…1468`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `void-robe` (39): JUnit 20/20 и шесть GameTest-мутантов пойманы локально; GitHub (прогон 17) — 38 из 39, выживший `wash-keeps-level` не объяснён (см. выше). Повторный прогон `elemental-shovel` (16) на `8046f2a` зелёный — оба выживших выжили, как задокументировано; `build.yml` на `8046f2a` зелёный.
+**Seen:** нет. **Не проверено:** надетый вид, цвета на клиенте. **Не перенесено:** модель `ModelRobe` (58 деталей, 128 × 64; временно надеты слои Void-брони) — отдельная клиентская единица.
+**Следующее:** Fortress-броня (ARMORFORTRESS, маски, доли /20 для огня и взрыва: `MagicWard` обобщить), Бур с Киркой Огня, Essentia Reservoir (нужен новый профиль `EssentiaTransfers`), M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium; варп (M11).
+
+### Актуально20.10 (двадцать вторая группа: Меч Бури, Claude): реализовано, собрано, game-tested 170/170
+
+Контракт и реализация: [elemental-sword](analysis/2026-10-20-elemental-sword.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `elemental_sword` (1500 прочности, скорость 10, урон 7, зачаровываемость 18, rare, ремонт слитком таумия), **удержание** кнопки (подъём +0,08 за тик с потолком 0,5→0,2, падение и дистанция падения делятся на 1,2, обнуление счётчика «парения» сервера, отталкивание всех, кроме игроков, в радиусе 2,5, звук `wind` и износ в тиках 0/20/40…), **размах удара** (`Player.attack`: каждый живой моб в боксе цели ±(1,2; 1,1; 1,2), кроме собственных големов, ручных животных и игроков, получает обычный удар игрока со своим износом меча; перезарядка сохраняется; вложенные удары не размахиваются), инфузия `ELEMENTALSWORD`.
+**Built / game-tested:** `:common:test` **497 JUnit** (+7), `:fabric:remapJar`, `:fabric:runGameTest` **170/170** (+`swordOfTheZephyrLiftsBlowsAndSweeps`: настоящий подключённый игрок, настоящие `Player.attack`), JAR SHA-256 `2ceea75f…b26f`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `elemental-sword` (36): JUnit 20/20 и пять GameTest-мутантов пойманы локально; GitHub (прогон 15) — 35 из 36 как ожидалось, один эквивалентный выживший (`any-sword-sweeps`, задокументирован). `elemental-shovel` (35): GitHub (прогон 14) — 33 из 35, два эквивалентных выживших (`bedrock-attempted`, `thaumium-too`, задокументированы).
+**Seen:** нет. **Не проверено:** подъём на настоящем клиенте, частицы, звуки, поза лука (вместо блока мечом), сеть/два игрока.
+**Следующее:** Primal Crusher (ELDRITCH) — после фокуса Primal; M01 R10–R16 (копирование, unknown scrolls, clues, режимы сложности, deconstruction), M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium; варп (M11).
+
+### Актуально20.10 (двадцать первая группа: Лопата Землероя, Claude): реализовано, собрано, game-tested 169/169
+
+Контракт и реализация: [elemental-shovel](analysis/2026-10-20-elemental-shovel.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `elemental_shovel` (1500 прочности, скорость 10, урон 4, зачаровываемость 18, rare, ремонт слитком таумия), **копание 3 × 3** поперёк грани, на которую смотрит игрок (вложенные обычные разрушения: прочность, выпадение, события защиты; не при крадущемся, не в креативе, только блоки `mineable/shovel`), **укладка 3 × 3** копии щёлкнутого блока из инвентаря (по ориентации 0/1/2 и повороту игрока; трава → земля), ориентация — компонент `thaumcraft:shovel_orientation` и клавиша G (`ShovelOrientationPayload`), инфузия `ELEMENTALSHOVEL`.
+**Built / game-tested:** `:common:test` **490 JUnit** (+10), `:fabric:remapJar`, `:fabric:runGameTest` **169/169** (+`shovelOfTheEarthmoverMinesAndLaysSquares`: настоящий подключённый игрок, настоящие блоки), JAR SHA-256 `bc13bd2d…aa06`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `elemental-shovel` (35): JUnit 17/17 и четыре GameTest-мутанта пойманы локально; GitHub (прогон 14) — 33 из 35 как ожидалось, два эквивалентных выживших (`bedrock-attempted`, `thaumium-too`) задокументированы. `elemental-hoe` (25) и `elemental-pickaxe` (27) на GitHub — все как ожидалось.
+**Seen:** нет. **Не проверено:** значок, звуки, сама клавиша G в клиенте, работа с модом защиты территории.
+**Не перенесено:** призрачный предпросмотр (`IArchitect`) и искры, переключатель жезла на клавише G.
+**Следующее:** Elemental Sword (взлёт и притягивание при удержании, удар по всем рядом), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально20.10 (двадцатая группа: Мотыга Роста, Claude): реализовано, собрано, game-tested 168/168
+
+Контракт и реализация: [elemental-hoe](analysis/2026-10-20-elemental-hoe.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `elemental_hoe` (1500 прочности, зачаровываемость 5, rare, без урона, удар не тратит прочность), вспашка 3 × 3 (1 прочность за блок, право правки на каждый, крадущийся — один), при пустой вспашке костная мука (1 прочность), затем рост магического саженца: Greatwood за 5 при остатке от 20, Silverwood за 25 при остатке от 150 (плата и при отсутствии места), инфузия `ELEMENTALHOE`, звук `wand`.
+**Built / game-tested:** `:common:test` **480 JUnit** (+4), `:fabric:remapJar`, `:fabric:runGameTest` **168/168** (+`hoeOfGrowthTillsFertilisesAndGrowsSaplings`: настоящий игрок, настоящие блоки и деревья), JAR SHA-256 `49fb705c…2a5e`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `elemental-hoe` (25): JUnit 14/14 и три GameTest-мутанта пойманы локально, GitHub (прогон 13) — все 25 как ожидалось. `elemental-pickaxe` (27) на GitHub (прогон 12) — тоже все как ожидалось.
+**Seen:** нет. **Не проверено:** значок, звук, искры (не портированы), раздатчик.
+**Следующее:** Elemental Shovel (3 × 3 копание и укладка, IArchitect) и Sword (взлёт и притягивание), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально20.10 (девятнадцатая группа: Кирка Огня и особая добыча кластеров, Claude): реализовано, собрано, game-tested 167/167
+
+Контракт и реализация: [elemental-pickaxe](analysis/2026-10-20-elemental-pickaxe.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `elemental_pickaxe` (1500 прочности, скорость 10, урон 5, зачаровываемость 18, rare, ремонт слитком таумия), поджог на 2 секунды при ударе (правило PvP), 5 прочности и звук `wandfail` за правый щелчок, инфузия `ELEMENTALPICK`,
+**особая добыча** (`SpecialMining` + миксин `SpecialMiningBlockMixin` в `Block.getDrops`): `raw_iron` / `raw_gold` / `cinnabar_ore` превращаются в кластеры с шансом `0,2 + удача × 0,075` (× 1,0 / 0,9 / 0,9), то же количество, без Silk Touch, только у игрока с этой киркой.
+**Built / game-tested:** `:common:test` **476 JUnit** (+6), `:fabric:remapJar`, `:fabric:runGameTest` **167/167** (+`pickaxeOfTheCoreBurnsWearsAndFindsClusters`: 400-кратные выборки `Block.getDrops` и 120 настоящих добыч), JAR SHA-256 `305d58b7…347b`; три команды шага CI с ресурсами зелёные. Один красный прогон по дороге — дорожка NO-LAUNCHER в тесте дротика насчитала чужой дротик; дорожки теперь считают только дротики своего голема (`getOwner()`), причина не доказана.
+**Мутации:** `elemental-pickaxe` (27): JUnit 13/13 локально, GitHub (прогон 12) — все 27 как ожидалось. `native-clusters` (24) и `void-gear` (27) на GitHub — все как ожидалось.
+**Seen:** нет. **Не проверено:** значок кирки, звуки, работа с Буром (Бур пока принимает только ванильные кирки и Thaumium Pickaxe), Excavation с Dowsing.
+**Не перенесено:** клиентский скан руд (правый щелчок), Primal Crusher, Dowsing.
+**Следующее:** Elemental Hoe / Shovel / Sword (мотыга растит деревья, лопата 3×3, меч подбрасывает), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально20.10 (восемнадцатая группа: самородные кластеры железа/золота/киновари, Claude): реализовано, собрано, game-tested 166/166
+
+Контракт и реализация: [native-clusters](analysis/2026-10-20-native-clusters.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** предметы `cluster_iron/gold/cinnabar`, четыре рецепта тигля (`PUREIRON`, `PUREGOLD` — руда и сырая руда в кластер; `TRANSIRON`, `TRANSGOLD` — самородок в три), три печных рецепта «кластер → два слитка», аспекты `ConfigAspects:360-362`, псевдонимы книги и значки исследований.
+Новый тип `thaumcraft:stack_smelting` (`StackSmeltingRecipe`, остаётся `RecipeType.SMELTING`): `minecraft:smelting` 1.21.1 молча теряет количество результата, а оригинал платит два слитка.
+**Built / game-tested:** `:common:test` **470 JUnit** (+2 `ClusterAssetsTest`; `EarlyObjectAspectBindingsTest` обновлён под три новые строки), `:fabric:remapJar`, `:fabric:runGameTest` **166/166** (+`nativeClustersPurifyTripleAndMelt`: рецепты, аспекты и три настоящие ванильные печи), JAR SHA-256 `a658954e…8d44`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `native-clusters` (24): JUnit 15/15 пойманы локально, GitHub (прогон 11) — все 24 как ожидалось. `void-cap` (20) и `void-gear` (27) на GitHub — тоже все как ожидалось.
+**Seen:** нет. **Не проверено:** значки кластеров, настоящая варка в котле, особая добыча.
+**Не перенесено:** особая добыча кластеров (Elemental Pickaxe, Primal Crusher, Excavation с Dowsing, Arcane Bore: `Utils.findSpecialMiningResult`, шанс `0,2 + удача × 0,075`) — придёт вместе с группой Elemental-инструментов; выпадение у Пеха и торговля волшебников (мобы M11); бонус Продвинутой алхимической печи.
+**Следующее:** Elemental Pickaxe/Hoe/Sword/Shovel вместе с перехватом выпадения блока (особая добыча, Primal Crusher, Dowsing), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально20.10 (семнадцатая группа: Void-инструменты и броня, Claude): реализовано, собрано, game-tested 165/165
+
+Контракт и реализация: [void-gear](analysis/2026-10-20-void-gear.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** девять предметов из Void metal (меч, кирка, топор, лопата, мотыга, шлем, кираса, поножи, ботинки) с оригинальными числами (прочность 150 / 110–160, скорость 8, урон, защита 3/7/6/3), верстачные рецепты, самолечение раз в 20 тиков носителя (надетая деталь — дважды; творческий режим не чинится),
+иссушение при ударе (меч 3 с, остальные 4 с; правило PvP), `IWarpingGear` у всех девяти и сумма `WarpGear.fromGear` (рука + четыре слота брони), оригинальная особенность ремонта инструментов Primal Charm'ом, слои брони, теги, имена.
+**Built / game-tested:** `:common:test` **468 JUnit** (+3), `:fabric:remapJar`, `:fabric:runGameTest` **165/165** (+`voidMetalGearMendsWithersAndWarps`), JAR SHA-256 `d3a4dd8f…8571`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `void-gear` (27): JUnit 4/4 локально, 23 GameTest у GitHub. `staff-rods` (36) на GitHub — все как ожидалось; `void-cap` (20) на GitHub — все как ожидалось.
+**Seen:** нет. **Не проверено:** вид иконок и слоёв брони, сами события варпа (M11), Void-мантии (`ARMORVOIDFORTRESS`), сеть/два игрока, NeoForge.
+**Следующее:** M01 R10–R16 (копирование, unknown scrolls, clues, режимы сложности, deconstruction), M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium; варп (M11) — когда дойдёт очередь.
+
+### Актуально20.10 (шестнадцатая группа: Void metal и колпачок Void, Claude): реализовано, собрано, game-tested 164/164
+
+Контракт и реализация: [void-cap](analysis/2026-10-20-void-cap.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** добыча Void metal в тигле (`crucible/void_seed`: пшеничные семена + tenebrae 8, vacuos 8, alienis 2; `crucible/void_ingot`: Void Seed + metallum 8; исследование `VOIDMETAL`), самородок `void_nugget` (9 из слитка и обратно, тег `c:nuggets/void`), неактивный колпачок (`NNN/N N`, perditio 27 + ordo 27 + ignis 18 + aer 18), заряд инфузией (4 Salis Mundus, нестабильность 8, по 18 potentia / vacuos / alienis / auram),
+колпачок Void как материал жезла (множитель 0,8, цена 9; жезл с ним платит на пятую часть меньше), 360 составных моделей жезла.
+**Built / game-tested:** `:common:test` **465 JUnit** (+3 `VoidCapTest`), `:fabric:remapJar`, `:fabric:runGameTest` **164/164** (+`voidMetalAndTheVoidCapBrewCraftAndDiscount`; расширен тест очков `gogglesCraftProtectAndReduceVis` на четвёртый колпачок), JAR SHA-256 `5184292e…ea7a`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `void-cap` (20): JUnit 7/7 локально, 13 GameTest у GitHub. `staff-rods` (36) у GitHub ещё в очереди на момент записи (JUnit 19/19 локально).
+**Seen:** нет. **Не проверено:** вид колпачка/значка, настоящий тигель с этими рецептами, алтарь с зарядом, сеть/два игрока, NeoForge.
+**Следующее:** доспехи и инструменты из Void metal (`VoidHelm…VoidSword`, исследование `VOIDMETAL`), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально20.10 (пятнадцатая группа: стержни-посохи, Claude): реализовано, собрано, game-tested 163/163
+
+Контракт и реализация: [staff-rods](analysis/2026-10-20-staff-rods.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** девять ядер посоха (greatwood 125/8, obsidian/blaze/ice/quartz/bone/reed 175/14 со своим первичным, silverwood 250/24, primal 250/32), предметы `staff_rod_*`, восемь арканных рецептов и инфузия Primal (нестабильность 8, 32 каждого первичного + 64 praecantatio), `WandRodPassive` для Primal (каждые 50 тиков +1 вис случайному первичному ниже десятой части),
+посох как оружие (+6 урона нативным компонентом `attribute_modifiers`, удар 7), запрет посоха в слоте/тайле/меню арканного верстака и при превращении стола (`ArcaneVis.isWorkbenchWand`), название по обычному стержню с существительным «посох»; предел вис компонента 25000, предел цены сборки 288;
+селектор моделей жезла делит значение стержня на 32 (270 переопределений, 135 новых составных моделей, `staff_shape`/`staff_focus_shape`).
+**Built / game-tested:** `:common:test` **462 JUnit** (+5), `:fabric:remapJar`, `:fabric:runGameTest` **163/163** (+`staffRodsBrewAssembleStrikeAndRefill`: рецепты, сборка и сохранение, слот верстака, настоящий игрок — 7 урона по свинье, подзарядка обсидианового и Primal-посоха), JAR SHA-256 `52607405…97ae`; пять подряд прогонов GameTest зелёные; три команды шага CI с ресурсами (`record_verification --begin-run`, `convert_assets.py --verify`, `unittest discover scripts/porting` — 76 тестов) тоже зелёные.
+**Исправление красной сборки предыдущего коммита:** кожи стержней жезла и сундука плейсера не были в атласе — добавлены (подробности в [wand-rods](analysis/2026-10-19-wand-rods.md)).
+**Мутации:** `staff-rods` (36): JUnit 19/19 локально; 17 GameTest у GitHub.
+**Seen:** нет. **Не проверено:** вид посоха/значка/позы в руке (размеры взяты из `ModelWand`, а не со снимка), руны и свечение, ритуал Primal (нужен ещё не портированный `FOCUSPRIMAL`), сеть/два игрока, NeoForge.
+**Следующее:** колпачок void (нужны void-нуггет и крафт из `ConfigRecipes`), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально19.10 (четырнадцатая группа: элементные стержни жезлов и выбор модели жезла, Claude): реализовано, собрано, game-tested 162/162
+
+Контракт и реализация: [wand-rods](analysis/2026-10-19-wand-rods.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** шесть стержней obsidian / blaze / ice / quartz / bone / reed (ёмкость 75, цена 6, свой первичный аспект), `WandRodPassive` + `ItemWandCasting.inventoryTick` (каждые 200 тиков игрока +1 вис своего аспекта, если запас меньше десятой части ёмкости), шесть предметов и инфузионных рецептов `ROD_*`,
+`WandModels` и `scripts/porting/gen_wand_models.py` (135 переопределений `wand.json` — раньше любой жезл рисовался одной иконкой без фокуса; 90 новых составных моделей), модель `trunk_spawner` как коробки сундука.
+**Built / game-tested:** `:common:test` **457 JUnit** (+10: `WandRodPassiveTest` 5, `WandModelAssetsTest` 4, `TrunkSpawnerModelTest` 1), `:fabric:remapJar`, `:fabric:runGameTest` **162/162** (+`elementalWandRodsBrewAssembleAndRefillTheirOwnPrimal`: рецепты, сборка жезлов, настоящий игрок и подзарядка на 200-м тике; в тест дротика добавлена дорожка TOO-CLOSE), JAR SHA-256 `a10da880…0109`.
+**Находка про стабильность тестов:** до правки голем-GameTest падали в 7 из 12 прогонов (Fetter, радиус очков Decorations, Entropy item-match, урон дротика). Причина в тесте, а не в големе: `EntityGolemBase.loadedNavigationArea` требует загруженные чанки на 48 блоков вокруг, а GameTest стоит в случайном месте мира — если стенд пересекает границу чанка, кольцо за квадратом 3×3 не загружено, голем стоит.
+Теперь `GolemChunks.hold` (common/src/gameTest) загружает и держит это кольцо; проверка радиуса очков вынесена на 5 тиков позже (сущности только что загруженного чанка не видны миру сразу); после правки — 12 зелёных прогонов из 12. Новым голем-тестам с дальними целями нужен `GolemChunks.hold`.
+**Мутации:** `wand-rods` (24; JUnit 17/17 локально; 7 GameTest запрошены у GitHub). GitHub по прошлым группам: дротик — 39 пойманы, 2 ожидаемо выжили, 1 неожиданный (`too-close-still-shoots`, цель ближе трёх блоков) → добавлена дорожка TOO-CLOSE, мутант пойман локально; горящий улов — без неожиданностей.
+**Seen:** нет. **Не проверено:** вид составных моделей жезла и иконок, свечение блейз-стержня, модель плейсера сундука, полный алтарный ритуал с новыми рецептами, сеть/два игрока, NeoForge.
+**Следующее:** стержни-посохи (`STAFF_ROD_*`, `isStaff`), колпачок void, затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально19.10 (тринадцатая группа: горящий улов Fire-голема Fishing, Claude): реализовано, собрано, game-tested 161/161
+
+Контракт и реализация: [golem-fishing-burn](analysis/2026-10-19-golem-fishing-burn.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemFishingSmelting.burningTicks` (40 тиков при Fire), `Catch.fireTicks` в `FishingGolemGoals` (решение при вылове, необязательный ключ `Fire` в NBT неопубликованного улова), поле `fireTicks` записи очереди `DeferredItemDrops.Pending` (необязательный ключ `Fire`, границы 0..600, только рыбацкая запись, карантин для невозможных), `ItemEntity.setRemainingFireTicks` при выбросе.
+**Built / game-tested:** `:common:test` **447 JUnit**, `:fabric:remapJar`, `:fabric:runGameTest` **161/161** (+`fireGolemCatchesAreDeliveredAlightForTwoSeconds`; дополнены `fireUpgradeCooksTheFishingGolemsCatch` и живой `realFishingGolemsCastIntoPondsAndDeliverCooksAndExtraCatches`: улов Fire-голема горит, остальных — нет), JAR SHA-256 `0064e584…804abe`.
+**Мутации:** 11 у GitHub; ожидаемый выживший — сохранение неопубликованного улова с огнём.
+**Seen:** нет. **Не проверено:** вид огня, гашение в воде, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** остаток M10 (оригинальный рендер предмета-плейсера сундука `ItemTrunkSpawnerRenderer`, Butcher с дротиком), затем M01 R10–R16, M03/M08, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально19.10 (двенадцатая группа: дротикомёт голема `R`, Claude): реализовано, собрано, game-tested 160/160
+
+Контракт и реализация: [golem-dart](analysis/2026-10-19-golem-dart.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemDartRules`, `EntityDart` (родная стрела, сущность `thaumcraft:dart`), цель `Dart` в `GuardGolemGoals` (приоритет 2, только при `R`), `EntityGolemBase.shootDart` и левая рука (`LEFT_ARM`), перестройка целей при установке `R`, предмет `golem_decoration_dart` с аркан-рецептом, `RenderDart`, lang en/ru, подсказки Air/Water.
+**Built / game-tested:** `:common:test` **447 JUnit** (+10: `GolemDartRulesTest` 7, `GolemDartAssetsTest` 3), `:fabric:remapJar`, `:fabric:runGameTest` **160/160** (+`golemDartLauncherShootsAtItsIntervalAndHurtsWhatItHits`: пять настоящих големов на дорожках), JAR SHA-256 `391e9031…faa8`.
+**Находки:** сервер падал бы при сохранении мира с летящим дротиком (`AbstractArrow` с пустым стеком) — исправлено; Guard берёт БЛИЖАЙШУЮ цель, поэтому дорожки GameTest нужно разносить; широкая область очистки ломает соседний тест (Fetter).
+**Мутации:** 42 (19 JUnit + 23 GameTest) запрошены у GitHub; ожидаемые выжившие — `shoots-without-sight`, `spread-ignores-water`.
+**Seen:** нет. **Не проверено:** вид дротика и позы руки, Butcher с дротиком, стрельба через препятствия, статистика разброса, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** горящий предмет улова (`EntityItem.setFire(2)` при Fire; нужен `fireTicks` в `DeferredItemDrops.Pending`), затем M01 R10–R16, M03/M08, M07 enchant-инфузия, Thaumatorium.
+
+### Актуально19.10 (одиннадцатая группа: Traveling Trunk, Claude): реализовано, собрано, game-tested 159/159
+
+Контракт и реализация: [traveling-trunk](analysis/2026-10-19-traveling-trunk.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `TrunkRules`, `EntityTravelingTrunk` (прыжки за владельцем, телепорт, защита Fire, втягивание Entropy, лечение, смерть, колокольчик с Order, переход в измерение владельца), `InventoryTrunk`, `ContainerTravelingTrunk`, `ItemTrunkSpawner`, рецепт `traveling_trunk`;
+клиент — `ModelTrunk`, `RenderTravelingTrunk` (масштаб/крышка по формулам оригинала, злая текстура, значок улучшения), `GuiTravelingTrunk`.
+**Built / game-tested:** `:common:test` **437 JUnit** (+13 с записи Liquid, 424: 3 `GolemFetterAssetsTest`, 6 `TrunkRulesTest`, 4 `TravelingTrunkClientAssetsTest`), `:fabric:remapJar`, `:fabric:runGameTest` **159/159**, JAR SHA-256 `e58263e8…450d1`.
+**Мутации:** 32 у GitHub (`mutation.yml`): 31 поймана, выжил `the-pull-reaches-far` (предмет за радиусом проверялся слишком рано) — тест усилен, локально пойман.
+**CI:** найден и исправлен хрупкий реальный лимит 10 с у `frostFocusCraftsSelectsAndPays` и `shockFocus…` (теперь 60 с, тиковый предел прежний) — на раннере GitHub тест давал 10,02 с.
+**Seen:** нет. **Не проверено:** вид модели/значка/экрана, переход вслед за владельцем в другое измерение (в GameTest не исполняется), сеть/два игрока, save/reload мира, NeoForge. Плейсер `trunk_spawner` пока с плоской моделью.
+**Следующее:** дротик `R` (`AIDartAttack`, снаряд, рендер), горящий предмет улова.
+
+### Актуально19.10 (десятая группа: Golem Fetter, Claude): реализовано, собрано, game-tested 157/157
+
+Контракт и реализация: [golem-fetter](analysis/2026-10-19-golem-fetter.md).
+**Implemented:** блок `golem_fetter` со свойством `active` (вместо метаданных 9/10), `BlockGolemFetter.neighborChanged` по редстоуну (как оригинал — только при смене соседа), `holds()` под ногами голема, `EntityGolemBase.fettered` → `isImmobile()` и `canWork()`, поза `setInactive`, рецепт `SSS/IRI/BBB`, лут, lang.
+**Built / game-tested:** `:common:test` **427 JUnit** (+3 `GolemFetterAssetsTest`), `:fabric:runGameTest` **157/157** (+`golemFetterHoldsGolemsWhileItsRedstoneSignalLasts`: три настоящих Fill-голема).
+**Мутации:** 16 у GitHub, пойманы 13; три выживших объяснены (клиентская охрана; `isImmobile` и `canWork` перекрываются).
+**Seen:** нет. **Не проверено:** поза неактивного голема на экране, сложные редстоун-схемы, сеть/два игрока, save/reload мира, NeoForge.
+
+### Актуально19.10 (девятая группа: очередь Liquid у Entropy, Claude): реализовано, собрано, game-tested 156/156
+
+Контракт и реализация: [golem-liquid-queue](analysis/2026-10-19-golem-liquid-queue.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemLiquidQueue` (обход в глубину по 26 соседям, дальние первыми, маркер последним), якорь добычи в `EntityGolemBase`/`LiquidGolemGoals`, перепроверка записей, предел 65536.
+**Built / game-tested:** `:common:test` **424 JUnit** (+10), `:fabric:remapJar`, `:fabric:runGameTest` **156/156** (+`entropyQueuesTheFarthestConnectedWaterForLiquidGolems`: три настоящих голема с тиглями), JAR SHA-256 `cef678ad…c892c`.
+**Мутации:** 19, пойманы 14; пять не пойманы — дублирующие защитные слои (см. контракт).
+**CI на GitHub:** обычная проверка (`build.yml`) уже идёт на каждый пуш; в ней почти всегда красен старый `frostFocusCraftsSelectsAndPays` (жёсткий лимит 10 с реального времени на медленном раннере, чинится отдельно).
+Мутационный workflow `mutation.yml` (скрипт `scripts/mutation/mutate.py`, группы `scripts/mutation/groups/*.json`) запускается пушем файла-заявки `scripts/mutation/run-request.txt` или вручную; пробный запуск на двух мутантах зелёный.
+**Seen:** нет. **Не проверено:** вид откачки, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** дротик `R`, горящий предмет улова, Traveling Trunk.
+
+### Актуально19.10 (восьмая группа: нечёткое сравнение предметов Entropy, Claude): реализовано, собрано, game-tested 155/155
+
+Контракт и реализация: [golem-item-match](analysis/2026-10-19-golem-item-match.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemItemMatch` (теги / без урона / без компонентов), `GolemData.itemMatch` (JSON `item_match`, сеть: бит 0x40 + байт, NBT `ItemMatch`), нечёткие поиск/счёт склада и пробы Fill/Empty/Sorting,
+расширение Empty/Use по тегам одним Entropy, цвета слотов, кнопки меню 55–57 и три флажка `GuiGolem`, lang en/ru.
+**Built / game-tested:** `:common:test` **414 JUnit** (+11), `:fabric:remapJar`, `:fabric:runGameTest` **155/155** (+`entropySwitchesChangeWhatRealGolemsFetchEmptyAndSort`: десять настоящих големов в пяти парах), JAR SHA-256 `811a950b…eb55c`.
+**Мутации:** 41, пойманы 37; не пойманы два эквивалентных, строгая проба `fillTick` (перезапуск маршрута) и ядро Use (нет игрового стенда — подключено, не проверено).
+**Уроки:** GameTest с настоящими тегами поймал правило групп `c:tools/pickaxe` (JUnit не видит тегов); соседний GameTest стирает блоки вокруг своей структуры — линии стоят этажами на одном пятачке.
+**Seen:** нет. **Не проверено:** флажки/подписи GUI, Use в игре, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** очередь Liquid у Entropy, дротик `R`, горящий предмет улова, Traveling Trunk.
+
+### Актуально19.10 (седьмая группа: аксессуары голема, Claude): реализовано, собрано, game-tested 154/154
+
+Контракт и реализация: [golem-decorations](analysis/2026-10-19-golem-decorations.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `GolemDecorations` (чистые правила), `GolemData.decoration` (JSON/сеть: бит 0x20 + строка/NBT), семь предметов `golem_decoration_*` и аркан-рецептов, установка ПКМ, эффекты (здоровье, броня, скорость, урон, радиус, ремонт, пометка опыта у забрала),
+NBT `Decoration`, подсказка плейсера, сохранение при обычной отдаче колокольчиком (приседающая разборка теряет), псевдонимы книги `Tiny*`, иконки, lang en/ru, запись `lastHurtByPlayerTime` в accesswidener.
+**Built / game-tested:** `:common:test` **403 JUnit** (+10 `GolemDecorationsTest`), `:fabric:remapJar`, `:fabric:runGameTest` **154/154** (+`golemAccessoriesInstallChangeStatsAndSurviveTheBell`), JAR SHA-256 `9668a7c3…1fc40`.
+Асинхронные дорожки: настоящий Guard с забралом убил паука — 5 опыта (без забрала 0); ремонт феской 50 тиков против 76.
+**Мутации:** 25 по одной, все ловятся (11 чистых правил — JUnit; 14 проводок — GameTest/JUnit). Урок: скрипт читал только исключения синхронных тестов и «пропустил» две асинхронные мутации; после правки диагностики обе ловятся.
+**Seen:** нет. **Не проверено:** модель/накладки на голема, значок плейсера, дротик `R` (не перенесён), сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** нечёткое сравнение предметов Entropy ([контракт](analysis/2026-10-19-golem-item-match.md)), очередь Liquid, дротик `R`, Traveling Trunk.
+
+### Актуально19.10 (шестая группа: продвинутый голем, Claude): реализовано, собрано, game-tested 153/153
+
+Контракт и реализация: [golem-advanced](analysis/2026-10-19-golem-advanced.md); аудит и независимая проверка сборки в контейнере: [full-project-audit](analysis/2026-10-19-full-project-audit.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`, не публиковалось.
+**Implemented:** `GolemData.advanced` (JSON/NBT/сеть: бит 0x10 последнего байта), слот улучшений `материал + 1`, скорость ×1,1 после Air, радиус `+max(20 %, 2)`, атака 18 тиков, подсказка `tc.adv`, колокольчик сохраняет флаг даже в голом плейсере,
+`InfusionResultPatches` + `result_patch` рецепта (центр копируется и патчится), рецепт `infusion/golem_advanced`, псевдоним книги `AdvancedGolem`, иконка исследования `ag`.
+**Built / game-tested:** `:common:test` 393 JUnit (+8 `GolemAdvancedTest`, +1 `CrystalLootTableTest` до этого), `:fabric:remapJar`, `:fabric:runGameTest` **153/153** (+`advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag`, +`crystalBlocksDropSixOwnShards`); JAR SHA-256 `769b2d4b…60c3`.
+Исправлены два устаревших теста: `rawRecipeWire` (маркер патча) и `GolemGuardTargetsTest` (бит 16 — флаг advanced, повреждены только старшие биты).
+**Мутации (по одной, затем побайтное восстановление, sha256 сверен):** слоты, скорость, радиус, задержка атаки, NBT-сохранение, голый плейсер при разборке, патч центра, ёмкость плейсера — ловятся GameTest-ом (и частью JUnit); бит в проводе — JUnit; избыточная проверка `canApply` в `matches` вначале **не ловилась** (ингредиент уже ограничивает центр), после добавления прямого теста с «свободным» ингредиентом — ловится.
+**Seen:** нет. **Не проверено:** значок плейсера/вид голема, полный ритуал алтаря с этим рецептом, сеть/два игрока, save/reload мира, NeoForge.
+**Следующее:** декорации ([контракт](analysis/2026-10-19-golem-decorations.md): H G B F V P M сразу, дротик R вместе с `AIDartAttack`), затем остаток Entropy и Traveling Trunk.
+
 ### Актуально19.10 (пятая группа: переключатели целей Guard (Order), улов Fishing (Order/Entropy/Air), Claude): реализовано, собрано, game-tested 151/151
 
 Реализация, отклонения, мутации и точные формулировки: раздел «Пятая группа» в [golem-upgrades-implementation](analysis/2026-10-19-golem-upgrades-implementation.md); контракт — [§5a](analysis/2026-10-19-golem-upgrades.md). Ничего не закоммичено и не опубликовано; только Fabric/common, NeoForge не запускался.

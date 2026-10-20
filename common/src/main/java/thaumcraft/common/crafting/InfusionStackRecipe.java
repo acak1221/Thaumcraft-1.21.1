@@ -30,13 +30,15 @@ import thaumcraft.common.lib.crafting.InfusionMatching;
  * no component/NBT equality; only declared damage/water-potion/empty-jar
  * requirements are checked. Central input damage applies at admission, never
  * to running-ritual retention.
- * General legacy NBT predicates, metadata wildcards, tag-patch outputs and
- * enchantment recipes are NOT represented or registered by this serializer.
+ * A recipe may name a {@link InfusionResultPatches result patch}: its output is then the actual central item patched
+ * (original {@code Object[]{key, tag}} results, e.g. ADVANCEDGOLEM) and {@code result} is only the sample shown in the book.
+ * General legacy NBT predicates, metadata wildcards and enchantment recipes are NOT represented or registered by
+ * this serializer.
  */
 public record InfusionStackRecipe(String research, Ingredient input, List<Ingredient> components,
                                   Map<String, Integer> aspects, int instability, ItemStack result,
                                   List<InfusionComponentPredicate.Declaration> componentPredicates,
-                                  Optional<Integer> inputDamage)
+                                  Optional<Integer> inputDamage, Optional<String> resultPatch)
         implements Recipe<InfusionRecipeInput> {
     private static final Codec<String> ASPECT = Codec.STRING.comapFlatMap(tag -> Aspect.getAspect(tag) == null
             ? DataResult.error(() -> "Unknown infusion aspect: " + tag) : DataResult.success(tag), tag -> tag);
@@ -50,7 +52,8 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
             ItemStack.STRICT_CODEC.fieldOf("result").forGetter(InfusionStackRecipe::result),
             InfusionComponentPredicate.Declaration.CODEC.listOf(0, InfusionComponentPredicate.MAX_COMPONENTS)
                     .optionalFieldOf("component_predicates", List.of()).forGetter(InfusionStackRecipe::componentPredicates),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("input_damage").forGetter(InfusionStackRecipe::inputDamage)
+            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("input_damage").forGetter(InfusionStackRecipe::inputDamage),
+            Codec.STRING.optionalFieldOf("result_patch").forGetter(InfusionStackRecipe::resultPatch)
     ).apply(instance, InfusionStackRecipe::new)).flatXmap(InfusionStackRecipe::validate, InfusionStackRecipe::validate);
     public static final Serializer SERIALIZER = new Serializer();
 
@@ -72,6 +75,13 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
         this(research, input, components, aspects, instability, result, componentPredicates, Optional.empty());
     }
 
+    public InfusionStackRecipe(String research, Ingredient input, List<Ingredient> components,
+                               Map<String, Integer> aspects, int instability, ItemStack result,
+                               List<InfusionComponentPredicate.Declaration> componentPredicates,
+                               Optional<Integer> inputDamage) {
+        this(research, input, components, aspects, instability, result, componentPredicates, inputDamage, Optional.empty());
+    }
+
     private DataResult<InfusionStackRecipe> validate() {
         if (input.isEmpty() || components.isEmpty() || components.size() > InfusionComponentPredicate.MAX_COMPONENTS
                 || components.stream().anyMatch(Ingredient::isEmpty)
@@ -79,6 +89,9 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
                 || aspects.entrySet().stream().anyMatch(entry -> Aspect.getAspect(entry.getKey()) == null || entry.getValue() <= 0)
                 || aspects.values().stream().mapToLong(Integer::longValue).sum() > Integer.MAX_VALUE) {
             return DataResult.error(() -> "Infusion requires a central input, components, result, valid aspect cost and instability 0..24");
+        }
+        if (resultPatch.isPresent() && !InfusionResultPatches.known(resultPatch.get())) {
+            return DataResult.error(() -> "Unknown infusion result patch: " + resultPatch.get());
         }
         return InfusionComponentPredicate.validateDeclarations(components, componentPredicates).flatMap(checked -> {
             if (inputDamage.isEmpty()) return DataResult.success(this);
@@ -90,6 +103,8 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
 
     @Override public boolean matches(InfusionRecipeInput offered, Level level) {
         if (!InfusionMatching.matches(input, inputDamage, offered.central()) || offered.components().size() != components.size()) return false;
+        // A patch recipe is only craftable when its patch can be applied to this very centre.
+        if (resultPatch.isPresent() && !InfusionResultPatches.canApply(resultPatch.get(), offered.central())) return false;
         // Original InfusionRecipe:51-70: remove the first match, not a sorted or
         // count-flattened inventory. One occupied pedestal supplies one component.
         List<ItemStack> remaining = new ArrayList<>(offered.components());
@@ -130,8 +145,16 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
     }
 
     public ItemStack result() { return result.copy(); }
-    @Override public ItemStack assemble(InfusionRecipeInput offered, HolderLookup.Provider registries) { return result.copy(); }
-    @Override public ItemStack getResultItem(HolderLookup.Provider registries) { return result.copy(); }
+    /** The fixed result, or the centre with the recipe's patch applied (empty when it cannot be applied). */
+    @Override public ItemStack assemble(InfusionRecipeInput offered, HolderLookup.Provider registries) {
+        return resultPatch.isPresent() ? InfusionResultPatches.apply(resultPatch.get(), offered.central()) : result.copy();
+    }
+    /** What the book and tooltips show: the sample result, patched when the recipe patches its centre. */
+    @Override public ItemStack getResultItem(HolderLookup.Provider registries) {
+        if (resultPatch.isEmpty()) return result.copy();
+        ItemStack shown = InfusionResultPatches.apply(resultPatch.get(), result);
+        return shown.isEmpty() ? result.copy() : shown;
+    }
     @Override public boolean canCraftInDimensions(int width, int height) { return false; }
     @Override public NonNullList<Ingredient> getIngredients() {
         NonNullList<Ingredient> ingredients = NonNullList.create();
@@ -167,6 +190,8 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
             }
             buffer.writeBoolean(recipe.inputDamage.isPresent());
             recipe.inputDamage.ifPresent(buffer::writeVarInt);
+            buffer.writeBoolean(recipe.resultPatch.isPresent());
+            recipe.resultPatch.ifPresent(buffer::writeUtf);
         }
 
         private static InfusionStackRecipe decode(RegistryFriendlyByteBuf buffer) {
@@ -192,7 +217,8 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
                         buffer.readBoolean(), buffer.readBoolean()));
             }
             Optional<Integer> inputDamage = buffer.readBoolean() ? Optional.of(buffer.readVarInt()) : Optional.empty();
-            var recipe = new InfusionStackRecipe(research, input, components, aspects, instability, result, predicates, inputDamage);
+            Optional<String> resultPatch = buffer.readBoolean() ? Optional.of(buffer.readUtf()) : Optional.empty();
+            var recipe = new InfusionStackRecipe(research, input, components, aspects, instability, result, predicates, inputDamage, resultPatch);
             return recipe.validate().getOrThrow();
         }
 

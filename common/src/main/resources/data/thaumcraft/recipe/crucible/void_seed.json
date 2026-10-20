@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "VOIDMETAL",
+  "source_order": 10,
+  "catalyst": {"item": "minecraft:wheat_seeds"},
+  "result": {"id": "thaumcraft:void_seed", "count": 1},
+  "aspects": {"tenebrae": 8, "vacuos": 8, "alienis": 2}
+}

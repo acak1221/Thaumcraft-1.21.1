@@ -63,7 +63,7 @@ public final class BlockArcaneWorkbench extends BaseEntityBlock {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         ItemStack held = context.getItemInHand();
-        if (player == null || player.isSpectator() || !ArcaneVis.isCraftingWand(held) || !level.hasChunkAt(pos)) return InteractionResult.PASS;
+        if (player == null || player.isSpectator() || !ArcaneVis.isWorkbenchWand(held) || !level.hasChunkAt(pos)) return InteractionResult.PASS;
         BlockState before = level.getBlockState(pos);
         // Source BlockTable:224-238 permits exactly metadata 0/1. Do not convert
         // a research main, a secondary/double-table half, or any foreign BE.

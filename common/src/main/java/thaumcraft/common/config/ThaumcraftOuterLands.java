@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.lib.world.DungeonRooms;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.lib.world.OuterLandsProvider;
 
 /**
@@ -40,9 +41,11 @@ import thaumcraft.common.lib.world.OuterLandsProvider;
  *   <li>{@code thaumcraft:eldritch} - the eldritch block with an integer "variant" property that
  *       accepts the original 1.7 metadata 0..10 (0 altar, 1 obelisk base, 2 obelisk shaft,
  *       3 cap, 4 decoration, 5 library desk, 7 door, 8 door lock, 9 crab spawner, 10 trap).</li>
- *   <li>{@code thaumcraft:cosmetic_solid} - the cosmetic solid with an integer "variant" property
- *       that accepts the original metadata 0..15 (1 ring floor, 11 wall, 12 rock, 13 no spawn,
- *       14 crust, 15 table).</li>
+ *   <li>{@code thaumcraft:cosmetic_solid}, {@code thaumcraft:cosmetic_solid_tough} and
+ *       {@code thaumcraft:cosmetic_solid_thaumium} - the cosmetic solid with an integer "variant"
+ *       property that accepts the original metadata 0..15 (1 ring floor, 11 wall, 12 rock, 13 no
+ *       spawn, 14 crust, 15 table). The metadata that differ in hardness became separate blocks, so
+ *       the original metadata decides the block.</li>
  *   <li>{@code thaumcraft:stairs_eldritch} - the eldritch stairs with a "facing" and a "half"
  *       property that reproduce the 1.7 stair metadata.</li>
  *   <li>{@code thaumcraft:eldritch_nothing}, {@code thaumcraft:airy},
@@ -93,8 +96,30 @@ public final class ThaumcraftOuterLands {
         return block("eldritch");
     }
 
-    public static Block cosmeticSolid() {
-        return block("cosmetic_solid");
+    /**
+     * The cosmetic solid block of the hardness group that hosts the original metadata.
+     *
+     * <p>The original metadata that differ in hardness became separate blocks of the same class
+     * (the oracle BlockCosmeticSolid:213-225 and :241-253), so the metadata decides the block.
+     */
+    public static Block cosmeticSolid(int variant) {
+        return block(cosmeticSolidId(EldritchBlockRules.cosmeticGroup(variant)));
+    }
+
+    /** The block id of a cosmetic hardness group. */
+    public static String cosmeticSolidId(int group) {
+        if (group == 1) return "cosmetic_solid_tough";
+        if (group == 2) return "cosmetic_solid_thaumium";
+        return "cosmetic_solid";
+    }
+
+    /** True when the state is one of the three blocks of the cosmetic solid family. */
+    public static boolean isCosmeticSolid(BlockState state) {
+        for (int group = 0; group < 3; group++) {
+            Block block = block(cosmeticSolidId(group));
+            if (block != null && state.is(block)) return true;
+        }
+        return false;
     }
 
     /**
@@ -167,7 +192,7 @@ public final class ThaumcraftOuterLands {
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case COSMETIC_SOLID -> {
-                Block block = cosmeticSolid();
+                Block block = cosmeticSolid(variant);
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case ELDRITCH -> {

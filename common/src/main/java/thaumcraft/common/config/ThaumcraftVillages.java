@@ -63,8 +63,8 @@ public final class ThaumcraftVillages {
 
     /** The eldritch stone family of the Outer Lands unit. */
     private static final ResourceLocation ELDRITCH = ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "eldritch");
-    /** The cosmetic solid family of the Outer Lands unit. */
-    private static final ResourceLocation COSMETIC_SOLID = ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "cosmetic_solid");
+    /** The cosmetic solid family of the Outer Lands unit; the metadata zero and one are the tough group. */
+    private static final ResourceLocation COSMETIC_SOLID = ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "cosmetic_solid_tough");
 
     private ThaumcraftVillages() {}
 

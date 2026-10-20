@@ -329,9 +329,8 @@ public final class OuterLandsProvider {
         @Override public boolean isCosmeticSolidOrStair(int x, int y, int z) {
             if (!inside(x, z)) return false;
             BlockState state = level.getBlockState(new BlockPos(x, y, z));
-            Block cosmetic = ThaumcraftOuterLands.cosmeticSolid();
             Block stairs = ThaumcraftOuterLands.stairsEldritch();
-            return (cosmetic != null && state.is(cosmetic)) || (stairs != null && state.is(stairs));
+            return ThaumcraftOuterLands.isCosmeticSolid(state) || (stairs != null && state.is(stairs));
         }
     }
 

@@ -1,6 +1,9 @@
 package thaumcraft.common.blocks;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -18,18 +21,39 @@ import thaumcraft.common.tiles.TileWardingStone;
  * Original BlockCosmeticSolid: the sixteen decorative stones of the Outer Lands.
  *
  * <p>The original is ONE block with sixteen metadata values; the metadata became the
- * {@link #VARIANT} block state. The two metadata values that carry a block entity, the warding
- * stone and the node, keep it.
+ * {@link #VARIANT} block state. Minecraft 1.21.1 binds the hardness and the blast resistance to
+ * the block and not to the block state, so the metadata that differ in hardness (the oracle
+ * BlockCosmeticSolid:213-225 and :241-253) became separate blocks of this class; every one of them
+ * hosts the metadata of its own hardness group. The two metadata values that carry a block entity,
+ * the warding stone and the node, keep it.
  */
 public final class BlockCosmeticSolid extends BaseEntityBlock {
-    public static final MapCodec<BlockCosmeticSolid> CODEC = simpleCodec(BlockCosmeticSolid::new);
+    public static final MapCodec<BlockCosmeticSolid> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.intRange(0, 2).fieldOf("group").forGetter(BlockCosmeticSolid::group),
+            propertiesCodec()).apply(instance, BlockCosmeticSolid::new));
     /** Original BlockCosmeticSolid metadata 0..15. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
 
-    public BlockCosmeticSolid(Properties properties) {
+    private final List<Integer> variants;
+    private final int group;
+
+    /** The hardness and the blast resistance belong to the block in 1.21.1. */
+    public BlockCosmeticSolid(int group, Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(VARIANT, 0));
+        this.group = group;
+        this.variants = EldritchBlockRules.cosmeticGroupVariants(group);
+        if (this.variants.isEmpty()) throw new IllegalArgumentException("Unknown original cosmetic hardness group " + group);
+        registerDefaultState(stateDefinition.any().setValue(VARIANT, this.variants.get(0)));
     }
+
+    /** The hardness group of this block. */
+    public int group() { return group; }
+
+    /** The original metadata values that this block hosts. */
+    public List<Integer> variants() { return variants; }
+
+    /** True when the block hosts the original metadata. */
+    public boolean allows(int variant) { return variants.contains(variant); }
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }

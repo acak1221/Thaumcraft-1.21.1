@@ -1,31 +1,13 @@
 {
   "variants": {
-    "variant=0": {
-      "model": "thaumcraft:block/cosmetic_solid_0"
-    },
-    "variant=1": {
-      "model": "thaumcraft:block/cosmetic_solid_1"
-    },
     "variant=2": {
       "model": "thaumcraft:block/cosmetic_solid_2"
     },
     "variant=3": {
       "model": "thaumcraft:block/cosmetic_solid_3"
     },
-    "variant=4": {
-      "model": "thaumcraft:block/cosmetic_solid_4"
-    },
     "variant=5": {
       "model": "thaumcraft:block/cosmetic_solid_5"
-    },
-    "variant=6": {
-      "model": "thaumcraft:block/cosmetic_solid_6"
-    },
-    "variant=7": {
-      "model": "thaumcraft:block/cosmetic_solid_7"
-    },
-    "variant=8": {
-      "model": "thaumcraft:block/cosmetic_solid_8"
     },
     "variant=9": {
       "model": "thaumcraft:block/cosmetic_solid_9"

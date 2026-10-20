@@ -13,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import net.minecraft.world.item.Item;
@@ -203,17 +204,20 @@ class EldritchAndDeviceAssetsTest {
         }
     }
 
-    @Test void theCosmeticSolidKnowsEveryOriginalMetadataOfTheFamily() throws Exception {
-        JsonObject variants = ResourceTree.object(ASSETS + "blockstates/cosmetic_solid.json").getAsJsonObject("variants");
-        assertEquals(16, variants.size(), "the cosmetic solid is ONE block with the sixteen original metadata values");
-        for (int variant = 0; variant <= 15; variant++) {
-            assertTrue(variants.has("variant=" + variant), "the cosmetic solid misses variant=" + variant);
+    @Test void theCosmeticSolidFamilyKnowsTheOriginalMetadataOfItsGroup() throws Exception {
+        // BlockCosmeticSolid:213-225 and :241-253 - the hardness groups of the oracle.
+        Map<String, List<String>> expected = Map.of(
+                "cosmetic_solid", List.of("variant=2", "variant=3", "variant=5", "variant=9", "variant=10",
+                        "variant=11", "variant=12", "variant=13", "variant=14", "variant=15"),
+                "cosmetic_solid_tough", List.of("variant=0", "variant=1", "variant=8"),
+                "cosmetic_solid_thaumium", List.of("variant=4", "variant=6", "variant=7"));
+        for (var group : expected.entrySet()) {
+            JsonObject variants = ResourceTree.object(ASSETS + "blockstates/" + group.getKey() + ".json").getAsJsonObject("variants");
+            assertEquals(group.getValue().size(), variants.size(), group.getKey() + " covers the original metadata of its group");
+            for (String variant : group.getValue()) assertTrue(variants.has(variant), group.getKey() + " misses " + variant);
         }
         JsonObject opaque = ResourceTree.object(ASSETS + "blockstates/cosmetic_opaque.json").getAsJsonObject("variants");
         assertEquals(3, opaque.size(), "the cosmetic opaque is ONE block with its three original metadata values");
-        for (int variant = 0; variant <= 2; variant++) {
-            assertTrue(opaque.has("variant=" + variant), "the cosmetic opaque misses variant=" + variant);
-        }
     }
 
     @Test void theAiryFamilyKnowsTheOriginalMetadataOfItsGroup() throws Exception {

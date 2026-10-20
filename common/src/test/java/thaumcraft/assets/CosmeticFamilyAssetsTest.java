@@ -10,24 +10,32 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * The TC4 cosmetic block families: ONE block per original family, the original 1.7.10 metadata as
- * the {@code variant} block state.
+ * The TC4 cosmetic block families: the original metadata of the cosmetic solid became the
+ * {@code variant} block state of the hardness groups of the oracle.
  *
- * <p>The original BlockCosmeticSolid is one block with sixteen metadata values and the original
- * BlockCosmeticOpaque is one block with three. Three original recipes produce a single metadata
- * value, so each of them gets an item that places the block with that variant, because a 1.21.1
- * recipe result cannot carry a block state. This test locks that mapping: the texture of every
- * metadata, the loot table of the family blocks and the names of the variant items.</p>
+ * <p>Minecraft 1.21.1 binds the hardness and the blast resistance to the block and not to the block
+ * state, so the original BlockCosmeticSolid became three blocks: the ordinary stones, the obsidian
+ * totem group and the thaumium group. The cosmetic opaque stays ONE block with its three metadata.
+ * Three original recipes produce a single metadata value, so each of them gets an item that places
+ * the block with that variant, because a 1.21.1 recipe result cannot carry a block state. This test
+ * locks that mapping: the texture of every metadata, the loot table of every group block and the
+ * names of the variant items.</p>
  */
 class CosmeticFamilyAssetsTest {
-    /** The block ids of the per metadata wave that the family design replaced. */
+    /** The block ids of the per metadata wave that the hardness group design replaced. */
     private static final List<String> OLD_BLOCK_IDS = List.of("obsidian_tile", "obsidian_totem_base",
             "eldritch_stone", "infused_stone_pillar", "cosmetic_stone_slab", "cosmetic_wood_slab");
 
-    /** The block ids of the family design. */
-    private static final List<String> NEW_IDS = List.of("cosmetic_solid", "cosmetic_opaque",
-            "cosmetic_stone_slab_arcane", "cosmetic_stone_slab_eldritch",
-            "cosmetic_wood_slab_greatwood", "cosmetic_wood_slab_silverwood");
+    /** The block ids of the hardness group design. */
+    private static final List<String> NEW_IDS = List.of("cosmetic_solid", "cosmetic_solid_tough",
+            "cosmetic_solid_thaumium", "cosmetic_opaque", "cosmetic_stone_slab_arcane",
+            "cosmetic_stone_slab_eldritch", "cosmetic_wood_slab_greatwood", "cosmetic_wood_slab_silverwood");
+
+    /** The metadata values of every hardness group of the oracle. */
+    private static final Map<String, List<Integer>> GROUP_VARIANTS = Map.of(
+            "cosmetic_solid", List.of(2, 3, 5, 9, 10, 11, 12, 13, 14, 15),
+            "cosmetic_solid_tough", List.of(0, 1, 8),
+            "cosmetic_solid_thaumium", List.of(4, 6, 7));
 
     /** The side, the top and the bottom texture of one original metadata. */
     private record Faces(String side, String top, String bottom) {}
@@ -71,6 +79,13 @@ class CosmeticFamilyAssetsTest {
             "paving_stone_warding", "Камень сдерживания",
             "warded_glass", "Усиленное стекло");
 
+    /** The block id of the hardness group that hosts the original metadata. */
+    private static String blockOf(int variant) {
+        if (variant == 0 || variant == 1 || variant == 8) return "cosmetic_solid_tough";
+        if (variant == 4 || variant == 6 || variant == 7) return "cosmetic_solid_thaumium";
+        return "cosmetic_solid";
+    }
+
     private JsonObject json(String path) throws Exception { return ResourceTree.object(path); }
 
     private JsonObject variants(String block) throws Exception {
@@ -91,17 +106,35 @@ class CosmeticFamilyAssetsTest {
         return json("assets/thaumcraft/models/" + reference.substring("thaumcraft:".length()) + ".json").getAsJsonObject("textures");
     }
 
+    @Test void everyGroupBlockHostsExactlyItsOriginalMetadata() throws Exception {
+        for (var group : GROUP_VARIANTS.entrySet()) {
+            JsonObject states = variants(group.getKey());
+            assertEquals(group.getValue().size(), states.size(), group.getKey() + " hosts its original metadata");
+            for (int variant : group.getValue()) {
+                assertTrue(states.has("variant=" + variant), group.getKey() + " misses variant=" + variant);
+            }
+        }
+        assertEquals(16, GROUP_VARIANTS.values().stream().mapToInt(List::size).sum(),
+                "the sixteen original metadata values are hosted by the three groups");
+    }
+
     @Test void everyMetadataOfTheCosmeticSolidKeepsItsOriginalTexture() throws Exception {
-        JsonObject states = variants("cosmetic_solid");
-        assertEquals(16, states.size(), "the cosmetic solid has the sixteen original metadata values");
         for (var entry : SOLID_TEXTURES.entrySet()) {
+            String block = blockOf(entry.getKey());
             String state = "variant=" + entry.getKey();
-            assertTrue(states.has(state), "cosmetic_solid misses " + state);
-            JsonObject textures = modelTextures(model("cosmetic_solid", state));
+            JsonObject textures = modelTextures(model(block, state));
             Faces faces = entry.getValue();
-            assertEquals(faces.side(), face(textures, "side"), state + " side");
-            assertEquals(faces.top(), face(textures, "top"), state + " top");
-            assertEquals(faces.bottom(), face(textures, "bottom"), state + " bottom");
+            assertEquals(faces.side(), face(textures, "side"), block + " " + state + " side");
+            assertEquals(faces.top(), face(textures, "top"), block + " " + state + " top");
+            assertEquals(faces.bottom(), face(textures, "bottom"), block + " " + state + " bottom");
+        }
+    }
+
+    @Test void everyMetadataOfTheCosmeticSolidHasAModelThatExists() throws Exception {
+        for (var entry : SOLID_TEXTURES.entrySet()) {
+            String reference = model(blockOf(entry.getKey()), "variant=" + entry.getKey());
+            assertTrue(ResourceTree.exists("assets/thaumcraft/models/" + reference.substring("thaumcraft:".length()) + ".json"),
+                    "variant " + entry.getKey() + " -> " + reference);
         }
     }
 
@@ -128,21 +161,22 @@ class CosmeticFamilyAssetsTest {
         assertEquals("thaumcraft:blocks/es_1", face(modelTextures("thaumcraft:block/eldritch_stairs"), "side"));
     }
 
-    @Test void everyMetadataOfTheCosmeticSolidHasAModelThatExists() throws Exception {
-        for (int variant = 0; variant <= 15; variant++) {
-            String reference = model("cosmetic_solid", "variant=" + variant);
-            assertTrue(ResourceTree.exists("assets/thaumcraft/models/" + reference.substring("thaumcraft:".length()) + ".json"),
-                    "cosmetic_solid variant " + variant + " -> " + reference);
-        }
-    }
-
-    @Test void everyFamilyBlockHasALootTableAndIsNamedInBothLanguages() throws Exception {
+    @Test void everyGroupBlockHasALootTableAndIsNamedInBothLanguages() throws Exception {
         for (String id : NEW_IDS) {
             assertTrue(ResourceTree.exists("data/thaumcraft/loot_table/blocks/" + id + ".json"), id + " loot table");
             assertTrue(ResourceTree.exists("assets/thaumcraft/models/item/" + id + ".json"), id + " item model");
             for (String lang : List.of("en_us", "ru_ru")) {
                 assertTrue(json("assets/thaumcraft/lang/" + lang + ".json").has("block.thaumcraft." + id), lang + " " + id);
             }
+        }
+    }
+
+    @Test void everyGroupBlockDropsItsOwnItem() throws Exception {
+        for (String id : List.of("cosmetic_solid_tough", "cosmetic_solid_thaumium")) {
+            JsonObject table = json("data/thaumcraft/loot_table/blocks/" + id + ".json");
+            String drop = table.getAsJsonArray("pools").get(0).getAsJsonObject().getAsJsonArray("entries")
+                    .get(0).getAsJsonObject().get("name").getAsString();
+            assertEquals("thaumcraft:" + id, drop, id + " drops the item of its own group");
         }
     }
 
@@ -164,7 +198,7 @@ class CosmeticFamilyAssetsTest {
                 drops.add(entry.getAsJsonObject().get("name").getAsString());
             }
         }
-        assertTrue(drops.contains("thaumcraft:cosmetic_solid"), "the family item drops itself");
+        assertTrue(drops.contains("thaumcraft:cosmetic_solid"), "the group item drops itself");
         assertTrue(drops.contains("thaumcraft:paving_stone_travel"), "the travel stone drops its own item");
         assertTrue(drops.contains("thaumcraft:paving_stone_warding"), "the warding stone drops its own item");
     }
@@ -202,10 +236,6 @@ class CosmeticFamilyAssetsTest {
         for (String lang : List.of("en_us", "ru_ru")) {
             JsonObject names = json("assets/thaumcraft/lang/" + lang + ".json");
             for (String id : OLD_BLOCK_IDS) assertFalse(names.has("block.thaumcraft." + id), lang + " " + id);
-            for (String id : List.of("cosmetic_solid_tough", "cosmetic_solid_thaumium")) {
-                assertFalse(names.has("block.thaumcraft." + id), lang + " " + id);
-                assertFalse(names.has("item.thaumcraft." + id), lang + " " + id);
-            }
         }
     }
 

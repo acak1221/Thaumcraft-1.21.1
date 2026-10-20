@@ -205,6 +205,7 @@ public final class EldritchBlockRules {
     public static float cosmeticHardness(int variant) {
         switch (variant) {
             case COSMETIC_OBSIDIAN_TILE:
+            case COSMETIC_OBSIDIAN_TOTEM_BASE:
             case COSMETIC_OBSIDIAN_TILE_SHADED:
                 return 30.0F;
             case COSMETIC_THAUMIUM_BLOCK:
@@ -227,6 +228,7 @@ public final class EldritchBlockRules {
     public static float cosmeticExplosionResistance(int variant) {
         switch (variant) {
             case COSMETIC_OBSIDIAN_TILE:
+            case COSMETIC_OBSIDIAN_TOTEM_BASE:
             case COSMETIC_OBSIDIAN_TILE_SHADED:
                 return 999.0F;
             case COSMETIC_THAUMIUM_BLOCK:
@@ -247,6 +249,41 @@ public final class EldritchBlockRules {
     /** BlockCosmeticSolid:278-286 - warding stone and the node tile carry a block entity. */
     public static boolean cosmeticHasTile(int variant) {
         return variant == COSMETIC_WARDING_STONE || variant == COSMETIC_OBSIDIAN_TILE_SHADED;
+    }
+
+    /**
+     * The hardness groups of the cosmetic solid family, one group per original metadata.
+     *
+     * <p>Minecraft 1.21.1 binds the hardness and the blast resistance to the block and not to the
+     * block state, so the original metadata that differ in hardness become separate blocks. The
+     * groups are the ones of the oracle: BlockCosmeticSolid:213-225 gives the hardness 30 for the
+     * metadata zero, one and eight, 4 for the metadata four, six and seven and 2 for the rest, and
+     * :241-253 gives the blast resistance 999, 20 and the inherited 6.
+     */
+    public static final int[] COSMETIC_GROUPS = {1, 1, 0, 0, 2, 0, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0};
+    /** The hardness of a cosmetic group: the ordinary, the tough and the thaumium one. */
+    public static final float[] COSMETIC_GROUP_HARDNESS = {2.0F, 30.0F, 4.0F};
+    /** The blast resistance of a cosmetic group. */
+    public static final float[] COSMETIC_GROUP_RESISTANCE = {6.0F, 999.0F, 20.0F};
+
+    /** The hardness group of a cosmetic metadata. */
+    public static int cosmeticGroup(int variant) {
+        return variant >= 0 && variant < COSMETIC_GROUPS.length ? COSMETIC_GROUPS[variant] : 0;
+    }
+
+    /** The hardness of a cosmetic group. */
+    public static float cosmeticGroupHardness(int group) { return COSMETIC_GROUP_HARDNESS[group]; }
+
+    /** The blast resistance of a cosmetic group. */
+    public static float cosmeticGroupResistance(int group) { return COSMETIC_GROUP_RESISTANCE[group]; }
+
+    /** The metadata values of a cosmetic group. */
+    public static java.util.List<Integer> cosmeticGroupVariants(int group) {
+        java.util.List<Integer> variants = new java.util.ArrayList<>();
+        for (int variant = 0; variant <= 15; variant++) {
+            if (cosmeticGroup(variant) == group) variants.add(variant);
+        }
+        return variants;
     }
 
     // ------------------------------------------------------------- cosmetic opaque

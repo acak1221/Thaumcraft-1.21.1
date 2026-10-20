@@ -1,8 +1,11 @@
-## Текущая работа — 20.10.2026, после d17b966
+## Текущая работа — 20.10.2026, после ed66820
 
-Последний GitHub-прогон d17b966 выполнил243 Fabric GameTest:242 прошли,
-один Hungry-сценарий не прошёл. В нём исправлена настоящая грунтовая опора
-саженца перед original heightmap/ray проверкой; gameplay не изменён.
+GitHub-прогон ed66820 прошёл сборку/unit checks, но остановился до GameTest XML:
+SpawnEggItem запросил ещё не зарегистрированный тип taint_spider. Исправлен
+порядок ThaumcraftTaint: blocks → entities → items. После этого actual main и
+Fabric GameTest sources компилируются (43s,.tmp/taint-bootstrap-order-compile.log).
+Сам игровой прогон ed66820 не принят. Предыдущий d17b966 имел242/243 PASS;
+его Hungry fixture уже исправлен настоящим грунтом перед heightmap/ray проверкой.
 Полностью принятый серверный baseline пока b1e49f2 (648JUnit/212GameTest/79Python),
 run39409582347. PASS прежних входов не переносится на нынешний код.
 

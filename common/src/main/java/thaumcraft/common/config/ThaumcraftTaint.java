@@ -70,7 +70,7 @@ public final class ThaumcraftTaint {
     private ThaumcraftTaint() {}
     private static BlockBehaviour.Properties properties(float hardness,float resistance) {return BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).strength(hardness,resistance).sound(SOUND).randomTicks().pushReaction(PushReaction.DESTROY);}
     public static void register() {
-        if(registered)return;registered=true;BLOCKS.register();ITEMS.register();ENTITIES.register();
+        if(registered)return;registered=true;BLOCKS.register();ENTITIES.register();ITEMS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB,CRUST_ITEM,SOIL_ITEM);
         for(int type=0;type<4;type++)CreativeTabRegistry.append(ThaumcraftContent.TAB,FIBRE_ITEMS.get(type));
         for(var egg:List.of(SPIDER_EGG,SPORE_EGG,SWARMER_EGG,SWARM_EGG,TENTACLE_EGG,SMALL_EGG))CreativeTabRegistry.append(ThaumcraftContent.TAB,egg);

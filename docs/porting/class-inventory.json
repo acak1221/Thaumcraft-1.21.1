@@ -1687,7 +1687,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java",
       "role": "native_foundation",
-      "sha256": "dc1a69b88a00cdf5838f637e86920c360f7a04d313b16deac21b2e22cb7761c9"
+      "sha256": "b43d06657f930f0f466a73713d66d3e1e71923381e26db401324be2ad0f22872"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftTaintSettings.java",

@@ -1,0 +1,14 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "JARBRAIN",
+  "input": {"item": "thaumcraft:jar"},
+  "components": [
+    {"item": "thaumcraft:zombie_brain"},
+    {"item": "minecraft:spider_eye"},
+    {"item": "minecraft:water_bucket"},
+    {"item": "minecraft:spider_eye"}
+  ],
+  "aspects": {"cognitio": 10, "sensus": 10, "exanimis": 20},
+  "instability": 4,
+  "result": {"id": "thaumcraft:jar_brain", "count": 1}
+}

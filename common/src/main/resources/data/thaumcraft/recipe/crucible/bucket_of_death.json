@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "LIQUIDDEATH",
+  "source_order": 160,
+  "catalyst": {"item": "minecraft:bucket"},
+  "result": {"id": "thaumcraft:bucket_death", "count": 1},
+  "aspects": {"mortuus": 32, "venenum": 32, "perditio": 32}
+}

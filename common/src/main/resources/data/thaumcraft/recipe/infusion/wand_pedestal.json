@@ -1,0 +1,14 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "WANDPED",
+  "input": {"item": "thaumcraft:arcane_pedestal"},
+  "components": [
+    {"item": "minecraft:gold_ingot"},
+    {"item": "minecraft:diamond"},
+    {"item": "thaumcraft:primal_charm"},
+    {"item": "minecraft:diamond"}
+  ],
+  "aspects": {"auram": 10, "praecantatio": 15, "permutatio": 15},
+  "instability": 3,
+  "result": {"id": "thaumcraft:wand_pedestal", "count": 1}
+}

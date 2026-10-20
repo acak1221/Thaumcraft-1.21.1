@@ -1,0 +1,89 @@
+{
+ "description": "Arcane Ear: real vanilla note hook, original instruments and pitches, inclusive 64-block range, ten-tick redstone pulse, tuning and original recipe",
+ "watch": {
+  "junit": [],
+  "gametests": ["arcaneEarListensToMatchingNotesAndPulsesRedstone"]
+ },
+ "mutants": [
+  {
+   "id": "pulse-nine-ticks",
+   "name": "a heard note gives nine ticks instead of ten",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileSensor.java",
+   "old": "tile.redstoneSignal = 10;",
+   "new": "tile.redstoneSignal = 9;"
+  },
+  {
+   "id": "range-excludes-64",
+   "name": "an exactly 64-block distant note is outside the hearing range",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java",
+   "old": "ear.distSqr(note.pos()) <= 4096.0",
+   "new": "ear.distSqr(note.pos()) < 4096.0"
+  },
+  {
+   "id": "range-includes-65",
+   "name": "a 65-block distant note is heard",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java",
+   "old": "ear.distSqr(note.pos()) <= 4096.0",
+   "new": "ear.distSqr(note.pos()) <= 4225.0"
+  },
+  {
+   "id": "instrument-is-ignored",
+   "name": "the ear responds to another instrument playing its pitch",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java",
+   "old": "note.instrument() == instrument && note.pitch() == pitch",
+   "new": "note.pitch() == pitch"
+  },
+  {
+   "id": "pitch-is-ignored",
+   "name": "the ear responds to another pitch on the right instrument",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java",
+   "old": "note.instrument() == instrument && note.pitch() == pitch",
+   "new": "note.instrument() == instrument"
+  },
+  {
+   "id": "wood-is-harp",
+   "name": "the original bass instrument is interpreted as harp",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java",
+   "old": "case BASS -> 4;",
+   "new": "case BASS -> 0;"
+  },
+  {
+   "id": "tuning-wraps-at-24",
+   "name": "manual tuning has only 24 pitches",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileSensor.java",
+   "old": "note = (note + 1) % 25;",
+   "new": "note = (note + 1) % 24;"
+  },
+  {
+   "id": "strong-signal-is-missing",
+   "name": "the powered ear emits weak redstone power only",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockArcaneEar.java",
+   "old": "getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction side) { return getSignal(state, level, pos, side); }",
+   "new": "getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction side) { return 0; }"
+  },
+  {
+   "id": "vanilla-note-hook-is-disconnected",
+   "name": "actual vanilla note playback never reaches the ear event queue",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/mixin/ArcaneEarNoteMixin.java",
+   "old": "if (level instanceof ServerLevel server) ArcaneEarNotes.record(",
+   "new": "if (level instanceof ServerLevel server && false) ArcaneEarNotes.record("
+  },
+  {
+   "id": "recipe-costs-nine-air",
+   "name": "the arcane recipe costs nine air instead of ten",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/arcane_ear.json",
+   "old": "\"aer\": 10",
+   "new": "\"aer\": 9"
+  }
+ ]
+}

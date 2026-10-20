@@ -1,5 +1,20 @@
 # Полный перенос TC4 на Minecraft 1.21.1 — handoff
 
+## Актуально 20.10.2026: магическое ухо, после резервуаров `5b19be4`
+
+**Implemented:** `thaumcraft:arcane_ear`, исходные пять инструментов/25 нот,
+радиус 64 включительно, повторяемый импульс 15 на 10 тиков, настройка кликом,
+сохранение настройки без импульса, арканный рецепт/книга/иконка/EN-RU/модели.
+Ноты идут из настоящего vanilla `NoteBlock.playNote`; сохранена исходная очередь до POST тика.
+Исправлены pre-tick gameTime gate и кодирование тихого block event (-1 становится 255 в пакете).
+**Проверено:** 542 JUnit / **177 Fabric GameTest** / 76 Python, ресурсы без пропущенных ссылок,
+`:fabric:clientTestClasses`, `:fabric:build`, production/test isolation.
+JAR SHA-256 `0e2b9d70cd22f5e2247e8e3058a3997cf77ffaf7a251e2c73bc787bda6066136`.
+Контракт и уровни evidence: [arcane-ear](analysis/2026-10-20-arcane-ear.md).
+Клиент/настоящий restart/NeoForge не запускались; 10 mutation scenarios подготовлены, не исполнены.
+Срез резервуаров ниже уже отправлен в `origin/work`; текущий срез продолжает ту же ветку.
+Дальше остаются Warding/Trade, остальные M09 устройства, R10–R16, enchant-инфузия и Thaumatorium.
+
 ## Актуально 20.10.2026: продолжение с GitHub `88d683b`, ветка `work`
 
 Перед изменениями выполнены `git fetch origin --prune` и fast-forward до `origin/main`.

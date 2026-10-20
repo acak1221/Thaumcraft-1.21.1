@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "thaumcraft:cosmetic_stone_slab"
+          "name": "thaumcraft:cosmetic_opaque"
         }
       ]
     }

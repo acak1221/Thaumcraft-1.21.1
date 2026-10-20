@@ -67,6 +67,7 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftSettings.load(dev.architectury.platform.Platform.getConfigFolder().resolve("thaumcraft.properties"));
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initServer();
         thaumcraft.common.lib.network.WarpMessageNetworking.initServer();
+        thaumcraft.common.lib.network.KnowledgeNotificationNetworking.initServer();
         ResearchCatalog.loadBundled();
         thaumcraft.common.lib.research.ResearchConditions.initializeNative();
         ObjectAspectCatalog.loadBundled();
@@ -75,6 +76,8 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftCrystalClusters.register();
         thaumcraft.common.config.ThaumcraftRunic.register();
         thaumcraft.common.config.ThaumcraftBaubles.register();
+        thaumcraft.common.config.ThaumcraftTravelGear.register();
+        thaumcraft.common.lib.network.HoverNetworking.init();
         thaumcraft.common.config.ThaumcraftLoot.register();
         thaumcraft.common.config.ThaumcraftFocusPouches.register();
         thaumcraft.common.config.ThaumcraftColoredCandles.register();

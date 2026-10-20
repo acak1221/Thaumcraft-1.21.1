@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -45,6 +47,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
@@ -84,6 +87,7 @@ public final class PechRuntimeChecks {
     private static void run(GameTestHelper test,int group){try(var f=new Fixture(test)){switch(group){case 0->f.entity();case 1->f.trade();case 2->f.curse();case 3->f.beans();default->f.goals();}}test.succeed();}
     private static final class Fixture implements AutoCloseable {
         final FocusUpgradeRuntimeChecks.Actor a;final List<Entity> owned=new ArrayList<>();final CompoundTag knowledge;
+        final Map<BlockPos,BlockState> extendedFloor=new LinkedHashMap<>();
         Fixture(GameTestHelper test){a=new FocusUpgradeRuntimeChecks.Actor(test,new BlockPos(4,90,4));knowledge=KnowledgeAccess.get(a.player).save();a.clearLane();for(int x=-3;x<=5;x++)for(int z=-3;z<=3;z++)a.put(a.root.offset(x,-1,z),Blocks.STONE.defaultBlockState());}
         <T extends Mob>T mob(EntityType<T> type,int x,int z){T mob=type.create(a.level);a.require(mob!=null,"actual registered entity exists "+type);mob.setPos(a.root.getX()+x+.5,a.root.getY(),a.root.getZ()+z+.5);mob.setNoAi(true);mob.setNoGravity(true);mob.setOnGround(true);owned.add(mob);a.require(a.level.addFreshEntity(mob),"actual entity admitted");return mob;}
         EntityPech pech(int x,int z){return mob(ThaumcraftPech.PECH.get(),x,z);}
@@ -171,11 +175,24 @@ public final class PechRuntimeChecks {
             a.player.setPos(pech.getX()+8,pech.getY(),pech.getZ());a.require(PechAvoidGoal.closestPlayer(pech,8)==null,"plain nearest player range is strict: exactly eight blocks is outside");
             a.player.setPos(pech.getX()+2,pech.getY(),pech.getZ());a.player.setGameMode(GameType.SPECTATOR);a.require(PechAvoidGoal.closestPlayer(pech,8)==null,"modern spectators are excluded from the original player selector adapter");a.player.setGameMode(GameType.CREATIVE);
             a.put(a.root.offset(1,0,0),Blocks.AIR.defaultBlockState());a.put(a.root.offset(1,1,0),Blocks.AIR.defaultBlockState());
+            // Native getPosAway searches a16-block horizontal radius. The
+            // ordinary9x7 melee lane cannot support that navigation fixture.
+            // Snapshot and restore a real37x37 floor; no target/path is forced.
+            fleeFloor(a.root);
             var avoid=avoids.getFirst();boolean admitted=false;
             for(int seed=0;seed<128&&!admitted;seed++){pech.getRandom().setSeed(seed);admitted=avoid.canUse();}
             a.require(admitted,"bounded declared native flee-position seeds admit a real supported retreat path from the invisible creative player");avoid.start();avoid.tick();
             var path=pech.getNavigation().getPath();a.require(path!=null&&path.getEndNode()!=null&&!pech.getNavigation().isDone(),"original avoidance starts actual native navigation along its admitted path");
-            var end=path.getEndNode();a.require(a.player.distanceToSqr(end.x+.5,end.y,end.z+.5)>=a.player.distanceToSqr(pech),"native retreat path ends farther from the player");pech.getNavigation().stop();avoid.stop();
+            var end=path.getEndNode();a.require(a.player.distanceToSqr(end.x,end.y,end.z)>=a.player.distanceToSqr(pech),"native path end retains original integer retreat coordinates farther from the player");pech.getNavigation().stop();avoid.stop();
+            // Repeat the actual installed goal on an owned negative-coordinate
+            // platform: truncating native bottom-center coordinates would
+            // otherwise reject every valid path in this quadrant.
+            Vec3 original=pech.position();var negative=new BlockPos(-97,a.root.getY(),-97);fleeFloor(negative);
+            pech.setPos(negative.getX()+.5,negative.getY(),negative.getZ()+.5);pech.setOnGround(true);a.player.setPos(pech.getX()+2,pech.getY(),pech.getZ());admitted=false;
+            for(int seed=0;seed<128&&!admitted;seed++){pech.getRandom().setSeed(seed);admitted=avoid.canUse();}
+            a.require(admitted,"actual installed avoidance admits a native path from an invisible creative player at negative world coordinates");avoid.start();avoid.tick();path=pech.getNavigation().getPath();
+            a.require(path!=null&&path.getEndNode()!=null&&path.getEndNode().x<0&&path.getEndNode().z<0,"negative-coordinate retreat starts real native navigation in the same quadrant");
+            end=path.getEndNode();a.require(a.player.distanceToSqr(end.x,end.y,end.z)>=a.player.distanceToSqr(pech),"negative native path end preserves original integer distance and endpoint checks");pech.getNavigation().stop();avoid.stop();pech.setPos(original);pech.setOnGround(true);
             a.player.setPos(pech.getX()+12,pech.getY(),pech.getZ());var cow=mob(EntityType.COW,2,1);
             long seed=0;while(seed<100000&&RandomSource.create(seed).nextFloat()>=.02F)seed++;a.require(seed<100000,"declared bounded ordinary-watch chance seed exists");
             pech.getRandom().setSeed(seed);expected=RandomSource.create(seed);expected.nextFloat();duration=40+expected.nextInt(40);
@@ -188,6 +205,13 @@ public final class PechRuntimeChecks {
             for(int tick=0;tick<4;tick++){pech.setDeltaMovement(Vec3.ZERO);pech.tick();}
             a.require(pech.getLookControl().getWantedX()==a.player.getX()&&pech.getLookControl().getWantedY()==a.player.getEyeY(),"ordinary native Pech ticks run the installed close watcher for an invisible creative player");
             a.player.setGameMode(GameType.SURVIVAL);
+        }
+        private void fleeFloor(BlockPos center){
+            for(int x=(center.getX()-18)>>4;x<=(center.getX()+18)>>4;x++)for(int z=(center.getZ()-18)>>4;z<=(center.getZ()+18)>>4;z++)a.level.getChunk(x,z);
+            for(int x=-18;x<=18;x++)for(int z=-18;z<=18;z++){
+                var pos=center.offset(x,-1,z);a.require(a.level.getBlockEntity(pos)==null,"extended flee floor contains no block entity to overwrite");
+                extendedFloor.putIfAbsent(pos,a.level.getBlockState(pos));a.put(pos,Blocks.STONE.defaultBlockState());
+            }
         }
         void trade(){
             var pech=pech(0,0);pech.setTamed(true);pech.setPechType(0);a.player.setPos(pech.getX()+1,pech.getY(),pech.getZ());
@@ -295,7 +319,7 @@ public final class PechRuntimeChecks {
         }
         private static long growthSeed(){for(long seed=0;seed<10000;seed++)if(RandomSource.create(seed).nextInt(30)==0)return seed;throw new AssertionError();}
         private static long foodSeed(int slot,boolean reward){for(long seed=0;seed<100000;seed++){var rng=RandomSource.create(seed);if(rng.nextInt(40)==slot&&(rng.nextFloat()<.25F)==reward)return seed;}throw new AssertionError();}
-        @Override public void close(){try{clear();KnowledgeAccess.get(a.player).load(knowledge);}finally{a.close();}}
+        @Override public void close(){try{clear();KnowledgeAccess.get(a.player).load(knowledge);}finally{try{extendedFloor.forEach(a::put);}finally{a.close();}}}
     }
     private static final class MagicalBiomeFixture implements AutoCloseable {
         final Holder.Reference<Biome> biome;final List<TagKey<Biome>> original;final Method bind;

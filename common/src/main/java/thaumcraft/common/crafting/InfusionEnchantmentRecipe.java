@@ -91,7 +91,8 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
             case "minecraft:silk_touch", "minecraft:fortune" -> item instanceof DiggerItem && !(item instanceof HoeItem);
             case "minecraft:unbreaking" -> true;
             case "thaumcraft:repair" -> item instanceof IRepairable;
-            case "thaumcraft:haste" -> item instanceof ArmorItem armor && armor.getEquipmentSlot() == EquipmentSlot.FEET;
+            case "thaumcraft:haste" -> item instanceof ArmorItem armor && armor.getEquipmentSlot() == EquipmentSlot.FEET
+                    || item instanceof thaumcraft.common.items.armor.ItemHoverHarness;
             case "minecraft:power", "minecraft:punch", "minecraft:flame", "minecraft:infinity" -> item instanceof BowItem;
             default -> target.value().canEnchant(central);
         };

@@ -20,6 +20,7 @@ import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -101,15 +102,26 @@ public final class HungryNodeRuntimeChecks {
                     "actual WHOLE-stack native death buys ONE current unit; damage runs BEFORE increment and neither a second actual hungry node, a nested tick nor unpaid pearl can debit/credit that in-flight source again");
             var paid=node.getAspects();ticks(5);f.check(node.getAspects().aspects.equals(paid.aspects) && node.getNodeVisBase(chosen)==3,"dead source is never credited again");put(pos.east(),Blocks.AIR);
             fresh(stock(3));var dirt=named(Items.DIRT,64,"hungry-one-item-chance-not-stack");
+            f.check(!dirt.has(DataComponents.CONTAINER),"ordinary named dirt starts without a synthetic container component");
             f.check(ObjectAspectResolver.get(dirt.copyWithCount(1),world).getAmount(Aspect.EARTH)==2,"real dirt carries original Earth2 per ONE item");
+            var dirtPrimals=DeconstructionRules.primals(ObjectAspectResolver.scanTags(dirt.copyWithCount(1),world));
+            f.check(dirtPrimals.size()==1 && dirtPrimals.getAmount(Aspect.EARTH)==2,"actual production scan/SUM path has exactly one Earth2 primal before consuming dirt; actual="+dirtPrimals.aspects);
             var failed=item(dirt,Vec3.atCenterOf(pos),4);
-            try(var rng=new InputRandom(f,bound->bound==7?2:0,true)) { tick();f.check(rng.bounds.equals(List.of(1,7)),"full BASE3 chance uses original nextInt(1+3*2), not stackcount weighting"); }
-            f.check(failed.isRemoved() && node.getNodeVisBase(Aspect.EARTH)==3 && node.getAspects().getAmount(Aspect.EARTH)==3,"actual64-item stack is consumed; draw2 is NOT below one-itemEarth2 and grows no aura");
+            f.check(failed.saveWithoutId(new net.minecraft.nbt.CompoundTag()).getShort("Health")==1 && !failed.isRemoved()
+                            && world.getBlockEntity(pos)==node && !node.isRemoved() && node.getTickCount()==0
+                            && node.getAspects().getAmount(Aspect.EARTH)==3 && node.getNodeVisBase(Aspect.EARTH)==3,
+                    "full-BASE fixture starts with a current zero-tick node and an actual one-health item; nodeRemoved="+node.isRemoved()+", count="+node.getTickCount()+", current="+node.getAspects().aspects+", base="+node.getAspectsBase().aspects);
+            try(var rng=new InputRandom(f,bound->bound==7?2:0,true)) { tick();f.check(rng.bounds.equals(List.of(1,7)),"full BASE3 chance uses original nextInt(1+3*2), not stackcount weighting; actual bounds="+rng.bounds+", effects="+rng.effects+", itemRemoved="+failed.isRemoved()+", current="+node.getAspects().aspects+", base="+node.getAspectsBase().aspects); }
+            f.check(failed.isRemoved() && failed.getItem()==dirt && dirt.getCount()==64
+                            && ItemContainerContents.EMPTY.equals(dirt.get(DataComponents.CONTAINER))
+                            && node.getNodeVisBase(Aspect.EARTH)==3 && node.getAspects().getAmount(Aspect.EARTH)==3,
+                    "actual64-item stack is consumed through native BlockItem.onDestroyed adding EMPTY container; draw2 is NOT below one-itemEarth2 and grows no aura");
             var won=item(named(Items.DIRT,9,"hungry-base-growth-input"),Vec3.atCenterOf(pos),4);
             try(var rng=new InputRandom(f,bound->bound==7?1:0,true)) { tick(); }
             f.check(won.isRemoved() && node.getNodeVisBase(Aspect.EARTH)==4 && node.getAspects().getAmount(Aspect.EARTH)==3,"winning draw1 raises only BASE byONE; nine physical items do not refill current or multiply the reward");
             var saved=node.saveWithoutMetadata(world.registryAccess());var detached=new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(),pos,node.getBlockState());detached.loadWithComponents(saved,world.registryAccess());
             f.check(detached.getNodeType()==TileNode.NodeType.HUNGRY && detached.getNodeVisBase(Aspect.EARTH)==4 && detached.getAspects().getAmount(Aspect.EARTH)==3,"actual current/base/type ownership survives native NBT independently");
+            nativeBlockItemDeath();
             var oldTags=ThaumcraftApi.objectTags;var oldGroups=ThaumcraftApi.groupedObjectTags;
             try {
                 ThaumcraftApi.objectTags=new ConcurrentHashMap<>(oldTags);ThaumcraftApi.groupedObjectTags=new ConcurrentHashMap<>(oldGroups);
@@ -132,6 +144,38 @@ public final class HungryNodeRuntimeChecks {
             f.check(!chicken.isAlive() && node.getAspects().getAmount(fed)==3 && node.getNodeVisBase(fed)==3,
                     "a real native living-entity death uses original entity scan tags/SUM and refills ONE current primal");chicken.discard();clearDrops();
 
+        }
+        void nativeBlockItemDeath() {
+            fresh(stock(3));node.takeVis("terra",1);
+            var contents=named(Items.IRON_INGOT,7,"hungry-native-container-seven-physical-iron");
+            var expectedContents=contents.copy();
+            var packed=named(Items.DIRT,2,"hungry-native-container-parent-block");
+            packed.set(DataComponents.CONTAINER,ItemContainerContents.fromItems(List.of(contents)));
+            var source=item(packed,Vec3.atCenterOf(pos),4);
+            try(var rng=new InputRandom(f,bound->0,true)) {
+                tick();
+                f.check(rng.bounds.equals(List.of(1)),"one paid parent block death draws only its original single Earth primal; native child contents get no extra same-tick meal");
+            }
+            var children=nearDrops().stream().filter(drop->ItemStack.isSameItemSameComponents(drop.getItem(),expectedContents)).toList();
+            f.check(source.isRemoved() && source.getItem()==packed && packed.getCount()==2
+                            && ItemContainerContents.EMPTY.equals(packed.get(DataComponents.CONTAINER))
+                            && children.size()==1 && ItemStack.matches(children.getFirst().getItem(),expectedContents)
+                            && node.getAspects().getAmount(Aspect.EARTH)==3 && node.getNodeVisBase(Aspect.EARTH)==3
+                            && node.getAspects().getAmount(Aspect.ORDER)==3 && node.getNodeVisBase(Aspect.ORDER)==3,
+                    "native nonempty CONTAINER clears once, both parent blocks pay one Earth refill, and exactly seven named physical iron ingots survive separately without an extra aura reward");
+            children.forEach(ItemEntity::discard);
+            for(int mutation=0;mutation<3;mutation++) {
+                fresh(stock(3));node.takeVis("terra",1);
+                var changed=new ChangingDeathItem(world,Vec3.atCenterOf(pos),named(Items.DIRT,2,"hungry-death-custody-"+mutation),mutation);
+                admit(changed);f.check(changed.hurt(world.damageSources().drown(),4F),"adversarial native source starts at one real item health");changed.armed=true;
+                var before=node.getAspects();var base=node.getAspectsBase();
+                try(var rng=new InputRandom(f,bound->0,true)) {
+                    tick();
+                    f.check(changed.isRemoved() && changed.changed && rng.bounds.isEmpty()
+                                    && node.getAspects().aspects.equals(before.aspects) && node.getAspectsBase().aspects.equals(base.aspects),
+                            "a native paid death callback changing another component, count or stack identity refuses all aura and every meal RNG draw; mutation="+mutation);
+                }
+            }
         }
         Pig pig(Vec3 at,boolean invulnerable) { var pig=EntityType.PIG.create(world);f.check(pig!=null,"native pig fixture factory");pig.setNoAi(true);pig.setNoGravity(true);pig.setPos(at);pig.setInvulnerable(invulnerable);return admit(pig); }
         void pullAndFlags() {
@@ -223,6 +267,23 @@ public final class HungryNodeRuntimeChecks {
     private static final class RefusingItem extends ItemEntity {
         RefusingItem(ServerLevel world,Vec3 at,ItemStack actual) { super(world,at.x,at.y,at.z,actual,0,0,0);setNoGravity(true);setNeverPickUp(); }
         @Override public boolean hurt(DamageSource source,float amount) { return false; }
+    }
+    private static final class ChangingDeathItem extends ItemEntity {
+        final int mutation;boolean armed,changed;
+        ChangingDeathItem(ServerLevel world,Vec3 at,ItemStack actual,int mutation) { super(world,at.x,at.y,at.z,actual,0,0,0);this.mutation=mutation;setNoGravity(true);setNeverPickUp(); }
+        @Override public boolean hurt(DamageSource source,float amount) {
+            boolean result=super.hurt(source,amount);
+            if(armed && isRemoved()) {
+                changed=true;
+                switch(mutation) {
+                    case 0 -> getItem().set(DataComponents.CUSTOM_NAME,Component.literal("changed-after-native-container-clear"));
+                    case 1 -> getItem().shrink(1);
+                    case 2 -> setItem(getItem().copy());
+                    default -> throw new AssertionError(mutation);
+                }
+            }
+            return result;
+        }
     }
     private static final class WitnessItem extends ItemEntity {
         final TileNode node,peer;final List<Integer> seenCounts=new ArrayList<>();int calls;boolean unpaidPearlRefused=true;

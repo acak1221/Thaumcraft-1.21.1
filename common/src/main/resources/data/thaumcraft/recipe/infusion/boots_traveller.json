@@ -1,0 +1,17 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "BOOTSTRAVELLER",
+  "instability": 1,
+  "aspects": {"volatus": 25, "iter": 25},
+  "input": {"item": "minecraft:leather_boots"},
+  "input_damage": 0,
+  "components": [
+    {"item": "thaumcraft:air_shard"},
+    {"item": "thaumcraft:air_shard"},
+    {"item": "thaumcraft:enchanted_fabric"},
+    {"item": "thaumcraft:enchanted_fabric"},
+    {"item": "minecraft:feather"},
+    {"tag": "thaumcraft:original_raw_fish"}
+  ],
+  "result": {"id": "thaumcraft:boots_traveller", "count": 1}
+}

@@ -65,8 +65,8 @@ five-byte wrapper body through the production codec, rejecting trailing bytes.
 All requested-delta, clamp, ordering and replay expectations remain unchanged;
 the production command/network/gameplay sources did not change for this fix.
 
-PacketAspectPool flying aspect icons, research popup/highlight/clue messages and
-other original notification consumers are separate remaining client units.
-This change provides their real shared text/image queue without claiming them
-implemented or seen. No full client, multiplayer or survival acquisition replay
-is inferred from server checks.
+The subsequent RP/discovery/research consumer source group is documented in
+`2026-10-20-knowledge-notifications.md`, including its separate validation state.
+This earlier checkpoint proves the shared text/image queue and warp paths only.
+No full client, multiplayer or survival acquisition replay is inferred from
+server checks.

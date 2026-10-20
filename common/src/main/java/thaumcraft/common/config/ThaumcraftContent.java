@@ -132,9 +132,8 @@ public final class ThaumcraftContent {
                 case "alumentum" -> new thaumcraft.common.items.ItemAlumentum(new Item.Properties());
                 case "zombie_brain" -> new thaumcraft.common.items.ItemZombieBrain(new Item.Properties());
                 case "jar_label" -> new thaumcraft.common.items.ItemJarLabel(new Item.Properties());
-                // Original ItemResource:314. Passive orb/hint callbacks remain
-                // explicitly outside the manipulator's ingredient acquisition.
-                case "primal_charm" -> new Item(new Item.Properties().stacksTo(1));
+                case "primal_charm" -> new thaumcraft.common.items.ItemPrimalCharm(new Item.Properties());
+                case "knowledge_fragment" -> new thaumcraft.common.items.ItemKnowledgeFragment(new Item.Properties());
                 default -> new Item(new Item.Properties());
             }));
         }

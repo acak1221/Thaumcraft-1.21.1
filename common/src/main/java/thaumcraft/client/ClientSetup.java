@@ -50,6 +50,8 @@ public final class ClientSetup {
         thaumcraft.client.ThaumcraftMonsterClient.init();
         thaumcraft.client.ThaumcraftRunicClient.init();
         thaumcraft.client.ThaumcraftBaublesClient.init();
+        thaumcraft.client.ThaumcraftTravelGearClient.init();
+        thaumcraft.common.items.ItemPrimalCharm.setTooltipViewer(() -> Minecraft.getInstance().player);
         thaumcraft.client.ThaumcraftFocusPouchesClient.init();
         thaumcraft.client.ThaumcraftColoredCandlesClient.init();
         thaumcraft.client.ThaumcraftHungryNodeClient.init();

@@ -133,6 +133,8 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemBaubleBlanks" -> variant(List.of("mundane_amulet", "mundane_ring", "mundane_belt", "discount_ring_aer", "discount_ring_terra", "discount_ring_ignis", "discount_ring_aqua", "discount_ring_ordo", "discount_ring_perditio"), metadata);
             case "ConfigItems.itemRingRunic" -> variant(List.of("runic_ring_lesser", "runic_ring", "runic_ring_charged", "runic_ring_healing"), metadata);
             case "ConfigItems.itemAmuletRunic" -> variant(List.of("runic_amulet", "runic_amulet_emergency"), metadata);
+            case "ConfigItems.itemBootsTraveller" -> metadata == 0 ? "boots_traveller" : null;
+            case "ConfigItems.itemHoverHarness" -> metadata == 0 ? "hover_harness" : null;
             case "ConfigItems.itemGirdleHover" -> metadata == 0 ? "hover_girdle" : null;
             case "ConfigItems.itemGirdleRunic" -> variant(List.of("runic_girdle", "runic_girdle_kinetic"), metadata);
             case "ConfigItems.itemFocusHellbat" -> metadata == 0 ? "focus_hellbat" : null;

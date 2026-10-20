@@ -35,6 +35,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     VisNetClientEffects.setShader(shader);
                 }));
         ClientSetup.init();
+        thaumcraft.fabric.client.FabricTravelGearClient.init();
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftAdvancedFurnace.FURNACE_ITEM.get(),
                 thaumcraft.client.renderers.tile.TileAlchemyFurnaceAdvancedRenderer::renderItem);
         for (var crystal : thaumcraft.common.config.ThaumcraftCrystalClusters.blocks())
@@ -43,11 +44,13 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
             thaumcraft.client.ThaumcraftWarpClient.renderHud(graphics);
             thaumcraft.client.ThaumcraftRunicClient.renderHud(graphics);
             thaumcraft.client.lib.PlayerNotifications.renderHud(graphics);
+            if (Minecraft.getInstance().screen == null) thaumcraft.client.gui.GuiResearchPopup.renderHud(graphics);
         });
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             thaumcraft.client.ThaumcraftWarpClient.reset();
             thaumcraft.client.ThaumcraftRunicClient.reset();
             thaumcraft.client.lib.PlayerNotifications.reset();
+            thaumcraft.client.ThaumcraftTravelGearClient.reset();
             thaumcraft.common.config.ThaumcraftSettings.resetClient();
         });
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)
@@ -58,7 +61,8 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager resources) {
                         thaumcraft.client.ThaumcraftWarpClient.reset();
                         thaumcraft.client.ThaumcraftRunicClient.reset();
-            thaumcraft.client.lib.PlayerNotifications.reset();
+                        thaumcraft.client.lib.PlayerNotifications.reset();
+                        thaumcraft.client.ThaumcraftTravelGearClient.reset();
                     }
                 });
         // The retained shell is shared with blocks, but actual item contents

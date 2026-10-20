@@ -84,6 +84,7 @@ public final class ItemManaBean extends Item implements IEssentiaContainerItem {
             }
             if(level.random.nextFloat()<.25F&&contents!=null&&!contents.isEmpty()){
                 KnowledgeAccess.get(actor).addAspectPool(contents.firstTag(),1);KnowledgeEvents.sync(actor);
+                thaumcraft.common.lib.network.KnowledgeNotificationNetworking.pool(actor,contents.firstTag(),1);
             }
         }
         return result;

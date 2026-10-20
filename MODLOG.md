@@ -1,12 +1,12 @@
 # MODLOG — анализ Thaumcraft 4.2 FOREVA
 
-## 2026-10-20: интеграция исследований, инфузии, устройств и Warp — CI pending
+## 2026-10-20: интеграция исследований, инфузии, устройств и Warp — CI passed
 
 - R10: исходные расходы копирования и whole-stack persistence/count100/127/128.
 - Thaumatorium и Mnemonic Matrix; 22 рецепта зачарования с оплатой XP до эссенции.
 - Warding/Architect/Trade, Arcane Lamp/Amber и Vis Charge Relay с оплатой до callbacks.
 - Warp: серверные ветки, эффекты, Mind Spider/Guardian/Orb и клиентские ресурсы.
-- Локально 582 JUnit/78 Python; окончательный серверный прогон передан GitHub после исправлений стендов. Клиент/NeoForge не подтверждены.
+- GitHub CI на d508ada: 582 JUnit / 186 Fabric GameTest / 78 Python, fresh-result/production-isolation/attribution gates прошли. Клиент/NeoForge не подтверждены.
 - CI: кэш Gradle/Loom, свежие тесты без принудительной пересборки всех задач, отчёты 7 дней, отмена устаревших прогонов.
 
 

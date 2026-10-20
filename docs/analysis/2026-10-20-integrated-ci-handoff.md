@@ -35,3 +35,11 @@ Client visuals/audio, packaged multiplayer/survival and NeoForge remain unverifi
 forwarding/overlays, several native Trade placement topologies and remaining content are still
 open work; this is not a full-port acceptance or release. R11, Repair/Haste, Deconstruction and
 further lamps are prepared outside source sets and will continue while CI tests this snapshot.
+
+## Final remote verdict
+
+GitHub Actions run [39398016295](https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39398016295) on exact commit `d508adae7ec980a1e0aa2410ac3df8ccf79542f6` completed successfully.
+Fresh verification reported 582 JUnit, zero failures/errors/skips; 186 Fabric GameTests;78 Python tests.
+Gradle took7m6s on the first cold runner, GameTest56.67s. Packaged isolation/notices and fresh source/output gates passed.
+The downloaded job log was checked through the GitHub connector. CI JAR bytes were not compared with the local JAR.
+This verdict does not cover the newer local source window or client/NeoForge acceptance.

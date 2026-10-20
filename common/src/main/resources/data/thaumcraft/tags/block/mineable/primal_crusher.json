@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:mineable/pickaxe",
+    "#minecraft:mineable/shovel",
+    "thaumcraft:taint_crust",
+    "thaumcraft:taint_soil",
+    "thaumcraft:taint_fibres"
+  ]
+}

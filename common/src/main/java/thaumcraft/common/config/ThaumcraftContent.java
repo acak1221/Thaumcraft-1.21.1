@@ -117,11 +117,18 @@ public final class ThaumcraftContent {
     static {
         // Original ItemNugget metadata5 / ConfigRecipes:283,404-405. This is
         // one ninth of a resource quicksilver, not a whole-quicksilver alias.
-        MATERIALS.put("quicksilver_drop", ITEMS.register("quicksilver_drop", () -> new Item(new Item.Properties())));
+        MATERIALS.put("quicksilver_drop", ITEMS.register("quicksilver_drop",
+                () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_QUICKSILVER)));
         // Original ItemNugget metadata 16 (iron), 31 (gold) and 21 (cinnabar): the "Native Clusters" that purified ore becomes
         // (ConfigRecipes:112-113) and that a furnace melts into two ingots (ConfigRecipes:469-471).
-        for (String id : new String[]{"cluster_iron", "cluster_gold", "cluster_cinnabar"}) {
-            MATERIALS.put(id, ITEMS.register(id, () -> new Item(new Item.Properties())));
+        String[] clusterIds = {"cluster_iron", "cluster_gold", "cluster_cinnabar"};
+        int[] clusterTypes = {thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_IRON,
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_GOLD,
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_CINNABAR};
+        for (int cluster = 0; cluster < clusterIds.length; cluster++) {
+            String id = clusterIds[cluster];
+            int type = clusterTypes[cluster];
+            MATERIALS.put(id, ITEMS.register(id, () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), type)));
         }
         ITEMS.register("jar", () -> new ItemJar(JAR.get(), new Item.Properties()));
         ITEMS.register("jar_void", () -> new ItemJar(VOID_JAR.get(), new Item.Properties()));
@@ -136,6 +143,9 @@ public final class ThaumcraftContent {
                 case "jar_label" -> new thaumcraft.common.items.ItemJarLabel(new Item.Properties());
                 case "primal_charm" -> new thaumcraft.common.items.ItemPrimalCharm(new Item.Properties());
                 case "knowledge_fragment" -> new thaumcraft.common.items.ItemKnowledgeFragment(new Item.Properties());
+                // Original ItemResource metadata 11 and 12: the tainted goo and the taint tendril poison their carrier.
+                case "tainted_goo" -> new thaumcraft.common.items.ItemResource(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.RESOURCE_TAINTED_GOO);
+                case "taint_tendril" -> new thaumcraft.common.items.ItemResource(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.RESOURCE_TAINT_TENDRIL);
                 default -> new Item(new Item.Properties());
             }));
         }
@@ -143,7 +153,9 @@ public final class ThaumcraftContent {
         String[] names = {"air", "fire", "water", "earth", "order", "entropy", "balance"};
         for (int i = 0; i < names.length; i++) {
             String id = names[i] + "_shard";
-            SHARDS.put(tags[i], ITEMS.register(id, () -> new Item(new Item.Properties())));
+            // Original ItemShard metadata 0..6: the shard of the element.
+            int shardType = i;
+            SHARDS.put(tags[i], ITEMS.register(id, () -> new thaumcraft.common.items.ItemShard(new Item.Properties(), shardType)));
             if (i < 6) {
                 String crystalId = "crystal_" + names[i];
                 RegistrySupplier<Block> block = BLOCKS.register(crystalId, () -> new thaumcraft.common.blocks.BlockCrystal(ThaumcraftCrystalClusters.properties()));

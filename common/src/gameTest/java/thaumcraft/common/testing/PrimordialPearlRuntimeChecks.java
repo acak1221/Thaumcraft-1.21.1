@@ -87,6 +87,9 @@ public final class PrimordialPearlRuntimeChecks {
         var pearl = pearl(f);
         f.check(pearl.getItem() instanceof ItemPrimordialPearl && pearl.getRarity() == Rarity.EPIC && pearl.getMaxStackSize() == 1,
                 "real flattened metadata3 has original EPIC and stack1 identity");
+        var pearlAspects = thaumcraft.common.lib.research.ObjectAspectResolver.get(pearl,f.level);
+        f.check(pearlAspects.size()==6 && pearlAspects.visSize()==96, "actual native primordial pearl resolves exact original96 essentia, six primal tags");
+        for(Aspect primal:Aspect.getPrimalAspects()) f.check(pearlAspects.getAmount(primal)==16, "original direct primordial pearl aspect16: "+primal.getTag());
         try (var rng = new InputRandom(f, bound -> 0, true)) {
             f.check(f.use(pos).consumesAction(), "actual native survival game-mode use accepts a physical pearl without PRIMNODE research");
             prefix(f, rng.bounds, List.of(6,6,3,3,3,3,3,3,5));
@@ -150,21 +153,32 @@ public final class PrimordialPearlRuntimeChecks {
         node(f, pos, new AspectList().add(Aspect.AIR,1), TileNode.NodeModifier.BRIGHT);
         f.put(pos.above(), Blocks.GLASS); pearl(f);
         f.chat(); // Discard prior operations' packets before observing THIS native blast.
-        int[] six = {0};
+        int[] previousBound = {0}, placementDraws = {0}; boolean[] explosionShuffled = {false};
         try (var rng = new InputRandom(f, bound -> {
-            if (bound != 6) return 0;
-            int draw = six[0]++;
-            // First bound6 is current AIR. Trial1=(+1,-1,0), trial2=(+1,0,0); all later trials hit occupied origin.
-            return draw == 1 || draw == 4 || draw == 7 ? 1 : 0;
+            // Native terrain-damaging Explosion.finalizeExplosion calls Util.shuffle(toBlow, level.random).
+            // Its Fisher-Yates integer prefix descends ...7,6,5,4,3,2 BEFORE the original pearl's33 trials.
+            // Do not confuse that native bound6 with a pearl x/y/z draw (ExplosionInteraction.NONE has no such prefix).
+            if (!explosionShuffled[0]) {
+                if (previousBound[0] == 3 && bound == 2) explosionShuffled[0] = true;
+                previousBound[0] = bound;
+                return 0;
+            }
+            f.check(bound == 6, "after the completed native block-explosion shuffle, only original pearl bound6 placement draws remain");
+            int draw = placementDraws[0]++;
+            // Trial1=(+1,-1,0), trial2=(+1,0,0); all later trials hit occupied origin.
+            return draw == 0 || draw == 3 || draw == 6 ? 1 : 0;
         }, true)) {
             f.check(f.use(pos).consumesAction(), "actual physical use reaches its paid native explosion and flux tail");
+            prefix(f, rng.bounds, List.of(6,3,3,3,3,3,3));
             tail(f, rng.bounds);
+            f.check(explosionShuffled[0] && placementDraws[0] == 198,
+                    "native block-explosion shuffle completes before EXACTLY198 original pearl placement draws, none consumed by native shuffle");
         }
         f.check(f.level.getBlockState(pos.above()).isAir(), "original smoking=true maps to an actual terrain-damaging native blast");
         var goo = f.level.getBlockState(pos.offset(1,-1,0)); var gas = f.level.getBlockState(pos.offset(1,0,0));
         f.check(goo.is(ThaumcraftFlux.FLUX_GOO.get()) && goo.getValue(FluxFiniteBlock.LEVEL) == 8
                         && gas.is(ThaumcraftFlux.FLUX_GAS.get()) && gas.getValue(FluxFiniteBlock.LEVEL) == 8,
-                "33 actual six-draw trials place original metadata8 goo below node Y and metadata8 gas at node Y");
+                "33 actual six-draw trials place original metadata8 goo below node Y and metadata8 gas at node Y; goo="+goo+", gas="+gas);
         f.connection.flushChannel(); f.channel.runPendingTasks(); Object packet; int blasts = 0;
         while ((packet = f.channel.readOutbound()) != null) {
             try {

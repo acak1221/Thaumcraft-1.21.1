@@ -85,7 +85,10 @@ public final class InfusionRunicAugmentRecipe implements Recipe<InfusionRecipeIn
     @Override public RecipeSerializer<?> getSerializer() { return ThaumcraftRunic.AUGMENT_SERIALIZER.get(); }
     @Override public RecipeType<?> getType() { return ThaumcraftRunic.AUGMENT_TYPE.get(); }
     public static final class Serializer implements RecipeSerializer<InfusionRunicAugmentRecipe> {
-        private static final StreamCodec<RegistryFriendlyByteBuf, InfusionRunicAugmentRecipe> STREAM = StreamCodec.unit(new InfusionRunicAugmentRecipe());
+        // Stateless recipe instances reconstructed from JSON are distinct objects.
+        // StreamCodec.unit enforces identity equality, breaking the whole update-recipes packet.
+        private static final StreamCodec<RegistryFriendlyByteBuf, InfusionRunicAugmentRecipe> STREAM = StreamCodec.of(
+                (buffer, recipe) -> {}, buffer -> new InfusionRunicAugmentRecipe());
         @Override public MapCodec<InfusionRunicAugmentRecipe> codec() { return CODEC; }
         @Override public StreamCodec<RegistryFriendlyByteBuf, InfusionRunicAugmentRecipe> streamCodec() { return STREAM; }
     }

@@ -34,6 +34,7 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.utils.AspectOrbQueue;
+import thaumcraft.common.lib.utils.RejectedEntitySpawn;
 import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
 import thaumcraft.common.tiles.TileNode;
 
@@ -123,6 +124,9 @@ public final class UnstableNodeRuntimeChecks {
             EntityEvent.ADD.register(cancel);
             try { AspectOrbQueue.tick(level); } finally { EntityEvent.ADD.unregister(cancel); }
             test.assertTrue(attempts==1 && level.getEntity(paidId)==null && node.getAspects().getAmount(Aspect.AIR)==2 && hasPending(paidId), "actual native ADD cancellation and recursive flush retain the one paid pending owner without another debit");
+            var reservationProbe=EntityAspectOrb.unspawned(level,Vec3.atCenterOf(controlled),Vec3.ZERO,0,Aspect.AIR,1); reservationProbe.setUUID(paidId);
+            test.assertTrue(!RejectedEntitySpawn.snapshotBefore(level,reservationProbe).knownBefore(),
+                    "canceled native ADD releases its otherwise orphaned UUID reservation before a same-UUID retry"); reservationProbe.discard();
             var savedQueue=AspectOrbQueue.snapshot(level); level.getDataStorage().set(AspectOrbQueue.ID,AspectOrbQueue.load(savedQueue,level.registryAccess()));
             test.assertTrue(hasPending(paidId),"the canceled actual emission survives a real SavedData encode/decode/storage replacement");
             set(controlled,Blocks.AIR.defaultBlockState());

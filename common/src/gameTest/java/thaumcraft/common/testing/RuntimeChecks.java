@@ -261,8 +261,9 @@ public final class RuntimeChecks {
         var item = ThaumcraftContent.THAUMOMETER.get();
         item.use(test.getLevel(), player, InteractionHand.MAIN_HAND);
         var session = thaumometer.get(ThaumcraftContent.SCAN_SESSION.get());
-        test.assertTrue(session != null && session.signature().equals("@minecraft:redstone"),
-                "placed wire resolves its picked item identity on the server");
+        test.assertTrue(session != null && session.signature().equals("item:minecraft:redstone:0")
+                        && !knowledge.hasScannedItem("@minecraft:redstone"),
+                "placed wire starts its picked item-ID/metadata session without awarding its persistent item marker early");
         test.runAfterDelay(21, () -> {
             item.onUseTick(test.getLevel(), player, thaumometer, 4);
             test.assertValueEqual(knowledge.getAspectPoolFor("potentia"), 2, "placed wire uses original redstone potentia2");
@@ -281,8 +282,9 @@ public final class RuntimeChecks {
             player.lookAt(EntityAnchorArgument.Anchor.EYES, dropped.position().add(0, dropped.getBbHeight() / 2.0, 0));
             item.use(test.getLevel(), player, InteractionHand.MAIN_HAND);
             var droppedSession = thaumometer.get(ThaumcraftContent.SCAN_SESSION.get());
-            test.assertTrue(droppedSession != null && droppedSession.signature().equals("@minecraft:redstone"),
-                    "dropped redstone shares placed wire scan identity");
+            test.assertTrue(droppedSession != null && droppedSession.signature().equals("entity:" + dropped.getId())
+                            && !droppedSession.signature().equals(session.signature()) && knowledge.hasScannedItem("@minecraft:redstone"),
+                    "dropped redstone retains its type2 entity-instance use session while sharing the placed wire's persistent item marker");
             test.runAfterDelay(21, () -> {
                 item.onUseTick(test.getLevel(), player, thaumometer, 4);
                 test.assertValueEqual(knowledge.getAspectPoolFor("potentia"), 2, "dropped duplicate cannot award again");

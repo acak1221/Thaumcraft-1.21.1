@@ -115,3 +115,5 @@ Eldritch shield FX требуют отдельной связи с их existing
 Данная группа — реальный shield/augmentation **существующей брони**, не весь runic
 accessory port. Client HUD/particles/book ещё не inspected in-game, multiplayer,
 world restart и NeoForge этой группой не проверены.
+
+CI4d6a458 found a real native recipe-sync defect: StreamCodec.unit rejects distinct stateless recipe instances created by JSON. The runic serializer now accepts any instance, writes no recipe fields and reconstructs a fresh stateless recipe on decode; MapCodec.unit supplier already accepts independent instances. A focused JSON→native wire round trip covers independently constructed and JSON-decoded recipes. Full update-recipes packet rerun is pending.

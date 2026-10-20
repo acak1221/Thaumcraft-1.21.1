@@ -109,10 +109,13 @@ public final class AspectOrbQueue extends SavedData {
                     continue;
                 }
                 var attempt = new Attempt(queue, level, row);
+                RejectedEntitySpawn.Snapshot beforeSpawn = null;
+                boolean added = false;
                 try {
                     attempt.entity = EntityAspectOrb.unspawned(level, row.position, row.motion, row.yaw, row.aspect, 1);
                     attempt.entity.setUUID(row.id); ACTIVE.get().put(row.id, attempt);
-                    boolean added = level.addFreshEntity(attempt.entity);
+                    beforeSpawn = RejectedEntitySpawn.snapshotBefore(level, attempt.entity);
+                    added = level.addFreshEntity(attempt.entity);
                     if (!attempt.admitted && (added || level.getEntity(row.id) == attempt.entity)) attempt.accept();
                 } catch (RuntimeException | Error failure) {
                     if (!attempt.admitted && attempt.entity != null && level.getEntity(row.id) == attempt.entity) attempt.accept();
@@ -120,8 +123,19 @@ public final class AspectOrbQueue extends SavedData {
                 } finally {
                     ACTIVE.get().remove(row.id);
                     if (!attempt.admitted) {
-                        if (attempt.entity != null) attempt.entity.discard();
-                        queue.pending.put(row.id, new Pending(row.id, row.position, row.motion, row.yaw, row.aspect, level.getGameTime() + 20)); queue.setDirty();
+                        try {
+                            if (attempt.entity != null) {
+                                attempt.entity.discard();
+                                // Fabric Architectury cancels after knownUuids reservation but before
+                                // the entity receives its removal callback. Release only this exact
+                                // unused reservation, never a pre-existing or hidden native owner.
+                                if (beforeSpawn != null) RejectedEntitySpawn.releaseRejected(level, attempt.entity, beforeSpawn, added);
+                            }
+                        } catch (RuntimeException | Error failure) {
+                            Thaumcraft.LOG.warn("Rejected paid aspect orb cleanup failed at {}; ownership retained", pos, failure);
+                        } finally {
+                            queue.pending.put(row.id, new Pending(row.id, row.position, row.motion, row.yaw, row.aspect, level.getGameTime() + 20)); queue.setDirty();
+                        }
                     }
                 }
             }

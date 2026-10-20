@@ -1,4 +1,4 @@
-essentia-reservoir
-port-inverted suction-always insert-short zero-take-fails face-range-9 face-not-saved take-any-face add-any-face contains-list-loose pull-from-below burst-from-two blast-no-power wand-always-sneaks comparator-zero no-analog-output invisible placed-clicked-face soft-resistance no-tool-needed
+levitator
+range-stops-at-solid-air powered-lifts fall-kept nobody-sneaks power-change-ignored soft-resistance stone-sound
 
-# request 21: the 19 essentia-reservoir game-test mutants not run locally (24 JUnit and 8 game-test mutants were caught locally); fortress (run 20) is still to be read
+# request 22: the 7 levitator game-test mutants not run locally (17 JUnit and 6 game-test mutants were caught locally); essentia-reservoir (run 21) is read: 18 of 19 as expected, one anchor fixed

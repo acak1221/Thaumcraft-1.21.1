@@ -34,6 +34,12 @@ public final class ReservoirRules {
         return plus - nextInt.applyAsInt(BURST_SPREAD);
     }
 
+    /**
+     * Whether a cell may take the flux: it must be air, and never the reservoir's own cell. In the original the block was still there
+     * (not air) while it burst; here it is already air, and flux put into its own cell would turn the removal into a failed one.
+     */
+    public static boolean burstTarget(boolean ownCell, boolean air) { return !ownCell && air; }
+
     /** Goo below the reservoir's own level, gas at or above it. */
     public static boolean gooAt(int y, int originY) { return y < originY; }
 

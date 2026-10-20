@@ -207,6 +207,14 @@
    "new": "\"block.thaumcraft.essentia_reservoir\": \"Резервуар\""
   },
   {
+   "id": "own-cell-target",
+   "name": "the burst may fill its own cell",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return !ownCell && air;",
+   "new": "return air;"
+  },
+  {
    "id": "port-inverted",
    "name": "every side but the facing is a port",
    "tier": "gametest",
@@ -395,7 +403,7 @@
    "name": "a placed one opens away from the click",
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java",
-   "old": "ReservoirRules.placedFacing(context.getClickedFace())",
+   "old": "thaumcraft.common.lib.essentia.ReservoirRules.placedFacing(context.getClickedFace())",
    "new": "context.getClickedFace()"
   },
   {

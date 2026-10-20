@@ -1,0 +1,258 @@
+{
+ "description": "Arcane Levitator: range and stacking, the lift of items, creatures, horses and players, power, the block's telling of the stack, recipe (docs/analysis/2026-10-20-arcane-levitator.md)",
+ "watch": {
+  "junit": [
+   "LevitatorRulesTest",
+   "LevitatorAssetsTest"
+  ],
+  "gametests": [
+   "arcaneLevitatorLiftsItemsAndCreaturesAndStacks"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.LevitatorRulesTest",
+  "thaumcraft.assets.LevitatorAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "base-range-9",
+   "name": "the range is nine blocks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "BASE_RANGE = 10",
+   "new": "BASE_RANGE = 9"
+  },
+  {
+   "id": "per-levitator-5",
+   "name": "a stacked one adds five",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "RANGE_PER_LEVITATOR = 10",
+   "new": "RANGE_PER_LEVITATOR = 5"
+  },
+  {
+   "id": "recheck-50",
+   "name": "it counts every fiftieth tick",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "RECHECK_TICKS = 100",
+   "new": "RECHECK_TICKS = 50"
+  },
+  {
+   "id": "ceiling-04",
+   "name": "the lift stops at 0.4",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "LIFT_CEILING = 0.35F",
+   "new": "LIFT_CEILING = 0.4F"
+  },
+  {
+   "id": "step-02",
+   "name": "an entity gains two tenths",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "LIFT_STEP = 0.1F",
+   "new": "LIFT_STEP = 0.2F"
+  },
+  {
+   "id": "damping-08",
+   "name": "a sneaker keeps eighty percent",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "SNEAK_DAMPING = 0.9F",
+   "new": "SNEAK_DAMPING = 0.8F"
+  },
+  {
+   "id": "sneaker-lifted",
+   "name": "a sneaker at rest is lifted",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "return vertical < 0.0 ? vertical * SNEAK_DAMPING : vertical;",
+   "new": "return vertical < 0.0 ? vertical * SNEAK_DAMPING : vertical + LIFT_STEP;"
+  },
+  {
+   "id": "lift-at-ceiling",
+   "name": "an entity at the ceiling still gains",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "return vertical < LIFT_CEILING ? vertical + LIFT_STEP : vertical;",
+   "new": "return vertical <= LIFT_CEILING ? vertical + LIFT_STEP : vertical;"
+  },
+  {
+   "id": "no-horses",
+   "name": "horses are not lifted",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "return item || pushable || horse;",
+   "new": "return item || pushable;"
+  },
+  {
+   "id": "no-stack-bonus",
+   "name": "a stack lifts no further",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/LevitatorRules.java",
+   "old": "return BASE_RANGE + RANGE_PER_LEVITATOR * unpoweredBelow;",
+   "new": "return BASE_RANGE;"
+  },
+  {
+   "id": "recipe-aer-9",
+   "name": "the recipe costs 9 air",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/levitator.json",
+   "old": "\"aer\": 10",
+   "new": "\"aer\": 9"
+  },
+  {
+   "id": "recipe-shape",
+   "name": "the bottom row has two air shards",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/levitator.json",
+   "old": "\"WAW\"",
+   "new": "\"WAA\""
+  },
+  {
+   "id": "recipe-iron-gold",
+   "name": "the recipe wants gold",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/levitator.json",
+   "old": "\"item\": \"minecraft:iron_ingot\"",
+   "new": "\"item\": \"minecraft:gold_ingot\""
+  },
+  {
+   "id": "ru-name",
+   "name": "a short Russian name",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"block.thaumcraft.levitator\": \"Магический подъёмник\"",
+   "new": "\"block.thaumcraft.levitator\": \"Подъёмник\""
+  },
+  {
+   "id": "tag-not-chopped",
+   "name": "an axe does not chop it",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/block/mineable/axe.json",
+   "old": "\"thaumcraft:levitator\"]",
+   "new": "\"thaumcraft:levitatorx\"]"
+  },
+  {
+   "id": "loot-planks",
+   "name": "it drops planks",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/loot_table/blocks/levitator.json",
+   "old": "\"name\": \"thaumcraft:levitator\"",
+   "new": "\"name\": \"thaumcraft:greatwood_planks\""
+  },
+  {
+   "id": "top-texture-side",
+   "name": "the top shows the side",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/block/levitator.json",
+   "old": "\"top\": \"thaumcraft:blocks/liftertop\"",
+   "new": "\"top\": \"thaumcraft:blocks/lifterside\""
+  },
+  {
+   "id": "stack-bonus-always",
+   "name": "a lone levitator counts a neighbour",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "int max = LevitatorRules.maxRange(0), count = 1;",
+   "new": "int max = LevitatorRules.maxRange(1), count = 1;"
+  },
+  {
+   "id": "powered-stack-counted",
+   "name": "a powered levitator under it still counts",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "&& !level.hasNeighborSignal(pos.below(count))) {",
+   "new": ") {"
+  },
+  {
+   "id": "range-stops-at-solid-air",
+   "name": "any block stops the range, glass too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "!level.getBlockState(pos.above(1 + tile.rangeAbove)).canOcclude()",
+   "new": "level.getBlockState(pos.above(1 + tile.rangeAbove)).isAir()"
+  },
+  {
+   "id": "powered-lifts",
+   "name": "a powered levitator lifts anyway",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "if (tile.rangeAbove <= 0 || tile.gettingPower()) return;",
+   "new": "if (tile.rangeAbove <= 0) return;"
+  },
+  {
+   "id": "above-power-ignored",
+   "name": "power on the block above is ignored",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "level.hasNeighborSignal(worldPosition) || level.hasNeighborSignal(worldPosition.above())",
+   "new": "level.hasNeighborSignal(worldPosition)"
+  },
+  {
+   "id": "nothing-pushable",
+   "name": "creatures and players are not lifted",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "entity instanceof ItemEntity, entity.isPushable(), entity instanceof AbstractHorse",
+   "new": "entity instanceof ItemEntity, false, entity instanceof AbstractHorse"
+  },
+  {
+   "id": "nobody-sneaks",
+   "name": "sneaking changes nothing",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "LevitatorRules.lifted(motion.y, entity.isShiftKeyDown())",
+   "new": "LevitatorRules.lifted(motion.y, false)"
+  },
+  {
+   "id": "fall-kept",
+   "name": "the fall is not forgotten",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
+   "old": "entity.resetFallDistance();",
+   "new": ""
+  },
+  {
+   "id": "tells-those-above",
+   "name": "the block tells the levitators above it",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockLevitator.java",
+   "old": "level.getBlockState(pos.below(count)).is(this); ++count)",
+   "new": "level.getBlockState(pos.above(count)).is(this); ++count)"
+  },
+  {
+   "id": "power-change-ignored",
+   "name": "a change of power tells nobody",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockLevitator.java",
+   "old": "tile.gettingPower() != tile.wasPowered()",
+   "new": "tile.gettingPower() == tile.wasPowered()"
+  },
+  {
+   "id": "skips-the-nearest",
+   "name": "the nearest levitator under is not told",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockLevitator.java",
+   "old": "for (int count = 1; level.getBlockState(pos.below(count)).is(this); ++count) {",
+   "new": "for (int count = 2; level.getBlockState(pos.below(count)).is(this); ++count) {"
+  },
+  {
+   "id": "soft-resistance",
+   "name": "resistance 3 instead of 9",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java",
+   "old": ".strength(2.5F, 9.0F)",
+   "new": ".strength(2.5F, 3.0F)"
+  },
+  {
+   "id": "stone-sound",
+   "name": "a stone sound",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java",
+   "old": ".sound(SoundType.WOOD)",
+   "new": ".sound(SoundType.STONE)"
+  }
+ ]
+}

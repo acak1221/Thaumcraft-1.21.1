@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#minecraft:planks",
+      "required": false
+    },
+    "thaumcraft:greatwood_planks",
+    "thaumcraft:silverwood_planks"
+  ]
+}

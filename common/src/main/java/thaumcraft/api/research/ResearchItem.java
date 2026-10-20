@@ -79,8 +79,13 @@ public class ResearchItem {
 
     /** The public view of an original corpus entry. */
     public static ResearchItem of(ResearchDefinition definition) {
-        ResearchItem item = new ResearchItem(definition.key(), definition.category(),
-                new AspectList(), definition.column(), definition.row(), definition.complexity(), (ResourceLocation) null);
+        AspectList tags = new AspectList();
+        for (var cost : definition.aspectCost().entrySet()) {
+            Aspect aspect = Aspect.getAspect(cost.getKey());
+            if (aspect != null) tags.add(aspect, cost.getValue());
+        }
+        ResearchItem item = new ResearchItem(definition.key(), definition.category(), tags, definition.column(),
+                definition.row(), definition.complexity(), (ResourceLocation) null);
         item.definition = definition;
         item.complexity = Math.min(3, Math.max(1, definition.complexity()));
         item.isVirtual = definition.isVirtual();

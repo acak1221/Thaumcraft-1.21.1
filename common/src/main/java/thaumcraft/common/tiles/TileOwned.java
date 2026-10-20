@@ -34,11 +34,6 @@ public class TileOwned extends BlockEntity {
     /** TileOwned:21 - set once a wand has claimed the block; the original never saves it. */
     public boolean safeToRemove = false;
 
-    /** The tile of a block whose own type is not known at construction time. */
-    public TileOwned(BlockPos pos, BlockState state) { this(ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state); }
-
-    public TileOwned(BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type, pos, state); }
-
     /**
      * The constructor of the original tile: the owned block entity of the arcane
      * door, the arcane pressure plate and the warded glass.
@@ -46,6 +41,8 @@ public class TileOwned extends BlockEntity {
     public TileOwned(BlockPos pos, BlockState state) {
         this(ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state);
     }
+
+    public TileOwned(BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type, pos, state); }
 
     /** The owner name, as the original door and device blocks set it. */
     public void setOwner(String owner) {
@@ -58,9 +55,6 @@ public class TileOwned extends BlockEntity {
 
     /** TileOwned:30 - the owner of the block. */
     public String getOwner() { return owner; }
-
-    /** The owner of the block; an empty name means that the block has no owner. */
-    public void setOwner(String owner) { this.owner = owner == null ? "" : owner; }
 
     /** TileOwned:32-37 - the access list of the block. */
     public List<String> accessList() { return List.copyOf(accessList); }

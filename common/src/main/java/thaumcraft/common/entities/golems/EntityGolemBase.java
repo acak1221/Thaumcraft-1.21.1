@@ -404,6 +404,51 @@ public class EntityGolemBase extends AbstractGolem {
         getNavigation().stop();
     }
     public ItemStack getCarriedItem() { return (level().isClientSide ? entityData.get(CARRIED) : carried).copy(); }
+
+    /**
+     * Original {@code EntityGolemBase.setCarried(ItemStack)} (oracle {@code EntityGolemBase.java:778-781}): the
+     * golem's own cargo field, mirrored into the synced data.
+     *
+     * <p>The 1.7 original kept the carried stack in the public field {@code itemCarried} and the goal set wrote
+     * that field directly. The native port keeps the field private, so the ported goal set reaches it through
+     * this setter. The setter moves the ORIGINAL stack, never a copy of it in the main hand.</p>
+     */
+    public void setCarriedItem(ItemStack stack) {
+        requireServerThread();
+        if (level().isClientSide) return;
+        carried = stack == null || stack.isEmpty() ? ItemStack.EMPTY : stack.copy();
+        syncCarried();
+    }
+
+    /**
+     * The original essentia stock setter of the alchemy goals: the golem's own aspect cargo.
+     *
+     * <p>The original wrote the aspect and the amount into the golem's own fields, the native port keeps them
+     * in the {@link GolemAspectCargo} record, so the goal set reaches them through this setter.</p>
+     */
+    public void setEssentiaCargo(Aspect aspect, int amount) {
+        requireServerThread();
+        if (level().isClientSide) return;
+        if (amount <= 0) {
+            aspectCargo = GolemAspectCargo.EMPTY;
+            syncAspectCargo();
+            return;
+        }
+        if (aspect == null || aspectCargo.amount() > 0 && aspectCargo.aspect() != null && aspectCargo.aspect() != aspect) return;
+        GolemAspectCargo stock = new GolemAspectCargo(aspect, Math.min(amount, GolemAspectCargo.MAX_AMOUNT));
+        aspectCargo = stock;
+        syncAspectCargo();
+    }
+
+    /** The original water stock setter of the liquid goals: the golem's own water tank, in millibuckets. */
+    public void setWaterCargoMb(int amount) {
+        requireServerThread();
+        if (level().isClientSide) return;
+        if (amount < 0) return;
+        waterMb = Math.min(amount, GolemWaterCargo.MAX_AMOUNT_MB);
+        syncWater();
+    }
+
     public float getBootupTimer() { return entityData.get(BOOTUP); }
     public int getHealingTimer() { return entityData.get(HEALING); }
     // Original pose value, NOT the raw six-tick action countdown.

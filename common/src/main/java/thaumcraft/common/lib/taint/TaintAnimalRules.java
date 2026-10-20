@@ -186,6 +186,17 @@ public final class TaintAnimalRules {
 
     /** Original1.12 taint seed spread area: the prime seed spreads over a doubled area. */
     public static int seedArea(boolean prime) { return prime ? 2 : 1; }
+
+    /**
+     * The growth supply of the taint seed.
+     *
+     * <p>Forced 1.21.1 change: the later Thaumcraft6 seed grows on the flux saturation of its chunk, and the TC4
+     * aura has no flux and no per chunk aura at all, so the native seed grows on the taint blocks around it: the
+     * block it stands on or one of its six neighbours.</p>
+     */
+    public static boolean seedGrowthSupply(boolean selfIsTaint, int taintedNeighbours) {
+        return selfIsTaint || taintedNeighbours > 0;
+    }
     public static int seedMaxHealth(boolean prime) { return prime ? 150 : 75; }
     public static int seedAttackDamage(boolean prime) { return prime ? 7 : 4; }
     public static int seedExperience(boolean prime) { return prime ? 12 : 8; }

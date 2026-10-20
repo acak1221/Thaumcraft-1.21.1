@@ -2,14 +2,11 @@ package thaumcraft.common.lib.golems;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.ChestBlock;
@@ -427,8 +424,11 @@ public final class GolemAiRules {
     /* ------------------------------------------------------------------ the golem cargo */
 
     /**
-     * The cargo the ported goals move. The native golem keeps its own cargo in a private field with only a getter, so
-     * the ported goal set carries the item in the golem's main hand and the essentia and water stock beside it.
+     * The cargo the ported goals move.
+     *
+     * <p>The 1.7 original kept the carried item in the public field {@code EntityGolemBase.itemCarried} and the
+     * goals wrote that very field, so the goal set and the golem always agreed on one stack. The native golem keeps
+     * the field private, so the goal set reaches it through the public cargo setters of {@link EntityGolemBase}.</p>
      */
     public interface Cargo {
         /** The stack the golem carries, never null. */
@@ -453,59 +453,53 @@ public final class GolemAiRules {
         boolean setWaterMb(int amount);
     }
 
-    /** The shared per-golem stock of the essentia and water cargo. */
-    private static final class Stock {
-        Aspect aspect;
-        int amount;
-        int waterMb;
-    }
-
-    private static final Map<EntityGolemBase, Stock> STOCKS = new WeakHashMap<>();
-
-    /** The cargo of one golem: the item rides in its main hand, the essentia and water stock beside it. */
+    /**
+     * The cargo of one golem: the golem's own carried stack, its essentia stock and its water tank.
+     *
+     * <p>The stock is not a side table any more: every value is read from and written to the golem itself, so the
+     * Fill, Empty, Sorting and Use goals move the ORIGINAL item.</p>
+     */
     public static final class NativeCargo implements Cargo {
         private final EntityGolemBase golem;
-        private final Stock stock;
 
-        NativeCargo(EntityGolemBase golem, Stock stock) {
+        NativeCargo(EntityGolemBase golem) {
             this.golem = golem;
-            this.stock = stock;
         }
 
-        @Override public ItemStack carried() { return golem.getMainHandItem(); }
+        @Override public ItemStack carried() { return golem.getCarriedItem(); }
         @Override public boolean setCarried(ItemStack stack) {
             if (golem.level().isClientSide) return false;
-            golem.setItemInHand(InteractionHand.MAIN_HAND, stack == null ? ItemStack.EMPTY : stack.copy());
+            golem.setCarriedItem(stack);
             return true;
         }
         @Override public int carryLimit() { return golem.getCarryLimit(); }
         @Override public int carrySpace() { return GolemAiRules.carrySpace(carryLimit(), carried()); }
         @Override public int fluidCarryLimit() { return golem.getFluidCarryLimit(); }
-        @Override public Aspect aspect() { return stock.aspect; }
-        @Override public int essentiaAmount() { return stock.amount; }
+        @Override public Aspect aspect() { return golem.getEssentiaAspect(); }
+        @Override public int essentiaAmount() { return golem.getEssentiaAmount(); }
         @Override public boolean setEssentia(Aspect aspect, int amount) {
             if (amount < 0 || amount > golem.getCarryLimit()) return false;
             if (amount == 0) {
-                stock.aspect = null;
-                stock.amount = 0;
+                golem.setEssentiaCargo(null, 0);
                 return true;
             }
-            if (aspect == null || stock.amount > 0 && stock.aspect != null && stock.aspect != aspect) return false;
-            stock.aspect = aspect;
-            stock.amount = amount;
+            if (aspect == null) return false;
+            Aspect current = golem.getEssentiaAspect();
+            if (current != null && current != aspect) return false;
+            golem.setEssentiaCargo(aspect, amount);
             return true;
         }
-        @Override public int waterMb() { return stock.waterMb; }
+        @Override public int waterMb() { return golem.getWaterAmountMb(); }
         @Override public boolean setWaterMb(int amount) {
             if (amount < 0 || amount > golem.getFluidCarryLimit()) return false;
-            stock.waterMb = amount;
+            golem.setWaterCargoMb(amount);
             return true;
         }
     }
 
-    /** The cargo of the given golem; the same stock is shared by every goal of that golem. */
+    /** The cargo of the given golem; every goal of that golem reads and writes the golem's own cargo. */
     public static Cargo cargoOf(EntityGolemBase golem) {
-        return new NativeCargo(golem, STOCKS.computeIfAbsent(golem, key -> new Stock()));
+        return new NativeCargo(golem);
     }
 
     /** The Air upgrade count of a golem, the original's {@code getUpgradeAmount(0)}. */

@@ -12,6 +12,11 @@ public final class ReservoirRules {
     public static final float BURST_POWER = 1.0F;
     /** The creak on the client: a one in {@code 500 - units} chance per tick. */
     public static final int CREAK_BOUND = 500;
+    /**
+     * The tank the stored essentia fills (original TileEssentiaReservoirRenderer:73 with BlockRenderer.W3/W13/W10): the inner box of
+     * the block, three sixteenths from every side, standing three sixteenths above the bottom and ten sixteenths tall when full.
+     */
+    public static final float LIQUID_EDGE = 3 / 16F, LIQUID_FAR = 13 / 16F, LIQUID_HEIGHT = 10 / 16F;
 
     private ReservoirRules() {}
 
@@ -53,4 +58,10 @@ public final class ReservoirRules {
     /** The creak sounds for a roll in [0, 500 - units). */
     public static boolean creaks(int roll) { return roll == 0; }
     public static int creakBound(int units) { return CREAK_BOUND - units; }
+
+    /** The original fill level: the stored units over the capacity. */
+    public static float liquidLevel(int units) { return units / (float) CAPACITY; }
+
+    /** The height of the coloured volume: the tank's bottom plus its height times the fill level. */
+    public static float liquidTop(int units) { return LIQUID_EDGE + LIQUID_HEIGHT * liquidLevel(units); }
 }

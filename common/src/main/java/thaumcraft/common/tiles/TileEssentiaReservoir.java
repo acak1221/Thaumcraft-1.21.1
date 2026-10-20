@@ -2,6 +2,7 @@ package thaumcraft.common.tiles;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,7 +33,9 @@ import thaumcraft.common.lib.essentia.ReservoirRules;
  * every fifth tick, offers its stock only through that side, and answers a sided type query with nothing (a tube asks the unsided one,
  * which names the first aspect stored). The stock is kept like the buffer's: an immutable insertion-ordered map replaced by prepared
  * changes, so every transfer goes through the shared native executor; a malformed saved payload is kept verbatim and the reservoir
- * stays closed instead of the original's null-aspect crash, while a total above 256 is dropped as the original did.
+ * stays closed instead of the original's null-aspect crash, while a total above 256 is dropped as the original did. The client side
+ * keeps the original's tank colour: the shown aspect cycles through the stock and the colour walks towards it, so the renderer can
+ * draw the stored essentia as the original's coloured volume.
  */
 public final class TileEssentiaReservoir extends BlockEntity implements IAspectSource, EssentiaAtomicEndpoint {
     public static final int MAX_AMOUNT = ReservoirRules.CAPACITY;
@@ -41,6 +44,7 @@ public final class TileEssentiaReservoir extends BlockEntity implements IAspectS
     private Direction facing = Direction.DOWN;
     private int count;
     private CompoundTag rejected;
+    private final ReservoirColour colour = new ReservoirColour();
 
     public TileEssentiaReservoir(BlockPos pos, BlockState state) { super(ThaumcraftTubes.RESERVOIR_BLOCK_ENTITY.get(), pos, state); }
 
@@ -49,6 +53,14 @@ public final class TileEssentiaReservoir extends BlockEntity implements IAspectS
     public int getSpace() { return ReservoirRules.space(getAmount()); }
     public int getTickCount() { return count; }
     public boolean isQuarantined() { return rejected != null; }
+    /** The capacity of the tank; the original's maxAmount. */
+    public int getMaxAmount() { return MAX_AMOUNT; }
+    /** The aspect the tank shows; it cycles through the stock every twentieth tick, as the original's displayAspect does. */
+    public Aspect getDisplayAspect() { return colour.displayAspect(); }
+    /** The colour the tank is drawn in; the original's cr/cg/cb, faded towards the shown aspect's colour. */
+    public float getRed() { return colour.red(); }
+    public float getGreen() { return colour.green(); }
+    public float getBlue() { return colour.blue(); }
 
     /** Original comparator: {@code floor(units / 256 * 14)} plus one when anything is stored. */
     public int comparatorSignal() { return ReservoirRules.comparator(getAmount()); }
@@ -140,10 +152,14 @@ public final class TileEssentiaReservoir extends BlockEntity implements IAspectS
         if (tile.level != level || !tile.worldPosition.equals(pos) || tile.isQuarantined() || tile.isRemoved()) return;
         ++tile.count;
         if (level.isClientSide) {
-            // Original client branch: a creak now and then, more often the fuller the vessel (the colour cycling belongs to its renderer).
+            // Original client branch: a creak now and then, more often the fuller the vessel, and the colour of the tank's contents
+            // walks towards the aspect it shows (the original's displayAspect cycle).
             int units = tile.getAmount();
-            if (units > 0 && ReservoirRules.creaks(level.random.nextInt(ReservoirRules.creakBound(units)))) {
-                level.playLocalSound(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, CREAK, SoundSource.BLOCKS, 1.0F, 1.4F + level.random.nextFloat() * .2F, false);
+            if (units > 0) {
+                if (ReservoirRules.creaks(level.random.nextInt(ReservoirRules.creakBound(units)))) {
+                    level.playLocalSound(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, CREAK, SoundSource.BLOCKS, 1.0F, 1.4F + level.random.nextFloat() * .2F, false);
+                }
+                tile.colour.update(List.copyOf(tile.stock.keySet()), tile.count);
             }
             return;
         }

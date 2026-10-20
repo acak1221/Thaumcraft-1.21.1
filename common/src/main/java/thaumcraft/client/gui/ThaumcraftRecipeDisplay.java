@@ -158,6 +158,15 @@ public final class ThaumcraftRecipeDisplay {
             alias("WandRodReed", "infusion/wand_rod_reed"), // 314
             alias("WandRodBlaze", "infusion/wand_rod_blaze"), // 315
             alias("WandRodBone", "infusion/wand_rod_bone"), // 316
+            alias("WandRodGreatwoodStaff", "arcane/staff_rod_greatwood"), // 220
+            alias("WandRodObsidianStaff", "arcane/staff_rod_obsidian"), // 221
+            alias("WandRodSilverwoodStaff", "arcane/staff_rod_silverwood"), // 222
+            alias("WandRodIceStaff", "arcane/staff_rod_ice"), // 223
+            alias("WandRodQuartzStaff", "arcane/staff_rod_quartz"), // 224
+            alias("WandRodReedStaff", "arcane/staff_rod_reed"), // 225
+            alias("WandRodBlazeStaff", "arcane/staff_rod_blaze"), // 226
+            alias("WandRodBoneStaff", "arcane/staff_rod_bone"), // 227
+            alias("WandRodPrimalStaff", "infusion/staff_rod_primal"), // 318
             alias("TallowCandle", "tallow_candle"),            // 477
             alias("JarLabel", "jar_label"));                    // 416-418; dynamic bind/clear not static diagrams
 

@@ -53,9 +53,9 @@ public final class TileArcaneWorkbench extends BlockEntity implements WorldlyCon
         setChanged();
     }
     @Override public void clearContent() { items.clear(); setChanged(); }
-    @Override public boolean canPlaceItem(int slot, ItemStack stack) { return slot != 9 && (slot != WAND_SLOT || ArcaneVis.isCraftingWand(stack)); }
+    @Override public boolean canPlaceItem(int slot, ItemStack stack) { return slot != 9 && (slot != WAND_SLOT || ArcaneVis.isWorkbenchWand(stack)); }
     @Override public int[] getSlotsForFace(Direction side) { return new int[] {WAND_SLOT}; }
-    @Override public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) { return slot == WAND_SLOT && ArcaneVis.isCraftingWand(stack); }
+    @Override public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) { return slot == WAND_SLOT && ArcaneVis.isWorkbenchWand(stack); }
     @Override public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) { return slot == WAND_SLOT; }
 
     @Override public boolean stillValid(Player player) {

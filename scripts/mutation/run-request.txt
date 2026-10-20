@@ -1,3 +1,3 @@
-wand-rods
+staff-rods
 
-# request 7: the elemental wand rods and the wand model selection (dart run 5 and fishing-burn run 6 have been read)
+# request 8: the nine staff rods (wand-rods run 7 may still be running)

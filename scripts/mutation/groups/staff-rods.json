@@ -1,0 +1,308 @@
+{
+ "description": "The nine staff rods: capacity, price, refill, weapon modifier, workbench exclusion, recipes (docs/analysis/2026-10-19-staff-rods.md)",
+ "watch": {
+  "junit": [
+   "WandStaffRodsTest",
+   "WandRodPassiveTest",
+   "WandModelAssetsTest",
+   "WandDataTest"
+  ],
+  "gametests": [
+   "staffRodsBrewAssembleStrikeAndRefill"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.wands.*",
+  "thaumcraft.assets.WandModelAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "greatwood-staff-capacity",
+   "name": "the greatwood staff core holds 120 vis",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "GREATWOOD_STAFF = new Rod(\"greatwood_staff\", 12500, 8)",
+   "new": "GREATWOOD_STAFF = new Rod(\"greatwood_staff\", 12000, 8)"
+  },
+  {
+   "id": "obsidian-staff-cost",
+   "name": "the obsidian staff core costs 12",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "OBSIDIAN_STAFF = new Rod(\"obsidian_staff\", 17500, 14, \"terra\")",
+   "new": "OBSIDIAN_STAFF = new Rod(\"obsidian_staff\", 17500, 12, \"terra\")"
+  },
+  {
+   "id": "silverwood-staff-cost",
+   "name": "the silverwood staff core costs 23",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "SILVERWOOD_STAFF = new Rod(\"silverwood_staff\", 25000, 24)",
+   "new": "SILVERWOOD_STAFF = new Rod(\"silverwood_staff\", 25000, 23)"
+  },
+  {
+   "id": "primal-staff-cost",
+   "name": "the primal staff core costs 30",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "PRIMAL_STAFF = new Rod(\"primal_staff\", 25000, 32, ANY_PRIMAL)",
+   "new": "PRIMAL_STAFF = new Rod(\"primal_staff\", 25000, 30, ANY_PRIMAL)"
+  },
+  {
+   "id": "primal-staff-fixed-aspect",
+   "name": "the primal staff refills only air",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "PRIMAL_STAFF = new Rod(\"primal_staff\", 25000, 32, ANY_PRIMAL)",
+   "new": "PRIMAL_STAFF = new Rod(\"primal_staff\", 25000, 32, \"aer\")"
+  },
+  {
+   "id": "ice-staff-wrong-aspect",
+   "name": "the icy staff refills fire",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "ICE_STAFF = new Rod(\"ice_staff\", 17500, 14, \"aqua\")",
+   "new": "ICE_STAFF = new Rod(\"ice_staff\", 17500, 14, \"ignis\")"
+  },
+  {
+   "id": "reed-staff-no-refill",
+   "name": "the reed staff refills nothing",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "REED_STAFF = new Rod(\"reed_staff\", 17500, 14, \"aer\")",
+   "new": "REED_STAFF = new Rod(\"reed_staff\", 17500, 14)"
+  },
+  {
+   "id": "staff-not-detected",
+   "name": "no rod is a staff",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "public boolean staff() { return tag.endsWith(STAFF); }",
+   "new": "public boolean staff() { return false; }"
+  },
+  {
+   "id": "base-tag-keeps-suffix",
+   "name": "a staff is named after its own tag",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "return staff() ? tag.substring(0, tag.length() - STAFF.length()) : tag;",
+   "new": "return tag;"
+  },
+  {
+   "id": "staff-order-swapped",
+   "name": "obsidian and blaze staves change places",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "OBSIDIAN_STAFF, BLAZE_STAFF, ICE_STAFF,",
+   "new": "BLAZE_STAFF, OBSIDIAN_STAFF, ICE_STAFF,"
+  },
+  {
+   "id": "primal-period-two-hundred",
+   "name": "the primal staff waits 200 ticks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+   "old": "PRIMAL_PERIOD = 50;",
+   "new": "PRIMAL_PERIOD = 200;"
+  },
+  {
+   "id": "primal-ignores-threshold",
+   "name": "the primal staff refills a full primal too",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+   "old": "if (wand.amount(primal) < threshold(wand.capacity())) low.add(primal);",
+   "new": "low.add(primal);"
+  },
+  {
+   "id": "primal-picks-first",
+   "name": "the primal staff never draws",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+   "old": "String chosen = low.get(pick.applyAsInt(low.size()));",
+   "new": "String chosen = low.get(0);"
+  },
+  {
+   "id": "primal-draws-among-six",
+   "name": "the primal staff draws among six",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+   "old": "pick.applyAsInt(low.size())",
+   "new": "pick.applyAsInt(WandData.PRIMALS.size())"
+  },
+  {
+   "id": "primal-adds-two",
+   "name": "the primal staff adds two vis",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+   "old": "return wand.withAmount(chosen, wand.amount(chosen) + STEP);",
+   "new": "return wand.withAmount(chosen, wand.amount(chosen) + 2 * STEP);"
+  },
+  {
+   "id": "vis-limit-low",
+   "name": "a component cannot hold a staff's vis",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandData.java",
+   "old": "MAX_CENTIVIS = 25000;",
+   "new": "MAX_CENTIVIS = 10000;"
+  },
+  {
+   "id": "rod-scale-sixteen",
+   "name": "the rod property runs over 16 places",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandModels.java",
+   "old": "ROD_SCALE = 32F",
+   "new": "ROD_SCALE = 16F"
+  },
+  {
+   "id": "staff-model-wand-shape",
+   "name": "a primal staff with a gold cap is drawn with the wand shape",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/wand_primal_staff_gold.json",
+   "old": "thaumcraft:item/staff_shape",
+   "new": "thaumcraft:item/wand_shape"
+  },
+  {
+   "id": "staff-model-wrong-skin",
+   "name": "a reed staff with an iron cap and a frost focus wears the bone skin",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/wand_reed_staff_iron_frost.json",
+   "old": "wand_rod_reed",
+   "new": "wand_rod_bone"
+  },
+  {
+   "id": "staff-hits-for-five",
+   "name": "a staff adds 5 attack damage",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java",
+   "old": "new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, 6.0,",
+   "new": "new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, 5.0,"
+  },
+  {
+   "id": "assembly-forgets-modifier",
+   "name": "an assembled staff has no weapon modifier until it is carried",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java",
+   "old": "stack.set(ThaumcraftContent.WAND_DATA.get(), data);\n        normalizeModifiers(stack);",
+   "new": "stack.set(ThaumcraftContent.WAND_DATA.get(), data);"
+  },
+  {
+   "id": "nothing-is-a-staff",
+   "name": "isStaff is always false",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java",
+   "old": "public static boolean isStaff(ItemStack stack) { return WandMaterials.rod(data(stack).rod()).staff(); }",
+   "new": "public static boolean isStaff(ItemStack stack) { return false; }"
+  },
+  {
+   "id": "workbench-accepts-staves",
+   "name": "the workbench wand rule ignores staves",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/crafting/ArcaneVis.java",
+   "old": "return isCraftingWand(stack) && !ItemWandCasting.isStaff(stack);",
+   "new": "return isCraftingWand(stack);"
+  },
+  {
+   "id": "tile-slot-accepts-staves",
+   "name": "the tile's wand slot takes a staff",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileArcaneWorkbench.java",
+   "old": "(slot != WAND_SLOT || ArcaneVis.isWorkbenchWand(stack)); }",
+   "new": "(slot != WAND_SLOT || ArcaneVis.isCraftingWand(stack)); }"
+  },
+  {
+   "id": "menu-slot-accepts-staves",
+   "name": "the menu's wand slot takes a staff",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/container/ContainerArcaneWorkbench.java",
+   "old": "public boolean mayPlace(ItemStack stack) { return ArcaneVis.isWorkbenchWand(stack); }",
+   "new": "public boolean mayPlace(ItemStack stack) { return ArcaneVis.isCraftingWand(stack); }"
+  },
+  {
+   "id": "table-converts-for-staves",
+   "name": "a staff turns the table into a workbench",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockArcaneWorkbench.java",
+   "old": "!ArcaneVis.isWorkbenchWand(held)",
+   "new": "!ArcaneVis.isCraftingWand(held)"
+  },
+  {
+   "id": "staff-named-wand",
+   "name": "a staff is called a wand",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java",
+   "old": "(rod.staff() ? \"staff\" : \"wand\")",
+   "new": "\"wand\""
+  },
+  {
+   "id": "name-uses-staff-tag",
+   "name": "a staff is named after its staff tag",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java",
+   "old": "\"item.Wand.\" + rod.baseTag() + \".rod\"",
+   "new": "\"item.Wand.\" + rod.tag() + \".rod\""
+  },
+  {
+   "id": "craft-cost-limit-low",
+   "name": "the craft-cost component cannot hold a staff's price",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java",
+   "old": "Codec.intRange(0, 32 * 9)",
+   "new": "Codec.intRange(0, 54)"
+  },
+  {
+   "id": "obsidian-staff-cost-recipe",
+   "name": "the obsidian staff core costs 13 order",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/staff_rod_obsidian.json",
+   "old": "\"ordo\": 14",
+   "new": "\"ordo\": 13"
+  },
+  {
+   "id": "silverwood-staff-recipe-research",
+   "name": "the silverwood staff core needs the greatwood research",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/staff_rod_silverwood.json",
+   "old": "ROD_silverwood_staff",
+   "new": "ROD_greatwood_staff"
+  },
+  {
+   "id": "ice-staff-pattern",
+   "name": "the icy staff core's pattern is mirrored",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/staff_rod_ice.json",
+   "old": "\"  S\"",
+   "new": "\"S  \""
+  },
+  {
+   "id": "reed-staff-wrong-rod",
+   "name": "the reed staff core takes a bone rod",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/staff_rod_reed.json",
+   "old": "\"item\": \"thaumcraft:wand_rod_reed\"",
+   "new": "\"item\": \"thaumcraft:wand_rod_bone\""
+  },
+  {
+   "id": "primal-recipe-instability",
+   "name": "the primal core brews at instability 7",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/staff_rod_primal.json",
+   "old": "\"instability\": 8",
+   "new": "\"instability\": 7"
+  },
+  {
+   "id": "primal-recipe-cheap-magic",
+   "name": "the primal core needs 32 magic",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/staff_rod_primal.json",
+   "old": "\"praecantatio\": 64",
+   "new": "\"praecantatio\": 32"
+  },
+  {
+   "id": "primal-recipe-no-bone",
+   "name": "the primal core takes no bone rod",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/staff_rod_primal.json",
+   "old": "\"item\": \"thaumcraft:wand_rod_bone\"",
+   "new": "\"item\": \"thaumcraft:wand_rod_ice\""
+  }
+ ]
+}

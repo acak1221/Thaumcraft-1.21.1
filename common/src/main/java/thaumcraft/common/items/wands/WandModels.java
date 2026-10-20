@@ -6,8 +6,9 @@ import java.util.List;
  * The numbers the wand's item model selector reads: one float per part, matched against the {@code overrides} of {@code wand.json}.
  * The client registers these as the item properties {@code thaumcraft:wand_rod}, {@code wand_cap} and {@code wand_focus}; they live here
  * so that the model files and their selector can be checked without a client. A rod's value is its place in {@link WandMaterials#RODS}
- * over the number of gaps, a cap's is its place over the gaps, and a focus has a fixed one; every value is a binary fraction, so the
- * {@code >=} test of a model override is exact.
+ * over {@link #ROD_SCALE}, a cap's its place over {@link #CAP_SCALE}, and a focus has a fixed one; the scales are powers of two (not
+ * the number of parts, which would give thirds and fifths), so every value is an exact binary fraction and the {@code >=} test of a model
+ * override is exact however many parts are added later.
  */
 public final class WandModels {
     /** The focus part of a wand's model: the suffix of the model file and the property value. */
@@ -20,18 +21,21 @@ public final class WandModels {
     public static final Focus SHOCK = new Focus("shock", 1F);
     public static final List<Focus> FOCI = List.of(NONE, OTHER, EXCAVATION, FROST, SHOCK);
 
+    /** At most 33 rods (places 0..32) and 5 caps (0..4) fit these scales; the JUnit test fails before a model silently goes wrong. */
+    public static final float ROD_SCALE = 32F, CAP_SCALE = 4F;
+
     private WandModels() {}
 
     public static float rodValue(String tag) {
         for (int index = 0; index < WandMaterials.RODS.size(); index++) {
-            if (WandMaterials.RODS.get(index).tag().equals(tag)) return index / (float) (WandMaterials.RODS.size() - 1);
+            if (WandMaterials.RODS.get(index).tag().equals(tag)) return index / ROD_SCALE;
         }
         return 0F;
     }
 
     public static float capValue(String tag) {
         for (int index = 0; index < WandMaterials.CAPS.size(); index++) {
-            if (WandMaterials.CAPS.get(index).tag().equals(tag)) return index / (float) (WandMaterials.CAPS.size() - 1);
+            if (WandMaterials.CAPS.get(index).tag().equals(tag)) return index / CAP_SCALE;
         }
         return 0F;
     }

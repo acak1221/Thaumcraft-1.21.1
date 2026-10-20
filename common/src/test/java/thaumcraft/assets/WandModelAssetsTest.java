@@ -54,10 +54,12 @@ class WandModelAssetsTest {
                 // The chosen model really is that rod and that cap, with the focus part only when a focus is fitted.
                 JsonObject model = json("assets/thaumcraft/models/item/" + chosen.substring("thaumcraft:item/".length()) + ".json");
                 JsonObject textures = model.getAsJsonObject("textures");
-                if (!textures.get("rod").getAsString().equals("thaumcraft:models/wand_rod_" + rod.tag())
+                // A staff is drawn with the long staff shape and the skin of the plain rod it is made from.
+                String shape = (rod.staff() ? "thaumcraft:item/staff" : "thaumcraft:item/wand") + (focus.suffix().isEmpty() ? "_shape" : "_focus_shape");
+                if (!textures.get("rod").getAsString().equals("thaumcraft:models/wand_rod_" + rod.baseTag())
                         || !textures.get("cap").getAsString().equals("thaumcraft:models/wand_cap_" + cap.tag())
                         || textures.has("focus") != !focus.suffix().isEmpty()
-                        || !model.get("parent").getAsString().equals(focus.suffix().isEmpty() ? "thaumcraft:item/wand_shape" : "thaumcraft:item/wand_focus_shape"))
+                        || !model.get("parent").getAsString().equals(shape))
                     wrong.add(chosen + " shows the wrong parts: " + textures);
             }
         }
@@ -65,18 +67,21 @@ class WandModelAssetsTest {
     }
 
     @Test void thePropertyValuesAreExactBinaryFractionsInOrder() {
+        assertTrue(WandMaterials.RODS.size() <= WandModels.ROD_SCALE + 1 && WandMaterials.CAPS.size() <= WandModels.CAP_SCALE + 1,
+                "the scales must hold every rod and cap: more parts need a bigger power of two (and the generator's scales)");
         float last = -1;
         for (var rod : WandMaterials.RODS) {
             float value = WandModels.rodValue(rod.tag());
             assertTrue(value > last && value >= 0 && value <= 1, rod.tag());
-            assertEquals(value, (float) (Math.round(value * 8) / 8.0), 0F, rod.tag() + " is a multiple of 1/8");
+            assertEquals(value, (float) (Math.round(value * 32) / 32.0), 0F, rod.tag() + " is a multiple of 1/32");
             last = value;
         }
         assertEquals(0F, WandModels.rodValue("wood"), 0F);
-        assertEquals(1F, WandModels.rodValue("reed"), 0F);
+        assertEquals(8 / 32F, WandModels.rodValue("reed"), 0F);
+        assertEquals(17 / 32F, WandModels.rodValue("primal_staff"), 0F);
         assertEquals(0F, WandModels.capValue("iron"), 0F);
-        assertEquals(.5F, WandModels.capValue("gold"), 0F);
-        assertEquals(1F, WandModels.capValue("thaumium"), 0F);
+        assertEquals(.25F, WandModels.capValue("gold"), 0F);
+        assertEquals(.5F, WandModels.capValue("thaumium"), 0F);
         assertEquals(List.of(0F, .25F, .5F, .75F, 1F), WandModels.FOCI.stream().map(WandModels.Focus::value).toList());
     }
 
@@ -87,8 +92,8 @@ class WandModelAssetsTest {
             assertTrue(name.startsWith("thaumcraft:item/"), name);
             JsonObject model = json("assets/thaumcraft/models/item/" + name.substring("thaumcraft:item/".length()) + ".json");
             String parent = model.get("parent").getAsString();
-            boolean withFocus = parent.equals("thaumcraft:item/wand_focus_shape");
-            assertTrue(withFocus || parent.equals("thaumcraft:item/wand_shape"), name + " has the parent " + parent);
+            boolean withFocus = parent.equals("thaumcraft:item/wand_focus_shape") || parent.equals("thaumcraft:item/staff_focus_shape");
+            assertTrue(withFocus || parent.equals("thaumcraft:item/wand_shape") || parent.equals("thaumcraft:item/staff_shape"), name + " has the parent " + parent);
             assertEquals(name.endsWith("_fire") || name.endsWith("_excavation") || name.endsWith("_frost") || name.endsWith("_shock"), withFocus, name);
             JsonObject textures = model.getAsJsonObject("textures");
             assertEquals(withFocus ? 3 : 2, textures.size(), name);
@@ -97,16 +102,18 @@ class WandModelAssetsTest {
                 assertTrue(exists("assets/thaumcraft/textures/" + texture.substring("thaumcraft:".length()) + ".png"), name + ": texture " + texture);
             }
         }
-        for (String shape : List.of("wand_shape", "wand_focus_shape")) assertTrue(exists("assets/thaumcraft/models/item/" + shape + ".json"), shape);
+        for (String shape : List.of("wand_shape", "wand_focus_shape", "staff_shape", "staff_focus_shape")) assertTrue(exists("assets/thaumcraft/models/item/" + shape + ".json"), shape);
     }
 
     @Test void everyRodHasItsItemModelAndTextures() throws Exception {
         for (var rod : WandMaterials.RODS) {
             if (rod.tag().equals("wood")) continue; // the vanilla stick
-            JsonObject item = json("assets/thaumcraft/models/item/wand_rod_" + rod.tag() + ".json");
-            assertEquals("thaumcraft:items/wand_rod_" + rod.tag(), item.getAsJsonObject("textures").get("layer0").getAsString(), rod.tag());
-            assertTrue(exists("assets/thaumcraft/textures/items/wand_rod_" + rod.tag() + ".png"), rod.tag() + " icon");
-            assertTrue(exists("assets/thaumcraft/textures/models/wand_rod_" + rod.tag() + ".png"), rod.tag() + " model skin");
+            // A staff core is the item staff_rod_<rod> with its own icon; the model skin is the plain rod's.
+            String item = (rod.staff() ? "staff_rod_" : "wand_rod_") + rod.baseTag();
+            JsonObject model = json("assets/thaumcraft/models/item/" + item + ".json");
+            assertEquals("thaumcraft:items/" + item, model.getAsJsonObject("textures").get("layer0").getAsString(), rod.tag());
+            assertTrue(exists("assets/thaumcraft/textures/items/" + item + ".png"), rod.tag() + " icon");
+            assertTrue(exists("assets/thaumcraft/textures/models/wand_rod_" + rod.baseTag() + ".png"), rod.tag() + " model skin");
         }
         for (var cap : WandMaterials.CAPS) assertTrue(exists("assets/thaumcraft/textures/models/wand_cap_" + cap.tag() + ".png"), cap.tag());
     }

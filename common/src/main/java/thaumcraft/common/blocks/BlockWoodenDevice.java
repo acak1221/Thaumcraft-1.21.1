@@ -1,0 +1,174 @@
+package thaumcraft.common.blocks;
+
+import com.mojang.serialization.MapCodec;
+import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.IAspectSource;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.tiles.TileArcanePressurePlate;
+import thaumcraft.common.tiles.TileBanner;
+import thaumcraft.common.tiles.TileOwned;
+
+/**
+ * Original BlockWoodenDevice: the wooden device family. This port owns the two
+ * arcane pressure plate variants, the greatwood and silverwood blocks and the
+ * banner; every other metadata of the original family already exists as its
+ * own native block.
+ */
+public final class BlockWoodenDevice extends BaseEntityBlock {
+    public static final MapCodec<BlockWoodenDevice> CODEC = simpleCodec(BlockWoodenDevice::new);
+    /** Original BlockWoodenDevice metadata 0..14. */
+    public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
+    /** The arcane pressure plate is a thin plate at the bottom of the block. */
+    private static final VoxelShape PLATE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
+    /** The banner hangs on a wall. */
+    private static final VoxelShape BANNER = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 1.0D);
+
+    public BlockWoodenDevice(Properties properties) {
+        super(properties);
+        registerDefaultState(stateDefinition.any().setValue(VARIANT, 6));
+    }
+
+    @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
+
+    public static int variant(BlockState state) { return state.getValue(VARIANT); }
+
+    /** BlockWoodenDevice:473-495 - the block entity of the owned wooden variants. */
+    @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        int kind = EldritchBlockRules.woodenDeviceKind(state.getValue(VARIANT));
+        if (kind == EldritchBlockRules.DEVICE_KIND_PRESSURE_PLATE) {
+            return new TileArcanePressurePlate(pos, state);
+        }
+        if (kind == EldritchBlockRules.DEVICE_KIND_BANNER) {
+            return new TileBanner(pos, state);
+        }
+        return null;
+    }
+
+    /** BlockWoodenDevice - the pressure plate is a plate, the banner a thin wall plate. */
+    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        int kind = EldritchBlockRules.woodenDeviceKind(state.getValue(VARIANT));
+        if (kind == EldritchBlockRules.DEVICE_KIND_PRESSURE_PLATE) return PLATE;
+        if (kind == EldritchBlockRules.DEVICE_KIND_BANNER) return BANNER;
+        return Shapes.block();
+    }
+
+    /** BlockWoodenDevice:552-604 - the plate is checked every tick. */
+    @Override protected void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
+        super.tick(state, level, pos, random);
+        int variant = state.getValue(VARIANT);
+        if (variant != EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE
+                && variant != EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_PRESSED) return;
+        boolean pressed = detectPlate(level, pos, state);
+        if (pressed && variant != EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_PRESSED) {
+            level.setBlock(pos, state.setValue(VARIANT, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_PRESSED), Block.UPDATE_ALL);
+            level.playSound(null, pos, net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), net.minecraft.sounds.SoundSource.BLOCKS, .2F, .6F);
+        } else if (!pressed && variant != EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE) {
+            level.setBlock(pos, state.setValue(VARIANT, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE), Block.UPDATE_ALL);
+            level.playSound(null, pos, net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), net.minecraft.sounds.SoundSource.BLOCKS, .2F, .5F);
+        }
+        level.scheduleTick(pos, this, 1);
+    }
+
+    /** BlockWoodenDevice:551-576 - the detection box and the owner filter. */
+    private boolean detectPlate(Level level, BlockPos pos, BlockState state) {
+        TileArcanePressurePlate plate = level.getBlockEntity(pos) instanceof TileArcanePressurePlate tile ? tile : null;
+        int setting = plate == null ? 0 : plate.getSetting();
+        String owner = plate == null ? "" : plate.getOwner();
+        List<String> access = plate == null ? List.of() : plate.getAccessList();
+        AABB box = new AABB(pos.getX() + EldritchBlockRules.PLATE_INSET, pos.getY(), pos.getZ() + EldritchBlockRules.PLATE_INSET,
+                pos.getX() + 1.0D - EldritchBlockRules.PLATE_INSET, pos.getY() + EldritchBlockRules.PLATE_HEIGHT,
+                pos.getZ() + 1.0D - EldritchBlockRules.PLATE_INSET);
+        List<Entity> found = level.getEntities(null, box);
+        for (Entity entity : found) {
+            boolean player = entity instanceof Player;
+            String entityName = entity instanceof Player named ? named.getGameProfile().getName() : "";
+            boolean isOwner = player && (entityName.equals(owner) || access.contains("0" + entityName) || access.contains("1" + entityName));
+            if (!EldritchBlockRules.plateDetects(setting, !entity.isAlive(), player, isOwner, access.contains("0" + entityName) || access.contains("1" + entityName))) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /** BlockWoodenDevice:540-548 - the plate needs a scheduled tick. */
+    @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        if (EldritchBlockRules.woodenDeviceKind(state.getValue(VARIANT)) == EldritchBlockRules.DEVICE_KIND_PRESSURE_PLATE) {
+            level.scheduleTick(pos, this, 1);
+        }
+    }
+
+    /** BlockWoodenDevice:363-401 - the owner cycles the plate sensitivity and the banner takes an aspect. */
+    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        int variant = state.getValue(VARIANT);
+        if (variant == EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE || variant == EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_PRESSED) {
+            if (!(level.getBlockEntity(pos) instanceof TileArcanePressurePlate plate)) return InteractionResult.PASS;
+            if (!plate.getOwner().equals(player.getGameProfile().getName())
+                    && !plate.getAccessList().contains("1" + player.getGameProfile().getName())) return InteractionResult.PASS;
+            int setting = EldritchBlockRules.plateNextSetting(plate.getSetting());
+            plate.setSetting((byte) setting);
+            player.displayClientMessage(Component.translatable(switch (setting) {
+                case EldritchBlockRules.PLATE_SETTING_ALL -> "chat.thaumcraft.plate.all";
+                case EldritchBlockRules.PLATE_SETTING_NOT_OWNER -> "chat.thaumcraft.plate.not_owner";
+                default -> "chat.thaumcraft.plate.owner";
+            }), true);
+            level.playSound(null, pos, net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), net.minecraft.sounds.SoundSource.BLOCKS, .1F, .9F);
+            plate.setChanged();
+            level.sendBlockUpdated(pos, state, state, 3);
+            return InteractionResult.CONSUME;
+        }
+        if (variant != EldritchBlockRules.DEVICE_WOOD_BANNER) return InteractionResult.PASS;
+        if (!(level.getBlockEntity(pos) instanceof TileBanner banner)) return InteractionResult.PASS;
+        ItemStack held = player.getItemInHand(player.getUsedItemHand());
+        if (player.isShiftKeyDown()) {
+            banner.setAspect(null);
+        } else if (held.getItem() instanceof IAspectSource source && source.getAspects().getAspects().length > 0) {
+            Aspect aspect = source.getAspects().getAspects()[0];
+            banner.setAspect(aspect);
+            if (!player.getAbilities().instabuild) held.shrink(1);
+        } else {
+            return InteractionResult.PASS;
+        }
+        banner.setChanged();
+        level.sendBlockUpdated(pos, state, state, 3);
+        level.playSound(null, pos, net.minecraft.sounds.SoundEvents.WOOL_PLACE, net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 1.0F);
+        return InteractionResult.CONSUME;
+    }
+
+    /** BlockWoodenDevice:443-450 - the owner of the banner is the placer. */
+    @Override public void setPlacedBy(Level level, BlockPos pos, BlockState state, net.minecraft.world.entity.LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (state.getValue(VARIANT) != EldritchBlockRules.DEVICE_WOOD_BANNER) return;
+        if (!(level.getBlockEntity(pos) instanceof TileBanner banner)) return;
+        banner.setFacing(Direction.from2DDataValue(placer.getDirection().get2DDataValue()).getOpposite());
+        if (stack.getItem() instanceof DyeItem dye) banner.setColor((byte) dye.getDyeColor().getId());
+        banner.setChanged();
+        level.sendBlockUpdated(pos, state, state, 3);
+    }
+}

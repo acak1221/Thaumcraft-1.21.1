@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=west": {
+      "model": "thaumcraft:block/arcane_furnace_nozzle_west"
+    },
+    "facing=east": {
+      "model": "thaumcraft:block/arcane_furnace_nozzle_east"
+    },
+    "facing=north": {
+      "model": "thaumcraft:block/arcane_furnace_nozzle_north"
+    },
+    "facing=south": {
+      "model": "thaumcraft:block/arcane_furnace_nozzle_south"
+    }
+  }
+}

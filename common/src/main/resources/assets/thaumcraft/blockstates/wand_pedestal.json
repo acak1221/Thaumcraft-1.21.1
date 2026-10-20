@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "focus=false": {
+      "model": "thaumcraft:block/wand_pedestal"
+    },
+    "focus=true": {
+      "model": "thaumcraft:block/wand_pedestal_focus"
+    }
+  }
+}

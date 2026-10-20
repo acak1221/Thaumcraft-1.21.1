@@ -1,0 +1,12 @@
+{
+  "feature": "thaumcraft:village_banker_homes",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 1
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

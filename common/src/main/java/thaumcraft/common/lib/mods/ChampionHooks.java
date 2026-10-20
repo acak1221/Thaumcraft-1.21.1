@@ -23,7 +23,6 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.biome.Biome;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.lib.world.BiomeColumns;
-import thaumcraft.common.mixin.ChampionAccess;
 
 /**
  * The original champion lifecycle of the 1.7 bestiary, wired into the native mob
@@ -72,6 +71,7 @@ public final class ChampionHooks {
 
     private static volatile boolean championsEnabled = true;
     private static volatile DangerousLocation dangerousLocation = (level, x, y, z) -> false;
+    private static boolean initialized;
 
     private ChampionHooks() {}
 
@@ -96,6 +96,8 @@ public final class ChampionHooks {
      * Architectury, which stands in the same place on every loader.
      */
     public static void init() {
+        if (initialized) return;
+        initialized = true;
         EntityEvent.ADD.register((entity, world) -> {
             if (world instanceof ServerLevel level) onEntityAdded(entity, level);
             return EventResult.pass();
@@ -182,6 +184,7 @@ public final class ChampionHooks {
      */
     public static void tickChampion(Mob mob) {
         if (mob.level().isClientSide) {
+            if (!mob.isAlive()) return;
             int shown = clientChampionId(mob);
             if (shown >= 0) ChampionRules.ClientFx.showChampionFx(mob, shown, mob.level().getRandom());
             return;

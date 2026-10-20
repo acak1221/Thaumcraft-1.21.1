@@ -4,6 +4,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import net.minecraft.world.entity.Entity;
+import thaumcraft.common.lib.mods.ChampionAccess;
 
 /**
  * The original champion modifier id was a custom entity attribute, so it travelled

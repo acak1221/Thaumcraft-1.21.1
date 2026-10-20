@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import thaumcraft.common.lib.mods.ChampionAccess;
 import thaumcraft.common.lib.mods.ChampionHooks;
 
 /**

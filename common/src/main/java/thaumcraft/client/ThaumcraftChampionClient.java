@@ -97,11 +97,6 @@ public final class ThaumcraftChampionClient {
             setSize(0.01F, 0.01F);
         }
 
-        private static double[] position(Entity champion, IChampionModifierEffect.Fx fx) {
-            AABB box = champion.getBoundingBox();
-            return new double[]{box.minX + fx.x(), box.minY + fx.y(), box.minZ + fx.z()};
-        }
-
         /** The original frame of the particle. */
         private int frame() {
             if (spark) return frameBase + (int) ((float) age / (float) lifetime * 7.0F);

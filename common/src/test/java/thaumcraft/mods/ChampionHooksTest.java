@@ -19,27 +19,31 @@ import thaumcraft.common.lib.mods.ChampionRules;
  * point of the original Outer Lands maze.
  */
 class ChampionHooksTest {
-    /** Random that answers with fixed values so the original chances can be checked exactly. */
+    /** Random that answers with a fixed value so the original chances can be checked exactly. */
     private static final class ScriptedJavaRandom extends java.util.Random {
         private final int intValue;
         ScriptedJavaRandom(int intValue) { this.intValue = intValue; }
         @Override public int nextInt(int bound) { return Math.floorMod(intValue, bound); }
     }
 
-    /** Random that answers with fixed values so the original chances can be checked exactly. */
+    /**
+     * Random that answers with a scripted sequence, so the original spawn roll and
+     * the original modifier roll can be told apart.
+     */
     private static final class ScriptedRandom implements RandomSource {
-        private final int intValue;
-        private final float floatValue;
-        ScriptedRandom(int intValue, float floatValue) { this.intValue = intValue; this.floatValue = floatValue; }
+        private final int[] values;
+        private int index;
+        ScriptedRandom(int... values) { this.values = values; }
+        private int next() { int value = values[Math.min(index, values.length - 1)]; index++; return value; }
         @Override public RandomSource fork() { return this; }
         @Override public PositionalRandomFactory forkPositional() { throw new UnsupportedOperationException(); }
         @Override public void setSeed(long seed) {}
-        @Override public int nextInt() { return intValue; }
-        @Override public int nextInt(int bound) { return Math.floorMod(intValue, bound); }
-        @Override public long nextLong() { return intValue; }
-        @Override public boolean nextBoolean() { return floatValue < 0.5F; }
-        @Override public float nextFloat() { return floatValue; }
-        @Override public double nextDouble() { return floatValue; }
+        @Override public int nextInt() { return next(); }
+        @Override public int nextInt(int bound) { return Math.floorMod(next(), bound); }
+        @Override public long nextLong() { return next(); }
+        @Override public boolean nextBoolean() { return next() % 2 == 0; }
+        @Override public float nextFloat() { return next() / 100.0F; }
+        @Override public double nextDouble() { return next() / 100.0; }
         @Override public double nextGaussian() { return 0.0D; }
     }
 
@@ -47,70 +51,71 @@ class ChampionHooksTest {
                                                   boolean dangerous, boolean creeper, boolean enabled) {
         return new ChampionHooks.SpawnFacts(enabled, easy, hard, outer, hostile, dangerous, creeper);
     }
+
     @Test void originalRollBecomesAChampionWhenTheShiftedRollReachesZero() {
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 0),
                 facts(false, false, false, false, false, false, true), ChampionRules.TIER_COMMON, 20.0F));
-        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(1, 0.0F),
+        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(1, 0),
                 facts(false, false, false, false, false, false, true), ChampionRules.TIER_COMMON, 20.0F));
     }
 
     @Test void originalRollKeepsEveryWorldShift() {
         // The easy difficulty adds two, so a roll of zero no longer reaches the champion.
-        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0),
                 facts(true, false, false, false, false, false, true), ChampionRules.TIER_COMMON, 20.0F));
         // The hard difficulty takes two away, so a roll of two still reaches the champion.
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(2, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(2, 0),
                 facts(false, true, false, false, false, false, true), ChampionRules.TIER_COMMON, 20.0F));
         // The Outer Lands take three away.
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(3, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(3, 0),
                 facts(false, false, true, false, false, false, true), ChampionRules.TIER_COMMON, 20.0F));
         // A spooky, nether or end biome takes two away.
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(2, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(2, 0),
                 facts(false, false, false, true, false, false, true), ChampionRules.TIER_COMMON, 20.0F));
         // A dangerous location takes ten away.
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(10, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(10, 0),
                 facts(false, false, false, false, true, false, true), ChampionRules.TIER_COMMON, 20.0F));
     }
 
     @Test void originalWhitelistLevelShiftsTheRoll() {
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(1, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(1, 0),
                 facts(false, false, false, false, false, false, true), ChampionRules.TIER_RARE, 20.0F));
-        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(2, 0.0F),
+        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(2, 0),
                 facts(false, false, false, false, false, false, true), ChampionRules.TIER_RARE, 20.0F));
-        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0),
                 facts(false, false, false, false, false, false, true), ChampionRules.TIER_NONE, 20.0F));
     }
 
     @Test void originalHealthGateKeepsTenBaseHealth() {
-        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0),
                 facts(false, false, false, false, false, false, true), ChampionRules.TIER_COMMON, 9.9F));
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 0),
                 facts(false, false, false, false, false, false, true), ChampionRules.TIER_COMMON, 10.0F));
     }
 
     @Test void originalCreeperChampionWasAlwaysBold() {
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        // The modifier roll would answer the warded modifier, the creeper takes bold.
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 5),
                 facts(false, false, false, false, false, true, true), ChampionRules.TIER_COMMON, 20.0F));
-        // A creeper rolls the bold modifier even when the random would answer another one.
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(7, 0.0F),
-                facts(false, false, false, false, false, true, true), ChampionRules.TIER_COMMON, 20.0F));
+        assertEquals(ChampionModifier.WARDED, ChampionHooks.roll(new ScriptedRandom(0, 5),
+                facts(false, false, false, false, false, false, true), ChampionRules.TIER_COMMON, 20.0F));
     }
 
     @Test void originalDisabledChampionsOnlyKeptTheBoss() {
-        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        assertEquals(ChampionRules.NO_CHAMPION, ChampionHooks.roll(new ScriptedRandom(0, 0),
                 facts(false, false, false, false, false, false, false), ChampionRules.TIER_COMMON, 20.0F));
-        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 0.0F),
+        assertEquals(ChampionModifier.BOLD, ChampionHooks.roll(new ScriptedRandom(0, 0),
                 facts(false, false, false, false, false, false, false), ChampionRules.TIER_BOSS, 20.0F));
     }
 
     @Test void nativeRollAgreesWithThePortedAdapter() {
         ChampionHooks.SpawnFacts world = facts(false, false, true, true, false, false, true);
-        int rolled = ChampionRules.Adapter.spawnRoll(new ScriptedRandom(3, 0.0F), world.championsEnabled(),
+        int rolled = ChampionRules.Adapter.spawnRoll(new ScriptedRandom(3, 0), world.championsEnabled(),
                 world.easy(), world.hard(), world.outerDimension(), world.hostileBiome(), world.dangerousLocation());
         boolean champion = ChampionRules.becomesChampion(rolled, ChampionRules.TIER_RARE, 20.0F, world.championsEnabled());
-        int expected = champion ? ChampionRules.rollModifier(new ScriptedJavaRandom(3), world.creeper()).id
+        int expected = champion ? ChampionRules.rollModifier(new ScriptedJavaRandom(0), world.creeper()).id
                 : ChampionRules.NO_CHAMPION;
-        assertEquals(expected, ChampionHooks.roll(new ScriptedRandom(3, 0.0F), world, ChampionRules.TIER_RARE, 20.0F));
+        assertEquals(expected, ChampionHooks.roll(new ScriptedRandom(3, 0), world, ChampionRules.TIER_RARE, 20.0F));
     }
 
     @Test void neverRolledKeepsTheOriginalAttributeValue() {

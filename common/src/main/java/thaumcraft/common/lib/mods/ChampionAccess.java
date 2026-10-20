@@ -1,4 +1,4 @@
-package thaumcraft.common.mixin;
+package thaumcraft.common.lib.mods;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;

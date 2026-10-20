@@ -60,7 +60,12 @@
     "BathSaltExpiryMixin",
     "PureWaterMaterialMixin",
     "PureVanillaWaterFlowMixin",
-    "PureBucketFillMixin"
+    "PureBucketFillMixin",
+    "ChampionEntityDataMixin",
+    "ChampionLivingDataMixin",
+    "ChampionMobMixin",
+    "ChampionTickMixin",
+    "ChampionHurtMixin"
   ],
   "client": [
     "client.TableOutlineMixin",

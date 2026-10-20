@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "variant=12": {
+      "model": "thaumcraft:block/airy_unbreakable"
+    }
+  }
+}

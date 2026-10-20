@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "thaumcraft:blocks/wardedglass",
+    "particle": "thaumcraft:blocks/wardedglass"
+  }
+}

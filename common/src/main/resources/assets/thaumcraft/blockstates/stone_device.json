@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=1": {
+      "model": "thaumcraft:block/stone_device_1"
+    },
+    "variant=2": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=3": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=4": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=5": {
+      "model": "thaumcraft:block/stone_device"
+    },
+    "variant=6": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=7": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=8": {
+      "model": "thaumcraft:block/stone_device_8"
+    },
+    "variant=9": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=10": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=11": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    },
+    "variant=12": {
+      "model": "thaumcraft:block/stone_device_12"
+    },
+    "variant=13": {
+      "model": "thaumcraft:block/stone_device_13"
+    },
+    "variant=14": {
+      "model": "thaumcraft:block/stone_device_14"
+    },
+    "variant=15": {
+      "model": "thaumcraft:block/stone_device_arcane"
+    }
+  }
+}

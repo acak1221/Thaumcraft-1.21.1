@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "variant=4": {
+      "model": "thaumcraft:block/cosmetic_solid_4"
+    },
+    "variant=6": {
+      "model": "thaumcraft:block/cosmetic_solid_6"
+    },
+    "variant=7": {
+      "model": "thaumcraft:block/cosmetic_solid_7"
+    }
+  }
+}

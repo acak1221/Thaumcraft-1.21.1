@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "thaumcraft:blocks/pedestal_top",
+    "particle": "thaumcraft:blocks/pedestal_top"
+  }
+}

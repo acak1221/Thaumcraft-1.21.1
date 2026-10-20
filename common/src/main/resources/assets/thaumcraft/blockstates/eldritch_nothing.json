@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "exposed=0": {
+      "model": "thaumcraft:block/eldritch_nothing"
+    },
+    "exposed=1": {
+      "model": "thaumcraft:block/eldritch_nothing"
+    }
+  }
+}

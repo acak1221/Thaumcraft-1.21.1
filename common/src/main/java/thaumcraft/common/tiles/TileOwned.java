@@ -10,6 +10,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.tiles.LegacyTileRules;
 
 /**
@@ -29,6 +30,20 @@ public class TileOwned extends BlockEntity {
     public boolean safeToRemove = false;
 
     public TileOwned(BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type, pos, state); }
+
+    /**
+     * The constructor of the original tile: the owned block entity of the arcane
+     * door, the arcane pressure plate and the warded glass.
+     */
+    public TileOwned(BlockPos pos, BlockState state) {
+        this(ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state);
+    }
+
+    /** The owner name, as the original door and device blocks set it. */
+    public void setOwner(String owner) {
+        this.owner = owner == null ? "" : owner;
+        setChanged();
+    }
 
     /** TileOwned:30 - the owner of the block. */
     public String owner() { return owner; }

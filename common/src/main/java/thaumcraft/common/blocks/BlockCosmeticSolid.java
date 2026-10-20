@@ -47,6 +47,19 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
         registerDefaultState(stateDefinition.any().setValue(VARIANT, this.variants.get(0)));
     }
 
+    /**
+     * A single original metadata value of the cosmetic solid family. The legacy
+     * registrations name one block per stone (the obsidian tile, the paving
+     * stones, the eldritch stone), so this constructor keeps that shape next to
+     * the hardness group constructor.
+     */
+    public BlockCosmeticSolid(Properties properties, int variant) {
+        super(properties);
+        this.group = EldritchBlockRules.cosmeticGroup(variant);
+        this.variants = java.util.List.of(variant);
+        registerDefaultState(stateDefinition.any().setValue(VARIANT, variant));
+    }
+
     /** The hardness group of this block. */
     public int group() { return group; }
 

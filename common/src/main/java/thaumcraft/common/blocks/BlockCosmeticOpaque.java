@@ -26,6 +26,16 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock {
         registerDefaultState(stateDefinition.any().setValue(VARIANT, 0));
     }
 
+    /**
+     * A single original metadata value of the cosmetic opaque family. The legacy
+     * registration names the warded glass, so this constructor keeps that shape
+     * next to the default constructor.
+     */
+    public BlockCosmeticOpaque(Properties properties, int variant) {
+        super(properties);
+        registerDefaultState(stateDefinition.any().setValue(VARIANT, variant));
+    }
+
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
 

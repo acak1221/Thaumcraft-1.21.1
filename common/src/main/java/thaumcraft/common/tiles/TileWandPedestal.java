@@ -3,6 +3,7 @@ package thaumcraft.common.tiles;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -39,10 +40,21 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     /** The node the client draws the vis from. */
     public int drainX, drainY, drainZ, drainColor;
     private List<BlockPos> nodes;
+    /** The side the player faced when the pedestal was placed. */
+    private Direction facing = Direction.NORTH;
 
     public TileWandPedestal(BlockPos pos, BlockState state) {
         // The wand slot is the only slot and it is the one the client sees.
         super(ThaumcraftLegacyTiles.WAND_PEDESTAL_BLOCK_ENTITY.get(), pos, state, 1, new int[]{0});
+    }
+
+    /** The side the pedestal faces. */
+    public Direction getFacing() { return facing; }
+
+    /** The side the pedestal faces. */
+    public void setFacing(Direction facing) {
+        this.facing = facing == null ? Direction.NORTH : facing;
+        setChanged();
     }
 
     /** The nodes the pedestal knows, or null before the first search. */
@@ -191,11 +203,13 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putBoolean("draining", draining);
+        tag.putByte("facing", (byte) facing.get3DDataValue());
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         draining = tag.getBoolean("draining");
+        facing = Direction.from3DDataValue(tag.getByte("facing"));
         nodes = null;
         somethingChanged = false;
         counter = 0;

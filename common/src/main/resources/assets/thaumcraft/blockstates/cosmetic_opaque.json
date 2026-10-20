@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "thaumcraft:block/cosmetic_opaque_0"
+    },
+    "variant=1": {
+      "model": "thaumcraft:block/cosmetic_opaque_1"
+    },
+    "variant=2": {
+      "model": "thaumcraft:block/cosmetic_opaque_2"
+    }
+  }
+}

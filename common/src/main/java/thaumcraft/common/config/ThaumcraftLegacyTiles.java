@@ -29,6 +29,7 @@ import thaumcraft.common.tiles.TileArcaneFurnaceNozzle;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileOwned;
 import thaumcraft.common.tiles.TileWandPedestal;
+import thaumcraft.common.tiles.TileWardingStone;
 
 /**
  * The remaining TC4 blocks and tiles of the legacy port: the arcane furnace, the death fluid, the cosmetic
@@ -113,9 +114,23 @@ public final class ThaumcraftLegacyTiles {
             BLOCK_ENTITIES.register("obsidian_totem_base",
                     () -> BlockEntityType.Builder.of((pos, state) -> new TileNode(ThaumcraftLegacyTiles.COSMETIC_SOLID_NODE_BLOCK_ENTITY.get(), pos, state),
                             OBSIDIAN_TOTEM_BASE.get()).build(null));
+    /**
+     * The warding stone of the legacy paving stone. The eldritch family owns the
+     * warding stone of its own cosmetic solid, so this type belongs to the paving
+     * stone of warding and to nothing else.
+     */
+    public static final RegistrySupplier<BlockEntityType<TileWardingStone>> PAVING_STONE_WARDING_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register("paving_stone_warding",
+                    () -> BlockEntityType.Builder.of((pos, state) -> new TileWardingStone(ThaumcraftLegacyTiles.PAVING_STONE_WARDING_BLOCK_ENTITY.get(), pos, state),
+                            PAVING_STONE_WARDING.get()).build(null));
+    /**
+     * The wand pedestal of the original stone device and of the legacy wand pedestal
+     * block are the same tile, so one block entity type claims both blocks.
+     */
     public static final RegistrySupplier<BlockEntityType<TileWandPedestal>> WAND_PEDESTAL_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("wand_pedestal",
-                    () -> BlockEntityType.Builder.of(TileWandPedestal::new, WAND_PEDESTAL.get()).build(null));
+                    () -> BlockEntityType.Builder.of(TileWandPedestal::new, WAND_PEDESTAL.get(),
+                            ThaumcraftEldritchBlocks.STONE_DEVICE.get()).build(null));
 
     private ThaumcraftLegacyTiles() {}
 

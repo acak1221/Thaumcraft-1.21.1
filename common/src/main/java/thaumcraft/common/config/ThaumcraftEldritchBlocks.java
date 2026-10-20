@@ -6,10 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
-import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
@@ -39,13 +37,9 @@ import thaumcraft.common.blocks.BlockLootItem;
 import thaumcraft.common.blocks.BlockMagicBox;
 import thaumcraft.common.blocks.BlockMetalDevice;
 import thaumcraft.common.blocks.BlockMirror;
-import thaumcraft.common.blocks.BlockStairsEldritch;
-import thaumcraft.common.blocks.BlockStairsGreatwood;
-import thaumcraft.common.blocks.BlockStairsSilverwood;
 import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.blocks.ItemArcaneDoor;
-import thaumcraft.common.container.ContainerMagicBox;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileArcanePressurePlate;
 import thaumcraft.common.tiles.TileBanner;
@@ -61,7 +55,6 @@ import thaumcraft.common.tiles.TileMirror;
 import thaumcraft.common.tiles.TileMirrorEssentia;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileOwned;
-import thaumcraft.common.tiles.TileWandPedestal;
 import thaumcraft.common.tiles.TileWardingStone;
 import thaumcraft.common.tiles.TileWardingStoneFence;
 
@@ -78,7 +71,6 @@ public final class ThaumcraftEldritchBlocks {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK_ENTITY_TYPE);
-    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Thaumcraft.MODID, Registries.MENU);
 
     // ------------------------------------------------------------------ blocks
 
@@ -141,17 +133,9 @@ public final class ThaumcraftEldritchBlocks {
             () -> new BlockCosmeticWoodSlab(EldritchBlockRules.SLAB_WOOD_SILVERWOOD,
                     BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
 
-    public static final RegistrySupplier<BlockStairsEldritch> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
-            () -> new BlockStairsEldritch(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0F, 10.0F).sound(SoundType.STONE)));
-
-    public static final RegistrySupplier<BlockStairsGreatwood> STAIRS_GREATWOOD = BLOCKS.register("greatwood_stairs",
-            () -> new BlockStairsGreatwood(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(2.0F, 5.0F).sound(SoundType.WOOD)));
-
-    public static final RegistrySupplier<BlockStairsSilverwood> STAIRS_SILVERWOOD = BLOCKS.register("silverwood_stairs",
-            () -> new BlockStairsSilverwood(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(2.0F, 5.0F).sound(SoundType.WOOD)));
+    // The eldritch stairs are not registered here: the id "eldritch_stairs" belongs
+    // to the legacy tile unit, whose block takes the texture of the eldritch stone,
+    // exactly like the original cosmetic stairs.
 
     public static final RegistrySupplier<BlockArcaneDoor> ARCANE_DOOR = BLOCKS.register("arcane_door",
             () -> new BlockArcaneDoor(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
@@ -248,9 +232,6 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ELDRITCH_ITEM = ITEMS.register("cosmetic_stone_slab_eldritch", () -> new BlockItem(COSMETIC_STONE_SLAB_ELDRITCH.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_GREATWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_greatwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_GREATWOOD.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_silverwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_SILVERWOOD.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> STAIRS_ELDRITCH_ITEM = ITEMS.register("eldritch_stairs", () -> new BlockItem(STAIRS_ELDRITCH.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> STAIRS_GREATWOOD_ITEM = ITEMS.register("greatwood_stairs", () -> new BlockItem(STAIRS_GREATWOOD.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> STAIRS_SILVERWOOD_ITEM = ITEMS.register("silverwood_stairs", () -> new BlockItem(STAIRS_SILVERWOOD.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> ARCANE_DOOR_ITEM = ITEMS.register("arcane_door", () -> new ItemArcaneDoor(new Item.Properties()));
     public static final RegistrySupplier<Item> MAGIC_BOX_ITEM = ITEMS.register("magic_box", () -> new BlockItem(MAGIC_BOX.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new BlockItem(MIRROR.get(), new Item.Properties()));
@@ -299,8 +280,9 @@ public final class ThaumcraftEldritchBlocks {
 
     /** The metal grate tile is owned by ThaumcraftGrate (the upstream item grate unit). */
 
-    public static final RegistrySupplier<BlockEntityType<TileWandPedestal>> WAND_PEDESTAL_TILE = BLOCK_ENTITIES.register("wand_pedestal",
-            () -> BlockEntityType.Builder.of((pos, state) -> new TileWandPedestal(pos, state), STONE_DEVICE.get()).build(null));
+    // The wand pedestal tile is owned by the legacy tile unit, whose type claims the
+    // stone device of this family as well, so the stone device and the wand pedestal
+    // block share one block entity type.
 
     public static final RegistrySupplier<BlockEntityType<TileFluxScrubber>> FLUX_SCRUBBER_TILE = BLOCK_ENTITIES.register("flux_scrubber",
             () -> BlockEntityType.Builder.of((pos, state) -> new TileFluxScrubber(pos, state), STONE_DEVICE.get()).build(null));
@@ -332,8 +314,8 @@ public final class ThaumcraftEldritchBlocks {
 
     // -------------------------------------------------------------------- menus
 
-    public static final RegistrySupplier<MenuType<ContainerMagicBox>> MAGIC_BOX_MENU = MENUS.register("magic_box",
-            () -> MenuRegistry.ofExtended(ContainerMagicBox::new));
+    // The magic box menu is owned by the device menu unit, whose type the magic box
+    // container and the client screen already read.
 
     private ThaumcraftEldritchBlocks() {}
 
@@ -379,13 +361,11 @@ public final class ThaumcraftEldritchBlocks {
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITIES.register();
-        MENUS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB, ELDRITCH_ITEM, ELDRITCH_CRUST_ITEM, ELDRITCH_DECO_ITEM,
                 ELDRITCH_DOORWAY_ITEM, ELDRITCH_SPAWNER_ITEM, ELDRITCH_CRYSTAL_ITEM,
                 COSMETIC_SOLID_ITEM, COSMETIC_SOLID_TOUGH_ITEM, COSMETIC_SOLID_THAUMIUM_ITEM, COSMETIC_OPAQUE_ITEM,
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,
-                STAIRS_ELDRITCH_ITEM, STAIRS_GREATWOOD_ITEM, STAIRS_SILVERWOOD_ITEM,
                 ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
                 METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM,
                 AIRY_ITEM, AIRY_NODE_ITEM, JAR_BRAIN_ITEM, JAR_NODE_ITEM, ETHEREAL_BLOOM_ITEM);

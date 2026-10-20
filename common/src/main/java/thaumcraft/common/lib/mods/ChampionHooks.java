@@ -161,7 +161,10 @@ public final class ChampionHooks {
 
     /** The champion modifier id the client received with the entity data. */
     public static int clientChampionId(Entity entity) {
-        return entity.getEntityData().get(ChampionAccess.CHAMPION_DATA);
+        // The champion id belongs to the living entity branch of the entity tree,
+        // so an entity that is not living never carries it.
+        if (!(entity instanceof LivingEntity living)) return ChampionRules.NO_CHAMPION;
+        return living.getEntityData().get(ChampionAccess.CHAMPION_DATA);
     }
 
     /**

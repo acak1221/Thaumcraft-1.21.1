@@ -15,7 +15,11 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockItemGrate;
 import thaumcraft.common.tiles.TileGrate;
 
-/** The original Item Grate (BlockMetalDevice metadata 5/6, TileGrate); call after ThaumcraftContent.register(). */
+/**
+ * The original Item Grate (BlockMetalDevice metadata 5/6, TileGrate); call after
+ * ThaumcraftContent.register() and after the eldritch block family, whose metal
+ * device holds the same grate tile.
+ */
 public final class ThaumcraftGrate {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
@@ -26,8 +30,13 @@ public final class ThaumcraftGrate {
             () -> new BlockItemGrate(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3.0F, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
     public static final RegistrySupplier<Item> ITEM_GRATE_ITEM = ITEMS.register("item_grate",
             () -> new BlockItem(ITEM_GRATE.get(), new Item.Properties()));
+    /**
+     * The grate tile is the tile of the item grate block and of the grate metadata
+     * of the metal device, so the type claims both blocks.
+     */
     public static final RegistrySupplier<BlockEntityType<TileGrate>> GRATE_BLOCK_ENTITY = BLOCK_ENTITIES.register("item_grate",
-            () -> BlockEntityType.Builder.of(TileGrate::new, ITEM_GRATE.get()).build(null));
+            () -> BlockEntityType.Builder.of(TileGrate::new, ITEM_GRATE.get(),
+                    ThaumcraftEldritchBlocks.METAL_DEVICE.get()).build(null));
 
     private static boolean registered;
     private ThaumcraftGrate() {}

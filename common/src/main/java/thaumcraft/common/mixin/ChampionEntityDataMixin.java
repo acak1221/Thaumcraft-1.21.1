@@ -11,10 +11,10 @@ import thaumcraft.common.lib.mods.ChampionAccess;
  * The original champion modifier id was a custom entity attribute, so it travelled
  * with the entity and reached the client with the entity itself. The native port
  * keeps the id in the mob's own field and mirrors it into the entity's synced data.
- * The entity tree numbers its data ids in the order they are defined, so the
- * champion id has to be defined while Entity itself initialises, before the living
- * entity ids take their numbers. The same static initialiser runs on the client and
- * on the server, so both sides know the same slot.
+ * The entity tree numbers its data ids per class branch in the order they are
+ * defined, so the champion id has to be defined while Entity itself initialises,
+ * before the living entity ids take their numbers. The same static initialiser runs
+ * on the client and on the server, so both sides know the same slot.
  */
 @Mixin(Entity.class)
 public abstract class ChampionEntityDataMixin {

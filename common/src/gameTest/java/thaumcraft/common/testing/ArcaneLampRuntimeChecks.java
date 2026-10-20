@@ -20,6 +20,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
@@ -38,12 +39,26 @@ public final class ArcaneLampRuntimeChecks {
     public static void run(GameTestHelper test) {
         Check check = new Check(test);
         try { check.prepare(); } catch (RuntimeException | Error failure) { check.finish(); throw failure; }
-        test.runAfterDelay(20, () -> {
+        awaitNativeLight(check, 0);
+    }
+    private static void awaitNativeLight(Check check, int attempts) {
+        check.test.runAfterDelay(5, () -> {
             try {
+                check.test.assertTrue(check.level.getBlockState(check.center).is(ThaumcraftLamps.ARCANE_LAMP.get())
+                                && check.level.getBlockState(check.center).getLightEmission() == 15
+                                && check.level.getBlockEntity(check.center) == check.tile,
+                        "actual registered lamp remains a native emission15 source while threaded propagation completes");
+                int blockLight = check.level.getBrightness(LightLayer.BLOCK, check.center.above());
+                if (blockLight < 9) {
+                    check.test.assertTrue(attempts < 25,
+                            "native block-light propagation reaches lamp-adjacent cell within130 ordinary server ticks; actual=" + blockLight);
+                    awaitNativeLight(check, attempts + 1);
+                    return;
+                }
                 check.direct(); check.recipe();
                 check.tile.removeLights(); // Discard deterministic probes before observing ordinary server ticks.
-                test.runAfterDelay(60, () -> {
-                    try { check.naturalAndRemoval(); test.succeed(); } finally { check.finish(); }
+                check.test.runAfterDelay(60, () -> {
+                    try { check.naturalAndRemoval(); check.test.succeed(); } finally { check.finish(); }
                 });
             } catch (RuntimeException | Error failure) { check.finish(); throw failure; }
         });
@@ -67,6 +82,9 @@ public final class ArcaneLampRuntimeChecks {
                 if (x==16 || y==16 || z==16) set(pos,Blocks.STONE.defaultBlockState(),QUIET);
             }
             set(center.below(),Blocks.STONE.defaultBlockState(),QUIET);
+            // Transparent temporary guard prevents native lamp ticks from placing a secondary
+            // light in the exact bright-air probe before its own emission has propagated.
+            set(center.above(),Blocks.GLASS.defaultBlockState(),QUIET);
             set(center,ThaumcraftLamps.ARCANE_LAMP.get().defaultBlockState(),QUIET);
             tile=(TileArcaneLamp) level.getBlockEntity(center);
             test.assertTrue(tile!=null,"a real Arcane Lamp is installed in an explicitly roofed room");
@@ -86,6 +104,7 @@ public final class ArcaneLampRuntimeChecks {
         void direct() {
             test.assertTrue(!at(0,-1,0) && level.getBlockState(center.below()).is(Blocks.STONE),"a solid support is not replaced by light");
             BlockPos bright=center.above();
+            set(bright,Blocks.AIR.defaultBlockState(),QUIET);
             test.assertTrue(level.getRawBrightness(bright,0)>=9,"the lamp itself is an actually bright source");
             test.assertTrue(!at(0,1,0) && !level.getBlockState(bright).is(ThaumcraftLamps.ARCANE_LIGHT.get()),"already safe bright air is not filled with light blocks");
             BlockPos candidate=null;

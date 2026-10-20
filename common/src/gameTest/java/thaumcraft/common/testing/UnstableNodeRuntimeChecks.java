@@ -194,7 +194,7 @@ public final class UnstableNodeRuntimeChecks {
                     "a real player just beyond8 eye-blocks supplies no attraction even if its bounding box intersects the search cube"); beyond.discard();
             player.getInventory().clearContent(); player.setPos(Vec3.atCenterOf(base).add(20,0,0));
             var air=fixtureOrb(Vec3.atCenterOf(controlled.above(4)),Aspect.FIRE); double y=air.getY(); air.tick();
-            test.assertTrue(Math.abs(air.getY()-(y-(double).03F))<1e-8 && Math.abs(air.getDeltaMovement().y-(-(double).03F*.98F))<1e-8 && air.getOrbAge()==1,"a real native orb applies the exact original gravity/move/friction order"); air.discard();
+            test.assertTrue(Math.abs(air.getY()-(y-(double).03F))<1e-8 && Math.abs(air.getDeltaMovement().y-(-(double).03F*.98F))<1e-8 && air.getOrbAge()==1,"a real native orb applies the exact original gravity/move/friction order; expectedY="+(y-(double).03F)+", actualY="+air.getY()+", expectedMotionY="+(-(double).03F*.98F)+", actualMotion="+air.getDeltaMovement()+", age="+air.getOrbAge()+", onGround="+air.onGround()); air.discard();
             CompoundTag physical=new CompoundTag(); air.saveWithoutId(physical);
             var restored=EntityAspectOrb.unspawned(level,Vec3.atCenterOf(controlled.above(4)),Vec3.ZERO,0,Aspect.FIRE,1); restored.load(physical);
             test.assertTrue(!restored.isQuarantined() && restored.getOrbAge()==1 && restored.getAspect()==Aspect.FIRE && restored.getAspectValue()==1,
@@ -202,6 +202,13 @@ public final class UnstableNodeRuntimeChecks {
             var unknown=physical.copy(); unknown.putString("Aspect","unknown_aspect_orb_payload"); restored.load(unknown); var quarantined=new CompoundTag(); restored.saveWithoutId(quarantined);
             test.assertTrue(restored.isQuarantined() && restored.getAspectValue()==0 && quarantined.getCompound("RejectedAspectOrb").equals(unknown),
                     "unknown physical-orb payload retains its original native NBT and cannot grant wand vis"); restored.discard();
+            BlockPos embeddedCell=controlled.above(4); set(embeddedCell,Blocks.STONE.defaultBlockState());
+            var embedded=fixtureOrb(new Vec3(embeddedCell.getX()+.9,embeddedCell.getY()+.5,embeddedCell.getZ()+.5),Aspect.FIRE);
+            embedded.setDeltaMovement(0,.04D,.02D); embedded.tick();
+            test.assertTrue(embedded.getDeltaMovement().x>0 && Math.abs(embedded.getDeltaMovement().y-((.04D-(double).03F)*.98F))<1e-8
+                            && Math.abs(embedded.getDeltaMovement().z-.02D*.98F)<1e-8,
+                    "an actually embedded orb escapes toward nearest EAST while preserving the other two original velocities without modern .75 damping; actual="+embedded.getDeltaMovement());
+            embedded.discard();set(embeddedCell,Blocks.AIR.defaultBlockState());
             var hurt=fixtureOrb(Vec3.atCenterOf(controlled.above(4)),Aspect.FIRE);
             test.assertTrue(!hurt.hurt(level.damageSources().generic(),4F) && !hurt.isRemoved() && !hurt.hurt(level.damageSources().generic(),1F) && hurt.isRemoved(),"original health5 and false damage return survive the real native entity path");
             BlockPos floor=controlled.above(5); set(floor,Blocks.STONE.defaultBlockState()); var expires=fixtureOrb(new Vec3(floor.getX()+.5,floor.getY()+1,floor.getZ()+.5),Aspect.FIRE);

@@ -233,7 +233,7 @@ public final class ResearchTableRuntimeChecks {
             var note = ItemResearchNotes.create(ResearchNoteRuntimeChecks.solvedNitor(), true);
             note.set(DataComponents.CUSTOM_NAME, Component.literal("persistent-note"));
             note.setCount(70); tile.setItem(1, note);
-            test.assertTrue(tile.getItem(1).getCount() == 64, "native setter retains original inventory64 clamp rather than itemmax1");
+            test.assertTrue(tile.getItem(1).getCount() == 70, "R10 whole-stack return preserves copied-note counts above64; ordinary tools retain their setter limit");
             tile.setItem(0, tool);
             tile.getItem(1).setCount(127); // Model direct original load/R10 state, not a legal setter insertion.
             var expected = tile.getItem(1).copy();

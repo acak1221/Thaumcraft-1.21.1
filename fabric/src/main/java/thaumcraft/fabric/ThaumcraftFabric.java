@@ -28,6 +28,26 @@ public final class ThaumcraftFabric implements ModInitializer {
         thaumcraft.fabric.bore.FabricBorePlatform.init();
         thaumcraft.fabric.golems.FabricGolemHarvestPlatform.init();
         thaumcraft.fabric.golems.FabricGolemUsePlatform.init();
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftWarp.MIND_SPIDER.get(),
+                thaumcraft.common.entities.monster.EntityMindSpider.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftWarp.ELDRITCH_GUARDIAN.get(),
+                thaumcraft.common.entities.monster.EntityEldritchGuardian.createAttributes());
+        thaumcraft.common.lib.world.TradeSwaps.install((level, player, pos, before, after) -> {
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false);
+            return UseBlockCallback.EVENT.invoker().interact(player, level, net.minecraft.world.InteractionHand.MAIN_HAND, hit) == InteractionResult.PASS
+                    && net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, before, null)
+                    && !dev.architectury.event.events.common.BlockEvent.PLACE.invoker().placeBlock(level, pos, after, player).isFalse();
+        });
+        net.fabricmc.fabric.api.event.player.AttackBlockCallback.EVENT.register((player, level, hand, pos, face) -> {
+            var wand = player.getItemInHand(hand);
+            if (!(thaumcraft.common.items.wands.foci.FocusData.get(wand).getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusTrade))
+                return InteractionResult.PASS;
+            if (player instanceof net.minecraft.server.level.ServerPlayer server)
+                thaumcraft.common.items.wands.foci.ItemFocusTrade.leftClick(server, wand, pos);
+            return InteractionResult.SUCCESS;
+        });
         // Forge onItemUseFirst preceded EVERY transport block, including addon
         // GUIs. Consume once here; common block dispatch and secondary use share
         // the same validated helper when called outside this Fabric callback.

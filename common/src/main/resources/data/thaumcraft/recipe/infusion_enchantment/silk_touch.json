@@ -1,0 +1,25 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "minecraft:silk_touch",
+  "components": [
+    {
+      "item": "minecraft:iron_pickaxe"
+    },
+    {
+      "item": "minecraft:glass"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 16,
+    "instrumentum": 16,
+    "ordo": 16,
+    "meto": 16,
+    "perfodio": 16
+  },
+  "instability": 5,
+  "first_level_minimum_cost": 15
+}

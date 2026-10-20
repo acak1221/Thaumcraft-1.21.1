@@ -32,6 +32,19 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     VisNetClientEffects.setShader(shader);
                 }));
         ClientSetup.init();
+        net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((graphics, ticks) ->
+                thaumcraft.client.ThaumcraftWarpClient.renderHud(graphics));
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
+                thaumcraft.client.ThaumcraftWarpClient.reset());
+        net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)
+                .registerReloadListener(new net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener() {
+                    @Override public net.minecraft.resources.ResourceLocation getFabricId() {
+                        return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "warp_effects");
+                    }
+                    @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager resources) {
+                        thaumcraft.client.ThaumcraftWarpClient.reset();
+                    }
+                });
         // The retained shell is shared with blocks, but actual item contents
         // and labels must come from this stack, never a synthetic world tile.
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftContent.JAR.get(), JarItemRenderer::render);
@@ -46,6 +59,8 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftNodeDevices.NODE_STABILIZER.get(), TileNodeStabilizerRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftNodeDevices.NODE_TRANSDUCER.get(), TileNodeConverterRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftNodeDevices.VIS_RELAY.get(), TileVisRelayRenderer::renderItem);
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftVisCharging.VIS_CHARGE_RELAY_ITEM.get(),
+                thaumcraft.client.renderers.tile.TileMagicWorkbenchChargerRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftArcaneBore.ARCANE_BORE.get(),
                 thaumcraft.client.renderers.tile.TileArcaneBoreRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftArcaneBore.ARCANE_BORE_BASE.get(),

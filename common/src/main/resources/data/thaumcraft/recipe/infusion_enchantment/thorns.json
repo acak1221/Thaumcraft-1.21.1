@@ -1,0 +1,23 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "minecraft:thorns",
+  "components": [
+    {
+      "item": "minecraft:cactus"
+    },
+    {
+      "item": "minecraft:quartz"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 4,
+    "telum": 8,
+    "herba": 8
+  },
+  "instability": 2,
+  "first_level_minimum_cost": 10
+}

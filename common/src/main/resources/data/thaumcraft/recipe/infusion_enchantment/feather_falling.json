@@ -1,0 +1,20 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "minecraft:feather_falling",
+  "components": [
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 4,
+    "aer": 4,
+    "volatus": 4
+  },
+  "instability": 1,
+  "first_level_minimum_cost": 5
+}

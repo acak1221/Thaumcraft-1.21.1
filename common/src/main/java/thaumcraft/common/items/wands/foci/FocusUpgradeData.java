@@ -18,7 +18,7 @@ import thaumcraft.common.config.ThaumcraftContent;
 public record FocusUpgradeData(List<Short> ranks) {
     public static final int SLOTS = 5;
     public static final FocusUpgradeData EMPTY = new FocusUpgradeData(List.of((short)-1, (short)-1, (short)-1, (short)-1, (short)-1));
-    private static final Codec<Short> ID_CODEC = Codec.intRange(-1, 3).xmap(value -> (short)(int)value, Short::intValue);
+    private static final Codec<Short> ID_CODEC = Codec.intRange(-1, Short.MAX_VALUE).xmap(value -> (short)(int)value, Short::intValue);
     public static final Codec<FocusUpgradeData> CODEC = ID_CODEC.listOf(SLOTS, SLOTS).flatXmap(
             values -> valid(values) ? DataResult.success(new FocusUpgradeData(values))
                     : DataResult.error(() -> "Expected five supported focus upgrade IDs or -1"),
@@ -75,7 +75,10 @@ public record FocusUpgradeData(List<Short> ranks) {
                 || focus.has(ThaumcraftFoci.WAND_FOCUS.get()) || focus.has(ThaumcraftContent.WAND_DATA.get())
                 || !(focus.getItem() instanceof ItemFocusFire || focus.getItem() instanceof ItemFocusFrost
                     || focus.getItem() instanceof ItemFocusShock || focus.getItem() instanceof ItemFocusExcavation
-                    || focus.getItem() instanceof ItemFocusPortableHole)) return false;
+                    || focus.getItem() instanceof ItemFocusPortableHole || focus.getItem() instanceof ItemFocusWarding
+                    || focus.getItem() instanceof ItemFocusTrade)) return false;
+        if (focus.getItem() instanceof ItemFocusWarding && read(focus).level(FocusUpgradeType.enlarge) > 0
+                && read(focus).level(FocusUpgradeType.architect) == 0) return false;
         ItemFocusBasic item = (ItemFocusBasic) focus.getItem();
         List<Short> ranks = read(focus).ranks;
         for (int slot = 0; slot < SLOTS; slot++) {

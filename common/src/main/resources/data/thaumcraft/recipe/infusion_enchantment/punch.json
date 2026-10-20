@@ -1,0 +1,20 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "minecraft:punch",
+  "components": [
+    {
+      "item": "minecraft:piston"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 4,
+    "telum": 3,
+    "motus": 3
+  },
+  "instability": 2,
+  "first_level_minimum_cost": 12
+}

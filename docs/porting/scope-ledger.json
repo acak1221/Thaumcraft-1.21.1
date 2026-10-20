@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "ed80f3742d83869fc053c31f40f2fa2abd94920693124dca10baa71765bd841a",
+    "canonical_json_sha256": "f4bcee27702a62ac2e034db080e802978e88e057675e7a601b9d7f53af4d82ad",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {
@@ -14412,8 +14412,8 @@
       "original": {
         "source_alias": "tc4_4_2_3_5_oracle",
         "path": "thaumcraft/codechicken/core/launch/DepLoader.java",
-        "sha256_lf": "9882b0c0731daac1a3b0bdf21ea909021670aa84e4e6bc62e9005cf5b144b7e4",
-        "lines": 634
+        "sha256_lf": "293e08ea954ab769899b6d9b7636a5e3e7e1c9509d963cac92359df7db583e6e",
+        "lines": 635
       },
       "legacy": null,
       "source_layer": "support",
@@ -33582,7 +33582,7 @@
       "original": {
         "source_alias": "tc4_4_2_3_5_oracle",
         "path": "thaumcraft/common/lib/utils/BlockUtils.java",
-        "sha256_lf": "fe38e8e777926231d7c33f9c2f39ff94d5013620010cd8ef5d3eb6ed0d28c452",
+        "sha256_lf": "4f1fd84b9b01cf2d01a86f661ac28520d7d314017f6a147985c5bf15cd8071c0",
         "lines": 335
       },
       "legacy": {

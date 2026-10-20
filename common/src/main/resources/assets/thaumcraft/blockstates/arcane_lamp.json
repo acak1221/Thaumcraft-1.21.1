@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "thaumcraft:block/arcane_lamp"
+    },
+    "facing=up": {
+      "model": "thaumcraft:block/arcane_lamp"
+    },
+    "facing=north": {
+      "model": "thaumcraft:block/arcane_lamp"
+    },
+    "facing=south": {
+      "model": "thaumcraft:block/arcane_lamp"
+    },
+    "facing=west": {
+      "model": "thaumcraft:block/arcane_lamp"
+    },
+    "facing=east": {
+      "model": "thaumcraft:block/arcane_lamp"
+    }
+  }
+}

@@ -2,7 +2,9 @@ name: Build and test Fabric 1.21.1
 
 on:
   push:
+    paths-ignore: ['docs/**', 'README.md', 'MODLOG.md', 'AGENTS.md']
   pull_request:
+    paths-ignore: ['docs/**', 'README.md', 'MODLOG.md', 'AGENTS.md']
   workflow_dispatch:
   workflow_call:
 

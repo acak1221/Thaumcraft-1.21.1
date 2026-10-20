@@ -79,7 +79,7 @@ public final class ResearchCatalog {
     public static Set<String> unconditionalAutoUnlocks() {
         Set<String> result = new LinkedHashSet<>();
         for (ResearchDefinition definition : all()) {
-            if (definition.isAutoUnlock() && definition.conditions().isEmpty()) result.add(definition.key());
+            if (definition.isAutoUnlock() && definition.isEnabled()) result.add(definition.key());
         }
         return Set.copyOf(result);
     }

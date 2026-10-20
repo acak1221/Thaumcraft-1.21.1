@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import struct
 import tempfile
 import unittest
@@ -74,15 +75,64 @@ class FoundationAssetsTest(unittest.TestCase):
             if path.is_file():
                 relative = path.relative_to(converter.ASSETS).as_posix()
                 self.assertRegex(relative, r"^[a-z0-9/._-]+$")
-        # No bulk legacy shader copying. Only this authored native adapter is
-        # approved; the retained vertex program is Minecraft's own resource.
-        self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh"},
+        # Explicit native adapters only. Warp shaders have a separate deterministic
+        # GLSL150 conversion; none are bulk-copied into Minecraft's namespace.
+        self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh",
+                          "post/warp_blurred.json", "post/warp_death_gaze.json", "post/warp_hunger.json", "post/warp_sun_scorned.json",
+                          "program/bloom_color.json", "program/bloom_color.fsh", "program/bloom2.json", "program/bloom2.fsh",
+                          "program/bloom_vertex_base.vsh", "program/color_convolve2.json", "program/color_convolve2.fsh"},
                          {path.relative_to(converter.ASSETS / "shaders").as_posix()
                           for path in (converter.ASSETS / "shaders").rglob("*") if path.is_file()})
         self.assertFalse((converter.RESOURCE_ROOT / "assets/minecraft/shaders").exists())
         pack = json.loads((converter.RESOURCE_ROOT / "pack.mcmeta").read_text(encoding="utf-8"))
         self.assertEqual(34, pack["pack"]["pack_format"])
         self.assertEqual({"min_inclusive": 34, "max_inclusive": 48}, pack["pack"]["supported_formats"])
+
+    def test_warp_post_programs_are_reproducible_glsl150_conversions_with_resolved_links(self) -> None:
+        spec = importlib.util.spec_from_file_location("warp_shader_converter", Path(__file__).with_name("convert_warp_shaders.py"))
+        warp = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(warp)
+        shader_root = converter.ASSETS / "shaders"
+        with tempfile.TemporaryDirectory() as tmp, patch.object(warp, "TARGET", Path(tmp)):
+            warp.main()
+            for produced in Path(tmp).rglob("*"):
+                if produced.is_file():
+                    native = shader_root / produced.relative_to(tmp)
+                    self.assertEqual(produced.read_bytes(), native.read_bytes(), f"stale converted shader: {native}")
+        for stage in (shader_root / "program").glob("*sh"):
+            text = stage.read_text()
+            self.assertTrue(text.startswith("#version 150"), stage)
+            self.assertNotRegex(text, r"\b(attribute|varying|gl_FragColor|texture2D)\b")
+            if stage.suffix == ".fsh": self.assertIn("out vec4 fragColor;", text)
+        bloom = (shader_root / "program/bloom_color.fsh").read_text()
+        self.assertLess(bloom.index("void main()"), bloom.index("vec4 averageColor="), "uniform texture reads belong inside main in core GLSL")
+        builtins = {"minecraft:box_blur", "minecraft:blit", "minecraft:sobel", "minecraft:color_convolve"}
+        for post in (shader_root / "post").glob("warp_*.json"):
+            data = json.loads(post.read_text()); targets = {"minecraft:main", *data["targets"]}
+            for step in data["passes"]:
+                self.assertIn(step["intarget"], targets); self.assertIn(step["outtarget"], targets)
+                if step["name"] in builtins: continue
+                self.assertRegex(step["name"], r"^thaumcraft:[a-z0-9_]+$")
+                program = json.loads((shader_root / "program" / (step["name"].split(":")[1] + ".json")).read_text())
+                for kind, extension in (("vertex", ".vsh"), ("fragment", ".fsh")):
+                    namespace, name = program[kind].split(":")
+                    self.assertIn(namespace, {"minecraft", "thaumcraft"})
+                    if namespace == "thaumcraft": self.assertTrue((shader_root / "program" / (name + extension)).is_file(), program[kind])
+
+    def test_warp_effect_icons_use_original_gui_y198_origin_and_visible_pixels(self) -> None:
+        from PIL import Image
+        cells = {"warp_ward": (3, 2), "death_gaze": (4, 2), "blurred_vision": (5, 2),
+                 "sun_scorned": (6, 2), "thaumarhia": (7, 2), "unnatural_hunger": (7, 1)}
+        with Image.open(converter.ROOT / "thaumcraft_src/assets/thaumcraft/textures/misc/potions.png") as source:
+            source = source.convert("RGBA")
+            for name, (x, y) in cells.items():
+                with Image.open(converter.ASSETS / f"textures/mob_effect/{name}.png") as native:
+                    native = native.convert("RGBA")
+                    self.assertEqual((18, 18), native.size, name)
+                    self.assertGreater(sum(native.getchannel("A").histogram()[1:]), 30, f"invisible effect icon: {name}")
+                    expected = source.crop((18*x, 198+18*y, 18*(x+1), 198+18*(y+1)))
+                    self.assertEqual(expected.tobytes(), native.tobytes(), f"wrong retained atlas cell: {name}")
 
     def test_visual_gaps_are_retained_instead_of_claiming_parity(self) -> None:
         self.assertFalse(self.manifest["visual_parity_validated"])

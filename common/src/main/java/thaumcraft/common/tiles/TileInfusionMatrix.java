@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -14,6 +15,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -27,6 +32,7 @@ import thaumcraft.common.config.ThaumcraftInfusion;
 import thaumcraft.common.crafting.InfusionComponentPredicate;
 import thaumcraft.common.crafting.InfusionRecipeInput;
 import thaumcraft.common.crafting.InfusionStackRecipe;
+import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.crafting.InfusionMatching;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
@@ -36,7 +42,7 @@ import thaumcraft.common.lib.infusion.InfusionInstability;
 import thaumcraft.common.lib.infusion.InfusionStructure;
 import thaumcraft.common.lib.network.InfusionFxNetworking;
 
-/** Original TC4 matrix session/cycle, bounded to real native STACK-output recipes. */
+/** Original TC4 matrix session/cycle for stack and enchantment outputs. */
 public final class TileInfusionMatrix extends BlockEntity implements InfusionDemandEndpoint {
     private boolean active;
     private boolean crafting;
@@ -50,6 +56,8 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     private int recipeInstability;
     private int recipeType;
     private int recipeXP;
+    private ResourceLocation recipeEnchantment;
+    private int countDelay = 10;
     private UUID recipePlayer;
     private String recipePlayerName = "";
 
@@ -78,6 +86,10 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     public BlockPos getCenterPos() { return worldPosition.below(2); }
     public int getRemainingIngredientCount() { return recipeIngredients.size(); }
     public int getTickCount() { return count; }
+    public int getRecipeType() { return recipeType; }
+    public int getRemainingXPLevels() { return recipeXP; }
+    public int getCycleDelay() { return countDelay; }
+    public ResourceLocation getRecipeEnchantment() { return recipeEnchantment; }
 
     /** Actual consumption target/countdown only; never a preview/output item. */
     public BlockPos getIngredientTarget() { return ingredientTarget; }
@@ -140,6 +152,7 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
                 recipeInstability = recipe.instability();
                 recipeType = 0;
                 recipeXP = 0;
+                recipeEnchantment = null;
                 recipeEssentia = recipe.aspectCost();
                 recipeCost = recipeEssentia.copy();
                 recipePlayer = player.getUUID();
@@ -147,6 +160,30 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
                 instability = symmetry + recipeInstability; // Intentionally not clamped to zero (or 25).
                 // Original M252-333 deliberately retains a partial ingredient
                 // countdown from an aborted session. Only reload resets it.
+                ingredientTarget = null;
+                crafting = true;
+                changed();
+                sendEffect(0, worldPosition, 0);
+                return true;
+            }
+            for (var holder : server.getRecipeManager().getAllRecipesFor(ThaumcraftInfusion.ENCHANTMENT_RECIPE_TYPE.get())) {
+                InfusionEnchantmentRecipe recipe = holder.value();
+                if (!recipe.research().isEmpty() && !KnowledgeAccess.get(player).isResearchComplete(recipe.research())
+                        || !recipe.matches(offered, server) || !current()) continue;
+                recipeInput = central.copy();
+                recipeIngredients.clear();
+                recipeIngredients.addAll(recipe.selectedComponents());
+                recipeOutput = ItemStack.EMPTY;
+                recipeOutputLabel = "";
+                recipeEnchantment = recipe.enchantment();
+                recipeInstability = recipe.calculatedInstability(central);
+                recipeType = 1;
+                recipeXP = recipe.xpLevels(central, server.registryAccess());
+                recipeEssentia = recipe.aspectCost(central, server.registryAccess());
+                recipeCost = recipeEssentia.copy();
+                recipePlayer = player.getUUID();
+                recipePlayerName = player.getGameProfile().getName();
+                instability = symmetry + recipeInstability;
                 ingredientTarget = null;
                 crafting = true;
                 changed();
@@ -173,7 +210,7 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
                 matrix.changed();
                 return; // Crucially: crafting, demand, input and output survive.
             }
-            if (matrix.active && matrix.crafting && matrix.count % 10 == 0) {
+            if (matrix.active && matrix.crafting && matrix.count % matrix.countDelay == 0) {
                 matrix.craftCycle(server);
                 if (matrix.current()) matrix.setChanged();
             }
@@ -183,9 +220,8 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     }
 
     private void craftCycle(ServerLevel server) {
-        // No enchantment/tag-patch recipe is registered. A foreign/corrupt saved
-        // session cannot turn unsupported output or empty ingredients into a reward.
-        if (recipeType != 0 || recipeOutput.isEmpty() || recipeInstability < 0 || recipeInstability > 24
+        // A foreign/corrupt saved session cannot turn an unsupported output or empty ingredient into a reward.
+        if (!supportedOutput(server) || recipeXP < 0 || recipeInstability < 0 || recipeInstability > 24
                 || recipeIngredients.stream().anyMatch(required -> required.ingredient().isEmpty())) {
             active = false;
             changed();
@@ -210,6 +246,14 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
             sendEffect(6, worldPosition, 0);
             return;
         }
+
+        // Original M421-451: enchantments first take one entire XP LEVEL from a nearby player per cycle.
+        if (recipeType == 1 && recipeXP > 0) {
+            ingredientTarget = null;
+            takeEnchantmentXP(server);
+            return;
+        }
+        if (recipeType == 1) countDelay = 10;
 
         if (recipeEssentia.visSize() > 0) {
             ingredientTarget = null;
@@ -272,8 +316,42 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
         finishCrafting(server, center);
     }
 
+    private boolean supportedOutput(ServerLevel server) {
+        return recipeType == 0 ? !recipeOutput.isEmpty()
+                : recipeType == 1 && recipeEnchantment != null && recipeOutput.isEmpty()
+                && server.registryAccess().registryOrThrow(Registries.ENCHANTMENT).containsKey(recipeEnchantment);
+    }
+
+    private void takeEnchantmentXP(ServerLevel server) {
+        var players = server.getEntitiesOfClass(ServerPlayer.class, new AABB(worldPosition).inflate(10));
+        for (ServerPlayer target : players) {
+            if (target.isRemoved() || target.experienceLevel <= 0) continue;
+            // Both owners are paid before damage, effects or update callbacks. A later failure never refunds a level.
+            --recipeXP;
+            countDelay = 20;
+            server.blockEntityChanged(worldPosition);
+            target.giveExperienceLevels(-1);
+            target.hurt(server.damageSources().magic(), server.random.nextInt(2));
+            if (!current()) return;
+            changed();
+            sendEffect(3, target.blockPosition(), target.getId());
+            server.playSound(null, target.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS,
+                    1.0F, 2.0F + server.random.nextFloat() * .4F);
+            return;
+        }
+        // No players is a plain stall. Present, empty-level players have the original 1/3 shortage roll.
+        Aspect[] aspects = recipeEssentia.getAspects();
+        if (!players.isEmpty() && aspects.length > 0 && server.random.nextInt(3) == 0) {
+            recipeEssentia.add(aspects[server.random.nextInt(aspects.length)], 1);
+            if (server.random.nextInt(50 - recipeInstability * 2) == 0) ++instability;
+            if (instability > 25) instability = 25;
+            changed();
+        }
+    }
+
     private void finishCrafting(ServerLevel server, TilePedestal center) {
-        ItemStack output = recipeOutput.copy();
+        ItemStack output = recipeType == 1
+                ? InfusionEnchantmentRecipe.raise(center.getItem(0), recipeEnchantment, server.registryAccess()) : recipeOutput.copy();
         UUID crafter = recipePlayer;
         // M504-509/578-606: finish the session before any output/comparator/addon
         // callback. No output rematch, start debit, or ordinary slot-limit clamp.
@@ -281,6 +359,8 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
         instability = 0;
         recipeEssentia = new AspectList();
         recipeOutput = ItemStack.EMPTY;
+        recipeEnchantment = null;
+        recipeXP = 0;
         ingredientTarget = null;
         itemCount = 0;
         server.blockEntityChanged(worldPosition);
@@ -317,7 +397,8 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     }
 
     @Override public int getPendingEssentia(Aspect aspect) {
-        return aspect != null && active && crafting && recipeType == 0 && current() ? recipeEssentia.getAmount(aspect) : 0;
+        return aspect != null && active && crafting && current() && level instanceof ServerLevel server
+                && supportedOutput(server) && (recipeType == 0 || recipeXP == 0) ? recipeEssentia.getAmount(aspect) : 0;
     }
 
     @Override public void consumeInfusionEssentiaRaw(Aspect aspect) {
@@ -374,7 +455,8 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
         tag.put("recipein", ingredients);
         tag.put("recipeinput", saveStack(recipeInput, registries));
         tag.put("recipeout", saveStack(recipeOutput, registries));
-        tag.putString("rotype", "@");
+        tag.putString("rotype", recipeType == 1 ? "enchantment" : "@");
+        if (recipeEnchantment != null) tag.putString("RecipeEnchantment", recipeEnchantment.toString());
         tag.putString("recipeOutputLabel", recipeOutputLabel);
         tag.putInt("recipeinst", recipeInstability);
         tag.putInt("recipetype", recipeType);
@@ -410,6 +492,9 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
         recipeInstability = tag.getInt("recipeinst");
         recipeType = tag.getInt("recipetype");
         recipeXP = tag.getInt("recipexp");
+        recipeEnchantment = tag.contains("RecipeEnchantment", Tag.TAG_STRING)
+                ? ResourceLocation.tryParse(tag.getString("RecipeEnchantment")) : null;
+        countDelay = 10; // Original transient delay resets on load, even in the middle of XP payment.
         recipePlayerName = tag.getString("recipeplayer");
         recipePlayer = tag.hasUUID("RecipePlayerId") ? tag.getUUID("RecipePlayerId") : null;
         count = 0;

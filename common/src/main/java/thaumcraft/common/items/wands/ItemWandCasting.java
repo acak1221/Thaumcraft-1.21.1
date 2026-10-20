@@ -109,9 +109,16 @@ public final class ItemWandCasting extends Item {
     }
 
     @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return Integer.MAX_VALUE; }
+    @Override public float getDestroySpeed(ItemStack stack, net.minecraft.world.level.block.state.BlockState state) {
+        return FocusData.get(stack).getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusTrade ? 0 : super.getDestroySpeed(stack, state);
+    }
     @Override public UseAnim getUseAnimation(ItemStack stack) { return UseAnim.BOW; }
 
     @Override public InteractionResult useOn(UseOnContext context) {
+        InteractionResult charger = thaumcraft.common.blocks.BlockMagicWorkbenchCharger.tryWandInteraction(context);
+        if (charger != InteractionResult.PASS) return charger;
+        InteractionResult thaumatorium = thaumcraft.common.lib.ThaumatoriumFormation.tryForm(context);
+        if (thaumatorium != InteractionResult.PASS) return thaumatorium;
         InteractionResult bore = thaumcraft.common.blocks.BlockArcaneBore.tryWandInteraction(context);
         if (bore != InteractionResult.PASS) return bore;
         InteractionResult boreBase = thaumcraft.common.blocks.BlockArcaneBoreBase.tryWandInteraction(context);

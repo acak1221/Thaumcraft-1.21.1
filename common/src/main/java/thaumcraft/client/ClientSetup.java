@@ -70,11 +70,13 @@ public final class ClientSetup {
         ThaumcraftGogglesClient.init();
         ThaumcraftShockClient.init();
         ThaumcraftExcavationClient.init();
+        ThaumcraftWarpClient.init();
         ItemWispEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         ItemJar.setTooltipViewer(() -> Minecraft.getInstance().player);
         thaumcraft.common.items.ItemCrystalEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftInfusion.TALLOW_CANDLE.get());
         MenuRegistry.registerScreenFactory(ThaumcraftContent.RESEARCH_TABLE_MENU.get(), GuiResearchTable::new);
+        MenuRegistry.registerScreenFactory(thaumcraft.common.config.ThaumcraftThaumatorium.MENU.get(), thaumcraft.client.gui.GuiThaumatorium::new);
         BlockEntityRendererRegistry.register(ThaumcraftContent.TABLE_BLOCK_ENTITY.get(), TileTableRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftContent.RESEARCH_TABLE_BLOCK_ENTITY.get(), TileResearchTableRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftContent.JAR_BLOCK_ENTITY.get(), TileJarRenderer::new);
@@ -82,6 +84,9 @@ public final class ClientSetup {
         BlockEntityRendererRegistry.register(ThaumcraftNodeDevices.NODE_TRANSDUCER_BLOCK_ENTITY.get(), TileNodeConverterRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftNodeDevices.ENERGIZED_NODE_BLOCK_ENTITY.get(), TileNodeEnergizedRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftNodeDevices.VIS_RELAY_BLOCK_ENTITY.get(), TileVisRelayRenderer::new);
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftLamps.ARCANE_LAMP_TILE.get(), thaumcraft.client.renderers.tile.TileArcaneLampRenderer::new);
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftVisCharging.VIS_CHARGE_RELAY_TILE.get(), thaumcraft.client.renderers.tile.TileMagicWorkbenchChargerRenderer::new);
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftWards.WARDED_TILE.get(), thaumcraft.client.renderers.tile.TileWardedRenderer::new);
         TileNodeConverter.setClientEffects(VisNetClientEffects.CONVERTER_EFFECTS);
         VisNetFxNetworking.initClient(payload -> {
             var client = Minecraft.getInstance();
@@ -121,6 +126,7 @@ public final class ClientSetup {
         // hiding real essentia. TC4 jars use the translucent world render pass.
         RenderTypeRegistry.register(RenderType.translucent(), ThaumcraftContent.JAR.get(), ThaumcraftContent.VOID_JAR.get());
         RenderTypeRegistry.register(RenderType.translucent(), thaumcraft.common.config.ThaumcraftTubes.ESSENTIA_RESERVOIR.get());
+        RenderTypeRegistry.register(RenderType.translucent(), thaumcraft.common.config.ThaumcraftLamps.AMBER_BLOCK.get(), thaumcraft.common.config.ThaumcraftLamps.AMBER_BRICKS.get());
         // These are original shard colors, which differ from aspect HUD colors.
         String[] tags = {"aer", "ignis", "aqua", "terra", "ordo", "perditio"};
         int[] colors = {0xffff7e, 0xff3c01, 0x0090ff, 0x00a000, 0xeeccff, 0x555577};

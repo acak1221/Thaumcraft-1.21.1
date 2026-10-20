@@ -166,7 +166,8 @@ class ResearchPurchaseTest {
 
     @Test
     void conditionalVirtualAndAutoUnlockEntriesCannotBePurchased() {
-        for (String key : List.of("MIRRORESSENTIA", "CAP_iron", "CRUCIBLE")) {
+        ResearchConditions.setFeatures(true, false);
+        try { for (String key : List.of("MIRRORESSENTIA", "CAP_iron", "CRUCIBLE")) {
             PlayerKnowledge knowledge = funded(key);
             for (String parent : ResearchCatalog.get(key).parents()) knowledge.addResearch(parent);
             CompoundTag before = knowledge.save();
@@ -174,7 +175,7 @@ class ResearchPurchaseTest {
             assertEquals(UNAVAILABLE, result.failure(), key);
             assertEquals(ResearchCatalog.get(key).aspectCost(), result.costs());
             assertEquals(before, knowledge.save(), key);
-        }
+        } } finally { ResearchConditions.setFeatures(true, true); }
     }
 
     @Test

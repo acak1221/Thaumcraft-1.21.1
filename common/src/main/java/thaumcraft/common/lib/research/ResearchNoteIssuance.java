@@ -118,7 +118,7 @@ public final class ResearchNoteIssuance {
         Objects.requireNonNull(knowledge, "knowledge");
         ResearchDefinition research = resolve(key);
         if (research == null) return Failure.UNKNOWN_RESEARCH;
-        if (research.isVirtual() || research.isAutoUnlock() || !research.conditions().isEmpty()
+        if (research.isVirtual() || research.isAutoUnlock() || !research.isEnabled()
                 || research.aspectCost().isEmpty()
                 || ("ELDRITCH".equals(research.category()) && !knowledge.isResearchComplete("ELDRITCHMINOR"))) {
             return Failure.UNAVAILABLE;

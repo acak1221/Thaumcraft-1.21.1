@@ -418,6 +418,7 @@ public final class BoreWork {
             // bridge still verifies native actor/profile/level; changed hands
             // AFTER the true delegate must not hide a completed removal.
             if (BoreNativeContext.isLiveLevel(f.level)) {
+                thaumcraft.common.lib.ArcaneLampLighting.afterBoreDig(f.top, f.before.base());
                 try { platform.after(f.level, actor, f.before.targetPos(), f.before.targetState()); }
                 catch (RuntimeException notice) {
                     // The true native witness is already durable. An observer

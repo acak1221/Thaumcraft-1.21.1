@@ -19,7 +19,7 @@ public final class ResearchBrowserData {
     private ResearchBrowserData() {}
 
     public static boolean isVisible(ResearchDefinition research, Set<String> completed) {
-        if (research == null || research.isVirtual() || !research.conditions().isEmpty()) return false;
+        if (research == null || research.isVirtual() || !research.isEnabled()) return false;
         if (!isCategoryVisible(research.category(), completed)) return false;
         // Original GuiResearchBrowser icon loop: completion and @ clue each
         // bypass Hidden/Lost/Concealed checks; Virtual still never draws.
@@ -80,10 +80,10 @@ public final class ResearchBrowserData {
         for (ResearchDefinition research : orderedResearch) byKey.put(research.key(), research);
         boolean changed = false;
         for (ResearchDefinition research : orderedResearch) {
-            if (!research.conditions().isEmpty() || !knowledge.isResearchComplete(research.key())) continue;
+            if (!research.isEnabled() || !knowledge.isResearchComplete(research.key())) continue;
             for (String sibling : research.siblings()) {
                 ResearchDefinition definition = byKey.get(sibling);
-                if (definition != null && !definition.conditions().isEmpty()) continue;
+                if (definition != null && !definition.isEnabled()) continue;
                 if (!knowledge.addResearch(sibling)) continue;
                 changed = true;
                 // Original ResearchManager.completeResearch, default wuss=false.

@@ -14,6 +14,8 @@ import thaumcraft.common.items.wands.foci.ItemFocusFire;
 import thaumcraft.common.items.wands.foci.ItemFocusFrost;
 import thaumcraft.common.items.wands.foci.ItemFocusPortableHole;
 import thaumcraft.common.items.wands.foci.ItemFocusShock;
+import thaumcraft.common.items.wands.foci.ItemFocusWarding;
+import thaumcraft.common.items.wands.foci.ItemFocusTrade;
 
 /** The five implemented basic foci; absence of WAND_FOCUS means an unequipped wand. */
 public final class ThaumcraftFoci {
@@ -36,6 +38,10 @@ public final class ThaumcraftFoci {
             () -> new ItemFocusShock(new Item.Properties()));
     public static final RegistrySupplier<ItemFocusPortableHole> PORTABLE_HOLE_FOCUS = ITEMS.register("focus_portable_hole",
             () -> new ItemFocusPortableHole(new Item.Properties()));
+    public static final RegistrySupplier<ItemFocusWarding> WARDING_FOCUS = ITEMS.register("focus_warding",
+            () -> new ItemFocusWarding(new Item.Properties()));
+    public static final RegistrySupplier<ItemFocusTrade> TRADE_FOCUS = ITEMS.register("focus_trade",
+            () -> new ItemFocusTrade(new Item.Properties()));
 
     private static boolean registered;
     private ThaumcraftFoci() {}
@@ -50,5 +56,7 @@ public final class ThaumcraftFoci {
         CreativeTabRegistry.append(ThaumcraftContent.TAB, FROST_FOCUS);
         CreativeTabRegistry.append(ThaumcraftContent.TAB, SHOCK_FOCUS);
         CreativeTabRegistry.append(ThaumcraftContent.TAB, PORTABLE_HOLE_FOCUS);
+        CreativeTabRegistry.append(ThaumcraftContent.TAB, WARDING_FOCUS);
+        CreativeTabRegistry.append(ThaumcraftContent.TAB, TRADE_FOCUS);
     }
 }

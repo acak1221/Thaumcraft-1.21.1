@@ -1,0 +1,20 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "minecraft:efficiency",
+  "components": [
+    {
+      "item": "minecraft:iron_pickaxe"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 4,
+    "instrumentum": 4,
+    "ordo": 4
+  },
+  "instability": 2,
+  "first_level_minimum_cost": 1
+}

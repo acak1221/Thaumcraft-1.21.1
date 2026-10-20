@@ -21,6 +21,7 @@ import thaumcraft.common.blocks.BlockInfusionPillar;
 import thaumcraft.common.blocks.BlockPedestal;
 import thaumcraft.common.blocks.BlockTallowCandle;
 import thaumcraft.common.crafting.InfusionStackRecipe;
+import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.lib.events.EssentiaHandler;
 import thaumcraft.common.lib.potions.PotionFluxTaint;
 import thaumcraft.common.tiles.TileInfusionMatrix;
@@ -64,6 +65,12 @@ public final class ThaumcraftInfusion {
             });
     public static final RegistrySupplier<RecipeSerializer<InfusionStackRecipe>> INFUSION_RECIPE_SERIALIZER = SERIALIZERS.register("infusion_stack",
             () -> InfusionStackRecipe.SERIALIZER);
+    public static final RegistrySupplier<RecipeType<InfusionEnchantmentRecipe>> ENCHANTMENT_RECIPE_TYPE = RECIPE_TYPES.register("infusion_enchantment",
+            () -> new RecipeType<InfusionEnchantmentRecipe>() {
+                @Override public String toString() { return "thaumcraft:infusion_enchantment"; }
+            });
+    public static final RegistrySupplier<RecipeSerializer<InfusionEnchantmentRecipe>> ENCHANTMENT_RECIPE_SERIALIZER = SERIALIZERS.register("infusion_enchantment",
+            () -> InfusionEnchantmentRecipe.SERIALIZER);
     public static final RegistrySupplier<MobEffect> FLUX_TAINT = EFFECTS.register("flux_taint", PotionFluxTaint::new);
     private static boolean registered;
     private ThaumcraftInfusion() {}

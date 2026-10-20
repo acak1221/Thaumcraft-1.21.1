@@ -475,6 +475,20 @@ public final class DeferredItemDrops extends SavedData {
         data.setDirty();
     }
 
+    /** A paid machine output with its original ejection point and trajectory; caller relinquishes the actual result on return. */
+    public static void enqueueDirected(ServerLevel level, BlockPos source, Vec3 position, Vec3 motion, ItemStack actualResult) {
+        if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
+            throw new IllegalStateException("Machine output requires the canonical server level and thread");
+        if (source == null || position == null || motion == null || actualResult == null || actualResult.isEmpty()
+                || !Double.isFinite(position.x) || !Double.isFinite(position.y) || !Double.isFinite(position.z)
+                || !Double.isFinite(motion.x) || !Double.isFinite(motion.y) || !Double.isFinite(motion.z))
+            throw new IllegalArgumentException("Machine output requires actual stock and finite position/motion");
+        var data = level.getDataStorage().computeIfAbsent(FACTORY, ID);
+        data.pending.addLast(new Pending(UUID.randomUUID(), source.immutable(), position, motion, actualResult.copy()));
+        data.deliveryRequested = true;
+        data.setDirty();
+    }
+
     public static void enqueue(ServerLevel level, BlockPos source, List<ItemStack> stacks) {
         if (!level.getServer().isSameThread()) throw new IllegalStateException("Inventory drops require the server thread");
         var data = level.getDataStorage().computeIfAbsent(FACTORY, ID);

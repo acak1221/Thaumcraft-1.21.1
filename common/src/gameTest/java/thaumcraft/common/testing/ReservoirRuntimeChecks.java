@@ -295,6 +295,14 @@ public final class ReservoirRuntimeChecks {
         demand.putBoolean("active", true);
         demand.putBoolean("crafting", true);
         demand.putInt("recipetype", 0);
+        // This endpoint fixture represents a supported saved stack ritual, not an empty-output foreign session.
+        var recipe = (InfusionStackRecipe) level.getRecipeManager().byKey(id("infusion/essentia_reservoir")).orElseThrow().value();
+        ItemStack result = recipe.getResultItem(registries);
+        CompoundTag output = new CompoundTag();
+        output.put("Stack", result.copyWithCount(1).save(registries));
+        output.putInt("StoredCount", result.getCount());
+        demand.putString("rotype", "@");
+        demand.put("recipeout", output);
         ListTag rows = new ListTag();
         var row = new CompoundTag();
         row.putString("key", AQUA.getTag());

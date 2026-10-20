@@ -943,6 +943,51 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.ArcaneEarRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r10_overstack")
+    public void researchNoteWholeStacksSurviveNativeOwners(GameTestHelper test) {
+        thaumcraft.common.testing.ResearchNoteOverstackRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r10_copy")
+    public void researchTableCopiesDiscoveriesWithExactCosts(GameTestHelper test) {
+        thaumcraft.common.testing.ResearchNoteCopyRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m08_warding")
+    public void wardingPreservesOwnersStatesAndArchitectPayments(GameTestHelper test) {
+        thaumcraft.common.testing.WardingRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m09_arcane_lamp")
+    public void arcaneLampLightsDarkAirAndCleansItsOriginalRange(GameTestHelper test) {
+        thaumcraft.common.testing.ArcaneLampRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m05_thaumatorium")
+    public void thaumatoriumFormsPullsAndPaysNativeOutputs(GameTestHelper test) {
+        thaumcraft.common.testing.ThaumatoriumRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1000, batch = "m07_enchantment_infusion")
+    public void enchantmentInfusionPaysLevelsBeforeEssentiaAndRaisesActualCentre(GameTestHelper test) {
+        thaumcraft.common.testing.EnchantmentInfusionRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "m08_trade")
+    public void tradeSwapsPayOnceAndRespectArchitectAndProtection(GameTestHelper test) {
+        thaumcraft.common.testing.TradeRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m03_vis_charge")
+    public void visChargeRelayCreditsTheActualWorkbenchWand(GameTestHelper test) {
+        thaumcraft.common.testing.VisChargeRelayRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "r12_warp")
+    public void warpDispatchesOriginalBranchesWithNativeEffects(GameTestHelper test) {
+        thaumcraft.common.testing.WarpRuntimeChecks.run(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void crystalBlocksDropSixOwnShards(GameTestHelper test) {
         thaumcraft.common.testing.CrystalDropRuntimeChecks.run(test);

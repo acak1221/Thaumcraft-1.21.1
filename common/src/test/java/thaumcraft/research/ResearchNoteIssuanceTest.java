@@ -44,9 +44,13 @@ class ResearchNoteIssuanceTest {
 
     @Test void virtualAutoAspectlessConditionalAndCompletedResearchAreRefused() {
         var knowledge = new PlayerKnowledge();
-        for (String key : List.of("CAP_iron", "ELDRITCHMINOR", "MIRRORESSENTIA")) {
+        for (String key : List.of("CAP_iron", "ELDRITCHMINOR")) {
             assertEquals(UNAVAILABLE, ResearchNoteIssuance.validate(knowledge, key), key);
         }
+        assertEquals(SECONDARY_REQUIRES_PURCHASE, ResearchNoteIssuance.validate(knowledge, "MIRRORESSENTIA"));
+        ResearchConditions.setFeatures(true, false);
+        try { assertEquals(UNAVAILABLE, ResearchNoteIssuance.validate(knowledge, "MIRRORESSENTIA")); }
+        finally { ResearchConditions.setFeatures(true, true); }
         knowledge.addResearch("CRUCIBLE");
         knowledge.addResearch("NITOR");
         assertEquals(ALREADY_COMPLETE, ResearchNoteIssuance.validate(knowledge, "NITOR"));

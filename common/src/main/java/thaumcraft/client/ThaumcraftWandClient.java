@@ -34,7 +34,11 @@ public final class ThaumcraftWandClient {
                 (stack, level, entity, seed) -> {
                     var focus = FocusData.get(stack);
                     return (focus.getItem() instanceof ItemFocusShock ? WandModels.SHOCK : focus.getItem() instanceof ItemFocusFrost ? WandModels.FROST
-                            : focus.getItem() instanceof ItemFocusExcavation ? WandModels.EXCAVATION : focus.isEmpty() ? WandModels.NONE : WandModels.OTHER).value();
+                            : focus.getItem() instanceof ItemFocusExcavation ? WandModels.EXCAVATION
+                            : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusWarding ? WandModels.WARDING
+                            : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusTrade ? WandModels.TRADE
+                            : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusPortableHole ? WandModels.PORTABLE_HOLE
+                            : focus.isEmpty() ? WandModels.NONE : WandModels.OTHER).value();
                 });
         ColorHandlerRegistry.registerItemColors((stack, tint) -> {
             var focus = FocusData.get(stack);

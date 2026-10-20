@@ -15,17 +15,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FocusUpgradeDataTest {
     @Test void canonicalClosedCatalogueHasDefensiveAspectsAndSafeLookup() {
-        var types = List.of(FocusUpgradeType.potency, FocusUpgradeType.frugal, FocusUpgradeType.treasure, FocusUpgradeType.enlarge);
-        var aspects = List.of(Aspect.WEAPON, Aspect.HUNGER, Aspect.GREED, Aspect.TRAVEL);
-        for (int id = 0; id < 4; id++) {
-            var type = types.get(id);
+        var types = List.of(FocusUpgradeType.potency, FocusUpgradeType.frugal, FocusUpgradeType.treasure, FocusUpgradeType.enlarge,
+                FocusUpgradeType.architect, FocusUpgradeType.extend, FocusUpgradeType.silktouch);
+        var aspects = List.of(Aspect.WEAPON, Aspect.HUNGER, Aspect.GREED, Aspect.TRAVEL, Aspect.CRAFT, Aspect.EXCHANGE, Aspect.GREED);
+        int[] ids = {0, 1, 2, 3, 6, 7, 8};
+        for (int index = 0; index < ids.length; index++) {
+            int id = ids[index];
+            var type = types.get(index);
             assertEquals(id, type.id); assertSame(type, FocusUpgradeType.get(id));
-            assertEquals(1, type.getAspects().getAmount(aspects.get(id)));
+            assertEquals(1, type.getAspects().getAmount(aspects.get(index)));
             type.getAspects().aspects.clear();
-            assertEquals(1, type.getAspects().getAmount(aspects.get(id)));
+            assertEquals(1, type.getAspects().getAmount(aspects.get(index)));
             assertTrue(type.icon.getPath().startsWith("textures/foci/"));
         }
-        for (int id : new int[]{Integer.MIN_VALUE, -1, 4, 8, 20, 65536, Integer.MAX_VALUE}) assertNull(FocusUpgradeType.get(id));
+        for (int id : new int[]{Integer.MIN_VALUE, -1, 4, 5, 9, 20, 65536, Integer.MAX_VALUE}) assertNull(FocusUpgradeType.get(id));
     }
 
     @Test void orderedHolesAndOccurrenceLevelsNeverAlias() {
@@ -44,7 +47,8 @@ class FocusUpgradeDataTest {
     }
 
     @Test void fixedSlotsRoundTripJsonNbtAndExactlyTenWireBytes() {
-        for (var data : List.of(FocusUpgradeData.EMPTY, new FocusUpgradeData(List.of((short)2, (short)3, (short)0, (short)3, (short)1)))) {
+        for (var data : List.of(FocusUpgradeData.EMPTY, new FocusUpgradeData(List.of((short)2, (short)3, (short)0, (short)3, (short)1)),
+                new FocusUpgradeData(List.of((short)1, (short)7, (short)6, (short)3, (short)8)))) {
             var json = FocusUpgradeData.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow();
             assertEquals(data, FocusUpgradeData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
             var nbt = FocusUpgradeData.CODEC.encodeStart(NbtOps.INSTANCE, data).getOrThrow();
@@ -59,7 +63,7 @@ class FocusUpgradeDataTest {
     }
 
     @Test void malformedListsAndUnimplementedIdsReturnDecodeErrors() {
-        for (String json : List.of("[]", "[-1]", "[-1,-1,-1,-1,-1,-1]", "[0,1,2,3,8]", "[0,1,2,3,20]",
+        for (String json : List.of("[]", "[-1]", "[-1,-1,-1,-1,-1,-1]", "[0,1,2,3,4]", "[0,1,2,3,20]",
                 "[0,1,2,3,-2]", "[0,1,2,3,65536]", "[0,1,2,3,null]", "{}")) {
             var result = assertDoesNotThrow(() -> FocusUpgradeData.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)));
             assertTrue(result.error().isPresent(), json); assertTrue(result.result().isEmpty(), json);

@@ -10,10 +10,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.container.ContainerResearchTable;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
+import thaumcraft.common.lib.network.ResearchTableCopyNetworking;
 import thaumcraft.common.lib.research.ResearchAspectCombination;
 import thaumcraft.common.lib.research.ResearchCatalog;
 import thaumcraft.common.lib.research.ResearchNoteData;
@@ -94,6 +96,26 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
             return;
         }
         ResearchNoteData note = note();
+        if (copyVisible(note) && inside(mouseX, mouseY, 37, 5, 24, 24)) {
+            var lines = new ArrayList<Component>();
+            lines.add(Component.translatable("tc.research.copy"));
+            lines.add(Component.translatable(Items.PAPER.getDescriptionId()).append(" × 1").withStyle(
+                    ResearchTableCopyNetworking.findSupply(minecraft.player.getInventory(), Items.PAPER) >= 0 ? ChatFormatting.GRAY : ChatFormatting.RED));
+            lines.add(Component.translatable(Items.INK_SAC.getDescriptionId()).append(" × 1").withStyle(
+                    ResearchTableCopyNetworking.findSupply(minecraft.player.getInventory(), Items.INK_SAC) >= 0 ? ChatFormatting.GRAY : ChatFormatting.RED));
+            var definition = ResearchCatalog.get(note.key());
+            if (definition != null) {
+                for (var entry : definition.aspectCost().entrySet().stream().sorted(java.util.Comparator.comparing(
+                        entry -> Aspect.getAspect(entry.getKey()).getName())).toList()) {
+                    long price = (long) entry.getValue() + note.copies();
+                    lines.add(Component.literal(Aspect.getAspect(entry.getKey()).getName() + " × " + price).withStyle(
+                            price <= poolFor(entry.getKey()) ? ChatFormatting.GRAY : ChatFormatting.RED));
+                }
+            }
+            if (!menu.editReady()) lines.add(Component.translatable("tc.port.table.waiting").withStyle(ChatFormatting.GRAY));
+            tooltip(graphics, lines, mouseX, mouseY);
+            return;
+        }
         if (inside(mouseX, mouseY, 79, 120, 13, 12)) {
             var lines = new ArrayList<Component>();
             var definition = note == null ? null : ResearchCatalog.get(note.key());
@@ -101,7 +123,7 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
             lines.add(Component.translatable("tc.port.table.help"));
             lines.add(Component.translatable("tc.port.table.combine_help"));
             if (note != null && note.complete()) lines.add(Component.translatable("tc.port.table.learn").withStyle(ChatFormatting.GREEN));
-            if (note != null && !hasInk()) lines.add(Component.translatable("tc.port.table.no_ink").withStyle(ChatFormatting.RED));
+            if (note != null && !note.complete() && !hasInk()) lines.add(Component.translatable("tc.port.table.no_ink").withStyle(ChatFormatting.RED));
             if (!menu.editReady()) lines.add(Component.translatable("tc.port.table.waiting").withStyle(ChatFormatting.GRAY));
             tooltip(graphics, lines, mouseX, mouseY);
             return;
@@ -122,6 +144,11 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
         drawCombination(graphics);
         graphics.drawString(font, "?", leftPos + 82, topPos + 121, 0xCEB995, false);
         var note = note();
+        if (copyVisible(note)) {
+            // Original button5 location and sprite; only an authoritative acknowledged revision can request copying.
+            blitAlpha(graphics, BACKGROUND, leftPos + 37, topPos + 5, 232, 200, 24, 24, 256, 256,
+                    1, 1, 1, menu.canCopy() ? 1 : .4F);
+        }
         if (note == null) {
             graphics.drawWordWrap(font, Component.translatable("tc.port.table.empty"), leftPos + 105, topPos + 72, 130, 0xCEB995);
             return;
@@ -133,7 +160,7 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
                 font.plainSubstrByWidth(Component.translatable(definition.nameKey()).getString(), 134), leftPos + 101, topPos + 11, 0x806344, false);
         graphics.drawString(font, Component.translatable(note.complete() ? "tc.port.table.complete" : "tc.port.table.incomplete"),
                 leftPos + 101, topPos + 144, 0x806344, false);
-        if (!hasInk()) graphics.drawString(font, font.plainSubstrByWidth(Component.translatable("tc.port.table.no_ink").getString(), 134),
+        if (!note.complete() && !hasInk()) graphics.drawString(font, font.plainSubstrByWidth(Component.translatable("tc.port.table.no_ink").getString(), 134),
                 leftPos + 101, topPos + 156, 0xE6A0A0, false);
         else if (!menu.editReady()) graphics.drawString(font, font.plainSubstrByWidth(Component.translatable("tc.port.table.waiting").getString(), 134),
                 leftPos + 101, topPos + 156, 0xCEB995, false);
@@ -144,6 +171,12 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
     }
 
     private ResearchNoteData note() { return menu.getSlot(1).getItem().get(ThaumcraftContent.RESEARCH_NOTE_DATA.get()); }
+
+    private boolean copyVisible(ResearchNoteData note) {
+        return minecraft.player != null && note != null && note.complete()
+                && menu.getSlot(1).getItem().is(ThaumcraftContent.DISCOVERY.get())
+                && KnowledgeAccess.get(minecraft.player).isResearchComplete("RESEARCHDUPE");
+    }
 
     private boolean hasInk() { return ScribingInk.consumeFromTable(menu.getSlot(0).getItem(), false); }
 
@@ -279,6 +312,11 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
         // Item slots, shift-click and vanilla carried/quick-craft gestures stay native.
         if (overSlot(x, y) || !menu.getCarried().isEmpty()) return super.mouseClicked(x, y, button);
         if (minecraft.player == null) return super.mouseClicked(x, y, button);
+        if (button == 0 && copyVisible(note()) && inside(x, y, 37, 5, 24, 24)) {
+            handledButton = button;
+            if (menu.requestCopy()) sound("cameraclack", .4F, 1);
+            return true;
+        }
         List<String> tags = palette();
         if (button >= 0 && button <= 2) {
             if (inside(x, y, 35, 139, 32, 16) && selectedLeft != null && selectedRight != null) {

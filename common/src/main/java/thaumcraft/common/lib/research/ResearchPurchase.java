@@ -79,7 +79,7 @@ public final class ResearchPurchase {
     private static Result validate(PlayerKnowledge knowledge, ResearchDefinition research) {
         if (research == null) return rejected(Failure.UNKNOWN_RESEARCH, Map.of());
         Map<String, Integer> costs = research.aspectCost();
-        if (research.isVirtual() || research.isAutoUnlock() || !research.conditions().isEmpty()
+        if (research.isVirtual() || research.isAutoUnlock() || !research.isEnabled()
                 || ("ELDRITCH".equals(research.category()) && !knowledge.isResearchComplete("ELDRITCHMINOR"))
                 || costs.isEmpty() || costs.entrySet().stream().anyMatch(cost ->
                         Aspect.getAspect(cost.getKey()) == null || cost.getValue() == null || cost.getValue() <= 0)) {

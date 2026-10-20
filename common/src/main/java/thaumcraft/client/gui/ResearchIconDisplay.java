@@ -17,8 +17,8 @@ import thaumcraft.common.items.wands.WandData;
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
-            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCustomOre|blockChestHungry|blockTaint|blockEssentiaReservoir|blockLifter))"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
+            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCustomOre|blockChestHungry|blockTaint|blockEssentiaReservoir|blockLifter))"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
 
     // Original ItemResource:81-100; native ThaumcraftContent.MATERIALS flattening.
@@ -129,6 +129,8 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemGoggles" -> metadata == 0 ? "goggles_revealing" : null;
             case "ConfigItems.itemEssence" -> metadata == 0 ? "phial_empty" : null;
             case "ConfigItems.itemFocusFire" -> metadata == 0 ? "focus_fire" : null;
+            case "ConfigItems.itemFocusTrade" -> metadata == 0 ? "focus_trade" : null;
+            case "ConfigItems.itemFocusWarding" -> metadata == 0 ? "focus_warding" : null;
             case "ConfigItems.itemFocusShock" -> metadata == 0 ? "focus_shock" : null;
             case "ConfigItems.itemFocusExcavation" -> metadata == 0 ? "focus_excavation" : null;
             case "ConfigItems.itemFocusFrost" -> metadata == 0 ? "focus_frost" : null;
@@ -213,6 +215,11 @@ final class ResearchIconDisplay {
                 default -> null;
             };
             // ConfigResearch:167,254,300,305 and native masonry/alchemy registrations.
+            case "ConfigBlocks.blockCosmeticOpaque" -> switch (metadata) {
+                case 0 -> "amber_block";
+                case 1 -> "amber_bricks";
+                default -> null;
+            };
             case "ConfigBlocks.blockCosmeticSolid" -> switch (metadata) {
                 case 4 -> "thaumium_block";
                 case 5 -> "tallow_block";
@@ -224,7 +231,11 @@ final class ResearchIconDisplay {
             case "ConfigBlocks.blockMetalDevice" -> switch (metadata) {
                 case 0 -> "crucible";
                 case 1 -> "alembic";
+                case 2 -> "vis_charge_relay";
+                case 7 -> "arcane_lamp";
                 case 9 -> "alchemical_construct";
+                case 10, 11 -> "alchemical_construct";
+                case 12 -> "mnemonic_matrix";
                 case 14 -> "vis_relay";
                 default -> null;
             };

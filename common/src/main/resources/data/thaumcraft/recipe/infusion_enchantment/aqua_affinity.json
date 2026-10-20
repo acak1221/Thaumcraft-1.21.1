@@ -1,0 +1,23 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "minecraft:aqua_affinity",
+  "components": [
+    {
+      "item": "minecraft:cod"
+    },
+    {
+      "item": "minecraft:slime_ball"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ],
+  "aspects": {
+    "praecantatio": 4,
+    "motus": 8,
+    "aqua": 8
+  },
+  "instability": 2,
+  "first_level_minimum_cost": 1
+}

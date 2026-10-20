@@ -31,10 +31,19 @@ class OuterLandsWiringRulesTest {
 
     @Test void everyEldritchMetadataIsHostedByItsOwnBlock() {
         for (int variant = 0; variant <= 11; ++variant) {
-            assertEquals(variant, EldritchBlockRules.eldritchGroup(variant));
-            assertTrue(EldritchBlockRules.eldritchHasTile(variant) || variant == 6,
-                    "the metadata " + variant + " must be a known one");
+            int group = EldritchBlockRules.eldritchGroup(variant);
+            assertTrue(EldritchBlockRules.eldritchGroupVariants(group).contains(variant),
+                    "the metadata " + variant + " must be hosted by the group " + group);
         }
+        // Oracle BlockEldritch:151-153 - only these metadata values carry a block entity.
+        assertTrue(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_ALTAR));
+        assertTrue(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_OBELISK));
+        assertTrue(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_CAPSTONE));
+        assertTrue(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_LOCK));
+        assertTrue(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_CRAB_SPAWNER));
+        assertTrue(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_RUNED));
+        assertFalse(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_GLOWING_CRUST));
+        assertFalse(EldritchBlockRules.eldritchHasTile(EldritchBlockRules.ELDRITCH_DECO));
     }
 
     @Test void everyCosmeticSolidMetadataLandsOnItsOwnBlock() {

@@ -7,6 +7,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -29,6 +31,18 @@ public final class BlockEldritchPortal extends BaseEntityBlock {
 
     /** BlockEldritchPortal:115-121 - every portal tile exists. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileEldritchPortal(pos, state); }
+
+    /**
+     * Original TileEldritchPortal:41-54 - the gate tile updates every tick.
+     *
+     * <p>The 1.7 tile updated itself, so the native port needs the block ticker of the gate.
+     */
+    @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return createTickerHelper(type, ThaumcraftEldritchBlocks.ELDRITCH_PORTAL_TILE.get(),
+                (lvl, pos, st, tile) -> {
+                    if (tile instanceof TileEldritchPortal portal) TileEldritchPortal.tick(lvl, pos, st, portal);
+                });
+    }
 
     /** BlockEldritchPortal:80-89 - the portal has neither a selection nor a collision box. */
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {

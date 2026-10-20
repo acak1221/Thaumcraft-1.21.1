@@ -44,8 +44,15 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         if (OuterLandsProvider.isOuterLands(level.getLevel())) return false;
         int x = context.origin().getX();
         int z = context.origin().getZ();
+        int chunkX = x >> 4;
+        int chunkZ = z >> 4;
+        // The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
+        // footprint of the ring has to stay inside it. The centre is therefore pulled into the
+        // chunk when the draw put it on the border.
+        int centreX = inside(x, chunkX);
+        int centreZ = inside(z, chunkZ);
         // Oracle ThaumcraftWorldGenerator:424 - the ring grows nine blocks below the surface.
-        int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, centreX, centreZ);
         int randPosY = surface - 9;
         // Oracle ThaumcraftWorldGenerator:425 - the surface structures only grow below the sea level.
         if (randPosY >= level.getSeaLevel()) return false;
@@ -56,20 +63,31 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         int height = size[1];
         // Oracle ThaumcraftWorldGenerator:437 - the ring base is eight blocks above the roll.
         int j = randPosY + 8;
-        int chunkX = x >> 4;
-        int chunkZ = z >> 4;
         for (int[] sample : StructurePlacementRules.RING_SAMPLES) {
-            if (!validSpawn(level, x + sample[0], j, z + sample[1])) return false;
+            if (!validSpawn(level, centreX + sample[0], j, centreZ + sample[1])) return false;
         }
         OuterLandsProvider.MazeSavedData maze = OuterLandsProvider.maze(server);
         if (maze.mazesInRange(chunkX, chunkZ, width, height)) return false;
-        buildRing(level, random, x, j, z);
+        buildRing(level, random, centreX, j, centreZ);
         // Oracle ThaumcraftWorldGenerator:447 - the ring seeds the labyrinth of the Outer Lands.
         long seed = random.nextLong();
         MazeGenerator generator = new MazeGenerator(width, height, seed);
         while (!generator.generate()) generator = new MazeGenerator(width, height, ++seed);
         maze.storeLabyrinth(generator, chunkX, chunkZ);
         return true;
+    }
+
+    /**
+     * The centre of the ring inside its chunk.
+     *
+     * <p>The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
+     * footprint of the ring has to stay inside the chunk of its centre.
+     */
+    private static int inside(int coordinate, int chunk) {
+        int base = chunk << 4;
+        int low = base + StructurePlacementRules.RING_RADIUS;
+        int high = base + 15 - StructurePlacementRules.RING_RADIUS;
+        return Math.min(Math.max(coordinate, low), high);
     }
 
     /** Oracle {@code WorldGenEldritchRing.LocationIsValidSpawn:39-62}. */

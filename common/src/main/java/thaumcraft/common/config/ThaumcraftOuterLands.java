@@ -3,7 +3,6 @@ package thaumcraft.common.config;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockAiry;
@@ -30,6 +30,7 @@ import thaumcraft.common.blocks.BlockTaintFibres;
 import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.lib.world.DungeonRooms;
 import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.lib.world.OuterLandsProvider;
 import thaumcraft.common.lib.world.OuterLandsWiringRules;
 import thaumcraft.common.tiles.TileBanner;
 import thaumcraft.common.tiles.TileEldritchAltar;
@@ -104,29 +105,14 @@ public final class ThaumcraftOuterLands {
     /* The eldritch content of the Outer Lands                              */
     /* ------------------------------------------------------------------ */
 
-    /** The registry id of an eldritch block of the Outer Lands. */
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, path);
-    }
-
-    /** The eldritch block of the altar, the obelisk and the capstone. */
-    public static Block eldritch() {
-        return ThaumcraftEldritchBlocks.ELDRITCH.get();
-    }
-
-    /** The ordinary cosmetic stone of the rooms. */
-    public static Block cosmeticSolid() {
-        return ThaumcraftEldritchBlocks.COSMETIC_SOLID.get();
+    /** The invisible wall face of the rooms. */
+    public static Block eldritchNothing() {
+        return ThaumcraftEldritchBlocks.ELDRITCH_NOTHING.get();
     }
 
     /** The eldritch stairs of the rooms. */
     public static Block stairsEldritch() {
         return ThaumcraftEldritchBlocks.STAIRS_ELDRITCH.get();
-    }
-
-    /** The invisible wall face of the rooms. */
-    public static Block eldritchNothing() {
-        return ThaumcraftEldritchBlocks.ELDRITCH_NOTHING.get();
     }
 
     /* ------------------------------------------------------------------ */
@@ -170,7 +156,7 @@ public final class ThaumcraftOuterLands {
                 // variant in the lower bits and the upper half in the third bit.
                 Block block = slabBlock(variant);
                 yield block.defaultBlockState().setValue(BlockStateProperties.SLAB_TYPE,
-                        OuterLandsWiringRules.slabUpper(variant) ? Half.TOP : Half.BOTTOM);
+                        OuterLandsWiringRules.slabUpper(variant) ? SlabType.TOP : SlabType.BOTTOM);
             }
             case COSMETIC_SOLID -> {
                 Block block = cosmeticSolidBlock(variant);

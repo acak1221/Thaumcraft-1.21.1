@@ -91,11 +91,7 @@ public final class InfusionInstability {
         knowledge.setWarpCounter(knowledge.getTotalWarp());
         if (selected instanceof ServerPlayer player) {
             KnowledgeEvents.sync(player);
-            // Native action-bar notification replaces TC4's private toast queue.
-            // PacketWarpMessage:63-76 whispers ONLY for sticky (not temporary).
-            player.displayClientMessage(Component.translatable(sticky ? "tc.addwarpsticky" : "tc.addwarptemp"), true);
-            if (sticky) player.playNotifySound(SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "whispers")),
-                    SoundSource.PLAYERS, .5F, 1);
+            thaumcraft.common.lib.network.WarpMessageNetworking.send(player, (byte) (sticky ? 1 : 2), amount);
         }
     }
 

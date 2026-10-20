@@ -39,6 +39,8 @@
     "thaumcraft:thaumatorium_top",
     "thaumcraft:mnemonic_matrix",
     "thaumcraft:growth_lamp",
-    "thaumcraft:fertility_lamp"
+    "thaumcraft:fertility_lamp",
+    "thaumcraft:advanced_alchemical_construct",
+    "thaumcraft:advanced_alchemical_furnace"
   ]
 }

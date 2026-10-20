@@ -1,0 +1,44 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "RUNICEMERGENCY",
+  "input": {
+    "item": "thaumcraft:runic_amulet"
+  },
+  "components": [
+    {
+      "item": "thaumcraft:balance_shard"
+    },
+    {
+      "item": "thaumcraft:earth_shard"
+    },
+    {
+      "item": "thaumcraft:earth_shard"
+    },
+    {
+      "item": "minecraft:potion"
+    },
+    {
+      "item": "thaumcraft:earth_shard"
+    },
+    {
+      "item": "thaumcraft:earth_shard"
+    }
+  ],
+  "aspects": {
+    "tutamen": 20,
+    "praecantatio": 35,
+    "terra": 32,
+    "vacuos": 32
+  },
+  "instability": 7,
+  "result": {
+    "id": "thaumcraft:runic_amulet_emergency",
+    "count": 1
+  },
+  "component_predicates": [
+    {
+      "component": 3,
+      "potion": "minecraft:strong_strength"
+    }
+  ]
+}

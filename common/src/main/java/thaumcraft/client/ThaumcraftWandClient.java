@@ -33,7 +33,9 @@ public final class ThaumcraftWandClient {
         ItemPropertiesRegistry.register(ThaumcraftContent.WAND.get(), FOCUS_PROPERTY,
                 (stack, level, entity, seed) -> {
                     var focus = FocusData.get(stack);
-                    return (focus.getItem() instanceof ItemFocusShock ? WandModels.SHOCK : focus.getItem() instanceof ItemFocusFrost ? WandModels.FROST
+                    return (focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusHellbat ? WandModels.HELLBAT
+                            : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusPech ? WandModels.PECH
+                            : focus.getItem() instanceof ItemFocusShock ? WandModels.SHOCK : focus.getItem() instanceof ItemFocusFrost ? WandModels.FROST
                             : focus.getItem() instanceof ItemFocusExcavation ? WandModels.EXCAVATION
                             : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusWarding ? WandModels.WARDING
                             : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusTrade ? WandModels.TRADE

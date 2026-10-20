@@ -38,9 +38,11 @@ public final class ItemThaumonomicon extends Item {
         if (player instanceof ServerPlayer serverPlayer) {
             if (!serverPlayer.server.isSameThread()) throw new IllegalStateException("Thaumonomicon use requires the server thread");
             var knowledge = KnowledgeAccess.get(player); var settings = ThaumcraftSettings.server();
+            var beforeResearch = knowledge.getResearchComplete();
             if (cheatSheet && settings.cheatSheet()) ResearchCheatSheet.grant(knowledge, settings);
             else ResearchBrowserData.applyBookSiblingUnlocks(knowledge);
             KnowledgeEvents.sync(serverPlayer);
+            thaumcraft.common.lib.network.WarpMessageNetworking.researchSince(serverPlayer, beforeResearch);
             NetworkManager.sendToPlayer(serverPlayer, OpenThaumonomiconPayload.INSTANCE);
         }
         return InteractionResultHolder.sidedSuccess(held, level.isClientSide);

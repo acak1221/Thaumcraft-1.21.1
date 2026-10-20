@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.ThaumcraftApi;
+import net.minecraft.world.item.ItemStack;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -43,6 +45,7 @@ public final class ObjectAspectCatalog {
     private static Set<ResourceLocation> expectedContentIds = Set.of();
     private static volatile Set<ResourceLocation> conflictingIds = Set.of();
     private static boolean loaded;
+    private static boolean publicTagsInitialized;
 
     private ObjectAspectCatalog() {}
 
@@ -137,12 +140,38 @@ public final class ObjectAspectCatalog {
 
     public static Set<ResourceLocation> conflictingIds() { return conflictingIds; }
 
+    /** One-time native registry seeding. Later public removals/replacements are never silently restored. */
+    public static synchronized void initializePublicTags() {
+        if (publicTagsInitialized) return;
+        loadBundled();
+        for (var entry : bindings.entrySet()) {
+            if (!BuiltInRegistries.ITEM.containsKey(entry.getKey())) continue;
+            var item = BuiltInRegistries.ITEM.get(entry.getKey());
+            Integer declared = EarlyObjectAspectBindings.metadata(entry.getKey());
+            int metadata = declared != null ? declared : new ItemStack(item).isDamageableItem() ? ObjectAspectRegistry.WILDCARD : 0;
+            ThaumcraftApi.objectTags.putIfAbsent(List.of(item, metadata), entry.getValue().copy());
+        }
+        publicTagsInitialized = true;
+    }
+
+    /** Native bundled expressions/complex recipes remain on-demand so RecipeManager reloads still take effect. */
+    public static boolean hasDerivedRegistration(ResourceLocation id, int metadata) {
+        Integer declared = EarlyObjectAspectBindings.complex().containsKey(id) ? EarlyObjectAspectBindings.metadata(id) : null;
+        if (id.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "thaumonomicon"))
+                || id.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "thaumonomicon_cheat"))) declared = ObjectAspectRegistry.WILDCARD;
+        if (id.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "salis_mundus"))
+                || id.equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "crucible"))) declared = 0;
+        return declared != null && (declared == ObjectAspectRegistry.WILDCARD || declared == metadata
+                || metadata == ObjectAspectRegistry.WILDCARD && declared >= 0 && declared < 16);
+    }
+
     /** Run after both vanilla and deferred mod registrations have completed. */
     public static synchronized ValidationReport validateAgainstRegistries() {
         loadBundled();
         ValidationResult result = validate(candidateBindings, blockCandidateIds, conflictingIds,
                 BuiltInRegistries.ITEM::containsKey, BuiltInRegistries.BLOCK::containsKey);
         bindings = result.accepted();
+        initializePublicTags();
         ValidationReport report = result.report();
         if (!report.missingItemIds().isEmpty()) {
             LOG.warn("TC4 object aspects: unresolved item registry identifiers: {}", sortedIds(report.missingItemIds()));

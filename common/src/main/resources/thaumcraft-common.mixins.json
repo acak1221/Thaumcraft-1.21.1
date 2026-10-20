@@ -48,7 +48,9 @@
     "ThaumatoriumHopperInventoryMixin",
     "ThaumatoriumFurnaceInventoryMixin",
     "WarpFoodMixin",
-    "PlayerRunicSaveMixin"
+    "PlayerRunicSaveMixin",
+    "PlayerAccessoriesMixin",
+    "ItemEntityPechDropMixin"
   ],
   "client": [
     "client.TableOutlineMixin",

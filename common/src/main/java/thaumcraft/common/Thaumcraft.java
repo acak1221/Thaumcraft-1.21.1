@@ -66,12 +66,21 @@ public final class Thaumcraft {
         initialized = true;
         thaumcraft.common.config.ThaumcraftSettings.load(dev.architectury.platform.Platform.getConfigFolder().resolve("thaumcraft.properties"));
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initServer();
+        thaumcraft.common.lib.network.WarpMessageNetworking.initServer();
         ResearchCatalog.loadBundled();
         thaumcraft.common.lib.research.ResearchConditions.initializeNative();
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();
         ThaumcraftContent.register();
+        thaumcraft.common.config.ThaumcraftCrystalClusters.register();
         thaumcraft.common.config.ThaumcraftRunic.register();
+        thaumcraft.common.config.ThaumcraftBaubles.register();
+        thaumcraft.common.config.ThaumcraftLoot.register();
+        thaumcraft.common.config.ThaumcraftFocusPouches.register();
+        thaumcraft.common.config.ThaumcraftColoredCandles.register();
+        thaumcraft.common.config.ThaumcraftManaBeans.register();
+        thaumcraft.common.config.ThaumcraftPech.register();
+        thaumcraft.common.config.ThaumcraftHellbatFoci.register();
         thaumcraft.common.config.ThaumcraftAspectOrbs.register();
         thaumcraft.common.config.ThaumcraftExplosiveOrbs.register();
         thaumcraft.common.config.ThaumcraftShockOrbs.register();
@@ -89,6 +98,7 @@ public final class Thaumcraft {
         ThaumcraftPlants.register();
         ThaumcraftMasonry.register();
         ThaumcraftDistillation.register();
+        thaumcraft.common.config.ThaumcraftAdvancedFurnace.register();
         ThaumcraftAlembics.register();
         ThaumcraftWands.register();
         ThaumcraftBellows.register();
@@ -163,6 +173,7 @@ public final class Thaumcraft {
             VisNetFxNetworking.clearLevel(level);
         });
         LifecycleEvent.SERVER_STOPPED.register(server -> {
+            thaumcraft.common.lib.research.ObjectAspectRegistry.serverStopped(server);
             thaumcraft.common.lib.bore.BoreNativeContext.clearServer(server);
             VisNetHandler.clearServer(server);
             VisNetFxNetworking.clearServer(server);
@@ -171,7 +182,11 @@ public final class Thaumcraft {
             WandFocusActions.clearCooldowns();
             ItemFocusExcavation.clearAll();
         });
-        LifecycleEvent.SERVER_STARTED.register(server -> ObjectAspectCatalog.validateAgainstRegistries());
+        LifecycleEvent.SERVER_STARTED.register(server -> {
+            ObjectAspectCatalog.validateAgainstRegistries();
+            thaumcraft.common.lib.loot.LootTables.initialize();
+            thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);
+        });
         ThaumcraftCommands.register();
         LOG.info("TC4 Minecraft 1.21.1 migration: {} research definitions loaded; gameplay coverage is tracked in MIGRATION_STATUS.md",
                 ResearchCatalog.all().size());

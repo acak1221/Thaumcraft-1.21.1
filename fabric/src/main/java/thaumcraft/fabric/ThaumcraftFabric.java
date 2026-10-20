@@ -19,6 +19,12 @@ import thaumcraft.common.blocks.BlockTube;
 public final class ThaumcraftFabric implements ModInitializer {
     @Override public void onInitialize() {
         Thaumcraft.init();
+        thaumcraft.fabric.loot.FabricThaumcraftLoot.init();
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftPech.PECH.get(), thaumcraft.common.entities.monster.EntityPech.createAttributes());
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftPech.PECH.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityPech::checkPechSpawnRules);
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftMonsters.FIREBAT.get(), thaumcraft.common.entities.monster.EntityFireBat.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(

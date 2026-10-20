@@ -83,8 +83,8 @@ GAPS = [
      "detail": "Thaumometer icon aliases the original scanner UV atlas byte-for-byte; scanner.obj and hand/screen rendering are not implemented."},
     {"id": "wand_mesh", "status": "pending",
      "detail": "Foundation wand is a static layered original rod/cap icon; dynamic TC4 rod/cap/focus geometry and use poses remain to port."},
-    {"id": "crystal_geometry", "status": "pending",
-     "detail": "Crystals use an original tinted crystal sprite on crossed planes; six-piece randomized 3D clusters and attachment orientation remain to port."},
+    {"id": "crystal_geometry", "status": "implemented_client_unverified",
+     "detail": "Seven native tile/builtin item renderers use the original six-piece ModelCrystal geometry, face attachment and positional Java RNG; inspected client visual acceptance remains pending."},
     {"id": "jar_contents", "status": "pending",
      "detail": "Jar uses the existing two-box shell with original face textures; essentia fill, labels, brain/node/void variants need dedicated rendering."},
     {"id": "aura_node_renderer", "status": "pending",
@@ -92,7 +92,7 @@ GAPS = [
     {"id": "research_gui", "status": "partial",
      "detail": "Thaumonomicon map and completed text/illustration pages use the original corpus. Item-backed node icons, recipe pages, original line animations, research table and puzzle remain pending; visual parity is not established."},
     {"id": "item_tint_registration", "status": "platform_client_registration_required",
-     "detail": "Shard/crystal models use tint index 0 and original RGB values. Filled phials use the aspect component color at tint index 1 while layer 0 stays white. Loader clients must register these providers and jar/crystal cutout layers."},
+     "detail": "Shard models use tint index 0 and original RGB values. Seven crystal tile/builtin item renderers apply original per-piece colors directly. Filled phials use the aspect component color at tint index 1 while layer 0 stays white. Loader clients must register these providers and jar cutout layers."},
     {"id": "legacy_mesh_formats", "status": "reference_only",
      "detail": "OBJ/MTL text content is preserved with canonical LF newlines; these references are not auto-loaded, and internal paths/legacy formats still need a modern renderer importer."},
     {"id": "shader_and_remaining_model_coverage", "status": "pending",
@@ -324,6 +324,29 @@ def create_jar_models() -> list[dict[str, Any]]:
     return mappings
 
 
+def create_crystal_models() -> list[dict[str, Any]]:
+    """Regenerate only seven builtin crystal presentations; actual geometry belongs to TileCrystalRenderer."""
+    mappings: list[dict[str, Any]] = []
+    display = {
+        "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [.625, .625, .625]},
+        "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [.25, .25, .25]},
+        "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [.5, .5, .5]},
+        "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [.375, .375, .375]},
+        "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [.4, .4, .4]},
+        "firstperson_lefthand": {"rotation": [0, 225, 0], "translation": [0, 0, 0], "scale": [.4, .4, .4]},
+    }
+    for metadata, primal, tint in (*PRIMALS, (6, "mixed", None)):
+        crystal_id = f"crystal_{primal}"
+        model(f"block/{crystal_id}", {"ambientocclusion": False, "textures": {"particle": "thaumcraft:blocks/crystal"}, "elements": []})
+        model(f"item/{crystal_id}", {"parent": "minecraft:builtin/entity", "gui_light": "side", "display": display,
+                                     "textures": {"particle": "thaumcraft:blocks/crystal"}})
+        write_json(ASSETS / "blockstates" / f"{crystal_id}.json", {"variants": {"": {"model": f"thaumcraft:block/{crystal_id}"}}})
+        mappings.append(legacy_mapping("blockcrystal", metadata, crystal_id, ["models/crystal", "blocks/crystal"],
+                                       [f"tile.thaumcraft.crystal.{metadata}.name"], registry="block_and_item", tint=tint,
+                                       visual_status="native_six_piece_renderer_client_unverified"))
+    return mappings
+
+
 def create_models() -> list[dict[str, Any]]:
     mappings: list[dict[str, Any]] = []
     for metadata, item_id, legacy_name in MATERIALS:
@@ -335,31 +358,14 @@ def create_models() -> list[dict[str, Any]]:
         if item_id == "zombie_brain":
             keys.insert(0, "item.thaumcraft.zombie_brain.name")
         mappings.append(legacy_mapping("itemresource", metadata, item_id, textures, keys))
+    crystal_mappings = create_crystal_models()
     for metadata, primal, tint in PRIMALS:
         shard_id = f"{primal}_shard"
         item_model(shard_id, "items/shard")
         mappings.append(legacy_mapping("itemshard", metadata, shard_id, ["items/shard"],
                                        [f"item.thaumcraft.shard.{metadata}.name"], tint=tint))
-        crystal_id = f"crystal_{primal}"
-        item_model(crystal_id, "items/shard")
-        # Foundation geometry intentionally uses the existing crystal sprite;
-        # a proper randomized TC4 cluster remains a separate renderer task.
-        faces = {face: {"texture": "#crystal", "tintindex": 0, "uv": [0, 0, 16, 16]}
-                 for face in ("north", "south")}
-        model(f"block/{crystal_id}", {
-            "ambientocclusion": False,
-            "textures": {"particle": "thaumcraft:blocks/crystal", "crystal": "thaumcraft:blocks/crystal"},
-            "elements": [{"from": [0, 0, 8], "to": [16, 16, 8],
-                          "rotation": {"origin": [8, 8, 8], "axis": "y", "angle": angle},
-                          "shade": False, "faces": faces} for angle in (-45, 45)],
-        })
-        write_json(ASSETS / "blockstates" / f"{crystal_id}.json",
-                   {"variants": {"": {"model": f"thaumcraft:block/{crystal_id}"}}})
-        mappings.append(legacy_mapping("blockcrystal", metadata, crystal_id,
-                                       ["items/shard", "blocks/crystal"],
-                                       [f"tile.thaumcraft.crystal.{metadata}.name"],
-                                       registry="block_and_item", tint=tint,
-                                       visual_status="foundation_crossed_sprite"))
+        mappings.append(crystal_mappings[metadata])
+    mappings.append(crystal_mappings[6])
     item_model("balance_shard", "items/shard_balanced")
     mappings.append(legacy_mapping("itemshard", 6, "balance_shard", ["items/shard_balanced"],
                                    ["item.thaumcraft.shard.6.name"]))
@@ -606,6 +612,34 @@ def block_atlas_sprites() -> dict[str, Path]:
     return sprites
 
 
+def blockstate_models(data: dict[str, Any], context: str) -> list[str]:
+    """Resolve both vanilla blockstate forms, including weighted arrays inside multipart apply."""
+    result: list[str] = []
+    def applications(value: Any, location: str) -> None:
+        values = value if isinstance(value, list) else [value]
+        if not values:
+            raise ValueError(f"{context} {location} has no model applications")
+        for entry in values:
+            if not isinstance(entry, dict) or not isinstance(entry.get("model"), str):
+                raise ValueError(f"{context} {location} requires a model or a list of model objects")
+            result.append(entry["model"])
+    if "variants" in data:
+        if not isinstance(data["variants"], dict):
+            raise ValueError(f"{context} variants must be an object")
+        for variant, value in data["variants"].items():
+            applications(value, f"variant {variant!r}")
+    if "multipart" in data:
+        if not isinstance(data["multipart"], list):
+            raise ValueError(f"{context} multipart must be an array")
+        for index, part in enumerate(data["multipart"]):
+            if not isinstance(part, dict) or "apply" not in part:
+                raise ValueError(f"{context} multipart[{index}] requires apply")
+            applications(part["apply"], f"multipart[{index}].apply")
+    if "variants" not in data and "multipart" not in data:
+        raise ValueError(f"{context} requires variants or multipart")
+    return result
+
+
 def validate_resources() -> dict[str, int]:
     missing: list[str] = []
     texture_refs = 0
@@ -660,14 +694,12 @@ def validate_resources() -> dict[str, int]:
                 missing.append(f"Non-square unanimated atlas texture: {texture} {width}x{height}")
     for path in sorted((ASSETS / "blockstates").glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
-        for value in data["variants"].values():
-            values = value if isinstance(value, list) else [value]
-            for entry in values:
-                model_refs += 1
-                resource_location(entry["model"])
-                relative = entry["model"].split(":", 1)[1]
-                if not (ASSETS / "models" / f"{relative}.json").is_file():
-                    missing.append(f"{path.relative_to(ROOT)} model {entry['model']}")
+        for model_id in blockstate_models(data, str(path.relative_to(ROOT))):
+            model_refs += 1
+            resource_location(model_id)
+            relative = model_id.split(":", 1)[1]
+            if not (ASSETS / "models" / f"{relative}.json").is_file():
+                missing.append(f"{path.relative_to(ROOT)} model {model_id}")
     sound_refs = 0
     sound_events = json.loads((ASSETS / "sounds.json").read_text(encoding="utf-8"))
     sound_event_refs = 0

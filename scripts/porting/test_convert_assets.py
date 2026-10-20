@@ -50,8 +50,24 @@ class FoundationAssetsTest(unittest.TestCase):
 
     def test_foundation_ids_have_models_and_both_language_names(self) -> None:
         mappings = self.manifest["identity_mappings"]
-        self.assertEqual(44, len(mappings))
-        self.assertEqual(44, len({entry["modern_id"] for entry in mappings}))
+        self.assertEqual(45, len(mappings))
+        self.assertEqual(45, len({entry["modern_id"] for entry in mappings}))
+        clusters = [entry for entry in mappings if entry["legacy_id"] == "thaumcraft:blockcrystal"]
+        self.assertEqual(dict(enumerate(("air", "fire", "water", "earth", "order", "entropy", "mixed"))),
+                         {entry["legacy_metadata"]: entry["modern_id"].removeprefix("thaumcraft:crystal_") for entry in clusters})
+        self.assertEqual(7, len(clusters), "one actual mixed identity extends the six original primal mappings")
+        for entry in clusters:
+            self.assertEqual("block_and_item", entry["registry"])
+            self.assertEqual("native_six_piece_renderer_client_unverified", entry["visual_status"])
+            self.assertEqual(["thaumcraft:models/crystal", "thaumcraft:blocks/crystal"], entry["textures"])
+            native_id = entry["modern_id"].split(":", 1)[1]
+            item = json.loads((converter.ASSETS / "models/item" / f"{native_id}.json").read_text())
+            block = json.loads((converter.ASSETS / "models/block" / f"{native_id}.json").read_text())
+            self.assertEqual("minecraft:builtin/entity", item["parent"], "actual renderer replaces the crossed-plane item")
+            self.assertEqual([], block["elements"], "actual tile renderer owns crystal geometry")
+        mixed = next(entry for entry in clusters if entry["legacy_metadata"] == 6)
+        self.assertNotIn("tint_rgb", mixed, "mixed is six original piece colors, not a seventh fixed tint")
+        self.assertNotIn("tint_index", mixed)
         for entry in mappings:
             item_id = entry["modern_id"].split(":", 1)[1]
             self.assertTrue((converter.ASSETS / "models/item" / f"{item_id}.json").is_file(), item_id)
@@ -66,6 +82,8 @@ class FoundationAssetsTest(unittest.TestCase):
                                         if entry["legacy_id"] == "thaumcraft:itemresource"})
         self.assertEqual(set(range(7)), {entry["legacy_metadata"] for entry in mappings
                                        if entry["legacy_id"] == "thaumcraft:itemshard"})
+        self.assertEqual(set(range(7)), {entry["legacy_metadata"] for entry in mappings
+                                       if entry["legacy_id"] == "thaumcraft:blockcrystal"})
         tint_map = {entry["modern_id"]: entry.get("tint_rgb") for entry in mappings}
         self.assertEqual("#0090FF", tint_map["thaumcraft:water_shard"])
         self.assertEqual("#555577", tint_map["thaumcraft:crystal_entropy"])
@@ -574,6 +592,63 @@ class FoundationAssetsTest(unittest.TestCase):
             for path in generated:
                 relative = path.relative_to(assets)
                 self.assertEqual(path.read_bytes(), (converter.ASSETS / relative).read_bytes(), str(relative))
+
+    def test_crystal_only_regeneration_retains_all_seven_actual_builtin_renderers(self) -> None:
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            assets = Path(temporary)
+            with patch.object(converter, "ASSETS", assets):
+                mappings = converter.create_crystal_models()
+            self.assertEqual(set(range(7)), {entry["legacy_metadata"] for entry in mappings})
+            self.assertEqual("thaumcraft:crystal_mixed", mappings[6]["modern_id"])
+            self.assertNotIn("tint_rgb", mappings[6], "mixed geometry has six original colors, not one invented tint")
+            generated = [path for path in assets.rglob("*") if path.is_file()]
+            self.assertEqual(21, len(generated))
+            for path in generated:
+                relative = path.relative_to(assets)
+                self.assertEqual(path.read_bytes(), (converter.ASSETS / relative).read_bytes(), str(relative))
+            for entry in mappings:
+                name = entry["modern_id"].split(":", 1)[1]
+                item = json.loads((assets / f"models/item/{name}.json").read_text())
+                block = json.loads((assets / f"models/block/{name}.json").read_text())
+                self.assertEqual("minecraft:builtin/entity", item["parent"])
+                self.assertEqual([], block["elements"], "six-piece renderer must not be replaced by the old crossed-plane block marker")
+
+    def _validate_blockstate_fixture(self, blockstates: dict[str, dict], models: tuple[str, ...] = ("known", "weighted")) -> dict:
+        with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:
+            assets = Path(temporary)
+            (assets / "models/block").mkdir(parents=True)
+            (assets / "blockstates").mkdir()
+            (assets / "sounds.json").write_text("{}")
+            for name in models:
+                (assets / f"models/block/{name}.json").write_text(json.dumps({"elements": []}))
+            for name, state in blockstates.items():
+                (assets / f"blockstates/{name}.json").write_text(json.dumps(state))
+            with patch.object(converter, "ASSETS", assets), patch.object(converter, "block_atlas_sprites", return_value={}):
+                return converter.validate_resources()
+
+    def test_blockstate_validation_resolves_variant_and_multipart_weighted_model_lists(self) -> None:
+        checks = self._validate_blockstate_fixture({
+            "ordinary": {"variants": {"": {"model": "thaumcraft:block/known"}, "facing=north": [
+                {"model": "thaumcraft:block/known", "weight": 2}, {"model": "thaumcraft:block/weighted", "y": 90}]}},
+            "multipart": {"multipart": [{"apply": {"model": "thaumcraft:block/known"}},
+                {"when": {"OR": [{"north": "true"}, {"south": "true"}]}, "apply": [
+                    {"model": "thaumcraft:block/known"}, {"model": "thaumcraft:block/weighted", "weight": 3}]}]},
+        })
+        self.assertEqual(0, checks["missing_references"])
+        self.assertEqual(6, checks["checked_local_model_refs"])
+
+    def test_multipart_validation_rejects_a_missing_model_after_a_valid_weighted_entry(self) -> None:
+        with self.assertRaisesRegex(ValueError, "model thaumcraft:block/missing_multipart"):
+            self._validate_blockstate_fixture({"multipart": {"multipart": [{"apply": [
+                {"model": "thaumcraft:block/known"}, {"model": "thaumcraft:block/missing_multipart"}]}]}})
+
+    def test_variant_validation_still_rejects_missing_models(self) -> None:
+        with self.assertRaisesRegex(ValueError, "model thaumcraft:block/missing_variant"):
+            self._validate_blockstate_fixture({"ordinary": {"variants": {"": {"model": "thaumcraft:block/missing_variant"}}}})
+
+    def test_multipart_requires_explicit_apply_rather_than_crashing_on_variants_key(self) -> None:
+        with self.assertRaisesRegex(ValueError, r"multipart\[0\] requires apply"):
+            self._validate_blockstate_fixture({"broken": {"multipart": [{"when": {"north": "true"}}]}})
 
     def test_language_regeneration_retains_unowned_native_keys(self) -> None:
         with tempfile.TemporaryDirectory(dir=converter.ROOT / ".tmp") as temporary:

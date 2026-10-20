@@ -21,11 +21,22 @@ type strings select sticky warp. Direct command mutations do not reset warpCount
 snapshots synchronize the target after each accepted action.
 
 Native adaptation: selectors and player lookup use Brigadier's current rules; malformed syntax is a
-native command error rather than the old hand-written usage message. The original delta-specific
-PacketWarpMessage popup/whispers and the shared client notification queue remain a separate pending
-client unit; command state synchronization is implemented. An online player named grant takes precedence over the existing self-grant spelling, including console use.
-Native literals use current case-sensitive Brigadier parsing; mixed-case action spellings and ignored trailing
-warp tokens from the original hand parser remain explicit command-parser parity gaps.
+native command error rather than the old hand-written usage message. Original delta-specific
+PacketWarpMessage popup/whispers now use the real shared client notification queue; source and
+consumer contracts are recorded in `2026-10-20-warp-notifications.md`, with target/runtime/client
+verification tracked separately. An online player named grant takes precedence over the existing self-grant spelling, including console use.
+Original case-insensitive help/research/aspect/warp and research LIST/warp ADD/SET spellings
+now enter a narrowly scoped standard native Brigadier greedy-argument fallback. Only these recognized TC4
+normalizations can execute the canonical tree with the same source and a private recursion guard;
+unchanged invalid syntax never enters replay. No custom argument serializer is needed in the native
+client command tree. Scoped fallbacks at research/warp handle the native
+dispatcher's exact-literal preference, while help/list have their original ignored-tail children.
+Selectors, including quoted selector values, use the native EntityArgument reader without rewriting
+their contents. Help and research list ignore extras. Warp honors a type only with exactly five
+original arguments; additional tokens select sticky warp and are ignored. Research/aspect retain
+their exact arity, native target lookup, ranges and permission checks. Native runtime cases cover
+both lowercase parent literals with mixed child actions and mixed whole actions, ignored malformed
+unused tails, quoted selectors, unchanged state on permission/range/arity refusal and unknown actions.
 The old self-grant alias now uses the real
 recursive original research operation. Public API breadth and arbitrary addon research registration
 remain separate pending work.

@@ -49,7 +49,7 @@ public final class DeferredItemDrops extends SavedData {
     private static final String ID = "thaumcraft_pending_inventory_drops";
     private static final Factory<DeferredItemDrops> FACTORY = new Factory<>(
             DeferredItemDrops::new, DeferredItemDrops::load, null);
-    private static final int VERSION = 3; // V1/V2 rows retain their original physics/ownership.
+    private static final int VERSION = 4; // V1..V3 rows retain physics/ownership; absent PechDrop is false.
     private static final int BATCH = 64;
     /** Bounded first-slice physical plan, NOT a source-count clamp. */
     public static final int MAX_BORE_EJECTION_SEGMENTS = 4096;
@@ -75,7 +75,10 @@ public final class DeferredItemDrops extends SavedData {
     private record BoreDrop(UUID transaction, BlockPos target, int nozzle, int attachment, boolean evacuation, int member, int segment) {}
     /** The longest a catch may be saved as burning (a Fishing golem sets two seconds); anything above is a malformed row. */
     private static final int MAX_FIRE_TICKS = 600;
-    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks) {
+    private record Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks, boolean pechDrop) {
+        private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore, int fireTicks) {
+            this(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, routing, bore, fireTicks, false);
+        }
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter, int crystalFace, boolean routing, BoreDrop bore) {
             this(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, routing, bore, 0);
         }
@@ -85,8 +88,8 @@ public final class DeferredItemDrops extends SavedData {
         private Pending(UUID id, BlockPos source, Vec3 position, Vec3 motion, ItemStack stack, int pickupDelay, long retryAfter) {
             this(id, source, position, motion, stack, pickupDelay, retryAfter, -1, false, null);
         }
-        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore, fireTicks); }
-        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore, fireTicks); }
+        private Pending retryAt(long time) { return new Pending(id, source, position, motion, stack, pickupDelay, time, crystalFace, routing, bore, fireTicks, pechDrop); }
+        private Pending ready() { return new Pending(id, source, position, motion, stack, pickupDelay, retryAfter, crystalFace, false, bore, fireTicks, pechDrop); }
     }
 
     private static final class Attempt {
@@ -475,6 +478,31 @@ public final class DeferredItemDrops extends SavedData {
         data.setDirty();
     }
 
+    /** Original Pech menu close's player throw: four PLAYER float draws,40-tick
+     * pickup delay, persisted PechDrop entity marker. Caller clears its actual
+     * menu slot immediately on normal return; admission/retries occur level-post.
+     * This closes native Player.drop's ignored addFreshEntity-refusal item loss. */
+    public static void enqueuePechReturn(ServerLevel level, net.minecraft.world.entity.player.Player player, ItemStack actualResult) {
+        if (!level.getServer().isSameThread() || player.level() != level || level.getServer().getLevel(level.dimension()) != level)
+            throw new IllegalStateException("Pech return requires the canonical player level and server thread");
+        if (actualResult == null || actualResult.isEmpty()) throw new IllegalArgumentException("Pech return requires its actual menu stock");
+        var data = level.getDataStorage().computeIfAbsent(FACTORY, ID);
+        float yaw = player.getYRot() / 180 * (float) Math.PI, pitch = player.getXRot() / 180 * (float) Math.PI;
+        double vx = -net.minecraft.util.Mth.sin(yaw) * net.minecraft.util.Mth.cos(pitch) * .3F;
+        double vz = net.minecraft.util.Mth.cos(yaw) * net.minecraft.util.Mth.cos(pitch) * .3F;
+        double vy = -net.minecraft.util.Mth.sin(pitch) * .3F + .1F;
+        float angle = player.getRandom().nextFloat() * (float) Math.PI * 2;
+        float spread = .02F * player.getRandom().nextFloat();
+        vx += Math.cos(angle) * spread;
+        vy += (double) ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * .1F);
+        vz += Math.sin(angle) * spread;
+        data.pending.addLast(new Pending(UUID.randomUUID(), player.blockPosition().immutable(),
+                new Vec3(player.getX(), player.getY() - (double) .3F + player.getEyeHeight(), player.getZ()),
+                new Vec3(vx, vy, vz), actualResult.copy(), 40, Long.MIN_VALUE, -1, false, null, 0, true));
+        data.deliveryRequested = true;
+        data.setDirty();
+    }
+
     /** A paid machine output with its original ejection point and trajectory; caller relinquishes the actual result on return. */
     public static void enqueueDirected(ServerLevel level, BlockPos source, Vec3 position, Vec3 motion, ItemStack actualResult) {
         if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
@@ -605,6 +633,7 @@ public final class DeferredItemDrops extends SavedData {
                 output.setDeltaMovement(entry.motion);
                 output.setPickUpDelay(entry.pickupDelay);
                 if (entry.fireTicks > 0) output.setRemainingFireTicks(entry.fireTicks);
+                if (entry.pechDrop) thaumcraft.common.lib.pech.PechDrops.mark(output);
                 beforeSpawn = RejectedEntitySpawn.snapshotBefore(level, output);
             } catch (RuntimeException exception) {
                 pending.addLast(entry.retryAt(level.getGameTime() + RETRY_DELAY));
@@ -743,6 +772,10 @@ public final class DeferredItemDrops extends SavedData {
                 Vec3 position = vector(row, "X", "Y", "Z");
                 Vec3 motion = vector(row, "DX", "DY", "DZ");
                 int crystalFace = row.contains("CrystalFace") ? row.getInt("CrystalFace") : -1;
+                boolean pechDrop = row.getBoolean("PechDrop");
+                if (row.contains("PechDrop") && (tag.getInt("Version") < 4 || !row.contains("PechDrop", Tag.TAG_BYTE) || row.getByte("PechDrop") != 1
+                        || pickupDelay != 40 || row.contains("Fire") || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
+                    throw new IllegalArgumentException("Invalid Pech-return marker on pending drop");
                 int fireTicks = row.contains("Fire") ? row.getInt("Fire") : 0; // Only a Fire golem's fishing catch is ever saved alight.
                 if (row.contains("Fire") && (!row.contains("Fire", Tag.TAG_INT) || fireTicks <= 0 || fireTicks > MAX_FIRE_TICKS
                         || pickupDelay != 20 || row.contains("CrystalFace") || row.contains("Routing") || row.contains("Bore")))
@@ -779,7 +812,7 @@ public final class DeferredItemDrops extends SavedData {
                 } else if (row.contains("Routing")) throw new IllegalArgumentException("Routing without a paid crystal");
                 // Saved ROUTING/IN_FLIGHT never replays inventory. The same paid
                 // UUID becomes a residual physical delivery, unless acknowledged.
-                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore, fireTicks));
+                if (!data.settled.contains(id)) data.pending.addLast(new Pending(id, source, position, motion, stack, pickupDelay, Long.MIN_VALUE, crystalFace, false, bore, fireTicks, pechDrop));
             } catch (RuntimeException exception) {
                 data.quarantined.add(row.copy());
                 Thaumcraft.LOG.error("Invalid pending inventory drop retained in quarantine", exception);
@@ -891,6 +924,7 @@ public final class DeferredItemDrops extends SavedData {
         row.put("Stack", entry.bore == null ? encoded : encoded.copy()); row.putInt("Count", entry.stack.getCount());
         if (entry.pickupDelay != 0) row.putInt("PickupDelay", entry.pickupDelay);
         if (entry.fireTicks != 0) row.putInt("Fire", entry.fireTicks);
+        if (entry.pechDrop) row.putBoolean("PechDrop", true);
         row.putDouble("X", entry.position.x); row.putDouble("Y", entry.position.y); row.putDouble("Z", entry.position.z);
         row.putDouble("DX", entry.motion.x); row.putDouble("DY", entry.motion.y); row.putDouble("DZ", entry.motion.z);
         if (entry.crystalFace >= 0) { row.putInt("CrystalFace", entry.crystalFace); if (entry.routing) row.putBoolean("Routing", true); }

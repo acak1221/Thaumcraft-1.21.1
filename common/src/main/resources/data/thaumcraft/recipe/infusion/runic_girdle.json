@@ -1,0 +1,46 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "RUNICARMOR",
+  "input": {
+    "item": "thaumcraft:mundane_belt"
+  },
+  "components": [
+    {
+      "item": "thaumcraft:primal_charm"
+    },
+    {
+      "item": "thaumcraft:amber_gem"
+    },
+    {
+      "item": "thaumcraft:enchanted_fabric"
+    },
+    {
+      "item": "thaumcraft:nitor"
+    },
+    {
+      "item": "thaumcraft:nitor"
+    },
+    {
+      "item": "thaumcraft:nitor"
+    },
+    {
+      "item": "thaumcraft:inkwell"
+    }
+  ],
+  "aspects": {
+    "tutamen": 30,
+    "praecantatio": 50,
+    "potentia": 50
+  },
+  "instability": 4,
+  "result": {
+    "id": "thaumcraft:runic_girdle",
+    "count": 1
+  },
+  "component_predicates": [
+    {
+      "component": 6,
+      "damage": 0
+    }
+  ]
+}

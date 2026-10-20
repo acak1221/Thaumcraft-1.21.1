@@ -44,7 +44,7 @@ public final class ScanCallbacks {
             if (entity == null || entity.isRemoved() || entity.level() != level || level.getEntity(entity.getId()) != entity) return null;
             if (entity instanceof ItemEntity drop) {
                 var target = item(level, drop.getItem());
-                return target == null ? null : new Target(target.signature(), "entity:" + entity.getId(), target.aspects(), target.kind(), target.clue());
+                return target == null ? null : new Target(target.signature(), "entity:" + entity.getId(), target.aspects(), target.kind(), ResearchClues.Context.item(drop.getItem()));
             }
             var target = EntityAspectBindings.describe(entity);
             return target == null ? null : new Target(target.signature(), "entity:" + entity.getId(), target.aspects(), ScanManager.ScanKind.ENTITY, target.clue());
@@ -76,8 +76,9 @@ public final class ScanCallbacks {
     private static Target item(ServerLevel level, ItemStack witness) {
         if (witness == null || witness.isEmpty()) return null;
         ItemStack item = witness.copyWithCount(1);
+        var grouped = ObjectAspectResolver.groupedScanWitness(item);
         var id = BuiltInRegistries.ITEM.getKey(item.getItem());
-        return new Target("@" + id, "item:" + id + ":" + item.getDamageValue(), ObjectAspectResolver.get(item, level),
-                ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item));
+        return new Target("@" + id, "item:" + id + ":" + item.getDamageValue(), ObjectAspectResolver.scanTags(item, level),
+                ScanManager.ScanKind.ITEM, ResearchClues.Context.item(grouped.stack()));
     }
 }

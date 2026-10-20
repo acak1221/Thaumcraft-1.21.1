@@ -18,7 +18,7 @@ import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.items.wands.WandManager;
 import thaumcraft.common.lib.network.RunicNetworking;
 
-/** Original EventHandlerRunic, armor-first slice. All state is server-owned; client has only a separate HUD snapshot. */
+/** Original EventHandlerRunic, native armor and four accessory slots. All state is server-owned; client has only a separate HUD snapshot. */
 public final class RunicShield {
     private static final Map<MinecraftServer, ServerState> SERVERS = java.util.Collections.synchronizedMap(new WeakHashMap<>());
     private static boolean initialized;
@@ -28,9 +28,9 @@ public final class RunicShield {
         int rechargeDelay;
     }
     private static final class State {
-        int charge, max, last = -1;
+        int charge, max, last = -1, charged, healing, kinetic, emergency;
         boolean present;
-        long nextCycle;
+        long nextCycle, nextKinetic, nextHealing, nextEmergency;
     }
     public record Snapshot(int charge, int maximum) {}
     private RunicShield() {}
@@ -47,6 +47,9 @@ public final class RunicShield {
         return SERVERS.computeIfAbsent(player.server, ignored -> new ServerState());
     }
     private static State state(ServerPlayer player, ServerState server) { return server.players.computeIfAbsent(player.getId(), ignored -> new State()); }
+    public static void markDirty(LivingEntity wearer) {
+        if (wearer instanceof ServerPlayer player) server(player).dirty = true;
+    }
     public static Snapshot view(ServerPlayer player) {
         State state = state(player, server(player)); return new Snapshot(state.charge, state.max);
     }
@@ -57,7 +60,19 @@ public final class RunicShield {
             server.dirty = false;
             int maximum = 0;
             for (var armor : player.getInventory().armor) maximum += RunicArmor.finalCharge(armor);
-            // Actual four accessory slots and their modifiers are a separate pending unit.
+            state.charged=state.healing=state.kinetic=state.emergency=0;
+            var accessories=thaumcraft.common.lib.baubles.PlayerAccessories.get(player);
+            for(int slot=0;slot<4;slot++) {
+                var stack=accessories.getItem(slot);
+                maximum+=RunicArmor.finalCharge(stack);
+                if(stack.getItem() instanceof thaumcraft.common.items.baubles.ItemRunicBauble item) switch(item.upgrade()) {
+                    case CHARGED -> ++state.charged;
+                    case HEALING -> ++state.healing;
+                    case KINETIC -> ++state.kinetic;
+                    case EMERGENCY -> ++state.emergency;
+                    default -> {}
+                }
+            }
             state.max = maximum; state.present = maximum > 0;
             if (!state.present) { state.charge = 0; RunicNetworking.charge(player,0,0); }
             else if (state.charge > maximum) { state.charge = maximum; RunicNetworking.charge(player,maximum,maximum); }
@@ -69,7 +84,7 @@ public final class RunicShield {
         if (state.charge > state.max) state.charge = state.max;
         else if (state.charge < state.max && state.nextCycle < now && WandManager.consumeVisFromInventory(player,
                 new AspectList().add(Aspect.AIR, RunicSettings.current().cost()).add(Aspect.EARTH, RunicSettings.current().cost()))) {
-            state.nextCycle = now + RunicSettings.current().rechargeMillis(); ++state.charge;
+            state.nextCycle = now + RunicRules.rechargeInterval(RunicSettings.current().rechargeMillis(),state.charged); ++state.charge;
         }
         if (state.last != state.charge) {
             RunicNetworking.charge(player,state.charge,state.max); state.last = state.charge;
@@ -89,6 +104,21 @@ public final class RunicShield {
         RunicNetworking.hit(player,target);
         var paid = RunicRules.absorb(state.charge,damage);
         state.charge = paid.charge();
+        long now=System.currentTimeMillis();
+        if(state.charge<=0 && state.kinetic>0 && state.nextKinetic<now) {
+            state.nextKinetic=now+20000L;
+            player.serverLevel().explode(player,player.getX(),player.getY()+player.getBbHeight()/2F,player.getZ(),1.5F+state.kinetic*.5F,false,net.minecraft.world.level.Level.ExplosionInteraction.NONE);
+        }
+        if(state.charge<=0 && state.healing>0 && state.nextHealing<now) {
+            state.nextHealing=now+20000L;
+            player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION,240,state.healing));
+            player.level().playSound(null,player.getX(),player.getY(),player.getZ(),net.minecraft.sounds.SoundEvent.createVariableRangeEvent(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft","runicshieldeffect")),net.minecraft.sounds.SoundSource.PLAYERS,1,1);
+        }
+        if(state.charge<=0 && state.emergency>0 && state.nextEmergency<now) {
+            state.nextEmergency=now+60000L;
+            state.charge=Math.min(state.max,8*state.emergency);server.dirty=true;
+            player.level().playSound(null,player.getX(),player.getY(),player.getZ(),net.minecraft.sounds.SoundEvent.createVariableRangeEvent(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft","runicshieldcharge")),net.minecraft.sounds.SoundSource.PLAYERS,1,1);
+        }
         if (state.charge <= 0) server.rechargeDelay = RunicSettings.current().delayTicks();
         RunicNetworking.charge(player,state.charge,state.max);
         return paid.damage();

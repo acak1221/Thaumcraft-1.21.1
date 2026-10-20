@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "thaumcraft:block/advanced_alchemical_furnace"
+      }
+    }
+  ]
+}

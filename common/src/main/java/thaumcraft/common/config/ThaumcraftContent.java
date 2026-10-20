@@ -145,9 +145,9 @@ public final class ThaumcraftContent {
             SHARDS.put(tags[i], ITEMS.register(id, () -> new Item(new Item.Properties())));
             if (i < 6) {
                 String crystalId = "crystal_" + names[i];
-                RegistrySupplier<Block> block = BLOCKS.register(crystalId, () -> new thaumcraft.common.blocks.BlockCrystal(BlockBehaviour.Properties.of().strength(0.4F).noOcclusion().noCollission().sound(SoundType.GLASS)));
+                RegistrySupplier<Block> block = BLOCKS.register(crystalId, () -> new thaumcraft.common.blocks.BlockCrystal(ThaumcraftCrystalClusters.properties()));
                 CRYSTALS.put(tags[i], block);
-                ITEMS.register(crystalId, () -> new BlockItem(block.get(), new Item.Properties()));
+                ITEMS.register(crystalId, () -> new thaumcraft.common.blocks.BlockCrystalItem(block.get(), new Item.Properties()));
             }
         }
     }

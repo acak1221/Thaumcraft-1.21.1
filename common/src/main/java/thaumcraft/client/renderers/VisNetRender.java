@@ -46,7 +46,11 @@ public final class VisNetRender {
     }
     /** Same owned state transaction, native lightmap particle format and the original low-alpha threshold. */
     public static void drawParticle(ResourceLocation texture,ShaderInstance selected,Consumer<VertexConsumer> vertices){
-        drawFormat(texture,GL11.GL_ONE,false,selected,DefaultVertexFormat.PARTICLE,vertices);
+        drawParticle(texture,GL11.GL_ONE,selected,vertices);
+    }
+    /** Original particle layers also use standard-alpha smoke (destination771). */
+    public static void drawParticle(ResourceLocation texture,int destination,ShaderInstance selected,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,destination,false,selected,DefaultVertexFormat.PARTICLE,vertices);
     }
     private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,Consumer<VertexConsumer> vertices){
         Objects.requireNonNull(selected,"Native effect shader must be registered before drawing");

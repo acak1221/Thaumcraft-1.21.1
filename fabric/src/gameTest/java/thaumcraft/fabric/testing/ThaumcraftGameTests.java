@@ -1122,4 +1122,119 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void scanCallbacksRespectOcclusionAndNativeTiming(GameTestHelper test) {
         thaumcraft.common.testing.ScanApiRuntimeChecks.callbacksRespectOcclusionAndTwentyTickSession(test, test.makeMockServerPlayerInLevel());
     }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m04_object_aspect_direct")
+    public void objectAspectApiDirectAndGroupedTagsReachProductionConsumers(GameTestHelper test) {
+        thaumcraft.common.testing.ObjectAspectApiRuntimeChecks.nativeDirectAndGroupedTagsReachProductionConsumers(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m04_object_aspect_complex")
+    public void objectAspectApiComplexRegistrationUsesOriginalServerPhase(GameTestHelper test) {
+        thaumcraft.common.testing.ObjectAspectApiRuntimeChecks.complexRegistrationUsesOriginalBranchesAndServerPhase(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "m04_object_aspect_callback")
+    public void objectAspectApiCallbacksRetainOriginalExistingAmounts(GameTestHelper test) {
+        thaumcraft.common.testing.ObjectAspectApiRuntimeChecks.callbackCanRegisterComplexTagsAndEarnOnlyOriginalExistingAmounts(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "m08_hellbat")
+    public void hellbatFocusUsesOriginalTargetPaymentAndUpgradeGates(GameTestHelper test) {
+        thaumcraft.common.testing.HellbatFocusRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_focus_pouch")
+    public void focusPouchUsesNativeMenuAndAtomicWandSelection(GameTestHelper test) {
+        thaumcraft.common.testing.FocusPouchRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m07_colored_candles")
+    public void coloredCandlesRetainOriginalDyeCraftingAndSupportDrops(GameTestHelper test) {
+        thaumcraft.common.testing.ColoredCandlesRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m02_hungry_nodes")
+    public void hungryNodesRetainOriginalDamageConsumptionAndBlockDestruction(GameTestHelper test) {
+        thaumcraft.common.testing.HungryNodeRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "m09_accessories_menu")
+    public void accessoriesUseNativeMenuPersistenceAndDeathCustody(GameTestHelper test) {
+        thaumcraft.common.testing.AccessoriesRuntimeChecks.menuPersistenceAndDeath(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m09_vis_amulet")
+    public void visAmuletsTransferAndPayThroughActualNativeRelay(GameTestHelper test) {
+        thaumcraft.common.testing.VisAmuletRuntimeChecks.nativeWornTransferAndRelayPayment(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 180, batch = "m09_runic_accessories")
+    public void runicAccessoriesUseOriginalEquipmentAndDepletionUpgrades(GameTestHelper test) {
+        thaumcraft.common.testing.RunicAccessoriesRuntimeChecks.nativeEquipmentAndDepletionUpgrades(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m06_advanced_furnace")
+    public void advancedFurnaceFormsAndProcessesOriginalNativeStructure(GameTestHelper test) {
+        thaumcraft.common.testing.AdvancedFurnaceRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m06_advanced_callbacks")
+    public void advancedFurnaceFencesPaymentAndNativeCallbacks(GameTestHelper test) {
+        thaumcraft.common.testing.AdvancedFurnaceCallbackRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1000, batch = "m06_advanced_unload")
+    public void advancedFurnacePreservesCustodyAcrossRealChunkUnload(GameTestHelper test) {
+        thaumcraft.common.testing.AdvancedFurnaceUnloadRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "r14_pech_entity")
+    public void pechOriginalEntityUsesNativeGameplay(GameTestHelper test) {
+        thaumcraft.common.testing.PechRuntimeChecks.entity(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "r14_pech_trade")
+    public void pechOriginalTradeUsesNativeGameplay(GameTestHelper test) {
+        thaumcraft.common.testing.PechRuntimeChecks.trade(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "r14_pech_curse")
+    public void pechOriginalCurseUsesNativeGameplay(GameTestHelper test) {
+        thaumcraft.common.testing.PechRuntimeChecks.curse(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "r14_pech_beans")
+    public void pechOriginalBeansUsesNativeGameplay(GameTestHelper test) {
+        thaumcraft.common.testing.PechRuntimeChecks.beans(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m00_crystal_clusters")
+    public void crystalClustersCraftPlaceOnAllOriginalFacesAndDropSixShards(GameTestHelper test) {
+        thaumcraft.common.testing.CrystalClustersRuntimeChecks.sevenRecipesPlaceOnSixFacesAndRecoverTheirSixShards(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "m00_crystal_clusters_lifecycle")
+    public void mixedCrystalOrientationSurvivesActualChunkUnload(GameTestHelper test) {
+        thaumcraft.common.testing.CrystalClustersRuntimeChecks.mixedOrientationActuallyUnloadsAndReloadsFromChunkNbt(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m10_loot_bags")
+    public void lootBagsPreserveOriginalPoolsAndPaidNativeDropCustody(GameTestHelper test) {
+        thaumcraft.common.testing.LootBagRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m00_warp_notifications")
+    public void warpNotificationsFollowOriginalCommittedDeltasAndNativePackets(GameTestHelper test) {
+        thaumcraft.common.testing.WarpNotificationRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m09_runic_loot_potions")
+    public void runicRecipesAcceptExactOriginalLootPotionIdentities(GameTestHelper test) {
+        thaumcraft.common.testing.RunicPotionRuntimeChecks.actualLootPotionsPayRunicRecipeIdentities(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m04_pech_entity_scans")
+    public void pechEntityScansReadActualThreeByteVariants(GameTestHelper test) {
+        thaumcraft.common.testing.PechScanRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
 }

@@ -12,8 +12,7 @@ import thaumcraft.common.config.ThaumcraftFlux;
 import thaumcraft.common.items.wands.foci.FocusData;
 import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 
-/** Original WandManager:75-101 / ItemWandCasting:247-259, for implemented caps/armor.
- * Baubles, staves and sceptres remain pending, not simulated here. */
+/** Original WandManager:75-101 / ItemWandCasting:247-259, for native caps, four accessory slots and armor. */
 public final class WandVisDiscount {
     private static final List<EquipmentSlot> ARMOR_SLOTS = List.of(EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD);
     private WandVisDiscount() {}
@@ -22,6 +21,11 @@ public final class WandVisDiscount {
     public static int percentagePoints(Player player, Aspect aspect) {
         if (player == null) return 0;
         int total = 0;
+        var accessories=thaumcraft.common.lib.baubles.PlayerAccessories.get(player);
+        for(int index=0;index<4;index++) {
+            ItemStack stack=accessories.getItem(index);
+            if(!stack.isEmpty() && stack.getItem() instanceof IVisDiscountGear gear)total+=gear.getVisDiscount(stack,player,aspect);
+        }
         for (EquipmentSlot slot : ARMOR_SLOTS) {
             ItemStack armor = player.getItemBySlot(slot);
             if (!armor.isEmpty() && armor.getItem() instanceof IVisDiscountGear gear) total += gear.getVisDiscount(armor, player, aspect);

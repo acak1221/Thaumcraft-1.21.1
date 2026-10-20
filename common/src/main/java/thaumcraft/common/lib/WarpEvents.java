@@ -159,6 +159,7 @@ public final class WarpEvents {
     public static void addTemporaryWarp(ServerPlayer player, int amount) {
         var knowledge = KnowledgeAccess.get(player);
         knowledge.addWarpTemp(amount); knowledge.setWarpCounter(knowledge.getTotalWarp()); KnowledgeEvents.sync(player);
+        thaumcraft.common.lib.network.WarpMessageNetworking.send(player, (byte) 2, amount);
     }
     /** Original ItemCraftedEvent: one sticky amount for the output type, independent of its produced stack count. */
     public static int onCrafted(ServerPlayer player, ItemStack output) {
@@ -173,7 +174,7 @@ public final class WarpEvents {
         if (amount > 0) {
             var knowledge = KnowledgeAccess.get(player);
             knowledge.addWarpSticky(amount); knowledge.setWarpCounter(knowledge.getTotalWarp()); KnowledgeEvents.sync(player);
-            player.displayClientMessage(Component.translatable("tc.addwarpsticky"), true);
+            thaumcraft.common.lib.network.WarpMessageNetworking.send(player, (byte) 1, amount);
         }
         return amount;
     }

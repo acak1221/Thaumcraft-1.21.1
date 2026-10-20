@@ -91,6 +91,9 @@ class EarlyObjectAspectBindingsTest {
         assertAspects(complex, "minecraft:piston", new AspectList().add(Aspect.MECHANISM, 2).add(Aspect.MOTION, 4));
         assertAspects(complex, "minecraft:oak_trapdoor", new AspectList().add(Aspect.MOTION, 1));
         assertAspects(complex, "minecraft:furnace", new AspectList().add(Aspect.FIRE, 2));
+        assertAspects(complex, "thaumcraft:arcane_ear", new AspectList().add(Aspect.SENSES, 4));
+        assertEquals(32767, EarlyObjectAspectBindings.metadata(id("thaumcraft:goggles_revealing")));
+        assertEquals(0, EarlyObjectAspectBindings.metadata(id("thaumcraft:arcane_ear")));
         for (String name : new String[]{"minecraft:blaze_powder", "minecraft:raw_iron", "minecraft:raw_gold",
                 "minecraft:copper_ingot", "minecraft:netherite_ingot", "minecraft:deepslate_iron_ore",
                 "minecraft:crimson_planks", "thaumcraft:balance_shard", "thaumcraft:salis_mundus",
@@ -123,23 +126,55 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(117, direct.size(), "previous direct item bindings plus the original native Primordial Pearl");
-        assertEquals(9, complex.size(), "seven existing complex bindings plus piston and wooden trapdoor");
+        assertEquals(118, direct.size(), "previous direct item bindings plus the original native Primordial Pearl and Pech focus");
+        assertEquals(10, complex.size(), "nine existing complex bindings plus the actual native Arcane Ear");
+        assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
+                .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
+        assertEquals(0, EarlyObjectAspectBindings.metadata(id("thaumcraft:focus_pech")), "original one-argument ItemStack(Item) selects exact metadata0, not wildcard");
+        assertFalse(complex.containsKey(id("thaumcraft:focus_pech")), "the actual focus has an original complete direct tag, not a raw recipe addition");
         assertFalse(direct.containsKey(id("minecraft:piston")), "a raw addition must not suppress the recipe base");
         assertEquals(List.of(Aspect.MECHANISM, Aspect.MOTION), new ArrayList<>(complex.get(id("minecraft:piston")).aspects.keySet()));
         var stream = getClass().getClassLoader().getResourceAsStream("data/thaumcraft/tc4/early_object_aspects.json");
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(97, rows.size());
+            assertEquals(99, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
             int wheat = 0;
+            int ears = 0;
+            int pechFoci = 0;
             Map<Integer, JsonObject> clusters = new java.util.TreeMap<>();
             for (int index = 0; index < rows.size(); index++) {
                 var row = rows.get(index).getAsJsonObject();
                 int sourceLine = row.get("original_source_line").getAsInt();
+                if (sourceLine == 436) {
+                    ++pechFoci;
+                    assertEquals("direct", row.get("registration").getAsString());
+                    assertEquals("ConfigItems.itemFocusPech", row.get("original_target").getAsString());
+                    assertEquals(0, row.get("original_metadata").getAsInt());
+                    assertEquals(JsonParser.parseString("[\"thaumcraft:focus_pech\"]"), row.get("modern_ids"));
+                    assertEquals(JsonParser.parseString("{\"praecantatio\":5,\"venenum\":5,\"perditio\":5,\"alienis\":5,\"telum\":5}"), row.get("aspects"));
+                    assertTrue(row.get("identifier_evidence").getAsString().contains("ConfigItems361-362"));
+                    continue;
+                }
+                if (sourceLine == 434) {
+                    ++ears;
+                    assertEquals("complex", row.get("registration").getAsString());
+                    assertEquals("ConfigBlocks.blockWoodenDevice", row.get("original_target").getAsString());
+                    assertEquals(1, row.get("original_metadata").getAsInt());
+                    assertEquals(JsonParser.parseString("[\"thaumcraft:arcane_ear\"]"), row.get("modern_ids"));
+                    assertEquals(JsonParser.parseString("{\"sensus\":4}"), row.get("aspects"));
+                    continue;
+                }
+                if (sourceLine == 433) {
+                    assertEquals("wildcard:32767", row.get("original_metadata").getAsString(), "original ConfigAspects433 explicitly registers a wildcard durable goggles stack");
+                    // Preserve the historical ALL90 digest with its old metadata typo normalized only for that comparison.
+                    // The live corrected value is asserted independently above; all remaining row fields stay pinned.
+                    var historical = row.deepCopy(); historical.addProperty("original_metadata", 0); previous.add(historical);
+                    continue;
+                }
                 if (sourceLine == 454) {
                     assertEquals("ConfigItems.itemEldritchObject", row.get("original_target").getAsString());
                     assertEquals(3, row.get("original_metadata").getAsInt());
@@ -185,6 +220,8 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(1, added);
             assertEquals(1, trapdoors);
             assertEquals(1, wheat);
+            assertEquals(1, ears);
+            assertEquals(1, pechFoci);
             assertEquals(3, clusters.size());
             assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
             assertCluster(clusters.get(361), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");

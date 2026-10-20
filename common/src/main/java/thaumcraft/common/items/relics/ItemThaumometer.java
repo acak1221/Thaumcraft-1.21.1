@@ -74,7 +74,7 @@ public final class ItemThaumometer extends Item {
             ItemStack item = itemEntity.getItem();
             if (item.isEmpty()) return null;
             var id = BuiltInRegistries.ITEM.getKey(item.getItem());
-            return new Target("@" + id, "entity:" + entity.getId(), ObjectAspectResolver.get(item, level), ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item));
+            return new Target("@" + id, "entity:" + entity.getId(), ObjectAspectResolver.scanTags(item, level), ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item));
         }
         if (entity != null) {
             var scanned = EntityAspectBindings.describe(entity);
@@ -97,8 +97,9 @@ public final class ItemThaumometer extends Item {
         // identity even when its block identifier differs from the item id.
         ItemStack picked = state.getBlock().getCloneItemStack(level, block.getBlockPos(), state);
         if (picked.isEmpty()) return null;
+        var grouped = ObjectAspectResolver.groupedScanWitness(picked);
         var id = BuiltInRegistries.ITEM.getKey(picked.getItem());
-        return new Target("@" + id, "item:" + id + ":" + picked.getDamageValue(), ObjectAspectResolver.get(picked, level), ScanManager.ScanKind.ITEM, ResearchClues.Context.item(picked));
+        return new Target("@" + id, "item:" + id + ":" + grouped.metadata(), ObjectAspectResolver.scanTags(picked, level), ScanManager.ScanKind.ITEM, ResearchClues.Context.item(grouped.stack()));
     }
 
     /** Original EntityUtils.getPointedEntity(.5,10,0,true): all entities, minimum distance, eye LOS and at least .8 pick padding. */

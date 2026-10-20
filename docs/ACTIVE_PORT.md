@@ -1,3 +1,7 @@
+Следующая группа локально691JUnit/84Python и main/gameTest/clientTest compile PASS,235 native cases ждут GitHub.
+Все активные sources заморожены до commit. Следующие единицы пока только .tmp: TravelGear/HoverHarness,
+HoverGirdle/Primal focus, PrimalCharm, RP/research notifications, реальные биомы, PURE/DARK ecology.
+
 Последний принятый серверный commit: b1e49f2 (648 JUnit/212 Fabric GameTest/79 Python), GitHub run39409582347.
 Текущая следующая группа ещё не проверена. User explicitly asks for coding subagents; six active units.
 

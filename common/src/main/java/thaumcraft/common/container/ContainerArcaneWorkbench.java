@@ -127,9 +127,10 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
         ItemStack wand = contents.getItem(TileArcaneWorkbench.WAND_SLOT).copy();
         if (match.arcane() && !ArcaneVis.debit(wand, match.prices())) return ItemStack.EMPTY;
         var matrix = new ArrayList<ItemStack>(9);
-        for (ItemStack stack : match.input().items()) {
-            ItemStack next = stack.copy();
-            if (!next.isEmpty()) next.shrink(1);
+        for (int slot=0;slot<match.input().items().size();slot++) {
+            boolean retain=thaumcraft.common.lib.AdvancedFurnaceCrafting.retainCenterPearl(match,slot);
+            ItemStack next = retain?contents.getItem(slot):match.input().items().get(slot).copy();
+            if (!next.isEmpty() && !retain) next.shrink(1);
             matrix.add(next);
         }
         tile.applyCraft(matrix, wand);

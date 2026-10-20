@@ -1,0 +1,43 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "RUNICCHARGED",
+  "input": {
+    "item": "thaumcraft:runic_ring"
+  },
+  "components": [
+    {
+      "item": "thaumcraft:balance_shard"
+    },
+    {
+      "item": "thaumcraft:fire_shard"
+    },
+    {
+      "item": "thaumcraft:fire_shard"
+    },
+    {
+      "item": "minecraft:potion"
+    },
+    {
+      "item": "thaumcraft:fire_shard"
+    },
+    {
+      "item": "thaumcraft:fire_shard"
+    }
+  ],
+  "aspects": {
+    "tutamen": 16,
+    "praecantatio": 16,
+    "potentia": 64
+  },
+  "instability": 6,
+  "result": {
+    "id": "thaumcraft:runic_ring_charged",
+    "count": 1
+  },
+  "component_predicates": [
+    {
+      "component": 3,
+      "potion": "minecraft:strong_swiftness"
+    }
+  ]
+}

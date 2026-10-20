@@ -95,6 +95,10 @@ empty template and timeout200. They use declared bare entities/player/floor/
 RNG inputs and real native ticks/deaths/loot admission; they do not claim fresh
 survival acquisition. JUnit checks the complete seeded bolt geometry across64
 seeds; the resource contract checks the native lit particle shader linkage.
-These sources await the next integrated compile/runtime. Client appearance,
+Checkpoint4d6a458 passed integrated common/Fabric production, native GameTest
+and clientTest compilation,647 JUnit and79 Python tests. WispLightningShapeTest
+passed2 tests, including64 seeded geometries/21,760 joined segments. The exact
+checkpoint's212-test native server CI remains pending; no server GameTest pass
+is inferred from compilation. Client appearance,
 multiplayer visuals and survival acquisition remain unverified until inspected
 game evidence; resource/class loading is not visual acceptance.

@@ -22,6 +22,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -130,6 +131,7 @@ public final class EntityEldritchGuardian extends Monster implements RangedAttac
         super.dropCustomDeathLoot(level, source, player);
         if (player && OriginalMobLoot.rare(OriginalMobLoot.looting(level, source), random::nextInt)) spawnAtLocation(ThaumcraftWarp.ELDRITCH_EYE.get());
     }
+    @Override public ItemEntity spawnAtLocation(ItemStack stack, float height) { return OriginalMobLoot.spawn(this, stack, height); }
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         if (hasRestriction()) { tag.putLong("WarpHome", getRestrictCenter().asLong()); tag.putFloat("WarpHomeRange", getRestrictRadius()); }

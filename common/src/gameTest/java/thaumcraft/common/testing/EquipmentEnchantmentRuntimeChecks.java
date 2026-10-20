@@ -48,6 +48,7 @@ public final class EquipmentEnchantmentRuntimeChecks {
         boolean[] finished = {false};
         Runnable finish = () -> {
             if (finished[0]) return; finished[0] = true;
+            level.getServer().getConnection().getConnections().remove(connection);
             if (level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player);
             player.discard(); channel.finishAndReleaseAll();
         };
@@ -105,6 +106,11 @@ public final class EquipmentEnchantmentRuntimeChecks {
             ItemWandCasting.withData(full, new WandData("greatwood", "gold", all));
             all.put("terra", 0); ItemWandCasting.withData(partial, new WandData("greatwood", "gold", all));
             player.getInventory().items.set(34, full); player.getInventory().items.set(35, partial);
+            // ServerPlayer's world tick advances its age, but the real living
+            // tick runs through packetListener.tick -> doTick. An EmbeddedChannel
+            // is not accepted by the server listener automatically.
+            test.assertTrue(level.getServer().getConnection().getConnections().add(connection),
+                    "fixture transport joins the actual server connection loop for native player living ticks");
             int startTick = player.tickCount;
             test.onEachTick(() -> {
                 if (finished[0]) return;

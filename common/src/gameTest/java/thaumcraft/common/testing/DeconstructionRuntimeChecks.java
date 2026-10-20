@@ -1,5 +1,7 @@
 package thaumcraft.common.testing;
 
+import com.mojang.authlib.GameProfile;
+import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -11,10 +13,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -23,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HopperBlock;
@@ -65,6 +72,8 @@ public final class DeconstructionRuntimeChecks {
         final GameTestHelper test;
         final ServerLevel level;
         final ServerPlayer player;
+        final Connection connection = new Connection(PacketFlow.SERVERBOUND);
+        final EmbeddedChannel channel = new EmbeddedChannel(connection);
         final BlockPos pos;
         final Map<BlockPos, BlockState> original = new LinkedHashMap<>();
         final List<ChunkPos> forced = new ArrayList<>();
@@ -72,10 +81,18 @@ public final class DeconstructionRuntimeChecks {
         TileArcaneWorkbench workbench;
         TileDeconstructionTable table;
         boolean finished;
-        Check(GameTestHelper test) { this.test = test; level = test.getLevel(); player = test.makeMockServerPlayerInLevel(); pos = test.absolutePos(new BlockPos(3, 100, 3)); }
+        Check(GameTestHelper test) {
+            this.test = test; level = test.getLevel(); pos = test.absolutePos(new BlockPos(3, 100, 3));
+            var profile = new GameProfile(UUID.randomUUID(), "decon-" + UUID.randomUUID().toString().substring(0, 8));
+            player = new ServerPlayer(level.getServer(), level, profile, ClientInformation.createDefault());
+        }
         ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath("thaumcraft", path); }
         void set(BlockPos where, BlockState state) { original.putIfAbsent(where, level.getBlockState(where)); level.setBlock(where, state, QUIET); }
         void prepare() {
+            // GameTestHelper's mock permanently overrides isCreative(); use a real survival actor for native paid placement.
+            level.getServer().getPlayerList().placeNewPlayer(connection, player, CommonListenerCookie.createInitial(player.getGameProfile(), false));
+            player.setGameMode(GameType.SURVIVAL); player.setNoGravity(true);
+            test.assertTrue(!player.isCreative() && level.getServer().getPlayerList().getPlayer(player.getUUID()) == player, "native connected survival placement actor");
             forced.addAll(GolemChunks.hold(level, List.of(pos.offset(-3, -3, -3), pos.offset(3, 3, 3))));
             level.getAllEntities().forEach(entity -> oldEntities.add(entity.getUUID()));
             for (BlockPos where : BlockPos.betweenClosed(pos.offset(-3, -3, -3), pos.offset(3, 3, 3))) set(where.immutable(), Blocks.AIR.defaultBlockState());
@@ -204,6 +221,8 @@ public final class DeconstructionRuntimeChecks {
             original.forEach((where, state) -> level.setBlock(where, state, QUIET));
             for (var drop : level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(4))) if (!oldEntities.contains(drop.getUUID())) drop.discard();
             for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
+            try { if (level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player); }
+            finally { player.discard(); channel.finishAndReleaseAll(); }
         }
     }
 }

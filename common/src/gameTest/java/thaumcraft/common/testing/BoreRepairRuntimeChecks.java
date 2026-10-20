@@ -88,9 +88,11 @@ public final class BoreRepairRuntimeChecks {
                                     && state.available("aer") == 2 && state.available("terra") == 0 && state.available("ignis") == 0
                                     && state.available("aqua") == 0 && state.available("ordo") == 2 && state.available("perditio") == 0,
                             "native RepairII spends its complete stored primal bill once; full-price fills retain original aer/ordo overfill: " + state);
-                    test.assertTrue(bore.top.getAccelerationCredit() == 20 && bore.top.workReference() == null
+                    // Original FLOAT additions:25*.8F is still below20;
+                    // the26th real4-unit pulse reaches20.799997 (raw104 total).
+                    test.assertTrue(Float.floatToIntBits(bore.top.getAccelerationCredit()) == 0x41a66665 && bore.top.workReference() == null
                                     && network.level.getBlockState(bore.target).isAir(),
-                            "normal separate prefill consumed100 raw perditio for credit20; no mining/output occurred");
+                            "normal separate prefill consumed104 raw perditio for original float credit20.799997; no mining/output occurred: credit=" + bore.top.getAccelerationCredit());
                     var saved = bore.top.saveWithFullMetadata(network.level.registryAccess());
                     // Explicit native NBT decode on the same idle installed fixture,
                     // as existing exhausted-revision checks do; not a world restart.

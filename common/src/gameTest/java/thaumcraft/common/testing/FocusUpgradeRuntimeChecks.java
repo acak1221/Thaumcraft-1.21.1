@@ -78,10 +78,16 @@ public final class FocusUpgradeRuntimeChecks {
                     && !focus.has(ThaumcraftFoci.FOCUS_UPGRADES.get()), "missing upgrades read empty without rewriting input");
             for (int rank = 1; rank <= 5; rank++) {
                 var choices = item.getPossibleUpgradesByRank(focus, rank);
-                a.require(choices.length == (item instanceof ItemFocusExcavation ? 3 : 2)
-                        && choices[0] == FocusUpgradeType.frugal && choices[1] == FocusUpgradeType.potency,
-                        "all four foci offer only implemented original-relative-order choices");
-                if (choices.length == 3) a.require(choices[2] == (rank % 2 == 0 ? FocusUpgradeType.enlarge : FocusUpgradeType.treasure), "Excavation exact odd/even upgrade ranks");
+                FocusUpgradeType[] expected;
+                if (item instanceof ItemFocusExcavation) {
+                    expected = switch (rank) {
+                        case 2, 4 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.enlarge};
+                        case 3 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure, FocusUpgradeType.dowsing};
+                        case 5 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure, FocusUpgradeType.silktouch};
+                        default -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure};
+                    };
+                } else expected = new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency};
+                a.require(java.util.Arrays.equals(choices, expected), "all four foci retain exact implemented original rank candidates: " + item + " rank" + rank);
             }
             a.require(item.applyUpgrade(focus, FocusUpgradeType.potency, 5) && item.applyUpgrade(focus, FocusUpgradeType.frugal, 1), "public API preserves ordered holes");
             for (int rank : new int[]{Integer.MIN_VALUE, 0, 6, Integer.MAX_VALUE})

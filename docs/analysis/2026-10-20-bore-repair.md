@@ -57,7 +57,9 @@ native ticker authority. Оплата кирки и резерва примен�
 - Native pick base проверяется как metallum9/praecantatio4/arbor1, bill как
   aer6/terra12/ignis4/aqua2/ordo10/perditio4. Первый terra4 partial grant не снижает
   wear. Успешная попытка тратит весь bill, сохраняет исходный aer/ordo overfill.
-  Отдельный прежний normal prefill расходует raw perditio100 на acceleration20;
+  Отдельный прежний normal prefill расходует raw perditio104 на float acceleration
+  `20.799997` (bits`0x41a66665`):25 последовательных `.8F` дают ещё значение<20,
+  поэтому original threshold допускает26-й pulse. Disk short сохраняет20.
   mining/output не происходит. Нет общего конечного запаса у renewable node:
   ограничен каждый его pulse, и reserve получает только реально выданные grants.
 - Native BE save/decode применяется к тому же idle installed test BE и проверяет

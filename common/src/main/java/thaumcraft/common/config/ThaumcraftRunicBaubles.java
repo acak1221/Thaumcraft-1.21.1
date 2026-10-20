@@ -21,7 +21,6 @@ import thaumcraft.common.items.armor.ItemCultistBoots;
 import thaumcraft.common.items.armor.ItemCultistLeaderArmor;
 import thaumcraft.common.items.armor.ItemCultistPlateArmor;
 import thaumcraft.common.items.armor.ItemCultistRobeArmor;
-import thaumcraft.common.items.armor.RecipesVoidRobeArmorDyes;
 import thaumcraft.common.items.baubles.ItemAmuletRunic;
 import thaumcraft.common.items.baubles.ItemBaubleBlanks;
 import thaumcraft.common.items.baubles.ItemGirdleRunic;
@@ -93,8 +92,10 @@ public final class ThaumcraftRunicBaubles {
             () -> new ItemCultistBoots(CULTIST_BOOTS_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Properties()));
 
     /** The original RecipesVoidRobeArmorDyes, the dyeing recipe of the void thaumaturge robes. */
-    public static final RegistrySupplier<RecipeSerializer<RecipesVoidRobeArmorDyes>> VOID_ROBE_DYE_SERIALIZER = SERIALIZERS.register("void_robe_dye",
-            () -> new SimpleCraftingRecipeSerializer<>(RecipesVoidRobeArmorDyes::new));
+    // The original had a second, identical dye recipe for the void robes
+    // (RecipesRobeArmorDyes and RecipesVoidRobeArmorDyes). The native port
+    // serves both robe families with the single thaumcraft:robe_dye recipe,
+    // which matches every DyedRobe.
 
     // The original ConfigItems:529-548 order, so the creative tab lists the pieces as the original did.
     private static final Map<String, RegistrySupplier<? extends Item>> CULTIST_PIECES = pieceMap();

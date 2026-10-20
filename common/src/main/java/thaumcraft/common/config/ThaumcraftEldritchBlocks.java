@@ -374,7 +374,12 @@ public final class ThaumcraftEldritchBlocks {
         }
     }
 
+    private static boolean registered;
+
     public static void register() {
+        // The Outer Lands registration calls this class as well, so the call must be idempotent.
+        if (registered) return;
+        registered = true;
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITIES.register();

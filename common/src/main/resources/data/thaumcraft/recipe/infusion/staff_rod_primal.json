@@ -1,0 +1,47 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "ROD_primal_staff",
+  "input": {
+    "item": "thaumcraft:wand_rod_silverwood"
+  },
+  "components": [
+    {
+      "item": "thaumcraft:primal_charm"
+    },
+    {
+      "item": "thaumcraft:wand_rod_obsidian"
+    },
+    {
+      "item": "thaumcraft:wand_rod_ice"
+    },
+    {
+      "item": "thaumcraft:wand_rod_quartz"
+    },
+    {
+      "item": "thaumcraft:primal_charm"
+    },
+    {
+      "item": "thaumcraft:wand_rod_reed"
+    },
+    {
+      "item": "thaumcraft:wand_rod_blaze"
+    },
+    {
+      "item": "thaumcraft:wand_rod_bone"
+    }
+  ],
+  "aspects": {
+    "aer": 32,
+    "ignis": 32,
+    "aqua": 32,
+    "terra": 32,
+    "ordo": 32,
+    "perditio": 32,
+    "praecantatio": 64
+  },
+  "instability": 8,
+  "result": {
+    "id": "thaumcraft:staff_rod_primal",
+    "count": 1
+  }
+}

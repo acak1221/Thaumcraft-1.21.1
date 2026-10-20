@@ -55,7 +55,7 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
             @Override public boolean isFake() { return true; }
         });
         addSlot(new Slot(contents, TileArcaneWorkbench.WAND_SLOT, 160, 24) {
-            @Override public boolean mayPlace(ItemStack stack) { return ArcaneVis.isCraftingWand(stack); }
+            @Override public boolean mayPlace(ItemStack stack) { return ArcaneVis.isWorkbenchWand(stack); }
             @Override public int getMaxStackSize() { return 1; }
         });
         for (int row = 0; row < 3; row++) {
@@ -224,9 +224,9 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
             return original;
         }
         boolean moved;
-        if (index >= 11 && index < 38) moved = ArcaneVis.isCraftingWand(current)
+        if (index >= 11 && index < 38) moved = ArcaneVis.isWorkbenchWand(current)
                 ? moveItemStackTo(current, 1, 2, false) : moveItemStackTo(current, 38, 47, false);
-        else if (index >= 38 && index < 47) moved = ArcaneVis.isCraftingWand(current)
+        else if (index >= 38 && index < 47) moved = ArcaneVis.isWorkbenchWand(current)
                 ? moveItemStackTo(current, 1, 2, false) : moveItemStackTo(current, 11, 38, false);
         else moved = moveItemStackTo(current, 11, 47, false);
         if (!moved || current.getCount() == original.getCount()) return ItemStack.EMPTY;

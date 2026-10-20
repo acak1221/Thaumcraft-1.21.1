@@ -36,8 +36,8 @@ class WandDataTest {
     }
     @Test void malformedJsonReturnsDecodeErrorsWithoutThrowing() {
         for (String json : List.of(
-                "{\"rod\":\"silverwood_staff\"}",
-                "{\"rod\":\"greatwood_staff\"}",
+                "{\"rod\":\"copper_staff\"}",
+                "{\"rod\":\"wood_staff\"}",
                 "{\"cap\":\"void\"}",
                 "{\"cap\":\"thaumium_inert\"}",
                 "{\"vis\":{\"vitium\":100}}",
@@ -46,7 +46,9 @@ class WandDataTest {
                 "{\"vis\":{\"aer\":2501}}",
                 "{\"rod\":\"wood\",\"cap\":\"gold\",\"vis\":{\"aer\":5000}}",
                 "{\"rod\":\"greatwood\",\"vis\":{\"aer\":5001}}",
-                "{\"rod\":\"silverwood\",\"vis\":{\"aer\":10001}}")) {
+                "{\"rod\":\"silverwood\",\"vis\":{\"aer\":10001}}",
+                "{\"rod\":\"greatwood_staff\",\"vis\":{\"aer\":12501}}",
+                "{\"rod\":\"primal_staff\",\"vis\":{\"aer\":25001}}")) {
             var result = assertDoesNotThrow(() -> WandData.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)));
             assertTrue(result.error().isPresent(), json);
             assertTrue(result.result().isEmpty(), json);

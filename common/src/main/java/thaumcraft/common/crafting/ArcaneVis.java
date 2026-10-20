@@ -21,6 +21,14 @@ public final class ArcaneVis {
         return WandMaterials.supportsRod(data.rod()) && WandMaterials.supportsCap(data.cap());
     }
 
+    /**
+     * A wand the arcane workbench takes in its wand slot. Original TileMagicWorkbench:143,157, ContainerArcaneWorkbench:85,94,
+     * SlotLimitedByWand and BlockTable:211 all refuse a staff there; foci, the infusion altar and the rest still accept it.
+     */
+    public static boolean isWorkbenchWand(ItemStack stack) {
+        return isCraftingWand(stack) && !ItemWandCasting.isStaff(stack);
+    }
+
     public static Map<String, Integer> price(Map<String, Integer> vis, ItemStack wand) {
         return price(vis, wand, null);
     }

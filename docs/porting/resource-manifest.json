@@ -12130,6 +12130,38 @@
       {
         "type": "minecraft:single",
         "resource": "thaumcraft:models/wandtable"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/wand_rod_obsidian"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/wand_rod_blaze"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/wand_rod_ice"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/wand_rod_quartz"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/wand_rod_bone"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/wand_rod_reed"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/wand_rod_primal"
+      },
+      {
+        "type": "minecraft:single",
+        "resource": "thaumcraft:models/trunk"
       }
     ],
     "excluded_legacy_strips": [
@@ -12281,6 +12313,78 @@
         "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
         "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_silverwood.png",
         "sha256": "09f6fc4133c0427be99b9f773c81a711baedff18fc13ce86ae3b4ad10a42c480",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/wand_rod_obsidian",
+        "width": 32,
+        "height": 32,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_obsidian.png",
+        "sha256": "286a81c32cd07d1750ec8f71074f6954ab5909210fd8a30d40227d6df9038c52",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/wand_rod_blaze",
+        "width": 32,
+        "height": 32,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_blaze.png",
+        "sha256": "cfbe3e2a845dc4a109069c7e68dc7459ae533f183bc74dc212f1e5ed1b0d74e0",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/wand_rod_ice",
+        "width": 32,
+        "height": 32,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_ice.png",
+        "sha256": "ec0c31220a9c8fe5d6c7995ce475d59f4e1e8f719e1c95aa2cfa654ea2b488e9",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/wand_rod_quartz",
+        "width": 32,
+        "height": 32,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_quartz.png",
+        "sha256": "5487147fe09bd6db10dc71210468425d8fe82530839b6814e2f1ffd21ee930c2",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/wand_rod_bone",
+        "width": 32,
+        "height": 32,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_bone.png",
+        "sha256": "1f24f14cdb200424bc3c9a32f6e30e0130bebc8bd08c84bcbf4ac092c90f5c7c",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/wand_rod_reed",
+        "width": 32,
+        "height": 32,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_reed.png",
+        "sha256": "cb8cca012667ab59786c4a5df7014e52c3ae6c48381a4d05c669ac43726e8fb8",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/wand_rod_primal",
+        "width": 48,
+        "height": 64,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/wand_rod_primal.png",
+        "sha256": "7223930115f7788b9cfd2a1580ea028d843a57c0bccddfc84f8e16e506007c20",
+        "transformation": "none; original PNG and model UV coordinates retained"
+      },
+      {
+        "sprite": "thaumcraft:models/trunk",
+        "width": 64,
+        "height": 64,
+        "frame_contract": "Native 1.21.1 no-animation metadata uses the full image width/height.",
+        "texture": "common/src/main/resources/assets/thaumcraft/textures/models/trunk.png",
+        "sha256": "bdf3e8b6e117d51aee7381615045371307f66a2df299329632295190cca62107",
         "transformation": "none; original PNG and model UV coordinates retained"
       },
       {
@@ -13378,10 +13482,10 @@
     ]
   },
   "validation": {
-    "checked_model_texture_refs": 340,
-    "checked_local_model_refs": 230,
-    "checked_atlas_sprite_refs": 340,
-    "atlas_sprites_available": 506,
+    "checked_model_texture_refs": 1054,
+    "checked_local_model_refs": 472,
+    "checked_atlas_sprite_refs": 1054,
+    "atlas_sprites_available": 514,
     "atlas_mipmap_level_guard": 4,
     "checked_sound_refs": 111,
     "checked_sound_event_ids": 66,

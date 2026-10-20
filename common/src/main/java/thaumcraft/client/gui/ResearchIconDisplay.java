@@ -84,7 +84,7 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemShard" -> variant(SHARDS, metadata);
             case "ConfigItems.itemNugget" -> metadata == 6 ? "thaumium_nugget" : null;
             case "ConfigItems.itemZombieBrain" -> metadata == 0 ? "zombie_brain" : null;
-            // ConfigResearch:89-97; ConfigItems:292-304. Staves and the void cap remain unsupported.
+            // ConfigResearch:89-97; ConfigItems:292-313 (staff cores are metadata 50-57 and 100). The void cap remains unsupported.
             case "ConfigItems.itemWandRod" -> switch (metadata) {
                 case 0 -> "wand_rod_greatwood";
                 case 1 -> "wand_rod_obsidian";
@@ -94,6 +94,15 @@ final class ResearchIconDisplay {
                 case 5 -> "wand_rod_reed";
                 case 6 -> "wand_rod_blaze";
                 case 7 -> "wand_rod_bone";
+                case 50 -> "staff_rod_greatwood";
+                case 51 -> "staff_rod_obsidian";
+                case 52 -> "staff_rod_silverwood";
+                case 53 -> "staff_rod_ice";
+                case 54 -> "staff_rod_quartz";
+                case 55 -> "staff_rod_reed";
+                case 56 -> "staff_rod_blaze";
+                case 57 -> "staff_rod_bone";
+                case 100 -> "staff_rod_primal";
                 default -> null;
             };
             case "ConfigItems.itemWandCap" -> switch (metadata) {

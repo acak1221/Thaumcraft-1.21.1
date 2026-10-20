@@ -404,11 +404,37 @@ public class EntityGolemBase extends AbstractGolem {
         getNavigation().stop();
     }
     public ItemStack getCarriedItem() { return (level().isClientSide ? entityData.get(CARRIED) : carried).copy(); }
+
+    /**
+     * The actual item cargo of the golem, written from outside the guarded transfers.
+     *
+     * <p>This is the bridge for the ported TC4 goal set, whose own cargo model ({@code GolemAiRules.Cargo})
+     * cannot see the golem's private cargo. The guarded transfers of the native golem (the take from a
+     * container, the place at home or at a marker, the directed throws) keep their own rules and never call
+     * it. The write keeps the same invariants as every other cargo change: the server thread, no other work in
+     * flight, no custody, remainder or unread state, a live golem and the carry limit of its material.</p>
+     */
+    public boolean setCarriedItem(ItemStack stack) {
+        requireServerThread();
+        if (level().isClientSide || stack == null || busy || useCustodyActive() || hasUseRemainders()
+                || essentiaMutationActive() || unreadCarried != null || retiring || unsupported
+                || !current() || !canWork()) return false;
+        if (stack.isEmpty()) {
+            if (carried.isEmpty()) return true;
+            carried = ItemStack.EMPTY;
+            syncCarried();
+            return true;
+        }
+        if (stack.getCount() > Math.min(getCarryLimit(), stack.getMaxStackSize())) return false;
+        carried = stack.copy();
+        syncCarried();
+        return true;
+    }
     public float getBootupTimer() { return entityData.get(BOOTUP); }
     public int getHealingTimer() { return entityData.get(HEALING); }
     // Original pose value, NOT the raw six-tick action countdown.
     public int getActionTimer() { return 3 - Math.abs(entityData.get(ACTION) - 3); }
-    void startActionTimer() {
+    public void startActionTimer() {
         requireServerThread();
         if (level() instanceof ServerLevel server && isAlive() && current() && entityData.get(ACTION) == 0) {
             entityData.set(ACTION, 6);
@@ -427,7 +453,7 @@ public class EntityGolemBase extends AbstractGolem {
      * Original attackEntityWithRangedAttack: a dart at the launcher's speed whose spread narrows with every Water upgrade, doing 0.4 of
      * the golem's attack attribute; the shot clicks like iron and lifts the left arm.
      */
-    void shootDart(LivingEntity target) {
+    public void shootDart(LivingEntity target) {
         requireServerThread();
         if (!(level() instanceof ServerLevel) || !isAlive()) return;
         EntityDart dart = new EntityDart(level(), this, target, GolemDartRules.SPEED, GolemDartRules.inaccuracy(getUpgradeAmount(GolemUpgrade.WATER)));
@@ -766,7 +792,7 @@ public class EntityGolemBase extends AbstractGolem {
         requireServerThread();
         configurationOpeners.remove(player);
     }
-    boolean canWork() {
+    public boolean canWork() {
         return !level().isClientSide && !ItemGolemPlacer.isPlacementInProgress()
                 && isAlive() && current() && hasHome && !fettered && EnumGolemType.isSupported(material) && !unsupported && !retiring
                 && unreadCarried == null && unreadWater == null && unreadAspect == null
@@ -775,8 +801,59 @@ public class EntityGolemBase extends AbstractGolem {
                 && !fishing.hasPending() && hasSupportedCore() && configurationOpeners.isEmpty()
                 && (core != GolemData.LIQUID || liquidControls()) && (core != GolemData.USE || useControls());
     }
-    void addWorkGoal(int priority, Goal goal) { goalSelector.addGoal(priority, goal); }
-    void addTargetGoal(int priority, Goal goal) { targetSelector.addGoal(priority, goal); }
+    /**
+     * The native selector priority of a goal.
+     *
+     * <p>TC4 1.7 gave the LOWEST priority number the HIGHEST precedence, and the native 1.21.1 selector reads the
+     * number the same way: {@code GoalSelector} hands the flags of a running goal only to a goal whose own number
+     * is STRICTLY LOWER ({@code WrappedGoal.canBeReplacedBy}), and the vanilla mobs register their goals in
+     * ascending order, so the goal with the lowest number is the one that runs. A ported TC4 goal therefore keeps
+     * the number it publishes in its {@code PRIORITY} constant and the whole selector keeps the original 1.7
+     * order; this helper writes that decision down in one place so the direction cannot drift between the native
+     * goals and the ported goal set.</p>
+     *
+     * <p>The native goals of this golem already carry the original numbers: the creeper flight 0, the dart 2, the
+     * melee 3, the fill route 4, the door 5, the return home 6, the watch 7 and the idle look 8.</p>
+     */
+    public static int nativeGoalPriority(int originalPriority) { return originalPriority; }
+
+    /** The work selector of the golem; the priority is the original TC4 number (see {@link #nativeGoalPriority(int)}). */
+    public void addWorkGoal(int priority, Goal goal) { goalSelector.addGoal(priority, goal); }
+    /** The target selector of the golem; the priority is the original TC4 number (see {@link #nativeGoalPriority(int)}). */
+    public void addTargetGoal(int priority, Goal goal) { targetSelector.addGoal(priority, goal); }
+    /**
+     * The goal set of the golem, rebuilt whenever the core, the decoration or the upgrades change.
+     *
+     * <p>The native goals ARE the original TC4 goal set: every original goal has its native counterpart here
+     * and carries the original 1.7 number (see {@link #nativeGoalPriority(int)}). Per core:</p>
+     *
+     * <ul>
+     * <li>Fill (0): HomeReplace0/HomePlace1/HomeDrop2/FillTake3/FillGoto4 -> the inventory route at 4 with the
+     * take, the place and the drop in its own server tick.</li>
+     * <li>Empty (1): HomeReplace0/EmptyPlace1/EmptyDrop2/EmptyGoto3/HomeTake4 -> the inventory route at 3 with
+     * the same transfers.</li>
+     * <li>Gather (2): HomeReplace0/HomePlace1/ItemPickup2 -> the pickup goal at 2 and the home place.</li>
+     * <li>Harvest (3): HarvestCrops2 -> the harvest goal at 2.</li>
+     * <li>Guard (4): Dart2 (with the launcher), AttackOnCollide3, HurtByTarget1 and NearestAttackableTarget2 ->
+     * the dart, the melee and the two target goals.</li>
+     * <li>Decanting (5): LiquidEmpty1/LiquidGather2/LiquidGoto3 -> the three liquid goals.</li>
+     * <li>Alchemy (6): EssentiaEmpty1/EssentiaGather2/EssentiaGoto3 -> the three alchemy goals.</li>
+     * <li>Lumber (7): HarvestLogs2 -> the lumber goal at 2.</li>
+     * <li>Use (8): HomeReplace0/UseItem0/HomeTake4 -> the replace, the click and the take goals.</li>
+     * <li>Butcher (9): Dart2, AttackOnCollide3 and NearestButcherTarget1 -> the dart, the melee and the oldest
+     * target goal.</li>
+     * <li>Sorting (10): HomeReplace0/SortingPlace1/SortingGoto3/HomeTakeSorting4 -> the inventory route at 3
+     * with the same transfers.</li>
+     * <li>Fishing (11): Fish2 -> the fishing goal at 2.</li>
+     * <li>Every core: AvoidCreeperSwell0, OpenDoor5, ReturnHome6, WatchClosest7 and LookIdle8 -> the creeper
+     * flight, the door, the return home, the watch and the idle look.</li>
+     * </ul>
+     *
+     * <p>The ported TC4 goal set ({@code thaumcraft.common.entities.ai}) is therefore superseded and is NOT
+     * installed beside these goals: it would handle the same work a second time, and its own cargo model
+     * ({@code GolemAiRules.Cargo}: the golem's main hand and a side stock for the water and the essentia)
+     * cannot see the golem's real cargo, which only the guarded native transfers may change.</p>
+     */
     private void rebuildGoals() {
         use.reset();
         alchemy.reset();
@@ -815,17 +892,17 @@ public class EntityGolemBase extends AbstractGolem {
         if (core == GolemData.LUMBER) return lumber.hasTarget();
         return core == GolemData.HARVEST ? harvest.hasTarget() : inventoryCore(core) && core != GolemData.GATHER && inventories.hasRoute();
     }
-    boolean hasCargo() { return !carried.isEmpty(); }
-    int carrySpace() {
+    public boolean hasCargo() { return !carried.isEmpty(); }
+    public int carrySpace() {
         int limit = getCarryLimit();
         return carried.isEmpty() ? limit : Math.max(0, Math.min(limit, carried.getMaxStackSize()) - carried.getCount());
     }
-    double distanceToHomeSqr() {
+    public double distanceToHomeSqr() {
         BlockPos home = getHomePosition();
         return distanceToSqr(home.getX() + .5, home.getY() + .5, home.getZ() + .5);
     }
     /** Guard the native pathfinder's local region as well as its target against chunk loads. */
-    boolean loadedNavigationArea(BlockPos target) {
+    public boolean loadedNavigationArea(BlockPos target) {
         if (!level().hasChunkAt(target)) return false;
         int minX = Math.min(blockPosition().getX(), target.getX()) - 48;
         int maxX = Math.max(blockPosition().getX(), target.getX()) + 48;
@@ -1048,7 +1125,7 @@ public class EntityGolemBase extends AbstractGolem {
         return false;
     }
     /** Explicit core dispatch; Guard's hostile policy above is deliberately unchanged. */
-    boolean isCombatTarget(LivingEntity target) {
+    public boolean isCombatTarget(LivingEntity target) {
         return switch (core) {
             case GolemData.GUARD -> isGuardTarget(target);
             case GolemData.BUTCHER -> hasButcherSurplus(target);
@@ -1894,11 +1971,11 @@ public class EntityGolemBase extends AbstractGolem {
         }
     }
 
-    BlockPos homeInventoryPosition() { return getHomePosition().relative(getHomeFacing().getOpposite()); }
-    GolemHomeInventory.Destination homeInventory() {
+    public BlockPos homeInventoryPosition() { return getHomePosition().relative(getHomeFacing().getOpposite()); }
+    public GolemHomeInventory.Destination homeInventory() {
         return hasHome && level() instanceof ServerLevel server ? GolemHomeInventory.find(server, homeInventoryPosition()) : null;
     }
-    boolean hasHomeWorldThrowTarget() {
+    public boolean hasHomeWorldThrowTarget() {
         return hasHome && level() instanceof ServerLevel server
                 && GolemHomeInventory.isWorldThrowTarget(server, homeInventoryPosition());
     }
@@ -1910,7 +1987,7 @@ public class EntityGolemBase extends AbstractGolem {
                 && marker.dimension().equals(server.dimension().location())
                 && GolemHomeInventory.isWorldThrowTarget(server, marker.pos());
     }
-    GolemHomeInventory.Destination markedInventory(GolemMarker marker) {
+    public GolemHomeInventory.Destination markedInventory(GolemMarker marker) {
         if (!(level() instanceof ServerLevel server) || marker == null || !markers.contains(marker)
                 || !marker.dimension().equals(level().dimension().location()) || marker.pos().equals(homeInventoryPosition())) return null;
         BlockPos home = getHomePosition();
@@ -1925,7 +2002,7 @@ public class EntityGolemBase extends AbstractGolem {
         // because the marker happens to name its other physical half.
         return result == null || result.sharesStorage(homeInventory()) ? null : result;
     }
-    GolemHomeInventory.Destination markedSortingInventory(GolemMarker marker) {
+    public GolemHomeInventory.Destination markedSortingInventory(GolemMarker marker) {
         if (core != GolemData.SORTING || !(level() instanceof ServerLevel server) || marker == null || !markers.contains(marker)
                 || !marker.dimension().equals(server.dimension().location()) || marker.pos().equals(homeInventoryPosition())
                 || distanceToMarkerSqr(marker) > rangeSqr()) return null;
@@ -1934,7 +2011,7 @@ public class EntityGolemBase extends AbstractGolem {
         GolemHomeInventory.Destination result = GolemHomeInventory.find(server, marker.pos());
         return result == null || result.sharesStorage(homeInventory()) ? null : result;
     }
-    double distanceToMarkerSqr(GolemMarker marker) {
+    public double distanceToMarkerSqr(GolemMarker marker) {
         return distanceToSqr(marker.pos().getX() + .5, marker.pos().getY() + .5, marker.pos().getZ() + .5);
     }
 

@@ -118,11 +118,7 @@ public final class GolemFetterRuntimeChecks {
 
         private void start() {
             touched = true;
-            var center = new ChunkPos(base);
-            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                var chunk = new ChunkPos(center.x + dx, center.z + dz);
-                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
-            }
+            forced.addAll(GolemChunks.hold(level, original.keySet()));
             for (BlockPos mutable : original.keySet()) {
                 level.setBlock(mutable, (mutable.getY() - (base.getY() - 1)) % LAYER == 0 && mutable.getY() >= base.getY() - 1
                         ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET);
@@ -317,7 +313,7 @@ public final class GolemFetterRuntimeChecks {
             for (Lane lane : lanes) {
                 text.append("walking phase ").append(midPhase).append(' ').append(lane.name).append(" fettered=").append(lane.golem.isFettered()).append(" home ").append(count(lane.home))
                         .append(" source ").append(count(lane.source)).append(" carrying ").append(lane.golem.getCarriedItem())
-                        .append(" at ").append(lane.golem.position()).append("; ");
+                        .append(" at ").append(lane.golem.position()).append(" ticks ").append(lane.golem.tickCount).append("; ");
             }
             return text.toString();
         }

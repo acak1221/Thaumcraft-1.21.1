@@ -24,6 +24,13 @@ public final class ThaumcraftWands {
 
     public static final RegistrySupplier<Item> GREATWOOD_WAND_ROD = ITEMS.register("wand_rod_greatwood", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> SILVERWOOD_WAND_ROD = ITEMS.register("wand_rod_silverwood", () -> new Item(new Item.Properties()));
+    // Original ItemWandRod metadata 1, 6, 3, 4, 7, 5: the elemental rods, each refilling its own primal in the wand.
+    public static final RegistrySupplier<Item> OBSIDIAN_WAND_ROD = ITEMS.register("wand_rod_obsidian", () -> new Item(new Item.Properties()));
+    public static final RegistrySupplier<Item> BLAZE_WAND_ROD = ITEMS.register("wand_rod_blaze", () -> new Item(new Item.Properties()));
+    public static final RegistrySupplier<Item> ICE_WAND_ROD = ITEMS.register("wand_rod_ice", () -> new Item(new Item.Properties()));
+    public static final RegistrySupplier<Item> QUARTZ_WAND_ROD = ITEMS.register("wand_rod_quartz", () -> new Item(new Item.Properties()));
+    public static final RegistrySupplier<Item> BONE_WAND_ROD = ITEMS.register("wand_rod_bone", () -> new Item(new Item.Properties()));
+    public static final RegistrySupplier<Item> REED_WAND_ROD = ITEMS.register("wand_rod_reed", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> GOLD_WAND_CAP = ITEMS.register("wand_cap_gold", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> THAUMIUM_NUGGET = ITEMS.register("thaumium_nugget", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> THAUMIUM_WAND_CAP_INERT = ITEMS.register("wand_cap_thaumium_inert", () -> new Item(new Item.Properties()));
@@ -41,7 +48,8 @@ public final class ThaumcraftWands {
         COMPONENTS.register();
         ITEMS.register();
         SERIALIZERS.register();
-        CreativeTabRegistry.append(ThaumcraftContent.TAB, GREATWOOD_WAND_ROD, SILVERWOOD_WAND_ROD, GOLD_WAND_CAP,
+        CreativeTabRegistry.append(ThaumcraftContent.TAB, GREATWOOD_WAND_ROD, SILVERWOOD_WAND_ROD, OBSIDIAN_WAND_ROD, BLAZE_WAND_ROD, ICE_WAND_ROD,
+                QUARTZ_WAND_ROD, BONE_WAND_ROD, REED_WAND_ROD, GOLD_WAND_CAP,
                 THAUMIUM_NUGGET, THAUMIUM_WAND_CAP_INERT, THAUMIUM_WAND_CAP);
     }
 
@@ -52,6 +60,12 @@ public final class ThaumcraftWands {
             case "wood" -> Items.STICK;
             case "greatwood" -> GREATWOOD_WAND_ROD.get();
             case "silverwood" -> SILVERWOOD_WAND_ROD.get();
+            case "obsidian" -> OBSIDIAN_WAND_ROD.get();
+            case "blaze" -> BLAZE_WAND_ROD.get();
+            case "ice" -> ICE_WAND_ROD.get();
+            case "quartz" -> QUARTZ_WAND_ROD.get();
+            case "bone" -> BONE_WAND_ROD.get();
+            case "reed" -> REED_WAND_ROD.get();
             default -> throw new IllegalArgumentException("Unsupported wand rod: " + tag);
         });
     }

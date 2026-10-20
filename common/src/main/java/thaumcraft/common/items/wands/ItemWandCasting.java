@@ -66,6 +66,14 @@ public final class ItemWandCasting extends Item {
         return amount - accepted;
     }
 
+    /** Original ItemWandCasting.onUpdate: the server asks the rod to act on its carrier's tick (an elemental rod refills its primal). */
+    @Override public void inventoryTick(ItemStack stack, Level level, net.minecraft.world.entity.Entity entity, int slot, boolean selected) {
+        if (level.isClientSide || !(entity instanceof Player player)) return;
+        WandData before = data(stack);
+        WandData after = WandRodPassive.tick(before, player.tickCount);
+        if (after != before) stack.set(ThaumcraftContent.WAND_DATA.get(), after);
+    }
+
     @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return Integer.MAX_VALUE; }
     @Override public UseAnim getUseAnimation(ItemStack stack) { return UseAnim.BOW; }
 

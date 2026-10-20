@@ -84,10 +84,16 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemShard" -> variant(SHARDS, metadata);
             case "ConfigItems.itemNugget" -> metadata == 6 ? "thaumium_nugget" : null;
             case "ConfigItems.itemZombieBrain" -> metadata == 0 ? "zombie_brain" : null;
-            // ConfigResearch:92,101; ConfigItems:302-307. Higher caps/rods remain unsupported.
+            // ConfigResearch:89-97; ConfigItems:292-304. Staves and the void cap remain unsupported.
             case "ConfigItems.itemWandRod" -> switch (metadata) {
                 case 0 -> "wand_rod_greatwood";
+                case 1 -> "wand_rod_obsidian";
                 case 2 -> "wand_rod_silverwood";
+                case 3 -> "wand_rod_ice";
+                case 4 -> "wand_rod_quartz";
+                case 5 -> "wand_rod_reed";
+                case 6 -> "wand_rod_blaze";
+                case 7 -> "wand_rod_bone";
                 default -> null;
             };
             case "ConfigItems.itemWandCap" -> switch (metadata) {

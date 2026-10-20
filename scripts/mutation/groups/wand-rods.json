@@ -1,0 +1,211 @@
+{
+  "description": "The six elemental wand rods and the wand model selector (docs/analysis/2026-10-19-wand-rods.md)",
+  "watch": {
+    "junit": [
+      "WandRodPassiveTest",
+      "WandModelAssetsTest",
+      "WandDataTest"
+    ],
+    "gametests": [
+      "elementalWandRodsBrewAssembleAndRefillTheirOwnPrimal"
+    ]
+  },
+  "junit_tests": [
+    "thaumcraft.wands.*",
+    "thaumcraft.assets.WandModelAssetsTest"
+  ],
+  "mutants": [
+    {
+      "id": "obsidian-holds-seventy",
+      "name": "the obsidian rod holds 70 vis",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+      "old": "OBSIDIAN = new Rod(\"obsidian\", 7500, 6, \"terra\")",
+      "new": "OBSIDIAN = new Rod(\"obsidian\", 7000, 6, \"terra\")"
+    },
+    {
+      "id": "blaze-costs-five",
+      "name": "the blaze rod costs 5",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+      "old": "BLAZE = new Rod(\"blaze\", 7500, 6, \"ignis\")",
+      "new": "BLAZE = new Rod(\"blaze\", 7500, 5, \"ignis\")"
+    },
+    {
+      "id": "ice-refills-fire",
+      "name": "the ice rod refills fire",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+      "old": "ICE = new Rod(\"ice\", 7500, 6, \"aqua\")",
+      "new": "ICE = new Rod(\"ice\", 7500, 6, \"ignis\")"
+    },
+    {
+      "id": "quartz-has-no-refill",
+      "name": "the quartz rod refills nothing",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+      "old": "QUARTZ = new Rod(\"quartz\", 7500, 6, \"ordo\")",
+      "new": "QUARTZ = new Rod(\"quartz\", 7500, 6)"
+    },
+    {
+      "id": "bone-and-reed-swapped",
+      "name": "bone and reed refill each other's aspect",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+      "old": "BONE = new Rod(\"bone\", 7500, 6, \"perditio\")",
+      "new": "BONE = new Rod(\"bone\", 7500, 6, \"aer\")"
+    },
+    {
+      "id": "rod-order-changed",
+      "name": "blaze and obsidian trade places",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+      "old": "List.of(WOOD, GREATWOOD, SILVERWOOD, OBSIDIAN, BLAZE, ICE, QUARTZ, BONE, REED)",
+      "new": "List.of(WOOD, GREATWOOD, SILVERWOOD, BLAZE, OBSIDIAN, ICE, QUARTZ, BONE, REED)"
+    },
+    {
+      "id": "refill-every-hundred-ticks",
+      "name": "the refill comes every 100 ticks",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+      "old": "PERIOD = 200;",
+      "new": "PERIOD = 100;"
+    },
+    {
+      "id": "refill-half-a-vis",
+      "name": "the refill adds half a vis",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+      "old": "STEP = 100;",
+      "new": "STEP = 50;"
+    },
+    {
+      "id": "threshold-a-fifth",
+      "name": "the refill stops at a fifth",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+      "old": "return capacity / 10;",
+      "new": "return capacity / 5;"
+    },
+    {
+      "id": "refill-between-periods",
+      "name": "the refill happens between periods",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+      "old": "playerTick % PERIOD != 0",
+      "new": "playerTick % PERIOD == 0"
+    },
+    {
+      "id": "refill-up-to-and-including-the-tenth",
+      "name": "a wand at a tenth is refilled too",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandRodPassive.java",
+      "old": "wand.amount(aspect) >= threshold(wand.capacity())",
+      "new": "wand.amount(aspect) > threshold(wand.capacity())"
+    },
+    {
+      "id": "model-values-not-binary",
+      "name": "model values are not binary fractions",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandModels.java",
+      "old": "return index / (float) (WandMaterials.RODS.size() - 1);",
+      "new": "return index / (float) WandMaterials.RODS.size();"
+    },
+    {
+      "id": "cap-values-shifted",
+      "name": "the gold cap has the thaumium value",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/WandModels.java",
+      "old": "return index / (float) (WandMaterials.CAPS.size() - 1);",
+      "new": "return (index + 1) / (float) WandMaterials.CAPS.size();"
+    },
+    {
+      "id": "wrong-model-selected",
+      "name": "the obsidian gold frost wand shows the shock model",
+      "tier": "junit",
+      "file": "common/src/main/resources/assets/thaumcraft/models/item/wand.json",
+      "old": "\"model\": \"thaumcraft:item/wand_obsidian_gold_frost\"",
+      "new": "\"model\": \"thaumcraft:item/wand_obsidian_gold_shock\""
+    },
+    {
+      "id": "selector-entry-missing",
+      "name": "one combination has no selector entry",
+      "tier": "junit",
+      "file": "common/src/main/resources/assets/thaumcraft/models/item/wand.json",
+      "old": "   \"model\": \"thaumcraft:item/wand_reed_thaumium_shock\"\n  }\n ]",
+      "new": "   \"model\": \"thaumcraft:item/wand_reed_thaumium_frost\"\n  }\n ]"
+    },
+    {
+      "id": "reed-model-uses-the-bone-skin",
+      "name": "the reed iron wand wears the bone rod",
+      "tier": "junit",
+      "file": "common/src/main/resources/assets/thaumcraft/models/item/wand_reed_iron.json",
+      "old": "wand_rod_reed",
+      "new": "wand_rod_bone"
+    },
+    {
+      "id": "ice-item-uses-the-quartz-icon",
+      "name": "the ice rod item shows the quartz icon",
+      "tier": "junit",
+      "file": "common/src/main/resources/assets/thaumcraft/models/item/wand_rod_ice.json",
+      "old": "items/wand_rod_ice",
+      "new": "items/wand_rod_quartz"
+    },
+    {
+      "id": "obsidian-item-is-the-blaze-rod",
+      "name": "the obsidian rod is the blaze rod item",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java",
+      "old": "case \"obsidian\" -> OBSIDIAN_WAND_ROD.get();",
+      "new": "case \"obsidian\" -> BLAZE_WAND_ROD.get();"
+    },
+    {
+      "id": "wands-do-not-tick",
+      "name": "the wand never asks its rod to act",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java",
+      "old": "        if (after != before) stack.set(ThaumcraftContent.WAND_DATA.get(), after);\n",
+      "new": ""
+    },
+    {
+      "id": "ice-recipe-one-short",
+      "name": "the ice rod needs 11 aqua",
+      "tier": "gametest",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_rod_ice.json",
+      "old": "\"aqua\": 12",
+      "new": "\"aqua\": 11"
+    },
+    {
+      "id": "bone-recipe-more-unstable",
+      "name": "the bone rod is more unstable",
+      "tier": "gametest",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_rod_bone.json",
+      "old": "\"instability\": 3",
+      "new": "\"instability\": 4"
+    },
+    {
+      "id": "obsidian-recipe-wrong-shard",
+      "name": "the obsidian rod takes a fire shard",
+      "tier": "gametest",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_rod_obsidian.json",
+      "old": "thaumcraft:earth_shard",
+      "new": "thaumcraft:fire_shard"
+    },
+    {
+      "id": "quartz-recipe-wrong-centre",
+      "name": "the quartz rod starts from packed ice",
+      "tier": "gametest",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_rod_quartz.json",
+      "old": "minecraft:quartz_block",
+      "new": "minecraft:packed_ice"
+    },
+    {
+      "id": "reed-recipe-no-secondary",
+      "name": "the reed rod needs no motion",
+      "tier": "gametest",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_rod_reed.json",
+      "old": ", \"motus\": 6",
+      "new": ""
+    }
+  ]
+}

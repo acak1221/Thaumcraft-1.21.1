@@ -2,9 +2,14 @@ package thaumcraft.common.items.wands;
 
 import java.util.List;
 
-/** Bounded TC4 material catalogue. Original ConfigItems:302-314; staves/other rods/caps remain absent. */
+/**
+ * Bounded TC4 material catalogue. Original ConfigItems:292-304: iron/gold/thaumium caps and the wooden, greatwood, silverwood and the
+ * six elemental rods; staves and the void cap remain absent. An elemental rod carries a primal aspect (original
+ * {@code WandRodPrimalOnUpdate}) that it slowly refills in the wand it sits in; see {@link WandRodPassive}.
+ */
 public final class WandMaterials {
-    public record Rod(String tag, int capacity, int craftCost) {
+    public record Rod(String tag, int capacity, int craftCost, String passive) {
+        public Rod(String tag, int capacity, int craftCost) { this(tag, capacity, craftCost, null); }
         public String research() { return "ROD_" + tag; }
     }
 
@@ -16,18 +21,23 @@ public final class WandMaterials {
     public static final Rod WOOD = new Rod("wood", 2500, 1);
     public static final Rod GREATWOOD = new Rod("greatwood", 5000, 3);
     public static final Rod SILVERWOOD = new Rod("silverwood", 10000, 9);
+    public static final Rod OBSIDIAN = new Rod("obsidian", 7500, 6, "terra");
+    public static final Rod BLAZE = new Rod("blaze", 7500, 6, "ignis");
+    public static final Rod ICE = new Rod("ice", 7500, 6, "aqua");
+    public static final Rod QUARTZ = new Rod("quartz", 7500, 6, "ordo");
+    public static final Rod BONE = new Rod("bone", 7500, 6, "perditio");
+    public static final Rod REED = new Rod("reed", 7500, 6, "aer");
     public static final Cap IRON = new Cap("iron", 1.1F, 1);
     public static final Cap GOLD = new Cap("gold", 1.0F, 3);
     public static final Cap THAUMIUM = new Cap("thaumium", .9F, 6);
-    public static final List<Rod> RODS = List.of(WOOD, GREATWOOD, SILVERWOOD);
+    /** The order is part of the client model selector: appending keeps the earlier rods' values. */
+    public static final List<Rod> RODS = List.of(WOOD, GREATWOOD, SILVERWOOD, OBSIDIAN, BLAZE, ICE, QUARTZ, BONE, REED);
     public static final List<Cap> CAPS = List.of(IRON, GOLD, THAUMIUM);
 
     private WandMaterials() {}
 
     public static Rod rod(String tag) {
-        if (WOOD.tag().equals(tag)) return WOOD;
-        if (GREATWOOD.tag().equals(tag)) return GREATWOOD;
-        if (SILVERWOOD.tag().equals(tag)) return SILVERWOOD;
+        for (Rod rod : RODS) if (rod.tag().equals(tag)) return rod;
         throw new IllegalArgumentException("Unsupported wand rod: " + tag);
     }
 

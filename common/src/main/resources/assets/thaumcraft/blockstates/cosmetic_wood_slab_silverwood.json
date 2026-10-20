@@ -5,6 +5,9 @@
     },
     "type=top": {
       "model": "thaumcraft:block/cosmetic_wood_slab_1_top"
+    },
+    "type=double": {
+      "model": "thaumcraft:block/cosmetic_wood_slab_1_double"
     }
   }
 }

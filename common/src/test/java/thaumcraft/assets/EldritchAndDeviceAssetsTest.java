@@ -161,9 +161,10 @@ class EldritchAndDeviceAssetsTest {
     }
 
     @Test void everySlabOfTheTwoFamiliesKnowsItsThreeStates() throws Exception {
+        // The group design renamed the original slab ids: the arcane and the eldritch stone slab
+        // and the greatwood and the silverwood wood slab are four blocks now.
         for (String id : List.of("cosmetic_stone_slab_arcane", "cosmetic_stone_slab_eldritch",
-                "cosmetic_wood_slab_greatwood", "cosmetic_wood_slab_silverwood", "cosmetic_stone_slab",
-                "cosmetic_wood_slab")) {
+                "cosmetic_wood_slab_greatwood", "cosmetic_wood_slab_silverwood")) {
             JsonObject variants = ResourceTree.object(ASSETS + "blockstates/" + id + ".json").getAsJsonObject("variants");
             assertEquals(3, variants.size(), id + ": bottom, top and double");
             for (String type : List.of("bottom", "top", "double")) {

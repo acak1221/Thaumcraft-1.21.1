@@ -35,6 +35,7 @@ import thaumcraft.common.entities.projectile.EntityEldritchOrb;
 import thaumcraft.common.lib.MagicWard;
 import thaumcraft.common.lib.WarpEvents;
 import thaumcraft.common.lib.network.WarpEventNetworking;
+import thaumcraft.common.lib.loot.OriginalMobLoot;
 
 /** Original guardian's combat, undead/magic ward, proximity mist, home and drops. Natural obelisk/Outer Lands spawns are separate. */
 public final class EntityEldritchGuardian extends Monster implements RangedAttackMob, IEldritchMob {
@@ -126,12 +127,8 @@ public final class EntityEldritchGuardian extends Monster implements RangedAttac
             var stack = new ItemStack(ThaumcraftEssences.WISP_ESSENCE.get());
             ThaumcraftEssences.WISP_ESSENCE.get().setAspects(stack, new AspectList().add(aspect, 2)); spawnAtLocation(stack);
         }
-        if (player) {
-            int looting = source.getEntity() instanceof LivingEntity killer
-                    ? EnchantmentHelper.getEnchantmentLevel(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LOOTING), killer) : 0;
-            if (random.nextFloat() < .025F + looting * .01F) spawnAtLocation(ThaumcraftWarp.ELDRITCH_EYE.get());
-        }
         super.dropCustomDeathLoot(level, source, player);
+        if (player && OriginalMobLoot.rare(OriginalMobLoot.looting(level, source), random::nextInt)) spawnAtLocation(ThaumcraftWarp.ELDRITCH_EYE.get());
     }
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);

@@ -1,0 +1,21 @@
+{
+  "description": {
+    "translate": "enchantment.haste"
+  },
+  "supported_items": "#thaumcraft:enchantable/haste",
+  "weight": 3,
+  "max_level": 3,
+  "min_cost": {
+    "base": 15,
+    "per_level_above_first": 9
+  },
+  "max_cost": {
+    "base": 61,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "feet"
+  ],
+  "effects": {}
+}

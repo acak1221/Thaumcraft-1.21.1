@@ -1,3 +1,10 @@
+## 2026-10-20 — Next Fabric content group (remote runtime validation pending)
+
+Unknown knowledge and scan clues/entity variants; server research settings; Repair/Haste infusion
+and native Bore repair; Ward behaviour and Excavation Silk/Dowsing; Growth/Fertility lamps,
+Deconstruction table, Brainy/Giant zombies. Local 620 JUnit and 78 Python pass; full server
+validation is offloaded to GitHub CI for the next commit. Client/NeoForge acceptance remains pending.
+
 # MODLOG — анализ Thaumcraft 4.2 FOREVA
 
 ## 2026-10-20: интеграция исследований, инфузии, устройств и Warp — CI passed

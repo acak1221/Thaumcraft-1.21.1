@@ -594,13 +594,11 @@ public final class DeferredItemDrops extends SavedData {
                     output = new EntityInventoryItem(ThaumcraftContent.INVENTORY_ITEM.get(), level);
                     output.setPos(entry.position);
                     output.setItem(physical);
-                } else if (entry.pickupDelay > 0 || entry.crystalFace >= 0 || entry.bore != null) {
+                } else {
                     // Explicit velocity avoids extra world-RNG draws from the
-                    // modern convenience constructor; harvest sampled it once.
+                    // modern convenience constructor; the producer saved it once.
                     output = new ItemEntity(level, entry.position.x, entry.position.y, entry.position.z, physical,
                             entry.motion.x, entry.motion.y, entry.motion.z);
-                } else {
-                    output = new ItemEntity(level, entry.position.x, entry.position.y, entry.position.z, physical);
                 }
                 output.setUUID(entry.id);
                 attempt.entity = output;

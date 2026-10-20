@@ -1913,7 +1913,7 @@
   "tc.port.research.failure.already_complete": "Это исследование уже завершено.",
   "tc.port.research.failure.missing_prerequisites": "Сначала завершите предшествующие исследования.",
   "tc.port.research.failure.missing_clue": "Сначала найдите подсказку к этому исследованию.",
-  "tc.port.research.failure.primary_requires_note": "Первичное исследование требует записки исследования.",
+  "tc.port.research.failure.primary_requires_note": "Для этого исследования нужна записка.",
   "tc.port.research.failure.insufficient_aspects": "Недостаточно очков исследования нужных аспектов.",
   "tc.port.research.note_forbidden": "Запретное знание (%1$s)",
   "item.thaumcraft.inkwell": "Чернильница с пером",
@@ -1933,7 +1933,7 @@
   "tc.port.note.failure.already_complete": "Это исследование уже завершено.",
   "tc.port.note.failure.missing_prerequisites": "Сначала завершите предшествующие исследования.",
   "tc.port.note.failure.missing_clue": "Сначала найдите подсказку к этому исследованию.",
-  "tc.port.note.failure.secondary_requires_purchase": "Для этого вторичного исследования нужны очки исследования.",
+  "tc.port.note.failure.secondary_requires_purchase": "Это исследование нужно купить в Таумономиконе.",
   "tc.port.note.failure.missing_paper": "Нужен один лист бумаги.",
   "tc.port.note.failure.missing_ink": "Нужны письменные принадлежности с чернилами.",
   "tc.port.note.failure.delivery_failed": "Не удалось выдать записку исследования.",
@@ -2061,5 +2061,12 @@
   "tc.architect.axis.1": "X",
   "tc.architect.axis.2": "Z",
   "tc.architect.axis.3": "Y",
-  "tc.port.book_recipe.xp_levels": "%s уровней"
+  "tc.port.book_recipe.xp_levels": "%s уровней",
+  "block.thaumcraft.deconstruction_table": "Стол расщепления",
+  "block.thaumcraft.growth_lamp": "Светильник роста",
+  "block.thaumcraft.fertility_lamp": "Светильник скрещивания",
+  "entity.thaumcraft.brainy_zombie": "Злой зомби",
+  "entity.thaumcraft.giant_brainy_zombie": "Яростный зомби",
+  "item.thaumcraft.brainy_zombie_spawn_egg": "Яйцо призыва злого зомби",
+  "item.thaumcraft.giant_brainy_zombie_spawn_egg": "Яйцо призыва яростного зомби"
 }

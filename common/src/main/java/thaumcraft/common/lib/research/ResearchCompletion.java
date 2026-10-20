@@ -28,7 +28,7 @@ final class ResearchCompletion {
         if (!state.addResearch(research.key())) return;
         unlocked.add(research.key());
         int warp = research.warp();
-        if (warp > 0) {
+        if (warp > 0 && !thaumcraft.common.lib.WarpEvents.isWussMode()) {
             // ResearchManager:510 / Thaumcraft:302; original wuss default false.
             state.addWarpPerm(warp - warp / 2);
             state.addWarpSticky(warp / 2);

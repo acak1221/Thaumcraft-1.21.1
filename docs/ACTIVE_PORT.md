@@ -9,13 +9,13 @@
 
 | Агент | Область | Общие подключения |
 |---|---|---|
-| root | Focus Trade, общие контракты/registry/bootstrap/book/lang, интеграция, сборки, Git | Только root меняет общие файлы |
-| next_content | R10 copy и overstack lifecycle, затем R11 | table classes/network новые; GUI/bootstrap root |
-| review_reservoir | Focus Warding, затем общий Architect | новые ward/focus classes; общие focus contracts root |
-| review_tests | Thaumatorium | новые classes/GUI/resources; существующий crucible не менять без согласования |
-| devices | Arcane Lamp/Amber, затем Vis Charge Relay | новые device classes/resources; root bootstrap/lang/book |
-| enchant_infusion | Enchantment infusion, matrix integration; затем Repair/Haste/runic | Владеет TileInfusionMatrix и новыми recipe classes |
-| warp | Полный Warp dispatcher/custom effects/MindSpider/Guardian/mist | новые classes, registry/packets/render; root общие подключения |
+| root | R13 settings, общие registry/bootstrap/book/lang, интеграция, сборки, Git/CI | Только root меняет общие файлы без явной передачи |
+| next_content | R11 unknown knowledge, R12 clues/entity scans, затем R15/API | Общие wrappers временно переданы и возвращены root |
+| review_reservoir | Ward behaviour, Excavation specials, затем Fire/Frost/Shock | Владеет согласованными focus contracts и mixin entries |
+| review_tests | Deconstruction, затем UNSTABLE nodes + aspect orbs | Closed paid orb queue; root bootstrap/render integration |
+| devices | Growth/Fertility, затем cheat sheet и advanced furnace | ClientSetup временно передан и возвращён root |
+| enchant_infusion | Repair/Haste, Bore repair, затем runic armour | Владеет matrix/recipes и согласованным WandManager |
+| warp | Brainy/Giant zombies, затем Firebat/Wisp | Новые entities/render/network; root общие подключения |
 
 ## Остающиеся крупные системы
 
@@ -42,8 +42,8 @@ HANDOFF/MIGRATION_STATUS и MODLOG с каждым принятым checkpoint.
 recipes/engine, Warding/Architect, Trade, Lamp/Amber/VisChargeRelay, Warp dispatcher/effects/mobs.
 582 JUnit и 78 Python прошли; integrated3 дал 185/186, integrated4 — 184/186. Последние
 два сценария исправлены в тестовых fixtures (native connection tick и cached source discovery),
-финальный общий серверный результат ещё ожидается в CI. Клиент не осматривался.
-Новые R11, Repair/Haste, Deconstructor, lamps и Ward completion пока только .tmp drafts.
+финальный результат этой группы подтверждён CI ниже. Клиент не осматривался.
+Следующая группа R11/R12, Repair/Haste, Deconstructor, lamps, zombies и Ward completion уже в active source; её CI ещё не принят.
 
 CI `d508ada` завершён SUCCESS: 582 JUnit,186/186 GameTest,78 Python; fresh-result/attribution gates passed.
 Run: https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39398016295; first cold Gradle execution 7m6s, server56.67s. Agents worked on the next source window during this run.

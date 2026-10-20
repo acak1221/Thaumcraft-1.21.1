@@ -988,6 +988,66 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.WarpRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m11_brainy_zombies")
+    public void brainyZombiesFightRageCureAndDropOriginalLoot(GameTestHelper test) {
+        thaumcraft.common.testing.BrainyZombieRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r11_unknown_knowledge")
+    public void unknownKnowledgeRevealsHiddenNotesAndRetriesFragments(GameTestHelper test) {
+        thaumcraft.common.testing.UnknownKnowledgeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r12_item_clues")
+    public void researchCluesRespectOriginalItemTriggersAndPersist(GameTestHelper test) {
+        thaumcraft.common.testing.ResearchClueRuntimeChecks.itemCluesUseOriginalMetadataDamageAndNbt(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r12_entity_scans")
+    public void entityScansUseOriginalVariantsAndGrantNaturalClues(GameTestHelper test) {
+        thaumcraft.common.testing.ResearchClueRuntimeChecks.entitiesUseNativeVariantsAndRealThaumometerTiming(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_ward_behaviour")
+    public void wardsPreserveSolidGroundAndFenceBehaviour(GameTestHelper test) {
+        thaumcraft.common.testing.WardingBehaviourRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "m08_excavation_special")
+    public void excavationPreservesSpecialDropsAndDurableOutputs(GameTestHelper test) {
+        thaumcraft.common.testing.ExcavationSpecialRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m07_equipment_enchantments")
+    public void equipmentEnchantmentsAffectNativeGameplay(GameTestHelper test) {
+        thaumcraft.common.testing.EquipmentEnchantmentRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2000, batch = "m07_custom_enchantments")
+    public void customEnchantmentInfusionUsesNativeEquipmentAndPayments(GameTestHelper test) {
+        thaumcraft.common.testing.CustomEnchantmentInfusionRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m09_bore_repair")
+    public void boreRepairsItsActualToolWithOriginalCosts(GameTestHelper test) {
+        thaumcraft.common.testing.BoreRepairRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m05_deconstruction_table")
+    public void deconstructionConsumesItemsAndProducesOriginalResearchPoints(GameTestHelper test) {
+        thaumcraft.common.testing.DeconstructionRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m09_growth_lamp")
+    public void growthLampConsumesEssentiaAndFertilisesPlants(GameTestHelper test) {
+        thaumcraft.common.testing.BiologicalLampRuntimeChecks.growth(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m09_fertility_lamp")
+    public void fertilityLampConsumesEssentiaAndBreedsAnimals(GameTestHelper test) {
+        thaumcraft.common.testing.BiologicalLampRuntimeChecks.fertility(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void crystalBlocksDropSixOwnShards(GameTestHelper test) {
         thaumcraft.common.testing.CrystalDropRuntimeChecks.run(test);

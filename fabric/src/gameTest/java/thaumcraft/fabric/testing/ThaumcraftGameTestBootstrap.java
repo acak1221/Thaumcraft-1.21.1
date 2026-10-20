@@ -13,5 +13,6 @@ public final class ThaumcraftGameTestBootstrap implements ModInitializer {
         NodeTransductionRuntimeChecks.registerTestProbes();
         FluxOverfullRuntimeChecks.registerTestProbes();
         ExcavationRemovalFailureRuntimeChecks.registerEarlyProbe();
+        thaumcraft.common.testing.BiologicalLampRuntimeChecks.registerTestProbes();
     }
 }

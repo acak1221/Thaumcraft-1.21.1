@@ -1,0 +1,20 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "thaumcraft:haste",
+  "instability": 3,
+  "first_level_minimum_cost": 15,
+  "aspects": {
+    "praecantatio": 4,
+    "iter": 8,
+    "volatus": 8
+  },
+  "components": [
+    {
+      "item": "thaumcraft:nitor"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ]
+}

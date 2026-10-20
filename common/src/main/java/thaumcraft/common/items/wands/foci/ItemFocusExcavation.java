@@ -34,9 +34,8 @@ import thaumcraft.common.lib.network.ExcavationFxNetworking;
 import thaumcraft.common.lib.world.ExcavationHarvest;
 
 /**
- * Original held-channel Excavation plus Frugal/Potency/Treasure/Enlarge. Native
+ * Original held-channel Excavation with its Frugal/Potency/Treasure/Enlarge/Silk/Dowsing upgrades. Native
  * held ticks, not ordinary mining speed/attack, drive coordinate-only progress.
- * Silk/Dowsing and their original shared cost2 remain explicitly deferred.
  * Server-owned weak IDENTITY keys avoid Entity.equals' numeric-ID aliasing;
  * values retain no player, level, stack or block state. Dimension, death/logout
  * and player-instance boundaries are explicit safety adaptations to name keys.
@@ -50,10 +49,18 @@ public final class ItemFocusExcavation extends ItemFocusBasic {
     private static final SoundEvent RUMBLE = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "rumble"));
     private static final ReferenceQueue<ServerPlayer> COLLECTED = new ReferenceQueue<>();
     private static final Map<PlayerKey, Progress> PROGRESS = new HashMap<>();
+    private static final ExcavationVisCosts.Tooltip TOOLTIP_COST = new ExcavationVisCosts.Tooltip();
 
     public ItemFocusExcavation(Properties properties) { super(properties); }
 
-    @Override public AspectList getVisCost(ItemStack focus) { return new AspectList().add(Aspect.EARTH, BASE_COST_CENTIVIS); }
+    @Override public AspectList getVisCost(ItemStack focus) {
+        boolean realFocus = focus.getItem() instanceof ItemFocusExcavation;
+        boolean silk = realFocus && FocusUpgradeData.level(focus, FocusUpgradeType.silktouch) > 0;
+        boolean dowsing = realFocus && FocusUpgradeData.level(focus, FocusUpgradeType.dowsing) > 0;
+        var cost = new AspectList();
+        TOOLTIP_COST.cost(silk, dowsing).forEach((tag, amount) -> cost.add(Aspect.getAspect(tag), amount));
+        return cost;
+    }
     @Override public boolean isVisCostPerTick(ItemStack focus) { return true; } // Original tooltip, NOT a per-tick debit.
     @Override public int getActivationCooldown(ItemStack focus) { return 0; }
     @Override public int getFocusColor(ItemStack focus) { return 409606; }
@@ -61,7 +68,9 @@ public final class ItemFocusExcavation extends ItemFocusBasic {
     @Override public WandFocusAnimation getAnimation(ItemStack focus) { return WandFocusAnimation.CHARGE; }
     @Override public FocusUpgradeType[] getPossibleUpgradesByRank(ItemStack focus, int rank) {
         return switch (rank) {
-            case 1, 3, 5 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure};
+            case 1 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure};
+            case 3 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure, FocusUpgradeType.dowsing};
+            case 5 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure, FocusUpgradeType.silktouch};
             case 2, 4 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.enlarge};
             default -> new FocusUpgradeType[0];
         };

@@ -1,0 +1,617 @@
+{
+  "schema_version": 1,
+  "source": "TC4 4.2.3.5 ConfigAspects.registerEntityAspects",
+  "source_sha256": "2cd727a11cd9f54a2c45cfca2cb6b3dee9e4069379d25aef1b17e009088a8b87",
+  "entries": [
+    {
+      "original_name": "Zombie",
+      "aspects": {
+        "exanimis": 2,
+        "humanus": 1,
+        "terra": 1
+      },
+      "source_line": 40
+    },
+    {
+      "original_name": "Giant",
+      "aspects": {
+        "exanimis": 4,
+        "humanus": 3,
+        "terra": 3
+      },
+      "source_line": 41
+    },
+    {
+      "original_name": "Skeleton",
+      "aspects": {
+        "exanimis": 3,
+        "humanus": 1,
+        "terra": 1
+      },
+      "source_line": 42
+    },
+    {
+      "original_name": "Skeleton",
+      "aspects": {
+        "exanimis": 4,
+        "humanus": 1,
+        "ignis": 2
+      },
+      "source_line": 43,
+      "byte_condition": {
+        "name": "SkeletonType",
+        "value": 1
+      }
+    },
+    {
+      "original_name": "Creeper",
+      "aspects": {
+        "herba": 2,
+        "ignis": 2
+      },
+      "source_line": 44
+    },
+    {
+      "original_name": "Creeper",
+      "aspects": {
+        "herba": 3,
+        "ignis": 3,
+        "potentia": 3
+      },
+      "source_line": 45,
+      "byte_condition": {
+        "name": "powered",
+        "value": 1
+      }
+    },
+    {
+      "original_name": "EntityHorse",
+      "aspects": {
+        "bestia": 4,
+        "terra": 1,
+        "aer": 1
+      },
+      "source_line": 46
+    },
+    {
+      "original_name": "Pig",
+      "aspects": {
+        "bestia": 2,
+        "terra": 2
+      },
+      "source_line": 47
+    },
+    {
+      "original_name": "XPOrb",
+      "aspects": {
+        "cognitio": 5
+      },
+      "source_line": 48
+    },
+    {
+      "original_name": "Sheep",
+      "aspects": {
+        "bestia": 2,
+        "terra": 2
+      },
+      "source_line": 49
+    },
+    {
+      "original_name": "Cow",
+      "aspects": {
+        "bestia": 3,
+        "terra": 3
+      },
+      "source_line": 50
+    },
+    {
+      "original_name": "MushroomCow",
+      "aspects": {
+        "bestia": 3,
+        "herba": 1,
+        "terra": 2
+      },
+      "source_line": 51
+    },
+    {
+      "original_name": "SnowMan",
+      "aspects": {
+        "gelum": 3,
+        "aqua": 1
+      },
+      "source_line": 52
+    },
+    {
+      "original_name": "Ozelot",
+      "aspects": {
+        "bestia": 3,
+        "perditio": 3
+      },
+      "source_line": 53
+    },
+    {
+      "original_name": "Chicken",
+      "aspects": {
+        "bestia": 2,
+        "volatus": 2,
+        "aer": 1
+      },
+      "source_line": 54
+    },
+    {
+      "original_name": "Squid",
+      "aspects": {
+        "bestia": 2,
+        "aqua": 2
+      },
+      "source_line": 55
+    },
+    {
+      "original_name": "Wolf",
+      "aspects": {
+        "bestia": 3,
+        "terra": 3
+      },
+      "source_line": 56
+    },
+    {
+      "original_name": "Bat",
+      "aspects": {
+        "bestia": 1,
+        "volatus": 1,
+        "aer": 1
+      },
+      "source_line": 57
+    },
+    {
+      "original_name": "Boat",
+      "aspects": {
+        "machina": 2,
+        "aqua": 2
+      },
+      "source_line": 58
+    },
+    {
+      "original_name": "Spider",
+      "aspects": {
+        "bestia": 3,
+        "perditio": 2
+      },
+      "source_line": 59
+    },
+    {
+      "original_name": "Slime",
+      "aspects": {
+        "limus": 2,
+        "aqua": 2
+      },
+      "source_line": 60
+    },
+    {
+      "original_name": "Ghast",
+      "aspects": {
+        "exanimis": 3,
+        "ignis": 2
+      },
+      "source_line": 61
+    },
+    {
+      "original_name": "PigZombie",
+      "aspects": {
+        "exanimis": 4,
+        "ignis": 2
+      },
+      "source_line": 62
+    },
+    {
+      "original_name": "Enderman",
+      "aspects": {
+        "alienis": 4,
+        "iter": 2,
+        "aer": 2
+      },
+      "source_line": 63
+    },
+    {
+      "original_name": "CaveSpider",
+      "aspects": {
+        "bestia": 2,
+        "venenum": 2,
+        "terra": 1
+      },
+      "source_line": 64
+    },
+    {
+      "original_name": "Silverfish",
+      "aspects": {
+        "bestia": 1,
+        "terra": 1
+      },
+      "source_line": 65
+    },
+    {
+      "original_name": "Blaze",
+      "aspects": {
+        "alienis": 4,
+        "ignis": 1
+      },
+      "source_line": 66
+    },
+    {
+      "original_name": "LavaSlime",
+      "aspects": {
+        "limus": 3,
+        "ignis": 2
+      },
+      "source_line": 67
+    },
+    {
+      "original_name": "EnderDragon",
+      "aspects": {
+        "alienis": 20,
+        "bestia": 20,
+        "perditio": 20
+      },
+      "source_line": 68
+    },
+    {
+      "original_name": "WitherBoss",
+      "aspects": {
+        "exanimis": 20,
+        "perditio": 20,
+        "ignis": 15
+      },
+      "source_line": 69
+    },
+    {
+      "original_name": "Witch",
+      "aspects": {
+        "humanus": 3,
+        "praecantatio": 2,
+        "ignis": 1
+      },
+      "source_line": 70
+    },
+    {
+      "original_name": "Villager",
+      "aspects": {
+        "humanus": 3,
+        "aer": 2
+      },
+      "source_line": 71
+    },
+    {
+      "original_name": "VillagerGolem",
+      "aspects": {
+        "metallum": 4,
+        "terra": 3
+      },
+      "source_line": 72
+    },
+    {
+      "original_name": "MinecartRideable",
+      "aspects": {
+        "machina": 3,
+        "aer": 2
+      },
+      "source_line": 73
+    },
+    {
+      "original_name": "MinecartChest",
+      "aspects": {
+        "machina": 3,
+        "aer": 1,
+        "vacuos": 1
+      },
+      "source_line": 74
+    },
+    {
+      "original_name": "MinecartFurnace",
+      "aspects": {
+        "machina": 3,
+        "aer": 1,
+        "ignis": 1
+      },
+      "source_line": 75
+    },
+    {
+      "original_name": "MinecartTNT",
+      "aspects": {
+        "machina": 3,
+        "aer": 1,
+        "ignis": 1
+      },
+      "source_line": 76
+    },
+    {
+      "original_name": "MinecartHopper",
+      "aspects": {
+        "machina": 3,
+        "aer": 1,
+        "permutatio": 1
+      },
+      "source_line": 77
+    },
+    {
+      "original_name": "MinecartSpawner",
+      "aspects": {
+        "machina": 3,
+        "aer": 1,
+        "praecantatio": 1
+      },
+      "source_line": 78
+    },
+    {
+      "original_name": "EnderCrystal",
+      "aspects": {
+        "alienis": 3,
+        "praecantatio": 3,
+        "sano": 3
+      },
+      "source_line": 79
+    },
+    {
+      "original_name": "ItemFrame",
+      "aspects": {
+        "sensus": 3,
+        "pannus": 1
+      },
+      "source_line": 80
+    },
+    {
+      "original_name": "Painting",
+      "aspects": {
+        "sensus": 5,
+        "pannus": 3
+      },
+      "source_line": 81
+    },
+    {
+      "original_name": "Thaumcraft.PrimalOrb",
+      "aspects": {
+        "aer": 5,
+        "perditio": 10,
+        "praecantatio": 10,
+        "potentia": 10
+      },
+      "source_line": 82
+    },
+    {
+      "original_name": "Thaumcraft.Firebat",
+      "aspects": {
+        "bestia": 2,
+        "volatus": 1,
+        "ignis": 2
+      },
+      "source_line": 83
+    },
+    {
+      "original_name": "Thaumcraft.Pech",
+      "aspects": {
+        "humanus": 2,
+        "praecantatio": 2,
+        "permutatio": 2,
+        "lucrum": 2
+      },
+      "source_line": 84,
+      "byte_condition": {
+        "name": "PechType",
+        "value": 0
+      }
+    },
+    {
+      "original_name": "Thaumcraft.Pech",
+      "aspects": {
+        "humanus": 2,
+        "praecantatio": 2,
+        "permutatio": 2,
+        "telum": 2
+      },
+      "source_line": 85,
+      "byte_condition": {
+        "name": "PechType",
+        "value": 1
+      }
+    },
+    {
+      "original_name": "Thaumcraft.Pech",
+      "aspects": {
+        "humanus": 2,
+        "praecantatio": 4,
+        "permutatio": 2
+      },
+      "source_line": 86,
+      "byte_condition": {
+        "name": "PechType",
+        "value": 2
+      }
+    },
+    {
+      "original_name": "Thaumcraft.ThaumSlime",
+      "aspects": {
+        "limus": 2,
+        "praecantatio": 1,
+        "aqua": 1
+      },
+      "source_line": 87
+    },
+    {
+      "original_name": "Thaumcraft.BrainyZombie",
+      "aspects": {
+        "exanimis": 3,
+        "humanus": 1,
+        "cognitio": 1,
+        "terra": 1
+      },
+      "source_line": 88
+    },
+    {
+      "original_name": "Thaumcraft.GiantBrainyZombie",
+      "aspects": {
+        "exanimis": 4,
+        "humanus": 2,
+        "cognitio": 1,
+        "terra": 2
+      },
+      "source_line": 89
+    },
+    {
+      "original_name": "Thaumcraft.Taintacle",
+      "aspects": {
+        "vitium": 3,
+        "aqua": 2
+      },
+      "source_line": 90
+    },
+    {
+      "original_name": "Thaumcraft.TaintacleTiny",
+      "aspects": {
+        "vitium": 1,
+        "aqua": 1
+      },
+      "source_line": 91
+    },
+    {
+      "original_name": "Thaumcraft.TaintSpider",
+      "aspects": {
+        "vitium": 1,
+        "terra": 1
+      },
+      "source_line": 92
+    },
+    {
+      "original_name": "Thaumcraft.TaintSpore",
+      "aspects": {
+        "vitium": 2,
+        "aer": 2
+      },
+      "source_line": 93
+    },
+    {
+      "original_name": "Thaumcraft.TaintSwarmer",
+      "aspects": {
+        "vitium": 2,
+        "aer": 2
+      },
+      "source_line": 94
+    },
+    {
+      "original_name": "Thaumcraft.TaintSwarm",
+      "aspects": {
+        "vitium": 3,
+        "aer": 3
+      },
+      "source_line": 95
+    },
+    {
+      "original_name": "Thaumcraft.TaintedPig",
+      "aspects": {
+        "vitium": 2,
+        "terra": 2
+      },
+      "source_line": 96
+    },
+    {
+      "original_name": "Thaumcraft.TaintedSheep",
+      "aspects": {
+        "vitium": 2,
+        "terra": 2
+      },
+      "source_line": 97
+    },
+    {
+      "original_name": "Thaumcraft.TaintedCow",
+      "aspects": {
+        "vitium": 3,
+        "terra": 3
+      },
+      "source_line": 98
+    },
+    {
+      "original_name": "Thaumcraft.TaintedChicken",
+      "aspects": {
+        "vitium": 2,
+        "volatus": 2,
+        "aer": 1
+      },
+      "source_line": 99
+    },
+    {
+      "original_name": "Thaumcraft.TaintedVillager",
+      "aspects": {
+        "vitium": 3,
+        "aer": 2
+      },
+      "source_line": 100
+    },
+    {
+      "original_name": "Thaumcraft.TaintedCreeper",
+      "aspects": {
+        "vitium": 2,
+        "ignis": 2
+      },
+      "source_line": 101
+    },
+    {
+      "original_name": "Thaumcraft.MindSpider",
+      "aspects": {
+        "vitium": 2,
+        "ignis": 2
+      },
+      "source_line": 102
+    },
+    {
+      "original_name": "Thaumcraft.EldritchGuardian",
+      "aspects": {
+        "alienis": 4,
+        "mortuus": 2,
+        "exanimis": 4
+      },
+      "source_line": 103
+    },
+    {
+      "original_name": "Thaumcraft.EldritchOrb",
+      "aspects": {
+        "alienis": 2,
+        "mortuus": 2
+      },
+      "source_line": 104
+    },
+    {
+      "original_name": "Thaumcraft.CultistKnight",
+      "aspects": {
+        "alienis": 1,
+        "humanus": 2,
+        "perditio": 1
+      },
+      "source_line": 105
+    },
+    {
+      "original_name": "Thaumcraft.CultistCleric",
+      "aspects": {
+        "alienis": 1,
+        "humanus": 2,
+        "perditio": 1
+      },
+      "source_line": 106
+    },
+    {
+      "original_name": "Thaumcraft.Wisp",
+      "aspects": {
+        "praecantatio": 1,
+        "aer": 1
+      },
+      "source_line": 108,
+      "dynamic_wisp_type": true
+    },
+    {
+      "original_name": "Thaumcraft.Golem",
+      "aspects": {
+        "aer": 2,
+        "terra": 2,
+        "praecantatio": 2
+      },
+      "source_line": 110
+    }
+  ]
+}

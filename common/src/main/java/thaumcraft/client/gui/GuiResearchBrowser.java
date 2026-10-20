@@ -85,7 +85,7 @@ public final class GuiResearchBrowser extends Screen {
         for (Node node : nodes) {
             boolean unlocked = completed.contains(node.research.key());
             boolean available = node.research.hasPrerequisites(completed);
-            int frameX = node.research.flags().contains("Round") ? 54 : node.research.isHidden() ? 86 : node.research.isSecondary() ? 110 : 0;
+            int frameX = node.research.flags().contains("Round") ? 54 : node.research.isHidden() ? 86 : purchases(node.research) ? 110 : 0;
             graphics.blit(FRAME, node.x - 2, node.y - 2, frameX, 230, 26, 26, 256, 256);
             if (!ResearchIconDisplay.render(graphics, font, node.research.iconExpression(), node.x + 3, node.y + 3)) {
                 var expression = TEXTURE.matcher(node.research.iconExpression() == null ? "" : node.research.iconExpression());
@@ -108,6 +108,10 @@ public final class GuiResearchBrowser extends Screen {
         }
     }
 
+    private static boolean purchases(ResearchDefinition research) {
+        return thaumcraft.common.config.ThaumcraftSettings.current().purchases(research.isSecondary());
+    }
+
     private List<Component> tooltip(ResearchDefinition research) {
         var lines = new ArrayList<Component>();
         lines.add(Component.translatable(research.nameKey()));
@@ -118,7 +122,7 @@ public final class GuiResearchBrowser extends Screen {
             lines.add(Component.translatable("tc.port.research.read").withStyle(ChatFormatting.GREEN));
             return lines;
         }
-        if (!research.isSecondary()) {
+        if (!purchases(research)) {
             var preview = ResearchNoteIssuance.preview(minecraft.player, research.key());
             if (preview.success() && preview.reused()) {
                 lines.add(Component.translatable("tc.port.note.action_existing").withStyle(ChatFormatting.YELLOW));
@@ -138,7 +142,7 @@ public final class GuiResearchBrowser extends Screen {
             return lines;
         }
         var preview = ResearchPurchase.preview(knowledge, research.key());
-        if (research.isSecondary() && !preview.costs().isEmpty()) {
+        if (purchases(research) && !preview.costs().isEmpty()) {
             lines.add(Component.translatable("tc.port.research.cost_header").withStyle(ChatFormatting.GRAY));
             preview.costs().entrySet().stream().sorted((first, second) -> {
                 int amount = Integer.compare(second.getValue(), first.getValue());
@@ -186,7 +190,7 @@ public final class GuiResearchBrowser extends Screen {
             var knowledge = KnowledgeAccess.get(minecraft.player);
             if (knowledge.isResearchComplete(node.research.key())) {
                 minecraft.setScreen(new GuiResearchRecipe(this, node.research));
-            } else if (!node.research.isSecondary()) {
+            } else if (!purchases(node.research)) {
                 var preview = ResearchNoteIssuance.preview(minecraft.player, node.research.key());
                 if (preview.success() && !preview.reused()) {
                     // The server chooses inventory slots and commits paper/ink.

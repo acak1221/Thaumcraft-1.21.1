@@ -54,8 +54,13 @@ public final class ScanManager {
      * time, and server-observed target. No client-supplied stack is trusted here.
      */
     public static boolean completeScan(ServerPlayer player, String signature, AspectList aspects, ScanKind kind) {
+        return completeScan(player, signature, aspects, kind, null);
+    }
+
+    public static boolean completeScan(ServerPlayer player, String signature, AspectList aspects, ScanKind kind, ResearchClues.Context context) {
         if (player == null || !player.server.isSameThread()) return false;
-        ScanOutcome result = awardScan(KnowledgeAccess.get(player), signature, aspects, kind, DEFAULT_ASPECT_TOTAL_CAP);
+        ScanOutcome result = awardScan(KnowledgeAccess.get(player), signature, aspects, kind,
+                thaumcraft.common.config.ThaumcraftSettings.server().aspectCap());
         if (!result.success()) {
             if (result.failure() == Failure.MISSING_PARENT) {
                 player.sendSystemMessage(Component.translatable("tc.discoveryerror",
@@ -66,6 +71,7 @@ public final class ScanManager {
             return false;
         }
 
+        ResearchClues.reveal(KnowledgeAccess.get(player), context, result.awards(), bound -> player.serverLevel().random.nextInt(bound));
         KnowledgeEvents.sync(player);
         for (String tag : result.discovered()) {
             Aspect aspect = Aspect.getAspect(tag);
@@ -78,8 +84,6 @@ public final class ScanManager {
                     .reduce((left, right) -> left + ", " + right).orElse("");
             player.sendSystemMessage(Component.translatable("tc.port.scan.points", Component.literal(points)));
         }
-        // Research clue/item/entity trigger generation is a separate port unit.
-        // Do not infer triggers from the research catalogue's raw Java expressions.
         return true;
     }
 
@@ -95,7 +99,7 @@ public final class ScanManager {
         }
         if (wasScanned(knowledge, signature, kind)) return ScanOutcome.rejected(Failure.DUPLICATE, null);
         if (aspects == null || aspects.size() == 0) return ScanOutcome.rejected(Failure.EMPTY_ASPECTS, null);
-        if (poolCap <= 0) throw new IllegalArgumentException("Aspect pool threshold must be positive");
+        // Original config accepts any signed integer; zero/negative caps immediately apply its soft-cap arithmetic.
 
         AspectList scanAspects = aspects.copy();
         for (Aspect aspect : scanAspects.getAspects()) {

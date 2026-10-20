@@ -34,8 +34,10 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         ClientSetup.init();
         net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((graphics, ticks) ->
                 thaumcraft.client.ThaumcraftWarpClient.renderHud(graphics));
-        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
-                thaumcraft.client.ThaumcraftWarpClient.reset());
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            thaumcraft.client.ThaumcraftWarpClient.reset();
+            thaumcraft.common.config.ThaumcraftSettings.resetClient();
+        });
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)
                 .registerReloadListener(new net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener() {
                     @Override public net.minecraft.resources.ResourceLocation getFabricId() {

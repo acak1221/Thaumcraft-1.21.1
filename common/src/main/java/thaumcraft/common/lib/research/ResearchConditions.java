@@ -11,10 +11,12 @@ import net.minecraft.tags.TagKey;
 /** The closed original conditional expressions, evaluated as facts rather than executable legacy Java. */
 public final class ResearchConditions {
     private static volatile boolean nativeReady;
-    private static volatile boolean wardedStone = true, mirrors = true;
     private ResearchConditions() {}
     public static void initializeNative() { nativeReady = true; }
-    public static void setFeatures(boolean wardsAllowed, boolean mirrorsAllowed) { wardedStone = wardsAllowed; mirrors = mirrorsAllowed; }
+    public static void setFeatures(boolean wardsAllowed, boolean mirrorsAllowed) {
+        var settings = thaumcraft.common.config.ThaumcraftSettings.server();
+        thaumcraft.common.config.ThaumcraftSettings.configureServer(settings.withFeatures(wardsAllowed, mirrorsAllowed));
+    }
     public static boolean available(List<String> conditions) { return evaluate(conditions, ResearchConditions::fact); }
     public static boolean evaluate(List<String> conditions, Predicate<String> facts) {
         for (String expression : conditions) {
@@ -29,8 +31,8 @@ public final class ResearchConditions {
     }
     private static boolean fact(String name) {
         return switch (name) {
-            case "wardedStone" -> wardedStone;
-            case "allowMirrors" -> mirrors;
+            case "wardedStone" -> thaumcraft.common.config.ThaumcraftSettings.current().wardedStone();
+            case "allowMirrors" -> thaumcraft.common.config.ThaumcraftSettings.current().mirrors();
             // Copper exists in vanilla 1.21.1, independently of optional material tags.
             case "foundCopperIngot", "foundCopperOre" -> true;
             case "foundSilverIngot" -> tagged("ingots/silver");

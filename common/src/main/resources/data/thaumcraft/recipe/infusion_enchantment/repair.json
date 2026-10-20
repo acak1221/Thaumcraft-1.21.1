@@ -1,0 +1,20 @@
+{
+  "type": "thaumcraft:infusion_enchantment",
+  "research": "INFUSIONENCHANTMENT",
+  "enchantment": "thaumcraft:repair",
+  "instability": 4,
+  "first_level_minimum_cost": 20,
+  "aspects": {
+    "praecantatio": 8,
+    "fabrico": 10,
+    "ordo": 10
+  },
+  "components": [
+    {
+      "item": "minecraft:anvil"
+    },
+    {
+      "item": "thaumcraft:salis_mundus"
+    }
+  ]
+}

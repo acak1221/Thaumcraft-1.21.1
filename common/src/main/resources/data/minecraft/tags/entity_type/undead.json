@@ -1,4 +1,4 @@
 {
   "replace": false,
-  "values": ["thaumcraft:eldritch_guardian"]
+  "values": ["thaumcraft:eldritch_guardian", "thaumcraft:brainy_zombie", "thaumcraft:giant_brainy_zombie"]
 }

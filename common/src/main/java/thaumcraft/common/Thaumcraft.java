@@ -64,11 +64,14 @@ public final class Thaumcraft {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        thaumcraft.common.config.ThaumcraftSettings.load(dev.architectury.platform.Platform.getConfigFolder().resolve("thaumcraft.properties"));
+        thaumcraft.common.lib.network.ResearchSettingsNetworking.initServer();
         ResearchCatalog.loadBundled();
         thaumcraft.common.lib.research.ResearchConditions.initializeNative();
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();
         ThaumcraftContent.register();
+        thaumcraft.common.config.ThaumcraftUnknownKnowledge.register();
         thaumcraft.common.config.ThaumcraftGolemMaterials.register();
         ThaumcraftOres.register();
         ThaumcraftWorldgen.register();
@@ -91,11 +94,15 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftLevitator.register();
         thaumcraft.common.config.ThaumcraftArcaneEar.register();
         thaumcraft.common.config.ThaumcraftLamps.register();
+        thaumcraft.common.config.ThaumcraftBiologicalLamps.register();
+        thaumcraft.common.lib.network.GrowthLampFxNetworking.initServer();
+        thaumcraft.common.config.ThaumcraftDeconstruction.register();
         thaumcraft.common.config.ThaumcraftVisCharging.register();
         thaumcraft.common.config.ThaumcraftThaumatorium.register();
         thaumcraft.common.config.ThaumcraftWards.register();
         thaumcraft.common.config.ThaumcraftArchitect.register();
         thaumcraft.common.config.ThaumcraftWarp.register();
+        thaumcraft.common.config.ThaumcraftMonsters.register();
         thaumcraft.common.config.ThaumcraftWarp.enableEvents();
         thaumcraft.common.lib.world.TradeSwaps.init();
         thaumcraft.common.lib.network.WandArchitectNetworking.init();
@@ -142,6 +149,7 @@ public final class Thaumcraft {
         TickEvent.SERVER_LEVEL_POST.register(level -> {
             NodeHarvest.endTick(level);
             DeferredItemDrops.tick(level);
+            thaumcraft.common.lib.GrowthLampTicks.tick(level);
         });
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register(level -> {
             thaumcraft.common.lib.world.WardingCasts.clear(level);

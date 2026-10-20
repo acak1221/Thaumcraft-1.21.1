@@ -1,6 +1,6 @@
 # R11 — неизвестные знания: original audit и план интеграции, 20.10.2026
 
-**Статус: audited contract и staged implementation/test drafts в ignored `.tmp/r11-draft`; активных исходников R11 пока нет. Общая сборка R10 выполняется без частичного R11.**
+**Статус: R11 production/resources/JUnit/GameTest восстановлены в активные source sets после source window; shared bootstrap/tint/book/delegate интегрирует ведущий. Сборка и runtime этой группы пока не выполнялись.**
 
 Источники: TC4 4.2.3.5, CFR вне репозитория: `ItemResearchNotes.onItemRightClick`, `ResearchManager.findHiddenResearch/createNote`, `ResearchCategories`, `ResearchCategoryList`, `ConfigRecipes:431`, `ConfigResearch`; ранее — [research-notes-spec](2026-10-15-research-notes-spec.md), раздел5. Mapping имени часов дополнительно проверен по `methods.csv` MCP stable12-1.7.10 (скачанный ZIP только в ignored `.tmp`).
 
@@ -18,7 +18,7 @@
 
 Внешние категории хранятся в `LinkedHashMap`, порядок регистрации: `BASICS`, `THAUMATURGY`, `ALCHEMY`, `ARTIFICE`, `GOLEMANCY`, `ELDRITCH`. Внутри каждой категории — **обычный default `HashMap`**, заполняемый в порядке регистрации `ConfigResearch`. Поэтому сортировка по key меняет результат одного и того же seed.
 
-Bundled JSON сортирует общий список research по key, но сохраняет `source.line`; `ResearchCatalog.loadBundled` сейчас этот provenance в `ResearchDefinition` не переносит. Узкая draft-адаптация: `ResearchHiddenSelection` отдельно читает retained provenance corpus, формирует immutable registration-order key list по `source.line` (без изменения конструктора/схемы `ResearchDefinition` и общего `ResearchCatalog`), затем отдельные default HashMap по категориям. До помещения в карты исключить `!definition.isEnabled()`, как original conditional registration. В частности `MIRROR` зависит от `allowMirrors`; нельзя заменять этот gate на `conditions().isEmpty()`.
+Bundled JSON сортирует общий список research по key, но сохраняет `source.line`; `ResearchCatalog.loadBundled` сейчас этот provenance в `ResearchDefinition` не переносит. Узкая draft-адаптация: `ResearchRegistrationOrder` (общий helper R11/R12) отдельно читает retained provenance corpus, формирует immutable registration-order key list по `source.line` (без изменения конструктора/схемы `ResearchDefinition` и общего `ResearchCatalog`), затем отдельные default HashMap по категориям. До помещения в карты исключить `!definition.isEnabled()`, как original conditional registration. В частности `MIRROR` зависит от `allowMirrors`; нельзя заменять этот gate на `conditions().isEmpty()`.
 
 Размеры полного extracted corpus по категориям: Basics19, Thaumaturgy42, Alchemy35, Artifice50, Golemancy39, Eldritch16. Размер/порядок вставок влияют на resize HashMap, поэтому нельзя строить HashMap только из22 hidden кандидатов: сначала весь enabled category, затем фильтрация original `values()`.
 
@@ -35,5 +35,13 @@ R11 закрывает применение fragments/unknown notes. Полны�
 ## Текущее доказательство
 
 - Independent read-only review (`review_reservoir`,20.10.2026) сверил draft с oracle: blockers не найдено для reconstruction порядка категорий/HashMap, dayTime clock/RNG, complete-note precedence и creative fragment consumption. Это source review, не runtime PASS.
-- `.tmp/r11-draft/manifest.json` сохраняет9 staged путей; `.tmp/r11-draft/INTEGRATION.md` — точные shared hooks. Ни один draft не включён в текущую R10 сборку; наследование требует вернуть non-final `ItemResearchNotes` лишь в следующем source window.
-- Draft runtime test использует фактический `ServerPlayerGameMode.useItem` с real creative/survival modes, native shaped manager, persistent/wire codecs, world POST output и native UUID collision/retry; delay45 ticks. Его ещё не компилировали и не запускали.
+- `.tmp/r11-draft/manifest.json` сохраняет9 путей и snapshot исходников до восстановления; `.tmp/r11-draft/INTEGRATION.md` — точные shared hooks. После разрешённого source window все9 путей восстановлены, `ItemResearchNotes` теперь non-final для flattening variants. Immutable CI checkpoint d508ada предшествует R11 и не является его доказательством.
+- Runtime test использует фактический `ServerPlayerGameMode.useItem` с real creative/survival modes, native shaped manager, persistent/wire codecs, world POST output и native UUID collision/retry; delay45 ticks. Его ещё не компилировали и не запускали. Same-key reuse unknown data проверяется через настоящую ResearchNoteIssuance; соответствующий closed-family predicate интегрирует ведущий в своей R13 зоне.
+
+## Forced modern RNG/physics adaptation
+
+Authoritative old vanilla oracle `minecraft-1.7.10-client.jar`, class xk constructor(ahb,DDD), подтвердил original EntityItem: четыре Math.random draws (hover,yaw,motionX,motionZ), horizontal motion `(double)(float)(Math.random()*0.2F-0.1F)`, vertical motion `(double)0.2F`. Modern ItemEntity convenience constructor читает два `level.random.nextDouble()` вместо локальных draws; создание лишь template незаметно меняло world stream после единственного failure `nextInt(3)`.
+
+UnknownKnowledge больше не создаёт native template: отдельно сохраняет original point и точно округлённую motion, сохраняя четыре Math.random draws в исходном порядке. Fragments/count не меняются. DeferredItemDrops уже хранит motion; ведущий исправил generic delivery constructor на existing explicit-velocity overload для всех обычных paid entries: сохранённая motion не пересэмплируется, schema/receipts/protocol не меняются; overstack>99 EntityInventoryItem branch оставлен прежним. Modern sound uses отдельный threadSafeRandom, не level.random. Эта корректировка сделана после первого compile/JUnit, до snapshot; build после финального hunk ещё pending.
+
+Local prerequisite evidence: JUnit ResearchHiddenSelectionTest4/4 PASS (common XML09:31:19UTC,0.030s). Центральная production/JUnit сборка до последнего RNG hunk скомпилировала R11/R12; общий common suite619/620, единственная ошибка в Deconstruction unit. Runtime R11 GameTest ещё не запускался/не подтверждён; final staging hunk требует последующего compile.

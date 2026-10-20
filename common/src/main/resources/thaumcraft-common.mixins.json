@@ -35,6 +35,12 @@
     "LivingEntityMagicWardMixin",
     "ArcaneEarNoteMixin",
     "WardedPlayerGameModeMixin",
+    "WardedCallbackMutationMixin",
+    "WardedEnchantingTableMixin",
+    "WardedBeaconMixin",
+    "WardedLeavesMixin",
+    "WardedPlantMixin",
+    "PlayerEnchantmentTickMixin",
     "ResearchNoteStackCodecMixin",
     "ResearchNoteContainerCountMixin",
     "ResearchNoteMenuCountMixin",
@@ -44,6 +50,6 @@
     "WarpFoodMixin"
   ],
   "client": ["client.TableOutlineMixin", "client.WandFocusKeyMixin", "client.MinecraftItemColorsAccess", "client.RobeArmorLayerMixin",
-    "client.WarpFogMixin", "client.WarpPostEffectsMixin"],
+    "client.WarpFogMixin", "client.WarpPostEffectsMixin", "client.WardedHitParticleMixin"],
   "injectors": {"defaultRequire": 1}
 }

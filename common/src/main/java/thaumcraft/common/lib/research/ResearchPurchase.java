@@ -86,8 +86,8 @@ public final class ResearchPurchase {
             return rejected(Failure.UNAVAILABLE, costs);
         }
         if (knowledge.isResearchComplete(research.key())) return rejected(Failure.ALREADY_COMPLETE, costs);
-        // GuiResearchBrowser:644: default difficulty=0 purchases Secondary only.
-        if (!research.isSecondary()) return rejected(Failure.PRIMARY_REQUIRES_NOTE, costs);
+        // GuiResearchBrowser:644: easy purchases all; normal Secondary; other modes use notes.
+        if (!thaumcraft.common.config.ThaumcraftSettings.current().purchases(research.isSecondary())) return rejected(Failure.PRIMARY_REQUIRES_NOTE, costs);
         if (!research.hasPrerequisites(knowledge.getResearchComplete())) {
             return rejected(Failure.MISSING_PREREQUISITES, costs);
         }

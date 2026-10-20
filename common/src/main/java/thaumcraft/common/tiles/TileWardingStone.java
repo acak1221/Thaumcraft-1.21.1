@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
@@ -19,7 +20,15 @@ public final class TileWardingStone extends BlockEntity {
     int count = 0;
 
     public TileWardingStone(BlockPos pos, BlockState state) {
-        super(ThaumcraftEldritchBlocks.WARDING_STONE_TILE.get(), pos, state);
+        this(ThaumcraftEldritchBlocks.WARDING_STONE_TILE.get(), pos, state);
+    }
+
+    /**
+     * The warding stone of a block that owns its own block entity type, like the
+     * paving stone of warding of the legacy registration.
+     */
+    public TileWardingStone(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     /** Original TileWardingStone:24 - the ward only works with a redstone signal. */

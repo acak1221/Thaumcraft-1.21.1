@@ -76,6 +76,10 @@ public final class Thaumcraft {
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();
         ThaumcraftContent.register();
+        // The eldritch block family owns the ids the worldgen of the Outer Lands and of the
+        // villages reads, so it is registered before the legacy tile unit, whose wand pedestal
+        // block entity type also claims the stone device of the eldritch family.
+        thaumcraft.common.config.ThaumcraftEldritchBlocks.register();
         thaumcraft.common.config.ThaumcraftDeviceMenus.register();
         thaumcraft.common.config.ThaumcraftLegacyTiles.register();
         thaumcraft.common.config.ThaumcraftProjectiles.register();

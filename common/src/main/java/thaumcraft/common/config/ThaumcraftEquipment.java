@@ -25,6 +25,7 @@ import thaumcraft.common.items.equipment.ItemVoidPickaxe;
 import thaumcraft.common.items.equipment.ItemVoidShovel;
 import thaumcraft.common.items.equipment.ItemVoidSword;
 import thaumcraft.common.items.equipment.ItemElementalAxe;
+import thaumcraft.common.items.equipment.ItemElementalHoe;
 import thaumcraft.common.items.equipment.ItemElementalPickaxe;
 import thaumcraft.common.items.equipment.ItemThaumiumAxe;
 import thaumcraft.common.items.equipment.ItemThaumiumHoe;
@@ -97,6 +98,9 @@ public final class ThaumcraftEquipment {
     /** Pickaxe of the Core, ConfigItems itemPickElemental; obtained only by the researched infusion. */
     public static final RegistrySupplier<ItemElementalPickaxe> ELEMENTAL_PICKAXE = ITEMS.register("elemental_pickaxe",
             () -> new ItemElementalPickaxe(ELEMENTAL_TIER, new Item.Properties()));
+    /** Hoe of Growth, ConfigItems itemHoeElemental; obtained only by the researched infusion. */
+    public static final RegistrySupplier<ItemElementalHoe> ELEMENTAL_HOE = ITEMS.register("elemental_hoe",
+            () -> new ItemElementalHoe(ELEMENTAL_TIER, new Item.Properties()));
     public static final RegistrySupplier<ItemThaumiumShovel> THAUMIUM_SHOVEL = ITEMS.register("thaumium_shovel",
             () -> new ItemThaumiumShovel(THAUMIUM_TIER, new Item.Properties()));
     public static final RegistrySupplier<ItemThaumiumHoe> THAUMIUM_HOE = ITEMS.register("thaumium_hoe",
@@ -149,7 +153,7 @@ public final class ThaumcraftEquipment {
         ITEMS.register();
         // Architectury's supplier varargs require one invariant item type;
         // these registered suppliers intentionally retain their specific APIs.
-        for (RegistrySupplier<? extends Item> item : List.of(THAUMIUM_SWORD, THAUMIUM_PICKAXE, THAUMIUM_AXE, ELEMENTAL_AXE, ELEMENTAL_PICKAXE,
+        for (RegistrySupplier<? extends Item> item : List.of(THAUMIUM_SWORD, THAUMIUM_PICKAXE, THAUMIUM_AXE, ELEMENTAL_AXE, ELEMENTAL_PICKAXE, ELEMENTAL_HOE,
                 THAUMIUM_SHOVEL, THAUMIUM_HOE, THAUMIUM_HELMET, THAUMIUM_CHESTPLATE, THAUMIUM_LEGGINGS, THAUMIUM_BOOTS,
                 VOID_SWORD, VOID_PICKAXE, VOID_AXE, VOID_SHOVEL, VOID_HOE, VOID_HELMET, VOID_CHESTPLATE, VOID_LEGGINGS, VOID_BOOTS)) {
             CreativeTabRegistry.append(ThaumcraftContent.TAB, item);

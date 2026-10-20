@@ -6,8 +6,22 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "thaumcraft:cosmetic_solid",
+<<<<<<<< HEAD:common/src/main/resources/data/thaumcraft/loot_table/blocks/cosmetic_stone_slab.json
+          "name": "thaumcraft:cosmetic_stone_slab",
           "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": 2,
+              "conditions": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "thaumcraft:cosmetic_stone_slab",
+                  "properties": {
+                    "type": "double"
+                  }
+                }
+              ]
+            },
             {
               "function": "minecraft:explosion_decay"
             }
@@ -17,6 +31,9 @@
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
+========
+          "name": "thaumcraft:cosmetic_solid"
+>>>>>>>> 721188f (Unify the TC4 cosmetic block family on the group design with the variant state):common/src/main/resources/data/thaumcraft/loot_table/blocks/cosmetic_solid.json
         }
       ]
     }

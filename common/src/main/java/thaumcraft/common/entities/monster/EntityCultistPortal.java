@@ -1,10 +1,7 @@
 package thaumcraft.common.entities.monster;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.Difficulty;
@@ -21,13 +18,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.blocks.BlockLoot;
+import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftCultists;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.cult.CultistRoomRules;
 import thaumcraft.common.lib.cult.CultistRules;
+import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.tiles.TileBanner;
 
 /**
  * Original TC4 crimson portal: the stationary gate that arms itself with four cult
@@ -124,60 +125,41 @@ public class EntityCultistPortal extends Monster {
     private void placeBanners() {
         level().broadcastEntityEvent(this, (byte) 16);
         BlockState state = bannerState();
-        if (state == null) return;
         // Original ForgeDirection ordinals two to five: north, south, west, east.
         for (int direction = 2; direction < 6; direction++) {
-            Direction facing = switch (direction) {
-                case 2 -> Direction.NORTH;
-                case 3 -> Direction.SOUTH;
-                case 4 -> Direction.WEST;
-                default -> Direction.EAST;
-            };
-            BlockPos at = new BlockPos((int) getX() - facing.getStepX() * CultistRules.PORTAL_BANNER_RADIUS,
-                    (int) getY(), (int) getZ() + facing.getStepZ() * CultistRules.PORTAL_BANNER_RADIUS);
-            BlockState placed = state.hasProperty(BlockStateProperties.FACING)
-                    ? state.setValue(BlockStateProperties.FACING, facing) : state;
-            level().setBlock(at, placed, 3);
+            CultistRoomRules.Banner banner = CultistRoomRules.banner(direction);
+            BlockPos at = new BlockPos((int) getX() + banner.offsetX() * CultistRules.PORTAL_BANNER_RADIUS,
+                    (int) getY(), (int) getZ() + banner.offsetZ() * CultistRules.PORTAL_BANNER_RADIUS);
+            level().setBlock(at, state, 3);
+            // Original EntityCultistPortal:157 - the banner shows its face to the portal.
+            if (level().getBlockEntity(at) instanceof TileBanner tile) tile.setFacing(banner.facing());
             playSound(EntityCultist.sound("wandfail"), 1.0F, 1.0F);
         }
     }
 
-    /** The wooden device that carries the banner belongs to the device unit; the portal skips it without it. */
+    /** The wooden device that carries the banner: the original metadata eight. */
     private BlockState bannerState() {
-        for (String id : CultistRules.BLOCK_WOODEN_DEVICE_IDS) {
-            var block = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, id));
-            if (block.isEmpty()) continue;
-            return block.get().defaultBlockState();
-        }
-        return null;
+        return ThaumcraftEldritchBlocks.WOODEN_DEVICE.get().defaultBlockState()
+                .setValue(BlockWoodenDevice.VARIANT, EldritchBlockRules.DEVICE_WOOD_BANNER);
     }
 
     /** Original EntityCultistPortal: the abandoned crates that seed the arena. */
     private void placeLootCrate() {
         int x = (int) getX() + random.nextInt(5) - random.nextInt(5);
         int z = (int) getZ() + random.nextInt(5) - random.nextInt(5);
-        if (x == (int) getX() || z == (int) getZ()) return;
+        if (!CultistRoomRules.crateSpot((int) getX(), (int) getZ(), x, z)) return;
         BlockPos at = new BlockPos(x, (int) getY(), z);
         if (!level().getBlockState(at).isAir()) return;
-        BlockState state = lootCrateState();
-        if (state == null) return;
-        // Original EntityCultistPortal draws the crate variant from the world random. The native
-        // crate of the other unit exposes its three variants; without it the roll is still made
-        // so the original random sequence is kept and the default variant is placed.
-        int variant = CultistRules.lootCrateVariant(level().getRandom().nextFloat());
+        // Original EntityCultistPortal draws the crate variant from the world random.
+        int variant = CultistRoomRules.crateRarity(level().getRandom().nextFloat());
         level().broadcastEntityEvent(this, (byte) 16);
-        level().setBlock(at, state, 3);
+        level().setBlock(at, lootCrateState(variant), 3);
         playSound(EntityCultist.sound("wandfail"), 1.0F, 1.0F);
     }
 
-    /** The abandoned crate belongs to another unit; the portal skips it without it. */
-    private BlockState lootCrateState() {
-        for (String id : CultistRules.BLOCK_LOOT_CRATE_IDS) {
-            var block = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, id));
-            if (block.isEmpty()) continue;
-            return block.get().defaultBlockState();
-        }
-        return null;
+    /** The abandoned crate: the original metadata is the rarity of the generated loot. */
+    private BlockState lootCrateState(int rarity) {
+        return ThaumcraftEldritchBlocks.LOOT_CRATE.get().defaultBlockState().setValue(BlockLoot.RARITY, rarity);
     }
 
     /** Original EntityCultistPortal.spawnMinions. */

@@ -105,6 +105,12 @@ public final class CultistRules {
     /** Original AIAltarFocus compares a squared block distance against sixteen. */
     public static final double RITUALIST_MAX_HOME_DISTANCE_SQ = 16.0;
 
+    /** Original TileEldritchAltar:180 - the ritualist cleric anchors its home at the altar. */
+    public static final int ALTAR_CLERIC_HOME_RADIUS = 8;
+
+    /** Original TileEldritchAltar:127 - the cultist knight anchors its home at the altar. */
+    public static final int ALTAR_GUARD_HOME_RADIUS = 16;
+
     /**
      * Original AIAltarFocus.updateTask: the ritualist breaks when it drifts from the
      * altar block or when the altar block is no longer an eldritch altar.
@@ -303,13 +309,7 @@ public final class CultistRules {
 
     /** Original EntityCultistPortal: the four banners stand on the four cardinal directions. */
     public static int bannerFacing(int directionIndex) {
-        return switch (directionIndex) {
-            case 2 -> 8;
-            case 3 -> 0;
-            case 4 -> 12;
-            case 5 -> 4;
-            default -> 0;
-        };
+        return CultistRoomRules.banner(directionIndex).originalFacing();
     }
 
     // ---------------------------------------------------------------- native ids
@@ -325,10 +325,4 @@ public final class CultistRules {
     public static final String ITEM_LEADER_LEGGINGS = "cultist_leader_legs";
     public static final String ITEM_BOOTS = "cultist_boots";
     public static final String ITEM_CRIMSON_SWORD = "crimson_sword";
-    /** Native id candidates of the eldritch altar the cleric ritualist focuses on. */
-    public static final String[] BLOCK_ELDRITCH_ALTAR_IDS = {"eldritch_altar", "eldritch"};
-    /** Native id of the wooden device that carries the crimson cult banner. */
-    public static final String[] BLOCK_WOODEN_DEVICE_IDS = {"wooden_device"};
-    /** Native id of the abandoned loot crate the portal seeds around itself. */
-    public static final String[] BLOCK_LOOT_CRATE_IDS = {"loot_crate"};
 }

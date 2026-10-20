@@ -1,7 +1,6 @@
 package thaumcraft.common.entities.monster;
 
 import java.util.EnumSet;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -20,6 +19,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -28,6 +28,10 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftCultists;
 import thaumcraft.common.config.ThaumcraftEldritchItems;
+import thaumcraft.common.config.ThaumcraftEquipment;
+import thaumcraft.common.config.ThaumcraftLegacyItems;
+import thaumcraft.common.config.ThaumcraftRunicBaubles;
+import thaumcraft.common.lib.cult.CultistEquipmentRules;
 import thaumcraft.common.lib.cult.CultistRules;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
 
@@ -68,15 +72,24 @@ public class EntityCultist extends Monster {
     }
 
     // ---------------------------------------------------------------- gear helpers
-    /** Native id lookup for gear that another unit owns; a missing item leaves the slot empty. */
-    public static Item item(String id) {
-        return BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, id)).orElse(null);
+    /**
+     * The registered cultist armour piece of the original equipment table. An empty
+     * slot of the original table stays empty.
+     */
+    public static ItemStack cultistPiece(CultistEquipmentRules.Piece piece) {
+        if (piece == null) return ItemStack.EMPTY;
+        return ThaumcraftRunicBaubles.cultistPiece(piece.id());
     }
 
-    /** Native id lookup that skips an absent item instead of failing the whole equipment set. */
-    public static ItemStack stack(String id) {
-        Item found = item(id);
-        return found == null ? ItemStack.EMPTY : new ItemStack(found);
+    /** The registered blade of the original equipment table. */
+    public static ItemStack cultistWeapon(CultistEquipmentRules.Weapon weapon) {
+        return switch (weapon) {
+            case NONE -> ItemStack.EMPTY;
+            case IRON_SWORD -> new ItemStack(Items.IRON_SWORD);
+            case VOID_SWORD -> new ItemStack(ThaumcraftEquipment.VOID_SWORD.get());
+            case THAUMIUM_SWORD -> new ItemStack(ThaumcraftEquipment.THAUMIUM_SWORD.get());
+            case CRIMSON_SWORD -> new ItemStack(ThaumcraftLegacyItems.CRIMSON_SWORD.get());
+        };
     }
 
     /** Original EntityCultist.dropFewItems: one nextInt(10) roll picks the resource. */

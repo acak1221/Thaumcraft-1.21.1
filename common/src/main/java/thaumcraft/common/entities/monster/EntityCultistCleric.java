@@ -3,12 +3,10 @@ package thaumcraft.common.entities.monster;
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
 import thaumcraft.common.entities.projectile.EntityGolemOrb;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -31,9 +29,10 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.blocks.BlockEldritch;
+import thaumcraft.common.lib.cult.CultistEquipmentRules;
 import thaumcraft.common.lib.cult.CultistRules;
+import thaumcraft.common.tiles.TileEldritchAltar;
 
 /**
  * Original TC4 crimson cleric: thirty health, a homing energy orb or a volley of three
@@ -83,12 +82,16 @@ public class EntityCultistCleric extends EntityCultist implements RangedAttackMo
 
     /** Original EntityCultistCleric.addRandomArmor: the crimson robe and, rarely, the cultist boots. */
     @Override protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
-        setItemSlot(EquipmentSlot.HEAD, stack(CultistRules.ITEM_ROBE_HOOD));
-        setItemSlot(EquipmentSlot.CHEST, stack(CultistRules.ITEM_ROBE_CHESTPLATE));
-        setItemSlot(EquipmentSlot.LEGS, stack(CultistRules.ITEM_ROBE_LEGGINGS));
-        if (random.nextFloat() < CultistRules.clericBootsChance(level().getDifficulty() == Difficulty.HARD)) {
-            setItemSlot(EquipmentSlot.FEET, stack(CultistRules.ITEM_BOOTS));
-        }
+        CultistEquipmentRules.Loadout loadout = CultistEquipmentRules.cleric(level().getDifficulty() == Difficulty.HARD,
+                new CultistEquipmentRules.Rolls() {
+                    @Override public float nextFloat() { return random.nextFloat(); }
+                    @Override public int nextInt(int bound) { return random.nextInt(bound); }
+                    @Override public boolean nextBoolean() { return random.nextBoolean(); }
+                });
+        setItemSlot(EquipmentSlot.HEAD, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.HELM)));
+        setItemSlot(EquipmentSlot.CHEST, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.CHEST)));
+        setItemSlot(EquipmentSlot.LEGS, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.LEGS)));
+        setItemSlot(EquipmentSlot.FEET, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.FEET)));
     }
 
     /** Original EntityCultistCleric.attackEntityWithRangedAttack: an orb or three small fireballs. */
@@ -165,7 +168,8 @@ public class EntityCultistCleric extends EntityCultist implements RangedAttackMo
 
     /**
      * Original AIAltarFocus: the ritualist keeps kneeling at the eldritch altar as long as
-     * it stays close to it. The altar block itself belongs to the eldritch block unit.
+     * it stays close to it. The altar is the eldritch block entity of the eldritch block
+     * family, and the ritualist finds it at its restrict centre.
      */
     public static class CultistAltarFocusGoal extends Goal {
         private final EntityCultistCleric cleric;
@@ -186,14 +190,15 @@ public class EntityCultistCleric extends EntityCultist implements RangedAttackMo
             if (CultistRules.ritualistShouldStop(distance, isEldritchAltar(cleric.level(), home))) cleric.setIsRitualist(false);
         }
 
-        /** The eldritch altar belongs to another unit; the ritualist simply stops without it. */
+        /**
+         * Original AIAltarFocus.updateTask: the ritualist kneels while the eldritch altar
+         * stands at its home. The original compared the block itself, so every original
+         * metadata of ConfigBlocks.blockEldritch keeps the ritualist kneeling; the native
+         * altar is the eldritch block entity of that block.
+         */
         public static boolean isEldritchAltar(Level level, BlockPos pos) {
-            BlockState state = level.getBlockState(pos);
-            for (String id : CultistRules.BLOCK_ELDRITCH_ALTAR_IDS) {
-                if (BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, id))
-                        .map(block -> state.is(block)).orElse(false)) return true;
-            }
-            return false;
+            if (level.getBlockEntity(pos) instanceof TileEldritchAltar) return true;
+            return level.getBlockState(pos).getBlock() instanceof BlockEldritch;
         }
     }
 }

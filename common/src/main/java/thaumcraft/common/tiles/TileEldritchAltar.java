@@ -11,12 +11,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.entities.monster.EntityCultist;
+import thaumcraft.common.entities.monster.EntityCultistCleric;
+import thaumcraft.common.lib.cult.CultistRules;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
@@ -78,8 +82,12 @@ public final class TileEldritchAltar extends BlockEntity {
             Entity entity = type.create(level);
             if (entity == null) continue;
             entity.moveTo(pos.getX() + .5D + xx, pos.getY(), pos.getZ() + .5D + zz, 0.0F, 0.0F);
+            // Original TileEldritchAltar:180 - the cleric anchors its home at the altar.
+            prepare(entity, level, pos, CultistRules.ALTAR_CLERIC_HOME_RADIUS);
             if (!level.addFreshEntity(entity)) continue;
             success++;
+            // Original TileEldritchAltar:185 - the cleric kneels at the altar as a ritualist.
+            if (entity instanceof EntityCultistCleric cleric) cleric.setIsRitualist(true);
         }
         if (success > EldritchBlockRules.ALTAR_CLERICS_REQUIRED) {
             spawnedClerics = true;
@@ -105,6 +113,8 @@ public final class TileEldritchAltar extends BlockEntity {
         Entity entity = type.create(level);
         if (entity == null) return;
         entity.moveTo(x + .5D, y, z + .5D, 0.0F, 0.0F);
+        // Original TileEldritchAltar:125-127 - the knight rolls its gear and anchors at the altar.
+        prepare(entity, level, pos, CultistRules.ALTAR_GUARD_HOME_RADIUS);
         level.addFreshEntity(entity);
     }
 
@@ -121,7 +131,22 @@ public final class TileEldritchAltar extends BlockEntity {
         Entity entity = type.create(level);
         if (entity == null) return;
         entity.moveTo(x + .5D, y, z + .5D, 0.0F, 0.0F);
+        // Original TileEldritchAltar:141-144 - the guardian anchors at the altar.
+        prepare(entity, level, pos, CultistRules.ALTAR_GUARD_HOME_RADIUS);
         level.addFreshEntity(entity);
+    }
+
+    /**
+     * Original TileEldritchAltar:125-127 and 180 - the spawned cultist rolls its own
+     * equipment, keeps its home at the altar and never despawns.
+     */
+    private void prepare(Entity entity, Level level, BlockPos pos, int homeRadius) {
+        if (entity instanceof Mob mob) {
+            mob.restrictTo(pos, homeRadius);
+            mob.setPersistenceRequired();
+        }
+        if (entity instanceof EntityCultist cultist && level instanceof ServerLevel server)
+            cultist.originalSpawnEquipment(server, server.getCurrentDifficultyAt(pos));
     }
 
     /** Counts the cultists that are close to the altar. */

@@ -97,8 +97,13 @@ public final class ThaumcraftOuterLands {
         return block("cosmetic_solid");
     }
 
+    /**
+     * The eldritch stairs of the Outer Lands. The contract id is {@code stairs_eldritch}; the native
+     * registration of the eldritch stairs carries the id of the original block, {@code eldritch_stairs}.
+     */
     public static Block stairsEldritch() {
-        return block("stairs_eldritch");
+        Block block = block("stairs_eldritch");
+        return block == null ? block("eldritch_stairs") : block;
     }
 
     public static Block eldritchNothing() {
@@ -155,7 +160,10 @@ public final class ThaumcraftOuterLands {
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case COSMETIC_SLAB_STONE -> {
+                // The contract id is cosmetic_slab_stone; the native registration splits the original
+                // slab into its two kinds, the arcane one and the eldritch one.
                 Block block = block("cosmetic_slab_stone");
+                if (block == null) block = block("cosmetic_stone_slab_eldritch");
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case COSMETIC_SOLID -> {

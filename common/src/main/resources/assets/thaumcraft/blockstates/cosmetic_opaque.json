@@ -1,13 +1,13 @@
 {
   "variants": {
     "variant=0": {
-      "model": "thaumcraft:block/cosmetic_opaque_0"
+      "model": "thaumcraft:block/amber_block"
     },
     "variant=1": {
-      "model": "thaumcraft:block/cosmetic_opaque_1"
+      "model": "thaumcraft:block/amber_bricks"
     },
     "variant=2": {
-      "model": "thaumcraft:block/cosmetic_opaque_2"
+      "model": "thaumcraft:block/warded_glass"
     }
   }
 }

@@ -1,4 +1,4 @@
-# Actual TC4 biomes — coherent implementation, first compile pending
+# Actual TC4 biomes — compiled implementation, native world replay pending
 
 Canonical public keys `thaumcraft.common.config.ThaumcraftBiomes`:
 `MAGICAL_FOREST` (`thaumcraft:magical_forest`), `EERIE` (`thaumcraft:eerie`),
@@ -97,7 +97,7 @@ Greatwood draft now completes real CaveSpider spawner,50web attempts,actual
 weighted38-entry descriptor chest and original eight overwrite-slot writes.
 It uses the region/immutable-provider loot overload and PRIVATE tree RNG,
 with worker-safe actual BEs; no live ServerLevel queries or shared WORLD RNG.
-New source and runtime fixture remain uncompiled/unrun.
+New source and runtime fixture compile; native runtime execution remains pending.
 Silverwood PURE embedded node lifecycle next_content-owned, replaces old
 entire-tree skip. Need both before full decoration acceptance.
 
@@ -232,7 +232,7 @@ It then invokes unmodified native weighted NaturalSpawner callback on actual
 forest ground over512 bounded declared WORLD seeds: no forced Pech type,
 construction/finalizeSpawn bypass, fake biome tags or test plant insertion.
 This is native weighted callback coverage, not an ordinary multi-hour natural
-population replay. All new code and fixtures remain UNCOMPILED/UNRUN.
+population replay. All new code and fixtures compile; native runtime execution remains UNRUN.
 
 
 Builtin-registry bootstrap guard (pre-activation correction):
@@ -249,7 +249,9 @@ Tc4BuiltinBiomeParameterListsMixin. No builtin asset/preset table mutation.
 
 
 Activation checkpoint: own manifest activated after d17b966; shared root hooks
-pending. No new compile, server runtime or visual acceptance claimed yet.
+are integrated. Parent reports918 JUnit passing and261 native wrappers compiled
+after this group. These are compile/unit results only: server runtime and visual
+acceptance remain pending until the actual immutable CI/client runs.
 
 
 Narrow existing ore consumer integration:
@@ -267,3 +269,12 @@ claiming original structures are implemented. Original surface structures
 require dimensionBlacklist==-1, genStructure, dimension0, nonflat, freshworld;
 Nether totem and Outer branches have distinct original guards, so the future
 unit must inspect each caller rather than applying one universal switch.
+
+
+Current validation evidence: parent completed common/Fabric production and
+all native source-set compilation,918 JUnit PASS,261 GameTest wrappers
+compiled. Biome policy/settings/ordered-spawn unit tests are part of that
+run. Actual new biome server GameTests are pending immutable GitHub replay;
+all biome client visuals remain uninspected. An extra differently keyed
+compatible-preset negative fixture is queued only in .tmp for a later
+CI-fix window and is NOT part of this compiled snapshot.

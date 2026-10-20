@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "5e71ef666085709b299606310cc84bffd73e939d08d7049080568c26978aaa59",
+    "canonical_json_sha256": "2f2d1f25fdd58f6db539f629dd16b897fa293da383374011689e51713a282eca",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {

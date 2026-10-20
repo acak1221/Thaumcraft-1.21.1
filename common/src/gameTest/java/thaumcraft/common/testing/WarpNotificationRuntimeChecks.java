@@ -35,9 +35,11 @@ public final class WarpNotificationRuntimeChecks {
             messages(f);
             dispatcher.execute("tc warp @s set 2 TEMP", source);
             f.check(messages(f).isEmpty(), "original command SET syncs state but sends no delta popup packet");
-            dispatcher.execute("tc warp @s ADD -100 TEMP", source);
-            f.check(knowledge.getWarpTemp() == 0 && messages(f).equals(List.of(new WarpMessagePayload(-100, (byte)2))),
-                    "actual command ADD packet retains REQUESTED negative100 even when native nonnegative channel clamps actual loss to two");
+            int added = dispatcher.execute("tc warp @s ADD -100 TEMP", source);
+            var actualMessages = messages(f);
+            f.check(added == 1 && knowledge.getWarpTemp() == 0 && actualMessages.equals(List.of(new WarpMessagePayload(-100, (byte)2))),
+                    "actual command ADD packet retains REQUESTED negative100 even when native nonnegative channel clamps actual loss to two; result="
+                            + added + ",temp=" + knowledge.getWarpTemp() + ",actual=" + actualMessages);
             dispatcher.execute("tc warp @s add 7 PERM ignored", source);
             f.check(messages(f).equals(List.of(new WarpMessagePayload(7, (byte)1))), "original extra-token fallback sends sticky kind, never stale PERM type");
             dispatcher.execute("tc warp @s add 0 PERM", source);
@@ -94,7 +96,21 @@ public final class WarpNotificationRuntimeChecks {
     private static List<WarpMessagePayload> messages(Fixture f) {
         f.connection.flushChannel(); f.channel.runPendingTasks(); Object packet; var result=new ArrayList<WarpMessagePayload>();
         while((packet=f.channel.readOutbound())!=null) {
-            try { if(packet instanceof ClientboundCustomPayloadPacket custom && custom.payload() instanceof WarpMessagePayload warp) result.add(warp); }
+            try {
+                if (packet instanceof ClientboundCustomPayloadPacket custom && custom.payload().type().id().equals(WarpMessagePayload.TYPE.id())) {
+                    if (custom.payload() instanceof WarpMessagePayload warp) result.add(warp);
+                    else if (custom.payload() instanceof dev.architectury.impl.NetworkAggregator.BufCustomPacketPayload wrapped) {
+                        // Architectury13 encodes typed messages into this REAL outbound wrapper before Fabric sends them.
+                        // Inspect its actual codec body, not a separately re-created packet or a production test sink.
+                        var body = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(wrapped.payload()), f.level.registryAccess());
+                        try {
+                            f.check(body.readableBytes() == 5, "actual native outbound warp codec body is exactly five bytes");
+                            result.add(WarpMessagePayload.STREAM_CODEC.decode(body));
+                            f.check(!body.isReadable(), "actual native outbound warp payload has no ignored trailing bytes");
+                        } finally { body.release(); }
+                    } else throw new IllegalStateException("Unknown native warp payload wrapper: " + custom.payload().getClass().getName());
+                }
+            }
             finally { ReferenceCountUtil.release(packet); }
         }
         return List.copyOf(result);

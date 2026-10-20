@@ -20,3 +20,19 @@ https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39408815980
 
 With cached dependencies/Gradle outputs, the last Gradle run took2m43s versus7m6s for the first cold run.
 Full runtime checks remain on GitHub while development continues locally against a separate source window.
+
+
+Fourth-group run04208de failed; it is not accepted and produced no completed GameTest XML.
+https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39413473246
+
+The server aborted on a test-only PulseRelay installed with the production TileVisRelay type/ticker.
+Its replacement has its own registered test block/type and native matching ticker. Six earlier failures
+were: stale manually encoded optional-potion bytes, an incorrect 1% discount expectation (9ratherthan10
+centivis), inspecting a typed payload rather than Architectury's actual encoded wrapper, ignoring native
+XP-orb world RNG draws, Pech's original wrong-WAND cost query rejected by strict focus data, and an
+Advanced Furnace handler rejecting unrelated wand targets before checking its trigger. The last two
+are production integration fixes; the other assertions retain their original resource/state requirements.
+
+The follow-up also includes original Pech avoidance/watch goals and the actual Hover Girdle.
+Local691JUnit/84Python, Fabric main/gameTest/clientTest compilation and zero missing asset references
+pass;237nativecases require the next remote run. Full server acceptance still belongs to b1e49f2.

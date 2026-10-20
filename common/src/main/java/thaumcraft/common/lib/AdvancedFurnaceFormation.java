@@ -77,10 +77,12 @@ public final class AdvancedFurnaceFormation {
         if(isMutationActive() || !(context.getItemInHand().getItem() instanceof ItemWandCasting)) return InteractionResult.PASS;
         Level raw=context.getLevel(); BlockPos clicked=context.getClickedPos();
         if(!(raw instanceof ServerLevel world)) return InteractionResult.PASS;
-        if(!(context.getPlayer() instanceof ServerPlayer player) || player.isSpectator() || !world.getServer().isSameThread() || world.getServer().getLevel(world.dimension())!=world) return InteractionResult.FAIL;
+        if(!world.getServer().isSameThread() || world.getServer().getLevel(world.dimension())!=world) return InteractionResult.FAIL;
         BlockState trigger=world.getBlockState(clicked);
         // Original trigger7 exists only on advanced/ordinary alchemical constructs.
+        // An unrelated wand target must continue through the other native item handlers.
         if(!trigger.is(ThaumcraftAdvancedFurnace.ADVANCED_CONSTRUCT.get()) && !trigger.is(ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT.get())) return InteractionResult.PASS;
+        if(!(context.getPlayer() instanceof ServerPlayer player) || player.isSpectator()) return InteractionResult.FAIL;
         if(!KnowledgeAccess.get(player).isResearchComplete("ADVALCHEMYFURNACE")) return InteractionResult.PASS;
         MUTATING.set(true);
         try {

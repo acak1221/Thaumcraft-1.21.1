@@ -62,10 +62,10 @@ public final class AccessoriesRuntimeChecks {
             amulet.storeVis(worn,Aspect.AIR,9);amulet.storeVis(worn,Aspect.EARTH,9);
             ItemStack wand=new ItemStack(ThaumcraftContent.WAND.get());wand.set(ThaumcraftContent.WAND_DATA.get(),new WandData("greatwood","gold",Map.of("aer",100,"terra",100)));f.player.getInventory().setItem(35,wand);
             test.assertTrue(WandManager.consumeVisFromInventory(f.player,new AspectList().add(Aspect.AIR,10).add(Aspect.EARTH,10))
-                    &&amulet.getVis(worn,Aspect.AIR)==9&&amulet.getVis(worn,Aspect.EARTH)==9&&ItemWandCasting.getVis(wand,"aer")==90&&ItemWandCasting.getVis(wand,"terra")==90,
-                    "a short amulet pays nothing; one independent full wand pays the bill with actual aspect discounts");
+                    &&amulet.getVis(worn,Aspect.AIR)==9&&amulet.getVis(worn,Aspect.EARTH)==9&&ItemWandCasting.getVis(wand,"aer")==91&&ItemWandCasting.getVis(wand,"terra")==90,
+                    "a short amulet pays nothing; one independent full wand pays9 aer (10*.99F truncates) and10 terra with actual aspect discounts");
             test.assertTrue(WandManager.consumeVisFromInventory(f.player,new AspectList().add(Aspect.AIR,9).add(Aspect.EARTH,9))
-                    &&amulet.getVis(worn,Aspect.AIR)==0&&amulet.getVis(worn,Aspect.EARTH)==0&&ItemWandCasting.getVis(wand,"aer")==90&&ItemWandCasting.getVis(wand,"terra")==90,
+                    &&amulet.getVis(worn,Aspect.AIR)==0&&amulet.getVis(worn,Aspect.EARTH)==0&&ItemWandCasting.getVis(wand,"aer")==91&&ItemWandCasting.getVis(wand,"terra")==90,
                     "one full worn amulet has original raw-cost priority over inventory35 and never applies wand discounts");
             f.player.closeContainer();var saved=f.player.saveWithoutId(new CompoundTag());
             inventory.removeItem(1,1);f.player.load(saved);

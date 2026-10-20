@@ -28,6 +28,7 @@ public final class ThaumcraftBaubles {
             .persistent(VisAmuletData.codec(25000)).networkSynchronized(VisAmuletData.streamCodec(25000)).build());
     public static final RegistrySupplier<ItemAmuletVis> VIS_AMULET_LESSER = ITEMS.register("vis_amulet_lesser", () -> new ItemAmuletVis(props(Rarity.UNCOMMON), true));
     public static final RegistrySupplier<ItemAmuletVis> VIS_AMULET = ITEMS.register("vis_amulet", () -> new ItemAmuletVis(props(Rarity.RARE), false));
+    public static final RegistrySupplier<thaumcraft.common.items.baubles.ItemGirdleHover> HOVER_GIRDLE = ITEMS.register("hover_girdle", () -> new thaumcraft.common.items.baubles.ItemGirdleHover(props(Rarity.RARE)));
     public static final RegistrySupplier<ItemBaubleBlank> MUNDANE_AMULET = blank("mundane_amulet", BaubleType.AMULET);
     public static final RegistrySupplier<ItemBaubleBlank> MUNDANE_RING = blank("mundane_ring", BaubleType.RING);
     public static final RegistrySupplier<ItemBaubleBlank> MUNDANE_BELT = blank("mundane_belt", BaubleType.BELT);
@@ -56,7 +57,7 @@ public final class ThaumcraftBaubles {
     public static void register() {
         if (initialized) return; initialized = true;
         COMPONENTS.register(); ITEMS.register(); MENUS.register();
-        for (RegistrySupplier<? extends Item> item : java.util.List.of(VIS_AMULET_LESSER, VIS_AMULET, MUNDANE_AMULET, MUNDANE_RING, MUNDANE_BELT,
+        for (RegistrySupplier<? extends Item> item : java.util.List.of(VIS_AMULET_LESSER, VIS_AMULET, HOVER_GIRDLE, MUNDANE_AMULET, MUNDANE_RING, MUNDANE_BELT,
                 RUNIC_RING_LESSER, RUNIC_RING, RUNIC_RING_CHARGED, RUNIC_RING_HEALING, RUNIC_AMULET, RUNIC_AMULET_EMERGENCY, RUNIC_GIRDLE, RUNIC_GIRDLE_KINETIC))
             CreativeTabRegistry.append(ThaumcraftContent.TAB, item);
         for(var item:DISCOUNT_RINGS.values())CreativeTabRegistry.append(ThaumcraftContent.TAB,item);

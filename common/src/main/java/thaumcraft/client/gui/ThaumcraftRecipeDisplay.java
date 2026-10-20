@@ -197,6 +197,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("MundaneRing", "mundane_ring"),
             alias("MundaneBelt", "mundane_belt"),
             alias("VisAmulet", "infusion/vis_amulet"),
+            alias("HoverGirdle", "infusion/hover_girdle"),
             alias("RunicAmulet", "infusion/runic_amulet"),
             alias("RunicAmuletEmergency", "infusion/runic_amulet_emergency"),
             alias("RunicRing", "infusion/runic_ring"),

@@ -56,6 +56,15 @@ Meaningful verification sources:
   actual cheat-sheet single missing key/replay and Wuss. Native tests do not
   prove transport into a second client or inspected HUD/audio.
 
+CI04208de exposed a fixture transport mistake: Architectury13.0.11's actual
+NetworkAggregator.collectPackets wraps typed payloads in BufCustomPacketPayload
+before Fabric sends ClientboundCustomPayloadPacket. Inspecting only a direct
+WarpMessagePayload instance incorrectly ignored every real outbound message.
+The native fixture now matches the actual packet type ID and decodes its actual
+five-byte wrapper body through the production codec, rejecting trailing bytes.
+All requested-delta, clamp, ordering and replay expectations remain unchanged;
+the production command/network/gameplay sources did not change for this fix.
+
 PacketAspectPool flying aspect icons, research popup/highlight/clue messages and
 other original notification consumers are separate remaining client units.
 This change provides their real shared text/image queue without claiming them

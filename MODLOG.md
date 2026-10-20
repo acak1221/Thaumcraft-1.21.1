@@ -1,3 +1,10 @@
+## 2026-10-20 — Fourth-group runtime corrections, Hover Girdle and Pech goals
+
+Fix incompatible test relay ticker, real typed-payload wire inspection, optional-potion fixture bytes,
+exact discounted payment and native XP RNG. Correct Pech wrong-wand cost query and unrelated wand
+formation dispatch. Add original Hover Girdle and Pech avoid/watch goals. Local691JUnit/84Python and
+all Fabric source-set compilation pass;237runtimecases await GitHub. The aborted04208de run is unaccepted.
+
 ## 2026-10-20 — Native accessories, Pech, hungry nodes and loot (runtime pending)
 
 Six-agent content integration: object-tag API; HUNGRY node ecology; Hellbat; native Baubles,

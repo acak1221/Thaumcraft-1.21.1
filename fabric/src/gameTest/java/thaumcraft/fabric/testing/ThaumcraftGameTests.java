@@ -1237,4 +1237,14 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.PechScanRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 140, batch = "m09_hover_girdle")
+    public void hoverGirdleReducesOnlyPositiveFallDistanceThroughActualWornBelt(GameTestHelper test) {
+        thaumcraft.common.testing.HoverGirdleRuntimeChecks.actualWornBeltReducesOnlyPositiveFallDistance(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "r14_pech_goals")
+    public void pechAvoidAndWatchGoalsRetainOriginalPlayerAndMutexRules(GameTestHelper test) {
+        thaumcraft.common.testing.PechRuntimeChecks.goals(test);
+    }
+
 }

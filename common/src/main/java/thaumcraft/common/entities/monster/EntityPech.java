@@ -60,8 +60,10 @@ import thaumcraft.common.config.ThaumcraftManaBeans;
 import thaumcraft.common.config.ThaumcraftPech;
 import thaumcraft.common.container.ContainerPech;
 import thaumcraft.common.entities.ai.pech.PechItemGoal;
+import thaumcraft.common.entities.ai.pech.PechAvoidGoal;
 import thaumcraft.common.entities.ai.pech.PechMeleeGoal;
 import thaumcraft.common.entities.ai.pech.PechRangedGoal;
+import thaumcraft.common.entities.ai.pech.PechWatchGoal;
 import thaumcraft.common.entities.projectile.EntityPechBlast;
 import thaumcraft.common.items.ItemManaBean;
 import thaumcraft.common.items.wands.ItemWandCasting;
@@ -85,7 +87,7 @@ public final class EntityPech extends Monster implements RangedAttackMob {
     private int chargeCount;
     private LivingEntity legacyTarget;
     private UUID customer;
-    private PechMeleeGoal melee;private PechRangedGoal arrows,blasts;private AvoidEntityGoal<Player> avoid;
+    private PechMeleeGoal melee;private PechRangedGoal arrows,blasts;private PechAvoidGoal avoid;
     public EntityPech(EntityType<? extends EntityPech> type,Level level){
         super(type,level);xpReward=5;Arrays.fill(loot,ItemStack.EMPTY);
         if(getNavigation() instanceof GroundPathNavigation navigation){navigation.setCanOpenDoors(true);navigation.setCanFloat(false);}
@@ -93,7 +95,7 @@ public final class EntityPech extends Monster implements RangedAttackMob {
     }
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,30).add(Attributes.ATTACK_DAMAGE,6).add(Attributes.MOVEMENT_SPEED,.5);}
     @Override protected void registerGoals(){
-        melee=new PechMeleeGoal(this);arrows=new PechRangedGoal(this,50);blasts=new PechRangedGoal(this,30);avoid=new AvoidEntityGoal<>(this,Player.class,8,.5,.6);
+        melee=new PechMeleeGoal(this);arrows=new PechRangedGoal(this,50);blasts=new PechRangedGoal(this,30);avoid=new PechAvoidGoal(this);
         goalSelector.addGoal(0,new FloatGoal(this));
         goalSelector.addGoal(1,new Goal(){
             {setFlags(EnumSet.of(Flag.MOVE,Flag.JUMP));}
@@ -104,7 +106,7 @@ public final class EntityPech extends Monster implements RangedAttackMob {
         goalSelector.addGoal(3,new PechItemGoal(this));goalSelector.addGoal(5,new OpenDoorGoal(this,true));
         goalSelector.addGoal(6,new MoveTowardsRestrictionGoal(this,.5));goalSelector.addGoal(6,new MoveThroughVillageGoal(this,1,false,0,()->true));
         goalSelector.addGoal(9,new RandomStrollGoal(this,.6));
-        goalSelector.addGoal(9,new LookAtPlayerGoal(this,Player.class,3,1));goalSelector.addGoal(10,new LookAtPlayerGoal(this,Mob.class,8));goalSelector.addGoal(11,new RandomLookAroundGoal(this));
+        goalSelector.addGoal(9,new PechWatchGoal(this,true));goalSelector.addGoal(10,new PechWatchGoal(this,false));goalSelector.addGoal(11,new RandomLookAroundGoal(this));
         targetSelector.addGoal(1,new HurtByTargetGoal(this));
     }
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder){super.defineSynchedData(builder);builder.define(TYPE,(byte)0);builder.define(ANGER,0);builder.define(TAMED,(byte)0);}

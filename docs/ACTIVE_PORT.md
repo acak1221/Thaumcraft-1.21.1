@@ -1,3 +1,6 @@
+04208de CI failed before final XML; follow-up fixes+HoverGirdle+originalPechAI compile/JUnit691/Python84 PASS,
+237 authored runtime cases pending remote. Current sources frozen for follow-up push; future largeunits .tmp.
+
 Следующая группа локально691JUnit/84Python и main/gameTest/clientTest compile PASS,235 native cases ждут GitHub.
 Все активные sources заморожены до commit. Следующие единицы пока только .tmp: TravelGear/HoverHarness,
 HoverGirdle/Primal focus, PrimalCharm, RP/research notifications, реальные биомы, PURE/DARK ecology.

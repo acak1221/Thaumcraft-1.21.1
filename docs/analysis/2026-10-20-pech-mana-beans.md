@@ -68,19 +68,20 @@ Critical preserved quirks established by dependency audit:
   carries the narrowed short). Renderer safely uses Forager skin for unknown
   signed values rather than reproducing the original array-index crash.
 
-Known remaining Pech goal parity before this unit can be called complete:
-- The current native AvoidEntityGoal uses modern combat targeting, which
-  excludes creative/invisible players and checks line of sight. Original
-  EntityAIAvoidEntity's Player branch calls World.getClosestPlayer: strict
-  distance8 includes creative/invisible players and has no sight requirement.
-  Replace this bounded goal with the original selector/policy while using
-  current native flee-path geometry; this was found during read-only review.
-- Original EntityAIWatchClosest2 at priority9 owns BOTH MOVE and LOOK flags;
-  current native LookAtPlayerGoal owns LOOK only. Its original nearest-player
-  and40..79-tick watching policy is also pending exact port. Ordinary
-  EntityAIWatchClosest at priority10 owns LOOK and uses the original nearest
-  Mob query. These are explicit missing behaviors, not compile failures or
-  completed original parity.
+Original nearest-player/watch policy follow-up:
+- PechAvoidGoal now uses the original plain nearest-player query: strict
+  distance8 includes creative/invisible players and does not require sight.
+  Current native flee-position geometry and pathfinding remain the platform
+  adapter; modern spectators have no1.7 counterpart and are excluded.
+- PechWatchGoal preserves priority9 WatchClosest2 MOVE+LOOK flags, player
+  range3/probability1, priority10 ordinary Mob watch LOOK/range8/probability.02,
+  exact40..79 active ticks and original eye-targeting controls. The1.7 vanilla
+  oracle tw/un/ul and World nearest-query tie behavior were checked directly.
+- An additional native GameTest checks the actual installed goals, creative
+  invisible player behind a real opaque wall, strict range and spectator
+  gates, exact watcher RNG/lifetime, actual retreat navigation, native Mob
+  eye tracking/removal and ordinary Mob.tick driving the installed selector.
+  It is implemented but has not yet compiled or run in the new checkpoint.
 - Natural MagicalForest/Eerie Pech spawning and pod survival/acquisition still
   depend on actual TC4 biome registration/world integration. No production
   vanilla biome is tagged magical to bypass that dependency.
@@ -116,25 +117,30 @@ Documented original authority/resource/liveness fixes:
    of performing old post-removal movement. Curse age is saved so reload
    cannot rejuvenate the500-tick lifetime.
 
-Verification state after parent compile3:
-- Common production and Fabric main/clientTest classes PASS in parent
-  .tmp/full-port-fourth-compile3.log. This is code loading/compilation, not
-  inspected client rendering or native server acceptance.
-- Seven focused native-stack planner JUnit regressions PASS, exact XML
-  common/build/test-results/test/TEST-thaumcraft.pech.PechTradeTest.xml at
-  2026-10-20T11:01:10 (7 tests,0 failures/errors). Full691 suite had1
-  unrelated notification failure handled by its owner; no full-suite pass.
-- First GameTest compilation found3 Pech fixture errors: protected partial
-  NBT APIs and a shadowed local. Sources now use actual public Entity
-  saveWithoutId/load and a distinct crowdExpected name; rerun is pending.
-- Four native server GameTest entrypoints are written: entity/trade/curse/beans.
+Verification state:
+- Parent checkpoint04208de21ece81c473cce4bb8598d81ea663070f was pushed after
+  all production/Fabric main/gameTest/clientTest compilation,691 JUnit and84
+  Python tests passed. These checks predate the new nearest/watch follow-up.
+- Seven focused native-stack planner JUnit regressions passed. Four native
+  server GameTest entrypoints entity/trade/curse/beans were compiled and sent
+  to235-case CI run39413473246. That run exposed two Pech failures before
+  an unrelated fatal fixture crash; it is not a passing server checkpoint.
   Actual10-tick meal/Saturation/RP,1/30 random tick, registered spawn predicate,
   native NPC ranged emission,10-tick melee, death-loot RNG, full paid native
   trade, repeated-interaction authority, cancelled close/retry/reload UUID
-  ownership and all curse status branches are covered but have not yet run.
+  ownership and all curse status branches are covered by those fixtures.
   Connected actors, high supported lanes, declared seeds and temporary native
   biome-holder MAGICAL tag are fixtures. Tag state is restored in finally;
   no production vanilla biome is labelled magical by these tests.
+- CI fixes awaiting rerun: getVisCost(WAND) must return the original base
+  three-aspect cost before consulting the strict focus-only upgrade decoder.
+  The death fixture now verifies actual pack/coin counts and five native XP
+  separately, then accounts for native1.21 ExperienceOrb.award immediate
+  tryMergeToExisting nextInt40 draws (5XP splits3+1+1) AFTER the two original
+  loot draws. Production death RNG and item physics were unchanged. Failures
+  now report actual counts and next-RNG values for diagnosis.
+- The new fifth goals entrypoint and nearest/watch production changes await
+  compilation and native server validation; no pass is claimed for them.
 - No fresh-world magical-biome natural spawn/pod acquisition replay, no
   multiplayer/client visual acceptance, no NeoForge validation. Actual TC4
   MagicalForest/Eerie biomes and their world integration remain a later unit.

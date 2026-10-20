@@ -28,6 +28,7 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockAiry;
 import thaumcraft.common.blocks.BlockArcaneDoor;
 import thaumcraft.common.blocks.BlockCosmeticOpaque;
+import thaumcraft.common.blocks.BlockCosmeticStairs;
 import thaumcraft.common.blocks.BlockCosmeticSolid;
 import thaumcraft.common.blocks.BlockCosmeticStoneSlab;
 import thaumcraft.common.blocks.BlockCosmeticWoodSlab;
@@ -334,6 +335,15 @@ public final class ThaumcraftEldritchBlocks {
 
     // -------------------------------------------------------------------- menus
 
+    /** The eldritch stairs of the original: the cosmetic stairs over the cosmetic solid metadata 11. */
+    public static final RegistrySupplier<BlockCosmeticStairs> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
+            () -> new BlockCosmeticStairs(COSMETIC_SOLID.get().defaultBlockState().setValue(BlockCosmeticSolid.VARIANT, 11),
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                            .strength(2.0F, 10.0F).sound(SoundType.STONE)));
+
+    public static final RegistrySupplier<Item> STAIRS_ELDRITCH_ITEM = ITEMS.register("eldritch_stairs",
+            () -> new BlockItem(STAIRS_ELDRITCH.get(), new Item.Properties()));
+
     private ThaumcraftEldritchBlocks() {}
 
     /** The original jar variants of the magic box family. */
@@ -391,7 +401,7 @@ public final class ThaumcraftEldritchBlocks {
                 COSMETIC_OPAQUE_ITEM,
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,
-                ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
+                STAIRS_ELDRITCH_ITEM, ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
                 METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM,
                 AIRY_ITEM, AIRY_NODE_ITEM, JAR_BRAIN_ITEM, JAR_NODE_ITEM, ETHEREAL_BLOOM_ITEM);
     }

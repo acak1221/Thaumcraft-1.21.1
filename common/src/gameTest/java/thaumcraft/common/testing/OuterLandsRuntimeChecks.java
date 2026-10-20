@@ -11,7 +11,7 @@ import thaumcraft.common.lib.world.OuterLandsRules;
 import thaumcraft.common.lib.world.VillageBankerManager;
 import thaumcraft.common.lib.world.VillageWizardManager;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
-import thaumcraft.common.lib.world.WorldGenEldritchRing;
+import thaumcraft.common.lib.world.EldritchRingFeature;
 import thaumcraft.common.lib.world.WorldGenHilltopStones;
 
 /**

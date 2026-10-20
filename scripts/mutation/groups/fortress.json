@@ -1,0 +1,341 @@
+{
+ "description": "Thaumium Fortress armor: numbers, set bonus, ward against magic/fire/explosions, goggles, masks and their infusions (docs/analysis/2026-10-20-fortress-armor.md)",
+ "watch": {
+  "junit": [
+   "FortressRulesTest",
+   "FortressAssetsTest",
+   "MagicWardTest"
+  ],
+  "gametests": [
+   "thaumiumFortressWardsSetsAndMasks",
+   "voidThaumaturgeRobesMendWardAndDye"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.FortressRulesTest",
+  "thaumcraft.assets.FortressAssetsTest",
+  "thaumcraft.items.MagicWardTest"
+ ],
+ "mutants": [
+  {
+   "id": "set-base-one",
+   "name": "nothing worn already counts as 1",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "SET_BASE = 0.875",
+   "new": "SET_BASE = 1.0"
+  },
+  {
+   "id": "set-piece-tenth",
+   "name": "a piece lifts the set by 0.1",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "SET_PER_PIECE = 0.125",
+   "new": "SET_PER_PIECE = 0.1"
+  },
+  {
+   "id": "set-mask-tenth",
+   "name": "a mask lifts the set by 0.1",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "SET_PER_MASK = 0.05",
+   "new": "SET_PER_MASK = 0.1"
+  },
+  {
+   "id": "set-unworn-counted",
+   "name": "an empty slot still lifts the set",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "if (!worn[slot]) continue;",
+   "new": "if (false) continue;"
+  },
+  {
+   "id": "set-mask-lowers",
+   "name": "a mask lowers the set",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "if (masked[slot]) set += SET_PER_MASK;",
+   "new": "if (masked[slot]) set -= SET_PER_MASK;"
+  },
+  {
+   "id": "ghost-divisor-eight",
+   "name": "the ghost wakes at damage over 8",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "GHOST_DIVISOR = 10F",
+   "new": "GHOST_DIVISOR = 8F"
+  },
+  {
+   "id": "fiend-divisor-ten",
+   "name": "the fiend feeds at damage over 10",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "FIEND_DIVISOR = 12F",
+   "new": "FIEND_DIVISOR = 10F"
+  },
+  {
+   "id": "wither-sixty",
+   "name": "the wither lasts 60 ticks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "WITHER_TICKS = 80",
+   "new": "WITHER_TICKS = 60"
+  },
+  {
+   "id": "trigger-inclusive",
+   "name": "a roll equal to the chance triggers",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "return roll < damage / divisor;",
+   "new": "return roll <= damage / divisor;"
+  },
+  {
+   "id": "fire-divisor-25",
+   "name": "fire is warded by armor over 25",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "FIRE_DIVISOR = 20.0",
+   "new": "FIRE_DIVISOR = 25.0"
+  },
+  {
+   "id": "share-uncapped",
+   "name": "the shares may add up to two",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "total = Math.min(total, 1.0);",
+   "new": "total = Math.min(total, 2.0);"
+  },
+  {
+   "id": "helm-emerald-diamond",
+   "name": "the helm infusion wants a diamond",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/fortress_helm.json",
+   "old": "\"item\": \"minecraft:emerald\"",
+   "new": "\"item\": \"minecraft:diamond\""
+  },
+  {
+   "id": "legs-tutamen-24",
+   "name": "the thigh guards cost 24 tutamen",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/fortress_legs.json",
+   "old": "\"tutamen\": 20",
+   "new": "\"tutamen\": 24"
+  },
+  {
+   "id": "goggles-instability-4",
+   "name": "the goggles infusion is stable to 4",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/fortress_goggles.json",
+   "old": "\"instability\": 5",
+   "new": "\"instability\": 4"
+  },
+  {
+   "id": "ghost-mortuus-32",
+   "name": "the Angry Ghost needs only 32 mortuus",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/fortress_mask_ghost.json",
+   "old": "\"mortuus\": 64",
+   "new": "\"mortuus\": 32"
+  },
+  {
+   "id": "fiend-patch-ghost",
+   "name": "the Sipping Fiend infusion gives mask 1",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/fortress_mask_fiend.json",
+   "old": "\"result_patch\": \"fortress_mask_2\"",
+   "new": "\"result_patch\": \"fortress_mask_1\""
+  },
+  {
+   "id": "cuirass-name",
+   "name": "the cuirass is named Chestplate",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/en_us.json",
+   "old": "\"Thaumium Fortress Cuirass\"",
+   "new": "\"Thaumium Fortress Chestplate\""
+  },
+  {
+   "id": "durability-30",
+   "name": "durability factor 30",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressRules.java",
+   "old": "DURABILITY_FACTOR = 40",
+   "new": "DURABILITY_FACTOR = 30"
+  },
+  {
+   "id": "rarity-uncommon",
+   "name": "the armor is uncommon",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": ".rarity(Rarity.RARE)",
+   "new": ".rarity(Rarity.UNCOMMON)"
+  },
+  {
+   "id": "enchantability-20",
+   "name": "enchantability 20",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "25, SoundEvents.ARMOR_EQUIP_IRON, ThaumcraftEquipment::thaumiumRepairIngredient,\n            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, \"thaumium\"))), 0, 0));\n    /** The helm's goggles",
+   "new": "20, SoundEvents.ARMOR_EQUIP_IRON, ThaumcraftEquipment::thaumiumRepairIngredient,\n            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, \"thaumium\"))), 0, 0));\n    /** The helm's goggles"
+  },
+  {
+   "id": "fire-ward-off",
+   "name": "the armor does not ward fire",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": "@Override public boolean wardsFire() { return true; }",
+   "new": "@Override public boolean wardsFire() { return false; }"
+  },
+  {
+   "id": "set-never-applies",
+   "name": "the set bonus never applies",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": "wearer instanceof Player player ? set(player) : 1.0",
+   "new": "wearer instanceof Player player ? 1.0 : 1.0"
+  },
+  {
+   "id": "set-applies-to-mobs",
+   "name": "mobs get a set bonus too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": "wearer instanceof Player player ? set(player) : 1.0",
+   "new": "wearer instanceof Player player ? set(player) : 1.25"
+  },
+  {
+   "id": "goggles-always-seen",
+   "name": "node sight without the goggles",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": "@Override public boolean showNodes(ItemStack stack, LivingEntity wearer) { return stack.has(ThaumcraftEquipment.FORTRESS_GOGGLES.get()); }",
+   "new": "@Override public boolean showNodes(ItemStack stack, LivingEntity wearer) { return true; }"
+  },
+  {
+   "id": "popups-always",
+   "name": "popups without the goggles",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": "@Override public boolean showIngamePopups(ItemStack stack, LivingEntity wearer) { return stack.has(ThaumcraftEquipment.FORTRESS_GOGGLES.get()); }",
+   "new": "@Override public boolean showIngamePopups(ItemStack stack, LivingEntity wearer) { return true; }"
+  },
+  {
+   "id": "mask-default-zero",
+   "name": "a helm without a mask has mask 0",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": "stack.getOrDefault(ThaumcraftEquipment.FORTRESS_MASK.get(), -1)",
+   "new": "stack.getOrDefault(ThaumcraftEquipment.FORTRESS_MASK.get(), 0)"
+  },
+  {
+   "id": "set-without-helm",
+   "name": "the helm is not part of the set",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemFortressArmor.java",
+   "old": "{EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD}",
+   "new": "{EquipmentSlot.LEGS, EquipmentSlot.CHEST}"
+  },
+  {
+   "id": "fiend-heals-two",
+   "name": "the fiend heals two points",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressMasks.java",
+   "old": "leecher.heal(1.0F);",
+   "new": "leecher.heal(2.0F);"
+  },
+  {
+   "id": "fiend-wrong-mask",
+   "name": "the fiend works with the ghost's mask",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressMasks.java",
+   "old": "== FortressRules.MASK_FIEND",
+   "new": "== FortressRules.MASK_GHOST"
+  },
+  {
+   "id": "ghost-wrong-mask",
+   "name": "the ghost works with the fiend's mask",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressMasks.java",
+   "old": "== FortressRules.MASK_GHOST",
+   "new": "== FortressRules.MASK_FIEND"
+  },
+  {
+   "id": "ghost-arrows",
+   "name": "an arrow's shooter is withered too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressMasks.java",
+   "old": "source.getDirectEntity() instanceof LivingEntity attacker",
+   "new": "source.getEntity() instanceof LivingEntity attacker"
+  },
+  {
+   "id": "ghost-poisons",
+   "name": "the ghost poisons instead of withering",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/FortressMasks.java",
+   "old": "new MobEffectInstance(MobEffects.WITHER,",
+   "new": "new MobEffectInstance(MobEffects.POISON,"
+  },
+  {
+   "id": "void-robe-guards-fire",
+   "name": "a plain ward piece guards against fire",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "case FIRE -> gear.wardsFire() ? fireRatio(armor) * gear.wardFactor(stack, entity) : 0;",
+   "new": "case FIRE -> fireRatio(armor) * gear.wardFactor(stack, entity);"
+  },
+  {
+   "id": "explosion-not-fire",
+   "name": "explosions are not warded",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "if (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)) return Kind.FIRE;",
+   "new": "if (source.is(DamageTypeTags.IS_FIRE)) return Kind.FIRE;"
+  },
+  {
+   "id": "delta-adds-ward-armor",
+   "name": "pieces that ward still count their armor",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "delta -= gear.wardArmor(stack);",
+   "new": "delta += gear.wardArmor(stack);"
+  },
+  {
+   "id": "delta-no-set-bonus",
+   "name": "ordinary armor gets no set bonus",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "else if (kind == Kind.NONE) delta +=",
+   "new": "else if (false) delta +="
+  },
+  {
+   "id": "armor-value-untouched",
+   "name": "vanilla sees the plain armor value",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/mixin/LivingEntityMagicWardMixin.java",
+   "old": "Math.max(0F, armor + MagicWard.armorDelta(entity, source))",
+   "new": "armor"
+  },
+  {
+   "id": "goggles-patch-empty",
+   "name": "the goggles infusion changes nothing",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/crafting/InfusionResultPatches.java",
+   "old": "if (mask == null) result.set(ThaumcraftEquipment.FORTRESS_GOGGLES.get(), true);",
+   "new": "if (mask == null) result = new ItemStack(result.getItem());"
+  },
+  {
+   "id": "mask-patch-zero",
+   "name": "every mask infusion gives mask 0",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/crafting/InfusionResultPatches.java",
+   "old": "else result.set(ThaumcraftEquipment.FORTRESS_MASK.get(), mask);",
+   "new": "else result.set(ThaumcraftEquipment.FORTRESS_MASK.get(), 0);"
+  },
+  {
+   "id": "patch-any-armor",
+   "name": "any Fortress piece takes the patch",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/crafting/InfusionResultPatches.java",
+   "old": "helm.getType() == ArmorItem.Type.HELMET",
+   "new": "helm.getType() != null"
+  }
+ ]
+}

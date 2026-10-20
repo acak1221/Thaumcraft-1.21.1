@@ -41,6 +41,7 @@ import thaumcraft.common.config.ThaumcraftTaint;
 import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.lib.taint.TaintacleRules;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
+import thaumcraft.common.lib.loot.OriginalTaintExperience;
 import thaumcraft.common.lib.world.BiomeColumns;
 
 /** Original rooted hostile: nearest non-tainted living target, melee and remote small tentacles. */
@@ -171,12 +172,22 @@ public class EntityTaintacle extends Monster implements ITaintedMob {
                 &&.5F-level.getLightLevelDependentMagicValue(pos)>=0;
     }
     @Override public ItemEntity spawnAtLocation(ItemStack stack,float height) { return OriginalMobLoot.spawn(this,stack,height); }
+    /** Vanilla1.7 delayed this inherited reward until the twentieth native death update. */
+    @Override protected void dropExperience(Entity killer) {}
+    @Override protected void tickDeath() {
+        if(OriginalTaintExperience.finishDeathTick(this,()->lastHurtByPlayerTime>0||isAlwaysExperienceDropper(),
+                ()->OriginalTaintExperience.originalReward(this,xpReward,this::getEquipmentDropChance)))return;
+        super.tickDeath();
+    }
     @Override protected void dropFromLootTable(DamageSource source,boolean recentlyHit) {}
     @Override protected void dropCustomDeathLoot(ServerLevel level,DamageSource source,boolean recentlyHit) {
         dropNativeEquipment(level,source,recentlyHit);
         spawnAtLocation(new ItemStack(ThaumcraftContent.MATERIALS.get(level.random.nextBoolean()?"tainted_goo":"taint_tendril").get()),getBbHeight()/2F);
     }
-    protected final void dropNativeEquipment(ServerLevel level,DamageSource source,boolean recentlyHit){super.dropCustomDeathLoot(level,source,recentlyHit);}
+    protected final void dropNativeEquipment(ServerLevel level,DamageSource source,boolean recentlyHit){
+        OriginalTaintExperience.rememberEquipment(this);
+        super.dropCustomDeathLoot(level,source,recentlyHit);
+    }
     protected static SoundEvent sound(String id) { return SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft",id)); }
     @Override public int getAmbientSoundInterval() { return 200; }
     @Override public SoundEvent getAmbientSound() { return sound("roots"); }

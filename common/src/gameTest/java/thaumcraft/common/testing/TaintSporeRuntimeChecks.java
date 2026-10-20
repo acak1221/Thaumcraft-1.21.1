@@ -51,15 +51,22 @@ public final class TaintSporeRuntimeChecks {
                 Vec3 before=spore.position();spore.move(MoverType.SELF,new Vec3(2,2,2));a.require(spore.position().equals(before),"actual fibres4 anchors ALL native movement");
                 steps(a,spore,1200);a.require(spore.getSporeSize()==2&&spore.isAlive(),"1200 actual native server entity updates retain original size2 in actual Taint biome");
                 CompoundTag saved=spore.saveWithoutId(new CompoundTag());a.require(saved.getInt("Size")==1&&!saved.contains("growth"),"native persistence writes original size-minus-one and omits runtime growth");
-                steps(a,spore,1);a.require(spore.getSporeSize()==3,"the original postincrement grows on update1201");spore.discard();
+                steps(a,spore,1);a.require(spore.getSporeSize()==3&&spore.isAlive()&&spore.position().equals(before)&&spore.supportPos().equals(a.root.below()),"the original postincrement grows on update1201 while preserving exact anchored feet/support; actual="+spore.position()+", support="+spore.supportPos()+", alive="+spore.isAlive());spore.discard();
                 saved.remove("UUID");var reloaded=ThaumcraftTaint.TAINT_SPORE.get().create(a.level);reloaded.load(saved);a.require(a.level.addFreshEntity(reloaded),"native size snapshot reload owns a fresh entity identity");
                 steps(a,reloaded,1);a.require(reloaded.getSporeSize()==2,"actual reload restarts growth instead of persisting the previous1200 counter");steps(a,reloaded,1199);a.require(reloaded.getSporeSize()==2,"reloaded counter1200 still has not grown");steps(a,reloaded,1);a.require(reloaded.getSporeSize()==3,"reloaded update1201 grows again");
                 reloaded.setSporeSize(6);var draws=new ArrayList<Object>();draws.add(.5F);draws.add(new Roll(4,3));for(int i=0;i<30;i++)draws.add(.5F);
                 try(var random=new WorldInput(a.level,draws)){reloaded.playerTouch(a.player);random.complete();}
-                var spiders=a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds);a.require(reloaded.isRemoved()&&spiders.size()==5&&a.level.getBlockState(a.root.below()).getValue(BlockTaintFibres.TYPE)==3&&a.items().isEmpty(),"actual contact rupture creates witnessed5spiders, restores only its support4to3 and has no death loot");
+                var spiders=a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds);a.require(reloaded.isRemoved()&&spiders.size()==5&&a.level.getBlockState(a.root.below()).getValue(BlockTaintFibres.TYPE)==3&&a.items().isEmpty(),"actual contact rupture creates witnessed5spiders, restores only its support4to3 and has no death loot; removed="+reloaded.isRemoved()+", spiders="+spiders.size()+", pos="+reloaded.position()+", support="+reloaded.supportPos()+", state="+a.level.getBlockState(reloaded.supportPos())+", items="+a.items().stream().map(e->e.getItem().toString()).toList());
                 for(var spider:spiders)a.require(spider.getX()==a.root.getX()+.5&&spider.getY()==a.root.getY()+.5&&spider.getZ()==a.root.getZ()+.5&&spider.getYRot()==180&&spider.getHealth()==5&&spider.getAttributeValue(Attributes.ATTACK_DAMAGE)==2,"actual burst child retains original six world draws/position/yaw and real tiny-spider attributes");
                 reloaded.playerTouch(a.player);a.require(a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds).size()==5,"a removed original spore cannot replay its already claimed physical burst");
                 var unregistered=ThaumcraftTaint.TAINT_SPORE.get().create(a.level);unregistered.moveTo(a.root.getX(),a.root.getY(),a.root.getZ(),0,0);unregistered.playerTouch(a.player);a.require(!unregistered.isRemoved()&&a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds).size()==5,"a detached never-installed entity cannot authorize world child/material writes");
+                cleanup(a);anchor(a);var dying=spore(a,2);
+                try(var random=new WorldInput(a.level,List.of(true))){a.require(dying.hurt(a.player.damageSources().playerAttack(a.player),100),"actual player damage kills an ordinary Spore");random.complete();}
+                a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty()&&a.items().size()==1,"ordinary Spore die keeps original one item but grants no immediate nativeXP");
+                var deathDraws=new ArrayList<Object>();deathDraws.add(.5F);deathDraws.add(new Roll(2,1));for(int i=0;i<6;i++)deathDraws.add(.5F);
+                try(var random=new WorldInput(a.level,deathDraws)){steps(a,dying,1);random.complete();}
+                a.require(dying.isRemoved()&&dying.deathTime==1&&a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds).size()==1,"ordinary Spore death1 ruptures into the witnessed real spider before original death20 reward");
+                steps(a,dying,20);a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"removed ordinary Spore cannot grant XP even when stale native death updates are replayed beyond20");
             }finally{cleanup(a);}
         }test.succeed();
     }
@@ -75,9 +82,13 @@ public final class TaintSporeRuntimeChecks {
                 var copy=ThaumcraftTaint.TAINT_SWARMER.get().create(a.level);copy.load(swarmer.saveWithoutId(new CompoundTag()));a.require(copy.getSpawnCounter()==500&&copy.getSporeSize()==10,"native swarmer reload retains size but resets the absent-NBT counter500");
                 steps(a,swarmer,1);swarmer.playerTouch(a.player);a.require(a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).size()==1,"native player collision neither ruptures the Swarmer nor adds an extra immediate Swarm");
                 try(var random=new WorldInput(a.level,List.of(true,false))){a.require(swarmer.hurt(a.player.damageSources().playerAttack(a.player),100),"actual lethal native damage reaches the Swarmer death path");random.complete();}
+                a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"actual Swarmer death has no immediate native XP/extra world40 draw before original deathTime20");
                 a.require(a.items().size()==2&&a.items().stream().mapToInt(e->e.getItem().getCount()).sum()==2&&a.items().stream().anyMatch(e->e.getItem().is(ThaumcraftContent.MATERIALS.get("tainted_goo").get()))&&a.items().stream().anyMatch(e->e.getItem().is(ThaumcraftContent.MATERIALS.get("taint_tendril").get())),"actual Swarmer death executes both original world Boolean drops once without native table/equipment duplication");
                 try(var random=new WorldInput(a.level,List.of(.5F,.75F))){steps(a,swarmer,1);random.complete();}
                 a.require(swarmer.deathTime==1&&a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).size()==2,"actual deathTime1 releases one more genuine Swarm");steps(a,swarmer,1);a.require(a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).size()==2,"deathTime2 cannot repeat its death Swarm");
+                steps(a,swarmer,17);a.require(swarmer.deathTime==19&&!swarmer.isRemoved()&&a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"actual Swarmer19 dead updates still hold all originalXP10 until20");
+                try(var random=new WorldInput(a.level,List.of())){steps(a,swarmer,1);random.complete();}
+                a.require(swarmer.isRemoved()&&swarmer.deathTime==20&&a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).stream().mapToInt(ExperienceOrb::getValue).sum()==10,"actual Swarmer20 drops canonical7+3 XP once with zero new WORLD merge draws");
             }finally{cleanup(a);}
         }test.succeed();
     }
@@ -88,15 +99,33 @@ public final class TaintSporeRuntimeChecks {
                 for(int y=0;y<=3;y++)for(int z=-4;z<=4;z++)a.put(a.root.offset(1,y,z),Blocks.STONE.defaultBlockState());
                 var spider=ThaumcraftTaint.TAINT_SPIDER.get().create(a.level);spider.moveTo(a.root.getX()+.5,a.root.getY(),a.root.getZ()+.5,0,0);a.require(a.level.addFreshEntity(spider),"actual registered tiny Taint Spider enters its owned lane");
                 a.player.setPos(a.root.getX()+3.5,a.root.getY(),a.root.getZ()+.5);steps(a,spider,8);
-                a.require(spider.getTarget()==a.player&&!spider.getSensing().hasLineOfSight(a.player)&&spider.getBbWidth()==.4F&&spider.getBbHeight()==.3F&&spider.getEyeHeight()==.3F*.85F&&spider.getPickRadius()==.1F&&spider.getVoicePitch()==.7F,"actual tiny spider targets its real vulnerable player12 through an actual wall and retains physical/eye/pick/PITCH values");
-                a.player.setPos(spider.getX()+.5,spider.getY(),spider.getZ());float health=a.player.getHealth();a.require(spider.doHurtTarget(a.player)&&a.player.getHealth()<health&&spider.getAttributeValue(Attributes.ATTACK_DAMAGE)==2,"actual native spider attack damages its real player using original attack2 attribute");spider.discard();
+                a.require(spider.getTarget()==a.player&&!spider.getSensing().hasLineOfSight(a.player)&&spider.getBbWidth()==.4F&&spider.getBbHeight()==.3F&&spider.getEyeHeight()==.3F*.85F&&spider.getPickRadius()==.1F&&spider.getVoicePitch()==.7F,"actual tiny spider targets its real vulnerable player12 through an actual wall and retains physical/eye/pick/PITCH values; target="+(spider.getTarget()==a.player)+", LOS="+spider.getSensing().hasLineOfSight(a.player)+", body="+spider.getBbWidth()+"x"+spider.getBbHeight()+", eye="+spider.getEyeHeight()+", pick="+spider.getPickRadius()+", pitch="+spider.getVoicePitch()+", pos="+spider.position());
+                // Declared synthetic native player updates expire the real sixty-tick
+                // ServerPlayer login gate; no private timer or damage gate is changed.
+                int beforeWarmup=a.player.tickCount;for(int tick=0;tick<61;tick++)a.level.tickNonPassenger(a.player);
+                a.require(a.player.tickCount==beforeWarmup+61,"actual connected player completes61 native level entity updates before its first ordinary mob damage");
+                a.player.setPos(spider.getX()+.5,spider.getY(),spider.getZ());float health=a.player.getHealth();boolean attacked=spider.doHurtTarget(a.player);
+                a.require(attacked&&a.player.getHealth()<health&&spider.getAttributeValue(Attributes.ATTACK_DAMAGE)==2,"actual native spider attack damages its real player using original attack2 attribute; returned="+attacked+", before="+health+", after="+a.player.getHealth()+", damage="+spider.getAttributeValue(Attributes.ATTACK_DAMAGE)+", playerUpdates="+a.player.tickCount);spider.discard();
                 for(int branch=0;branch<3;branch++){
                     a.purgeOutputs();var victim=ThaumcraftTaint.TAINT_SPIDER.get().create(a.level);victim.moveTo(a.root.getX()+.5,a.root.getY(),a.root.getZ()+.5,0,0);a.require(a.level.addFreshEntity(victim),"actual next native death owns a separate spider identity");
                     List<Object> draws=branch==0?List.of(new Roll(6,5)):List.of(new Roll(6,0),branch==1);
                     try(var random=new WorldInput(a.level,draws)){a.require(victim.hurt(a.player.damageSources().playerAttack(a.player),100),"actual player damage enters tiny spider death loot");random.complete();}
                     if(branch==0)a.require(a.items().isEmpty(),"original five-of-six rejection emits no native string/eye/custom loot");
                     else a.require(a.items().size()==1&&a.items().getFirst().getItem().getCount()==1&&a.items().getFirst().getItem().is(ThaumcraftContent.MATERIALS.get(branch==1?"tainted_goo":"taint_tendril").get()),"actual one-in-six death emits the witnessed Boolean resource once and preserves next world RNG draw");
-                    steps(a,victim,20);a.require(victim.isRemoved()&&a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).stream().mapToInt(ExperienceOrb::getValue).sum()==2,"actual native player-killed tiny spider death releases originalXP2 once");
+                    a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"actual tiny-spider death suppresses native immediate XP and its extra WORLD40 draws");
+                    steps(a,victim,19);a.require(victim.deathTime==19&&!victim.isRemoved()&&a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"actual tiny-spider death19 has not issued originalXP2");
+                    int beforeXp=a.player.totalExperience;int[] admitted={0};
+                    dev.architectury.event.events.common.EntityEvent.Add observe=(entity,world)->{
+                        if(world!=a.level||!(entity instanceof ExperienceOrb orb)||!a.bounds.contains(orb.position()))return dev.architectury.event.EventResult.pass();
+                        admitted[0]++;a.require(victim.deathTime==20,"native ADD sees already-claimed deathTime20, so callback saves cannot rewind paid reward");
+                        orb.playerTouch(a.player);a.require(a.player.totalExperience==beforeXp,"unadmitted actual native XP candidate cannot give free XP from an ADD callback");
+                        steps(a,victim,1);a.require(victim.deathTime==20,"actual source tick reentry cannot advance/remove/reaward the claimed death20 frame");
+                        return dev.architectury.event.EventResult.pass();
+                    };
+                    dev.architectury.event.events.common.EntityEvent.ADD.register(observe);
+                    try(var random=new WorldInput(a.level,List.of())){steps(a,victim,1);random.complete();}
+                    finally{dev.architectury.event.events.common.EntityEvent.ADD.unregister(observe);}
+                    a.require(victim.isRemoved()&&victim.deathTime==20&&admitted[0]==2&&a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).stream().mapToInt(ExperienceOrb::getValue).sum()==2,"actual native player-killed tiny spider20 emits two canonicalXP1 segments once despite actual ADD/source reentry, with no WORLD draw");
                 }
             }finally{cleanup(a);}
         }test.succeed();

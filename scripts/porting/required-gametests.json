@@ -223,6 +223,7 @@
     "tablepairactuallyunloadsandreloads",
     "tablesecondaryquirksandsearchorder",
     "tablespawncallbackpreservesreplacementinventory",
+    "taintacleexperiencefollowsoriginaldeathtimeandplayercredit",
     "taintacleskeeporiginalcombatandrootedai",
     "taintacleskeeporiginalretaliationlifetimeandloot",
     "taintaclesrequirenoinventedfloororpotionmutation",

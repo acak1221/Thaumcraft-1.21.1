@@ -69,6 +69,9 @@ public final class NaturalBiomeRuntimeChecks {
         int minX=(centre.getX()>>4)-2,minZ=(centre.getZ()>>4)-2;
         for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++)
             test.assertTrue(level.getChunkSource().getChunkNow(cx,cz)==null,"all25 requested forest chunks are fresh before native generation");
+        // Finish the whole declared region before observing it: a later
+        // neighbor's genuine feature pass may write into an earlier chunk.
+        for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++)level.getChunk(cx,cz);
         int oak=0,magicalLogs=0,vishrooms=0;List<BlockPos> pods=new ArrayList<>(),ground=new ArrayList<>();
         for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++) {
             var chunk=level.getChunk(cx,cz);
@@ -89,10 +92,10 @@ public final class NaturalBiomeRuntimeChecks {
                 }
             }
         }
+        Thaumcraft.LOG.info("TC4 fresh forest core {}: oakLogs={}, magicalLogs={}, vishrooms={}, typedPods={}",centre,oak,magicalLogs,vishrooms,pods.size());
         test.assertTrue(oak>0&&magicalLogs>0,"real fresh forest decoration produces actual BigMagic oak and original magical tree species");
         test.assertTrue(vishrooms>0&&!pods.isEmpty(),"real25-chunk forest decoration produces actual Vishrooms and typed ManaPods without fixture insertion");
         test.assertTrue(!ground.isEmpty(),"naturally generated forest contains real supported open ground for native population");
-        Thaumcraft.LOG.info("TC4 fresh forest core {}: oakLogs={}, magicalLogs={}, vishrooms={}, typedPods={}",centre,oak,magicalLogs,vishrooms,pods.size());
         try(var actor=new FocusUpgradeRuntimeChecks.Actor(test)) {
             try {
                 harvestAndReplant(test,level,actor,pods.getFirst());

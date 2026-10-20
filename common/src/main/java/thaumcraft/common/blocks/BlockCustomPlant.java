@@ -36,7 +36,7 @@ public final class BlockCustomPlant extends BushBlock {
                 || cinderpearl && (soil.is(Blocks.SAND) || soil.is(Blocks.RED_SAND));
     }
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below()) && (level.getRawBrightness(pos, 0) >= 8 || level.canSeeSky(pos));
+        return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below());
     }
     @Override protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!state.canSurvive(level, pos)) level.destroyBlock(pos, true);
@@ -46,7 +46,7 @@ public final class BlockCustomPlant extends BushBlock {
     }
     public interface ClientEffects { void tick(Level level, BlockPos pos, boolean cinderpearl, RandomSource random); }
     public static void setClientEffects(ClientEffects effects) { clientEffects = effects; }
-    /** Placement itself was permissive; ordinary stay/random ticks still enforce soil/light. */
+    /** Placement itself was permissive; ordinary stay/random ticks still enforce soil. */
     public static final class PlantItem extends BlockItem {
         public PlantItem(Block block, Item.Properties properties) { super(block, properties); }
         @Override protected boolean mustSurvive() { return false; }

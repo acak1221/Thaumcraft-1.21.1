@@ -41,7 +41,7 @@ public final class BiomeColumns {
         if (!level.hasChunk(x >> 4, z >> 4)) return null;
         ChunkAccess chunk = level.getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, false);
         if (chunk == null) return null;
-        int y = Mth.clamp(chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x & 15, z & 15), level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
+        int y = Mth.clamp(chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15), level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
         return chunk.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z));
     }
 
@@ -71,7 +71,7 @@ public final class BiomeColumns {
         if (!level.hasChunk(x >> 4, z >> 4)) return false;
         ChunkAccess chunk = level.getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, false);
         if (chunk == null) return false;
-        int y = Mth.clamp(chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x & 15, z & 15), level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
+        int y = Mth.clamp(chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15), level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
         if (!level.ensureCanWrite(new net.minecraft.core.BlockPos(x, y, z))) return false;
         Holder<Biome> target = level.registryAccess().registryOrThrow(Registries.BIOME).getHolder(targetKey).orElse(null);
         if (target == null) throw new IllegalStateException("Missing real native biome " + targetKey.location());

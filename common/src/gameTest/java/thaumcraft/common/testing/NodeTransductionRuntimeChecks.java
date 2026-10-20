@@ -436,6 +436,8 @@ public final class NodeTransductionRuntimeChecks {
                 effects.add(method.getName());
                 if (nativeEffects) return switch (method.getName()) {
                     case "nextFloat" -> .5F; case "nextDouble", "nextGaussian" -> .5D; case "nextBoolean" -> false;
+                    // Keep the real default triangle implementation: two declared .5 uniform samples yield its mean.
+                    case "triangle" -> java.lang.reflect.InvocationHandler.invokeDefault(proxy,method,args);
                     default -> throw new AssertionError("Unexpected native explosion effect RNG " + method);
                 };
                 throw new AssertionError("Unexpected branch RNG " + method);

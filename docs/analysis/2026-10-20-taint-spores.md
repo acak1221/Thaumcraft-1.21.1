@@ -22,7 +22,7 @@ Spore: size signed-byte watcher default1 then constructor2; NBT Size=size-1,
 missing Size produces1. Physical max(.15F*size,.5F), inherited eyeHeight*.85,
 HP1/attack1, XP=size, pick radius0. Growth and display are NOT persisted.
 Growth test is size<10 && growth++==1200: size changes on call1201, resets0.
-Native API rejects negative/overflowed watcher sizes that crash original RNG.
+Native API rejects negative/overflowed watcher sizes that crash original RNG. Native fudgePositionAfterSizeChange is disabled for this stationary actor: original setSporeSize explicitly reapplies identical feet XYZ, so growth must not shift its exact support.
 No goal AI; pickable but not pushable. All X/Z/upward movement clamped; exact
 below boundingBox.minY-1 fibres TYPE4 prevents all movement. Outside actual
 Taint biome generic1 damage every20ticks. Unsupported, deathTime>0 and player
@@ -31,7 +31,7 @@ single current installed entity; client effects cannot spawn or edit blocks.
 Burst world draws: pitch float; count size/3+nextInt(size/2+1); for each child,
 X two floats/Y one/Z two/yaw one. Actual native spider children and exact
 support4->3, then discard. Alive rupture does not run death loot. Death loot is
-one Boolean-selected goo/tendril; normal native death XP remains. Client grows
+one Boolean-selected goo/tendril; ordinary Spore disappears at deathTime1 before original death20 XP, so it grants0 XP. Client grows
 display+.02 when below watcher, manages floor(size/3) original FXSwarm companions
 one at a time and50 sploosh effects when its local burst condition is seen.
 Fullbright body nested12/16 cubes64x64, negative -.12*display pulse.025, wobble
@@ -68,3 +68,38 @@ physical sizes and inherited eyes above, ThaumcraftTaintSporesClient.init()
 registers all three renderers and actual visual provider; client resource reset
 calls ThaumcraftTaintSporesClient.reset(). No shared mixin or gameplay tick loop.
 Runtime helpers: growthAndBurst (batch m08_taint_spore_growth, timeout200), swarmerBoundaryAndLoot (batch m08_taint_swarmer, timeout200), spiderTargetsAndLoot (batch m08_taint_spider, timeout200). All use native entity ticks, declared actual actors/biome inputs and actual physical loot; execution is pending.
+
+Post-integration native audit (fixes implemented; new run pending):
+- Native NearestAttackableTargetGoal mustSee=false controls continuation but
+  its separate targetConditions still checks LOS at acquisition. The owned
+  OriginalPlayerTarget explicitly calls ignoreLineOfSight, retaining original
+  vulnerable-player12 search rather than weakening the wall-target assertion.
+- Native refreshDimensions/fudgePositionAfterSizeChange preserves old centre
+  and shifts feet when growing; original setSize+setPosition preserves feet.
+  The Spore override retains exact anchored XYZ and tests alive/support at1201.
+- Original EntityLivingBase.sv.aF increments deathTime then awards XP exactly20.
+  Modern LivingEntity awards at die and ExperienceOrb.award adds WORLD nextInt40
+  per split. Scoped OriginalTaintExperience suppresses immediate actor rewards,
+  performs original recent-player/can-drop/DOMOBLOOT checks on20, then emits
+  canonical native XP orbs directly with original independent Math.random
+  scatter. Spider2 and Swarmer10 award at20; ordinary Spore bursts/removes at1
+  and therefore0XP. No global XP rewrite, merge-roll fixture normalization or
+  free/public enqueue-by-position is introduced. Native Sculk consumed-XP gate
+  is retained to prevent a second reward. Original five equipment slots are
+  remembered before native drops clear them; actual <=1 chances and reward
+  RNG are evaluated at20. Native dropCustomDeathLoot/setItemSlot do not reset
+  chances; guaranteed>1 equipment stays excluded. Offhand adds no XP.
+- Claimed deathTime20 precedes ADD/save callbacks. Exact-source reentry returns
+  without a second reward; actual native XP candidate pickup requires world
+  admission. Each canonical split gets one native ADD, and a rejected unused
+  UUID uses the existing generic recovery. No retry/refund is added to original
+  mob XP veto behavior. Before each next split the same world/source-level and
+  loaded birth chunk are checked, without forcing unavailable terrain.
+- Runtime cases now assert no immediate/19-tick XP, exact20 terminal reward,
+  actual XP ADD/source tick reentry and denied pre-admission pickup, plus
+  ordinary Spore's absence of XP after its death1 rupture. Original loot/world
+  draws remain strict; no native WORLD40 rolls were added to expected inputs.
+
+The first integrated local/CI run exposed these three native deviations. These
+fixes have not yet passed a subsequent build/runtime run; client rendering,
+physical multiplayer and survival acquisition remain unverified.

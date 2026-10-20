@@ -55,6 +55,9 @@ public final class BiomeRuntimeChecks {
         var presets=registries.registryOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
         var source=MultiNoiseBiomeSource.createFromPreset(presets.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD));
         var nether=MultiNoiseBiomeSource.createFromPreset(presets.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER));
+        var compatibleKey=ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST,ResourceLocation.fromNamespaceAndPath("thaumcraft_gametest","overworld_compatible"));
+        var compatible=MultiNoiseBiomeSource.createFromPreset(presets.getHolderOrThrow(compatibleKey));
+        test.assertTrue(compatible.possibleBiomes().stream().noneMatch(holder->holder.is(ThaumcraftBiomes.MAGICAL_FOREST)||holder.is(ThaumcraftBiomes.EERIE)||holder.is(ThaumcraftBiomes.TAINT)),"a genuine differently keyed native parameter-list using compatible OVERWORLD preset acquires no TC4 palette entries");
         var direct=MultiNoiseBiomeSource.createFromList(new Climate.ParameterList<>(List.of(Pair.of(Climate.parameters(0,0,0,0,0,0,0),biomes.getHolderOrThrow(Biomes.PLAINS)))));
         var noise=RandomState.create(registries.registryOrThrow(Registries.NOISE_SETTINGS).getOrThrow(NoiseGeneratorSettings.OVERWORLD),registries.lookupOrThrow(Registries.NOISE),912873);
         test.assertTrue(source.possibleBiomes().containsAll(List.of(forest,eerie,taint)),"real canonical Overworld source advertises TC4 holders for native feature sorting");
@@ -65,6 +68,7 @@ public final class BiomeRuntimeChecks {
             foundForest|=found.is(ThaumcraftBiomes.MAGICAL_FOREST);foundTaint|=found.is(ThaumcraftBiomes.TAINT);
             test.assertTrue(!found.is(ThaumcraftBiomes.EERIE),"Eerie has no climate ticket; DARK ecology must create it");
             test.assertTrue(direct.getNoiseBiome(x,16,z,noise.sampler()).is(Biomes.PLAINS),"direct native custom source remains its genuine single-biome palette");
+            var other=compatible.getNoiseBiome(x,16,z,noise.sampler());test.assertTrue(!other.is(ThaumcraftBiomes.MAGICAL_FOREST)&&!other.is(ThaumcraftBiomes.EERIE)&&!other.is(ThaumcraftBiomes.TAINT),"differently keyed compatible source remains native across actual seeded climate queries");
         }
         test.assertTrue(foundForest&&foundTaint,"bounded native worldseed/sample grid reaches both actual WARM/COOL TC4 biome tickets");
         // Recreate the actual source and native seeded noise state, then query
@@ -74,6 +78,44 @@ public final class BiomeRuntimeChecks {
         var sameNoise=RandomState.create(registries.registryOrThrow(Registries.NOISE_SETTINGS).getOrThrow(NoiseGeneratorSettings.OVERWORLD),registries.lookupOrThrow(Registries.NOISE),912873);
         for(int x=512;x>=-512;x-=64)for(int z=512;z>=-512;z-=64)test.assertTrue(source.getNoiseBiome(x,16,z,noise.sampler()).unwrapKey().equals(copy.getNoiseBiome(x,16,z,sameNoise.sampler()).unwrapKey()),"real seeded source result survives independent sampler and reverse query order");
         test.succeed();
+    }
+    private static void darkPlants(GameTestHelper test,BlockPos origin) {
+        var level=test.getLevel();Map<BlockPos,BlockState> saved=new LinkedHashMap<>();
+        var bounds=new net.minecraft.world.phys.AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(origin.offset(-2,-1,-2)),net.minecraft.world.phys.Vec3.atLowerCornerOf(origin.offset(3,3,3)));
+        var prior=new java.util.HashSet<java.util.UUID>();level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,bounds).forEach(item->prior.add(item.getUUID()));
+        for(var mutable:BlockPos.betweenClosed(origin.offset(-2,-1,-2),origin.offset(2,2,2))){var pos=mutable.immutable();test.assertTrue(level.getBlockEntity(pos)==null,"opaque plant-soil fixture has no existing BE");saved.put(pos,level.getBlockState(pos));}
+        try {
+            for(var pos:saved.keySet()) {
+                boolean wall=Math.abs(pos.getX()-origin.getX())==2||Math.abs(pos.getZ()-origin.getZ())==2||pos.getY()==origin.getY()-1||pos.getY()==origin.getY()+2;
+                level.setBlock(pos,wall?Blocks.STONE.defaultBlockState():Blocks.AIR.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
+            }
+            level.setBlock(origin.below(),Blocks.GRASS_BLOCK.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
+            awaitDarkPlants(test,origin,saved,bounds,prior,0);
+        } catch(RuntimeException|Error failure) {restorePlants(level,saved,bounds,prior);throw failure;}
+    }
+    private static void awaitDarkPlants(GameTestHelper test,BlockPos origin,Map<BlockPos,BlockState> saved,net.minecraft.world.phys.AABB bounds,java.util.Set<java.util.UUID> prior,int waited) {
+        var level=test.getLevel();
+        try {
+            if((level.canSeeSky(origin)||level.getRawBrightness(origin,0)>=8)&&waited<40){test.runAfterDelay(2,()->awaitDarkPlants(test,origin,saved,bounds,prior,waited+2));return;}
+            test.assertTrue(level.isEmptyBlock(origin)&&!level.canSeeSky(origin)&&level.getRawBrightness(origin,0)<8,"real opaque enclosure reaches native darkness before any self-luminous plant is inserted");
+            var plants=List.<Block>of(ThaumcraftBiomes.VISHROOM.get(),ThaumcraftPlants.SHIMMERLEAF.get(),ThaumcraftPlants.CINDERPEARL.get());
+            for(var plant:plants)test.assertTrue(plant.defaultBlockState().canSurvive(level,origin),"original Forge BlockBush soil rule admits each actual plant in unmodified native darkness: "+plant);
+            for(var plant:plants){
+                level.setBlock(origin.below(),Blocks.GRASS_BLOCK.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
+                level.setBlock(origin,plant.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
+                level.getBlockState(origin).randomTick(level,origin,RandomSource.create(715));
+                test.assertTrue(level.getBlockState(origin).is(plant),"actual random tick retains the grass-supported plant under the real roof");
+                level.setBlock(origin.below(),Blocks.STONE.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
+                test.assertTrue(!plant.defaultBlockState().canSurvive(level,origin),"removing original plains/desert soil still invalidates each luminous plant");
+                level.getBlockState(origin).randomTick(level,origin,RandomSource.create(716));
+                test.assertTrue(level.isEmptyBlock(origin),"actual invalid-soil random tick removes the real plant");
+            }
+        } catch(RuntimeException|Error failure) {restorePlants(level,saved,bounds,prior);throw failure;}
+        restorePlants(level,saved,bounds,prior);test.succeed();
+    }
+    private static void restorePlants(net.minecraft.server.level.ServerLevel level,Map<BlockPos,BlockState> saved,net.minecraft.world.phys.AABB bounds,java.util.Set<java.util.UUID> prior) {
+        saved.forEach((pos,state)->level.setBlock(pos,state,Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE));
+        level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,bounds,item->!prior.contains(item.getUUID())).forEach(net.minecraft.world.entity.Entity::discard);
     }
     public static void treesAndDungeon(GameTestHelper test) {
         var level=test.getLevel();var origin=new BlockPos(test.absolutePos(BlockPos.ZERO).getX()+8,180,test.absolutePos(BlockPos.ZERO).getZ()+8);
@@ -102,7 +144,7 @@ public final class BiomeRuntimeChecks {
             test.assertTrue(occupied>0&&occupied<=8,"actual original eight weighted random slot writes produce native rewards, with overwrite semantics");
             test.assertTrue(saved.keySet().stream().anyMatch(pos->level.getBlockState(pos).is(Blocks.COBWEB)),"actual original50-attempt branch emits connected native cobwebs");
         } finally {for(var pos:saved.keySet())level.removeBlockEntity(pos);saved.forEach((pos,state)->level.setBlock(pos,state,2|Block.UPDATE_KNOWN_SHAPE));level.random.setSeed(resume);}
-        test.succeed();
+        darkPlants(test,origin);
     }
     private static void clear(net.minecraft.server.level.ServerLevel level,Map<BlockPos,BlockState> saved) {for(var pos:saved.keySet()){level.removeBlockEntity(pos);level.setBlock(pos,Blocks.AIR.defaultBlockState(),2|Block.UPDATE_KNOWN_SHAPE);}}
     private static void soil(net.minecraft.server.level.ServerLevel level,BlockPos origin) {for(var pos:BlockPos.betweenClosed(origin.offset(-4,-1,-4),origin.offset(4,-1,4)))level.setBlock(pos,Blocks.DIRT.defaultBlockState(),2|Block.UPDATE_KNOWN_SHAPE);}

@@ -34,7 +34,7 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
         int chunkX = context.origin().getX() & ~15;
         int chunkZ = context.origin().getZ() & ~15;
         if (!level.hasChunkAt(new BlockPos(chunkX + 8, level.getMinBuildHeight(), chunkZ + 8))) return false;
-        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, chunkX + 8, chunkZ + 8);
+        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, chunkX + 8, chunkZ + 8);
         if (biome(level, chunkX + 8, top, chunkZ + 8).is(BLACKLIST)) return false;
         RandomSource random = context.random();
         boolean placed = false;
@@ -43,7 +43,7 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
         if (random.nextInt(60) == 3) {
             int x = chunkX + random.nextInt(16);
             int z = chunkZ + random.nextInt(16);
-            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             if (MagicalTreeBiomeAdapter.silverwood(biome(level, x, y, z))) {
                 placed = new WorldGenSilverwoodTrees(false, 7, 4).generate(level, random, new BlockPos(x, y, z));
             }
@@ -51,7 +51,7 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
         if (random.nextInt(25) == 7) {
             int x = chunkX + random.nextInt(16);
             int z = chunkZ + random.nextInt(16);
-            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             if (MagicalTreeBiomeAdapter.greatwoodChance(biome(level, x, y, z)) > random.nextFloat()) {
                 placed |= new WorldGenGreatwoodTrees(false).generate(level, random, new BlockPos(x, y, z), random.nextInt(8) == 0);
             }
@@ -60,7 +60,7 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
         // only hot sand-top biomes consume the one-in30 flower draw. The native
         // tag explicitly maps vanilla desert and permits a declared addon mapping.
         int flowerX = chunkX + random.nextInt(16), flowerZ = chunkZ + random.nextInt(16);
-        int flowerY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, flowerX, flowerZ);
+        int flowerY = level.getHeight(Heightmap.Types.WORLD_SURFACE, flowerX, flowerZ);
         var flowerBiome = biome(level, flowerX, flowerY, flowerZ);
         if (flowerY < level.getMaxBuildHeight() && flowerBiome.is(CINDERPEARL) && flowerBiome.value().getBaseTemperature() > 1 && random.nextInt(30) == 0) {
             placed |= WorldGenCustomFlowers.place(level, random, new BlockPos(flowerX, flowerY, flowerZ), ThaumcraftPlants.CINDERPEARL.get()) > 0;

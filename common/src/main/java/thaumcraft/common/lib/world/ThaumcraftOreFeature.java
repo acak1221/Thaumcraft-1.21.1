@@ -63,7 +63,7 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
          * cinnabar nextInt(actualHeight/5), infused nextInt(max(5,surface-5)).
          * actualHeight is 1.21's level.getHeight() (384 in vanilla Overworld),
          * so cinnabar is Y 0..75, not -64..11 and not artificially capped at 50.
-         * WORLD_SURFACE_WG is the first-free surface Y, including water/leaves.
+         * WORLD_SURFACE is the live first-free surface Y, including water/leaves.
          * Amber can go below zero in low terrain. Out-of-world samples are
          * skipped, never clamped; an exotic height<5 uses bound1, never bound0.
          * No extra deepslate pass, attempt scaling, retrogen or old-seed identity.
@@ -117,7 +117,7 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
     }
 
     private static int surface(WorldGenLevel level, int x, int z) {
-        return level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+        return level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
     }
 
     private static Holder<Biome> surfaceBiome(WorldGenLevel level, int x, int top, int z) {

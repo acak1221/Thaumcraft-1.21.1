@@ -1,34 +1,34 @@
-## Текущая работа — 20.10.2026, после ed66820
+## Текущая работа — 20.10.2026, исправления после fc1f8ff
 
-GitHub-прогон ed66820 прошёл сборку/unit checks, но остановился до GameTest XML:
-SpawnEggItem запросил ещё не зарегистрированный тип taint_spider. Исправлен
-порядок ThaumcraftTaint: blocks → entities → items. После этого actual main и
-Fabric GameTest sources компилируются (43s,.tmp/taint-bootstrap-order-compile.log).
-Сам игровой прогон ed66820 не принят. Предыдущий d17b966 имел242/243 PASS;
-его Hungry fixture уже исправлен настоящим грунтом перед heightmap/ray проверкой.
-Полностью принятый серверный baseline пока b1e49f2 (648JUnit/212GameTest/79Python),
-run39409582347. PASS прежних входов не переносится на нынешний код.
+GitHub-прогон `fc1f8ff` выполнил 261 игровой сценарий: 255 PASS, 6 FAIL.
+[Точный прогон](https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39426400166).
+Исправлены acquisition LOS заражённого паука, исходная deathTime20 выдача опыта
+у opt-in Taint actors, положение Spore при росте и актуальные heightmaps декораторов.
+Убрано отсутствовавшее в original Forge ограничение освещения Vishroom/custom plants.
+Падающий crust сохраняет исходное округление float на больших координатах;
+fixture теперь ставит опору в его действительном столбце. Hungry chest fixture
+учитывает настоящий native split RNG после шести исходных ray draws.
 
-Активирована совместная группа: Taint crust/soil/fibres/falling, Spider/Spore/
-Swarmer/Swarm/Taintacle/Small; actual Magical Forest/Eerie/Taint с native worldgen,
-spawn settings/Vishroom/decorators; PURE/DARK/TAINTED ecology, Silverwood knots,
-общий all-type NodeGeneration; Primal Focus/Seeker/Orb и отдельный direct renderer
-его animated depth/outer shell. Новые aspect/name/book/model/attribute/bootstrap
-связи подключены. Vanilla bootstrap guard не запрашивает ещё не созданные TC4
-biome holders; естественная генерация и feature indices используют явный порядок.
-Manifest теперь требует261 actual Fabric GameTest; новые сценарии ещё не приняты.
-Локально918JUnit без failures/errors/skips; Main/Fabric/gameTest/clientTest
-компиляция успешна (.tmp/taint-biome-core-compile-5.log,53s). Исторический
-ALL90 aspect-row digest сохранён; восемь новых записей проверены отдельно.
-Python84PASS; references missing0 (2738atlas/model texture refs,1139model refs).
-Inventory887native mainJava; metadata ledger1044needs_review. Это не процент
-переноса и не автоматическое признание исходных классов завершёнными.
+После этих изменений локально: **918 JUnit / 84 Python PASS**, ресурсы missing0;
+main/Fabric/gameTest/clientTest компилируются. Полный native прогон в НОВОМ мире
+дал **260/262 PASS**, `.tmp/core-native-parity-fixes-runtime.log` (3m53s).
+Оставшиеся два fixture сбоя исправлены: настоящий login grace игрока до mobAttack
+и восстановленная creative-wrapper detached ссылка на уже потраченную жемчужину.
+Добавлена actual pending-death reload проверка: исходный recent-player timer тоже
+не сохранялся в1.7, поэтому после нового экземпляра XP0; eligibility не изобретается.
+Повторный полный GitHub-прогон следующего commit обязателен; эти новые assertions
+пока не приняты. После финальных fixture изменений все source sets снова скомпилированы
+(.tmp/core-native-parity-final-compile.log,23s). Manifest требует **262** actual Fabric GameTest.
 
-Субагенты продолжают отдельные draft-группы: заражённые животные/Thaumic Slime/
-original wooden-door villages; Brain in a Jar; Spa/Bath Salts/Purifying Fluid/
-Soap/Rites; original Overworld structures. Они не входят в текущие source sets.
-Реальные client visuals, full survival/multiplayer и NeoForge остаются открытыми.
-Fabric first; продолжать после этого checkpoint до полного переноса.
+Inventory888native mainJava; legacy934: partial34/pending900/complete0.
+Ledger1044needs_review — metadata, не процент или автоматическая приёмка переноса.
+Последний полностью принятый серверный baseline пока `b1e49f2`
+(648JUnit/212GameTest/79Python), run39409582347; его PASS не переносится на новые входы.
+Текущая группа Taint/биомы/ecology/Primal активна; Spa/Soap/Rites, BrainJar,
+заражённые животные/Slime/villages и структуры остаются изолированными drafts.
+Субагенты также пишут actual культистов, их снаряжение и champion mechanics.
+Реальные client visuals, полная survival/multiplayer-прогрессия и NeoForge открыты.
+Fabric first; после checkpoint сразу продолжать до полного переноса.
 
 Следующие записи сохраняют историю прежних срезов; актуальные результаты указаны выше.
 

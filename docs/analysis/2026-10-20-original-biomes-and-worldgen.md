@@ -103,7 +103,7 @@ entire-tree skip. Need both before full decoration acceptance.
 
 Vishroom absent from actual plants (onlymetadata2/3 currently): new actual
 block/item idvishroom, old .1..9 x/z bounds,height.8, no collision, light8,
-plains-soil/light stay checks, exactcontact CONFUSION200/amp0 for living mobs,
+original Forge plains-soil stay checks, exactcontact CONFUSION200/amp0 for living mobs,
 ordinary self drops/fire spread60/flammability100. Client original FXWisp
 purple .1/shrink/gravity.015 at1/3 animate gate; actual manashroom texture.
 
@@ -275,6 +275,72 @@ Current validation evidence: parent completed common/Fabric production and
 all native source-set compilation,918 JUnit PASS,261 GameTest wrappers
 compiled. Biome policy/settings/ordered-spawn unit tests are part of that
 run. Actual new biome server GameTests are pending immutable GitHub replay;
-all biome client visuals remain uninspected. An extra differently keyed
-compatible-preset negative fixture is queued only in .tmp for a later
-CI-fix window and is NOT part of this compiled snapshot.
+all biome client visuals remain uninspected.
+
+## Native replay findings and current correction
+
+Immutable fc1f8ff GitHub run39426400166/job118639950424 executed261 native
+cases (255 passed,6 failed). The same natural-plant assertion also failed in
+the parent's full local replay. Saved natural-region chunks contained24 real
+Vishrooms and zero ManaPods; this was a production heightmap error, not an
+absent biome feature or an acquisition fixture that needed inserted plants.
+
+Native ProtoChunk.setBlockState updates its persisted status's heightmaps.
+From CARVERS onward those are FINAL_HEIGHTMAPS: WORLD_SURFACE/OCEAN_FLOOR,
+not WORLD_SURFACE_WG/OCEAN_FLOOR_WG. The WG terrain height therefore did not
+rise when the forest's real trees were committed. WorldGenManaPods ended its
+upward search at ground height before reaching any actual hanging support.
+The correction uses the live final native heightmaps for the original
+post-tree getHeight queries and the biome decorator's ordered passes. The
+same narrow correction covers both generation-region biome-column queries,
+the existing global tree/Cinderpearl pass's four current-height queries and
+the existing ore pass's original live terrain bound. It
+preserves original64/128 limits, ten attempts, branch gates and RNG calls.
+Native surface-height/block classification remains a declared1.21 terrain
+adapter; this does not assert1.7 heightmap or seed identity.
+
+The natural replay still requests the same25 fresh chunks and requires both
+actual Vishrooms and typed ManaPods. It finishes generating the declared
+region before inspecting it, since a later neighbor's feature pass can write
+into a chunk already observed. Counts are logged before assertions so a
+future failure identifies the missing natural content. No fixture plant,
+tree, biome replacement or weakened natural-presence assertion was added.
+
+Independent oracle audit of official Forge1.7.10 BlockBush.canBlockStay shows
+soil.canSustainPlant alone, with no brightness/sky predicate. TC4's
+BlockCustomPlant inherits it. The extra native brightness>=8 or sky gate is
+removed for Vishroom, Shimmerleaf and Cinderpearl; their actual original
+plains/desert soil differences remain. Existing trees/dungeon native replay
+now additionally encloses real grass in opaque stone, waits at most40 real
+ticks for native darkness before placing any self-luminous plant, verifies
+all three actual states survive there, and invokes real random ticks with
+supported and invalid stone soil. All enclosure blocks and newly emitted
+test drops are cleaned up. This is a declared soil-rule fixture, not natural
+acquisition evidence.
+
+The existing source replay now loads an actual differently keyed native
+parameter-list resource using preset minecraft:overworld and verifies both
+its possible-biome palette and seeded results remain native. This extends the
+direct/custom/Nether negatives without adding a source-harness replacement.
+
+These corrections and new assertions are implemented, with compilation and
+fresh native server replay pending. Existing source/trees tests passed the
+previous replay; the failed natural acquisition/spawn tail has not passed
+yet. No client visuals have been inspected.
+
+
+Current local replay of the corrected sources: all262 native cases ran,260
+passed and2 failed in other units (Hungry-node Pearl fixture and Taint Spider
+attack fixture). All three actual biome wrappers PASS: source/palette/spawn
+rows including differently keyed compatible-preset isolation; real trees,
+Greatwood dungeon and opaque-roof plant soil/random ticks; fresh-world natural
+forest acquisition and native weighted Pech population. Actual fresh core
+(6400,67,8192),25 chunks:537 oak logs,760 magical logs,13 Vishrooms and4 typed
+ManaPods. The same test harvested a generated pod, obtained its real native
+dropped beans, replanted an owned bean, and admitted a genuine native Pech
+after11 unforced weighted population callbacks. Evidence:
+.tmp/core-native-parity-fixes-runtime.log and fabric/build/gametest-results.xml.
+The parent reset the local GameTest world before this replay, so persisted
+pre-fix FULL chunks were not reused. These are actual local server results
+for this corrected snapshot; final immutable GitHub replay remains pending.
+Biome client colors, foliage, plant models and particles remain uninspected.

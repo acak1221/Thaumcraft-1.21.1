@@ -42,7 +42,7 @@ public record FocusData(ItemStack focus) {
                     || stack.getItem() instanceof ItemFocusFrost || stack.getItem() instanceof ItemFocusShock
                     || stack.getItem() instanceof ItemFocusPortableHole || stack.getItem() instanceof ItemFocusWarding
                     || stack.getItem() instanceof ItemFocusTrade || stack.getItem() instanceof ItemFocusHellbat
-                    || stack.getItem() instanceof ItemFocusPech)
+                    || stack.getItem() instanceof ItemFocusPech || stack.getItem() instanceof ItemFocusPrimal)
                 && !stack.has(ThaumcraftFoci.WAND_FOCUS.get())
                 && !stack.has(ThaumcraftContent.WAND_DATA.get())
                 && FocusUpgradeData.supportedForFocus(stack);

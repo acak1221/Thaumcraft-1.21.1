@@ -95,6 +95,7 @@ public final class ThaumcraftNaturals {
             // FireBlock takes spread/encouragement first, flammability second.
             fire.setFlammable(GREATWOOD_LOG.get(), 5, 5);
             fire.setFlammable(SILVERWOOD_LOG.get(), 5, 5);
+            fire.setFlammable(ThaumcraftContent.SILVERWOOD_KNOT.get(), 5, 5);
             fire.setFlammable(GREATWOOD_PLANKS.get(), 5, 20);
             fire.setFlammable(SILVERWOOD_PLANKS.get(), 5, 20);
             fire.setFlammable(GREATWOOD_LEAVES.get(), 30, 60);

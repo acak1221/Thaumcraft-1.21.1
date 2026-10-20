@@ -490,6 +490,106 @@
       "aspects": {"terra": 1, "perditio": 3, "vitreus": 2}
     },
     {
+      "original_source_line": 381,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTaint",
+      "original_metadata": 0,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native taint_crust flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:taint_crust"
+      ],
+      "aspects": {
+        "arbor": 1,
+        "vitium": 3
+      }
+    },
+    {
+      "original_source_line": 382,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTaint",
+      "original_metadata": 1,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native taint_soil flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:taint_soil"
+      ],
+      "aspects": {
+        "terra": 1,
+        "vitium": 3
+      }
+    },
+    {
+      "original_source_line": 383,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTaintFibres",
+      "original_metadata": 0,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native taint_fibres flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:taint_fibres"
+      ],
+      "aspects": {
+        "victus": 1,
+        "vitium": 2
+      }
+    },
+    {
+      "original_source_line": 384,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTaintFibres",
+      "original_metadata": 1,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native taint_grass flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:taint_grass"
+      ],
+      "aspects": {
+        "herba": 1,
+        "vitium": 1
+      }
+    },
+    {
+      "original_source_line": 385,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTaintFibres",
+      "original_metadata": 2,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native taint_plant flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:taint_plant"
+      ],
+      "aspects": {
+        "herba": 1,
+        "vitium": 1
+      }
+    },
+    {
+      "original_source_line": 386,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTaintFibres",
+      "original_metadata": 3,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native taint_spore_stalk flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:taint_spore_stalk"
+      ],
+      "aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      }
+    },
+    {
+      "original_source_line": 387,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockTaintFibres",
+      "original_metadata": 4,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native taint_spore_stalk_mature flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:taint_spore_stalk_mature"
+      ],
+      "aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      }
+    },
+    {
       "original_source_line": 389, "registration": "direct", "original_target": "ConfigBlocks.blockMagicalLog", "original_metadata": 0,
       "identifier_evidence": "Original greatwood log variant, flattened to the native magical-tree block item; overrides earlier logWood arbor4",
       "modern_ids": ["thaumcraft:greatwood_log"],
@@ -536,6 +636,21 @@
       "identifier_evidence": "Original cinderpearl, now an actual native hot-desert plant",
       "modern_ids": ["thaumcraft:cinderpearl"],
       "aspects": {"herba": 2, "ignis": 2, "praecantatio": 2}
+    },
+    {
+      "original_source_line": 397,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomPlant",
+      "original_metadata": 5,
+      "identifier_evidence": "Original ConfigAspects literal metadata; actual native vishroom flattens the same original block state.",
+      "modern_ids": [
+        "thaumcraft:vishroom"
+      ],
+      "aspects": {
+        "herba": 2,
+        "venenum": 1,
+        "praecantatio": 2
+      }
     },
     {
       "original_source_line": 398, "registration": "direct", "original_target": "ConfigBlocks.blockCosmeticSolid", "original_metadata": 6,

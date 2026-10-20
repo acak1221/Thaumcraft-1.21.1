@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.items.wands.WandMaterials;
+import thaumcraft.client.renderers.item.PrimalWandFocusRenderer.Geometry;
 import thaumcraft.common.items.wands.WandModels;
 
 /**
@@ -55,7 +56,7 @@ class WandModelAssetsTest {
                 JsonObject model = json("assets/thaumcraft/models/item/" + chosen.substring("thaumcraft:item/".length()) + ".json");
                 JsonObject textures = model.getAsJsonObject("textures");
                 // A staff is drawn with the long staff shape and the skin of the plain rod it is made from.
-                String shape = (rod.staff() ? "thaumcraft:item/staff" : "thaumcraft:item/wand") + (focus.suffix().isEmpty() ? "_shape" : "_focus_shape");
+                String shape = (rod.staff() ? "thaumcraft:item/staff" : "thaumcraft:item/wand") + (focus.suffix().isEmpty() ? "_shape" : focus.equals(WandModels.PRIMAL) ? "_primal_shape" : "_focus_shape");
                 if (!textures.get("rod").getAsString().equals("thaumcraft:models/wand_rod_" + rod.baseTag())
                         || !textures.get("cap").getAsString().equals("thaumcraft:models/wand_cap_" + cap.tag())
                         || textures.has("focus") != !focus.suffix().isEmpty()
@@ -83,7 +84,7 @@ class WandModelAssetsTest {
         assertEquals(.25F, WandModels.capValue("gold"), 0F);
         assertEquals(.5F, WandModels.capValue("thaumium"), 0F);
         assertEquals(.75F, WandModels.capValue("void"), 0F);
-        assertEquals(List.of(0F, .25F, .5F, .75F, .8125F, .875F, .9375F, .953125F, .96875F, 1F), WandModels.FOCI.stream().map(WandModels.Focus::value).toList());
+        assertEquals(List.of(0F, .25F, .5F, .75F, .8125F, .875F, .9375F, .953125F, .96875F, .984375F, 1F), WandModels.FOCI.stream().map(WandModels.Focus::value).toList());
     }
 
     @Test void everyNamedModelExistsWithItsParentAndTextures() throws Exception {
@@ -93,11 +94,12 @@ class WandModelAssetsTest {
             assertTrue(name.startsWith("thaumcraft:item/"), name);
             JsonObject model = json("assets/thaumcraft/models/item/" + name.substring("thaumcraft:item/".length()) + ".json");
             String parent = model.get("parent").getAsString();
-            boolean withFocus = parent.equals("thaumcraft:item/wand_focus_shape") || parent.equals("thaumcraft:item/staff_focus_shape");
+            boolean withFocus = parent.equals("thaumcraft:item/wand_focus_shape") || parent.equals("thaumcraft:item/staff_focus_shape")
+                    || parent.equals("thaumcraft:item/wand_primal_shape") || parent.equals("thaumcraft:item/staff_primal_shape");
             assertTrue(withFocus || parent.equals("thaumcraft:item/wand_shape") || parent.equals("thaumcraft:item/staff_shape"), name + " has the parent " + parent);
             assertEquals(name.endsWith("_fire") || name.endsWith("_excavation") || name.endsWith("_frost") || name.endsWith("_shock")
                     || name.endsWith("_warding") || name.endsWith("_trade") || name.endsWith("_portable_hole")
-                    || name.endsWith("_hellbat") || name.endsWith("_pech"), withFocus, name);
+                    || name.endsWith("_hellbat") || name.endsWith("_pech") || name.endsWith("_primal"), withFocus, name);
             JsonObject textures = model.getAsJsonObject("textures");
             assertEquals(withFocus ? 3 : 2, textures.size(), name);
             for (String key : textures.keySet()) {
@@ -105,7 +107,7 @@ class WandModelAssetsTest {
                 assertTrue(exists("assets/thaumcraft/textures/" + texture.substring("thaumcraft:".length()) + ".png"), name + ": texture " + texture);
             }
         }
-        for (String shape : List.of("wand_shape", "wand_focus_shape", "staff_shape", "staff_focus_shape")) assertTrue(exists("assets/thaumcraft/models/item/" + shape + ".json"), shape);
+        for (String shape : List.of("wand_shape", "wand_focus_shape", "wand_primal_shape", "staff_shape", "staff_focus_shape", "staff_primal_shape")) assertTrue(exists("assets/thaumcraft/models/item/" + shape + ".json"), shape);
     }
 
     @Test void everyRodHasItsItemModelAndTextures() throws Exception {
@@ -119,5 +121,29 @@ class WandModelAssetsTest {
             assertTrue(exists("assets/thaumcraft/textures/models/wand_rod_" + rod.baseTag() + ".png"), rod.tag() + " model skin");
         }
         for (var cap : WandMaterials.CAPS) assertTrue(exists("assets/thaumcraft/textures/models/wand_cap_" + cap.tag() + ".png"), cap.tag());
+    }
+
+    @Test void primalDepthUsesOriginalSeparateInnerCubeWhileKeepingBodyGeometry() throws Exception {
+        for (String kind : List.of("wand", "staff")) {
+            JsonObject shape = json("assets/thaumcraft/models/item/" + kind + "_primal_shape.json");
+            assertEquals("thaumcraft:item/" + kind + "_shape", shape.get("parent").getAsString());
+            assertEquals(1, shape.size(), "inherit exact original body/display only; direct renderer owns both focus cubes without an atlas/opaque-cube substitute");
+            double[][] bounds = Geometry.depthBounds(kind.equals("staff"));
+            double[] expectedFrom = kind.equals("wand") ? new double[]{6.72, 15.41, 6.72} : new double[]{6.68, 29.138, 6.68};
+            double[] expectedTo = kind.equals("wand") ? new double[]{9.28, 17.97, 9.28} : new double[]{9.32, 31.962, 9.32};
+            for (int axis = 0; axis < 3; axis++) {
+                assertEquals(expectedFrom[axis], bounds[0][axis], 1e-8, "original renderer depth scale/translation and native cap anchor");
+                assertEquals(expectedTo[axis], bounds[1][axis], 1e-8);
+            }
+        }
+        JsonArray frames = json("assets/thaumcraft/textures/items/focus_primal_depth.png.mcmeta").getAsJsonObject("animation").getAsJsonArray("frames");
+        int[] actual = Geometry.frames(); assertEquals(frames.size(), actual.length);
+        for (int index = 0; index < actual.length; index++) {
+            assertEquals(frames.get(index).getAsInt(), actual[index], "native direct-texture sequence retains original repeated atlas frames");
+            assertEquals(actual[index], Geometry.frame(index));
+        }
+        actual[0] = 29; assertEquals(0, Geometry.frame(0), "external inspection cannot change live animation data");
+        assertEquals(29, Geometry.frame(35)); assertEquals(0, Geometry.frame(36));
+        assertEquals(205, Geometry.pulse(0)); assertEquals(213, Geometry.pulse(3)); assertEquals(195, Geometry.pulse(14));
     }
 }

@@ -14,6 +14,8 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import thaumcraft.common.config.ThaumcraftPlants;
+import thaumcraft.common.config.ThaumcraftBiomeSettings;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 
 /** One chunk's tree pass, from ThaumcraftWorldGenerator:459-472,563-584. */
 public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguration> {
@@ -26,7 +28,9 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
 
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
-        if (!surfaceDimension(level)) return false;
+        if (!surfaceDimension(level)||!ThaumcraftBiomeSettings.current().generateTrees()
+                || NodeEcologyPolicy.dimensionLevel(level.getLevel().dimension())!=-1
+                || level.getLevel().getChunkSource().getGenerator() instanceof FlatLevelSource) return false;
         int chunkX = context.origin().getX() & ~15;
         int chunkZ = context.origin().getZ() & ~15;
         if (!level.hasChunkAt(new BlockPos(chunkX + 8, level.getMinBuildHeight(), chunkZ + 8))) return false;

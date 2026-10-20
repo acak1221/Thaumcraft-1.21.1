@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "thaumcraft:blocks/taint_fibres",
+    "all": "thaumcraft:blocks/taint_fibres"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0.08,
+        0
+      ],
+      "to": [
+        16,
+        0.08,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#all",
+          "tintindex": 0
+        }
+      }
+    }
+  ]
+}

@@ -18,6 +18,7 @@ final class MagicalTreePlacement {
     final WorldGenLevel level;
     private final Map<BlockPos, BlockState> blocks = new LinkedHashMap<>();
     private boolean writable = true;
+    private final Map<BlockPos, NodeGeneration.Plan> nodes = new LinkedHashMap<>();
 
     MagicalTreePlacement(WorldGenLevel level) { this.level = level; }
 
@@ -35,6 +36,11 @@ final class MagicalTreePlacement {
         blocks.put(pos.immutable(), state);
     }
 
+    void node(BlockPos pos, NodeGeneration.Plan plan) {
+        if (!available(pos)) { writable = false; return; }
+        nodes.put(pos.immutable(), plan);
+    }
+
     void reject() { writable = false; }
 
     static boolean soil(BlockState state) { return state.is(BlockTags.DIRT) || state.is(Blocks.FARMLAND); }
@@ -47,13 +53,15 @@ final class MagicalTreePlacement {
         // lose supporting logs or mark every generated leaf persistent. Compute
         // the native 1..7 distance against the ACTUAL two-tier branches/trunks,
         // including already-present trees, before exposing any leaf to ticks.
-        blocks.replaceAll((pos, state) -> state.getBlock() instanceof BlockMagicalLeaves
-                ? state.setValue(LeavesBlock.DISTANCE, 7).setValue(LeavesBlock.PERSISTENT, false)
-                        .setValue(BlockMagicalLeaves.CHECK_DECAY, false) : state);
+        blocks.replaceAll((pos, state) -> {
+            if (!(state.getBlock() instanceof LeavesBlock)) return state;
+            state = state.setValue(LeavesBlock.DISTANCE, 7).setValue(LeavesBlock.PERSISTENT, false);
+            return state.hasProperty(BlockMagicalLeaves.CHECK_DECAY) ? state.setValue(BlockMagicalLeaves.CHECK_DECAY, false) : state;
+        });
         for (int pass = 0; pass < 6; pass++) {
             for (var entry : blocks.entrySet()) {
                 BlockState state = entry.getValue();
-                if (!(state.getBlock() instanceof BlockMagicalLeaves)) continue;
+                if (!(state.getBlock() instanceof LeavesBlock)) continue;
                 int distance = 7;
                 for (Direction direction : Direction.values()) {
                     BlockState neighbor = state(entry.getKey().relative(direction));
@@ -70,9 +78,16 @@ final class MagicalTreePlacement {
         // the brand-new canopy for decay before its support state is exposed.
         // Known-shape suppresses premature native distance cascades as well.
         for (boolean leaves : new boolean[] {false, true}) for (var entry : blocks.entrySet()) {
-            if ((entry.getValue().getBlock() instanceof BlockMagicalLeaves) == leaves) {
+            if ((entry.getValue().getBlock() instanceof LeavesBlock) == leaves) {
                 level.setBlock(entry.getKey(), entry.getValue(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
             }
+        }
+        // Real knot blocks and their shared TileNode exist before initializing the prepared original generation plan.
+        for (var entry : nodes.entrySet()) {
+            if (!level.getBlockState(entry.getKey()).is(thaumcraft.common.config.ThaumcraftContent.SILVERWOOD_KNOT.get())
+                    || !(level.getBlockEntity(entry.getKey()) instanceof thaumcraft.common.tiles.TileNode node))
+                throw new IllegalStateException("Committed Silverwood knot has no actual native TileNode at " + entry.getKey());
+            var plan = entry.getValue(); node.initializeGenerated(plan.aspects(), plan.type(), plan.modifier(), level);
         }
         return true;
     }

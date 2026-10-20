@@ -23,8 +23,9 @@ public final class WandModels {
     public static final Focus PORTABLE_HOLE = new Focus("portable_hole", .9375F);
     public static final Focus HELLBAT = new Focus("hellbat", .953125F);
     public static final Focus PECH = new Focus("pech", .96875F);
+    public static final Focus PRIMAL = new Focus("primal", .984375F);
     public static final Focus SHOCK = new Focus("shock", 1F);
-    public static final List<Focus> FOCI = List.of(NONE, OTHER, EXCAVATION, FROST, WARDING, TRADE, PORTABLE_HOLE, HELLBAT, PECH, SHOCK);
+    public static final List<Focus> FOCI = List.of(NONE, OTHER, EXCAVATION, FROST, WARDING, TRADE, PORTABLE_HOLE, HELLBAT, PECH, PRIMAL, SHOCK);
 
     /** At most 33 rods (places 0..32) and 5 caps (0..4) fit these scales; the JUnit test fails before a model silently goes wrong. */
     public static final float ROD_SCALE = 32F, CAP_SCALE = 4F;

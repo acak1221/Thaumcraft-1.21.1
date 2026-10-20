@@ -91,6 +91,15 @@ public final class ResourceParticle extends SingleQuadParticle {
         add(particle);
     }
 
+    /** Original BlockCustomPlant metadata5 animate branch; caller owns1/3 gate. */
+    public static void vishroom(Level world,BlockPos pos) {
+        if(!(world instanceof ClientLevel level))return;
+        var random=level.random;
+        double x=pos.getX()+.5F+spread(random,.4F),y=pos.getY()+.3F,z=pos.getZ()+.5F+spread(random,.4F);
+        var particle=wisp(level,x,y,z,.1F,-1,.015F,true);
+        particle.setColor(.5F,.3F,.8F);add(particle);
+    }
+
     public static final class NitorEffects implements TileNitor.ClientEffects {
         @Override public void tick(Level world, BlockPos pos) {
             if (!(world instanceof ClientLevel level)) return;

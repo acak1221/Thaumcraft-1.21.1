@@ -1,27 +1,18 @@
 package thaumcraft.common.lib.world;
 
-import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
-import thaumcraft.api.aspects.Aspect;
-import thaumcraft.api.aspects.AspectList;
-import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftNaturals;
 import thaumcraft.common.config.ThaumcraftPlants;
 
 /** Actual TC4 WorldGenSilverwoodTrees:31-164 (NOT WorldGenSilverwoodTreesOld). */
 public final class WorldGenSilverwoodTrees {
-    private static final AtomicLong SKIPPED_PURE_KNOTS = new AtomicLong();
-    private static final AtomicLong SKIPPED_KNOT_TREES = new AtomicLong();
     private final int minTreeHeight;
     private final int randomTreeHeight;
     private final boolean worldgen;
@@ -67,19 +58,16 @@ public final class WorldGenSilverwoodTrees {
         }
         int chance = (int)(height * 1.5);
         boolean lastBlock = false;
-        boolean pureKnot = false;
         for (int yy = 0; yy < height; yy++) {
             BlockPos pos = origin.above(yy);
             if (!MagicalTreePlacement.replaceableByLeaves(tree.state(pos))) continue;
             if (yy > 0 && !lastBlock && random.nextInt(chance) == 0) {
-                // No NORMAL node and no inert/counterfeit PURE knot is placed.
-                // Plan the wood-equivalent non-foliage state ONLY for the RNG
-                // environment calculation; the ENTIRE transaction is rejected
-                // below when any knot was selected. Never retry inside a roll.
-                log(tree, pos, Direction.Axis.Y);
-                consumePureNodeRoll(tree, pos, random);
-                pureKnot = true;
-                SKIPPED_PURE_KNOTS.incrementAndGet();
+                tree.put(pos, thaumcraft.common.config.ThaumcraftContent.SILVERWOOD_KNOT.get().defaultBlockState()
+                        .setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y));
+                var biome = BiomeColumns.surfaceHolder(level, pos.getX(), pos.getZ());
+                if (biome == null) return false;
+                tree.node(pos, NodeGeneration.plan(biome, pos, random, true, false, false,
+                        sample -> tree.available(sample) ? tree.state(sample) : null));
                 chance += height;
                 lastBlock = true;
             } else {
@@ -104,62 +92,11 @@ public final class WorldGenSilverwoodTrees {
         if (worldgen) {
             WorldGenCustomFlowers.plan(tree, random, origin, ThaumcraftPlants.SHIMMERLEAF.get());
         }
-        if (pureKnot) {
-            if (SKIPPED_KNOT_TREES.getAndIncrement() == 0) Thaumcraft.LOG.warn(
-                    "Silverwood PURE-knot ecology is pending: knot-bearing tree candidate skipped atomically, without NORMAL-node/log substitution or reroll; saplings are restored");
-            return false;
-        }
         return tree.finish();
     }
-
-    public static long skippedPureKnots() { return SKIPPED_PURE_KNOTS.get(); }
-    public static long skippedKnotTrees() { return SKIPPED_KNOT_TREES.get(); }
 
     private static void log(MagicalTreePlacement tree, BlockPos pos, Direction.Axis axis) {
         tree.put(pos, ThaumcraftNaturals.SILVERWOOD_LOG.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis));
     }
 
-    /**
-     * Consume createRandomNodeAt(silverwood=true):218-387 before continuing the
-     * trunk stream. This is RNG accounting, NOT an implementation of a PURE node.
-     * Biome types/environment use the declared native adapter, so cross-version
-     * seed identity is deliberately not claimed. No node block/entity is touched.
-     */
-    private static void consumePureNodeRoll(MagicalTreePlacement tree, BlockPos pos, RandomSource random) {
-        if (random.nextInt(9) == 0) random.nextInt(3); // Config.specialNodeRarity=18
-        int surface = tree.level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, pos.getX(), pos.getZ());
-        var biome = MagicalTreeBiomeAdapter.describe(ThaumcraftTreeFeature.biome(tree.level, pos.getX(), surface, pos.getZ()));
-        int aura = biome.aura() / 4;
-        random.nextInt(Math.max(1, aura / 2));
-        AspectList aspects = new AspectList();
-        Aspect tag = biome.randomTag(random);
-        var complex = Aspect.getCompoundAspects();
-        var basic = Aspect.getPrimalAspects();
-        if (tag != null) aspects.add(tag, 2);
-        else {
-            aspects.add(complex.get(random.nextInt(complex.size())), 1);
-            aspects.add(basic.get(random.nextInt(basic.size())), 1);
-        }
-        for (int i = 0; i < 3; i++) if (random.nextBoolean()) {
-            var pool = random.nextInt(18) == 0 ? complex : basic;
-            aspects.merge(pool.get(random.nextInt(pool.size())), 1);
-        }
-        aspects.merge(random.nextBoolean() ? Aspect.LIFE : Aspect.ORDER, 2);
-        int water = 0, lava = 0, stone = 0, foliage = 0;
-        for (BlockPos sample : BlockPos.betweenClosed(pos.offset(-5, -5, -5), pos.offset(5, 5, 5))) {
-            if (!tree.available(sample)) continue;
-            BlockState state = tree.state(sample);
-            if (state.getFluidState().is(FluidTags.WATER)) ++water;
-            else if (state.getFluidState().is(FluidTags.LAVA)) ++lava;
-            else if (state.is(Blocks.STONE)) ++stone;
-            if (state.is(BlockTags.LEAVES)) ++foliage;
-        }
-        if (water > 100) aspects.merge(Aspect.WATER, 1);
-        if (lava > 100) { aspects.merge(Aspect.FIRE, 1); aspects.merge(Aspect.EARTH, 1); }
-        if (stone > 500) aspects.merge(Aspect.EARTH, 1);
-        if (foliage > 100) aspects.merge(Aspect.PLANT, 1);
-        for (Aspect aspect : aspects.getAspectsSorted()) {
-            random.nextInt(aspects.getAmount(aspect) == 2 ? 25 : 50);
-        }
-    }
 }

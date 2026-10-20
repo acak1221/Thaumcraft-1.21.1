@@ -17,11 +17,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.config.ThaumcraftEssences;
+import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.tiles.TileNode;
 
 /**
- * BlockAiry:265-279, restricted to this port's implemented NORMAL/UNSTABLE/HUNGRY ordinary nodes.
+ * BlockAiry:265-279, ordinary aura nodes and real embedded Silverwood node knots.
  * 1.7 Forge calls onBlockHarvested even in creative, BEFORE removedByPlayer;
  * Block.dropBlockAsItem checks doTileDrops, not creative or Fortune. Native1.21
  * destroy runs after SUCCESSFUL removal, before its creative early return.
@@ -55,7 +56,8 @@ public final class NodeHarvest {
     public static void prepare(Level level, BlockPos pos, BlockState state, Player player, TileNode node) {
         if (!(level instanceof ServerLevel server) || player.level() != level || player.isSpectator()
                 || node == null || node.isRemoved() || node.getLevel() != level
-                || (node.getNodeType() != TileNode.NodeType.NORMAL && node.getNodeType() != TileNode.NodeType.UNSTABLE && node.getNodeType() != TileNode.NodeType.HUNGRY) || !server.hasChunkAt(pos)
+                || !state.is(ThaumcraftContent.AURA_NODE.get()) && !state.is(ThaumcraftContent.SILVERWOOD_KNOT.get())
+                || !server.hasChunkAt(pos)
                 || server.getBlockEntity(pos) != node || server.getBlockState(pos) != state
                 || !player.canInteractWithBlock(pos, 0) || !server.mayInteract(player, pos)) return;
         requireServerThread(server);

@@ -1,0 +1,12 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "FOCUSPRIMAL",
+  "pattern": ["CQC", "Q#Q", "CQC"],
+  "key": {
+    "C": {"item": "minecraft:diamond"},
+    "Q": {"item": "minecraft:quartz"},
+    "#": {"item": "thaumcraft:primal_charm"}
+  },
+  "vis": {"terra": 25, "perditio": 25, "ordo": 25, "aer": 25, "ignis": 25, "aqua": 25},
+  "result": {"id": "thaumcraft:focus_primal", "count": 1}
+}

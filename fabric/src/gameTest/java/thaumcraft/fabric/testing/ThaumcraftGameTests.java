@@ -1278,4 +1278,94 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.PrimalCharmRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "m02_taint_blocks")
+    public void taintBlocksPreserveOriginalSpreadLootAndFallingCustody(GameTestHelper test) {
+        thaumcraft.common.testing.TaintBlockRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_taint_spore_growth")
+    public void taintSporesGrowOnRealFibresAndBurstIntoActualSpiders(GameTestHelper test) {
+        thaumcraft.common.testing.TaintSporeRuntimeChecks.growthAndBurst(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_taint_swarmer")
+    public void taintSwarmersKeepOriginalBoundaryAndDeathLoot(GameTestHelper test) {
+        thaumcraft.common.testing.TaintSporeRuntimeChecks.swarmerBoundaryAndLoot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_taint_spider")
+    public void taintSpidersKeepOriginalTargetsAndLoot(GameTestHelper test) {
+        thaumcraft.common.testing.TaintSporeRuntimeChecks.spiderTargetsAndLoot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 180, batch = "m08_taint_swarm")
+    public void taintSwarmsPreserveOriginalFlightCombatAndSummonedLifetime(GameTestHelper test) {
+        thaumcraft.common.testing.TaintSwarmRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 140, batch = "m08_taintacle_combat")
+    public void taintaclesKeepOriginalCombatAndRootedAi(GameTestHelper test) {
+        thaumcraft.common.testing.TaintacleRuntimeChecks.combatAndRootedAi(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 140, batch = "m08_taintacle_lifetime")
+    public void taintaclesKeepOriginalRetaliationLifetimeAndLoot(GameTestHelper test) {
+        thaumcraft.common.testing.TaintacleRuntimeChecks.retaliationLifetimeAndLoot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 140, batch = "m08_taintacle_spawn")
+    public void taintaclesRequireNoInventedFloorOrPotionMutation(GameTestHelper test) {
+        thaumcraft.common.testing.TaintacleRuntimeChecks.noInventedFloorOrPotionMutation(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 180, batch = "m08_primal_focus")
+    public void primalFocusPaysActualVisAndUsesSeeker(GameTestHelper test) {
+        thaumcraft.common.testing.PrimalFocusRuntimeChecks.actualFocusPaymentAndSeeker(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 180, batch = "m08_primal_orb")
+    public void primalOrbsCreateActualRareNodesAndTaint(GameTestHelper test) {
+        thaumcraft.common.testing.PrimalFocusRuntimeChecks.actualRareImpactNodeAndTaint(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m02_pure_node_ecology")
+    public void pureNodesCleanseOnlyTaintUnlessEmbeddedInSilverwood(GameTestHelper test) {
+        thaumcraft.common.testing.NodeEcologyRuntimeChecks.pure(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "m02_dark_node_ecology")
+    public void darkNodesConvertBiomesAndRespectOriginalFourthGiantCap(GameTestHelper test) {
+        thaumcraft.common.testing.NodeEcologyRuntimeChecks.dark(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m02_tainted_node_ecology")
+    public void taintedNodesSpreadRealFibresAndInfectBeforeDarkEcology(GameTestHelper test) {
+        thaumcraft.common.testing.NodeEcologyRuntimeChecks.tainted(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m02_silverwood_node_harvest")
+    public void embeddedSilverwoodNodesHarvestOnlyThroughRealPlayerCustody(GameTestHelper test) {
+        thaumcraft.common.testing.NodeEcologyRuntimeChecks.embeddedHarvest(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "m02_node_biome_storage")
+    public void embeddedSilverwoodBiomesAndAuraSurviveActualChunkStorage(GameTestHelper test) {
+        thaumcraft.common.testing.NodeBiomeStorageRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "r14_biome_source")
+    public void originalBiomesUseActualRegistrySourcesAndSpawnRows(GameTestHelper test) {
+        thaumcraft.common.testing.BiomeRuntimeChecks.source(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "r14_biome_trees")
+    public void originalBiomeTreesAndDungeonsUseRealWorldgen(GameTestHelper test) {
+        thaumcraft.common.testing.BiomeRuntimeChecks.treesAndDungeon(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600, batch = "r14_biome_natural")
+    public void magicalBiomesGenerateNaturallyAndSpawnActualPech(GameTestHelper test) {
+        thaumcraft.common.testing.NaturalBiomeRuntimeChecks.run(test);
+    }
+
 }

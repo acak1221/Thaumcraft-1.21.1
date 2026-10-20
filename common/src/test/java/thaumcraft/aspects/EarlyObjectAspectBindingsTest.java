@@ -126,7 +126,7 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(118, direct.size(), "previous direct item bindings plus the original native Primordial Pearl and Pech focus");
+        assertEquals(126, direct.size(), "previous direct item bindings plus actual Taint states and Vishroom");
         assertEquals(10, complex.size(), "nine existing complex bindings plus the actual native Arcane Ear");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
@@ -138,17 +138,40 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(99, rows.size());
+            assertEquals(107, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
             int wheat = 0;
             int ears = 0;
             int pechFoci = 0;
+            int taintAndVishroom = 0;
             Map<Integer, JsonObject> clusters = new java.util.TreeMap<>();
             for (int index = 0; index < rows.size(); index++) {
                 var row = rows.get(index).getAsJsonObject();
                 int sourceLine = row.get("original_source_line").getAsInt();
+                if (sourceLine >= 381 && sourceLine <= 387 || sourceLine == 397) {
+                    ++taintAndVishroom;
+                    assertEquals("direct", row.get("registration").getAsString());
+                    // These newly activated original rows do not enter the unchanged ALL90 digest.
+                    String nativeId = switch (sourceLine) {
+                        case 381 -> "taint_crust"; case 382 -> "taint_soil";
+                        case 383 -> "taint_fibres"; case 384 -> "taint_grass";
+                        case 385 -> "taint_plant"; case 386 -> "taint_spore_stalk";
+                        case 387 -> "taint_spore_stalk_mature"; default -> "vishroom";
+                    };
+                    assertEquals(JsonParser.parseString("[\"thaumcraft:" + nativeId + "\"]"), row.get("modern_ids"));
+                    AspectList expected = switch (sourceLine) {
+                        case 381 -> new AspectList().add(Aspect.TREE, 1).add(Aspect.TAINT, 3);
+                        case 382 -> new AspectList().add(Aspect.EARTH, 1).add(Aspect.TAINT, 3);
+                        case 383 -> new AspectList().add(Aspect.LIFE, 1).add(Aspect.TAINT, 2);
+                        case 384, 385 -> new AspectList().add(Aspect.PLANT, 1).add(Aspect.TAINT, 1);
+                        case 386, 387 -> new AspectList().add(Aspect.BEAST, 1).add(Aspect.PLANT, 1).add(Aspect.TAINT, 2);
+                        default -> new AspectList().add(Aspect.PLANT, 2).add(Aspect.POISON, 1).add(Aspect.MAGIC, 2);
+                    };
+                    assertAspects(direct, "thaumcraft:" + nativeId, expected);
+                    continue;
+                }
                 if (sourceLine == 436) {
                     ++pechFoci;
                     assertEquals("direct", row.get("registration").getAsString());
@@ -222,6 +245,7 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(1, wheat);
             assertEquals(1, ears);
             assertEquals(1, pechFoci);
+            assertEquals(8, taintAndVishroom);
             assertEquals(3, clusters.size());
             assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
             assertCluster(clusters.get(361), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");

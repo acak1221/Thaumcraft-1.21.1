@@ -1,4 +1,10 @@
 {
   "replace": false,
-  "values": [{"id": "#c:is_wasteland", "required": false}]
+  "values": [
+    {
+      "id": "#c:is_wasteland",
+      "required": false
+    },
+    "thaumcraft:taint"
+  ]
 }

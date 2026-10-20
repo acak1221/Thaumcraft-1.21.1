@@ -1,19 +1,31 @@
-## Текущая работа — 20.10.2026, после075df78
+## Текущая работа — 20.10.2026, после d17b966
 
-Полный GitHub-прогон075df78 завершил243 Fabric GameTest:238 прошли,5 не прошли.
-Этот commit не принят. Последний полностью принятый серверный baseline — b1e49f2
-(648 JUnit /212 GameTest /79 Python), run39409582347.
-Сейчас подключены настоящие Boots of the Traveller и Hover Harness с топливом/GUI/
-правами полёта, RP/discovery/research уведомления, Knowledge Fragment и пассивный Primal Charm.
-Совместные локальные проверки:704 JUnit без ошибок,84 Python, все Fabric source sets
-компилируются; отсутствующих asset-ссылок0. Manifest требует243 игровых сценария,
-повторный прогон после новых исправлений ещё не выполнен. Отдельный локальный запуск подтвердил выгрузку кристаллов и выявил native CONTAINER-
-переход при смерти предмета блока; голодный узел исправлен узким адаптером и дополнен
-проверками сохранности/подмены. Этот запуск не считается полным243-сценарным результатом.
-Биомы, PURE/DARK/TAINTED ecology, Silverwood knot, Primal focus/orb, заражённые блоки/
-падающее заражение/существа готовятся согласованной группой в.tmp и ещё не активированы.
-Клиентская визуальная проверка, survival/multiplayer и NeoForge остаются открытыми.
-Шесть субагентов продолжают писать код; ведущий интегрирует и отправляет checkpoints.
+Последний GitHub-прогон d17b966 выполнил243 Fabric GameTest:242 прошли,
+один Hungry-сценарий не прошёл. В нём исправлена настоящая грунтовая опора
+саженца перед original heightmap/ray проверкой; gameplay не изменён.
+Полностью принятый серверный baseline пока b1e49f2 (648JUnit/212GameTest/79Python),
+run39409582347. PASS прежних входов не переносится на нынешний код.
+
+Активирована совместная группа: Taint crust/soil/fibres/falling, Spider/Spore/
+Swarmer/Swarm/Taintacle/Small; actual Magical Forest/Eerie/Taint с native worldgen,
+spawn settings/Vishroom/decorators; PURE/DARK/TAINTED ecology, Silverwood knots,
+общий all-type NodeGeneration; Primal Focus/Seeker/Orb и отдельный direct renderer
+его animated depth/outer shell. Новые aspect/name/book/model/attribute/bootstrap
+связи подключены. Vanilla bootstrap guard не запрашивает ещё не созданные TC4
+biome holders; естественная генерация и feature indices используют явный порядок.
+Manifest теперь требует261 actual Fabric GameTest; новые сценарии ещё не приняты.
+Локально918JUnit без failures/errors/skips; Main/Fabric/gameTest/clientTest
+компиляция успешна (.tmp/taint-biome-core-compile-5.log,53s). Исторический
+ALL90 aspect-row digest сохранён; восемь новых записей проверены отдельно.
+Python84PASS; references missing0 (2738atlas/model texture refs,1139model refs).
+Inventory887native mainJava; metadata ledger1044needs_review. Это не процент
+переноса и не автоматическое признание исходных классов завершёнными.
+
+Субагенты продолжают отдельные draft-группы: заражённые животные/Thaumic Slime/
+original wooden-door villages; Brain in a Jar; Spa/Bath Salts/Purifying Fluid/
+Soap/Rites; original Overworld structures. Они не входят в текущие source sets.
+Реальные client visuals, full survival/multiplayer и NeoForge остаются открытыми.
+Fabric first; продолжать после этого checkpoint до полного переноса.
 
 Следующие записи сохраняют историю прежних срезов; актуальные результаты указаны выше.
 

@@ -89,6 +89,9 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftShockOrbs.register();
         thaumcraft.common.config.ThaumcraftUnknownKnowledge.register();
         thaumcraft.common.config.ThaumcraftGolemMaterials.register();
+        thaumcraft.common.config.ThaumcraftTaint.register();
+        thaumcraft.common.config.ThaumcraftPrimalFoci.register();
+        thaumcraft.common.config.ThaumcraftBiomes.register();
         ThaumcraftOres.register();
         ThaumcraftWorldgen.register();
         ThaumcraftNodes.register();

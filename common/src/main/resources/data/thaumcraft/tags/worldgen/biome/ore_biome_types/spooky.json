@@ -1,4 +1,14 @@
 {
   "replace": false,
-  "values": [{"id": "#c:is_spooky", "required": false}, {"id": "thaumcraft:eerie", "required": false}, {"id": "thaumcraft:eldritch_lands", "required": false}]
+  "values": [
+    {
+      "id": "#c:is_spooky",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:eldritch_lands",
+      "required": false
+    },
+    "thaumcraft:eerie"
+  ]
 }

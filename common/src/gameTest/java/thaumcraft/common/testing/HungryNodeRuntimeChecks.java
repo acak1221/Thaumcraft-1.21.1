@@ -26,6 +26,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
@@ -213,7 +214,17 @@ public final class HungryNodeRuntimeChecks {
             f.check(world.getBlockState(pos.east(2)).isAir() && nearDrops().stream().filter(e->e.getItem().is(Items.COBBLESTONE)).mapToInt(e->e.getItem().getCount()).sum()==1,"native50-tick Second destroys its first real stone hit and emits exactly one real loot item while hardNodes=false");clearDrops();
             put(pos.east(2),Blocks.IRON_BLOCK);f.check(world.getBlockState(pos.east(2)).getDestroySpeed(world,pos.east(2))==5,"actual vanilla boundary block hardness5");ray(2,0,0);
             f.check(world.getBlockState(pos.east(2)).is(Blocks.IRON_BLOCK),"exact hardness5 is refused");put(pos.east(2),Blocks.BEDROCK);ray(2,0,0);f.check(world.getBlockState(pos.east(2)).is(Blocks.BEDROCK),"negative hardness is refused");
-            put(pos.east(2),Blocks.OAK_SAPLING);ray(2,0,0);f.check(world.getBlockState(pos.east(2)).isAir(),"zero hardness and a non-collision outline remain valid original ray targets");clearDrops();
+            // Original Second clamps its endpoint to the column height BEFORE
+            // tracing. A floating sapling has no opacity/motion height, so its
+            // unsupported column aimed the ray down to distant terrain instead
+            // of through its outline. Real dirt support makes the first air at
+            // the sapling's own Y, retaining the original horizontal ray.
+            var saplingPos=pos.east(2);put(saplingPos.below(),Blocks.DIRT);put(saplingPos,Blocks.OAK_SAPLING);
+            var sapling=world.getBlockState(saplingPos);int saplingColumnHeight=world.getHeight(Heightmap.Types.MOTION_BLOCKING,saplingPos.getX(),saplingPos.getZ());
+            f.check(sapling.getDestroySpeed(world,saplingPos)==0F&&sapling.getCollisionShape(world,saplingPos).isEmpty()&&!sapling.getShape(world,saplingPos).isEmpty()
+                            &&saplingColumnHeight>=saplingPos.getY(),"actual supported sapling retains zero hardness/non-collision outline and a native endpoint-height column; height="+saplingColumnHeight+", target="+saplingPos);
+            var saplingHit=HungryNodeTrace.hit(world,pos,saplingPos);f.check(saplingHit!=null&&saplingHit.getBlockPos().equals(saplingPos),"declared real sapling is the first selected-outline ray hit before its actual50-tick destruction");
+            ray(2,0,0);f.check(world.getBlockState(saplingPos).isAir(),"zero hardness and a non-collision outline remain valid original ray targets");clearDrops();put(saplingPos.below(),Blocks.AIR);
             put(pos.east(3),Blocks.STONE);put(pos.east(),Blocks.WATER);ray(3,0,0);
             f.check(world.getBlockState(pos.east(3)).is(Blocks.STONE),"original stopOnLiquid source water shields the block behind it");
             world.setBlock(pos.east(),Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL,1),TubeVariantsRuntimeChecks.QUIET);ray(3,0,0);

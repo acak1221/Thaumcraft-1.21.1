@@ -430,6 +430,53 @@ public class EntityGolemBase extends AbstractGolem {
         syncCarried();
         return true;
     }
+
+    /**
+     * The essentia stock of the golem, written from outside the guarded transfers.
+     *
+     * <p>The bridge of the ported goal set for the alchemy goals, the same bridge as
+     * {@link #setCarriedItem}: the write keeps the invariants of every other cargo change and never runs while
+     * another transfer is in flight. The stock of one aspect is never replaced by the stock of another aspect,
+     * and the capacity of the material is the limit.</p>
+     */
+    public boolean setEssentiaCargo(Aspect aspect, int amount) {
+        requireServerThread();
+        if (level().isClientSide || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()
+                || unreadAspect != null || retiring || unsupported || !current() || !canWork()) return false;
+        if (amount <= 0) {
+            if (aspectCargo.amount() == 0) return true;
+            aspectCargo = GolemAspectCargo.EMPTY;
+            syncAspectCargo();
+            return true;
+        }
+        if (aspect == null) return false;
+        if (aspectCargo.amount() > 0 && aspectCargo.aspect() != null && aspectCargo.aspect() != aspect) return false;
+        if (!EnumGolemType.isSupported(material)) return false;
+        if (amount > GolemAspectCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH))) return false;
+        aspectCargo = new GolemAspectCargo(aspect, amount);
+        syncAspectCargo();
+        return true;
+    }
+
+    /**
+     * The water stock of the golem, written from outside the guarded transfers.
+     *
+     * <p>The bridge of the ported goal set for the liquid goals, the same bridge as
+     * {@link #setCarriedItem}. The stock is measured in millibuckets and never exceeds the capacity of the
+     * material.</p>
+     */
+    public boolean setWaterCargoMb(int amount) {
+        requireServerThread();
+        if (level().isClientSide || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()
+                || unreadWater != null || retiring || unsupported || !current() || !canWork()) return false;
+        if (amount < 0) return false;
+        if (!EnumGolemType.isSupported(material)) return false;
+        if (amount > GolemWaterCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH))) return false;
+        if (amount == waterMb) return true;
+        waterMb = amount;
+        syncWater();
+        return true;
+    }
     public float getBootupTimer() { return entityData.get(BOOTUP); }
     public int getHealingTimer() { return entityData.get(HEALING); }
     // Original pose value, NOT the raw six-tick action countdown.

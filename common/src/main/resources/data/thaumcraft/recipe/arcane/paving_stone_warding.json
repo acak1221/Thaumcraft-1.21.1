@@ -1,12 +1,27 @@
 {
   "type": "thaumcraft:arcane_shaped",
   "research": "PAVEWARD",
-  "pattern": ["SAS", "SBS"],
+  "pattern": [
+    "SAS",
+    "SBS"
+  ],
   "key": {
-    "S": {"item": "thaumcraft:arcane_stone_bricks"},
-    "A": {"item": "thaumcraft:fire_shard"},
-    "B": {"item": "thaumcraft:order_shard"}
+    "S": {
+      "item": "thaumcraft:arcane_stone_bricks"
+    },
+    "A": {
+      "item": "thaumcraft:fire_shard"
+    },
+    "B": {
+      "item": "thaumcraft:order_shard"
+    }
   },
-  "result": {"id": "thaumcraft:paving_stone_warding", "count": 4},
-  "vis": {"ignis": 10, "ordo": 10}
+  "result": {
+    "id": "thaumcraft:cosmetic_solid",
+    "count": 4
+  },
+  "vis": {
+    "ignis": 10,
+    "ordo": 10
+  }
 }

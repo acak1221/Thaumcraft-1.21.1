@@ -36,10 +36,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.entities.IEldritchMob;
+import thaumcraft.api.entities.IThaumcraftBoss;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftLoot;
 import thaumcraft.common.entities.EntitySpecialItem;
 import thaumcraft.common.entities.projectile.EntityEldritchOrb;
+import thaumcraft.common.lib.mods.ChampionHooks;
+import thaumcraft.common.lib.mods.ChampionModifier;
 import thaumcraft.common.lib.world.EldritchMobRules;
 
 /**
@@ -49,7 +52,7 @@ import thaumcraft.common.lib.world.EldritchMobRules;
  * scaling, the 35 damage cap with its 200 tick enrage, the 24 block home, the boss bar and the inherited
  * eldritch drops. The Warden and the Golem both extend it.
  */
-abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob {
+abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob, IThaumcraftBoss {
     private static final EntityDataAccessor<Integer> ANGER=SynchedEntityData.defineId(EntityThaumcraftBoss.class,EntityDataSerializers.INT);
     /** Original modifier identities of the multiplayer health and damage scaling. */
     private static final ResourceLocation[] HEALTH_BONUS={modifierId("health_buff_1"),modifierId("health_buff_2"),
@@ -233,6 +236,12 @@ abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob {
         special.setDefaultPickUpDelay();
         level.addFreshEntity(special);
     }
+
+    /**
+     * Original EntityThaumcraftBoss.generateName: the base boss does not name itself at all,
+     * the eldritch warden and the eldritch construct do.
+     */
+    @Override public void generateName() {}
 }
 
 /**
@@ -289,6 +298,20 @@ public class EntityEldritchWarden extends EntityThaumcraftBoss implements Ranged
     public int getTitle() { return entityData.get(TITLE); }
     public void setTitle(int title) { entityData.set(TITLE,title); }
     public String getTitleName() { return EldritchMobRules.wardenTitle(getTitle()); }
+
+    /**
+     * Original EntityEldritchWarden.generateName: the title of the warden and the name of its
+     * champion modifier. The 1.7 original read the champion modifier out of the champion
+     * attribute of the mob, the native port reads it out of the champion field.
+     */
+    @Override public void generateName() {
+        int modifier = ChampionHooks.championId(this);
+        if (modifier < 0) return;
+        ChampionModifier champion = ChampionModifier.byId(modifier);
+        if (champion == null) return;
+        setCustomName(Component.translatable("entity.thaumcraft.eldritchwarden.champion.name",
+                getTitleName(), Component.translatable(champion.localizationKey())));
+    }
 
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);

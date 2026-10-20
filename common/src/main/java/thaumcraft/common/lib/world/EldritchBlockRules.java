@@ -501,6 +501,11 @@ public final class EldritchBlockRules {
         return 15 + random.nextInt(8) * 2;
     }
 
+    /** TileEldritchAltar:219-220 - the same size for an already drawn roll. */
+    public static int altarMazeSize(int roll) {
+        return 15 + roll * 2;
+    }
+
     /** TileEldritchAltar:93-107 - the first spawn happens after 80 ticks, then every 40. */
     public static final int ALTAR_FIRST_SPAWN_DELAY = 80;
     public static final int ALTAR_SPAWN_PERIOD = 40;

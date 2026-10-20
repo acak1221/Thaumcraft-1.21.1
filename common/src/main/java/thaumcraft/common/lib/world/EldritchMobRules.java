@@ -77,9 +77,14 @@ public final class EldritchMobRules {
     public static int bossSpeedAmplifier(float damage) { return (int)(damage/40F); }
     /** Original eldritch object item id, dropped by every eldritch boss. */
     public static final String ELDRITCH_OBJECT_ID="eldritch_object";
-    /** Original cultist plate item ids worn and dropped by the eldritch crab and the inhabited zombie. */
-    public static final String CULTIST_PLATE_HELMET_ID="cultist_plate_helmet";
-    public static final String CULTIST_PLATE_CHEST_ID="cultist_plate_chest";
+    /**
+     * The registered cultist plate items worn and dropped by the eldritch crab and the
+     * inhabited zombie. The 1.7 original wore the items ItemHelmetCultistPlate,
+     * ItemChestplateCultistPlate and ItemLeggingsCultistPlate (oracle ConfigItems:537-541),
+     * the native port flattens them to the three ids below.
+     */
+    public static final String CULTIST_PLATE_HELMET_ID="cultist_plate_helm";
+    public static final String CULTIST_PLATE_CHEST_ID="cultist_plate";
     public static final String CULTIST_PLATE_LEGS_ID="cultist_plate_legs";
     /** Original airy block id used by the warden eldritch field. */
     public static final String AIRY_BLOCK_ID="airy";

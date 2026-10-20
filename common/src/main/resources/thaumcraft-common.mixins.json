@@ -65,7 +65,8 @@
     "ChampionLivingDataMixin",
     "ChampionMobMixin",
     "ChampionTickMixin",
-    "ChampionHurtMixin"
+    "ChampionHurtMixin",
+    "ChampionDeathLootMixin"
   ],
   "client": [
     "client.TableOutlineMixin",

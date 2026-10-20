@@ -14,15 +14,22 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
+import thaumcraft.api.entities.IThaumcraftBoss;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.config.ThaumcraftLoot;
+import thaumcraft.common.lib.loot.OriginalMobLoot;
 import thaumcraft.common.lib.world.BiomeColumns;
+import thaumcraft.common.lib.world.OuterLandsProvider;
 
 /**
  * The original champion lifecycle of the 1.7 bestiary, wired into the native mob
@@ -46,8 +53,9 @@ public final class ChampionHooks {
     public static final String SAVE_KEY = "tc.mobmod";
     /**
      * The native key of the Outer Lands. The 1.7 original tested the dimension id of
-     * Config.dimensionOuterId; the native port has no Outer Lands dimension yet, so
-     * the eldritch lands biome is the native marker of that place.
+     * Config.dimensionOuterId; the native port owns that dimension now, the eldritch
+     * lands biome stays the marker of the same place for the surfaces that are not
+     * inside the dimension.
      */
     public static final ResourceKey<Biome> ELDRITCH_LANDS = ResourceKey.create(Registries.BIOME,
             ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "eldritch_lands"));
@@ -61,8 +69,8 @@ public final class ChampionHooks {
     /**
      * The original dangerous location test. The 1.7 original called a place
      * dangerous when it stood in the Outer Lands and in a maze cell of feature six
-     * or eight. The native port has no maze yet, so nothing is dangerous until the
-     * maze wires its own test in.
+     * or eight. The native port reads the same cells from the saved data of the
+     * labyrinth, see {@link ChampionWiring}.
      */
     public interface DangerousLocation {
         /** Whether the block position is a dangerous location of the original maze. */
@@ -147,10 +155,19 @@ public final class ChampionHooks {
         Holder<Biome> biome = surfaceBiome(level, mob);
         return new SpawnFacts(championsEnabled, level.getDifficulty() == Difficulty.EASY,
                 level.getDifficulty() == Difficulty.HARD,
-                biome != null && biome.is(ELDRITCH_LANDS),
+                outerLands(level, biome),
                 biome != null && (biome.is(SPOOKY) || biome.is(NETHER) || biome.is(END)),
                 dangerous(level, Mth.floor(mob.getX()), Mth.floor(mob.getY()), Mth.floor(mob.getZ())),
                 mob instanceof Creeper);
+    }
+
+    /**
+     * The original Outer Lands test of the spawn roll. The 1.7 original compared the
+     * dimension id of the world with Config.dimensionOuterId; the native port owns that
+     * dimension and keeps the eldritch lands biome as the marker of the same place.
+     */
+    private static boolean outerLands(ServerLevel level, Holder<Biome> biome) {
+        return OuterLandsProvider.isOuterLands(level) || (biome != null && biome.is(ELDRITCH_LANDS));
     }
 
     /** The original champion modifier id of a mob, {@code NOT_ROLLED} while it was never rolled. */
@@ -227,12 +244,39 @@ public final class ChampionHooks {
     }
 
     /**
-     * The original dangerous location test of a block position. The native port has
-     * no Outer Lands maze yet, so nothing is dangerous until the maze wires its own
-     * test in.
+     * The original dangerous location test of a block position. The native port reads the
+     * labyrinth cells of the Outer Lands, see {@link ChampionWiring}.
      */
     public static boolean dangerous(ServerLevel level, int x, int y, int z) {
         return dangerousLocation.test(level, x, y, z);
+    }
+
+    /**
+     * The original champion death reward.
+     *
+     * <p>Oracle {@code EventHandlerEntity.livingDrops:453-461} paid every champion mob
+     * that died five to seven extra experience and one loot bag to a mob that was hit by a
+     * player, and it paid nothing to a boss. The native port stands in the same place, in
+     * the death loot of the mob.
+     */
+    public static void onDeathLoot(LivingEntity mob, ServerLevel level, DamageSource source, boolean recentlyHit) {
+        if (!(mob instanceof Mob mobEntity)) return;
+        int modifier = championId(mobEntity);
+        if (!ChampionWiringRules.championReward(recentlyHit, true, mobEntity instanceof IThaumcraftBoss, modifier)) return;
+        int experience = ChampionRules.championExperience(new ChampionRules.WorldRandom(level.getRandom()));
+        ExperienceOrb.award(level, mob.position(), experience);
+        int looting = OriginalMobLoot.looting(level, source);
+        int tier = ChampionRules.championLootBagTier(new ChampionRules.WorldRandom(level.getRandom()), looting);
+        OriginalMobLoot.spawn(mob, new ItemStack(lootBag(tier)), mob.getBbHeight() / 2.0F);
+    }
+
+    /** The registered loot bag of an original loot bag metadata. */
+    private static Item lootBag(int tier) {
+        return switch (tier) {
+            case 0 -> ThaumcraftLoot.LOOT_BAG_COMMON.get();
+            case 1 -> ThaumcraftLoot.LOOT_BAG_UNCOMMON.get();
+            default -> ThaumcraftLoot.LOOT_BAG_RARE.get();
+        };
     }
 
     /** The biome of the surface column of the mob, null when the column is not ready. */

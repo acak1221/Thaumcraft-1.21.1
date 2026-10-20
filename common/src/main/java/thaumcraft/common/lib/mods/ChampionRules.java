@@ -22,6 +22,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import thaumcraft.api.entities.IThaumcraftBoss;
 import thaumcraft.common.entities.monster.EntityTaintSpider;
 import thaumcraft.common.lib.WarpEvents;
 
@@ -74,7 +75,11 @@ public final class ChampionRules {
             Map.entry("thaumcraft:pech", TIER_UNCOMMON),
             Map.entry("thaumcraft:cultist", TIER_UNCOMMON),
             Map.entry("thaumcraft:watcher", TIER_RARE),
-            Map.entry("thaumcraft:inhabited_zombie", TIER_ELITE));
+            Map.entry("thaumcraft:inhabited_zombie", TIER_ELITE),
+            // Original ConfigEntities:208 - the boss base was whitelisted with the level 200,
+            // so a boss always became a champion, even while the champion mobs were off.
+            Map.entry("thaumcraft:eldritch_warden", TIER_BOSS),
+            Map.entry("thaumcraft:eldritch_golem", TIER_BOSS));
 
     /**
      * Original spawn roll. The 1.7 original rolled nextInt(100) and shifted the roll by
@@ -202,26 +207,34 @@ public final class ChampionRules {
         /**
          * Original promotion: the champion health bonus, the champion damage multiplier,
          * the promotion heal, the champion name and the bonus of the rolled modifier.
+         *
+         * <p>Oracle {@code EntityUtils.makeChampion:243-254} skipped the first four for a
+         * boss, because a boss scales with the players that hunt it, and let the boss name
+         * itself after its champion modifier instead.
          */
         public static void promote(LivingEntity mob, int modifierId) {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
             if (modifier == null) return;
             AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
-            if (health != null) health.addPermanentModifier(new AttributeModifier(CHAMPION_HEALTH_ID, modifier.healthBonus(), AttributeModifier.Operation.ADD_VALUE));
-            // The original 1.7 operation two multiplied the total by its amount, the native
-            // operation multiplies the total by one plus its amount.
             AttributeInstance damage = mob.getAttribute(Attributes.ATTACK_DAMAGE);
-            if (damage != null) {
-                damage.addPermanentModifier(new AttributeModifier(CHAMPION_DAMAGE_ID, modifier.damageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-                if (modifier.id == ChampionModifier.MIGHTY) damage.addPermanentModifier(new AttributeModifier(MIGHTY_DAMAGE_ID, modifier.extraDamageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+            if (ChampionWiringRules.ordinaryChampionBonuses(mob instanceof IThaumcraftBoss)) {
+                if (health != null) health.addPermanentModifier(new AttributeModifier(CHAMPION_HEALTH_ID, modifier.healthBonus(), AttributeModifier.Operation.ADD_VALUE));
+                // The original 1.7 operation two multiplied the total by its amount, the native
+                // operation multiplies the total by one plus its amount.
+                if (damage != null) damage.addPermanentModifier(new AttributeModifier(CHAMPION_DAMAGE_ID, modifier.damageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                mob.heal(ChampionModifier.CHAMPION_HEAL);
+                mob.setCustomName(championName(mob, modifier));
+            } else if (mob instanceof IThaumcraftBoss boss) {
+                boss.generateName();
+            }
+            if (modifier.id == ChampionModifier.MIGHTY && damage != null) {
+                damage.addPermanentModifier(new AttributeModifier(MIGHTY_DAMAGE_ID, modifier.extraDamageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             }
             // The original 1.7 operation one was the percentage of the running total.
             if (modifier.id == ChampionModifier.BOLD) {
                 AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
                 if (speed != null) speed.addPermanentModifier(new AttributeModifier(BOLD_SPEED_ID, modifier.speedMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             }
-            mob.heal(ChampionModifier.CHAMPION_HEAL);
-            mob.setCustomName(championName(mob, modifier));
             if (modifier.id == ChampionModifier.WARDED && health != null) mob.setHealth(mob.getHealth() + (int) health.getBaseValue() / 2);
         }
 

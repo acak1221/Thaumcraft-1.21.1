@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "thaumcraft:block/cosmetic_wood_slab_0"
+    },
+    "type=top": {
+      "model": "thaumcraft:block/cosmetic_wood_slab_0_top"
+    }
+  }
+}

@@ -3,21 +3,26 @@ package thaumcraft.common.tiles;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
+import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWandPedestal;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.config.ThaumcraftLegacyTiles;
 import thaumcraft.common.items.baubles.ItemAmuletVis;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.tiles.LegacyTileRules;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
  * Original TileWandPedestal: the pedestal that fills a wand or a vis amulet from the nodes around it.
@@ -26,6 +31,10 @@ import thaumcraft.common.lib.tiles.LegacyTileRules;
  * moves one whole vis of an aspect from a node into the wand, and it keeps one vis of every aspect back
  * unless the wand is iron capped or has a wooden rod. A focus block on top of the pedestal lets it take the
  * primal parts of a compound aspect as well.
+ * <p>
+ * The original wand pedestal is the metadata five of the stone device family. The native port has that
+ * metadata in the stone device block and the pedestal with its focus block as the wand pedestal block, so
+ * the tile takes the block entity type of the block it belongs to.
  * <p>
  * Oracle: {@code thaumcraft/common/tiles/TileWandPedestal.java}, lines 46-398.
  */
@@ -39,16 +48,39 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     /** The node the client draws the vis from. */
     public int drainX, drainY, drainZ, drainColor;
     private List<BlockPos> nodes;
+    /** The direction the pedestal was placed in. */
+    private Direction facing = Direction.NORTH;
 
     public TileWandPedestal(BlockPos pos, BlockState state) {
         // The wand slot is the only slot and it is the one the client sees.
-        super(ThaumcraftLegacyTiles.WAND_PEDESTAL_BLOCK_ENTITY.get(), pos, state, 1, new int[]{0});
+        super(typeFor(state), pos, state, 1, new int[]{0});
+    }
+
+    /**
+     * The registered block entity type of the wand pedestal that the state belongs to. The native wand
+     * pedestal block and the wand pedestal metadata of the stone device are two blocks of the original
+     * family and every block has exactly one block entity type.
+     */
+    private static BlockEntityType<?> typeFor(BlockState state) {
+        if (state.getBlock() instanceof BlockStoneDevice
+                && BlockStoneDevice.variant(state) == EldritchBlockRules.DEVICE_STONE_WAND_PEDESTAL) {
+            return ThaumcraftEldritchBlocks.WAND_PEDESTAL_TILE.get();
+        }
+        return ThaumcraftLegacyTiles.WAND_PEDESTAL_BLOCK_ENTITY.get();
     }
 
     /** The nodes the pedestal knows, or null before the first search. */
     public List<BlockPos> nodes() { return nodes == null ? List.of() : List.copyOf(nodes); }
     /** Whether the pedestal is filling the wand at the moment. */
     public boolean isDraining() { return draining; }
+    /** The direction the pedestal was placed in. */
+    public Direction getFacing() { return facing; }
+
+    /** The direction the pedestal was placed in. */
+    public void setFacing(Direction facing) {
+        this.facing = facing == null ? Direction.NORTH : facing;
+        setChanged();
+    }
 
     public static void tick(Level level, BlockPos pos, BlockState state, TileWandPedestal tile) {
         if (tile.level != level || !pos.equals(tile.worldPosition) || tile.isRemoved() || tile.getBlockState() != state) return;
@@ -191,6 +223,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putBoolean("draining", draining);
+        tag.putByte("facing", (byte) facing.get3DDataValue());
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -199,5 +232,6 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
         nodes = null;
         somethingChanged = false;
         counter = 0;
+        facing = Direction.from3DDataValue(tag.getByte("facing"));
     }
 }

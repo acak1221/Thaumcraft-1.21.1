@@ -328,12 +328,13 @@ public final class InfusionComponentPredicateGameTests {
         recipe.aspects().forEach((aspect, amount) -> { wire.writeUtf(aspect); wire.writeVarInt(amount); });
         wire.writeVarInt(recipe.instability()); ItemStack.STREAM_CODEC.encode(wire, recipe.result());
         wire.writeVarInt(count);
-        // Current native layout: four fields per predicate (water-potion and empty-jar flags
-        // were appended by the Alchemy core), then the optional central input_damage marker
+        // Current native layout includes the optional exact-potion marker/string per predicate,
+        // then the optional central input_damage marker
         // and the optional result-patch marker (ADVANCEDGOLEM).
         for (var declaration : declarations) {
             wire.writeVarInt(declaration.component()); wire.writeVarInt(declaration.damage());
             wire.writeBoolean(declaration.waterPotion()); wire.writeBoolean(declaration.emptyJar());
+            wire.writeBoolean(declaration.potion().isPresent());declaration.potion().ifPresent(wire::writeUtf);
         }
         wire.writeBoolean(false);
         wire.writeBoolean(false);

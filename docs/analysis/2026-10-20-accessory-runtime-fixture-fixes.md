@@ -1,0 +1,9 @@
+# Native accessory fixture corrections after 04208de
+
+The first integrated server run stopped before XML completion because an asynchronous amulet scenario installed a `TileVisNode` pulse probe under the real `TileVisRelay` block entity type. Native world ticking invoked the registered relay ticker, whose required `TileVisRelay` cast correctly failed. The probe now has its own test-only registered block, block entity type, factory and matching native `TileVisNode` ticker. The actual endpoint relay, earned source, real connected player's worn updates, source debit and before-pulse amulet-credit assertion remain in use. The probe registration belongs only to the isolated game-test initializer and is excluded from production artifacts. Fixture cleanup still removes the installed probe and restores the owned footprint.
+
+The accessory inventory scenario expected an incorrect ten-CV air debit despite wearing the real one-percent air-discount ring. The original integer payment is `(int)(10 * .99F) == 9`, leaving 91 air and 90 earth in the one independent full wand. The short nine-CV amulet remains unchanged, then pays the following complete nine/nine raw bill before that wand. All quantity, ownership and raw-priority assertions remain.
+
+The adversarial infusion wire writer also predated the new optional potion-identity field. It now writes that presence flag/string for every declaration, followed by the existing centre-damage and result-patch markers. Invalid index/wear/count tests therefore reach semantic decoder validation using the actual current packet shape, rather than accidentally exhausting a stale packet.
+
+These are fixture corrections, with no production payment, source, relay or recipe validation changes. Verification is pending the parent build and repeated server run.

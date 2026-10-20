@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,13 +26,16 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -50,7 +54,9 @@ import thaumcraft.common.blocks.BlockManaPod;
 import thaumcraft.common.config.*;
 import thaumcraft.common.container.ContainerPech;
 import thaumcraft.common.entities.ai.pech.PechItemGoal;
+import thaumcraft.common.entities.ai.pech.PechAvoidGoal;
 import thaumcraft.common.entities.ai.pech.PechMeleeGoal;
+import thaumcraft.common.entities.ai.pech.PechWatchGoal;
 import thaumcraft.common.entities.monster.EntityPech;
 import thaumcraft.common.entities.projectile.EntityPechBlast;
 import thaumcraft.common.items.ItemManaBean;
@@ -74,7 +80,8 @@ public final class PechRuntimeChecks {
     public static void trade(GameTestHelper test){run(test,1);}
     public static void curse(GameTestHelper test){run(test,2);}
     public static void beans(GameTestHelper test){run(test,3);}
-    private static void run(GameTestHelper test,int group){try(var f=new Fixture(test)){switch(group){case 0->f.entity();case 1->f.trade();case 2->f.curse();default->f.beans();}}test.succeed();}
+    public static void goals(GameTestHelper test){run(test,4);}
+    private static void run(GameTestHelper test,int group){try(var f=new Fixture(test)){switch(group){case 0->f.entity();case 1->f.trade();case 2->f.curse();case 3->f.beans();default->f.goals();}}test.succeed();}
     private static final class Fixture implements AutoCloseable {
         final FocusUpgradeRuntimeChecks.Actor a;final List<Entity> owned=new ArrayList<>();final CompoundTag knowledge;
         Fixture(GameTestHelper test){a=new FocusUpgradeRuntimeChecks.Actor(test,new BlockPos(4,90,4));knowledge=KnowledgeAccess.get(a.player).save();a.clearLane();for(int x=-3;x<=5;x++)for(int z=-3;z<=3;z++)a.put(a.root.offset(x,-1,z),Blocks.STONE.defaultBlockState());}
@@ -129,11 +136,59 @@ public final class PechRuntimeChecks {
             pech.hurt(a.level.damageSources().playerAttack(a.player),1000);
             int diamonds=a.items().stream().filter(item->item.getItem().is(Items.DIAMOND)).mapToInt(item->item.getItem().getCount()).sum();
             int coins=a.items().stream().filter(item->item.getItem().is(ThaumcraftContent.MATERIALS.get("gold_coin").get())).mapToInt(item->item.getItem().getCount()).sum();
-            a.require(pech.isDeadOrDying()&&diamonds==(pack?3:0)&&coins==(gold?1:0)&&coins==1&&a.level.random.nextLong()==expected.nextLong(),"actual Pech death preserves pack .88/gold_coin WORLD sequence without item-physics draws");
+            a.require(pech.isDeadOrDying()&&diamonds==(pack?3:0)&&coins==(gold?1:0)&&coins==1,"actual Pech death preserves pack .88/gold_coin rewards: diamonds="+diamonds+",coins="+coins);
+            // Native1.21 drops XP immediately in dropAllDeathLoot. Five XP is
+            // split3+1+1; each native tryMergeToExisting consumes nextInt40,
+            // even when there are no pre-existing orbs. These are native XP
+            // draws AFTER the original two loot draws, never item physics.
+            int xp=0;for(var orb:a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds)){var tag=orb.saveWithoutId(new CompoundTag());xp+=tag.getShort("Value")*tag.getInt("Count");}
+            a.require(xp==5,"actual Pech native death emits original five XP, got="+xp);
+            for(int i=0;i<3;i++)expected.nextInt(40);long actualNext=a.level.random.nextLong(),expectedNext=expected.nextLong();
+            a.require(actualNext==expectedNext,"actual death WORLD stream is loot .88/coin10 then native XP merge40x3, without item-physics draws: actual="+actualNext+",expected="+expectedNext);
             for(var dropped:a.items())if(dropped.getItem().is(ThaumcraftManaBeans.MANA_BEAN.get()))a.require(ItemManaBean.data(dropped.getItem())!=null&&Aspect.getAspect(ItemManaBean.data(dropped.getItem()).firstTag()).isPrimal(),"actual Pech death bean is typed with an original primal");
         }
         private static long goldSeed(){for(long seed=0;seed<10000;seed++){var rng=RandomSource.create(seed);if(rng.nextFloat()<.88F&&rng.nextInt(10)==0)return seed;}throw new AssertionError();}
         private static long seedForTame(){for(long seed=0;seed<1000;seed++)if(RandomSource.create(seed).nextInt(10)<5)return seed;throw new AssertionError();}
+        void goals(){
+            var pech=pech(0,0);var installed=new ArrayList<Goal>();
+            // Public native selector traversal; a false predicate removes nothing.
+            pech.removeAllGoals(goal->{installed.add(goal);return false;});
+            var avoids=installed.stream().filter(PechAvoidGoal.class::isInstance).map(PechAvoidGoal.class::cast).toList();
+            var watchers=installed.stream().filter(PechWatchGoal.class::isInstance).map(PechWatchGoal.class::cast).toList();
+            a.require(avoids.size()==1&&watchers.size()==2,"actual registered untamed Pech installs original avoid and both watch goals");
+            var close=watchers.stream().filter(goal->goal.getFlags().contains(Goal.Flag.MOVE)).findFirst().orElseThrow();
+            var ordinary=watchers.stream().filter(goal->!goal.getFlags().contains(Goal.Flag.MOVE)).findFirst().orElseThrow();
+            a.require(close.getFlags().equals(EnumSet.of(Goal.Flag.MOVE,Goal.Flag.LOOK))&&ordinary.getFlags().equals(EnumSet.of(Goal.Flag.LOOK)),"WatchClosest2 owns MOVE and LOOK; ordinary Mob watching only LOOK");
+            a.player.setGameMode(GameType.CREATIVE);a.player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY,400));
+            a.player.setPos(pech.getX()+2,pech.getY(),pech.getZ());
+            a.put(a.root.offset(1,0,0),Blocks.STONE.defaultBlockState());a.put(a.root.offset(1,1,0),Blocks.STONE.defaultBlockState());
+            a.require(!pech.getSensing().hasLineOfSight(a.player)&&PechAvoidGoal.closestPlayer(pech,8)==a.player,"original plain nearest selector includes a creative invisible player behind a real opaque wall");
+            pech.getRandom().setSeed(181);var expected=RandomSource.create(181);expected.nextFloat();int duration=40+expected.nextInt(40);
+            a.require(close.canUse(),"actual close watcher admits invisible creative player without line of sight");close.start();
+            a.require(pech.getRandom().nextLong()==expected.nextLong(),"actual close watch uses exactly chance float then original40..79 duration draw");
+            for(int tick=0;tick<duration;tick++){a.require(close.canContinueToUse(),"original close watch remains active until exact duration");close.tick();}
+            a.require(!close.canContinueToUse()&&pech.getLookControl().getWantedX()==a.player.getX()&&pech.getLookControl().getWantedY()==a.player.getEyeY(),"actual native LookControl targets player eyes and watching expires at original duration");close.stop();
+            a.player.setPos(pech.getX()+8,pech.getY(),pech.getZ());a.require(PechAvoidGoal.closestPlayer(pech,8)==null,"plain nearest player range is strict: exactly eight blocks is outside");
+            a.player.setPos(pech.getX()+2,pech.getY(),pech.getZ());a.player.setGameMode(GameType.SPECTATOR);a.require(PechAvoidGoal.closestPlayer(pech,8)==null,"modern spectators are excluded from the original player selector adapter");a.player.setGameMode(GameType.CREATIVE);
+            a.put(a.root.offset(1,0,0),Blocks.AIR.defaultBlockState());a.put(a.root.offset(1,1,0),Blocks.AIR.defaultBlockState());
+            var avoid=avoids.getFirst();boolean admitted=false;
+            for(int seed=0;seed<128&&!admitted;seed++){pech.getRandom().setSeed(seed);admitted=avoid.canUse();}
+            a.require(admitted,"bounded declared native flee-position seeds admit a real supported retreat path from the invisible creative player");avoid.start();avoid.tick();
+            var path=pech.getNavigation().getPath();a.require(path!=null&&path.getEndNode()!=null&&!pech.getNavigation().isDone(),"original avoidance starts actual native navigation along its admitted path");
+            var end=path.getEndNode();a.require(a.player.distanceToSqr(end.x+.5,end.y,end.z+.5)>=a.player.distanceToSqr(pech),"native retreat path ends farther from the player");pech.getNavigation().stop();avoid.stop();
+            a.player.setPos(pech.getX()+12,pech.getY(),pech.getZ());var cow=mob(EntityType.COW,2,1);
+            long seed=0;while(seed<100000&&RandomSource.create(seed).nextFloat()>=.02F)seed++;a.require(seed<100000,"declared bounded ordinary-watch chance seed exists");
+            pech.getRandom().setSeed(seed);expected=RandomSource.create(seed);expected.nextFloat();duration=40+expected.nextInt(40);
+            a.require(ordinary.canUse(),"actual ordinary watcher admits nearby native Mob on original .02 chance");ordinary.start();ordinary.tick();
+            a.require(pech.getRandom().nextLong()==expected.nextLong()&&ordinary.canContinueToUse()&&pech.getLookControl().getWantedX()==cow.getX()&&pech.getLookControl().getWantedY()==cow.getEyeY(),"ordinary watcher uses exact duration RNG and native Mob eye target");
+            cow.discard();a.require(!ordinary.canContinueToUse(),"removed native Mob ends watching immediately");ordinary.stop();
+            // Ordinary Mob.tick drives the installed GoalSelector rather than calling this goal directly.
+            pech.setTamed(true);pech.setCombatTask();pech.removeAllGoals(goal->!(goal instanceof PechWatchGoal));pech.setNoAi(false);
+            a.player.setPos(pech.getX()+2,pech.getY(),pech.getZ());pech.getLookControl().setLookAt(pech.getX(),pech.getY()-10,pech.getZ());
+            for(int tick=0;tick<4;tick++){pech.setDeltaMovement(Vec3.ZERO);pech.tick();}
+            a.require(pech.getLookControl().getWantedX()==a.player.getX()&&pech.getLookControl().getWantedY()==a.player.getEyeY(),"ordinary native Pech ticks run the installed close watcher for an invisible creative player");
+            a.player.setGameMode(GameType.SURVIVAL);
+        }
         void trade(){
             var pech=pech(0,0);pech.setTamed(true);pech.setPechType(0);a.player.setPos(pech.getX()+1,pech.getY(),pech.getZ());
             a.require(pech.mobInteract(a.player,InteractionHand.MAIN_HAND).consumesAction()&&a.player.containerMenu instanceof ContainerPech,"real native interaction opens admitted Pech menu");

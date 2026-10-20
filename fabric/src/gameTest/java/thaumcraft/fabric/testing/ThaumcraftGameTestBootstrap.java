@@ -11,6 +11,7 @@ import thaumcraft.common.testing.ExcavationRemovalFailureRuntimeChecks;
 public final class ThaumcraftGameTestBootstrap implements ModInitializer {
     @Override public void onInitialize() {
         NodeTransductionRuntimeChecks.registerTestProbes();
+        thaumcraft.common.testing.VisAmuletRuntimeChecks.registerTestProbes();
         FluxOverfullRuntimeChecks.registerTestProbes();
         ExcavationRemovalFailureRuntimeChecks.registerEarlyProbe();
         thaumcraft.common.testing.BiologicalLampRuntimeChecks.registerTestProbes();

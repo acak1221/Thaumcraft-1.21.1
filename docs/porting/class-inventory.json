@@ -16,7 +16,7 @@
     "partial": 34,
     "pending": 900,
     "complete": 0,
-    "active_native_java_files": 775
+    "active_native_java_files": 778
   },
   "active_native_sources": [
     {
@@ -562,7 +562,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/gui/ResearchIconDisplay.java",
       "role": "native_foundation",
-      "sha256": "bb326dc861299337956640d8472ca70c88d37e65a297bdd8929b580fab1562d4"
+      "sha256": "626780bc6cebd0305c1eb7ad1597fe40a42a5487af01479f01d9b0479ab2b0df"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/gui/ResearchText.java",
@@ -582,7 +582,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java",
       "role": "native_foundation",
-      "sha256": "9e0079343cf4cedb073d1be08c43ea96981bf909477ab2e60a5a7f75123d669a"
+      "sha256": "ae63b05fe39539e2909db9eac4e573b6efe6afc1c22ad2468e379666bdccc1e3"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/lib/NotificationQueue.java",
@@ -1272,7 +1272,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java",
       "role": "native_foundation",
-      "sha256": "ea070c239d8ff3df6a0976706695ee2436324f3700ff4cf43725eb70ad512175"
+      "sha256": "5d195156fe26a827cce5d13dd675155bf9eae8e4390270873cf1a12cca190633"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java",
@@ -1685,6 +1685,11 @@
       "sha256": "0658a6cea398db51622064a52ff383a9045b9ee4e8436443eafae1e5ea2b66b0"
     },
     {
+      "path": "common/src/main/java/thaumcraft/common/entities/ai/pech/PechAvoidGoal.java",
+      "role": "native_foundation",
+      "sha256": "2e7d0d50ce1be88fbcb24849c21c132946a0cd0150e423e4b9ca685bb4d3aae5"
+    },
+    {
       "path": "common/src/main/java/thaumcraft/common/entities/ai/pech/PechItemGoal.java",
       "role": "native_foundation",
       "sha256": "402e2c68a95822a04d327e82369c5ac7bc08670021c4480c3d2eb13afd68a0b9"
@@ -1698,6 +1703,11 @@
       "path": "common/src/main/java/thaumcraft/common/entities/ai/pech/PechRangedGoal.java",
       "role": "native_foundation",
       "sha256": "3e4db7256474ab54d5900459d179c3ff166731f569d92c8c6589c14df2e6ed7d"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/entities/ai/pech/PechWatchGoal.java",
+      "role": "native_foundation",
+      "sha256": "9b1b633865051e64ba73be2d29f78d8fdf3215d9058fdd26c0ecf1951b91689e"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java",
@@ -1837,7 +1847,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityPech.java",
       "role": "native_foundation",
-      "sha256": "ecdf97b35e14b1a11867e5e025ccfce911956d83b5dca34f3efcacd46e33aa7c"
+      "sha256": "b9d6445a4e98ecdcd62aa48371ce4189d7a33e7ba687e7805f08b5f07c3c533b"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityWisp.java",
@@ -2053,6 +2063,11 @@
       "path": "common/src/main/java/thaumcraft/common/items/baubles/ItemBaubleBlank.java",
       "role": "native_foundation",
       "sha256": "0a1b734bee35852a6686375fe1b471a2567ffe57a23d7afd2e7c0f620a631496"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/items/baubles/ItemGirdleHover.java",
+      "role": "native_foundation",
+      "sha256": "ed6fafe4fae729fca76b1dd81d19bf4323a3d5f0c5c51ec67e54e62f774cb055"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/items/baubles/ItemRunicBauble.java",
@@ -2367,7 +2382,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPech.java",
       "role": "native_foundation",
-      "sha256": "19da0b5105bd073b207d4d60ab9464ae86f351009f60d9484135784e0e3b13c3"
+      "sha256": "6f060c9faf01d002832dc370eda918565f73a2663f84af22717f508a7c30b7fa"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java",
@@ -2412,7 +2427,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/AdvancedFurnaceFormation.java",
       "role": "native_foundation",
-      "sha256": "19f601da49bfd346983e8f0d8d17b02d181f6f1d8dc2427d4f31325abfc2146a"
+      "sha256": "8af923085695190ebcd01ac7d2afe85fc27af0cebc5ddfa8357b900159a6f0dc"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/AdvancedFurnaceRules.java",

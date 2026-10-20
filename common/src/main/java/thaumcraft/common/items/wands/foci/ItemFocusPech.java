@@ -25,7 +25,7 @@ public final class ItemFocusPech extends ItemFocusBasic {
     public ItemFocusPech(Properties properties) {super(properties);}
     private static AspectList baseCost() {return new AspectList().add(Aspect.EARTH,10).add(Aspect.ENTROPY,10).add(Aspect.WATER,10);}
     @Override public AspectList getVisCost(ItemStack focus) {
-        return isUpgradedWith(focus,FocusUpgradeType.nightshade)?new AspectList().add(Aspect.AIR,10).add(Aspect.FIRE,10).add(Aspect.EARTH,10).add(Aspect.ORDER,10).add(Aspect.ENTROPY,10).add(Aspect.WATER,10):baseCost();
+        return focus.getItem() instanceof ItemFocusPech&&isUpgradedWith(focus,FocusUpgradeType.nightshade)?new AspectList().add(Aspect.AIR,10).add(Aspect.FIRE,10).add(Aspect.EARTH,10).add(Aspect.ORDER,10).add(Aspect.ENTROPY,10).add(Aspect.WATER,10):baseCost();
     }
     @Override public int getActivationCooldown(ItemStack focus) {return 250;}
     @Override public int getFocusColor(ItemStack focus) {return 0x229944;}

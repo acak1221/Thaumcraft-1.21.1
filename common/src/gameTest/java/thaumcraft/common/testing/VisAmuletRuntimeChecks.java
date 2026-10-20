@@ -1,17 +1,26 @@
 package thaumcraft.common.testing;
 
-import java.lang.ref.WeakReference;
-import java.util.Map;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.GameTestListener;
 import net.minecraft.gametest.framework.GameTestRunner;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.visnet.TileVisNode;
 import thaumcraft.common.blocks.BlockVisRelay;
@@ -26,7 +35,16 @@ import thaumcraft.common.tiles.TileVisRelay;
 
 /** Real native player living ticks drive the worn item; earned source, original relay cache and paid-before-pulse removal. */
 public final class VisAmuletRuntimeChecks {
+    private static PulseRelayBlock probeBlock;
+    private static BlockEntityType<PulseRelay> probeType;
     private VisAmuletRuntimeChecks() {}
+    /** Test-mod initializer only: actual compatible native block/type/ticker, never a production relay impostor. */
+    public static synchronized void registerTestProbes(){
+        if(probeBlock!=null)return;
+        var id=ResourceLocation.fromNamespaceAndPath("thaumcraft_gametest","amulet_pulse_relay");
+        probeBlock=Registry.register(BuiltInRegistries.BLOCK,id,new PulseRelayBlock(BlockBehaviour.Properties.of().noOcclusion()));
+        probeType=Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,id,BlockEntityType.Builder.of(PulseRelay::new,probeBlock).build(null));
+    }
     public static void nativeWornTransferAndRelayPayment(GameTestHelper test) {
         var f=NodeTransductionRuntimeChecks.fixture(test,false);
         Runnable close=()->{f.level.getServer().getConnection().getConnections().remove(f.connection);f.close();};
@@ -39,11 +57,13 @@ public final class VisAmuletRuntimeChecks {
         });
         try {
             f.open();
+            test.assertTrue(probeBlock!=null&&probeType!=null,"test mod registered the native amulet pulse probe before registry freeze");
             var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(64),null,TileNode.NodeType.NORMAL);
             NodeTransductionRuntimeChecks.sourceTick(f,source);
             f.put(f.base.below(),Blocks.STONE);
-            f.level.setBlock(f.base,ThaumcraftNodeDevices.VIS_RELAY.get().defaultBlockState().setValue(BlockVisRelay.FACING,Direction.UP),TubeVariantsRuntimeChecks.QUIET);
-            f.level.removeBlockEntity(f.base);var middle=new PulseRelay(f.base,f.level.getBlockState(f.base));f.level.setBlockEntity(middle);
+            f.level.setBlock(f.base,probeBlock.defaultBlockState(),TubeVariantsRuntimeChecks.QUIET);
+            var middle=(PulseRelay)f.level.getBlockEntity(f.base);
+            test.assertTrue(middle!=null&&middle.getType()==probeType&&probeType.isValid(middle.getBlockState()),"actual installed pulse probe owns its compatible native type and ticker");
             TileVisNode.tick(f.level,f.base,middle.getBlockState(),middle);
             BlockPos at=f.base.east(6);f.put(at.below(),Blocks.STONE);
             f.level.setBlock(at,ThaumcraftNodeDevices.VIS_RELAY.get().defaultBlockState().setValue(BlockVisRelay.FACING,Direction.UP),TubeVariantsRuntimeChecks.QUIET);
@@ -95,9 +115,19 @@ public final class VisAmuletRuntimeChecks {
     }
     private static final class PulseRelay extends TileVisNode {
         Runnable action;
-        PulseRelay(BlockPos pos,BlockState state){super(ThaumcraftNodeDevices.VIS_RELAY_BLOCK_ENTITY.get(),pos,state);}
+        PulseRelay(BlockPos pos,BlockState state){super(probeType,pos,state);}
         @Override public int getRange(){return 8;}
         @Override public boolean isSource(){return false;}
         @Override public void triggerConsumeEffect(Aspect aspect){if(action!=null){Runnable once=action;action=null;once.run();}}
+    }
+    private static final class PulseRelayBlock extends BaseEntityBlock {
+        private static final MapCodec<PulseRelayBlock> CODEC=simpleCodec(PulseRelayBlock::new);
+        private PulseRelayBlock(Properties properties){super(properties);}
+        @Override protected MapCodec<? extends BaseEntityBlock> codec(){return CODEC;}
+        @Override public BlockEntity newBlockEntity(BlockPos pos,BlockState state){return new PulseRelay(pos,state);}
+        @Override protected RenderShape getRenderShape(BlockState state){return RenderShape.INVISIBLE;}
+        @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level,BlockState state,BlockEntityType<T> type){
+            return createTickerHelper(type,probeType,TileVisNode::tick);
+        }
     }
 }

@@ -12,9 +12,10 @@ import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 import thaumcraft.common.items.wands.foci.ItemFocusExcavation;
 import thaumcraft.common.items.wands.foci.ItemFocusFire;
 import thaumcraft.common.items.wands.foci.ItemFocusFrost;
+import thaumcraft.common.items.wands.foci.ItemFocusPortableHole;
 import thaumcraft.common.items.wands.foci.ItemFocusShock;
 
-/** The four implemented basic foci; absence of WAND_FOCUS means an unequipped wand. */
+/** The five implemented basic foci; absence of WAND_FOCUS means an unequipped wand. */
 public final class ThaumcraftFoci {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<DataComponentType<?>> COMPONENTS = DeferredRegister.create(Thaumcraft.MODID, Registries.DATA_COMPONENT_TYPE);
@@ -33,6 +34,8 @@ public final class ThaumcraftFoci {
             () -> new ItemFocusFrost(new Item.Properties()));
     public static final RegistrySupplier<ItemFocusShock> SHOCK_FOCUS = ITEMS.register("focus_shock",
             () -> new ItemFocusShock(new Item.Properties()));
+    public static final RegistrySupplier<ItemFocusPortableHole> PORTABLE_HOLE_FOCUS = ITEMS.register("focus_portable_hole",
+            () -> new ItemFocusPortableHole(new Item.Properties()));
 
     private static boolean registered;
     private ThaumcraftFoci() {}
@@ -46,5 +49,6 @@ public final class ThaumcraftFoci {
         CreativeTabRegistry.append(ThaumcraftContent.TAB, EXCAVATION_FOCUS);
         CreativeTabRegistry.append(ThaumcraftContent.TAB, FROST_FOCUS);
         CreativeTabRegistry.append(ThaumcraftContent.TAB, SHOCK_FOCUS);
+        CreativeTabRegistry.append(ThaumcraftContent.TAB, PORTABLE_HOLE_FOCUS);
     }
 }

@@ -1,6 +1,7 @@
 package thaumcraft.common.entities;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -82,7 +83,7 @@ public final class EntityAspectOrb extends Entity {
                 setDeltaMovement((random.nextFloat() - random.nextFloat()) * .2F, .2F, (random.nextFloat() - random.nextFloat()) * .2F);
                 playSound(SoundEvents.LAVA_EXTINGUISH, .4F, 2F + random.nextFloat() * .4F);
             }
-            moveTowardsClosestSpace(getX(), (getBoundingBox().minY + getBoundingBox().maxY) / 2D, getZ());
+            pushOutOfSolidBlocks();
             if (closestPlayer != null && (closestPlayer.isRemoved() || closestPlayer.level() != level())) closestPlayer = null;
             if (tickCount % 5 == 0 && closestPlayer == null && validValue()) {
                 double nearest = Double.MAX_VALUE;
@@ -105,6 +106,37 @@ public final class EntityAspectOrb extends Entity {
             Vec3 motion = getDeltaMovement(); setDeltaMovement(motion.x * friction, motion.y * .98F * (onGround() ? -.9F : 1F), motion.z * friction);
             if (++age >= MAX_AGE) discard();
         } finally { ticking = false; }
+    }
+    /** Vanilla1.7 Entity.func_145771_j, called by original TC4 every tick.
+     * The modern similarly named helper omits this collision guard, changes tie
+     * order and damps the other axes, so calling it directly kicks orbs in AIR. */
+    private void pushOutOfSolidBlocks() {
+        double middleY = (getBoundingBox().minY + getBoundingBox().maxY) / 2D;
+        BlockPos cell = BlockPos.containing(getX(), middleY, getZ());
+        if (!level().getBlockCollisions(this, getBoundingBox()).iterator().hasNext() && !solidEscapeCell(cell)) return;
+        Direction exit = Direction.UP;
+        double closest = 9999D;
+        for (Direction side : new Direction[]{Direction.WEST,Direction.EAST,Direction.UP,Direction.NORTH,Direction.SOUTH}) {
+            if (solidEscapeCell(cell.relative(side))) continue;
+            double fraction = switch (side.getAxis()) {
+                case X -> getX() - cell.getX();
+                case Y -> middleY - cell.getY();
+                case Z -> getZ() - cell.getZ();
+            };
+            double distance = side.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1D - fraction : fraction;
+            if (distance < closest) { closest = distance; exit = side; }
+        }
+        float speed = random.nextFloat() * .2F + .1F;
+        double impulse = exit.getAxisDirection().getStep() * speed;
+        Vec3 motion = getDeltaMovement();
+        setDeltaMovement(exit.getAxis() == Direction.Axis.X ? impulse : motion.x,
+                exit.getAxis() == Direction.Axis.Y ? impulse : motion.y,
+                exit.getAxis() == Direction.Axis.Z ? impulse : motion.z);
+    }
+    private boolean solidEscapeCell(BlockPos pos) {
+        if (!level().hasChunkAt(pos)) return true;
+        var shape = level().getBlockState(pos).getCollisionShape(level(),pos);
+        return !shape.isEmpty() && shape.bounds().getSize() >= 1D;
     }
     /** Source InventoryUtils398-409 chooses the FIRST eligible hotbar slot, including staves/sceptres. */
     private int firstWand(Player player) {

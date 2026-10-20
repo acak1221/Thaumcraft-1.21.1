@@ -144,6 +144,10 @@ public final class ThaumcraftRecipeDisplay {
             alias("WandCapGold", "arcane/wand_cap_gold"),      // 229
             alias("WandCapThaumiumInert", "arcane/wand_cap_thaumium_inert"), // 236
             alias("WandCapThaumium", "infusion/wand_cap_thaumium"), // 328
+            alias("WandCapVoidInert", "arcane/wand_cap_void_inert"), // 218
+            alias("WandCapVoid", "infusion/wand_cap_void"), // 310
+            alias("VoidMetal", "crucible/void_ingot"), // 99
+            alias("VoidSeed", "crucible/void_seed"), // 100
             alias("WandRodGreatwood", "arcane/wand_rod_greatwood"), // 238
             alias("FocusFire", "arcane/focus_fire"),             // 247
             alias("FocusFrost", "arcane/focus_frost"),           // 248

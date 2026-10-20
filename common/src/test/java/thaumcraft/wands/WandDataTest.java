@@ -38,7 +38,8 @@ class WandDataTest {
         for (String json : List.of(
                 "{\"rod\":\"copper_staff\"}",
                 "{\"rod\":\"wood_staff\"}",
-                "{\"cap\":\"void\"}",
+                "{\"cap\":\"copper\"}",
+                "{\"cap\":\"void_inert\"}",
                 "{\"cap\":\"thaumium_inert\"}",
                 "{\"vis\":{\"vitium\":100}}",
                 "{\"vis\":{\"unknown\":100}}",
@@ -69,7 +70,7 @@ class WandDataTest {
     }
     @Test void codecValidationDoesNotWeakenDirectConstruction() {
         assertThrows(IllegalArgumentException.class, () -> new WandData("unknown", "iron", Map.of()));
-        assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "void", Map.of()));
+        assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "silver", Map.of()));
         assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "gold", Map.of("aer", 2501)));
         assertThrows(IllegalArgumentException.class, () -> new WandData("greatwood", "gold", Map.of("aer", 5001)));
         assertThrows(IllegalArgumentException.class, () -> new WandData("silverwood", "gold", Map.of("aer", 10001)));

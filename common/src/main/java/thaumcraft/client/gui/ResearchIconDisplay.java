@@ -82,9 +82,9 @@ final class ResearchIconDisplay {
         String id = switch (match.group(1)) {
             case "ConfigItems.itemResource" -> variant(RESOURCES, metadata);
             case "ConfigItems.itemShard" -> variant(SHARDS, metadata);
-            case "ConfigItems.itemNugget" -> metadata == 6 ? "thaumium_nugget" : null;
+            case "ConfigItems.itemNugget" -> metadata == 6 ? "thaumium_nugget" : metadata == 7 ? "void_nugget" : null;
             case "ConfigItems.itemZombieBrain" -> metadata == 0 ? "zombie_brain" : null;
-            // ConfigResearch:89-97; ConfigItems:292-313 (staff cores are metadata 50-57 and 100). The void cap remains unsupported.
+            // ConfigResearch:89-97; ConfigItems:292-313 (staff cores are metadata 50-57 and 100). The copper and silver caps (other-mod metals) remain unsupported.
             case "ConfigItems.itemWandRod" -> switch (metadata) {
                 case 0 -> "wand_rod_greatwood";
                 case 1 -> "wand_rod_obsidian";
@@ -110,6 +110,8 @@ final class ResearchIconDisplay {
                 case 1 -> "wand_cap_gold";
                 case 2 -> "wand_cap_thaumium";
                 case 6 -> "wand_cap_thaumium_inert";
+                case 7 -> "wand_cap_void";
+                case 8 -> "wand_cap_void_inert";
                 default -> null;
             };
             // ConfigResearch:172,249,367,369. No filled-phial aspect or potion is guessed.

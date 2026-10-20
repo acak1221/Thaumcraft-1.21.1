@@ -132,6 +132,10 @@
     {
       "type": "minecraft:single",
       "resource": "thaumcraft:models/trunk"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_cap_void"
     }
   ]
 }

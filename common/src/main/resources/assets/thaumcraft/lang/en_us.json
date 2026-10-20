@@ -2180,5 +2180,20 @@
   "block.thaumcraft.eldritch_stairs": "Eldritch Stairs",
   "block.thaumcraft.cosmetic_stone_slab": "Arcane Stone Slab",
   "block.thaumcraft.cosmetic_wood_slab": "Greatwood Slab",
-  "block.thaumcraft.wand_pedestal": "Wand Pedestal"
+  "block.thaumcraft.wand_pedestal": "Wand Pedestal",
+  "item.thaumcraft.bone_bow.name": "Bow of Bone",
+  "item.thaumcraft.primal_arrow_air.name": "Air Arrow",
+  "item.thaumcraft.primal_arrow_fire.name": "Fire Arrow",
+  "item.thaumcraft.primal_arrow_water.name": "Water Arrow",
+  "item.thaumcraft.primal_arrow_earth.name": "Earth Arrow",
+  "item.thaumcraft.primal_arrow_order.name": "Order Arrow",
+  "item.thaumcraft.primal_arrow_entropy.name": "Entropy Arrow",
+  "item.thaumcraft.key_iron.name": "Iron Arcane Key",
+  "item.thaumcraft.key_gold.name": "Gold Arcane Key",
+  "item.thaumcraft.nugget_chicken.name": "Chicken Nugget",
+  "item.thaumcraft.nugget_beef.name": "Beef Nugget",
+  "item.thaumcraft.nugget_pork.name": "Pork Nugget",
+  "item.thaumcraft.nugget_fish.name": "Fish Nugget",
+  "item.thaumcraft.eldritch_tablet.name": "Runed Tablet",
+  "item.thaumcraft.eldritch_placer.name": "Eldritch Obelisk Placer"
 }

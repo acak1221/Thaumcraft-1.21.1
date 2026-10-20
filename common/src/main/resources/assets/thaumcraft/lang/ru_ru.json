@@ -2180,5 +2180,20 @@
   "block.thaumcraft.eldritch_stairs": "Эльдрические ступени",
   "block.thaumcraft.cosmetic_stone_slab": "Плита магического камня",
   "block.thaumcraft.cosmetic_wood_slab": "Плита из великого дерева",
-  "block.thaumcraft.wand_pedestal": "Пьедестал для палочки"
+  "block.thaumcraft.wand_pedestal": "Пьедестал для палочки",
+  "item.thaumcraft.bone_bow.name": "Костяной лук",
+  "item.thaumcraft.primal_arrow_air.name": "Грозовая стрела",
+  "item.thaumcraft.primal_arrow_fire.name": "Огненная стрела",
+  "item.thaumcraft.primal_arrow_water.name": "Ледяная стрела",
+  "item.thaumcraft.primal_arrow_earth.name": "Каменная стрела",
+  "item.thaumcraft.primal_arrow_order.name": "Стрела порядка",
+  "item.thaumcraft.primal_arrow_entropy.name": "Разрушающая стрела",
+  "item.thaumcraft.key_iron.name": "Железный магический ключ",
+  "item.thaumcraft.key_gold.name": "Золотой магический ключ",
+  "item.thaumcraft.nugget_chicken.name": "Кусочек курятины",
+  "item.thaumcraft.nugget_beef.name": "Кусочек говядины",
+  "item.thaumcraft.nugget_pork.name": "Кусочек свинины",
+  "item.thaumcraft.nugget_fish.name": "Кусочек рыбки",
+  "item.thaumcraft.eldritch_tablet.name": "Рунная скрижаль",
+  "item.thaumcraft.eldritch_placer.name": "Установщик древних обелисков"
 }

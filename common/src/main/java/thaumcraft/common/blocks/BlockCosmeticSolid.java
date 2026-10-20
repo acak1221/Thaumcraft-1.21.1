@@ -9,6 +9,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -74,6 +76,17 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
             return new TileNode(ThaumcraftEldritchBlocks.COSMETIC_NODE_TILE.get(), pos, state);
         }
         return null;
+    }
+
+    /**
+     * Original TileWardingStone:31-56 - the warding stone pushes the entities out of itself and
+     * seals the two blocks above it. The original ticked the tile on both sides, so the ticker
+     * runs on the client as well.
+     */
+    @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (state.getValue(VARIANT) != EldritchBlockRules.COSMETIC_WARDING_STONE) return null;
+        return createTickerHelper(type, ThaumcraftEldritchBlocks.WARDING_STONE_TILE.get(),
+                (lvl, pos, st, tile) -> { if (tile instanceof TileWardingStone stone) TileWardingStone.tick(lvl, pos, st, stone); });
     }
 
     /** BlockCosmeticSolid:360-370 - the golem stone toggles with the redstone power. */

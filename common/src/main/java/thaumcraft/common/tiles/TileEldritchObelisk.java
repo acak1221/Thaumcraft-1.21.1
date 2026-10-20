@@ -31,11 +31,9 @@ public final class TileEldritchObelisk extends BlockEntity {
         obelisk.counter++;
         if (level.isClientSide) return;
         if (obelisk.counter % EldritchBlockRules.OBELISK_TICK_PERIOD != 0) return;
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class,
-                new net.minecraft.world.phys.AABB(pos.getX() + .5D, pos.getY(), pos.getZ() + .5D,
-                        EldritchBlockRules.OBELISK_RANGE, EldritchBlockRules.OBELISK_RANGE, EldritchBlockRules.OBELISK_RANGE))) {
-            if (!(entity instanceof IEldritchMob)) continue;
-            if (!EldritchBlockRules.obeliskAffects(true, entity instanceof LivingEntity)) continue;
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, EldritchBlockRules.obeliskBox(pos))) {
+            if (!EldritchBlockRules.obeliskAffects(entity instanceof IEldritchMob, entity instanceof LivingEntity,
+                    entity.hasEffect(MobEffects.DIG_SLOWDOWN))) continue;
             entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, EldritchBlockRules.OBELISK_EFFECT_DURATION,
                     EldritchBlockRules.OBELISK_EFFECT_AMPLIFIER));
             entity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, EldritchBlockRules.OBELISK_EFFECT_DURATION,

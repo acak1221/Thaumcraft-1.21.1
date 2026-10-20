@@ -10,6 +10,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
@@ -31,6 +33,14 @@ public final class BlockMagicBox extends BaseEntityBlock {
     /** BlockMagicBox:87-91 - every magic box carries the inventory block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileMagicBox(pos, state);
+    }
+
+    /**
+     * Original BlockMagicBox and TileMagicBox:165-170 - the box links itself to its neighbours.
+     * The original ticked the tile on both sides, so the ticker runs on the client as well.
+     */
+    @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return createTickerHelper(type, ThaumcraftEldritchBlocks.MAGIC_BOX_TILE.get(), TileMagicBox::tick);
     }
 
     /** BlockMagicBox:71-85 - the right click opens the box interface. */

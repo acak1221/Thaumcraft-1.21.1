@@ -28,11 +28,13 @@ import thaumcraft.common.tiles.TileChestHungry;
 import thaumcraft.common.blocks.BlockFlesh;
 import thaumcraft.common.items.golems.GolemItemMatch;
 
-/** Finite native golem inventories, NOT a registry of arbitrary Container providers. */
-final class GolemHomeInventory {
+/** Finite native golem inventories, NOT a registry of arbitrary Container providers.
+ *  Public so that the ported TC4 goal set can reach the home and sorting inventories of the
+ *  native golem from its own package. */
+public final class GolemHomeInventory {
     private GolemHomeInventory() {}
 
-    static Destination find(ServerLevel level, BlockPos pos) {
+    public static Destination find(ServerLevel level, BlockPos pos) {
         if (!level.hasChunkAt(pos)) return null;
         BlockState state = level.getBlockState(pos);
         BlockEntity first = level.getBlockEntity(pos);
@@ -58,7 +60,7 @@ final class GolemHomeInventory {
     }
 
     /** Positive non-container classification, NEVER the negation of find/roomFor. */
-    static boolean isWorldThrowTarget(ServerLevel level, BlockPos pos) {
+    public static boolean isWorldThrowTarget(ServerLevel level, BlockPos pos) {
         if (pos == null || level.isOutsideBuildHeight(pos) || !level.getWorldBorder().isWithinBounds(pos)
                 || !level.hasChunkAt(pos)) return false;
         BlockState state = level.getBlockState(pos);
@@ -85,34 +87,34 @@ final class GolemHomeInventory {
                 || type == SmokerBlockEntity.class || type == TileChestHungry.class;
     }
 
-    record Destination(ServerLevel level, BlockPos pos, BlockState state, BlockEntity first,
-                       BlockPos otherPos, BlockState otherState, BlockEntity other, Container container) {
-        boolean current() {
+    public record Destination(ServerLevel level, BlockPos pos, BlockState state, BlockEntity first,
+                              BlockPos otherPos, BlockState otherState, BlockEntity other, Container container) {
+        public boolean current() {
             return level.hasChunkAt(pos) && !first.isRemoved() && level.getBlockEntity(pos) == first
                     && level.getBlockState(pos) == state
                     && (other == null || level.hasChunkAt(otherPos) && !other.isRemoved()
                     && level.getBlockEntity(otherPos) == other && level.getBlockState(otherPos) == otherState);
         }
 
-        int[] slots(Direction face) {
+        public int[] slots(Direction face) {
             return container instanceof WorldlyContainer sided ? sided.getSlotsForFace(face)
                     : IntStream.range(0, container.getContainerSize()).toArray();
         }
 
-        boolean accepts(int slot, ItemStack stack, Direction face) {
+        public boolean accepts(int slot, ItemStack stack, Direction face) {
             return slot >= 0 && slot < container.getContainerSize() && container.canPlaceItem(slot, stack)
                     && (!(container instanceof WorldlyContainer sided) || sided.canPlaceItemThroughFace(slot, stack, face));
         }
 
-        boolean extracts(int slot, ItemStack stack, Direction face) {
+        public boolean extracts(int slot, ItemStack stack, Direction face) {
             return slot >= 0 && slot < container.getContainerSize() && !stack.isEmpty()
                     && (!(container instanceof WorldlyContainer sided) || sided.canTakeItemThroughFace(slot, stack, face));
         }
 
-        int firstExtractable(ItemStack exemplar, Direction face) { return firstExtractable(exemplar, face, 0); }
+        public int firstExtractable(ItemStack exemplar, Direction face) { return firstExtractable(exemplar, face, 0); }
 
         /** The first exposed slot whose stack matches {@code exemplar} under Entropy's switches (original extractStack:190-208). */
-        int firstExtractable(ItemStack exemplar, Direction face, int match) {
+        public int firstExtractable(ItemStack exemplar, Direction face, int match) {
             if (!current()) return -1;
             int[] exposed = slots(face);
             if (exposed == null) return -1;
@@ -125,10 +127,10 @@ final class GolemHomeInventory {
             return -1;
         }
 
-        long countVisible(ItemStack exemplar, Direction face) { return countVisible(exemplar, face, 0); }
+        public long countVisible(ItemStack exemplar, Direction face) { return countVisible(exemplar, face, 0); }
 
         /** Visible stock under Entropy's switches (original getMissingItems:186-196). */
-        long countVisible(ItemStack exemplar, Direction face, int match) {
+        public long countVisible(ItemStack exemplar, Direction face, int match) {
             if (!current()) return 0;
             int[] exposed = slots(face);
             if (exposed == null) return 0;
@@ -142,7 +144,7 @@ final class GolemHomeInventory {
             return count;
         }
 
-        int roomFor(ItemStack stack, Direction face) {
+        public int roomFor(ItemStack stack, Direction face) {
             if (!current() || stack.isEmpty()) return 0;
             int[] exposed = slots(face);
             if (exposed == null) return 0;
@@ -158,9 +160,9 @@ final class GolemHomeInventory {
             return room;
         }
 
-        boolean hasSeedAndRoom(ItemStack exemplar, Direction face) { return hasSeedAndRoom(exemplar, face, 0); }
+        public boolean hasSeedAndRoom(ItemStack exemplar, Direction face) { return hasSeedAndRoom(exemplar, face, 0); }
 
-        boolean hasSeedAndRoom(ItemStack exemplar, Direction face, int match) {
+        public boolean hasSeedAndRoom(ItemStack exemplar, Direction face, int match) {
             // Quantity is irrelevant; this is a read-only extraction probe of
             // actual destination stock, on the SAME face that accepts the cargo.
             // The room is strict (it merges only identical stacks); the seed may be a look-alike under Entropy's switches.
@@ -168,7 +170,7 @@ final class GolemHomeInventory {
                     && firstExtractable(exemplar, face, match) >= 0;
         }
 
-        boolean sharesStorage(Destination otherInventory) {
+        public boolean sharesStorage(Destination otherInventory) {
             return otherInventory != null && (first == otherInventory.first || first == otherInventory.other
                     || other != null && (other == otherInventory.first || other == otherInventory.other));
         }

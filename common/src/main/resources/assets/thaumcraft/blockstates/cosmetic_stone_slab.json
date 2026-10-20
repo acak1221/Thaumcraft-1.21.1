@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "type=bottom,variant=0": {
+      "model": "thaumcraft:block/cosmetic_stone_slab_0"
+    },
+    "type=top,variant=0": {
+      "model": "thaumcraft:block/cosmetic_stone_slab_0_top"
+    },
+    "type=bottom,variant=1": {
+      "model": "thaumcraft:block/cosmetic_stone_slab_1"
+    },
+    "type=top,variant=1": {
+      "model": "thaumcraft:block/cosmetic_stone_slab_1_top"
+    }
+  }
+}

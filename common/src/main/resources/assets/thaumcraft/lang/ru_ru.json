@@ -2166,5 +2166,19 @@
   "block.thaumcraft.greatwood_stairs": "Лестница из великого дерева",
   "block.thaumcraft.silverwood_stairs": "Лестница из серебряного дерева",
   "block.thaumcraft.greatwood_slab": "Плита из великого дерева",
-  "block.thaumcraft.silverwood_slab": "Плита из серебряного дерева"
+  "block.thaumcraft.silverwood_slab": "Плита из серебряного дерева",
+  "block.thaumcraft.arcane_furnace": "Магическая печь",
+  "block.thaumcraft.arcane_furnace_nozzle": "Сопло магической печи",
+  "block.thaumcraft.death_fluid": "Жидкость смерти",
+  "block.thaumcraft.obsidian_tile": "Обсидиановая плитка",
+  "block.thaumcraft.paving_stone_travel": "Брусчатка",
+  "block.thaumcraft.paving_stone_warding": "Охраняющая брусчатка",
+  "block.thaumcraft.obsidian_totem_base": "Основание обсидианового тотема",
+  "block.thaumcraft.eldritch_stone": "Эльдрическая порода",
+  "block.thaumcraft.infused_stone_pillar": "Столб зачарованного камня",
+  "block.thaumcraft.warded_glass": "Охраняющее стекло",
+  "block.thaumcraft.eldritch_stairs": "Эльдрические ступени",
+  "block.thaumcraft.cosmetic_stone_slab": "Плита магического камня",
+  "block.thaumcraft.cosmetic_wood_slab": "Плита из великого дерева",
+  "block.thaumcraft.wand_pedestal": "Пьедестал для палочки"
 }

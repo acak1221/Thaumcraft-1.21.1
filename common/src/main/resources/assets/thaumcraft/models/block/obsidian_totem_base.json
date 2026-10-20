@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "particle": "thaumcraft:blocks/obsidiantotembase",
+    "bottom": "thaumcraft:blocks/obsidiantotembase",
+    "top": "thaumcraft:blocks/obsidiantotembase",
+    "side": "thaumcraft:blocks/obsidiantotembaseshaded"
+  }
+}

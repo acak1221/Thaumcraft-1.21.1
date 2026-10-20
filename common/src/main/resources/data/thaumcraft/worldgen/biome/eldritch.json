@@ -1,0 +1,59 @@
+{
+  "carvers": {},
+  "has_precipitation": false,
+  "temperature": 0.5,
+  "downfall": 0.5,
+  "spawn_costs": {},
+  "creature_spawn_probability": 0.1,
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "thaumcraft:tc4_outer_lands_maze"
+    ],
+    []
+  ],
+  "effects": {
+    "fog_color": 1576216,
+    "water_color": 4159204,
+    "water_fog_color": 329011,
+    "sky_color": 0
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "thaumcraft:inhabited_zombie",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "thaumcraft:eldritch_guardian",
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ],
+    "creature": [],
+    "water_creature": [],
+    "ambient": [
+      {
+        "type": "minecraft:bat",
+        "weight": 10,
+        "minCount": 8,
+        "maxCount": 8
+      }
+    ],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  }
+}

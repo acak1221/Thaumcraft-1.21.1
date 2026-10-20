@@ -45,6 +45,7 @@ import thaumcraft.common.lib.WarpEvents;
 import thaumcraft.common.lib.cult.CultistEquipmentRules;
 import thaumcraft.common.lib.cult.CultistRules;
 import thaumcraft.common.lib.loot.OriginalLootEnchantments;
+import thaumcraft.common.lib.ward.WardRules;
 
 /**
  * Original TC4 cultist praetor: a hundred and twenty-five health, a crimson praetor
@@ -200,7 +201,10 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
         if (modifier == CultistRules.CHAMPION_BOLD && speed != null) speed.addPermanentModifier(BOLD_SPEED);
         if (modifier == CultistRules.CHAMPION_MIGHTY && damage != null) damage.addPermanentModifier(MIGHTY_DAMAGE);
         if (modifier == CultistRules.CHAMPION_WARDED) {
-            setAbsorptionAmount(CultistRules.championAbsorption((float) getAttributeValue(Attributes.MAX_HEALTH)));
+            // Oracle EntityUtils.makeChampion:271-274 - the warded champion takes half of its maximum
+            // health as its ward, and the ward joins its absorption. 1.21.1 clamps the absorption by the
+            // max absorption attribute, so the ward raises that attribute first.
+            WardRules.setWard(this, CultistRules.championAbsorption((float) getAttributeValue(Attributes.MAX_HEALTH)));
         }
     }
 

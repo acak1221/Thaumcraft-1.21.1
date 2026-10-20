@@ -9,7 +9,7 @@ import java.util.Random;
 public final class ChampionModArmored implements IChampionModifierEffect {
     @Override public Result performEffect(Context context, Random random) {
         if (context.unblockable()) return Result.unchanged(context);
-        return new Result(context.amount() * 19.0f / 25.0f, 0.0f, 0.0f, Status.NONE, 0, 0, 0, false);
+        return new Result(context.amount() * 19.0f / 25.0f, 0.0f, 0.0f, 0.0f, Status.NONE, 0, 0, 0, false);
     }
     @Override public Fx showFx(Random random, float width, float height) {
         if (random.nextInt(4) != 0) return null;

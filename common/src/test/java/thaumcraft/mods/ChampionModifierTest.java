@@ -46,13 +46,16 @@ class ChampionModifierTest {
     }
 
     private static IChampionModifierEffect.Context attack(float amount, boolean player) {
-        return IChampionModifierEffect.Context.attack(amount, player, 0, 10.0f, 20.0f, false);
+        return IChampionModifierEffect.Context.attack(amount, player, 0, 10.0f, 20.0f, 0.0f, false);
     }
     private static IChampionModifierEffect.Context damaged(float amount, boolean unblockable, boolean thorns) {
-        return IChampionModifierEffect.Context.damaged(amount, unblockable, thorns, true, false, 0, 10.0f, 20.0f, false);
+        return IChampionModifierEffect.Context.damaged(amount, unblockable, thorns, true, false, 0, 10.0f, 20.0f, 0.0f, false);
     }
     private static IChampionModifierEffect.Context tick(int ticks, float health, float baseMaxHealth, boolean invulnerable) {
-        return IChampionModifierEffect.Context.tick(ticks, health, baseMaxHealth, invulnerable);
+        return IChampionModifierEffect.Context.tick(ticks, health, baseMaxHealth, 0.0f, invulnerable);
+    }
+    private static IChampionModifierEffect.Context tick(int ticks, float health, float baseMaxHealth, float absorption, boolean invulnerable) {
+        return IChampionModifierEffect.Context.tick(ticks, health, baseMaxHealth, absorption, invulnerable);
     }
 
     @Test void originalModifiersKeepTheirIdentityAndTrigger() {
@@ -112,7 +115,7 @@ class ChampionModifierTest {
         assertEquals(1.0f, new ChampionModSpined().performEffect(damaged(10.0f, false, false), new ScriptedRandom(0.5f, 0)).reflected(), 0.0f);
         assertEquals(0.0f, new ChampionModSpined().performEffect(damaged(10.0f, false, true), new ScriptedRandom(0.5f, 2)).reflected(), 0.0f);
         assertEquals(0.0f, new ChampionModSpined().performEffect(
-                IChampionModifierEffect.Context.damaged(10.0f, false, false, false, false, 0, 10.0f, 20.0f, false), new ScriptedRandom(0.5f, 2)).reflected(), 0.0f);
+                IChampionModifierEffect.Context.damaged(10.0f, false, false, false, false, 0, 10.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 2)).reflected(), 0.0f);
     }
 
     @Test void originalGrimFierySicklyAndVenomousHitTheirTargetWithFortyPercentChance() {
@@ -156,11 +159,16 @@ class ChampionModifierTest {
         assertEquals(1.0f, new ChampionModUndying().performEffect(tick(40, 5.0f, 20.0f, false), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
     }
 
-    @Test void originalWardedChampionHealsOneHealthBelowHalfItsBaseHealthEveryTwentyFifthTick() {
-        assertEquals(1.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, false), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
-        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 10.0f, 20.0f, false), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
-        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(26, 5.0f, 20.0f, false), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
-        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, true), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
+    @Test void originalWardedChampionRegainsOnePointOfItsWardEveryTwentyFifthTick() {
+        // Oracle ChampionModWarded:25-30 - the ward of the warded champion is its absorption,
+        // never its health, and it grows by one point every twenty fifth tick while the champion
+        // is not hurt and its ward is below half of its base max health.
+        assertEquals(1.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
+        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 10.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
+        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(26, 5.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
+        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, true), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
+        // The ward is never a heal of the champion.
+        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
     }
 
     @Test void originalInfestedChampionSpawnsASpiderlingWithFortyPercentChance() {

@@ -8,7 +8,7 @@ import java.util.Random;
  */
 public final class ChampionModWarp implements IChampionModifierEffect {
     @Override public Result performEffect(Context context, Random random) {
-        if (random.nextFloat() < 0.33f && context.targetIsPlayer()) return new Result(context.amount(), 0.0f, 0.0f, Status.NONE, 0, 0, 1 + random.nextInt(3), false);
+        if (random.nextFloat() < 0.33f && context.targetIsPlayer()) return new Result(context.amount(), 0.0f, 0.0f, 0.0f, Status.NONE, 0, 0, 1 + random.nextInt(3), false);
         return Result.unchanged(context);
     }
     @Override public Fx showFx(Random random, float width, float height) {

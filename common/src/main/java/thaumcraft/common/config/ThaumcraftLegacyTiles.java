@@ -48,7 +48,9 @@ public final class ThaumcraftLegacyTiles {
             FLUIDS.register("death_fluid_flowing", () -> new BlockFluidDeath.Flowing());
     /** The death fluid block. */
     public static final RegistrySupplier<BlockFluidDeath> DEATH_FLUID = BLOCKS.register("death_fluid",
-            // Original BlockFluidFinite: the hardness of one hundred and the light of the fluid.
+            // Original BlockFluidFinite over BlockLiquid: setHardness100, so the hardness is one hundred
+            // and the explosion resistance is one hundred as well (the 1.7 engine stored it as five
+            // hundred and exposed a fifth of it). The light of the fluid is the light of the block.
             () -> new BlockFluidDeath(DEATH_FLUID_SOURCE.get(), fluid()));
 
     /** The arcane furnace: one block with the eleven original metadata values. */

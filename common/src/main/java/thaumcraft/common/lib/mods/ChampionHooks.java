@@ -178,7 +178,9 @@ public final class ChampionHooks {
 
     /** The champion modifier id the client received with the entity data. */
     public static int clientChampionId(Entity entity) {
-        return entity.getEntityData().get(ChampionAccess.CHAMPION_DATA);
+        // Only the living entities define the champion data id.
+        if (!(entity instanceof LivingEntity)) return ChampionRules.NO_CHAMPION;
+        return entity.getEntityData().get(ChampionData.CHAMPION);
     }
 
     /**
@@ -189,7 +191,7 @@ public final class ChampionHooks {
         if (!(mob instanceof ChampionAccess access)) return;
         access.thaumcraft$setChampionModifier(modifier);
         if (!mob.level().isClientSide) {
-            mob.getEntityData().set(ChampionAccess.CHAMPION_DATA,
+            mob.getEntityData().set(ChampionData.CHAMPION,
                     modifier < 0 ? ChampionRules.NO_CHAMPION : modifier);
         }
     }

@@ -62,7 +62,6 @@
     "PureVanillaWaterFlowMixin",
     "PureBucketFillMixin",
     "ChampionEntityDataMixin",
-    "ChampionLivingDataMixin",
     "ChampionMobMixin",
     "ChampionTickMixin",
     "ChampionHurtMixin",

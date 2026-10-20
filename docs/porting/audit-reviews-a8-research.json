@@ -1,0 +1,1201 @@
+{
+  "thaumcraft/api/IScribeTools.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/api/IScribeTools.java:6 public interface IScribeTools {}",
+      "native common/src/main/java/thaumcraft/api/IScribeTools.java:4 public interface IScribeTools {}",
+      "native common/src/main/java/thaumcraft/common/items/ItemInkwell.java:15 public final class ItemInkwell extends Item implements IScribeTools",
+      "native common/src/main/java/thaumcraft/common/lib/research/ScribingInk.java:104 stack.getItem() instanceof IScribeTools"
+    ],
+    "notes": [
+      "Marker interface kept at the original path; the legacy duplicate thaumcraft/api/items/IScribeTools.java was merged into it (see that row)."
+    ],
+    "reviewed_sha256": {
+      "original": "ea13a67b91de614a3126de12230be90d96fd0749dcdd97afcd4ef698da5eff6d",
+      "legacy": "b55e3b2bbd7b48ae2446eb3934f0a57ae48305f99bfe7e809de312262a1c724e"
+    }
+  },
+  "thaumcraft/api/capabilities/IPlayerKnowledge.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/capabilities/IPlayerKnowledge.java:11 enum EnumKnowledgeType { THEORY(32, true, \"T\"), OBSERVATION(16, true, \"O\") }",
+      "native common/src/main/java/thaumcraft/api/capabilities/IPlayerKnowledge.java:17 enum EnumKnowledgeType { THEORY(32, true, \"T\"), OBSERVATION(16, true, \"O\") }",
+      "native common/src/main/java/thaumcraft/api/capabilities/IPlayerKnowledge.java:81 void sync(ServerPlayer player)",
+      "native common/src/main/java/thaumcraft/api/capabilities/NativePlayerKnowledge.java:100 addKnowledge/getKnowledge/getKnowledgeRaw implemented against ResearchCatalog"
+    ],
+    "notes": [
+      "1.21.1 forced changes: EntityPlayerMP became ServerPlayer and INBTSerializable<NBTTagCompound> was dropped; the whole method set of the legacy contract is present.",
+      "The native keeps the per-research stage/flag markers that the original TC4 corpus has no counterpart for; they are documented as native-only additions."
+    ],
+    "reviewed_sha256": {
+      "legacy": "e39d1597d54e97ffeea6bb04b09370255b36a4a569738c0f29cc5944f91c010a"
+    }
+  },
+  "thaumcraft/api/items/IScribeTools.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/IScribeTools.java:3 public interface IScribeTools extends thaumcraft.api.items.IScribeTools {}",
+      "legacy src/main/java/thaumcraft/api/items/IScribeTools.java:3 public interface IScribeTools {}",
+      "native common/src/main/java/thaumcraft/api/IScribeTools.java:4 public interface IScribeTools {} (single canonical marker, no sub-interface)"
+    ],
+    "notes": [
+      "The two identical legacy marker interfaces were merged into the single canonical thaumcraft.api.IScribeTools; the duplicate carried no members, so no behaviour is lost."
+    ],
+    "reviewed_sha256": {
+      "legacy": "def948bbfeb6ae434d793cc17a36d96d2ffefb7fa3a793b84bb2e140e3573272"
+    }
+  },
+  "thaumcraft/api/research/IScanEventHandler.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/api/research/IScanEventHandler.java:17 ScanResult scanPhenomena(ItemStack var1, World var2, EntityPlayer var3)",
+      "native common/src/main/java/thaumcraft/api/research/IScanEventHandler.java:10 ScanResult scanPhenomena(ItemStack stack, Level world, Player player)",
+      "native common/src/main/java/thaumcraft/common/lib/research/ScanCallbacks.java:32 iterates ThaumcraftApi.scanEventhandlers in registration order",
+      "native common/src/main/java/thaumcraft/common/lib/research/ScanCallbacks.java:34 if (result != null) return result; // first non-null wins, as in the original"
+    ],
+    "notes": [
+      "Forced 1.21.1 rename only (EntityPlayer/World -> Player/Level); the callback contract and the first-non-null dispatch order are unchanged.",
+      "The original dispatches the callback on the client; the native resolves it on the server, which is an authority change, not an API change."
+    ],
+    "reviewed_sha256": {
+      "original": "ed99d711ac7ad6d92452e27896b1875fc3138e82ff18710fd632a7ab0b72a154",
+      "legacy": "e310d9092b6de01682fdaf196bd2c4b16e977a912b6dd02173dc3484122e27ce"
+    }
+  },
+  "thaumcraft/api/research/IScanThing.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/IScanThing.java:5-11 boolean checkThing / String getResearchKey / default void onSuccess",
+      "native common/src/main/java/thaumcraft/api/research/IScanThing.java:12-18 the same three members with Player instead of EntityPlayer"
+    ],
+    "notes": [
+      "Only the 1.21.1 Player rename; the legacy 1.12 class and the native class have identical member sets."
+    ],
+    "reviewed_sha256": {
+      "legacy": "ce01d95d88d72f5b347f5c648cc904484b449163d5eadc863a4b3a80f324f38e"
+    }
+  },
+  "thaumcraft/api/research/ResearchAddendum.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/ResearchAddendum.java:11-37 getText/getTextLocalized/setText/getRecipes/setResearch accessors",
+      "native common/src/main/java/thaumcraft/api/research/ResearchAddendum.java:14-28 the same accessors"
+    ],
+    "notes": [
+      "I18n.translateToLocal became Component.translatable(...).getString(); the accessor contract is unchanged."
+    ],
+    "reviewed_sha256": {
+      "legacy": "49e6f8ee6231d35243d6c436b2cc3ca9358d48ae7cb28831475206bb67a46ac8"
+    }
+  },
+  "thaumcraft/api/research/ResearchCategories.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/api/research/ResearchCategories.java:22 public static LinkedHashMap<String, ResearchCategoryList> researchCategories",
+      "oracle thaumcraft/api/research/ResearchCategories.java:51-75 addResearch rejects a non-virtual entry that overlaps an existing cell",
+      "native common/src/main/java/thaumcraft/api/research/ResearchCategories.java:82-99 addResearch keeps that overlap rejection and the FATAL log",
+      "native common/src/main/java/thaumcraft/api/research/ResearchCategories.java:35 researchCategories.put(definition.category(), new ResearchCategoryList(null, null))",
+      "oracle thaumcraft/common/config/ConfigResearch.java:68-73 registerCategory(\"BASICS\", ... \"textures/items/thaumonomiconcheat.png\"), (\"THAUMATURGY\", ... r_thaumaturgy.png), (\"ALCHEMY\", ... r_crucible.png), (\"ARTIFICE\", ... r_artifice.png), (\"GOLEMANCY\", ... r_golemancy.png), (\"ELDRITCH\", ... r_eldritch.png)"
+    ],
+    "notes": [
+      "Forced data-driven change: the six original categories are published from the bundled corpus, but their icon and background ResourceLocations are dropped (null).",
+      "Consequence: the research browser tabs are text buttons (native GuiResearchBrowser.java:59-64) instead of the original's icon tabs (oracle GuiResearchBrowser.java:495 binds rcl.icon); the icon textures are still shipped in assets/thaumcraft/textures/misc/.",
+      "The original's linear getResearch scan was replaced by a map lookup; the observable answer is identical."
+    ],
+    "reviewed_sha256": {
+      "original": "cc4f36a0760199c57be44f2ed7e005cc29dbd02eaa5bdc8276d89925dc78e064",
+      "legacy": "c435af1a116a4585d3c6337e2bf21a55982727ba1a33d627f3790fbcf84014b2"
+    }
+  },
+  "thaumcraft/api/research/ResearchCategoriesCompat.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/ResearchCategoriesCompat.java:5-7 getResearch(String key) returns ResearchCategories.getResearch(key)",
+      "native common/src/main/java/thaumcraft/api/research/ResearchCategoriesCompat.java:13-16 getResearch returns ResearchEntry.of(item)"
+    ],
+    "notes": [
+      "The native additionally exposes getResearchCategory(String); the legacy answer is produced from the same registry."
+    ],
+    "reviewed_sha256": {
+      "legacy": "bac994c881beb9b80d064920a466852e1472521e854cde1582bf70d860c44c7e"
+    }
+  },
+  "thaumcraft/api/research/ResearchCategory.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/ResearchCategory.java:40-43 total += multiplier*multiplier*input.getAmount(a)*formula.getAmount(a)/10.0; return (int)Math.ceil(total>0?Math.sqrt(total):total)",
+      "native common/src/main/java/thaumcraft/api/research/ResearchCategory.java:45-47 the identical formula and rounding"
+    ],
+    "notes": [
+      "The knowledge formula is byte-for-byte the legacy formula; only the ResourceLocation/AspectList imports changed for 1.21.1."
+    ],
+    "reviewed_sha256": {
+      "legacy": "0345187f5948af7f79d3ee25ddb423c370e9a43a84d56136166d04f5494fd563"
+    }
+  },
+  "thaumcraft/api/research/ResearchCategoryList.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/api/research/ResearchCategoryList.java:21 public Map<String, ResearchItem> research = new HashMap<String, ResearchItem>()",
+      "native common/src/main/java/thaumcraft/api/research/ResearchCategoryList.java:20 public Map<String, ResearchItem> research = new LinkedHashMap<>()",
+      "oracle thaumcraft/api/research/ResearchCategoryList.java:16-19 icon and background fields",
+      "native common/src/main/java/thaumcraft/api/research/ResearchCategoryList.java:18-19 the same fields, but null for the six corpus categories"
+    ],
+    "notes": [
+      "Forced change: HashMap -> LinkedHashMap so the browser draws the cells in a stable order; this is documented in the class comment.",
+      "The original's HashMap iteration order is reproduced where it is observable (RNG selection) by ResearchRegistrationOrder, which rebuilds the original per-category HashMap from the corpus provenance (native common/lib/research/ResearchRegistrationOrder.java:19-28).",
+      "icon/background are null for the corpus categories, see the ResearchCategories row."
+    ],
+    "reviewed_sha256": {
+      "original": "ea6975a8ef78df53f92dc0b57a7a9d2eff76eb89604418b7097462a45656b4cd",
+      "legacy": "c5d68ecbdfad026c143abe9cad249b21b5b822b43b4430f94d3006aba8575613"
+    }
+  },
+  "thaumcraft/api/research/ResearchEntry.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/ResearchEntry.java:13-32 the same field set (key, category, name, parents, siblings, displayColumn/Row, icons, meta, rewardItem, rewardKnow, stages, addenda)",
+      "native common/src/main/java/thaumcraft/api/research/ResearchEntry.java:14-26 the same field set and the same EnumResearchMeta values",
+      "native common/src/main/java/thaumcraft/api/research/ResearchEntry.java:38-50 of(ResearchItem) builds the view from the corpus"
+    ],
+    "notes": [
+      "The native adds a static factory and two parent-prefix helpers; the legacy accessor contract is unchanged."
+    ],
+    "reviewed_sha256": {
+      "legacy": "febb7edf538d8c0582283ba8fc444cb9977474ee00f01700bc03fee149addefc"
+    }
+  },
+  "thaumcraft/api/research/ResearchItem.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/api/research/ResearchItem.java:90-138 the full builder API (setSpecial/Stub/Lost/Concealed/Hidden/Virtual/Parents/ParentsHidden/Siblings/Pages)",
+      "native common/src/main/java/thaumcraft/api/research/ResearchItem.java:114-132 the same builder API",
+      "native common/src/main/java/thaumcraft/api/research/ResearchItem.java:88 new ResearchItem(..., (ResourceLocation) null) - the corpus view has no icon item",
+      "native common/src/main/java/thaumcraft/api/research/ResearchItem.java:159-161 getItemTriggers/getEntityTriggers/getAspectTriggers",
+      "oracle thaumcraft/common/config/ConfigResearch.java:80 setItemTriggers(new ItemStack(ConfigBlocks.blockWoodenDevice, 1, 8)) and setAspectTriggers(Aspect.FIRE) were executable"
+    ],
+    "notes": [
+      "The builder API is preserved, but a corpus-backed ResearchItem never carries icon_item/icon_resource, itemTriggers or aspectTriggers: the bundled corpus keeps those only as provenance strings (native ResearchItem.of:81-109).",
+      "Consequence: add-ons that read getItemTriggers()/getAspectTriggers() from a corpus entry see null/empty instead of the original's executable triggers; the built-in clue system uses ResearchTriggerBindings instead (see the Report section)."
+    ],
+    "reviewed_sha256": {
+      "original": "d65045e20143c2a10e087f3bc30801853d04f98801ded6f8e985a4571cf8eeb9",
+      "legacy": "290b15a29875d204175fbd9607d3040c6a031d53cb1bd6aed5f5c6e9094ede1c"
+    }
+  },
+  "thaumcraft/api/research/ResearchPage.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/api/research/ResearchPage.java:26-32 fields type/text/research/image/aspects/recipe/recipeOutput and the 11 PageType values",
+      "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:23-31 the same fields and the same 11 PageType values",
+      "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:88-103 the smelting page needs a Level in 1.21.1",
+      "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:130-135 of() maps the corpus page kinds, legacy_expression becomes PageType.IMAGE"
+    ],
+    "notes": [
+      "Forced 1.21.1 changes: IRecipe became Recipe, the furnace lookup needs a Level, StatCollector became Component.",
+      "The bundled corpus only carries text / recipe_reference / legacy_expression pages, so the original's IMAGE, ASPECTS, SMELTING, NORMAL_CRAFTING, CRUCIBLE_CRAFTING, INFUSION_CRAFTING, COMPOUND_CRAFTING and INFUSION_ENCHANTMENT kinds are never produced from the corpus; of() maps legacy_expression to IMAGE, which is a lossy but presentation-only mapping."
+    ],
+    "reviewed_sha256": {
+      "original": "7c3318b10863b86c671e0d804eea388b24e2f75ea1549b1915b0339dbb3c8669",
+      "legacy": "463ee029d72a08d181e631faec040e94d45f865fecccd89dfa650d04e67c61b8"
+    }
+  },
+  "thaumcraft/api/research/ResearchStage.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/ResearchStage.java:9-104 text/recipes/obtain/craft/craftReference/know/research/researchIcon/warp accessors",
+      "native common/src/main/java/thaumcraft/api/research/ResearchStage.java:11-76 the same accessors and the nested Knowledge record"
+    ],
+    "notes": [
+      "EntityPlayer became Player and NBTTagCompound was not needed here; the member set is identical."
+    ],
+    "reviewed_sha256": {
+      "legacy": "c52016c71dac77e15af3604c72d244bf3dbe146d9b2ff357da595855b3cafda5"
+    }
+  },
+  "thaumcraft/api/research/ScanBlock.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/ScanBlock.java:12 this(\"!\" + block.getRegistryName(), block)",
+      "native common/src/main/java/thaumcraft/api/research/ScanBlock.java:19 this(\"!\" + BuiltInRegistries.BLOCK.getKey(block), block)",
+      "legacy src/main/java/thaumcraft/api/research/ScanBlock.java:20-32 checkThing compares the block instance",
+      "native common/src/main/java/thaumcraft/api/research/ScanBlock.java:27-36 checkThing compares the block instance"
+    ],
+    "notes": [
+      "The automatic research key keeps the original '!' + registry-name shape, now built from a ResourceLocation."
+    ],
+    "reviewed_sha256": {
+      "legacy": "69f1d575fb81d5832e3ad11e1b46b1cd425f36e8d39db858cd3ca3c38dafa5cc"
+    }
+  },
+  "thaumcraft/api/research/ScanResult.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/api/research/ScanResult.java:12-16 public byte type; int id; int meta; Entity entity; String phenomena",
+      "native common/src/main/java/thaumcraft/api/research/ScanResult.java:13-17 the same fields plus stack/nodePosition/nodeDimension",
+      "oracle thaumcraft/api/research/ScanResult.java:26-43 equals compares type, id/meta, entity id and phenomena",
+      "native common/src/main/java/thaumcraft/api/research/ScanResult.java:46-53 the same equals, including the original's permissive non-ScanResult branch"
+    ],
+    "notes": [
+      "The numeric id/meta fields now carry native registry ids and the original's permissive equals quirk is preserved verbatim.",
+      "The extra stack/nodePosition/nodeDimension fields are the native witness/locator for a fresh world; the original's process-global node id list has no 1.21.1 counterpart."
+    ],
+    "reviewed_sha256": {
+      "original": "1046eb48b6f8f04619a7d6f6d47ce5cdb06f96011341925c22cc234033c3cbe4",
+      "legacy": "d0ddeca47cf44466bdc1474863dcf375c3bcc642f603a771f5ef75dcade365cc"
+    }
+  },
+  "thaumcraft/api/research/ScanningManager.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/ScanningManager.java:9-11 addScannableThing(IScanThing) appends to a static list",
+      "native common/src/main/java/thaumcraft/api/research/ScanningManager.java:18-20 addScannableThing appends to the same static list",
+      "native common/src/main/java/thaumcraft/api/research/ScanningManager.java:26-31 find() returns the first accepting handler"
+    ],
+    "notes": [
+      "Registration order and first-match semantics are kept; the native adds a read-only accessor.",
+      "The registry is an add-on extension point only - the original TC4 4.2.3.5 has no such class and the built-in scan never consults it."
+    ],
+    "reviewed_sha256": {
+      "legacy": "d13c12528680a97d9f5e3194e69eca091f7c7afe34b58483d4e366071a7ad461"
+    }
+  },
+  "thaumcraft/api/research/theorycraft/ITheorycraftAid.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/theorycraft/ITheorycraftAid.java:4-6 Object getAidObject(); Class<TheorycraftCard>[] getCards()",
+      "native common/src/main/java/thaumcraft/api/research/theorycraft/ITheorycraftAid.java:8-12 the same two members"
+    ],
+    "notes": [
+      "Byte-identical contract; only the javadoc was added."
+    ],
+    "reviewed_sha256": {
+      "legacy": "9a11e2d0013a88bcd92fc90f722d44a97dda764887b89cda87da86d555a6d2b6"
+    }
+  },
+  "thaumcraft/api/research/theorycraft/ResearchTableData.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/theorycraft/ResearchTableData.java:8-38 table/player/inspiration/inspirationStart/bonusDraws/categoryTotals with hasTotal/getTotal/addTotal/addInspiration",
+      "native common/src/main/java/thaumcraft/api/research/theorycraft/ResearchTableData.java:14-45 the same fields and the same four methods"
+    ],
+    "notes": [
+      "EntityPlayer became Player, TileEntity became BlockEntity; the numbers and the TreeMap semantics are unchanged."
+    ],
+    "reviewed_sha256": {
+      "legacy": "040294e8d6cdc54d95c255869dd71a700fd2e885e78bb106c68b4de03b9fdc7e"
+    }
+  },
+  "thaumcraft/api/research/theorycraft/TheorycraftCard.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/theorycraft/TheorycraftCard.java:10-53 seed/initialize/isAidOnly/getInspirationCost/getResearchCategory/getLocalizedName/getLocalizedText/getRequiredItems/getRequiredItemsConsumed/activate/serialize/deserialize",
+      "native common/src/main/java/thaumcraft/api/research/theorycraft/TheorycraftCard.java:17-55 the same members with Player and CompoundTag"
+    ],
+    "notes": [
+      "NBTTagCompound became CompoundTag and EntityPlayer became Player; the seed serialization contract is unchanged."
+    ],
+    "reviewed_sha256": {
+      "legacy": "66decd69584a280f95eadf9b8d15921783e71505ce8a5f8278b9d515c9b74012"
+    }
+  },
+  "thaumcraft/api/research/theorycraft/TheorycraftManager.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/research/theorycraft/TheorycraftManager.java:6-16 static aids/cards maps with putIfAbsent registration",
+      "native common/src/main/java/thaumcraft/api/research/theorycraft/TheorycraftManager.java:11-25 the same maps, the same putIfAbsent rule, plus null/type guards"
+    ],
+    "notes": [
+      "First-registration-wins is preserved; the native rejects null and non-TheorycraftCard classes and adds two read-only accessors."
+    ],
+    "reviewed_sha256": {
+      "legacy": "09cba26034cc19272f71307318401087971a2003932a3017e08df3f9a78a4c47"
+    }
+  },
+  "thaumcraft/client/gui/GuiResearchBrowser.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/client/gui/GuiResearchBrowser.java:75-76 protected int paneWidth = 256; protected int paneHeight = 230",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:51 panelWidth = Math.min(510, width-16); panelHeight = Math.min(300, height-16)",
+      "oracle thaumcraft/client/gui/GuiResearchBrowser.java:387-399 the research frame u-coordinate: Round 54, Hidden 230 (easy/-1) or 86, other 110 (easy/secondary) or 0",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:96 int frameX = ... isHidden() ? 86 : purchases(research) ? 110 : 0",
+      "oracle thaumcraft/client/gui/GuiResearchBrowser.java:366 drawForbidden(var42+11, var41+11) for a research with warp > 0",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:84-108 the native node loop has no forbidden marker and no Special overlay",
+      "oracle thaumcraft/client/gui/GuiResearchBrowser.java:327-348 sibling connectors",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:84-92 only parent connectors are drawn"
+    ],
+    "notes": [
+      "The map, the clue/parent/category visibility rules and the authoritative purchase/note actions are reproduced (native ResearchBrowserData.isVisible:21-29 mirrors oracle GuiResearchBrowser:318/371).",
+      "Deviation: the panel geometry, the category tabs (text buttons instead of the original's icon tabs), the animated wiggle connectors (straight hLine/vLine), the Special overlay and the warp 'forbidden' marker are not reproduced.",
+      "Deviation: the frame u-coordinate of a hidden research is always 86 in the native; the original uses 230 for a hidden research at researchDifficulty -1 or for a hidden secondary research at difficulty 0 (oracle GuiResearchBrowser:389-393).",
+      "Deviation: the sibling connectors are missing.",
+      "Unresolved icon expressions fall back to the thaumonomicon icon instead of drawing nothing (native GuiResearchBrowser:100-104)."
+    ],
+    "reviewed_sha256": {
+      "original": "b9d0562345cdbbda6d3688795456e8196b88831e6952304d28826338b0b69563",
+      "legacy": "9fbec6a91098702e8d5c5af39afff072b26a84a18906aada1d6125bef4a9682d"
+    }
+  },
+  "thaumcraft/client/gui/GuiResearchPopup.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/client/gui/GuiResearchPopup.java:79 double var1 = (Minecraft.func_71386_F() - researchTime)/3000.0 and the quartic 36px slide",
+      "native common/src/main/java/thaumcraft/client/lib/ResearchToastQueue.java:15-19 the same 3000ms window and the same quartic 36px slide",
+      "oracle thaumcraft/client/gui/GuiResearchPopup.java:103-104 blit 96x202 from a 160x32 crop at (0, y)",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java:27 graphics.blit(FRAME, 0, frame.y(), 0, 0, 160, 32, 160, 32)",
+      "oracle thaumcraft/client/gui/GuiResearchPopup.java:104 \"Research Completed!\" and the 125px name down-scale",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchPopup.java:28-35 the same literal and the same 125px down-scale"
+    ],
+    "notes": [
+      "The toast is a 1.21.1 HUD overlay instead of a Gui, but the crop size, the quartic slide, the duration and the text scaling are the original numbers.",
+      "The crop texture is assets/thaumcraft/textures/gui/research_toast.png instead of the original's textures/gui/achievement/achievement_background.png."
+    ],
+    "reviewed_sha256": {
+      "original": "c83422008bdb288fac957d495eedfdcdda49cb4393fff261c0c176bdc0ed771c",
+      "legacy": "6665c23240840e33ac97a7e8849a239c5f1592eb13e1cc9dcb50b1f487a1a995"
+    }
+  },
+  "thaumcraft/client/gui/GuiResearchRecipe.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/client/gui/GuiResearchRecipe.java:25-1313 the research book with all PageType renderers",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:31-129 the native book renders text pages and resolved native recipe pages",
+      "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:363 resolves only the cruc.toArray(...) crucible array",
+      "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:374 resolves only the raug.toArray(...) infusion array",
+      "oracle thaumcraft/common/config/ConfigResearch.java:199 BANNERS page new ResearchPage(banners.toArray(new IArcaneRecipe[0]))",
+      "oracle thaumcraft/common/config/ConfigResearch.java:374 ORE page new ResearchPage(rc.toArray(new IRecipe[0]))"
+    ],
+    "notes": [
+      "The book renders the original text pages and every recipe page whose original recipe key resolves to a native recipe file (250 mapped keys, verified against the packaged data/thaumcraft/recipe tree).",
+      "Deviation: six of the eight array/smelting pages (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) have no native renderer and are not shown at all.",
+      "Deviation: the original's per-PageType renderers (aspect page, image page, infusion-enchantment page, the original's own recipe renderers) are replaced by one native recipe renderer."
+    ],
+    "reviewed_sha256": {
+      "original": "c1494ae9ea784462097adadd94458ea893f759949dbab894a8e5d4386bdf39d9",
+      "legacy": "4dd40928744cc32ebd55a2e9af89c44210b0138ee5a387dce1ac6fb97eb355e3"
+    }
+  },
+  "thaumcraft/client/gui/GuiResearchTable.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/client/gui/GuiResearchTable.java:68 private final int HEX_SIZE = 9",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:37 HEX and UNKNOWN textures, native hex grid",
+      "oracle thaumcraft/client/gui/GuiResearchTable.java:100-102 RESEARCHER_1 / RESEARCHER_2 / RESEARCHDUPE gates",
+      "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:178 KnowledgeAccess.get(minecraft.player).isResearchComplete(\"RESEARCHDUPE\")",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:108-142 the original 0.1/0.25/0.5 researcher rolls and the pool/table-bonus funding order"
+    ],
+    "notes": [
+      "The palette, the hex grid, drag and drop placement, erasing, the researcher bonus rolls, the aspect combination and the paid copy are implemented and the original RNG order and thresholds are preserved.",
+      "Deviation: the original's rune/line drawing and the 6-parchment sheet look are replaced by the native sheet; the server-authoritative edit/combine/copy requests add a revision/session handshake that the original does not have."
+    ],
+    "reviewed_sha256": {
+      "original": "3f53b3dd1aa87217248213f98ab149c2dc0fce8b8dc7342e3cc638ace0aca557",
+      "legacy": "9fd1672da818007984001858c8ce9af21b9c487670e63027bc89bcd49803f33a"
+    }
+  },
+  "thaumcraft/client/integration/jei/ResearchVisibility.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "missing",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibility.java:11-91 the JEI hidden-recipe state machine",
+      "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibilityTicker.java:25-31 its only caller",
+      "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java registers the ticker",
+      "native common/src/main/java/thaumcraft contains no client/integration package and no JEI/EMI dependency (no 'jei' reference in common/src/main/java)"
+    ],
+    "notes": [
+      "Excluded: the class only exists to drive the 1.12 JEI plugin (net.minecraftforge JEI API), which has no counterpart in the 1.21.1 port; the port ships no recipe-viewer integration at all.",
+      "The research visibility rules it enforced are still honoured inside the mod by ResearchBrowserData.isVisible and the server-side admission in ResearchPurchase/ResearchNoteIssuance."
+    ],
+    "reviewed_sha256": {
+      "legacy": "a0b48d4f954926390ef497c1983bebc0cad68d359fa29a607d885077705069fe"
+    }
+  },
+  "thaumcraft/client/integration/jei/ResearchVisibilityTicker.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "missing",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibilityTicker.java:18-32 the client-tick subscriber",
+      "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java the JEI plugin that owns it",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:51-57 the native snapshot sync replaces the tick poll"
+    ],
+    "notes": [
+      "Excluded with ResearchVisibility: there is no JEI plugin in the 1.21.1 port, so the ticker has no event source.",
+      "The knowledge refresh the ticker polled for is now an explicit server snapshot (KnowledgeEvents.sync)."
+    ],
+    "reviewed_sha256": {
+      "legacy": "93c3017d8ce234afac08cb5e2afe871bbc477f2ac8cb3de9128502c59d3c55b6"
+    }
+  },
+  "thaumcraft/client/renderers/item/ItemThaumometerRenderer.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "missing",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:72-75 public class ItemThaumometerRenderer implements IItemRenderer with the scanner.obj model",
+      "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:98-135 the first-person view model with the player arm",
+      "native common/src/main/resources/assets/thaumcraft/models/item/thaumometer.json is a plain 1.21.1 item model",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:33-61 the scan is executed on the server"
+    ],
+    "notes": [
+      "Excluded: 1.21.1 removed IItemRenderer/IModelCustom, so the original's custom first-person scanner view model has no target API in the port.",
+      "Consequence: the port renders the thaumometer as a normal item and offers no first-person scanner view; this is a visual gap, not a gameplay one."
+    ],
+    "reviewed_sha256": {
+      "original": "9d5454e08e83d70d4f7d287f4aa101aeb6315077a3b262d4ad35bdb3d9756a5e",
+      "legacy": "b907327e1dceed26af0abdb9aa9cdea70e69f022f5ad6ea2a5f82f74afee951b"
+    }
+  },
+  "thaumcraft/client/renderers/item/ThaumometerPerspectiveModel.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "missing",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/client/renderers/item/ThaumometerPerspectiveModel.java:59-63 handlePerspective delegates to ItemThaumometerRenderer.setTransformType",
+      "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:72 the IItemRenderer implementation it depends on",
+      "native common/src/main/java/thaumcraft has no ItemThaumometerRenderer and no perspective model"
+    ],
+    "notes": [
+      "Excluded for the same reason as ItemThaumometerRenderer: the 1.21.1 item model pipeline has no equivalent hook."
+    ],
+    "reviewed_sha256": {
+      "legacy": "7a6f3715278a8f5c1bce5a831fda54c313b38c9f089a8cf8c2479d8141d09d23"
+    }
+  },
+  "thaumcraft/client/renderers/models/ModelResearchTable.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelResearchTable.java:31-33 Top 32x4x16 at (-8,0,-8) texture (0,0)",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelResearchTable.java:16 the identical box and offset",
+      "oracle thaumcraft/client/renderers/models/ModelResearchTable.java:37-57 the four legs 4x12x4 at (-6,4,-6)/(-6,4,2)/(18,4,-6)/(18,4,2), texture (0,24)",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelResearchTable.java:17-21 the same four offsets",
+      "oracle thaumcraft/client/renderers/models/ModelResearchTable.java:61-63 Crossbar 24x4x4 at (-4,10,-2), texture (24,24)",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelResearchTable.java:22 the same crossbar",
+      "oracle thaumcraft/client/renderers/models/ModelResearchTable.java:67-69 Inkwell 3x2x3 at (-6,-2,3), texture (0,44)",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelResearchTable.java:24 the same inkwell",
+      "oracle thaumcraft/client/renderers/models/ModelResearchTable.java:73-84 ScrollTube (-21,-0.5,-8, 8x2x2), ScrollRibbon (-15.1,-0.275,-6.75, 1x2x2) and the 10-radian rotation",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelResearchTable.java:26-27 the same boxes, including the 10-radian rotation"
+    ],
+    "notes": [
+      "Every box, offset, texture offset and rotation of the original 128x64 model is reproduced; only the ModelRenderer -> ModelPart API changed."
+    ],
+    "reviewed_sha256": {
+      "original": "07971b4b12bcbed3d92a2654d3c34d1615c1636096ee7f3a0d9116af03be5908",
+      "legacy": "e95404992ae219a34729b99462afa2103d944fa788a9bbecaba954f1a77852b6"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileResearchTableRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:48-62 translate (0.5,1,0.5), rotate X 180 and the md 2/3/4 -> 270/90/180 rotation",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:30-33 the identical transform chain",
+      "oracle thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:67-79 the quill at (-0.17,0.1,-0.15) with 15 degrees and scale 0.5",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:40-45 the identical quill transform",
+      "oracle thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:82-90 six parchment quads at (0.1,-0.01-a*0.015,0.35) with 15+a%3*2 degrees",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:48-57 the identical six quads",
+      "oracle thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:92-98 the scroll colour defaults to 0x999999",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileResearchTableRenderer.java:60 int color = data == null ? 0x999999 : data.color()"
+    ],
+    "notes": [
+      "The original transform chain, the quill, the six parchment quads, the scroll tube/ribbon and the default scroll colour are reproduced; the native adds the ModelPart vertex path."
+    ],
+    "reviewed_sha256": {
+      "original": "2ae67358c1f73ded3057854398db2b22fe65c4c45f5aad56fa3448f70b59496e",
+      "legacy": "c5777ef6ef0e453e21f9818efdfe5d73a1e018d4144ffa24918964db74937597"
+    }
+  },
+  "thaumcraft/common/config/ConfigResearch.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/config/ConfigResearch.java:77-414 the 201 new ResearchItem(...) registrations",
+      "native common/src/main/resources/data/thaumcraft/tc4/research.json:1-1 the bundled corpus with 201 entries",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java:61 if (loaded.size() != 201) throw new IllegalStateException",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchCatalog.java:66-69 the parents/parentsHidden/siblings dependency check",
+      "audit independent re-parse of the oracle ConfigResearch.java against the bundled corpus: 201/201 entries, 0 discrepancies in key, category, cell, complexity, aspect cost, flags, parents, parentsHidden, siblings, entity/aspect/item triggers, page count/order/kind/recipe key and the 20 warp registrations",
+      "audit scripts/porting/extract_tc4_definitions.py --check --oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle reproduced research_key_category_sha256=397d6208... and text_page_sha256=66a10cd3... (201 entries, 294 text pages)"
+    ],
+    "notes": [
+      "The code-defined research of the original was replaced by a data-driven corpus; the corpus content is complete and was verified twice (the pinned extractor hashes and an independent second parser).",
+      "Not preserved as executable data: the recipe objects of the recipe pages and three of the twelve item-trigger bindings (see the Report section); they remain provenance strings in the corpus."
+    ],
+    "reviewed_sha256": {
+      "original": "588bf9a773e6f8a1695a6c4cd90cb1a1c710672690d974e03e6bdca2d37269ce"
+    }
+  },
+  "thaumcraft/common/config/research/ConfigResearch.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/config/research/ConfigResearch.java the 1.12 research definitions of this category (0 new ResearchItem calls)",
+      "native common/src/main/resources/data/thaumcraft/tc4/research.json the bundled corpus that replaces the per-category sources",
+      "audit scripts/porting/extract_tc4_definitions.py --check: the 1.12 corpus and the original corpus agree on the 12 metadata fields (category, column, row, complexity, aspect_cost, flags, parents, parents_hidden, siblings, aspect_triggers, entity_triggers, warp) for all 201 entries"
+    ],
+    "notes": [
+      "The 1.12 per-category research sources were replaced by the shared bundled corpus, which is byte-identical to the original 4.2.3.5 definitions.",
+      "Note: the sibling file thaumcraft/common/config/research/ConfigResearchEldritch.java (16 ELDRITCH entries) is routed to the M12 family by the name heuristic, but its content is covered by the same corpus and the same extractor check."
+    ],
+    "reviewed_sha256": {
+      "legacy": "cc1bce67770d8e51c66702cdd4a3f46107a37e5d4e3d25af4baa6ff304a6241d"
+    }
+  },
+  "thaumcraft/common/config/research/ConfigResearchAlchemy.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/config/research/ConfigResearchAlchemy.java the 1.12 research definitions of this category (35 new ResearchItem calls)",
+      "native common/src/main/resources/data/thaumcraft/tc4/research.json the bundled corpus that replaces the per-category sources",
+      "audit scripts/porting/extract_tc4_definitions.py --check: the 1.12 corpus and the original corpus agree on the 12 metadata fields (category, column, row, complexity, aspect_cost, flags, parents, parents_hidden, siblings, aspect_triggers, entity_triggers, warp) for all 201 entries"
+    ],
+    "notes": [
+      "The 1.12 per-category research sources were replaced by the shared bundled corpus, which is byte-identical to the original 4.2.3.5 definitions.",
+      "Note: the sibling file thaumcraft/common/config/research/ConfigResearchEldritch.java (16 ELDRITCH entries) is routed to the M12 family by the name heuristic, but its content is covered by the same corpus and the same extractor check."
+    ],
+    "reviewed_sha256": {
+      "legacy": "e659e9c84c0cea9b47cf2575b5db61baf148543bd79bacc4058e5a64417c6dfc"
+    }
+  },
+  "thaumcraft/common/config/research/ConfigResearchArtifice.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/config/research/ConfigResearchArtifice.java the 1.12 research definitions of this category (50 new ResearchItem calls)",
+      "native common/src/main/resources/data/thaumcraft/tc4/research.json the bundled corpus that replaces the per-category sources",
+      "audit scripts/porting/extract_tc4_definitions.py --check: the 1.12 corpus and the original corpus agree on the 12 metadata fields (category, column, row, complexity, aspect_cost, flags, parents, parents_hidden, siblings, aspect_triggers, entity_triggers, warp) for all 201 entries"
+    ],
+    "notes": [
+      "The 1.12 per-category research sources were replaced by the shared bundled corpus, which is byte-identical to the original 4.2.3.5 definitions.",
+      "Note: the sibling file thaumcraft/common/config/research/ConfigResearchEldritch.java (16 ELDRITCH entries) is routed to the M12 family by the name heuristic, but its content is covered by the same corpus and the same extractor check."
+    ],
+    "reviewed_sha256": {
+      "legacy": "4d0e8b6d7b0316a3247a76d70f74ac0e4465ab39a4c89ceec999c44b71e8d059"
+    }
+  },
+  "thaumcraft/common/config/research/ConfigResearchBasics.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/config/research/ConfigResearchBasics.java the 1.12 research definitions of this category (19 new ResearchItem calls)",
+      "native common/src/main/resources/data/thaumcraft/tc4/research.json the bundled corpus that replaces the per-category sources",
+      "audit scripts/porting/extract_tc4_definitions.py --check: the 1.12 corpus and the original corpus agree on the 12 metadata fields (category, column, row, complexity, aspect_cost, flags, parents, parents_hidden, siblings, aspect_triggers, entity_triggers, warp) for all 201 entries"
+    ],
+    "notes": [
+      "The 1.12 per-category research sources were replaced by the shared bundled corpus, which is byte-identical to the original 4.2.3.5 definitions.",
+      "Note: the sibling file thaumcraft/common/config/research/ConfigResearchEldritch.java (16 ELDRITCH entries) is routed to the M12 family by the name heuristic, but its content is covered by the same corpus and the same extractor check."
+    ],
+    "reviewed_sha256": {
+      "legacy": "df566ef158f1af7f076fe2dc1dbef7dbd61e0b022a6f7e5f2b58178dd5c4b74b"
+    }
+  },
+  "thaumcraft/common/config/research/ConfigResearchGolemancy.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/config/research/ConfigResearchGolemancy.java the 1.12 research definitions of this category (39 new ResearchItem calls)",
+      "native common/src/main/resources/data/thaumcraft/tc4/research.json the bundled corpus that replaces the per-category sources",
+      "audit scripts/porting/extract_tc4_definitions.py --check: the 1.12 corpus and the original corpus agree on the 12 metadata fields (category, column, row, complexity, aspect_cost, flags, parents, parents_hidden, siblings, aspect_triggers, entity_triggers, warp) for all 201 entries"
+    ],
+    "notes": [
+      "The 1.12 per-category research sources were replaced by the shared bundled corpus, which is byte-identical to the original 4.2.3.5 definitions.",
+      "Note: the sibling file thaumcraft/common/config/research/ConfigResearchEldritch.java (16 ELDRITCH entries) is routed to the M12 family by the name heuristic, but its content is covered by the same corpus and the same extractor check."
+    ],
+    "reviewed_sha256": {
+      "legacy": "b90fcd36148d6274f19dfd4a0a5ad7edb575c9c3156a9f672a869dc681989b0c"
+    }
+  },
+  "thaumcraft/common/config/research/ConfigResearchThaumaturgy.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/config/research/ConfigResearchThaumaturgy.java the 1.12 research definitions of this category (42 new ResearchItem calls)",
+      "native common/src/main/resources/data/thaumcraft/tc4/research.json the bundled corpus that replaces the per-category sources",
+      "audit scripts/porting/extract_tc4_definitions.py --check: the 1.12 corpus and the original corpus agree on the 12 metadata fields (category, column, row, complexity, aspect_cost, flags, parents, parents_hidden, siblings, aspect_triggers, entity_triggers, warp) for all 201 entries"
+    ],
+    "notes": [
+      "The 1.12 per-category research sources were replaced by the shared bundled corpus, which is byte-identical to the original 4.2.3.5 definitions.",
+      "Note: the sibling file thaumcraft/common/config/research/ConfigResearchEldritch.java (16 ELDRITCH entries) is routed to the M12 family by the name heuristic, but its content is covered by the same corpus and the same extractor check."
+    ],
+    "reviewed_sha256": {
+      "legacy": "c19d6d2376e7f75f8cbf34d9e622e84558af614c816b2c0bbabf6664a3c484af"
+    }
+  },
+  "thaumcraft/common/container/ContainerResearchTable.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/container/ContainerResearchTable.java:36-37 SlotLimitedByClass(IScribeTools.class, ..., 0, 14, 10) and SlotLimitedByClass(ItemResearchNotes.class, ..., 1, 70, 10)",
+      "native common/src/main/java/thaumcraft/common/container/ContainerResearchTable.java:69-72 the same two slots and the same positions",
+      "oracle thaumcraft/common/container/ContainerResearchTable.java:45-49 the player inventory slots at 48+j*18/175+i*18 and 48+i*18/233",
+      "native common/src/main/java/thaumcraft/common/container/ContainerResearchTable.java:73-78 the identical player slot layout",
+      "oracle thaumcraft/common/container/ContainerResearchTable.java:70 the transfer order: slot<2 -> player inventory, else -> the table",
+      "native common/src/main/java/thaumcraft/common/container/ContainerResearchTable.java:215 moveItemStackTo(current, 2, slots.size(), true) / (current, 0, 2, false)",
+      "oracle thaumcraft/common/container/ContainerResearchTable.java:115-123 the mergeItemStack quirk: the whole remainder goes into the first empty slot",
+      "native common/src/main/java/thaumcraft/common/container/ContainerResearchTable.java:247-251 the same quirk is documented and kept",
+      "oracle thaumcraft/common/container/ContainerResearchTable.java:54-55 button 1 returns true, button 5 duplicates the note",
+      "native common/src/main/java/thaumcraft/common/container/ContainerResearchTable.java:194-197 button 1 is a no-op, the copy is a separate server-authoritative request"
+    ],
+    "notes": [
+      "The slot classes, the slot positions, the player inventory layout and the transfer order are the original numbers.",
+      "The original's mergeItemStack remainder quirk is preserved verbatim.",
+      "Deviation: the button-5 duplicate is now a validated server request instead of a direct tile call, and the menu carries a session/revision handshake the original does not have."
+    ],
+    "reviewed_sha256": {
+      "original": "48edb2f424652dbc0283bfaabe7704702e83401117104143cd3ceda0628ef30c",
+      "legacy": "bc272ecdc33eb4227e6fbddee6049f848645e1717b0cefb8fb6a508ab7184c60"
+    }
+  },
+  "thaumcraft/common/items/ItemInkwell.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemInkwell.java:42-46 maxStackSize 1, repairable, maxDamage 100, no enchant",
+      "native common/src/main/java/thaumcraft/common/items/ItemInkwell.java:18 super(properties.durability(CAPACITY)) with CAPACITY=100",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:73 ITEMS.register(\"inkwell\", () -> new ItemInkwell(new Item.Properties()))",
+      "oracle thaumcraft/common/items/ItemInkwell.java:67-75 the four-side search for the second table and the orientation of the pair",
+      "native common/src/main/java/thaumcraft/common/items/ItemInkwell.java:26-28 delegates to BlockTable.tryCreateResearchTable",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTable.java:143-155 the same direction search over TableTopology.SEARCH_ORDER"
+    ],
+    "notes": [
+      "In 1.21.1 Item.Properties.durability(100) also sets MAX_STACK_SIZE=1 and DAMAGE=0, so the original stack limit 1 and 100 ink points are reproduced exactly.",
+      "The table conversion is the same search over the four neighbours with the same orientation result."
+    ],
+    "reviewed_sha256": {
+      "original": "a47ea891305a128ab48f9d38dbfb021bd80807a01b29218322e69cf973346fd7",
+      "legacy": "587ffb0e12f03781b7bf290429449ab64f880df885b59ed68287237d0013dc0f"
+    }
+  },
+  "thaumcraft/common/items/ItemResearchNotes.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemResearchNotes.java:87-104 a solved note completes the research and its direct siblings and consumes one note",
+      "native common/src/main/java/thaumcraft/common/items/ItemResearchNotes.java:36-55 the same learning flow via ResearchNoteLearning.learn",
+      "oracle thaumcraft/common/items/ItemResearchNotes.java:105-116 metadata 42/24 reveal an unknown note or drop 7-9 fragments",
+      "native common/src/main/java/thaumcraft/common/lib/research/UnknownKnowledge.java:19-47 the unknown note is a separate native item with the same 7+rand(3) fragment drop",
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:154 new Random(player.worldObj.getTotalWorldTime()/10L/5L)",
+      "native common/src/main/java/thaumcraft/common/lib/research/UnknownKnowledge.java:24 ResearchHiddenSelection.choose(knowledge, level.getDayTime())",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchHiddenSelection.java:13 new Random(dayTime/10L/5L)"
+    ],
+    "notes": [
+      "Deviation (behaviour): the hidden-note seed differs. The original seeds with the absolute world time (/10/5); the native seeds with the day time (/10/5), so the same world state can reveal a different random hidden research.",
+      "Deviation: the original metadata 42/24 unknown note became two separate native items (unknown_research_note and unknown_research_note_24); the note tooltip and rarity are split accordingly.",
+      "The original's sibling pass on learning is reproduced by ResearchCompletion.apply (native ResearchCompletion.java:19-23)."
+    ],
+    "reviewed_sha256": {
+      "original": "8f601ffcf7f493a6a8b2e2cd20273955fa9da6066054220f4f265abfbb9e17c7",
+      "legacy": "c15ad6770cc6df9f0e8649c78756b7d928ec012b442d60ac7e09889ca1e0f8f7"
+    }
+  },
+  "thaumcraft/common/items/relics/ItemThaumometer.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/items/relics/ItemThaumometer.java:79-81 getMaxItemUseDuration returns 25",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:31 getUseDuration returns 25",
+      "oracle thaumcraft/common/items/relics/ItemThaumometer.java:155-158 the scan completes when count <= 5, i.e. after 20 of the 25 ticks",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:56 level.getGameTime() - session.startTick() >= 20",
+      "oracle thaumcraft/common/items/relics/ItemThaumometer.java:87-140 the client picks the entity, the node, the block or a scan callback",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:67-103 the same order on the server",
+      "oracle thaumcraft/common/items/relics/ItemThaumometer.java:92 Thaumcraft.proxy.blockRunes(...) and :163 the \"thaumcraft:cameraticks\" sound",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:26-61 no client feedback payload is sent"
+    ],
+    "notes": [
+      "The use duration, the 20-tick completion window, the target order (entity -> node -> block -> phenomena callback) and the entity pick range are the original numbers.",
+      "Forced change: the scan is resolved on the server; the original's PacketScannedToServer (client picks, server re-validates) has no counterpart because the client no longer chooses the target.",
+      "Deviation (client feedback): the original plays \"thaumcraft:cameraticks\" every second tick of the scan and draws the rune particles at the target; the native port has neither."
+    ],
+    "reviewed_sha256": {
+      "original": "f79250eb33a27e1948b031585184c1b34fa0a7eef8b3305df186a73a06573986",
+      "legacy": "225943056223c2a217d7defadf1dc9567e41651ec665a4066503a738badeb9cf"
+    }
+  },
+  "thaumcraft/common/items/relics/ItemThaumonomicon.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/items/relics/ItemThaumonomicon.java:80-92 the cheat sheet completes every research and sets every undiscovered aspect pool to 50",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchCheatSheet.java:13-26 the same two passes, including the pool of 50",
+      "oracle thaumcraft/common/items/relics/ItemThaumonomicon.java:94-104 the normal use completes the incomplete siblings of every completed research",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:78-98 the same sibling pass with the same warp split",
+      "oracle thaumcraft/common/items/relics/ItemThaumonomicon.java:111 player.openGui(...)",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumonomicon.java:46 NetworkManager.sendToPlayer(serverPlayer, OpenThaumonomiconPayload.INSTANCE)"
+    ],
+    "notes": [
+      "Both book variants keep the original behaviour: the cheat sheet grants every research and 50 of every aspect, the normal book grants only the missing siblings.",
+      "Forced change: metadata 42 became a separate native item (ItemThaumonomicon(Properties, boolean cheatSheet)); the original's client 'thaumcraft:page' sound when the GUI opens is not reproduced."
+    ],
+    "reviewed_sha256": {
+      "original": "58cca68347624ede0a35b0f4ad811055b6df2accae40e33a9097019607d6822d",
+      "legacy": "6fd0df34348f9cf231f36603dd607b52fe60b8d12ab42f20a0617046e50603b8"
+    }
+  },
+  "thaumcraft/common/lib/capabilities/IPlayerKnowledge.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/lib/capabilities/IPlayerKnowledge.java:9-57 the 1.12 Forge capability contract",
+      "native common/src/main/java/thaumcraft/api/capabilities/IPlayerKnowledge.java:14-81 the same contract in the public API package",
+      "native common/src/main/java/thaumcraft/api/capabilities/NativePlayerKnowledge.java:22 the implementation bound to the native PlayerKnowledge"
+    ],
+    "notes": [
+      "The contract moved from the internal capability package to the public API package and is implemented by NativePlayerKnowledge over the native PlayerKnowledge; every legacy method is present.",
+      "The native adds the stage/flag markers that the original TC4 surface has no counterpart for."
+    ],
+    "reviewed_sha256": {
+      "legacy": "0e435f2c5f8a19889261a5e7d3e9590e8ae23ebc893a8182b252439dd29c413d"
+    }
+  },
+  "thaumcraft/common/lib/capabilities/PlayerKnowledgeCapability.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/lib/capabilities/PlayerKnowledgeCapability.java:18-30 warp, discovered aspects, scanned sets and completed research held in a Forge capability",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:21-30 the same state as an immutable per-player object",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:150-189 save/load of the same state as native NBT",
+      "native common/src/main/java/thaumcraft/common/lib/capabilities/KnowledgeAccess.java:10-16 the runtime access path"
+    ],
+    "notes": [
+      "Forced change: Forge's INBTSerializable capability has no 1.21.1 counterpart; the state lives in PlayerKnowledge and is attached to the player by a common mixin (PlayerKnowledgeHolder).",
+      "The .thaum file format of the original is not an importer; only fresh 1.21.1 worlds are supported, as the project rules require."
+    ],
+    "reviewed_sha256": {
+      "legacy": "b497513ea6efc1199104d102e256b713fe80aadf31d395fbb61e350de12660b4"
+    }
+  },
+  "thaumcraft/common/lib/capabilities/PlayerKnowledgeProvider.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/lib/capabilities/PlayerKnowledgeProvider.java:19-40 the Forge Capability registration and injection",
+      "native common/src/main/java/thaumcraft/common/lib/capabilities/PlayerKnowledgeHolder.java:6-8 the mixin interface that replaces the capability",
+      "native common/src/main/java/thaumcraft/common/lib/capabilities/KnowledgeAccess.java:10-16 get(Player) resolves the holder"
+    ],
+    "notes": [
+      "The Forge capability provider has no 1.21.1 equivalent (the Capability API was removed); the provider is replaced by the common mixin holder, which is the documented 1.21.1 mechanism.",
+      "Behaviour preserved: the knowledge is per player, follows the player on clone and is synchronized to the client on join/respawn/dimension change."
+    ],
+    "reviewed_sha256": {
+      "legacy": "bbc42ad11befc2a037749beedb808fc462387c5fd0cddb18dc599b947384d713"
+    }
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketResearchComplete.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketResearchComplete.java:56-79 the S2C research-complete notice",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeNotificationNetworking.java:44 research(player, key) sends ResearchNoticePayload",
+      "native common/src/main/java/thaumcraft/client/lib/ResearchNotifications.java:39-45 the same client effects: the tc.addclue notice and the learn sound for a clue, the popup queue and the key/category highlight otherwise",
+      "oracle thaumcraft/common/lib/network/playerdata/PacketResearchComplete.java:68-75 the browser refresh on completion"
+    ],
+    "notes": [
+      "The 1.7.10 SimpleImpl packet became a 1.21.1 CustomPacketPayload (ResearchNoticePayload); the client effects of the original notice are reproduced one by one.",
+      "The original's client-side completeResearch call is covered by the authoritative knowledge snapshot instead of a second packet."
+    ],
+    "reviewed_sha256": {
+      "original": "d8dfd5081de1dc771abdf058d495d13c1d8e0e3a8580cf23964bcb39cd7b20b2",
+      "legacy": "55ace1276fe23064df73947e3f25091d310aced751729e481caadd5e4221fe22"
+    }
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketScannedToServer.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketScannedToServer.java:44-53 the C2S scan packet with player id, dimension, type, id, meta, entity id, phenomena and prefix",
+      "oracle thaumcraft/common/lib/network/playerdata/PacketScannedToServer.java:77-91 the server re-runs ScanManager.completeScan on the received data",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:56-59 the scan is completed on the server without any C2S packet",
+      "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:60-79 the server-side completion and its notifications"
+    ],
+    "notes": [
+      "The C2S scan packet is gone: the server derives the target itself, which removes the original's client-authority surface.",
+      "Deviation (client feedback): because nothing crosses the wire any more, the original's client-side scan sound and rune particles are not reproduced (see the ItemThaumometer row)."
+    ],
+    "reviewed_sha256": {
+      "original": "1eec86b0ebd6816a9f542ab7251c89280cd68701038e0416802fe3de2b1b95b4",
+      "legacy": "d4f70f5916c128e981e9c26218b5612fae4b0394d1fbcb31a3bfceae3261e11b"
+    }
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketSyncResearch.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketSyncResearch.java:39-41 the server sends the completed research list",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:51-57 sync(player) sends the whole knowledge snapshot",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java:11-31 the snapshot payload",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:166 writeSet(tag, \"researchComplete\", completedResearch)"
+    ],
+    "notes": [
+      "The four separate list packets were replaced by one NBT snapshot that carries the research, the aspects, the scans and the warp; the client answer is the same."
+    ],
+    "reviewed_sha256": {
+      "original": "79335d17987cb8ec8fb1527618970691d9ebcb16fc9e7da1d176ebde3ce16847",
+      "legacy": "c11159bb25875b2928af0dae42397e1575bd1f1dbaa47688fa44cafe315fc197"
+    }
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketSyncScannedEntities.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketSyncScannedEntities.java:37-39 the scanned entity list of the player",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:168 writeSet(tag, \"scannedEntities\", scannedEntities)",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java:11-31 the single snapshot payload"
+    ],
+    "notes": [
+      "The scanned entity list now travels inside the shared knowledge snapshot; the data and the client answer are unchanged."
+    ],
+    "reviewed_sha256": {
+      "original": "f1fc31bfc84e6c0e709f2e50376f00834310cf594d9bb3d0e136071987a40859",
+      "legacy": "f071b2539c36e20301a46144a742d6ec6e8b8fa389dd12a573d2dd64fe0ca588"
+    }
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketSyncScannedItems.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketSyncScannedItems.java:37-39 the scanned object list of the player",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:167 writeSet(tag, \"scannedItems\", scannedItems)",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java:11-31 the single snapshot payload"
+    ],
+    "notes": [
+      "The scanned object list now travels inside the shared knowledge snapshot; the data and the client answer are unchanged."
+    ],
+    "reviewed_sha256": {
+      "original": "670d43d244b8ace94464d436943dd580a6609d88064176dfdc5b6440c77a2c1b",
+      "legacy": "29dbfebcd0a961b8786b782ac02090ecd51ba452bfb94d65ca456100b213e9ad"
+    }
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketSyncScannedPhenomena.java": {
+    "disposition": "replace",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketSyncScannedPhenomena.java:57-59 the scanned phenomena list of the player",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:169 writeSet(tag, \"scannedPhenomena\", scannedPhenomena)",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java:11-31 the single snapshot payload"
+    ],
+    "notes": [
+      "The scanned phenomena list now travels inside the shared knowledge snapshot; the data and the client answer are unchanged."
+    ],
+    "reviewed_sha256": {
+      "original": "ba251dbeb23e021aa465698cfec5a92feaee0b903788683de4b90a951d86e79f",
+      "legacy": "be1be92292cb465713afc8c693014e95bb6f4fdff81b70645c91abe5c165919b"
+    }
+  },
+  "thaumcraft/common/lib/research/PlayerKnowledge.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/research/PlayerKnowledge.java:14-22 nine process-wide maps keyed by the player name",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:21-30 one immutable object per player",
+      "oracle thaumcraft/common/lib/research/PlayerKnowledge.java:98 return (short)known.getAmount(aspect)",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:66 getAspectPoolFor returns an int",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:93 queryPool(int raw) returns (short) raw - the short query is modelled where it is observable",
+      "oracle thaumcraft/common/lib/research/PlayerKnowledge.java:24-33 wipePlayerKnowledge does not clear warpCount",
+      "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:116-125 reset() clears warpCounter"
+    ],
+    "notes": [
+      "Forced change: the process-wide player-name maps became a per-player object attached by a mixin; the values, the aspect-pool arithmetic and the overdraw quirk are preserved.",
+      "Deviation: the short cast of getAspectPoolFor is dropped from the API (the value no longer overflows) and is only applied where the original's signed-short query is observable (the research table).",
+      "Deviation: the native reset() also clears warpCounter, the original wipePlayerKnowledge kept it.",
+      "Deviation: the native persists the AutoUnlock research entries, the original skipped them in saveResearchNBT (oracle ResearchManager:793); the native re-grants them on join anyway."
+    ],
+    "reviewed_sha256": {
+      "original": "b5309c2723a39a5ead0afe4c3c061f345131b7a897ef81cbb587d081a940baa1",
+      "legacy": "595012a0b7361ca2e0443db6826a65921b766a43a98135b061cdc7231dc6dab1"
+    }
+  },
+  "thaumcraft/common/lib/research/ResearchManager.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:84-118 createClue",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchClues.java:27-57 the same rule set (hidden/lost, not completed, no @clue) with one world-RNG draw",
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:137-160 findHiddenResearch",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchHiddenSelection.java:11-26 the same filter over ResearchRegistrationOrder.enabled()",
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:120-135 createResearchNoteForPlayer",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteIssuance.java:44-114 the same admission, but the native also consumes one paper",
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:268-337 createNote and getData/updateData",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteGenerator.java:27-113 and common/src/main/java/thaumcraft/common/lib/research/ResearchNoteData.java:26-144",
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:221-250 checkResearchCompletion and :252-266 checkConnections",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNotePuzzle.java:21-78 the same connectivity rule",
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:510-528 completeResearch and the warp split",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchCompletion.java:27-37 the same perm/sticky split (warp - warp/2 and warp/2)",
+      "oracle thaumcraft/common/lib/research/ResearchManager.java:162-185 findMatchingResearch has no caller in the original",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchAdministration.java:13-26 the original command behaviour (grant, grantAll, resetResearch)"
+    ],
+    "notes": [
+      "The 863-line manager was split into focused classes; every live original method has a counterpart (createClue -> ResearchClues, findHiddenResearch -> ResearchHiddenSelection, createNote -> ResearchNoteGenerator, checkResearchCompletion -> ResearchNotePuzzle, completeResearch -> ResearchCompletion, the command behaviour -> ResearchAdministration).",
+      "Deviation (behaviour): the original checks for a paper but never consumes one when it issues a primary research note; the native consumes one paper per issued note (native ResearchNoteIssuance.java:80).",
+      "Deviation: the process-wide player maps and the .thaum file format of the original were replaced by the per-player capability state.",
+      "Not ported: findMatchingResearch - it has no caller in the original, so it was dropped with the dead code.",
+      "The original's PacketPlayerCompleteToServer did not re-check the aspect cost; the native re-validates every admission rule (documented authority fix, native ResearchPurchase.java:16-19)."
+    ],
+    "reviewed_sha256": {
+      "original": "4cc13ec51f85ae315c4097296a4ff4c6d848f7f4dcbbe2c54075bf2501ae0fd5",
+      "legacy": "db6ee663eeccf5d501e1560ff97752ece89b14109e2c3d89208f5e8f77fae1bb"
+    }
+  },
+  "thaumcraft/common/lib/research/ResearchNoteData.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/research/ResearchNoteData.java:11-20 public String key; int color; HashMap hexEntries; HashMap hexes; boolean complete; int copies",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteData.java:26 public record ResearchNoteData(String key, int color, boolean complete, int copies, List<Cell> cells)",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteData.java:190-215 Cell(q, r, type, aspect) with the original hexgrid semantics (type 0 blank, 1 fixed, 2 placed)",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteData.java:80-144 the bounded stream codec"
+    ],
+    "notes": [
+      "The mutable NBT DTO became an immutable validated record with a bounded codec; the cell semantics (hexq/hexr/type/aspect), the colour, the complete flag and the copies counter are preserved.",
+      "Forced change: the original's item NBT layout is not an importer - only fresh 1.21.1 notes are supported."
+    ],
+    "reviewed_sha256": {
+      "original": "a56a936e2b196f5457db67cf6960780dcf798407e74b6e3b375d079cfdc8c6c9",
+      "legacy": "d1ba465b01ee1f3ce8a60b4cf44793b26ef982dac3754da17a8c71bfe7ad495e"
+    }
+  },
+  "thaumcraft/common/lib/research/ScanManager.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/lib/research/ScanManager.java:420-441 checkAndSyncAspectKnowledge",
+      "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:110-124 the same discovery bonus (+2), the sqrt soft cap and the 1.25x cap rule",
+      "oracle thaumcraft/common/lib/research/ScanManager.java:443-464 validScan",
+      "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:96-106 the same parent-aspect admission",
+      "oracle thaumcraft/common/lib/research/ScanManager.java:235-275 generateNodeAspects (max(4, vis/10) per aspect plus the node-type bonus)",
+      "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:42-50 nodeScanAspects keeps max(4, vis/10) in sorted aspect order",
+      "oracle thaumcraft/common/lib/research/ScanManager.java:132-181 generateItemHash and :76-130 generateEntityHash",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:77-102 the native uses explicit string signatures",
+      "native common/src/main/java/thaumcraft/common/lib/research/ObjectAspectResolver.java and EntityAspectBindings.java the object and entity aspect bindings"
+    ],
+    "notes": [
+      "The scan reward arithmetic, the aspect discovery rule, the parent-aspect admission and the node aspect scaling are the original numbers.",
+      "Forced change: the numeric item/entity hashes of the original cannot exist in a fresh 1.21.1 world; the native uses readable string signatures and a separate object/entity aspect binding catalogue.",
+      "The original's hash functions are therefore not reproduced verbatim - only their observable purpose (one scan per witness, one reward per scan)."
+    ],
+    "reviewed_sha256": {
+      "original": "bdbf7c1881a7b90ac9603eb05e1ed05d18b2bee7070f37ae27ae37852f057bfe",
+      "legacy": "b34c88141131f0cec05df425cba335d8880dcd31022d3610fdc9bf19162bea39"
+    }
+  },
+  "thaumcraft/common/tiles/TileResearchTable.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a8-research",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileResearchTable.java:64 public ItemStack[] contents = new ItemStack[2]",
+      "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:68 public static final int SIZE = 2 and :84 the NonNullList inventory",
+      "oracle thaumcraft/common/tiles/TileResearchTable.java:340-342 getInventoryStackLimit returns 64",
+      "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:129 getMaxStackSize returns 64",
+      "oracle thaumcraft/common/tiles/TileResearchTable.java:117 if (!world.isRemote && this.nextRecalc++ > 600) recalculateBonus()",
+      "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:114 if (table.nextBonusRecalc++ > 600) - the same 602-tick period",
+      "oracle thaumcraft/common/tiles/TileResearchTable.java:189-291 the bonus ecology over Material.ground/circuits/fire/water/leaves/sand/piston and the ore/crystal metadata",
+      "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:254-301 the same producers rewritten on 1.21.1 block classes and tags",
+      "oracle thaumcraft/common/tiles/TileResearchTable.java:141-187 placeAspect (ink, the researcher rolls, the pool debit, the bonus fallback)",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:101-155 the same 0.1/0.25/0.5 rolls and the same funding order",
+      "oracle thaumcraft/common/tiles/TileResearchTable.java:398-422 duplicate (the aspect cost plus copies, one paper, one ink sac)",
+      "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteCopying.java:14-38 the same cost model"
+    ],
+    "notes": [
+      "The two-slot table, the 64 stack limit, the 600-tick bonus recalculation, the bonus producers and the aspect placement rules keep the original numbers.",
+      "Deviation: the original's Material-based block classification is replaced by an explicit 1.21.1 block list plus tags (native TileResearchTable.java:285-301); the bonus pool is a bounded map instead of an AspectList with merge(max) semantics.",
+      "Deviation: the original's client-side placeAspect packet became a server-authoritative, revision-checked edit request; the original's overwrite/hole/free-funding exploits are closed (documented in ResearchNoteEditing).",
+      "Not reproduced: the original's replace-the-table-on-copy side effect (oracle TileResearchTable:415) - the native keeps the table and the copied note."
+    ],
+    "reviewed_sha256": {
+      "original": "cfa85e36602963466912ff91217764ef5e8c0cd673b71ef521d04124012b3f37",
+      "legacy": "136ad31647b36ab30cd480ef5196befbbb007f981bab67f33468687424ce916f"
+    }
+  }
+}

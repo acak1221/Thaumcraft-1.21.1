@@ -1,0 +1,11 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "WARDEDARCANA",
+  "pattern": ["NNI", "N  "],
+  "key": {
+    "I": {"item": "minecraft:gold_ingot"},
+    "N": {"item": "minecraft:gold_nugget"}
+  },
+  "result": {"id": "thaumcraft:key_gold", "count": 2},
+  "vis": {"aqua": 5, "ordo": 5}
+}

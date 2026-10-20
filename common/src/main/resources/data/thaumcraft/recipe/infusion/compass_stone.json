@@ -1,0 +1,14 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "SINSTONE",
+  "input": {"item": "minecraft:flint"},
+  "components": [
+    {"item": "thaumcraft:nitor"},
+    {"item": "thaumcraft:order_shard"},
+    {"item": "thaumcraft:knowledge_fragment"},
+    {"item": "thaumcraft:entropy_shard"}
+  ],
+  "aspects": {"sensus": 8, "tenebrae": 8, "alienis": 8, "auram": 8},
+  "instability": 5,
+  "result": {"id": "thaumcraft:compass_stone", "count": 1}
+}

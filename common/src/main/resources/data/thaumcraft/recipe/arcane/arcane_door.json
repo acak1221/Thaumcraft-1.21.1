@@ -1,0 +1,12 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "WARDEDARCANA",
+  "pattern": ["TDT", "DBD", "TDT"],
+  "key": {
+    "T": {"item": "thaumcraft:thaumium_ingot"},
+    "B": {"item": "thaumcraft:zombie_brain"},
+    "D": {"item": "thaumcraft:greatwood_planks"}
+  },
+  "result": {"id": "thaumcraft:arcane_door", "count": 1},
+  "vis": {"aqua": 20, "ordo": 10, "terra": 10, "ignis": 5}
+}

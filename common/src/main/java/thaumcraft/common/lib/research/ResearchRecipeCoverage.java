@@ -199,6 +199,7 @@ public final class ResearchRecipeCoverage {
         ids.put("Alumentum", "thaumcraft:crucible/alumentum");
         ids.put("ArcaneBore", "thaumcraft:infusion/arcane_bore");
         ids.put("ArcaneBoreBase", "thaumcraft:arcane/arcane_bore_base");
+        ids.put("ArcaneDoor", "thaumcraft:arcane/arcane_door");
         ids.put("ArcaneEar", "thaumcraft:arcane/arcane_ear");
         ids.put("ArcaneLamp", "thaumcraft:arcane/arcane_lamp");
         ids.put("ArcanePedestal", "thaumcraft:arcane/arcane_pedestal");
@@ -212,7 +213,9 @@ public final class ResearchRecipeCoverage {
         ids.put("BlockFlesh", "thaumcraft:flesh_block");
         ids.put("BlockTallow", "thaumcraft:tallow_block");
         ids.put("BlockThaumium", "thaumcraft:thaumium_block");
+        ids.put("BoneBow", "thaumcraft:arcane/bone_bow");
         ids.put("BootsTraveller", "thaumcraft:infusion/boots_traveller");
+        ids.put("BottleTaint", "thaumcraft:crucible/bottle_taint");
         ids.put("Centrifuge", "thaumcraft:arcane/centrifuge");
         ids.put("CoreAlchemy", "thaumcraft:infusion/golem_core_alchemy");
         ids.put("CoreBlank", "thaumcraft:arcane/golem_core_blank");
@@ -237,6 +240,7 @@ public final class ResearchRecipeCoverage {
         ids.put("EnchantedFabric", "thaumcraft:arcane/enchanted_fabric");
         ids.put("EssentiaCrystalizer", "thaumcraft:arcane/essentia_crystallizer");
         ids.put("EssentiaReservoir", "thaumcraft:infusion/essentia_reservoir");
+        ids.put("EtherealBloom", "thaumcraft:crucible/ethereal_bloom");
         ids.put("Filter", "thaumcraft:arcane/vis_filter");
         ids.put("FocalManipulator", "thaumcraft:arcane/focal_manipulator");
         ids.put("FocusExcavation", "thaumcraft:arcane/focus_excavation");
@@ -260,6 +264,8 @@ public final class ResearchRecipeCoverage {
         ids.put("GolemTallow", "thaumcraft:crucible/golem_tallow");
         ids.put("GolemThaumium", "thaumcraft:crucible/golem_thaumium");
         ids.put("GolemWood", "thaumcraft:crucible/golem_wood");
+        ids.put("GoldKey", "thaumcraft:arcane/gold_key");
+        ids.put("Grate", "thaumcraft:item_grate");
         ids.put("HelmGoggles", "thaumcraft:infusion/fortress_goggles");
         ids.put("HoverGirdle", "thaumcraft:infusion/hover_girdle");
         ids.put("HoverHarness", "thaumcraft:infusion/hover_harness");
@@ -290,6 +296,8 @@ public final class ResearchRecipeCoverage {
         ids.put("InfEnchRepair", "thaumcraft:infusion_enchantment/repair");
         ids.put("InfusionAltar", "thaumcraft:arcane/infusion_matrix");
         ids.put("InfusionMatrix", "thaumcraft:arcane/infusion_matrix");
+        ids.put("IronKey", "thaumcraft:arcane/iron_key");
+        ids.put("JarBrain", "thaumcraft:infusion/jar_brain");
         ids.put("JarLabel", "thaumcraft:jar_label");
         ids.put("JarLabelNull", "thaumcraft:jar_label_clear");
         ids.put("JarVoid", "thaumcraft:arcane/jar_void");
@@ -297,10 +305,13 @@ public final class ResearchRecipeCoverage {
         ids.put("LampFertility", "thaumcraft:infusion/fertility_lamp");
         ids.put("LampGrowth", "thaumcraft:infusion/growth_lamp");
         ids.put("Levitator", "thaumcraft:arcane/levitator");
+        ids.put("LiquidDeath", "thaumcraft:crucible/bucket_of_death");
         ids.put("MaskAngryGhost", "thaumcraft:infusion/fortress_mask_ghost");
         ids.put("MaskGrinningDevil", "thaumcraft:infusion/fortress_mask_devil");
         ids.put("MaskSippingFiend", "thaumcraft:infusion/fortress_mask_fiend");
+        ids.put("Mirror", "thaumcraft:infusion/mirror");
         ids.put("MirrorGlass", "thaumcraft:arcane/mirrored_glass");
+        ids.put("MirrorHand", "thaumcraft:infusion/hand_mirror");
         ids.put("MnemonicMatrix", "thaumcraft:arcane/mnemonic_matrix");
         ids.put("MundaneAmulet", "thaumcraft:mundane_amulet");
         ids.put("MundaneBelt", "thaumcraft:mundane_belt");
@@ -310,10 +321,13 @@ public final class ResearchRecipeCoverage {
         ids.put("NodeRelay", "thaumcraft:arcane/vis_relay");
         ids.put("NodeStabilizer", "thaumcraft:arcane/node_stabilizer");
         ids.put("NodeTransducer", "thaumcraft:arcane/node_transducer");
+        ids.put("PaveTravel", "thaumcraft:arcane/paving_stone_travel");
+        ids.put("PaveWard", "thaumcraft:arcane/paving_stone_warding");
         ids.put("Phial", "thaumcraft:phial_empty");
         ids.put("PlankGreatwood", "thaumcraft:greatwood_planks");
         ids.put("PlankSilverwood", "thaumcraft:silverwood_planks");
         ids.put("PrimalCharm", "thaumcraft:arcane/primal_charm");
+        ids.put("PrimalCrusher", "thaumcraft:infusion/primal_crusher");
         ids.put("PureGold", "thaumcraft:crucible/pure_gold");
         ids.put("PureIron", "thaumcraft:crucible/pure_iron");
         ids.put("Resonator", "thaumcraft:arcane/resonator");
@@ -328,9 +342,11 @@ public final class ResearchRecipeCoverage {
         ids.put("RunicRingCharged", "thaumcraft:infusion/runic_ring_charged");
         ids.put("RunicRingHealing", "thaumcraft:infusion/runic_ring_healing");
         ids.put("SaneSoap", "thaumcraft:crucible/sanity_soap");
+        ids.put("SanityCheck", "thaumcraft:infusion/sanity_checker");
         ids.put("Scribe1", "thaumcraft:scribing_tools_phial");
         ids.put("Scribe2", "thaumcraft:scribing_tools_bottle");
         ids.put("Scribe3", "thaumcraft:scribing_tools_refill");
+        ids.put("SinStone", "thaumcraft:infusion/compass_stone");
         ids.put("Table", "thaumcraft:table");
         ids.put("Tallow", "thaumcraft:crucible/tallow");
         ids.put("TallowCandle", "thaumcraft:tallow_candle");
@@ -394,6 +410,7 @@ public final class ResearchRecipeCoverage {
         ids.put("WandCapThaumiumInert", "thaumcraft:arcane/wand_cap_thaumium_inert");
         ids.put("WandCapVoid", "thaumcraft:infusion/wand_cap_void");
         ids.put("WandCapVoidInert", "thaumcraft:arcane/wand_cap_void_inert");
+        ids.put("WandPed", "thaumcraft:infusion/wand_pedestal");
         ids.put("WandRodBlaze", "thaumcraft:infusion/wand_rod_blaze");
         ids.put("WandRodBlazeStaff", "thaumcraft:arcane/staff_rod_blaze");
         ids.put("WandRodBone", "thaumcraft:infusion/wand_rod_bone");
@@ -411,6 +428,7 @@ public final class ResearchRecipeCoverage {
         ids.put("WandRodReedStaff", "thaumcraft:arcane/staff_rod_reed");
         ids.put("WandRodSilverwood", "thaumcraft:infusion/wand_rod_silverwood");
         ids.put("WandRodSilverwoodStaff", "thaumcraft:arcane/staff_rod_silverwood");
+        ids.put("WardedGlass", "thaumcraft:arcane/warded_glass");
         ids.put("WardedJar", "thaumcraft:arcane/warded_jar");
         return Collections.unmodifiableMap(ids);
     }
@@ -431,30 +449,14 @@ public final class ResearchRecipeCoverage {
 
     private static Map<String, String> buildDeferred() {
         Map<String, String> reasons = new LinkedHashMap<>();
-        reasons.put("ArcaneDoor", "no native arcane door item; the original WARDEDARCANA shape (thaumium / zombie brain / greatwood planks) needs the item registered first");
-        reasons.put("ArcanePressurePlate", "no native arcane pressure plate item");
-        reasons.put("BoneBow", "no native bone bow item");
-        reasons.put("BottleTaint", "no native bottle-of-taint catalyst item");
-        reasons.put("EtherealBloom", "no native ethereal bloom crop block");
-        reasons.put("FluxScrubber", "no native flux scrubber block");
-        reasons.put("GoldKey", "no native gold key item");
-        reasons.put("Grate", "no native metal grate block");
-        reasons.put("IronKey", "no native iron key item");
-        reasons.put("JarBrain", "no native brain-jar block variant; the native jar carries its content in block data that no fixed result stack can express");
-        reasons.put("LiquidDeath", "no native bucket of death catalyst item");
-        reasons.put("Mirror", "no native mirror block");
-        reasons.put("MirrorEssentia", "no native essentia mirror block");
-        reasons.put("MirrorHand", "no native hand mirror item");
-        reasons.put("NodeStabilizerAdv", "no native advanced node stabilizer block");
-        reasons.put("PaveTravel", "no native paved-travel block");
-        reasons.put("PaveWard", "no native paved-ward block");
-        reasons.put("PrimalCrusher", "no native primal crusher item");
+        reasons.put("ArcanePressurePlate", "the original result is blockWoodenDevice metadata 2, the arcane pressure plate; the native wooden_device family keeps it as a variant state and has no separate arcane pressure plate item, and a 1.21.1 recipe result cannot carry a block state");
+        reasons.put("FluxScrubber", "the original result is blockStoneDevice metadata 14, the flux scrubber; the native stone_device family keeps it as a variant state and has no separate flux scrubber item, and a 1.21.1 recipe result cannot carry a block state");
+        reasons.put("MirrorEssentia", "the original result is blockMirror metadata 6, the essentia mirror; the native mirror block keeps it as the essentia block state and has no separate essentia mirror item, and a 1.21.1 recipe result cannot carry a block state");
+        reasons.put("NodeStabilizerAdv", "no native advanced node stabilizer; ThaumcraftNodeDevices registers only the ordinary node stabilizer");
         reasons.put("PureCopper", "third-party ore: the original registers this crucible recipe only when Config.foundCopperIngot, and 1.21.1 has no pure-copper item");
         reasons.put("PureLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot, and 1.21.1 has no lead at all");
         reasons.put("PureSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot, and 1.21.1 has no silver at all");
         reasons.put("PureTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot, and 1.21.1 has no tin at all");
-        reasons.put("SanityCheck", "no native sanity checker item");
-        reasons.put("SinStone", "no native sin stone compass item");
         reasons.put("TransCopper", "third-party ore: the original registers this crucible recipe only when Config.foundCopperIngot");
         reasons.put("TransLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot");
         reasons.put("TransSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot");
@@ -462,9 +464,7 @@ public final class ResearchRecipeCoverage {
         reasons.put("WandCapCopper", "no native copper wand cap item; the original needs a third-party copper ingot");
         reasons.put("WandCapSilver", "no native silver wand cap item; the original needs a third-party silver ingot");
         reasons.put("WandCapSilverInert", "no native silver wand cap item; the original needs a third-party silver ingot");
-        reasons.put("WandPed", "no native wand pedestal block");
-        reasons.put("WandPedFocus", "no native focus wand pedestal block");
-        reasons.put("WardedGlass", "no native warded glass block");
+        reasons.put("WandPedFocus", "the original result is blockStoneDevice metadata 8, the focus that sits on the wand pedestal; the native wand_pedestal block keeps it as the focus block state and has no separate focus item, and a 1.21.1 recipe result cannot carry a block state");
         return Collections.unmodifiableMap(reasons);
     }
 

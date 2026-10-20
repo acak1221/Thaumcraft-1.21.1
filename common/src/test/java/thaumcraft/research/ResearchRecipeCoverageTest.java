@@ -20,35 +20,27 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class ResearchRecipeCoverageTest {
     /**
-     * The original recipes that still have no native recipe. Each one is blocked on a missing 1.21.1
-     * item/block registration (not on a recipe) or on the original's third-party ore condition; the
-     * reason for each is kept in {@link ResearchRecipeCoverage#deferredRecipes()}.
+     * The original recipes that still have no native recipe.
+     *
+     * <p>Two groups remain:
+     * <ul>
+     *   <li>{@link #THIRD_PARTY_ORE} - the eleven original recipes the oracle registers only when another mod
+     *       supplies the matching ore (Config.foundCopperIngot, foundTinIngot, foundSilverIngot, foundLeadIngot).
+     *       Without another mod's ingots there is no copper, lead, silver or tin item in 1.21.1, so the original
+     *       never registers them either. They stay deferred on purpose.</li>
+     *   <li>The remaining entries are blocked on a native BLOCK or ITEM that still does not exist; the reason for
+     *       each one is kept in {@link ResearchRecipeCoverage#deferredRecipes()}.</li>
+     * </ul>
      */
     private static final List<String> EXPECTED_MISSING = List.of(
-            "ArcaneDoor",
             "ArcanePressurePlate",
-            "BoneBow",
-            "BottleTaint",
-            "EtherealBloom",
             "FluxScrubber",
-            "GoldKey",
-            "Grate",
-            "IronKey",
-            "JarBrain",
-            "LiquidDeath",
-            "Mirror",
             "MirrorEssentia",
-            "MirrorHand",
             "NodeStabilizerAdv",
-            "PaveTravel",
-            "PaveWard",
-            "PrimalCrusher",
             "PureCopper",
             "PureLead",
             "PureSilver",
             "PureTin",
-            "SanityCheck",
-            "SinStone",
             "TransCopper",
             "TransLead",
             "TransSilver",
@@ -56,16 +48,22 @@ class ResearchRecipeCoverageTest {
             "WandCapCopper",
             "WandCapSilver",
             "WandCapSilverInert",
-            "WandPed",
-            "WandPedFocus",
-            "WardedGlass");
+            "WandPedFocus");
+
+    /**
+     * The eleven original recipes the oracle registers only when another mod supplies copper, lead, silver or tin.
+     * They are the part of the remainder that no amount of native content can close.
+     */
+    private static final List<String> THIRD_PARTY_ORE = List.of(
+            "PureCopper", "PureLead", "PureSilver", "PureTin",
+            "TransCopper", "TransLead", "TransSilver", "TransTin",
+            "WandCapCopper", "WandCapSilver", "WandCapSilverInert");
 
     /** The research entries whose pages still show an unresolved original recipe. */
     private static final List<String> EXPECTED_RESEARCH = List.of(
-            "BONEBOW", "BOTTLETAINT", "CAP_copper", "CAP_silver", "ETHEREALBLOOM", "FLUXSCRUB", "GRATE",
-            "JARBRAIN", "LIQUIDDEATH", "MIRROR", "MIRRORESSENTIA", "MIRRORHAND", "NODESTABILIZERADV",
-            "PAVETRAVEL", "PAVEWARD", "PRIMALCRUSHER", "PURECOPPER", "PURELEAD", "PURESILVER", "PURETIN",
-            "SANITYCHECK", "SINSTONE", "TRANSCOPPER", "TRANSLEAD", "TRANSSILVER", "TRANSTIN", "WANDPED",
+            "CAP_copper", "CAP_silver", "FLUXSCRUB", "MIRRORESSENTIA", "NODESTABILIZERADV",
+            "PURECOPPER", "PURELEAD", "PURESILVER", "PURETIN",
+            "TRANSCOPPER", "TRANSLEAD", "TRANSSILVER", "TRANSTIN",
             "WANDPEDFOC", "WARDEDARCANA");
 
     /** The original keys the corpus itself stores as a plain List, not as a recipe. */
@@ -89,9 +87,21 @@ class ResearchRecipeCoverageTest {
     }
 
     @Test
+    void theThirdPartyOreRecipesStayDeferredAndAreReportedAsSuch() {
+        Map<String, String> deferred = ResearchRecipeCoverage.deferredRecipes();
+        for (String key : THIRD_PARTY_ORE) {
+            assertTrue(deferred.containsKey(key), key + " must stay deferred");
+            assertTrue(deferred.get(key).contains("third-party ore"), key + " must report the third-party ore condition");
+        }
+        // The third-party ore group is the part of the remainder that no native content can close.
+        assertTrue(THIRD_PARTY_ORE.containsAll(EXPECTED_MISSING.stream()
+                .filter(key -> deferred.get(key).contains("third-party ore")).toList()));
+    }
+
+    @Test
     void everyMappedOriginalKeyResolvesToAPackagedNativeRecipe() {
         Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
-        assertEquals(232, ids.size());
+        assertEquals(250, ids.size());
         Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
         for (Map.Entry<String, String> entry : ids.entrySet()) {
             String id = entry.getValue();

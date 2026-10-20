@@ -1,0 +1,8 @@
+{
+  "type": "thaumcraft:crucible",
+  "research": "BOTTLETAINT",
+  "source_order": 163,
+  "catalyst": {"item": "thaumcraft:phial_filled"},
+  "result": {"id": "thaumcraft:bottle_taint", "count": 1},
+  "aspects": {"vitium": 8, "praecantatio": 8}
+}

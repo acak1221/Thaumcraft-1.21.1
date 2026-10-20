@@ -182,6 +182,8 @@ public class EntityTaintCreeper extends Monster implements ITaintedMob {
             }
         }
         super.tick();
+        // Original func_70636_d: the spawn splash of the first five ticks.
+        if (level().isClientSide && tickCount < 5 && clientEffects != null) clientEffects.effect(this, false);
     }
 
     /**

@@ -1,0 +1,21 @@
+{
+  "description": {
+    "translate": "enchantment.potency"
+  },
+  "supported_items": "#thaumcraft:enchantable/potency",
+  "weight": 2,
+  "max_level": 3,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 11
+  },
+  "max_cost": {
+    "base": 61,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "any"
+  ],
+  "effects": {}
+}

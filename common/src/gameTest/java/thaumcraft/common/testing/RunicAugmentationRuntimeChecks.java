@@ -98,11 +98,18 @@ public final class RunicAugmentationRuntimeChecks {
             }
             var componentPositions = new ArrayList<BlockPos>();
             componentPositions.add(centerPos.west(3)); componentPositions.add(centerPos.east(3));
-            outer: for (int x = -7; x <= 7; x++) for (int z = -7; z <= 7; z++) {
-                if (Math.abs(x) < 2 || Math.abs(z) < 2) continue;
-                componentPositions.add(centerPos.offset(x,0,z)); if(componentPositions.size()==27) break outer;
+            // Original symmetry counts BOTH physical pedestals and occupied opposites.
+            // Build fourteen physical pairs; only27 slots carry the boundary's27 ingredients.
+            // The final empty mirror avoids an accidental one-sided75-point instability fixture.
+            outer: for (int x = 2; x <= 7; x++) for (int z = 2; z <= 7; z++) {
+                componentPositions.add(centerPos.offset(-x,0,z));
+                componentPositions.add(centerPos.offset(x,0,-z));
+                if(componentPositions.size()==28) break outer;
             }
-            for (BlockPos pos : componentPositions) { set(pos,ThaumcraftInfusion.PEDESTAL.get().defaultBlockState()); peripherals.add((TilePedestal)level.getBlockEntity(pos)); }
+            for (int index=0;index<componentPositions.size();index++) {
+                BlockPos pos=componentPositions.get(index);set(pos,ThaumcraftInfusion.PEDESTAL.get().defaultBlockState());
+                if(index<27)peripherals.add((TilePedestal)level.getBlockEntity(pos));
+            }
             center = (TilePedestal)level.getBlockEntity(centerPos); first=peripherals.get(0); second=peripherals.get(1);
             matrix = (TileInfusionMatrix)level.getBlockEntity(matrixPos);
             armor=jar(-8,Aspect.ARMOR); magic=jar(-7,Aspect.MAGIC); energy=jar(-6,Aspect.ENERGY);
@@ -145,6 +152,7 @@ public final class RunicAugmentationRuntimeChecks {
                         useWand(); test.assertTrue(matrix.isCrafting() && matrix.getDemand().getAmount(Aspect.ARMOR)==536870912
                                 && matrix.getDemand().getAmount(Aspect.MAGIC)==536870912 && matrix.getDemand().getAmount(Aspect.ENERGY)==1073741824,
                                 "fc25 ritual is accepted with ORIGINAL individual costs although original int total overflows negative");
+                        test.assertTrue(matrix.getInstability()<=0,"declared mirrored pedestals and actual skulls make boundary payment deterministic without suppressing production hazards: "+matrix.getInstability());
                         boundaryStarted=level.getGameTime(); phase=1;
                     } else {
                         if(level.getGameTime()-boundaryStarted<35) return;
@@ -152,7 +160,9 @@ public final class RunicAugmentationRuntimeChecks {
                         test.assertTrue(matrix.isCrafting() && demand.getAmount(Aspect.ARMOR)<536870912 && demand.getAmount(Aspect.ARMOR)>536870896
                                 && demand.getAmount(Aspect.MAGIC)==536870912 && demand.getAmount(Aspect.ENERGY)==1073741824
                                 && peripherals.stream().noneMatch(TilePedestal::isEmpty) && thaumcraft.common.lib.runic.RunicArmor.hardening(center.getItem(0))==25,
-                                "actual native fc25 cycle debits finite armor source and keeps all27 ingredients/centre pending instead of overflowing into free output");
+                                "actual native fc25 cycle debits finite armor source and keeps all27 ingredients/centre pending instead of overflowing into free output: crafting="+matrix.isCrafting()
+                                        +", demand="+demand.aspects+", armorJar="+armor.getAmount()+", instability="+matrix.getInstability()
+                                        +", occupied="+peripherals.stream().filter(pedestal->!pedestal.isEmpty()).count()+", centralHardening="+thaumcraft.common.lib.runic.RunicArmor.hardening(center.getItem(0)));
                         var saved=matrix.saveWithFullMetadata(level.registryAccess()); matrix.loadWithComponents(saved,level.registryAccess());
                         test.assertTrue(matrix.isCrafting() && matrix.getDemand().aspects.equals(demand.aspects)
                                 && matrix.getPendingEssentia(Aspect.ENERGY)==1073741824,

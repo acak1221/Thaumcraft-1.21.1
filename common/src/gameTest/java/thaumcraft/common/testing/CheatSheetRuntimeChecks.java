@@ -32,6 +32,11 @@ public final class CheatSheetRuntimeChecks {
                             && cheat.getRarity() == Rarity.EPIC && cheat.getMaxStackSize() == 1
                             && normal.getRarity() == Rarity.UNCOMMON && normal.getMaxStackSize() == 1,
                     "native metadata42 flattening has EPIC/stacks1 identity, independent from normal uncommon book");
+            var expectedBookAspects = thaumcraft.common.lib.research.ObjectAspectResolver.baseTags(new ItemStack(net.minecraft.world.item.Items.BOOKSHELF), f.level).add(Aspect.MAGIC,2).merge(Aspect.MIND,2);
+            f.check(thaumcraft.common.lib.research.ObjectAspectResolver.baseTags(normal,f.level).aspects.equals(expectedBookAspects.aspects)
+                            && thaumcraft.common.lib.research.ObjectAspectResolver.baseTags(cheat,f.level).aspects.equals(expectedBookAspects.aspects)
+                            && thaumcraft.common.lib.research.ObjectAspectResolver.get(normal,f.level).aspects.equals(thaumcraft.common.lib.research.ObjectAspectResolver.get(cheat,f.level).aspects),
+                    "actual object-aspect resolver applies original wildcard metadata book binding to BOTH identities, derived from native bookshelf plus magic2/merge mind2");
             var tooltip = new ArrayList<net.minecraft.network.chat.Component>();
             cheat.getItem().appendHoverText(cheat, net.minecraft.world.item.Item.TooltipContext.of(f.level), tooltip, TooltipFlag.NORMAL);
             f.check(tooltip.stream().anyMatch(line -> line.getString().equals("Cheat Sheet")), "exact original metadata42 tooltip");

@@ -61,7 +61,12 @@ physical pearls. It reuses the existing scoped branch RNG adapter (restoring the
 exact original instance), checks unresearched/researched draw prefixes, all198
 flux offset draws, negative rejection, zero keys, fallback CURRENT reduction,
 paid/unpaid/stale authority, creative consumption, actual NBT replacement,
-actual blast packet/glass destruction and goo/gas metadata8. Implemented checks
+actual blast packet/glass destruction and goo/gas metadata8. Native terrain-damaging
+`Explosion.finalizeExplosion` also calls `Util.shuffle(toBlow, level.random)`; its
+Fisher-Yates descending integer prefix (including one bound6) must finish before
+the test scripts/counts the198 original pearl offset draws. Treating every bound6
+as a pearl draw was a fixture error exposed by the first CI runtime; the corrected
+fixture retains the actual blast and exact metadata8 state assertions. Implemented checks
 are pending compilation/runtime until the root's next target run; no client
 inspection is claimed.
 

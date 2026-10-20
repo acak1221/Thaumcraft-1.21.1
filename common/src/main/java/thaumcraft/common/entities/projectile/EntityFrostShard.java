@@ -145,7 +145,6 @@ public final class EntityFrostShard extends Projectile {
         if (!level().isClientSide) entityData.set(AGE, age);
         super.tick();
         if (isRemoved()) return;
-        if (level().isClientSide && getFrosty() > 0) clientTrail.accept(this);
         HitResult hit = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
         // Clients predict block ricochets, but never choose/damage an entity or
         // emit impact events. Actual server events alone produce frost bursts.
@@ -166,6 +165,7 @@ public final class EntityFrostShard extends Projectile {
         applyGravity();
         setPos(next);
         updateRotation(); // Frost:168-184 uses FINAL dragged/gravity-adjusted motion.
+        if (level().isClientSide && getFrosty() > 0) clientTrail.accept(this);
     }
 
     @Override protected void updateRotation() {

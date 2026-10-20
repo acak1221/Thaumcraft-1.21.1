@@ -41,9 +41,7 @@ public final class ContainerAlchemyFurnace extends AbstractContainerMenu {
         furnacePos = pos.immutable();
         checkContainerSize(contents, 2);
         checkContainerDataCount(data, DATA_COUNT);
-        addSlot(new Slot(contents, TileAlchemyFurnace.INPUT_SLOT, 80, 8) {
-            @Override public boolean mayPlace(ItemStack stack) { return TileAlchemyFurnace.hasAspects(stack, viewer.level()); }
-        });
+        addSlot(new SlotLimitedHasAspects(contents, TileAlchemyFurnace.INPUT_SLOT, 80, 8, viewer.level()));
         // Source ContainerAlchemyFurnace:44 uses an unrestricted manual fuel
         // slot. Automation/shift-click still require real native furnace fuel.
         addSlot(new Slot(contents, TileAlchemyFurnace.FUEL_SLOT, 80, 48));

@@ -91,6 +91,8 @@ public final class ThaumcraftContent {
     public static final RegistrySupplier<BlockJar> JAR = BLOCKS.register("jar", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 9)));
     public static final RegistrySupplier<BlockJar> VOID_JAR = BLOCKS.register("jar_void", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 9), true));
     public static final RegistrySupplier<BlockAuraNode> AURA_NODE = BLOCKS.register("aura_node", () -> new BlockAuraNode(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).noOcclusion().noCollission().lightLevel(state -> 8)));
+    public static final RegistrySupplier<thaumcraft.common.blocks.BlockSilverwoodNode> SILVERWOOD_KNOT = BLOCKS.register("silverwood_knot",
+            () -> new thaumcraft.common.blocks.BlockSilverwoodNode(BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).strength(2.5F).sound(SoundType.WOOD).lightLevel(state -> 7)));
     public static final RegistrySupplier<BlockTable> TABLE = BLOCKS.register("table", () -> new BlockTable(
             BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion()));
     public static final RegistrySupplier<Item> TABLE_ITEM = ITEMS.register("table", () -> new BlockItem(TABLE.get(), new Item.Properties()));
@@ -106,7 +108,7 @@ public final class ThaumcraftContent {
     public static final RegistrySupplier<BlockEntityType<TileResearchTable>> RESEARCH_TABLE_BLOCK_ENTITY = BLOCK_ENTITIES.register("research_table",
             () -> BlockEntityType.Builder.of(TileResearchTable::new, TABLE.get()).build(null));
     public static final RegistrySupplier<BlockEntityType<TileJar>> JAR_BLOCK_ENTITY = BLOCK_ENTITIES.register("jar", () -> BlockEntityType.Builder.of((pos, state) -> new TileJar(ThaumcraftContent.JAR_BLOCK_ENTITY.get(), pos, state), JAR.get(), VOID_JAR.get()).build(null));
-    public static final RegistrySupplier<BlockEntityType<TileNode>> NODE_BLOCK_ENTITY = BLOCK_ENTITIES.register("aura_node", () -> BlockEntityType.Builder.of((pos, state) -> new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), pos, state), AURA_NODE.get()).build(null));
+    public static final RegistrySupplier<BlockEntityType<TileNode>> NODE_BLOCK_ENTITY = BLOCK_ENTITIES.register("aura_node", () -> BlockEntityType.Builder.of((pos, state) -> new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), pos, state), AURA_NODE.get(), SILVERWOOD_KNOT.get()).build(null));
     public static final Map<String, RegistrySupplier<Item>> MATERIALS = new LinkedHashMap<>();
     public static final Map<String, RegistrySupplier<Item>> SHARDS = new LinkedHashMap<>();
     public static final Map<String, RegistrySupplier<Block>> CRYSTALS = new LinkedHashMap<>();

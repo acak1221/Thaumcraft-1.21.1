@@ -35,23 +35,31 @@ public final class ThaumcraftFabric implements ModInitializer {
         net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftMonsters.WISP.get(),
                 net.minecraft.world.entity.SpawnPlacementTypes.NO_RESTRICTIONS, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 thaumcraft.common.entities.monster.EntityWisp::checkWispSpawnRules);
-        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_NETHER), net.minecraft.world.entity.MobCategory.MONSTER,
-                thaumcraft.common.config.ThaumcraftMonsters.FIREBAT.get(), 10, 1, 2);
-        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_NETHER), net.minecraft.world.entity.MobCategory.MONSTER,
-                thaumcraft.common.config.ThaumcraftMonsters.WISP.get(), 5, 1, 1);
-        var calendar = java.util.Calendar.getInstance();
-        if (calendar.get(java.util.Calendar.MONTH) == java.util.Calendar.OCTOBER && calendar.get(java.util.Calendar.DAY_OF_MONTH) == 31) {
-            BiomeModifications.addSpawn(BiomeSelectors.tag(thaumcraft.common.config.ThaumcraftMonsters.BRAINY_SPAWNS), net.minecraft.world.entity.MobCategory.MONSTER,
-                    thaumcraft.common.config.ThaumcraftMonsters.FIREBAT.get(), 5, 1, 2);
-        }
+        thaumcraft.fabric.world.FabricBiomeSpawns.init();
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftTaint.TAINT_SPIDER.get(), thaumcraft.common.entities.monster.EntityTaintSpider.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftTaint.TAINT_SPORE.get(), thaumcraft.common.entities.monster.EntityTaintSpore.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftTaint.TAINT_SWARMER.get(), thaumcraft.common.entities.monster.EntityTaintSporeSwarmer.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftTaint.TAINT_SWARM.get(), thaumcraft.common.entities.monster.EntityTaintSwarm.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftTaint.TAINTACLE.get(), thaumcraft.common.entities.monster.EntityTaintacle.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftTaint.TAINTACLE_SMALL.get(), thaumcraft.common.entities.monster.EntityTaintacleSmall.createAttributes());
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftTaint.TAINT_SWARM.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.NO_RESTRICTIONS, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityTaintSwarm::checkTaintSwarmSpawnRules);
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.NO_RESTRICTIONS, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityTaintacle::checkSpawnRules);
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftMonsters.BRAINY_ZOMBIE.get(),
                 thaumcraft.common.entities.monster.EntityBrainyZombie.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftMonsters.GIANT_BRAINY_ZOMBIE.get(),
                 thaumcraft.common.entities.monster.EntityGiantBrainyZombie.createAttributes());
-        BiomeModifications.addSpawn(BiomeSelectors.tag(thaumcraft.common.config.ThaumcraftMonsters.BRAINY_SPAWNS),
-                net.minecraft.world.entity.MobCategory.MONSTER, thaumcraft.common.config.ThaumcraftMonsters.BRAINY_ZOMBIE.get(), 10, 1, 1);
         net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftMonsters.BRAINY_ZOMBIE.get(),
                 net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 thaumcraft.common.entities.monster.EntityBrainyZombie::checkBrainySpawnRules);

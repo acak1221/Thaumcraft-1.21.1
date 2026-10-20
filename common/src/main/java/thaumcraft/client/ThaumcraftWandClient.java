@@ -35,6 +35,7 @@ public final class ThaumcraftWandClient {
                     var focus = FocusData.get(stack);
                     return (focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusHellbat ? WandModels.HELLBAT
                             : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusPech ? WandModels.PECH
+                            : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusPrimal ? WandModels.PRIMAL
                             : focus.getItem() instanceof ItemFocusShock ? WandModels.SHOCK : focus.getItem() instanceof ItemFocusFrost ? WandModels.FROST
                             : focus.getItem() instanceof ItemFocusExcavation ? WandModels.EXCAVATION
                             : focus.getItem() instanceof thaumcraft.common.items.wands.foci.ItemFocusWarding ? WandModels.WARDING

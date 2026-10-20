@@ -55,6 +55,17 @@ public final class ClientSetup {
         thaumcraft.client.ThaumcraftFocusPouchesClient.init();
         thaumcraft.client.ThaumcraftColoredCandlesClient.init();
         thaumcraft.client.ThaumcraftHungryNodeClient.init();
+        thaumcraft.client.ThaumcraftTaintBlocksClient.init();
+        thaumcraft.client.ThaumcraftTaintSporesClient.init();
+        thaumcraft.client.ThaumcraftBiomeClient.init();
+        thaumcraft.client.ThaumcraftPrimalFociClient.init();
+        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINT_SWARM,
+                thaumcraft.client.renderers.entity.RenderTaintSwarm::new);
+        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE,
+                context -> new thaumcraft.client.renderers.entity.RenderTaintacle(context, .6F, 10));
+        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE_SMALL,
+                context -> new thaumcraft.client.renderers.entity.RenderTaintacle(context, .2F, 6));
+        thaumcraft.common.entities.monster.EntityTaintacle.setClientEffects(thaumcraft.client.fx.particles.TaintacleAriseParticle::arise);
         thaumcraft.common.items.ItemManaBean.setTooltipViewer(() -> Minecraft.getInstance().player);
         ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? 0xff000000 | thaumcraft.common.items.ItemManaBean.color(stack) : -1,
                 thaumcraft.common.config.ThaumcraftManaBeans.MANA_BEAN);

@@ -1,4 +1,14 @@
 {
   "replace": false,
-  "values": ["#minecraft:is_forest", "#minecraft:is_taiga", "#minecraft:is_jungle", "minecraft:grove", {"id": "#c:is_forest", "required": false}]
+  "values": [
+    "#minecraft:is_forest",
+    "#minecraft:is_taiga",
+    "#minecraft:is_jungle",
+    "minecraft:grove",
+    {
+      "id": "#c:is_forest",
+      "required": false
+    },
+    "thaumcraft:magical_forest"
+  ]
 }

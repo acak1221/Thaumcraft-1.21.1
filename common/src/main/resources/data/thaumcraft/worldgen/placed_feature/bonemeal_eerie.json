@@ -1,0 +1,9 @@
+{
+  "feature": "thaumcraft:bonemeal_eerie",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 0
+    }
+  ]
+}

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -12,8 +11,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -157,18 +157,59 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     /** Called only after the real feature has placed the existing aura-node block. */
     public void initializeNatural(AspectList values, NodeModifier modifier) { initializeNatural(values, NodeType.NORMAL, modifier); }
     public void initializeNatural(AspectList values, NodeType type, NodeModifier modifier) {
-        if (type != NodeType.NORMAL && type != NodeType.UNSTABLE && type != NodeType.HUNGRY) throw new IllegalArgumentException("This native initializer supports NORMAL/UNSTABLE/HUNGRY only");
-        if (transducing) throw new IllegalStateException("Node aura is captured by an active transduction");
-        natural = true;
-        nodeType = type;
-        nodeModifier = modifier;
-        count = 0;
-        nodeLock = 0;
-        regeneration = -1;
-        rechargeWait = 0;
-        lastActive = 0;
-        catchUp = false;
-        setAspects(values);
+        initializeGenerated(values, type, modifier);
+    }
+
+    /** Original createNodeAt, shared by natural, embedded and actual primal-generated nodes. */
+    public void initializeGenerated(AspectList values, NodeType type, NodeModifier modifier) {
+        if (level == null) { initializeGeneratedFields(values, type, modifier); return; }
+        if (!(level instanceof ServerLevel server)) throw new IllegalStateException("Generated nodes require a native server context");
+        initializeGenerated(values, type, modifier, server);
+    }
+
+    /** Explicit generation context avoids server chunk/packet call-outs from a WorldGenRegion worker. */
+    public void initializeGenerated(AspectList values, NodeType type, NodeModifier modifier,
+                                    net.minecraft.world.level.WorldGenLevel owner) {
+        if (!tryInitializeGenerated(values, type, modifier, owner))
+            throw new IllegalStateException("Generated node initialization requires its available current owner");
+    }
+
+    /** A runtime generator may encounter an existing node owned by an active
+     * tick/pearl/conversion frame. Consume the generation roll, then refuse
+     * initialization without stealing that aura or crashing the caller. */
+    public boolean tryInitializeGenerated(AspectList values, NodeType type, NodeModifier modifier,
+                                         net.minecraft.world.level.WorldGenLevel owner) {
+        if (owner instanceof ServerLevel server) {
+            if (!server.getServer().isSameThread() || server.getServer().getLevel(server.dimension()) != server)
+                throw new IllegalStateException("Generated node initialization requires a native server thread");
+        } else if (!(owner instanceof net.minecraft.server.level.WorldGenRegion)) {
+            throw new IllegalStateException("Generated node initialization requires a native generation region");
+        }
+        if (ticking || notifying || transducing || pearlPlanning || orbIntent != null) return false;
+        if (owner instanceof ServerLevel server) {
+            if (level != server || !current()) return false;
+            initializeGeneratedFields(values, type, modifier); changed();
+        } else {
+            if (isRemoved() || !owner.hasChunkAt(worldPosition)
+                    || !owner.ensureCanWrite(worldPosition) || owner.getBlockEntity(worldPosition) != this
+                    || owner.getBlockState(worldPosition) != getBlockState()
+                    || !getBlockState().is(ThaumcraftContent.AURA_NODE.get()) && !getBlockState().is(ThaumcraftContent.SILVERWOOD_KNOT.get()))
+                return false;
+            initializeGeneratedFields(values, type, modifier);
+            owner.getChunk(worldPosition).setUnsaved(true);
+        }
+        return true;
+    }
+
+    private void initializeGeneratedFields(AspectList values, NodeType type, NodeModifier modifier) {
+        java.util.Objects.requireNonNull(type, "node type");
+        if (ticking || notifying || transducing || pearlPlanning || orbIntent != null)
+            throw new IllegalStateException("Node aura is captured by an active native lifecycle frame");
+        natural = true; nodeType = type; nodeModifier = modifier;
+        count = 0; nodeLock = 0; regeneration = -1; rechargeWait = 0; lastActive = 0; catchUp = false;
+        aspects = new AspectList();
+        if (values != null) for (Aspect aspect : values.getAspects()) aspects.add(aspect, Math.max(0, values.getAmount(aspect)));
+        aspectsBase = aspects.copy();
     }
 
     /** Opaque original metadata3 pearl transition; only the exact paid native item receipt can apply it. */
@@ -295,7 +336,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TileNode node) {
-        if (level.isClientSide || node.isRemoved() || (node.nodeType != NodeType.NORMAL && node.nodeType != NodeType.UNSTABLE && node.nodeType != NodeType.HUNGRY) || node.ticking || node.notifying || node.transducing || node.pearlPlanning
+        if (level.isClientSide || node.isRemoved() || node.ticking || node.notifying || node.transducing || node.pearlPlanning
                 || node.level != level || !node.worldPosition.equals(pos) || state != node.getBlockState()) return;
         node.tickingLevel = level;
         node.tickingState = state;
@@ -316,11 +357,28 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
             if (!node.current()) return;
             change |= node.rechargeAndPrune();
             if (!node.current()) return;
+            int ecologyTick = node.count;
+            NodeType ecologyType = node.nodeType;
+            if (thaumcraft.common.lib.world.NodeEcology.taint(node,
+                    () -> node.current() && node.count == ecologyTick && node.nodeType == ecologyType)) {
+                if (!node.current()) return;
+                node.nodeType = NodeType.TAINTED; node.regeneration = -1; node.changed();
+            }
+            if (!node.current()) return;
             change |= node.handleStability();
             if (!node.current()) return;
-            node.hungrySecond(); // Original after dark/pure handlers; those remain pending.
+            node.runBiomeEcology();
+            if (!node.current()) return;
+            node.hungrySecond();
             if (change && node.current()) node.changed();
         } finally { node.ticking = false; node.tickingLevel = null; node.tickingState = null; }
+    }
+
+    private void runBiomeEcology() {
+        int tick = count; NodeType type = nodeType;
+        java.util.function.BooleanSupplier owner = () -> current() && count == tick && nodeType == type;
+        thaumcraft.common.lib.world.NodeEcology.dark(this, owner);
+        if (owner.getAsBoolean()) thaumcraft.common.lib.world.NodeEcology.pure(this, owner);
     }
 
     /** Client-first visual/prediction adapter; authoritative stock mutation remains server-only. */
@@ -448,7 +506,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     private boolean current() {
         Level world = level;
         BlockState state = getBlockState();
-        return world != null && (!ticking || world == tickingLevel && state == tickingState) && !isRemoved() && state.is(ThaumcraftContent.AURA_NODE.get())
+        return world != null && (!ticking || world == tickingLevel && state == tickingState) && !isRemoved() && (state.is(ThaumcraftContent.AURA_NODE.get()) || state.is(ThaumcraftContent.SILVERWOOD_KNOT.get()))
                 && !world.isOutsideBuildHeight(worldPosition) && world.hasChunkAt(worldPosition)
                 && world.getBlockEntity(worldPosition) == this && world.getBlockState(worldPosition) == state
                 && !isRemoved() && level == world && getBlockState() == state;
@@ -471,7 +529,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         // Never load a neighbouring chunk to look for a node.
         if (level.isOutsideBuildHeight(otherPos) || !level.hasChunkAt(otherPos)
                 || !(level.getBlockEntity(otherPos) instanceof TileNode other)
-                || other.level != level || (other.nodeType != NodeType.NORMAL && other.nodeType != NodeType.UNSTABLE && other.nodeType != NodeType.HUNGRY) || !other.current() || !current()) return false;
+                || other.level != level || !other.current() || !current()) return false;
         if (other.transducing || other.nodeLock > 0) return false; // Original lock check BEFORE aspect-selection RNG; atomic capture cannot be bullied.
         int otherAverage = (other.aspects.visSize() + other.aspectsBase.visSize()) / 2;
         int thisAverage = (aspects.visSize() + aspectsBase.visSize()) / 2;
@@ -607,8 +665,13 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
                 }
             }
             if (aspects.size() == 0) {
-                // Original airy-node death, with no free block/item drop.
-                level.removeBlock(worldPosition, false);
+                // Original knot metadata2 -> ordinary silverwood1 retains its axis; airy nodes disappear without a free node item.
+                BlockState owner = getBlockState();
+                if (owner.is(ThaumcraftContent.SILVERWOOD_KNOT.get())) {
+                    level.setBlock(worldPosition, thaumcraft.common.config.ThaumcraftNaturals.SILVERWOOD_LOG.get().defaultBlockState()
+                            .setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS,
+                                    owner.getValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS)), 3);
+                } else level.removeBlock(worldPosition, false);
                 return true;
             }
         }

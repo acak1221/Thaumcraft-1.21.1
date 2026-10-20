@@ -1,0 +1,9 @@
+{
+  "feature": "thaumcraft:bonemeal_taint",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 0
+    }
+  ]
+}

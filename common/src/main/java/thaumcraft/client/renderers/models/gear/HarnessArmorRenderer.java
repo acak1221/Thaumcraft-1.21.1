@@ -1,6 +1,8 @@
 package thaumcraft.client.renderers.models.gear;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.io.IOException;
@@ -14,7 +16,8 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -28,10 +31,11 @@ import thaumcraft.common.items.armor.HarnessData;
 import thaumcraft.common.lib.geometry.HarnessObjMesh;
 
 /** Original chest cube and retained124-triangle backpack, explicit sneak
- * transforms and fullbright back. No default armor geometry is substituted. */
+ * transforms and back without directional light. No default armor geometry is substituted. */
 public final class HarnessArmorRenderer {
     private static final ResourceLocation CHEST=texture("textures/models/hoverharness.png"),BACK=texture("textures/models/hoverharness2.png"),MESH=texture("textures/models/hoverharness.obj");
     private static final ModelPart BODY=body();
+    private static final RenderType BACK_TYPE=new UnlitBackType();
     private static HarnessObjMesh mesh;
     private HarnessArmorRenderer() {}
     private static ResourceLocation texture(String path) {return ResourceLocation.fromNamespaceAndPath("thaumcraft",path);}
@@ -53,19 +57,38 @@ public final class HarnessArmorRenderer {
         pose.pushPose();try {
             pose.scale(.1F,.1F,.1F);pose.mulPose(Axis.XN.rotationDegrees(90));
             if(entity.isShiftKeyDown())pose.mulPose(Axis.XP.rotationDegrees(28.64789F));
-            pose.translate(0,.33,-3.7);VertexConsumer vertices=buffers.getBuffer(RenderType.entityCutoutNoCull(BACK));
+            pose.translate(0,.33,-3.7);VertexConsumer vertices=buffers.getBuffer(BACK_TYPE);
             for(var triangle:mesh().triangles()) {
                 float averageU=(triangle.a().u()+triangle.b().u()+triangle.c().u())/3F,averageV=(triangle.a().v()+triangle.b().v()+triangle.c().v())/3F;
-                vertex(pose,vertices,triangle.a(),averageU,averageV);vertex(pose,vertices,triangle.b(),averageU,averageV);vertex(pose,vertices,triangle.c(),averageU,averageV);
+                vertex(pose,vertices,triangle.a(),averageU,averageV,light);vertex(pose,vertices,triangle.b(),averageU,averageV,light);vertex(pose,vertices,triangle.c(),averageU,averageV,light);
                 // Native entity consumers are quad batches: a repeated final
                 // vertex preserves exactly one triangle and one degenerate.
-                vertex(pose,vertices,triangle.c(),averageU,averageV);
+                vertex(pose,vertices,triangle.c(),averageU,averageV,light);
             }
         }finally {pose.popPose();}
         ThaumcraftTravelGearClient.renderHarnessEffects(pose,buffers,armor,entity);
     }
-    private static void vertex(PoseStack pose,VertexConsumer out,HarnessObjMesh.Vertex vertex,float averageU,float averageV) {
+    private static void vertex(PoseStack pose,VertexConsumer out,HarnessObjMesh.Vertex vertex,float averageU,float averageV,int light) {
         float u=vertex.u()+(vertex.u()>averageU?-.0005F:.0005F),v=vertex.v()+(vertex.v()>averageV?-.0005F:.0005F);
-        out.addVertex(pose.last(),vertex.x(),vertex.y(),vertex.z()).setColor(0xffffffff).setUv(u,v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(pose.last(),vertex.nx(),vertex.ny(),vertex.nz());
+        out.addVertex(pose.last(),vertex.x(),vertex.y(),vertex.z()).setColor(0xffffffff).setUv(u,v).setLight(light).setNormal(pose.last(),vertex.nx(),vertex.ny(),vertex.nz());
+    }
+    /** Vanilla's cutout block shader retains fog/alpha-test/lightmap but does
+     * NOT apply minecraft_mix_light. This matches the original GL_LIGHTING-off
+     * OBJ while retaining the armor renderer's actual world lightmap. */
+    private static final class UnlitBackType extends RenderType {
+        private static final TextureStateShard SHEET=new TextureStateShard(BACK,false,false);
+        private static ShaderInstance selected;
+        private static float oldX,oldY,oldZ;
+        UnlitBackType(){super("thaumcraft_harness_unlit_back",DefaultVertexFormat.BLOCK,VertexFormat.Mode.QUADS,8192,false,false,UnlitBackType::begin,UnlitBackType::end);}
+        private static void begin(){
+            if(selected!=null)throw new IllegalStateException("Nested harness back draw");
+            selected=java.util.Objects.requireNonNull(GameRenderer.getRendertypeCutoutShader());
+            if(selected.CHUNK_OFFSET!=null){var values=selected.CHUNK_OFFSET.getFloatBuffer();oldX=values.get(0);oldY=values.get(1);oldZ=values.get(2);selected.CHUNK_OFFSET.set(0F,0F,0F);}
+            RENDERTYPE_CUTOUT_SHADER.setupRenderState();SHEET.setupRenderState();LIGHTMAP.setupRenderState();NO_TRANSPARENCY.setupRenderState();NO_CULL.setupRenderState();LEQUAL_DEPTH_TEST.setupRenderState();COLOR_DEPTH_WRITE.setupRenderState();
+        }
+        private static void end(){
+            try{if(selected!=null&&selected.CHUNK_OFFSET!=null)selected.CHUNK_OFFSET.set(oldX,oldY,oldZ);}
+            finally{COLOR_DEPTH_WRITE.clearRenderState();LEQUAL_DEPTH_TEST.clearRenderState();NO_CULL.clearRenderState();NO_TRANSPARENCY.clearRenderState();LIGHTMAP.clearRenderState();SHEET.clearRenderState();RENDERTYPE_CUTOUT_SHADER.clearRenderState();selected=null;}
+        }
     }
 }

@@ -31,7 +31,8 @@ import net.minecraft.world.level.levelgen.placement.BiomeFilter;
 import net.minecraft.world.phys.AABB;
 import thaumcraft.common.blocks.BlockMagicalLeaves;
 import thaumcraft.common.config.ThaumcraftNaturals;
-import thaumcraft.common.lib.world.WorldGenSilverwoodTrees;
+import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.tiles.TileNode;
 
 /** One native growth→survival harvest→real recipe/leaf loot check; loader wiring belongs to root. */
 public final class MagicalTreeRuntimeChecks {
@@ -101,10 +102,28 @@ public final class MagicalTreeRuntimeChecks {
                     level.setBlock(soil, Blocks.DIRT.defaultBlockState(), Block.UPDATE_CLIENTS);
                 }
                 if (silverwood) {
-                    long before = WorldGenSilverwoodTrees.skippedKnotTrees();
-                    test.assertTrue(!sapling.grow(level, origin, RandomSource.create(0)) && level.getBlockState(origin).is(sapling)
-                                    && WorldGenSilverwoodTrees.skippedKnotTrees() == before + 1,
-                            "fixed PURE-knot candidate is counted/skipped atomically, not rerolled into a NORMAL node or plain log");
+                    test.assertTrue(sapling.grow(level, origin, RandomSource.create(0)),
+                            "the fixed original PURE-knot tree now grows without a skip or replacement roll");
+                    var knots = saved.keySet().stream().filter(pos -> level.getBlockState(pos).is(ThaumcraftContent.SILVERWOOD_KNOT.get())).toList();
+                    test.assertTrue(!knots.isEmpty(), "actual sapling growth commits real embedded Silverwood nodes");
+                    for (BlockPos knot : knots) {
+                        test.assertTrue(level.getBlockEntity(knot) instanceof TileNode, "a grown knot owns the actual shared native TileNode");
+                        var embedded = (TileNode) level.getBlockEntity(knot);
+                        test.assertTrue(embedded.isNatural() && embedded.getNodeType() == TileNode.NodeType.PURE
+                                        && embedded.getAspects().size() > 0 && embedded.getAspects().aspects.equals(embedded.getAspectsBase().aspects),
+                                "actual generated knot contains initialized original PURE current and independent BASE stock");
+                        var nbt = embedded.saveWithoutMetadata(level.registryAccess());
+                        var copy = new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), knot, embedded.getBlockState());
+                        copy.loadWithComponents(nbt, level.registryAccess());
+                        test.assertTrue(copy.getScanId().equals(embedded.getScanId()) && copy.getNodeType() == TileNode.NodeType.PURE
+                                        && copy.getAspects().aspects.equals(embedded.getAspects().aspects)
+                                        && copy.getAspectsBase().aspects.equals(embedded.getAspectsBase().aspects),
+                                "grown native knot's scan identity/current/BASE/type survive the actual TileNode codec");
+                    }
+                    // Retain the independent seed7 geometry/leaf-RNG/survival-plank fixture below.
+                    for (BlockPos pos : saved.keySet()) level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                    for (BlockPos soil : BlockPos.betweenClosed(origin.offset(-3, -1, -3), origin.offset(3, -1, 3))) level.setBlock(soil, Blocks.DIRT.defaultBlockState(), Block.UPDATE_CLIENTS);
+                    level.setBlock(origin, sapling.defaultBlockState(), Block.UPDATE_CLIENTS);
                 }
                 // Fixed successful fixtures: no retry loop, no gameplay rarity
                 // bypass inside the production generator. The public growth

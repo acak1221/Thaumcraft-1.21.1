@@ -35,6 +35,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     VisNetClientEffects.setShader(shader);
                 }));
         ClientSetup.init();
+        thaumcraft.fabric.client.FabricTaintFibresModel.init();
         thaumcraft.fabric.client.FabricTravelGearClient.init();
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftAdvancedFurnace.FURNACE_ITEM.get(),
                 thaumcraft.client.renderers.tile.TileAlchemyFurnaceAdvancedRenderer::renderItem);
@@ -51,6 +52,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
             thaumcraft.client.ThaumcraftRunicClient.reset();
             thaumcraft.client.lib.PlayerNotifications.reset();
             thaumcraft.client.ThaumcraftTravelGearClient.reset();
+            thaumcraft.client.ThaumcraftTaintSporesClient.reset();
             thaumcraft.common.config.ThaumcraftSettings.resetClient();
         });
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)
@@ -63,6 +65,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                         thaumcraft.client.ThaumcraftRunicClient.reset();
                         thaumcraft.client.lib.PlayerNotifications.reset();
                         thaumcraft.client.ThaumcraftTravelGearClient.reset();
+                        thaumcraft.client.ThaumcraftTaintSporesClient.reset();
                     }
                 });
         // The retained shell is shared with blocks, but actual item contents

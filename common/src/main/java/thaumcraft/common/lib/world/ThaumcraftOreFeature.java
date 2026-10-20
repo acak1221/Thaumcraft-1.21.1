@@ -20,6 +20,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import thaumcraft.common.config.ThaumcraftOres;
+import thaumcraft.common.config.ThaumcraftBiomeSettings;
 
 /** Source: TC4 ThaumcraftWorldGenerator:481-546; one invocation is one chunk's complete ore pass. */
 public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration> {
@@ -47,12 +48,14 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
 
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
-        if (!isSurfaceDimension(level)) return false;
+        if (!isSurfaceDimension(level) || !NodeEcologyPolicy.permitsLevel(NodeEcologyPolicy.dimensionLevel(level.getLevel().dimension()))) return false;
         int chunkX = context.origin().getX() & ~15;
         int chunkZ = context.origin().getZ() & ~15;
         if (!level.hasChunk(chunkX >> 4, chunkZ >> 4)) return false;
         int centerSurface = surface(level, chunkX + 8, chunkZ + 8);
-        if (surfaceBiome(level, chunkX + 8, centerSurface, chunkZ + 8).is(BIOME_BLACKLIST)) return false;
+        var centreBiome = surfaceBiome(level, chunkX + 8, centerSurface, chunkZ + 8);
+        if (centreBiome.is(BIOME_BLACKLIST) || !NodeEcologyPolicy.permitsLevel(NodeEcologyPolicy.biomeLevel(centreBiome))) return false;
+        var options = ThaumcraftBiomeSettings.worldgen();
         RandomSource random = context.random();
         boolean placed = false;
 
@@ -66,19 +69,19 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
          * No extra deepslate pass, attempt scaling, retrogen or old-seed identity.
          */
         int cinnabarBound = Math.max(1, level.getHeight() / 5);
-        for (int attempt = 0; attempt < 18; attempt++) {
+        if (options.cinnabarOre()) for (int attempt = 0; attempt < 18; attempt++) {
             int x = chunkX + random.nextInt(16);
             int y = random.nextInt(cinnabarBound);
             int z = chunkZ + random.nextInt(16);
             placed |= single(level, random, new BlockPos(x, y, z), ThaumcraftOres.CINNABAR.get().defaultBlockState());
         }
-        for (int attempt = 0; attempt < 20; attempt++) {
+        if (options.amberOre()) for (int attempt = 0; attempt < 20; attempt++) {
             int x = chunkX + random.nextInt(16);
             int z = chunkZ + random.nextInt(16);
             int y = surface(level, x, z) - random.nextInt(25);
             placed |= single(level, random, new BlockPos(x, y, z), ThaumcraftOres.AMBER.get().defaultBlockState());
         }
-        for (int attempt = 0; attempt < 8; attempt++) {
+        if (options.infusedStone()) for (int attempt = 0; attempt < 8; attempt++) {
             int x = chunkX + random.nextInt(16);
             int z = chunkZ + random.nextInt(16);
             int top = surface(level, x, z);

@@ -6,6 +6,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
@@ -33,26 +37,47 @@ public final class TileManaPod extends BlockEntity implements IAspectContainer {
         BlockState state=getBlockState();if(!(state.getBlock() instanceof BlockManaPod))return;
         int age=state.getValue(BlockManaPod.AGE);
         if(age<7){age++;level.setBlock(worldPosition,state.setValue(BlockManaPod.AGE,age),3);}
-        if(age<=2)return;
+        var growth=chooseAspect(level,worldPosition,age,aspect,level.random);
+        if(growth.changed()){aspect=growth.aspect();changed();}
+    }
+    /** WorldGenRegion-safe initialization after the real pod state/BE was
+     * admitted. The generator owns a separate deterministic native worldgen
+     * growth stream; runtime block growth still consumes the WORLD stream.
+     * Region writes never query/mutate the ServerLevel's live chunk cache. */
+    public static boolean initializeGenerated(WorldGenLevel region,BlockPos pos,RandomSource growthRandom) {
+        if(region instanceof ServerLevel server&&!server.getServer().isSameThread())throw new IllegalStateException("Live pod generation requires the server thread");
+        if(!region.hasChunkAt(pos)||!region.ensureCanWrite(pos)||!(region.getBlockEntity(pos) instanceof TileManaPod pod))return false;
+        BlockState state=region.getBlockState(pos);if(!(state.getBlock() instanceof BlockManaPod))return false;
+        int age=state.getValue(BlockManaPod.AGE);if(age<7){age++;if(!region.setBlock(pos,state.setValue(BlockManaPod.AGE,age),2))return false;}
+        if(region.getBlockEntity(pos)!=pod)return false;
+        var growth=chooseAspect(region,pos,age,pod.aspect,growthRandom);if(growth.changed())pod.aspect=growth.aspect();
+        if(region instanceof ServerLevel)pod.changed();
+        return true;
+    }
+    private record Growth(Aspect aspect,boolean changed) {}
+    private static Growth chooseAspect(BlockGetter neighbors,BlockPos origin,int age,Aspect aspect,RandomSource random) {
+        if(age<=2)return new Growth(aspect,false);
+        boolean changed=false;
         if(age==3){
             AspectList parents=new AspectList();if(aspect!=null)parents.add(aspect,1);
             for(Direction direction:new Direction[]{Direction.NORTH,Direction.SOUTH,Direction.WEST,Direction.EAST})
-                if(level.getBlockEntity(worldPosition.relative(direction)) instanceof TileManaPod pod&&pod.aspect!=null)parents.add(pod.aspect,1);
+                if(neighbors.getBlockEntity(origin.relative(direction)) instanceof TileManaPod pod&&pod.aspect!=null)parents.add(pod.aspect,1);
             if(parents.size()>1){
                 var choices=new ArrayList<Aspect>();Aspect[] types=parents.getAspects();
                 for(int i=0;i<types.length;i++){
                     choices.add(types[i]);
                     for(int j=0;j<types.length;j++)if(i!=j){Aspect combined=Aspect.getCombinationResult(types[i],types[j]);if(combined!=null){choices.add(combined);choices.add(combined);}}
                 }
-                if(!choices.isEmpty()){aspect=choices.get(level.random.nextInt(choices.size()));changed();}
+                if(!choices.isEmpty()){aspect=choices.get(random.nextInt(choices.size()));changed=true;}
             }
-            if(parents.size()>0&&aspect==null){aspect=parents.getAspectsSortedAmount()[0];changed();}
+            if(parents.size()>0&&aspect==null){aspect=parents.getAspectsSortedAmount()[0];changed=true;}
         }
         if(aspect==null){
-            if(level.random.nextInt(8)==0)aspect=Aspect.PLANT;
-            else{var primals=Aspect.getPrimalAspects();aspect=primals.get(level.random.nextInt(primals.size()));}
-            changed();
+            if(random.nextInt(8)==0)aspect=Aspect.PLANT;
+            else{var primals=Aspect.getPrimalAspects();aspect=primals.get(random.nextInt(primals.size()));}
+            changed=true;
         }
+        return new Growth(aspect,changed);
     }
     private void changed(){setChanged();if(level!=null&&!level.isClientSide)level.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(),3);}
     @Override protected void saveAdditional(CompoundTag tag,HolderLookup.Provider registries){super.saveAdditional(tag,registries);if(aspect!=null)tag.putString("aspect",aspect.getTag());}

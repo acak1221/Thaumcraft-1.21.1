@@ -1,7 +1,6 @@
 package thaumcraft.common.lib.world;
 
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -9,7 +8,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockMagicalLeaves;
 import thaumcraft.common.config.ThaumcraftNaturals;
 
@@ -22,8 +20,7 @@ import thaumcraft.common.config.ThaumcraftNaturals;
  */
 public final class WorldGenGreatwoodTrees {
     private static final int[] OTHER_COORDS = {2, 0, 0, 1, 2, 1};
-    private static final AtomicLong SKIPPED_SPIDER_DUNGEONS = new AtomicLong();
-    private final Random random = new Random(0);
+    private final RandomSource random = new LegacyRandomSource(0);
     private MagicalTreePlacement tree;
     private final int[] base = new int[3];
     private int heightLimit;
@@ -67,22 +64,12 @@ public final class WorldGenGreatwoodTrees {
         generateLeafNodeBases();
         generateTrunk();
         if (!tree.finish()) return false;
-        if (spiders) {
-            // The oracle only names Forge's mutable dungeonChest hook; it does
-            // not contain that complete 1.7 table (and several TC4 loot items
-            // are still unported). Do NOT substitute 1.21 simple_dungeon loot,
-            // an empty chest, or a spawner with counterfeit treasure. Preserve
-            // the selected branch and caller's 50*3 cobweb coordinate draws.
-            if (SKIPPED_SPIDER_DUNGEONS.getAndIncrement() == 0) Thaumcraft.LOG.warn(
-                    "Greatwood spider-dungeon decoration is pending original dungeonChest loot provenance; rolled branch omitted without replacement (tree retained)");
-            for (int i = 0; i < 50; i++) {
-                callerRandom.nextInt(14); callerRandom.nextInt(10); callerRandom.nextInt(14);
-            }
-        }
+        if (spiders) GreatwoodDungeon.place(level,callerRandom,random,origin);
         return true;
     }
 
-    public static long skippedSpiderDungeons() { return SKIPPED_SPIDER_DUNGEONS.get(); }
+    /** Retained compatibility metric: the original dungeon branch is now implemented. */
+    public static long skippedSpiderDungeons() { return 0; }
 
     private void generateLeafNodeList() {
         height = (int)(heightLimit * .618);

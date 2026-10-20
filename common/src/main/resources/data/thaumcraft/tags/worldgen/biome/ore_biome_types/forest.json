@@ -1,4 +1,12 @@
 {
   "replace": false,
-  "values": ["#minecraft:is_forest", "#minecraft:is_taiga", {"id": "#c:is_forest", "required": false}, {"id": "thaumcraft:magical_forest", "required": false}]
+  "values": [
+    "#minecraft:is_forest",
+    "#minecraft:is_taiga",
+    {
+      "id": "#c:is_forest",
+      "required": false
+    },
+    "thaumcraft:magical_forest"
+  ]
 }

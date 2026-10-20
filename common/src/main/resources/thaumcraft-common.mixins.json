@@ -51,7 +51,12 @@
     "PlayerRunicSaveMixin",
     "PlayerAccessoriesMixin",
     "ItemEntityPechDropMixin",
-    "PlayerTravelGearMixin"
+    "PlayerTravelGearMixin",
+    "Tc4BuiltinBiomeParameterListsMixin",
+    "Tc4BiomeParameterListMixin",
+    "Tc4ClimateSamplerMixin",
+    "Tc4RandomStateMixin",
+    "Tc4MultiNoiseBiomeSourceMixin"
   ],
   "client": [
     "client.TableOutlineMixin",
@@ -61,7 +66,9 @@
     "client.WarpFogMixin",
     "client.WarpPostEffectsMixin",
     "client.WardedHitParticleMixin",
-    "client.ResearchPopupScreenMixin"
+    "client.ResearchPopupScreenMixin",
+    "client.Tc4BiomeColorsMixin",
+    "client.PrimalWandItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

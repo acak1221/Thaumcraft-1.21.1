@@ -17,8 +17,8 @@ import thaumcraft.common.items.wands.WandData;
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
-            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCrystal|blockCustomOre|blockChestHungry|blockTaint|blockEssentiaReservoir|blockLifter))"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusPrimal|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
+            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCrystal|blockCustomOre|blockChestHungry|blockTaint|blockTaintFibres|blockEssentiaReservoir|blockLifter))"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
 
     // Original ItemResource:81-100; native ThaumcraftContent.MATERIALS flattening.
@@ -139,6 +139,7 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemGirdleRunic" -> variant(List.of("runic_girdle", "runic_girdle_kinetic"), metadata);
             case "ConfigItems.itemFocusHellbat" -> metadata == 0 ? "focus_hellbat" : null;
             case "ConfigItems.itemFocusPech" -> metadata == 0 ? "focus_pech" : null;
+            case "ConfigItems.itemFocusPrimal" -> metadata == 0 ? "focus_primal" : null;
             case "ConfigItems.itemFocusFire" -> metadata == 0 ? "focus_fire" : null;
             case "ConfigItems.itemFocusTrade" -> metadata == 0 ? "focus_trade" : null;
             case "ConfigItems.itemFocusWarding" -> metadata == 0 ? "focus_warding" : null;
@@ -216,7 +217,13 @@ final class ResearchIconDisplay {
             };
             case "ConfigItems.itemGolemBell" -> metadata == 0 ? "golem_bell" : null;
             case "ConfigItems.itemTrunkSpawner" -> metadata == 0 ? "trunk_spawner" : null;
-            case "ConfigBlocks.blockTaint" -> metadata == 2 ? "flesh_block" : null;
+            case "ConfigBlocks.blockTaint" -> switch (metadata) {
+                case 0 -> "taint_crust";
+                case 1 -> "taint_soil";
+                case 2 -> "flesh_block";
+                default -> null;
+            };
+            case "ConfigBlocks.blockTaintFibres" -> variant(List.of("taint_fibres", "taint_grass", "taint_plant", "taint_spore_stalk", "taint_spore_stalk_mature"), metadata);
             // ConfigResearch:169-171 uses metadata 1 for RESTABLE; original
             // BlockTableRenderer:42-54 renders both 1 and 2 as a research table.
             case "ConfigBlocks.blockTable" -> switch (metadata) {
@@ -305,6 +312,7 @@ final class ResearchIconDisplay {
                 case 1 -> "silverwood_sapling";
                 case 2 -> "shimmerleaf";
                 case 3 -> "cinderpearl";
+                case 5 -> "vishroom";
                 default -> null;
             };
             case "ConfigBlocks.blockCrystal" -> variant(List.of("crystal_air", "crystal_fire", "crystal_water", "crystal_earth", "crystal_order", "crystal_entropy", "crystal_mixed"), metadata);

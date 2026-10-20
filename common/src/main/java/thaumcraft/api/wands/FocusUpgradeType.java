@@ -25,13 +25,14 @@ public final class FocusUpgradeType {
     public static final FocusUpgradeType batbombs = new FocusUpgradeType(13, "batbombs", Aspect.ENERGY, Aspect.TRAP);
     public static final FocusUpgradeType devilbats = new FocusUpgradeType(14, "devilbats", Aspect.ARMOR);
     public static final FocusUpgradeType nightshade = new FocusUpgradeType(15, "nightshade", Aspect.LIFE, Aspect.POISON, Aspect.MAGIC);
+    public static final FocusUpgradeType seeker = new FocusUpgradeType(16, "seeker", Aspect.SENSES, Aspect.MIND);
     public static final FocusUpgradeType chainlightning = new FocusUpgradeType(17, "chainlightning", Aspect.WEATHER);
     public static final FocusUpgradeType earthshock = new FocusUpgradeType(18, "earthshock", Aspect.WEATHER);
     public static final FocusUpgradeType vampirebats = new FocusUpgradeType(19, "vampirebats", Aspect.HUNGER, Aspect.LIFE);
     public static final FocusUpgradeType dowsing = new FocusUpgradeType(20, "dowsing", Aspect.MINE);
     private static final Map<Short, FocusUpgradeType> TYPES = catalogue(potency, frugal, treasure, enlarge,
             alchemistsfire, alchemistsfrost, architect, extend, silktouch, fireball, firebeam,
-            scattershot, iceboulder, batbombs, devilbats, nightshade, chainlightning, earthshock, vampirebats, dowsing);
+            scattershot, iceboulder, batbombs, devilbats, nightshade, seeker, chainlightning, earthshock, vampirebats, dowsing);
 
     public final short id;
     public final String name;

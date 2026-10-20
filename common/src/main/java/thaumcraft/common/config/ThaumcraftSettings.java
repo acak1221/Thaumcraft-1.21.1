@@ -43,12 +43,23 @@ public final class ThaumcraftSettings {
                 Files.writeString(file, "# Thaumcraft server research settings; restart required.\n"
                         + "# research_difficulty: -1 purchases all, 0 purchases Secondary, 1 uses notes for all.\n"
                         + "allow_cheat_sheet=false\nallow_warded_stone=true\nallow_mirrors=true\nhard_mode_nodes=true\n"
-                        + "wuss_mode=false\nresearch_difficulty=0\naspect_total_cap=100\n", StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
+                        + "wuss_mode=false\nresearch_difficulty=0\naspect_total_cap=100\n"
+                        + "biome_taint_spread=200\nspawn_taint_spores=true\nglowing_taint=true\n"
+                        + "magical_forest_biome_weight=5\ntaint_biome_weight=2\nblue_magical_forest=false\n"
+                        + "spawn_angry_zombies=true\nspawn_pechs=true\nspawn_fire_bats=true\nspawn_wisps=true\n"
+                        + "spawn_eldercreatures=true\nspawn_taintacles=true\n"
+                        + "generate_trees=true\ngenerate_taint=true\ngenerate_aura_nodes=true\n"
+                        + "generate_structures=true\ngenerate_cinnibar_ore=true\ngenerate_amber_ore=true\ngenerate_infused_stone=true\n",
+                        StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }
             configureServer(ResearchSettings.read(properties));
+            ThaumcraftTaintSettings.load(properties);
+            ThaumcraftBiomeSettings.configure(properties);
         } catch (IOException | IllegalArgumentException failure) {
-            Thaumcraft.LOG.error("Cannot read Thaumcraft research configuration at {}; using original defaults", file, failure);
+            Thaumcraft.LOG.error("Cannot read Thaumcraft configuration at {}; using original defaults", file, failure);
             configureServer(ResearchSettings.DEFAULTS);
+            ThaumcraftTaintSettings.configure(ThaumcraftTaintSettings.DEFAULTS);
+            ThaumcraftBiomeSettings.defaults();
         }
     }
 }

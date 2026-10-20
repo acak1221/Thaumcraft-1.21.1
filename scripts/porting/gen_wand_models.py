@@ -19,7 +19,7 @@ MODELS = ROOT / "common/src/main/resources/assets/thaumcraft/models/item"
 ROD_TAGS = ["wood", "greatwood", "silverwood", "obsidian", "blaze", "ice", "quartz", "bone", "reed",
             "greatwood_staff", "obsidian_staff", "blaze_staff", "ice_staff", "quartz_staff", "bone_staff", "reed_staff", "silverwood_staff", "primal_staff"]
 CAP_TAGS = ["iron", "gold", "thaumium", "void"]
-FOCI = [("", 0.0), ("fire", 0.25), ("excavation", 0.5), ("frost", 0.75), ("warding", 0.8125), ("trade", 0.875), ("portable_hole", 0.9375), ("hellbat", 0.953125), ("pech", 0.96875), ("shock", 1.0)]
+FOCI = [("", 0.0), ("fire", 0.25), ("excavation", 0.5), ("frost", 0.75), ("warding", 0.8125), ("trade", 0.875), ("portable_hole", 0.9375), ("hellbat", 0.953125), ("pech", 0.96875), ("primal", 0.984375), ("shock", 1.0)]
 
 
 # Powers of two, like WandModels.ROD_SCALE / CAP_SCALE: the values stay exact binary fractions however many parts are added.
@@ -43,7 +43,16 @@ def model_name(rod, cap, suffix):
     return f"wand_{rod}_{cap}" + (f"_{suffix}" if suffix else "")
 
 
+def write_primal_shapes():
+    # Both original depth+outer cubes have a dedicated direct-texture renderer.
+    # The retained6px depth strip must stay out of the global mipmap4 block atlas.
+    for kind in ["wand", "staff"]:
+        shape = {"parent": f"thaumcraft:item/{kind}_shape"}
+        (MODELS / f"{kind}_primal_shape.json").write_text(json.dumps(shape, indent=2) + "\n", encoding="utf-8", newline="")
+
+
 def main():
+    write_primal_shapes()
     overrides = []
     for r, rod in enumerate(ROD_TAGS):
         for c, cap in enumerate(CAP_TAGS):
@@ -54,7 +63,7 @@ def main():
                     textures = {"rod": f"thaumcraft:models/wand_rod_{base_tag(rod)}", "cap": f"thaumcraft:models/wand_cap_{cap}"}
                     if suffix:
                         textures["focus"] = "thaumcraft:models/wand"
-                    shape = ("staff" if is_staff(rod) else "wand") + ("_focus_shape" if suffix else "_shape")
+                    shape = ("staff" if is_staff(rod) else "wand") + ("_primal_shape" if suffix == "primal" else "_focus_shape" if suffix else "_shape")
                     model = {"parent": "thaumcraft:item/" + shape, "textures": textures}
                     path.write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8", newline="")
                 overrides.append({"predicate": {"thaumcraft:wand_rod": value(r, ROD_SCALE), "thaumcraft:wand_cap": value(c, CAP_SCALE),

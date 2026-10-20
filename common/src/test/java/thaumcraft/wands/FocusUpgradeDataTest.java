@@ -19,11 +19,11 @@ class FocusUpgradeDataTest {
                 FocusUpgradeType.architect, FocusUpgradeType.extend, FocusUpgradeType.silktouch, FocusUpgradeType.dowsing,
                 FocusUpgradeType.alchemistsfire, FocusUpgradeType.alchemistsfrost, FocusUpgradeType.fireball, FocusUpgradeType.firebeam,
                 FocusUpgradeType.scattershot, FocusUpgradeType.iceboulder, FocusUpgradeType.chainlightning, FocusUpgradeType.earthshock,
-                FocusUpgradeType.batbombs, FocusUpgradeType.devilbats, FocusUpgradeType.vampirebats, FocusUpgradeType.nightshade);
+                FocusUpgradeType.batbombs, FocusUpgradeType.devilbats, FocusUpgradeType.vampirebats, FocusUpgradeType.nightshade, FocusUpgradeType.seeker);
         var aspects = List.of(Aspect.WEAPON, Aspect.HUNGER, Aspect.GREED, Aspect.TRAVEL, Aspect.CRAFT, Aspect.EXCHANGE, Aspect.GREED, Aspect.MINE,
                 Aspect.ENERGY, Aspect.COLD, Aspect.DARKNESS, Aspect.ENERGY, Aspect.COLD, Aspect.COLD, Aspect.WEATHER, Aspect.WEATHER,
-                Aspect.ENERGY, Aspect.ARMOR, Aspect.HUNGER, Aspect.LIFE);
-        int[] ids = {0, 1, 2, 3, 6, 7, 8, 20, 4, 5, 9, 10, 11, 12, 17, 18, 13, 14, 19, 15};
+                Aspect.ENERGY, Aspect.ARMOR, Aspect.HUNGER, Aspect.LIFE, Aspect.SENSES);
+        int[] ids = {0, 1, 2, 3, 6, 7, 8, 20, 4, 5, 9, 10, 11, 12, 17, 18, 13, 14, 19, 15, 16};
         for (int index = 0; index < ids.length; index++) {
             int id = ids[index];
             var type = types.get(index);
@@ -42,7 +42,8 @@ class FocusUpgradeDataTest {
         assertEquals(1, FocusUpgradeType.vampirebats.getAspects().getAmount(Aspect.LIFE));
         assertEquals(1, FocusUpgradeType.nightshade.getAspects().getAmount(Aspect.POISON));
         assertEquals(1, FocusUpgradeType.nightshade.getAspects().getAmount(Aspect.MAGIC));
-        for (int id : new int[]{Integer.MIN_VALUE, -1, 16, 21, 65536, Integer.MAX_VALUE}) assertNull(FocusUpgradeType.get(id));
+        assertEquals(1, FocusUpgradeType.seeker.getAspects().getAmount(Aspect.MIND));
+        for (int id : new int[]{Integer.MIN_VALUE, -1, 21, 65536, Integer.MAX_VALUE}) assertNull(FocusUpgradeType.get(id));
     }
 
     @Test void orderedHolesAndOccurrenceLevelsNeverAlias() {
@@ -61,7 +62,7 @@ class FocusUpgradeDataTest {
     }
 
     @Test void fixedSlotsRoundTripJsonNbtAndExactlyTenWireBytes() {
-        for (var data : List.of(FocusUpgradeData.EMPTY, new FocusUpgradeData(List.of((short)2, (short)3, (short)0, (short)3, (short)1)),
+        for (var data : List.of(FocusUpgradeData.EMPTY, new FocusUpgradeData(List.of((short)0, (short)16, (short)0, (short)-1, (short)16)), new FocusUpgradeData(List.of((short)2, (short)3, (short)0, (short)3, (short)1)),
                 new FocusUpgradeData(List.of((short)1, (short)7, (short)6, (short)3, (short)8)),
                 new FocusUpgradeData(List.of((short)2, (short)-1, (short)20, (short)-1, (short)8)),
                 new FocusUpgradeData(List.of((short)0, (short)0, (short)13, (short)1, (short)19)))) {
@@ -79,7 +80,7 @@ class FocusUpgradeDataTest {
     }
 
     @Test void malformedListsAndUnimplementedIdsReturnDecodeErrors() {
-        for (String json : List.of("[]", "[-1]", "[-1,-1,-1,-1,-1,-1]", "[0,1,2,3,16]", "[0,1,2,3,21]",
+        for (String json : List.of("[]", "[-1]", "[-1,-1,-1,-1,-1,-1]", "[0,1,2,3,21]",
                 "[0,1,2,3,-2]", "[0,1,2,3,65536]", "[0,1,2,3,null]", "{}")) {
             var result = assertDoesNotThrow(() -> FocusUpgradeData.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)));
             assertTrue(result.error().isPresent(), json); assertTrue(result.result().isEmpty(), json);

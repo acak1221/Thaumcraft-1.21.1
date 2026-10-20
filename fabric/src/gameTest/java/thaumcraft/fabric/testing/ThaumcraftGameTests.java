@@ -908,6 +908,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.ElementalSwordRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void voidThaumaturgeRobesMendWardAndDye(GameTestHelper test) {
+        thaumcraft.common.testing.VoidRobeRuntimeChecks.run(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void crystalBlocksDropSixOwnShards(GameTestHelper test) {
         thaumcraft.common.testing.CrystalDropRuntimeChecks.run(test);

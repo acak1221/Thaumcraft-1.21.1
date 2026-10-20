@@ -31,7 +31,8 @@
     "SpecialMiningBlockMixin",
     "ServerGamePacketListenerFloatAccess",
     "LivingEntityAttackStrengthAccess",
-    "PlayerAttackSweepMixin"
+    "PlayerAttackSweepMixin",
+    "LivingEntityMagicWardMixin"
   ],
   "client": ["client.TableOutlineMixin", "client.WandFocusKeyMixin", "client.MinecraftItemColorsAccess", "client.RobeArmorLayerMixin"],
   "injectors": {"defaultRequire": 1}

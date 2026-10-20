@@ -4,6 +4,15 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально20.10 (двадцать третья группа: Пустотные одеяния тауматурга, Claude): реализовано, собрано, game-tested 171/171
+
+Контракт и реализация: [void-robes](analysis/2026-10-20-void-robes.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `void_robe_helmet` / `void_robe_chestplate` / `void_robe_leggings` (материал Void: защита 3/7/6, прочность 110/160/150, зачаровываемость 10, epic, ремонт слитком пустоты), самолечение (общая `VoidMetal.armorTick`: тик инвентаря + тик брони для надетой вещи), скидка вис-стоимости 5 % и варп 2 за вещь, очки (узлы и подсказки) у капюшона, **магическая защита** `защита / 35` за надетую вещь (`MagicWard` + миксин `LivingEntityMagicWardMixin` вокруг `getDamageAfterArmorAbsorb`, тег `thaumcraft:is_magic`), краска и смывание в котле общие с обычными мантиями (маркер `DyedRobe`), три инфузии `ARMORVOIDFORTRESS` (нестабильность 6, центр — Void-броня без износа, очки и мантии без износа).
+**Built / game-tested:** `:common:test` **504 JUnit** (+7), `:fabric:remapJar`, `:fabric:runGameTest` **171/171** (+`voidThaumaturgeRobesMendWardAndDye`: настоящий подключённый игрок, настоящий урон и тики), JAR SHA-256 `a098d8c9…1468`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `void-robe` (39): JUnit 20/20 и шесть GameTest-мутантов пойманы локально, остальные 13 GameTest у GitHub. Повторный прогон `elemental-shovel` (16) на `8046f2a` зелёный — оба выживших выжили, как задокументировано; `build.yml` на `8046f2a` зелёный.
+**Seen:** нет. **Не проверено:** надетый вид, цвета на клиенте. **Не перенесено:** модель `ModelRobe` (58 деталей, 128 × 64; временно надеты слои Void-брони) — отдельная клиентская единица.
+**Следующее:** Fortress-броня (ARMORFORTRESS, маски, доли /20 для огня и взрыва: `MagicWard` обобщить), Бур с Киркой Огня, Essentia Reservoir (нужен новый профиль `EssentiaTransfers`), M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium; варп (M11).
+
 ### Актуально20.10 (двадцать вторая группа: Меч Бури, Claude): реализовано, собрано, game-tested 170/170
 
 Контракт и реализация: [elemental-sword](analysis/2026-10-20-elemental-sword.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

@@ -80,6 +80,9 @@ public final class ThaumcraftRecipeDisplay {
             alias("VoidChest", "void_chestplate"),          // 450
             alias("VoidLegs", "void_leggings"),             // 451
             alias("VoidBoots", "void_boots"),               // 452
+            alias("VoidRobeHelm", "infusion/void_robe_helm"),   // ConfigRecipes:363, pristine void helmet / goggles / 4 enchanted fabric / salis mundus
+            alias("VoidRobeChest", "infusion/void_robe_chest"), // 364, pristine void chestplate / robe chestplate / void and thaumium ingot / salis mundus / fabric / leather
+            alias("VoidRobeLegs", "infusion/void_robe_legs"),   // 365, the same with the robe leggings
             alias("VoidShovel", "void_shovel"),             // 453
             alias("VoidPick", "void_pickaxe"),              // 454
             alias("VoidAxe", "void_axe"),                   // 455

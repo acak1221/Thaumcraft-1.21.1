@@ -26,9 +26,7 @@ public class ItemVoidArmor extends ArmorItem implements IRepairable, IRunicArmor
 
     @Override public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, level, entity, slot, selected);
-        VoidMetal.repair(stack, entity);
-        // Original onArmorTick: the worn piece, on the same tick, once more.
-        if (entity instanceof Player player && player.getItemBySlot(getEquipmentSlot()) == stack) VoidMetal.repair(stack, entity);
+        VoidMetal.armorTick(stack, entity, getEquipmentSlot());
     }
 
     @Override public int getWarp(ItemStack stack, Player player) { return 1; }

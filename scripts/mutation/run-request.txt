@@ -1,4 +1,3 @@
-elemental-shovel
-bedrock-attempted thaumium-too
+void-robe
 
-# request 16: re-run the two documented survivors of the Shovel of the Earthmover (now expected to survive); elemental-sword any-sword-sweeps is documented the same way
+# request 17: the Void Thaumaturge robes (run 16, the shovel survivors, and the build of 8046f2a were green)

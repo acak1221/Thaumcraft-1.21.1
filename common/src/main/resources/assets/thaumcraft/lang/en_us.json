@@ -1705,6 +1705,8 @@
   "tc.port.book_recipe.required_air": "Required empty space",
   "death.attack.thaumcraft.taint": "%1$s was consumed by taint",
   "death.attack.thaumcraft.taint.player": "%1$s was consumed by taint while fighting %2$s",
+  "death.attack.thaumcraft.dissolve": "%1$s was dissolved",
+  "death.attack.thaumcraft.dissolve.player": "%1$s was dissolved while fighting %2$s",
   "block.thaumcraft.essentia_tube": "Essentia Tube",
   "block.thaumcraft.essentia_valve": "Essentia Valve",
   "block.thaumcraft.essentia_filter": "Filtered Essentia Tube",

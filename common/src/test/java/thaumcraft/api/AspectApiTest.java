@@ -60,7 +60,9 @@ class AspectApiTest {
         assertEquals(0, AspectRegistryEvent.listenerCount());
     }
 
-    @Test void theAspectSourceHelperRefusesATileThatIsNotAnInfusionMatrix() {
+    @Test void theAspectSourceHelperRefusesATileWithoutAWorld() {
+        // The original helper searched any IAspectSource around the tile (oracle AspectSourceHelper:21-39);
+        // a tile that is not in a world has no source at all.
         assertFalse(thaumcraft.api.aspects.AspectSourceHelper.drainEssentia(null, Aspect.AIR, net.minecraft.core.Direction.UP, 12));
         assertFalse(thaumcraft.api.aspects.AspectSourceHelper.findEssentia(null, Aspect.AIR, net.minecraft.core.Direction.UP, 12));
     }

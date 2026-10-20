@@ -192,6 +192,10 @@ public class EntityTaintCreeper extends Monster implements ITaintedMob {
      * <p>The original created an explosion of the strength 1.5 that never destroys blocks, poisoned every living
      * entity within six blocks that was not a tainted mob and not immune to fire, and turned up to ten random
      * spots of the neighbourhood into the taint biome with taint fibres on top.</p>
+     *
+     * <p>Oracle {@code EntityTaintCreeper:166} created the explosion with the creeper as the exploder, so the
+     * explosion itself keeps the vanilla attributed explosion source. The poison of {@code :172} is the original
+     * taint poison, and its damage is the published {@code DamageSourceThaumcraft.taint} source.</p>
      */
     private void taintExplosion() {
         if (!(level() instanceof ServerLevel server)) return;

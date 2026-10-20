@@ -1705,6 +1705,8 @@
   "tc.port.book_recipe.required_air": "Должно быть пусто",
   "death.attack.thaumcraft.taint": "%1$s поглощён порчей",
   "death.attack.thaumcraft.taint.player": "%1$s поглощён порчей в бою с %2$s",
+  "death.attack.thaumcraft.dissolve": "%1$s растворён",
+  "death.attack.thaumcraft.dissolve.player": "%1$s растворён в бою с %2$s",
   "block.thaumcraft.essentia_tube": "Труба для эссенции",
   "block.thaumcraft.essentia_valve": "Клапан для эссенции",
   "block.thaumcraft.essentia_filter": "Фильтрующая труба для эссенции",

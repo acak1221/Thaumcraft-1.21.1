@@ -30,6 +30,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import thaumcraft.api.damagesource.DamageSourceThaumcraft;
 import thaumcraft.common.config.ThaumcraftLegacyTiles;
 import thaumcraft.common.lib.tiles.LegacyTileRules;
 
@@ -84,10 +85,13 @@ public final class BlockFluidDeath extends LiquidBlock {
 
     /**
      * BlockFluidDeath:55-59 - the death fluid dissolves every living thing in it.
+     *
+     * <p>Oracle {@code BlockFluidDeath:57} hurts with {@code DamageSourceThaumcraft.dissolve}, the
+     * published source of the API, and not with the vanilla magic damage.</p>
      */
     @Override protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (level.isClientSide || !(entity instanceof LivingEntity living)) return;
-        living.hurt(level.damageSources().magic(), damage(state.getValue(LEVEL)));
+        living.hurt(DamageSourceThaumcraft.dissolve(level), damage(state.getValue(LEVEL)));
     }
 
     /** The original death fluid does not push entities and does not drown them. */

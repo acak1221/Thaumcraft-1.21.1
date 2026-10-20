@@ -100,25 +100,34 @@ public final class ReservoirRuntimeChecks {
             for (int z = (origin.getZ() - 16) >> 4; z <= ((origin.getZ() + 100) >> 4); z++) level.getChunk(x, z);
         }
         List<Mob> spawned = new ArrayList<>();
-        // Entities (pigs, drops, the player) only exist where the chunk is entity-ticking; force the columns the fixtures use.
+        // Entities (pigs, drops, the player) only exist where the chunk is entity-ticking; force the columns the fixtures use (and only
+        // those nobody else forced, so that the unforcing below never takes another test's).
         Set<ChunkPos> forced = new LinkedHashSet<>();
-        for (BlockPos spot : List.of(origin.offset(30, 0, 0), origin.offset(72, 0, 0), origin.offset(0, 0, 90), origin.offset(10, 0, 90))) {
-            for (int x = (spot.getX() - 8) >> 4; x <= ((spot.getX() + 8) >> 4); x++) for (int z = (spot.getZ() - 8) >> 4; z <= ((spot.getZ() + 8) >> 4); z++) {
+        for (BlockPos spot : List.of(origin.offset(30, 0, 0), origin.offset(44, 0, 0), origin.offset(58, 0, 0), origin.offset(72, 0, 0), origin.offset(0, 0, 90), origin.offset(10, 0, 90))) {
+            for (int x = (spot.getX() - 3) >> 4; x <= ((spot.getX() + 3) >> 4); x++) for (int z = (spot.getZ() - 3) >> 4; z <= ((spot.getZ() + 3) >> 4); z++) {
                 ChunkPos chunk = new ChunkPos(x, z);
-                if (forced.add(chunk)) level.setChunkForced(x, z, true);
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }
             }
         }
         try {
             container(test, level, origin);
             persistence(test, level, origin.offset(0, 0, 12));
             infusion(test, level, origin.offset(0, 0, 24));
-            burst(test, level, origin.offset(30, 0, 0), spawned);
-            pulls(test, level, origin, spawned, forced);
         } catch (RuntimeException | Error failure) {
-            spawned.forEach(Mob::discard);
             unforce(level, forced);
             throw failure;
         }
+        // A forced chunk becomes entity-ticking a tick later: the pigs and the player come after that.
+        test.runAfterDelay(5, () -> {
+            try {
+                burst(test, level, origin.offset(30, 0, 0), spawned);
+                pulls(test, level, origin, spawned, forced);
+            } catch (RuntimeException | Error failure) {
+                spawned.forEach(Mob::discard);
+                unforce(level, forced);
+                throw failure;
+            }
+        });
     }
 
     private static void unforce(ServerLevel level, Set<ChunkPos> forced) {
@@ -342,7 +351,8 @@ public final class ReservoirRuntimeChecks {
             pig.setPos(Vec3.atCenterOf(pos.east()));
             level.addFreshEntity(pig);
             spawned.add(pig);
-            test.assertTrue(level.destroyBlock(pos, false) && level.getBlockState(pos).isAir(), "the reservoir of " + spec.units() + " units is broken");
+            boolean broken = level.destroyBlock(pos, false);
+            test.assertTrue(broken && level.getBlockState(pos).isAir(), "the reservoir of " + spec.units() + " units is broken: " + broken + " " + level.getBlockState(pos) + " " + level.hasChunkAt(pos) + " " + level.isPositionEntityTicking(pos));
             List<BlockPos> goo = new ArrayList<>(), gas = new ArrayList<>();
             int flux = fluxBlocks(level, pos, goo, gas);
             if (spec.sprays() == 0) {

@@ -87,6 +87,7 @@ public final class Thaumcraft {
         ThaumcraftFoci.register();
         ThaumcraftFocalManipulation.register();
         thaumcraft.common.config.ThaumcraftHoles.register();
+        thaumcraft.common.config.ThaumcraftLevitator.register();
         thaumcraft.common.config.ThaumcraftArcaneBore.register();
         thaumcraft.common.config.ThaumcraftHungryChest.register();
         thaumcraft.common.config.ThaumcraftGolems.register();

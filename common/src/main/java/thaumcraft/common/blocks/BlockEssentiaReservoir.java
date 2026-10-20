@@ -64,7 +64,7 @@ public final class BlockEssentiaReservoir extends BaseEntityBlock {
             int y = pos.getY() + ReservoirRules.burstOffset(level.random::nextInt);
             int z = pos.getZ() + ReservoirRules.burstOffset(level.random::nextInt);
             BlockPos target = new BlockPos(x, y, z);
-            if (!FluxFiniteBlock.loaded(level, target) || !level.getBlockState(target).isAir()) continue;
+            if (!FluxFiniteBlock.loaded(level, target) || !ReservoirRules.burstTarget(target.equals(pos), level.getBlockState(target).isAir())) continue;
             FluxFiniteBlock flux = ReservoirRules.gooAt(y, pos.getY()) ? ThaumcraftFlux.FLUX_GOO.get() : ThaumcraftFlux.FLUX_GAS.get();
             level.setBlock(target, flux.withGeometry(flux.defaultBlockState().setValue(FluxFiniteBlock.LEVEL, ReservoirRules.FLUX_LEVEL), level, target), Block.UPDATE_ALL);
             if (ReservoirRules.burstDone(placed++, sprays)) break;

@@ -72,6 +72,13 @@ class ReservoirRulesTest {
         assertEquals(-4, ReservoirRules.burstOffset(bound -> draws[index[0]++]), "0 - 4: the first draw comes first");
     }
 
+    @Test void onlyAirOutsideTheReservoirsOwnCellTakesTheFlux() {
+        assertTrue(ReservoirRules.burstTarget(false, true));
+        assertFalse(ReservoirRules.burstTarget(false, false), "a solid cell is skipped");
+        assertFalse(ReservoirRules.burstTarget(true, true), "its own cell is skipped, as the block was still standing in the original");
+        assertFalse(ReservoirRules.burstTarget(true, false));
+    }
+
     @Test void flowsBelowItsOwnLevelAreGooAndTheRestGas() {
         assertTrue(ReservoirRules.gooAt(63, 64));
         assertFalse(ReservoirRules.gooAt(64, 64), "its own level is gas");

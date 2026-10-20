@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +22,7 @@ import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -94,8 +97,15 @@ public final class PortableHoleRuntimeChecks {
         recipe(test, level);
         // Far above the other tests' rooms: their checks look for stray entities near them.
         BlockPos origin = test.absolutePos(new BlockPos(3, 100, 3));
+        // The tunnels grow only in chunks that tick, and the tickets of the neighbouring tests are not a thing to lean on (they end when
+        // those tests do): the columns are forced for the length of this test, as the golem tests do (and only the ones nobody forced).
+        Set<ChunkPos> forced = new LinkedHashSet<>();
         for (int x = (origin.getX() - 16) >> 4; x <= ((origin.getX() + 60) >> 4); x++) {
-            for (int z = (origin.getZ() - 16) >> 4; z <= ((origin.getZ() + 16) >> 4); z++) level.getChunk(x, z);
+            for (int z = (origin.getZ() - 16) >> 4; z <= ((origin.getZ() + 16) >> 4); z++) {
+                level.getChunk(x, z);
+                ChunkPos chunk = new ChunkPos(x, z);
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }
+            }
         }
         var connection = new Connection(PacketFlow.SERVERBOUND);
         var channel = new EmbeddedChannel(connection);
@@ -106,6 +116,8 @@ public final class PortableHoleRuntimeChecks {
         List<Region> regions = new ArrayList<>();
         Runnable cleanup = () -> {
             for (Region region : regions) for (BlockPos pos : region.positions()) level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+            for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
+            forced.clear();
             try {
                 if (level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player);
             } finally {

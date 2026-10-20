@@ -96,12 +96,13 @@ class ResearchNoteLearningTest {
     }
 
     @Test void unresolvedConditionalDataCannotGrantAndAspectlessVirtualHasNoValidNote() {
-        for (String key : List.of("MIRROR", "MIRRORESSENTIA")) {
+        ResearchConditions.setFeatures(true, false);
+        try { for (String key : List.of("MIRROR", "MIRRORESSENTIA")) {
             var knowledge = new PlayerKnowledge();
             var before = knowledge.save();
             assertEquals(UNAVAILABLE, ResearchNoteLearning.learn(knowledge, note(key, true)).failure());
             assertEquals(before, knowledge.save());
-        }
+        } } finally { ResearchConditions.setFeatures(true, true); }
         assertThrows(IllegalArgumentException.class, () -> new ResearchNoteData("CAP_iron", 0, true, 0,
                 List.of(new ResearchNoteData.Cell(0, 0, 1, "metallum"))));
     }

@@ -3,6 +3,7 @@
 The user explicitly authorized migration to Minecraft 1.21.1 on 2026-10-15. Java 21, Architectury, Fabric and NeoForge replace the legacy Java 8/Forge 1.12 build. Old no-upgrade constraints apply only to the retained legacy source. Original instructions/build snapshots are under docs/legacy-build/.
 
 ## Execution priority — user correction 2026-10-16
+- **User correction 2026-10-20:** continue until the entire port is finished; do not end the task after a content checkpoint. Sub-agents and commits/pushes to the existing repository's `work` branch are explicitly authorized. Keep Fabric first, then finish NeoForge. A passing server suite is not full client, multiplayer or survival acceptance.
 - **Fabric first:** complete the TC4 gameplay port on Fabric before resuming NeoForge work. Do not develop or run NeoForge builds/tests in parallel with the remaining content work.
 - Keep the existing NeoForge module and the shared Architectury/common foundation; do not delete or rewrite that work merely to change priority. NeoForge parity is deferred, not claimed for new Fabric checkpoints.
 - Current content validation/build/client runs target Fabric only. Old NeoForge results remain historical evidence of their exact earlier inputs, never evidence for newer common code.

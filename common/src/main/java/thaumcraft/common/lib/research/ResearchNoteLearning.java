@@ -24,7 +24,7 @@ public final class ResearchNoteLearning {
         if (!note.complete()) return rejected(Failure.UNFINISHED);
         var definition = ResearchCatalog.get(note.key());
         if (definition == null || definition.isVirtual() || definition.isAutoUnlock()
-                || !definition.conditions().isEmpty()) return rejected(Failure.UNAVAILABLE);
+                || !definition.isEnabled()) return rejected(Failure.UNAVAILABLE);
         if (knowledge.isResearchComplete(note.key())) return rejected(Failure.ALREADY_COMPLETE);
         if (!definition.hasPrerequisites(knowledge.getResearchComplete())) return rejected(Failure.MISSING_PREREQUISITES);
         // ItemResearchNotes:87-104 does not charge RP, require its clue or check

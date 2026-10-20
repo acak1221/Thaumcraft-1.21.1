@@ -36,8 +36,17 @@ import thaumcraft.api.aspects.Aspect;
  * All persistent static references to worlds/nodes are weak; root lifecycle hooks
  * still explicitly clear the complete level/server lifetime. */
 public final class VisNetHandler {
-    /** Server-side post-debit beam effect. The packet sender lives in common and is registered at startup,
-     * so this public API class carries no dependency on thaumcraft.common. */
+    private record WorkbenchGrant(thaumcraft.common.tiles.TileMagicWorkbenchCharger charger, Aspect aspect, int units) {}
+    private static final ThreadLocal<WorkbenchGrant> WORKBENCH_GRANT = new ThreadLocal<>();
+
+    /** Closed native receive frame: no public callback can forge or replay a paid workbench-wand credit. */
+    public static void requireWorkbenchGrant(thaumcraft.common.tiles.TileMagicWorkbenchCharger charger, Aspect aspect, int units) {
+        WorkbenchGrant grant = WORKBENCH_GRANT.get();
+        if (grant == null || grant.charger() != charger || grant.aspect() != aspect || grant.units() != units) {
+            throw new IllegalStateException("Workbench wand credit requires the executor's exact committed grant");
+        }
+    }
+    /** Server-side post-debit beam effect. The packet sender lives in common and is registered at startup. */
     @FunctionalInterface public interface EffectSink { void send(ServerLevel level, BlockPos consumer, BlockPos selectedNode, Aspect aspect); }
     private static final Logger LOG = LoggerFactory.getLogger("Thaumcraft");
     private static volatile EffectSink effectSink = (level, consumer, node, aspect) -> {};
@@ -514,6 +523,11 @@ public final class VisNetHandler {
                 Path route = path(net, node); if (route == null || route.root != root || !unchanged(net, route)) continue;
                 if (consumer != null && inRange(level, new WorldCoordinates(level.dimension(), consumer.pos), node.getLocation(), route.steps.getFirst().metadata.range) <= 0) continue;
                 int remaining = (int) ((long) amount - actual);
+                // A charger is also an ordinary graph relay. Positional consumers and explicit API drains outside its
+                // prepared native charge phase retain their original semantics; only the wand transfer owns this receipt.
+                thaumcraft.common.tiles.TileMagicWorkbenchCharger workbench = consumer == null
+                        && node instanceof thaumcraft.common.tiles.TileMagicWorkbenchCharger charger && charger.hasPreparedVisCharge() ? charger : null;
+                if (workbench != null && !workbench.readyForVisGrant(aspect, remaining)) break;
                 int grant;
                 try { grant = root.debit(aspect, remaining); }
                 catch (RuntimeException failure) {
@@ -526,6 +540,11 @@ public final class VisNetHandler {
                 }
                 actual += grant; // COMMIT readback before ANY pulse/network callbacks.
                 if (grant == 0) continue;
+                if (workbench != null) {
+                    WORKBENCH_GRANT.set(new WorkbenchGrant(workbench, aspect, grant));
+                    try { workbench.acceptPreparedVisGrant(aspect, grant); }
+                    finally { WORKBENCH_GRANT.remove(); }
+                }
                 for (int i = route.steps.size() - 1; i >= 0; --i) {
                     Step step = route.steps.get(i); // Original recursive forwarding unwinds parent -> child.
                     try { if (isCurrent(step.node)) step.node.triggerConsumeEffect(aspect); }

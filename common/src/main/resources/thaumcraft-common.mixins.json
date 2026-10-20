@@ -33,8 +33,17 @@
     "LivingEntityAttackStrengthAccess",
     "PlayerAttackSweepMixin",
     "LivingEntityMagicWardMixin",
-    "ArcaneEarNoteMixin"
+    "ArcaneEarNoteMixin",
+    "WardedPlayerGameModeMixin",
+    "ResearchNoteStackCodecMixin",
+    "ResearchNoteContainerCountMixin",
+    "ResearchNoteMenuCountMixin",
+    "ThaumatoriumChestInventoryMixin",
+    "ThaumatoriumHopperInventoryMixin",
+    "ThaumatoriumFurnaceInventoryMixin",
+    "WarpFoodMixin"
   ],
-  "client": ["client.TableOutlineMixin", "client.WandFocusKeyMixin", "client.MinecraftItemColorsAccess", "client.RobeArmorLayerMixin"],
+  "client": ["client.TableOutlineMixin", "client.WandFocusKeyMixin", "client.MinecraftItemColorsAccess", "client.RobeArmorLayerMixin",
+    "client.WarpFogMixin", "client.WarpPostEffectsMixin"],
   "injectors": {"defaultRequire": 1}
 }

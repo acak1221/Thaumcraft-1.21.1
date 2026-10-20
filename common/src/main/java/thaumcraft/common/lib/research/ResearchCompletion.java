@@ -18,7 +18,7 @@ final class ResearchCompletion {
         // direct ordered siblings, their own prerequisites, no recursion/costs.
         for (String key : main.siblings()) {
             var sibling = resolver.apply(key);
-            if (sibling != null && sibling.conditions().isEmpty()
+            if (sibling != null && sibling.isEnabled()
                     && sibling.hasPrerequisites(staged.getResearchComplete())) complete(staged, sibling, unlocked);
         }
         return Collections.unmodifiableSet(unlocked);

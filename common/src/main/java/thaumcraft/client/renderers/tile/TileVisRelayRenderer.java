@@ -22,6 +22,7 @@ import thaumcraft.client.renderers.VisNetRender;
 import thaumcraft.client.renderers.models.ModelVisRelay;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.tiles.TileVisRelay;
+import thaumcraft.common.tiles.TileMagicWorkbenchCharger;
 
 /** Original relay geometry/orientations and native parent beam. Java weak parent
  * is dereferenced ONCE per draw; no attachment/debit mutation in this renderer. */
@@ -33,7 +34,7 @@ public final class TileVisRelayRenderer implements BlockEntityRenderer<TileVisRe
     @Override public void render(TileVisRelay relay,float partialTick,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
         var reference=relay.getParent();TileVisNode parent=reference==null?null:reference.get();boolean linked=liveParent(relay,parent);renderModel(model,relay.getOrientation(),relay.getAttunement(),linked,VisNetRender.cameraTicks()+partialTick,pose,buffers,light,overlay);
         if(!linked){beams.remove(relay);return;}if(!VisNetRender.flush(buffers))return;
-        Vec3 own=new Vec3(.5,.5,.5).subtract(Vec3.atLowerCornerOf(relay.getOrientation().getNormal()).scale(.05));Vec3 start=Vec3.atCenterOf(parent.getBlockPos()).subtract(Vec3.atLowerCornerOf(relay.getBlockPos()));if(parent instanceof TileVisRelay other)start=start.subtract(Vec3.atLowerCornerOf(other.getOrientation().getNormal()).scale(.05));
+        Vec3 own=new Vec3(.5,.5,.5).subtract(Vec3.atLowerCornerOf(relay.getOrientation().getNormal()).scale(.05));Vec3 start=Vec3.atCenterOf(parent.getBlockPos()).subtract(Vec3.atLowerCornerOf(relay.getBlockPos()));if(parent instanceof TileVisRelay other)start=start.subtract(Vec3.atLowerCornerOf(other.getOrientation().getNormal()).scale(.05));else if(parent instanceof TileMagicWorkbenchCharger charger)start=start.subtract(Vec3.atLowerCornerOf(charger.getOrientation().getNormal()).scale(.05));
         float opacity=beams.computeIfAbsent(relay,ignored->new BeamView(VisNetRender.cameraTicks())).observe(relay);var viewer=Minecraft.getInstance().player;if(viewer==null)return;ItemStack head=viewer.getItemBySlot(EquipmentSlot.HEAD);if(!(head.getItem() instanceof IRevealer))opacity*=.1F;
         int colour=Mth.clamp((int)(relay.getPulseRed()*255),0,255)<<16|Mth.clamp((int)(relay.getPulseGreen()*255),0,255)<<8|Mth.clamp((int)(relay.getPulseBlue()*255),0,255);VisNetRender.beam(pose,start,own,VisNetRender.cameraTicks()+partialTick,opacity,colour);
     }

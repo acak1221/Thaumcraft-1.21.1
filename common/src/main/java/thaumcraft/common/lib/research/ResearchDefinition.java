@@ -33,6 +33,7 @@ public record ResearchDefinition(
     public boolean isHidden() { return this.flags.contains("Hidden"); }
     public boolean isLost() { return this.flags.contains("Lost"); }
     public boolean isSecondary() { return this.flags.contains("Secondary"); }
+    public boolean isEnabled() { return ResearchConditions.available(conditions); }
 
     public boolean hasPrerequisites(Set<String> completed) {
         return completed.containsAll(this.parents) && completed.containsAll(this.parentsHidden);

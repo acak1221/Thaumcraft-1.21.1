@@ -48,11 +48,15 @@ class ResearchBrowserDataTest {
     }
 
     @Test
-    void conditionalExpressionsDoNotBecomeEnabledConfiguration() {
-        assertFalse(ResearchBrowserData.isVisible(ResearchCatalog.get("MIRROR"), Set.of("MIRROR", "@MIRROR")));
-        assertTrue(ResearchBrowserData.entries("ARTIFICE", Set.of()).stream()
-                .allMatch(research -> research.conditions().isEmpty() && !research.isVirtual()));
-        assertTrue(ResearchBrowserData.readablePages(ResearchCatalog.get("MIRROR"), Set.of("MIRROR")).isEmpty());
+    void closedConditionalFactsControlVisibilityAndReadablePages() {
+        assertTrue(ResearchBrowserData.isVisible(ResearchCatalog.get("MIRROR"), Set.of("MIRROR", "@MIRROR")));
+        ResearchConditions.setFeatures(true, false);
+        try {
+            assertFalse(ResearchBrowserData.isVisible(ResearchCatalog.get("MIRROR"), Set.of("MIRROR", "@MIRROR")));
+            assertTrue(ResearchBrowserData.entries("ARTIFICE", Set.of()).stream()
+                    .allMatch(research -> research.isEnabled() && !research.isVirtual()));
+            assertTrue(ResearchBrowserData.readablePages(ResearchCatalog.get("MIRROR"), Set.of("MIRROR")).isEmpty());
+        } finally { ResearchConditions.setFeatures(true, true); }
     }
 
     @Test

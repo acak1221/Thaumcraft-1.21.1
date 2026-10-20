@@ -145,6 +145,7 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
         }
         ItemStack output = match.output().copy();
         output.onCraftedBy(viewer.level(), viewer, output.getCount());
+        dev.architectury.event.events.common.PlayerEvent.CRAFT_ITEM.invoker().craft(viewer, output, contents);
         result.setRecipeUsed(match.recipe());
         result.awardUsedRecipes(viewer, match.input().items());
         viewer.getInventory().setChanged();

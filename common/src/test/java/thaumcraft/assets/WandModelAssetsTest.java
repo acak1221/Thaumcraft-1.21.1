@@ -83,7 +83,7 @@ class WandModelAssetsTest {
         assertEquals(.25F, WandModels.capValue("gold"), 0F);
         assertEquals(.5F, WandModels.capValue("thaumium"), 0F);
         assertEquals(.75F, WandModels.capValue("void"), 0F);
-        assertEquals(List.of(0F, .25F, .5F, .75F, 1F), WandModels.FOCI.stream().map(WandModels.Focus::value).toList());
+        assertEquals(List.of(0F, .25F, .5F, .75F, .8125F, .875F, .9375F, 1F), WandModels.FOCI.stream().map(WandModels.Focus::value).toList());
     }
 
     @Test void everyNamedModelExistsWithItsParentAndTextures() throws Exception {
@@ -95,7 +95,8 @@ class WandModelAssetsTest {
             String parent = model.get("parent").getAsString();
             boolean withFocus = parent.equals("thaumcraft:item/wand_focus_shape") || parent.equals("thaumcraft:item/staff_focus_shape");
             assertTrue(withFocus || parent.equals("thaumcraft:item/wand_shape") || parent.equals("thaumcraft:item/staff_shape"), name + " has the parent " + parent);
-            assertEquals(name.endsWith("_fire") || name.endsWith("_excavation") || name.endsWith("_frost") || name.endsWith("_shock"), withFocus, name);
+            assertEquals(name.endsWith("_fire") || name.endsWith("_excavation") || name.endsWith("_frost") || name.endsWith("_shock")
+                    || name.endsWith("_warding") || name.endsWith("_trade") || name.endsWith("_portable_hole"), withFocus, name);
             JsonObject textures = model.getAsJsonObject("textures");
             assertEquals(withFocus ? 3 : 2, textures.size(), name);
             for (String key : textures.keySet()) {

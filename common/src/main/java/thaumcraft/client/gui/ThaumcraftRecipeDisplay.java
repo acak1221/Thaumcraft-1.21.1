@@ -18,6 +18,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.config.ThaumcraftArcane;
@@ -30,6 +31,7 @@ import thaumcraft.common.crafting.NativeArcaneRecipe;
 import thaumcraft.common.crafting.CrucibleRecipe;
 import thaumcraft.common.crafting.ArcaneVis;
 import thaumcraft.common.crafting.InfusionStackRecipe;
+import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.infusion.InfusionStructure;
 import thaumcraft.common.lib.research.ResearchDefinition;
@@ -112,11 +114,13 @@ public final class ThaumcraftRecipeDisplay {
             alias("TubeOneway", "arcane/essentia_oneway"),    // 288, original dyeBlue includes lapis
             alias("TubeBuffer", "arcane/essentia_buffer"),    // 289, distinct shaped CENTRIFUGE gate
             alias("AlchemicalConstruct", "arcane/alchemical_construct"), // 290, FOUR basic tubes
+            alias("MnemonicMatrix", "arcane/mnemonic_matrix"),
             alias("Centrifuge", "arcane/centrifuge"),         // 292, no advanced-construct substitution
             alias("EssentiaCrystalizer", "arcane/essentia_crystallizer"), // 293, dispenser/balanced shards
             alias("EssentiaReservoir", "infusion/essentia_reservoir"), // 372, buffer centre, two void ingots and four jars
             alias("Levitator", "arcane/levitator"), // 194, greatwood planks, earth and air shards, nitor, iron
             alias("ArcaneEar", "arcane/arcane_ear"),
+            alias("ArcaneLamp", "arcane/arcane_lamp"),
             alias("NodeStabilizer", "arcane/node_stabilizer"), // 199, quartz BLOCK / stone BRICKS / Nitor ITEM
             alias("NodeTransducer", "arcane/node_transducer"), // 200, literal iron/redstone BLOCK/comparator
             alias("NodeRelay", "arcane/vis_relay"), // 201, balanced shard, TWO relays
@@ -184,6 +188,30 @@ public final class ThaumcraftRecipeDisplay {
             alias("FocusShock", "arcane/focus_shock"),           // 249
             alias("FocusPortableHole", "infusion/focus_portable_hole"), // ConfigRecipes:320, ender pearl / 3 nether quartz / earth, air and entropy shards
             alias("FocusExcavation", "arcane/focus_excavation"), // 251
+            alias("FocusTrade", "arcane/focus_trade"),
+            alias("FocusWarding", "infusion/focus_warding"),
+            alias("InfEnch0", "infusion_enchantment/protection"), // ConfigRecipes:300
+            alias("InfEnch1", "infusion_enchantment/fire_protection"), // ConfigRecipes:301
+            alias("InfEnch2", "infusion_enchantment/blast_protection"), // ConfigRecipes:302
+            alias("InfEnch3", "infusion_enchantment/projectile_protection"), // ConfigRecipes:303
+            alias("InfEnch4", "infusion_enchantment/feather_falling"), // ConfigRecipes:304
+            alias("InfEnch5", "infusion_enchantment/respiration"), // ConfigRecipes:305
+            alias("InfEnch6", "infusion_enchantment/aqua_affinity"), // ConfigRecipes:306
+            alias("InfEnch7", "infusion_enchantment/thorns"), // ConfigRecipes:307
+            alias("InfEnch8", "infusion_enchantment/sharpness"), // ConfigRecipes:308
+            alias("InfEnch9", "infusion_enchantment/smite"), // ConfigRecipes:309
+            alias("InfEnch10", "infusion_enchantment/bane_of_arthropods"), // ConfigRecipes:310
+            alias("InfEnch11", "infusion_enchantment/knockback"), // ConfigRecipes:311
+            alias("InfEnch12", "infusion_enchantment/fire_aspect"), // ConfigRecipes:312
+            alias("InfEnch13", "infusion_enchantment/looting"), // ConfigRecipes:313
+            alias("InfEnch14", "infusion_enchantment/efficiency"), // ConfigRecipes:314
+            alias("InfEnch15", "infusion_enchantment/silk_touch"), // ConfigRecipes:315
+            alias("InfEnch16", "infusion_enchantment/unbreaking"), // ConfigRecipes:316
+            alias("InfEnch17", "infusion_enchantment/fortune"), // ConfigRecipes:317
+            alias("InfEnch18", "infusion_enchantment/power"), // ConfigRecipes:318
+            alias("InfEnch19", "infusion_enchantment/punch"), // ConfigRecipes:319
+            alias("InfEnch20", "infusion_enchantment/flame"), // ConfigRecipes:320
+            alias("InfEnch21", "infusion_enchantment/infinity"), // ConfigRecipes:321
             alias("InfusionMatrix", "arcane/infusion_matrix"),  // 221
             alias("ArcanePedestal", "arcane/arcane_pedestal"),  // 222
             alias("WandRodSilverwood", "infusion/wand_rod_silverwood"), // 336
@@ -211,6 +239,7 @@ public final class ThaumcraftRecipeDisplay {
     private final boolean shapeless;
     private final List<ThaumcraftRecipeDisplay> alternatives;
     private final boolean infusionAltar;
+    private final boolean thaumatorium;
 
     private ThaumcraftRecipeDisplay(RecipeHolder<?> recipe, List<Ingredient> ingredients, int gridWidth, boolean shapeless) {
         this.recipe = recipe;
@@ -219,6 +248,7 @@ public final class ThaumcraftRecipeDisplay {
         this.shapeless = shapeless;
         alternatives = List.of();
         infusionAltar = false;
+        thaumatorium = false;
     }
 
     private ThaumcraftRecipeDisplay(List<ThaumcraftRecipeDisplay> alternatives) {
@@ -229,15 +259,17 @@ public final class ThaumcraftRecipeDisplay {
         shapeless = first.shapeless;
         this.alternatives = List.copyOf(alternatives);
         infusionAltar = false;
+        thaumatorium = false;
     }
 
-    private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe) {
+    private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe, boolean thaumatorium) {
         recipe = matrixRecipe;
         ingredients = List.of();
         gridWidth = 3;
         shapeless = false;
         alternatives = List.of();
-        infusionAltar = true;
+        infusionAltar = !thaumatorium;
+        this.thaumatorium = thaumatorium;
     }
 
     private static Map.Entry<String, ResourceLocation> alias(String original, String nativeId) {
@@ -247,7 +279,7 @@ public final class ThaumcraftRecipeDisplay {
     public static Map<String, ResourceLocation> aliases() { return ALIASES; }
     public RecipeHolder<?> recipe() { return recipe; }
     public boolean sameRecipes(ThaumcraftRecipeDisplay other) {
-        if (recipe != other.recipe || infusionAltar != other.infusionAltar || alternatives.size() != other.alternatives.size()) return false;
+        if (recipe != other.recipe || infusionAltar != other.infusionAltar || thaumatorium != other.thaumatorium || alternatives.size() != other.alternatives.size()) return false;
         for (int i = 0; i < alternatives.size(); i++) if (!alternatives.get(i).sameRecipes(other.alternatives.get(i))) return false;
         return true;
     }
@@ -277,7 +309,16 @@ public final class ThaumcraftRecipeDisplay {
             return matrix != null && matrix.value() instanceof ArcaneShapedRecipe
                     && !matrix.value().getResultItem(level.registryAccess()).isEmpty()
                     && ThaumcraftInfusion.PEDESTAL.get().asItem() != net.minecraft.world.item.Items.AIR
-                    ? new ThaumcraftRecipeDisplay(matrix) : null;
+                    ? new ThaumcraftRecipeDisplay(matrix, false) : null;
+        }
+        // The original Thaumatorium recipe is a wand-formed column of two constructs over a crucible.
+        // Anchor its blueprint to the real construct recipe, without manufacturing a formed-machine item.
+        if ("Thaumatorium".equals(page.recipeKey())) {
+            var construct = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/alchemical_construct")).orElse(null);
+            return construct != null && construct.value() instanceof ArcaneShapedRecipe
+                    && !construct.value().getResultItem(level.registryAccess()).isEmpty()
+                    && ThaumcraftAlchemy.CRUCIBLE_ITEM.get() != net.minecraft.world.item.Items.AIR
+                    ? new ThaumcraftRecipeDisplay(construct, true) : null;
         }
         ResourceLocation id = ALIASES.get(page.recipeKey());
         if (id == null) return null;
@@ -293,6 +334,15 @@ public final class ThaumcraftRecipeDisplay {
             declared.add(infusion.input());
             declared.addAll(infusion.components());
             for (Ingredient ingredient : declared) {
+                if (ingredient.isEmpty() || java.util.Arrays.stream(ingredient.getItems())
+                        .noneMatch(stack -> !stack.isEmpty() && stack.isItemEnabled(level.enabledFeatures()))) return null;
+            }
+            ItemStack output = infusion.getResultItem(level.registryAccess());
+            return output.isEmpty() || !output.isItemEnabled(level.enabledFeatures()) ? null
+                    : new ThaumcraftRecipeDisplay(holder, infusion.components(), 3, false);
+        }
+        if (nativeRecipe instanceof InfusionEnchantmentRecipe infusion && nativeRecipe.getType() == ThaumcraftInfusion.ENCHANTMENT_RECIPE_TYPE.get()) {
+            for (Ingredient ingredient : infusion.components()) {
                 if (ingredient.isEmpty() || java.util.Arrays.stream(ingredient.getItems())
                         .noneMatch(stack -> !stack.isEmpty() && stack.isItemEnabled(level.enabledFeatures()))) return null;
             }
@@ -341,8 +391,11 @@ public final class ThaumcraftRecipeDisplay {
                          int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
         if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);
+        if (thaumatorium) return ThaumatoriumBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
         if (infusionAltar) return renderInfusionAltar(graphics, font, x, y, width, height, mouseX, mouseY);
         if (recipe.value() instanceof InfusionStackRecipe infusion) return renderInfusion(infusion, graphics, font, level,
+                x, y, width, height, mouseX, mouseY, cycle);
+        if (recipe.value() instanceof InfusionEnchantmentRecipe infusion) return renderEnchantmentInfusion(infusion, graphics, font, level,
                 x, y, width, height, mouseX, mouseY, cycle);
         if (recipe.value() instanceof CrucibleRecipe crucible) return renderCrucible(crucible, graphics, font, level,
                 x, y, width, height, mouseX, mouseY, cycle);
@@ -508,6 +561,68 @@ public final class ThaumcraftRecipeDisplay {
             graphics.pose().translate(sx + 16, sy + 11, 200);
             graphics.pose().scale(.5F, .5F, 1);
             String amount = Integer.toString(infusion.aspects().get(aspect.getTag()));
+            graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
+            graphics.pose().popPose();
+            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,
+                    List.of(Component.literal(aspect.getName()), Component.translatable("tc.aspect." + aspect.getTag())));
+        }
+        graphics.pose().popPose();
+        return hover;
+    }
+
+    /** Original GuiResearchRecipe:1112-1235: cycling enchantment levels, XP, component ring and essentia. */
+    private Hover renderEnchantmentInfusion(InfusionEnchantmentRecipe infusion, GuiGraphics graphics, Font font, Level level,
+                                             int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
+        float scale = Math.min(width / 120F, height / 206F);
+        if (scale <= 0) return null;
+        float originX = x + (width - 120 * scale) / 2, originY = y + (height - 206 * scale) / 2;
+        float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
+        var target = infusion.enchantment(level.registryAccess());
+        int nextLevel = 1 + (int)Math.floorMod(cycle, (long)target.value().getMaxLevel());
+        // A valid unenchanted exemplar supplies only the previous target level.
+        // The original page describes the enchantment, rather than prescribing a central item.
+        ItemStack prior = new ItemStack(infusion.getResultItem(level.registryAccess()).getItem());
+        if (nextLevel > 1) prior.enchant(target, nextLevel - 1);
+        var costs = infusion.aspectCost(prior, level.registryAccess());
+        Hover hover = null;
+        graphics.pose().pushPose();
+        graphics.pose().translate(originX, originY, 0);
+        graphics.pose().scale(scale, scale, 1);
+        drawCenteredFit(graphics, font, Component.translatable("recipe.type.infusionenchantment"), 56, 0, 112, 0xFF505050);
+        drawCenteredFit(graphics, font, Enchantment.getFullname(target, nextLevel), 56, 24, 112, 0xFF705090);
+        drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.xp_levels", infusion.xpLevels(prior, level.registryAccess())),
+                56, 40, 112, 0xFF508850);
+        drawCenteredFit(graphics, font, Component.translatable("tc.inst").append(" ")
+                .append(Component.translatable("tc.inst." + Math.min(5, infusion.instability() / 2))), 56, 194, 112, 0xFF505050);
+        graphics.flush();
+        RenderSystem.enableBlend();
+        graphics.blit(OVERLAY, 0, 58, 120, 88, 400, 154, 120, 88, 512, 512);
+        RenderSystem.disableBlend();
+        int count = infusion.components().size(), slice = count == 0 ? 0 : 360 / count;
+        var selected = infusion.selectedComponents();
+        for (int i = 0; i < count; i++) {
+            double angle = (-90 + i * slice) / 180F * (float)Math.PI;
+            int sx = 56 + (int)(Math.cos(angle) * 40) - 8, sy = 102 + (int)(Math.sin(angle) * 40) - 8;
+            ItemStack component = selected.get(i).displayStack(declaredChoice(infusion.components().get(i), level, cycle));
+            drawItem(graphics, font, component, sx, sy);
+            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(component, List.of());
+        }
+        var tags = infusion.aspects().keySet().stream().sorted().toList();
+        int rows = (tags.size() - 1) / 5, shift = (5 - tags.size() % 5) * 10;
+        for (int i = 0; i < tags.size(); i++) {
+            Aspect aspect = Aspect.getAspect(tags.get(i));
+            int sx = 8 + i % 5 * 20 + (i / 5 >= rows && (rows > 1 || tags.size() < 5) ? shift : 0);
+            int sy = 164 - 10 * rows + i / 5 * 20, color = aspect.getColor();
+            graphics.flush();
+            RenderSystem.enableBlend();
+            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+            graphics.blit(aspect.getImage(), sx, sy, 0, 0, 16, 16, 16, 16);
+            graphics.setColor(1, 1, 1, 1);
+            RenderSystem.disableBlend();
+            graphics.pose().pushPose();
+            graphics.pose().translate(sx + 16, sy + 11, 200);
+            graphics.pose().scale(.5F, .5F, 1);
+            String amount = Integer.toString(costs.getAmount(aspect));
             graphics.drawString(font, amount, -font.width(amount), 0, 0xFFFFFFFF, true);
             graphics.pose().popPose();
             if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(ItemStack.EMPTY,

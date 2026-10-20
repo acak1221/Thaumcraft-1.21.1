@@ -30,6 +30,13 @@
     "thaumcraft:infusion_pillar",
     "thaumcraft:thaumium_block",
     "thaumcraft:golem_fetter",
-    "thaumcraft:tallow_block"
+    "thaumcraft:tallow_block",
+    "thaumcraft:arcane_lamp",
+    "thaumcraft:amber_block",
+    "thaumcraft:amber_bricks",
+    "thaumcraft:vis_charge_relay",
+    "thaumcraft:thaumatorium",
+    "thaumcraft:thaumatorium_top",
+    "thaumcraft:mnemonic_matrix"
   ]
 }

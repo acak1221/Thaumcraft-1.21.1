@@ -30,6 +30,8 @@ public final class ThaumcraftMiscKeyClient {
         while (MISC_TOGGLE.consumeClick()) {
             if (client.player == null || client.level == null || client.screen != null) continue;
             if (client.player.getMainHandItem().getItem() instanceof ItemElementalShovel) ShovelOrientationNetworking.request();
+            else if (thaumcraft.common.items.wands.WandArchitect.enabled(client.player.getMainHandItem()))
+                thaumcraft.common.lib.network.WandArchitectNetworking.request();
         }
     }
 }

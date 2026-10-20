@@ -65,6 +65,7 @@ public final class Thaumcraft {
         if (initialized) return;
         initialized = true;
         ResearchCatalog.loadBundled();
+        thaumcraft.common.lib.research.ResearchConditions.initializeNative();
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();
         ThaumcraftContent.register();
@@ -89,6 +90,15 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftHoles.register();
         thaumcraft.common.config.ThaumcraftLevitator.register();
         thaumcraft.common.config.ThaumcraftArcaneEar.register();
+        thaumcraft.common.config.ThaumcraftLamps.register();
+        thaumcraft.common.config.ThaumcraftVisCharging.register();
+        thaumcraft.common.config.ThaumcraftThaumatorium.register();
+        thaumcraft.common.config.ThaumcraftWards.register();
+        thaumcraft.common.config.ThaumcraftArchitect.register();
+        thaumcraft.common.config.ThaumcraftWarp.register();
+        thaumcraft.common.config.ThaumcraftWarp.enableEvents();
+        thaumcraft.common.lib.world.TradeSwaps.init();
+        thaumcraft.common.lib.network.WandArchitectNetworking.init();
         thaumcraft.common.config.ThaumcraftArcaneBore.register();
         thaumcraft.common.config.ThaumcraftHungryChest.register();
         thaumcraft.common.config.ThaumcraftGolems.register();
@@ -104,6 +114,7 @@ public final class Thaumcraft {
         ResearchNoteRequestNetworking.init();
         ResearchTableEditNetworking.init();
         ResearchTableCombineNetworking.init();
+        thaumcraft.common.lib.network.ResearchTableCopyNetworking.init();
         FocusSelectionNetworking.init();
         thaumcraft.common.lib.network.GolemBellNetworking.init();
         thaumcraft.common.lib.network.ShovelOrientationNetworking.init();
@@ -116,6 +127,10 @@ public final class Thaumcraft {
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.
         PlayerEvent.PLAYER_QUIT.register(ItemFocusExcavation::clearPlayer);
+        PlayerEvent.CRAFT_ITEM.register((player, output, matrix) -> {
+            if (player instanceof net.minecraft.server.level.ServerPlayer server)
+                thaumcraft.common.lib.WarpEvents.onCrafted(server, output);
+        });
         PlayerEvent.CHANGE_DIMENSION.register((player, from, to) -> ItemFocusExcavation.clearPlayer(player));
         PlayerEvent.PLAYER_CLONE.register((oldPlayer, newPlayer, wonGame) -> {
             ItemFocusExcavation.clearPlayer(oldPlayer);
@@ -129,6 +144,7 @@ public final class Thaumcraft {
             DeferredItemDrops.tick(level);
         });
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register(level -> {
+            thaumcraft.common.lib.world.WardingCasts.clear(level);
             thaumcraft.common.lib.bore.BoreNativeContext.clearLevel(level);
             VisNetHandler.clearLevel(level);
             VisNetFxNetworking.clearLevel(level);

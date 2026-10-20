@@ -18,14 +18,18 @@ import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.items.ItemResearchNotes;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.network.ResearchTableCombinePayload;
+import thaumcraft.common.lib.network.ResearchTableCopyPayload;
+import thaumcraft.common.lib.network.ResearchTableCopyNetworking;
 import thaumcraft.common.lib.network.ResearchTableEditPayload;
 import thaumcraft.common.lib.network.ResearchTableStatePayload;
 import thaumcraft.common.lib.research.ResearchAspectCombination;
 import thaumcraft.common.lib.research.ResearchNoteEditing;
+import thaumcraft.common.lib.research.ResearchNoteCopying;
 import thaumcraft.common.lib.research.ScribingInk;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.tiles.TileResearchTable;
 
-/** Original shared slots/transfer order with authoritative editing/combination; copy is R10. */
+/** Original shared slots/transfer order with authoritative editing, combination and paid discovery copying. */
 public final class ContainerResearchTable extends AbstractContainerMenu {
     // Session identity is not a gameplay roll or a secret; it must never consume
     // Level.random, and must not repeat when vanilla reuses a containerId.
@@ -143,6 +147,23 @@ public final class ContainerResearchTable extends AbstractContainerMenu {
     }
 
     /** State follows native slot/knowledge sync and also acknowledges refused intents. */
+    public boolean canCopy() {
+        if (!editReady()) return false;
+        ItemStack stack = getSlot(1).getItem();
+        return stack.is(ThaumcraftContent.DISCOVERY.get()) && ResearchNoteCopying.canPay(KnowledgeAccess.get(viewer), ItemResearchNotes.data(stack), stack.getCount())
+                && ResearchTableCopyNetworking.findSupply(viewer.getInventory(), net.minecraft.world.item.Items.PAPER) >= 0
+                && ResearchTableCopyNetworking.findSupply(viewer.getInventory(), net.minecraft.world.item.Items.INK_SAC) >= 0;
+    }
+    public boolean requestCopy() {
+        if (!canCopy()) return false;
+        var payload = new ResearchTableCopyPayload(containerId, sessionToken, syncedRevision);
+        editPending = true;
+        try { NetworkManager.sendToServer(payload); }
+        catch (RuntimeException failure) { editPending = false; throw failure; }
+        return true;
+    }
+
+    /** State follows native slot/knowledge sync and also acknowledges refused intents. */
     public void applyState(ResearchTableStatePayload state) {
         if (tile != null || state.containerId() != containerId
                 || (stateReady && state.sessionToken() != sessionToken)
@@ -179,6 +200,16 @@ public final class ContainerResearchTable extends AbstractContainerMenu {
     @Override public boolean clickMenuButton(Player player, int button) {
         // Original button1 is a no-op; button5 belongs to R10 validation/copy.
         return button == 1 && stillValid(player);
+    }
+
+    /** The old container drops its entire cursor on close; do not split copied max-stack-one discoveries into player slots. */
+    @Override public void removed(Player player) {
+        ItemStack cursor = getCarried();
+        if (player instanceof ServerPlayer server && cursor.getItem() instanceof ItemResearchNotes && cursor.getCount() > 1) {
+            DeferredItemDrops.enqueue(server.serverLevel(), server.blockPosition(), java.util.List.of(cursor));
+            setCarried(ItemStack.EMPTY); // Paid queue owns a copy before the native close path sees the empty cursor.
+        }
+        super.removed(player);
     }
 
     @Override public ItemStack quickMoveStack(Player player, int index) {

@@ -13,8 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 /** Bounded adapter for the retained original relay OBJ, not a general loader.
- * Support36 is parsed but deliberately NOT drawn: original renderer draws only
- * RingBase32, RingFloat32 and Crystal16. Pinned OpenTC4 compared, not copied. */
+ * Relay draws RingBase32, RingFloat32 and Crystal16; the workbench charger also
+ * draws Support36. Pinned OpenTC4 compared, not copied. */
 public final class ModelVisRelay {
     private record Vertex(float x,float y,float z,float u,float v,float nx,float ny,float nz) {}
     private final Map<String,List<Vertex>> groups;
@@ -36,7 +36,7 @@ public final class ModelVisRelay {
     }
     private static float number(String text){float value=Float.parseFloat(text);if(!Float.isFinite(value))throw new IllegalArgumentException("Nonfinite original OBJ coordinate");return value;}
     public void render(String group,PoseStack pose,VertexConsumer out,int light,int overlay,int colour){
-        if(!Set.of("RingBase","RingFloat","Crystal").contains(group))throw new IllegalArgumentException("Not an original rendered relay part "+group);
+        if(!Set.of("RingBase","RingFloat","Crystal","Support").contains(group))throw new IllegalArgumentException("Not an original rendered relay part "+group);
         for(Vertex v:groups.get(group))out.addVertex(pose.last(),v.x,v.y,v.z).setColor(colour>>16&255,colour>>8&255,colour&255,255).setUv(v.u,v.v).setOverlay(overlay).setLight(light).setNormal(pose.last(),v.nx,v.ny,v.nz);
     }
 }

@@ -56,8 +56,10 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.blocks.BlockTable;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.container.ContainerResearchTable;
+import thaumcraft.common.items.ItemResearchNotes;
 import thaumcraft.common.lib.research.PlayerKnowledge;
 import thaumcraft.common.lib.research.ResearchNoteData;
+import thaumcraft.common.lib.research.ResearchNoteCopying;
 import thaumcraft.common.lib.research.TableTopology;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
@@ -140,9 +142,9 @@ public final class TileResearchTable extends BlockEntity implements Container, M
 
     @Override public void setItem(int slot, ItemStack stack) {
         items.set(slot, Objects.requireNonNull(stack, "stack"));
-        // Original TileResearchTable.setInventorySlotContents clamps to the
-        // inventory's 64, not the item's max1. Load deliberately bypasses this.
-        if (stack.getCount() > getMaxStackSize()) stack.setCount(getMaxStackSize());
+        // R10's original whole-stack transfers can return a copied note above64.
+        // Preserve that owned stock; ordinary tools/items retain the original64 setter limit.
+        if (!(stack.getItem() instanceof ItemResearchNotes) && stack.getCount() > getMaxStackSize()) stack.setCount(getMaxStackSize());
         setChanged();
     }
 
@@ -328,8 +330,28 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     /**
      * Material-only commit after server admission/pure planning. No setters,
      * listeners, dirty/block updates, network or sounds may run between writes.
-     * In particular setItem would silently clamp a direct-loaded count127 to64.
+     * Physical copied-note counts are preserved without changing other slot limits.
      */
+    public void commitCopy(long expectedRevision, ItemStack note, ResearchNoteCopying.Plan plan,
+                           PlayerKnowledge actor, ItemStack paper, ItemStack inkSac) {
+        if (!(level instanceof ServerLevel serverLevel) || !serverLevel.getServer().isSameThread()) throw new IllegalStateException("Research copy requires the server thread");
+        if (tableRevision() != expectedRevision || expectedRevision == Long.MAX_VALUE || note != items.get(1)
+                || note.getCount() == Integer.MAX_VALUE || plan.count() != note.getCount() + 1
+                || !note.is(ThaumcraftContent.DISCOVERY.get()) || !ResearchNoteCopying.canPay(actor, ItemResearchNotes.data(note), note.getCount())
+                || !paper.is(net.minecraft.world.item.Items.PAPER) || paper.isEmpty() || paper.getDamageValue() != 0
+                || !inkSac.is(net.minecraft.world.item.Items.INK_SAC) || inkSac.isEmpty() || inkSac.getDamageValue() != 0) {
+            throw new IllegalStateException("Admitted research copy changed before commit");
+        }
+        var component = ThaumcraftContent.RESEARCH_NOTE_DATA.get();
+        ItemStack snapshot = note.copy(); snapshot.set(component, plan.note()); snapshot.setCount(plan.count());
+        // The same actual stack is updated. All allocations/validation precede these callback-free owner writes.
+        actor.copyFrom(plan.knowledge()); paper.shrink(1); inkSac.shrink(1);
+        note.set(component, plan.note()); note.setCount(plan.count());
+        editRevision++;
+        observedReferences[1] = note; observedStacks[1] = snapshot;
+    }
+
+    /** Material-only R08 edit commit; no setters/notifications between the prepared owner changes. */
     public void commitEdit(long expectedRevision, ItemStack tool, ItemStack note, Map<String, Integer> bonus,
                            PlayerKnowledge actor, PlayerKnowledge stagedKnowledge) {
         if (!(level instanceof ServerLevel serverLevel) || !serverLevel.getServer().isSameThread()) {

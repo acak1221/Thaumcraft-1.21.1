@@ -115,7 +115,8 @@ public final class FocusUpgradeRuntimeChecks {
         a.require(!FocusUpgradeData.supportedForFocus(illegal) && !FocusData.isSupportedFocus(illegal), "directly attached Treasure on Fire is not silently basic");
         boolean rejected = false;
         try { new FocusData(illegal); } catch (IllegalArgumentException expected) { rejected = true; }
-        a.require(rejected && FocusUpgradeType.get(8) == null && FocusUpgradeType.get(20) == null, "invalid nested data and deferred Silk/Dowsing are rejected");
+        a.require(rejected && FocusUpgradeType.get(8) == FocusUpgradeType.silktouch && FocusUpgradeType.get(20) == null,
+                "invalid nested data is rejected, Silk has its original id8, and deferred Dowsing stays unavailable");
     }
 
     private static void casting(Actor a) {

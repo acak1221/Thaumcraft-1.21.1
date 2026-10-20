@@ -40,7 +40,8 @@ public record FocusData(ItemStack focus) {
                 // must never decode, select, or silently dispatch as Fire.
                 && (stack.getItem() instanceof ItemFocusFire || stack.getItem() instanceof ItemFocusExcavation
                     || stack.getItem() instanceof ItemFocusFrost || stack.getItem() instanceof ItemFocusShock
-                    || stack.getItem() instanceof ItemFocusPortableHole)
+                    || stack.getItem() instanceof ItemFocusPortableHole || stack.getItem() instanceof ItemFocusWarding
+                    || stack.getItem() instanceof ItemFocusTrade)
                 && !stack.has(ThaumcraftFoci.WAND_FOCUS.get())
                 && !stack.has(ThaumcraftContent.WAND_DATA.get())
                 && FocusUpgradeData.supportedForFocus(stack);

@@ -56,7 +56,11 @@
     "Tc4BiomeParameterListMixin",
     "Tc4ClimateSamplerMixin",
     "Tc4RandomStateMixin",
-    "Tc4MultiNoiseBiomeSourceMixin"
+    "Tc4MultiNoiseBiomeSourceMixin",
+    "BathSaltExpiryMixin",
+    "PureWaterMaterialMixin",
+    "PureVanillaWaterFlowMixin",
+    "PureBucketFillMixin"
   ],
   "client": [
     "client.TableOutlineMixin",

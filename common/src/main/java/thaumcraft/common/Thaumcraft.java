@@ -124,6 +124,8 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftWarp.register();
         thaumcraft.common.config.ThaumcraftMonsters.register();
         thaumcraft.common.config.ThaumcraftWarp.enableEvents();
+        thaumcraft.common.config.ThaumcraftSpa.register();
+        thaumcraft.common.config.ThaumcraftEldritchItems.register();
         thaumcraft.common.lib.world.TradeSwaps.init();
         thaumcraft.common.lib.network.WandArchitectNetworking.init();
         thaumcraft.common.config.ThaumcraftArcaneBore.register();

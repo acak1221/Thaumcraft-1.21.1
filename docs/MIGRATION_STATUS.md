@@ -1,34 +1,62 @@
-## Текущая работа — 20.10.2026, исправления после fc1f8ff
+## Текущая работа — 20.10.2026, Spa/Pure Bucket после827a0b3
 
-GitHub-прогон `fc1f8ff` выполнил 261 игровой сценарий: 255 PASS, 6 FAIL.
-[Точный прогон](https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39426400166).
-Исправлены acquisition LOS заражённого паука, исходная deathTime20 выдача опыта
-у opt-in Taint actors, положение Spore при росте и актуальные heightmaps декораторов.
-Убрано отсутствовавшее в original Forge ограничение освещения Vishroom/custom plants.
-Падающий crust сохраняет исходное округление float на больших координатах;
-fixture теперь ставит опору в его действительном столбце. Hungry chest fixture
-учитывает настоящий native split RNG после шести исходных ray draws.
+`827a0b3cbfad41e0fb4bdf3127a5f7660442d6be` отправлен в work;
+после свежего git fetch local HEAD и origin/work совпадают.
+[GitHub run39432156806](https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39432156806)
+дал261/262PASS. Все прежние Taint/Hungry/biome failures прошли;
+оставшаяся lamp fixture исправлена без изменения production и затем проходит локально.
+Полностью принятый серверный baseline всё ещё b1e49f2 (648JUnit/212GameTest/79Python).
+Новые входы не наследуют его PASS.
 
-После этих изменений локально: **918 JUnit / 84 Python PASS**, ресурсы missing0;
-main/Fabric/gameTest/clientTest компилируются. Полный native прогон в НОВОМ мире
-дал **260/262 PASS**, `.tmp/core-native-parity-fixes-runtime.log` (3m53s).
-Оставшиеся два fixture сбоя исправлены: настоящий login grace игрока до mobAttack
-и восстановленная creative-wrapper detached ссылка на уже потраченную жемчужину.
-Добавлена actual pending-death reload проверка: исходный recent-player timer тоже
-не сохранялся в1.7, поэтому после нового экземпляра XP0; eligibility не изобретается.
-Повторный полный GitHub-прогон следующего commit обязателен; эти новые assertions
-пока не приняты. После финальных fixture изменений все source sets снова скомпилированы
-(.tmp/core-native-parity-final-compile.log,23s). Manifest требует **262** actual Fabric GameTest.
+Активна связанная группа Arcane Spa/Bath Salts/PureFluid/Soap/Crimson Rites,
+а также настоящее Pure Bucket (6новых файлов+5targeted hunks). Manifest272:
+8проверок основной группы и2проверки ведра сверх предыдущих262.
+До bucket all Fabric source sets compiled,932JUnit/84PythonPASS,
+resources missing0 (2745texture refs/1142model refs).
+Полные native replays270:266/270,268/270,268/270,268/270;
+последний Pure flow/physics/Ward/207ticks salts PASS, Soap fixture RNG FAIL,
+отдельный intermittent Crystal actual unload540ticks FAIL.
+Логи .tmp/spa-soap-native-{1,2,3,4}.log; не считать их полной приёмкой.
 
-Inventory888native mainJava; legacy934: partial34/pending900/complete0.
-Ledger1044needs_review — metadata, не процент или автоматическая приёмка переноса.
-Последний полностью принятый серверный baseline пока `b1e49f2`
-(648JUnit/212GameTest/79Python), run39409582347; его PASS не переносится на новые входы.
-Текущая группа Taint/биомы/ecology/Primal активна; Spa/Soap/Rites, BrainJar,
-заражённые животные/Slime/villages и структуры остаются изолированными drafts.
-Субагенты также пишут actual культистов, их снаряжение и champion mechanics.
-Реальные client visuals, полная survival/multiplayer-прогрессия и NeoForge открыты.
-Fabric first; после checkpoint сразу продолжать до полного переноса.
+Focused replay2 .tmp/spa-soap-focused-2.log: **2/2 native PASS**, BUILD SUCCESS1m34:
+Soap и Pure. Вызовы native Player.aiStep расходуют nextInt200 ДВАЖДЫ даже
+для пустых плечевых тегов. Точное one-soap-float утверждение теперь учитывает
+эти доказанные native calls; extra/missing soap draw всё ещё провалит проверку.
+Proper frame = level.tickNonPassenger(player), player.connection.tick(), age+1.
+Весь временный WorldRngTrace/reflection УДАЛЁН. Soap production не менялся.
+Focused результаты в отдельном fabric/build/gametest-focused-results.xml;
+optional -PgameTestFilter=<comma exact method names> не меняет default/full CI
+и не заменяет272required cases. Первый focused replay1 дал1/2, не accepted.
+
+Доказанные адаптации: Architectury13.0.11 Fabric Pair.getPatch терял components
+nonempty fluid — исправлен predicate; реальные copy/codec/network/transfers
+проверены. Scoped WaterFluid-consumer сохраняет original asymmetric material
+identity. Ward ставит SOURCE в AIR UPDATE_ALL: native removeBlock сохранял fluid.
+Crystal540tick assertions/tickets сохранены; добавлены только timeout diagnostics
+доcleanup, чтобы отделить очередь реального IO от ошибки сохранения.
+
+PureBucket all-target compile PASS1m19,932JUnit/84PythonPASS;
+resources0missing (2746texture refs/1142models), native production Java917.
+Focused12 replay .tmp/spa-pure-bucket-focused-1.log:11PASS/1FAIL.
+Все8Spa/Soap/Rites/Pure cases, world bucket/Nether/Spa/custody, Lamp и Crystal
+actual unload540ticks PASS. Единственный FAIL — ошибочная fixture premise:
+actual Fabric FluidVariant.of(flowing) НОРМАЛИЗУЕТ в source (документированное
+поведение API). Проверка теперь явно утверждает normalization, partial refusal,
+затем реальный normalized transfer и прежние строгие commit/abort postconditions.
+Production не менялся. Final :fabric:gameTestClasses compile:
+.tmp/spa-pure-bucket-final-compile.log. Исправленная native fixture требует CI.
+Commit/push этой группы запускает полный GitHub build со всеми272cases.
+Нет client/survival/multiplayer/NeoForge acceptance.
+
+Готовые НЕАКТИВНЫЕ drafts: BrainJar26+4shared, Animals29+6mixins,
+Swarmdespawn3patch, otherTC4XP8, Hilltop37, Mound43,
+DeathAspectOrb8+Animals4overlay, Champion10, TaintFXalpha2+doc,
+SpecialItem explosion-versus-fire narrow correction+native fixture.
+OuterLands/provider/rooms, Maze+Altar/Obelisk, Cultists/gear/projectiles,
+InhabitedZombie/Crab, Warden/Golem и Eldritch devices пишут6coding agents
+в отдельных .tmp; main менять им не разрешено во время интеграции.
+Новый1.21.1 world создан для каждого local replay, прежние owned worlds сохранены.
+Продолжать Fabric, затем NeoForge до полного переноса; не останавливаться наcheckpoint.
 
 Следующие записи сохраняют историю прежних срезов; актуальные результаты указаны выше.
 

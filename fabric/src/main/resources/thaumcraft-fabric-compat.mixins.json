@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "thaumcraft.fabric.mixin.compat",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ArchitecturyFluidPatchMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

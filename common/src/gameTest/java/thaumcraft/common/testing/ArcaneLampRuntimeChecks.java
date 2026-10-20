@@ -56,7 +56,10 @@ public final class ArcaneLampRuntimeChecks {
                     return;
                 }
                 check.direct(); check.recipe();
-                check.tile.removeLights(); // Discard deterministic probes before observing ordinary server ticks.
+                // direct() already replaced its sole injected light with cobblestone.
+                // Retain lights created by ordinary native ticks during the initial propagation wait.
+                // Purging them here queues asynchronous light decreases: fast GameTest ticks can
+                // sample their stale bright cache for the whole next observation window.
                 check.test.runAfterDelay(60, () -> {
                     try { check.naturalAndRemoval(); check.test.succeed(); } finally { check.finish(); }
                 });
@@ -141,9 +144,15 @@ public final class ArcaneLampRuntimeChecks {
             test.assertTrue(block.defaultBlockState().getDestroySpeed(level,center)==3 && Math.abs(block.getExplosionResistance()-10.2F)<1e-6,"original metal-device hardness and converted resistance");
         }
         void naturalAndRemoval() {
-            int lights=0;
-            for (BlockPos pos:BlockPos.betweenClosed(center.offset(-15,-15,-15),center.offset(15,15,15))) if (level.getBlockState(pos).is(ThaumcraftLamps.ARCANE_LIGHT.get())) ++lights;
-            test.assertTrue(lights>0,"ordinary server ticks make secondary lights in the real dark room, saw "+lights);
+            int lights=0,darkAir=0;
+            for (BlockPos pos:BlockPos.betweenClosed(center.offset(-15,-15,-15),center.offset(15,15,15))) {
+                var state=level.getBlockState(pos);
+                if(state.is(ThaumcraftLamps.ARCANE_LIGHT.get()))++lights;
+                else if(state.isAir()&&level.getRawBrightness(pos,0)<9)++darkAir;
+            }
+            test.assertTrue(lights>0,"ordinary server ticks make secondary lights in the real dark room, saw "+lights
+                    +", darkAir="+darkAir+", currentTile="+(level.getBlockEntity(center)==tile)
+                    +", removed="+tile.isRemoved()+", aboveBlockLight="+level.getBrightness(LightLayer.BLOCK,center.above()));
             BlockPos edge=center.offset(15,0,0),outside=center.offset(16,0,0);
             set(edge,ThaumcraftLamps.ARCANE_LIGHT.get().defaultBlockState(),QUIET);
             set(outside,ThaumcraftLamps.ARCANE_LIGHT.get().defaultBlockState(),QUIET);

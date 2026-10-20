@@ -35,6 +35,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     VisNetClientEffects.setShader(shader);
                 }));
         ClientSetup.init();
+        thaumcraft.fabric.client.FabricSpaClient.init();
         thaumcraft.fabric.client.FabricTaintFibresModel.init();
         thaumcraft.fabric.client.FabricTravelGearClient.init();
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftAdvancedFurnace.FURNACE_ITEM.get(),

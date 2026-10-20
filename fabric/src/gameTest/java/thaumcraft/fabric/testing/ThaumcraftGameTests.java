@@ -1373,4 +1373,55 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.TaintacleRuntimeChecks.originalExperienceWaitsForDeathTwenty(test);
     }
 
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m14_spa_backend_cycle")
+    public void spaRetainsOriginalGridCycleRedstoneAndReload(GameTestHelper test) {
+        thaumcraft.common.testing.SpaBackendRuntimeChecks.firstCycleGridOrderRedstoneAndReload(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m14_spa_backend_custody")
+    public void spaPreservesOriginalContainersFluidPatchesAndInventory(GameTestHelper test) {
+        thaumcraft.common.testing.SpaBackendRuntimeChecks.containerQuirksPatchIdentityAndNativePersistence(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m14_spa_storage")
+    public void spaUsesNativeFabricTransactionsAndRetiredOwners(GameTestHelper test) {
+        SpaFluidStorageRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "m14_spa_menu")
+    public void spaMenuPreservesNativeOwnershipAndOriginalQuickMove(GameTestHelper test) {
+        thaumcraft.common.testing.SpaMenuRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 280, batch = "m14_spa_fluid")
+    public void purifyingFluidPreservesOriginalClassicFlowWardAndSaltExpiry(GameTestHelper test) {
+        thaumcraft.common.testing.PureFluidRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m14_crimson_rites")
+    public void crimsonRitesCompleteResearchWithoutConsumingTheBook(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchItemsRuntimeChecks.reusableRitesCompleteCrimson(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m14_sanity_soap")
+    public void sanitySoapUsesOriginalNativeReleaseAndWarpChances(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchItemsRuntimeChecks.soapUsesNativeReleaseAndOriginalChances(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m14_soap_recipe")
+    public void sanitySoapCrucibleRecipePaysActualIngredients(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchItemsRuntimeChecks.soapCrucibleRecipePaysActualIngredients(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m11_pure_bucket")
+    public void pureBucketPreservesOriginalSourcePickupPlacementAndCustody(GameTestHelper test) {
+        thaumcraft.common.testing.PureBucketRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m11_pure_bucket_storage")
+    public void pureBucketParticipatesInActualNativeFluidTransactions(GameTestHelper test) {
+        PureBucketStorageRuntimeChecks.run(test);
+    }
+
 }

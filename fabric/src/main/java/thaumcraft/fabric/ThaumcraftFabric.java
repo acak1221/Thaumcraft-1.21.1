@@ -19,6 +19,7 @@ import thaumcraft.common.blocks.BlockTube;
 public final class ThaumcraftFabric implements ModInitializer {
     @Override public void onInitialize() {
         Thaumcraft.init();
+        thaumcraft.fabric.fluid.FabricSpaStorage.init();
         thaumcraft.fabric.loot.FabricThaumcraftLoot.init();
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftPech.PECH.get(), thaumcraft.common.entities.monster.EntityPech.createAttributes());

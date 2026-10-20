@@ -28,7 +28,7 @@ class BlockResourceCoverageTest {
     /** Blocks that have no loot table because their drops come from code, or because they never drop an item. */
     private static final Set<String> NO_LOOT_TABLE = Set.of(
             "arcane_light", "arcane_workbench", "aura_node", "flux_gas", "flux_goo", "hole", "jar", "jar_void", "mana_pod",
-            "shock_trap", "table", "warded");
+            "shock_trap", "table", "warded", "purifying_fluid");
 
     private static final List<String> CANDLES = List.of("black", "blue", "brown", "cyan", "gray", "green", "light_blue", "light_gray", "lime",
             "magenta", "orange", "pink", "purple", "red", "yellow");

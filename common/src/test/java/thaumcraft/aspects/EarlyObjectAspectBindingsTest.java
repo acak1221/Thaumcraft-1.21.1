@@ -126,7 +126,7 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(126, direct.size(), "previous direct item bindings plus actual Taint states and Vishroom");
+        assertEquals(127, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom and Crimson Rites");
         assertEquals(10, complex.size(), "nine existing complex bindings plus the actual native Arcane Ear");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
@@ -138,13 +138,14 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(107, rows.size());
+            assertEquals(108, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
             int wheat = 0;
             int ears = 0;
             int pechFoci = 0;
+            int crimsonRites = 0;
             int taintAndVishroom = 0;
             Map<Integer, JsonObject> clusters = new java.util.TreeMap<>();
             for (int index = 0; index < rows.size(); index++) {
@@ -198,6 +199,16 @@ class EarlyObjectAspectBindingsTest {
                     var historical = row.deepCopy(); historical.addProperty("original_metadata", 0); previous.add(historical);
                     continue;
                 }
+                if (sourceLine == 449) {
+                    ++crimsonRites;
+                    assertEquals("direct", row.get("registration").getAsString());
+                    assertEquals("ConfigItems.itemEldritchObject", row.get("original_target").getAsString());
+                    assertEquals(1, row.get("original_metadata").getAsInt());
+                    assertEquals(JsonParser.parseString("[\"thaumcraft:crimson_rites\"]"), row.get("modern_ids"));
+                    assertAspects(direct, "thaumcraft:crimson_rites", new AspectList().add(Aspect.MIND, 5)
+                            .add(Aspect.MAGIC, 3).add(Aspect.ELDRITCH, 3).add(Aspect.SOUL, 3));
+                    continue;
+                }
                 if (sourceLine == 454) {
                     assertEquals("ConfigItems.itemEldritchObject", row.get("original_target").getAsString());
                     assertEquals(3, row.get("original_metadata").getAsInt());
@@ -245,6 +256,7 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(1, wheat);
             assertEquals(1, ears);
             assertEquals(1, pechFoci);
+            assertEquals(1, crimsonRites);
             assertEquals(8, taintAndVishroom);
             assertEquals(3, clusters.size());
             assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");

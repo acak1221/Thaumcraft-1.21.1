@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.api.aspects.Aspect;
@@ -26,7 +28,11 @@ class ResearchCheatSheetTest {
     private static final ResearchSettings ON = new ResearchSettings(true, true, true, true, false, 0, 100);
     private static final ResearchSettings ON_WUSS = new ResearchSettings(true, true, true, true, true, 0, 100);
 
-    @BeforeAll static void load() { ResearchCatalog.loadBundled(); }
+    @BeforeAll static void load() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+        ResearchCatalog.loadBundled();
+    }
 
     private static List<ResearchDefinition> enabled() { return ResearchRegistrationOrder.enabled(); }
 

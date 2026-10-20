@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +38,11 @@ class ResearchRegistrationOrderTest {
     private static final List<String> CATEGORIES = List.of("BASICS", "THAUMATURGY", "ALCHEMY", "ARTIFICE", "GOLEMANCY", "ELDRITCH");
     private ResearchSettings before;
 
-    @BeforeAll static void load() { ResearchCatalog.loadBundled(); }
+    @BeforeAll static void load() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+        ResearchCatalog.loadBundled();
+    }
 
     @BeforeEach void remember() { before = ThaumcraftSettings.server(); }
 

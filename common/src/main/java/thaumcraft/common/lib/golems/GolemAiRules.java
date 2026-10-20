@@ -480,20 +480,17 @@ public final class GolemAiRules {
         @Override public boolean setEssentia(Aspect aspect, int amount) {
             if (amount < 0 || amount > golem.getCarryLimit()) return false;
             if (amount == 0) {
-                golem.setEssentiaCargo(null, 0);
-                return true;
+                return golem.setEssentiaCargo(null, 0);
             }
             if (aspect == null) return false;
             Aspect current = golem.getEssentiaAspect();
             if (current != null && current != aspect) return false;
-            golem.setEssentiaCargo(aspect, amount);
-            return true;
+            return golem.setEssentiaCargo(aspect, amount);
         }
         @Override public int waterMb() { return golem.getWaterAmountMb(); }
         @Override public boolean setWaterMb(int amount) {
             if (amount < 0 || amount > golem.getFluidCarryLimit()) return false;
-            golem.setWaterCargoMb(amount);
-            return true;
+            return golem.setWaterCargoMb(amount);
         }
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemUpgrades;
 
@@ -36,7 +37,7 @@ final class HarvestGolemGoals extends Goal {
     /** Original AIHarvestCrops:84 {@code ceil(range / 4)}, read live: a Water upgrade changes it without a new goal. */
     private int radius() { return GolemUpgrades.workRadius(golem.getRange(), 4); }
 
-    void install() { golem.addWorkGoal(2, this); }
+    void install() { golem.addWorkGoal(GoalPriority.HARVEST_CROPS, this); }
     boolean hasTarget() { return target != null || running; }
     void reset() {
         try { stop(); }

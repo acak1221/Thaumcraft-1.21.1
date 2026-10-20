@@ -2,7 +2,6 @@ package thaumcraft.common.entities.monster;
 
 import dev.architectury.registry.menu.MenuRegistry;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -63,6 +62,7 @@ import thaumcraft.common.entities.ai.pech.PechItemGoal;
 import thaumcraft.common.entities.ai.pech.PechAvoidGoal;
 import thaumcraft.common.entities.ai.pech.PechMeleeGoal;
 import thaumcraft.common.entities.ai.pech.PechRangedGoal;
+import thaumcraft.common.entities.ai.pech.PechTradePlayer;
 import thaumcraft.common.entities.ai.pech.PechWatchGoal;
 import thaumcraft.common.entities.projectile.EntityPechBlast;
 import thaumcraft.common.items.ItemManaBean;
@@ -97,13 +97,8 @@ public final class EntityPech extends Monster implements RangedAttackMob {
     @Override protected void registerGoals(){
         melee=new PechMeleeGoal(this);arrows=new PechRangedGoal(this,50);blasts=new PechRangedGoal(this,30);avoid=new PechAvoidGoal(this);
         goalSelector.addGoal(0,new FloatGoal(this));
-        goalSelector.addGoal(1,new Goal(){
-            {setFlags(EnumSet.of(Flag.MOVE,Flag.JUMP));}
-            @Override public boolean canUse(){return isAlive()&&!isInWater()&&isTamed()&&onGround()&&!hurtMarked&&trading;}
-            @Override public void start(){getNavigation().stop();}
-            @Override public void stop(){trading=false;}
-        });
-        goalSelector.addGoal(3,new PechItemGoal(this));goalSelector.addGoal(5,new OpenDoorGoal(this,true));
+        goalSelector.addGoal(PechTradePlayer.PRIORITY,new PechTradePlayer(this));
+        goalSelector.addGoal(PechItemGoal.PRIORITY,new PechItemGoal(this));goalSelector.addGoal(5,new OpenDoorGoal(this,true));
         goalSelector.addGoal(6,new MoveTowardsRestrictionGoal(this,.5));goalSelector.addGoal(6,new MoveThroughVillageGoal(this,1,false,0,()->true));
         goalSelector.addGoal(9,new RandomStrollGoal(this,.6));
         goalSelector.addGoal(9,new PechWatchGoal(this,true));goalSelector.addGoal(10,new PechWatchGoal(this,false));goalSelector.addGoal(11,new RandomLookAroundGoal(this));

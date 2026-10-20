@@ -9,6 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemDartRules;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemDecorations;
@@ -32,12 +33,12 @@ final class GuardGolemGoals {
     void install() {
         int core = golem.getGolemCore();
         if (core != GolemData.GUARD && core != GolemData.BUTCHER) return;
-        if (GolemDecorations.has(golem.getDecoration(), GolemDecorations.DART)) golem.addWorkGoal(2, dart); // Original AIDartAttack, priority 2.
-        golem.addWorkGoal(3, melee);
+        if (GolemDecorations.has(golem.getDecoration(), GolemDecorations.DART)) golem.addWorkGoal(GoalPriority.DART_ATTACK, dart); // Original AIDartAttack, priority 2.
+        golem.addWorkGoal(GoalPriority.MELEE, melee);
         if (core == GolemData.GUARD) {
-            golem.addTargetGoal(1, retaliate);
-            golem.addTargetGoal(2, nearest);
-        } else golem.addTargetGoal(1, oldest); // NO retaliation/nearest-hostile goal for Butcher.
+            golem.addTargetGoal(GoalPriority.HURT_BY_TARGET, retaliate);
+            golem.addTargetGoal(GoalPriority.NEAREST_TARGET, nearest);
+        } else golem.addTargetGoal(GoalPriority.OLDEST_TARGET, oldest); // NO retaliation/nearest-hostile goal for Butcher.
     }
     private boolean working() {
         int core = golem.getGolemCore();

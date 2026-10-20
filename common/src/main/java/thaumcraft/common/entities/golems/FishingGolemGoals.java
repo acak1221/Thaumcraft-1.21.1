@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemUpgrades;
@@ -74,7 +75,7 @@ final class FishingGolemGoals extends Goal {
     /** Original AIFish:71 {@code ceil(range / 2)}, read live so a Water upgrade needs no new goal. */
     private int radius() { return GolemUpgrades.workRadius(golem.getRange(), 2); }
 
-    void install() { golem.addWorkGoal(2, this); }
+    void install() { golem.addWorkGoal(GoalPriority.FISH, this); }
     boolean hasPending() { return pending != null || unreadPending != null; }
     boolean hasUnreadPending() { return unreadPending != null; }
     boolean hasCast() { return admitted && water != null && bobber != null; }

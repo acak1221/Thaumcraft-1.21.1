@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemData;
 
 /** Shared ordinary-core safety/return/idle goals and Gather's physical-item goal. */
@@ -26,22 +27,22 @@ final class GatherGolemGoals {
     GatherGolemGoals(EntityGolemBase golem) { this.golem = golem; }
 
     void install() {
-        golem.addWorkGoal(0, new AvoidSwell());
-        golem.addWorkGoal(1, new FloatGoal(golem) {
+        golem.addWorkGoal(GoalPriority.CREEPER_FLIGHT, new AvoidSwell());
+        golem.addWorkGoal(GoalPriority.SWIM, new FloatGoal(golem) {
             @Override public boolean canUse() { return golem.canWork() && super.canUse(); }
             @Override public boolean canContinueToUse() { return golem.canWork() && super.canContinueToUse(); }
         });
-        if (golem.getGolemCore() == GolemData.GATHER) golem.addWorkGoal(2, new Pickup());
-        golem.addWorkGoal(5, new OpenDoorGoal(golem, true) {
+        if (golem.getGolemCore() == GolemData.GATHER) golem.addWorkGoal(GoalPriority.ITEM_PICKUP, new Pickup());
+        golem.addWorkGoal(GoalPriority.OPEN_DOOR, new OpenDoorGoal(golem, true) {
             @Override public boolean canUse() { return golem.canWork() && super.canUse(); }
             @Override public boolean canContinueToUse() { return golem.canWork() && super.canContinueToUse(); }
         });
-        golem.addWorkGoal(6, new ReturnHome());
-        golem.addWorkGoal(7, new LookAtPlayerGoal(golem, Player.class, 6) {
+        golem.addWorkGoal(GoalPriority.RETURN_HOME, new ReturnHome());
+        golem.addWorkGoal(GoalPriority.WATCH_CLOSEST, new LookAtPlayerGoal(golem, Player.class, 6) {
             @Override public boolean canUse() { return golem.canWork() && super.canUse(); }
             @Override public boolean canContinueToUse() { return golem.canWork() && super.canContinueToUse(); }
         });
-        golem.addWorkGoal(8, new RandomLookAroundGoal(golem) {
+        golem.addWorkGoal(GoalPriority.LOOK_IDLE, new RandomLookAroundGoal(golem) {
             @Override public boolean canUse() { return golem.canWork() && super.canUse(); }
             @Override public boolean canContinueToUse() { return golem.canWork() && super.canContinueToUse(); }
         });

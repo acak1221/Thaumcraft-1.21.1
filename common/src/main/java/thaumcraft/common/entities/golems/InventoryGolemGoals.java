@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemMarker;
 
@@ -29,7 +30,11 @@ final class InventoryGolemGoals {
         route = new Route();
     }
 
-    void install() { golem.addWorkGoal(golem.getGolemCore() == GolemData.FILL ? 4 : 3, route); }
+    void install() {
+        int core = golem.getGolemCore();
+        golem.addWorkGoal(core == GolemData.FILL ? GoalPriority.FILL_GOTO
+                : core == GolemData.SORTING ? GoalPriority.SORTING_GOTO : GoalPriority.EMPTY_GOTO, route);
+    }
     boolean hasRoute() {
         return target != null || route.running || interactionPause > 0 || !watched.isEmpty() || interactionReady;
     }

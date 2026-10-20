@@ -13,6 +13,8 @@ import thaumcraft.common.lib.pech.PechDrops;
 /** Original AIPechItemEntityGoto, including the default golemDelay FIVE-tick
  * search gate, whole-stack canPickup admission and failed-path retry penalty. */
 public final class PechItemGoal extends Goal {
+    /** The original 1.7 selector priority of {@code AIPechItemEntityGoto}. */
+    public static final int PRIORITY = 3;
     private final EntityPech pech;private ItemEntity target;private int count,failedPathFindingPenalty;
     public PechItemGoal(EntityPech pech){this.pech=pech;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
     @Override public boolean canUse(){

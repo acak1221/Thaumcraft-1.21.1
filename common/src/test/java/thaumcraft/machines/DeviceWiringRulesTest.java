@@ -2,9 +2,10 @@ package thaumcraft.machines;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import thaumcraft.common.lib.crafting.DeviceWiringRules;
-import thaumcraft.common.lib.crafting.DeviceWiringRules.HandMirrorTarget;
-import thaumcraft.common.lib.crafting.DeviceWiringRules.MirrorLinkAction;
+import thaumcraft.common.lib.crafting.DeviceContainerRules;
+import thaumcraft.common.lib.crafting.DeviceContainerRules.HandMirrorTarget;
+import thaumcraft.common.lib.crafting.DeviceContainerRules.MirrorLinkAction;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
  * The pure decisions of the device glue: the magic box menu, the hand mirror
@@ -14,74 +15,77 @@ class DeviceWiringRulesTest {
 
     // ------------------------------------------------------------------ magic box
     @Test void magicBoxMenuCarriesTheSizeOfTheWholeChain() {
-        assertEquals(27, DeviceWiringRules.magicBoxMenuSize(27));
+        assertEquals(27, DeviceContainerRules.magicBoxMenuSize(27));
         // A linked box owns twenty seven slots per box.
-        assertEquals(54, DeviceWiringRules.magicBoxMenuSize(54));
-        assertEquals(0, DeviceWiringRules.magicBoxMenuSize(-1));
+        assertEquals(54, DeviceContainerRules.magicBoxMenuSize(54));
+        assertEquals(0, DeviceContainerRules.magicBoxMenuSize(-1));
     }
     @Test void magicBoxMenuBindsThreeRowsWhateverTheChainSizeIs() {
-        assertEquals(27, DeviceWiringRules.magicBoxBoundSlots());
+        assertEquals(27, DeviceContainerRules.magicBoxBoundSlots());
         // The original binds three rows of the chain, never more.
-        assertTrue(DeviceWiringRules.magicBoxBoundSlots() <= 27);
+        assertTrue(DeviceContainerRules.magicBoxBoundSlots() <= 27);
     }
 
     // --------------------------------------------------------------- hand mirror
     @Test void handMirrorWithoutALinkHasNoTarget() {
-        assertEquals(HandMirrorTarget.NO_LINK, DeviceWiringRules.handMirrorTarget(false, false, false));
-        assertEquals(HandMirrorTarget.NO_LINK, DeviceWiringRules.handMirrorTarget(false, true, true));
+        assertEquals(HandMirrorTarget.NO_LINK, DeviceContainerRules.handMirrorTarget(false, false, false));
+        assertEquals(HandMirrorTarget.NO_LINK, DeviceContainerRules.handMirrorTarget(false, true, true));
     }
     @Test void handMirrorAsksForTheWorldBeforeTheMirror() {
-        assertEquals(HandMirrorTarget.NO_WORLD, DeviceWiringRules.handMirrorTarget(true, false, false));
-        assertEquals(HandMirrorTarget.NO_WORLD, DeviceWiringRules.handMirrorTarget(true, false, true));
-        assertEquals(HandMirrorTarget.NO_MIRROR, DeviceWiringRules.handMirrorTarget(true, true, false));
-        assertEquals(HandMirrorTarget.MIRROR, DeviceWiringRules.handMirrorTarget(true, true, true));
+        assertEquals(HandMirrorTarget.NO_WORLD, DeviceContainerRules.handMirrorTarget(true, false, false));
+        assertEquals(HandMirrorTarget.NO_WORLD, DeviceContainerRules.handMirrorTarget(true, false, true));
+        assertEquals(HandMirrorTarget.NO_MIRROR, DeviceContainerRules.handMirrorTarget(true, true, false));
+        assertEquals(HandMirrorTarget.MIRROR, DeviceContainerRules.handMirrorTarget(true, true, true));
     }
     @Test void handMirrorScreenOpensOnlyForALiveMirror() {
-        assertTrue(DeviceWiringRules.handMirrorOpensScreen(HandMirrorTarget.MIRROR));
-        assertFalse(DeviceWiringRules.handMirrorOpensScreen(HandMirrorTarget.NO_LINK));
-        assertFalse(DeviceWiringRules.handMirrorOpensScreen(HandMirrorTarget.NO_WORLD));
-        assertFalse(DeviceWiringRules.handMirrorOpensScreen(HandMirrorTarget.NO_MIRROR));
+        assertTrue(DeviceContainerRules.handMirrorOpensView(HandMirrorTarget.MIRROR));
+        assertFalse(DeviceContainerRules.handMirrorOpensView(HandMirrorTarget.NO_LINK));
+        assertFalse(DeviceContainerRules.handMirrorOpensView(HandMirrorTarget.NO_WORLD));
+        assertFalse(DeviceContainerRules.handMirrorOpensView(HandMirrorTarget.NO_MIRROR));
     }
     @Test void handMirrorClearsItsLinkOnlyWhenItsMirrorIsGone() {
-        assertTrue(DeviceWiringRules.handMirrorClearsLink(HandMirrorTarget.NO_MIRROR));
-        assertFalse(DeviceWiringRules.handMirrorClearsLink(HandMirrorTarget.NO_LINK));
-        assertFalse(DeviceWiringRules.handMirrorClearsLink(HandMirrorTarget.NO_WORLD));
-        assertFalse(DeviceWiringRules.handMirrorClearsLink(HandMirrorTarget.MIRROR));
+        assertTrue(DeviceContainerRules.handMirrorClearsLink(HandMirrorTarget.NO_MIRROR));
+        assertFalse(DeviceContainerRules.handMirrorClearsLink(HandMirrorTarget.NO_LINK));
+        assertFalse(DeviceContainerRules.handMirrorClearsLink(HandMirrorTarget.NO_WORLD));
+        assertFalse(DeviceContainerRules.handMirrorClearsLink(HandMirrorTarget.MIRROR));
     }
     @Test void handMirrorCarriesAnItemOnlyToALiveMirror() {
-        assertTrue(DeviceWiringRules.handMirrorTransports(HandMirrorTarget.MIRROR));
-        assertFalse(DeviceWiringRules.handMirrorTransports(HandMirrorTarget.NO_LINK));
-        assertFalse(DeviceWiringRules.handMirrorTransports(HandMirrorTarget.NO_WORLD));
-        assertFalse(DeviceWiringRules.handMirrorTransports(HandMirrorTarget.NO_MIRROR));
+        assertTrue(DeviceContainerRules.handMirrorTransports(HandMirrorTarget.MIRROR));
+        assertFalse(DeviceContainerRules.handMirrorTransports(HandMirrorTarget.NO_LINK));
+        assertFalse(DeviceContainerRules.handMirrorTransports(HandMirrorTarget.NO_WORLD));
+        assertFalse(DeviceContainerRules.handMirrorTransports(HandMirrorTarget.NO_MIRROR));
     }
 
     // -------------------------------------------------------------- item filter
     @Test void itemFilterIsTheDedicatedGrateAndTheTwoMetalDeviceVariants() {
-        assertTrue(DeviceWiringRules.itemFilterBlock(true, false, 0));
-        assertTrue(DeviceWiringRules.itemFilterBlock(false, true, DeviceWiringRules.ITEM_FILTER_OPEN));
-        assertTrue(DeviceWiringRules.itemFilterBlock(false, true, DeviceWiringRules.ITEM_FILTER_CLOSED));
-        // The original metal device metadata five is the open filter and six the closed one.
-        assertEquals(5, DeviceWiringRules.ITEM_FILTER_OPEN);
-        assertEquals(6, DeviceWiringRules.ITEM_FILTER_CLOSED);
+        assertTrue(EldritchBlockRules.itemFilterBlock(true, false, 0));
+        assertTrue(EldritchBlockRules.itemFilterBlock(false, true, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN));
+        assertTrue(EldritchBlockRules.itemFilterBlock(false, true, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED));
+        // Oracle TileGrate:66 - the metal device metadata five is the closed filter: it answers
+        // isSideSolid with true and gives its slot to the top side only. The metadata six is the
+        // open one, and damageDropped (oracle BlockMetalDevice:389-392) turns a dropped metadata six
+        // into a metadata five.
+        assertEquals(5, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED);
+        assertEquals(6, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN);
     }
     @Test void itemFilterIsNoOtherBlock() {
-        assertFalse(DeviceWiringRules.itemFilterBlock(false, false, 0));
-        assertFalse(DeviceWiringRules.itemFilterBlock(false, true, 0));
-        assertFalse(DeviceWiringRules.itemFilterBlock(false, true, 4));
-        assertFalse(DeviceWiringRules.itemFilterBlock(false, true, 7));
-        assertFalse(DeviceWiringRules.itemFilterBlock(false, true, 12));
+        assertFalse(EldritchBlockRules.itemFilterBlock(false, false, 0));
+        assertFalse(EldritchBlockRules.itemFilterBlock(false, true, 0));
+        assertFalse(EldritchBlockRules.itemFilterBlock(false, true, 4));
+        assertFalse(EldritchBlockRules.itemFilterBlock(false, true, 7));
+        assertFalse(EldritchBlockRules.itemFilterBlock(false, true, 12));
     }
 
     // -------------------------------------------------------------- mirror link
     @Test void mirrorItemBindsItselfToAMirrorWithoutAPartner() {
-        assertEquals(MirrorLinkAction.BIND_ITEM, DeviceWiringRules.mirrorItemLink(true, true, false));
+        assertEquals(MirrorLinkAction.BIND_ITEM, DeviceContainerRules.mirrorItemLink(true, true, false));
         // A mirror with a valid partner refuses a second one.
-        assertEquals(MirrorLinkAction.ALREADY_LINKED, DeviceWiringRules.mirrorItemLink(true, true, true));
+        assertEquals(MirrorLinkAction.ALREADY_LINKED, DeviceContainerRules.mirrorItemLink(true, true, true));
     }
     @Test void mirrorItemBindsItselfToNoOtherBlock() {
-        assertEquals(MirrorLinkAction.UNSUPPORTED, DeviceWiringRules.mirrorItemLink(false, true, false));
+        assertEquals(MirrorLinkAction.UNSUPPORTED, DeviceContainerRules.mirrorItemLink(false, true, false));
         // The essentia mirror has no item form of its own in the native tree.
-        assertEquals(MirrorLinkAction.UNSUPPORTED, DeviceWiringRules.mirrorItemLink(true, false, false));
-        assertEquals(MirrorLinkAction.UNSUPPORTED, DeviceWiringRules.mirrorItemLink(true, false, true));
+        assertEquals(MirrorLinkAction.UNSUPPORTED, DeviceContainerRules.mirrorItemLink(true, false, false));
+        assertEquals(MirrorLinkAction.UNSUPPORTED, DeviceContainerRules.mirrorItemLink(true, false, true));
     }
 }

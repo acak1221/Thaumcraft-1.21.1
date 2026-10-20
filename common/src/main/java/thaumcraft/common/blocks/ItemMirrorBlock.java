@@ -18,8 +18,8 @@ import net.minecraft.world.level.block.Block;
 import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.items.relics.ItemHandMirror;
 import thaumcraft.common.items.relics.ItemHandMirror.MirrorLink;
-import thaumcraft.common.lib.crafting.DeviceWiringRules;
-import thaumcraft.common.lib.crafting.DeviceWiringRules.MirrorLinkAction;
+import thaumcraft.common.lib.crafting.DeviceContainerRules;
+import thaumcraft.common.lib.crafting.DeviceContainerRules.MirrorLinkAction;
 import thaumcraft.common.tiles.TileMirror;
 
 /**
@@ -51,7 +51,7 @@ public final class ItemMirrorBlock extends BlockItem {
         if (!(level.getBlockState(pos).getBlock() instanceof BlockMirror)) return super.useOn(context);
         if (level.isClientSide) return InteractionResult.SUCCESS;
         TileMirror mirror = level.getBlockEntity(pos) instanceof TileMirror tile ? tile : null;
-        MirrorLinkAction action = DeviceWiringRules.mirrorItemLink(true, mirror != null, mirror != null && mirror.isLinkValid());
+        MirrorLinkAction action = DeviceContainerRules.mirrorItemLink(true, mirror != null, mirror != null && mirror.isLinkValid());
         if (action == MirrorLinkAction.ALREADY_LINKED) {
             // Oracle BlockMirrorItem:112 - a mirror with a valid partner refuses another one.
             player.displayClientMessage(Component.translatable("tc.mirroralreadylinked")

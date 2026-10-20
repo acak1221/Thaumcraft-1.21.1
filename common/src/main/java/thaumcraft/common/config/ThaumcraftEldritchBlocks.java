@@ -57,6 +57,7 @@ import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.blocks.BannerData;
 import thaumcraft.common.blocks.ItemArcaneDoor;
+import thaumcraft.common.blocks.ItemMirrorBlock;
 import thaumcraft.common.blocks.ItemVariantBlock;
 import thaumcraft.common.container.ContainerMagicBox;
 import thaumcraft.common.lib.world.EldritchBlockRules;
@@ -156,38 +157,38 @@ public final class ThaumcraftEldritchBlocks {
 
     public static final RegistrySupplier<BlockCosmeticStoneSlab> COSMETIC_STONE_SLAB_ARCANE = BLOCKS.register("cosmetic_stone_slab_arcane",
             () -> new BlockCosmeticStoneSlab(EldritchBlockRules.SLAB_STONE_ARCANE,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, 10.0F).sound(SoundType.STONE)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
 
     public static final RegistrySupplier<BlockCosmeticStoneSlab> COSMETIC_STONE_SLAB_ELDRITCH = BLOCKS.register("cosmetic_stone_slab_eldritch",
             () -> new BlockCosmeticStoneSlab(EldritchBlockRules.SLAB_STONE_ELDRITCH,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, 10.0F).sound(SoundType.STONE)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
 
     public static final RegistrySupplier<BlockCosmeticWoodSlab> COSMETIC_WOOD_SLAB_GREATWOOD = BLOCKS.register("cosmetic_wood_slab_greatwood",
             () -> new BlockCosmeticWoodSlab(EldritchBlockRules.SLAB_WOOD_GREATWOOD,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
 
     public static final RegistrySupplier<BlockCosmeticWoodSlab> COSMETIC_WOOD_SLAB_SILVERWOOD = BLOCKS.register("cosmetic_wood_slab_silverwood",
             () -> new BlockCosmeticWoodSlab(EldritchBlockRules.SLAB_WOOD_SILVERWOOD,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
 
     // The original blockCosmeticDoubleSlabWood and blockCosmeticDoubleSlabStone (ConfigBlocks:300-301): the double halves of the
     // four cosmetic slabs. The original registered two blocks with the metadata of their single slab; the native port keeps the
     // four double slabs in one block with the four metadata values, and the double half is the double value of the slab type.
     public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_WOOD_GREATWOOD = BLOCKS.register("cosmetic_double_slab_wood_greatwood",
             () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_WOOD_GREATWOOD,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
 
     public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_WOOD_SILVERWOOD = BLOCKS.register("cosmetic_double_slab_wood_silverwood",
             () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_WOOD_SILVERWOOD,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, EldritchBlockRules.COSMETIC_WOOD_SLAB_RESISTANCE).sound(SoundType.WOOD)));
 
     public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_STONE_ARCANE = BLOCKS.register("cosmetic_double_slab_stone_arcane",
             () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_STONE_ARCANE,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, 10.0F).sound(SoundType.STONE)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
 
     public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_STONE_ELDRITCH = BLOCKS.register("cosmetic_double_slab_stone_eldritch",
             () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_STONE_ELDRITCH,
-                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, 10.0F).sound(SoundType.STONE)));
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, EldritchBlockRules.COSMETIC_STONE_SLAB_RESISTANCE).sound(SoundType.STONE)));
 
     public static final RegistrySupplier<BlockArcaneDoor> ARCANE_DOOR = BLOCKS.register("arcane_door",
             () -> new BlockArcaneDoor(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
@@ -330,7 +331,7 @@ public final class ThaumcraftEldritchBlocks {
             () -> new ItemVariantBlock(WOODEN_DEVICE.get(), EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE, "arcane_pressure_plate", new Item.Properties()));
     public static final RegistrySupplier<Item> ARCANE_DOOR_ITEM = ITEMS.register("arcane_door", () -> new ItemArcaneDoor(new Item.Properties()));
     public static final RegistrySupplier<Item> MAGIC_BOX_ITEM = ITEMS.register("magic_box", () -> new BlockItem(MAGIC_BOX.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new BlockItem(MIRROR.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new ItemMirrorBlock(MIRROR.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> METAL_DEVICE_ITEM = ITEMS.register("metal_device", () -> new BlockItem(METAL_DEVICE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> WOODEN_DEVICE_ITEM = ITEMS.register("wooden_device", () -> new BlockItem(WOODEN_DEVICE.get(), new Item.Properties()));
     /**

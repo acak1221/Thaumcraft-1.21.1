@@ -301,6 +301,25 @@ public final class EldritchBlockRules {
         return variants;
     }
 
+    // ------------------------------------------------------------- cosmetic slabs
+
+    /**
+     * Oracle ConfigBlocks:298 and :300 - the cosmetic wooden slabs call
+     * {@code func_149711_c(2.0f).func_149752_b(5.0f)}, so the hardness is two and the blast
+     * resistance is the 1.7.10 setter value five. That setter stores the value three times and
+     * the 1.7.10 getter divides it by five, so the effective resistance of the original is
+     * three, and that is what 1.21.1, which has neither the multiplication nor the division,
+     * needs.
+     */
+    public static final float COSMETIC_WOOD_SLAB_RESISTANCE = 3.0F;
+
+    /**
+     * Oracle ConfigBlocks:299 and :301 - the cosmetic stone slabs call
+     * {@code func_149711_c(2.0f).func_149752_b(10.0f)}, so the effective resistance of the
+     * original is ten times three divided by five, that is six.
+     */
+    public static final float COSMETIC_STONE_SLAB_RESISTANCE = 6.0F;
+
     // ------------------------------------------------------------- cosmetic opaque
 
     /** BlockCosmeticOpaque:57-58 - family hardness 1.5 and the blast resistance setter value 5, effective 3.0. */

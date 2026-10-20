@@ -142,13 +142,13 @@ public final class BlockMirror extends BaseEntityBlock {
     }
 
     /**
-     * BlockMirror:227-235 with ItemHandMirror:100-121 - the original ran the
-     * item hook before the mirror consumed the click, so the hand mirror skips
-     * the default block interaction of 1.21.1 and every other item is still
-     * refused by the mirror.
+     * BlockMirror:227-235 with ItemHandMirror:100-121 and BlockMirrorItem:86-139 - the original ran the
+     * item hook before the mirror consumed the click, so the hand mirror and the mirror item skip
+     * the default block interaction of 1.21.1 and every other item is still refused by the mirror.
      */
     @Override protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!stack.isEmpty() && stack.getItem() instanceof ItemHandMirror) {
+        if (stack.isEmpty()) return ItemInteractionResult.CONSUME;
+        if (stack.getItem() instanceof ItemHandMirror || stack.getItem() instanceof ItemMirrorBlock) {
             return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
         return ItemInteractionResult.CONSUME;

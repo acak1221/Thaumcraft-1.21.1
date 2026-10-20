@@ -73,14 +73,21 @@ class OuterLandsEldritchVariantTest {
 
     /** The original metadata zero to ten and the values of the oracle. */
     private static final List<Row> ROWS = List.of(
+            // The family hardness of the original is fifty and its blast resistance is set with
+            // setResistance(20000). Minecraft 1.7.10 stores that as 20000 * 3 and the getter
+            // divides it by five, so the effective resistance of the original is 12000 and the
+            // native block carries that effective value (1.21.1 has neither the multiplication
+            // nor the division).
             new Row(0, "thaumcraft:eldritch", List.of("thaumcraft:block/eldritch"),
-                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 20000.0F, 8),
+                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 12000.0F, 8),
             new Row(1, "thaumcraft:eldritch", List.of("thaumcraft:block/eldritch_1"),
-                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 20000.0F, 8),
+                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 12000.0F, 8),
             new Row(2, "thaumcraft:eldritch", List.of("thaumcraft:block/eldritch_2"),
-                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 20000.0F, 8),
+                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 12000.0F, 8),
             new Row(3, "thaumcraft:eldritch", List.of("thaumcraft:block/eldritch_3"),
-                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 20000.0F, 8),
+                    List.of("thaumcraft:blocks/obsidiantile"), 50.0F, 12000.0F, 8),
+            // The other groups override the getter with an absolute value (oracle BlockEldritch:248),
+            // so they are not scaled by the 0.6 factor of the setter.
             new Row(4, "thaumcraft:eldritch_crust", List.of("thaumcraft:block/eldritch_crust"),
                     List.of("thaumcraft:blocks/es_i_1"), 2.0F, 30.0F, 12),
             new Row(5, "thaumcraft:eldritch_crust", List.of("thaumcraft:block/eldritch_crust_5"),

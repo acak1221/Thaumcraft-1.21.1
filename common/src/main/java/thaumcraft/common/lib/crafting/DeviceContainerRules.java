@@ -90,6 +90,44 @@ public final class DeviceContainerRules {
     /** Oracle ItemHandMirror:134-139 - a mirror that is gone clears the link of the hand mirror. */
     public static boolean handMirrorClearsLink(HandMirrorTarget target) { return target == HandMirrorTarget.NO_MIRROR; }
 
+    /** Oracle ContainerHandMirror:64-65 - only a mirror that is really there carries the item away. */
+    public static boolean handMirrorTransports(HandMirrorTarget target) { return target == HandMirrorTarget.MIRROR; }
+
+    // ----------------------------------------------------------------- magic box
+
+    /**
+     * Oracle ContainerMagicBox:28 - the menu of a magic box carries the size of the whole box
+     * chain, because the quick move boundary uses it.
+     */
+    public static int magicBoxMenuSize(int chainSize) { return Math.max(0, chainSize); }
+
+    /**
+     * Oracle ContainerMagicBox:38-44 - the menu binds three rows of the chain whatever the chain
+     * size is, so a linked box shows the first twenty seven slots only.
+     */
+    public static int magicBoxBoundSlots() { return MAGIC_BOX_SLOTS; }
+
+    // -------------------------------------------------------------- mirror link
+
+    /** What a right click with a mirror item does. */
+    public enum MirrorLinkAction {
+        /** Oracle BlockMirrorItem:95-110 - the item is bound to the mirror it was used on. */
+        BIND_ITEM,
+        /** Oracle BlockMirrorItem:112 - the mirror already has a valid partner. */
+        ALREADY_LINKED,
+        /** The block is no mirror the item can be bound to. */
+        UNSUPPORTED
+    }
+
+    /**
+     * Oracle BlockMirrorItem:86-139 - a mirror item that is used on a mirror without a valid partner
+     * binds itself to that mirror; a mirror with a valid partner refuses a second one.
+     */
+    public static MirrorLinkAction mirrorItemLink(boolean mirrorBlock, boolean itemMirror, boolean partnerLinked) {
+        if (!mirrorBlock || !itemMirror) return MirrorLinkAction.UNSUPPORTED;
+        return partnerLinked ? MirrorLinkAction.ALREADY_LINKED : MirrorLinkAction.BIND_ITEM;
+    }
+
     // --------------------------------------------------------------- focus pouch
     // Oracle ContainerFocusPouch, InventoryFocusPouch.
     public static final int FOCUS_POUCH_SLOTS = 18;

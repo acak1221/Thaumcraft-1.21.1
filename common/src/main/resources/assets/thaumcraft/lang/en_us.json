@@ -816,6 +816,7 @@
   "tc.handmirrorlinked": "Mirror linked",
   "tc.handmirrorerror": "Mirror link is broken",
   "tc.handmirrorlinkedto": "Linked to",
+  "tc.mirroralreadylinked": "That mirror is already linked to a valid destination.",
   "tc.sanity": "Current Warp: %s",
   "tc.sanity.detail": "Permanent: %1$s  Sticky: %2$s  Temporary: %3$s",
   "tc.break.fly": "Something disrupts your ability to fly.",

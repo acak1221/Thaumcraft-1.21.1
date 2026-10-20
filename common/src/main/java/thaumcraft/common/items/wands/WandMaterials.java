@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Bounded TC4 material catalogue. Original ConfigItems:292-313: iron/gold/thaumium caps, the wooden, greatwood, silverwood and the
  * six elemental rods, and the nine staff rods ({@code StaffRod}: tag {@code <rod>_staff}, a bigger capacity and price, the
- * {@code isStaff} behaviour); the void cap remains absent. An elemental rod carries a primal aspect (original
+ * {@code isStaff} behaviour), and the void cap (the copper and silver caps exist only when another mod supplies those metals). An elemental rod carries a primal aspect (original
  * {@code WandRodPrimalOnUpdate}) that it slowly refills in the wand it sits in, the primal staff all six; see {@link WandRodPassive}.
  */
 public final class WandMaterials {
@@ -49,10 +49,12 @@ public final class WandMaterials {
     public static final Cap IRON = new Cap("iron", 1.1F, 1);
     public static final Cap GOLD = new Cap("gold", 1.0F, 3);
     public static final Cap THAUMIUM = new Cap("thaumium", .9F, 6);
+    /** Original {@code WandCap("void", 0.8f, ..., 9)} (ConfigItems:297): the dearest cap and the cheapest wand to use. */
+    public static final Cap VOID = new Cap("void", .8F, 9);
     /** The order is part of the client model selector: appending keeps the earlier rods' values. */
     public static final List<Rod> RODS = List.of(WOOD, GREATWOOD, SILVERWOOD, OBSIDIAN, BLAZE, ICE, QUARTZ, BONE, REED,
             GREATWOOD_STAFF, OBSIDIAN_STAFF, BLAZE_STAFF, ICE_STAFF, QUARTZ_STAFF, BONE_STAFF, REED_STAFF, SILVERWOOD_STAFF, PRIMAL_STAFF);
-    public static final List<Cap> CAPS = List.of(IRON, GOLD, THAUMIUM);
+    public static final List<Cap> CAPS = List.of(IRON, GOLD, THAUMIUM, VOID);
 
     private WandMaterials() {}
 
@@ -65,6 +67,7 @@ public final class WandMaterials {
         if (IRON.tag().equals(tag)) return IRON;
         if (GOLD.tag().equals(tag)) return GOLD;
         if (THAUMIUM.tag().equals(tag)) return THAUMIUM;
+        if (VOID.tag().equals(tag)) return VOID;
         throw new IllegalArgumentException("Unsupported wand cap: " + tag);
     }
 

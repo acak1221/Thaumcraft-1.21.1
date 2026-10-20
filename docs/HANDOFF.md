@@ -4,6 +4,16 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально20.10 (шестнадцатая группа: Void metal и колпачок Void, Claude): реализовано, собрано, game-tested 164/164
+
+Контракт и реализация: [void-cap](analysis/2026-10-20-void-cap.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** добыча Void metal в тигле (`crucible/void_seed`: пшеничные семена + tenebrae 8, vacuos 8, alienis 2; `crucible/void_ingot`: Void Seed + metallum 8; исследование `VOIDMETAL`), самородок `void_nugget` (9 из слитка и обратно, тег `c:nuggets/void`), неактивный колпачок (`NNN/N N`, perditio 27 + ordo 27 + ignis 18 + aer 18), заряд инфузией (4 Salis Mundus, нестабильность 8, по 18 potentia / vacuos / alienis / auram),
+колпачок Void как материал жезла (множитель 0,8, цена 9; жезл с ним платит на пятую часть меньше), 360 составных моделей жезла.
+**Built / game-tested:** `:common:test` **465 JUnit** (+3 `VoidCapTest`), `:fabric:remapJar`, `:fabric:runGameTest` **164/164** (+`voidMetalAndTheVoidCapBrewCraftAndDiscount`; расширен тест очков `gogglesCraftProtectAndReduceVis` на четвёртый колпачок), JAR SHA-256 `5184292e…ea7a`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `void-cap` (20): JUnit 7/7 локально, 13 GameTest у GitHub. `staff-rods` (36) у GitHub ещё в очереди на момент записи (JUnit 19/19 локально).
+**Seen:** нет. **Не проверено:** вид колпачка/значка, настоящий тигель с этими рецептами, алтарь с зарядом, сеть/два игрока, NeoForge.
+**Следующее:** доспехи и инструменты из Void metal (`VoidHelm…VoidSword`, исследование `VOIDMETAL`), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
 ### Актуально20.10 (пятнадцатая группа: стержни-посохи, Claude): реализовано, собрано, game-tested 163/163
 
 Контракт и реализация: [staff-rods](analysis/2026-10-20-staff-rods.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

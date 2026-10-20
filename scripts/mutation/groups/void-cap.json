@@ -1,0 +1,180 @@
+{
+ "description": "Void metal and the void wand cap: crucible recipes, nuggets, inert cap, charging, price and discount (docs/analysis/2026-10-20-void-cap.md)",
+ "watch": {
+  "junit": [
+   "VoidCapTest",
+   "WandModelAssetsTest",
+   "WandDataTest"
+  ],
+  "gametests": [
+   "voidMetalAndTheVoidCapBrewCraftAndDiscount",
+   "gogglesCraftProtectAndReduceVis"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.wands.*",
+  "thaumcraft.assets.WandModelAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "void-modifier-nine",
+   "name": "the void cap takes only a tenth off",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "VOID = new Cap(\"void\", .8F, 9)",
+   "new": "VOID = new Cap(\"void\", .9F, 9)"
+  },
+  {
+   "id": "void-cost-eight",
+   "name": "the void cap costs 8 to build with",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "VOID = new Cap(\"void\", .8F, 9)",
+   "new": "VOID = new Cap(\"void\", .8F, 8)"
+  },
+  {
+   "id": "void-cap-unknown",
+   "name": "cap(\"void\") is unsupported",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "        if (VOID.tag().equals(tag)) return VOID;\n",
+   "new": ""
+  },
+  {
+   "id": "void-cap-not-listed",
+   "name": "the void cap is not in the cap list",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandMaterials.java",
+   "old": "List.of(IRON, GOLD, THAUMIUM, VOID)",
+   "new": "List.of(IRON, GOLD, THAUMIUM)"
+  },
+  {
+   "id": "cap-scale-two",
+   "name": "the cap property runs over two places",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/WandModels.java",
+   "old": "CAP_SCALE = 4F",
+   "new": "CAP_SCALE = 2F"
+  },
+  {
+   "id": "void-model-wrong-skin",
+   "name": "an obsidian wand with a void cap and a frost focus wears the bone skin",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/wand_obsidian_void_frost.json",
+   "old": "wand_rod_obsidian",
+   "new": "wand_rod_bone"
+  },
+  {
+   "id": "void-model-wrong-cap",
+   "name": "a greatwood wand with a void cap wears the gold cap",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/wand_greatwood_void.json",
+   "old": "wand_cap_void",
+   "new": "wand_cap_gold"
+  },
+  {
+   "id": "seed-needs-less-eldritch",
+   "name": "the void seed needs one eldritch",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/void_seed.json",
+   "old": "\"alienis\": 2",
+   "new": "\"alienis\": 1"
+  },
+  {
+   "id": "seed-from-pumpkin",
+   "name": "the void seed grows from pumpkin seeds",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/void_seed.json",
+   "old": "minecraft:wheat_seeds",
+   "new": "minecraft:pumpkin_seeds"
+  },
+  {
+   "id": "ingot-seven-metal",
+   "name": "the void ingot needs seven metal",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/void_ingot.json",
+   "old": "\"metallum\": 8",
+   "new": "\"metallum\": 7"
+  },
+  {
+   "id": "ingot-wrong-research",
+   "name": "the void ingot is locked behind alumentum",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/void_ingot.json",
+   "old": "\"research\": \"VOIDMETAL\"",
+   "new": "\"research\": \"ALUMENTUM\""
+  },
+  {
+   "id": "nuggets-eight",
+   "name": "an ingot splits into eight nuggets",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/void_nuggets.json",
+   "old": "\"count\":9",
+   "new": "\"count\":8"
+  },
+  {
+   "id": "ingot-from-eight",
+   "name": "eight nuggets make an ingot",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/void_ingot_from_nuggets.json",
+   "old": "[\"NNN\",\"NNN\",\"NNN\"]",
+   "new": "[\"NNN\",\"NNN\",\"NN\"]"
+  },
+  {
+   "id": "inert-cheap-air",
+   "name": "the inert cap needs 17 air",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/wand_cap_void_inert.json",
+   "old": "\"aer\":18",
+   "new": "\"aer\":17"
+  },
+  {
+   "id": "inert-full-pattern",
+   "name": "the inert cap is a full block of nuggets",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/wand_cap_void_inert.json",
+   "old": "[\"NNN\",\"N N\"]",
+   "new": "[\"NNN\",\"NNN\"]"
+  },
+  {
+   "id": "inert-thaumium-nuggets",
+   "name": "the inert cap takes thaumium nuggets",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/wand_cap_void_inert.json",
+   "old": "c:nuggets/void",
+   "new": "c:nuggets/thaumium"
+  },
+  {
+   "id": "charge-instability-seven",
+   "name": "the charging brews at instability 7",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_cap_void.json",
+   "old": "\"instability\":8",
+   "new": "\"instability\":7"
+  },
+  {
+   "id": "charge-three-salis",
+   "name": "the charging takes three Salis Mundus",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_cap_void.json",
+   "old": "{\"item\":\"thaumcraft:salis_mundus\"},{\"item\":\"thaumcraft:salis_mundus\"},{\"item\":\"thaumcraft:salis_mundus\"},{\"item\":\"thaumcraft:salis_mundus\"}",
+   "new": "{\"item\":\"thaumcraft:salis_mundus\"},{\"item\":\"thaumcraft:salis_mundus\"},{\"item\":\"thaumcraft:salis_mundus\"}"
+  },
+  {
+   "id": "charge-less-eldritch",
+   "name": "the charging needs 16 eldritch",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/wand_cap_void.json",
+   "old": "\"alienis\":18",
+   "new": "\"alienis\":16"
+  },
+  {
+   "id": "void-cap-item-is-thaumium",
+   "name": "the void cap item is the thaumium cap",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftWands.java",
+   "old": "case \"void\" -> VOID_WAND_CAP.get();",
+   "new": "case \"void\" -> THAUMIUM_WAND_CAP.get();"
+  }
+ ]
+}

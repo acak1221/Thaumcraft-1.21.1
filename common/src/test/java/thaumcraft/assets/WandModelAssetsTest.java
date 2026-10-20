@@ -82,6 +82,7 @@ class WandModelAssetsTest {
         assertEquals(0F, WandModels.capValue("iron"), 0F);
         assertEquals(.25F, WandModels.capValue("gold"), 0F);
         assertEquals(.5F, WandModels.capValue("thaumium"), 0F);
+        assertEquals(.75F, WandModels.capValue("void"), 0F);
         assertEquals(List.of(0F, .25F, .5F, .75F, 1F), WandModels.FOCI.stream().map(WandModels.Focus::value).toList());
     }
 

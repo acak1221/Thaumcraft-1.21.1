@@ -785,6 +785,12 @@
       "aspects": {"praecantatio": 5, "venenum": 5, "perditio": 5, "alienis": 5, "telum": 5}
     },
     {
+      "original_source_line": 449, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 1,
+      "identifier_evidence": "ConfigAspects449 direct Crimson Rites row; actual native reusable ItemCrimsonRites now registered as crimson_rites",
+      "modern_ids": ["thaumcraft:crimson_rites"],
+      "aspects": {"cognitio": 5, "praecantatio": 3, "alienis": 3, "spiritus": 3}
+    },
+    {
       "original_source_line": 454, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 3,
       "identifier_evidence": "Original Primordial Pearl metadata3 now has its native ItemPrimordialPearl behavior and primordial_pearl registry item",
       "modern_ids": ["thaumcraft:primordial_pearl"],

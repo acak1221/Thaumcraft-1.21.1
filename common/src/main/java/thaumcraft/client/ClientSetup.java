@@ -59,6 +59,8 @@ public final class ClientSetup {
         thaumcraft.client.ThaumcraftTaintSporesClient.init();
         thaumcraft.client.ThaumcraftBiomeClient.init();
         thaumcraft.client.ThaumcraftPrimalFociClient.init();
+        thaumcraft.client.ThaumcraftEldritchItemsClient.init();
+        thaumcraft.client.ThaumcraftSpaClient.init();
         EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINT_SWARM,
                 thaumcraft.client.renderers.entity.RenderTaintSwarm::new);
         EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE,

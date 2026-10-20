@@ -483,6 +483,19 @@ public final class DeferredItemDrops extends SavedData {
      * menu slot immediately on normal return; admission/retries occur level-post.
      * This closes native Player.drop's ignored addFreshEntity-refusal item loss. */
     public static void enqueuePechReturn(ServerLevel level, net.minecraft.world.entity.player.Player player, ItemStack actualResult) {
+        enqueuePaidContainerReturn(level,player,actualResult,true);
+    }
+
+    /** Paid Pure bucket pickup overflow/refund, with the original player throw
+     * and40-tick pickup delay; it has no PechDrop marker. Caller already consumed
+     * its actual empty container/source before routing this single result. */
+    public static void enqueueBucketReturn(ServerLevel level, net.minecraft.world.entity.player.Player player, ItemStack actualResult) {
+        if(actualResult==null||actualResult.isEmpty()||!actualResult.is(net.minecraft.world.item.Items.BUCKET)&&!actualResult.is(thaumcraft.common.config.ThaumcraftSpa.BUCKET_PURE.get()))
+            throw new IllegalArgumentException("Paid Pure bucket result required");
+        enqueuePaidContainerReturn(level,player,actualResult,false);
+    }
+
+    private static void enqueuePaidContainerReturn(ServerLevel level, net.minecraft.world.entity.player.Player player, ItemStack actualResult,boolean pechDrop) {
         if (!level.getServer().isSameThread() || player.level() != level || level.getServer().getLevel(level.dimension()) != level)
             throw new IllegalStateException("Pech return requires the canonical player level and server thread");
         if (actualResult == null || actualResult.isEmpty()) throw new IllegalArgumentException("Pech return requires its actual menu stock");
@@ -498,7 +511,7 @@ public final class DeferredItemDrops extends SavedData {
         vz += Math.sin(angle) * spread;
         data.pending.addLast(new Pending(UUID.randomUUID(), player.blockPosition().immutable(),
                 new Vec3(player.getX(), player.getY() - (double) .3F + player.getEyeHeight(), player.getZ()),
-                new Vec3(vx, vy, vz), actualResult.copy(), 40, Long.MIN_VALUE, -1, false, null, 0, true));
+                new Vec3(vx, vy, vz), actualResult.copy(), 40, Long.MIN_VALUE, -1, false, null, 0, pechDrop));
         data.deliveryRequested = true;
         data.setDirty();
     }

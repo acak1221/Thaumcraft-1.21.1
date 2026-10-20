@@ -234,6 +234,7 @@ if (clientSmokeScope != 'full') {
       }
 }
 def clientTestModRoots = files(sourceSets.clientTest.output)
+def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
 loom.runs {
  gameTest {
   server()
@@ -241,7 +242,8 @@ loom.runs {
   name 'Thaumcraft 1.21.1 GameTests'
   vmArg "-Dfabric.classPathGroups=${gameTestModRoots.asPath}"
   vmArg '-Dfabric-api.gametest'
-  vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file('gametest-results.xml').get().asFile.absolutePath}"
+  if (!gameTestFilter.isBlank()) vmArg "-Dthaumcraft.gameTestFilter=${gameTestFilter}"
+  vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file(gameTestFilter.isBlank() ? 'gametest-results.xml' : 'gametest-focused-results.xml').get().asFile.absolutePath}"
   runDir 'run-gametest'
  }
  clientSmoke {

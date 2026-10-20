@@ -17,7 +17,7 @@ import thaumcraft.common.items.wands.WandData;
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusPrimal|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemGirdleHover|itemFocusHellbat|itemFocusPech|itemFocusPrimal|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain|itemBathSalts|itemSanitySoap|itemEldritchObject)"
             + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCrystal|blockCustomOre|blockChestHungry|blockTaint|blockTaintFibres|blockEssentiaReservoir|blockLifter))"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
 
@@ -140,6 +140,9 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemFocusHellbat" -> metadata == 0 ? "focus_hellbat" : null;
             case "ConfigItems.itemFocusPech" -> metadata == 0 ? "focus_pech" : null;
             case "ConfigItems.itemFocusPrimal" -> metadata == 0 ? "focus_primal" : null;
+            case "ConfigItems.itemBathSalts" -> metadata == 0 ? "bath_salts" : null;
+            case "ConfigItems.itemSanitySoap" -> metadata == 0 ? "sanity_soap" : null;
+            case "ConfigItems.itemEldritchObject" -> switch(metadata) {case 0 -> "eldritch_eye";case 1 -> "crimson_rites";case 3 -> "primordial_pearl";default -> null;};
             case "ConfigItems.itemFocusFire" -> metadata == 0 ? "focus_fire" : null;
             case "ConfigItems.itemFocusTrade" -> metadata == 0 ? "focus_trade" : null;
             case "ConfigItems.itemFocusWarding" -> metadata == 0 ? "focus_warding" : null;
@@ -261,6 +264,7 @@ final class ResearchIconDisplay {
                 default -> null;
             };
             case "ConfigBlocks.blockStoneDevice" -> switch (metadata) {
+                case 12 -> "arcane_spa";
                 case 0 -> "alchemy_furnace";
                 case 1 -> "arcane_pedestal";
                 case 2 -> "infusion_matrix";

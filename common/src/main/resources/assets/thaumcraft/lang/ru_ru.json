@@ -2154,5 +2154,12 @@
   "entity.thaumcraft.falling_taint": "Заражённый осадок",
   "biome.thaumcraft.magical_forest": "Магический лес",
   "biome.thaumcraft.eerie": "Зловещий биом",
-  "biome.thaumcraft.taint": "Заражённые земли"
+  "biome.thaumcraft.taint": "Заражённые земли",
+  "block.thaumcraft.arcane_spa": "Магическая ванна",
+  "item.thaumcraft.arcane_spa": "Магическая ванна",
+  "item.thaumcraft.bath_salts": "Очищающая соль",
+  "item.thaumcraft.sanity_soap": "Лечащее мыло",
+  "item.thaumcraft.crimson_rites": "Багровые ритуалы",
+  "block.thaumcraft.purifying_fluid": "Очищающая жидкость",
+  "item.thaumcraft.bucket_pure": "Ведро очищающей жидкости"
 }

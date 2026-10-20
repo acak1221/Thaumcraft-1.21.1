@@ -188,6 +188,9 @@ public final class ThaumcraftRecipeDisplay {
             alias("FocusFrost", "arcane/focus_frost"),           // 248
             alias("FocusShock", "arcane/focus_shock"),           // 249
             alias("FocusPrimal", "arcane/focus_primal"),
+            alias("BathSalts", "crucible/bath_salts"),
+            alias("ArcaneSpa", "arcane/arcane_spa"),
+            alias("SaneSoap", "crucible/sanity_soap"),
             alias("FocusPortableHole", "infusion/focus_portable_hole"), // ConfigRecipes:320, ender pearl / 3 nether quartz / earth, air and entropy shards
             alias("FocusExcavation", "arcane/focus_excavation"), // 251
             alias("FocusTrade", "arcane/focus_trade"),

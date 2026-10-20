@@ -2154,5 +2154,12 @@
   "entity.thaumcraft.falling_taint": "Tainted Crust",
   "biome.thaumcraft.magical_forest": "Magical Forest",
   "biome.thaumcraft.eerie": "Eerie",
-  "biome.thaumcraft.taint": "Tainted Land"
+  "biome.thaumcraft.taint": "Tainted Land",
+  "block.thaumcraft.arcane_spa": "Arcane Spa",
+  "item.thaumcraft.arcane_spa": "Arcane Spa",
+  "item.thaumcraft.bath_salts": "Bath Salts",
+  "item.thaumcraft.sanity_soap": "Sanity Soap",
+  "item.thaumcraft.crimson_rites": "Crimson Rites",
+  "block.thaumcraft.purifying_fluid": "Purifying Fluid",
+  "item.thaumcraft.bucket_pure": "Bucket of Purity"
 }

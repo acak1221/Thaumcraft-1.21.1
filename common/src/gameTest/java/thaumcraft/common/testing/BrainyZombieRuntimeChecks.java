@@ -154,6 +154,16 @@ public final class BrainyZombieRuntimeChecks {
         int amount(net.minecraft.world.item.Item item) { return level.getEntitiesOfClass(ItemEntity.class, bounds).stream().map(ItemEntity::getItem).filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum(); }
         void deathLoot() {
             var brain = ThaumcraftContent.MATERIALS.get("zombie_brain").get();
+            var emission = spawn(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), 0);
+            level.random.setSeed(98765); emission.getRandom().setSeed(54321);
+            var drop = emission.spawnAtLocation(new ItemStack(Items.ROTTEN_FLESH), 1.5F);
+            test.assertTrue(drop != null && drop.getDeltaMovement().x >= -.1F && drop.getDeltaMovement().x <= .1F
+                            && drop.getDeltaMovement().y == (double) .2F && drop.getDeltaMovement().z >= -.1F && drop.getDeltaMovement().z <= .1F,
+                    "actual native loot admission retains the original independent float item motion");
+            test.assertTrue(level.random.nextLong() == RandomSource.create(98765).nextLong()
+                            && emission.getRandom().nextLong() == RandomSource.create(54321).nextLong(),
+                    "drop motion consumes neither world nor mob gameplay RNG before the next flesh/brain/rare roll");
+            emission.discard(); clearDrops();
             clearDrops(); var ordinary = spawn(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), 0); level.random.setSeed(allFleshSeed(3));
             ordinary.hurt(level.damageSources().generic(), 1000);
             test.assertTrue(ordinary.isDeadOrDying() && amount(Items.ROTTEN_FLESH) == 3 && amount(brain) == 1,

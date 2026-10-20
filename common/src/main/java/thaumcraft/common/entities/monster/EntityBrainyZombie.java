@@ -26,6 +26,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -81,6 +82,7 @@ public class EntityBrainyZombie extends ZombieVillager {
     @Override public SoundEvent getStepSound() { return SoundEvents.ZOMBIE_STEP; }
     @Override public float getVoicePitch() { return (isBaby() ? 1.5F : 1F) + (random.nextFloat() - random.nextFloat()) * .2F; }
     @Override protected ItemStack getSkull() { return ItemStack.EMPTY; } // Charged-creeper skull loot did not exist in 1.7.
+    @Override public ItemEntity spawnAtLocation(ItemStack stack, float height) { return OriginalMobLoot.spawn(this, stack, height); }
     @Override protected void dropFromLootTable(DamageSource source, boolean recentlyHit) {}
     protected int fleshAttempts() { return 3; }
     protected int fleshPerDrop() { return 1; }

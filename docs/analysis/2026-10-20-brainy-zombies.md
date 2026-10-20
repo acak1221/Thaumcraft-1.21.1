@@ -26,6 +26,15 @@ Brainy rare choice is iron/carrot/potato; Giant adds thaumium/amber in place
 of iron and uses four equal choices. The earlier guardian eye gate is fixed
 to the same exact integer rule in this unit.
 
+The native1.21 convenience ItemEntity constructor consumes two WORLD random
+doubles for motion, whereas original1.7 EntityItem uses independent Math.random
+and casts each motion component to float. Using that constructor inside the
+flesh loop changes the following flesh/brain rolls. OriginalMobLoot.spawn now
+uses explicit native item motion with the original independent float draws;
+Brainy/Giant and Guardian route custom/equipment emissions through it. A native
+runtime assertion checks admitted item motion and both untouched gameplay RNG
+streams before the existing actual-death maximum-flesh assertions.
+
 Important retained quirk: original Zombie.setSize(float,float) is final and
 updates STORED width/height after initialization, without applying the box.
 Giant's constructor/rage update therefore leave a fresh adult's ACTUAL box

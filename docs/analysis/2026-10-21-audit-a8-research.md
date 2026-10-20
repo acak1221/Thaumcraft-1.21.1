@@ -176,7 +176,10 @@ wand construct, либо отложен с письменной причиной
   `native .../ResearchItem.java:88` создаёт элемент корпуса **без иконки**
   (`(ResourceLocation) null`), а `itemTriggers`/`aspectTriggers` остаются
   `null`: в корпусе они хранятся только как provenance-строки
-  (`native .../ResearchItem.java:81-109`).
+  (`native .../ResearchItem.java:81-109`). В самом браузере иконка записи всё
+  же рисуется — она восстанавливается из `icon_expression` через
+  `ResearchIconDisplay` (`native .../ResearchIconDisplay.java:57-330`,
+  белый список оригинальных предметов/блоков и их метаданных).
 * `thaumcraft/api/research/ResearchPage.java` — `adapt`/`partial`.
   Оригинал: `oracle .../ResearchPage.java:26-32` и 11 значений `PageType`.
   Порт: `native .../ResearchPage.java:23-31` те же поля и те же 11 типов, но

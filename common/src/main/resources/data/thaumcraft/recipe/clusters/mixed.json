@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "thaumcraft_crystal_clusters",
+  "ingredients": [
+    {
+      "item": "thaumcraft:air_shard"
+    },
+    {
+      "item": "thaumcraft:fire_shard"
+    },
+    {
+      "item": "thaumcraft:water_shard"
+    },
+    {
+      "item": "thaumcraft:earth_shard"
+    },
+    {
+      "item": "thaumcraft:order_shard"
+    },
+    {
+      "item": "thaumcraft:entropy_shard"
+    }
+  ],
+  "result": {
+    "id": "thaumcraft:crystal_mixed",
+    "count": 1
+  }
+}

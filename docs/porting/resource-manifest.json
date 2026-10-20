@@ -11628,13 +11628,13 @@
       "modern_id": "thaumcraft:crystal_air",
       "registry": "block_and_item",
       "textures": [
-        "thaumcraft:items/shard",
+        "thaumcraft:models/crystal",
         "thaumcraft:blocks/crystal"
       ],
       "legacy_translation_keys": [
         "tile.thaumcraft.crystal.0.name"
       ],
-      "visual_status": "foundation_crossed_sprite",
+      "visual_status": "native_six_piece_renderer_client_unverified",
       "tint_index": 0,
       "tint_rgb": "#FFFF7E"
     },
@@ -11659,13 +11659,13 @@
       "modern_id": "thaumcraft:crystal_fire",
       "registry": "block_and_item",
       "textures": [
-        "thaumcraft:items/shard",
+        "thaumcraft:models/crystal",
         "thaumcraft:blocks/crystal"
       ],
       "legacy_translation_keys": [
         "tile.thaumcraft.crystal.1.name"
       ],
-      "visual_status": "foundation_crossed_sprite",
+      "visual_status": "native_six_piece_renderer_client_unverified",
       "tint_index": 0,
       "tint_rgb": "#FF3C01"
     },
@@ -11690,13 +11690,13 @@
       "modern_id": "thaumcraft:crystal_water",
       "registry": "block_and_item",
       "textures": [
-        "thaumcraft:items/shard",
+        "thaumcraft:models/crystal",
         "thaumcraft:blocks/crystal"
       ],
       "legacy_translation_keys": [
         "tile.thaumcraft.crystal.2.name"
       ],
-      "visual_status": "foundation_crossed_sprite",
+      "visual_status": "native_six_piece_renderer_client_unverified",
       "tint_index": 0,
       "tint_rgb": "#0090FF"
     },
@@ -11721,13 +11721,13 @@
       "modern_id": "thaumcraft:crystal_earth",
       "registry": "block_and_item",
       "textures": [
-        "thaumcraft:items/shard",
+        "thaumcraft:models/crystal",
         "thaumcraft:blocks/crystal"
       ],
       "legacy_translation_keys": [
         "tile.thaumcraft.crystal.3.name"
       ],
-      "visual_status": "foundation_crossed_sprite",
+      "visual_status": "native_six_piece_renderer_client_unverified",
       "tint_index": 0,
       "tint_rgb": "#00A000"
     },
@@ -11752,13 +11752,13 @@
       "modern_id": "thaumcraft:crystal_order",
       "registry": "block_and_item",
       "textures": [
-        "thaumcraft:items/shard",
+        "thaumcraft:models/crystal",
         "thaumcraft:blocks/crystal"
       ],
       "legacy_translation_keys": [
         "tile.thaumcraft.crystal.4.name"
       ],
-      "visual_status": "foundation_crossed_sprite",
+      "visual_status": "native_six_piece_renderer_client_unverified",
       "tint_index": 0,
       "tint_rgb": "#EECCFF"
     },
@@ -11783,15 +11783,29 @@
       "modern_id": "thaumcraft:crystal_entropy",
       "registry": "block_and_item",
       "textures": [
-        "thaumcraft:items/shard",
+        "thaumcraft:models/crystal",
         "thaumcraft:blocks/crystal"
       ],
       "legacy_translation_keys": [
         "tile.thaumcraft.crystal.5.name"
       ],
-      "visual_status": "foundation_crossed_sprite",
+      "visual_status": "native_six_piece_renderer_client_unverified",
       "tint_index": 0,
       "tint_rgb": "#555577"
+    },
+    {
+      "legacy_id": "thaumcraft:blockcrystal",
+      "legacy_metadata": 6,
+      "modern_id": "thaumcraft:crystal_mixed",
+      "registry": "block_and_item",
+      "textures": [
+        "thaumcraft:models/crystal",
+        "thaumcraft:blocks/crystal"
+      ],
+      "legacy_translation_keys": [
+        "tile.thaumcraft.crystal.6.name"
+      ],
+      "visual_status": "native_six_piece_renderer_client_unverified"
     },
     {
       "legacy_id": "thaumcraft:itemshard",
@@ -13518,8 +13532,8 @@
     },
     {
       "id": "crystal_geometry",
-      "status": "pending",
-      "detail": "Crystals use an original tinted crystal sprite on crossed planes; six-piece randomized 3D clusters and attachment orientation remain to port."
+      "status": "implemented_client_unverified",
+      "detail": "Seven native tile/builtin item renderers use the original six-piece ModelCrystal geometry, face attachment and positional Java RNG; inspected client visual acceptance remains pending."
     },
     {
       "id": "jar_contents",
@@ -13539,7 +13553,7 @@
     {
       "id": "item_tint_registration",
       "status": "platform_client_registration_required",
-      "detail": "Shard/crystal models use tint index 0 and original RGB values. Filled phials use the aspect component color at tint index 1 while layer 0 stays white. Loader clients must register these providers and jar/crystal cutout layers."
+      "detail": "Shard models use tint index 0 and original RGB values. Seven crystal tile/builtin item renderers apply original per-piece colors directly. Filled phials use the aspect component color at tint index 1 while layer 0 stays white. Loader clients must register these providers and jar cutout layers."
     },
     {
       "id": "legacy_mesh_formats",

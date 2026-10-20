@@ -38,6 +38,17 @@ import thaumcraft.api.aspects.Aspect;
 public final class VisNetHandler {
     private record WorkbenchGrant(thaumcraft.common.tiles.TileMagicWorkbenchCharger charger, Aspect aspect, int units) {}
     private static final ThreadLocal<WorkbenchGrant> WORKBENCH_GRANT = new ThreadLocal<>();
+    private static final class AmuletGrant {
+        final thaumcraft.common.tiles.TileVisRelay relay; final Aspect aspect; final int units; boolean used;
+        AmuletGrant(thaumcraft.common.tiles.TileVisRelay relay,Aspect aspect,int units){this.relay=relay;this.aspect=aspect;this.units=units;}
+    }
+    private static final ThreadLocal<AmuletGrant> AMULET_GRANT=new ThreadLocal<>();
+    public static void requireAmuletGrant(thaumcraft.common.tiles.TileVisRelay relay,Aspect aspect,int units) {
+        AmuletGrant grant=AMULET_GRANT.get();
+        if(grant==null||grant.used||grant.relay!=relay||grant.aspect!=aspect||grant.units!=units)
+            throw new IllegalStateException("Amulet credit requires executor's exact unused committed grant");
+        grant.used=true;
+    }
 
     /** Closed native receive frame: no public callback can forge or replay a paid workbench-wand credit. */
     public static void requireWorkbenchGrant(thaumcraft.common.tiles.TileMagicWorkbenchCharger charger, Aspect aspect, int units) {
@@ -45,6 +56,20 @@ public final class VisNetHandler {
         if (grant == null || grant.charger() != charger || grant.aspect() != aspect || grant.units() != units) {
             throw new IllegalStateException("Workbench wand credit requires the executor's exact committed grant");
         }
+    }
+    private static final class AdvancedFurnaceGrant {
+        final thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced furnace;
+        final Aspect aspect;
+        int units;
+        boolean accepted;
+        AdvancedFurnaceGrant(thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced furnace,Aspect aspect) { this.furnace=furnace; this.aspect=aspect; }
+    }
+    private static final ThreadLocal<AdvancedFurnaceGrant> ADVANCED_FURNACE_GRANT=new ThreadLocal<>();
+    public static void requireAdvancedFurnaceGrant(thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced furnace,Aspect aspect,int units) {
+        AdvancedFurnaceGrant grant=ADVANCED_FURNACE_GRANT.get();
+        if(grant==null || grant.accepted || grant.furnace!=furnace || grant.aspect!=aspect || grant.units!=units)
+            throw new IllegalStateException("Advanced furnace power requires the exact native committed grant");
+        grant.accepted=true;
     }
     /** Server-side post-debit beam effect. The packet sender lives in common and is registered at startup. */
     @FunctionalInterface public interface EffectSink { void send(ServerLevel level, BlockPos consumer, BlockPos selectedNode, Aspect aspect); }
@@ -528,6 +553,13 @@ public final class VisNetHandler {
                 thaumcraft.common.tiles.TileMagicWorkbenchCharger workbench = consumer == null
                         && node instanceof thaumcraft.common.tiles.TileMagicWorkbenchCharger charger && charger.hasPreparedVisCharge() ? charger : null;
                 if (workbench != null && !workbench.readyForVisGrant(aspect, remaining)) break;
+                thaumcraft.common.tiles.TileVisRelay amulet=consumer==null && node instanceof thaumcraft.common.tiles.TileVisRelay relay
+                        && thaumcraft.common.lib.baubles.PlayerAccessories.hasPreparedAmuletCharge(relay) ? relay : null;
+                if(amulet!=null && !thaumcraft.common.lib.baubles.PlayerAccessories.readyForAmuletGrant(amulet,aspect,remaining))break;
+                thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced furnace=consumer!=null
+                        && consumer.owner instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced candidate && candidate.hasPreparedPowerGrant(aspect)?candidate:null;
+                if(furnace!=null && !furnace.readyForPowerGrant(aspect,remaining)) break;
+                AdvancedFurnaceGrant furnaceReceipt=furnace==null?null:new AdvancedFurnaceGrant(furnace,aspect);
                 int grant;
                 try { grant = root.debit(aspect, remaining); }
                 catch (RuntimeException failure) {
@@ -544,6 +576,17 @@ public final class VisNetHandler {
                     WORKBENCH_GRANT.set(new WorkbenchGrant(workbench, aspect, grant));
                     try { workbench.acceptPreparedVisGrant(aspect, grant); }
                     finally { WORKBENCH_GRANT.remove(); }
+                }
+                if(amulet!=null) {
+                    AMULET_GRANT.set(new AmuletGrant(amulet,aspect,grant));
+                    try { thaumcraft.common.lib.baubles.PlayerAccessories.acceptPreparedAmuletGrant(amulet,aspect,grant); }
+                    finally { AMULET_GRANT.remove(); }
+                }
+                if(furnaceReceipt!=null) {
+                    furnaceReceipt.units=grant;
+                    ADVANCED_FURNACE_GRANT.set(furnaceReceipt);
+                    try { furnace.acceptPreparedPowerGrant(aspect,grant); }
+                    finally { ADVANCED_FURNACE_GRANT.remove(); }
                 }
                 for (int i = route.steps.size() - 1; i >= 0; --i) {
                     Step step = route.steps.get(i); // Original recursive forwarding unwinds parent -> child.

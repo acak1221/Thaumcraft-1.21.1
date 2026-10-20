@@ -113,7 +113,8 @@ public final class ThaumcraftRecipeDisplay {
             alias("TubeRestrict", "arcane/essentia_restrict"), // 287, stone not cobblestone
             alias("TubeOneway", "arcane/essentia_oneway"),    // 288, original dyeBlue includes lapis
             alias("TubeBuffer", "arcane/essentia_buffer"),    // 289, distinct shaped CENTRIFUGE gate
-            alias("AlchemicalConstruct", "arcane/alchemical_construct"), // 290, FOUR basic tubes
+            alias("AlchemicalConstruct", "arcane/alchemical_construct"),
+            alias("AdvAlchemyConstruct", "arcane/advanced_alchemical_construct"), // 290, FOUR basic tubes
             alias("MnemonicMatrix", "arcane/mnemonic_matrix"),
             alias("Centrifuge", "arcane/centrifuge"),         // 292, no advanced-construct substitution
             alias("EssentiaCrystalizer", "arcane/essentia_crystallizer"), // 293, dispenser/balanced shards
@@ -190,6 +191,20 @@ public final class ThaumcraftRecipeDisplay {
             alias("FocusExcavation", "arcane/focus_excavation"), // 251
             alias("FocusTrade", "arcane/focus_trade"),
             alias("FocusWarding", "infusion/focus_warding"),
+            alias("FocusHellbat", "infusion/focus_hellbat"),
+            alias("FocusPouch", "arcane/focus_pouch"),
+            alias("MundaneAmulet", "mundane_amulet"),
+            alias("MundaneRing", "mundane_ring"),
+            alias("MundaneBelt", "mundane_belt"),
+            alias("VisAmulet", "infusion/vis_amulet"),
+            alias("RunicAmulet", "infusion/runic_amulet"),
+            alias("RunicAmuletEmergency", "infusion/runic_amulet_emergency"),
+            alias("RunicRing", "infusion/runic_ring"),
+            alias("RunicRingCharged", "infusion/runic_ring_charged"),
+            alias("RunicRingHealing", "infusion/runic_ring_healing"),
+            alias("RunicGirdle", "infusion/runic_girdle"),
+            alias("RunicGirdleKinetic", "infusion/runic_girdle_kinetic"),
+            alias("RunicGirdleKinetic_2", "infusion/runic_girdle_kinetic_2"),
             alias("Deconstructor", "arcane/deconstruction_table"),
             alias("LampGrowth", "infusion/growth_lamp"),
             alias("LampFertility", "infusion/fertility_lamp"),
@@ -237,6 +252,13 @@ public final class ThaumcraftRecipeDisplay {
             alias("WandRodBoneStaff", "arcane/staff_rod_bone"), // 227
             alias("WandRodPrimalStaff", "infusion/staff_rod_primal"), // 318
             alias("TallowCandle", "tallow_candle"),            // 477
+            alias("Clusters0", "clusters/air"),
+            alias("Clusters1", "clusters/fire"),
+            alias("Clusters2", "clusters/water"),
+            alias("Clusters3", "clusters/earth"),
+            alias("Clusters4", "clusters/order"),
+            alias("Clusters5", "clusters/entropy"),
+            alias("Clusters6", "clusters/mixed"),
             alias("JarLabel", "jar_label"));                    // 416-418; dynamic bind/clear not static diagrams
 
     private final RecipeHolder<?> recipe;
@@ -246,6 +268,7 @@ public final class ThaumcraftRecipeDisplay {
     private final List<ThaumcraftRecipeDisplay> alternatives;
     private final boolean infusionAltar;
     private final boolean thaumatorium;
+    private final boolean advancedFurnace;
 
     private ThaumcraftRecipeDisplay(RecipeHolder<?> recipe, List<Ingredient> ingredients, int gridWidth, boolean shapeless) {
         this.recipe = recipe;
@@ -255,6 +278,7 @@ public final class ThaumcraftRecipeDisplay {
         alternatives = List.of();
         infusionAltar = false;
         thaumatorium = false;
+        advancedFurnace = false;
     }
 
     private ThaumcraftRecipeDisplay(List<ThaumcraftRecipeDisplay> alternatives) {
@@ -266,15 +290,21 @@ public final class ThaumcraftRecipeDisplay {
         this.alternatives = List.copyOf(alternatives);
         infusionAltar = false;
         thaumatorium = false;
+        advancedFurnace = false;
     }
 
     private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe, boolean thaumatorium) {
+        this(matrixRecipe, thaumatorium, false);
+    }
+
+    private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe, boolean thaumatorium, boolean advancedFurnace) {
         recipe = matrixRecipe;
         ingredients = List.of();
         gridWidth = 3;
         shapeless = false;
         alternatives = List.of();
-        infusionAltar = !thaumatorium;
+        infusionAltar = !thaumatorium && !advancedFurnace;
+        this.advancedFurnace = advancedFurnace;
         this.thaumatorium = thaumatorium;
     }
 
@@ -330,6 +360,12 @@ public final class ThaumcraftRecipeDisplay {
                     && !construct.value().getResultItem(level.registryAccess()).isEmpty()
                     && ThaumcraftAlchemy.CRUCIBLE_ITEM.get() != net.minecraft.world.item.Items.AIR
                     ? new ThaumcraftRecipeDisplay(construct, true) : null;
+        }
+        if ("AdvAlchemyFurnace".equals(page.recipeKey())) {
+            var construct = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/advanced_alchemical_construct")).orElse(null);
+            return construct != null && construct.value() instanceof ArcaneShapedRecipe
+                    && !construct.value().getResultItem(level.registryAccess()).isEmpty()
+                    ? new ThaumcraftRecipeDisplay(construct, false, true) : null;
         }
         ResourceLocation id = ALIASES.get(page.recipeKey());
         if (id == null) return null;
@@ -413,6 +449,7 @@ public final class ThaumcraftRecipeDisplay {
                          int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
         if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);
+        if (advancedFurnace) return AdvancedFurnaceBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
         if (thaumatorium) return ThaumatoriumBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
         if (infusionAltar) return renderInfusionAltar(graphics, font, x, y, width, height, mouseX, mouseY);
         if (recipe.value() instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe infusion)

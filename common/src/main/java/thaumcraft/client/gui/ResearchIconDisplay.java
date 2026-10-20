@@ -17,8 +17,8 @@ import thaumcraft.common.items.wands.WandData;
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
-            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCustomOre|blockChestHungry|blockTaint|blockEssentiaReservoir|blockLifter))"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusPouch|itemAmuletVis|itemBaubleBlanks|itemRingRunic|itemAmuletRunic|itemGirdleRunic|itemFocusHellbat|itemFocusPech|itemFocusFire|itemFocusTrade|itemFocusWarding|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
+            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticOpaque|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCrystal|blockCustomOre|blockChestHungry|blockTaint|blockEssentiaReservoir|blockLifter))"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
 
     // Original ItemResource:81-100; native ThaumcraftContent.MATERIALS flattening.
@@ -128,6 +128,14 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemThaumometer" -> metadata == 0 ? "thaumometer" : null;
             case "ConfigItems.itemGoggles" -> metadata == 0 ? "goggles_revealing" : null;
             case "ConfigItems.itemEssence" -> metadata == 0 ? "phial_empty" : null;
+            case "ConfigItems.itemFocusPouch" -> metadata == 0 ? "focus_pouch" : null;
+            case "ConfigItems.itemAmuletVis" -> variant(List.of("vis_amulet_lesser", "vis_amulet"), metadata);
+            case "ConfigItems.itemBaubleBlanks" -> variant(List.of("mundane_amulet", "mundane_ring", "mundane_belt", "discount_ring_aer", "discount_ring_terra", "discount_ring_ignis", "discount_ring_aqua", "discount_ring_ordo", "discount_ring_perditio"), metadata);
+            case "ConfigItems.itemRingRunic" -> variant(List.of("runic_ring_lesser", "runic_ring", "runic_ring_charged", "runic_ring_healing"), metadata);
+            case "ConfigItems.itemAmuletRunic" -> variant(List.of("runic_amulet", "runic_amulet_emergency"), metadata);
+            case "ConfigItems.itemGirdleRunic" -> variant(List.of("runic_girdle", "runic_girdle_kinetic"), metadata);
+            case "ConfigItems.itemFocusHellbat" -> metadata == 0 ? "focus_hellbat" : null;
+            case "ConfigItems.itemFocusPech" -> metadata == 0 ? "focus_pech" : null;
             case "ConfigItems.itemFocusFire" -> metadata == 0 ? "focus_fire" : null;
             case "ConfigItems.itemFocusTrade" -> metadata == 0 ? "focus_trade" : null;
             case "ConfigItems.itemFocusWarding" -> metadata == 0 ? "focus_warding" : null;
@@ -296,6 +304,7 @@ final class ResearchIconDisplay {
                 case 3 -> "cinderpearl";
                 default -> null;
             };
+            case "ConfigBlocks.blockCrystal" -> variant(List.of("crystal_air", "crystal_fire", "crystal_water", "crystal_earth", "crystal_order", "crystal_entropy", "crystal_mixed"), metadata);
             case "ConfigBlocks.blockCustomOre" -> variant(ORES, metadata);
             case "ConfigBlocks.blockChestHungry" -> metadata == 0 ? "hungry_chest" : null;
             case "ConfigBlocks.blockEssentiaReservoir" -> metadata == 0 ? "essentia_reservoir" : null;

@@ -76,7 +76,8 @@ public record FocusUpgradeData(List<Short> ranks) {
                 || !(focus.getItem() instanceof ItemFocusFire || focus.getItem() instanceof ItemFocusFrost
                     || focus.getItem() instanceof ItemFocusShock || focus.getItem() instanceof ItemFocusExcavation
                     || focus.getItem() instanceof ItemFocusPortableHole || focus.getItem() instanceof ItemFocusWarding
-                    || focus.getItem() instanceof ItemFocusTrade)) return false;
+                    || focus.getItem() instanceof ItemFocusTrade || focus.getItem() instanceof ItemFocusHellbat
+                    || focus.getItem() instanceof ItemFocusPech)) return false;
         if (focus.getItem() instanceof ItemFocusWarding && read(focus).level(FocusUpgradeType.enlarge) > 0
                 && read(focus).level(FocusUpgradeType.architect) == 0) return false;
         if (focus.getItem() instanceof ItemFocusShock && read(focus).level(FocusUpgradeType.enlarge) > 0

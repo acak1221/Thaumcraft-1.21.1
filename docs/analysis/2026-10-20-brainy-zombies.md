@@ -61,7 +61,10 @@ old sky draw32/local brightness draw8 and thunder subtraction10. Giant Eerie
 weight8 and Sinister node spawning depend on the later biome/node-type unit;
 no invented vanilla substitute is registered for those missing sources.
 
-Implemented sources and behavioral checks are pending the next integrated
-compile/runtime. Entity scanning aspects and exact JARBRAIN clue names are
+Integrated common/Fabric production, native GameTest and clientTest compilation
+passed for checkpoint4d6a458, alongside647 JUnit and79 Python tests. The complete
+native server run of that exact checkpoint is pending CI; these compile results
+do not establish the actual death/cure/spawn assertions passed. Entity scanning
+aspects and exact JARBRAIN clue names are
 integrated by the separate EntityAspectBindings owner. Client rendering and
 natural survival acquisition still require inspected gameplay evidence.

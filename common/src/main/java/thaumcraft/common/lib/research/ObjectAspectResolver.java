@@ -41,6 +41,7 @@ import net.minecraft.world.level.Level;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IEssentiaContainerItem;
+import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.common.crafting.ArcaneShapedRecipe;
 import thaumcraft.common.crafting.ArcaneShapelessRecipe;
 import thaumcraft.common.crafting.InfusionStackRecipe;
@@ -67,8 +68,17 @@ public final class ObjectAspectResolver {
     /** Original getObjectTags, per one item: capped base and dynamic wand/potion tags only.
      * No container, equipment or enchantment bonuses and no six-aspect culling; every return is an independent mutable list. */
     public static AspectList baseTags(ItemStack stack, Level level) {
+        return baseTags(stack, level, stack == null ? 0 : stack.getDamageValue());
+    }
+
+    /** Native explicit metadata query supports wildcard/group keys without fabricating out-of-range item damage components. */
+    public static AspectList baseTags(ItemStack stack, Level level, int metadata) {
         if (stack == null || stack.isEmpty() || level == null) return new AspectList();
-        AspectList base = new Resolution(level, index(level)).base(stack.getItem());
+        ObjectAspectCatalog.initializePublicTags();
+        var registered = ObjectAspectRegistry.lookup(ThaumcraftApi.objectTags, stack.getItem(), metadata);
+        // Original raw int[] key returns before dynamic bonuses and capAspects. Return a copy so readers cannot mutate addon state.
+        if (registered != null && registered.range()) return registered.aspects().copy();
+        AspectList base = registered == null ? new Resolution(level, index(level)).base(stack.getItem()) : registered.aspects().copy();
         if (stack.getItem() instanceof ItemWandCasting) {
             var data = ItemWandCasting.data(stack);
             int cost = WandMaterials.rodCraftCost(data.rod()) + WandMaterials.capCraftCost(data.cap());
@@ -80,10 +90,35 @@ public final class ObjectAspectResolver {
         return cap(base);
     }
 
+    /** Original generateTags branch used by complex registration: generated/capped base, before runtime item bonuses. */
+    public static AspectList generatedTags(Item item, Level level) {
+        ObjectAspectCatalog.initializePublicTags();
+        return cap(new Resolution(level, index(level)).base(item));
+    }
+
+    /** Only scan preflight uses grouped metadata; ordinary dissolution/getObjectTags deliberately does not. */
+    public record ItemWitness(ItemStack stack, int metadata) {}
+    public static ItemWitness groupedScanWitness(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return new ItemWitness(ItemStack.EMPTY, 0);
+        ItemStack result = stack.copyWithCount(1);
+        int[] metadata = ThaumcraftApi.groupedObjectTags.get(List.of(stack.getItem(), stack.getDamageValue()));
+        // Native damage access clamps to maxDamage, including0 for ordinary items. Keep the original lookup metadata separately.
+        return new ItemWitness(result, metadata != null && metadata.length > 0 ? metadata[0] : stack.getDamageValue());
+    }
+
+    public static AspectList scanTags(ItemStack stack, Level level) {
+        var witness = groupedScanWitness(stack);
+        return get(witness.stack(), level, witness.metadata());
+    }
+
     /** Amounts are per ONE item, not multiplied by the supplied stack count. */
     public static AspectList get(ItemStack stack, Level level) {
+        return get(stack, level, stack == null ? 0 : stack.getDamageValue());
+    }
+
+    private static AspectList get(ItemStack stack, Level level, int metadata) {
         if (stack == null || stack.isEmpty() || level == null) return new AspectList();
-        AspectList base = baseTags(stack, level);
+        AspectList base = baseTags(stack, level, metadata);
         AspectList result = new AspectList();
         if (stack.getItem() instanceof IEssentiaContainerItem container) {
             AspectList contained = container.getAspects(stack);
@@ -147,7 +182,8 @@ public final class ObjectAspectResolver {
 
         AspectList base(Item item) {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-            if (ObjectAspectCatalog.registeredIds().contains(id)) return ObjectAspectCatalog.get(id);
+            var registered = ObjectAspectRegistry.lookup(ThaumcraftApi.objectTags, item, ObjectAspectRegistry.WILDCARD);
+            if (registered != null) return registered.aspects().copy();
             if (resolved.containsKey(item)) return resolved.get(item).copy();
             if (history.contains(item) || history.size() >= 99) return new AspectList();
             history.add(item); // Source history is shared across siblings, not a popped call stack.

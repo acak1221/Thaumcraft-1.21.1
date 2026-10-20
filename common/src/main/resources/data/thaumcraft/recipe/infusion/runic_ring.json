@@ -1,0 +1,40 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "RUNICARMOR",
+  "input": {
+    "item": "thaumcraft:mundane_ring"
+  },
+  "components": [
+    {
+      "item": "thaumcraft:primal_charm"
+    },
+    {
+      "item": "thaumcraft:amber_gem"
+    },
+    {
+      "item": "thaumcraft:enchanted_fabric"
+    },
+    {
+      "item": "thaumcraft:nitor"
+    },
+    {
+      "item": "thaumcraft:inkwell"
+    }
+  ],
+  "aspects": {
+    "tutamen": 10,
+    "praecantatio": 25,
+    "potentia": 25
+  },
+  "instability": 3,
+  "result": {
+    "id": "thaumcraft:runic_ring",
+    "count": 1
+  },
+  "component_predicates": [
+    {
+      "component": 4,
+      "damage": 0
+    }
+  ]
+}

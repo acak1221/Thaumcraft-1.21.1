@@ -33,6 +33,9 @@ public final class EarlyObjectAspectBindings {
         return copy(Holder.BINDINGS.complex());
     }
 
+    /** Old subtype identities are flattened; a declared wildcard remains a wildcard rather than becoming native damage0. */
+    public static Integer metadata(ResourceLocation id) { return Holder.BINDINGS.metadata().get(id); }
+
     // Neither the resource nor Aspect instances are touched when this outer class is initialized.
     private static final class Holder {
         private static final Bindings BINDINGS = load();
@@ -48,6 +51,7 @@ public final class EarlyObjectAspectBindings {
             }
             Map<ResourceLocation, AspectList> direct = new LinkedHashMap<>();
             Map<ResourceLocation, AspectList> complex = new LinkedHashMap<>();
+            Map<ResourceLocation, Integer> metadata = new LinkedHashMap<>();
             int previousLine = 0;
             for (JsonElement element : root.getAsJsonArray("bindings")) {
                 JsonObject row = element.getAsJsonObject();
@@ -75,17 +79,23 @@ public final class EarlyObjectAspectBindings {
                 }
                 for (JsonElement identifier : row.getAsJsonArray("modern_ids")) {
                     ResourceLocation id = ResourceLocation.parse(identifier.getAsString());
+                    var declared = row.get("original_metadata");
+                    int nativeMetadata = declared != null && declared.isJsonPrimitive()
+                            && declared.getAsJsonPrimitive().isString() && declared.getAsString().equals("wildcard:32767")
+                            ? ObjectAspectRegistry.WILDCARD : 0;
                     if ("direct".equals(registration)) {
                         direct.put(id, aspects.copy());
                         complex.remove(id);
+                        metadata.put(id, nativeMetadata);
                     } else if (!direct.containsKey(id)) {
                         // Original API259-273 does not add the supplied amounts once a tag exists.
                         // This bounded resource includes only the no-existing-tag complex branch.
                         complex.putIfAbsent(id, aspects.copy());
+                        metadata.putIfAbsent(id, nativeMetadata);
                     }
                 }
             }
-            return new Bindings(Collections.unmodifiableMap(direct), Collections.unmodifiableMap(complex));
+            return new Bindings(Collections.unmodifiableMap(direct), Collections.unmodifiableMap(complex), Collections.unmodifiableMap(metadata));
         } catch (IOException | IllegalArgumentException | IllegalStateException | ArithmeticException exception) {
             throw new IllegalStateException("Cannot load early object aspect bindings: " + RESOURCE, exception);
         }
@@ -98,5 +108,5 @@ public final class EarlyObjectAspectBindings {
         return Collections.unmodifiableMap(result);
     }
 
-    private record Bindings(Map<ResourceLocation, AspectList> direct, Map<ResourceLocation, AspectList> complex) {}
+    private record Bindings(Map<ResourceLocation, AspectList> direct, Map<ResourceLocation, AspectList> complex, Map<ResourceLocation, Integer> metadata) {}
 }

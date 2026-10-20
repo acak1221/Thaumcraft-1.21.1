@@ -18,6 +18,8 @@ public final class RunicRules {
     public static boolean safeInstability(int instability) { return instability >= 0 && instability <= 24; }
     public static int componentCount(int finalCharge) { return Math.addExact(2, Math.max(0, finalCharge)); }
     public static boolean hasDemand(Map<?, Integer> cost) { return cost.values().stream().anyMatch(amount -> amount > 0); }
+    /** Original subtraction has no floor: two charged rings may make a configured500ms interval negative. */
+    public static long rechargeInterval(long configured,int charged) { return configured-charged*500L; }
     public record Hit(int charge, float damage) {}
     public static Hit absorb(int charge, float damage) {
         if (charge <= 0 || damage <= 0) return new Hit(charge, damage);

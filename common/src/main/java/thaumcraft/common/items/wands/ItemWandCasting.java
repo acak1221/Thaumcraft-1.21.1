@@ -119,6 +119,8 @@ public final class ItemWandCasting extends Item {
         if (charger != InteractionResult.PASS) return charger;
         InteractionResult thaumatorium = thaumcraft.common.lib.ThaumatoriumFormation.tryForm(context);
         if (thaumatorium != InteractionResult.PASS) return thaumatorium;
+        InteractionResult advanced = thaumcraft.common.lib.AdvancedFurnaceFormation.tryForm(context);
+        if (advanced != InteractionResult.PASS) return advanced;
         InteractionResult bore = thaumcraft.common.blocks.BlockArcaneBore.tryWandInteraction(context);
         if (bore != InteractionResult.PASS) return bore;
         InteractionResult boreBase = thaumcraft.common.blocks.BlockArcaneBoreBase.tryWandInteraction(context);

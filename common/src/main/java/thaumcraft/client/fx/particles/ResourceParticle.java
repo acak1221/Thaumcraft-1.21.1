@@ -55,9 +55,9 @@ public final class ResourceParticle extends SingleQuadParticle {
         quadSize = (sparkle ? .1F : .5F) * (random.nextFloat() * .5F + .5F) * 2 * scale;
         alpha = sparkle ? 1 : .5F;
         if (sparkle) {
-            // Source FXSparkle:56-109 has NO case 6. Both callers request 6,
-            // leaving its constructor's (1,0,0), not FXWisp's white case 6.
-            setColor(1, 0, 0);
+            // Original FXSparkle case6: all three channels use the client WORLD stream.
+            setColor(.8F + level.random.nextFloat() * .2F, .8F + level.random.nextFloat() * .2F,
+                    .8F + level.random.nextFloat() * .2F);
         } else if (type == 4) setColor(.7F + random.nextFloat() * .3F, .2F, .2F);
         else if (type == 1) setColor(.5F + random.nextFloat() * .3F, .5F + random.nextFloat() * .3F, .2F);
         else if (type >= 0) setColor(random.nextFloat() * .1F, random.nextFloat() * .1F, random.nextFloat() * .1F);

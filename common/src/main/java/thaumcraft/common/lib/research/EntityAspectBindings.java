@@ -44,7 +44,8 @@ public final class EntityAspectBindings {
             Map.entry("minecraft:end_crystal", "EnderCrystal"), Map.entry("minecraft:item_frame", "ItemFrame"), Map.entry("minecraft:painting", "Painting"),
             Map.entry("thaumcraft:golem", "Thaumcraft.Golem"), Map.entry("thaumcraft:brainy_zombie", "Thaumcraft.BrainyZombie"),
             Map.entry("thaumcraft:giant_brainy_zombie", "Thaumcraft.GiantBrainyZombie"), Map.entry("thaumcraft:firebat", "Thaumcraft.Firebat"),
-            Map.entry("thaumcraft:wisp", "Thaumcraft.Wisp"), Map.entry("thaumcraft:mind_spider", "Thaumcraft.MindSpider"),
+            Map.entry("thaumcraft:wisp", "Thaumcraft.Wisp"), Map.entry("thaumcraft:pech", "Thaumcraft.Pech"),
+            Map.entry("thaumcraft:mind_spider", "Thaumcraft.MindSpider"),
             Map.entry("thaumcraft:eldritch_guardian", "Thaumcraft.EldritchGuardian"), Map.entry("thaumcraft:eldritch_orb", "Thaumcraft.EldritchOrb"));
     private static volatile List<Row> rows;
     private record Row(String name, Map<String, Integer> aspects, String byteName, int byteValue, boolean wisp) {}

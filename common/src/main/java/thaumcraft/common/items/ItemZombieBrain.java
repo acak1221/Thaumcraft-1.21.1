@@ -43,10 +43,7 @@ public final class ItemZombieBrain extends Item {
             else knowledge.addWarpTemp(amount);
             knowledge.setWarpCounter(knowledge.getTotalWarp());
             KnowledgeEvents.sync(player);
-            // Same native persistence/notification path as InfusionInstability.warp.
-            player.displayClientMessage(Component.translatable(sticky ? "tc.addwarpsticky" : "tc.addwarptemp"), true);
-            if (sticky) player.playNotifySound(SoundEvent.createVariableRangeEvent(
-                    ResourceLocation.fromNamespaceAndPath("thaumcraft", "whispers")), SoundSource.PLAYERS, .5F, 1);
+            thaumcraft.common.lib.network.WarpMessageNetworking.send(player, (byte) (sticky ? 1 : 2), amount);
         }
         // Keep native hunger/saturation, effect roll, statistics, advancements,
         // creative handling and payment; warp is deliberately BEFORE this call.

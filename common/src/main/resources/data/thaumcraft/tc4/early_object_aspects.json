@@ -652,10 +652,22 @@
       "aspects": {"auram": 2}
     },
     {
-      "original_source_line": 433, "registration": "complex", "original_target": "ConfigItems.itemGoggles", "original_metadata": 0,
+      "original_source_line": 433, "registration": "complex", "original_target": "ConfigItems.itemGoggles", "original_metadata": "wildcard:32767",
       "identifier_evidence": "Original Goggles of Revealing now has a real native recipe/material; add sensus4 to recipe-derived tags, never replace the entire item base with the supplied bonus",
       "modern_ids": ["thaumcraft:goggles_revealing"],
       "aspects": {"sensus": 4}
+    },
+    {
+      "original_source_line": 434, "registration": "complex", "original_target": "ConfigBlocks.blockWoodenDevice", "original_metadata": 1,
+      "identifier_evidence": "ConfigRecipes214 ArcaneEar output is woodenDevice1; its real native block/item and arcane recipe are registered",
+      "modern_ids": ["thaumcraft:arcane_ear"],
+      "aspects": {"sensus": 4}
+    },
+    {
+      "original_source_line": 436, "registration": "direct", "original_target": "ConfigItems.itemFocusPech", "original_metadata": 0,
+      "identifier_evidence": "ConfigItems361-362 registers ItemFocusPech/FocusPech; original one-argument ItemStack(Item) selects count1 and metadata0, now the actual native focus_pech item",
+      "modern_ids": ["thaumcraft:focus_pech"],
+      "aspects": {"praecantatio": 5, "venenum": 5, "perditio": 5, "alienis": 5, "telum": 5}
     },
     {
       "original_source_line": 454, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 3,

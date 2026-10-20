@@ -32,6 +32,7 @@ public final class ResearchPurchaseNetworking {
         var result = ResearchPurchase.purchase(KnowledgeAccess.get(player), key);
         if (result.success()) {
             KnowledgeEvents.sync(player);
+            WarpMessageNetworking.research(player, result.unlocked());
             player.serverLevel().playSound(null, player.blockPosition(),
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "learn")),
                     SoundSource.PLAYERS, 0.75F, 1.0F);

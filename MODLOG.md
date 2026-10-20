@@ -1,3 +1,12 @@
+## 2026-10-20 — Native accessories, Pech, hungry nodes and loot (runtime pending)
+
+Six-agent content integration: object-tag API; HUNGRY node ecology; Hellbat; native Baubles,
+FocusPouch and coloured candles; Pech/trades/curse/ManaBeans; seven crystal clusters;
+Advanced Furnace; original loot bags/potions/enchant selection; administrator parser and warp feedback.
+Local691JUnit/84Python and Fabric main/gameTest/clientTest compilation pass;235 native cases are
+required by the next GitHub run. No full runtime, client visual or NeoForge acceptance is claimed.
+Remaining natural biomes, Pech goal differences and vanilla brewing adaptation are documented.
+
 ## 2026-10-20 — Fabric b1e49f2 accepted by GitHub CI
 
 648 JUnit, all212 required Fabric GameTests and79 Python checks pass for exact commit

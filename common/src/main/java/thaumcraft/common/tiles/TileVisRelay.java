@@ -31,12 +31,15 @@ import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
-/** Original relay link attunement and five-tick RGB pulse. No stock, amulet,
- * player-entity-ID map, aspect filter or independent generation lives here. */
+/** Original relay link attunement, five-tick RGB pulse and transient nearest-relay player association. No independent stock or generation. */
 public final class TileVisRelay extends TileVisNode {
     private static final int[] COLORS = {0xffff7e, 0xff3c01, 0x0090ff, 0x00a000, 0xeeccff, 0x555577};
     private static final String[] SHARDS = {"aer", "ignis", "aqua", "terra", "ordo", "perditio", "balanced"};
     private static final SoundEvent CRYSTAL = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "crystal"));
+    private static final java.util.Map<net.minecraft.server.MinecraftServer, java.util.Map<java.util.UUID, PlayerRelay>> PLAYER_RELAYS = new java.util.WeakHashMap<>();
+    private static final java.util.concurrent.atomic.AtomicLong NEXT_PLAYER_RELAY = new java.util.concurrent.atomic.AtomicLong();
+    private final long playerRelayIdentity = NEXT_PLAYER_RELAY.incrementAndGet();
+    private record PlayerRelay(net.minecraft.resources.ResourceKey<Level> dimension, BlockPos pos, long identity) {}
     private byte color = -1;
     private int pulse;
     private float pRed = .5F, pGreen = .5F, pBlue = .5F;
@@ -76,9 +79,39 @@ public final class TileVisRelay extends TileVisNode {
                 relay.pBlue = Math.min(1, relay.pBlue + .025F);
             } else if (!VisNetHandler.isNativeServerLevel(level)) return;
             if (relay.pulse > 0) --relay.pulse; // drawEffect precedes original graph phase.
-            if (!level.isClientSide) TileVisNode.tick(level, pos, state, relay);
+            if (!level.isClientSide) {
+                TileVisNode.tick(level, pos, state, relay);
+                if (relay.isCurrentNode() && relay.getNodeCounter() % 20 == 0) relay.scanNearbyPlayers((ServerLevel)level);
+            }
         } finally { relay.ticking = false; }
     }
+    /** Original TileVisRelay95: scan a block AABB inflated5 after each twentieth node update. */
+    private void scanNearbyPlayers(ServerLevel world) {
+        var cache = PLAYER_RELAYS.computeIfAbsent(world.getServer(), ignored -> new java.util.HashMap<>());
+        for (Player player : world.getEntitiesOfClass(Player.class, new net.minecraft.world.phys.AABB(worldPosition).inflate(5))) {
+            TileVisRelay previous = resolve(world, cache.get(player.getUUID()));
+            if (previous != null && previous.worldPosition.distToCenterSqr(player.position()) < worldPosition.distToCenterSqr(player.position())) continue;
+            cache.put(player.getUUID(), new PlayerRelay(world.dimension(),worldPosition,playerRelayIdentity));
+        }
+    }
+    private static TileVisRelay resolve(ServerLevel world, PlayerRelay entry) {
+        if (entry == null || !world.dimension().equals(entry.dimension()) || !world.hasChunkAt(entry.pos())) return null;
+        return world.getBlockEntity(entry.pos()) instanceof TileVisRelay relay && relay.playerRelayIdentity == entry.identity()
+                && relay.isCurrentNode() && !relay.isQuarantined() ? relay : null;
+    }
+    /** Association is primitive UUID/dimension/position/token data, never a strong Player/Level/BE reference. */
+    public static TileVisRelay nearbyPlayer(Player player) {
+        if (!(player.level() instanceof ServerLevel world)) return null;
+        if (!world.getServer().isSameThread()) throw new IllegalStateException("Relay player association requires server thread");
+        var cache=PLAYER_RELAYS.get(world.getServer()); if(cache==null)return null;
+        TileVisRelay relay=resolve(world,cache.get(player.getUUID()));
+        if(relay==null || relay.worldPosition.distToCenterSqr(player.position())>=26) {cache.remove(player.getUUID());return null;}
+        return relay;
+    }
+    public static void forgetPlayer(net.minecraft.server.level.ServerPlayer player) {
+        var cache=PLAYER_RELAYS.get(player.server);if(cache!=null)cache.remove(player.getUUID());
+    }
+    public static void forgetServer(net.minecraft.server.MinecraftServer server) { PLAYER_RELAYS.remove(server); }
     @Override public void parentChanged() {
         Level world = level; BlockState state = getBlockState();
         if (world == null || !isCurrentNode()) return;

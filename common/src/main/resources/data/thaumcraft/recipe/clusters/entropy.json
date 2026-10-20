@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "thaumcraft_crystal_clusters",
+  "ingredients": [
+    {
+      "item": "thaumcraft:entropy_shard"
+    },
+    {
+      "item": "thaumcraft:entropy_shard"
+    },
+    {
+      "item": "thaumcraft:entropy_shard"
+    },
+    {
+      "item": "thaumcraft:entropy_shard"
+    },
+    {
+      "item": "thaumcraft:entropy_shard"
+    },
+    {
+      "item": "thaumcraft:entropy_shard"
+    }
+  ],
+  "result": {
+    "id": "thaumcraft:crystal_entropy",
+    "count": 1
+  }
+}

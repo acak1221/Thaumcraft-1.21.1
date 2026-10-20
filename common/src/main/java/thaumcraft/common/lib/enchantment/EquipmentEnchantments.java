@@ -22,6 +22,7 @@ public final class EquipmentEnchantments {
     }
     /** The original LivingUpdateEvent runs on both sides before movement. Repair alone is server-side. */
     public static void playerLivingTick(Player player) {
+        thaumcraft.common.lib.baubles.PlayerAccessories.tick(player);
         if (!player.level().isClientSide && player.tickCount % 40 == 0 && !player.getAbilities().instabuild)
             EnchantmentRepair.tick(player);
         EnchantmentHaste.tick(player);

@@ -24,10 +24,11 @@ import thaumcraft.client.ThaumcraftFocusClient;
 import thaumcraft.common.items.wands.foci.FocusData;
 import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.lib.network.FocusSelectionNetworking;
+import thaumcraft.common.items.wands.FocusSelectionSources;
 
 /**
  * Native non-pausing version of TC4 REHWandHandler's held-F radial. All stacks
- * here are previews; only (hand, inventory slot) or (hand, -1) leaves this GUI.
+ * here are previews; only (hand, physical source) or (hand, -1) leaves this GUI.
  */
 public final class GuiFocusSelect extends Screen {
     private static final ResourceLocation RADIAL = texture("textures/misc/radial.png");
@@ -66,14 +67,7 @@ public final class GuiFocusSelect extends Screen {
 
     private static List<Choice> availableChoices(LocalPlayer player, boolean copy) {
         var result = new ArrayList<Choice>();
-        for (int slot = 0; slot < 36; slot++) {
-            ItemStack stack = player.getInventory().getItem(slot);
-            if (FocusData.isSupportedFocus(stack)) result.add(new Choice(slot, copy ? stack.copy() : stack));
-        }
-        // Original keys AF/BE/BL, stable inventory-slot tie-break. Unlike a
-        // TreeMap, sorting never overwrites equal-key duplicate focus stacks.
-        result.sort(Comparator.comparing((Choice choice) -> ((ItemFocusBasic) choice.preview().getItem()).getSortingHelper(choice.preview()))
-                .thenComparingInt(Choice::inventorySlot));
+        for(var choice:FocusSelectionSources.choices(player))result.add(new Choice(choice.address(),choice.focus()));
         return result;
     }
 
@@ -216,7 +210,9 @@ public final class GuiFocusSelect extends Screen {
         if (hover >= 0) {
             Choice choice = choices.get(hover);
             List<Component> lines = new ArrayList<>(Screen.getTooltipFromItem(minecraft, choice.preview()));
-            lines.add(Component.translatable("tc.port.focus.slot", choice.inventorySlot() + 1).withStyle(ChatFormatting.GRAY));
+            int pouchSlot=FocusSelectionSources.pouchSlot(choice.inventorySlot());
+            lines.add(Component.translatable(pouchSlot<0?"tc.port.focus.slot":"tc.port.focus.pouch_slot",
+                    pouchSlot<0?choice.inventorySlot()+1:pouchSlot+1).withStyle(ChatFormatting.GRAY));
             graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
         } else if (!equipped.isEmpty() && Math.abs(mouseX - centerX) <= 10 && Math.abs(mouseY - centerY) <= 10) {
             graphics.renderTooltip(font, equipped, mouseX, mouseY);

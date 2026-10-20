@@ -26,7 +26,7 @@ import thaumcraft.common.tiles.TileNode.NodeType;
 
 /**
  * Original ThaumcraftWorldGenerator.generateWildNodes:189-215 and
- * createRandomNodeAt:218-399, restricted to naturally rolled NORMAL and UNSTABLE nodes.
+ * createRandomNodeAt:218-399, restricted to naturally rolled NORMAL, UNSTABLE and HUNGRY nodes.
  * One invocation is ONE chunk attempt, so the placed feature has no count,
  * rarity or in-square modifier. Other special rolls are skipped, never rerolled.
  */
@@ -78,10 +78,10 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         }
         NodeModifier modifier = null;
         if (random.nextInt(SPECIAL_NODE_RARITY / 2) == 0) modifier = NodeModifier.values()[random.nextInt(3)];
-        if (type != NodeType.NORMAL && type != NodeType.UNSTABLE) {
+        if (type != NodeType.NORMAL && type != NodeType.UNSTABLE && type != NodeType.HUNGRY) {
             // Aggregate every skip, but warn only once per type, not per chunk.
             if (SKIPPED_TYPES.getAndIncrement(type.ordinal()) == 0) {
-                Thaumcraft.LOG.warn("Natural aura nodes: rolled {} is pending and skipped without replacement; only NORMAL/UNSTABLE ecology is implemented", type);
+                Thaumcraft.LOG.warn("Natural aura nodes: rolled {} is pending and skipped without replacement; only NORMAL/UNSTABLE/HUNGRY ecology is implemented", type);
             }
             return false;
         }
@@ -100,6 +100,11 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         for (int i = 0; i < 3; i++) if (random.nextBoolean()) {
             var pool = random.nextInt(SPECIAL_NODE_RARITY) == 0 ? complex : basic;
             aspects.merge(pool.get(random.nextInt(pool.size())), 1);
+        }
+        if (type == NodeType.HUNGRY) {
+            // Original wild-node type tags precede environment/spread draws.
+            aspects.merge(Aspect.HUNGER, 2);
+            if (random.nextBoolean()) aspects.merge(Aspect.GREED, 1);
         }
         addEnvironmentalAspects(level, pos, aspects);
         Aspect[] sorted = aspects.getAspectsSorted();

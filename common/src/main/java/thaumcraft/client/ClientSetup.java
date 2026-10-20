@@ -46,8 +46,17 @@ public final class ClientSetup {
         if (initialized) return;
         initialized = true;
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initClient();
+        thaumcraft.client.lib.PlayerNotifications.init();
         thaumcraft.client.ThaumcraftMonsterClient.init();
         thaumcraft.client.ThaumcraftRunicClient.init();
+        thaumcraft.client.ThaumcraftBaublesClient.init();
+        thaumcraft.client.ThaumcraftFocusPouchesClient.init();
+        thaumcraft.client.ThaumcraftColoredCandlesClient.init();
+        thaumcraft.client.ThaumcraftHungryNodeClient.init();
+        thaumcraft.common.items.ItemManaBean.setTooltipViewer(() -> Minecraft.getInstance().player);
+        ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? 0xff000000 | thaumcraft.common.items.ItemManaBean.color(stack) : -1,
+                thaumcraft.common.config.ThaumcraftManaBeans.MANA_BEAN);
+        RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftManaBeans.MANA_POD.get());
         thaumcraft.client.ThaumcraftFireSpecialClient.init();
         thaumcraft.client.ThaumcraftShockOrbsClient.init();
         dev.architectury.registry.client.level.entity.EntityRendererRegistry.register(
@@ -62,6 +71,9 @@ public final class ClientSetup {
         ThaumcraftPlantClient.init();
         ThaumcraftBiologicalLampClient.init();
         ThaumcraftDistillationClient.init();
+        ThaumcraftAdvancedFurnaceClient.init();
+        ThaumcraftCrystalClustersClient.init();
+        ThaumcraftPechClient.init();
         ThaumcraftAlembicClient.init();
         ThaumcraftWandClient.init();
         ThaumcraftBellowsClient.init();

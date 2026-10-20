@@ -40,7 +40,9 @@ public final class BlockAuraNode extends BaseEntityBlock {
         return NODE_SHAPE;
     }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ThaumcraftContent.NODE_BLOCK_ENTITY.get(), TileNode::serverTick);
+        return level.isClientSide
+                ? createTickerHelper(type, ThaumcraftContent.NODE_BLOCK_ENTITY.get(), TileNode::clientTick)
+                : createTickerHelper(type, ThaumcraftContent.NODE_BLOCK_ENTITY.get(), TileNode::serverTick);
     }
     @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         TileNode node = level.getBlockEntity(pos) instanceof TileNode value ? value : null;

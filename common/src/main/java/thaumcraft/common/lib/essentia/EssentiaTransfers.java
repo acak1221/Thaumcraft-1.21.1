@@ -447,8 +447,11 @@ public final class EssentiaTransfers {
         if (profile == Profile.COMPAT && stockFrom == null) return new Attempt(false, 0, null);
         Mutation mutation = new Mutation(receiver, source);
         MUTATION.set(mutation);
+        thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced sharedCore=source instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle?nozzle.atomicCore():null;
+        if(sharedCore!=null) mutation.additionalActors.add(sharedCore);
         boolean selected = false;
         try {
+            if(source instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle && (sharedCore==null || !nozzle.nativeCoreCurrent())) return new Attempt(false,0,null);
             var beforeInto = into.snapshotAtomicState(); var beforeFrom = stockFrom == null ? null : stockFrom.snapshotAtomicState();
             Direction output = inputFace.getOpposite();
             if (!from.isConnectable(output) || profile != Profile.BUFFER && (!into.isConnectable(inputFace) || !into.canInputFrom(inputFace))) return new Attempt(false, 0, null);
@@ -532,6 +535,7 @@ public final class EssentiaTransfers {
                     || profile != Profile.BUFFER && (!into.isConnectable(inputFace) || !into.canInputFrom(inputFace))
                     || !current(receiver, level) || !current(source, level)
                     || level.getBlockEntity(receiver.getBlockPos().relative(inputFace)) != source
+                    || source instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle && !nozzle.nativeCoreCurrent()
                     || !into.matchesAtomicState(beforeInto) || !stockFrom.matchesAtomicState(beforeFrom)) return new Attempt(true, 0, null);
             RuntimeException failure = commitPrepared(mutation, receiver, into, credit, source, stockFrom, debit);
             return new Attempt(true, 1, failure);
@@ -700,7 +704,12 @@ public final class EssentiaTransfers {
         }
     }
 
-    private enum LocalOperation { BUFFER_INSERT, BUFFER_EXTRACT, CENTRIFUGE_INPUT, CENTRIFUGE_OUTPUT_INSERT, CENTRIFUGE_OUTPUT_EXTRACT, CENTRIFUGE_COMPLETE, CRYSTALLIZER_INSERT, CRYSTALLIZER_EXTRACT, RESERVOIR_INSERT, RESERVOIR_EXTRACT }
+    /** Original nozzle direct container extraction, exact quantity and one shared-core lock. */
+    public static Attempt changeAdvancedFurnaceNozzle(thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle,Aspect aspect,int units) {
+        if(!EssentiaAtomicEndpoint.validAspect(aspect) || units<=0) return new Attempt(false,0,null);
+        return changeLocal(nozzle,new LocalRequest(LocalOperation.ADVANCED_FURNACE_EXTRACT,aspect,units,null,true));
+    }
+    private enum LocalOperation { ADVANCED_FURNACE_EXTRACT, BUFFER_INSERT, BUFFER_EXTRACT, CENTRIFUGE_INPUT, CENTRIFUGE_OUTPUT_INSERT, CENTRIFUGE_OUTPUT_EXTRACT, CENTRIFUGE_COMPLETE, CRYSTALLIZER_INSERT, CRYSTALLIZER_EXTRACT, RESERVOIR_INSERT, RESERVOIR_EXTRACT }
     private record LocalRequest(LocalOperation operation, Aspect aspect, int amount, Direction outputFace, boolean exact) {}
 
     /** One local scope for accepted buffers and the separate two-slot machine.
@@ -710,7 +719,9 @@ public final class EssentiaTransfers {
         if (!level.getServer().isSameThread()) throw new IllegalStateException("Native essentia changes require the server thread");
         if (MUTATION.get() != null || !current(owner, level)) return new Attempt(false, 0, null);
         boolean bufferOperation = request.operation() == LocalOperation.BUFFER_INSERT || request.operation() == LocalOperation.BUFFER_EXTRACT;
-        if (bufferOperation) {
+        if(request.operation()==LocalOperation.ADVANCED_FURNACE_EXTRACT) {
+            if(!(owner instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle) || nozzle.atomicCore()==null) return new Attempt(false,0,null);
+        } else if (bufferOperation) {
             if (!(owner instanceof TileTubeBuffer buffer) || buffer.isQuarantined()) return new Attempt(false, 0, null);
         } else if (request.operation() == LocalOperation.CRYSTALLIZER_INSERT || request.operation() == LocalOperation.CRYSTALLIZER_EXTRACT) {
             if (!(owner instanceof TileEssentiaCrystalizer tile) || tile.isQuarantined()) return new Attempt(false, 0, null);
@@ -719,13 +730,16 @@ public final class EssentiaTransfers {
         } else if (!(owner instanceof TileCentrifuge centrifuge) || centrifuge.isQuarantined()) return new Attempt(false, 0, null);
         EssentiaAtomicEndpoint endpoint = (EssentiaAtomicEndpoint) owner;
         Mutation mutation = new Mutation(owner, owner); MUTATION.set(mutation);
+        if(owner instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle) mutation.additionalActors.add(nozzle.atomicCore());
         boolean selected = false;
         try {
+            if(owner instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle && !nozzle.nativeCoreCurrent()) return new Attempt(false,0,null);
             var before = endpoint.snapshotAtomicState();
             if (request.outputFace() != null && (!endpoint.canOutputTo(request.outputFace()) || !endpoint.preflightTake(request.aspect(), request.outputFace()))) return new Attempt(false, 0, null);
             int units = 1;
             EssentiaAtomicEndpoint.Change change;
             switch (request.operation()) {
+                case ADVANCED_FURNACE_EXTRACT -> { units=request.amount(); change=endpoint.prepareExtract(before,request.aspect(),units); }
                 case BUFFER_INSERT, BUFFER_EXTRACT -> {
                     TileTubeBuffer buffer = (TileTubeBuffer) owner;
                     units = request.operation() == LocalOperation.BUFFER_INSERT || request.exact() ? request.amount() : Math.min(request.amount(), buffer.containerContains(request.aspect()));
@@ -757,7 +771,8 @@ public final class EssentiaTransfers {
                 default -> throw new IllegalStateException("Unrecognized native stock operation");
             }
             selected = true;
-            if (!prepared(change, endpoint, before, units) || !current(owner, level) || !endpoint.matchesAtomicState(before)
+            if (!prepared(change, endpoint, before, units) || !current(owner, level)
+                    || owner instanceof thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle nozzle && !nozzle.nativeCoreCurrent() || !endpoint.matchesAtomicState(before)
                     || request.outputFace() != null && !endpoint.canOutputTo(request.outputFace())) return new Attempt(true, 0, null);
             RuntimeException failure = commitPrepared(mutation, owner, endpoint, change, owner, endpoint, null);
             return new Attempt(true, units, failure);

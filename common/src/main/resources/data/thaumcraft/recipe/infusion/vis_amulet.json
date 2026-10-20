@@ -1,0 +1,38 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "VISAMULET",
+  "input": {
+    "item": "thaumcraft:mundane_amulet"
+  },
+  "components": [
+    {
+      "item": "thaumcraft:primal_charm"
+    },
+    {
+      "item": "thaumcraft:crystal_mixed"
+    },
+    {
+      "item": "thaumcraft:crystal_mixed"
+    },
+    {
+      "item": "thaumcraft:primal_charm"
+    },
+    {
+      "item": "thaumcraft:crystal_mixed"
+    },
+    {
+      "item": "thaumcraft:crystal_mixed"
+    }
+  ],
+  "aspects": {
+    "auram": 24,
+    "potentia": 64,
+    "praecantatio": 64,
+    "vacuos": 24
+  },
+  "instability": 6,
+  "result": {
+    "id": "thaumcraft:vis_amulet",
+    "count": 1
+  }
+}

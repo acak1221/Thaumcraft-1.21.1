@@ -54,7 +54,14 @@ public final class WandManager {
     /** Original WandManager104–120: raw centivis, one full payer, main slots35→0. */
     public static boolean consumeVisFromInventory(Player player, AspectList rawCost) {
         if (player == null || player.level().isClientSide || rawCost == null || rawCost.size() == 0) return false;
-        // Vis amulets/baubles have not been ported; their original priority is a visible pending integration.
+        // Original amulet slots0..3 are independent full RAW payers, with no wand cap/gear discount.
+        var accessories = thaumcraft.common.lib.baubles.PlayerAccessories.get(player);
+        for (int slot=0;slot<4;slot++) {
+            ItemStack stack=accessories.getItem(slot);
+            if (stack.getItem() instanceof thaumcraft.common.items.baubles.ItemAmuletVis amulet && amulet.consumeAllVis(stack,rawCost,true)) {
+                accessories.setChanged(); return true;
+            }
+        }
         // Each wand is tested independently, last main-inventory slot first. Costs never split across wands.
         for (int slot = player.getInventory().items.size() - 1; slot >= 0; slot--) {
             ItemStack wand = player.getInventory().items.get(slot);

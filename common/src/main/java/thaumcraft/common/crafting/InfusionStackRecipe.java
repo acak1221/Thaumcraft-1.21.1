@@ -133,7 +133,7 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
         for (Ingredient component : components) selected.add(new InfusionComponentPredicate(component));
         for (var declaration : componentPredicates) {
             selected.set(declaration.component(), new InfusionComponentPredicate(components.get(declaration.component()),
-                    declaration.optionalDamage(), declaration.waterPotion(), declaration.emptyJar()));
+                    declaration.optionalDamage(), declaration.waterPotion(), declaration.emptyJar(),declaration.potion()));
         }
         return List.copyOf(selected);
     }
@@ -187,6 +187,8 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
                 buffer.writeVarInt(declaration.damage());
                 buffer.writeBoolean(declaration.waterPotion());
                 buffer.writeBoolean(declaration.emptyJar());
+                buffer.writeBoolean(declaration.potion().isPresent());
+                declaration.potion().ifPresent(buffer::writeUtf);
             }
             buffer.writeBoolean(recipe.inputDamage.isPresent());
             recipe.inputDamage.ifPresent(buffer::writeVarInt);
@@ -213,8 +215,9 @@ public record InfusionStackRecipe(String research, Ingredient input, List<Ingred
             if (predicateCount < 0 || predicateCount > componentCount) throw new IllegalArgumentException("Invalid infusion component predicate count");
             List<InfusionComponentPredicate.Declaration> predicates = new ArrayList<>(predicateCount);
             for (int index = 0; index < predicateCount; index++) {
-                predicates.add(new InfusionComponentPredicate.Declaration(buffer.readVarInt(), buffer.readVarInt(),
-                        buffer.readBoolean(), buffer.readBoolean()));
+                int component=buffer.readVarInt(),damage=buffer.readVarInt();boolean water=buffer.readBoolean(),emptyJar=buffer.readBoolean();
+                Optional<String> potion=buffer.readBoolean()?Optional.of(buffer.readUtf()):Optional.empty();
+                predicates.add(new InfusionComponentPredicate.Declaration(component,damage,water,emptyJar,potion));
             }
             Optional<Integer> inputDamage = buffer.readBoolean() ? Optional.of(buffer.readVarInt()) : Optional.empty();
             Optional<String> resultPatch = buffer.readBoolean() ? Optional.of(buffer.readUtf()) : Optional.empty();

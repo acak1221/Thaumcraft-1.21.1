@@ -65,6 +65,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.0,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_wood_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_wood_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_wood_iron_shock"
@@ -124,6 +140,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_wood_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_wood_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_wood_gold_pech"
   },
   {
    "predicate": {
@@ -193,6 +225,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.0,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_wood_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_wood_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_wood_thaumium_shock"
@@ -252,6 +300,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_wood_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_wood_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_wood_void_pech"
   },
   {
    "predicate": {
@@ -321,6 +385,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.03125,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_greatwood_iron_shock"
@@ -380,6 +460,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_greatwood_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_gold_pech"
   },
   {
    "predicate": {
@@ -449,6 +545,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.03125,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_greatwood_thaumium_shock"
@@ -508,6 +620,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_greatwood_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_void_pech"
   },
   {
    "predicate": {
@@ -577,6 +705,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.0625,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_silverwood_iron_shock"
@@ -636,6 +780,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_silverwood_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_gold_pech"
   },
   {
    "predicate": {
@@ -705,6 +865,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.0625,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_silverwood_thaumium_shock"
@@ -764,6 +940,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_silverwood_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_void_pech"
   },
   {
    "predicate": {
@@ -833,6 +1025,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.09375,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_obsidian_iron_shock"
@@ -892,6 +1100,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_obsidian_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_gold_pech"
   },
   {
    "predicate": {
@@ -961,6 +1185,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.09375,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_obsidian_thaumium_shock"
@@ -1020,6 +1260,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_obsidian_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_void_pech"
   },
   {
    "predicate": {
@@ -1089,6 +1345,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.125,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_blaze_iron_shock"
@@ -1148,6 +1420,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_blaze_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_gold_pech"
   },
   {
    "predicate": {
@@ -1217,6 +1505,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.125,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_blaze_thaumium_shock"
@@ -1276,6 +1580,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_blaze_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_void_pech"
   },
   {
    "predicate": {
@@ -1345,6 +1665,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.15625,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_ice_iron_shock"
@@ -1404,6 +1740,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_ice_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_gold_pech"
   },
   {
    "predicate": {
@@ -1473,6 +1825,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.15625,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_ice_thaumium_shock"
@@ -1532,6 +1900,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_ice_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_void_pech"
   },
   {
    "predicate": {
@@ -1601,6 +1985,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.1875,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_quartz_iron_shock"
@@ -1660,6 +2060,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_quartz_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_gold_pech"
   },
   {
    "predicate": {
@@ -1729,6 +2145,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.1875,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_quartz_thaumium_shock"
@@ -1788,6 +2220,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_quartz_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_void_pech"
   },
   {
    "predicate": {
@@ -1857,6 +2305,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.21875,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_bone_iron_shock"
@@ -1916,6 +2380,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_bone_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_gold_pech"
   },
   {
    "predicate": {
@@ -1985,6 +2465,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.21875,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_bone_thaumium_shock"
@@ -2044,6 +2540,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_bone_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_void_pech"
   },
   {
    "predicate": {
@@ -2113,6 +2625,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.25,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_reed_iron_shock"
@@ -2172,6 +2700,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_reed_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_gold_pech"
   },
   {
    "predicate": {
@@ -2241,6 +2785,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.25,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_reed_thaumium_shock"
@@ -2300,6 +2860,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_reed_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_void_pech"
   },
   {
    "predicate": {
@@ -2369,6 +2945,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.28125,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_greatwood_staff_iron_shock"
@@ -2428,6 +3020,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_greatwood_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_gold_pech"
   },
   {
    "predicate": {
@@ -2497,6 +3105,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.28125,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_greatwood_staff_thaumium_shock"
@@ -2556,6 +3180,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_greatwood_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_void_pech"
   },
   {
    "predicate": {
@@ -2625,6 +3265,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.3125,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_obsidian_staff_iron_shock"
@@ -2684,6 +3340,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_obsidian_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_gold_pech"
   },
   {
    "predicate": {
@@ -2753,6 +3425,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.3125,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_obsidian_staff_thaumium_shock"
@@ -2812,6 +3500,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_obsidian_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_void_pech"
   },
   {
    "predicate": {
@@ -2881,6 +3585,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.34375,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_blaze_staff_iron_shock"
@@ -2940,6 +3660,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_blaze_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_gold_pech"
   },
   {
    "predicate": {
@@ -3009,6 +3745,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.34375,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_blaze_staff_thaumium_shock"
@@ -3068,6 +3820,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_blaze_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_void_pech"
   },
   {
    "predicate": {
@@ -3137,6 +3905,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.375,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_ice_staff_iron_shock"
@@ -3196,6 +3980,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_ice_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_staff_gold_pech"
   },
   {
    "predicate": {
@@ -3265,6 +4065,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.375,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_ice_staff_thaumium_shock"
@@ -3324,6 +4140,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_ice_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_staff_void_pech"
   },
   {
    "predicate": {
@@ -3393,6 +4225,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.40625,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_quartz_staff_iron_shock"
@@ -3452,6 +4300,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_quartz_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_gold_pech"
   },
   {
    "predicate": {
@@ -3521,6 +4385,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.40625,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_quartz_staff_thaumium_shock"
@@ -3580,6 +4460,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_quartz_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_void_pech"
   },
   {
    "predicate": {
@@ -3649,6 +4545,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.4375,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_bone_staff_iron_shock"
@@ -3708,6 +4620,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_bone_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_staff_gold_pech"
   },
   {
    "predicate": {
@@ -3777,6 +4705,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.4375,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_bone_staff_thaumium_shock"
@@ -3836,6 +4780,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_bone_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_staff_void_pech"
   },
   {
    "predicate": {
@@ -3905,6 +4865,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.46875,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_reed_staff_iron_shock"
@@ -3964,6 +4940,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_reed_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_staff_gold_pech"
   },
   {
    "predicate": {
@@ -4033,6 +5025,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.46875,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_reed_staff_thaumium_shock"
@@ -4092,6 +5100,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_reed_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_staff_void_pech"
   },
   {
    "predicate": {
@@ -4161,6 +5185,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.5,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_silverwood_staff_iron_shock"
@@ -4220,6 +5260,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_silverwood_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_gold_pech"
   },
   {
    "predicate": {
@@ -4289,6 +5345,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.5,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_silverwood_staff_thaumium_shock"
@@ -4348,6 +5420,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_silverwood_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_void_pech"
   },
   {
    "predicate": {
@@ -4417,6 +5505,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.53125,
     "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_primal_staff_iron_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_primal_staff_iron_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_primal_staff_iron_shock"
@@ -4476,6 +5580,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_primal_staff_gold_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_primal_staff_gold_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.25,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_primal_staff_gold_pech"
   },
   {
    "predicate": {
@@ -4545,6 +5665,22 @@
    "predicate": {
     "thaumcraft:wand_rod": 0.53125,
     "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_primal_staff_thaumium_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_primal_staff_thaumium_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.5,
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_primal_staff_thaumium_shock"
@@ -4604,6 +5740,22 @@
     "thaumcraft:wand_focus": 0.9375
    },
    "model": "thaumcraft:item/wand_primal_staff_void_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_primal_staff_void_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 0.75,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_primal_staff_void_pech"
   },
   {
    "predicate": {

@@ -36,8 +36,8 @@ public final class ScanManager {
     /**
      * TC4 ScanManager.generateNodeAspects scales each node aspect before scan
      * rewards: max(4, vis / 10), in sorted aspect order. Reading a node must not
-     * consume or expose its full vis as research points. Node-type bonus aspects
-     * belong to the pending node-type slice; the native node is ordinary only.
+     * consume or expose its full vis as research points. The node overload below adds the original
+     * node-type and brightness bonus aspects.
      */
     public static AspectList nodeScanAspects(AspectList nodeAspects) {
         AspectList result = new AspectList();

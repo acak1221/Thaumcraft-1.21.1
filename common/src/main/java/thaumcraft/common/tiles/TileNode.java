@@ -11,6 +11,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,11 +29,16 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.utils.AspectOrbQueue;
 import thaumcraft.common.lib.research.AspectOrbRules;
+import thaumcraft.common.lib.research.HungryNodeRules;
+import thaumcraft.common.lib.research.EntityAspectBindings;
+import thaumcraft.common.lib.research.ObjectAspectResolver;
+import thaumcraft.common.lib.research.DeconstructionRules;
+import thaumcraft.common.lib.world.HungryNodeTrace;
 
 /**
- * TC4 NORMAL/UNSTABLE node state and lifecycle. Source: original TileNode.setAspects,
- * handleDischarge, handleRecharge and onUsingWandTick. Basic stabilizer locking
- * and supported UNSTABLE emissions/FADING repair are included; other special-node ecology,
+ * TC4 NORMAL/UNSTABLE/HUNGRY node state and lifecycle. Source: original TileNode.setAspects,
+ * handleDischarge, handleRecharge and onUsingWandTick. Basic stabilizer locking,
+ * UNSTABLE emissions/FADING repair and HUNGRY entity/block ecology are included; other special-node ecology,
  * advanced stabilization and jars remain separate unimplemented units. Real
  * energized conversion/network routing live in the separate M09b node family.
  */
@@ -144,7 +154,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     /** Called only after the real feature has placed the existing aura-node block. */
     public void initializeNatural(AspectList values, NodeModifier modifier) { initializeNatural(values, NodeType.NORMAL, modifier); }
     public void initializeNatural(AspectList values, NodeType type, NodeModifier modifier) {
-        if (type != NodeType.NORMAL && type != NodeType.UNSTABLE) throw new IllegalArgumentException("This native initializer supports NORMAL/UNSTABLE only");
+        if (type != NodeType.NORMAL && type != NodeType.UNSTABLE && type != NodeType.HUNGRY) throw new IllegalArgumentException("This native initializer supports NORMAL/UNSTABLE/HUNGRY only");
         if (transducing) throw new IllegalStateException("Node aura is captured by an active transduction");
         natural = true;
         nodeType = type;
@@ -282,7 +292,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TileNode node) {
-        if (level.isClientSide || node.isRemoved() || (node.nodeType != NodeType.NORMAL && node.nodeType != NodeType.UNSTABLE) || node.ticking || node.notifying || node.transducing || node.pearlPlanning
+        if (level.isClientSide || node.isRemoved() || (node.nodeType != NodeType.NORMAL && node.nodeType != NodeType.UNSTABLE && node.nodeType != NodeType.HUNGRY) || node.ticking || node.notifying || node.transducing || node.pearlPlanning
                 || node.level != level || !node.worldPosition.equals(pos) || state != node.getBlockState()) return;
         node.tickingLevel = level;
         node.tickingState = state;
@@ -294,16 +304,112 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
             if (owner == null || !owner.isSameThread()) throw new IllegalStateException("Node ticks require the server thread");
             if (owner.getLevel(server.dimension()) != server) return; // A forged Level subclass is not a native server world.
             if (!node.current()) return;
+            boolean change = node.hungryFirst(); // Original BEFORE count++, including the old cached lock.
+            if (!node.current()) return;
             ++node.count;
             node.checkLock(); // Original129-147: AFTER count++, BEFORE discharge/recharge.
             if (!node.current()) return;
-            boolean change = node.handleDischarge();
+            change |= node.handleDischarge();
             if (!node.current()) return;
             change |= node.rechargeAndPrune();
             if (!node.current()) return;
             change |= node.handleStability();
+            if (!node.current()) return;
+            node.hungrySecond(); // Original after dark/pure handlers; those remain pending.
             if (change && node.current()) node.changed();
         } finally { node.ticking = false; node.tickingLevel = null; node.tickingState = null; }
+    }
+
+    /** Client-first visual/prediction adapter; authoritative stock mutation remains server-only. */
+    private static final ThreadLocal<java.util.Set<Entity>> HUNGRY_DAMAGE_FRAMES = ThreadLocal.withInitial(
+            () -> java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>()));
+    private static volatile java.util.function.Consumer<TileNode> hungryClientTick = node -> {};
+    public static void setHungryClientTick(java.util.function.Consumer<TileNode> handler) { hungryClientTick = java.util.Objects.requireNonNull(handler); }
+    public static void clientTick(Level world, BlockPos pos, BlockState state, TileNode node) {
+        if (!world.isClientSide || node.nodeType != NodeType.HUNGRY || node.ticking || node.notifying || node.transducing || node.pearlPlanning
+                || node.level != world || !node.worldPosition.equals(pos) || node.getBlockState() != state || !node.current()) return;
+        node.ticking = true; node.tickingLevel = world; node.tickingState = state;
+        try { hungryClientTick.accept(node); } finally { node.ticking = false; node.tickingLevel = null; node.tickingState = null; }
+    }
+
+    /** Original First runs before ++count and does not check a stabilizer lock. */
+    private boolean hungryFirst() {
+        if (nodeType != NodeType.HUNGRY || !thaumcraft.common.config.ThaumcraftSettings.server().hardNodes()) return false;
+        ServerLevel world = (ServerLevel) level;
+        boolean change = false;
+        Vec3 centre = Vec3.atCenterOf(worldPosition);
+        for (Entity entity : world.getEntitiesOfClass(Entity.class, new AABB(worldPosition).inflate(HungryNodeRules.RANGE))) {
+            if (!current() || nodeType != NodeType.HUNGRY) return change;
+            if (!hungryTarget(world, entity) || entity instanceof Player player && player.getAbilities().invulnerable) continue;
+            if (entity.isAlive() && !entity.isInvulnerable() && centre.distanceToSqr(entity.position()) < HungryNodeRules.DAMAGE_DISTANCE_SQUARED) {
+                change |= hungryBite(world, entity, centre);
+            }
+            // Corpses may remain natively indexed; discarded or teleported owners are never moved.
+            if (current() && hungryTarget(world, entity)) {
+                Vec3 pull = HungryNodeRules.pull(centre.subtract(entity.position()));
+                Vec3 motion = entity.getDeltaMovement().add(pull);
+                if (Double.isFinite(motion.x) && Double.isFinite(motion.y) && Double.isFinite(motion.z)) entity.setDeltaMovement(motion);
+            }
+        }
+        return change;
+    }
+    /** One native entity damage/reward frame across every HUNGRY node; ItemEntity
+     * invokes onDestroyed before discard, so a second node can otherwise observe
+     * a still-live zero-health source during that callback. Pull remains independent. */
+    private boolean hungryBite(ServerLevel world, Entity entity, Vec3 centre) {
+        var frames = HUNGRY_DAMAGE_FRAMES.get();
+        if (!frames.add(entity)) return false;
+        try {
+            // An ItemEntity is consumed as its WHOLE real stack by native health damage,
+            // but original ScanManager prices only ONE item; retain that intentional quirk.
+            ItemStack actual = entity instanceof ItemEntity item ? item.getItem() : null;
+            if (actual != null && actual.isEmpty()) return false;
+            ItemStack snapshot = actual == null ? null : ItemStack.parse(world.registryAccess(), actual.copyWithCount(1).save(world.registryAccess())).orElseThrow();
+            int ownedCount = actual == null ? 0 : actual.getCount();
+            if (snapshot != null) snapshot.setCount(ownedCount);
+            if (!current() || !hungryTarget(world, entity) || !entity.isAlive() || entity.isInvulnerable()
+                    || centre.distanceToSqr(entity.position()) >= HungryNodeRules.DAMAGE_DISTANCE_SQUARED
+                    || entity instanceof Player player && player.getAbilities().invulnerable
+                    || actual != null && (!(entity instanceof ItemEntity item) || item.getItem() != actual || !ItemStack.matches(actual, snapshot))) return false;
+            entity.hurt(world.damageSources().drown(), 1F);
+            if (!current() || nodeType != NodeType.HUNGRY) return false;
+            if (!entity.isAlive() && entity.level() == world
+                    && (actual == null || entity instanceof ItemEntity item && item.getItem() == actual && ItemStack.matches(actual, snapshot)))
+                return hungryMeal(entity, snapshot);
+            return false;
+        } finally { frames.remove(entity); }
+    }
+    private boolean hungryTarget(ServerLevel world, Entity entity) {
+        return entity.level() == world && !entity.isRemoved() && world.hasChunkAt(entity.blockPosition()) && world.getEntity(entity.getUUID()) == entity;
+    }
+    private boolean hungryMeal(Entity dead, ItemStack paidItem) {
+        AspectList tags;
+        if (paidItem != null) tags = ObjectAspectResolver.scanTags(paidItem.copyWithCount(1), level);
+        else { var binding = EntityAspectBindings.describe(dead); tags = binding == null ? null : binding.aspects(); }
+        if (tags == null || tags.size() == 0 || !current() || nodeType != NodeType.HUNGRY) return false;
+        AspectList primals = DeconstructionRules.primals(tags.copy());
+        AspectList currentRef = aspects, baseRef = aspectsBase, beforeCurrent = aspects.copy(), beforeBase = aspectsBase.copy();
+        var meal = HungryNodeRules.meal(primals, beforeCurrent, beforeBase, level.random::nextInt);
+        if (meal == null || !current() || nodeType != NodeType.HUNGRY || dead.level() != level || dead.isAlive()
+                || paidItem != null && (!(dead instanceof ItemEntity item) || !ItemStack.matches(item.getItem(),paidItem))
+                || aspects != currentRef || aspectsBase != baseRef
+                || !aspects.aspects.equals(beforeCurrent.aspects) || !aspectsBase.aspects.equals(beforeBase.aspects)) return false;
+        if (meal.refill()) { aspects.add(meal.aspect(), 1); return true; }
+        if (meal.grow()) { aspectsBase.add(meal.aspect(), 1); return true; }
+        return false;
+    }
+    /** Original Second is OUTSIDE hardNode and lock gates, after all other node handlers. */
+    private void hungrySecond() {
+        if (nodeType != NodeType.HUNGRY || count % HungryNodeRules.BLOCK_INTERVAL != 0) return;
+        var hit = HungryNodeTrace.randomHit(level, worldPosition, level.random);
+        if (hit == null || !current() || nodeType != NodeType.HUNGRY) return;
+        BlockPos target = hit.getBlockPos();
+        if (worldPosition.distSqr(target) >= 256D || !level.hasChunkAt(target)) return;
+        BlockState before = level.getBlockState(target);
+        float hardness = before.getDestroySpeed(level, target);
+        if (!before.isAir() && HungryNodeRules.breakable(hardness) && current() && nodeType == NodeType.HUNGRY
+                && level.hasChunkAt(target) && level.getBlockState(target) == before)
+            level.destroyBlock(target, true);
     }
 
     /** Original824-842: block+metadata only; no stabilizer-BE admission gate.
@@ -336,8 +442,8 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     /** A stronger nearby normal node can bully a weaker one, as in TC4. */
     private boolean handleDischarge() {
         if (nodeLock == 1 || nodeModifier == NodeModifier.FADING) return false;
-        boolean shiny = nodeModifier == NodeModifier.BRIGHT;
-        int interval = shiny ? 1 : nodeModifier == NodeModifier.PALE ? 3 : 2;
+        boolean shiny = nodeType == NodeType.HUNGRY || nodeModifier == NodeModifier.BRIGHT;
+        int interval = nodeModifier == null ? 2 : shiny ? 1 : nodeModifier == NodeModifier.PALE ? 3 : 2;
         if (count % interval != 0) return false;
         var random = level.random;
         int x = random.nextInt(5) - random.nextInt(5);
@@ -350,7 +456,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         // Never load a neighbouring chunk to look for a node.
         if (level.isOutsideBuildHeight(otherPos) || !level.hasChunkAt(otherPos)
                 || !(level.getBlockEntity(otherPos) instanceof TileNode other)
-                || other.level != level || (other.nodeType != NodeType.NORMAL && other.nodeType != NodeType.UNSTABLE) || !other.current() || !current()) return false;
+                || other.level != level || (other.nodeType != NodeType.NORMAL && other.nodeType != NodeType.UNSTABLE && other.nodeType != NodeType.HUNGRY) || !other.current() || !current()) return false;
         if (other.transducing || other.nodeLock > 0) return false; // Original lock check BEFORE aspect-selection RNG; atomic capture cannot be bullied.
         int otherAverage = (other.aspects.visSize() + other.aspectsBase.visSize()) / 2;
         int thisAverage = (aspects.visSize() + aspectsBase.visSize()) / 2;

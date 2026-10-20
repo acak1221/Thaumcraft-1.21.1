@@ -59,6 +59,7 @@ public final class ScanManager {
 
     public static boolean completeScan(ServerPlayer player, String signature, AspectList aspects, ScanKind kind, ResearchClues.Context context) {
         if (player == null || !player.server.isSameThread()) return false;
+        var notificationOrder = aspects == null ? java.util.List.<Aspect>of() : java.util.Arrays.asList(aspects.getAspects());
         ScanOutcome result = awardScan(KnowledgeAccess.get(player), signature, aspects, kind,
                 thaumcraft.common.config.ThaumcraftSettings.server().aspectCap());
         if (!result.success()) {
@@ -71,19 +72,10 @@ public final class ScanManager {
             return false;
         }
 
-        ResearchClues.reveal(KnowledgeAccess.get(player), context, result.awards(), bound -> player.serverLevel().random.nextInt(bound));
+        String clue = ResearchClues.reveal(KnowledgeAccess.get(player), context, result.awards(), bound -> player.serverLevel().random.nextInt(bound));
         KnowledgeEvents.sync(player);
-        for (String tag : result.discovered()) {
-            Aspect aspect = Aspect.getAspect(tag);
-            player.sendSystemMessage(Component.translatable("tc.port.scan.discovery",
-                    Component.literal(aspect.getName())));
-        }
-        if (!result.awards().isEmpty()) {
-            String points = result.awards().entrySet().stream()
-                    .map(entry -> Aspect.getAspect(entry.getKey()).getName() + " +" + entry.getValue())
-                    .reduce((left, right) -> left + ", " + right).orElse("");
-            player.sendSystemMessage(Component.translatable("tc.port.scan.points", Component.literal(points)));
-        }
+        thaumcraft.common.lib.network.KnowledgeNotificationNetworking.scan(player, notificationOrder, result.awards(), result.discovered());
+        if (clue != null) thaumcraft.common.lib.network.KnowledgeNotificationNetworking.research(player, "@" + clue);
         return true;
     }
 

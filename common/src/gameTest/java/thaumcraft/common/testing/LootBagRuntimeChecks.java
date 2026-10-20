@@ -52,6 +52,7 @@ import thaumcraft.common.config.ThaumcraftEquipment;
 import thaumcraft.common.config.ThaumcraftLoot;
 import thaumcraft.common.lib.loot.LootPotionVariants;
 import thaumcraft.common.lib.loot.LootTables;
+import thaumcraft.common.lib.loot.OriginalLootEnchantments;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /** Native weighted draws, mutable book aliases, actual bag payment, rejected ADD and exact durable replay. */
@@ -90,7 +91,9 @@ public final class LootBagRuntimeChecks {
         }
         List<WeightedRandomLoot> pool(int tier) { return tier==0?WeightedRandomLoot.lootBagCommon:tier==1?WeightedRandomLoot.lootBagUncommon:WeightedRandomLoot.lootBagRare; }
         void poolsAndPotions() {
-            int[] counts={85,90,92},weights={2943,2913,2591};
+            // Config.initLoot: uncommon non-potion weights total2669;
+            // the72 original potion entries add144, giving2813.
+            int[] counts={85,90,92},weights={2943,2813,2591};
             for(int tier=0;tier<3;tier++) {
                 var pool=pool(tier);test.assertTrue(pool.size()==counts[tier]&&pool.stream().mapToInt(e->e.itemWeight).sum()==weights[tier],"original literal tier entry count and total weight "+tier);
                 var coins=pool.getFirst();test.assertTrue(coins.item.is(ThaumcraftContent.MATERIALS.get("gold_coin").get())&&coins.item.getCount()==tier+1&&coins.itemWeight==2500-tier*250,"first weighted entry preserves original denomination and dominant weight");
@@ -153,6 +156,16 @@ public final class LootBagRuntimeChecks {
             for(long seed=0;seed<2000&&!bag;seed++)for(var stack:table.getRandomItems(params,seed))if(stack.is(ThaumcraftLoot.LOOT_BAG_COMMON.get())||stack.is(ThaumcraftLoot.LOOT_BAG_UNCOMMON.get())||stack.is(ThaumcraftLoot.LOOT_BAG_RARE.get()))bag=true;
             test.assertTrue(bag,"actual native dungeon table, loaded through the Fabric weighted-pool hook, naturally reaches a bag");
             test.assertTrue(ThaumcraftLoot.dungeonEntries(level).size()==38,"Pech's original uniform descriptor list retains sixteen vanilla plus twenty-two TC entries");
+            for(long seed:new long[]{0,47,1234}) {
+                var live=RandomSource.create(seed);var detached=RandomSource.create(seed);var tree=RandomSource.create(seed);
+                var expected=OriginalLootEnchantments.enchant(level,new ItemStack(Items.BOOK),live,30);
+                var snapshot=OriginalLootEnchantments.enchant(level.registryAccess(),new ItemStack(Items.BOOK),detached,30);
+                var descriptors=ThaumcraftLoot.dungeonEntries(level,tree);
+                test.assertTrue(ItemStack.matches(expected,snapshot)&&ItemStack.matches(expected,descriptors.get(15).baseStack()),
+                        "immutable registry snapshot and private tree RNG retain the original actual dungeon enchanted-book descriptor");
+                long next=live.nextLong();test.assertTrue(next==detached.nextLong()&&next==tree.nextLong(),
+                        "world-generation descriptor overload preserves the complete original caller RNG advancement");
+            }
         }
         DeferredItemDrops queue() { return level.getDataStorage().computeIfAbsent(FACTORY,QUEUE); }
         List<CompoundTag> rows(BlockPos source) {

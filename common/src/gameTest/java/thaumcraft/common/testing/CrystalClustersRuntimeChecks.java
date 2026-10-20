@@ -156,6 +156,8 @@ public final class CrystalClustersRuntimeChecks {
         var oldBlock = level.getBlockState(position); var oldSupport = level.getBlockState(support);
         var oldTile = level.getBlockEntity(position); var oldNbt = oldTile == null ? null : oldTile.saveWithFullMetadata(level.registryAccess());
         boolean[] closed = {false};
+        net.minecraft.world.level.chunk.LevelChunk[] loadedOwner = {null};
+        TileCrystal[] loadedTile = {null};
         Runnable cleanup = () -> {
             if (closed[0]) return; closed[0] = true;
             try {
@@ -175,25 +177,36 @@ public final class CrystalClustersRuntimeChecks {
             test.onEachTick(() -> {
                 if (closed[0]) return;
                 try {
-                    if (source.getChunkNow(chunk.x, chunk.z) != null || !crystal.isRemoved()) return;
-                    source.addRegionTicket(TICKET, chunk, 2, position); var reloadedChunk = level.getChunkAt(position); var reloaded = level.getBlockEntity(position);
-                    test.assertTrue(reloadedChunk != oldChunk && reloaded != crystal && reloaded instanceof TileCrystal,
-                            "actual ServerLevel unload is followed by a fresh native disk-loaded chunk and tile");
-                    var tile = (TileCrystal) reloaded; var state = level.getBlockState(position);
-                    test.assertTrue(state.is(ThaumcraftCrystalClusters.MIXED.get()) && tile.orientation == 5
-                                    && tile.saveWithoutMetadata(level.registryAccess()).contains("orientation", Tag.TAG_SHORT)
-                                    && ThaumcraftCrystalClusters.MIXED.get().getTicker(level, state, ThaumcraftCrystalClusters.CRYSTAL_TILE.get()) == null,
-                            "real chunk NBT retains mixed identity/SHORT EAST5 and has no invented growth ticker");
+                    if (loadedOwner[0] == null) {
+                        if (source.getChunkNow(chunk.x, chunk.z) != null || !crystal.isRemoved()) return;
+                        source.addRegionTicket(TICKET, chunk, 2, position); var reloadedChunk = level.getChunkAt(position); var reloaded = level.getBlockEntity(position);
+                        test.assertTrue(reloadedChunk != oldChunk && reloaded != crystal && reloaded instanceof TileCrystal,
+                                "actual ServerLevel unload is followed by a fresh native disk-loaded chunk and tile");
+                        var tile = (TileCrystal) reloaded; var state = level.getBlockState(position);
+                        test.assertTrue(state.is(ThaumcraftCrystalClusters.MIXED.get()) && tile.orientation == 5
+                                        && tile.saveWithoutMetadata(level.registryAccess()).contains("orientation", Tag.TAG_SHORT)
+                                        && ThaumcraftCrystalClusters.MIXED.get().getTicker(level, state, ThaumcraftCrystalClusters.CRYSTAL_TILE.get()) == null,
+                                "real chunk NBT retains mixed identity/SHORT EAST5 and has no invented growth ticker");
+                        loadedOwner[0] = reloadedChunk; loadedTile[0] = tile;
+                        return;
+                    }
+                    // FULL block access precedes native entity-section visibility after reload. Wait for the actual lifecycle,
+                    // rather than breaking in the reload call and querying an entity section that is still HIDDEN.
+                    if (!level.areEntitiesLoaded(chunk.toLong()) || !level.isPositionEntityTicking(position)) return;
+                    test.assertTrue(source.getChunkNow(chunk.x, chunk.z) == loadedOwner[0] && level.getBlockEntity(position) == loadedTile[0],
+                            "the same disk-loaded crystal remains current when its native entity section starts ticking");
                     level.setBlock(support, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
                     var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(position).inflate(2));
-                    test.assertTrue(level.isEmptyBlock(position) && drops.size() == 6 && drops.stream().allMatch(drop -> drop.getItem().getCount() == 1), "disk-loaded selected support loss still creates six individual drops once");
+                    test.assertTrue(level.isEmptyBlock(position) && drops.size() == 6 && drops.stream().allMatch(drop -> drop.getItem().getCount() == 1),
+                            "disk-loaded selected support loss still creates six individual drops once; state=" + level.getBlockState(position)
+                                    + ", drops=" + drops.stream().map(ItemEntity::getItem).toList());
                     for (int index = 0; index < 6; index++) {
                         Item expected = shard(index); test.assertTrue(drops.stream().filter(drop -> drop.getItem().is(expected)).count() == 1, "disk-loaded mixed drop retains each distinct primal exactly once");
                     }
                     cleanup.run(); test.succeed();
                 } catch (RuntimeException | Error failure) { cleanup.run(); throw failure; }
             });
-            test.runAfterDelay(540, () -> { if (!closed[0]) { cleanup.run(); test.fail("isolated crystal chunk did not actually unload within540 world ticks"); } });
+            test.runAfterDelay(540, () -> { if (!closed[0]) { cleanup.run(); test.fail("isolated crystal chunk did not complete actual unload/reload/entity ticking within540 world ticks"); } });
         } catch (RuntimeException | Error failure) { cleanup.run(); throw failure; }
     }
 }

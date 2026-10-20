@@ -104,7 +104,11 @@ public final class ResearchTableEditNetworking {
         // All material writes, including actor knowledge and the ONE revision
         // transition, are complete before block updates/listeners/network/sound.
         table.setChanged();
-        if (result.poolChange() != null) KnowledgeEvents.sync(player);
+        if (result.poolChange() != null) {
+            KnowledgeEvents.sync(player);
+            // Original PLACE/ERASE corrections always carry amount0, including an actual positive refund.
+            KnowledgeNotificationNetworking.pool(player, result.poolChange().aspect(), 0);
+        }
         menu.broadcastChanges();
         for (ServerPlayer viewer : player.server.getPlayerList().getPlayers()) {
             if (viewer != player && viewer.containerMenu instanceof ContainerResearchTable other

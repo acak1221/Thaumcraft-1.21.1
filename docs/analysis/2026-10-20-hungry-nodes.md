@@ -37,13 +37,35 @@ adds1 to BASE only. A failed chance still leaves the killed source consumed.
 
 No reward setter, synthetic item removal or public meal token can grant aura.
 Actual source references/count/components are checked before damage and retained
-through death; changed/revived source or stale node snapshots do not credit.
+through death, apart from the exact native BlockItem container transition described
+below; changed/revived source or stale node snapshots do not credit.
 The existing native destroyed/picked-up item custody hooks still observe native
 item deaths. A canceled damage call keeps physical stock and grants no aura. A private
 identity-only damage frame spans native damage and reward across hungry nodes,
 because ItemEntity calls onDestroyed before discard; reentrant neighbors may
 pull, but cannot damage/credit the same in-flight physical source twice.
 Node current/base state persists through its existing native NBT codec.
+
+### Native destroyed-block-item component transition
+
+Minecraft1.21.1 `BlockItem.onDestroyed` unconditionally writes
+`DataComponents.CONTAINER = ItemContainerContents.EMPTY`, even for ordinary dirt
+that had no container component. It also releases any prior container contents
+through native `ItemUtils.onContainerDestroyed`. This engine behavior has no
+equivalent component in the original1.7 item receipt. Comparing every component
+to the unmodified pre-death receipt therefore rejected ordinary block-item meals
+after the real item had already died.
+
+The adapter accepts exactly this transition only after native death of the same
+actual BlockItem stack. Entity/stack identity, count and every other component
+must still match; replacing the stack or changing its name/count refuses reward.
+Both post-damage and post-RNG checks use this witness. Tags still come from the
+unaltered pre-death one-item receipt. Any native released contents remain separate
+physical item entities and are never converted to an extra meal for the parent.
+The runtime fixture preserves exactly seven named iron ingots from a nonempty
+container and requires exactly one parent-primal draw. Separate real native death
+callbacks change the name, count or stack reference and must produce no meal draw
+or aura. No normalization is allowed before the physical payment.
 
 Second runs every50 post-increment ticks **outside hardNodes and lock gates**.
 It consumes exactly six nextInt16 offsets, clamps Y to the sampled column's
@@ -114,8 +136,16 @@ actors/items/blocks and explicit server RNG branch inputs, then verifies:
 - ONE fixed natural roll466 initializes HUNGRY/HUNGER2, then ordinary registered
   entity/node ticks consume a real five-item source and refill one current unit.
 
-Implemented and source-ready; these new tests have NOT yet run. Parent coordinator
-owns the single Gradle/runtime run and exact evidence. Earlier647-JUnit/
-79-Python checkpoint and the separate UNSTABLE fixes do not verify this unit.
+The full `b7c7845` CI run reached this test but failed its full-BASE dirt chance
+assertion. A subsequent local focused diagnostic ran exactly Hungry plus the
+crystal reload test using the existing Fabric server task. All native dirt
+health/current-owner/one-item Earth2 preconditions passed; the recorded failure
+had `bounds=[]`, `effects=[]`, a dead item and unchanged current/BASE. Native
+bytecode then established the BlockItem CONTAINER mutation above as the cause.
+The production adapter and expanded custody/conservation assertions were written
+after that diagnostic and still require subsequent compile/runtime verification.
+That two-test run is not acceptance of the full243-test snapshot. The temporary
+wrapper annotation selection was restored byte-for-byte afterward. Exact log:
+`.tmp/hungry-crystal-focused.log`; no test-filter infrastructure was added.
 Client inspection, remote multiplayer, full M02 ecology/public node API and
 NeoForge parity remain unverified/pending.

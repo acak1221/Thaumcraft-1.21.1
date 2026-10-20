@@ -28,12 +28,20 @@ public final class GuiResearchBrowser extends Screen {
     private static final Pattern TEXTURE = Pattern.compile("new ResourceLocation\\(\"thaumcraft\",\\s*\"([^\"]+)\"\\)");
     private static final ResourceLocation FRAME = texture("textures/gui/gui_research.png");
     private final List<Node> nodes = new ArrayList<>();
-    private String category = "BASICS";
+    private String category = thaumcraft.client.lib.ResearchNotifications.selectedCategory();
+    private final java.util.Map<String, Button> categoryButtons = new java.util.LinkedHashMap<>();
+    private static final ResourceLocation HIGHLIGHT = texture("textures/misc/particles.png");
     private int left, top, panelWidth, panelHeight, graphLeft, graphTop, graphWidth, graphHeight;
     private double panX, panY;
     private record Node(ResearchDefinition research, int x, int y) {}
 
-    public GuiResearchBrowser() { super(Component.translatable("item.thaumcraft.thaumonomicon")); }
+    public GuiResearchBrowser() {
+        super(Component.translatable("item.thaumcraft.thaumonomicon"));
+        if (thaumcraft.client.lib.ResearchNotifications.hasQueuedResearch()) {
+            panX = -thaumcraft.client.lib.ResearchNotifications.lastColumn() * 24;
+            panY = -thaumcraft.client.lib.ResearchNotifications.lastRow() * 24;
+        }
+    }
     private Set<String> completed() {
         return minecraft.player == null ? Set.of() : KnowledgeAccess.get(minecraft.player).getResearchComplete();
     }
@@ -44,16 +52,16 @@ public final class GuiResearchBrowser extends Screen {
         left = (width - panelWidth) / 2; top = (height - panelHeight) / 2;
         graphLeft = left + 116; graphTop = top + 28;
         graphWidth = panelWidth - 126; graphHeight = panelHeight - 58;
-        int y = top + 30;
+        int y = top + 30; categoryButtons.clear();
         var categories = ResearchBrowserData.categories(completed());
         if (!categories.contains(category)) category = "BASICS";
         for (String key : categories) {
             Button button = Button.builder(Component.translatable("tc.research_category." + key), b -> {
-                category = key; panX = panY = 0; rebuildWidgets();
+                category = key; thaumcraft.client.lib.ResearchNotifications.selectCategory(key); panX = panY = 0; rebuildWidgets();
             }).bounds(left + 8, y, 102, 20).build();
             button.active = !key.equals(category);
             button.setTooltip(Tooltip.create(Component.translatable("tc.research_category." + key)));
-            addRenderableWidget(button); y += 24;
+            addRenderableWidget(button); categoryButtons.put(key, button); y += 24;
         }
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
                 .bounds(left + panelWidth - 88, top + panelHeight - 24, 80, 20).build());
@@ -87,6 +95,7 @@ public final class GuiResearchBrowser extends Screen {
             boolean available = node.research.hasPrerequisites(completed);
             int frameX = node.research.flags().contains("Round") ? 54 : node.research.isHidden() ? 86 : purchases(node.research) ? 110 : 0;
             graphics.blit(FRAME, node.x - 2, node.y - 2, frameX, 230, 26, 26, 256, 256);
+            if (thaumcraft.client.lib.ResearchNotifications.highlighted(node.research.key())) highlight(graphics, node.x - 5, node.y - 5);
             if (!ResearchIconDisplay.render(graphics, font, node.research.iconExpression(), node.x + 3, node.y + 3)) {
                 var expression = TEXTURE.matcher(node.research.iconExpression() == null ? "" : node.research.iconExpression());
                 ResourceLocation icon = expression.matches() ? texture(expression.group(1).toLowerCase(java.util.Locale.ROOT))
@@ -99,6 +108,9 @@ public final class GuiResearchBrowser extends Screen {
         }
         graphics.disableScissor();
         super.render(graphics, mouseX, mouseY, delta);
+        categoryButtons.forEach((key, button) -> {
+            if (thaumcraft.client.lib.ResearchNotifications.highlighted(key)) highlight(graphics, button.getX() - 5, button.getY() - 5);
+        });
         Node hover = nodeAt(mouseX, mouseY);
         if (hover != null) {
             int tooltipWidth = Math.max(120, Math.min(300, width - 24));
@@ -225,6 +237,23 @@ public final class GuiResearchBrowser extends Screen {
             return true;
         }
         return super.mouseDragged(x, y, button, dx, dy);
+    }
+    private static void highlight(GuiGraphics graphics, int x, int y) {
+        float[] old = com.mojang.blaze3d.systems.RenderSystem.getShaderColor().clone();
+        try { graphics.setColor(1,1,1,1); graphics.blit(HIGHLIGHT,x,y,(int)(System.nanoTime()/50_000_000L%16)*16,80,16,16); }
+        finally { graphics.setColor(old[0],old[1],old[2],old[3]); }
+    }
+    @Override public void onClose() {
+        thaumcraft.client.lib.ResearchNotifications.clearHighlights();
+        super.onClose();
+    }
+    @Override public void removed() {
+        thaumcraft.client.lib.ResearchNotifications.rememberCenter((int)(-panX/24),(int)(-panY/24));
+        super.removed();
+    }
+    @Override public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (minecraft.options.keyInventory.matches(key,scanCode)) { onClose(); return true; }
+        return super.keyPressed(key,scanCode,modifiers);
     }
     @Override public boolean isPauseScreen() { return false; }
 }

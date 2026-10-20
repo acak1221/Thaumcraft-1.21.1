@@ -16,7 +16,7 @@ import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced;
 import thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedPart;
 
-/** ACTUAL ticket-driven neighboring chunk unload/save/reload, not reflected visibility absence or loadStatic replacement.
+/** ACTUAL ticket-driven two-chunk unload/save/reload, not reflected visibility absence or loadStatic replacement.
  * Suggested timeout1000: vanilla player-ticket removal/unload can take hundreds of ordinary server ticks. */
 public final class AdvancedFurnaceUnloadRuntimeChecks {
     private static final TicketType<BlockPos> OWNED=TicketType.create("thaumcraft_furnace_custody_test",Comparator.comparingLong(BlockPos::asLong));
@@ -28,11 +28,12 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
     private static final class Check {
         final GameTestHelper test; final Fixture f; final BlockPos center,shell; final ChunkPos coreChunk,shellChunk;
         final List<ChunkPos> forced=new ArrayList<>();
-        TileAlchemyFurnaceAdvanced core; TileAlchemyFurnaceAdvancedPart oldShell;
+        TileAlchemyFurnaceAdvanced core,oldCore; TileAlchemyFurnaceAdvancedPart oldShell;
         UUID machine; int polls; boolean coreTicket,shellTicket,closed;
         Check(GameTestHelper test) {
             this.test=test; f=new Fixture(test);
-            int remoteX=((f.base.getX()+512)>>4)*16+15, remoteZ=((f.base.getZ()+512)>>4)*16+8;
+            // Match the proven table/crystal disk-lifecycle fixtures' isolation from every live GameTest/player ring.
+            int remoteX=((f.base.getX()+1_048_580)>>4)*16+15, remoteZ=((f.base.getZ()+1_048_580)>>4)*16+8;
             center=new BlockPos(remoteX,f.base.getY()+100,remoteZ); shell=center.offset(1,0,1);
             coreChunk=new ChunkPos(center); shellChunk=new ChunkPos(shell);
         }
@@ -43,8 +44,10 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
             core=AdvancedFurnaceRuntimeChecks.form(f,center,false);
             oldShell=(TileAlchemyFurnaceAdvancedPart)f.level.getBlockEntity(shell); machine=core.machineId();
             f.check(oldShell.belongsTo(core),"real paid formation gives the remote shell exact persistent core UUID");
-            // Radius0 means native FULL level33 only for this chunk; its neighbor becomes unavailable at level34.
-            f.level.getChunkSource().addRegionTicket(OWNED,coreChunk,0,center); coreTicket=true;
+            oldCore=core;
+            // A retained FULL33 core ticket propagates34 into its neighbor. That demotes FULL access but
+            // retains the neighboring holder/old BE as a generation dependency, so it cannot prove unload.
+            // Release BOTH chunks first; only ServerLevel.unload retiring BOTH old BEs admits this phase.
             f.level.getServer().getPlayerList().remove(f.player); // Real owned actor logs out; no player view ticket can pin the remote shell.
             for(var chunk:forced) f.level.setChunkForced(chunk.x,chunk.z,false); forced.clear();
             f.level.getChunkSource().save(true);
@@ -54,11 +57,32 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
             test.runAfterDelay(5,()-> {
                 try {
                     polls++;
-                    var visible=f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z);
-                    if(visible!=null || !oldShell.isRemoved()) {
-                        f.check(polls<140,"native neighboring shell chunk ACTUALLY unloads and retires its old BE after ticket/player removal"); pollUnload(); return;
+                    var source=f.level.getChunkSource();
+                    if(source.getChunkNow(shellChunk.x,shellChunk.z)!=null || source.getChunkNow(coreChunk.x,coreChunk.z)!=null
+                            || !oldShell.isRemoved() || !oldCore.isRemoved()) {
+                        f.check(polls<140,"BOTH native furnace chunks ACTUALLY unload and retire BOTH old BEs after all owned ticket/player removal"
+                                +"; core="+source.getChunkDebugData(coreChunk)+", shell="+source.getChunkDebugData(shellChunk)
+                                +", oldCoreRemoved="+oldCore.isRemoved()+", oldShellRemoved="+oldShell.isRemoved()); pollUnload(); return;
                     }
-                    f.check(f.level.getChunkSource().getChunkNow(coreChunk.x,coreChunk.z)!=null && core.isCurrent(),"core remains the same genuinely loaded native BE while neighboring shell is unloaded");
+                    source.addRegionTicket(OWNED,coreChunk,0,center);coreTicket=true;polls=0;pollCoreReload();
+                } catch(RuntimeException|Error failure) { close(); throw failure; }
+            });
+        }
+        void pollCoreReload() {
+            test.runAfterDelay(5,()-> {
+                try {
+                    polls++;
+                    var chunk=f.level.getChunkSource().getChunkNow(coreChunk.x,coreChunk.z);
+                    if(chunk==null) { f.check(polls<40,"native radius0 ticket asynchronously reloads the actually saved core chunk");pollCoreReload();return; }
+                    var loaded=chunk.getBlockEntity(center);
+                    f.check(loaded instanceof TileAlchemyFurnaceAdvanced next && next!=oldCore && machine.equals(next.machineId())
+                                    && center.equals(next.ownerPosition()) && next.isCurrent()
+                                    && next.getAspects().aspects.equals(oldCore.getAspects().aspects)
+                                    && next.getHeat()==oldCore.getHeat() && next.getPower1()==oldCore.getPower1() && next.getPower2()==oldCore.getPower2(),
+                            "actual disk-backed core reload creates a NEW current native BE preserving exact paid UUID/owner, stock and raw heat/powers");
+                    core=(TileAlchemyFurnaceAdvanced)loaded;
+                    f.check(f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z)==null && oldShell.isRemoved(),
+                            "core-only FULL33 reload leaves remote shell FULL-inaccessible and its actually unloaded old BE retired");
                     int count=core.getTickCount(),heat=core.getHeat();
                     f.check(AdvancedFurnaceFormation.structure(core)==AdvancedFurnaceFormation.Status.UNLOADED,"real native structure observation distinguishes unavailable from missing");
                     AdvancedFurnaceRuntimeChecks.ticks(f,core,5);

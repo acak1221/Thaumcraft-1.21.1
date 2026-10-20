@@ -1,6 +1,8 @@
 package thaumcraft.common.entities.ai.pech;
 
 import java.util.EnumSet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
@@ -25,7 +27,12 @@ public final class PechAvoidGoal extends Goal {
     }
     @Override public boolean canUse(){
         target=closestPlayer(pech,8);if(target==null)return false;
-        var retreat=DefaultRandomPos.getPosAway(pech,16,7,target.position());if(retreat==null||target.distanceToSqr(retreat)<target.distanceToSqr(pech))return false;
+        var candidate=DefaultRandomPos.getPosAway(pech,16,7,target.position());if(candidate==null)return false;
+        // Old RandomPositionGenerator returns integer XYZ. Native returns
+        // bottom-center X+.5/Z+.5; restore the old coordinate contract BEFORE
+        // distance and exact path-end checks, including negative coordinates.
+        var retreat=Vec3.atLowerCornerOf(BlockPos.containing(candidate));
+        if(target.distanceToSqr(retreat)<target.distanceToSqr(pech))return false;
         path=pech.getNavigation().createPath(retreat.x,retreat.y,retreat.z,0);if(path==null)return false;
         var end=path.getEndNode();return end!=null&&end.x==(int)retreat.x&&end.z==(int)retreat.z;
     }

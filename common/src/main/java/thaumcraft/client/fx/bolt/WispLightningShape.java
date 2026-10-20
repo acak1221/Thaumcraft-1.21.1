@@ -14,11 +14,14 @@ public final class WispLightningShape {
     public int mainSegments=1;
     private final Random random;
     private int splits;
-    public WispLightningShape(Vec3 from,Vec3 to,long seed) {
-        random=new Random(seed);V start=V.of(from),end=V.of(to);length=end.copy().sub(start).length();maxAge=3+random.nextInt(3)-1;
+    public WispLightningShape(Vec3 from,Vec3 to,long seed) { this(from,to,seed,0,.4F); }
+    /** Harness uses the original duration override and its second random draw. */
+    public WispLightningShape(Vec3 from,Vec3 to,long seed,int duration,float multiplier) {
+        if(duration<0||!Float.isFinite(multiplier)||multiplier<=0)throw new IllegalArgumentException("Invalid bolt parameters");
+        random=new Random(seed);V start=V.of(from),end=V.of(to);length=end.copy().sub(start).length();int initialAge=3+random.nextInt(3)-1;maxAge=duration>0?duration+random.nextInt(duration)-duration/2:initialAge;
         segments.add(new Segment(new Point(start,new V(0,0,0)),new Point(end,new V(0,0,0)),1,0,0));
         int[] divisors={8,12,17,23,30,34,40};float[] chance={.7F,.5F,.5F,.5F,0,0,0};float[] angles={45,50,55,60,0,0,0};
-        for(int i=0;i<divisors.length;i++) fractal(length*.4F/divisors[i],chance[i],i<4?.1F:0,angles[i]);
+        for(int i=0;i<divisors.length;i++) fractal(length*multiplier/divisors[i],chance[i],i<4?.1F:0,angles[i]);
         segments.sort(Comparator.comparingInt((Segment s)->s.split).thenComparingInt(s->s.number));
         for(var segment:segments) segment.join();
         segments.sort(Comparator.comparingDouble((Segment s)->-s.light));

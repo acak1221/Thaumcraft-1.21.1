@@ -1,39 +1,38 @@
 package thaumcraft.common.blocks;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
- * Original BlockCosmeticStoneSlab: the arcane and the eldritch half block.
- * <p>
- * The original slab had two kinds, the arcane stone and the eldritch stone, and took the texture of the
- * cosmetic solid. The native port already has the slab of the arcane stone bricks, so this block serves the
- * original two kinds.
- * <p>
- * Oracle: {@code thaumcraft/common/blocks/BlockCosmeticStoneSlab.java}, lines 37-89.
+ * Original BlockCosmeticStoneSlab: the arcane and the eldritch stone slabs.
+ * The original metadata became a flattened block variant.
  */
 public final class BlockCosmeticStoneSlab extends SlabBlock {
-    public static final MapCodec<BlockCosmeticStoneSlab> CODEC = simpleCodec(BlockCosmeticStoneSlab::new);
-    /** The two original slab kinds: zero is arcane and one is eldritch. */
-    public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 1);
+    public static final MapCodec<BlockCosmeticStoneSlab> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.intRange(0, 1).fieldOf("variant").forGetter(BlockCosmeticStoneSlab::variant),
+            propertiesCodec()).apply(instance, BlockCosmeticStoneSlab::new));
 
-    public BlockCosmeticStoneSlab(Properties properties) {
+    private final int variant;
+
+    public BlockCosmeticStoneSlab(int variant, Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(VARIANT, 0));
+        if (variant != EldritchBlockRules.SLAB_STONE_ARCANE && variant != EldritchBlockRules.SLAB_STONE_ELDRITCH) {
+            throw new IllegalArgumentException("Unknown original cosmetic stone slab variant " + variant);
+        }
+        this.variant = variant;
     }
 
     @Override public MapCodec<? extends SlabBlock> codec() { return CODEC; }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(VARIANT);
-    }
+    public int variant() { return variant; }
 
-    // BlockCosmeticStoneSlab:44 applies to both single AND double blocks.
+    // BlockCosmeticStoneSlab:44 applies to both the single and the double block.
+    // Waterlogging has no 1.7 counterpart and keeps the native wet-state lighting.
     @Override protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
         return state.getValue(WATERLOGGED) ? super.getLightBlock(state, level, pos) : 0;
     }

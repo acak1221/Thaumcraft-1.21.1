@@ -3,75 +3,100 @@ package thaumcraft.common.blocks;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import thaumcraft.common.config.ThaumcraftLegacyTiles;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.common.tiles.TileWardingStone;
 
 /**
- * Original BlockCosmeticSolid: the sixteen decorative solid blocks of Thaumcraft.
- * <p>
- * The metadata of the original picked the block: obsidian tile, paving stone, thaumium block, tallow block,
- * arcane stone, golem stone, the infused stone totems and the taint crust. The original had one block with
- * sixteen metadata values; 1.21.1 has no metadata and no per state hardness, so the native port registers the
- * variants that are still missing as separate blocks of this class.
- * <p>
- * The metadata eight block is the base of an obsidian totem and holds a node, the metadata three block is the
- * warding stone whose tile entity belongs to the warding subsystem that the native port does not have yet.
- * <p>
- * Oracle: {@code thaumcraft/common/blocks/BlockCosmeticSolid.java}, lines 60-371.
+ * Original BlockCosmeticSolid: the sixteen decorative stone variants of the
+ * Outer Lands. The original metadata became the {@link #VARIANT} block state.
  */
 public final class BlockCosmeticSolid extends BaseEntityBlock {
     public static final MapCodec<BlockCosmeticSolid> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            propertiesCodec(), Codec.INT.fieldOf("variant").forGetter(block -> block.variant))
-            .apply(instance, BlockCosmeticSolid::new));
-    private final int variant;
+            Codec.intRange(0, 2).fieldOf("group").forGetter(BlockCosmeticSolid::group),
+            propertiesCodec()).apply(instance, BlockCosmeticSolid::new));
+    /** Original BlockCosmeticSolid metadata 0..15. */
+    public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
 
-    public BlockCosmeticSolid(Properties properties, int variant) {
+    private final java.util.List<Integer> variants;
+    private final int group;
+
+    /** The hardness and the blast resistance belong to the block in 1.21.1. */
+    public BlockCosmeticSolid(int group, Properties properties) {
         super(properties);
-        this.variant = variant;
+        this.group = group;
+        this.variants = EldritchBlockRules.cosmeticGroupVariants(group);
+        if (this.variants.isEmpty()) throw new IllegalArgumentException("Unknown original cosmetic hardness group " + group);
+        registerDefaultState(stateDefinition.any().setValue(VARIANT, this.variants.get(0)));
     }
 
-    @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
-    /** The original metadata value of this block. */
-    public int variant() { return variant; }
+    /** The hardness group of this block. */
+    public int group() { return group; }
 
+    /** The original metadata values that this block hosts. */
+    public java.util.List<Integer> variants() { return variants; }
+
+    /** True when the block hosts the original metadata. */
+    public boolean allows(int variant) { return variants.contains(variant); }
+
+    @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
+
+    public static int variant(BlockState state) { return state.getValue(VARIANT); }
+
+    /** BlockCosmeticSolid:227-239 - the per metadata light level. */
+    public static int lightOf(BlockState state) { return EldritchBlockRules.cosmeticLight(state.getValue(VARIANT)); }
+
+    /** BlockCosmeticSolid:259-261 - the original damage value of the dropped item. */
+    public int damageDropped(BlockState state) {
+        int variant = state.getValue(VARIANT);
+        if (variant == EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED) return 1;
+        if (variant == EldritchBlockRules.COSMETIC_GOLEM_STONE_ACTIVE) return 9;
+        return variant;
+    }
+
+    /** BlockCosmeticSolid:288-296 - the warding stone and the node tile carry a block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        // BlockCosmeticSolid:288-296 - the obsidian totem base holds a node.
-        if (variant == 8) return new TileNode(ThaumcraftLegacyTiles.COSMETIC_SOLID_NODE_BLOCK_ENTITY.get(), pos, state);
+        int variant = state.getValue(VARIANT);
+        if (variant == EldritchBlockRules.COSMETIC_WARDING_STONE) {
+            return new TileWardingStone(pos, state);
+        }
+        if (variant == EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED) {
+            return new TileNode(ThaumcraftEldritchBlocks.COSMETIC_NODE_TILE.get(), pos, state);
+        }
         return null;
     }
 
-    @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (variant != 8) return null;
-        return createTickerHelper(type, ThaumcraftLegacyTiles.COSMETIC_SOLID_NODE_BLOCK_ENTITY.get(), TileNode::serverTick);
+    /** BlockCosmeticSolid:360-370 - the golem stone toggles with the redstone power. */
+    @Override protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos neighbourPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighbor, neighbourPos, movedByPiston);
+        int variant = state.getValue(VARIANT);
+        if (variant == EldritchBlockRules.COSMETIC_GOLEM_STONE && level.hasNeighborSignal(pos)) {
+            level.setBlock(pos, state.setValue(VARIANT, EldritchBlockRules.COSMETIC_GOLEM_STONE_ACTIVE), Block.UPDATE_ALL);
+        } else if (variant == EldritchBlockRules.COSMETIC_GOLEM_STONE_ACTIVE && !level.hasNeighborSignal(pos)) {
+            level.setBlock(pos, state.setValue(VARIANT, EldritchBlockRules.COSMETIC_GOLEM_STONE), Block.UPDATE_ALL);
+        }
     }
 
-    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return Shapes.block();
-    }
-
-    /**
-     * BlockCosmeticSolid:263-276 - the paving stone of the warding street slows and weakens the living that
-     * walk over it.
-     */
-    @Override protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (variant != 2 || !(entity instanceof LivingEntity living)) return;
-        living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
-        living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 40, 0));
+    /** BlockCosmeticSolid:182-188 - the decorative stone is a full block. */
+    @Override protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) {
+        return true;
     }
 }

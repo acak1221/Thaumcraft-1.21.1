@@ -2,7 +2,6 @@ package thaumcraft.common.items;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -15,8 +14,14 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Half;
+import thaumcraft.common.blocks.BlockArcaneDoor;
+import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.lib.items.EquipmentRules;
+import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.tiles.TileOwned;
 
 import java.util.List;
 
@@ -24,19 +29,17 @@ import java.util.List;
  * The keys (original ItemKey). An iron key and a gold key link themselves to an arcane door or to an arcane pressure plate; a linked key
  * grants access to that door again, and the gold key may also hand the access on to others.
  *
- * <p>The ownership of a door lives in the TileOwned of the door, which is not part of this port, so the key keeps its link, its messages
- * and its own consumption but cannot yet write into the access list of a door.
+ * <p>The ownership of a door lives in the TileOwned of the door: the first use of a key links the key to the door of its owner, every
+ * further use writes the name of the player into the access list of the door.
  */
 public final class ItemKey extends Item {
     /** The link of a key: the position of the door it was linked to and the kind of door. */
     public record KeyLink(String location, int type) {}
 
-    /** The registry names of the arcane door. */
-    private static final String[] ARCANE_DOOR_IDS = {"thaumcraft:arcane_door", "thaumcraft:block_arcane_door"};
-    /** The registry names of the wooden device that carries the arcane pressure plate. */
-    private static final String[] ARCANE_PLATE_IDS = {"thaumcraft:wooden_device", "thaumcraft:block_wooden_device"};
-    /** The registry names of the arcane pressure plate as a block of its own. */
-    private static final String[] ARCANE_PRESSURE_PLATE_IDS = {"thaumcraft:arcane_pressure_plate", "thaumcraft:block_arcane_pressure_plate"};
+    /** The kind of the block a key works on: the arcane door. */
+    private static final int KIND_DOOR = 0;
+    /** The kind of the block a key works on: the arcane pressure plate. */
+    private static final int KIND_PLATE = 1;
 
     private static final SoundEvent KEY = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "key"));
 
@@ -59,35 +62,59 @@ public final class ItemKey extends Item {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.PASS;
-        int target = targetType(level, pos);
-        if (target < 0) return InteractionResult.PASS;
+        Target target = target(level, pos);
+        if (target == null) return InteractionResult.PASS;
+        TileOwned owned = owned(level, target.owner());
+        if (owned == null) return InteractionResult.PASS;
         ItemStack stack = context.getItemInHand();
         KeyLink link = link(stack);
+        String name = player.getGameProfile().getName();
+        String location = EquipmentRules.keyLocation(target.owner().getX(), target.owner().getY(), target.owner().getZ());
         if (link == null) {
+            // Original ItemKey.onItemUseFirst: the key claims the door of its owner, or a door the player may enter with the gold key.
+            if (!EquipmentRules.keyMayLink(name.equals(owned.owner()),
+                    EquipmentRules.keyHasGrantAccess(owned.accessList(), name), keyType)) return InteractionResult.PASS;
             if (!level.isClientSide) {
                 ItemStack linked = new ItemStack(stack.getItem(), 1);
-                linked.set(ThaumcraftLegacyItems.KEY_LINK.get(), new KeyLink(EquipmentRules.keyLocation(pos.getX(), pos.getY(), pos.getZ()), target));
+                linked.set(ThaumcraftLegacyItems.KEY_LINK.get(), new KeyLink(location, target.kind()));
                 if (!player.getInventory().add(linked)) player.drop(linked, false);
                 if (!player.getAbilities().instabuild) stack.shrink(1);
-                player.displayClientMessage(Component.translatable(target == 0 ? "tc.key1" : "tc.key2")
+                player.displayClientMessage(Component.translatable(target.kind() == KIND_DOOR ? "tc.key1" : "tc.key2")
                         .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC), false);
-                level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, KEY, SoundSource.BLOCKS, 1.0F, 0.9F);
+                level.playSound(null, target.owner().getX() + 0.5, target.owner().getY() + 0.5, target.owner().getZ() + 0.5,
+                        KEY, SoundSource.BLOCKS, 1.0F, 0.9F);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        boolean owner = name.equals(owned.owner());
+        boolean hasEntry = EquipmentRules.keyHasAccess(owned.accessList(), keyType, name);
+        boolean hasGrant = EquipmentRules.keyHasGrantAccess(owned.accessList(), name);
+        if (!owner && !hasEntry && !hasGrant && location.equals(link.location())) {
+            // Original ItemKey.onItemUseFirst: the key writes its access entry into the access list of the door.
+            if (!level.isClientSide) {
+                String entry = EquipmentRules.keyAccessEntry(keyType, name);
+                owned.addAccess(entry);
+                if (target.kind() == KIND_DOOR) {
+                    // Original ItemKey.onItemUseFirst: the upper half of the door carries the same access list.
+                    TileOwned other = owned(level, target.other());
+                    if (other != null) other.addAccess(entry);
+                }
+                player.displayClientMessage(Component.translatable(target.kind() == KIND_DOOR ? "tc.key3" : "tc.key5")
+                        .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC)
+                        .append(keyType == EquipmentRules.KEY_GOLD
+                                ? Component.translatable(target.kind() == KIND_DOOR ? "tc.key4" : "tc.key6")
+                                        .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC)
+                                : Component.empty()), false);
+                level.playSound(null, target.owner().getX() + 0.5, target.owner().getY() + 0.5, target.owner().getZ() + 0.5,
+                        KEY, SoundSource.BLOCKS, 1.0F, 1.1F);
+                if (!player.getAbilities().instabuild) stack.shrink(1);
             }
             return InteractionResult.SUCCESS;
         }
         if (!level.isClientSide) {
-            if (!link.location().equals(EquipmentRules.keyLocation(pos.getX(), pos.getY(), pos.getZ()))) {
-                player.displayClientMessage(Component.translatable("tc.key7").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC), false);
-                return InteractionResult.SUCCESS;
-            }
-            player.displayClientMessage(Component.translatable(target == 0 ? "tc.key3" : "tc.key5")
+            // Original ItemKey.onItemUseFirst: the key belongs to another door, or the player may not enter this one.
+            player.displayClientMessage(Component.translatable(location.equals(link.location()) ? "tc.key8" : "tc.key7")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC), false);
-            if (keyType == EquipmentRules.KEY_GOLD) {
-                player.displayClientMessage(Component.translatable(target == 0 ? "tc.key4" : "tc.key6")
-                        .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC), false);
-            }
-            level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, KEY, SoundSource.BLOCKS, 1.0F, 1.1F);
-            if (!player.getAbilities().instabuild) stack.shrink(1);
         }
         return InteractionResult.SUCCESS;
     }
@@ -99,19 +126,37 @@ public final class ItemKey extends Item {
             return;
         }
         tooltip.add(Component.translatable("tc.key9").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
-        tooltip.add(Component.translatable(link.type() == 0 ? "tc.key10" : "tc.key11").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+        tooltip.add(Component.translatable(link.type() == KIND_DOOR ? "tc.key10" : "tc.key11").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
         String[] parts = link.location().split(",");
         String where = parts.length == 3 ? "x " + parts[0] + ", z " + parts[2] + ", y " + parts[1] : link.location();
         tooltip.add(Component.literal(where).withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
         super.appendHoverText(stack, context, tooltip, flag);
     }
 
-    /** The kind of door at the position: zero the arcane door, one the arcane pressure plate, minus one for anything else. */
-    private static int targetType(Level level, BlockPos pos) {
-        String id = BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()).toString();
-        for (String door : ARCANE_DOOR_IDS) if (door.equals(id)) return 0;
-        for (String plate : ARCANE_PRESSURE_PLATE_IDS) if (plate.equals(id)) return 1;
-        for (String device : ARCANE_PLATE_IDS) if (device.equals(id)) return 1;
-        return -1;
+    /** The block a key works on: the arcane door or the arcane pressure plate of the wooden device. */
+    private static Target target(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof BlockArcaneDoor) {
+            // Original ItemKey.onItemUseFirst: the owner of a door is its lower half, the upper half carries the same access list.
+            boolean upper = state.getValue(BlockArcaneDoor.HALF) == Half.TOP;
+            return new Target(KIND_DOOR, upper ? pos.below() : pos, upper ? pos : pos.above());
+        }
+        if (state.getBlock() instanceof BlockWoodenDevice) {
+            int variant = BlockWoodenDevice.variant(state);
+            // Original ItemKey.onItemUseFirst: the wooden device with the metadata two or three, the arcane pressure plate.
+            if (variant == EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE
+                    || variant == EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_PRESSED) {
+                return new Target(KIND_PLATE, pos, pos);
+            }
+        }
+        return null;
     }
+
+    /** The owned block entity of a position, or null when the position carries none. */
+    private static TileOwned owned(Level level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof TileOwned owned ? owned : null;
+    }
+
+    /** The block a key works on: its kind and the positions of the halves that carry the ownership. */
+    private record Target(int kind, BlockPos owner, BlockPos other) {}
 }

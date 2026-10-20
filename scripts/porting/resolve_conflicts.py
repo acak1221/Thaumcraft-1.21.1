@@ -55,8 +55,14 @@ def main():
                 subprocess.run(["git", "checkout", "--ours", path])
                 print("lang  ", path, "(kept work)")
         else:
-            subprocess.run(["git", "checkout", "--ours", path])
-            print("keep  ", path)
+            # An add/add conflict has no "ours" side: keeping ours would DELETE the new file.
+            ours = subprocess.run(["git", "cat-file", "-e", ":2:" + path], capture_output=True).returncode == 0
+            if ours:
+                subprocess.run(["git", "checkout", "--ours", path])
+                print("keep  ", path)
+            else:
+                subprocess.run(["git", "checkout", "--theirs", path])
+                print("take  ", path, "(added by the branch)")
         subprocess.run(["git", "add", path])
     remaining = subprocess.run(["git", "diff", "--name-only", "--diff-filter=U"],
                                 capture_output=True, text=True).stdout.split()

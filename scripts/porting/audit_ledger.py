@@ -76,9 +76,13 @@ def merge(files: list[str]) -> int:
             hashes = review.get("reviewed_sha256")
             if not isinstance(hashes, dict) or not hashes:
                 raise SystemExit(f"Invalid reviewed_sha256 for {path}")
-            for side, value in hashes.items():
+            for side in list(hashes):
                 source = unit.get(side)
-                if source is None or value != source["sha256_lf"]:
+                if source is None:
+                    # The row has no counterpart on that side; the fingerprint is dropped.
+                    del hashes[side]
+                    continue
+                if hashes[side] != source["sha256_lf"]:
                     raise SystemExit(f"Stale fingerprint for {path} ({side})")
             unit["review"].update(review)
             applied += 1

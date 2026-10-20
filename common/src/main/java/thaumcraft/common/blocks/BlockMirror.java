@@ -7,7 +7,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +29,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.items.relics.ItemHandMirror;
 import thaumcraft.common.tiles.TileMirror;
 import thaumcraft.common.tiles.TileMirrorEssentia;
 
@@ -121,5 +124,19 @@ public final class BlockMirror extends BaseEntityBlock {
     /** BlockMirror:227-235 - the original right click is consumed without opening a container. */
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         return InteractionResult.CONSUME;
+    }
+
+    /**
+     * BlockMirror:227-235 - the original consumed every right click on a mirror, so nothing is ever placed on it. The two mirror items of
+     * the original, the hand mirror and the mirror item itself, were the only things that were used on a mirror, and the original ran
+     * their hook before the block consumed the click (oracle EntityPlayerMP.onItemUse). In 1.21.1 the item only gets its chance when
+     * the block steps aside, so those two items skip the default block interaction and every other item is still refused.
+     */
+    @Override protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (stack.isEmpty()) return ItemInteractionResult.CONSUME;
+        if (stack.getItem() instanceof ItemHandMirror || stack.getItem() instanceof ItemMirrorBlock) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        }
+        return ItemInteractionResult.CONSUME;
     }
 }

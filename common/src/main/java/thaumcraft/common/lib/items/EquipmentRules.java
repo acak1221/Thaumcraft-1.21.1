@@ -1,5 +1,7 @@
 package thaumcraft.common.lib.items;
 
+import thaumcraft.common.lib.world.EldritchBlockRules;
+
 import java.util.List;
 
 /**
@@ -78,6 +80,23 @@ public final class EquipmentRules {
 
     /** The speed the arrow of the bone bow leaves with (original ItemBowBone.func_77615_a). */
     public static float boneBowArrowSpeed(float power) { return power * BONE_BOW_ARROW_SPEED; }
+
+    /**
+     * The speed the primal arrow of the bone bow leaves with. Original EventHandlerEntity.bowShot: the primal arrow is created with the
+     * charge of the bow times the arrow damage of the bow, and the original EntityPrimalArrow leaves with one and a half times that
+     * value. The vanilla bow already leaves with three times its charge, which is the original's two times one and a half.
+     */
+    public static float boneBowPrimalArrowSpeed(float arrowSpeed) { return arrowSpeed * PRIMAL_ARROW_SPEED_FACTOR; }
+
+    /**
+     * The element of the primal arrow a bow fires. Original EventHandlerEntity.bowShot: the shot is replaced by a primal arrow as soon
+     * as the player carries one, and the element is the one of the first primal arrow of the player's inventory. The types are given in
+     * the order of the original's main inventory array, the hotbar first.
+     */
+    public static int firstPrimalArrowType(int[] inventoryTypes) {
+        for (int type : inventoryTypes) if (type >= 0) return type;
+        return ARROW_AIR;
+    }
 
     // ---------------------------------------------------------------------------------------------------------------
     // Crimson Blade (original ItemCrimsonSword)
@@ -408,12 +427,20 @@ public final class EquipmentRules {
     public static final int BUCKET_DEATH_MAX_STACK_SIZE = 1;
     /** The bucket of death is an infusion fluid in the original (ConfigFluids deathFluid). */
     public static final String BUCKET_DEATH_FLUID = "death";
+    /** The registry path of the death fluid block of the original (ConfigBlocks.blockFluidDeath). */
+    public static final String BUCKET_DEATH_BLOCK_PATH = "thaumcraft:death_fluid";
 
     /**
      * Whether the bucket can pour its fluid into a spot. Original ItemBucketDeath.tryPlaceContainedLiquid: the spot has to be empty
      * or made of a material that is not solid, and a replaceable liquid is not destroyed first.
      */
     public static boolean bucketDeathCanPour(boolean air, boolean solid, boolean liquid) { return air || !solid; }
+
+    /**
+     * Whether the spot has to be cleared before the death fluid is placed there. Original ItemBucketDeath.tryPlaceContainedLiquid: a
+     * spot that is not solid and not a liquid is emptied first.
+     */
+    public static boolean bucketDeathClearsSpot(boolean air, boolean solid, boolean liquid) { return !air && !solid && !liquid; }
 
     // ---------------------------------------------------------------------------------------------------------------
     // Key (original ItemKey)
@@ -428,15 +455,29 @@ public final class EquipmentRules {
 
     /**
      * The access entry a key writes into the door's access list: the kind of the key followed by the name of the player. The iron key
-     * uses the plain number, the gold key the number with a leading one (original ItemKey.onItemUseFirst).
+     * writes the plain zero, the gold key the one that carries the owner's access (original ItemKey.onItemUseFirst:
+     * {@code accessList.add(itemstack.getMetadata() + player.getCommandSenderName())}).
      */
     public static String keyAccessEntry(int keyType, String playerName) {
-        return (keyType == KEY_GOLD ? KEY_GRANT_ACCESS + "" : "") + playerName;
+        return keyType + playerName;
     }
 
     /** Whether the player may take the key of a door they do not own (original ItemKey: the owner or an access entry of the right kind). */
     public static boolean keyMayLink(boolean owner, boolean hasAccess, int keyType) {
         return owner || hasAccess && keyType == KEY_IRON;
+    }
+
+    /**
+     * Whether the access list of a block holds the entry of the gold key of this player (original ItemKey and BlockWoodenDevice:
+     * {@code accessList.contains("1" + name)}). The gold key grants the access of the owner.
+     */
+    public static boolean keyHasGrantAccess(List<String> accessList, String playerName) {
+        return accessList.contains(KEY_GRANT_ACCESS + playerName);
+    }
+
+    /** Whether the access list of a block already holds the entry of this key of this player. */
+    public static boolean keyHasAccess(List<String> accessList, int keyType, String playerName) {
+        return accessList.contains(keyAccessEntry(keyType, playerName));
     }
 
     /** The location string the key remembers: the x, y and z of the door (original ItemKey). */
@@ -495,6 +536,22 @@ public final class EquipmentRules {
 
     /** Original ItemEldritchObject.onItemUseFirst: the node stabilizer spends the item on a node. */
     public static final int NODE_STABILIZER_STUDY_RESEARCH = "PRIMNODE".hashCode();
+
+    /**
+     * The heights above the ground the obelisk of the eldritch occupies. Original ItemEldritchObject.onItemUseFirst: the six blocks
+     * above the ground have to be free before the obelisk is put up.
+     */
+    public static final int ELDRITCH_PLACER_FREE_HEIGHT = 6;
+
+    /**
+     * The eldritch variant the obelisk placer puts at the given height above the ground. Original ItemEldritchObject.onItemUseFirst:
+     * the altar at one, the obelisk at three and the middle of the obelisk at four, five, six and seven.
+     */
+    public static int eldritchPlacerVariant(int height) {
+        if (height == 1) return EldritchBlockRules.ELDRITCH_ALTAR;
+        if (height == 3) return EldritchBlockRules.ELDRITCH_OBELISK;
+        return EldritchBlockRules.ELDRITCH_OBELISK_MIDDLE;
+    }
 
     /**
      * The base vis a primal aspect of a node gets from the stabilizer. Original ItemEldritchObject.onItemUseFirst: the current value less

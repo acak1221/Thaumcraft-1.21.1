@@ -149,7 +149,7 @@ class LegacyItemsRulesTest {
 
     @Test void keyRemembersTheDoorItWasLinkedTo() {
         assertEquals("12,64,-7", EquipmentRules.keyLocation(12, 64, -7));
-        assertEquals("Steve", EquipmentRules.keyAccessEntry(EquipmentRules.KEY_IRON, "Steve"));
+        assertEquals("0Steve", EquipmentRules.keyAccessEntry(EquipmentRules.KEY_IRON, "Steve"));
         assertEquals("1Steve", EquipmentRules.keyAccessEntry(EquipmentRules.KEY_GOLD, "Steve"));
         assertTrue(EquipmentRules.keyMayLink(true, false, EquipmentRules.KEY_GOLD));
         assertTrue(EquipmentRules.keyMayLink(false, true, EquipmentRules.KEY_IRON));

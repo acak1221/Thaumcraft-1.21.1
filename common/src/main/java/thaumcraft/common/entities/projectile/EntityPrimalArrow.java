@@ -72,21 +72,32 @@ public final class EntityPrimalArrow extends AbstractArrow {
     }
 
     /**
-     * Original shooter constructor. The velocity is the bow charge times the
-     * arrow damage; the arrow leaves the hand at one and a half times that
-     * value with the original gaussian spread of one.
+     * The original shooter constructor without the launch: the arrow starts at
+     * the eye of the shooter, drawn back by the width of the shooter and one
+     * block along the look vector, and it keeps the shooter as its owner. The
+     * launch itself is left to the bow, which knows the charge of the shot.
      */
-    public EntityPrimalArrow(Level level, LivingEntity shooter, float velocity, int type) {
+    public EntityPrimalArrow(Level level, LivingEntity shooter, int type) {
         this(level);
         setOwner(shooter);
         setArrowType(type);
         float yaw = shooter.getYRot() / 180F * (float) Math.PI;
-        float pitch = shooter.getXRot() / 180F * (float) Math.PI;
         setPos(shooter.getX() - (double) (Mth.cos(yaw) * .16F), shooter.getEyeY() - (double) .1F,
                 shooter.getZ() - (double) (Mth.sin(yaw) * .16F));
         // The original adds the shooter's look vector to the start position.
         Vec3 look = shooter.getLookAngle();
         setPos(getX() + look.x, getY() + look.y, getZ() + look.z);
+    }
+
+    /**
+     * Original shooter constructor. The velocity is the bow charge times the
+     * arrow damage; the arrow leaves the hand at one and a half times that
+     * value with the original gaussian spread of one.
+     */
+    public EntityPrimalArrow(Level level, LivingEntity shooter, float velocity, int type) {
+        this(level, shooter, type);
+        float yaw = shooter.getYRot() / 180F * (float) Math.PI;
+        float pitch = shooter.getXRot() / 180F * (float) Math.PI;
         shoot(-Mth.sin(yaw) * Mth.cos(pitch), -Mth.sin(pitch), Mth.cos(yaw) * Mth.cos(pitch),
                 ProjectileRules.primalArrowLaunchSpeed(velocity), 1F);
     }

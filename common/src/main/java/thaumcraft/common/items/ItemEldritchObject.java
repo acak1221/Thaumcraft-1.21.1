@@ -2,9 +2,8 @@ package thaumcraft.common.items;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -14,6 +13,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import thaumcraft.common.blocks.BlockEldritch;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.items.EquipmentRules;
 
 import java.util.List;
@@ -23,12 +24,10 @@ import java.util.List;
  * obelisk placer. The crimson rites and the primordial pearl of the original are two separate items in this port.
  *
  * <p>The eye watches, the tablet is part of something larger and the placer puts up the obelisk of the eldritch, which is a creative tool
- * of the original.
+ * of the original. The obelisk is the native eldritch block of this port, so the placer puts up the altar, the obelisk and the middle of
+ * the obelisk of the original.
  */
 public final class ItemEldritchObject extends Item {
-    /** The registry names the eldritch block may carry. */
-    private static final String[] ELDRITCH_BLOCK_IDS = {"thaumcraft:eldritch", "thaumcraft:block_eldritch"};
-
     private final int type;
 
     public ItemEldritchObject(Properties properties, int type) {
@@ -74,28 +73,22 @@ public final class ItemEldritchObject extends Item {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.PASS;
-        if (context.getClickedFace() != net.minecraft.core.Direction.UP) return InteractionResult.PASS;
-        Block block = eldritchBlock();
-        if (block == null) return InteractionResult.PASS;
-        for (int height = 1; height <= 6; height++) {
-            if (!level.getBlockState(pos.offset(0, height, 0)).canBeReplaced()) return InteractionResult.PASS;
+        // Original ItemEldritchObject.onItemUseFirst: the obelisk is only put up on the top face of a block.
+        if (context.getClickedFace() != Direction.UP) return InteractionResult.PASS;
+        // Original ItemEldritchObject.onItemUseFirst: the six blocks above the ground have to be free.
+        for (int height = 1; height <= EquipmentRules.ELDRITCH_PLACER_FREE_HEIGHT; height++) {
+            if (!level.getBlockState(pos.offset(0, height, 0)).isAir()) return InteractionResult.PASS;
         }
-        player.releaseUsingItem();
+        // Original ItemEldritchObject.onItemUseFirst: the placer lets go of the hand of the player.
+        player.getCooldowns().removeCooldown(this);
         if (level.isClientSide) return InteractionResult.SUCCESS;
-        level.setBlock(pos.offset(0, 1, 0), block.defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(pos.offset(0, 3, 0), block.defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(pos.offset(0, 4, 0), block.defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(pos.offset(0, 5, 0), block.defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(pos.offset(0, 6, 0), block.defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(pos.offset(0, 7, 0), block.defaultBlockState(), Block.UPDATE_ALL);
-        return InteractionResult.SUCCESS;
-    }
-
-    private static Block eldritchBlock() {
-        for (String id : ELDRITCH_BLOCK_IDS) {
-            var block = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.parse(id));
-            if (block.isPresent()) return block.get();
+        // Original ItemEldritchObject.onItemUseFirst: the altar, the obelisk and the middle of the obelisk.
+        Block eldritch = ThaumcraftEldritchBlocks.ELDRITCH.get();
+        for (int height = 1; height <= 7; height++) {
+            if (height == 2) continue;
+            level.setBlock(pos.offset(0, height, 0), eldritch.defaultBlockState()
+                    .setValue(BlockEldritch.VARIANT, EquipmentRules.eldritchPlacerVariant(height)), Block.UPDATE_ALL);
         }
-        return null;
+        return InteractionResult.SUCCESS;
     }
 }

@@ -54,10 +54,7 @@ public final class ContainerArcaneWorkbench extends AbstractContainerMenu {
             @Override public void onTake(Player player, ItemStack stack) {} // Payment precedes extraction, never follows it.
             @Override public boolean isFake() { return true; }
         });
-        addSlot(new Slot(contents, TileArcaneWorkbench.WAND_SLOT, 160, 24) {
-            @Override public boolean mayPlace(ItemStack stack) { return ArcaneVis.isWorkbenchWand(stack); }
-            @Override public int getMaxStackSize() { return 1; }
-        });
+        addSlot(new SlotLimitedByWand(contents, TileArcaneWorkbench.WAND_SLOT, 160, 24, 1));
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 3; column++) addSlot(new Slot(contents, column + row * 3, 40 + column * 24, 40 + row * 24));
         }

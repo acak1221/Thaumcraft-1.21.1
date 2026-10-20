@@ -14,8 +14,11 @@ import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tier;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.IRepairable;
 import thaumcraft.api.IWarpingGear;
@@ -59,7 +62,7 @@ public class ItemPrimalCrusher extends DiggerItem implements IRepairable, IWarpi
         boolean result = super.mineBlock(stack, level, state, pos, entity);
         if (level.isClientSide || !(entity instanceof Player player) || player.isShiftKeyDown()) return result;
         if (!effectiveFor(stack, state)) return result;
-        Direction face = lookedAtFace(player);
+        Direction face = lookedAtFace(level, player);
         int[] offsets = EquipmentRules.primalCrusherOffsets(face.ordinal());
         for (int i = 0; i < offsets.length; i += 3) {
             BlockPos target = pos.offset(offsets[i], offsets[i + 1], offsets[i + 2]);
@@ -84,9 +87,17 @@ public class ItemPrimalCrusher extends DiggerItem implements IRepairable, IWarpi
     /** Original ItemPrimalCrusher.getWarp: two points of warp. */
     @Override public int getWarp(ItemStack stack, Player player) { return EquipmentRules.PRIMAL_CRUSHER_WARP; }
 
-    /** The face the player was looking at, the original's {@code this.side}. */
-    private static Direction lookedAtFace(Player player) {
+    /**
+     * The face the player looked at, the original's {@code this.side}. Original ItemPrimalCrusher.onBlockStartBreak: the face is the
+     * one the ray trace of the player hit, so the crusher harvests the plane across it.
+     */
+    private static Direction lookedAtFace(Level level, Player player) {
+        Vec3 eyes = player.getEyePosition();
         Vec3 look = player.getLookAngle();
+        // Original BlockUtils.getTargetBlock: the ray of the player reaches ten blocks.
+        BlockHitResult hit = level.clip(new ClipContext(eyes, eyes.add(look.scale(10.0D)),
+                ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        if (hit.getType() == HitResult.Type.BLOCK) return hit.getDirection();
         return Direction.getNearest(look.x, look.y, look.z);
     }
 

@@ -8,11 +8,14 @@ These failed runs are not accepted checkpoints. The last full accepted server ru
 
 - 1cb5723:210/212 GameTests. Recipe networking, session scan identity, rejected orb UUID retry, Shock and Pearl checks now pass. The remaining Arcane Lamp fixture raced the threaded native lighting engine; it now waits for observed block light while retaining the bright-air assertion. The orb trajectory failure exposed a production incompatibility: modern Entity.moveTowardsClosestSpace applies random escape velocity in air and damps other axes. The adapter now preserves the original vanilla1.7 collision guard, WEST/EAST/UP/NORTH/SOUTH selection and single-axis impulse; the real trajectory assertion remains and a solid-block escape case was added. These fixes still need the next remote run.
 
+- 7b9dccd:211/212 GameTests. Lamp lighting and both original orb trajectory/solid-escape assertions pass. The sole failure was the runic fc25 fixture: one-sided occupied pedestals added original instability and allowed real destructive hazards. The next fixture uses actual mirrored pedestals/skulls and checks nonpositive matrix instability while retaining all original resource/payment assertions; production behavior is unchanged.
+
 Runs:
 https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39402946505
 https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39404338634
 https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39406033014
 https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39407177380
+https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39408815980
 
 With cached dependencies/Gradle outputs, the last Gradle run took2m43s versus7m6s for the first cold run.
 Full runtime checks remain on GitHub while development continues locally against a separate source window.

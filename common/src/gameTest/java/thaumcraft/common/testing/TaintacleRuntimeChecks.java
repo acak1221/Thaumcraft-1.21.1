@@ -37,6 +37,7 @@ import thaumcraft.common.config.ThaumcraftTaint;
 import thaumcraft.common.entities.monster.EntityTaintacle;
 import thaumcraft.common.entities.monster.EntityTaintacleSmall;
 import thaumcraft.common.entities.monster.OriginalTaintCombat;
+import thaumcraft.common.lib.mods.ChampionHooks;
 import thaumcraft.common.lib.world.BiomeColumns;
 
 /** Real registered mobs, native attributes/effects/damage and ServerLevel entity ticker.
@@ -184,8 +185,10 @@ public final class TaintacleRuntimeChecks {
             var offhandOnly=terrain.tentacle(a.root);
             offhandOnly.setItemSlot(EquipmentSlot.OFFHAND,new ItemStack(Items.BLAZE_ROD));offhandOnly.setDropChance(EquipmentSlot.OFFHAND,0);
             fatal(a,offhandOnly,true);tick(a,offhandOnly,20);
-            a.require(offhandOnly.isRemoved()&&experience(a).stream().mapToInt(ExperienceOrb::getValue).sum()==10,
-                    "native offhand has no original five-slot counterpart and adds no original XP bonus");a.purgeOutputs();
+            int offhandXp=experience(a).stream().mapToInt(ExperienceOrb::getValue).sum();
+            a.require(offhandOnly.isRemoved()&&offhandXp==10,
+                    "native offhand has no original five-slot counterpart and adds no original XP bonus; xp="+offhandXp
+                            +", removed="+offhandOnly.isRemoved()+", champion="+ChampionHooks.championId(offhandOnly));a.purgeOutputs();
 
             var pending=terrain.tentacle(a.root);
             pending.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.STICK));pending.setDropChance(EquipmentSlot.MAINHAND,1);
@@ -256,7 +259,12 @@ public final class TaintacleRuntimeChecks {
         void put(BlockPos pos,net.minecraft.world.level.block.state.BlockState state){extraBlocks.putIfAbsent(pos,a.level.getBlockState(pos));a.require(a.level.getBlockEntity(pos)==null,"extra retaliation soil input has no previous BE");a.put(pos,state);}
         EntityTaintacle tentacle(BlockPos pos){var entity=new EntityTaintacle(a.level);prepare(entity,pos);return entity;}
         EntityTaintacleSmall small(BlockPos pos){var entity=new EntityTaintacleSmall(a.level);prepare(entity,pos);return entity;}
-        void prepare(EntityTaintacle entity,BlockPos pos){column(pos);entity.setPos(Vec3.atBottomCenterOf(pos));entity.setNoGravity(true);entity.setNoAi(true);owned.add(entity);a.require(a.level.addFreshEntity(entity),"actual registered tainted hostile enters native world index");}
+        void prepare(EntityTaintacle entity,BlockPos pos){column(pos);entity.setPos(Vec3.atBottomCenterOf(pos));entity.setNoGravity(true);entity.setNoAi(true);owned.add(entity);
+            // The 1.7 original rolled nextInt100 of the world random for every EntityMob that
+            // joined the world (oracle EventHandlerEntity.entitySpawns:391). The fixture declares
+            // that draw, so its exact death reward stays deterministic while the real world stream
+            // still advances by the original single draw.
+            a.require(ChampionJoinRoll.join(a.level,entity),"actual registered tainted hostile enters native world index");}
         net.minecraft.world.entity.animal.Cow cow(BlockPos pos){var entity=EntityType.COW.create(a.level);a.require(entity!=null&&entity.getMaxHealth()==10,"native cow input has10 health");entity.setPos(Vec3.atBottomCenterOf(pos));entity.setNoGravity(true);entity.setNoAi(true);owned.add(entity);a.require(a.level.addFreshEntity(entity),"native non-tainted target enters world");return entity;}
         @Override public void close(){
             owned.forEach(Entity::discard);extraBlocks.forEach(a::put);

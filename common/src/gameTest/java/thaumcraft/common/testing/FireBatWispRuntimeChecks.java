@@ -79,7 +79,11 @@ public final class FireBatWispRuntimeChecks {
         <T extends Mob> T spawn(EntityType<T> type,int x,int y,int z) {
             T mob=type.create(level);test.assertTrue(mob!=null,"registered native entity "+type);
             mob.setPos(origin.getX()+x+.5,origin.getY()+y,origin.getZ()+z+.5);mob.setNoGravity(true);mob.setNoAi(true);
-            level.addFreshEntity(mob);entities.add(mob);return mob;
+            // The 1.7 original rolled nextInt100 of the world random for every EntityMob that
+            // joined the world (oracle EventHandlerEntity.entitySpawns:391). The fixture declares
+            // that draw, so the exact original attributes of the Wisp stay deterministic.
+            test.assertTrue(ChampionJoinRoll.join(level,mob),"actual registered hostile enters the native world index");
+            entities.add(mob);return mob;
         }
         void clear() {entities.forEach(Entity::discard);entities.clear();drops().forEach(Entity::discard);player.removeAllEffects();}
         List<ItemEntity> drops() {return level.getEntitiesOfClass(ItemEntity.class,bounds);}

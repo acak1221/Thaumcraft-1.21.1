@@ -85,7 +85,11 @@ public final class BrainyZombieRuntimeChecks {
             T mob = type.create(level); test.assertTrue(mob != null, "registered native entity " + type);
             mob.setPos(origin.getX() + dx + .5, origin.getY(), origin.getZ() + .5);
             mob.setNoGravity(true); if (mob instanceof net.minecraft.world.entity.Mob ai) ai.setNoAi(true);
-            level.addFreshEntity(mob); entities.add(mob); return mob;
+            // The 1.7 original rolled nextInt100 of the world random for every EntityMob that
+            // joined the world (oracle EventHandlerEntity.entitySpawns:391). The fixture declares
+            // that draw, so the exact original attributes of the Brainy stay deterministic.
+            test.assertTrue(ChampionJoinRoll.join(level, mob), "actual registered hostile enters the native world index");
+            entities.add(mob); return mob;
         }
         void attributesAndRage() {
             var brainy = spawn(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), 0);

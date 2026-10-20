@@ -54,7 +54,11 @@ public final class TaintSporeRuntimeChecks {
                 steps(a,spore,1);a.require(spore.getSporeSize()==3&&spore.isAlive()&&spore.position().equals(before)&&spore.supportPos().equals(a.root.below()),"the original postincrement grows on update1201 while preserving exact anchored feet/support; actual="+spore.position()+", support="+spore.supportPos()+", alive="+spore.isAlive());spore.discard();
                 saved.remove("UUID");var reloaded=ThaumcraftTaint.TAINT_SPORE.get().create(a.level);reloaded.load(saved);a.require(a.level.addFreshEntity(reloaded),"native size snapshot reload owns a fresh entity identity");
                 steps(a,reloaded,1);a.require(reloaded.getSporeSize()==2,"actual reload restarts growth instead of persisting the previous1200 counter");steps(a,reloaded,1199);a.require(reloaded.getSporeSize()==2,"reloaded counter1200 still has not grown");steps(a,reloaded,1);a.require(reloaded.getSporeSize()==3,"reloaded update1201 grows again");
-                reloaded.setSporeSize(6);var draws=new ArrayList<Object>();draws.add(.5F);draws.add(new Roll(4,3));for(int i=0;i<30;i++)draws.add(.5F);
+                reloaded.setSporeSize(6);var draws=new ArrayList<Object>();draws.add(.5F);draws.add(new Roll(4,3));
+                // The original burst adds one child at a time: six world position floats for that
+                // child, then its original champion join roll, then the next child (oracle
+                // EntityTaintSpore.spiderBurst). Five children, so five champion rolls.
+                for(int i=0;i<5;i++){for(int f=0;f<6;f++)draws.add(.5F);draws.add(new Roll(100,0));}
                 try(var random=new WorldInput(a.level,draws)){reloaded.playerTouch(a.player);random.complete();}
                 var spiders=a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds);a.require(reloaded.isRemoved()&&spiders.size()==5&&a.level.getBlockState(a.root.below()).getValue(BlockTaintFibres.TYPE)==3&&a.items().isEmpty(),"actual contact rupture creates witnessed5spiders, restores only its support4to3 and has no death loot; removed="+reloaded.isRemoved()+", spiders="+spiders.size()+", pos="+reloaded.position()+", support="+reloaded.supportPos()+", state="+a.level.getBlockState(reloaded.supportPos())+", items="+a.items().stream().map(e->e.getItem().toString()).toList());
                 for(var spider:spiders)a.require(spider.getX()==a.root.getX()+.5&&spider.getY()==a.root.getY()+.5&&spider.getZ()==a.root.getZ()+.5&&spider.getYRot()==180&&spider.getHealth()==5&&spider.getAttributeValue(Attributes.ATTACK_DAMAGE)==2,"actual burst child retains original six world draws/position/yaw and real tiny-spider attributes");
@@ -64,6 +68,9 @@ public final class TaintSporeRuntimeChecks {
                 try(var random=new WorldInput(a.level,List.of(true))){a.require(dying.hurt(a.player.damageSources().playerAttack(a.player),100),"actual player damage kills an ordinary Spore");random.complete();}
                 a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty()&&a.items().size()==1,"ordinary Spore die keeps original one item but grants no immediate nativeXP");
                 var deathDraws=new ArrayList<Object>();deathDraws.add(.5F);deathDraws.add(new Roll(2,1));for(int i=0;i<6;i++)deathDraws.add(.5F);
+                // The single burst child spends its original champion join roll after its six
+                // world position floats, exactly like the 1.7 original world.spawnEntity.
+                deathDraws.add(new Roll(100,0));
                 try(var random=new WorldInput(a.level,deathDraws)){steps(a,dying,1);random.complete();}
                 a.require(dying.isRemoved()&&dying.deathTime==1&&a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds).size()==1,"ordinary Spore death1 ruptures into the witnessed real spider before original death20 reward");
                 steps(a,dying,20);a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"removed ordinary Spore cannot grant XP even when stale native death updates are replayed beyond20");
@@ -77,14 +84,19 @@ public final class TaintSporeRuntimeChecks {
                 a.require(swarmer.getSporeSize()==10&&swarmer.getBbWidth()==1&&swarmer.getBbHeight()==1&&swarmer.getEyeHeight()==.85F&&swarmer.getMaxHealth()==75,"actual size10 Swarmer has fixed1body/.85inherited eye and75health");
                 a.player.setPos(swarmer.getX()+15,swarmer.getY(),swarmer.getZ());a.player.setGameMode(GameType.CREATIVE);steps(a,swarmer,500);
                 a.require(swarmer.getSpawnCounter()==0&&a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).isEmpty(),"native500counter waits at0 rather than spawning for an actual invulnerable creative player");
-                a.player.setGameMode(GameType.SURVIVAL);try(var random=new WorldInput(a.level,List.of(.5F,.25F))){steps(a,swarmer,1);random.complete();}
+                a.player.setGameMode(GameType.SURVIVAL);
+                // The original Swarm burst spends the gore pitch float, the yaw float of the child
+                // and then the original champion join roll of that child.
+                try(var random=new WorldInput(a.level,List.of(.5F,.25F,new Roll(100,0)))){steps(a,swarmer,1);random.complete();}
                 var swarms=a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds);a.require(swarmer.getSpawnCounter()==500&&swarms.size()==1&&swarms.getFirst().getY()==swarmer.getY()+.5&&swarms.getFirst().getYRot()==90,"actual vulnerable player16 reopens one genuine Swarm burst with original pitch/yaw world draws");
                 var copy=ThaumcraftTaint.TAINT_SWARMER.get().create(a.level);copy.load(swarmer.saveWithoutId(new CompoundTag()));a.require(copy.getSpawnCounter()==500&&copy.getSporeSize()==10,"native swarmer reload retains size but resets the absent-NBT counter500");
                 steps(a,swarmer,1);swarmer.playerTouch(a.player);a.require(a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).size()==1,"native player collision neither ruptures the Swarmer nor adds an extra immediate Swarm");
                 try(var random=new WorldInput(a.level,List.of(true,false))){a.require(swarmer.hurt(a.player.damageSources().playerAttack(a.player),100),"actual lethal native damage reaches the Swarmer death path");random.complete();}
                 a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"actual Swarmer death has no immediate native XP/extra world40 draw before original deathTime20");
                 a.require(a.items().size()==2&&a.items().stream().mapToInt(e->e.getItem().getCount()).sum()==2&&a.items().stream().anyMatch(e->e.getItem().is(ThaumcraftContent.MATERIALS.get("tainted_goo").get()))&&a.items().stream().anyMatch(e->e.getItem().is(ThaumcraftContent.MATERIALS.get("taint_tendril").get())),"actual Swarmer death executes both original world Boolean drops once without native table/equipment duplication");
-                try(var random=new WorldInput(a.level,List.of(.5F,.75F))){steps(a,swarmer,1);random.complete();}
+                // The original death time one burst spends the gore pitch float, the yaw float of
+                // the released Swarm and then the original champion join roll of that Swarm.
+                try(var random=new WorldInput(a.level,List.of(.5F,.75F,new Roll(100,0)))){steps(a,swarmer,1);random.complete();}
                 a.require(swarmer.deathTime==1&&a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).size()==2,"actual deathTime1 releases one more genuine Swarm");steps(a,swarmer,1);a.require(a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).size()==2,"deathTime2 cannot repeat its death Swarm");
                 steps(a,swarmer,17);a.require(swarmer.deathTime==19&&!swarmer.isRemoved()&&a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"actual Swarmer19 dead updates still hold all originalXP10 until20");
                 try(var random=new WorldInput(a.level,List.of())){steps(a,swarmer,1);random.complete();}

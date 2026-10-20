@@ -1685,6 +1685,7 @@
   "item.thaumcraft.elemental_axe": "Топор Потока",
   "item.thaumcraft.elemental_pickaxe": "Кирка Огня",
   "item.thaumcraft.elemental_hoe": "Мотыга Роста",
+  "item.thaumcraft.elemental_shovel": "Лопата Землероя",
   "item.thaumcraft.thaumium_shovel": "Таум-лопата",
   "item.thaumcraft.thaumium_hoe": "Таум-мотыга",
   "item.thaumcraft.thaumium_helmet": "Таум-шлем",
@@ -2019,5 +2020,9 @@
   "tc.port.focus.choose": "Наведите курсор на набалдашник",
   "tc.port.focus.help": "Отпустите %s / щелчок · Стрелки / колесо · Esc",
   "tc.port.focus.slot": "Ячейка инвентаря: %s",
-  "tc.port.focus.entry": "%1$s — ячейка %2$s"
+  "tc.port.focus.entry": "%1$s — ячейка %2$s",
+  "key.thaumcraft.misc_toggle": "Доп. переключение жезла",
+  "tc.port.shovel.orientation.0": "Укладка: поперёк грани",
+  "tc.port.shovel.orientation.1": "Укладка: вертикальный квадрат",
+  "tc.port.shovel.orientation.2": "Укладка: пол или вертикальный квадрат"
 }

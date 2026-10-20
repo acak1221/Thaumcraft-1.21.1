@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import thaumcraft.common.lib.world.ElementalShovelHarvest;
 import thaumcraft.common.lib.world.ExcavationHarvest;
 import thaumcraft.common.lib.world.StreamAxeHarvest;
 
@@ -35,9 +36,15 @@ public abstract class ExcavationServerPlayerGameModeMixin implements ExcavationH
         // Axe of the Stream: a claimed chop breaks the endpoint through a nested ordinary
         // call and leaves the anchor; false makes vanilla resynchronise the client's prediction.
         if (StreamAxeHarvest.claim((ServerPlayerGameMode) (Object) this, level, player, pos)) return false;
+        // Shovel of the Earthmover: decided before the anchor goes, the other eight blocks follow it by ordinary nested breaks.
+        var face = ElementalShovelHarvest.plan((ServerPlayerGameMode) (Object) this, level, player, pos);
+        var before = face == null ? null : level.getBlockState(pos);
         var frame = ExcavationHarvest.enterNative((ServerPlayerGameMode) (Object) this, level, player, pos);
-        try { return original.call(pos); }
+        boolean destroyed;
+        try { destroyed = original.call(pos); }
         finally { if (frame != null) frame.close(); }
+        if (face != null && destroyed) ElementalShovelHarvest.finish((ServerPlayerGameMode) (Object) this, level, player, pos, before, face);
+        return destroyed;
     }
 
     @Unique private ExcavationHarvest.Frame thaumcraft$excavationFrame() {

@@ -1,0 +1,298 @@
+{
+ "description": "Shovel of the Earthmover: numbers, infusion, 3 x 3 mining by a connected player, 3 x 3 laying from the inventory and the orientation key (docs/analysis/2026-10-20-elemental-shovel.md)",
+ "watch": {
+  "junit": [
+   "ElementalShovelGeometryTest",
+   "ElementalShovelAssetsTest"
+  ],
+  "gametests": [
+   "shovelOfTheEarthmoverMinesAndLaysSquares"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.ElementalShovelGeometryTest",
+  "thaumcraft.assets.ElementalShovelAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "orientations-four",
+   "name": "the key cycles through four orientations",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "ORIENTATIONS = 3",
+   "new": "ORIENTATIONS = 4"
+  },
+  {
+   "id": "next-skips-one",
+   "name": "the key turns two at a time",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "Math.floorMod(orientation + 1, ORIENTATIONS)",
+   "new": "Math.floorMod(orientation + 2, ORIENTATIONS)"
+  },
+  {
+   "id": "quarter-turn-floor",
+   "name": "the facing rounds down",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "yaw * 4.0F / 360.0F + 0.5)",
+   "new": "yaw * 4.0F / 360.0F + 0.0)"
+  },
+  {
+   "id": "plane-top-swapped",
+   "name": "a top face runs its axes the other way round",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "if (side <= 1) return new BlockPos(a, 0, b);",
+   "new": "if (side <= 1) return new BlockPos(b, 0, a);"
+  },
+  {
+   "id": "plane-north-flat",
+   "name": "a north face is a floor square",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "if (side <= 3) return new BlockPos(a, b, 0);",
+   "new": "if (side <= 3) return new BlockPos(a, 0, b);"
+  },
+  {
+   "id": "plane-east-wrong",
+   "name": "an east face is a north-style wall",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "return new BlockPos(0, b, a);",
+   "new": "return new BlockPos(a, b, 0);"
+  },
+  {
+   "id": "upright-no-height",
+   "name": "orientation 1 lays the height along the width",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "                    y = b;\n                    if (side <= 1) { if (turn == 0 || turn == 2) x = a; else z = a; }",
+   "new": "                    y = a;\n                    if (side <= 1) { if (turn == 0 || turn == 2) x = a; else z = a; }"
+  },
+  {
+   "id": "upright-facing",
+   "name": "orientation 1 ignores the east-west facing",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "if (side <= 1) { if (turn == 0 || turn == 2) x = a; else z = a; }\n                    else if (side <= 3) z = a;",
+   "new": "if (side <= 1) { if (turn == 0 || turn == 1) x = a; else z = a; }\n                    else if (side <= 3) z = a;"
+  },
+  {
+   "id": "upright-north-width",
+   "name": "orientation 1 on a north face runs along the width",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java",
+   "old": "else if (side <= 3) z = a;",
+   "new": "else if (side <= 3) x = a;"
+  },
+  {
+   "id": "recipe-instability-two",
+   "name": "the infusion is unstable by 2",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_shovel.json",
+   "old": "\"instability\": 1",
+   "new": "\"instability\": 2"
+  },
+  {
+   "id": "recipe-fire-shard",
+   "name": "the infusion takes a fire shard",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_shovel.json",
+   "old": "{\"item\": \"thaumcraft:earth_shard\"},\n    {\"item\": \"thaumcraft:earth_shard\"}",
+   "new": "{\"item\": \"thaumcraft:earth_shard\"},\n    {\"item\": \"thaumcraft:fire_shard\"}"
+  },
+  {
+   "id": "recipe-research-hoe",
+   "name": "the infusion needs the hoe research",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_shovel.json",
+   "old": "\"research\": \"ELEMENTALSHOVEL\"",
+   "new": "\"research\": \"ELEMENTALHOE\""
+  },
+  {
+   "id": "recipe-less-craft",
+   "name": "the infusion takes 4 craft",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_shovel.json",
+   "old": "\"fabrico\": 8",
+   "new": "\"fabrico\": 4"
+  },
+  {
+   "id": "model-icon-hoe",
+   "name": "the shovel shows the hoe icon",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/elemental_shovel.json",
+   "old": "items/elementalshovel",
+   "new": "items/elementalhoe"
+  },
+  {
+   "id": "lang-ru-hoe",
+   "name": "the Russian shovel is named after the hoe",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"item.thaumcraft.elemental_shovel\": \"Лопата Землероя\"",
+   "new": "\"item.thaumcraft.elemental_shovel\": \"Мотыга Роста\""
+  },
+  {
+   "id": "key-name-changed",
+   "name": "the key is named after the focus key",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/en_us.json",
+   "old": "\"key.thaumcraft.misc_toggle\": \"Misc Wand Toggle\"",
+   "new": "\"key.thaumcraft.misc_toggle\": \"Change Wand Focus\""
+  },
+  {
+   "id": "not-a-shovel",
+   "name": "the shovel leaves the shovels tag",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/item/shovels.json",
+   "old": "\"thaumcraft:elemental_shovel\",",
+   "new": ""
+  },
+  {
+   "id": "sneak-ignored",
+   "name": "sneaking still mines nine",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": "|| player.isShiftKeyDown() || !mode.isSurvival()) return null;",
+   "new": "|| !mode.isSurvival()) return null;"
+  },
+  {
+   "id": "creative-mines-nine",
+   "name": "creative mines nine",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": "|| player.isShiftKeyDown() || !mode.isSurvival()) return null;",
+   "new": "|| player.isShiftKeyDown()) return null;"
+  },
+  {
+   "id": "look-not-checked",
+   "name": "a look that misses still decides the face",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": "hit.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(anchor) ? hit.getDirection() : null;",
+   "new": "hit.getType() == HitResult.Type.BLOCK ? hit.getDirection() : null;"
+  },
+  {
+   "id": "bedrock-attempted",
+   "name": "unbreakable neighbours are attempted",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": " || state.getDestroySpeed(level, cell) < 0) continue;",
+   "new": ") continue;"
+  },
+  {
+   "id": "any-neighbour",
+   "name": "blocks the shovel does not mine go too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": "if (state.isAir() || !state.is(BlockTags.MINEABLE_WITH_SHOVEL) || state.getDestroySpeed(level, cell) < 0) continue;",
+   "new": "if (state.isAir() || state.getDestroySpeed(level, cell) < 0) continue;"
+  },
+  {
+   "id": "any-anchor",
+   "name": "a stone anchor takes the square too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": "|| !level.getBlockState(anchor).is(BlockTags.MINEABLE_WITH_SHOVEL)) return null;",
+   "new": ") return null;"
+  },
+  {
+   "id": "thaumium-too",
+   "name": "any shovel mines nine",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": "if (!(player.getMainHandItem().getItem() instanceof ItemElementalShovel) || player.isShiftKeyDown()",
+   "new": "if (player.isShiftKeyDown()"
+  },
+  {
+   "id": "square-ignores-wear",
+   "name": "the square goes on after the shovel breaks",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
+   "old": "                if (!(player.getMainHandItem().getItem() instanceof ItemElementalShovel)) return;\n",
+   "new": ""
+  },
+  {
+   "id": "place-over-anything",
+   "name": "the square is laid over solid blocks",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java",
+   "old": "            if (!there.isAir() && !there.canBeReplaced()) continue;\n",
+   "new": ""
+  },
+  {
+   "id": "place-copies-chests",
+   "name": "a chest is copied too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java",
+   "old": "        if (level.getBlockEntity(clicked) != null) return InteractionResult.PASS;\n",
+   "new": ""
+  },
+  {
+   "id": "place-grass-needs-grass",
+   "name": "grass is never laid as dirt",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java",
+   "old": "else if (state.is(Blocks.GRASS_BLOCK) &&",
+   "new": "else if (state.is(Blocks.DIAMOND_BLOCK) &&"
+  },
+  {
+   "id": "place-creative-pays",
+   "name": "creative players must have the blocks",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java",
+   "old": "(player.getAbilities().instabuild || consume(player, state.getBlock().asItem()))",
+   "new": "(consume(player, state.getBlock().asItem()))"
+  },
+  {
+   "id": "place-no-wear",
+   "name": "laying costs no uses",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java",
+   "old": "            shovel.hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));\n",
+   "new": ""
+  },
+  {
+   "id": "consume-nothing",
+   "name": "laying takes nothing from the inventory",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java",
+   "old": "stack.shrink(1);",
+   "new": "stack.shrink(0);"
+  },
+  {
+   "id": "damage-base-two",
+   "name": "the base damage is 2",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java",
+   "old": "createAttributes(tier, 1, -3F)",
+   "new": "createAttributes(tier, 2, -3F)"
+  },
+  {
+   "id": "key-offhand",
+   "name": "the key reads the off hand",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/network/ShovelOrientationNetworking.java",
+   "old": "ItemStack held = player.getMainHandItem();",
+   "new": "ItemStack held = player.getOffhandItem();"
+  },
+  {
+   "id": "key-any-item",
+   "name": "the key turns any item",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/network/ShovelOrientationNetworking.java",
+   "old": "if (!(held.getItem() instanceof ItemElementalShovel)) return false;",
+   "new": ""
+  },
+  {
+   "id": "codec-narrow",
+   "name": "the orientation codec is too narrow to save 2",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "Codec.intRange(0, ElementalShovelGeometry.ORIENTATIONS - 1)",
+   "new": "Codec.intRange(0, 1)"
+  }
+ ]
+}

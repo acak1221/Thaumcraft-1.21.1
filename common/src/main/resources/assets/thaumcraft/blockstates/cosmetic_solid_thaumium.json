@@ -1,13 +1,13 @@
 {
   "variants": {
     "variant=4": {
-      "model": "thaumcraft:block/thaumium_block"
+      "model": "thaumcraft:block/cosmetic_solid_4"
     },
     "variant=6": {
-      "model": "thaumcraft:block/arcane_pedestal"
+      "model": "thaumcraft:block/cosmetic_solid_6"
     },
     "variant=7": {
-      "model": "thaumcraft:block/arcane_stone"
+      "model": "thaumcraft:block/cosmetic_solid_7"
     }
   }
 }

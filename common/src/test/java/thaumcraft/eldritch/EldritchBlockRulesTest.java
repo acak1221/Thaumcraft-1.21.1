@@ -358,6 +358,8 @@ class EldritchBlockRulesTest {
     // ---------------------------------------------------------------- cosmetic
     @Test void cosmeticSolidKeepsItsHardnessLightAndResistance() {
         assertEquals(30.0F, EldritchBlockRules.cosmeticHardness(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE));
+        assertEquals(30.0F, EldritchBlockRules.cosmeticHardness(EldritchBlockRules.COSMETIC_OBSIDIAN_TOTEM_BASE));
+        assertEquals(30.0F, EldritchBlockRules.cosmeticHardness(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED));
         assertEquals(4.0F, EldritchBlockRules.cosmeticHardness(EldritchBlockRules.COSMETIC_THAUMIUM_BLOCK));
         assertEquals(4.0F, EldritchBlockRules.cosmeticHardness(EldritchBlockRules.COSMETIC_ARCANE_STONE));
         assertEquals(2.0F, EldritchBlockRules.cosmeticHardness(EldritchBlockRules.COSMETIC_ELDRITCH_TILE));
@@ -365,7 +367,14 @@ class EldritchBlockRulesTest {
         assertEquals(4, EldritchBlockRules.cosmeticLight(EldritchBlockRules.COSMETIC_TAINT_CRUST));
         assertEquals(0, EldritchBlockRules.cosmeticLight(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE));
         assertEquals(999.0F, EldritchBlockRules.cosmeticExplosionResistance(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE));
+        assertEquals(999.0F, EldritchBlockRules.cosmeticExplosionResistance(EldritchBlockRules.COSMETIC_OBSIDIAN_TOTEM_BASE));
+        assertEquals(999.0F, EldritchBlockRules.cosmeticExplosionResistance(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED));
         assertEquals(20.0F, EldritchBlockRules.cosmeticExplosionResistance(EldritchBlockRules.COSMETIC_THAUMIUM_BLOCK));
+        // The 1.7.10 setter value 10 is stored as 30 and the vanilla getter divides it by five.
+        assertEquals(10.0F, EldritchBlockRules.COSMETIC_FAMILY_RESISTANCE);
+        assertEquals(6.0F, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE);
+        assertEquals(6.0F, EldritchBlockRules.cosmeticExplosionResistance(EldritchBlockRules.COSMETIC_ELDRITCH_TILE));
+        assertEquals(2.0F, EldritchBlockRules.COSMETIC_FAMILY_HARDNESS);
     }
 
     @Test void cosmeticFamiliesOnlyHostTheirOriginalBlockEntities() {
@@ -376,6 +385,16 @@ class EldritchBlockRulesTest {
         assertFalse(EldritchBlockRules.cosmeticOpaqueHasTile(0));
         assertTrue(EldritchBlockRules.cosmeticBlocksSpawning(EldritchBlockRules.COSMETIC_TRAVEL_STONE));
         assertFalse(EldritchBlockRules.cosmeticBlocksSpawning(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE));
+    }
+
+    @Test void theVariantItemsPlaceTheirOriginalMetadataValue() {
+        // ConfigRecipes:192, 209 and 212 - the result is a block with a metadata, so every one of
+        // them has its own item that places that metadata value.
+        assertEquals(2, EldritchBlockRules.variantOf("paving_stone_travel"));
+        assertEquals(3, EldritchBlockRules.variantOf("paving_stone_warding"));
+        assertEquals(2, EldritchBlockRules.variantOf("warded_glass"));
+        assertEquals(-1, EldritchBlockRules.variantOf("cosmetic_solid"));
+        assertEquals(3, EldritchBlockRules.VARIANT_ITEMS.size());
     }
 
     @Test void theHardnessGroupsKeepTheOriginalPerMetadataValues() {
@@ -397,12 +416,25 @@ class EldritchBlockRulesTest {
         assertEquals(List.of(0, 1, 2, 3), EldritchBlockRules.eldritchGroupVariants(0));
         assertEquals(List.of(4, 5), EldritchBlockRules.eldritchGroupVariants(1));
         assertEquals(List.of(7, 8), EldritchBlockRules.eldritchGroupVariants(3));
-        // The cosmetic family.
+        // The cosmetic family: the hardness groups of the oracle.
         assertEquals(1, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE));
+        assertEquals(1, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_OBSIDIAN_TOTEM_BASE));
+        assertEquals(1, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED));
         assertEquals(2, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_THAUMIUM_BLOCK));
+        assertEquals(2, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_PEDESTAL_TOP));
+        assertEquals(2, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_ARCANE_STONE));
+        assertEquals(0, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_TRAVEL_STONE));
+        assertEquals(0, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_WARDING_STONE));
         assertEquals(0, EldritchBlockRules.cosmeticGroup(EldritchBlockRules.COSMETIC_ELDRITCH_TILE));
+        assertEquals(2.0F, EldritchBlockRules.cosmeticGroupHardness(0));
         assertEquals(30.0F, EldritchBlockRules.cosmeticGroupHardness(1));
+        assertEquals(4.0F, EldritchBlockRules.cosmeticGroupHardness(2));
+        assertEquals(6.0F, EldritchBlockRules.cosmeticGroupResistance(0));
         assertEquals(999.0F, EldritchBlockRules.cosmeticGroupResistance(1));
+        assertEquals(20.0F, EldritchBlockRules.cosmeticGroupResistance(2));
+        assertEquals(List.of(0, 1, 8), EldritchBlockRules.cosmeticGroupVariants(1));
+        assertEquals(List.of(4, 6, 7), EldritchBlockRules.cosmeticGroupVariants(2));
+        assertEquals(List.of(2, 3, 5, 9, 10, 11, 12, 13, 14, 15), EldritchBlockRules.cosmeticGroupVariants(0));
         // The airy family.
         assertEquals(1, EldritchBlockRules.airyGroup(EldritchBlockRules.AIRY_NODE));
         assertEquals(2, EldritchBlockRules.airyGroup(EldritchBlockRules.AIRY_MAGIC_HOLE));

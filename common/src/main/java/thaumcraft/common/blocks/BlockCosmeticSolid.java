@@ -5,28 +5,27 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.storage.loot.LootParams;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileWardingStone;
 
 /**
- * Original BlockCosmeticSolid: the sixteen decorative stone variants of the
- * Outer Lands. The original metadata became the {@link #VARIANT} block state.
+ * Original BlockCosmeticSolid: the sixteen decorative stones of the Outer Lands.
+ *
+ * <p>The original is ONE block with sixteen metadata values; the metadata became the
+ * {@link #VARIANT} block state. Minecraft 1.21.1 binds the hardness and the blast resistance to
+ * the block and not to the block state, so the metadata that differ in hardness (the oracle
+ * BlockCosmeticSolid:213-225 and :241-253) became separate blocks of this class; every one of them
+ * hosts the metadata of its own hardness group. The two metadata values that carry a block entity,
+ * the warding stone and the node, keep it.
  */
 public final class BlockCosmeticSolid extends BaseEntityBlock {
     public static final MapCodec<BlockCosmeticSolid> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -35,7 +34,7 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
     /** Original BlockCosmeticSolid metadata 0..15. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
 
-    private final java.util.List<Integer> variants;
+    private final List<Integer> variants;
     private final int group;
 
     /** The hardness and the blast resistance belong to the block in 1.21.1. */
@@ -47,24 +46,11 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
         registerDefaultState(stateDefinition.any().setValue(VARIANT, this.variants.get(0)));
     }
 
-    /**
-     * A single original metadata value of the cosmetic solid family. The legacy
-     * registrations name one block per stone (the obsidian tile, the paving
-     * stones, the eldritch stone), so this constructor keeps that shape next to
-     * the hardness group constructor.
-     */
-    public BlockCosmeticSolid(Properties properties, int variant) {
-        super(properties);
-        this.group = EldritchBlockRules.cosmeticGroup(variant);
-        this.variants = java.util.List.of(variant);
-        registerDefaultState(stateDefinition.any().setValue(VARIANT, variant));
-    }
-
     /** The hardness group of this block. */
     public int group() { return group; }
 
     /** The original metadata values that this block hosts. */
-    public java.util.List<Integer> variants() { return variants; }
+    public List<Integer> variants() { return variants; }
 
     /** True when the block hosts the original metadata. */
     public boolean allows(int variant) { return variants.contains(variant); }
@@ -72,20 +58,13 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
 
+    /** The original metadata value of a state. */
     public static int variant(BlockState state) { return state.getValue(VARIANT); }
 
     /** BlockCosmeticSolid:227-239 - the per metadata light level. */
     public static int lightOf(BlockState state) { return EldritchBlockRules.cosmeticLight(state.getValue(VARIANT)); }
 
-    /** BlockCosmeticSolid:259-261 - the original damage value of the dropped item. */
-    public int damageDropped(BlockState state) {
-        int variant = state.getValue(VARIANT);
-        if (variant == EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED) return 1;
-        if (variant == EldritchBlockRules.COSMETIC_GOLEM_STONE_ACTIVE) return 9;
-        return variant;
-    }
-
-    /** BlockCosmeticSolid:288-296 - the warding stone and the node tile carry a block entity. */
+    /** BlockCosmeticSolid:278-296 - the warding stone and the node tile carry a block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         int variant = state.getValue(VARIANT);
         if (variant == EldritchBlockRules.COSMETIC_WARDING_STONE) {

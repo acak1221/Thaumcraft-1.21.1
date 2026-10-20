@@ -71,6 +71,12 @@ class ResearchRecipeCoverageTest {
             "AdvAlchemyFurnace", "ArcTable", "Crucible", "InfernalFurnace", "InfusionAltar", "NodeJar",
             "ResTable", "Thaumatorium", "Thaumonomicon");
 
+    /**
+     * The original recipes that produce ONE metadata value of a family block. The 1.21.1 port has one
+     * item per metadata value, so they resolve instead of staying deferred.
+     */
+    private static final List<String> VARIANT_RECIPES = List.of("PaveTravel", "PaveWard", "WardedGlass");
+
     @BeforeAll
     static void load() { ResearchCatalog.loadBundled(); }
 
@@ -190,6 +196,21 @@ class ResearchRecipeCoverageTest {
         } catch (java.io.IOException exception) {
             throw new IllegalStateException("Cannot read " + recipeId, exception);
         }
+    }
+
+    @Test
+    void theRecipesThatProduceOneMetadataValueResolveToTheirVariantItem() {
+        Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
+        Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
+        for (String key : VARIANT_RECIPES) {
+            assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
+            assertFalse(ResearchRecipeCoverage.deferredRecipes().containsKey(key), key + " must not stay deferred");
+            assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
+            assertTrue(ResearchRecipeCoverage.isResolved(key), key);
+        }
+        assertEquals("thaumcraft:arcane/paving_stone_travel", ids.get("PaveTravel"));
+        assertEquals("thaumcraft:arcane/paving_stone_warding", ids.get("PaveWard"));
+        assertEquals("thaumcraft:arcane/warded_glass", ids.get("WardedGlass"));
     }
 
     @Test

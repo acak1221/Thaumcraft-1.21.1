@@ -196,7 +196,8 @@ public final class OuterLandsProvider {
                 level.setBlock(pos, state, flags);
                 if (placement.kind() != DungeonRooms.Kind.CRYSTAL) continue;
                 // Oracle GenCommon:296-299 - the crystal points into the free neighbour.
-                ThaumcraftOuterLands.configureCrystal(level.getBlockEntity(pos), placement.facing());
+                if (level.getBlockEntity(pos) instanceof thaumcraft.common.tiles.TileCrystal crystal)
+                    crystal.setOrientation(Direction.from3DDataValue(placement.facing() < 0 ? 0 : placement.facing()));
             }
             decorations(level, builder, random);
             ThaumcraftOuterLands.spawnRoomEntities(level, builder);
@@ -229,8 +230,6 @@ public final class OuterLandsProvider {
                     BlockState crystal = ThaumcraftOuterLands.state(DungeonRooms.Kind.CRYSTAL, 7, direction.ordinal());
                     if (crystal == null) break;
                     level.setBlock(neighbour, crystal, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
-                    // Oracle GenCommon:297-298 - the crystal points into the free neighbour.
-                    ThaumcraftOuterLands.configureCrystal(level.getBlockEntity(neighbour), direction.ordinal());
                     break;
                 }
             }
@@ -273,11 +272,13 @@ public final class OuterLandsProvider {
 
         /** Oracle {@code BlockUtils.isBlockAdjacentToAtleast:256-275} for the eldritch block. */
         private static boolean adjacentToEldritch(WorldGenLevel level, BlockPos pos) {
+            Block eldritch = ThaumcraftOuterLands.eldritch();
+            if (eldritch == null) return false;
             for (int dx = -1; dx <= 1; ++dx) {
                 for (int dy = -1; dy <= 1; ++dy) {
                     for (int dz = -1; dz <= 1; ++dz) {
                         if (dx == 0 && dy == 0 && dz == 0) continue;
-                        if (ThaumcraftOuterLands.isEldritch(level.getBlockState(pos.offset(dx, dy, dz)))) return true;
+                        if (level.getBlockState(pos.offset(dx, dy, dz)).is(eldritch)) return true;
                     }
                 }
             }
@@ -329,8 +330,7 @@ public final class OuterLandsProvider {
             if (!inside(x, z)) return false;
             BlockState state = level.getBlockState(new BlockPos(x, y, z));
             Block stairs = ThaumcraftOuterLands.stairsEldritch();
-            if (stairs != null && state.is(stairs)) return true;
-            return ThaumcraftOuterLands.isCosmeticSolid(state);
+            return ThaumcraftOuterLands.isCosmeticSolid(state) || (stairs != null && state.is(stairs));
         }
     }
 

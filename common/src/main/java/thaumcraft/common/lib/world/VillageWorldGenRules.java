@@ -256,10 +256,10 @@ public final class VillageWorldGenRules {
         TRAPDOOR("minecraft:oak_trapdoor", -1),
         GLOWSTONE("minecraft:glowstone", -1),
         CHEST("minecraft:chest", -1),
-        /** Oracle ConfigBlocks.blockCosmeticSolid metadata 0, the obsidian tile. */
-        COSMETIC_SOLID_0("thaumcraft:cosmetic_solid", 0),
-        /** Oracle ConfigBlocks.blockCosmeticSolid metadata 1, the obsidian totem base. */
-        COSMETIC_SOLID_1("thaumcraft:cosmetic_solid", 1),
+        /** Oracle ConfigBlocks.blockCosmeticSolid metadata 0, the obsidian totem. */
+        COSMETIC_SOLID_0("thaumcraft:cosmetic_solid_tough", 0),
+        /** Oracle ConfigBlocks.blockCosmeticSolid metadata 1, the obsidian tile. */
+        COSMETIC_SOLID_1("thaumcraft:cosmetic_solid_tough", 1),
         /** Oracle ConfigBlocks.blockEldritch metadata 0, the eldritch altar. */
         ELDRITCH_ALTAR("thaumcraft:eldritch", 0),
         /** Oracle ConfigBlocks.blockEldritch metadata 1, the obelisk base. */

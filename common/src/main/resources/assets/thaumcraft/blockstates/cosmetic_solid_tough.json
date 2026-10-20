@@ -1,10 +1,13 @@
 {
   "variants": {
     "variant=0": {
-      "model": "thaumcraft:block/obsidian_totem_base"
+      "model": "thaumcraft:block/cosmetic_solid_0"
+    },
+    "variant=1": {
+      "model": "thaumcraft:block/cosmetic_solid_1"
     },
     "variant=8": {
-      "model": "thaumcraft:block/obsidian_totem_base"
+      "model": "thaumcraft:block/cosmetic_solid_8"
     }
   }
 }

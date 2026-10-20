@@ -6,8 +6,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
@@ -37,10 +39,11 @@ import thaumcraft.common.blocks.BlockLootItem;
 import thaumcraft.common.blocks.BlockMagicBox;
 import thaumcraft.common.blocks.BlockMetalDevice;
 import thaumcraft.common.blocks.BlockMirror;
-import thaumcraft.common.blocks.BlockStairsEldritch;
 import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.blocks.ItemArcaneDoor;
+import thaumcraft.common.blocks.ItemVariantBlock;
+import thaumcraft.common.container.ContainerMagicBox;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileArcanePressurePlate;
 import thaumcraft.common.tiles.TileBanner;
@@ -67,12 +70,15 @@ import thaumcraft.common.tiles.TileWardingStoneFence;
  *
  * <p>Minecraft 1.21.1 binds the hardness and the blast resistance to the block
  * and not to the block state, so the original metadata families that differ in
- * hardness become separate blocks of the same class.
+ * hardness become separate blocks of the same class. The cosmetic solid follows
+ * the oracle: the metadata zero, one and eight are one block, the metadata four,
+ * six and seven another one and the ten ordinary stones a third one.
  */
 public final class ThaumcraftEldritchBlocks {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK_ENTITY_TYPE);
+    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Thaumcraft.MODID, Registries.MENU);
 
     // ------------------------------------------------------------------ blocks
 
@@ -105,45 +111,39 @@ public final class ThaumcraftEldritchBlocks {
                     .lightLevel(state -> 15)));
 
     /**
-     * The ordinary cosmetic stone. It hosts the original metadata 1, 2, 3, 5, 9, 10, 11, 12, 13, 14
+     * The ordinary cosmetic stone. It hosts the original metadata 2, 3, 5, 9, 10, 11, 12, 13, 14
      * and 15; the metadata is the {@code variant} block state.
      */
     public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID = BLOCKS.register("cosmetic_solid",
             () -> new BlockCosmeticSolid(0, cosmeticProperties(0)));
-    /** The obsidian totem and the charged obsidian totem: the original metadata 0 and 8. */
+    /** The obsidian totem, the obsidian tile and the charged obsidian totem: the metadata 0, 1 and 8. */
     public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID_TOUGH = BLOCKS.register("cosmetic_solid_tough",
             () -> new BlockCosmeticSolid(1, cosmeticProperties(1)));
-    /** The thaumium block, the pedestal top and the arcane stone: the original metadata 4, 6 and 7. */
+    /** The thaumium block, the pedestal top and the arcane stone: the metadata 4, 6 and 7. */
     public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID_THAUMIUM = BLOCKS.register("cosmetic_solid_thaumium",
             () -> new BlockCosmeticSolid(2, cosmeticProperties(2)));
 
-    /** The amber block, the amber brick and the warded glass: the original metadata 0, 1 and 2. */
     public static final RegistrySupplier<BlockCosmeticOpaque> COSMETIC_OPAQUE = BLOCKS.register("cosmetic_opaque",
             () -> new BlockCosmeticOpaque(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
                     .strength(EldritchBlockRules.COSMETIC_OPAQUE_HARDNESS, EldritchBlockRules.COSMETIC_OPAQUE_RESISTANCE)
                     .sound(SoundType.STONE)));
 
-    /** The arcane stone slab of the original cosmetic stone slab family. */
     public static final RegistrySupplier<BlockCosmeticStoneSlab> COSMETIC_STONE_SLAB_ARCANE = BLOCKS.register("cosmetic_stone_slab_arcane",
             () -> new BlockCosmeticStoneSlab(EldritchBlockRules.SLAB_STONE_ARCANE,
                     BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, 10.0F).sound(SoundType.STONE)));
 
-    /** The eldritch stone slab of the original cosmetic stone slab family. */
     public static final RegistrySupplier<BlockCosmeticStoneSlab> COSMETIC_STONE_SLAB_ELDRITCH = BLOCKS.register("cosmetic_stone_slab_eldritch",
             () -> new BlockCosmeticStoneSlab(EldritchBlockRules.SLAB_STONE_ELDRITCH,
                     BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, 10.0F).sound(SoundType.STONE)));
 
-    /** The greatwood slab of the original cosmetic wood slab family. */
     public static final RegistrySupplier<BlockCosmeticWoodSlab> COSMETIC_WOOD_SLAB_GREATWOOD = BLOCKS.register("cosmetic_wood_slab_greatwood",
             () -> new BlockCosmeticWoodSlab(EldritchBlockRules.SLAB_WOOD_GREATWOOD,
                     BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
 
-    /** The silverwood slab of the original cosmetic wood slab family. */
     public static final RegistrySupplier<BlockCosmeticWoodSlab> COSMETIC_WOOD_SLAB_SILVERWOOD = BLOCKS.register("cosmetic_wood_slab_silverwood",
             () -> new BlockCosmeticWoodSlab(EldritchBlockRules.SLAB_WOOD_SILVERWOOD,
                     BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
 
-    /** The eldritch stairs of the original cosmetic stairs family. */
     public static final RegistrySupplier<BlockArcaneDoor> ARCANE_DOOR = BLOCKS.register("arcane_door",
             () -> new BlockArcaneDoor(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
                     .strength(15.0F, 999.0F).sound(SoundType.METAL).noOcclusion()));
@@ -234,6 +234,15 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> COSMETIC_SOLID_ITEM = ITEMS.register("cosmetic_solid", () -> new BlockItem(COSMETIC_SOLID.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_SOLID_TOUGH_ITEM = ITEMS.register("cosmetic_solid_tough", () -> new BlockItem(COSMETIC_SOLID_TOUGH.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_SOLID_THAUMIUM_ITEM = ITEMS.register("cosmetic_solid_thaumium", () -> new BlockItem(COSMETIC_SOLID_THAUMIUM.get(), new Item.Properties()));
+    /** The paving stone of travel is the metadata two of the cosmetic solid (ConfigRecipes:209). */
+    public static final RegistrySupplier<Item> PAVING_STONE_TRAVEL_ITEM = ITEMS.register("paving_stone_travel",
+            () -> new ItemVariantBlock(COSMETIC_SOLID.get(), EldritchBlockRules.variantOf("paving_stone_travel"), "paving_stone_travel", new Item.Properties()));
+    /** The paving stone of warding is the metadata three of the cosmetic solid (ConfigRecipes:212). */
+    public static final RegistrySupplier<Item> PAVING_STONE_WARDING_ITEM = ITEMS.register("paving_stone_warding",
+            () -> new ItemVariantBlock(COSMETIC_SOLID.get(), EldritchBlockRules.variantOf("paving_stone_warding"), "paving_stone_warding", new Item.Properties()));
+    /** The warded glass is the metadata two of the cosmetic opaque (ConfigRecipes:192). */
+    public static final RegistrySupplier<Item> WARDED_GLASS_ITEM = ITEMS.register("warded_glass",
+            () -> new ItemVariantBlock(COSMETIC_OPAQUE.get(), EldritchBlockRules.variantOf("warded_glass"), "warded_glass", new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_OPAQUE_ITEM = ITEMS.register("cosmetic_opaque", () -> new BlockItem(COSMETIC_OPAQUE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ARCANE_ITEM = ITEMS.register("cosmetic_stone_slab_arcane", () -> new BlockItem(COSMETIC_STONE_SLAB_ARCANE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ELDRITCH_ITEM = ITEMS.register("cosmetic_stone_slab_eldritch", () -> new BlockItem(COSMETIC_STONE_SLAB_ELDRITCH.get(), new Item.Properties()));
@@ -287,19 +296,23 @@ public final class ThaumcraftEldritchBlocks {
 
     /** The metal grate tile is owned by ThaumcraftGrate (the upstream item grate unit). */
 
-    public static final RegistrySupplier<BlockEntityType<TileWandPedestal>> WAND_PEDESTAL_TILE =
-            BLOCK_ENTITIES.register("stone_device_wand_pedestal",
-                    () -> BlockEntityType.Builder.of((pos, state) -> new TileWandPedestal(pos, state), STONE_DEVICE.get()).build(null));
+    /**
+     * The wand pedestal of the stone device, the original blockStoneDevice metadata five. The id of
+     * the separate wand pedestal block tile belongs to ThaumcraftLegacyTiles, so this one carries the
+     * name of its block family.
+     */
+    public static final RegistrySupplier<BlockEntityType<TileWandPedestal>> WAND_PEDESTAL_TILE = BLOCK_ENTITIES.register("stone_device_wand_pedestal",
+            () -> BlockEntityType.Builder.of((pos, state) -> new TileWandPedestal(pos, state), STONE_DEVICE.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<TileFluxScrubber>> FLUX_SCRUBBER_TILE = BLOCK_ENTITIES.register("flux_scrubber",
             () -> BlockEntityType.Builder.of((pos, state) -> new TileFluxScrubber(pos, state), STONE_DEVICE.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<TileWardingStone>> WARDING_STONE_TILE = BLOCK_ENTITIES.register("warding_stone",
-            () -> BlockEntityType.Builder.of((pos, state) -> new TileWardingStone(pos, state), COSMETIC_SOLID.get(), COSMETIC_SOLID_TOUGH.get(), COSMETIC_SOLID_THAUMIUM.get()).build(null));
+            () -> BlockEntityType.Builder.of((pos, state) -> new TileWardingStone(pos, state), COSMETIC_SOLID.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<TileNode>> COSMETIC_NODE_TILE = BLOCK_ENTITIES.register("cosmetic_node",
             () -> BlockEntityType.Builder.of((pos, state) -> new TileNode(cosmeticNodeType(), pos, state),
-                    COSMETIC_SOLID.get(), COSMETIC_SOLID_TOUGH.get(), COSMETIC_SOLID_THAUMIUM.get()).build(null));
+                    COSMETIC_SOLID_TOUGH.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<TileWardingStoneFence>> WARDING_FENCE_TILE = BLOCK_ENTITIES.register("warding_stone_fence",
             () -> BlockEntityType.Builder.of((pos, state) -> new TileWardingStoneFence(pos, state), AIRY.get()).build(null));
@@ -319,12 +332,7 @@ public final class ThaumcraftEldritchBlocks {
     /** The block entity type of the node inside the cosmetic solid. */
     private static BlockEntityType<TileNode> cosmeticNodeType() { return COSMETIC_NODE_TILE.get(); }
 
-    /** The eldritch stairs of the original: the cosmetic stairs over the cosmetic solid variant 11. */
-    public static final RegistrySupplier<BlockStairsEldritch> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
-            () -> new BlockStairsEldritch(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0F, 10.0F).sound(SoundType.STONE)));
-
-    public static final RegistrySupplier<Item> STAIRS_ELDRITCH_ITEM = ITEMS.register("eldritch_stairs", () -> new BlockItem(STAIRS_ELDRITCH.get(), new Item.Properties()));
+    // -------------------------------------------------------------------- menus
 
     private ThaumcraftEldritchBlocks() {}
 
@@ -366,20 +374,19 @@ public final class ThaumcraftEldritchBlocks {
         }
     }
 
-    private static boolean registered;
-
     public static void register() {
-        if (registered) return;
-        registered = true;
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITIES.register();
+        MENUS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB, ELDRITCH_ITEM, ELDRITCH_CRUST_ITEM, ELDRITCH_DECO_ITEM,
                 ELDRITCH_DOORWAY_ITEM, ELDRITCH_SPAWNER_ITEM, ELDRITCH_CRYSTAL_ITEM,
-                COSMETIC_SOLID_ITEM, COSMETIC_SOLID_TOUGH_ITEM, COSMETIC_SOLID_THAUMIUM_ITEM, COSMETIC_OPAQUE_ITEM,
+                COSMETIC_SOLID_ITEM, COSMETIC_SOLID_TOUGH_ITEM, COSMETIC_SOLID_THAUMIUM_ITEM,
+                PAVING_STONE_TRAVEL_ITEM, PAVING_STONE_WARDING_ITEM, WARDED_GLASS_ITEM,
+                COSMETIC_OPAQUE_ITEM,
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,
-                STAIRS_ELDRITCH_ITEM, ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
+                ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
                 METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM,
                 AIRY_ITEM, AIRY_NODE_ITEM, JAR_BRAIN_ITEM, JAR_NODE_ITEM, ETHEREAL_BLOOM_ITEM);
     }

@@ -97,6 +97,7 @@ import thaumcraft.common.items.golems.ItemGolemUpgrade;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
+import thaumcraft.common.lib.golems.GolemCargoRules;
 import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileCrucible;
 import thaumcraft.common.tiles.TileJar;
@@ -404,32 +405,6 @@ public class EntityGolemBase extends AbstractGolem {
         getNavigation().stop();
     }
     public ItemStack getCarriedItem() { return (level().isClientSide ? entityData.get(CARRIED) : carried).copy(); }
-
-    /**
-     * The actual item cargo of the golem, written from outside the guarded transfers.
-     *
-     * <p>This is the bridge for the ported TC4 goal set, whose own cargo model ({@code GolemAiRules.Cargo})
-     * cannot see the golem's private cargo. The guarded transfers of the native golem (the take from a
-     * container, the place at home or at a marker, the directed throws) keep their own rules and never call
-     * it. The write keeps the same invariants as every other cargo change: the server thread, no other work in
-     * flight, no custody, remainder or unread state, a live golem and the carry limit of its material.</p>
-     */
-    public boolean setCarriedItem(ItemStack stack) {
-        requireServerThread();
-        if (level().isClientSide || stack == null || busy || useCustodyActive() || hasUseRemainders()
-                || essentiaMutationActive() || unreadCarried != null || retiring || unsupported
-                || !current() || !canWork()) return false;
-        if (stack.isEmpty()) {
-            if (carried.isEmpty()) return true;
-            carried = ItemStack.EMPTY;
-            syncCarried();
-            return true;
-        }
-        if (stack.getCount() > Math.min(getCarryLimit(), stack.getMaxStackSize())) return false;
-        carried = stack.copy();
-        syncCarried();
-        return true;
-    }
     public float getBootupTimer() { return entityData.get(BOOTUP); }
     public int getHealingTimer() { return entityData.get(HEALING); }
     // Original pose value, NOT the raw six-tick action countdown.
@@ -802,18 +777,86 @@ public class EntityGolemBase extends AbstractGolem {
                 && (core != GolemData.LIQUID || liquidControls()) && (core != GolemData.USE || useControls());
     }
     /**
+     * The original TC4 1.7 goal numbers of the golem, in one place.
+     *
+     * <p>Every number below is the priority the original {@code EntityGolemBase} registers its goal with
+     * (TC4 4.2.3.5 oracle, {@code thaumcraft/common/entities/golems/EntityGolemBase.java:267-350}). They are
+     * used unchanged: TC4 1.7 gave the LOWEST priority number the HIGHEST precedence and the native 1.21.1
+     * selector reads the number the same way, so the original order survives the port.</p>
+     */
+    public static final class GoalPriority {
+        /** Original {@code AIAvoidCreeperSwell}: the creeper flight outranks every other golem goal. */
+        public static final int CREEPER_FLIGHT = 0;
+        /** Original {@code EntityAISwimming}: the native float goal of the golem. */
+        public static final int SWIM = 1;
+        /** Original {@code AIItemPickup}: the Gather pickup. */
+        public static final int ITEM_PICKUP = 2;
+        /** Original {@code AIHarvestCrops}: the harvest of the crops. */
+        public static final int HARVEST_CROPS = 2;
+        /** Original {@code AIHarvestLogs}: the harvest of the logs. */
+        public static final int HARVEST_LOGS = 2;
+        /** Original {@code AIFish}: the fishing cast. */
+        public static final int FISH = 2;
+        /** Original {@code AIDartAttack}: the dart of the Guard and the Butcher. */
+        public static final int DART_ATTACK = 2;
+        /** Original {@code AIGolemAttackOnCollide}: the melee of the Guard and the Butcher. */
+        public static final int MELEE = 3;
+        /** Original {@code AILiquidEmpty}: the Decanting emptying. */
+        public static final int LIQUID_EMPTY = 1;
+        /** Original {@code AILiquidGather}: the Decanting gathering. */
+        public static final int LIQUID_GATHER = 2;
+        /** Original {@code AILiquidGoto}: the Decanting route. */
+        public static final int LIQUID_GOTO = 3;
+        /** Original {@code AIEssentiaEmpty}: the Alchemy emptying. */
+        public static final int ESSENTIA_EMPTY = 1;
+        /** Original {@code AIEssentiaGather}: the Alchemy gathering. */
+        public static final int ESSENTIA_GATHER = 2;
+        /** Original {@code AIEssentiaGoto}: the Alchemy route. */
+        public static final int ESSENTIA_GOTO = 3;
+        /** Original {@code AIHomeReplace}: the home replacement of the Fill, the Empty, the Gather and the Use. */
+        public static final int HOME_REPLACE = 0;
+        /** Original {@code AIUseItem}: the click of the Use, together with the home replacement. */
+        public static final int USE_ITEM = 0;
+        /** Original {@code AIHomeTake}: the take of the Use. */
+        public static final int HOME_TAKE = 4;
+        /** Original {@code AIFillGoto}: the Fill route. */
+        public static final int FILL_GOTO = 4;
+        /** Original {@code AIEmptyGoto}: the Empty route. */
+        public static final int EMPTY_GOTO = 3;
+        /** Original {@code AISortingGoto}: the Sorting route. */
+        public static final int SORTING_GOTO = 3;
+        /** Original {@code AIHurtByTarget}: the retaliation of the Guard, in the target selector. */
+        public static final int HURT_BY_TARGET = 1;
+        /** Original {@code AINearestAttackableTarget}: the nearest hostile of the Guard, in the target selector. */
+        public static final int NEAREST_TARGET = 2;
+        /** Original {@code AINearestButcherTarget}: the oldest animal of the Butcher, in the target selector. */
+        public static final int OLDEST_TARGET = 1;
+        /** Original {@code AIOpenDoor}: the door, above the return home. */
+        public static final int OPEN_DOOR = 5;
+        /** Original {@code AIReturnHome}: the return home, below every other work goal. */
+        public static final int RETURN_HOME = 6;
+        /** Original {@code EntityAIWatchClosest}: the watch of the closest player. */
+        public static final int WATCH_CLOSEST = 7;
+        /** Original {@code EntityAILookIdle}: the idle look, the lowest golem goal. */
+        public static final int LOOK_IDLE = 8;
+
+        private GoalPriority() {}
+    }
+
+    /**
      * The native selector priority of a goal.
      *
      * <p>TC4 1.7 gave the LOWEST priority number the HIGHEST precedence, and the native 1.21.1 selector reads the
      * number the same way: {@code GoalSelector} hands the flags of a running goal only to a goal whose own number
-     * is STRICTLY LOWER ({@code WrappedGoal.canBeReplacedBy}), and the vanilla mobs register their goals in
-     * ascending order, so the goal with the lowest number is the one that runs. A ported TC4 goal therefore keeps
-     * the number it publishes in its {@code PRIORITY} constant and the whole selector keeps the original 1.7
-     * order; this helper writes that decision down in one place so the direction cannot drift between the native
-     * goals and the ported goal set.</p>
+     * is STRICTLY LOWER ({@code WrappedGoal.canBeReplacedBy}: {@code other.getPriority() < this.getPriority()}),
+     * and the vanilla mobs register their goals in ascending order, so the goal with the lowest number is the one
+     * that runs. A ported TC4 goal therefore keeps the number it publishes in its {@code PRIORITY} constant and
+     * the whole selector keeps the original 1.7 order; this helper writes that decision down in one place so the
+     * direction cannot drift between the native goals and the ported goal set.</p>
      *
-     * <p>The native goals of this golem already carry the original numbers: the creeper flight 0, the dart 2, the
-     * melee 3, the fill route 4, the door 5, the return home 6, the watch 7 and the idle look 8.</p>
+     * <p>The native goals of this golem already carry the original numbers, which {@link GoalPriority} publishes
+     * once: the creeper flight 0, the dart 2, the melee 3, the fill route 4, the door 5, the return home 6, the
+     * watch 7 and the idle look 8.</p>
      */
     public static int nativeGoalPriority(int originalPriority) { return originalPriority; }
 
@@ -849,10 +892,11 @@ public class EntityGolemBase extends AbstractGolem {
      * flight, the door, the return home, the watch and the idle look.</li>
      * </ul>
      *
-     * <p>The ported TC4 goal set ({@code thaumcraft.common.entities.ai}) is therefore superseded and is NOT
-     * installed beside these goals: it would handle the same work a second time, and its own cargo model
-     * ({@code GolemAiRules.Cargo}: the golem's main hand and a side stock for the water and the essentia)
-     * cannot see the golem's real cargo, which only the guarded native transfers may change.</p>
+     * <p>The ported TC4 goal set ({@code thaumcraft.common.entities.ai}) was therefore superseded and is NOT
+     * installed beside these goals: it would handle the same work a second time, and its own cargo model (the
+     * golem's main hand and a side stock for the water and the essentia) cannot see the golem's real cargo,
+     * which only the guarded native transfers may change. The original numbers of the goals that survive live in
+     * {@link GoalPriority}.</p>
      */
     private void rebuildGoals() {
         use.reset();
@@ -893,9 +937,9 @@ public class EntityGolemBase extends AbstractGolem {
         return core == GolemData.HARVEST ? harvest.hasTarget() : inventoryCore(core) && core != GolemData.GATHER && inventories.hasRoute();
     }
     public boolean hasCargo() { return !carried.isEmpty(); }
+    /** Original {@code getCarrySpace}: the room left in the cargo, never below zero. */
     public int carrySpace() {
-        int limit = getCarryLimit();
-        return carried.isEmpty() ? limit : Math.max(0, Math.min(limit, carried.getMaxStackSize()) - carried.getCount());
+        return Math.max(0, GolemCargoRules.carrySpace(getCarryLimit(), carried));
     }
     public double distanceToHomeSqr() {
         BlockPos home = getHomePosition();

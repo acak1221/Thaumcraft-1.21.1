@@ -65,23 +65,6 @@ public final class GolemUsePlatform {
         bridge = nativeBridge;
     }
 
-    /**
-     * The native machine actor of the level, or null when the platform is not installed.
-     *
-     * <p>The actor is the fake player "FakeThaumcraftGolem" ({@link GolemHarvestPlatform#MACHINE_UUID}) that the
-     * game-mode mixin owns and borrows for one Use job. It is deliberately NOT in the player list: the native
-     * check requires {@code level.getServer().getPlayerList().getPlayer(MACHINE_UUID) == null}, so a lookup in the
-     * player list can never find it. The ported TC4 goal set therefore has to ask the platform for the actor
-     * through this bridge instead of resolving it by itself; the native Use work
-     * ({@code EntityGolemBase.useMarkedBlock} -> {@link #useBlock}) keeps the single borrow of it.</p>
-     */
-    public static ServerPlayer nativeActor(ServerLevel level) {
-        Bridge platform = bridge;
-        if (platform == null || level == null) return null;
-        ServerPlayer actor = platform.actor(level);
-        return nativeActor(platform, level, actor) ? actor : null;
-    }
-
     public static boolean isDetaching(EntityGolemBase worker) {
         Context context = BORROW.get();
         return context != null && context.worker == worker && context.workerActive

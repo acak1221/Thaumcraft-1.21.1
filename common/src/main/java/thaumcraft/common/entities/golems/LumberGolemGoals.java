@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.lib.world.TreeLogTraversal;
 
@@ -39,7 +40,7 @@ final class LumberGolemGoals extends Goal {
     /** Original AIHarvestLogs:60 {@code ceil(range / 3)}, read live so a Water upgrade needs no new goal. */
     private int radius() { return LumberGeometry.radius(golem.getRange()); }
 
-    void install() { golem.addWorkGoal(2, this); }
+    void install() { golem.addWorkGoal(GoalPriority.HARVEST_LOGS, this); }
     boolean hasTarget() { return target != null || running; }
     void reset() {
         try { stop(); }

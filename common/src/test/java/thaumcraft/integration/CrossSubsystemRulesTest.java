@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchItem;
 import thaumcraft.common.entities.ai.combat.TaintCreeperSwell;
-import thaumcraft.common.lib.golems.GolemAiRules;
+import thaumcraft.common.lib.golems.GolemCargoRules;
 import thaumcraft.common.lib.taint.TaintAnimalRules;
 import thaumcraft.common.lib.taint.TaintDeathRules;
 import thaumcraft.common.lib.taint.TaintDeathRules.TaintedTwin;
@@ -161,10 +161,10 @@ class CrossSubsystemRulesTest {
 
     @Test void theCargoRoomIsTheOriginalRoom() {
         // Original EntityGolemBase.getCarrySpace.
-        assertEquals(10, GolemAiRules.carrySpace(10, null));
-        assertEquals(10, GolemAiRules.carrySpace(10, net.minecraft.world.item.ItemStack.EMPTY));
-        assertEquals(4, GolemAiRules.carrySpace(10, stack(net.minecraft.world.item.Items.IRON_INGOT, 6)));
-        assertEquals(0, GolemAiRules.carrySpace(10, stack(net.minecraft.world.item.Items.IRON_INGOT, 10)));
+        assertEquals(10, GolemCargoRules.carrySpace(10, null));
+        assertEquals(10, GolemCargoRules.carrySpace(10, net.minecraft.world.item.ItemStack.EMPTY));
+        assertEquals(4, GolemCargoRules.carrySpace(10, stack(net.minecraft.world.item.Items.IRON_INGOT, 6)));
+        assertEquals(0, GolemCargoRules.carrySpace(10, stack(net.minecraft.world.item.Items.IRON_INGOT, 10)));
     }
 
     // --------------------------------------------------------------------- the champion modifier table

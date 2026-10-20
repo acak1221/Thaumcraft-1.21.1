@@ -15,6 +15,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileAlembic;
@@ -37,9 +38,9 @@ final class AlchemyGolemGoals {
 
     AlchemyGolemGoals(EntityGolemBase golem) { this.golem = golem; }
     void install() {
-        golem.addWorkGoal(1, new Empty());
-        golem.addWorkGoal(2, new Gather());
-        golem.addWorkGoal(3, new Goto());
+        golem.addWorkGoal(GoalPriority.ESSENTIA_EMPTY, new Empty());
+        golem.addWorkGoal(GoalPriority.ESSENTIA_GATHER, new Gather());
+        golem.addWorkGoal(GoalPriority.ESSENTIA_GOTO, new Goto());
     }
     boolean hasRoute() { return gathering || emptying || moving || target != null && (gotoReady || emptyReady); }
     boolean ownsCollectionAttempt(BlockEntity actual, Aspect aspect) {

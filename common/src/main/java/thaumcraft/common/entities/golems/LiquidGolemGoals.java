@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemLiquidQueue;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.items.golems.GolemUpgrade;
@@ -46,9 +47,9 @@ final class LiquidGolemGoals {
 
     LiquidGolemGoals(EntityGolemBase golem) { this.golem = golem; }
     void install() {
-        golem.addWorkGoal(1, new Empty());
-        golem.addWorkGoal(2, new Gather());
-        golem.addWorkGoal(3, new Goto());
+        golem.addWorkGoal(GoalPriority.LIQUID_EMPTY, new Empty());
+        golem.addWorkGoal(GoalPriority.LIQUID_GATHER, new Gather());
+        golem.addWorkGoal(GoalPriority.LIQUID_GOTO, new Goto());
     }
     boolean hasRoute() { return watched || route != null || moving || gathering || emptying; }
     boolean ownsCollectionAttempt(BlockPos pos, BlockState state) {

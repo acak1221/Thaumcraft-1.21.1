@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemMarker;
 
 /** Ordinary DEFAULT Use8 only: supplied wheat planting or genuinely bare-hand redstone. */
@@ -38,9 +39,9 @@ final class UseGolemGoals {
         replace.delay = take.delay = 0;
         timeouts.clear();
         nextTick = (long) golem.tickCount + golem.getRandom().nextInt(6);
-        golem.addWorkGoal(0, replace);
-        golem.addWorkGoal(0, click);
-        golem.addWorkGoal(4, take);
+        golem.addWorkGoal(GoalPriority.HOME_REPLACE, replace);
+        golem.addWorkGoal(GoalPriority.USE_ITEM, click);
+        golem.addWorkGoal(GoalPriority.HOME_TAKE, take);
     }
     void reset() {
         click.stop();

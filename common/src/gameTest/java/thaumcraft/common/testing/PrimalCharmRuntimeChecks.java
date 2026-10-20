@@ -55,7 +55,7 @@ public final class PrimalCharmRuntimeChecks {
         final Connection connection=new Connection(PacketFlow.SERVERBOUND);final EmbeddedChannel channel=new EmbeddedChannel(connection);
         final List<ChunkPos> forced=new ArrayList<>();final Set<UUID> oldEntities=new HashSet<>(),delivered=new HashSet<>();
         final Map<UUID,CompoundTag> owned=new HashMap<>();EntityEvent.Add observer;ItemPrimalCharm item;ItemStack charm;ItemEntity dropped;ChestBlockEntity chest;BlockState oldChest;
-        boolean finished;int attempts;
+        boolean finished;int attempts;EmbeddedPlayerTickDriver embeddedDriver;
         Check(GameTestHelper test) {
             this.test=test;level=test.getLevel();base=test.absolutePos(new BlockPos(3,100,3));chestPos=base.above(5);
             player=new ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"charm-"+UUID.randomUUID().toString().substring(0,8)),ClientInformation.createDefault());
@@ -110,11 +110,18 @@ public final class PrimalCharmRuntimeChecks {
                 test.assertTrue(delivered.size()==6&&owned.keySet().stream().noneMatch(rows()::containsKey),"ordinary POST admits six exact saved orbs after original charm left inventory");
                 test.assertTrue(dropped.getItem().get(DataComponents.CUSTOM_DATA).contains("blurb")&&chest.getItem(0).get(DataComponents.CUSTOM_DATA).contains("blurb"),"ordinary world ticks leave actual dropped/stored charm passive state untouched");
                 legacyBlurb(charm);player.getInventory().setItem(17,charm);
-                test.runAfterDelay(2,()->{try {test.assertTrue(!charm.get(DataComponents.CUSTOM_DATA).contains("blurb")&&player.getInventory().getItem(17)==charm&&charm.getCount()==1,"ordinary registered world/player/inventory ticks reach an unselected main36 charm without manual item ticking");finish();test.succeed();}catch(RuntimeException|Error failure){finish();throw failure;}});
+                // placeNewPlayer installs the real game listener, but this test's
+                // EmbeddedChannel has no ServerConnectionListener transport loop.
+                // The shared TEST-ONLY driver completes the missing native
+                // entity/game-listener cycle on actual world POST and witnesses
+                // PLAYER_POST. This is declared synthetic native ticking;
+                // neither the charm nor inventory callback is called directly.
+                embeddedDriver=EmbeddedPlayerTickDriver.open(level,player);
+                test.runAfterDelay(2,()->{try {embeddedDriver.checkHealthy();test.assertTrue(embeddedDriver.serverPostTicks()>0&&embeddedDriver.nativeConnectionTicks()>0&&embeddedDriver.actualPlayerPostTicks()>=embeddedDriver.serverPostTicks()&&!charm.get(DataComponents.CUSTOM_DATA).contains("blurb")&&player.getInventory().getItem(17)==charm&&charm.getCount()==1,"actual world-POST embedded driver reaches native game-listener/player/inventory ticks and unselected main36 charm; connectionTicks="+embeddedDriver.nativeConnectionTicks()+", playerPOST="+embeddedDriver.actualPlayerPostTicks());finish();test.succeed();}catch(RuntimeException|Error failure){finish();throw failure;}});
             }catch(RuntimeException|Error failure){finish();throw failure;}});
         }
         void finish() {
-            if(finished)return;finished=true;if(observer!=null)EntityEvent.ADD.unregister(observer);player.getInventory().clearContent();
+            if(finished)return;finished=true;if(observer!=null)EntityEvent.ADD.unregister(observer);if(embeddedDriver!=null)embeddedDriver.close();player.getInventory().clearContent();
             if(dropped!=null)dropped.discard();if(chest!=null){chest.clearContent();level.setBlock(chestPos,oldChest,Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);}
             for(var orb:level.getEntitiesOfClass(EntityAspectOrb.class,new AABB(base).inflate(30)))if(!oldEntities.contains(orb.getUUID()))orb.discard();
             var saved=AspectOrbQueue.snapshot(level);var pending=saved.getList("Pending",Tag.TAG_COMPOUND);

@@ -33,7 +33,9 @@ import thaumcraft.common.lib.baubles.PlayerAccessories;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileVisRelay;
 
-/** Real native player living ticks drive the worn item; earned source, original relay cache and paid-before-pulse removal. */
+/** Declared synthetic native entity/game-listener cycles drive genuine player
+ * living ticks; earned source, original relay cache and paid-before-pulse
+ * removal remain actual gameplay. No physical packet-client claim. */
 public final class VisAmuletRuntimeChecks {
     private static PulseRelayBlock probeBlock;
     private static BlockEntityType<PulseRelay> probeType;
@@ -47,7 +49,8 @@ public final class VisAmuletRuntimeChecks {
     }
     public static void nativeWornTransferAndRelayPayment(GameTestHelper test) {
         var f=NodeTransductionRuntimeChecks.fixture(test,false);
-        Runnable close=()->{f.level.getServer().getConnection().getConnections().remove(f.connection);f.close();};
+        EmbeddedPlayerTickDriver[] clock={null};
+        Runnable close=()->{try{if(clock[0]!=null)clock[0].close();}finally{f.level.getServer().getConnection().getConnections().remove(f.connection);f.close();}};
         var info=BoreWorkRuntimeChecks.testInfo(test);
         info.addListener(new GameTestListener(){
             @Override public void testStructureLoaded(GameTestInfo actual){}
@@ -77,11 +80,13 @@ public final class VisAmuletRuntimeChecks {
             PlayerAccessories.get(f.player).setItem(0,amulet);
             ItemStack wand=new ItemStack(ThaumcraftContent.WAND.get());var amounts=new java.util.LinkedHashMap<String,Integer>();
             for(String tag:WandData.PRIMALS)amounts.put(tag,2498);wand.set(ThaumcraftContent.WAND_DATA.get(),new WandData("wood","gold",amounts));f.player.getInventory().setItem(0,wand);
-            test.assertTrue(f.level.getServer().getConnection().getConnections().add(f.connection),"fixture transport participates in real native packet-listener Player.aiStep ticks");
+            test.assertTrue(f.level.getServer().getConnection().getConnections().add(f.connection),"owned embedded fixture transport is registered without assuming it supplies physical client packets");
+            clock[0]=EmbeddedPlayerTickDriver.open(f.level,f.player);
             int[] stage={0};long[] moved={0};ItemStack[] ejecting={null};ItemEntity[] drop={null};boolean[] paidBeforePulse={false};
             test.onEachTick(()->{
                 if(f.closed)return;
                 try {
+                    clock[0].checkHealthy();
                     if(stage[0]==0) {
                         if(item.getVis(amulet,Aspect.AIR)==10)return;
                         for(Aspect aspect:Aspect.getPrimalAspects())test.assertTrue(item.getVis(amulet,aspect)==13&&ItemWandCasting.getVis(wand,aspect.getTag())==2500,
@@ -107,6 +112,8 @@ public final class VisAmuletRuntimeChecks {
                         };
                         stage[0]=2;
                     } else if(paidBeforePulse[0]) {
+                        test.assertTrue(clock[0].serverPostTicks()>0&&clock[0].nativeConnectionTicks()>0&&clock[0].actualPlayerPostTicks()>=3,
+                                "declared synthetic world-POST driver reaches real native player ticks across transfer, distance and paid detach phases");
                         var amuletDrops=f.drops().stream().filter(entity->entity.getItem().is(item)).toList();
                         test.assertTrue(PlayerAccessories.get(f.player).getItem(0).isEmpty()&&drop[0]!=null&&amuletDrops.size()==1&&amuletDrops.getFirst()==drop[0]&&ItemStack.matches(drop[0].getItem(),ejecting[0])
                                 &&item.getVis(drop[0].getItem(),Aspect.AIR)==5,"native physical drop retains one paid five-CV component snapshot with no equipped duplicate");

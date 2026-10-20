@@ -50,8 +50,11 @@ public final class HungryNodeRuntimeChecks {
     public static void run(GameTestHelper test) {
         var check=new Check(test);
         try { check.open(); } catch(RuntimeException|Error failure) { check.close(); throw failure; }
-        test.runAfterDelay(5,()->{
-            try { check.meals(); check.pullAndFlags(); check.blocks(); check.pearlAndHarvest(); check.naturalAndOrdinaryTicks(); }
+        // Real ServerPlayer starts with60 spawn-protected ticks. Its private
+        // ServerPlayer gate is separate from LivingEntity.invulnerableTime;
+        // let ordinary native level ticks expire it rather than changing either receipt or damage.
+        test.runAfterDelay(65,()->{
+            try { check.f.check(check.f.player.tickCount>=60,"actual native player has completed the initial sixty spawn-protected ticks; count="+check.f.player.tickCount);check.meals(); check.pullAndFlags(); check.blocks(); check.pearlAndHarvest(); check.naturalAndOrdinaryTicks(); }
             catch(RuntimeException|Error failure) { check.close(); throw failure; }
         });
     }
@@ -188,7 +191,7 @@ public final class HungryNodeRuntimeChecks {
             f.mode(GameType.CREATIVE);f.player.setPos(centre.add(1,0,0));f.player.setDeltaMovement(Vec3.ZERO);hp=f.player.getHealth();tick();
             f.check(f.player.getHealth()==hp && f.player.getDeltaMovement().equals(Vec3.ZERO),"actual creative abilities skip BOTH damage and pull");
             f.mode(GameType.SURVIVAL);f.player.setInvulnerable(false);f.player.invulnerableTime=0;f.player.setDeltaMovement(Vec3.ZERO);tick();
-            f.check(f.player.getHealth()==hp-1F && f.player.getDeltaMovement().x<0,"actual survival actor takes native drowning1 and is pulled inside squared-distance2");f.player.setInvulnerable(true);f.mode(GameType.CREATIVE);f.aim(centre);
+            f.check(f.player.getHealth()==hp-1F && f.player.getDeltaMovement().x<0,"actual survival actor takes native drowning1 and is pulled inside squared-distance2; health="+f.player.getHealth()+", before="+hp+", motion="+f.player.getDeltaMovement()+", abilitiesInvulnerable="+f.player.getAbilities().invulnerable+", nativeTicks="+f.player.tickCount);f.player.setInvulnerable(true);f.mode(GameType.CREATIVE);f.aim(centre);
             var disabled=item(named(Items.DIRT,3,"hard-disabled-surviving-input"),centre,4);hard(false);tick();
             f.check(!disabled.isRemoved() && disabled.getDeltaMovement().equals(Vec3.ZERO),"live hardNodes=false disables BOTH physical input damage and attraction, granting no reward");disabled.discard();
             hard(true);put(pos.below(),ThaumcraftNodeDevices.NODE_STABILIZER.get());fresh(stock(3));var locked=pig(centre.add(7.5,0,0),false);tick();locked.setDeltaMovement(Vec3.ZERO);tick();

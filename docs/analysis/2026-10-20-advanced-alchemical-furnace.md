@@ -143,3 +143,5 @@ Server tests explicitly provide raw materials, late wand energy, ordinary node
 capacities and physical pearls. These are unit fixtures, not survival acquisition
 or a full progression replay. Original boss/rare-loot pearl acquisition, full
 client inspection, multiplayer and eventual NeoForge acceptance stay separate.
+
+075df78 proved both real chunk unloads and the NEW paid-core reload, then failed at the quiet core removal's no-force-load assertion. The outer break already used flags18; a loaded inner part used flags3 and propagated shapes/neighbors indirectly into the unavailable shell chunk. Disassembly now preflights all17positions and uses quiet18 for ALL available reversions if ANY part is unavailable, retaining normal updates when fully loaded. The unchanged true disk-unload/custody/orphan fixture checks the actual quiet native onRemove path, not an ordinary player break with vanilla neighbor updates. Local compile/JUnit passed after this fix; native rerun pending.

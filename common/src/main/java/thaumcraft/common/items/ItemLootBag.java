@@ -62,10 +62,13 @@ public final class ItemLootBag extends Item {
             if(!actorCurrent(level,actor) || !actor.position().equals(position) || actor.getItemInHand(hand)!=stack
                     || stack.getItem()!=this || stack.getCount()!=count || count<=0 || !ItemStack.isSameItemSameComponents(stack,witness))
                 return InteractionResultHolder.fail(stack);
-            stack.shrink(1); paid=true;
+            // ItemInWorldManager1.7 restored the original count after creative
+            // use. Native1.21 ServerPlayerGameMode no longer does that; retain
+            // the original gameplay result here, using its actual game mode.
+            if (!actor.gameMode.isCreative()) stack.shrink(1);
+            paid=true;
             for(Drop drop:drops)DeferredItemDrops.enqueueDirected(level,source,position,drop.motion(),drop.stack());
             level.playSound(null,position.x,position.y,position.z,COINS,SoundSource.PLAYERS,.75F,1F);
-            // ServerPlayerGameMode's creative wrapper restores its original argument, as in 1.7.
             return InteractionResultHolder.consume(stack);
         } catch(RuntimeException failure) {
             if(!paid)throw failure;

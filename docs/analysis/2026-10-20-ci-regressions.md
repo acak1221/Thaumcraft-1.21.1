@@ -1,6 +1,7 @@
 # Remote Fabric regression runs — 2026-10-20
 
-These failed runs are not accepted checkpoints. The last full accepted server run remains d508ada.
+The failed runs below are not accepted checkpoints. Follow-up b1e49f2 is now accepted:648JUnit/212FabricGameTests/79Python, full build and fresh packaging/attribution/isolation gates passed.
+https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39409582347
 
 - ded7bef:193/198 GameTests;647 belongs to a later local compile, not this run. The five failures were stale focus candidates, an unreachable small seed range, an always-creative mock used for paid table placement, an embedded player transport outside the server living-tick loop, and exact original float Bore credit.
 - 9359eb4:196/198; remaining failures were the table menu's real indexOf(null) crash after reward claim and a loot fixture that seeded the world stream but not Minecraft's named iron-ore sequence. Both corrected in4d6a458.

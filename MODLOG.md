@@ -1,3 +1,12 @@
+## 2026-10-20 — Fabric b1e49f2 accepted by GitHub CI
+
+648 JUnit, all212 required Fabric GameTests and79 Python checks pass for exact commit
+b1e49f24d0c1112800bec4276277623939d4c670. Full build/freshness/isolation/attribution gates pass.
+Run: https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39409582347
+Original orb collision escape restored; native lamp/runic physical fixtures now deterministic.
+Later source groups and client/multiplayer/survival/NeoForge acceptance remain pending.
+Entries below are historical checkpoints.
+
 ## 2026-10-20 — Runic, special foci, nodes and scan API (CI pending)
 
 Native runic shield/augmentation, Fire/Frost/Shock specialisations, transient shock fields,

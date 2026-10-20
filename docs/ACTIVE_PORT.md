@@ -1,3 +1,6 @@
+Последний принятый серверный commit: b1e49f2 (648 JUnit/212 Fabric GameTest/79 Python), GitHub run39409582347.
+Текущая следующая группа ещё не проверена. User explicitly asks for coding subagents; six active units.
+
 # Полный перенос — активная работа 20.10.2026
 
 Запрос пользователя: продолжать до полного переноса, с субагентами и коммитами в репозиторий.
@@ -9,13 +12,13 @@
 
 | Агент | Область | Общие подключения |
 |---|---|---|
-| root | R13 settings, общие registry/bootstrap/book/lang, интеграция, сборки, Git/CI | Только root меняет общие файлы без явной передачи |
-| next_content | R11 unknown knowledge, R12 clues/entity scans, затем R15/API | Общие wrappers временно переданы и возвращены root |
-| review_reservoir | Ward behaviour, Excavation specials, затем Fire/Frost/Shock | Владеет согласованными focus contracts и mixin entries |
-| review_tests | Deconstruction, затем UNSTABLE nodes + aspect orbs | Closed paid orb queue; root bootstrap/render integration |
-| devices | Growth/Fertility, затем cheat sheet и advanced furnace | ClientSetup временно передан и возвращён root |
-| enchant_infusion | Repair/Haste, Bore repair, затем runic armour | Владеет matrix/recipes и согласованным WandManager |
-| warp | Brainy/Giant zombies, затем Firebat/Wisp | Новые entities/render/network; root общие подключения |
+| root | общие registry/bootstrap/book/lang, Loot/DungeonEntry, интеграция, сборки, Git/CI | Только root меняет общие файлы без явной передачи |
+| next_content | R16 object-aspect API, семь оригинальных crystal clusters | Общие wrappers временно переданы и возвращены root |
+| review_reservoir | Hellbat, FocusPouch и coloured candles, независимый review | Владеет согласованными focus contracts и mixin entries |
+| review_tests | HUNGRY nodes, ItemLootBag/LootTables, native runtime checks | Closed paid orb queue; root bootstrap/render integration |
+| devices | Advanced furnace, затем admin parser/warp notifications | ClientSetup временно передан и возвращён root |
+| enchant_infusion | Native Baubles/accessories и original random-enchant adapter | Владеет matrix/recipes и согласованным WandManager |
+| warp | Pech/entity/trade/focus, ManaBean и ManaPod | Новые entities/render/network; root общие подключения |
 
 ## Остающиеся крупные системы
 

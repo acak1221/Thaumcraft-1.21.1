@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.items.armor.ItemThaumiumArmor;
 import thaumcraft.common.items.armor.ItemVoidArmor;
+import thaumcraft.common.items.armor.ItemVoidRobeArmor;
 import thaumcraft.common.items.equipment.ItemVoidAxe;
 import thaumcraft.common.items.equipment.ItemVoidHoe;
 import thaumcraft.common.items.equipment.ItemVoidPickaxe;
@@ -93,6 +94,16 @@ public final class ThaumcraftEquipment {
             10, SoundEvents.ARMOR_EQUIP_IRON, ThaumcraftEquipment::voidRepairIngredient,
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "void"))), 0, 0));
 
+    /**
+     * The void armor material again (original ItemVoidRobeArmor takes armorMatVoid, not the unused armorMatVoidFortress), as its own
+     * holder: the robes' worn look is another model. INTERIM: until the original ModelRobe (a 128 x 64 model with its own texture) is
+     * ported the worn layers are the void armor's, undyed.
+     */
+    public static final RegistrySupplier<ArmorMaterial> VOID_ROBE_ARMOR_MATERIAL = ARMOR_MATERIALS.register("void_robe", () -> new ArmorMaterial(
+            Map.of(ArmorItem.Type.HELMET, 3, ArmorItem.Type.CHESTPLATE, 7, ArmorItem.Type.LEGGINGS, 6, ArmorItem.Type.BOOTS, 3),
+            10, SoundEvents.ARMOR_EQUIP_IRON, ThaumcraftEquipment::voidRepairIngredient,
+            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "void"))), 0, 0));
+
     public static final RegistrySupplier<ItemThaumiumSword> THAUMIUM_SWORD = ITEMS.register("thaumium_sword",
             () -> new ItemThaumiumSword(THAUMIUM_TIER, new Item.Properties()));
     public static final RegistrySupplier<ItemThaumiumPickaxe> THAUMIUM_PICKAXE = ITEMS.register("thaumium_pickaxe",
@@ -149,6 +160,12 @@ public final class ThaumcraftEquipment {
             () -> new ItemVoidArmor(VOID_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Properties()));
     public static final RegistrySupplier<ItemVoidArmor> VOID_BOOTS = ITEMS.register("void_boots",
             () -> new ItemVoidArmor(VOID_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Properties()));
+    public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_HELMET = ITEMS.register("void_robe_helmet",
+            () -> new ItemVoidRobeArmor(VOID_ROBE_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_CHESTPLATE = ITEMS.register("void_robe_chestplate",
+            () -> new ItemVoidRobeArmor(VOID_ROBE_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_LEGGINGS = ITEMS.register("void_robe_leggings",
+            () -> new ItemVoidRobeArmor(VOID_ROBE_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Properties()));
 
     private static boolean registered;
     private ThaumcraftEquipment() {}
@@ -173,7 +190,8 @@ public final class ThaumcraftEquipment {
         // these registered suppliers intentionally retain their specific APIs.
         for (RegistrySupplier<? extends Item> item : List.of(THAUMIUM_SWORD, THAUMIUM_PICKAXE, THAUMIUM_AXE, ELEMENTAL_AXE, ELEMENTAL_PICKAXE, ELEMENTAL_HOE, ELEMENTAL_SHOVEL, ELEMENTAL_SWORD,
                 THAUMIUM_SHOVEL, THAUMIUM_HOE, THAUMIUM_HELMET, THAUMIUM_CHESTPLATE, THAUMIUM_LEGGINGS, THAUMIUM_BOOTS,
-                VOID_SWORD, VOID_PICKAXE, VOID_AXE, VOID_SHOVEL, VOID_HOE, VOID_HELMET, VOID_CHESTPLATE, VOID_LEGGINGS, VOID_BOOTS)) {
+                VOID_SWORD, VOID_PICKAXE, VOID_AXE, VOID_SHOVEL, VOID_HOE, VOID_HELMET, VOID_CHESTPLATE, VOID_LEGGINGS, VOID_BOOTS,
+                VOID_ROBE_HELMET, VOID_ROBE_CHESTPLATE, VOID_ROBE_LEGGINGS)) {
             CreativeTabRegistry.append(ThaumcraftContent.TAB, item);
         }
     }

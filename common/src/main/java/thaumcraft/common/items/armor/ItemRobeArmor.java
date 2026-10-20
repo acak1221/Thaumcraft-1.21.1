@@ -24,7 +24,7 @@ import thaumcraft.common.config.ThaumcraftContent;
 
 /** Original ItemRobeArmor:61-163. Repair/runic interfaces are eligibility markers,
  * not an invented repair enchantment, shield or automatic enchantment glint. */
-public class ItemRobeArmor extends ArmorItem implements IRepairable, IRunicArmor, IVisDiscountGear {
+public class ItemRobeArmor extends ArmorItem implements IRepairable, IRunicArmor, IVisDiscountGear, DyedRobe {
     public static final int DEFAULT_COLOR = 0x6A3880;
     private static final DyedItemColor DEFAULT_DYED_COLOR = new DyedItemColor(DEFAULT_COLOR, false);
 
@@ -72,10 +72,19 @@ public class ItemRobeArmor extends ArmorItem implements IRepairable, IRunicArmor
     }
 
     @Override public InteractionResult useOn(UseOnContext context) {
+        InteractionResult washed = wash(context);
+        return washed != null ? washed : super.useOn(context);
+    }
+
+    /**
+     * Original onItemUseFirst of both robe classes: a robe used on a water cauldron holding at least one level loses its custom color
+     * and lowers the cauldron one level. Null when the click is not that wash (the caller then falls back to the item's own use).
+     */
+    public static InteractionResult wash(UseOnContext context) {
         var level = context.getLevel();
         var pos = context.getClickedPos();
         var state = level.getBlockState(pos);
-        if (!state.is(Blocks.WATER_CAULDRON) || state.getValue(LayeredCauldronBlock.LEVEL) <= 0) return super.useOn(context);
+        if (!state.is(Blocks.WATER_CAULDRON) || state.getValue(LayeredCauldronBlock.LEVEL) <= 0) return null;
         // Native AbstractCauldronBlock looks up its interaction by exact Item;
         // unregistered robes get PASS_TO_DEFAULT_BLOCK_INTERACTION, then this
         // actual useOn fallback. Do NOT add robes to ItemTags.DYEABLE or install

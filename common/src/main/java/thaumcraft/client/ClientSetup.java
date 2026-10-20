@@ -30,6 +30,7 @@ import thaumcraft.common.lib.network.KnowledgeEvents;
 import thaumcraft.common.items.ItemEssence;
 import thaumcraft.common.items.ItemWispEssence;
 import thaumcraft.common.items.ItemJar;
+import thaumcraft.common.config.ThaumcraftEquipment;
 import thaumcraft.common.config.ThaumcraftEssences;
 import thaumcraft.common.config.ThaumcraftWearables;
 import thaumcraft.common.items.armor.ItemRobeArmor;
@@ -108,6 +109,9 @@ public final class ClientSetup {
                 ThaumcraftContent.CRYSTAL_ESSENCE);
         ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(ItemRobeArmor.color(stack)) : -1,
                 ThaumcraftWearables.ROBE_CHESTPLATE, ThaumcraftWearables.ROBE_LEGGINGS, ThaumcraftWearables.ROBE_BOOTS);
+        // The void thaumaturge robes tint the plain pass (tint 0) with the same dye, the metal pass is untinted.
+        ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(ItemRobeArmor.color(stack)) : -1,
+                ThaumcraftEquipment.VOID_ROBE_HELMET, ThaumcraftEquipment.VOID_ROBE_CHESTPLATE, ThaumcraftEquipment.VOID_ROBE_LEGGINGS);
         ColorHandlerRegistry.registerItemColors((stack, tint) -> {
             var data = ItemResearchNotes.data(stack);
             return tint == 1 ? opaque(data == null ? 0x999999 : data.color()) : -1;

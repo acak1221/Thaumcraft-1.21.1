@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -26,6 +27,15 @@ public final class VoidMetal {
         if (carrier instanceof Player player && player.getAbilities().instabuild) return false;
         stack.setDamageValue(stack.getDamageValue() - 1);
         return true;
+    }
+
+    /**
+     * What the void armor (and the void robes) do on every inventory tick: the carrier's repair once and, when it is a player wearing the
+     * stack in the slot it belongs to, the original {@code onArmorTick} repair once more, so a worn piece mends two points a second.
+     */
+    public static void armorTick(ItemStack stack, Entity carrier, EquipmentSlot slot) {
+        repair(stack, carrier);
+        if (carrier instanceof Player player && player.getItemBySlot(slot) == stack) repair(stack, carrier);
     }
 
     /**

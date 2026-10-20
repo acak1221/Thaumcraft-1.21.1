@@ -66,16 +66,10 @@ public final class ContainerResearchTable extends AbstractContainerMenu {
             });
         }
         checkContainerSize(contents, 2);
-        addSlot(new Slot(contents, 0, 14, 10) {
-            @Override public boolean mayPlace(ItemStack stack) { return !stack.isEmpty() && stack.getItem() instanceof IScribeTools; }
-            @Override public int getMaxStackSize() { return 64; }
-        });
-        addSlot(new Slot(contents, 1, 70, 10) {
-            // Do not delegate to the automation predicate: original GUI permits
-            // solved/discovery notes and future unknown ItemResearchNotes too.
-            @Override public boolean mayPlace(ItemStack stack) { return !stack.isEmpty() && stack.getItem() instanceof ItemResearchNotes; }
-            @Override public int getMaxStackSize() { return 64; }
-        });
+        addSlot(new SlotLimitedByClass(IScribeTools.class, contents, 0, 14, 10));
+        // Do not delegate to the automation predicate: original GUI permits
+        // solved/discovery notes and future unknown ItemResearchNotes too.
+        addSlot(new SlotLimitedByClass(ItemResearchNotes.class, contents, 1, 70, 10));
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 addSlot(new Slot(inventory, column + row * 9 + 9, 48 + column * 18, 175 + row * 18));

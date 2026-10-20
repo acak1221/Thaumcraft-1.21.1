@@ -1,4 +1,4 @@
-fortress
-durability-30 rarity-uncommon enchantability-20 fire-ward-off set-applies-to-mobs goggles-always-seen popups-always mask-default-zero set-without-helm fiend-heals-two ghost-wrong-mask ghost-poisons explosion-not-fire delta-adds-ward-armor mask-patch-zero patch-any-armor
+essentia-reservoir
+port-inverted suction-always insert-short zero-take-fails face-range-9 face-not-saved take-any-face add-any-face contains-list-loose pull-from-below burst-from-two blast-no-power wand-always-sneaks comparator-zero no-analog-output invisible placed-clicked-face soft-resistance no-tool-needed
 
-# request 20: the 16 fortress game-test mutants not run locally (17 JUnit and 7 game-test mutants were caught locally)
+# request 21: the 19 essentia-reservoir game-test mutants not run locally (24 JUnit and 8 game-test mutants were caught locally); fortress (run 20) is still to be read

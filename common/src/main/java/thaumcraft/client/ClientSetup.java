@@ -120,6 +120,7 @@ public final class ClientSetup {
         // Cutout discards blending and writes an opaque blue depth shell,
         // hiding real essentia. TC4 jars use the translucent world render pass.
         RenderTypeRegistry.register(RenderType.translucent(), ThaumcraftContent.JAR.get(), ThaumcraftContent.VOID_JAR.get());
+        RenderTypeRegistry.register(RenderType.translucent(), thaumcraft.common.config.ThaumcraftTubes.ESSENTIA_RESERVOIR.get());
         // These are original shard colors, which differ from aspect HUD colors.
         String[] tags = {"aer", "ignis", "aqua", "terra", "ordo", "perditio"};
         int[] colors = {0xffff7e, 0xff3c01, 0x0090ff, 0x00a000, 0xeeccff, 0x555577};

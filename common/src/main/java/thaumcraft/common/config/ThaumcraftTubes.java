@@ -18,10 +18,12 @@ import thaumcraft.common.blocks.BlockTube;
 import thaumcraft.common.blocks.BlockTubeBuffer;
 import thaumcraft.common.blocks.BlockCentrifuge;
 import thaumcraft.common.blocks.BlockEssentiaCrystalizer;
+import thaumcraft.common.blocks.BlockEssentiaReservoir;
 import thaumcraft.common.tiles.TileTube;
 import thaumcraft.common.tiles.TileTubeBuffer;
 import thaumcraft.common.tiles.TileCentrifuge;
 import thaumcraft.common.tiles.TileEssentiaCrystalizer;
+import thaumcraft.common.tiles.TileEssentiaReservoir;
 
 /** Native blockTube:0..7 registrations; crystallizer VisNet acceleration is deferred. */
 public final class ThaumcraftTubes {
@@ -48,6 +50,11 @@ public final class ThaumcraftTubes {
     public static final RegistrySupplier<BlockEssentiaCrystalizer> ESSENTIA_CRYSTALLIZER = BLOCKS.register("essentia_crystallizer",
             () -> new BlockEssentiaCrystalizer(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
                     .strength(.5F, 3).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
+    public static final RegistrySupplier<BlockEssentiaReservoir> ESSENTIA_RESERVOIR = BLOCKS.register("essentia_reservoir",
+            // Original setHardness2 / setResistance17 (stored x3, exposed /5: 10.2); metal, not an opaque or normal cube.
+            () -> new BlockEssentiaReservoir(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0F, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()
+                    .isRedstoneConductor((state, level, pos) -> false).isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)));
     public static final RegistrySupplier<Item> ESSENTIA_TUBE_ITEM = ITEMS.register("essentia_tube",
             () -> tubeItem(ESSENTIA_TUBE.get()));
     public static final RegistrySupplier<Item> ESSENTIA_VALVE_ITEM = ITEMS.register("essentia_valve",
@@ -60,6 +67,17 @@ public final class ThaumcraftTubes {
             () -> tubeItem(ESSENTIA_ONEWAY.get()));
     public static final RegistrySupplier<Item> ESSENTIA_BUFFER_ITEM = ITEMS.register("essentia_buffer",
             () -> tubeItem(ESSENTIA_BUFFER.get()));
+    public static final RegistrySupplier<Item> ESSENTIA_RESERVOIR_ITEM = ITEMS.register("essentia_reservoir",
+            () -> new BlockItem(ESSENTIA_RESERVOIR.get(), new Item.Properties()) {
+                @Override protected boolean placeBlock(BlockPlaceContext context, BlockState state) {
+                    if (!super.placeBlock(context, state)) return false;
+                    // BlockEssentiaReservoirItem.placeBlockAt: the opening faces the block that was clicked.
+                    if (!context.getLevel().isClientSide && context.getLevel().getBlockEntity(context.getClickedPos()) instanceof TileEssentiaReservoir reservoir) {
+                        reservoir.setFacing(thaumcraft.common.lib.essentia.ReservoirRules.placedFacing(context.getClickedFace()));
+                    }
+                    return true;
+                }
+            });
     public static final RegistrySupplier<Item> CENTRIFUGE_ITEM = ITEMS.register("centrifuge",
             // The original item assigns a clicked facing only to TileTube and
             // crystallizer, NOT centrifuge. Its persisted default stays NORTH.
@@ -86,6 +104,9 @@ public final class ThaumcraftTubes {
             () -> BlockEntityType.Builder.of(TileCentrifuge::new, CENTRIFUGE.get()).build(null));
     public static final RegistrySupplier<BlockEntityType<TileEssentiaCrystalizer>> CRYSTALLIZER_BLOCK_ENTITY = BLOCK_ENTITIES.register("essentia_crystallizer",
             () -> BlockEntityType.Builder.of(TileEssentiaCrystalizer::new, ESSENTIA_CRYSTALLIZER.get()).build(null));
+
+    public static final RegistrySupplier<BlockEntityType<TileEssentiaReservoir>> RESERVOIR_BLOCK_ENTITY = BLOCK_ENTITIES.register("essentia_reservoir",
+            () -> BlockEntityType.Builder.of(TileEssentiaReservoir::new, ESSENTIA_RESERVOIR.get()).build(null));
 
     private static RegistrySupplier<BlockTube> variant(String id, BlockTube.Kind kind) {
         return BLOCKS.register(id, () -> new BlockTube(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
@@ -116,6 +137,6 @@ public final class ThaumcraftTubes {
         BLOCK_ENTITIES.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB, ESSENTIA_TUBE_ITEM, ESSENTIA_VALVE_ITEM,
                 ESSENTIA_FILTER_ITEM, ESSENTIA_BUFFER_ITEM, ESSENTIA_RESTRICT_ITEM, ESSENTIA_ONEWAY_ITEM, CENTRIFUGE_ITEM,
-                ESSENTIA_CRYSTALLIZER_ITEM);
+                ESSENTIA_CRYSTALLIZER_ITEM, ESSENTIA_RESERVOIR_ITEM);
     }
 }

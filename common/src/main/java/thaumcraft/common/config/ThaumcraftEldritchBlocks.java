@@ -58,6 +58,7 @@ import thaumcraft.common.tiles.TileMirror;
 import thaumcraft.common.tiles.TileMirrorEssentia;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileOwned;
+import thaumcraft.common.tiles.TileWandPedestal;
 import thaumcraft.common.tiles.TileWardingStone;
 import thaumcraft.common.tiles.TileWardingStoneFence;
 
@@ -309,6 +310,10 @@ public final class ThaumcraftEldritchBlocks {
     private static BlockEntityType<TileNode> cosmeticNodeType() { return COSMETIC_NODE_TILE.get(); }
 
     // -------------------------------------------------------------------- menus
+
+    public static final RegistrySupplier<BlockEntityType<TileWandPedestal>> WAND_PEDESTAL_TILE =
+            BLOCK_ENTITIES.register("stone_device_wand_pedestal",
+                    () -> BlockEntityType.Builder.of((pos, state) -> new TileWandPedestal(pos, state), STONE_DEVICE.get()).build(null));
 
     private ThaumcraftEldritchBlocks() {}
 

@@ -70,6 +70,7 @@ public final class Thaumcraft {
         thaumcraft.common.lib.network.KnowledgeNotificationNetworking.initServer();
         ResearchCatalog.loadBundled();
         thaumcraft.common.lib.mods.ChampionHooks.init();
+        thaumcraft.common.lib.mods.ChampionWiring.init();
         thaumcraft.common.lib.research.ResearchConditions.initializeNative();
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();

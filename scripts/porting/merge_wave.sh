@@ -43,14 +43,18 @@ for n in "$@"; do
   # A branch that is checked out in a worktree must be rebased inside that worktree.
   WT="$(git worktree list --porcelain | awk -v br="refs/heads/$b" '
         $1=="worktree"{w=$2} $1=="branch" && $2==br {print w}')"
-  echo "=== rebasing $b onto work (worktree: ${WT:-none}) ==="
-  if [ -n "$WT" ]; then
-    ( cd "$WT" && git rebase "$BASE" ) || {
-      echo "!!! CONFLICT rebasing $b -- resolve inside $WT, then: git rebase --continue / --abort"; exit 1; }
+  if git merge-base --is-ancestor "$BASE" "$b"; then
+    echo "=== $b already contains work: merging directly ==="
   else
-    git checkout -q "$b"
-    git rebase "$BASE" || { echo "!!! CONFLICT rebasing $b"; exit 1; }
-    git checkout -q work
+    echo "=== rebasing $b onto work (worktree: ${WT:-none}) ==="
+    if [ -n "$WT" ]; then
+      ( cd "$WT" && git rebase "$BASE" ) || {
+        echo "!!! CONFLICT rebasing $b -- resolve inside $WT, then: git rebase --continue / --abort"; exit 1; }
+    else
+      git checkout -q "$b"
+      git rebase "$BASE" || { echo "!!! CONFLICT rebasing $b"; exit 1; }
+      git checkout -q work
+    fi
   fi
   echo "=== merging $b into work ==="
   git checkout -q work

@@ -1,4 +1,4 @@
-name: Build and test Minecraft 1.21.1
+name: Build and test Fabric 1.21.1
 
 on:
   push:
@@ -8,6 +8,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: fabric-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -22,17 +26,23 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - name: Restore Gradle dependencies, Loom mappings and task outputs
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Install deterministic image conversion dependency
+        run: python -m pip install 'Pillow>=10,<13'
       - name: Validate asset references and conversion
         run: |
           python -B scripts/porting/record_verification.py --begin-run .tmp/ci-inputs.json
           python -B scripts/porting/convert_assets.py --verify
           python -B -m unittest discover -s scripts/porting -p 'test_*.py' 2>&1 | tee .tmp/ci-assets.log
-      - name: Compile, build and run both native GameTest servers
+      - name: Build Fabric and run fresh JUnit and GameTest checks
         run: |
-          ./scripts/dev.sh validate --rerun-tasks 2>&1 | tee .tmp/ci-validate.log
+          ./gradlew --no-daemon --console=plain --build-cache :common:test --rerun :fabric:clientTestClasses :fabric:build :fabric:runGameTest 2>&1 | tee .tmp/ci-validate.log
           python -c 'from pathlib import Path; Path(".tmp/ci-exit.json").write_text("{\"code\":0}\n", encoding="utf-8")'
       - name: Show failed game tests with their messages
         if: always()
@@ -55,7 +65,24 @@ jobs:
       - name: Verify fresh results, required cases and packaged attribution
         run: >-
           python -B scripts/porting/record_verification.py
+          --loaders fabric
           --run-snapshot .tmp/ci-inputs.json
           --build-exit-json .tmp/ci-exit.json
           --build-log .tmp/ci-validate.log
           --asset-test-log .tmp/ci-assets.log
+      - name: Keep logs and reports for debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-validation-${{ github.sha }}
+          retention-days: 7
+          if-no-files-found: warn
+          include-hidden-files: true
+          path: |
+            .tmp/ci-*.json
+            .tmp/ci-*.log
+            common/build/test-results/test/
+            common/build/reports/tests/test/
+            fabric/build/gametest-results.xml
+            fabric/run-gametest/logs/
+            docs/porting/verification.json

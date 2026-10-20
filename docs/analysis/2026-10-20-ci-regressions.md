@@ -36,3 +36,20 @@ are production integration fixes; the other assertions retain their original res
 The follow-up also includes original Pech avoidance/watch goals and the actual Hover Girdle.
 Local691JUnit/84Python, Fabric main/gameTest/clientTest compilation and zero missing asset references
 pass;237nativecases require the next remote run. Full server acceptance still belongs to b1e49f2.
+
+
+b7c7845 completed all237 native scenarios;231 passed and6 failed. This is not an accepted checkpoint.
+https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39415113101
+
+- Pech avoidance fixture supplied a9x7 floor to a native radius16/height7 flee search. The corrected fixture provides a real37x37 supported floor and restores all previous blocks; real path/distance and128-seed bounds remain.
+- Vis Amulet drop fixture discarded the stack returned by removeItem and attempted to drop the now-empty old alias. It now verifies and drops the actual detached paid5-CV snapshot; all real-drop/no-duplicate/replay assertions remain.
+- Uncommon loot expected weight2913 was a fixture arithmetic error:2669 non-potion weights plus144 potion weights is2813. Production weights match the original and were not changed.
+- Advanced Furnace unload fixture retained a FULL33 core ticket, which retains the neighboring holder at34 and prevents old shell-BE retirement. The corrected scenario truly unloads both core and shell, reloads a NEW paid core, checks unavailable-shell pause/no-force-load, breaks the core, then reloads and retires the orphan shell. Timeout1200 covers its three bounded native phases.
+- Crystal disk-reload fixture now waits for actual entity-section loading/ticking after full chunk reload before breaking support and demanding six individual physical drops.
+- Hungry native diagnostic proved actual block-item death added an empty CONTAINER component, causing the pre-death receipt match to reject before any RNG. The bounded production adapter accepts only that exact native transition while retaining entity/item reference, count and all other components; pricing uses the pre-death receipt. New real scenarios retain the existing BASE probability checks, conserve seven named child iron items from a destroyed container and refuse three callback substitutions. Crystal focused reload passed; the Hungry diagnostic failed before this production fix, so the fix awaits the next full run.
+
+The next active group includes real Traveller boots/Hover Harness, original RP/research/discovery feedback, Knowledge Fragments and passive Primal Charm. Local quick compile3 passed704JUnit and Fabric source sets;84Python and zero missing assets passed. The required full native manifest is243; remote acceptance is pending. New biome/node/Primal/taint units remain outside source sets in.tmp until coherent.
+
+A read-only original mapping audit also corrected MindSpider presentation: func_70647_i is voice pitch, while func_70599_aP is volume. Its original constant.7 now overrides native getVoicePitch; the incorrectly lowered volume override is removed. This is a native mapping correction, not a gameplay balance change; audible client acceptance remains pending.
+
+The follow-up also restores the original integer retreat-position contract before Pech distance/path-end checks. Native DefaultRandomPos returns bottom-center coordinates; legacy truncation rejected negative-coordinate endpoints. Real positive/negative navigation fixtures retain supported floors, strict endpoint/distance assertions and bounded original branch inputs. Final local build after all changes:704JUnit/0failures, common and Fabric main/gameTest/clientTest compilation,84Python, zero missing resource references. Full243-game runtime acceptance awaits the pushed GitHub commit.

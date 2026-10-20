@@ -40,7 +40,7 @@ public final class EntityMindSpider extends Spider {
     @Override public void push(Entity other) { if (!isHarmless()) super.push(other); }
     @Override public boolean isPushable() { return !isHarmless() && super.isPushable(); }
     @Override public void tick() { super.tick(); if (!level().isClientSide && tickCount > lifeSpan) discard(); }
-    @Override protected float getSoundVolume() { return .7F; }
+    @Override public float getVoicePitch() { return .7F; }
     @Override protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean player) {}
     @Override protected void dropFromLootTable(DamageSource source, boolean player) {}
     @Override protected int getBaseExperienceReward() { return isHarmless() ? 0 : super.getBaseExperienceReward(); }

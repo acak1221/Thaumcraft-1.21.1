@@ -1,1 +1,9 @@
-{"replace":false,"values":["thaumcraft:thaumium_boots","thaumcraft:robe_boots","thaumcraft:void_boots"]}
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:thaumium_boots",
+    "thaumcraft:robe_boots",
+    "thaumcraft:void_boots",
+    "thaumcraft:boots_traveller"
+  ]
+}

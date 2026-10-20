@@ -38,7 +38,7 @@ public final class ThaumcraftLoot {
     }
 
     /** Original initLoot uses one time-seeded charge template, shared by all chest/bag copies. */
-    public static ItemStack lootAmulet() {
+    public static synchronized ItemStack lootAmulet() {
         if (chargedAmulet == null) {
             ItemStack amulet = new ItemStack(ThaumcraftBaubles.VIS_AMULET_LESSER.get());
             Random random = new Random(System.currentTimeMillis());
@@ -65,6 +65,13 @@ public final class ThaumcraftLoot {
     public static List<DungeonEntry> dungeonEntries(ServerLevel level) {
         if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
             throw new IllegalStateException("Dungeon loot descriptors require the canonical server level/thread");
+        return dungeonEntries(level,level.random);
+    }
+
+    /** Original Greatwood uses a private tree RNG. Region generation must not touch
+     * ServerLevel.random or require its owner thread just to create loot descriptors. */
+    public static List<DungeonEntry> dungeonEntries(net.minecraft.world.level.WorldGenLevel level,net.minecraft.util.RandomSource random) {
+        java.util.Objects.requireNonNull(level);java.util.Objects.requireNonNull(random);
         List<DungeonEntry> entries = new ArrayList<>();
         entry(entries, Items.SADDLE, 1, 1, 10);
         entry(entries, Items.IRON_INGOT, 1, 4, 10);
@@ -81,7 +88,7 @@ public final class ThaumcraftLoot {
         entry(entries, Items.GOLDEN_HORSE_ARMOR, 1, 1, 2);
         entry(entries, Items.IRON_HORSE_ARMOR, 1, 1, 5);
         entry(entries, Items.DIAMOND_HORSE_ARMOR, 1, 1, 1);
-        entries.add(new DungeonEntry(OriginalLootEnchantments.enchant(level, new ItemStack(Items.BOOK), level.random, 30), 1, 1, 1));
+        entries.add(new DungeonEntry(OriginalLootEnchantments.enchant(level.registryAccess(), new ItemStack(Items.BOOK), random, 30), 1, 1, 1));
         entries.addAll(chestAdditions("dungeonChest"));
         return entries;
     }

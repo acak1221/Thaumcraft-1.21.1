@@ -91,22 +91,27 @@ public final class VisAmuletRuntimeChecks {
                         if(f.player.tickCount-moved[0]<10)return;
                         for(Aspect aspect:Aspect.getPrimalAspects())test.assertTrue(item.getVis(amulet,aspect)==13,"distance squared36 prevents original <26 relay recharge");
                         test.assertTrue(TileVisRelay.nearbyPlayer(f.player)==null,"outside cached association is removed instead of pulling distant vis");
-                        ItemStack empty=new ItemStack(item);ejecting[0]=empty;PlayerAccessories.get(f.player).setItem(0,empty);
+                        ItemStack empty=new ItemStack(item);PlayerAccessories.get(f.player).setItem(0,empty);
                         f.player.setPos(at.getX()+.5,at.getY()+.5,at.getZ()+.5);
                         middle.action=()->{
                             test.assertTrue(item.getVis(empty,Aspect.AIR)==5&&source.getAvailableVis().getAmount(Aspect.AIR)==3,
                                     "closed native amulet receives exactly the committed five from eight source units BEFORE route pulse callbacks");
-                            test.assertTrue(!PlayerAccessories.get(f.player).removeItem(0,1).isEmpty(),"callback detaches the actual paid amulet");
-                            drop[0]=f.player.drop(empty,false);paidBeforePulse[0]=true;
+                            ejecting[0]=empty.copy();
+                            // Native removeItem splits a NEW physical stack and
+                            // shrinks the previous equipped alias to count0.
+                            ItemStack removed=PlayerAccessories.get(f.player).removeItem(0,1);
+                            test.assertTrue(ItemStack.matches(removed,ejecting[0])&&empty.isEmpty(),"callback detaches the actual paid amulet and empties its old slot alias");
+                            drop[0]=f.player.drop(removed,false);paidBeforePulse[0]=true;
                             boolean refused=false;try{PlayerAccessories.acceptPreparedAmuletGrant(relay,Aspect.AIR,5);}catch(IllegalStateException expected){refused=true;}
-                            test.assertTrue(refused&&item.getVis(empty,Aspect.AIR)==5,"post-payment callback cannot forge or replay another exact amulet grant");
+                            test.assertTrue(refused&&item.getVis(removed,Aspect.AIR)==5,"post-payment callback cannot forge or replay another exact amulet grant");
                         };
                         stage[0]=2;
                     } else if(paidBeforePulse[0]) {
-                        test.assertTrue(PlayerAccessories.get(f.player).getItem(0).isEmpty()&&drop[0]!=null&&ItemStack.matches(drop[0].getItem(),ejecting[0])
+                        var amuletDrops=f.drops().stream().filter(entity->entity.getItem().is(item)).toList();
+                        test.assertTrue(PlayerAccessories.get(f.player).getItem(0).isEmpty()&&drop[0]!=null&&amuletDrops.size()==1&&amuletDrops.getFirst()==drop[0]&&ItemStack.matches(drop[0].getItem(),ejecting[0])
                                 &&item.getVis(drop[0].getItem(),Aspect.AIR)==5,"native physical drop retains one paid five-CV component snapshot with no equipped duplicate");
-                        for(Aspect aspect:Aspect.getPrimalAspects())if(aspect!=Aspect.AIR)test.assertTrue(item.getVis(ejecting[0],aspect)==0,"detached item cannot receive the later per-aspect source grants");
-                        f.drops();close.run();test.succeed();
+                        for(Aspect aspect:Aspect.getPrimalAspects())if(aspect!=Aspect.AIR)test.assertTrue(item.getVis(drop[0].getItem(),aspect)==0,"detached item cannot receive the later per-aspect source grants");
+                        close.run();test.succeed();
                     }
                 }catch(RuntimeException|Error failure){close.run();throw failure;}
             });

@@ -13,6 +13,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import thaumcraft.common.items.ItemPrimalCharm;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
@@ -20,7 +23,7 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.entities.EntityAspectOrb;
 import thaumcraft.common.tiles.TileNode;
 
-/** Closed one-vis UNSTABLE emission custody. Spawn callbacks never run during the node debit. */
+/** Closed original one-vis emission custody: UNSTABLE debit or a real primal-charm inventory roll. */
 public final class AspectOrbQueue extends SavedData {
     public static final String ID = "thaumcraft_pending_aspect_orbs";
     private static final Factory<AspectOrbQueue> FACTORY = new Factory<>(AspectOrbQueue::new, AspectOrbQueue::load, null);
@@ -81,6 +84,19 @@ public final class AspectOrbQueue extends SavedData {
                 (float)(Math.random() * .2D) * 2F,
                 (float)(Math.random() * (double).2F - (double).1F) * 2F), yaw, aspect, Long.MIN_VALUE);
         return valid(row) ? new Prepared(queue, level, row) : null;
+    }
+    /** Original charm generates one unit freely; its private exact native inventory-roll frame is the sole authority. */
+    public static boolean issuePrimalCharm(ServerLevel level,ServerPlayer player,ItemStack stack,int slot,Aspect aspect) {
+        if(!live(level)||RAW.get()!=null||player.level()!=level||!level.hasChunkAt(player.blockPosition()))return false;
+        var queue=level.getDataStorage().computeIfAbsent(FACTORY,ID);if(queue.flushing)return false;
+        Vec3 position=player.position();
+        float yaw=(float)(Math.random()*360D);
+        var row=new Pending(UUID.randomUUID(),position,new Vec3(
+                (float)(Math.random()*(double).2F-(double).1F)*2F,
+                (float)(Math.random()*.2D)*2F,
+                (float)(Math.random()*(double).2F-(double).1F)*2F),yaw,aspect,Long.MIN_VALUE);
+        if(!valid(row)||!ItemPrimalCharm.authorizeOrbEmission(level,player,stack,slot,aspect,position))return false;
+        queue.pending.put(row.id,row);queue.setDirty();return true;
     }
     public static void requireRaw(Prepared expected) { if (expected == null || RAW.get() != expected) throw new IllegalStateException("No paid native node emission scope"); }
 

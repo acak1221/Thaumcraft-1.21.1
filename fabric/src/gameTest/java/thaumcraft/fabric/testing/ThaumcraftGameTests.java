@@ -1182,7 +1182,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.AdvancedFurnaceCallbackRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1000, batch = "m06_advanced_unload")
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1200, batch = "m06_advanced_unload")
     public void advancedFurnacePreservesCustodyAcrossRealChunkUnload(GameTestHelper test) {
         thaumcraft.common.testing.AdvancedFurnaceUnloadRuntimeChecks.run(test);
     }
@@ -1245,6 +1245,37 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "r14_pech_goals")
     public void pechAvoidAndWatchGoalsRetainOriginalPlayerAndMutexRules(GameTestHelper test) {
         thaumcraft.common.testing.PechRuntimeChecks.goals(test);
+    }
+
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_traveller_boots")
+    public void travellerBootsPreserveOriginalNativeMovementAndJump(GameTestHelper test) {
+        thaumcraft.common.testing.TravelGearRuntimeChecks.boots(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "m08_hover_fuel")
+    public void hoverHarnessConsumesNativeFuelAndRestoresFlightPermissions(GameTestHelper test) {
+        thaumcraft.common.testing.TravelGearRuntimeChecks.harnessFuelAndPermissions(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_hover_menu")
+    public void hoverHarnessMenuPreservesActualJarCustody(GameTestHelper test) {
+        thaumcraft.common.testing.TravelGearRuntimeChecks.harnessMenu(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m00_knowledge_notifications")
+    public void knowledgeNotificationsUseOriginalCommittedFeedbackAndNativePackets(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeNotificationRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m04_knowledge_fragment")
+    public void knowledgeFragmentsGrantOriginalPrimalResearchPoints(GameTestHelper test) {
+        thaumcraft.common.testing.KnowledgeFragmentRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m10_primal_charm")
+    public void primalCharmUsesActualInventoryTicksForFreeOrbsAndClues(GameTestHelper test) {
+        thaumcraft.common.testing.PrimalCharmRuntimeChecks.run(test);
     }
 
 }

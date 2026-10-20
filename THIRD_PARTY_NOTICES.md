@@ -53,3 +53,15 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+### Research notification frame
+
+`common/src/main/resources/assets/thaumcraft/textures/gui/research_toast.png`
+is the exact160×32 pixel crop at(96,202) used by TC4 GuiResearchPopup from Mojang's
+Minecraft1.7.10 `assets/minecraft/textures/gui/achievement/achievement_background.png`.
+Minecraft and that asset are owned by Mojang/Microsoft; the repository's source
+license does not relicense it. Source client JAR SHA256:
+`a4fc2284657544e0f4bcc964f927c2fda3e3a205178ed1d5d58883aaf9780cce`;
+source PNG SHA256:`b99ec87194c344874949bcf3dcc40745128800c82def4a75c48b6d38e1694575`.
+Only the required small crop is retained, with deterministic extraction in
+`scripts/porting/extract_research_toast.py`; no original JAR or full atlas is included.

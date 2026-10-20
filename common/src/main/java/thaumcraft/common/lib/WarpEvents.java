@@ -1,5 +1,7 @@
 package thaumcraft.common.lib;
 
+import java.util.List;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -53,14 +55,16 @@ public final class WarpEvents {
         int actual = knowledge.getWarpPerm() + knowledge.getWarpSticky();
         boolean mask = ItemFortressArmor.mask(player.getItemBySlot(EquipmentSlot.HEAD)) == FortressRules.MASK_DEVIL;
         var decision = WarpRules.decide(knowledge.getTotalWarp(), knowledge.getWarpCounter(), WarpGear.fromGear(player), mask, random::nextInt);
+        var feedback = new java.util.ArrayList<net.minecraft.network.protocol.common.custom.CustomPacketPayload>();
         if (decision.triggered()) {
             knowledge.setWarpCounter(decision.remainingCounter());
             WarpEventNetworking.send(player, 0);
-            apply(player, decision, random);
+            apply(player, decision, random, feedback);
             for (String research : WarpRules.unlocks(actual, knowledge.getResearchComplete())) {
                 if (research.equals("@BATHSALTS")) message(player, 8);
-                else grantResearch(player, research.equals("ELDRITCHMINOR") ? 10 : 20, random);
+                else grantResearch(player, research.equals("ELDRITCHMINOR") ? 10 : 20, random, feedback);
                 if (knowledge.addResearch(research)) {
+                    feedback.add(new thaumcraft.common.lib.network.ResearchNoticePayload(research));
                     var definition = thaumcraft.common.lib.research.ResearchCatalog.get(research);
                     int addedWarp = definition == null ? 0 : definition.warp();
                     if (!wussMode && addedWarp > 0) {
@@ -73,14 +77,20 @@ public final class WarpEvents {
         }
         knowledge.addWarpTemp(-1);
         KnowledgeEvents.sync(player);
+        // Original per-draw payload totals/order were captured at the actual award, then sent after authoritative full sync.
+        for (var packet : feedback) {
+            if (packet instanceof thaumcraft.common.lib.network.AspectPoolPayload point) thaumcraft.common.lib.network.KnowledgeNotificationNetworking.pool(player, point);
+            else if (packet instanceof thaumcraft.common.lib.network.ResearchNoticePayload notice) thaumcraft.common.lib.network.KnowledgeNotificationNetworking.research(player, notice.key());
+            else if (packet instanceof thaumcraft.common.lib.network.WarpMessagePayload warp) thaumcraft.common.lib.network.WarpMessageNetworking.send(player, warp.kind(), warp.delta());
+        }
         return decision;
     }
 
-    private static void apply(ServerPlayer player, WarpRules.Decision decision, RandomSource random) {
+    private static void apply(ServerPlayer player, WarpRules.Decision decision, RandomSource random, List<net.minecraft.network.protocol.common.custom.CustomPacketPayload> feedback) {
         int warp = decision.effectiveWarp(), severity = decision.severity(), amplifier = WarpRules.amplifier(warp);
         switch (decision.event()) {
             case NONE -> {}
-            case RESEARCH -> { grantResearch(player, 1, random); message(player, 3); }
+            case RESEARCH -> { grantResearch(player, 1, random, feedback); message(player, 3); }
             case NOISE -> message(player, 11);
             case VIS_EXHAUST -> { player.addEffect(FluxEffects.uncurable(new MobEffectInstance(ThaumcraftFlux.visExhaust(), 5000, amplifier, true, true))); message(player, 1); }
             case THAUMARHIA -> { player.addEffect(FluxEffects.uncurable(new MobEffectInstance(ThaumcraftWarp.effect(ThaumcraftWarp.THAUMARHIA), Math.min(32000, 10 * warp), 0, true, true))); message(player, 15); }
@@ -97,15 +107,26 @@ public final class WarpEvents {
             case WATCHING -> message(player, 13);
             case MIST_MANY -> spawnMist(player, severity <= 68 ? warp / 30 : warp / 15);
             case BLINDNESS -> player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, Math.min(32000, 5 * warp), 0, true, true));
-            case CLARITY -> { if (KnowledgeAccess.get(player).getWarpSticky() > 0) KnowledgeAccess.get(player).addWarpSticky(-1); message(player, 14); }
-            case RESEARCH_MANY -> { grantResearch(player, warp / 10, random); message(player, 3); }
+            case CLARITY -> {
+                if (KnowledgeAccess.get(player).getWarpSticky() > 0) {
+                    KnowledgeAccess.get(player).addWarpSticky(-1);
+                    feedback.add(new thaumcraft.common.lib.network.WarpMessagePayload(-1, (byte) 1));
+                }
+                message(player, 14);
+            }
+            case RESEARCH_MANY -> { grantResearch(player, warp / 10, random, feedback); message(player, 3); }
             case REAL_SPIDERS -> suddenlySpiders(player, warp, true);
         }
     }
-    private static void grantResearch(ServerPlayer player, int times, RandomSource random) {
+    private static void grantResearch(ServerPlayer player, int times, RandomSource random, List<net.minecraft.network.protocol.common.custom.CustomPacketPayload> feedback) {
         int count = 1 + random.nextInt(times);
         var primals = Aspect.getPrimalAspects();
-        for (int i = 0; i < count; i++) KnowledgeAccess.get(player).addAspectPool(primals.get(random.nextInt(6)).getTag(), 1);
+        for (int i = 0; i < count; i++) {
+            String tag = primals.get(random.nextInt(6)).getTag();
+            var knowledge = KnowledgeAccess.get(player);
+            knowledge.addAspectPool(tag, 1);
+            feedback.add(new thaumcraft.common.lib.network.AspectPoolPayload(tag, (short) 1, (short) knowledge.getAspectPoolFor(tag)));
+        }
     }
     private static void message(ServerPlayer player, int id) { player.sendSystemMessage(Component.translatable("warp.text." + id).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC)); }
     private static void spawnMist(ServerPlayer player, int guardians) {

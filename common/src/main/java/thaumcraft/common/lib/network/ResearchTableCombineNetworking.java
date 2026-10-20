@@ -36,24 +36,32 @@ public final class ResearchTableCombineNetworking {
         var knowledge = KnowledgeAccess.get(player);
         var plan = ResearchAspectCombination.plan(knowledge, table.bonusPools(), payload.left(), payload.right());
         if (plan == null) return correct(player, menu);
+        // Immutable feedback for the admitted input order, including same-aspect RP1+bonus1.
+        // This local preview never pays resources; the existing native Plan owns the sole commit.
+        var previewPools = new java.util.HashMap<String, Integer>();
+        var inputFeedback = new java.util.ArrayList<AspectPoolPayload>();
+        for (String tag : java.util.List.of(payload.left(), payload.right())) {
+            int before = previewPools.computeIfAbsent(tag, knowledge::getAspectPoolFor);
+            if (thaumcraft.common.lib.research.ResearchNoteEditing.queryPool(before) > 0) {
+                previewPools.put(tag, before - 1);
+                inputFeedback.add(new AspectPoolPayload(tag, (short) 0, (short) (before - 1)));
+            }
+        }
 
         // No callbacks or inventory setters between actor/shared-bonus writes.
         // Combine works with empty slots and must retain their object identities.
         table.commitKnowledgeBonus(revision, plan.bonusPools(), knowledge, plan.knowledge());
         table.setChanged();
         KnowledgeEvents.sync(player);
+        for (var packet : inputFeedback) KnowledgeNotificationNetworking.pool(player, packet);
         menu.broadcastChanges();
         for (ServerPlayer viewer : player.server.getPlayerList().getPlayers()) {
             if (viewer != player && viewer.containerMenu instanceof ContainerResearchTable other
                     && other.tile() == table && other.stillValid(viewer)) other.broadcastChanges();
         }
-        // Reuse the native scan discovery/points presentation. Invalid pairs
-        // have no output, just as in the original; no made-up failure reward.
         if (plan.output() != null) {
-            if (plan.discovery()) player.sendSystemMessage(Component.translatable("tc.port.scan.discovery",
-                    Component.literal(plan.output().getName())));
-            player.sendSystemMessage(Component.translatable("tc.port.scan.points",
-                    Component.literal(plan.output().getName() + " +" + plan.award())));
+            if (plan.discovery()) KnowledgeNotificationNetworking.discover(player, plan.output().getTag());
+            if (plan.award() > 0) KnowledgeNotificationNetworking.pool(player, plan.output().getTag(), plan.award());
         }
         return true;
     }

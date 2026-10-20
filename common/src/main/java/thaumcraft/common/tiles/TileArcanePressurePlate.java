@@ -18,7 +18,7 @@ public final class TileArcanePressurePlate extends TileOwned {
     public byte setting = 0;
 
     public TileArcanePressurePlate(BlockPos pos, BlockState state) {
-        super(pos, state);
+        super(ThaumcraftEldritchBlocks.PRESSURE_PLATE_TILE.get(), pos, state);
     }
 
     public int getSetting() { return setting; }

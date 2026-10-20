@@ -28,6 +28,11 @@ public final class BlockCosmeticWoodSlab extends SlabBlock {
         this.variant = variant;
     }
 
+    /** The legacy registration of the slab block; it carries the greatwood planks. */
+    public BlockCosmeticWoodSlab(Properties properties) {
+        this(EldritchBlockRules.SLAB_WOOD_GREATWOOD, properties);
+    }
+
     @Override public MapCodec<? extends SlabBlock> codec() { return CODEC; }
     public int variant() { return variant; }
 

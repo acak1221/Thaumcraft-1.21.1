@@ -28,6 +28,11 @@ public final class BlockCosmeticStoneSlab extends SlabBlock {
         this.variant = variant;
     }
 
+    /** The legacy registration of the slab block; it carries the arcane stone. */
+    public BlockCosmeticStoneSlab(Properties properties) {
+        this(EldritchBlockRules.SLAB_STONE_ARCANE, properties);
+    }
+
     @Override public MapCodec<? extends SlabBlock> codec() { return CODEC; }
     public int variant() { return variant; }
 

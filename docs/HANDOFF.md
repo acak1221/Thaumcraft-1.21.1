@@ -4,13 +4,22 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально20.10 (двадцатая группа: Мотыга Роста, Claude): реализовано, собрано, game-tested 168/168
+
+Контракт и реализация: [elemental-hoe](analysis/2026-10-20-elemental-hoe.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `elemental_hoe` (1500 прочности, зачаровываемость 5, rare, без урона, удар не тратит прочность), вспашка 3 × 3 (1 прочность за блок, право правки на каждый, крадущийся — один), при пустой вспашке костная мука (1 прочность), затем рост магического саженца: Greatwood за 5 при остатке от 20, Silverwood за 25 при остатке от 150 (плата и при отсутствии места), инфузия `ELEMENTALHOE`, звук `wand`.
+**Built / game-tested:** `:common:test` **480 JUnit** (+4), `:fabric:remapJar`, `:fabric:runGameTest` **168/168** (+`hoeOfGrowthTillsFertilisesAndGrowsSaplings`: настоящий игрок, настоящие блоки и деревья), JAR SHA-256 `49fb705c…2a5e`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `elemental-hoe` (25): JUnit 14/14 и три GameTest-мутанта пойманы локально, остальные 8 GameTest у GitHub. `elemental-pickaxe` (27) на GitHub — результат не прочитан.
+**Seen:** нет. **Не проверено:** значок, звук, искры (не портированы), раздатчик.
+**Следующее:** Elemental Shovel (3 × 3 копание и укладка, IArchitect) и Sword (взлёт и притягивание), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
 ### Актуально20.10 (девятнадцатая группа: Кирка Огня и особая добыча кластеров, Claude): реализовано, собрано, game-tested 167/167
 
 Контракт и реализация: [elemental-pickaxe](analysis/2026-10-20-elemental-pickaxe.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
 **Implemented:** `elemental_pickaxe` (1500 прочности, скорость 10, урон 5, зачаровываемость 18, rare, ремонт слитком таумия), поджог на 2 секунды при ударе (правило PvP), 5 прочности и звук `wandfail` за правый щелчок, инфузия `ELEMENTALPICK`,
 **особая добыча** (`SpecialMining` + миксин `SpecialMiningBlockMixin` в `Block.getDrops`): `raw_iron` / `raw_gold` / `cinnabar_ore` превращаются в кластеры с шансом `0,2 + удача × 0,075` (× 1,0 / 0,9 / 0,9), то же количество, без Silk Touch, только у игрока с этой киркой.
 **Built / game-tested:** `:common:test` **476 JUnit** (+6), `:fabric:remapJar`, `:fabric:runGameTest` **167/167** (+`pickaxeOfTheCoreBurnsWearsAndFindsClusters`: 400-кратные выборки `Block.getDrops` и 120 настоящих добыч), JAR SHA-256 `305d58b7…347b`; три команды шага CI с ресурсами зелёные. Один красный прогон по дороге — дорожка NO-LAUNCHER в тесте дротика насчитала чужой дротик; дорожки теперь считают только дротики своего голема (`getOwner()`), причина не доказана.
-**Мутации:** `elemental-pickaxe` (27): JUnit 13/13 локально, 14 GameTest у GitHub. `native-clusters` (24) на GitHub (9 GameTest) ещё идёт; `void-gear` (27) — результат не прочитан.
+**Мутации:** `elemental-pickaxe` (27): JUnit 13/13 локально, 14 GameTest у GitHub. `native-clusters` (24) и `void-gear` (27) на GitHub — все как ожидалось.
 **Seen:** нет. **Не проверено:** значок кирки, звуки, работа с Буром (Бур пока принимает только ванильные кирки и Thaumium Pickaxe), Excavation с Dowsing.
 **Не перенесено:** клиентский скан руд (правый щелчок), Primal Crusher, Dowsing.
 **Следующее:** Elemental Hoe / Shovel / Sword (мотыга растит деревья, лопата 3×3, меч подбрасывает), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
@@ -21,7 +30,7 @@
 **Implemented:** предметы `cluster_iron/gold/cinnabar`, четыре рецепта тигля (`PUREIRON`, `PUREGOLD` — руда и сырая руда в кластер; `TRANSIRON`, `TRANSGOLD` — самородок в три), три печных рецепта «кластер → два слитка», аспекты `ConfigAspects:360-362`, псевдонимы книги и значки исследований.
 Новый тип `thaumcraft:stack_smelting` (`StackSmeltingRecipe`, остаётся `RecipeType.SMELTING`): `minecraft:smelting` 1.21.1 молча теряет количество результата, а оригинал платит два слитка.
 **Built / game-tested:** `:common:test` **470 JUnit** (+2 `ClusterAssetsTest`; `EarlyObjectAspectBindingsTest` обновлён под три новые строки), `:fabric:remapJar`, `:fabric:runGameTest` **166/166** (+`nativeClustersPurifyTripleAndMelt`: рецепты, аспекты и три настоящие ванильные печи), JAR SHA-256 `a658954e…8d44`; три команды шага CI с ресурсами зелёные.
-**Мутации:** `native-clusters` (24): JUnit 15/15 пойманы локально, 9 GameTest у GitHub. `void-cap` (20) на GitHub — все как ожидалось; `void-gear` (27) ещё идёт.
+**Мутации:** `native-clusters` (24): JUnit 15/15 пойманы локально, GitHub (прогон 11) — все 24 как ожидалось. `void-cap` (20) и `void-gear` (27) на GitHub — тоже все как ожидалось.
 **Seen:** нет. **Не проверено:** значки кластеров, настоящая варка в котле, особая добыча.
 **Не перенесено:** особая добыча кластеров (Elemental Pickaxe, Primal Crusher, Excavation с Dowsing, Arcane Bore: `Utils.findSpecialMiningResult`, шанс `0,2 + удача × 0,075`) — придёт вместе с группой Elemental-инструментов; выпадение у Пеха и торговля волшебников (мобы M11); бонус Продвинутой алхимической печи.
 **Следующее:** Elemental Pickaxe/Hoe/Sword/Shovel вместе с перехватом выпадения блока (особая добыча, Primal Crusher, Dowsing), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.

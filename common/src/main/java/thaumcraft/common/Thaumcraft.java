@@ -69,6 +69,7 @@ public final class Thaumcraft {
         thaumcraft.common.lib.network.WarpMessageNetworking.initServer();
         thaumcraft.common.lib.network.KnowledgeNotificationNetworking.initServer();
         ResearchCatalog.loadBundled();
+        thaumcraft.api.research.ResearchCategories.loadNative();
         thaumcraft.common.lib.mods.ChampionHooks.init();
         thaumcraft.common.lib.mods.ChampionWiring.init();
         thaumcraft.common.lib.research.ResearchConditions.initializeNative();
@@ -78,6 +79,7 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftDeviceMenus.register();
         thaumcraft.common.config.ThaumcraftLegacyTiles.register();
         thaumcraft.common.config.ThaumcraftProjectiles.register();
+        thaumcraft.common.lib.entities.FollowingItems.install();
         thaumcraft.common.config.ThaumcraftCrystalClusters.register();
         thaumcraft.common.config.ThaumcraftRunic.register();
         thaumcraft.common.config.ThaumcraftBaubles.register();
@@ -97,6 +99,8 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftGolemMaterials.register();
         thaumcraft.common.config.ThaumcraftTaint.register();
         thaumcraft.common.config.ThaumcraftTaintAnimals.register();
+        thaumcraft.common.config.ThaumcraftTaintCreeper.register();
+        thaumcraft.common.entities.monster.TaintDeathConversion.register();
         thaumcraft.common.config.ThaumcraftPrimalFoci.register();
         thaumcraft.common.config.ThaumcraftBiomes.register();
         ThaumcraftOres.register();
@@ -211,6 +215,9 @@ public final class Thaumcraft {
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);
         });
+        thaumcraft.common.lib.utils.OriginalOreTags.register();
+        thaumcraft.api.ThaumcraftApi.refreshPortableHoleBlackList();
+        thaumcraft.api.aspects.AspectRegistryEvent.post();
         ThaumcraftCommands.register();
         LOG.info("TC4 Minecraft 1.21.1 migration: {} research definitions loaded; gameplay coverage is tracked in MIGRATION_STATUS.md",
                 ResearchCatalog.all().size());

@@ -89,6 +89,9 @@ public final class ThaumcraftFabric implements ModInitializer {
         thaumcraft.common.config.ThaumcraftCultists.registerAttributes(
                 (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                         (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));
+        thaumcraft.common.config.ThaumcraftTaintCreeper.registerAttributes(
+                (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                        (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));
         thaumcraft.common.config.ThaumcraftTaintAnimals.registerAttributes(
                 (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                         (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));

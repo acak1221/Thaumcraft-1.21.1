@@ -139,6 +139,8 @@ public final class ClientSetup {
         thaumcraft.client.ThaumcraftDeviceGuiClient.init();
         thaumcraft.client.ThaumcraftGearModelsClient.init();
         thaumcraft.client.ThaumcraftChampionClient.init();
+        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaintCreeper.TAINT_CREEPER,
+                thaumcraft.client.renderers.entity.RenderTaintCreeper::new);
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OpenThaumonomiconPayload.TYPE,
                 OpenThaumonomiconPayload.STREAM_CODEC, (payload, context) -> context.queue(() -> {
                     var minecraft = Minecraft.getInstance();

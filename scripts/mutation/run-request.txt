@@ -1,3 +1,3 @@
-elemental-hoe
+elemental-shovel
 
-# request 13: the Hoe of Growth (elemental-pickaxe run 12 may still be running)
+# request 14: the Shovel of the Earthmover (elemental-hoe run 13 and elemental-pickaxe run 12 may still be running)

@@ -1,11 +1,14 @@
 package thaumcraft.common.config;
 
+import com.mojang.serialization.Codec;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -24,9 +27,11 @@ import thaumcraft.common.items.equipment.ItemVoidHoe;
 import thaumcraft.common.items.equipment.ItemVoidPickaxe;
 import thaumcraft.common.items.equipment.ItemVoidShovel;
 import thaumcraft.common.items.equipment.ItemVoidSword;
+import thaumcraft.common.items.equipment.ElementalShovelGeometry;
 import thaumcraft.common.items.equipment.ItemElementalAxe;
 import thaumcraft.common.items.equipment.ItemElementalHoe;
 import thaumcraft.common.items.equipment.ItemElementalPickaxe;
+import thaumcraft.common.items.equipment.ItemElementalShovel;
 import thaumcraft.common.items.equipment.ItemThaumiumAxe;
 import thaumcraft.common.items.equipment.ItemThaumiumHoe;
 import thaumcraft.common.items.equipment.ItemThaumiumPickaxe;
@@ -40,6 +45,7 @@ import thaumcraft.common.items.equipment.ItemThaumiumSword;
 public final class ThaumcraftEquipment {
     private static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(Thaumcraft.MODID, Registries.ARMOR_MATERIAL);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
+    private static final DeferredRegister<DataComponentType<?>> COMPONENTS = DeferredRegister.create(Thaumcraft.MODID, Registries.DATA_COMPONENT_TYPE);
 
     public static final Tier THAUMIUM_TIER = new Tier() {
         @Override public int getUses() { return 400; }
@@ -101,6 +107,13 @@ public final class ThaumcraftEquipment {
     /** Hoe of Growth, ConfigItems itemHoeElemental; obtained only by the researched infusion. */
     public static final RegistrySupplier<ItemElementalHoe> ELEMENTAL_HOE = ITEMS.register("elemental_hoe",
             () -> new ItemElementalHoe(ELEMENTAL_TIER, new Item.Properties()));
+    /** Shovel of the Earthmover, ConfigItems itemShovelElemental; obtained only by the researched infusion. */
+    public static final RegistrySupplier<ItemElementalShovel> ELEMENTAL_SHOVEL = ITEMS.register("elemental_shovel",
+            () -> new ItemElementalShovel(ELEMENTAL_TIER, new Item.Properties()));
+    /** The shovel's placing orientation, original NBT byte "or" (0..2); it is native component state, not item NBT. */
+    public static final RegistrySupplier<DataComponentType<Integer>> SHOVEL_ORIENTATION = COMPONENTS.register("shovel_orientation",
+            () -> DataComponentType.<Integer>builder().persistent(Codec.intRange(0, ElementalShovelGeometry.ORIENTATIONS - 1))
+                    .networkSynchronized(ByteBufCodecs.VAR_INT).build());
     public static final RegistrySupplier<ItemThaumiumShovel> THAUMIUM_SHOVEL = ITEMS.register("thaumium_shovel",
             () -> new ItemThaumiumShovel(THAUMIUM_TIER, new Item.Properties()));
     public static final RegistrySupplier<ItemThaumiumHoe> THAUMIUM_HOE = ITEMS.register("thaumium_hoe",
@@ -150,10 +163,11 @@ public final class ThaumcraftEquipment {
         if (registered) return;
         registered = true;
         ARMOR_MATERIALS.register();
+        COMPONENTS.register();
         ITEMS.register();
         // Architectury's supplier varargs require one invariant item type;
         // these registered suppliers intentionally retain their specific APIs.
-        for (RegistrySupplier<? extends Item> item : List.of(THAUMIUM_SWORD, THAUMIUM_PICKAXE, THAUMIUM_AXE, ELEMENTAL_AXE, ELEMENTAL_PICKAXE, ELEMENTAL_HOE,
+        for (RegistrySupplier<? extends Item> item : List.of(THAUMIUM_SWORD, THAUMIUM_PICKAXE, THAUMIUM_AXE, ELEMENTAL_AXE, ELEMENTAL_PICKAXE, ELEMENTAL_HOE, ELEMENTAL_SHOVEL,
                 THAUMIUM_SHOVEL, THAUMIUM_HOE, THAUMIUM_HELMET, THAUMIUM_CHESTPLATE, THAUMIUM_LEGGINGS, THAUMIUM_BOOTS,
                 VOID_SWORD, VOID_PICKAXE, VOID_AXE, VOID_SHOVEL, VOID_HOE, VOID_HELMET, VOID_CHESTPLATE, VOID_LEGGINGS, VOID_BOOTS)) {
             CreativeTabRegistry.append(ThaumcraftContent.TAB, item);

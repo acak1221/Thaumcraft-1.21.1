@@ -103,6 +103,7 @@ public final class Thaumcraft {
         ResearchTableCombineNetworking.init();
         FocusSelectionNetworking.init();
         thaumcraft.common.lib.network.GolemBellNetworking.init();
+        thaumcraft.common.lib.network.ShovelOrientationNetworking.init();
         FocalManipulatorNetworking.init();
         InfusionFxNetworking.initServer();
         ShockFxNetworking.initServer();

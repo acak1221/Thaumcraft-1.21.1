@@ -1685,6 +1685,7 @@
   "item.thaumcraft.elemental_axe": "Axe of the Stream",
   "item.thaumcraft.elemental_pickaxe": "Pickaxe of the Core",
   "item.thaumcraft.elemental_hoe": "Hoe of Growth",
+  "item.thaumcraft.elemental_shovel": "Shovel of the Earthmover",
   "item.thaumcraft.thaumium_shovel": "Thaumium Shovel",
   "item.thaumcraft.thaumium_hoe": "Thaumium Hoe",
   "item.thaumcraft.thaumium_helmet": "Thaumium Helm",
@@ -2019,5 +2020,9 @@
   "tc.port.focus.choose": "Point at a focus",
   "tc.port.focus.help": "Release %s / click · Arrows / wheel · Esc",
   "tc.port.focus.slot": "Inventory slot: %s",
-  "tc.port.focus.entry": "%1$s — slot %2$s"
+  "tc.port.focus.entry": "%1$s — slot %2$s",
+  "key.thaumcraft.misc_toggle": "Misc Wand Toggle",
+  "tc.port.shovel.orientation.0": "Placing: across the face",
+  "tc.port.shovel.orientation.1": "Placing: upright square",
+  "tc.port.shovel.orientation.2": "Placing: floor or upright square"
 }

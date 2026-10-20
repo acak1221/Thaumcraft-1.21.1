@@ -898,6 +898,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.ElementalHoeRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void shovelOfTheEarthmoverMinesAndLaysSquares(GameTestHelper test) {
+        thaumcraft.common.testing.ElementalShovelRuntimeChecks.run(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void crystalBlocksDropSixOwnShards(GameTestHelper test) {
         thaumcraft.common.testing.CrystalDropRuntimeChecks.run(test);

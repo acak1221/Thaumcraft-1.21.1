@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "particle": "thaumcraft:blocks/wandpedestal_focus_side",
+    "bottom": "thaumcraft:blocks/wandpedestal_focus_bot",
+    "top": "thaumcraft:blocks/wandpedestal_focus_top",
+    "side": "thaumcraft:blocks/wandpedestal_focus_side"
+  }
+}

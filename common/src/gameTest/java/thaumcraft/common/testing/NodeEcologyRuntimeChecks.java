@@ -384,8 +384,15 @@ public final class NodeEcologyRuntimeChecks {
                 if (method.getName().equals("nextInt") && args != null && args.length == 1) {
                     int bound = (int) args[0]; draws.add("int" + bound);
                     int index = integers++;
-                    f.check(index < 4 && bound == 12 || index == 4 && expectPosition && bound == 3, "DARK consumes only four offset draws then optional spawn Y");
-                    return index == 0 ? 6 : index == 4 ? 1 : 0;
+                    // The original DARK handler spends four nextInt12 offsets, the hard-node coin,
+                    // the optional spawn position and only then the original champion join roll
+                    // (oracle EventHandlerEntity.entitySpawns) of the Giant it just spawned.
+                    f.check(index < 4 && bound == 12 || index == 4 && expectPosition && bound == 3
+                                    || index == 5 && expectPosition && bound == 100,
+                            "DARK consumes only four offset draws then optional spawn Y and the original champion join roll");
+                    // The champion roll of the Giant stays far above the promotion threshold of the
+                    // original, so the Giant keeps its ordinary form and spends one single draw.
+                    return index == 0 ? 6 : index == 4 ? 1 : index == 5 ? 97 : 0;
                 }
                 draws.add(method.getName());
                 return switch (method.getName()) {
@@ -405,8 +412,8 @@ public final class NodeEcologyRuntimeChecks {
         }
         void assertDraws(boolean position) {
             var expected = new ArrayList<>(List.of("int12", "int12", "int12", "int12", "nextBoolean"));
-            if (position) expected.addAll(List.of("nextDouble", "nextDouble", "int3", "nextDouble", "nextDouble", "nextFloat"));
-            f.check(draws.equals(expected), "exact original DARK conversion/coin/cap/position/yaw draw order; actual=" + draws);
+            if (position) expected.addAll(List.of("nextDouble", "nextDouble", "int3", "nextDouble", "nextDouble", "nextFloat", "int100"));
+            f.check(draws.equals(expected), "exact original DARK conversion/coin/cap/position/yaw/champion draw order; actual=" + draws);
         }
         @Override public void close() {
             try { boolean owned = f.level.random == input; field.set(f.level, original); f.check(owned && f.level.random == original, "finally restores original world RNG identity"); }

@@ -89,7 +89,12 @@ public final class PechRuntimeChecks {
         final FocusUpgradeRuntimeChecks.Actor a;final List<Entity> owned=new ArrayList<>();final CompoundTag knowledge;
         final Map<BlockPos,BlockState> extendedFloor=new LinkedHashMap<>();
         Fixture(GameTestHelper test){a=new FocusUpgradeRuntimeChecks.Actor(test,new BlockPos(4,90,4));knowledge=KnowledgeAccess.get(a.player).save();a.clearLane();for(int x=-3;x<=5;x++)for(int z=-3;z<=3;z++)a.put(a.root.offset(x,-1,z),Blocks.STONE.defaultBlockState());}
-        <T extends Mob>T mob(EntityType<T> type,int x,int z){T mob=type.create(a.level);a.require(mob!=null,"actual registered entity exists "+type);mob.setPos(a.root.getX()+x+.5,a.root.getY(),a.root.getZ()+z+.5);mob.setNoAi(true);mob.setNoGravity(true);mob.setOnGround(true);owned.add(mob);a.require(a.level.addFreshEntity(mob),"actual entity admitted");return mob;}
+        <T extends Mob>T mob(EntityType<T> type,int x,int z){T mob=type.create(a.level);a.require(mob!=null,"actual registered entity exists "+type);mob.setPos(a.root.getX()+x+.5,a.root.getY(),a.root.getZ()+z+.5);mob.setNoAi(true);mob.setNoGravity(true);mob.setOnGround(true);owned.add(mob);
+            // The 1.7 original rolled nextInt100 of the world random for every EntityMob that
+            // joined the world (oracle EventHandlerEntity.entitySpawns:391). The fixture declares
+            // that draw, so the exact original attributes and death reward of the Pech stay
+            // deterministic.
+            a.require(ChampionJoinRoll.join(a.level,mob),"actual entity admitted");return mob;}
         EntityPech pech(int x,int z){return mob(ThaumcraftPech.PECH.get(),x,z);}
         void clear(){a.player.closeContainer();owned.forEach(Entity::discard);owned.clear();a.purgeOutputs();a.player.removeAllEffects();a.player.setHealth(a.player.getMaxHealth());}
         void entity(){

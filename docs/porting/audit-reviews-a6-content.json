@@ -1,0 +1,2071 @@
+{
+  "thaumcraft/api/crafting/CrucibleRecipe.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/api/crafting/CrucibleRecipe.java:31-47 matches(): catalyst test first, then per-aspect cost >= recipe cost",
+      "oracle thaumcraft/api/crafting/CrucibleRecipe.java:57-65 removeMatching(): copies the crucible list and subtracts the recipe cost",
+      "native common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java:48-59 matches()/removeMatching() implement the same two rules",
+      "native common/src/main/java/thaumcraft/api/crafting/CrucibleRecipe.java:51-74 is a thin facade that keeps the original argument shape"
+    ],
+    "notes": [
+      "the ore-name catalyst (\"oreIron\", \"dustGlowstone\") became a namespaced item tag: 1.21.1 has no ore dictionary (native api/crafting/ArcaneRecipes.java:54-70)",
+      "the real recipe rules moved to thaumcraft.common.crafting.CrucibleRecipe; the API class only delegates"
+    ],
+    "reviewed_sha256": {
+      "original": "80ece17eda89641bf4bb50ba317ac17d3f49708a413718368ecfbf783b65dd02",
+      "legacy": "1dc11b7f20c539a9c52aee8d484260294d9b640f3945121a68002c039c15bc7b"
+    }
+  },
+  "thaumcraft/client/renderers/block/BlockJarRenderer.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/block/BlockJarRenderer.java:36-45 renders the jar as two nested cubes (3,0,3)-(13,12,13) and (5,12,5)-(11,14,11) with alpha blending",
+      "native common/src/main/resources/assets/thaumcraft/models/block/jar.json renders exactly those two cubes",
+      "native common/src/main/resources/assets/thaumcraft/models/block/jar_void.json and jar_brain.json use the same geometry"
+    ],
+    "notes": [
+      "the 1.7.10 ISBRH was replaced by a 1.21.1 JSON block model; the two nested cubes and the 3/16..13/16 selection box are preserved",
+      "the original inventory special case for the brain jar (metadata 1) is handled by the separate jar_brain item model"
+    ],
+    "reviewed_sha256": {
+      "original": "0416e0b1c398f4ebf5a2b33a0e5091759d186d43746e76ae4a27e0c8803bc13f"
+    }
+  },
+  "thaumcraft/client/renderers/item/ItemJarRenderer.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no ItemJarRenderer: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java is the 1.21.1 equivalent of the legacy item renderer",
+      "native common/src/main/resources/assets/thaumcraft/models/item/jar.json renders the jar item"
+    ],
+    "notes": [
+      "legacy-only class: there is no original TC4 4.2.3.5 counterpart to compare numbers against",
+      "the legacy class was replaced by the native item renderer plus a JSON item model"
+    ],
+    "reviewed_sha256": {
+      "legacy": "15067b497e69a9ceb28995d46cfd0c1b892824d64ac024d69a8bbf321c43fd12"
+    }
+  },
+  "thaumcraft/client/renderers/models/ModelAlembic.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no ModelAlembic: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelAlembic.java (105 lines) rebuilds the legacy alembic model",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileAlembicRenderer.java drives it"
+    ],
+    "notes": [
+      "legacy-only class; the native port keeps the same model class name and the same box/pivot geometry"
+    ],
+    "reviewed_sha256": {
+      "legacy": "476c9677a3ec8bc8b2fd04ad0c0963c3d00eaf2f17778a514b1eaa1b35c4b5aa"
+    }
+  },
+  "thaumcraft/client/renderers/models/ModelBellows.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelBellows.java:21-53: bottom/middle/top 12x2x12 planks, bag 20x24x20 at texture (48,0), nozzle 4x4x2 at (0,36), texture 128x64",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelBellows.java:17-22 keeps every box, offset and texture offset",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileBellowsRenderer.java:33-37 applies the original 1/16 middle/nozzle scale at render time"
+    ],
+    "notes": [
+      "the 1.21 ModelPart API replaces ModelRenderer; the bag pivot moved to 0.5 because the renderer scales the bag itself",
+      "the original's post-hoc mirror()/texture-size calls are not reproduced, as the native model has no legacy UV mirroring"
+    ],
+    "reviewed_sha256": {
+      "original": "7c0cc85e59d2bca067723e87467c025702daa03500c5e93d67a339bebe72d0b3",
+      "legacy": "ec38e84cb39a9f1a155321695e973cecd488a2c0f16ef0a350abd8052359104e"
+    }
+  },
+  "thaumcraft/client/renderers/models/ModelJar.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelJar.java builds the jar body from the original texture sheet",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelJar.java (67 lines) rebuilds the same jar body",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java consumes it"
+    ],
+    "notes": [
+      "1.21.1 ModelPart API instead of the 1.7.10 ModelRenderer"
+    ],
+    "reviewed_sha256": {
+      "original": "06a5453999f517fce3eb9ffcd1a8919e00b69cc408ba05e5059092c7b7591e3a",
+      "legacy": "c88c8f4c366d75ca6d3a5dbb4e54b5f03345cef9fa8a3ba2ef0644feb911fe72"
+    }
+  },
+  "thaumcraft/client/renderers/tile/ItemJarFilledRenderer.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/ItemJarFilledRenderer.java renders the item form of a filled jar",
+      "the native has no separate filled-jar item: the jar item is one item and its contents live in the jar data component (common/src/main/java/thaumcraft/common/items/ItemJar.java, tiles/JarContents.java)",
+      "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java renders the jar item"
+    ],
+    "notes": [
+      "the original's distinct itemJarFilled item was flattened into the jar block item with a contents component, so this renderer class has no counterpart left to port",
+      "no visual inspection of the filled-jar item rendering was possible in this audit"
+    ],
+    "reviewed_sha256": {
+      "original": "c5978c843259689930e85d1fa53421744ef3876be558c9c9f5dc65e4b86d3b12"
+    }
+  },
+  "thaumcraft/client/renderers/tile/ItemJarNodeRenderer.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/ItemJarNodeRenderer.java renders the item form of the node jar",
+      "the native registers jar_node as a real block (ThaumcraftEldritchBlocks.java:197) with the shared jar item model (assets/thaumcraft/models/block/jar_node.json)",
+      "no ItemJarNodeRenderer exists in the native tree"
+    ],
+    "notes": [
+      "the original's itemJarNode item was replaced by a placeable jar_node block, so the item renderer has no counterpart",
+      "the node jar's own light level 11 and its wand conversion are missing in the native port (see the report)"
+    ],
+    "reviewed_sha256": {
+      "original": "6ec82a62ce2e79023f930ab120651c9a37f422a9e80373277fc07173facae335"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileAlembicRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileAlembicRenderer.java renders the alembic body and the aspect label",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileAlembicRenderer.java (119 lines) keeps the original six-way transforms",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelAlembic.java supplies the geometry"
+    ],
+    "notes": [
+      "1.21.1 BlockEntityRenderer API; the renderer itself was not run on a client during this audit"
+    ],
+    "reviewed_sha256": {
+      "original": "f68d43330d4a84fe38141c0b6d9e380fc24a4543bc0e6fda33cdc1d4eb189c7a",
+      "legacy": "7359c9090576c8c029e7d73a72fb6c5bf6456647eaa3c014c35807c83a96fdfc"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileBellowsRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileBellowsRenderer.java:30-84 six-way orientation transforms and the asymmetric inflation",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileBellowsRenderer.java:24-37 reproduces the six orientations and the (0.125+scale*0.875)/2-0.5 displacement",
+      "native common/src/main/java/thaumcraft/common/tiles/TileBellows.java:34-46 supplies the same inflation curve"
+    ],
+    "notes": [
+      "1.21.1 BlockEntityRenderer API"
+    ],
+    "reviewed_sha256": {
+      "original": "00d610933ed3b056f98cd312f5a9f8421b2020801de27037d3fdd50a7cae37db",
+      "legacy": "377ce89b05970fbe28739be2efdab1a7ce6736ff1e6cc723ee4b9185318f1cff"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileCrucibleRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileCrucibleRenderer.java renders the crucible with its fluid surface",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileCrucibleRenderer.java (205 lines) covers the crucible surface and the froth",
+      "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:166-172 keeps the original getFluidHeight() formula"
+    ],
+    "notes": [
+      "1.21.1 BlockEntityRenderer API; the original's client-side froth and bubble effects are driven by the native client effect hook (TileCrucible.ClientEffects)"
+    ],
+    "reviewed_sha256": {
+      "original": "123713b76519ac728aae2b7a5d4d6fd45338690b15c21a1b956aac04c5808405",
+      "legacy": "e36b4d449785f0cd3234b01ccf57b2206a697bc0f6d8090425b2fbc02f0f6d69"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileJarRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:38-104 renders the jar liquid, the aspect label and the node-jar animation",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java (90 lines) renders the jar liquid and the label",
+      "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 animates the node jar for one second after a wand hit"
+    ],
+    "notes": [
+      "the native has no node-jar sparkle animation because the native node jar never receives the wand hit (see the report)",
+      "the crooked-label rotation of the original is not reproduced"
+    ],
+    "reviewed_sha256": {
+      "original": "f8d9986d32a0cf7eafe3024eaa774b833a7a377b06ed5db80408d69044a7aae7",
+      "legacy": "a130ef962193761eaa32a572fccb14d70dd0dce9ec822b10f0c235df62edd0d8"
+    }
+  },
+  "thaumcraft/common/blocks/BlockAiry.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockAiry.java:115-140 the per metadata hardness (2, 100, -1), explosion resistance (200, 50, MAX_VALUE) and light (15, 0, 8)",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:405-416 AIRY_GROUP_HARDNESS {0,2,100,-1} and AIRY_GROUP_RESISTANCE {0,200,50,MAX}",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:63-66 lightOf() uses the same per variant light table",
+      "oracle thaumcraft/common/blocks/BlockAiry.java:206-230 the replaceable and leaves metadata sets",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:385-402 airyReplaceable/airyIsLeaves reproduce them"
+    ],
+    "notes": [
+      "the 13 metadata values became a VARIANT block state property; the node, the nitor, the energised node and the holes also exist as their own native blocks",
+      "the family sound stayed the cloth/wool sound type"
+    ],
+    "reviewed_sha256": {
+      "original": "861f381f7327e65c676a4bce22cd9abd790ccd10b754b0ddd4f3a93920009538",
+      "legacy": "00de30a0211ef8f817e19fc3a40a7f1718017ce060458e99a04a4e8ed0365f9c"
+    }
+  },
+  "thaumcraft/common/blocks/BlockAiryItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockAiryItem.java:24-40 the item carries the metadata and the tainted overlay icon",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:41-56 keeps the variant property, so the native BlockItem carries the variant instead of the damage value",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the airy family items as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item damage value, so the per-metadata ItemBlock became a variant property on the block"
+    ],
+    "reviewed_sha256": {
+      "original": "4b672e7e7ae3960704c91c9c0e98ff78dec39513ebed5e4772f3c3bdbd99c7a6"
+    }
+  },
+  "thaumcraft/common/blocks/BlockArcaneDoor.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockArcaneDoor.java:64-68 hardness 15 (or -1 with wardedStone) and setResistance(999)",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:150 strength(15.0F, 999.0F)",
+      "oracle thaumcraft/common/blocks/BlockArcaneDoor.java:110-373 the warded door block entity, the redstone opening and the doubled leaf",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneDoor.java (129 lines) and tiles/TileWarded.java implement the warded door"
+    ],
+    "notes": [
+      "the blast resistance kept the raw setter value 999; the 1.7.10 effective value of setResistance(999) is 999*3/5 = 599.4",
+      "the metadata became block states",
+      "DEVIATION: the original hardness is Config.wardedStone ? -1.0f : 15.0f; the native is always 15.0 even though the port has a wardedStone setting (native config/ResearchSettings.java:6)"
+    ],
+    "reviewed_sha256": {
+      "original": "f79bb0aaceb2d7020a10fdf84c8fab8fd5f194da0fc927d9e491b286efdd474b",
+      "legacy": "1b68d1be3535443468b9f1d410bbd2927d6c2cd9d5a6c85bd68adaaf5b0e5796"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCandle.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCandle.java:48-52 hardness 0.1 and light 0.95 (int(15*0.95) = 14)",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTallowCandle.java:30-33 strength(.1F), lightLevel 14 and the cloth sound",
+      "oracle thaumcraft/common/blocks/BlockCandle.java:104-106 the bounds (3/16,0,3/16)-(10/16,8/16,10/16)",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTallowCandle.java:28 SHAPE = box(6,0,6,10,8,10)"
+    ],
+    "notes": [
+      "the dye variants became 16 separate coloured candle blocks (ThaumcraftColoredCandles.java:27)",
+      "the original's getRenderPasses colour overlay became the per colour block"
+    ],
+    "reviewed_sha256": {
+      "original": "4d81196fbcf6b1c0602953ba01c369d9076557b46f636c547f9c113ab6bf2301",
+      "legacy": "2a2e18e608b808677209d10172687f23cfee640c2be4cd9fee212dd08c42785b"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCandleItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCandleItem.java:8-14 the metadata suffix in the item name",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftInfusion.java:54 registers tallow_candle as a plain BlockItem",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftColoredCandles.java:27 registers one block item per dye colour"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata, so each colour became its own item id"
+    ],
+    "reviewed_sha256": {
+      "original": "abe3659a30c176636c8e45d97dbe98c336f9bf85bccbd56aecef5e6efb584444"
+    }
+  },
+  "thaumcraft/common/blocks/BlockChestHungry.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockChestHungry.java:60-61 hardness 2.5 and the wood material",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftHungryChest.java:25 strength(2.5F) and the wood sound",
+      "oracle thaumcraft/common/blocks/BlockChestHungry.java:78-184 the hungry chest pulls the nearby items into itself",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockChestHungry.java and tiles/TileChestHungry.java implement the pull"
+    ],
+    "notes": [
+      "the metadata became block states; the chest inventory is a 1.21.1 menu container"
+    ],
+    "reviewed_sha256": {
+      "original": "f711bdbb2dda45e4a1689c24b034506d16abf766444e1012bf5fb3bd6b03f712",
+      "legacy": "3fee884d8001706238dc792ca3e8538182a45bba9022b173658bd5ad3c67f297"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticOpaque.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:64-70 hardness 1.5 and setResistance(5)",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:129 uses EldritchBlockRules.COSMETIC_OPAQUE_HARDNESS/COSMETIC_OPAQUE_RESISTANCE",
+      "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:253-266 the warded glass variant (metadata 2) is unbreakable with resistance 999",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:290-300 keeps the warded glass group"
+    ],
+    "notes": [
+      "the blast resistance kept the raw setter value 5; the 1.7.10 effective value of setResistance(5) is 5*3/5 = 3.0",
+      "the metadata values became separate native blocks (ThaumcraftEldritchBlocks.java:126-148)"
+    ],
+    "reviewed_sha256": {
+      "original": "f9054d0400f73a7c23ac34726e4ecc61b961d4c79faebb3da8cb16c398cd6dd9",
+      "legacy": "f5bea0c26d77ba3fff2525d63618afc8cd7c78b2195cff8333b51dac7361510e"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticOpaqueItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticOpaqueItem.java:8-14 the metadata suffix in the item name",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the cosmetic opaque family as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata, so each cosmetic opaque variant became its own block and item id"
+    ],
+    "reviewed_sha256": {
+      "original": "d7544668784896229de39e8b0a51772f9eea6352048ad5feace57ed65944dbd1"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticSolid.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:213-225 the per metadata hardness (30 for md 0/1/8, 4 for md 4/6/7, 2 otherwise)",
+      "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:227-238 the light (9 for md 2, 4 for md 14)",
+      "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:240-252 the explosion resistance (999 for md 0/1/8, 20 for md 4/6/7)",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:204-241 reproduces all three tables",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:213-215 binds them to three native hardness groups"
+    ],
+    "notes": [
+      "1.21.1 binds the hardness to the block, so the per metadata hardness became three groups (EldritchBlockRules.COSMETIC_GROUP_HARDNESS)",
+      "the base blast resistance was correctly converted from the 1.7.10 setter value 10 to the effective 6"
+    ],
+    "reviewed_sha256": {
+      "original": "8c0daef5ad9249901f6ae31fb75b8f44e6e2efe35ef09cba84ea1991389edc62",
+      "legacy": "99cee0304f78407cad3bcac64d3e7f5ab516f4538da8564637bb365fba1626ed"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticSolidItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticSolidItem.java:8-14 the metadata suffix in the item name",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers cosmetic_solid, cosmetic_solid_tough and cosmetic_solid_thaumium as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; the family became three native blocks with their own items"
+    ],
+    "reviewed_sha256": {
+      "original": "e1131dd691062613348a79456607c60f0952e5f6f250ec8cdd6d170e00b55e97"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticStairs.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:22-40 the stairs of a reference block with a special icon for the eldritch tile",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java implements the native stairs of a reference block"
+    ],
+    "notes": [
+      "the original's special icon lookup for cosmetic solid metadata 11 is not reproduced by the native model",
+      "the native stairs blocks are registered per material (ThaumcraftCosmeticWood.java:41, ThaumcraftEldritchBlocks.java)"
+    ],
+    "reviewed_sha256": {
+      "original": "f8e8bd1bff88a96fe7bb287a2cb17bb6ef467e8ac794768b0417acc5dfe50693"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticStoneSlab.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticStoneSlab.java:22-46 the slab of the cosmetic stone family with the original bounds",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStoneSlab.java implements the native slab of a reference block",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers arcane_stone_slab and eldritch_stone_slab"
+    ],
+    "notes": [
+      "1.21.1 slabs are a block state, not a metadata value"
+    ],
+    "reviewed_sha256": {
+      "original": "23207395a7c678c44242fa4f8f0096d3b0797134087e81d0df744b293df93719",
+      "legacy": "97b3c28d3c52beee8a4788d510850953f4f60ba4add57c4ba2af3526a3c30ee9"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticStoneSlabItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticStoneSlabItem.java:8-14 the metadata suffix in the item name",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the slabs as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata"
+    ],
+    "reviewed_sha256": {
+      "original": "134a5da3b0adad50fa9177d4db9032725a6a225f10acaf964d9b6b99373912ea",
+      "legacy": "c280f52d381d7d801f005c7bd8f637fc927858ffcf171d247a2f700407542120"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticWoodSlab.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticWoodSlab.java:22-46 the slab of the magical wood family",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticWoodSlab.java implements the native slab of a reference block",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:43 registers greatwood and silverwood slabs with strength(2,3)"
+    ],
+    "notes": [
+      "1.21.1 slabs are a block state, not a metadata value"
+    ],
+    "reviewed_sha256": {
+      "original": "f0620560266e568f9a9acc21261ed46da7bc248cd7b05a97b4d8b3e6dc1e1d78",
+      "legacy": "4f52c693f9678f22a4f0337934aa2673ecb10adcb4757f239c32c4f0d5fd393c"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCosmeticWoodSlabItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCosmeticWoodSlabItem.java:8-14 the metadata suffix in the item name",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java registers greatwood_slab and silverwood_slab as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata"
+    ],
+    "reviewed_sha256": {
+      "original": "22b7792ed09bae37ff0535f1cb17624f45adabc7544866fc4106aaa1fb1aaa22",
+      "legacy": "990eaa86ad5fcc3486d6083b93a02847512164cca3628272d2be7ac6ca6e06f4"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCrystal.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCrystal.java:57-62 hardness 0.7, setResistance(1) and light 0.5 (int(15*0.5) = 7)",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java:37 strength(.7F, .6F) and lightLevel 7",
+      "oracle thaumcraft/common/blocks/BlockCrystal.java the seven crystal variants with their own colours",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:152-157 registers one crystal block per element"
+    ],
+    "notes": [
+      "the setResistance(1) setter value was correctly converted to the effective 0.6 (1*3/5)"
+    ],
+    "reviewed_sha256": {
+      "original": "8c79882551b1f336854957840fff84ac460126237b2c7b38e5e2d5384ef6139b",
+      "legacy": "bd9bd57ba6fb9a8c1d8467f62cc3d2bcb7b36059780c2488caa4bc4efde34bda"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCrystalItem.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCrystalItem.java:36-43 the clicked side becomes the crystal orientation after the block is placed",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCrystalItem.java:12-18 does exactly that and stores it in the tile",
+      "native common/src/main/java/thaumcraft/common/tiles/TileCrystal.java keeps the orientation in the tile NBT"
+    ],
+    "notes": [
+      "the native class keeps the original name and role"
+    ],
+    "reviewed_sha256": {
+      "original": "d72e9bf4457bae52708a89628973c07bfbf77448dc6c731a149a80403ee64ca8"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCustomOre.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCustomOre.java:58-60 hardness 1.5 and setResistance(5)",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:44 strength(1.5F, 5.0F)",
+      "oracle thaumcraft/common/blocks/BlockCustomOre.java the seven infused stone variants plus the amber ore",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:32-38 registers the six infused stones and the amber ore"
+    ],
+    "notes": [
+      "the blast resistance kept the raw setter value 5; the 1.7.10 effective value of setResistance(5) is 3.0",
+      "the infused stone variants became separate blocks with their own ids instead of one metadata block"
+    ],
+    "reviewed_sha256": {
+      "original": "927242cf33e621a55f665ec26dfa86ae262fa50442502e595061dabdec747e4d",
+      "legacy": "d7de7d223d1d340c608d3320b9a19b69ecf525455dc30ad21b42bd05ac0d6ee8"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCustomOreItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCustomOreItem.java:15-24 the metadata name and the seven infused colours",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java:45 registers one BlockItem per ore id"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; each ore variant became its own block and item id"
+    ],
+    "reviewed_sha256": {
+      "original": "3e320957a70b233dae840b67cb4c512c69368667c0c917e7bb68188a0c769dd6"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCustomPlant.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCustomPlant.java:63 the plant material, no hardness",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java:28 the plant block with random ticks and light 8",
+      "oracle thaumcraft/common/blocks/BlockCustomPlant.java:174-182 the light 8 of the silverwood plants",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java implements the native plant"
+    ],
+    "notes": [
+      "the metadata values became separate native blocks; the ethereal bloom is now its own block (ThaumcraftEldritchBlocks.java:200)"
+    ],
+    "reviewed_sha256": {
+      "original": "7997d2d672daa7c2ae8f1654cd952d7867517f1e229979de8883aa3b18ec619c",
+      "legacy": "7eb98521c2720f2e184793053a79de905a5e7e96c1b4a70634919bbf0ed345df"
+    }
+  },
+  "thaumcraft/common/blocks/BlockCustomPlantItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:28-60 the six plant icons and the metadata plant placement",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java registers one block item per plant"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; the six plant variants became separate block ids",
+      "the original's IPlantable metadata placement hook has no 1.21.1 counterpart in the native tree"
+    ],
+    "reviewed_sha256": {
+      "original": "eaf3b4e3bca667e433b2ac53b00b8a091bcb793e7eab3a304b7fa0fae53794ec"
+    }
+  },
+  "thaumcraft/common/blocks/BlockFluidDeath.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockFluidDeath.java:38-40 the death fluid block with the taint material",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java:86-88 registers death_fluid with strength(10,300) and the light of the arcane furnace",
+      "oracle thaumcraft/common/blocks/BlockFluidDeath.java the flowing death fluid of the original"
+    ],
+    "notes": [
+      "the original's Forge fluid block became a native liquid block with a fluid type",
+      "the native registers the block without a model (common/src/test/java/thaumcraft/assets/BlockResourceCoverageTest.java NO_LOOT_TABLE)"
+    ],
+    "reviewed_sha256": {
+      "original": "9c23fb9445a97a5c7e8e407a4e26ad6d04c905ce9c9362c2af930daf2b06109f",
+      "legacy": "ca4ea7e0c50b7d3e118b7de90a74f4a212b50ee6465b7b8fe38d9e756ab5f620"
+    }
+  },
+  "thaumcraft/common/blocks/BlockFluidPure.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockFluidPure.java:42-44 the pure fluid block",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java registers purifying_fluid"
+    ],
+    "notes": [
+      "the original's Forge fluid block became a native liquid block with a fluid type",
+      "the native registers the block without a model or a loot table"
+    ],
+    "reviewed_sha256": {
+      "original": "68022b0c4864c1a70fb747d7ebb75b60098e02288b8c4067a20219d747dd5eb0",
+      "legacy": "d510ba88f0a5d713b8ae3b4a5f3b0534e8188f8df1ebfd686b8471c21a1c5aaa"
+    }
+  },
+  "thaumcraft/common/blocks/BlockFluxGas.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockFluxGas.java:45-47 the flux gas block with the flux goo material",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:42 the flux gas block with the light of its level",
+      "oracle thaumcraft/common/blocks/BlockFluxGas.java the eight damage levels of the gas"
+    ],
+    "notes": [
+      "the original's Forge fluid block became a native block with a level property; the native block has no model (asset test exception)"
+    ],
+    "reviewed_sha256": {
+      "original": "09ac7a4eb2e7e4943b866e8771f66d61323bdcceaa38498f59991924cecc94c6",
+      "legacy": "439871c84eee73b8d97d79f2d37f1ecae35ed1edc2e02ee64214767b231c3c62"
+    }
+  },
+  "thaumcraft/common/blocks/BlockFluxGasItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockFluxGasItem.java:8-16 the item stack limit 64 and the metadata 8",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java registers the flux gas items as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata and no per-metadata stack limit; the gas level is a block state"
+    ],
+    "reviewed_sha256": {
+      "original": "8270eef0d96f978c7d1a4b7f940e829fa39810202ce31c72f21c10442e0ee3c8"
+    }
+  },
+  "thaumcraft/common/blocks/BlockFluxGoo.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockFluxGoo.java:48-50 the flux goo block",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:42 the flux goo block with the same level light"
+    ],
+    "notes": [
+      "the original's Forge fluid block became a native block with a level property; the native block has no model (asset test exception)"
+    ],
+    "reviewed_sha256": {
+      "original": "86c4373d53614c173641522d3377a9439da9e3b737ab94a709471369bb292e4e",
+      "legacy": "01f8de7c555a1ef30e29486fe7c3477985cdf95b022a46046a8c133a11c61ef6"
+    }
+  },
+  "thaumcraft/common/blocks/BlockFluxGooItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockFluxGooItem.java:8-16 the item stack limit 64 and the metadata 8",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java registers the flux goo items as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata and no per-metadata stack limit"
+    ],
+    "reviewed_sha256": {
+      "original": "5637f19d5feb74cac8ce817ce8369dc606590d624a14319b574e46cd21069cc4"
+    }
+  },
+  "thaumcraft/common/blocks/BlockHole.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockHole.java:53-56 setResistance(6000000) and light 0.7 (int(15*0.7) = 10)",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java:21 the hole block with light 10",
+      "oracle thaumcraft/common/blocks/BlockHole.java:54 the full cube bounds and the random ticks"
+    ],
+    "notes": [
+      "the native hole block has no model and no loot table (documented exceptions of the asset test)",
+      "the native port does not reproduce the original's 6000000 resistance value"
+    ],
+    "reviewed_sha256": {
+      "original": "bb9c6976e54b03de4fd547d2ade83af17d009ff7c16a37b1c3f0de91c28ec06f",
+      "legacy": "00b40061b5c697cd5aa119ba2c9ed3dd265d081552001acdb9d85a152cc5b7c2"
+    }
+  },
+  "thaumcraft/common/blocks/BlockJar.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockJar.java:64-76 hardness 0.3 and the custom jar step sound",
+      "oracle thaumcraft/common/blocks/BlockJar.java:110-124 four metadata values (0 jar, 1 brain, 2 node, 3 void jar)",
+      "oracle thaumcraft/common/blocks/BlockJar.java:182-193 breaking the brain jar drops its stored experience orbs",
+      "oracle thaumcraft/common/blocks/BlockJar.java:223-275 right-clicking the brain jar releases part of the stored xp",
+      "oracle thaumcraft/common/blocks/BlockJar.java:299-305 the node jar (metadata 2) emits light 11",
+      "oracle thaumcraft/common/blocks/BlockJar.java:325-336 the comparator reads xp/xpMax or amount/maxAmount",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java:63-66 comparator formula amount*14/maxAmount+1 matches the original",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:194-198 jar_brain and jar_node are separate native blocks"
+    ],
+    "notes": [
+      "the four metadata values became two blocks (jar, jar_void) plus jar_brain and jar_node",
+      "MISSING: the brain jar no longer drops its stored xp when broken and cannot be emptied by right-clicking (native JarBlock has neither handler)",
+      "MISSING: the node jar no longer emits light 11 (native JarBlock has no lightLevel)",
+      "the original's custom jar step sound became the vanilla glass step sound"
+    ],
+    "reviewed_sha256": {
+      "original": "cbcc448ca0ffeb3add5d592c3e8eb44978aed81daa00196541a76c7e10354e55",
+      "legacy": "087343ff76200a83d8a9af56fddafcac6e3c83370c35e6301af4396265190d12"
+    }
+  },
+  "thaumcraft/common/blocks/BlockJarItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockJarItem.java:8-14 keeps the metadata suffix in the unlocalised name and the damage value",
+      "native common/src/main/java/thaumcraft/common/items/ItemJar.java replaces the per-metadata item with one item per block",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:135-136 registers jar and jar_void"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata, so the metadata suffix name became one name per block id"
+    ],
+    "reviewed_sha256": {
+      "original": "91b4ca88dd1cf1c766c32359d4de57f2dd4a4e75c29e36f76d66671aab0a5527",
+      "legacy": "d8776bf6ae847b09456d379299a04db3084600077bf5f1b08683105d6ef3d2aa"
+    }
+  },
+  "thaumcraft/common/blocks/BlockLifter.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockLifter.java:44-45 hardness 2.5 and setResistance(15)",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLevitator.java:26 strength(2.5F, 9.0F)",
+      "oracle thaumcraft/common/blocks/BlockLifter.java the levitator block that lifts the entities above it"
+    ],
+    "notes": [
+      "the setResistance(15) setter value was correctly converted to the effective 9.0 (15*3/5)",
+      "the native class is named BlockLevitator"
+    ],
+    "reviewed_sha256": {
+      "original": "5ec9f6519fbf502d1f7ea3d32199c9f93d279f3e7531e53749c51cb607f9bb4f",
+      "legacy": "f57a4b0d1148f26de05eedf5eb34cc0a6c4fb2de6a882b0c9962a07342bce841"
+    }
+  },
+  "thaumcraft/common/blocks/BlockLoot.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockLoot.java:43-45 hardness 0.15 and setResistance(0)",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:176-179 the loot urn and crate blocks with strength(0.15F, 0.0F)",
+      "oracle thaumcraft/common/blocks/BlockLoot.java the loot urn and the loot crate"
+    ],
+    "notes": [
+      "the two render types became two native blocks",
+      "the native loot blocks have no loot table of their own (asset test exception)"
+    ],
+    "reviewed_sha256": {
+      "original": "9f0bd2553389c7ead8470c610fb0ea497ff85c464b24470dd8709f943584a4ea",
+      "legacy": "ca636c422ee71ce14c1feebd280c249cb4a362cbd68303993ecd4240cf1ff885"
+    }
+  },
+  "thaumcraft/common/blocks/BlockLootItem.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockLootItem.java the item of the loot urn and the loot crate",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:176-179 registers the loot urn and crate items"
+    ],
+    "notes": [
+      "the original's per metadata item became one item per block"
+    ],
+    "reviewed_sha256": {
+      "original": "16c93076ca2cf800b50b7e5d2b225bb12767d82f2188bf0b5a0ee1118f02df0c",
+      "legacy": "bac7e1aa9c83c657d0d8f50a4e7d90a80e2a74a9f3522592d83078bc0a3a4064"
+    }
+  },
+  "thaumcraft/common/blocks/BlockMagicalLeaves.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockMagicalLeaves.java:56-59 hardness 0.2 and the leaves material",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:72-80 the greatwood and silverwood leaves with light 7 and 8",
+      "oracle thaumcraft/common/blocks/BlockMagicalLeaves.java:121-125 the light of the silverwood leaves",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockMagicalLeaves.java implements the native leaves"
+    ],
+    "notes": [
+      "the metadata values became separate native blocks; the original's damage bit 4 marker is not reproduced"
+    ],
+    "reviewed_sha256": {
+      "original": "e36ca9072689cdc414328b5185626f76b2bab616483db867ad21fb53f1bd7568",
+      "legacy": "4ebb40f84340841cdc165c231f3affc83cfbf492e56983fc3a5ec479974a7832"
+    }
+  },
+  "thaumcraft/common/blocks/BlockMagicalLeavesItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockMagicalLeavesItem.java:14-19 the damage value carries the bit 4 marker and the name uses the leaf type",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java registers greatwood and silverwood leaves as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item damage value, so the original's bit 4 leaf marker was dropped"
+    ],
+    "reviewed_sha256": {
+      "original": "24b06e957fc3008645e065c01fedae8d4207e93157b23aa42b0c23ea60589ad1"
+    }
+  },
+  "thaumcraft/common/blocks/BlockMagicalLog.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockMagicalLog.java:59-61 hardness 2.5 and the wood material",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:58 greatwood and silverwood logs with strength(2.5F)",
+      "oracle thaumcraft/common/blocks/BlockMagicalLog.java:150-157 the light of the silverwood log",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:72 the silverwood log with light 7"
+    ],
+    "notes": [
+      "the four metadata values became separate native blocks (greatwood, silverwood and their stripped variants)"
+    ],
+    "reviewed_sha256": {
+      "original": "07934dc63fb0604f71c6c747021e0b1a0b976b6f0ad58d5443d75347dca53ec4",
+      "legacy": "f733a6fe0eb980f52494b0ac6d48bdc6b8496e6f22cd5cda37089f763071b6fa"
+    }
+  },
+  "thaumcraft/common/blocks/BlockMagicalLogItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockMagicalLogItem.java:13-21 the name uses the wood type array",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java registers the logs as plain BlockItems with their own names"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; each wood type became its own block and item id"
+    ],
+    "reviewed_sha256": {
+      "original": "c0dc0a68c28c13219f95b761ece7711dc977a4936f1fd87785fe9ad4ddca9c74"
+    }
+  },
+  "thaumcraft/common/blocks/BlockManaPod.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockManaPod.java:69-72 the hardness is divided by the growth stage",
+      "oracle thaumcraft/common/blocks/BlockManaPod.java:173-182 the light of the growth stage",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftManaBeans.java:32 the mana pod with lightLevel(AGE)",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockManaPod.java implements the native growth stages"
+    ],
+    "notes": [
+      "the growth stage became a block state property; the native block has no model and no loot table (asset test exceptions)"
+    ],
+    "reviewed_sha256": {
+      "original": "3b49ccfbf6a40dd12e9c8631c2e7a198169c3e1967cd56c01ec95e60e0082a9d",
+      "legacy": "1956dc4b9c4b66242bffa75b8257a66b51cb04c3440f6717cb7eb3663a44bb16"
+    }
+  },
+  "thaumcraft/common/blocks/BlockMetalDevice.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockMetalDevice.java:100-101 hardness 3 and setResistance(17)",
+      "oracle thaumcraft/common/blocks/BlockMetalDevice.java:240-256 the crucible (metadata 0) smelts the items that fall into it",
+      "oracle thaumcraft/common/blocks/BlockMetalDevice.java the metal device family with 15 metadata values",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockMetalDevice.java:31-36 keeps only the grate and the brainbox variants",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCrucible.java:75-89 implements the crucible collision smelt",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftAlchemy.java:32-33 the crucible with strength(3, 17)"
+    ],
+    "notes": [
+      "the 15 metadata values were split into separate native blocks (crucible, alembic, alchemy furnace, advanced furnace, thaumatorium, nitor, grate, brainbox)",
+      "the blast resistance kept the raw setter value 17; the 1.7.10 effective value of setResistance(17) is 10.2 - the advanced furnace and the construct use 10.2, the crucible and the alembic still use 17"
+    ],
+    "reviewed_sha256": {
+      "original": "ef73fe617a959d7542f80ee53cc314457dd3685ec626403ce4f735f6fd73457b",
+      "legacy": "9b4f58b699c33e844ee0490732b28681f9b5a1ce5a298b44eb3e3e9a09ffaf3f"
+    }
+  },
+  "thaumcraft/common/blocks/BlockMetalDeviceItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockMetalDeviceItem.java:26-60 the metadata name and the placement hooks for the arcane lamp and the vis relay",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the metal device family items as plain BlockItems",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLamps.java and ThaumcraftNodeDevices.java register the split-off devices"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; the fifteen metal device metadata values became separate native blocks and items",
+      "the original's placeBlockAt hook that initialises the arcane lamp tiles has no single counterpart because the lamps are separate blocks now"
+    ],
+    "reviewed_sha256": {
+      "original": "bfcb1ef3282580d4a3ba7f4c054543793a258659baa50845446ed806d796c223"
+    }
+  },
+  "thaumcraft/common/blocks/BlockStairsArcaneStone.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no BlockStairsArcaneStone: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneStoneStairs.java is the native arcane stone stairs",
+      "native common/src/main/resources/assets/thaumcraft/blockstates/arcane_stone_stairs.json exists"
+    ],
+    "notes": [
+      "legacy-only class; the native port registers the stairs as a separate block id"
+    ],
+    "reviewed_sha256": {
+      "legacy": "c53d80aac8c167ad38b1e7c962de0b07eb25c6cc126d00e64078b3edd748c76d"
+    }
+  },
+  "thaumcraft/common/blocks/BlockStairsGreatwood.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no BlockStairsGreatwood: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticWoodStairs.java and ThaumcraftCosmeticWood.java register the greatwood stairs"
+    ],
+    "notes": [
+      "legacy-only class; the native port registers the stairs as a separate block id"
+    ],
+    "reviewed_sha256": {
+      "legacy": "2e9a871f619ac888fb7b7139078a0e7433d800420daf4d67cc89d9e9d56ab350"
+    }
+  },
+  "thaumcraft/common/blocks/BlockStairsSilverwood.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no BlockStairsSilverwood: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticWoodStairs.java and ThaumcraftCosmeticWood.java register the silverwood stairs"
+    ],
+    "notes": [
+      "legacy-only class; the native port registers the stairs as a separate block id"
+    ],
+    "reviewed_sha256": {
+      "legacy": "942fdfc7a607c9c58bc49f6cce2631c54bf1304ab45af0a396b1fa1b1c3830b7"
+    }
+  },
+  "thaumcraft/common/blocks/BlockStoneDevice.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockStoneDevice.java:92-93 hardness 3 and setResistance(25)",
+      "oracle thaumcraft/common/blocks/BlockStoneDevice.java the stone device family (levitator, flux scrubber, node stabilizer, node transducer, vis relay)",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockStoneDevice.java:28-32 keeps only the wand pedestal and the flux scrubber variants",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftNodeDevices.java and ThaumcraftLevitator.java register the split-off devices"
+    ],
+    "notes": [
+      "the metadata values were split into separate native blocks",
+      "the blast resistance kept the raw setter value 25; the 1.7.10 effective value of setResistance(25) is 15.0"
+    ],
+    "reviewed_sha256": {
+      "original": "8fcf6dd1ada422f66c74735351a956310209714c482ac6c5a922b5ec320fa881",
+      "legacy": "4e0fdcc7eaf42d9077d211c9d6f97be9648982af5a88127461127712d43f15d1"
+    }
+  },
+  "thaumcraft/common/blocks/BlockStoneDeviceItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockStoneDeviceItem.java:20-36 the metadata name and the flux scrubber placement hook",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the stone device family items as plain BlockItems",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockFluxScrubber.java implements the scrubber as its own block"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; each stone device metadata value became its own block and item id"
+    ],
+    "reviewed_sha256": {
+      "original": "fef93adaebce317f5eccbcf3e796da7dc4d4db72f21fbfebc8d7e28683d94825"
+    }
+  },
+  "thaumcraft/common/blocks/BlockTable.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockTable.java:62-63 hardness 2.5 and the wood material",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:97 the table with strength(2.5F)",
+      "oracle thaumcraft/common/blocks/BlockTable.java the research table and the normal table",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTable.java and tiles/TileTable.java implement the native table"
+    ],
+    "notes": [
+      "the table and the research table became two native blocks that share one block entity type",
+      "the native table has no loot table of its own (asset test exception)"
+    ],
+    "reviewed_sha256": {
+      "original": "6098ea8658435e2d941120149e2396e8e55da468b73353ff758577c967098ed4",
+      "legacy": "3063974564a6aa367fb2edfaadc2b6b58a290ec37716e0251c367764a0a6e57f"
+    }
+  },
+  "thaumcraft/common/blocks/BlockTableItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockTableItem.java:15-20 the metadata 2..9 variants are named \".research\"",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:101-103 registers table and research_table as separate items with their own names"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; the eight research table metadata values became one research_table item"
+    ],
+    "reviewed_sha256": {
+      "original": "7b6774690a8bb5b77ddfed436a40251f9c688abb4ad5c13ac4a386492e26a1f7"
+    }
+  },
+  "thaumcraft/common/blocks/BlockThaumcraftStairs.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no BlockThaumcraftStairs: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java is the native stairs of a reference block"
+    ],
+    "notes": [
+      "legacy-only class; the 1.12 generic stairs base class became the native BlockCosmeticStairs"
+    ],
+    "reviewed_sha256": {
+      "legacy": "f4fda7ee372761b3bf2677081d0b85391293d0a9421c42a0c6ac1de11c767013"
+    }
+  },
+  "thaumcraft/common/blocks/BlockWoodenDevice.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockWoodenDevice.java:81-82 hardness 2.5 and setResistance(10)",
+      "oracle thaumcraft/common/blocks/BlockWoodenDevice.java:191-210 the warded variants (metadata 2 and 3) are unbreakable with resistance 999",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockWoodenDevice.java keeps the remaining wooden device variants",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:167 uses DEVICE_WOOD_HARDNESS/DEVICE_WOOD_RESISTANCE"
+    ],
+    "notes": [
+      "the metadata values were split into separate native blocks (arcane door, magic box, bellows, banner, arcane bore)",
+      "the blast resistance kept the raw setter value 10; the 1.7.10 effective value of setResistance(10) is 6.0"
+    ],
+    "reviewed_sha256": {
+      "original": "37ba842678298b50252afb8055dcb552d870f2ae1812054f435be150ace97865",
+      "legacy": "1e41195dcc6fad80a168b4c928def540aa854dd9c161788cc8bff6ded10ff0df"
+    }
+  },
+  "thaumcraft/common/blocks/BlockWoodenDeviceItem.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockWoodenDeviceItem.java the metadata name and the placement hooks for the arcane bore and the bellows",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the wooden device family items as plain BlockItems"
+    ],
+    "notes": [
+      "1.21.1 has no item metadata; the wooden device metadata values became separate native blocks and items"
+    ],
+    "reviewed_sha256": {
+      "original": "e1728dc4e834c216dc9f5bd0e75e6537a62bb240c8f00a4e3728245247b0b9f2"
+    }
+  },
+  "thaumcraft/common/blocks/CustomStepSound.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/CustomStepSound.java:16-25 resolves the step and the break sound to \"thaumcraft:<name>\"",
+      "1.21.1 block sounds come from the block SoundType; the native tree has no CustomStepSound class",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:91-92 the jar uses SoundType.GLASS instead of the original \"thaumcraft:jar\" step sound"
+    ],
+    "notes": [
+      "the per block custom sound class was dropped in favour of the vanilla SoundType enum",
+      "the original's per block step and break sound names are therefore replaced by vanilla equivalents in the affected blocks"
+    ],
+    "reviewed_sha256": {
+      "original": "cb7c0eb4a233be500ed2a63d09c05b5ff56aef98380fdf0c4914c6da318c10b1",
+      "legacy": "7d534fdb6be8929cc00c964dd84ce5e1f9fade44c320078278ec64285c266617"
+    }
+  },
+  "thaumcraft/common/blocks/ItemArcaneDoor.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/ItemArcaneDoor.java:26-60 the item opens and closes the warded door and names it by the warded block",
+      "native common/src/main/java/thaumcraft/common/blocks/ItemArcaneDoor.java (77 lines) implements the native warded door item"
+    ],
+    "notes": [
+      "1.21.1 has no item damage value; the original's metadata naming became one item per warded door block"
+    ],
+    "reviewed_sha256": {
+      "original": "180652d191a6fd9f40c438b1ef8cdacc497967c13b734c917ebece4d892b7cb7",
+      "legacy": "6d609c3951b0d6eba172835bef387de67dd28605e3be3fd86e7325dd2a4fe723"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockAiryItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockAiryItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java carries the variant state instead of the item damage value"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "45d1f2376d3fdc80b65f78481eebb8d4c2f2872f7773887a74251be10781142a"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockCosmeticOpaqueItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockCosmeticOpaqueItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the cosmetic opaque items as plain BlockItems"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "ca9db7051ff83b93c962037d2b340470233ff1bd50b3ea963922b7554a80c751"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockCosmeticSolidItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockCosmeticSolidItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers cosmetic_solid, cosmetic_solid_tough and cosmetic_solid_thaumium"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "2a2d6e3425493c2e731114096268aa1f9473fe719274cea3a0b88fda574b4a4d"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockCrystalItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockCrystalItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCrystalItem.java is the native crystal item with the placement orientation hook"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "b794b94a39e331bd1b6281a227ef653493536332377a13124cf43e88a40906d1"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockCustomOreItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockCustomOreItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftOres.java registers one BlockItem per ore"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "7e39dd0cdbba553e2bf0aa677e46746b6da686107dfd7b5abe59fbd381450ab8"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockCustomPlantItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockCustomPlantItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java registers one BlockItem per plant"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "029fca1357f618a039a39ab0cbf69c4c725b2953a2253dde0047443173446491"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockFluxGasItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockFluxGasItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java registers the flux gas items"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "402b0164be13c97e9ab712aa044bb8e7d7349a4e840577e8074f38953442388d"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockFluxGooItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockFluxGooItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java registers the flux goo items"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "802c08a0f8c1c3ccea40ec6eb559b0b9552c5ba5eff8e1fe002ba62c7b3a7126"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockMagicalLeavesItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockMagicalLeavesItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java registers the leaves items"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "61e5f4138800cb60863309ba372caa35273e28b89cacff06dbbd7162e5b29a99"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockMetadataItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockMetadataItem: the path exists only in the 1.12 legacy tree",
+      "the native tree has no metadata item base class: 1.21.1 items carry no damage value and the native uses plain BlockItem"
+    ],
+    "notes": [
+      "legacy-only class; the legacy generic metadata item base class has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "38dea8e7295395479a1e59f88a52bcbc7419365db251a6d54098b77cbc984f1a"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockMetalDeviceItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockMetalDeviceItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the metal device items"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "65d7aa7c3d2675bbb8d82ed6989c2bbb854d036a6f238df441df04466762f65b"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockStoneDeviceItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockStoneDeviceItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the stone device items"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "810f818c639b8ac2536e9d9d6350dce4ad822af3c92e5b86c80c857c554ff2b2"
+    }
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockWoodenDeviceItem.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/blocks/ItemBlocks/BlockWoodenDeviceItem: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java registers the wooden device items"
+    ],
+    "notes": [
+      "legacy-only class; the legacy ItemBlocks package has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "10322fc6c0b8917949522850cf55f45d2b466be5eeb5df294886bb3a138352d3"
+    }
+  },
+  "thaumcraft/common/blocks/ItemJarFilled.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/ItemJarFilled.java is the filled-jar item with the aspect NBT",
+      "native common/src/main/java/thaumcraft/common/tiles/JarContents.java stores the jar contents",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java:115-127 writes the contents and the label into the dropped jar item"
+    ],
+    "notes": [
+      "the distinct itemJarFilled item was flattened into the jar block item with data components"
+    ],
+    "reviewed_sha256": {
+      "original": "60b463af08c365a10bd159fa319b5b157049d9457b9496b6acd4668ea353a484"
+    }
+  },
+  "thaumcraft/common/blocks/ItemJarNode.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/ItemJarNode.java is the node-jar item carrying the aspects and the node attributes",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:110-133 stores the aspects, the base aspects, the node type, the modifier and the node id",
+      "native common/src/main/resources/data/thaumcraft/loot_table/blocks/jar_node.json drops a plain jar_node item"
+    ],
+    "notes": [
+      "the itemJarNode item was replaced by a placeable jar_node block",
+      "MISSING: breaking the node jar loses the stored node aspects and attributes (the loot table drops a plain item)"
+    ],
+    "reviewed_sha256": {
+      "original": "232fffb2c6ad6670bd16373d2bfd1cb2215a1525f47f916e7de05e7b473314f8"
+    }
+  },
+  "thaumcraft/common/blocks/JarStepSound.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/JarStepSound.java resolves the step sound to \"thaumcraft:<name>\"",
+      "the native has no CustomStepSound/JarStepSound class: the jar block uses SoundType.GLASS (ThaumcraftContent.java:91-92)"
+    ],
+    "notes": [
+      "1.21.1 block step sounds come from the block SoundType, so the per-block sound class was dropped",
+      "the original jar step sound (\"thaumcraft:jar\") is therefore replaced by the vanilla glass step sound"
+    ],
+    "reviewed_sha256": {
+      "original": "689cf855ec2814b2d55809b3f70e10f30296c59e6192d1d1be9fe9ae8f9665c4"
+    }
+  },
+  "thaumcraft/common/config/recipes/ConfigRecipesCrucibleSlice.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no ConfigRecipesCrucibleSlice: the path exists only in the 1.12 legacy tree",
+      "the native crucible recipes are 46 JSON files in common/src/main/resources/data/thaumcraft/recipe/crucible/",
+      "native common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java:28-36 decodes them with the same research key, catalyst, result and aspect cost"
+    ],
+    "notes": [
+      "legacy-only class; the original recipe table lives in thaumcraft/common/config/ConfigRecipes.java:105-181 and is covered by the recipe comparison in the report"
+    ],
+    "reviewed_sha256": {
+      "legacy": "61fd1329684abd8bf1bbea269bfad2d46071cd9e9ccc62f8984c0bc114baba22"
+    }
+  },
+  "thaumcraft/common/items/BehaviorDispenseAlumetum.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/BehaviorDispenseAlumetum.java:17-30: a dispenser holding the alumentum throws it as a projectile, everything else is dropped",
+      "oracle thaumcraft/common/items/BehaviorDispenseAlumetum.java:36-38 the launch event 1009",
+      "native common/src/main/java/thaumcraft/common/items/BehaviorDispenseAlumetum.java:21-35 throws the alumentum and falls back to the default behaviour",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:535-541 the dispense power 1.1, the uncertainty 6.0, the lift 0.1 and the event 1009"
+    ],
+    "notes": [
+      "1.21.1 DispenseItemBehavior instead of the 1.7.10 BehaviorProjectileDispense; the item test is by identity instead of the damage value"
+    ],
+    "reviewed_sha256": {
+      "original": "be78555f6c5a1a9af008ae39d7252797a286953c2effcbe08a8179672cd759a7",
+      "legacy": "004bcfb32c88dfd4977e2833cbf8537d54274c5357021f26be8f55f242a0da03"
+    }
+  },
+  "thaumcraft/common/items/ItemBathSalts.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemBathSalts.java:28-31 the stack limit 200 and the spa use",
+      "native common/src/main/java/thaumcraft/common/items/ItemBathSalts.java:8-9 delegates to SpaRules.BATH_SALT_LIFETIME",
+      "native common/src/main/java/thaumcraft/common/lib/SpaRules.java holds the bath salt lifetime of the original"
+    ],
+    "notes": [
+      "the original's item only declares the stack limit; the spa effect itself lives in the spa code, which is outside this domain"
+    ],
+    "reviewed_sha256": {
+      "original": "6fee427062319553c942e5c53012420a840873acda4f19c8c80cde660dc9f9dc",
+      "legacy": "3d7f53f5c5d30264bb6b8407a6f154b299a206fd6d24e31f9ba821698bf8dca5"
+    }
+  },
+  "thaumcraft/common/items/ItemBucketDeath.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemBucketDeath.java the bucket that holds the death fluid and pours it",
+      "native common/src/main/java/thaumcraft/common/items/ItemBucketDeath.java implements the native bucket of the death fluid",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers bucket_death"
+    ],
+    "notes": [
+      "the Forge fluid container became a 1.21.1 bucket item with a fluid component"
+    ],
+    "reviewed_sha256": {
+      "original": "1d4fbbac39d6e686d72849c0ac6c9d28d92c2d4c23b718e7628166e35093f0d3",
+      "legacy": "b56a1ae7e14000ac41aecccdce8189d3c2462f0eaf39368e31170e3438db191b"
+    }
+  },
+  "thaumcraft/common/items/ItemBucketPure.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemBucketPure.java the bucket that holds the pure fluid and pours it",
+      "native common/src/main/java/thaumcraft/common/items/ItemBucketPure.java implements the native bucket of the pure fluid",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers bucket_pure"
+    ],
+    "notes": [
+      "the Forge fluid container became a 1.21.1 bucket item with a fluid component"
+    ],
+    "reviewed_sha256": {
+      "original": "daae129d4340bff10f28a137584ce5ecd3b567991b778d6f2b6d281d4c700527",
+      "legacy": "1e2a4ae7b67e409d4a46652297fba3b58bfd0a5b57ce3c5a09d66f7710150b13"
+    }
+  },
+  "thaumcraft/common/items/ItemCompassStone.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemCompassStone.java:27-74 the compass points at the sinister nodes, the stack limit is 1 and the rarity is rare",
+      "native common/src/main/java/thaumcraft/common/items/ItemCompassStone.java:28-45 stacksTo(1), Rarity.RARE and the sinister node registry",
+      "native common/src/main/java/thaumcraft/common/items/ItemCompassStone.java:45-73 the inventory tick that rotates the pointer"
+    ],
+    "notes": [
+      "1.21.1 items have no damage value; the original's second metadata (the pointing needle) became a state of the item"
+    ],
+    "reviewed_sha256": {
+      "original": "e454a35d7651c6c97b42755268944f6f00d1f49e0dab55ef2bd486ff5e89651d",
+      "legacy": "89cb908ab312cfe5d9dce9c1fcf075c6073b52d38d754549f6afcad442f300d1"
+    }
+  },
+  "thaumcraft/common/items/ItemCrystalEssence.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemCrystalEssence.java:76-96: the aspect list lives in the item NBT and the empty item cycles a random display colour every 500 ms",
+      "native common/src/main/java/thaumcraft/common/items/ItemCrystalEssence.java:43-54 reads and writes the crystal essence data component",
+      "native common/src/main/java/thaumcraft/common/items/ItemCrystalEssence.java:76-82 keeps the 500 ms display cycle as display only"
+    ],
+    "notes": [
+      "the NBT aspect list became the CRYSTAL_ESSENCE_DATA component with the same ordered whole-list semantics"
+    ],
+    "reviewed_sha256": {
+      "original": "07bf314cae2e5cdbf03913b6da57020ca514922d9a827156faff6f589cbd3445",
+      "legacy": "9fa6c0b8efdd39179dd14ffc17bf2b782b22117a5d4761e165149a68a71f5480"
+    }
+  },
+  "thaumcraft/common/items/ItemEssence.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemEssence.java:108-178: an empty phial takes 8 units from an alembic or a jar, a filled phial puts 8 units back and the label is honoured",
+      "native common/src/main/java/thaumcraft/common/items/ItemEssence.java:65-80 keeps the whole-phial price of 8 (PhialData.AMOUNT = 8)",
+      "native common/src/main/java/thaumcraft/common/items/ItemEssence.java:75-77 refuses a foreign aspect and a full jar exactly like the original addToContainer"
+    ],
+    "notes": [
+      "the NBT aspect list became the PHIAL_DATA component; the empty and the filled phial became two item ids"
+    ],
+    "reviewed_sha256": {
+      "original": "4386f059fea14ce091a1607bad10e3a97e1fc219ec64dbaf230b79e463a26f8d",
+      "legacy": "7cfb549a3f69ea7fa6cb9c22295a07f7fa191e0b1c91176b43f6001b98e0a4ec"
+    }
+  },
+  "thaumcraft/common/items/ItemKey.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemKey.java:62-72 the iron and the gold key with the metadata suffix name and the uncommon rarity",
+      "oracle thaumcraft/common/items/ItemKey.java:103-144 the key creates and grants the access of a TileOwned block and plays \"thaumcraft:key\"",
+      "native common/src/main/java/thaumcraft/common/items/ItemKey.java:30-95 keeps the two key types, the KEY_LINK component and the access grant",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers key_iron and key_gold"
+    ],
+    "notes": [
+      "the NBT of the linked location became the KEY_LINK data component",
+      "the original's access list of the owned block is stored per block entity in the native tree"
+    ],
+    "reviewed_sha256": {
+      "original": "c7ebfe01da75402c8f36ac1f84340f6037148e8847693bd15be8763007150681",
+      "legacy": "853353caa38a023c0977ead3154af05d2ab5701c43e2435ba8fb467838d5d7e9"
+    }
+  },
+  "thaumcraft/common/items/ItemLootBag.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemLootBag.java:89-101 the bag rolls 8 + rand(5) times and plays \"thaumcraft:coins\"",
+      "native common/src/main/java/thaumcraft/common/items/ItemLootBag.java:54-57 rolls 8 + nextInt(5) and the same coin sound",
+      "oracle thaumcraft/common/lib/utils/Utils.java:380-406 the 0.025*rarity gear chance and the enchant level 5 + rarity*0.75*rand(18)",
+      "native common/src/main/java/thaumcraft/common/lib/loot/LootTables.java:67-86 keeps both numbers",
+      "oracle thaumcraft/common/items/ItemLootBag.java:44-46 the stack limit 16 and the uncommon/rare rarities",
+      "native common/src/main/java/thaumcraft/common/items/ItemLootBag.java:34 stacksTo(16) and the rarity tiers"
+    ],
+    "notes": [
+      "the three metadata values became three item ids (loot_bag_common, loot_bag_uncommon, loot_bag_rare)"
+    ],
+    "reviewed_sha256": {
+      "original": "c7435a1a1474bca36c4dd878cdf93a83b831ee14e1e65bc04149fe84800628f2",
+      "legacy": "d588dbbc683635f0034f7048ac13ff1cf0ae79a463e5e9276333e8eb5fd53427"
+    }
+  },
+  "thaumcraft/common/items/ItemManaBean.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemManaBean.java:92-100 a random potion effect for 160 + rand(80) ticks and a 0.25 chance to consume the bean",
+      "oracle thaumcraft/common/items/ItemManaBean.java:148-155 a fresh bean gets a random display aspect",
+      "native common/src/main/java/thaumcraft/common/items/ItemManaBean.java:44-134 the native bean with the aspect data component",
+      "native common/src/test/java/thaumcraft/items/ManaBeanEffectTest.java covers the effect numbers"
+    ],
+    "notes": [
+      "the NBT aspect list became the MANA_BEAN_DATA component",
+      "the random potion effect selection and its 160..240 tick duration were not re-verified line by line in this audit"
+    ],
+    "reviewed_sha256": {
+      "original": "beaabbe9508a509bdd95171cae6658e197b4eebee3366f291f99023a6ddb8bcd",
+      "legacy": "66db18079c1dd7cd932cd46815fb6a6439df2cc04b15f4a2d38fa88889bf089a"
+    }
+  },
+  "thaumcraft/common/items/ItemNugget.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemNugget.java:39-52 the 64 metadata icons: the metal nuggets 0..7, the clusters 16..21 and the gold cluster 31",
+      "oracle thaumcraft/common/config/ConfigItems.java:276-293 the ore dictionary names nuggetIron .. clusterGold",
+      "native common/src/main/java/thaumcraft/common/items/ItemNugget.java carries a nugget type instead of a metadata value",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:120-131 registers quicksilver_drop and the three clusters"
+    ],
+    "notes": [
+      "1.21.1 items have no metadata, so every nugget type became its own item id",
+      "the original's 64 icon slots are not reproduced one by one; only the types that the recipes use exist as ids"
+    ],
+    "reviewed_sha256": {
+      "original": "81e45f297f56cd07bb06d8f23169e5692896a2b76070b0ad199cd862f0abaa95",
+      "legacy": "d7a068e3c48d5170ba2ab3c4d863bc9feeb1a7267fc3401ba6c3da0c824bc44d"
+    }
+  },
+  "thaumcraft/common/items/ItemNuggetEdible.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemNuggetEdible.java the edible meat nuggets of the golems",
+      "native common/src/main/java/thaumcraft/common/items/ItemNuggetEdible.java implements the native edible nugget"
+    ],
+    "notes": [
+      "the four food nuggets became separate item ids; the food values were not re-verified in this audit"
+    ],
+    "reviewed_sha256": {
+      "original": "95c6c4098b5220881336e8b8b462bc99112aa4d3fd6aaa9635043c6294c8e633",
+      "legacy": "58344ce5f4a5741232866639e71446ceff9f4f5599bf662100bfb5a013702c6f"
+    }
+  },
+  "thaumcraft/common/items/ItemResource.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemResource.java:54-86 the 19 resource metadata values from the alumentum (0) to the gold coin (18)",
+      "oracle thaumcraft/common/items/ItemResource.java:186-249 the nitor resource (metadata 1) places the nitor block",
+      "oracle thaumcraft/common/items/ItemResource.java the label (13), the primal charm (15), the tainted goo (11) and the taint tendril (12) behaviours",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:139-149 registers the 19 resources as separate items",
+      "native common/src/main/java/thaumcraft/common/items/ItemNitor.java:25-60 places the nitor block exactly like the original",
+      "native common/src/main/java/thaumcraft/common/items/ItemResource.java implements the tainted goo and the taint tendril"
+    ],
+    "notes": [
+      "the 19 metadata values became 19 separate item ids; nine of them are still plain items without the original's behaviour",
+      "the native source itself notes that the behavioural resource items stay pending in MIGRATION_STATUS"
+    ],
+    "reviewed_sha256": {
+      "original": "a320df79f4963a45a0d636e8e192ecbd1d7c688ccc6e5082229daf6712a1efb2",
+      "legacy": "fa4a60b1110ae3f383174354f8f088248752f22ff74e1e642c892d793657cf7a"
+    }
+  },
+  "thaumcraft/common/items/ItemSanitySoap.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemSanitySoap.java:36-46 the stack limit 200, the BLOCK use animation and the 195 tick lather",
+      "native common/src/main/java/thaumcraft/common/items/ItemSanitySoap.java:28-33 the native use duration, the BLOCK animation and the release",
+      "native common/src/main/java/thaumcraft/common/lib/warp/SanitySoapRules.java holds the duration and the warp effect"
+    ],
+    "notes": [
+      "the NBT free use duration became the native use duration; the client lather particles use the native client effect hook"
+    ],
+    "reviewed_sha256": {
+      "original": "334cf09f21fa88228c5eb192c84b7f3584adffad1f207e400cb18985608ad0d8",
+      "legacy": "bc6f7a150fe13c4ec930bc23762010222398ee756a3cfeb4ec52a865e16c8fda"
+    }
+  },
+  "thaumcraft/common/items/ItemShard.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemShard.java:29-40 the seven shards (0..5 elements and 6 balanced) with the ore colour table",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:150-157 registers air, fire, water, earth, order, entropy and balance shards",
+      "native common/src/main/java/thaumcraft/common/items/ItemShard.java:16-25 carries the shard type and its aspect tag"
+    ],
+    "notes": [
+      "the seven metadata values became seven item ids"
+    ],
+    "reviewed_sha256": {
+      "original": "3213ccbc8bd95c712a1bcc2a30385ae72d0fa0ff07a7f9323009dd627851954b",
+      "legacy": "6e98a99a49d400f6be0efe397f5ac2e3fc2fa26ed511ac6f7a0641a9d918806b"
+    }
+  },
+  "thaumcraft/common/items/ItemTripleMeatTreat.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemTripleMeatTreat.java:23-26 the food values 6 hunger, 0.8 saturation, always edible and the regeneration effect for 5 seconds with a 0.66 chance",
+      "native common/src/main/java/thaumcraft/common/items/ItemTripleMeatTreat.java:14-20 the same food values and the regeneration effect",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:450-456 TREAT_HUNGER 6, TREAT_SATURATION 0.8, TREAT_EFFECT_CHANCE 0.66, TREAT_REGENERATION_TICKS 100"
+    ],
+    "notes": [
+      "the effect duration is expressed in ticks (100) instead of the original's seconds (5)",
+      "DEFECT: thaumcraft:triple_meat_treat is registered but has no name in en_us.json or ru_ru.json (see the report)"
+    ],
+    "reviewed_sha256": {
+      "original": "180c6127e9858dd9a35959e242015bf2e690ff053c190c20aff26b156039ce33",
+      "legacy": "365196bcfbfca60cfe714abdbd5e4fb20e32f7d20bfc8e17a4099bf1cce5150d"
+    }
+  },
+  "thaumcraft/common/items/relics/ItemResonator.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/relics/ItemResonator.java the resonator that scans the nearby nodes",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java implements the native resonator",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java:69-78 routes the resonator use into the inspection"
+    ],
+    "notes": [
+      "the original's GUI was replaced by an inspection action; the node scan itself belongs to the research domain"
+    ],
+    "reviewed_sha256": {
+      "original": "12a972aa162606194af53e6bb48cbddac4a2271cd54779592d434236697e09d7",
+      "legacy": "bf6b943902c5f949253091a242b52c0076c2ad130313aad2174b2ec51d6259b8"
+    }
+  },
+  "thaumcraft/common/items/relics/ItemSanityChecker.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/items/relics/ItemSanityChecker.java:16-40 the stack limit 1 and the uncommon rarity",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers sanity_checker",
+      "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java implements the native checker"
+    ],
+    "notes": [
+      "1.21.1 items have no metadata; the sanity display itself belongs to the warp domain"
+    ],
+    "reviewed_sha256": {
+      "original": "3f7a196d734b3b46ac983d9585f38f3e73fe305e1bcbd04f68639513b8598c34",
+      "legacy": "59c093a909c5a57ef843dbf98b4572ed72115182587870d9b8c39e94840eced0"
+    }
+  },
+  "thaumcraft/common/items/resources/ItemCrystalEssence.java": {
+    "disposition": "exclude",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle has no common/items/resources/ItemCrystalEssence: the path exists only in the 1.12 legacy tree",
+      "native common/src/main/java/thaumcraft/common/items/ItemCrystalEssence.java is the single 1.21.1 crystal essence item"
+    ],
+    "notes": [
+      "legacy-only class; the 1.12 split between items/ and items/resources/ has no 1.21.1 counterpart"
+    ],
+    "reviewed_sha256": {
+      "legacy": "4fbf600f3de355b3cf5f3eb4e3751c7abbe7fdfc93572a81782789e0b6ff6312"
+    }
+  },
+  "thaumcraft/common/tiles/TileAlembic.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileAlembic.java:44 maxAmount 32, aspect + amount container, aspectFilter label",
+      "oracle thaumcraft/common/tiles/TileAlembic.java:93-122 addToContainer/takeFromContainer rules",
+      "native common/src/main/java/thaumcraft/common/tiles/TileAlembic.java:25 CAPACITY = 32 and :75-93 the same add/take rules",
+      "native common/src/main/java/thaumcraft/common/tiles/TileAlembic.java:164-166 the same connectable/output sides"
+    ],
+    "notes": [
+      "the facing moved from the NBT into the block state (1.21.1 binds the direction to the block)",
+      "the original's negative-amount take defect is refused by the native (documented in the native source)"
+    ],
+    "reviewed_sha256": {
+      "original": "5e685b6303aea6df0c02205b9db76fa44207986ff06ceeffb395e42a7150c5a0",
+      "legacy": "92d6510714ff54018805819d937e0d146ba143509c8e89138f897121c21e073f"
+    }
+  },
+  "thaumcraft/common/tiles/TileBellows.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileBellows.java:29-48 the unpowered oscillation 0.35..1.0 and the vanilla furnace tick every second tick",
+      "native common/src/main/java/thaumcraft/common/tiles/TileBellows.java:36-46 the same curve (0.35 + rand*0.55, -0.075, +0.025) and the same furnace tick",
+      "oracle thaumcraft/common/tiles/TileBellows.java:70-81 getBellows() counts the neighbouring bellows with the opposite orientation",
+      "native common/src/main/java/thaumcraft/common/tiles/TileBellows.java:65-73 the same counting rule"
+    ],
+    "notes": [
+      "the orientation moved from the NBT into the block state",
+      "the furnace tick bound became min(199, cookingTotalTime-1) so that modern datapack durations still complete"
+    ],
+    "reviewed_sha256": {
+      "original": "ea0ffb0a4b3e8dfbd1737d5e413c9c361e382c31c02933367803546896925d5e",
+      "legacy": "bf117e089b26398d286e5ea25c46e2bf7de69bd579db9fbe9299fe50357501a3"
+    }
+  },
+  "thaumcraft/common/tiles/TileCrucible.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileCrucible.java:66-77 heat, the 1000 mB water tank and the aspect list",
+      "oracle thaumcraft/common/tiles/TileCrucible.java:79-141 the heat curve (fire/lava/nitor below, +1+2*bellows up to 200, -1 down) and the decay above heat 150",
+      "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:109-144 reproduces the heat curve, the +1+2*bellows step and the decay",
+      "oracle thaumcraft/common/tiles/TileCrucible.java:248-287 attemptSmelt(): ceil(stack/2) crafts per collision, 50 mB per craft, counter = -250",
+      "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:174-227 keeps the half-stack craft rate, the 50 mB price and the counters",
+      "oracle thaumcraft/common/tiles/TileCrucible.java:300-310 getFluidHeight() = 0.3+0.5*water/1000 + tag/100*(1-base)",
+      "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:166-172 the same formula"
+    ],
+    "notes": [
+      "the original's Forge IFluidHandler (a 1000 mB water tank readable by other mods) has no counterpart: the native exposes fillWater(int) only (native TileCrucible.java:41,68-76)",
+      "the original's FML player-crafting event on a crucible craft is not fired",
+      "the original's heat source test used Material.FIRE; the native uses the FIRE block tag, so campfires and soul campfires also heat the crucible"
+    ],
+    "reviewed_sha256": {
+      "original": "69ba9c53c0a495ccaa4e784b00e462a11c57c53c1e7bd3a50207f7be8310618a",
+      "legacy": "10fb60fb7c00b97da720484038fb36a9df5c9cdc35e82adeb4ee86d14d374498"
+    }
+  },
+  "thaumcraft/common/tiles/TileJar.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileJar.java:24-25 canUpdate() true and the jar texture",
+      "oracle thaumcraft/common/tiles/TileJarFillable.java:23-42 the fillable jar: maxAmount 64, aspect, aspectFilter, facing",
+      "oracle thaumcraft/common/tiles/TileJarFillable.java:189-209 the five-tick pull from the block above",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJar.java:151-162 the same five-tick pull and the same accept rules",
+      "native common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java:487-495 reproduces the original's suction/pressure questions of fillJar()"
+    ],
+    "notes": [
+      "TileJarFillable and TileJarFillableVoid were merged into one native TileJar that selects the void behaviour from the block",
+      "the facing moved into the NBT of the native tile because the jar has no facing block state"
+    ],
+    "reviewed_sha256": {
+      "original": "00eea0e5e7d5431bb8026aba4df7bdfdfd40844278d16034775cc4a1fa022e4a",
+      "legacy": "cf062cc580a7da3805443f9c2648b0d9b2b6a7b8b09def4ad8f789ebed318695"
+    }
+  },
+  "thaumcraft/common/tiles/TileJarBrain.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileJarBrain.java:13-14 xp and xpMax 2000",
+      "oracle thaumcraft/common/tiles/TileJarBrain.java:45-50 the experience orb is pulled from a radius of 7 with the 0.15/0.33/0.15 factors",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:38-66 keeps the radius 7, the pull factors and the 2000 cap",
+      "oracle thaumcraft/common/tiles/TileJarBrain.java:104-125 getClosestXPOrb() searches the block box expanded by 6"
+    ],
+    "notes": [
+      "the original eats every orb inside the 0.1..1.1 block box; the native eats the closest orb within distance 1.0 and then waits 5 ticks (eatDelay 5) instead of the original's 40",
+      "MISSING: the client-side head rotation and the periodic sigh sound of the original are not implemented (native tick returns on the client side)",
+      "the native's jar_brain block has no use handler, so the original's right-click xp release is missing"
+    ],
+    "reviewed_sha256": {
+      "original": "8e5a3dcd7926f4ca4b51c345b700b1960f77c82e673560668b378e61c487c18f",
+      "legacy": "aa874493a525919d6106441736391f1196857ed87fb935075c8ec27df7b8e161"
+    }
+  },
+  "thaumcraft/common/tiles/TileJarFillable.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileJarFillable.java:14 maxAmount 64",
+      "oracle thaumcraft/common/tiles/TileJarFillable.java:152-160 getSuctionAmount(): 64 with a label, 32 without, 0 when full",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJar.java:136-139 the same 64/32/0 rule",
+      "oracle thaumcraft/common/tiles/TileJarFillable.java:112-115 doesContainerAccept() only looks at the label",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJar.java:44 the same label-only acceptance"
+    ],
+    "notes": [
+      "merged into the native TileJar; the void variant is selected by the block"
+    ],
+    "reviewed_sha256": {
+      "original": "2428cbc3407ef605c893a98fed0d4f26ea79bf5cdde0d9d40f6ee128c859f4f1",
+      "legacy": "ce456a571db0e12a30789673979f07c68d6c0d2f58c80c6e664c5ddc81d1bbb0"
+    }
+  },
+  "thaumcraft/common/tiles/TileJarFillableVoid.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileJarFillableVoid.java:18-22 the void jar clamps the stored amount to maxAmount instead of refusing the insert",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJar.java:58-69 and tiles/JarContents.java keep the clamping overflow for the void jar",
+      "oracle thaumcraft/common/tiles/TileJarFillableVoid.java:33-36 getSuctionAmount(): 48 only with a label and free space, otherwise 32",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJar.java:136-139 the same 48/32 rule",
+      "oracle thaumcraft/common/tiles/TileJarFillableVoid.java:38-42 the void jar pulls every five ticks even when full",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJar.java:153 the same isVoid() exemption"
+    ],
+    "notes": [
+      "merged into the native TileJar"
+    ],
+    "reviewed_sha256": {
+      "original": "8f31c213aa97f5844fe18376afef0862b61de822f5a0c9950795f401a84cecbc",
+      "legacy": "12915be2ca4ff8709f3a48a38278fef47671dccb6d487fbf73801d06ae03afb9"
+    }
+  },
+  "thaumcraft/common/tiles/TileJarNode.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "owner": "audit-a6-content",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileJarNode.java:99-144 the node jar keeps the aspects, the base aspects, the node type, the modifier and the node id",
+      "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:110-133 stores the same five pieces of data",
+      "oracle thaumcraft/common/tiles/TileJarNode.java:207-225 the wand turns the jar back into a node and copies the aspects and the node attributes"
+    ],
+    "notes": [
+      "MISSING: nothing in the native tree calls IWandable.onWandRightClick, so the native TileJarNode.onWandRightClick (native tiles/TileJarNode.java:61-73) is dead code and the node jar can never be turned back into a node",
+      "the native method also shrinks the wand stack, which the original never does",
+      "the original's IAspectContainer behaviour on the node jar (adding node aspects) is not implemented"
+    ],
+    "reviewed_sha256": {
+      "original": "72c3bc1c98aec80463607a04082f38fc323d0126aa5bdc01e73e4d5ebe990747",
+      "legacy": "6f0537f1267fce45e5667ff86db6f042a2fb2a76a5b5a3634c5d6aabaaa92b63"
+    }
+  }
+}

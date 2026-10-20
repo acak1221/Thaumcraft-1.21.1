@@ -100,6 +100,7 @@ import thaumcraft.common.lib.essentia.EssentiaTransfers;
 import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileCrucible;
 import thaumcraft.common.tiles.TileJar;
+import thaumcraft.common.tiles.TileEssentiaReservoir;
 
 /** Supported ordinary materials and Fill/Empty/Gather/Harvest/Guard/Decanting/Alchemy/Use/Butcher/Sorting/Fishing. */
 public class EntityGolemBase extends AbstractGolem {
@@ -204,8 +205,7 @@ public class EntityGolemBase extends AbstractGolem {
     private BlockPos aspectHomePosition;
     private Direction aspectHomeFace;
     private BlockEntity aspectBaseIntent;
-    private TileAlembic aspectSourceIntent;
-    private TileJar aspectSinkIntent;
+    private BlockEntity aspectSourceIntent, aspectSinkIntent;
     private Aspect aspectIntent;
     private int aspectLimit;
     private GolemAspectCargo aspectBeforeIntent;
@@ -1737,7 +1737,7 @@ public class EntityGolemBase extends AbstractGolem {
                     && AlchemyGolemGoals.loaded(server, pos);
         } finally { busy = false; }
     }
-    private void bindAspectWork(ServerLevel server, BlockEntity base, TileAlembic source, TileJar sink, Aspect aspect, int limit) {
+    private void bindAspectWork(ServerLevel server, BlockEntity base, BlockEntity source, BlockEntity sink, Aspect aspect, int limit) {
         aspectWorkLevel = server;
         aspectHomePosition = getHomePosition();
         aspectHomeFace = getHomeFacing();
@@ -1760,17 +1760,17 @@ public class EntityGolemBase extends AbstractGolem {
         return aspectNativeOwner() && deferredAspectRemoval == null && alchemyReady() && aspectBeforeIntent != null
                 && aspectCargo.equals(aspectBeforeIntent) && aspectHomePosition.equals(getHomePosition()) && aspectHomeFace == getHomeFacing();
     }
-    public boolean canCollectEssentia(TileAlembic source, Aspect aspect, int units) {
+    public boolean canCollectEssentia(BlockEntity source, Aspect aspect, int units) {
         return aspectBeforeCurrent() && aspectPermissionReady && aspectSourceIntent == source && source != null && aspectSinkIntent == null
                 && aspectIntent == aspect && units > 0 && units <= aspectLimit && alchemy.ownsCollectionAttempt(source, aspect)
                 && alchemy.currentSource(aspectBaseIntent, source, aspect, units);
     }
-    public boolean canDeliverEssentia(TileJar sink, Aspect aspect, int units) {
+    public boolean canDeliverEssentia(BlockEntity sink, Aspect aspect, int units) {
         if (!aspectBeforeCurrent() || !aspectPermissionReady || aspectSinkIntent != sink || sink == null || aspectSourceIntent != null
                 || aspectIntent != aspect || units <= 0 || units > aspectLimit || aspectCargo.aspect() != aspect || units > aspectCargo.amount()
                 || !alchemy.ownsDeliveryAttempt(sink, aspect) || !getNavigation().isDone()) return false;
         BlockPos pos = sink.getBlockPos();
-        return distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) <= 4 && alchemy.currentJar(sink, aspect, units);
+        return distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) <= 4 && alchemy.currentDestination(sink, aspect, units);
     }
     /** Executor-only, exact prepared objects; all checks precede the ONE raw owner replacement. */
     public void applyAspectCargoRaw(GolemAspectCargo before, GolemAspectCargo after) {
@@ -1799,11 +1799,11 @@ public class EntityGolemBase extends AbstractGolem {
         if (!aspectNativeOwner() || !essentiaMutationActive()) throw new IllegalStateException("Essentia notification outside executor scope");
         syncAspectCargo(); // Both raw owners are already paid; executor holds the mutation guard through notification.
     }
-    boolean collectAlchemyEssentia(TileAlembic source, Aspect aspect, int requested) {
+    boolean collectAlchemyEssentia(BlockEntity source, Aspect aspect, int requested) {
         if (busy || essentiaMutationActive() || !alchemyReady() || !alchemy.ownsCollectionAttempt(source, aspect)
                 || requested <= 0 || !(level() instanceof ServerLevel server)) return false;
         AlchemyGolemGoals.Source binding = alchemy.findSource(false);
-        if (binding == null || binding.alembic() != source || binding.aspect() != aspect) return false;
+        if (binding == null || binding.endpoint() != source || binding.aspect() != aspect) return false;
         GolemAspectCargo before = aspectCargo;
         boolean qualifying = false;
         busy = true;
@@ -1815,17 +1815,19 @@ public class EntityGolemBase extends AbstractGolem {
             if (!pos.equals(home) && (!AlchemyGolemGoals.loaded(server, pos) || !GolemHarvestPlatform.mayInteract(this, pos) || !aspectBeforeCurrent())) return false;
             if (!AlchemyGolemGoals.current(server, binding.base()) || !AlchemyGolemGoals.current(server, source)) return false;
             aspectPermissionReady = true;
-            int limit = Math.min(aspectLimit, Math.min(source.getAmount(), getCarryLimit() - aspectCargo.amount()));
+            int limit = Math.min(aspectLimit, binding.limit());
             if (!canCollectEssentia(source, aspect, limit)) return false;
             qualifying = true;
-            EssentiaTransfers.Attempt attempt = EssentiaTransfers.collectAlembic(this, source, Direction.UP, aspect, limit);
+            EssentiaTransfers.Attempt attempt = source instanceof TileAlembic alembic
+                    ? EssentiaTransfers.collectAlembic(this, alembic, Direction.UP, aspect, limit)
+                    : EssentiaTransfers.collectReservoir(this, (TileEssentiaReservoir) source, aspect, limit);
             if (attempt.failure() != null) Thaumcraft.LOG.warn("Golem alembic transfer reported {} committed units; never refunding", attempt.committedUnits(), attempt.failure());
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.warn("Golem alembic transfer failed; retaining actual cargo, never replaying a debit", failure);
         } finally { finishAspectWork(server, before, .05F); }
         return qualifying; // Even a qualifying zero-return attempt uses the original short delay mapping.
     }
-    int deliverAlchemyEssentia(TileJar sink, Aspect aspect, int requested) {
+    int deliverAlchemyEssentia(BlockEntity sink, Aspect aspect, int requested) {
         if (busy || essentiaMutationActive() || !alchemyReady() || !alchemy.ownsDeliveryAttempt(sink, aspect)
                 || requested <= 0 || !(level() instanceof ServerLevel server)) return 0;
         GolemAspectCargo before = aspectCargo;
@@ -1838,9 +1840,11 @@ public class EntityGolemBase extends AbstractGolem {
             if (!AlchemyGolemGoals.current(server, sink)) return 0;
             if (!AlchemyGolemGoals.loaded(server, pos) || !GolemHarvestPlatform.mayInteract(this, pos) || !aspectBeforeCurrent()) return 0;
             aspectPermissionReady = true;
-            int limit = Math.min(aspectLimit, Math.min(aspectCargo.amount(), sink.getMaxAmount() - sink.getAmount()));
+            int limit = Math.min(aspectLimit, Math.min(aspectCargo.amount(), AlchemyGolemGoals.space(sink)));
             if (!canDeliverEssentia(sink, aspect, limit)) return 0;
-            EssentiaTransfers.Attempt attempt = EssentiaTransfers.deliverNormalJar(this, sink, aspect, limit);
+            EssentiaTransfers.Attempt attempt = sink instanceof TileJar jar
+                    ? EssentiaTransfers.deliverNormalJar(this, jar, aspect, limit)
+                    : EssentiaTransfers.deliverReservoir(this, (TileEssentiaReservoir) sink, aspect, limit);
             if (attempt.failure() != null) Thaumcraft.LOG.warn("Golem jar transfer reported {} committed units; never refunding", attempt.committedUnits(), attempt.failure());
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.warn("Golem jar transfer failed; preserving exact actual remainder", failure);

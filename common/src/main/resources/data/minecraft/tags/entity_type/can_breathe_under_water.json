@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "thaumcraft:tainted_chicken",
+    "thaumcraft:tainted_cow",
+    "thaumcraft:tainted_pig",
+    "thaumcraft:tainted_sheep",
+    "thaumcraft:tainted_villager",
+    "thaumcraft:taint_crawler",
+    "thaumcraft:taint_seed",
+    "thaumcraft:taint_seed_prime"
+  ]
+}

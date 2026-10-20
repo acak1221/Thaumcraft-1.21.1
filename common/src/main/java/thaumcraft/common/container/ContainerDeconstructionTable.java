@@ -16,7 +16,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.config.ThaumcraftDeconstruction;
-import thaumcraft.common.lib.research.ObjectAspectResolver;
 import thaumcraft.common.tiles.TileDeconstructionTable;
 
 /** Reward button carries no aspect or quantity chosen by the client. */
@@ -40,8 +39,8 @@ public final class ContainerDeconstructionTable extends AbstractContainerMenu {
             @Override public void set(int index, int value) {}
             @Override public int getCount() { return 2; }
         };
-        addSlot(new Slot(input, 0, 64, 16) {
-            @Override public boolean mayPlace(ItemStack stack) { return ObjectAspectResolver.get(stack, viewer.level()).size() > 0 && (table == null || table.canPlaceItem(0, stack)); }
+        addSlot(new SlotLimitedHasAspects(input, 0, 64, 16, viewer.level()) {
+            @Override public boolean mayPlace(ItemStack stack) { return super.mayPlace(stack) && (table == null || table.canPlaceItem(0, stack)); }
         });
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column + row * 9 + 9, 8 + column * 18, 84 + row * 18));
         for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column, 8 + column * 18, 142));

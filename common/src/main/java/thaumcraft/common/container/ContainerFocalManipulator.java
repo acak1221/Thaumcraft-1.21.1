@@ -43,9 +43,7 @@ public final class ContainerFocalManipulator extends AbstractContainerMenu {
         this.pos = pos.immutable(); this.session = session; this.lifetime = lifetime; serverTile = tile;
         viewer = inventory.player; revisionData = data;
         checkContainerSize(contents, 1); checkContainerDataCount(data, 4);
-        addSlot(new Slot(contents, 0, 88, 60) {
-            @Override public boolean mayPlace(ItemStack stack) { return !stack.isEmpty() && stack.getItem() instanceof ItemFocusBasic; }
-        });
+        addSlot(new SlotLimitedByClass(ItemFocusBasic.class, contents, 0, 88, 60));
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++)
             addSlot(new Slot(inventory, column + row * 9 + 9, 16 + column * 18, 151 + row * 18));
         for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column, 16 + column * 18, 209));

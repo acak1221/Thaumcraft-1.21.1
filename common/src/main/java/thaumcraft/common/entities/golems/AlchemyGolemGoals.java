@@ -19,20 +19,20 @@ import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileJar;
+import thaumcraft.common.tiles.TileEssentiaReservoir;
 
-/** Ordinary, finite alembic -> actual entity cargo -> directly marked normal jar. */
+/** Finite alembic/reservoir -> actual entity cargo -> directly marked normal jar/reservoir. */
 final class AlchemyGolemGoals {
-    record Source(BlockEntity base, TileAlembic alembic, Aspect aspect, int limit) {}
+    record Source(BlockEntity base, BlockEntity endpoint, Aspect aspect, int limit) {}
     private final EntityGolemBase golem;
-    private TileJar target;
+    private BlockEntity target;
     private Path ownedPath;
     private ServerLevel pathLevel;
     private BlockPos origin;
     private long gatherAfter;
     private int pathCount;
     private boolean gotoReady, emptyReady, gathering, moving, emptying, nudged;
-    private TileAlembic collecting;
-    private TileJar delivering;
+    private BlockEntity collecting, delivering;
     private Aspect attemptedAspect;
 
     AlchemyGolemGoals(EntityGolemBase golem) { this.golem = golem; }
@@ -42,10 +42,10 @@ final class AlchemyGolemGoals {
         golem.addWorkGoal(3, new Goto());
     }
     boolean hasRoute() { return gathering || emptying || moving || target != null && (gotoReady || emptyReady); }
-    boolean ownsCollectionAttempt(TileAlembic actual, Aspect aspect) {
+    boolean ownsCollectionAttempt(BlockEntity actual, Aspect aspect) {
         return gathering && collecting == actual && actual != null && attemptedAspect == aspect;
     }
-    boolean ownsDeliveryAttempt(TileJar actual, Aspect aspect) {
+    boolean ownsDeliveryAttempt(BlockEntity actual, Aspect aspect) {
         return emptying && delivering == actual && actual != null && attemptedAspect == aspect;
     }
     static boolean canonical(Aspect aspect) { return aspect != null && Aspect.getAspect(aspect.getTag()) == aspect; }
@@ -75,6 +75,14 @@ final class AlchemyGolemGoals {
         if (golem.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) > 6 || !permitted(server, pos, query)) return null;
         BlockEntity base = server.getBlockEntity(pos);
         if (!current(server, base)) return null;
+        if (base instanceof TileEssentiaReservoir reservoir && !reservoir.isQuarantined()) {
+            // Original AIEssentiaGather uses the reservoir's own port and its FIRST stored aspect, not total stock.
+            Aspect aspect = reservoir.getEssentiaType(null);
+            int carried = golem.getEssentiaAmount(), amount = reservoir.containerContains(aspect);
+            if (!canonical(aspect) || amount <= 0 || !reservoir.canOutputTo(reservoir.getFacing())
+                    || carried >= golem.getCarryLimit() || carried > 0 && golem.getEssentiaAspect() != aspect) return null;
+            return new Source(base, reservoir, aspect, Math.min(amount, golem.getCarryLimit() - carried));
+        }
         if (base.getClass() == TileAlembic.class) {
             TileAlembic alembic = (TileAlembic) base;
             return alembic.canOutputTo(golem.getHomeFacing()) ? candidate(base, alembic) : null;
@@ -96,9 +104,9 @@ final class AlchemyGolemGoals {
         }
         return golem.level() == server && golem.alchemyReady() && current(server, base) ? best : null;
     }
-    boolean currentSource(BlockEntity base, TileAlembic actual, Aspect aspect, int units) {
+    boolean currentSource(BlockEntity base, BlockEntity actual, Aspect aspect, int units) {
         Source fresh = findSource(false);
-        return fresh != null && fresh.base() == base && fresh.alembic() == actual && fresh.aspect() == aspect
+        return fresh != null && fresh.base() == base && fresh.endpoint() == actual && fresh.aspect() == aspect
                 && units > 0 && units <= fresh.limit();
     }
     private double homeDistance(BlockPos pos) {
@@ -115,17 +123,31 @@ final class AlchemyGolemGoals {
                 || stored != null && stored != aspect || amount > 0 && stored != aspect) return -1;
         return label != null ? (amount > 0 ? 0 : 1) : (amount > 0 ? 2 : 3);
     }
-    boolean currentJar(TileJar jar, Aspect aspect, int units) {
-        if (!golem.alchemyReady() || units <= 0 || jarStage(jar, aspect) < 0 || units > jar.getMaxAmount() - jar.getAmount()) return false;
+    static int space(BlockEntity tile) {
+        return tile instanceof TileJar jar ? jar.getMaxAmount() - jar.getAmount()
+                : tile instanceof TileEssentiaReservoir reservoir ? reservoir.getSpace() : 0;
+    }
+    private int destinationStage(BlockEntity tile, Aspect aspect) {
+        if (tile instanceof TileJar jar) return jarStage(jar, aspect);
+        if (!(golem.level() instanceof ServerLevel server) || !(tile instanceof TileEssentiaReservoir reservoir)
+                || !canonical(aspect) || !current(server, tile) || reservoir.isQuarantined()
+                || homeDistance(tile.getBlockPos()) > golem.getRange() * golem.getRange()
+                || !reservoir.canInputFrom(reservoir.getFacing()) || reservoir.getSuctionAmount(reservoir.getFacing()) <= 0
+                || reservoir.getSuctionType(reservoir.getFacing()) != null && reservoir.getSuctionType(reservoir.getFacing()) != aspect
+                || reservoir.getSpace() <= 0) return -1;
+        return 0; // Original GolemHelper: reservoirs share the first tier with nonempty labelled jars.
+    }
+    boolean currentDestination(BlockEntity jar, Aspect aspect, int units) {
+        if (!golem.alchemyReady() || units <= 0 || destinationStage(jar, aspect) < 0 || units > space(jar)) return false;
         for (GolemMarker marker : golem.getMarkers()) {
             if (marker.dimension().equals(golem.level().dimension().location()) && marker.pos().equals(jar.getBlockPos())) return true;
         }
         return false;
     }
-    private TileJar findJar() {
+    private BlockEntity findJar() {
         if (!golem.alchemyReady() || golem.getEssentiaAmount() <= 0 || !(golem.level() instanceof ServerLevel server)) return null;
         Aspect aspect = golem.getEssentiaAspect();
-        List<TileJar> allowed = new ArrayList<>();
+        List<BlockEntity> allowed = new ArrayList<>();
         Set<BlockPos> seen = new HashSet<>();
         for (GolemMarker marker : golem.getMarkers()) {
             if (!marker.dimension().equals(server.dimension().location()) || !seen.add(marker.pos())
@@ -135,14 +157,14 @@ final class AlchemyGolemGoals {
                 continue;
             }
             BlockEntity tile = server.getBlockEntity(marker.pos());
-            if (tile instanceof TileJar jar && jar.getClass() == TileJar.class) allowed.add(jar);
+            if (tile instanceof TileJar jar && jar.getClass() == TileJar.class || tile instanceof TileEssentiaReservoir) allowed.add(tile);
         }
         if (golem.level() != server || !golem.alchemyReady() || golem.getEssentiaAspect() != aspect) return null;
-        TileJar best = null;
+        BlockEntity best = null;
         int stage = 4;
         double nearest = Double.MAX_VALUE;
-        for (TileJar jar : allowed) { // Fresh labels/type/room after every query callback has finished.
-            int next = jarStage(jar, aspect);
+        for (BlockEntity jar : allowed) { // Fresh labels/type/room after every query callback has finished.
+            int next = destinationStage(jar, aspect);
             double distance = homeDistance(jar.getBlockPos());
             if (next >= 0 && (next < stage || next == stage && distance < nearest)) {
                 stage = next;
@@ -152,7 +174,7 @@ final class AlchemyGolemGoals {
         }
         return best;
     }
-    private boolean near(TileJar jar) {
+    private boolean near(BlockEntity jar) {
         BlockPos pos = jar.getBlockPos();
         return golem.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) <= 4;
     }
@@ -160,13 +182,13 @@ final class AlchemyGolemGoals {
         if (!golem.alchemyReady()) { reset(); return; }
         try {
             if (!gathering && !moving && !emptying && golem.getNavigation().isDone()) {
-                TileJar fresh = findJar();
+                BlockEntity fresh = findJar();
                 emptyReady = fresh != null && near(fresh);
                 if (emptyReady) target = fresh;
             }
             if (golem.tickCount % 5 != 0 || moving || gathering || emptying) return;
             if (golem.getEssentiaAmount() == 0) { clearPath(); target = null; gotoReady = emptyReady = false; return; }
-            TileJar fresh = findJar();
+            BlockEntity fresh = findJar();
             target = fresh;
             gotoReady = fresh != null && (!golem.getNavigation().isDone() || !near(fresh));
             emptyReady = fresh != null && golem.getNavigation().isDone() && near(fresh);
@@ -209,9 +231,9 @@ final class AlchemyGolemGoals {
             try {
                 Source fresh = findSource(true);
                 if (fresh == null || !gathering) return;
-                collecting = fresh.alembic();
+                collecting = fresh.endpoint();
                 attemptedAspect = fresh.aspect();
-                if (golem.collectAlchemyEssentia(fresh.alembic(), fresh.aspect(), fresh.limit())) gatherAfter = golem.level().getGameTime() + 2;
+                if (golem.collectAlchemyEssentia(fresh.endpoint(), fresh.aspect(), fresh.limit())) gatherAfter = golem.level().getGameTime() + 2;
             } catch (RuntimeException failure) {
                 Thaumcraft.LOG.warn("Golem Alchemy gather failed; keeping paid/previous stock and early-failure delay", failure);
             } finally { collecting = null; attemptedAspect = null; }
@@ -227,7 +249,7 @@ final class AlchemyGolemGoals {
             if (attempted || !emptying) return;
             attempted = true;
             try {
-                TileJar fresh = findJar(); // NEW search, never a saved route entitlement.
+                BlockEntity fresh = findJar(); // NEW search, never a saved route entitlement.
                 if (fresh == null || !emptying || !golem.getNavigation().isDone() || !near(fresh)) return;
                 delivering = fresh;
                 attemptedAspect = golem.getEssentiaAspect();
@@ -241,7 +263,7 @@ final class AlchemyGolemGoals {
     private final class Goto extends AlchemyGoal {
         @Override public boolean canUse() { return gotoReady && validTarget(); }
         private boolean validTarget() {
-            return golem.alchemyReady() && golem.getEssentiaAmount() > 0 && currentJar(target, golem.getEssentiaAspect(), 1);
+            return golem.alchemyReady() && golem.getEssentiaAmount() > 0 && currentDestination(target, golem.getEssentiaAspect(), 1);
         }
         @Override public boolean canContinueToUse() { return moving && pathCount > 0 && validTarget() && !golem.getNavigation().isDone(); }
         @Override public void start() {

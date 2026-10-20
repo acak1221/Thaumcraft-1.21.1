@@ -1,0 +1,73 @@
+{
+ "description": "Alchemy golems and Essentia Reservoirs: first stored aspect, own port, destination tier and distance, partial delivery, paired stock ownership and Earth capacity",
+ "watch": {
+  "junit": [],
+  "gametests": ["alchemyGolemsCollectAndDeliverMixedReservoirs"]
+ },
+ "mutants": [
+  {
+   "id": "first-aspect-queried-from-home-side",
+   "name": "collection asks the sided query instead of the reservoir's first stored aspect",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java",
+   "old": "Aspect aspect = reservoir.getEssentiaType(null);",
+   "new": "Aspect aspect = reservoir.getEssentiaType(golem.getHomeFacing());"
+  },
+  {
+   "id": "collection-uses-home-port",
+   "name": "collection checks the golem's home-facing side instead of the reservoir's own port",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java",
+   "old": "amount <= 0 || !reservoir.canOutputTo(reservoir.getFacing())",
+   "new": "amount <= 0 || !reservoir.canOutputTo(golem.getHomeFacing())"
+  },
+  {
+   "id": "reservoir-behind-empty-labelled-jar",
+   "name": "reservoirs are placed behind empty labelled jars in the destination priority",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java",
+   "old": "return 0; // Original GolemHelper: reservoirs share the first tier with nonempty labelled jars.",
+   "new": "return 3; // Incorrectly prefer empty labelled jars before reservoirs."
+  },
+  {
+   "id": "same-tier-keeps-marker-order",
+   "name": "the first marked destination wins even when another destination of its tier is nearer",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java",
+   "old": "next == stage && distance < nearest",
+   "new": "next == stage && false"
+  },
+  {
+   "id": "partial-reservoir-delivery-refused",
+   "name": "delivery requires room for the whole cargo instead of depositing what fits",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": ": Math.min(beforeCargo.amount(), reservoir.getSpace()));",
+   "new": ": (beforeCargo.amount() <= reservoir.getSpace() ? beforeCargo.amount() : 0));"
+  },
+  {
+   "id": "collection-grants-cargo-without-debit",
+   "name": "the collection commit credits cargo without debiting the source reservoir",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": "? commitPrepared(mutation, reservoir, null, null, reservoir, reservoir, change)",
+   "new": "? commitPrepared(mutation, reservoir, null, null, reservoir, null, null)"
+  },
+  {
+   "id": "reservoir-delivery-disconnected",
+   "name": "the delivery entrypoint never reaches the prepared transfer",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": "return transferGolemReservoir(golem, reservoir, aspect, limit, false);",
+   "new": "return new Attempt(false, 0, null);"
+  },
+  {
+   "id": "earth-carry-still-capped-at-32",
+   "name": "the transfer executor refuses the original 64-unit carry capacity with two Earth upgrades",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": "capacity > 0 && capacity <= GolemAspectCargo.MAX_AMOUNT && before.amount() <= capacity",
+   "new": "capacity > 0 && capacity <= 32 && before.amount() <= capacity"
+  }
+ ]
+}

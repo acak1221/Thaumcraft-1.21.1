@@ -351,13 +351,69 @@ public final class EssentiaTransfers {
         } finally { finishTubeFilterMutation(mutation); }
     }
 
+    /** Original reservoir branches: first-aspect collection and partial delivery, paired with actual cargo in one native commit. */
+    public static Attempt collectReservoir(EntityGolemBase golem, TileEssentiaReservoir reservoir, Aspect aspect, int limit) {
+        return transferGolemReservoir(golem, reservoir, aspect, limit, true);
+    }
+
+    public static Attempt deliverReservoir(EntityGolemBase golem, TileEssentiaReservoir reservoir, Aspect aspect, int limit) {
+        return transferGolemReservoir(golem, reservoir, aspect, limit, false);
+    }
+
+    private static Attempt transferGolemReservoir(EntityGolemBase golem, TileEssentiaReservoir reservoir, Aspect aspect, int limit, boolean collect) {
+        if (golem == null || reservoir == null || limit <= 0 || !EssentiaAtomicEndpoint.validAspect(aspect)
+                || !(golem.level() instanceof ServerLevel level)) return new Attempt(false, 0, null);
+        if (!level.getServer().isSameThread()) throw new IllegalStateException("Golem reservoir transfer requires the server thread");
+        if (MUTATION.get() != null || !currentGolem(golem, level) || !currentReservoir(reservoir, level)) return new Attempt(false, 0, null);
+        Mutation mutation = new Mutation(reservoir, reservoir);
+        mutation.golem = golem;
+        MUTATION.set(mutation);
+        boolean selected = false;
+        try {
+            GolemAspectCargo beforeCargo = golem.getAspectCargo();
+            int capacity = golem.getCarryLimit();
+            var before = reservoir.snapshotAtomicState();
+            if (!matchesGolemCargo(golem, level, beforeCargo, capacity)
+                    || beforeCargo.amount() > 0 && beforeCargo.aspect() != aspect
+                    || collect && reservoir.getEssentiaType(null) != aspect) return new Attempt(false, 0, null);
+            int units = Math.min(limit, collect
+                    ? Math.min(reservoir.containerContains(aspect), capacity - beforeCargo.amount())
+                    : Math.min(beforeCargo.amount(), reservoir.getSpace()));
+            if (units <= 0 || !(collect ? golem.canCollectEssentia(reservoir, aspect, units)
+                    : golem.canDeliverEssentia(reservoir, aspect, units))) return new Attempt(false, 0, null);
+            selected = true;
+            var change = collect ? reservoir.prepareExtract(before, aspect, units) : reservoir.prepareInsert(before, aspect, units);
+            if (!prepared(change, reservoir, before, units) || !change.changed()
+                    || !matchesGolemCargo(golem, level, beforeCargo, capacity) || !currentReservoir(reservoir, level)
+                    || !reservoir.matchesAtomicState(before)
+                    || !(collect ? golem.canCollectEssentia(reservoir, aspect, units) : golem.canDeliverEssentia(reservoir, aspect, units))
+                    || !matchesGolemCargo(golem, level, beforeCargo, capacity) || !currentReservoir(reservoir, level)
+                    || !reservoir.matchesAtomicState(before)) return new Attempt(true, 0, null);
+            int after = beforeCargo.amount() + (collect ? units : -units);
+            mutation.beforeCargo = beforeCargo;
+            mutation.afterCargo = after == 0 ? GolemAspectCargo.EMPTY : new GolemAspectCargo(aspect, after);
+            RuntimeException failure = collect
+                    ? commitPrepared(mutation, reservoir, null, null, reservoir, reservoir, change)
+                    : commitPrepared(mutation, reservoir, reservoir, change, reservoir, null, null);
+            return new Attempt(true, units, failure);
+        } catch (RuntimeException failure) {
+            if (mutation.raw) throw failure;
+            return new Attempt(selected, 0, failure);
+        } finally { finishTubeFilterMutation(mutation); }
+    }
+
+    private static boolean currentReservoir(TileEssentiaReservoir reservoir, ServerLevel level) {
+        return current(reservoir, level) && reservoir.getType().isValid(level.getBlockState(reservoir.getBlockPos()))
+                && !reservoir.isQuarantined();
+    }
+
     private static boolean currentGolem(EntityGolemBase golem, ServerLevel level) {
         return golem.getClass() == EntityGolemBase.class && golem.level() == level && golem.isAlive() && !golem.isRemoved()
                 && level.hasChunkAt(golem.blockPosition()) && level.getEntity(golem.getUUID()) == golem && level.getEntity(golem.getId()) == golem;
     }
 
     private static boolean matchesGolemCargo(EntityGolemBase golem, ServerLevel level, GolemAspectCargo before, int capacity) {
-        return currentGolem(golem, level) && before != null && capacity > 0 && capacity <= 32 && before.amount() <= capacity
+        return currentGolem(golem, level) && before != null && capacity > 0 && capacity <= GolemAspectCargo.MAX_AMOUNT && before.amount() <= capacity
                 && golem.getCarryLimit() == capacity && before.equals(golem.getAspectCargo());
     }
 

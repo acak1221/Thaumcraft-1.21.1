@@ -98,6 +98,17 @@ public final class ThaumcraftRecipeDisplay {
             alias("VoidHoe", "void_hoe"),                   // 456
             alias("VoidSword", "void_sword"),               // 457
             alias("Tallow", "crucible/tallow"),                // 120
+            alias("AltGunpowder", "crucible/alt_gunpowder"),   // ConfigRecipes:101, two gunpowder from one
+            alias("AltSlime", "crucible/alt_slime"),
+            alias("AltClay", "crucible/alt_clay"),
+            alias("AltGlowstone", "crucible/alt_glowstone"),
+            alias("AltInk", "crucible/alt_ink"),
+            alias("AltWeb", "crucible/alt_web"),
+            alias("AltMossyCobble", "crucible/alt_mossy_cobble"),
+            alias("AltIce", "crucible/alt_ice"),               // catalyst is the snow BLOCK, not the layer
+            alias("AltCrackedBrick", "crucible/alt_cracked_brick"),
+            alias("AltBonemeal", "crucible/alt_bonemeal"),
+            alias("MirrorGlass", "arcane/mirrored_glass"),     // ConfigRecipes:196, shapeless quicksilver / glass pane
             alias("ArcaneStone1", "arcane/arcane_stone"),      // 205
             alias("ArcaneStone2", "arcane_stone_bricks"),      // 206
             alias("ArcaneStone3", "arcane_stone_brick_stairs"), // 207

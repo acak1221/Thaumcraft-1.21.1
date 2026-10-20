@@ -1,0 +1,7 @@
+{
+  "type": "thaumcraft:arcane_shapeless",
+  "research": "BASICARTIFACE",
+  "ingredients": [{"item": "thaumcraft:quick_silver"}, {"item": "minecraft:glass_pane"}],
+  "result": {"id": "thaumcraft:mirrored_glass", "count": 1},
+  "vis": {"ignis": 10, "terra": 10}
+}

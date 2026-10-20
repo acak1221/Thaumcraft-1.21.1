@@ -1434,4 +1434,163 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.GrateRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    // ---- the new content wave: the eldritch bestiary, the cultists, the tainted animals,
+    // ---- the champion system, the eldritch blocks, the Outer Lands, the projectiles,
+    // ---- the device containers, the new items and the runic accessories.
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void eldritch_warden_caps_its_hits_and_keeps_its_ward(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBestiaryRuntimeChecks.wardenDamageCapAndEnrage(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void eldritch_golem_loses_its_head_and_hits_for_three_quarters(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBestiaryRuntimeChecks.golemBeheadingAndMelee(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void eldritch_crab_watcher_slime_and_zombie_keep_their_numbers(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBestiaryRuntimeChecks.crabWatcherSlimeAndZombie(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void cultist_faction_keeps_its_numbers_gear_and_loot(GameTestHelper test) {
+        thaumcraft.common.testing.CultistFactionRuntimeChecks.factionNumbersGearAndLoot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void cultist_praetor_keeps_its_boss_behaviour(GameTestHelper test) {
+        thaumcraft.common.testing.CultistFactionRuntimeChecks.praetorBossBehaviour(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 6000)
+    public void cultist_portal_runs_its_stage_machine(GameTestHelper test) {
+        thaumcraft.common.testing.CultistFactionRuntimeChecks.portalStageMachine(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void tainted_animals_keep_their_numbers_and_drops(GameTestHelper test) {
+        thaumcraft.common.testing.TaintedAnimalRuntimeChecks.animalNumbersAndDrops(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void tainted_animals_convert_into_their_tainted_twin(GameTestHelper test) {
+        thaumcraft.common.testing.TaintedAnimalRuntimeChecks.conversionIntoTheTaintedTwin(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void taint_crawler_and_seeds_keep_their_numbers(GameTestHelper test) {
+        thaumcraft.common.testing.TaintedAnimalRuntimeChecks.crawlerAndSeedNumbers(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void champion_promotion_uses_the_original_bonuses(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.promotionUsesTheOriginalBonuses(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void champion_modifiers_answer_their_tick(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.modifiersAnswerTickHitAndWound(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void champion_modifiers_answer_their_hit_and_wound(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.modifiersAnswerHitAndWound(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void eldritch_altar_takes_eyes_and_switches_its_spawn_type(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.altarTakesEyesAndSwitchesItsSpawnType(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void eldritch_obelisk_slows_only_the_eldritch_mobs(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.obeliskSlowsOnlyTheEldritchMobs(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void magic_box_chain_owns_twenty_seven_slots_per_box(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.magicBoxChainOwnsTwentySevenSlotsPerBox(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void warding_stone_pushes_and_seals_its_ward(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.wardingStonePushesAndBannerKeepsItsAspect(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void banner_keeps_its_colour_and_aspect(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.bannerKeepsItsColourAndAspect(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void flux_scrubber_spends_its_charges(GameTestHelper test) {
+        thaumcraft.common.testing.EldritchBlockRuntimeChecks.fluxScrubberSpendsItsCharges(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void outer_lands_dimension_and_biome_use_the_original_values(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.dimensionAndBiomeUseTheOriginalValues(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void outer_lands_maze_uses_the_original_cell_layout(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.mazeUsesTheOriginalCellLayout(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void village_components_use_the_original_layout(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.villageComponentsUseTheOriginalLayout(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void bottle_of_taint_poisons_and_grows_fibres(GameTestHelper test) {
+        thaumcraft.common.testing.ProjectileRuntimeChecks.bottleOfTaintPoisonsAndGrowsFibres(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void golem_orb_homes_and_deals_the_original_damage(GameTestHelper test) {
+        thaumcraft.common.testing.ProjectileRuntimeChecks.golemOrbHomesAndDealsTheOriginalDamage(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void primal_arrow_keeps_its_damage_and_effects(GameTestHelper test) {
+        thaumcraft.common.testing.ProjectileRuntimeChecks.primalArrowKeepsItsDamageAndEffects(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void magic_box_and_hand_mirror_bind_the_original_slots(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceContainerRuntimeChecks.magicBoxAndHandMirrorBindTheOriginalSlots(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void ghost_slots_keep_the_original_limits(GameTestHelper test) {
+        thaumcraft.common.testing.DeviceContainerRuntimeChecks.ghostSlotsKeepTheOriginalLimits(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void bone_bow_keeps_its_original_draw_and_damage(GameTestHelper test) {
+        thaumcraft.common.testing.EquipmentItemRuntimeChecks.boneBowKeepsItsOriginalDrawAndDamage(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void crimson_sword_and_primal_crusher_keep_their_numbers(GameTestHelper test) {
+        thaumcraft.common.testing.EquipmentItemRuntimeChecks.crimsonSwordAndPrimalCrusherKeepTheirNumbers(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void relics_and_reliquaries_keep_their_original_rules(GameTestHelper test) {
+        thaumcraft.common.testing.EquipmentItemRuntimeChecks.relicsAndReliquariesKeepTheirOriginalRules(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void runic_accessories_keep_their_original_charge_and_slot(GameTestHelper test) {
+        thaumcraft.common.testing.RunicBaubleRuntimeChecks.runicAccessoriesKeepTheirOriginalChargeAndSlot(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void cultist_armour_keeps_its_original_numbers(GameTestHelper test) {
+        thaumcraft.common.testing.RunicBaubleRuntimeChecks.cultistArmourKeepsItsOriginalNumbers(test);
+    }
+
 }

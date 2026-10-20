@@ -1,14 +1,22 @@
 package thaumcraft.common.items.armor;
 
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Armor that stands against magic damage. The original gave this through Forge's {@code ISpecialArmor.getProperties}: for a magic source
- * (and only then, in the void robes) a worn piece absorbs {@code armor / 35} of the damage in a first pass, ahead of every ordinary
- * piece. Vanilla 1.21.1 armor attributes already carry the ordinary {@code armor / 25} share, so only the magic pass is a hook here
- * ({@code MagicWard}).
+ * Armor with the original's ISpecialArmor first pass. Forge asked such a piece for its properties per damage source: for a magic source
+ * it absorbed {@code armor / 35} of the damage, for the Thaumium Fortress armor also {@code armor / 20} for fire and explosions (all
+ * ahead of the ordinary pieces, as priority 1), and for ordinary damage {@code armor / 25}, which vanilla 1.21.1 armor attributes already
+ * do. So only the first pass is a hook here ({@code MagicWard}); a piece that took its share there is left out of vanilla's own armor
+ * value for that damage (and a bonus to the ordinary share is added to it), see {@code MagicWard.armorDelta}.
  */
 public interface MagicWardGear {
-    /** The armor points the piece measures its magic ward by (the original damageReduceAmount). */
+    /** The armor points the piece measures its ward by (the original damageReduceAmount). */
     int wardArmor(ItemStack stack);
+
+    /** Whether the piece also guards against fire and explosions (the Fortress armor, not the robes). */
+    default boolean wardsFire() { return false; }
+
+    /** The multiplier on the piece's share (and on its ordinary armor): the Fortress armor's set bonus for a player, 1 otherwise. */
+    default double wardFactor(ItemStack stack, LivingEntity wearer) { return 1.0; }
 }

@@ -1,4 +1,4 @@
-void-robe
-wash-keeps-level
+fortress
+durability-30 rarity-uncommon enchantability-20 fire-ward-off set-applies-to-mobs goggles-always-seen popups-always mask-default-zero set-without-helm fiend-heals-two ghost-wrong-mask ghost-poisons explosion-not-fire delta-adds-ward-armor mask-patch-zero patch-any-armor
 
-# request 19: re-run the one void-robe mutant that survived on GitHub in 48 s (run 17); it is caught locally. portable-hole (run 18) is still queued
+# request 20: the 16 fortress game-test mutants not run locally (17 JUnit and 7 game-test mutants were caught locally)

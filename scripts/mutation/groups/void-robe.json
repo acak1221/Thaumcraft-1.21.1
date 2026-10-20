@@ -27,8 +27,8 @@
    "name": "only the last piece's ward counts",
    "tier": "junit",
    "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
-   "old": "total += ratio(armor);",
-   "new": "total = ratio(armor);"
+   "old": "for (double ratio : ratios) total += ratio;",
+   "new": "for (double ratio : ratios) total = ratio;"
   },
   {
    "id": "reduce-half",
@@ -232,18 +232,18 @@
   },
   {
    "id": "ward-any-damage",
-   "name": "the ward answers every damage source",
+   "name": "every damage source counts as magic",
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
-   "old": "if (damage <= 0 || !source.is(MAGIC_DAMAGE)) return damage;",
-   "new": "if (damage <= 0) return damage;"
+   "old": "if (source.is(MAGIC_DAMAGE)) return Kind.MAGIC;",
+   "new": "if (true || source.is(MAGIC_DAMAGE)) return Kind.MAGIC;"
   },
   {
    "id": "ward-no-wear",
    "name": "the ward wears no piece",
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
-   "old": "stack.hurtAndBreak(wear(damage, gear.wardArmor(stack)), entity, slot);",
+   "old": "stack.hurtAndBreak(wearByRatio(damage, share(gear, stack, entity, kind)), entity, slot);",
    "new": ";"
   },
   {

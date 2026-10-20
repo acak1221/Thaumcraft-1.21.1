@@ -20,6 +20,8 @@ import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.items.armor.FortressRules;
+import thaumcraft.common.items.armor.ItemFortressArmor;
 import thaumcraft.common.items.armor.ItemThaumiumArmor;
 import thaumcraft.common.items.armor.ItemVoidArmor;
 import thaumcraft.common.items.armor.ItemVoidRobeArmor;
@@ -95,6 +97,21 @@ public final class ThaumcraftEquipment {
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "void"))), 0, 0));
 
     /**
+     * Api armorMatThaumiumFortress: durability factor 40 (set on the items), protection 3/7/6/3 (no boots exist), enchantability 25, mended
+     * with the thaumium ingot. INTERIM: the worn look is the Thaumium armor's layers until the original ModelFortressArmor is ported.
+     */
+    public static final RegistrySupplier<ArmorMaterial> FORTRESS_ARMOR_MATERIAL = ARMOR_MATERIALS.register("fortress", () -> new ArmorMaterial(
+            Map.of(ArmorItem.Type.HELMET, 3, ArmorItem.Type.CHESTPLATE, 7, ArmorItem.Type.LEGGINGS, 6, ArmorItem.Type.BOOTS, 3),
+            25, SoundEvents.ARMOR_EQUIP_IRON, ThaumcraftEquipment::thaumiumRepairIngredient,
+            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "thaumium"))), 0, 0));
+    /** The helm's goggles upgrade and its mask (0 Grinning Devil, 1 Angry Ghost, 2 Sipping Fiend): the original's NBT "goggles" and "mask". */
+    public static final RegistrySupplier<DataComponentType<Boolean>> FORTRESS_GOGGLES = COMPONENTS.register("fortress_goggles",
+            () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+    public static final RegistrySupplier<DataComponentType<Integer>> FORTRESS_MASK = COMPONENTS.register("fortress_mask",
+            () -> DataComponentType.<Integer>builder().persistent(Codec.intRange(FortressRules.MASK_DEVIL, FortressRules.MASK_FIEND))
+                    .networkSynchronized(ByteBufCodecs.VAR_INT).build());
+
+    /**
      * The void armor material again (original ItemVoidRobeArmor takes armorMatVoid, not the unused armorMatVoidFortress), as its own
      * holder: the robes' worn look is another model. INTERIM: until the original ModelRobe (a 128 x 64 model with its own texture) is
      * ported the worn layers are the void armor's, undyed.
@@ -160,6 +177,12 @@ public final class ThaumcraftEquipment {
             () -> new ItemVoidArmor(VOID_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Properties()));
     public static final RegistrySupplier<ItemVoidArmor> VOID_BOOTS = ITEMS.register("void_boots",
             () -> new ItemVoidArmor(VOID_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Properties()));
+    public static final RegistrySupplier<ItemFortressArmor> FORTRESS_HELMET = ITEMS.register("fortress_helmet",
+            () -> new ItemFortressArmor(FORTRESS_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final RegistrySupplier<ItemFortressArmor> FORTRESS_CHESTPLATE = ITEMS.register("fortress_chestplate",
+            () -> new ItemFortressArmor(FORTRESS_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final RegistrySupplier<ItemFortressArmor> FORTRESS_LEGGINGS = ITEMS.register("fortress_leggings",
+            () -> new ItemFortressArmor(FORTRESS_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Properties()));
     public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_HELMET = ITEMS.register("void_robe_helmet",
             () -> new ItemVoidRobeArmor(VOID_ROBE_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Properties()));
     public static final RegistrySupplier<ItemVoidRobeArmor> VOID_ROBE_CHESTPLATE = ITEMS.register("void_robe_chestplate",
@@ -191,7 +214,7 @@ public final class ThaumcraftEquipment {
         for (RegistrySupplier<? extends Item> item : List.of(THAUMIUM_SWORD, THAUMIUM_PICKAXE, THAUMIUM_AXE, ELEMENTAL_AXE, ELEMENTAL_PICKAXE, ELEMENTAL_HOE, ELEMENTAL_SHOVEL, ELEMENTAL_SWORD,
                 THAUMIUM_SHOVEL, THAUMIUM_HOE, THAUMIUM_HELMET, THAUMIUM_CHESTPLATE, THAUMIUM_LEGGINGS, THAUMIUM_BOOTS,
                 VOID_SWORD, VOID_PICKAXE, VOID_AXE, VOID_SHOVEL, VOID_HOE, VOID_HELMET, VOID_CHESTPLATE, VOID_LEGGINGS, VOID_BOOTS,
-                VOID_ROBE_HELMET, VOID_ROBE_CHESTPLATE, VOID_ROBE_LEGGINGS)) {
+                VOID_ROBE_HELMET, VOID_ROBE_CHESTPLATE, VOID_ROBE_LEGGINGS, FORTRESS_HELMET, FORTRESS_CHESTPLATE, FORTRESS_LEGGINGS)) {
             CreativeTabRegistry.append(ThaumcraftContent.TAB, item);
         }
     }

@@ -80,6 +80,13 @@ public final class ThaumcraftRecipeDisplay {
             alias("VoidChest", "void_chestplate"),          // 450
             alias("VoidLegs", "void_leggings"),             // 451
             alias("VoidBoots", "void_boots"),               // 452
+            alias("ThaumiumFortressHelm", "infusion/fortress_helm"),   // ConfigRecipes:360, pristine thaumium helmet / 2 thaumium ingots / 2 gold / emerald
+            alias("ThaumiumFortressChest", "infusion/fortress_chest"), // 361, pristine thaumium chestplate / 4 thaumium ingots / gold / leather
+            alias("ThaumiumFortressLegs", "infusion/fortress_legs"),   // 362, pristine thaumium leggings / 3 thaumium ingots / gold / leather
+            alias("HelmGoggles", "infusion/fortress_goggles"),         // 367, any fortress helm / slime ball / goggles
+            alias("MaskGrinningDevil", "infusion/fortress_mask_devil"),// 368
+            alias("MaskAngryGhost", "infusion/fortress_mask_ghost"),   // 369
+            alias("MaskSippingFiend", "infusion/fortress_mask_fiend"), // 370
             alias("VoidRobeHelm", "infusion/void_robe_helm"),   // ConfigRecipes:363, pristine void helmet / goggles / 4 enchanted fabric / salis mundus
             alias("VoidRobeChest", "infusion/void_robe_chest"), // 364, pristine void chestplate / robe chestplate / void and thaumium ingot / salis mundus / fabric / leather
             alias("VoidRobeLegs", "infusion/void_robe_legs"),   // 365, the same with the robe leggings

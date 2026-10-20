@@ -88,8 +88,12 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
                     AdvancedFurnaceRuntimeChecks.ticks(f,core,5);
                     f.check(core.getTickCount()==count && core.getHeat()==heat && f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z)==null,
                             "actual loaded core pauses through unknown17-part terrain without raw CV debit, heat decay, count advance or force-load");
-                    f.level.setBlock(center,Blocks.AIR.defaultBlockState(),TubeVariantsRuntimeChecks.QUIET);
-                    f.check(core.isRemoved() && f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z)==null,"actual core removal never force-loads the saved remote shell chunk");
+                    f.check(f.level.setBlock(center,Blocks.AIR.defaultBlockState(),TubeVariantsRuntimeChecks.QUIET),
+                            "actual native quiet18 core replacement invokes real onRemove; ordinary player-break neighbor propagation is a separate vanilla operation");
+                    f.check(core.isRemoved(),"actual native onRemove retires the disk-reloaded core BE");
+                    f.check(f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z)==null,
+                            "own partial disassembly never force-loads saved remote shell terrain through inner-parts' indirect shape updates; shell="
+                                    +f.level.getChunkSource().getChunkDebugData(shellChunk));
                     f.level.getChunkSource().addRegionTicket(OWNED,shellChunk,0,shell); shellTicket=true; polls=0; pollReload();
                 } catch(RuntimeException|Error failure) { close(); throw failure; }
             });

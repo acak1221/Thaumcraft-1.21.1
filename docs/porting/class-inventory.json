@@ -2002,7 +2002,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/items/ItemLootBag.java",
       "role": "native_foundation",
-      "sha256": "65a3ae0e196c1a6a1ff7f3f5b18d3aa16053eb1e41f7d51956580a87c87eda63"
+      "sha256": "ec9e5a127aa22b3b59d0ab36704fbef87e6813536351815410d2a57192a47919"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/items/ItemManaBean.java",
@@ -2527,7 +2527,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/AdvancedFurnaceFormation.java",
       "role": "native_foundation",
-      "sha256": "8af923085695190ebcd01ac7d2afe85fc27af0cebc5ddfa8357b900159a6f0dc"
+      "sha256": "191742b4431ea85fc72c6d6a8a4281ca843dcd859c1eeb85c2e145d7ead5084f"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/AdvancedFurnaceRules.java",

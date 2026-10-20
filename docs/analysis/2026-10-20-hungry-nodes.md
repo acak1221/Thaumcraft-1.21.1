@@ -143,7 +143,15 @@ health/current-owner/one-item Earth2 preconditions passed; the recorded failure
 had `bounds=[]`, `effects=[]`, a dead item and unchanged current/BASE. Native
 bytecode then established the BlockItem CONTAINER mutation above as the cause.
 The production adapter and expanded custody/conservation assertions were written
-after that diagnostic and still require subsequent compile/runtime verification.
+after that diagnostic. The subsequent `075df78` CI run passed every original
+meal, native container conservation and adversarial callback assertion, then
+failed the survival-player damage assertion. Native `ServerPlayer.hurt` has a
+separate private60-tick spawn protection; clearing public LivingEntity damage
+cooldown cannot bypass it. The fixture started after only5 world ticks. It now
+waits65 actual native world ticks and requires the actor to have completed at
+least60 native player ticks before running its unchanged damage/pull assertions.
+This fixture correction still requires subsequent compile/runtime verification;
+production damage is unchanged.
 That two-test run is not acceptance of the full243-test snapshot. The temporary
 wrapper annotation selection was restored byte-for-byte afterward. Exact log:
 `.tmp/hungry-crystal-focused.log`; no test-filter infrastructure was added.

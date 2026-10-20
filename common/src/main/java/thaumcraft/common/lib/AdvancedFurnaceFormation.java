@@ -148,8 +148,10 @@ public final class AdvancedFurnaceFormation {
         if(!(core.getLevel() instanceof ServerLevel world) || isMutationActive() || core.isStandaloneCreative()) return;
         BlockPos center=core.getBlockPos();
         // Known missing pieces revert; unknown terrain waits so no detached/orphan half is silently abandoned.
+        boolean unknownTerrain=false;
         for(int x=-1;x<=1;x++) for(int y=0;y<=1;y++) for(int z=-1;z<=1;z++)
-            if(!coreBeingBroken && AdvancedFurnaceRules.part(x,y,z)>=0 && !loaded(world,center.offset(x,y,z))) return;
+            if(AdvancedFurnaceRules.part(x,y,z)>=0 && !loaded(world,center.offset(x,y,z))) unknownTerrain=true;
+        if(!coreBeingBroken && unknownTerrain) return;
         MUTATING.set(true);
         try {
             for(int x=-1;x<=1;x++) for(int y=0;y<=1;y++) for(int z=-1;z<=1;z++) {
@@ -157,7 +159,9 @@ public final class AdvancedFurnaceFormation {
                 BlockPos pos=center.offset(x,y,z); if(!loaded(world,pos)) continue; BlockState state=world.getBlockState(pos);
                 if(state.is(ThaumcraftAdvancedFurnace.FURNACE.get()) && state.getValue(BlockAdvancedAlchemyFurnace.PART)==expected
                         && existing(world,pos) instanceof TileAlchemyFurnaceAdvancedPart owned && owned.belongsTo(core))
-                    world.setBlock(pos,original(expected),reversionFlags(world,pos));
+                    // Even an inner part's vanilla flags3 shape cascade can reach a second neighbor in an
+                    // unavailable chunk. A partial native retirement therefore keeps EVERY own write quiet.
+                    world.setBlock(pos,original(expected),unknownTerrain?Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE:reversionFlags(world,pos));
             }
             if(!coreBeingBroken && existing(world,center)==core && world.getBlockState(center).is(ThaumcraftAdvancedFurnace.FURNACE.get()))
                 world.setBlock(center,original(0),reversionFlags(world,center));

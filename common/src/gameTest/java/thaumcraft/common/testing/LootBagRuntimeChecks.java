@@ -198,7 +198,7 @@ public final class LootBagRuntimeChecks {
         void creativeWrapper() {
             EntityEvent.ADD.unregister(observer);observer=null;player.setGameMode(GameType.CREATIVE);BlockPos source=base.above(8);player.setPos(Vec3.atCenterOf(source));
             var bag=new ItemStack(ThaumcraftLoot.LOOT_BAG_COMMON.get(),2);player.setItemInHand(InteractionHand.MAIN_HAND,bag);level.random.setSeed(3);
-            test.assertTrue(player.gameMode.useItem(player,level,bag,InteractionHand.MAIN_HAND).consumesAction()&&player.getItemInHand(InteractionHand.MAIN_HAND)==bag&&bag.getCount()==2,"actual creative game-mode wrapper restores the original bag count, matching 1.7");
+            test.assertTrue(player.gameMode.useItem(player,level,bag,InteractionHand.MAIN_HAND).consumesAction()&&player.getItemInHand(InteractionHand.MAIN_HAND)==bag&&bag.getCount()==2,"actual creative game-mode use preserves the original bag count through the native compatibility adapter, matching 1.7");
             var rows=rows(source);test.assertTrue(rows.size()==12,"original seed3 reaches maximum twelve output rolls");
             for(var row:rows)paid.put(row.getUUID("Id"),row);queue().flush(level);finish();test.succeed();
         }

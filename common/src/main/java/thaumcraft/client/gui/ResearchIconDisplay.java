@@ -17,7 +17,7 @@ import thaumcraft.common.items.wands.WandData;
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
             + "|ConfigBlocks\\.(?:blockTable|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCustomOre|blockChestHungry|blockTaint))"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
 
@@ -140,6 +140,7 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemPickThaumium" -> metadata == 0 ? "thaumium_pickaxe" : null;
             case "ConfigItems.itemAxeThaumium" -> metadata == 0 ? "thaumium_axe" : null;
             case "ConfigItems.itemAxeElemental" -> metadata == 0 ? "elemental_axe" : null;
+            case "ConfigItems.itemPickElemental" -> metadata == 0 ? "elemental_pickaxe" : null;
             case "ConfigItems.itemShovelThaumium" -> metadata == 0 ? "thaumium_shovel" : null;
             case "ConfigItems.itemHoeThaumium" -> metadata == 0 ? "thaumium_hoe" : null;
             case "ConfigItems.itemHelmetThaumium" -> metadata == 0 ? "thaumium_helmet" : null;

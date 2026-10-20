@@ -70,6 +70,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("ThaumiumPick", "thaumium_pickaxe"),      // 464
             alias("ThaumiumAxe", "thaumium_axe"),           // 465
             alias("ElementalAxe", "infusion/elemental_axe"), // 364, pristine thaumium axe / two water shards / diamond / Greatwood log
+            alias("ElementalPick", "infusion/elemental_pickaxe"), // ConfigRecipes:346, pristine thaumium pickaxe / two fire shards / diamond / Greatwood log
             alias("ThaumiumHoe", "thaumium_hoe"),           // 466
             alias("ThaumiumSword", "thaumium_sword"),       // 467
             alias("VoidHelm", "void_helmet"),               // 449; ordinary, not research-gated crafting

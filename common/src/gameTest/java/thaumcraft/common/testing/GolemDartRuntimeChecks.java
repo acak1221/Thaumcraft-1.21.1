@@ -362,10 +362,11 @@ public final class GolemDartRuntimeChecks {
                 nearest = Math.min(nearest, distanceSq);
                 maxArm = Math.max(maxArm, guard.getLeftArmTimer());
                 if (!shots.isEmpty() && guard.getLeftArmTimer() == 0) armReset = true;
-                for (EntityDart dart : level.getEntitiesOfClass(EntityDart.class, region, entity -> !existing.contains(entity.getUUID()))) {
+                // Only the Guard's own darts are timed: a neighbouring test's Guard with a launcher may shoot into the lane from outside.
+                for (EntityDart dart : level.getEntitiesOfClass(EntityDart.class, region, entity -> !existing.contains(entity.getUUID()) && entity.getOwner() == guard)) {
                     if (!seen.add(dart.getUUID())) continue;
-                    test.assertTrue(dart.getOwner() == guard && guard.getTarget() == target,
-                            name + ": the dart belongs to the Guard and flies at the lane's spider, not at a stray target: " + guard.getTarget());
+                    test.assertTrue(guard.getTarget() == target,
+                            name + ": the Guard shoots at the lane's spider, not at a stray target: " + guard.getTarget());
                     double attack = (float) guard.getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.4F;
                     test.assertTrue(dart.getBaseDamage() == attack && dart.getBaseDamage() > 0,
                             name + ": the dart does 0.4 of the golem's attack: " + dart.getBaseDamage() + " vs " + attack);
@@ -435,7 +436,8 @@ public final class GolemDartRuntimeChecks {
             @Override void poll() {
                 test.assertTrue(golem.isAlive(), name + ": the golem survived");
                 nearest = Math.min(nearest, golem.distanceToSqr(target.getX(), target.getBoundingBox().minY, target.getZ()));
-                darts += level.getEntitiesOfClass(EntityDart.class, region, entity -> !existing.contains(entity.getUUID())).size();
+                // Only this golem's own darts count: a neighbouring test's Guard with a launcher may shoot into the lane from outside.
+                darts += level.getEntitiesOfClass(EntityDart.class, region, entity -> !existing.contains(entity.getUUID()) && entity.getOwner() == golem).size();
                 test.assertTrue(darts == 0, name + ": no dart may leave");
                 fought |= target.getHealth() < target.getMaxHealth();
                 if (test.getTick() >= startedAt + IDLE_TICKS) {

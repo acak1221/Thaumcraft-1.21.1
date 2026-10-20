@@ -28,7 +28,10 @@
     "ZombieBrainDropsMixin",
     "GolemUseServerPlayerGameModeMixin",
     "StreamAxeItemMixin",
-    "SpecialMiningBlockMixin"
+    "SpecialMiningBlockMixin",
+    "ServerGamePacketListenerFloatAccess",
+    "LivingEntityAttackStrengthAccess",
+    "PlayerAttackSweepMixin"
   ],
   "client": ["client.TableOutlineMixin", "client.WandFocusKeyMixin", "client.MinecraftItemColorsAccess", "client.RobeArmorLayerMixin"],
   "injectors": {"defaultRequire": 1}

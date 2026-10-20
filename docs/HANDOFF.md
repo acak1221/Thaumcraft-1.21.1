@@ -4,12 +4,21 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально20.10 (двадцать вторая группа: Меч Бури, Claude): реализовано, собрано, game-tested 170/170
+
+Контракт и реализация: [elemental-sword](analysis/2026-10-20-elemental-sword.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `elemental_sword` (1500 прочности, скорость 10, урон 7, зачаровываемость 18, rare, ремонт слитком таумия), **удержание** кнопки (подъём +0,08 за тик с потолком 0,5→0,2, падение и дистанция падения делятся на 1,2, обнуление счётчика «парения» сервера, отталкивание всех, кроме игроков, в радиусе 2,5, звук `wind` и износ в тиках 0/20/40…), **размах удара** (`Player.attack`: каждый живой моб в боксе цели ±(1,2; 1,1; 1,2), кроме собственных големов, ручных животных и игроков, получает обычный удар игрока со своим износом меча; перезарядка сохраняется; вложенные удары не размахиваются), инфузия `ELEMENTALSWORD`.
+**Built / game-tested:** `:common:test` **497 JUnit** (+7), `:fabric:remapJar`, `:fabric:runGameTest` **170/170** (+`swordOfTheZephyrLiftsBlowsAndSweeps`: настоящий подключённый игрок, настоящие `Player.attack`), JAR SHA-256 `2ceea75f…b26f`; три команды шага CI с ресурсами зелёные.
+**Мутации:** `elemental-sword` (36): JUnit 20/20 и пять GameTest-мутантов пойманы локально, остальные 11 GameTest у GitHub. `elemental-shovel` (35) на GitHub — результат не прочитан.
+**Seen:** нет. **Не проверено:** подъём на настоящем клиенте, частицы, звуки, поза лука (вместо блока мечом), сеть/два игрока.
+**Следующее:** Primal Crusher (ELDRITCH) — после фокуса Primal; M01 R10–R16 (копирование, unknown scrolls, clues, режимы сложности, deconstruction), M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium; варп (M11).
+
 ### Актуально20.10 (двадцать первая группа: Лопата Землероя, Claude): реализовано, собрано, game-tested 169/169
 
 Контракт и реализация: [elemental-shovel](analysis/2026-10-20-elemental-shovel.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
 **Implemented:** `elemental_shovel` (1500 прочности, скорость 10, урон 4, зачаровываемость 18, rare, ремонт слитком таумия), **копание 3 × 3** поперёк грани, на которую смотрит игрок (вложенные обычные разрушения: прочность, выпадение, события защиты; не при крадущемся, не в креативе, только блоки `mineable/shovel`), **укладка 3 × 3** копии щёлкнутого блока из инвентаря (по ориентации 0/1/2 и повороту игрока; трава → земля), ориентация — компонент `thaumcraft:shovel_orientation` и клавиша G (`ShovelOrientationPayload`), инфузия `ELEMENTALSHOVEL`.
 **Built / game-tested:** `:common:test` **490 JUnit** (+10), `:fabric:remapJar`, `:fabric:runGameTest` **169/169** (+`shovelOfTheEarthmoverMinesAndLaysSquares`: настоящий подключённый игрок, настоящие блоки), JAR SHA-256 `bc13bd2d…aa06`; три команды шага CI с ресурсами зелёные.
-**Мутации:** `elemental-shovel` (35): JUnit 17/17 и четыре GameTest-мутанта пойманы локально, остальные 14 GameTest у GitHub. `elemental-hoe` (25) и `elemental-pickaxe` (27) на GitHub — результат не прочитан.
+**Мутации:** `elemental-shovel` (35): JUnit 17/17 и четыре GameTest-мутанта пойманы локально, остальные 14 GameTest у GitHub. `elemental-hoe` (25) и `elemental-pickaxe` (27) на GitHub — все как ожидалось.
 **Seen:** нет. **Не проверено:** значок, звуки, сама клавиша G в клиенте, работа с модом защиты территории.
 **Не перенесено:** призрачный предпросмотр (`IArchitect`) и искры, переключатель жезла на клавише G.
 **Следующее:** Elemental Sword (взлёт и притягивание при удержании, удар по всем рядом), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
@@ -19,7 +28,7 @@
 Контракт и реализация: [elemental-hoe](analysis/2026-10-20-elemental-hoe.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
 **Implemented:** `elemental_hoe` (1500 прочности, зачаровываемость 5, rare, без урона, удар не тратит прочность), вспашка 3 × 3 (1 прочность за блок, право правки на каждый, крадущийся — один), при пустой вспашке костная мука (1 прочность), затем рост магического саженца: Greatwood за 5 при остатке от 20, Silverwood за 25 при остатке от 150 (плата и при отсутствии места), инфузия `ELEMENTALHOE`, звук `wand`.
 **Built / game-tested:** `:common:test` **480 JUnit** (+4), `:fabric:remapJar`, `:fabric:runGameTest` **168/168** (+`hoeOfGrowthTillsFertilisesAndGrowsSaplings`: настоящий игрок, настоящие блоки и деревья), JAR SHA-256 `49fb705c…2a5e`; три команды шага CI с ресурсами зелёные.
-**Мутации:** `elemental-hoe` (25): JUnit 14/14 и три GameTest-мутанта пойманы локально, остальные 8 GameTest у GitHub. `elemental-pickaxe` (27) на GitHub — результат не прочитан.
+**Мутации:** `elemental-hoe` (25): JUnit 14/14 и три GameTest-мутанта пойманы локально, GitHub (прогон 13) — все 25 как ожидалось. `elemental-pickaxe` (27) на GitHub (прогон 12) — тоже все как ожидалось.
 **Seen:** нет. **Не проверено:** значок, звук, искры (не портированы), раздатчик.
 **Следующее:** Elemental Shovel (3 × 3 копание и укладка, IArchitect) и Sword (взлёт и притягивание), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
 
@@ -29,7 +38,7 @@
 **Implemented:** `elemental_pickaxe` (1500 прочности, скорость 10, урон 5, зачаровываемость 18, rare, ремонт слитком таумия), поджог на 2 секунды при ударе (правило PvP), 5 прочности и звук `wandfail` за правый щелчок, инфузия `ELEMENTALPICK`,
 **особая добыча** (`SpecialMining` + миксин `SpecialMiningBlockMixin` в `Block.getDrops`): `raw_iron` / `raw_gold` / `cinnabar_ore` превращаются в кластеры с шансом `0,2 + удача × 0,075` (× 1,0 / 0,9 / 0,9), то же количество, без Silk Touch, только у игрока с этой киркой.
 **Built / game-tested:** `:common:test` **476 JUnit** (+6), `:fabric:remapJar`, `:fabric:runGameTest` **167/167** (+`pickaxeOfTheCoreBurnsWearsAndFindsClusters`: 400-кратные выборки `Block.getDrops` и 120 настоящих добыч), JAR SHA-256 `305d58b7…347b`; три команды шага CI с ресурсами зелёные. Один красный прогон по дороге — дорожка NO-LAUNCHER в тесте дротика насчитала чужой дротик; дорожки теперь считают только дротики своего голема (`getOwner()`), причина не доказана.
-**Мутации:** `elemental-pickaxe` (27): JUnit 13/13 локально, 14 GameTest у GitHub. `native-clusters` (24) и `void-gear` (27) на GitHub — все как ожидалось.
+**Мутации:** `elemental-pickaxe` (27): JUnit 13/13 локально, GitHub (прогон 12) — все 27 как ожидалось. `native-clusters` (24) и `void-gear` (27) на GitHub — все как ожидалось.
 **Seen:** нет. **Не проверено:** значок кирки, звуки, работа с Буром (Бур пока принимает только ванильные кирки и Thaumium Pickaxe), Excavation с Dowsing.
 **Не перенесено:** клиентский скан руд (правый щелчок), Primal Crusher, Dowsing.
 **Следующее:** Elemental Hoe / Shovel / Sword (мотыга растит деревья, лопата 3×3, меч подбрасывает), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.

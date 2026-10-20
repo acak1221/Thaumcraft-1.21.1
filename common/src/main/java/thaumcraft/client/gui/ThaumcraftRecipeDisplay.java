@@ -73,6 +73,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("ElementalPick", "infusion/elemental_pickaxe"), // ConfigRecipes:346, pristine thaumium pickaxe / two fire shards / diamond / Greatwood log
             alias("ElementalHoe", "infusion/elemental_hoe"), // ConfigRecipes:349, pristine thaumium hoe / order shard / entropy shard / diamond / Greatwood log
             alias("ElementalShovel", "infusion/elemental_shovel"), // ConfigRecipes:348, pristine thaumium shovel / two earth shards / diamond / Greatwood log
+            alias("ElementalSword", "infusion/elemental_sword"), // ConfigRecipes:347, pristine thaumium sword / two air shards / diamond / Greatwood log
             alias("ThaumiumHoe", "thaumium_hoe"),           // 466
             alias("ThaumiumSword", "thaumium_sword"),       // 467
             alias("VoidHelm", "void_helmet"),               // 449; ordinary, not research-gated crafting

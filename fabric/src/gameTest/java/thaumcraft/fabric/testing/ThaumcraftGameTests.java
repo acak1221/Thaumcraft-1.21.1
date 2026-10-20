@@ -1424,4 +1424,9 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         PureBucketStorageRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m09_alchemy_leftovers")
+    public void alchemyLeftoversBrewFromTheirCatalystsAtTheOriginalCost(GameTestHelper test) {
+        thaumcraft.common.testing.AlchemyLeftoversRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
 }

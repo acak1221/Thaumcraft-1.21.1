@@ -9,6 +9,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -21,11 +22,13 @@ import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
+import thaumcraft.common.lib.utils.AspectOrbQueue;
+import thaumcraft.common.lib.research.AspectOrbRules;
 
 /**
- * TC4 normal-node state and lifecycle. Source: original TileNode.setAspects,
+ * TC4 NORMAL/UNSTABLE node state and lifecycle. Source: original TileNode.setAspects,
  * handleDischarge, handleRecharge and onUsingWandTick. Basic stabilizer locking
- * and supported NORMAL/FADING repair are included; special-node ecology,
+ * and supported UNSTABLE emissions/FADING repair are included; other special-node ecology,
  * advanced stabilization and jars remain separate unimplemented units. Real
  * energized conversion/network routing live in the separate M09b node family.
  */
@@ -46,9 +49,13 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     private int rechargeWait;
     private long lastActive;
     private boolean catchUp;
-    private boolean ticking, notifying, transducing;
+    private boolean ticking, notifying, transducing, pearlPlanning;
     private Level tickingLevel;
     private BlockState tickingState;
+    private AspectOrbQueue.Prepared orbIntent;
+    private AspectList orbStock;
+    private Aspect orbAspect;
+    private int orbBefore, orbTick;
 
     public TileNode(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -64,6 +71,10 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     public int getNodeVisBase(Aspect aspect) { return aspectsBase.getAmount(aspect); }
     public String getScanId() { return scanId; }
     public NodeType getNodeType() { return nodeType; }
+    /** Original ScanManager235-274, reading current stock without consuming it. */
+    public AspectList getScanAspects() {
+        return thaumcraft.common.lib.research.NodeScanAspects.get(aspects.copy(), nodeType);
+    }
     public NodeModifier getNodeModifier() { return nodeModifier; }
     public boolean isNatural() { return natural; }
     public byte getLock() { return nodeLock; }
@@ -72,16 +83,16 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     public int getRegenerationTicks() { return regeneration; }
     public int getRechargeWait() { return rechargeWait; }
 
-    boolean canTransduce() { return !transducing && !ticking && !notifying && current(); }
+    boolean canTransduce() { return !transducing && !ticking && !notifying && !pearlPlanning && current(); }
     boolean beginTransduction() {
-        if (transducing || ticking || notifying) return false;
+        if (transducing || ticking || notifying || pearlPlanning) return false;
         transducing = true;
         try { if (current()) return true; }
         catch (RuntimeException | Error failure) { transducing = false; throw failure; }
         transducing = false;
         return false;
     }
-    boolean transductionCurrent() { return transducing && !ticking && !notifying && current(); }
+    boolean transductionCurrent() { return transducing && !ticking && !notifying && !pearlPlanning && current(); }
     void endTransduction() { transducing = false; }
     /** Detached native reversion only. Original converter69-72 sets BASE then
      * drains every current key toZERO; UUID is freshly generated, not preserved. */
@@ -131,10 +142,12 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     @Override public int containerContains(Aspect aspect) { return 0; }
 
     /** Called only after the real feature has placed the existing aura-node block. */
-    public void initializeNatural(AspectList values, NodeModifier modifier) {
+    public void initializeNatural(AspectList values, NodeModifier modifier) { initializeNatural(values, NodeType.NORMAL, modifier); }
+    public void initializeNatural(AspectList values, NodeType type, NodeModifier modifier) {
+        if (type != NodeType.NORMAL && type != NodeType.UNSTABLE) throw new IllegalArgumentException("This native initializer supports NORMAL/UNSTABLE only");
         if (transducing) throw new IllegalStateException("Node aura is captured by an active transduction");
         natural = true;
-        nodeType = NodeType.NORMAL;
+        nodeType = type;
         nodeModifier = modifier;
         count = 0;
         nodeLock = 0;
@@ -143,6 +156,89 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         lastActive = 0;
         catchUp = false;
         setAspects(values);
+    }
+
+    /** Opaque original metadata3 pearl transition; only the exact paid native item receipt can apply it. */
+    public static final class PrimalPearlChange {
+        private final TileNode owner;
+        private final ServerLevel world;
+        private final BlockState state;
+        private final AspectList currentRef, baseRef, beforeCurrent, beforeBase, afterCurrent, afterBase;
+        private final NodeType type;
+        private final NodeModifier beforeModifier, afterModifier;
+        private final int tick;
+        private boolean applied;
+        private PrimalPearlChange(TileNode owner, ServerLevel world, BlockState state,
+                                  AspectList currentRef, AspectList baseRef, AspectList beforeCurrent, AspectList beforeBase,
+                                  AspectList afterCurrent, AspectList afterBase, NodeModifier beforeModifier, NodeModifier afterModifier) {
+            this.owner = owner; this.world = world; this.state = state;
+            this.currentRef = currentRef; this.baseRef = baseRef; this.beforeCurrent = beforeCurrent; this.beforeBase = beforeBase;
+            this.afterCurrent = afterCurrent; this.afterBase = afterBase; this.beforeModifier = beforeModifier; this.afterModifier = afterModifier;
+            this.type = owner.nodeType; this.tick = owner.count;
+        }
+    }
+    public PrimalPearlChange preparePrimalPearl(RandomSource random, boolean researched) {
+        if (random == null || pearlPlanning || ticking || notifying || transducing || orbIntent != null) return null;
+        pearlPlanning = true;
+        PrimalPearlChange prepared;
+        try {
+            if (!(level instanceof ServerLevel world) || !world.getServer().isSameThread()
+                    || world.getServer().getLevel(world.dimension()) != world || !current()) return null;
+            AspectList currentRef = aspects, baseRef = aspectsBase;
+            AspectList beforeCurrent = currentRef.copy(), beforeBase = baseRef.copy();
+            AspectList afterCurrent = beforeCurrent.copy(), afterBase = beforeBase.copy();
+            NodeModifier beforeModifier = nodeModifier, afterModifier = beforeModifier;
+            // Original ItemEldritchObject:151-172 iterates CURRENT keys, then all six registered primals.
+            for (Aspect aspect : beforeCurrent.getAspects()) {
+                int capacity = afterBase.getAmount(aspect);
+                if (!aspect.isPrimal()) {
+                    if (random.nextBoolean()) pearlBase(afterBase, aspect, (short)(capacity - 1));
+                } else pearlBase(afterBase, aspect, (short)(capacity - 2 + random.nextInt(researched ? 9 : 6)));
+            }
+            for (Aspect aspect : Aspect.getPrimalAspects()) {
+                int draw = random.nextInt(researched ? 4 : 3);
+                if (draw <= 0 || draw <= afterBase.getAmount(aspect)) continue;
+                pearlBase(afterBase, aspect, (short)draw);
+                // Original addToContainer can REDUCE an overfull current value after BASE was lowered.
+                int left = Math.max(0, 1 + afterCurrent.getAmount(aspect) - afterBase.getAmount(aspect));
+                afterCurrent.add(aspect, 1 - left);
+            }
+            if (afterModifier == NodeModifier.FADING && random.nextBoolean()) afterModifier = NodeModifier.PALE;
+            else if (afterModifier == NodeModifier.PALE && random.nextBoolean()) afterModifier = null;
+            else if (afterModifier == null && random.nextInt(5) == 0) afterModifier = NodeModifier.BRIGHT;
+            prepared = new PrimalPearlChange(this, world, getBlockState(), currentRef, baseRef,
+                    beforeCurrent, beforeBase, afterCurrent, afterBase, beforeModifier, afterModifier);
+        } finally { pearlPlanning = false; }
+        return matchesPreparedPrimalPearl(prepared) ? prepared : null;
+    }
+    private static void pearlBase(AspectList base, Aspect aspect, short target) {
+        int previous = base.getAmount(aspect);
+        if (previous < target) base.merge(aspect, target);
+        else {
+            // Original reduce refuses negative target (and retains a successful zero key).
+            long debit = (long)previous - target;
+            if (debit <= Integer.MAX_VALUE) base.reduce(aspect, (int)debit);
+        }
+    }
+    public boolean matchesPreparedPrimalPearl(PrimalPearlChange prepared) {
+        if (prepared == null || prepared.owner != this || prepared.applied || pearlPlanning || ticking || notifying || transducing || orbIntent != null) return false;
+        pearlPlanning = true;
+        try {
+            ServerLevel world = prepared.world;
+            if (level != world || !world.getServer().isSameThread() || world.getServer().getLevel(world.dimension()) != world
+                    || getBlockState() != prepared.state || !current()) return false;
+            // End with local state checks: no world call occurs after the observations being authorized.
+            return !prepared.applied && aspects == prepared.currentRef && aspectsBase == prepared.baseRef
+                    && nodeType == prepared.type && nodeModifier == prepared.beforeModifier && count == prepared.tick
+                    && aspects.aspects.equals(prepared.beforeCurrent.aspects) && aspectsBase.aspects.equals(prepared.beforeBase.aspects);
+        } finally { pearlPlanning = false; }
+    }
+    public void applyPreparedPrimalPearl(PrimalPearlChange prepared) {
+        thaumcraft.common.items.ItemPrimordialPearl.requirePreparedNodeMutation(this, prepared);
+        // Caller validated the exact opaque state immediately before debit. This phase makes no queries/copies/callbacks.
+        if (prepared.owner != this || prepared.applied || aspects != prepared.currentRef || aspectsBase != prepared.baseRef)
+            throw new IllegalStateException("Paid primordial pearl transition lost its exact node state");
+        aspects = prepared.afterCurrent; aspectsBase = prepared.afterBase; nodeModifier = prepared.afterModifier; prepared.applied = true;
     }
 
     /** Wand API: compounds stay in the node, but TC4 wands accept only primals. */
@@ -186,7 +282,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TileNode node) {
-        if (level.isClientSide || node.isRemoved() || node.nodeType != NodeType.NORMAL || node.ticking || node.notifying || node.transducing
+        if (level.isClientSide || node.isRemoved() || (node.nodeType != NodeType.NORMAL && node.nodeType != NodeType.UNSTABLE) || node.ticking || node.notifying || node.transducing || node.pearlPlanning
                 || node.level != level || !node.worldPosition.equals(pos) || state != node.getBlockState()) return;
         node.tickingLevel = level;
         node.tickingState = state;
@@ -205,7 +301,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
             if (!node.current()) return;
             change |= node.rechargeAndPrune();
             if (!node.current()) return;
-            change |= node.repairFading();
+            change |= node.handleStability();
             if (change && node.current()) node.changed();
         } finally { node.ticking = false; node.tickingLevel = null; node.tickingState = null; }
     }
@@ -254,7 +350,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         // Never load a neighbouring chunk to look for a node.
         if (level.isOutsideBuildHeight(otherPos) || !level.hasChunkAt(otherPos)
                 || !(level.getBlockEntity(otherPos) instanceof TileNode other)
-                || other.level != level || other.nodeType != NodeType.NORMAL || !other.current() || !current()) return false;
+                || other.level != level || (other.nodeType != NodeType.NORMAL && other.nodeType != NodeType.UNSTABLE) || !other.current() || !current()) return false;
         if (other.transducing || other.nodeLock > 0) return false; // Original lock check BEFORE aspect-selection RNG; atomic capture cannot be bullied.
         int otherAverage = (other.aspects.visSize() + other.aspectsBase.visSize()) / 2;
         int thisAverage = (aspects.visSize() + aspectsBase.visSize()) / 2;
@@ -286,9 +382,49 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         return nodeLock == 1 ? interval * 2 : interval;
     }
 
-    /** Original726-747's FADING branch ONLY. UNSTABLE/orbs and other special
-     * nodes stay deferred. Original setNodeModifier250-252 only assigns the
-     * modifier: retain cached FADING0 until a later native cache invalidation. */
+    /** Original100-tick stability precedes its separate FADING repair roll. */
+    private boolean handleStability() {
+        if (count % AspectOrbRules.EMISSION_INTERVAL != 0) return false;
+        boolean change = false;
+        if (nodeType == NodeType.UNSTABLE) {
+            int before = count; boolean chosen = level.random.nextBoolean();
+            if (!current() || count != before || nodeType != NodeType.UNSTABLE) return false;
+            if (chosen) {
+                if (nodeLock == 0) change = emitOrb();
+                else {
+                    byte lock = nodeLock; int roll = level.random.nextInt(AspectOrbRules.stabilityBound(lock));
+                    if (current() && count == before && nodeType == NodeType.UNSTABLE && nodeLock == lock && roll == AspectOrbRules.STABILITY_ROLL) { nodeType = NodeType.NORMAL; change = true; }
+                }
+            }
+        }
+        change |= repairFading();
+        return change;
+    }
+    private boolean emitOrb() {
+        AspectList stock = aspects, before = aspects.copy(); int tick = count;
+        Aspect aspect = AspectOrbRules.chooseCurrentPrimal(before, level.random::nextInt);
+        if (aspect == null || !current() || aspects != stock || count != tick || nodeType != NodeType.UNSTABLE || nodeLock != 0 || aspects.getAmount(aspect) != before.getAmount(aspect)) return false;
+        var plan = AspectOrbQueue.prepare((ServerLevel) level, worldPosition, aspect);
+        if (plan == null || !current() || aspects != stock || count != tick || nodeType != NodeType.UNSTABLE || nodeLock != 0 || aspects.getAmount(aspect) != before.getAmount(aspect)) return false;
+        orbIntent = plan; orbStock = stock; orbAspect = aspect; orbBefore = before.getAmount(aspect); orbTick = tick;
+        try { return plan.commit(this); }
+        finally { orbIntent = null; orbStock = null; orbAspect = null; }
+    }
+    /** Read-only admission for the exact private native emission frame. */
+    public boolean canCommitOrbEmission(AspectOrbQueue.Prepared plan) {
+        return ticking && orbIntent == plan && !transducing && !notifying && current() && nodeType == NodeType.UNSTABLE && nodeLock == 0
+                && count == orbTick && aspects == orbStock && orbAspect != null && aspects.getAmount(orbAspect) == orbBefore && orbBefore > 0
+                && level instanceof ServerLevel server && plan.isFor(server, worldPosition, orbAspect);
+    }
+    /** Callback-free actual current-aura debit. No public plan can enter this scope. */
+    public void commitOrbEmissionRaw(AspectOrbQueue.Prepared plan) {
+        AspectOrbQueue.requireRaw(plan);
+        if (!ticking || orbIntent != plan || aspects != orbStock || orbAspect == null || aspects.getAmount(orbAspect) != orbBefore || !aspects.reduce(orbAspect, 1)) throw new IllegalStateException("Stale node emission owner");
+        orbIntent = null;
+    }
+
+    /** Original setNodeModifier250-252 only assigns the modifier: retain cached
+     * FADING0 until a later native cache invalidation. */
     private boolean repairFading() {
         if (count % 100 != 0 || nodeModifier != NodeModifier.FADING || nodeLock == 0) return false;
         int before = count;

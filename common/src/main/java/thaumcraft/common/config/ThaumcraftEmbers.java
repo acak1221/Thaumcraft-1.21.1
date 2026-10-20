@@ -32,7 +32,7 @@ public final class ThaumcraftEmbers {
      * this method neither refunds vis nor treats a rejected spawn as accepted.
      * fireSeconds is TOTAL entity ignition, not the alchemist's-fire upgrade level.
      */
-    public static boolean emit(ServerPlayer player, float damage, int scatter, int lifetime, int fireSeconds) {
+    public static boolean emit(ServerPlayer player, float damage, float scatter, int lifetime, int fireSeconds) {
         var ember = new EntityEmber(player.serverLevel(), player, scatter);
         ember.setDamage(damage);
         ember.setDuration(lifetime);

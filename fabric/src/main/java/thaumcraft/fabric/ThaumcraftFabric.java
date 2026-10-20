@@ -20,6 +20,25 @@ public final class ThaumcraftFabric implements ModInitializer {
     @Override public void onInitialize() {
         Thaumcraft.init();
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftMonsters.FIREBAT.get(), thaumcraft.common.entities.monster.EntityFireBat.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftMonsters.WISP.get(), thaumcraft.common.entities.monster.EntityWisp.createAttributes());
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftMonsters.FIREBAT.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.NO_RESTRICTIONS, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityFireBat::checkFireBatSpawnRules);
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftMonsters.WISP.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.NO_RESTRICTIONS, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityWisp::checkWispSpawnRules);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_NETHER), net.minecraft.world.entity.MobCategory.MONSTER,
+                thaumcraft.common.config.ThaumcraftMonsters.FIREBAT.get(), 10, 1, 2);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(BiomeTags.IS_NETHER), net.minecraft.world.entity.MobCategory.MONSTER,
+                thaumcraft.common.config.ThaumcraftMonsters.WISP.get(), 5, 1, 1);
+        var calendar = java.util.Calendar.getInstance();
+        if (calendar.get(java.util.Calendar.MONTH) == java.util.Calendar.OCTOBER && calendar.get(java.util.Calendar.DAY_OF_MONTH) == 31) {
+            BiomeModifications.addSpawn(BiomeSelectors.tag(thaumcraft.common.config.ThaumcraftMonsters.BRAINY_SPAWNS), net.minecraft.world.entity.MobCategory.MONSTER,
+                    thaumcraft.common.config.ThaumcraftMonsters.FIREBAT.get(), 5, 1, 2);
+        }
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftMonsters.BRAINY_ZOMBIE.get(),
                 thaumcraft.common.entities.monster.EntityBrainyZombie.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(

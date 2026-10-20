@@ -81,6 +81,8 @@ public final class ThaumcraftContent {
             () -> new ItemCrystalEssence(new Item.Properties().stacksTo(64)));
     public static final RegistrySupplier<Item> THAUMOMETER = ITEMS.register("thaumometer", () -> new ItemThaumometer(new Item.Properties().stacksTo(1)));
     public static final RegistrySupplier<Item> THAUMONOMICON = ITEMS.register("thaumonomicon", () -> new ItemThaumonomicon(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+    public static final RegistrySupplier<Item> THAUMONOMICON_CHEAT = ITEMS.register("thaumonomicon_cheat", () -> new ItemThaumonomicon(new Item.Properties(), true));
+    public static final RegistrySupplier<Item> PRIMORDIAL_PEARL = ITEMS.register("primordial_pearl", () -> new thaumcraft.common.items.ItemPrimordialPearl(new Item.Properties()));
     public static final RegistrySupplier<Item> RESONATOR = ITEMS.register("resonator", () -> new ItemResonator(new Item.Properties()));
     public static final RegistrySupplier<EntityType<EntitySpecialItem>> SPECIAL_ITEM = ENTITIES.register("special_item", () -> EntityType.Builder.<EntitySpecialItem>of(EntitySpecialItem::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("thaumcraft:special_item"));
     public static final RegistrySupplier<EntityType<EntityInventoryItem>> INVENTORY_ITEM = ENTITIES.register("inventory_item", () -> EntityType.Builder.<EntityInventoryItem>of(EntityInventoryItem::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("thaumcraft:inventory_item"));
@@ -163,7 +165,10 @@ public final class ThaumcraftContent {
 
     public static void register() {
         COMPONENTS.register(); BLOCKS.register(); ITEMS.register(); BLOCK_ENTITIES.register(); ENTITIES.register(); TABS.register(); MENUS.register();
-        CreativeTabRegistry.append(TAB, THAUMOMETER, WAND, THAUMONOMICON, RESONATOR);
+        CreativeTabRegistry.append(TAB, THAUMOMETER, WAND, THAUMONOMICON, RESONATOR, PRIMORDIAL_PEARL);
+        CreativeTabRegistry.modify(TAB, (flags, output, canUseGameMasterBlocks) -> {
+            if (ThaumcraftSettings.current().cheatSheet()) output.accept(new ItemStack(THAUMONOMICON_CHEAT.get()));
+        });
         CreativeTabRegistry.append(TAB, INKWELL);
         CreativeTabRegistry.append(TAB, TABLE_ITEM);
         CreativeTabRegistry.append(TAB, EMPTY_PHIAL);

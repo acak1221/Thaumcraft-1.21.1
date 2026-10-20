@@ -1,5 +1,10 @@
 package thaumcraft.common.items.wands;
 
+import java.util.LinkedHashMap;
+import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
+import thaumcraft.common.crafting.ArcaneVis;
+import thaumcraft.common.lib.enchantment.EquipmentEnchantmentRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.entities.EntitySpecialItem;
 
-/** Original bookshelf trigger only; other TC4 wand structures remain pending. */
+/** Original bookshelf trigger and inventory raw-vis payment; other wand structures have their own native paths. */
 public final class WandManager {
     private WandManager() {}
 
@@ -45,5 +50,29 @@ public final class WandManager {
         level.sendParticles(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 24, 0.3, 0.3, 0.3, 0.05);
         level.playSound(null, pos, SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand")), SoundSource.PLAYERS, 1, 1);
         return true;
+    }
+    /** Original WandManager104–120: raw centivis, one full payer, main slots35→0. */
+    public static boolean consumeVisFromInventory(Player player, AspectList rawCost) {
+        if (player == null || player.level().isClientSide || rawCost == null || rawCost.size() == 0) return false;
+        // Vis amulets/baubles have not been ported; their original priority is a visible pending integration.
+        // Each wand is tested independently, last main-inventory slot first. Costs never split across wands.
+        for (int slot = player.getInventory().items.size() - 1; slot >= 0; slot--) {
+            ItemStack wand = player.getInventory().items.get(slot);
+            if (!ArcaneVis.isCraftingWand(wand)) continue;
+            var current = ItemWandCasting.data(wand);
+            var prices = new LinkedHashMap<String, Integer>();
+            boolean canPay = true;
+            for (Aspect aspect : rawCost.getAspects()) {
+                int amount = EquipmentEnchantmentRules.repairPrice(rawCost.getAmount(aspect), WandVisDiscount.modifier(wand, player, aspect));
+                if (current.amount(aspect.getTag()) < amount) { canPay = false; break; }
+                prices.put(aspect.getTag(), amount);
+            }
+            if (!canPay) continue;
+            for (var entry : prices.entrySet()) current = current.withAmount(entry.getKey(), current.amount(entry.getKey()) - entry.getValue());
+            wand.set(ThaumcraftContent.WAND_DATA.get(), current);
+            player.getInventory().setChanged();
+            return true;
+        }
+        return false;
     }
 }

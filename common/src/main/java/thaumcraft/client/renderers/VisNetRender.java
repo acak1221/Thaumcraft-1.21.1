@@ -38,9 +38,21 @@ public final class VisNetRender {
 
     public static void draw(ResourceLocation texture,int destination,boolean depthWrite,Consumer<VertexConsumer> vertices){
         ShaderInstance selected=Objects.requireNonNull(shader,"Root must pass node_stabilizer_bubble to VisNetClientEffects.setShader before VisNet rendering");
+        draw(texture,destination,depthWrite,selected,vertices);
+    }
+    /** Additive caller with the ordinary alpha threshold, e.g. original Wisp's first billboard layer. */
+    public static void draw(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,vertices);
+    }
+    /** Same owned state transaction, native lightmap particle format and the original low-alpha threshold. */
+    public static void drawParticle(ResourceLocation texture,ShaderInstance selected,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,GL11.GL_ONE,false,selected,DefaultVertexFormat.PARTICLE,vertices);
+    }
+    private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,Consumer<VertexConsumer> vertices){
+        Objects.requireNonNull(selected,"Native effect shader must be registered before drawing");
         try(NativeState ignored=new NativeState()){
             RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,destination);RenderSystem.enableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);RenderSystem.disableCull();
-            var mesh=MESH.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);vertices.accept(mesh);BufferUploader.drawWithShader(mesh.buildOrThrow());
+            var mesh=MESH.begin(VertexFormat.Mode.QUADS,format);vertices.accept(mesh);BufferUploader.drawWithShader(mesh.buildOrThrow());
         }
     }
     /** UtilsFX facing-strip UVs. Positions supplied by a caller-owned pose. */

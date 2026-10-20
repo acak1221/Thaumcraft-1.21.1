@@ -1,6 +1,7 @@
 package thaumcraft.common.entities.projectile;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -11,6 +12,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -27,8 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftFrost;
 
 /**
- * BASIC TC4 EntityFrostShard:57-185,216-223. No fragile/frosty upgrades, slow,
- * freeze, block writes, extra shots, damage/iframe resets, vis or client damage.
+ * TC4 EntityFrostShard, including fragile scatter, boulder and frosty effects.
  *
  * Native Projectile owns UUID ownership, spawn/motion packets and base ticking;
  * ProjectileUtil supplies current voxel collision and its .3F entity margin.
@@ -50,12 +52,15 @@ public final class EntityFrostShard extends Projectile {
     public static final float LAUNCH_SPEED = 1.5F;
     public static final byte ENTITY_IMPACT_EVENT = 61;
     public static final byte TERMINAL_IMPACT_EVENT = 62;
-    private static final double BOUNCE = .5;
     private static final EntityDataAccessor<Float> DAMAGE = SynchedEntityData.defineId(EntityFrostShard.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> IMPACTS = SynchedEntityData.defineId(EntityFrostShard.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> AGE = SynchedEntityData.defineId(EntityFrostShard.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> FRAGILE = SynchedEntityData.defineId(EntityFrostShard.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> BOULDER = SynchedEntityData.defineId(EntityFrostShard.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> FROST = SynchedEntityData.defineId(EntityFrostShard.class, EntityDataSerializers.INT);
     // Client-only registration installs an unbound method reference, never a world/entity.
     private static BiConsumer<EntityFrostShard, Byte> clientImpact = (entity, event) -> {};
+    private static Consumer<EntityFrostShard> clientTrail = ignored -> {};
     private int age;
 
     public EntityFrostShard(EntityType<? extends EntityFrostShard> type, Level level) { super(type, level); }
@@ -80,6 +85,9 @@ public final class EntityFrostShard extends Projectile {
         builder.define(DAMAGE, 3F);
         builder.define(IMPACTS, 0);
         builder.define(AGE, 0);
+        builder.define(FRAGILE, false);
+        builder.define(BOULDER, false);
+        builder.define(FROST, 0);
     }
 
     @Override public Vec3 getMovementToShoot(double x, double y, double z, float speed, float scatter) {
@@ -96,7 +104,17 @@ public final class EntityFrostShard extends Projectile {
         entityData.set(DAMAGE, value);
     }
     public float getDamage() { return entityData.get(DAMAGE); }
-    public int getBounceLimit() { return 3 - getImpactCount(); }
+    public boolean isFragile() { return entityData.get(FRAGILE); }
+    public void setFragile(boolean value) { entityData.set(FRAGILE, value); }
+    public boolean isBoulder() { return entityData.get(BOULDER); }
+    public void configureBoulder() { entityData.set(BOULDER, true); }
+    public double getBounceStrength() { return isBoulder() ? .8 : .5; }
+    public int getFrosty() { return entityData.get(FROST); }
+    public void setFrosty(int value) {
+        if (value < 0 || value > 3) throw new IllegalArgumentException("Invalid frost level");
+        entityData.set(FROST, value);
+    }
+    public int getBounceLimit() { return (isBoulder() ? 6 : 3) - getImpactCount(); }
     public int getImpactCount() { return entityData.get(IMPACTS); }
     public int getAge() { return age; }
 
@@ -111,7 +129,7 @@ public final class EntityFrostShard extends Projectile {
         if (AGE.equals(accessor)) age = entityData.get(AGE);
     }
 
-    @Override protected double getDefaultGravity() { return .05F; }
+    @Override protected double getDefaultGravity() { return isFragile() ? .015F : .05F; }
     @Override public boolean canUsePortal(boolean allowPassengers) { return true; }
     @Override public boolean shouldRenderAtSqrDistance(double distance) {
         double range = getBoundingBox().getSize() * 4 * 64;
@@ -120,13 +138,14 @@ public final class EntityFrostShard extends Projectile {
 
     @Override public void tick() {
         if (isRemoved()) return;
-        if (getImpactCount() >= 4) { discard(); return; }
+        if (getBounceLimit() < 0) { discard(); return; }
         setOldPosAndRot();
         setDeltaMovement(finiteMotion(getDeltaMovement()));
         if (age < Integer.MAX_VALUE) ++age;
         if (!level().isClientSide) entityData.set(AGE, age);
         super.tick();
         if (isRemoved()) return;
+        if (level().isClientSide && getFrosty() > 0) clientTrail.accept(this);
         HitResult hit = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
         // Clients predict block ricochets, but never choose/damage an entity or
         // emit impact events. Actual server events alone produce frost bursts.
@@ -191,7 +210,7 @@ public final class EntityFrostShard extends Projectile {
                             0, 4 * (random.nextFloat() - .5), .5, 4 * (random.nextFloat() - .5), 1);
             }
         }
-        motion = motion.scale(BOUNCE);
+        motion = motion.scale(getBounceStrength());
         setDeltaMovement(motion);
         float length = (float)Math.sqrt(motion.lengthSqr());
         // Preserve the oracle's SUBTRACT/post-bounce/.05F quirk, with only the
@@ -201,8 +220,19 @@ public final class EntityFrostShard extends Projectile {
         if (level().isClientSide) return;
         markHurt();
         if (hit instanceof EntityHitResult entityHit) {
-            entityHit.getEntity().hurt(damageSources().thrown(this, getOwner()), getDamage());
+            Entity target = entityHit.getEntity();
+            Vec3 originalMotion = target.getDeltaMovement();
+            target.hurt(damageSources().thrown(this, getOwner()), getDamage());
+            // Original applies frost and fragile effects even when hurt refuses.
+            if (target instanceof LivingEntity living && getFrosty() > 0)
+                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, getFrosty() - 1));
             level().broadcastEntityEvent(this, ENTITY_IMPACT_EVENT);
+            if (isFragile()) {
+                target.invulnerableTime = 0;
+                discard();
+                playSound(Blocks.ICE.defaultBlockState().getSoundType().getBreakSound(), .3F, impactPitch());
+                target.setDeltaMovement(originalMotion.add(target.getDeltaMovement().subtract(originalMotion).scale(.1)));
+            }
         }
         // if (bounceLimit-- <= 0): 3->2->1->0 survive; 0->-1 is FOURTH terminal.
         entityData.set(IMPACTS, getImpactCount() + 1);
@@ -221,6 +251,7 @@ public final class EntityFrostShard extends Projectile {
     }
 
     public static void setClientImpactHandler(BiConsumer<EntityFrostShard, Byte> handler) { clientImpact = handler; }
+    public static void setClientTrailHandler(Consumer<EntityFrostShard> handler) { clientTrail = java.util.Objects.requireNonNull(handler); }
 
     @Override public void handleEntityEvent(byte event) {
         if (event == ENTITY_IMPACT_EVENT || event == TERMINAL_IMPACT_EVENT) {
@@ -235,8 +266,9 @@ public final class EntityFrostShard extends Projectile {
     @Override protected void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putFloat("damage", getDamage());
-        tag.putBoolean("fragile", false);
-        tag.putInt("frost", 0);
+        tag.putBoolean("fragile", isFragile());
+        tag.putBoolean("FrostBoulder", isBoulder());
+        tag.putInt("frost", getFrosty());
         tag.putInt("FrostImpacts", getImpactCount());
         tag.putInt("FrostAge", age);
     }
@@ -245,10 +277,12 @@ public final class EntityFrostShard extends Projectile {
         super.readAdditionalSaveData(tag);
         float damage = tag.contains("damage") ? tag.getFloat("damage") : 3;
         setDamage(Float.isFinite(damage) && damage >= 0 ? damage : 3);
-        entityData.set(IMPACTS, Mth.clamp(tag.getInt("FrostImpacts"), 0, 4));
+        setFragile(tag.getBoolean("fragile"));
+        entityData.set(BOULDER, tag.getBoolean("FrostBoulder"));
+        setFrosty(Mth.clamp(tag.getInt("frost"), 0, 3));
+        entityData.set(IMPACTS, Mth.clamp(tag.getInt("FrostImpacts"), 0, isBoulder() ? 7 : 4));
         age = Math.max(0, tag.getInt("FrostAge"));
         entityData.set(AGE, age);
         setDeltaMovement(finiteMotion(getDeltaMovement()));
-        // Advanced fragile/frost NBT is deliberately not an implemented upgrade.
     }
 }

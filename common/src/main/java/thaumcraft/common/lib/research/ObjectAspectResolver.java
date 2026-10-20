@@ -161,6 +161,10 @@ public final class ObjectAspectResolver {
                 // ConfigAspects421/AspectList25–37/InternalMethodHandler53–55:
                 // getObjectTags, NOT getBonusTags/cull6 or smelting derivation.
                 result = base(ThaumcraftContent.SHARDS.get("balanced").get()).add(Aspect.MAGIC, 2).remove(Aspect.CRYSTAL);
+            } else if (item == ThaumcraftContent.THAUMONOMICON.get() || item == ThaumcraftContent.THAUMONOMICON_CHEAT.get()) {
+                // ConfigAspects426 applies to both metadata variants. Wand conversion
+                // has no native recipe; the original explicitly derives the bookshelf base.
+                result = base(Items.BOOKSHELF).add(Aspect.MAGIC, 2).merge(Aspect.MIND, 2);
             } else if (id.getNamespace().equals("thaumcraft") && id.getPath().equals("crucible")) {
                 result = base(Items.CAULDRON).add(Aspect.CRAFT, 4).add(Aspect.MAGIC, 4);
             } else result = fromCrucible(candidates);

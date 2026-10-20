@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /** Small S2C-only route. Common/server code has no dependency on client render classes. */
@@ -42,5 +43,18 @@ public final class ShockFxNetworking {
         var level = caster.serverLevel();
         var payload = new ShockFxPayload(level.dimension().location(), caster.getId(), origin, target, level.random.nextLong(), impact);
         for (ServerPlayer observer : level.players()) if (observer.distanceToSqr(origin) <= 64 * 64) NetworkManager.sendToPlayer(observer, payload);
+    }
+
+    /** Original PacketFXZap: actual server-selected source/target body midpoints.
+     * Visual-only; the focus owns its prior payment and each chained hurt. */
+    public static void sendChain(ServerPlayer caster, LivingEntity source, LivingEntity target) {
+        if (!caster.server.isSameThread()) throw new IllegalStateException("Chain effects require the server thread");
+        if (source.level() != caster.level() || target.level() != caster.level() || source.isRemoved() || target.isRemoved()) return;
+        Vec3 origin = source.position().add(0, source.getBbHeight() / 2, 0);
+        Vec3 end = target.position().add(0, target.getBbHeight() / 2, 0);
+        if (!ShockFxPayload.validGeometry(origin, end)) return;
+        var level = caster.serverLevel();
+        var payload = new ShockFxPayload(level.dimension().location(), source.getId(), origin, end, level.random.nextLong(), false);
+        for (ServerPlayer observer : level.players()) if (observer.distanceToSqr(source) <= 64 * 64) NetworkManager.sendToPlayer(observer, payload);
     }
 }

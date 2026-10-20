@@ -21,7 +21,8 @@ public abstract class LivingEntityMagicWardMixin {
     @WrapMethod(method = "getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F", require = 1, allow = 1)
     private float thaumcraft$magicWard(DamageSource source, float damage, Operation<Float> original) {
         FortressMasks.onHurt((LivingEntity) (Object) this, source, damage);
-        return original.call(source, MagicWard.apply((LivingEntity) (Object) this, source, damage));
+        float remaining = thaumcraft.common.lib.runic.RunicShield.onHurt((LivingEntity) (Object) this, source, damage);
+        return original.call(source, MagicWard.apply((LivingEntity) (Object) this, source, remaining));
     }
 
     @WrapOperation(method = "getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F", require = 1, allow = 1,

@@ -13,11 +13,21 @@ public final class FocusUpgradeType {
     public static final FocusUpgradeType frugal = new FocusUpgradeType(1, "frugal", Aspect.HUNGER);
     public static final FocusUpgradeType treasure = new FocusUpgradeType(2, "treasure", Aspect.GREED);
     public static final FocusUpgradeType enlarge = new FocusUpgradeType(3, "enlarge", Aspect.TRAVEL);
+    public static final FocusUpgradeType alchemistsfire = new FocusUpgradeType(4, "alchemistsfire", Aspect.ENERGY, Aspect.SLIME);
+    public static final FocusUpgradeType alchemistsfrost = new FocusUpgradeType(5, "alchemistsfrost", Aspect.COLD, Aspect.TRAP);
     public static final FocusUpgradeType architect = new FocusUpgradeType(6, "architect", Aspect.CRAFT);
     public static final FocusUpgradeType extend = new FocusUpgradeType(7, "extend", Aspect.EXCHANGE);
     public static final FocusUpgradeType silktouch = new FocusUpgradeType(8, "silktouch", Aspect.GREED);
+    public static final FocusUpgradeType fireball = new FocusUpgradeType(9, "fireball", Aspect.DARKNESS);
+    public static final FocusUpgradeType firebeam = new FocusUpgradeType(10, "firebeam", Aspect.ENERGY, Aspect.AIR);
+    public static final FocusUpgradeType scattershot = new FocusUpgradeType(11, "scattershot", Aspect.COLD, Aspect.WEAPON);
+    public static final FocusUpgradeType iceboulder = new FocusUpgradeType(12, "iceboulder", Aspect.COLD, Aspect.CRYSTAL);
+    public static final FocusUpgradeType chainlightning = new FocusUpgradeType(17, "chainlightning", Aspect.WEATHER);
+    public static final FocusUpgradeType earthshock = new FocusUpgradeType(18, "earthshock", Aspect.WEATHER);
     public static final FocusUpgradeType dowsing = new FocusUpgradeType(20, "dowsing", Aspect.MINE);
-    private static final Map<Short, FocusUpgradeType> TYPES = catalogue(potency, frugal, treasure, enlarge, architect, extend, silktouch, dowsing);
+    private static final Map<Short, FocusUpgradeType> TYPES = catalogue(potency, frugal, treasure, enlarge,
+            alchemistsfire, alchemistsfrost, architect, extend, silktouch, fireball, firebeam,
+            scattershot, iceboulder, chainlightning, earthshock, dowsing);
 
     public final short id;
     public final String name;
@@ -25,13 +35,14 @@ public final class FocusUpgradeType {
     public final ResourceLocation icon;
     private final AspectList aspects;
 
-    private FocusUpgradeType(int id, String key, Aspect aspect) {
+    private FocusUpgradeType(int id, String key, Aspect... components) {
         if (id < 0 || id > Short.MAX_VALUE) throw new IllegalArgumentException("Invalid focus upgrade ID");
         this.id = (short) id;
         name = "focus.upgrade." + key + ".name";
         text = "focus.upgrade." + key + ".text";
         icon = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/foci/" + key + ".png");
-        aspects = new AspectList().add(aspect, 1);
+        aspects = new AspectList();
+        for (Aspect aspect : components) aspects.add(aspect, 1);
     }
 
     private static Map<Short, FocusUpgradeType> catalogue(FocusUpgradeType... entries) {

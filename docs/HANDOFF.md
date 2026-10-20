@@ -1,3 +1,11 @@
+## Третья группа для CI — 20.10.2026
+
+Новые Runic/боевые фокусы/UNSTABLE+orbs/Pearl/CheatSheet/Firebat+Wisp/scanAPI/admincommands
+прошли локальную common JUnit647 и Python79 +Fabric gameTest/clientTest compile (1m16).
+Полный серверный прогон будет GitHub для нового commit; клиент/NeoForge не проверены.
+Предыдущий9359eb4 дал196/198: native NPE empty reward в Deconstruction и named-loot-sequence
+fixture Dowsing исправлены в текущем дереве. Advanced Furnace остаётся .tmp draft, не включён.
+
 ## Следующая группа для удалённого прогона — 20.10.2026
 
 Рабочая группа R11/R12 + research settings, Repair/Haste/Bore repair, Ward/Excavation specials,

@@ -26,9 +26,9 @@ import thaumcraft.common.tiles.TileNode.NodeType;
 
 /**
  * Original ThaumcraftWorldGenerator.generateWildNodes:189-215 and
- * createRandomNodeAt:218-399, restricted to naturally rolled NORMAL nodes.
+ * createRandomNodeAt:218-399, restricted to naturally rolled NORMAL and UNSTABLE nodes.
  * One invocation is ONE chunk attempt, so the placed feature has no count,
- * rarity or in-square modifier. Special rolls are skipped, never rerolled.
+ * rarity or in-square modifier. Other special rolls are skipped, never rerolled.
  */
 public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfiguration> {
     public static final int NODE_RARITY = 36; // original Config defaults:872-873
@@ -78,10 +78,10 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         }
         NodeModifier modifier = null;
         if (random.nextInt(SPECIAL_NODE_RARITY / 2) == 0) modifier = NodeModifier.values()[random.nextInt(3)];
-        if (type != NodeType.NORMAL) {
+        if (type != NodeType.NORMAL && type != NodeType.UNSTABLE) {
             // Aggregate every skip, but warn only once per type, not per chunk.
             if (SKIPPED_TYPES.getAndIncrement(type.ordinal()) == 0) {
-                Thaumcraft.LOG.warn("Natural aura nodes: rolled {} is pending and skipped without replacement; only NORMAL ecology is implemented", type);
+                Thaumcraft.LOG.warn("Natural aura nodes: rolled {} is pending and skipped without replacement; only NORMAL/UNSTABLE ecology is implemented", type);
             }
             return false;
         }
@@ -114,7 +114,7 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         }
         if (!level.setBlock(pos, ThaumcraftContent.AURA_NODE.get().defaultBlockState(), Block.UPDATE_CLIENTS)) return false;
         if (level.getBlockEntity(pos) instanceof TileNode node) {
-            node.initializeNatural(aspects, modifier);
+            node.initializeNatural(aspects, type, modifier);
             return true;
         }
         // A node without its state must never survive as the 25-each fixture.

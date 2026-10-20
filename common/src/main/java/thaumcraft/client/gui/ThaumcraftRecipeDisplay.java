@@ -306,6 +306,11 @@ public final class ThaumcraftRecipeDisplay {
             }
             return choices.isEmpty() ? null : new ThaumcraftRecipeDisplay(choices);
         }
+        if ("legacy_expression".equals(page.kind()) && "raug.toArray(new InfusionRecipe[0])".equals(page.javaExpression())) {
+            var holder = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "infusion_runic_augment/runic_augmentation")).orElse(null);
+            return holder != null && holder.value() instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe
+                    ? resolve(holder, level) : null;
+        }
         if (!"recipe_reference".equals(page.kind()) || page.recipeKey() == null) return null;
         // Original ConfigRecipes:93 is a wand construct, NOT an executable
         // extracted expression or a registered fake crafting recipe. Display
@@ -335,6 +340,17 @@ public final class ThaumcraftRecipeDisplay {
 
     private static ThaumcraftRecipeDisplay resolve(RecipeHolder<?> holder, Level level) {
         var nativeRecipe = holder.value();
+        if (nativeRecipe instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe infusion
+                && nativeRecipe.getType() == thaumcraft.common.config.ThaumcraftRunic.AUGMENT_TYPE.get()) {
+            ItemStack sample = infusion.sample(0);
+            if (sample.isEmpty() || !sample.isItemEnabled(level.enabledFeatures())) return null;
+            var declared = infusion.components(sample);
+            for (Ingredient ingredient : declared) {
+                if (ingredient.isEmpty() || java.util.Arrays.stream(ingredient.getItems())
+                        .noneMatch(stack -> !stack.isEmpty() && stack.isItemEnabled(level.enabledFeatures()))) return null;
+            }
+            return new ThaumcraftRecipeDisplay(holder, declared, 3, false);
+        }
         if (nativeRecipe instanceof InfusionStackRecipe infusion && nativeRecipe.getType() == ThaumcraftInfusion.INFUSION_RECIPE_TYPE.get()) {
             List<Ingredient> declared = new ArrayList<>();
             declared.add(infusion.input());
@@ -399,6 +415,8 @@ public final class ThaumcraftRecipeDisplay {
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);
         if (thaumatorium) return ThaumatoriumBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
         if (infusionAltar) return renderInfusionAltar(graphics, font, x, y, width, height, mouseX, mouseY);
+        if (recipe.value() instanceof thaumcraft.common.crafting.InfusionRunicAugmentRecipe infusion)
+            return RunicAugmentationDisplay.render(infusion, graphics, font, level, x, y, width, height, mouseX, mouseY, cycle);
         if (recipe.value() instanceof InfusionStackRecipe infusion) return renderInfusion(infusion, graphics, font, level,
                 x, y, width, height, mouseX, mouseY, cycle);
         if (recipe.value() instanceof InfusionEnchantmentRecipe infusion) return renderEnchantmentInfusion(infusion, graphics, font, level,

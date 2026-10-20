@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import thaumcraft.client.renderers.entity.RenderFrostShard;
+import thaumcraft.client.fx.particles.FocusFrostSparkleParticle;
 import thaumcraft.common.config.ThaumcraftFrost;
 import thaumcraft.common.entities.projectile.EntityFrostShard;
 
@@ -22,6 +23,7 @@ public final class ThaumcraftFrostClient {
         initialized = true;
         EntityRendererRegistry.register(ThaumcraftFrost.FROST_SHARD, RenderFrostShard::new);
         EntityFrostShard.setClientImpactHandler(ThaumcraftFrostClient::impact);
+        EntityFrostShard.setClientTrailHandler(FocusFrostSparkleParticle::trail);
     }
 
     private static void impact(EntityFrostShard entity, byte event) {

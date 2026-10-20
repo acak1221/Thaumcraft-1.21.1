@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Random;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,10 +18,11 @@ import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.player.Player;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.common.entities.golems.EntityGolemBase;
 import thaumcraft.common.entities.golems.EnumGolemType;
 
-/** Closed original entity registry names and ConfigAspects data; last matching variant replaces, never sums the generic row. */
+/** Original baseline plus live public entity registrations; the last matching row replaces, never sums earlier rewards. */
 public final class EntityAspectBindings {
     private static final Map<String, String> NAMES = Map.ofEntries(
             Map.entry("minecraft:zombie", "Zombie"), Map.entry("minecraft:zombie_villager", "Zombie"), Map.entry("minecraft:giant", "Giant"),
@@ -52,27 +52,22 @@ public final class EntityAspectBindings {
     private EntityAspectBindings() {}
 
     public static Target describe(Entity entity) {
+        String registryName = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
         String name = entity instanceof Player player ? "player_" + player.getGameProfile().getName()
-                : NAMES.get(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
-        if (name == null) return null;
-        Map<String, Integer> variants = new LinkedHashMap<>();
-        if ("Skeleton".equals(name)) variants.put("SkeletonType", entity.getType() == EntityType.WITHER_SKELETON ? 1 : 0);
-        if (entity instanceof Creeper creeper) variants.put("powered", creeper.isPowered() ? 1 : 0);
-        String wispType = null;
-        boolean savedVariant = name.startsWith("Thaumcraft.") && rows().stream().anyMatch(row -> row.name.equals(name) && (row.byteName != null || row.wisp));
-        if (savedVariant) {
-            var nbt = entity.saveWithoutId(new CompoundTag());
-            for (Row row : rows()) if (row.name.equals(name) && row.byteName != null && nbt.contains(row.byteName, Tag.TAG_ANY_NUMERIC))
-                variants.put(row.byteName, (int) nbt.getByte(row.byteName));
-            wispType = nbt.contains("Type", Tag.TAG_STRING) ? nbt.getString("Type") : null;
-        }
-        AspectList aspects = entity instanceof Player player ? playerAspects(player.getGameProfile().getName()) : forOriginal(name, variants, wispType);
+                : NAMES.getOrDefault(registryName, registryName);
+        var registered = new ArrayList<>(ThaumcraftApi.scanEntities);
+        var nbt = new CompoundTag();
+        if (registered.stream().anyMatch(row -> matchesName(row.entityName, name, registryName) && row.nbts != null && row.nbts.length > 0))
+            nbt = entity.saveWithoutId(nbt);
+        // Vanilla split old SkeletonType metadata into two entity IDs. Preserve the original predicate key.
+        if ("Skeleton".equals(name)) nbt.putByte("SkeletonType", (byte) (entity.getType() == EntityType.WITHER_SKELETON ? 1 : 0));
+        AspectList aspects = entity instanceof Player player ? playerAspects(player.getGameProfile().getName()) : select(registered, name, registryName, nbt);
         if (aspects == null || aspects.size() == 0) return null;
         String hash = name;
-        for (Row row : rows()) {
-            if (!row.name.equals(hash)) continue;
-            if (row.wisp && Aspect.getAspect(wispType) != null) hash += "Type" + wispType;
-            else if (row.byteName != null && variants.getOrDefault(row.byteName, Integer.MIN_VALUE) == row.byteValue) hash += row.byteName + row.byteValue;
+        for (var row : registered) {
+            if (!matchesName(row.entityName, hash, hash.equals(name) ? registryName : hash) || row.nbts == null || row.nbts.length == 0
+                    || !EntityScanPredicates.matches(row.nbts, nbt)) continue;
+            for (var predicate : row.nbts) hash += predicate.name + predicate.value;
         }
         if (entity instanceof LivingEntity living && living.isBaby()) hash += "CHILD";
         if (entity instanceof ZombieVillager) hash += "VILLAGER";
@@ -91,16 +86,45 @@ public final class EntityAspectBindings {
 
     /** Original row order: a conditional match replaces the generic aspects instead of adding a second reward. */
     public static AspectList forOriginal(String name, Map<String, Integer> byteValues, String wispType) {
+        var data = new CompoundTag();
+        for (var entry : byteValues.entrySet()) data.putByte(entry.getKey(), entry.getValue().byteValue());
+        if (wispType != null) data.putString("Type", wispType);
+        return select(new ArrayList<>(ThaumcraftApi.scanEntities), name, name, data);
+    }
+
+    public static AspectList forNames(String originalName, String nativeName, CompoundTag data) {
+        return select(new ArrayList<>(ThaumcraftApi.scanEntities), originalName, nativeName, data);
+    }
+
+    private static AspectList select(List<ThaumcraftApi.EntityTags> registered, String originalName, String nativeName, CompoundTag data) {
         AspectList selected = null;
-        for (Row row : rows()) {
-            if (!row.name.equals(name)) continue;
-            if (row.byteName != null && byteValues.getOrDefault(row.byteName, Integer.MIN_VALUE) != row.byteValue) continue;
-            if (row.wisp && Aspect.getAspect(wispType) == null) continue;
-            selected = new AspectList();
-            if (row.wisp) selected.add(Aspect.getAspect(wispType), 2);
-            for (var entry : row.aspects.entrySet()) selected.add(Aspect.getAspect(entry.getKey()), entry.getValue());
+        for (var row : registered) {
+            if (matchesName(row.entityName, originalName, nativeName) && EntityScanPredicates.matches(row.nbts, data))
+                selected = row.aspects == null ? null : row.aspects.copy();
         }
         return selected;
+    }
+
+    private static boolean matchesName(String registered, String originalName, String nativeName) {
+        return registered != null && (registered.equals(originalName) || registered.equals(nativeName));
+    }
+
+    /** Expanded public API baseline:69 retained declarations include one loop over48 Wisp aspect variants, yielding116 rows. */
+    public static List<ThaumcraftApi.EntityTags> originalTags() {
+        var result = new ArrayList<ThaumcraftApi.EntityTags>();
+        for (Row row : rows()) {
+            var variants = row.wisp ? new ArrayList<>(Aspect.aspects.values()) : java.util.Collections.<Aspect>singletonList(null);
+            for (Aspect variant : variants) {
+                var aspects = new AspectList();
+                if (row.wisp) aspects.add(variant, 2);
+                for (var entry : row.aspects.entrySet()) aspects.add(Aspect.getAspect(entry.getKey()), entry.getValue());
+                var conditions = row.wisp ? new ThaumcraftApi.EntityTagsNBT[] { new ThaumcraftApi.EntityTagsNBT("Type", variant.getTag()) }
+                        : row.byteName == null ? new ThaumcraftApi.EntityTagsNBT[0]
+                        : new ThaumcraftApi.EntityTagsNBT[] { new ThaumcraftApi.EntityTagsNBT(row.byteName, (byte) row.byteValue) };
+                result.add(new ThaumcraftApi.EntityTags(row.name, aspects, conditions));
+            }
+        }
+        return result;
     }
 
     public static AspectList playerAspects(String playerName) {

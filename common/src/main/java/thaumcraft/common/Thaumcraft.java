@@ -71,6 +71,10 @@ public final class Thaumcraft {
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();
         ThaumcraftContent.register();
+        thaumcraft.common.config.ThaumcraftRunic.register();
+        thaumcraft.common.config.ThaumcraftAspectOrbs.register();
+        thaumcraft.common.config.ThaumcraftExplosiveOrbs.register();
+        thaumcraft.common.config.ThaumcraftShockOrbs.register();
         thaumcraft.common.config.ThaumcraftUnknownKnowledge.register();
         thaumcraft.common.config.ThaumcraftGolemMaterials.register();
         ThaumcraftOres.register();
@@ -150,6 +154,7 @@ public final class Thaumcraft {
             NodeHarvest.endTick(level);
             DeferredItemDrops.tick(level);
             thaumcraft.common.lib.GrowthLampTicks.tick(level);
+            thaumcraft.common.lib.utils.AspectOrbQueue.tick(level);
         });
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register(level -> {
             thaumcraft.common.lib.world.WardingCasts.clear(level);

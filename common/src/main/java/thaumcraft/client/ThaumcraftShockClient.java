@@ -58,7 +58,7 @@ public final class ThaumcraftShockClient {
                 || client.player.distanceToSqr(payload.origin()) > 64 * 64
                 || !level.hasChunkAt(BlockPos.containing(payload.origin())) || !level.hasChunkAt(BlockPos.containing(payload.target()))) return;
         var caster = level.getEntity(payload.casterId());
-        if (caster == null || caster.isRemoved() || caster.distanceToSqr(payload.origin()) > 3 * 3) return;
+        if (caster == null || caster.isRemoved() || !caster.getBoundingBox().inflate(3).contains(payload.origin())) return;
         if (BOLTS.size() == MAX_BOLTS) BOLTS.removeFirst();
         BOLTS.add(new Bolt(payload));
     }

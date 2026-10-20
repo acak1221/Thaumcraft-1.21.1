@@ -47,6 +47,11 @@ public final class ClientSetup {
         initialized = true;
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initClient();
         thaumcraft.client.ThaumcraftMonsterClient.init();
+        thaumcraft.client.ThaumcraftRunicClient.init();
+        thaumcraft.client.ThaumcraftFireSpecialClient.init();
+        thaumcraft.client.ThaumcraftShockOrbsClient.init();
+        dev.architectury.registry.client.level.entity.EntityRendererRegistry.register(
+                thaumcraft.common.config.ThaumcraftAspectOrbs.ORB, thaumcraft.client.renderers.entity.RenderAspectOrb::new);
         KnowledgeEvents.initClient();
         ThaumcraftArcaneClient.init();
         ThaumcraftNodeClient.init();

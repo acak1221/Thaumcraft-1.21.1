@@ -25,5 +25,6 @@ public final class EquipmentEnchantments {
         if (!player.level().isClientSide && player.tickCount % 40 == 0 && !player.getAbilities().instabuild)
             EnchantmentRepair.tick(player);
         EnchantmentHaste.tick(player);
+        thaumcraft.common.lib.runic.RunicShield.tick(player);
     }
 }

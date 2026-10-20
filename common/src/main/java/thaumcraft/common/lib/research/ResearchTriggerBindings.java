@@ -11,7 +11,8 @@ public final class ResearchTriggerBindings {
     private static final Map<String, Set<String>> ITEMS = Map.of(
             "BONEBOW", Set.of("minecraft:bow", "minecraft:bone"),
             "JARBRAIN", Set.of("thaumcraft:quick_silver"),
-            "MIRROR", Set.of("minecraft:ender_pearl"));
+            "MIRROR", Set.of("minecraft:ender_pearl"),
+            "PRIMPEARL", Set.of("thaumcraft:primordial_pearl"));
     private static final Set<String> CLOTHING = Set.of("TINYBOWTIE", "TINYFEZ", "TINYGLASSES", "TINYHAT");
     private ResearchTriggerBindings() {}
 

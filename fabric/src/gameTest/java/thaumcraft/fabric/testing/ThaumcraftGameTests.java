@@ -1052,4 +1052,74 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void crystalBlocksDropSixOwnShards(GameTestHelper test) {
         thaumcraft.common.testing.CrystalDropRuntimeChecks.run(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m00_admin_commands")
+    public void adminCommandsRespectOriginalStateAndNativePermissions(GameTestHelper test) {
+        thaumcraft.common.testing.AdministrationRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "r13_cheat_sheet")
+    public void cheatSheetUsesServerPermissionAndOriginalKnowledgeRules(GameTestHelper test) {
+        thaumcraft.common.testing.CheatSheetRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m07_runic_shield")
+    public void runicShieldAbsorbsNativeDamageAndPaysRegeneration(GameTestHelper test) {
+        thaumcraft.common.testing.RunicShieldRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1800, batch = "m07_runic_augmentation")
+    public void runicAugmentationUsesNativeInfusionAndOverflowSafeDemand(GameTestHelper test) {
+        thaumcraft.common.testing.RunicAugmentationRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m11_firebat")
+    public void fireBatPreservesNativeAttacksVariantsAndLoot(GameTestHelper test) {
+        thaumcraft.common.testing.FireBatWispRuntimeChecks.fireBat(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m11_wisp")
+    public void wispsKeepOriginalCombatMovementAndEssence(GameTestHelper test) {
+        thaumcraft.common.testing.FireBatWispRuntimeChecks.wisp(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m11_monster_population")
+    public void flyingMonstersUseOriginalNaturalPopulationRules(GameTestHelper test) {
+        thaumcraft.common.testing.FireBatWispRuntimeChecks.population(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "m02_unstable_nodes")
+    public void unstableNodesEmitPaidAspectOrbsAndCanStabilise(GameTestHelper test) {
+        thaumcraft.common.testing.UnstableNodeRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m02_primordial_pearl")
+    public void primordialPearlPaysForOriginalNodeChangesAndExplosion(GameTestHelper test) {
+        thaumcraft.common.testing.PrimordialPearlRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "m08_combat_special")
+    public void combatFocusSpecialisationsKeepOriginalCastingAndProjectiles(GameTestHelper test) {
+        thaumcraft.common.testing.CombatFocusSpecialRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m08_shock_orb")
+    public void shockOrbsDamageOriginalAreaAndPlaceTransientFields(GameTestHelper test) {
+        thaumcraft.common.testing.ShockOrbRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m04_scan_api_locators")
+    public void scanApiUsesNativeNbtAndNodeLocators(GameTestHelper test) {
+        thaumcraft.common.testing.ScanApiRuntimeChecks.nativeApiUsesWorldNbtAndNodeLocators(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m04_scan_api_identity")
+    public void identicalPhysicalTargetsCancelOldScanSession(GameTestHelper test) {
+        thaumcraft.common.testing.ScanApiRuntimeChecks.identicalPhysicalTargetsCancelOldSession(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "m04_scan_api_callbacks")
+    public void scanCallbacksRespectOcclusionAndNativeTiming(GameTestHelper test) {
+        thaumcraft.common.testing.ScanApiRuntimeChecks.callbacksRespectOcclusionAndTwentyTickSession(test, test.makeMockServerPlayerInLevel());
+    }
 }

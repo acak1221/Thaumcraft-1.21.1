@@ -123,7 +123,7 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(116, direct.size(), "all previous direct item bindings plus original wheat and the three native clusters");
+        assertEquals(117, direct.size(), "previous direct item bindings plus the original native Primordial Pearl");
         assertEquals(9, complex.size(), "seven existing complex bindings plus piston and wooden trapdoor");
         assertFalse(direct.containsKey(id("minecraft:piston")), "a raw addition must not suppress the recipe base");
         assertEquals(List.of(Aspect.MECHANISM, Aspect.MOTION), new ArrayList<>(complex.get(id("minecraft:piston")).aspects.keySet()));
@@ -131,7 +131,7 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(96, rows.size());
+            assertEquals(97, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
@@ -140,6 +140,14 @@ class EarlyObjectAspectBindingsTest {
             for (int index = 0; index < rows.size(); index++) {
                 var row = rows.get(index).getAsJsonObject();
                 int sourceLine = row.get("original_source_line").getAsInt();
+                if (sourceLine == 454) {
+                    assertEquals("ConfigItems.itemEldritchObject", row.get("original_target").getAsString());
+                    assertEquals(3, row.get("original_metadata").getAsInt());
+                    assertEquals(JsonParser.parseString("[\"thaumcraft:primordial_pearl\"]"), row.get("modern_ids"));
+                    assertAspects(direct, "thaumcraft:primordial_pearl", new AspectList().add(Aspect.AIR, 16)
+                            .add(Aspect.EARTH, 16).add(Aspect.FIRE, 16).add(Aspect.WATER, 16).add(Aspect.ORDER, 16).add(Aspect.ENTROPY, 16));
+                    continue;
+                }
                 if (sourceLine >= 360 && sourceLine <= 362) {
                     // Native iron, gold and cinnabar clusters (ConfigAspects:360-362), added after the ALL90 snapshot; checked on their own below.
                     clusters.put(sourceLine, row);

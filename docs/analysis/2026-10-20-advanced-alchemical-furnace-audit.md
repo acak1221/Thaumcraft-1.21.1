@@ -6,9 +6,19 @@
 `TileAlchemyFurnaceAdvancedRenderer`, `ConfigRecipes:100,291`, `ConfigResearch:403`,
 `EventHandlerWorld.onCrafting:163–167`, `ItemEldritchObject`, оригинальный `AspectList`.
 
+
+**Исправление первоначальной ошибки аудита:** нижний center — НЕ crucible.
+Original `WandManager:752` проверяет `ConfigBlocks.blockStoneDevice`, metadata0;
+`BlockStoneDevice.createTileEntity:257–259` явно создаёт для metadata0
+`new TileAlchemyFurnace()`. `ConfigRecipes:100` использует тот же stoneDevice0
+в схеме, а normal furnace recipe `ConfigRecipes:280` превращает metalDevice0
+(crucible) в stoneDevice0. Поэтому нормальная печь служит основанием и является
+результатом обратного превращения formed metadata0 (`BlockAlchemyFurnace:159–177`).
+Приватный oracle — декомпиляция исходного TC4 bytecode, не предположение по имени.
+
 ## Зависимости и сборка
 
-Нативно уже есть обычные crucible, alembic, alchemical construct, void ingot, VisNet,
+Нативно уже есть обычные alchemical furnace, alembic, alchemical construct, void ingot, VisNet,
 ObjectAspectResolver с bonus tags. **Ещё нет:** primordial pearl с полным применением
 к node, его настоящая survival выдача из bosses/rare loot, advanced construct,
 собственно formed furnace и nozzle. Pearl не следует подменять декоративным предметом
@@ -29,7 +39,7 @@ Pearl не расходуется. Это реализовано **не** кон
 порт должен возвращать ровно исходную pearl с компонентами через реальный оплаченный
 craft, без произвольного общего исключения для всех редких предметов.
 
-Blueprint3×2×3, вид сверху, C — crucible, A — advanced construct, N — normal
+Blueprint3×2×3, вид сверху, C — normal alchemical furnace, A — advanced construct, N — normal
 construct, L — alembic, `?` — **непроверяемая клетка**:
 
 ```
@@ -38,15 +48,17 @@ construct, L — alembic, `?` — **непроверяемая клетка**:
       L N L            A A A
 ```
 
-Необходимы8 advanced constructs,4 normal constructs,4 alembics и1 crucible.
+Необходимы8 advanced constructs,4 normal constructs,4 alembics и1 normal alchemical furnace.
 Верхний центр не проверяется и не заменяется — существующий блок/BE там должен
-сохраниться. В исходном коде поиск первого crucible идёт a,b,c=−1..1 вокруг клика;
+сохраниться. В исходном коде поиск первого normal alchemical furnace идёт a,b,c=−1..1 вокруг клика;
 после первого подходящего центра неверный blueprint сразу возвращает false,
-а не продолжает искать другой crucible. Успех оплачивает `ignis50,aqua50,ordo50`
+а не продолжает искать другую normal alchemical furnace. Успех оплачивает `ignis50,aqua50,ordo50`
 через `consumeAllVisCrafting`, преобразует17 физических частей и включает original
-wand sound/sparkles. Сохранять содержимое существующих входных устройств или
-отказывать наполненному input нужно решить по реальному original behavior и
-современному контракту инвентарного владения, не уничтожать скрытую информацию.
+wand sound/sparkles. Сохранять оригинальную семантику содержимого обязательно: center NORMAL furnace возвращает
+свои два физических inventory stacks через `InventoryUtils.dropItems`
+(`BlockStoneDevice:312–318`), накопленная slurry/энергия теряются; alembic возвращает
+label (`BlockMetalDevice:534–535`), его stock теряется. Не вводить отказ наполненным
+исходным устройствам: нативные removal hooks уже владеют возвратом физических предметов.
 
 ## Работа
 
@@ -111,10 +123,10 @@ Comparator оригинала имеет precedence quirk: `floor(fill*14)+vis >
 Он выдаёт только0/1, не0..15. Сохранять именно это, пока нет разрешённой коррекции.
 
 Поломка non-core части отмечает ближайший core destroy=true. Его следующий тик
-возвращает оставшиеся formed части в исходные блоки и сам core в crucible. Поломка
+возвращает оставшиеся formed части в исходные блоки и сам core в normal alchemical furnace. Поломка
 core возвращает остальные части сразу. Одна сломанная часть даёт собственный
 исходный материал: metadata1/4 advanced construct,2 alembic,3 normal construct,0
-crucible. Pool/энергия не становятся новым предметом или бесплатной порцией essentia.
+normal alchemical furnace. Pool/энергия не становятся новым предметом или бесплатной порцией essentia.
 
 Destroy transient создаёт ещё один путь для аудита: сохранение после поломки части,
 но до следующего core tick может потерять pending disassembly. При реализации надо

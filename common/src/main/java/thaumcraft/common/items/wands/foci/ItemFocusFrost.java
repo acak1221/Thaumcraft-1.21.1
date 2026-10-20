@@ -19,7 +19,7 @@ import thaumcraft.common.entities.projectile.EntityFrostShard;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.FocusVis;
 
-/** TC4 basic Frost plus Frugal/Potency. No scattershot, boulder or alchemist branch. */
+/** TC4 Frost, including its original scattershot, boulder and slowing branches. */
 public final class ItemFocusFrost extends ItemFocusBasic {
     public static final int COOLDOWN_MILLIS = 200;
     private static final SoundEvent ICE = SoundEvent.createVariableRangeEvent(
@@ -28,18 +28,33 @@ public final class ItemFocusFrost extends ItemFocusBasic {
     public ItemFocusFrost(Properties properties) { super(properties); }
 
     @Override public AspectList getVisCost(ItemStack focus) {
+        if (focus.getItem() instanceof ItemFocusFrost) {
+            if (isUpgradedWith(focus, FocusUpgradeType.scattershot))
+                return new AspectList().add(Aspect.WATER, 20).add(Aspect.FIRE, 2).add(Aspect.ENTROPY, 2).add(Aspect.AIR, 5);
+            if (isUpgradedWith(focus, FocusUpgradeType.iceboulder))
+                return new AspectList().add(Aspect.WATER, 20).add(Aspect.FIRE, 2).add(Aspect.ENTROPY, 2).add(Aspect.EARTH, 5);
+        }
         return new AspectList().add(Aspect.WATER, 5).add(Aspect.FIRE, 2).add(Aspect.ENTROPY, 2);
     }
-    @Override public int getActivationCooldown(ItemStack focus) { return COOLDOWN_MILLIS; }
+    @Override public int getActivationCooldown(ItemStack focus) {
+        return isUpgradedWith(focus, FocusUpgradeType.scattershot) || isUpgradedWith(focus, FocusUpgradeType.iceboulder) ? 500 : COOLDOWN_MILLIS;
+    }
     @Override public int getFocusColor(ItemStack focus) { return 5204428; }
     @Override public String getSortingHelper(ItemStack focus) { return "BF" + super.getSortingHelper(focus); }
     @Override public FocusUpgradeType[] getPossibleUpgradesByRank(ItemStack focus, int rank) {
-        return rank >= 1 && rank <= 5 ? new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency} : new FocusUpgradeType[0];
+        return switch (rank) {
+            case 1, 5 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.alchemistsfrost};
+            case 2, 4 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency};
+            case 3 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.scattershot, FocusUpgradeType.iceboulder, FocusUpgradeType.alchemistsfrost};
+            default -> new FocusUpgradeType[0];
+        };
     }
     // Original inherits WAVE and a per-activation (not per-tick) cost.
 
     /** CENTIVIS, not ArcaneVis.price's whole-vis recipe units. Preserve FLOAT truncation. */
     public static Map<String, Integer> activationCost(ItemStack wand, Player actor) {
+        // Original :61 calls getVisCost(WAND), so even specialized casts pay
+        // this base price. Only the actual focus's tooltip advertises 20 aqua.
         return FocusVis.price(new AspectList().add(Aspect.WATER, 5).add(Aspect.FIRE, 2).add(Aspect.ENTROPY, 2), wand, actor);
     }
 
@@ -68,12 +83,24 @@ public final class ItemFocusFrost extends ItemFocusBasic {
         wand.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(paid));
         player.getInventory().setChanged();
 
-        EntityFrostShard shard = new EntityFrostShard(level, player, 1F);
-        shard.setDamage(3F + potency * 1.5F);
-        level.addFreshEntity(shard);
+        ItemStack focus = FocusData.get(before);
+        int frost = FocusUpgradeData.level(focus, FocusUpgradeType.alchemistsfrost);
+        boolean scatter = FocusUpgradeData.level(focus, FocusUpgradeType.scattershot) > 0;
+        boolean boulder = FocusUpgradeData.level(focus, FocusUpgradeType.iceboulder) > 0;
+        ItemStack committed = wand.copy();
+        EntityFrostShard shard = null;
+        for (int shot = 0; shot < (scatter ? 5 + potency * 2 : 1); shot++) {
+            if (player.level() != level || !player.isAlive() || player.getItemInHand(hand) != wand || !ItemStack.matches(wand, committed)) break;
+            shard = new EntityFrostShard(level, player, scatter ? 8F : 1F);
+            shard.setDamage(scatter ? 1F : boulder ? 4F + potency * 2 : 3F + potency * 1.5F);
+            shard.setFragile(scatter);
+            if (boulder) shard.configureBoulder();
+            shard.setFrosty(frost);
+            level.addFreshEntity(shard);
+        }
         // :83-85 ignores insertion refusal: one PAID attempt, no retry/refund,
         // and sound at the constructed shard even when it never entered the index.
-        level.playSound(null, shard.getX(), shard.getY(), shard.getZ(), ICE, SoundSource.PLAYERS,
+        if (shard != null) level.playSound(null, shard.getX(), shard.getY(), shard.getZ(), ICE, SoundSource.PLAYERS,
                 .4F, 1F + level.random.nextFloat() * .1F);
         player.inventoryMenu.broadcastChanges();
         if (player.containerMenu != player.inventoryMenu) player.containerMenu.broadcastChanges();

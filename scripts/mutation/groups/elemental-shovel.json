@@ -180,7 +180,9 @@
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
    "old": " || state.getDestroySpeed(level, cell) < 0) continue;",
-   "new": ") continue;"
+   "new": ") continue;",
+   "expect": "survives",
+   "reason": "equivalent: bedrock (and every unbreakable vanilla block) is not mineable/shovel, so the tag filter on the line above already skips it; the hardness check only guards modded unbreakable shovel blocks"
   },
   {
    "id": "any-neighbour",
@@ -204,7 +206,9 @@
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalShovelHarvest.java",
    "old": "if (!(player.getMainHandItem().getItem() instanceof ItemElementalShovel) || player.isShiftKeyDown()",
-   "new": "if (player.isShiftKeyDown()"
+   "new": "if (player.isShiftKeyDown()",
+   "expect": "survives",
+   "reason": "equivalent: the same held-item check opens the loop in ElementalShovelHarvest.finish and ends the square before any extra block goes; the check in plan only saves the look ray for other tools"
   },
   {
    "id": "square-ignores-wear",

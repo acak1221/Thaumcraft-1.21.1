@@ -268,7 +268,9 @@
    "tier": "gametest",
    "file": "common/src/main/java/thaumcraft/common/lib/world/ElementalSwordSweep.java",
    "old": "if (!(player.getMainHandItem().getItem() instanceof ItemElementalSword) || !target.isAlive()) return;",
-   "new": "if (!target.isAlive()) return;"
+   "new": "if (!target.isAlive()) return;",
+   "expect": "survives",
+   "reason": "equivalent: the loop in ElementalSwordSweep.before opens with the same held-item check (it also ends the sweep when the sword breaks), so a weapon other than the sword strikes nobody; the check at the head only saves building the list"
   },
   {
    "id": "cooldown-spent",

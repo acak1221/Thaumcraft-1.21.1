@@ -1,3 +1,4 @@
-elemental-sword
+elemental-shovel
+bedrock-attempted thaumium-too
 
-# request 15: the Sword of the Zephyr (elemental-shovel run 14 may still be running)
+# request 16: re-run the two documented survivors of the Shovel of the Earthmover (now expected to survive); elemental-sword any-sword-sweeps is documented the same way

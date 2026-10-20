@@ -157,6 +157,10 @@ public final class ThaumcraftRecipeDisplay {
             alias("WandCapVoid", "infusion/wand_cap_void"), // 310
             alias("VoidMetal", "crucible/void_ingot"), // 99
             alias("VoidSeed", "crucible/void_seed"), // 100
+            alias("PureIron", "crucible/pure_iron"), // 112, iron ore -> native iron cluster
+            alias("PureGold", "crucible/pure_gold"), // 113, gold ore -> native gold cluster
+            alias("TransIron", "crucible/trans_iron"), // 126, one iron nugget -> three
+            alias("TransGold", "crucible/trans_gold"), // 127, one gold nugget -> three
             alias("WandRodGreatwood", "arcane/wand_rod_greatwood"), // 238
             alias("FocusFire", "arcane/focus_fire"),             // 247
             alias("FocusFrost", "arcane/focus_frost"),           // 248

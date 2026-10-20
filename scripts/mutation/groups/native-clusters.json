@@ -1,0 +1,210 @@
+{
+ "description": "Native iron, gold and cinnabar clusters: purification and tripling in the crucible, two-ingot furnace recipes, aspects (docs/analysis/2026-10-20-native-clusters.md)",
+ "watch": {
+  "junit": [
+   "ClusterAssetsTest",
+   "EarlyObjectAspectBindingsTest"
+  ],
+  "gametests": [
+   "nativeClustersPurifyTripleAndMelt"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.assets.ClusterAssetsTest",
+  "thaumcraft.aspects.EarlyObjectAspectBindingsTest"
+ ],
+ "mutants": [
+  {
+   "id": "smelt-iron-one-ingot",
+   "name": "a cluster of iron melts into one ingot",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/cluster_iron_smelting.json",
+   "old": "\"count\":2",
+   "new": "\"count\":1"
+  },
+  {
+   "id": "smelt-gold-iron-ingots",
+   "name": "a gold cluster melts into iron",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/cluster_gold_smelting.json",
+   "old": "minecraft:gold_ingot",
+   "new": "minecraft:iron_ingot"
+  },
+  {
+   "id": "smelt-cinnabar-plain-type",
+   "name": "the cinnabar furnace recipe is the vanilla single-item type",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/cluster_cinnabar_smelting.json",
+   "old": "thaumcraft:stack_smelting",
+   "new": "minecraft:smelting"
+  },
+  {
+   "id": "smelt-iron-fast",
+   "name": "the iron cluster melts in 100 ticks",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/cluster_iron_smelting.json",
+   "old": "\"cookingtime\":200",
+   "new": "\"cookingtime\":100"
+  },
+  {
+   "id": "smelt-gold-no-xp",
+   "name": "the gold cluster gives no experience",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/cluster_gold_smelting.json",
+   "old": "\"experience\":1.0",
+   "new": "\"experience\":0.0"
+  },
+  {
+   "id": "pure-iron-order",
+   "name": "the iron purification moves in the recipe order",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_iron.json",
+   "old": "\"source_order\": 22",
+   "new": "\"source_order\": 21"
+  },
+  {
+   "id": "pure-gold-research",
+   "name": "the gold purification needs the iron research",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_gold.json",
+   "old": "\"research\": \"PUREGOLD\"",
+   "new": "\"research\": \"PUREIRON\""
+  },
+  {
+   "id": "pure-iron-no-raw",
+   "name": "raw iron is not accepted by the purification",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_iron.json",
+   "old": ", {\"tag\": \"c:raw_materials/iron\"}",
+   "new": ""
+  },
+  {
+   "id": "trans-gold-no-greed",
+   "name": "tripling gold needs no greed",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/trans_gold.json",
+   "old": "\"aspects\": {\"metallum\": 2, \"lucrum\": 1}",
+   "new": "\"aspects\": {\"metallum\": 2}"
+  },
+  {
+   "id": "trans-iron-ingots",
+   "name": "tripling iron takes ingots",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/trans_iron.json",
+   "old": "\"c:nuggets/iron\"",
+   "new": "\"c:ingots/iron\""
+  },
+  {
+   "id": "aspect-iron-metal-five",
+   "name": "the iron cluster has five metal",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/tc4/early_object_aspects.json",
+   "old": "\"modern_ids\": [\"thaumcraft:cluster_iron\"],\n      \"aspects\": {\"ordo\": 1, \"metallum\": 6, \"terra\": 1}",
+   "new": "\"modern_ids\": [\"thaumcraft:cluster_iron\"],\n      \"aspects\": {\"ordo\": 1, \"metallum\": 5, \"terra\": 1}"
+  },
+  {
+   "id": "aspect-gold-one-greed",
+   "name": "the gold cluster has one greed",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/tc4/early_object_aspects.json",
+   "old": "\"terra\": 1, \"lucrum\": 2}",
+   "new": "\"terra\": 1, \"lucrum\": 1}"
+  },
+  {
+   "id": "aspect-cinnabar-one-poison",
+   "name": "the cinnabar cluster has one poison",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/tc4/early_object_aspects.json",
+   "old": "\"permutatio\": 4, \"venenum\": 2}",
+   "new": "\"permutatio\": 4, \"venenum\": 1}"
+  },
+  {
+   "id": "model-gold-icon",
+   "name": "the gold cluster shows the iron icon",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/cluster_gold.json",
+   "old": "items/clustergold",
+   "new": "items/clusteriron"
+  },
+  {
+   "id": "lang-ru-iron",
+   "name": "the Russian iron cluster is named after gold",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"item.thaumcraft.cluster_iron\": \"Железорудный кластер\"",
+   "new": "\"item.thaumcraft.cluster_iron\": \"Золоторудный кластер\""
+  },
+  {
+   "id": "stack-codec-single-item",
+   "name": "the stack smelting recipe reads its result as a single item",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/crafting/StackSmeltingRecipe.java",
+   "old": "ItemStack.STRICT_CODEC.fieldOf(\"result\")",
+   "new": "ItemStack.SINGLE_ITEM_CODEC.fieldOf(\"result\")"
+  },
+  {
+   "id": "pure-gold-two-clusters",
+   "name": "purifying gold ore yields two clusters",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_gold.json",
+   "old": "\"count\": 1",
+   "new": "\"count\": 2"
+  },
+  {
+   "id": "pure-iron-no-order",
+   "name": "purifying iron needs no order",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_iron.json",
+   "old": "\"aspects\": {\"metallum\": 1, \"ordo\": 1}",
+   "new": "\"aspects\": {\"metallum\": 1}"
+  },
+  {
+   "id": "pure-gold-order",
+   "name": "the gold purification takes the iron slot in the recipe order",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_gold.json",
+   "old": "\"source_order\": 23",
+   "new": "\"source_order\": 22"
+  },
+  {
+   "id": "trans-iron-two-nuggets",
+   "name": "tripling iron gives two nuggets",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/trans_iron.json",
+   "old": "\"count\": 3",
+   "new": "\"count\": 2"
+  },
+  {
+   "id": "trans-gold-catalyst-iron",
+   "name": "tripling gold takes the iron nugget",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/crucible/trans_gold.json",
+   "old": "\"catalyst\": {\"item\": \"minecraft:gold_nugget\"}",
+   "new": "\"catalyst\": {\"item\": \"minecraft:iron_nugget\"}"
+  },
+  {
+   "id": "smelt-cinnabar-slow",
+   "name": "the cinnabar cluster melts in 300 ticks",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/cluster_cinnabar_smelting.json",
+   "old": "\"cookingtime\":200",
+   "new": "\"cookingtime\":300"
+  },
+  {
+   "id": "smelt-gold-one-ingot",
+   "name": "a cluster of gold melts into one ingot",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/cluster_gold_smelting.json",
+   "old": "\"count\":2",
+   "new": "\"count\":1"
+  },
+  {
+   "id": "aspect-cinnabar-no-exchange",
+   "name": "the cinnabar cluster has no exchange",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/tc4/early_object_aspects.json",
+   "old": "\"terra\": 1, \"permutatio\": 4, \"venenum\": 2}",
+   "new": "\"terra\": 1, \"venenum\": 2}"
+  }
+ ]
+}

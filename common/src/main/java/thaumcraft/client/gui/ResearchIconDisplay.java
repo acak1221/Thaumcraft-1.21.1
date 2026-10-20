@@ -82,7 +82,15 @@ final class ResearchIconDisplay {
         String id = switch (match.group(1)) {
             case "ConfigItems.itemResource" -> variant(RESOURCES, metadata);
             case "ConfigItems.itemShard" -> variant(SHARDS, metadata);
-            case "ConfigItems.itemNugget" -> metadata == 6 ? "thaumium_nugget" : metadata == 7 ? "void_nugget" : null;
+            // ItemNugget metadata 16 / 21 / 31 are the native iron / cinnabar / gold clusters (ConfigAspects:360-362); 0 is the other-mod iron nugget.
+            case "ConfigItems.itemNugget" -> switch (metadata) {
+                case 6 -> "thaumium_nugget";
+                case 7 -> "void_nugget";
+                case 16 -> "cluster_iron";
+                case 21 -> "cluster_cinnabar";
+                case 31 -> "cluster_gold";
+                default -> null;
+            };
             case "ConfigItems.itemZombieBrain" -> metadata == 0 ? "zombie_brain" : null;
             // ConfigResearch:89-97; ConfigItems:292-313 (staff cores are metadata 50-57 and 100). The copper and silver caps (other-mod metals) remain unsupported.
             case "ConfigItems.itemWandRod" -> switch (metadata) {

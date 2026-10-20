@@ -76,4 +76,13 @@ class ChampionWiringRulesTest {
         assertFalse(ChampionWiringRules.championReward(true, true, false, ChampionRules.NO_CHAMPION));
         assertFalse(ChampionWiringRules.championReward(true, true, false, -2));
     }
+
+    @Test void originalWardedChampionTakesHalfOfItsMaximumHealthAsItsWard() {
+        // Oracle EntityUtils.makeChampion:271-274 - the ward is half of the maximum health of the
+        // champion and it joins its absorption.
+        assertEquals(10, ChampionWiringRules.wardedChampionWard(20.0));
+        assertEquals(62, ChampionWiringRules.wardedChampionWard(125.0));
+        assertEquals(132, ChampionWiringRules.wardedChampionWard(265.0));
+        assertEquals(0, ChampionWiringRules.wardedChampionWard(1.0));
+    }
 }

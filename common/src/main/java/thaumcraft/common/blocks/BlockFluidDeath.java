@@ -43,6 +43,13 @@ import thaumcraft.common.lib.tiles.LegacyTileRules;
  * 1.21.1 has no finite fluids, so the death fluid follows the native pure fluid structure: the block owns the
  * classic quanta flow and the fluid only carries its identity.
  * <p>
+ * The block owns the level of a cell, so a cell only ever receives a level it owns: a cell that is not a death
+ * fluid block has no level property at all and the death fluid block is placed there instead.
+ * <p>
+ * The original fluid was a rare liquid of the luminosity eight and the viscosity of one thousand five hundred
+ * ({@code ConfigBlocks.FLUIDDEATH}). 1.21.1 has no viscosity of its own, so the death fluid keeps the native
+ * liquid movement and never pushes an entity.
+ * <p>
  * Oracle: {@code thaumcraft/common/blocks/BlockFluidDeath.java}, lines 33-81 and
  * {@code thaumcraft/common/config/ConfigBlocks.java}:166.
  */
@@ -76,6 +83,8 @@ public final class BlockFluidDeath extends LiquidBlock {
     public static int damage(int level) { return LegacyTileRules.deathFluidDamage(level); }
 
     @Override protected FluidState getFluidState(BlockState state) {
+        // A state of another block owns no level at all, so it never carries one.
+        if (!state.hasProperty(LEVEL)) return Fluids.EMPTY.defaultFluidState();
         int level = state.getValue(LEVEL);
         if (level <= 0) return fluid.getSource(false);
         if (level < QUANTA_PER_BLOCK) return fluid.getFlowing(QUANTA_PER_BLOCK - level, false);
@@ -87,6 +96,7 @@ public final class BlockFluidDeath extends LiquidBlock {
      */
     @Override protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (level.isClientSide || !(entity instanceof LivingEntity living)) return;
+        if (!state.hasProperty(LEVEL)) return;
         living.hurt(level.damageSources().magic(), damage(state.getValue(LEVEL)));
     }
 
@@ -100,6 +110,8 @@ public final class BlockFluidDeath extends LiquidBlock {
      * every flowing cell without a stronger neighbour dries up again.
      */
     public void flowTick(Level level, BlockPos pos, BlockState state) {
+        // Only a cell of the death fluid carries a level; a foreign state never does.
+        if (!(state.getBlock() instanceof BlockFluidDeath)) return;
         int current = state.getValue(LEVEL);
         if (current >= QUANTA_PER_BLOCK) {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
@@ -125,15 +137,32 @@ public final class BlockFluidDeath extends LiquidBlock {
             int neighbourLevel = neighbour.getValue(LEVEL);
             if (neighbourLevel < best) best = neighbourLevel;
         }
-        int next = best >= QUANTA_PER_BLOCK ? current + 1 : best + 1;
+        int next = LegacyTileRules.deathFluidNextLevel(current, best);
         if (next == current) return;
         if (next >= QUANTA_PER_BLOCK) level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-        else level.setBlock(pos, state.setValue(LEVEL, next), Block.UPDATE_ALL);
+        else level.setBlock(pos, withLevel(state, next), Block.UPDATE_ALL);
     }
 
-    private void spread(Level level, BlockPos pos, int level0) {
+    /**
+     * The classic quanta cell of the death fluid. A cell that is not a death fluid block owns no level
+     * property at all, so the death fluid block itself is placed there; a state without the level
+     * property never receives one.
+     */
+    private void spread(Level level, BlockPos pos, int cellLevel) {
         BlockState state = level.getBlockState(pos);
-        level.setBlock(pos, state.setValue(LEVEL, level0), Block.UPDATE_ALL);
+        if (!(state.getBlock() instanceof BlockFluidDeath)) state = ThaumcraftLegacyTiles.DEATH_FLUID.get().defaultBlockState();
+        BlockState target = withLevel(state, cellLevel);
+        if (target == state) return;
+        level.setBlock(pos, target, Block.UPDATE_ALL);
+    }
+
+    /**
+     * The level a death fluid cell carries. A state that owns no level property keeps the state it had,
+     * so a level is never set on a block that does not know it.
+     */
+    private static BlockState withLevel(BlockState state, int cellLevel) {
+        int level = LegacyTileRules.deathFluidCellLevel(state.hasProperty(LEVEL), cellLevel);
+        return level < 0 ? state : state.setValue(LEVEL, level);
     }
 
     private static boolean canFlowInto(Level level, BlockPos pos) {
@@ -177,8 +206,10 @@ public final class BlockFluidDeath extends LiquidBlock {
             Block.dropResources(state, level, pos, level.getBlockEntity(pos));
         }
         @Override public BlockState createLegacyBlock(FluidState state) {
-            return ThaumcraftLegacyTiles.DEATH_FLUID.get().defaultBlockState()
-                    .setValue(LiquidBlock.LEVEL, state.isSource() ? 0 : QUANTA_PER_BLOCK - state.getAmount());
+            BlockState block = ThaumcraftLegacyTiles.DEATH_FLUID.get().defaultBlockState();
+            if (state.isSource()) return block.setValue(LiquidBlock.LEVEL, 0);
+            int level = Math.max(0, Math.min(QUANTA_PER_BLOCK - state.getAmount(), QUANTA_PER_BLOCK - 1));
+            return block.setValue(LiquidBlock.LEVEL, level);
         }
         @Override public float getOwnHeight(FluidState state) {
             return state.isSource() ? 1F : (QUANTA_PER_BLOCK - state.getAmount()) / (float) QUANTA_PER_BLOCK;

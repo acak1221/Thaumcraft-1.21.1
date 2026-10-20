@@ -25,6 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import thaumcraft.api.entities.IThaumcraftBoss;
 import thaumcraft.common.entities.monster.EntityTaintSpider;
 import thaumcraft.common.lib.WarpEvents;
+import thaumcraft.common.lib.ward.WardRules;
 
 /**
  * Champion selection and tier maths of the original 1.7 bestiary, kept pure so it can be
@@ -235,7 +236,12 @@ public final class ChampionRules {
                 AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
                 if (speed != null) speed.addPermanentModifier(new AttributeModifier(BOLD_SPEED_ID, modifier.speedMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             }
-            if (modifier.id == ChampionModifier.WARDED && health != null) mob.setHealth(mob.getHealth() + (int) health.getBaseValue() / 2);
+            if (modifier.id == ChampionModifier.WARDED && health != null) {
+                // Oracle EntityUtils.makeChampion:271-274 - the warded champion adds half of its
+                // maximum health to its absorption, never to its health. 1.21.1 clamps the absorption
+                // by the max absorption attribute, so the ward raises that attribute first.
+                WardRules.addWard(mob, (float) ChampionWiringRules.wardedChampionWard(health.getBaseValue()));
+            }
         }
 
         /** Original champion name: the modifier name in front of the entity name. */
@@ -247,7 +253,7 @@ public final class ChampionRules {
         public static void tickChampion(LivingEntity mob, int modifierId) {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
             if (modifier == null || !modifier.ticks()) return;
-            IChampionModifierEffect.Context context = IChampionModifierEffect.Context.tick(mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.invulnerableTime > 0);
+            IChampionModifierEffect.Context context = IChampionModifierEffect.Context.tick(mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             apply(mob, null, modifier.effect.performEffect(context, random(mob)));
         }
 
@@ -256,7 +262,7 @@ public final class ChampionRules {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
             if (modifier == null || !modifier.attacks() || amount <= 0.0f || target == null) return;
             IChampionModifierEffect.Context context = IChampionModifierEffect.Context.attack(amount, target instanceof Player,
-                    mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.invulnerableTime > 0);
+                    mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             apply(mob, target, modifier.effect.performEffect(context, random(mob)));
         }
 
@@ -272,7 +278,7 @@ public final class ChampionRules {
             if (!(attacker instanceof LivingEntity living)) return amount;
             IChampionModifierEffect.Context context = IChampionModifierEffect.Context.damaged(amount,
                     source.is(DamageTypeTags.BYPASSES_ARMOR), "thorns".equalsIgnoreCase(source.getMsgId()), true,
-                    living instanceof Player, mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.invulnerableTime > 0);
+                    living instanceof Player, mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             IChampionModifierEffect.Result result = modifier.effect.performEffect(context, random(mob));
             apply(mob, living, result);
             return result.amount();
@@ -281,6 +287,7 @@ public final class ChampionRules {
         /** Applies an original champion effect result to the world. */
         private static void apply(LivingEntity mob, LivingEntity target, IChampionModifierEffect.Result result) {
             if (result.heal() > 0.0f) mob.heal(result.heal());
+            if (result.absorption() > 0.0f) WardRules.addWard(mob, result.absorption());
             if (result.reflected() > 0.0f && target != null) target.hurt(mob.level().damageSources().thorns(mob), result.reflected());
             if (target != null) {
                 if (result.status() != IChampionModifierEffect.Status.NONE) target.addEffect(new MobEffectInstance(status(result.status()), result.statusDuration()));

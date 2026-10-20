@@ -37,6 +37,7 @@ import thaumcraft.common.lib.MagicWard;
 import thaumcraft.common.lib.WarpEvents;
 import thaumcraft.common.lib.network.WarpEventNetworking;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
+import thaumcraft.common.lib.ward.WardRules;
 
 /** Original guardian's combat, undead/magic ward, proximity mist, home and drops. Natural obelisk/Outer Lands spawns are separate. */
 public final class EntityEldritchGuardian extends Monster implements RangedAttackMob, IEldritchMob {
@@ -86,7 +87,10 @@ public final class EntityEldritchGuardian extends Monster implements RangedAttac
     private boolean inOuterLands() { return level().dimension().location().equals(ResourceLocation.fromNamespaceAndPath("thaumcraft", "outer_lands")); }
     @Override protected void customServerAiStep() {
         super.customServerAiStep();
-        if (inOuterLands() && hurtTime <= 0 && tickCount % 25 == 0 && getAbsorptionAmount() < getMaxHealth() / 2) setAbsorptionAmount(getAbsorptionAmount() + 1);
+        // Oracle EntityEldritchGuardian:252-259 - the guardian of the Outer Lands regains one point
+        // of its ward every twenty fifth tick, up to half of its maximum health. 1.21.1 clamps the
+        // absorption by the max absorption attribute, so the ward raises that attribute first.
+        if (inOuterLands() && hurtTime <= 0 && tickCount % 25 == 0 && getAbsorptionAmount() < getMaxHealth() / 2) WardRules.addWard(this, 1F);
     }
     @Override public boolean doHurtTarget(Entity target) {
         boolean hit = super.doHurtTarget(target);

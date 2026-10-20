@@ -12,6 +12,8 @@ package thaumcraft.common.lib.mods;
  *       room.</li>
  *   <li>Oracle {@code EntityUtils.makeChampion:243-254} - a boss never takes the ordinary
  *       champion bonuses, it names itself after its champion modifier instead.</li>
+ *   <li>Oracle {@code EntityUtils.makeChampion:271-274} - the warded champion takes half of
+ *       its maximum health as its ward, and the ward joins its absorption.</li>
  *   <li>Oracle {@code EventHandlerEntity.livingDrops:453-461} - the extra experience and the
  *       loot bag a champion mob dropped when it died.</li>
  * </ul>
@@ -62,4 +64,11 @@ public final class ChampionWiringRules {
     public static boolean championReward(boolean recentlyHit, boolean mob, boolean boss, int championModifier) {
         return recentlyHit && mob && !boss && championModifier >= 0;
     }
+
+    /**
+     * Original {@code EntityUtils.makeChampion:271-274}. The 1.7 original gave the warded
+     * champion half of its maximum health as its ward, and the ward joined the absorption of
+     * the champion instead of its health.
+     */
+    public static int wardedChampionWard(double maxHealth) { return (int) maxHealth / 2; }
 }

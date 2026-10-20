@@ -43,6 +43,7 @@ import thaumcraft.common.entities.EntitySpecialItem;
 import thaumcraft.common.entities.projectile.EntityEldritchOrb;
 import thaumcraft.common.lib.mods.ChampionHooks;
 import thaumcraft.common.lib.mods.ChampionModifier;
+import thaumcraft.common.lib.ward.WardRules;
 import thaumcraft.common.lib.world.EldritchMobRules;
 
 /**
@@ -325,7 +326,10 @@ public class EntityEldritchWarden extends EntityThaumcraftBoss implements Ranged
         spawnTimer=EldritchMobRules.WARDEN_SPAWN_TIMER;
         setTitle(getRandom().nextInt(EldritchMobRules.WARDEN_TITLES.length));
         float base=(float)getAttribute(Attributes.MAX_HEALTH).getBaseValue();
-        setAbsorptionAmount(getAbsorptionAmount()+base*EldritchMobRules.WARDEN_WARD_RATIO);
+        // Oracle EntityEldritchWarden:318 - the warden adds two thirds of its maximum health to its
+        // absorption. 1.21.1 clamps the absorption by the max absorption attribute, so the ward raises
+        // that attribute first.
+        WardRules.addWard(this,base*EldritchMobRules.WARDEN_WARD_RATIO);
         return data;
     }
 
@@ -337,7 +341,11 @@ public class EntityEldritchWarden extends EntityThaumcraftBoss implements Ranged
         if(frenzyCounter!=0)return;
         if(EldritchMobRules.wardenWardsRegenerate(hurtTime,tickCount)) {
             int cap=EldritchMobRules.wardenWardCap((float)getAttribute(Attributes.MAX_HEALTH).getBaseValue());
-            setAbsorptionAmount(EldritchMobRules.wardenWardRegeneration(getAbsorptionAmount(),cap));
+            // Oracle EntityEldritchWarden:164-169 - the warden regains one point of its ward every
+            // twenty fifth tick, up to the ceiling of two thirds of its maximum health.
+            float absorption=getAbsorptionAmount();
+            float regenerated=EldritchMobRules.wardenWardRegeneration(absorption,cap);
+            if(regenerated!=absorption)WardRules.addWard(this,regenerated-absorption);
         }
     }
 

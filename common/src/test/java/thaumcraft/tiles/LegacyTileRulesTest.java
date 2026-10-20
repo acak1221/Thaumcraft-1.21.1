@@ -160,6 +160,29 @@ class LegacyTileRulesTest {
         assertFalse(LegacyTileRules.deathFluidHurts(true));
     }
 
+    @Test void theDeathFluidCellTakesTheLevelOfItsStrongestNeighbour() {
+        // A cell that still has a stronger neighbour keeps the level of that neighbour plus one, so
+        // a cell next to the source stays at level one.
+        assertEquals(1, LegacyTileRules.deathFluidNextLevel(1, 0));
+        assertEquals(2, LegacyTileRules.deathFluidNextLevel(3, 1));
+        // A cell without a stronger neighbour loses one quanta on every step and dries up again.
+        assertEquals(2, LegacyTileRules.deathFluidNextLevel(1, 4));
+        assertEquals(3, LegacyTileRules.deathFluidNextLevel(2, 4));
+        assertEquals(4, LegacyTileRules.deathFluidNextLevel(3, 4));
+    }
+
+    @Test void aCellWithoutTheLevelPropertyNeverReceivesOne() {
+        // A state of another block owns no level at all, so the death fluid block is placed there.
+        assertEquals(-1, LegacyTileRules.deathFluidCellLevel(false, 1));
+        assertEquals(-1, LegacyTileRules.deathFluidCellLevel(false, 0));
+        // A cell of the death fluid only carries a level of the four quanta of the block.
+        assertEquals(0, LegacyTileRules.deathFluidCellLevel(true, 0));
+        assertEquals(1, LegacyTileRules.deathFluidCellLevel(true, 1));
+        assertEquals(3, LegacyTileRules.deathFluidCellLevel(true, 3));
+        assertEquals(3, LegacyTileRules.deathFluidCellLevel(true, 4));
+        assertEquals(3, LegacyTileRules.deathFluidCellLevel(true, 99));
+    }
+
     // ----------------------------------------------------------------------------------------------
     // Essentia tubes
     // ----------------------------------------------------------------------------------------------

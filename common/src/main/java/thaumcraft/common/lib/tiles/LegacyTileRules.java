@@ -197,6 +197,26 @@ public final class LegacyTileRules {
     /** BlockFluidDeath:57 - the death fluid never hurts a client side world. */
     public static boolean deathFluidHurts(boolean clientSide) { return !clientSide; }
 
+    /**
+     * The level a death fluid cell takes from the strongest cell around it. A cell that has no stronger
+     * neighbour loses one quanta on every step, so it dries up again once it reaches the quanta of the
+     * block.
+     */
+    public static int deathFluidNextLevel(int current, int strongestNeighbour) {
+        int next = strongestNeighbour >= DEATH_FLUID_QUANTA ? current + 1 : strongestNeighbour + 1;
+        return Math.min(next, DEATH_FLUID_QUANTA);
+    }
+
+    /**
+     * The level a death fluid cell may carry. A state that owns no level property never receives one, so
+     * the death fluid block itself has to be placed in a cell that has none; the level of a cell that does
+     * own the property never leaves the range of the four quanta of the block.
+     */
+    public static int deathFluidCellLevel(boolean hasLevelProperty, int requested) {
+        if (!hasLevelProperty) return -1;
+        return Math.max(0, Math.min(requested, DEATH_FLUID_QUANTA - 1));
+    }
+
     // --------------------------------------------------------------------------------------------------------------
     // Essentia tubes (oracle thaumcraft/common/tiles/TileTube*.java)
     // --------------------------------------------------------------------------------------------------------------

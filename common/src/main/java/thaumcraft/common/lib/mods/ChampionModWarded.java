@@ -3,14 +3,17 @@ package thaumcraft.common.lib.mods;
 import java.util.Random;
 
 /**
- * Original warded champion: every twenty fifth tick it healed itself for one health as
- * long as it was hurt and below half of its base max health.
+ * Original warded champion: every twenty fifth tick it regained one point of its ward as
+ * long as it was not hurt and its ward was below half of its base max health.
+ *
+ * <p>Oracle {@code ChampionModWarded:25-30}: the 1.7 original raised the absorption of the
+ * champion by one point, never its health.
  */
 public final class ChampionModWarded implements IChampionModifierEffect {
     @Override public Result performEffect(Context context, Random random) {
         if (context.invulnerable() || context.ticksExisted() % 25 != 0) return Result.unchanged(context);
         int ward = (int) context.baseMaxHealth() / 2;
-        if (context.health() < (float) ward) return Result.healing(context, 1.0f);
+        if (context.absorption() < (float) ward) return Result.warding(context, 1.0f);
         return Result.unchanged(context);
     }
     @Override public Fx showFx(Random random, float width, float height) {

@@ -72,6 +72,15 @@ public final class ThaumcraftRecipeDisplay {
             alias("ElementalAxe", "infusion/elemental_axe"), // 364, pristine thaumium axe / two water shards / diamond / Greatwood log
             alias("ThaumiumHoe", "thaumium_hoe"),           // 466
             alias("ThaumiumSword", "thaumium_sword"),       // 467
+            alias("VoidHelm", "void_helmet"),               // 449; ordinary, not research-gated crafting
+            alias("VoidChest", "void_chestplate"),          // 450
+            alias("VoidLegs", "void_leggings"),             // 451
+            alias("VoidBoots", "void_boots"),               // 452
+            alias("VoidShovel", "void_shovel"),             // 453
+            alias("VoidPick", "void_pickaxe"),              // 454
+            alias("VoidAxe", "void_axe"),                   // 455
+            alias("VoidHoe", "void_hoe"),                   // 456
+            alias("VoidSword", "void_sword"),               // 457
             alias("Tallow", "crucible/tallow"),                // 120
             alias("ArcaneStone1", "arcane/arcane_stone"),      // 205
             alias("ArcaneStone2", "arcane_stone_bricks"),      // 206

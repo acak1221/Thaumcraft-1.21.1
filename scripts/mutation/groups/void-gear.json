@@ -1,0 +1,232 @@
+{
+ "description": "The nine Void metal tools and armor: numbers, recipes, mending, wither, player-versus-player rule, warp (docs/analysis/2026-10-20-void-gear.md)",
+ "watch": {
+  "junit": [
+   "VoidGearAssetsTest"
+  ],
+  "gametests": [
+   "voidMetalGearMendsWithersAndWarps"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.assets.VoidGearAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "helmet-recipe-full",
+   "name": "the void helmet is a full row of three",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/void_helmet.json",
+   "old": "\"pattern\":[\"III\",\"I I\"]",
+   "new": "\"pattern\":[\"III\",\"III\"]"
+  },
+  {
+   "id": "sword-not-a-sword",
+   "name": "the void sword is not in #swords",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/item/swords.json",
+   "old": ",\"thaumcraft:void_sword\"",
+   "new": ""
+  },
+  {
+   "id": "axe-model-flat",
+   "name": "the void axe icon is drawn like a block item",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/void_axe.json",
+   "old": "minecraft:item/handheld",
+   "new": "minecraft:item/generated"
+  },
+  {
+   "id": "ingot-tag-wrong",
+   "name": "the void ingot tag holds the seed",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/c/tags/item/ingots/void.json",
+   "old": "thaumcraft:void_ingot",
+   "new": "thaumcraft:void_seed"
+  },
+  {
+   "id": "tier-uses",
+   "name": "void tools last 200 uses",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "getUses() { return 150; }",
+   "new": "getUses() { return 200; }"
+  },
+  {
+   "id": "tier-speed",
+   "name": "void tools dig at speed 7",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "getSpeed() { return 8; }",
+   "new": "getSpeed() { return 7; }"
+  },
+  {
+   "id": "tier-damage",
+   "name": "void tools add 2 damage",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "return 8; }\n        @Override public float getAttackDamageBonus() { return 3; }",
+   "new": "return 8; }\n        @Override public float getAttackDamageBonus() { return 2; }"
+  },
+  {
+   "id": "tier-enchant",
+   "name": "void tools have enchantability 14",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "getEnchantmentValue() { return 10; }",
+   "new": "getEnchantmentValue() { return 14; }"
+  },
+  {
+   "id": "tools-repair-with-ingot",
+   "name": "void tools mend with the void ingot, not the Primal Charm",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "Ingredient.of(ThaumcraftContent.MATERIALS.get(\"primal_charm\").get())",
+   "new": "Ingredient.of(ThaumcraftContent.MATERIALS.get(\"void_ingot\").get())"
+  },
+  {
+   "id": "armor-helmet-defense",
+   "name": "the void helmet protects 4",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "Map.of(ArmorItem.Type.HELMET, 3, ArmorItem.Type.CHESTPLATE, 7, ArmorItem.Type.LEGGINGS, 6, ArmorItem.Type.BOOTS, 3)",
+   "new": "Map.of(ArmorItem.Type.HELMET, 4, ArmorItem.Type.CHESTPLATE, 7, ArmorItem.Type.LEGGINGS, 6, ArmorItem.Type.BOOTS, 3)"
+  },
+  {
+   "id": "armor-repairs-with-charm",
+   "name": "void armor mends with the Primal Charm",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "return Ingredient.of(ThaumcraftContent.MATERIALS.get(\"void_ingot\").get());",
+   "new": "return Ingredient.of(ThaumcraftContent.MATERIALS.get(\"primal_charm\").get());"
+  },
+  {
+   "id": "armor-durability",
+   "name": "void armor has durability factor 25",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidArmor.java",
+   "old": "type.getDurability(10)",
+   "new": "type.getDurability(25)"
+  },
+  {
+   "id": "sword-damage",
+   "name": "the void sword adds 3 base damage",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemVoidSword.java",
+   "old": "SwordItem.createAttributes(tier, 4, -2.4F)",
+   "new": "SwordItem.createAttributes(tier, 3, -2.4F)"
+  },
+  {
+   "id": "hoe-enchantability",
+   "name": "the void hoe has enchantability 10",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemVoidHoe.java",
+   "old": "public int getEnchantmentValue() { return 5; }",
+   "new": "public int getEnchantmentValue() { return 10; }"
+  },
+  {
+   "id": "repair-period-forty",
+   "name": "void gear mends every 40 ticks",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/VoidMetal.java",
+   "old": "REPAIR_PERIOD = 20",
+   "new": "REPAIR_PERIOD = 40"
+  },
+  {
+   "id": "creative-mends",
+   "name": "a creative player's void gear mends too",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/VoidMetal.java",
+   "old": "if (carrier instanceof Player player && player.getAbilities().instabuild) return false;",
+   "new": ""
+  },
+  {
+   "id": "sword-wither-four",
+   "name": "a void sword withers for four seconds",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/VoidMetal.java",
+   "old": "SWORD_WITHER = 60",
+   "new": "SWORD_WITHER = 80"
+  },
+  {
+   "id": "tool-wither-three",
+   "name": "the other void tools wither for three seconds",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/VoidMetal.java",
+   "old": "TOOL_WITHER = 80",
+   "new": "TOOL_WITHER = 60"
+  },
+  {
+   "id": "pvp-ignored",
+   "name": "player-versus-player off changes nothing",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/VoidMetal.java",
+   "old": "if (target instanceof Player && !pvp && (!sword || attacker instanceof Player)) return;",
+   "new": ""
+  },
+  {
+   "id": "sword-spares-all-players",
+   "name": "a sword never withers a player with pvp off, even in a mob's hand",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/VoidMetal.java",
+   "old": "(!sword || attacker instanceof Player)",
+   "new": "true"
+  },
+  {
+   "id": "worn-armor-one-repair",
+   "name": "worn void armor mends once a second, like carried",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidArmor.java",
+   "old": "        if (entity instanceof Player player && player.getItemBySlot(getEquipmentSlot()) == stack) VoidMetal.repair(stack, entity);\n",
+   "new": ""
+  },
+  {
+   "id": "armor-warp-two",
+   "name": "each void armor piece is two warp",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidArmor.java",
+   "old": "public int getWarp(ItemStack stack, Player player) { return 1; }",
+   "new": "public int getWarp(ItemStack stack, Player player) { return 2; }"
+  },
+  {
+   "id": "sword-no-warp",
+   "name": "the void sword is no warp",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemVoidSword.java",
+   "old": "public int getWarp(ItemStack stack, Player player) { return 1; }",
+   "new": "public int getWarp(ItemStack stack, Player player) { return 0; }"
+  },
+  {
+   "id": "gear-warp-skips-boots",
+   "name": "the boots are not counted",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/WarpGear.java",
+   "old": "EquipmentSlot.LEGS, EquipmentSlot.FEET}",
+   "new": "EquipmentSlot.LEGS}"
+  },
+  {
+   "id": "boots-recipe-wide",
+   "name": "the void boots take three ingots in the lower row",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/void_boots.json",
+   "old": "\"pattern\":[\"I I\",\"I I\"]",
+   "new": "\"pattern\":[\"I I\",\"III\"]"
+  },
+  {
+   "id": "pickaxe-recipe-thaumium",
+   "name": "the void pickaxe takes thaumium ingots",
+   "tier": "gametest",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/void_pickaxe.json",
+   "old": "c:ingots/void",
+   "new": "c:ingots/thaumium"
+  },
+  {
+   "id": "axe-damage",
+   "name": "the void axe adds 2 base damage",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemVoidAxe.java",
+   "old": "DiggerItem.createAttributes(tier, 3, -3.1F)",
+   "new": "DiggerItem.createAttributes(tier, 2, -3.1F)"
+  }
+ ]
+}

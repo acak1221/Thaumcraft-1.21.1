@@ -1,3 +1,3 @@
-void-cap
+void-gear
 
-# request 9: void metal and the void cap (staff-rods run 8 may still be queued)
+# request 10: the Void metal tools and armor (void-cap run 9 may still be running)

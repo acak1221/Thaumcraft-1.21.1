@@ -1368,4 +1368,9 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.NaturalBiomeRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_taintacle_xp")
+    public void taintacleExperienceFollowsOriginalDeathTimeAndPlayerCredit(GameTestHelper test) {
+        thaumcraft.common.testing.TaintacleRuntimeChecks.originalExperienceWaitsForDeathTwenty(test);
+    }
+
 }

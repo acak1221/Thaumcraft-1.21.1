@@ -72,7 +72,7 @@ public final class TaintBlockRuntimeChecks {
         final List<Entity> entities=new ArrayList<>();final Map<BlockPos,List<Holder<Biome>>> biomes=new HashMap<>();
         final ThaumcraftTaintSettings.Values settings=ThaumcraftTaintSettings.values();EntityEvent.Add observer;boolean finished;
         ServerPlayer placementPlayer;Connection placementConnection;EmbeddedChannel placementChannel;
-        EntityFallingTaint falling;BlockPos fallSource,landing,expiring;
+        EntityFallingTaint falling;BlockPos fallSource,landing,expiring,cleaning;
         Check(GameTestHelper test){this.test=test;level=test.getLevel();base=test.absolutePos(new BlockPos(3,100,3));}
         void set(BlockPos pos,BlockState state){originals.putIfAbsent(pos.immutable(),level.getBlockState(pos));level.setBlock(pos,state,QUIET);}
         void biome(BlockPos pos,net.minecraft.resources.ResourceKey<Biome> key){
@@ -177,7 +177,12 @@ public final class TaintBlockRuntimeChecks {
         void falling(){
             // Remove conversion logs and all anchoring wood from this independent native fall corridor.
             for(BlockPos pos:BlockPos.betweenClosed(base.offset(-3,-3,-3),base.offset(3,10,3)))set(pos.immutable(),Blocks.AIR.defaultBlockState());
-            fallSource=base.above(7);landing=fallSource.below(5);set(landing.below(),Blocks.STONE.defaultBlockState());set(fallSource,ThaumcraftTaint.CRUST.get().defaultBlockState());
+            fallSource=base.above(7);
+            // Original tryToFall casts each coordinate to float BEFORE +.5F.
+            // Far-world GameTests cross2^23, where this rounds into a different
+            // column. Preserve that original body and support its REAL column.
+            landing=BlockPos.containing((double)((float)fallSource.getX()+.5F),fallSource.getY()-5D,(double)((float)fallSource.getZ()+.5F));
+            set(landing.below(),Blocks.STONE.defaultBlockState());set(fallSource,ThaumcraftTaint.CRUST.get().defaultBlockState());
             set(fallSource.below(),Blocks.OAK_LOG.defaultBlockState());test.assertTrue(!BlockTaint.canFallBelow(level,fallSource.below()),"real log within original27-cell neighbourhood anchors crust");set(fallSource.below(),Blocks.AIR.defaultBlockState());
             set(fallSource.below(),ThaumcraftFlux.FLUX_GOO.get().defaultBlockState().setValue(FluxFiniteBlock.LEVEL,4));test.assertTrue(!BlockTaint.canFallBelow(level,fallSource.below()),"native goo metadata4 is original stopping threshold");set(fallSource.below(),Blocks.AIR.defaultBlockState());
             final int[] attempts={0};observer=(entity,world)->{if(world!=level||!(entity instanceof EntityFallingTaint block)||!block.getSourcePos().equals(fallSource))return EventResult.pass();attempts[0]++;block.tick();test.assertTrue(!block.isDebited()&&level.getBlockState(fallSource).is(ThaumcraftTaint.CRUST.get()),"ADD observer cannot tick a not-yet-admitted source debit");test.assertTrue(!EntityFallingTaint.start(level,fallSource,fallSource),"same-source ADD reentry is bounded by actual falling operation");return EventResult.interruptFalse();};
@@ -185,6 +190,7 @@ public final class TaintBlockRuntimeChecks {
             test.assertTrue(attempts[0]==1&&level.getBlockState(fallSource).is(ThaumcraftTaint.CRUST.get()),"actual canceled spawn retains exactly the real source block");
             level.getBlockState(fallSource).tick(level,fallSource,RandomSource.create(0));var spawned=level.getEntitiesOfClass(EntityFallingTaint.class,new AABB(fallSource).inflate(1));test.assertTrue(spawned.size()==1,"registered crust tick naturally reaches the actual falling entity");falling=spawned.getFirst();entities.add(falling);
             test.assertTrue(EntityFallingTaint.start(level,fallSource,fallSource),"second admitted pre-tick falling attempt fixture exists");var duplicate=level.getEntitiesOfClass(EntityFallingTaint.class,new AABB(fallSource).inflate(1)).stream().filter(entity->entity!=falling).findFirst().orElseThrow();entities.add(duplicate);
+            test.assertTrue(falling.getX()==(double)((float)fallSource.getX()+.5F)&&falling.getZ()==(double)((float)fallSource.getZ()+.5F)&&BlockPos.containing(falling.getX(),landing.getY(),falling.getZ()).equals(landing),"native falling body retains the original far-coordinate float rounding and has the computed supported landing column");
             double initialY=falling.getY();falling.tick();duplicate.tick();
             test.assertTrue(falling.isDebited()&&level.isEmptyBlock(fallSource)&&duplicate.isRemoved()&&!duplicate.isDebited(),"two admitted falls transfer exactly one source, stale second owner retires without stock");
             test.assertTrue(Math.abs(falling.getY()-(initialY-(double).04F))<1e-10&&Math.abs(falling.getDeltaMovement().y-(-(double).04F*(double).98F))<1e-12&&Math.abs(falling.getBoundingBox().getCenter().y-falling.getY())<1e-10,"actual native falling gravity/move/friction order retains old float widening and centered yOffset");
@@ -193,8 +199,15 @@ public final class TaintBlockRuntimeChecks {
             var bad=saved.copy();bad.getCompound("BlockState").putString("Name","minecraft:diamond_block");var quarantine=ThaumcraftTaint.FALLING_TAINT.get().create(level);quarantine.load(bad);test.assertTrue(quarantine.isQuarantined(),"invalid stored falling material is preserved rather than fabricated as sand/crust");
             expiring=base.offset(6,0,6);set(expiring,Blocks.STONE.defaultBlockState());var timed=saved.copy();timed.putByte("Time",(byte)100);timed.putUUID("UUID",UUID.randomUUID());var ttl=reload(timed);ttl.setPos(expiring.getX()+.5,level.getMinBuildHeight()-3,expiring.getZ()+.5);ttl.tick();test.assertTrue(ttl.isRemoved(),"actual native out-of-height fall expires after100 even below world bounds");
             // Ordinary registered scheduling, no direct block tick, must kill out-of-biome fibres.
-            biome(base,Biomes.PLAINS);set(base.below(),Blocks.STONE.defaultBlockState());set(base,ThaumcraftTaint.FIBRES.get().defaultBlockState().setValue(BlockTaintFibres.TYPE,2));level.scheduleTick(base,ThaumcraftTaint.FIBRES.get(),1);
-            test.runAfterDelay(35,()->{try{test.assertTrue(level.isEmptyBlock(base),"ordinary native scheduled tick clears actual non-TAINT fibres");test.assertTrue(falling.isRemoved()&&level.getBlockState(landing).is(ThaumcraftTaint.CRUST.get())&&level.isEmptyBlock(fallSource),"ordinary world/entity ticks settle one actual paid crust at original computed landing");finish();test.succeed();}catch(RuntimeException|Error failure){finish();throw failure;}});
+            // Keep the independent cleanup biome outside the falling column:
+            // otherwise a random cleanup of the already landed crust races the assertion.
+            cleaning=base.offset(8,0,8);biome(cleaning,Biomes.PLAINS);set(cleaning.below(),Blocks.STONE.defaultBlockState());set(cleaning,ThaumcraftTaint.FIBRES.get().defaultBlockState().setValue(BlockTaintFibres.TYPE,2));level.scheduleTick(cleaning,ThaumcraftTaint.FIBRES.get(),1);
+            test.runAfterDelay(35,()->{try{
+                test.assertTrue(level.isEmptyBlock(cleaning),"ordinary native scheduled tick clears actual non-TAINT fibres");
+                int crusts=0;for(BlockPos pos:BlockPos.betweenClosed(base.offset(-3,-3,-3),base.offset(3,10,3)))if(level.getBlockState(pos).is(ThaumcraftTaint.CRUST.get()))crusts++;
+                test.assertTrue(falling.isRemoved()&&level.getBlockState(landing).is(ThaumcraftTaint.CRUST.get())&&level.isEmptyBlock(fallSource)&&crusts==1&&level.getEntitiesOfClass(EntityFallingTaint.class,new AABB(base).inflate(12)).isEmpty(),"ordinary world/entity ticks settle one actual paid crust at original computed landing; source="+fallSource+", landing="+landing+", actual="+falling.position()+", time="+falling.getFallTime()+", paid="+falling.isDebited()+", removed="+falling.isRemoved()+", ground="+falling.onGround()+", target="+level.getBlockState(landing)+", sourceState="+level.getBlockState(fallSource)+", crusts="+crusts);
+                finish();test.succeed();
+            }catch(RuntimeException|Error failure){finish();throw failure;}});
         }
         EntityFallingTaint reload(CompoundTag tag){var entity=ThaumcraftTaint.FALLING_TAINT.get().create(level);entity.load(tag);test.assertTrue(level.addFreshEntity(entity),"native persisted falling owner is admitted after previous UUID retired");entities.add(entity);return entity;}
         void closePlacementPlayer(){

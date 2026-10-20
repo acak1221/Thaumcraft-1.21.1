@@ -14,6 +14,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -42,7 +43,7 @@ public final class TaintSwarmRuntimeChecks {
     }
     private static final class Check implements AutoCloseable {
         final Fixture f;final BlockPos origin;final AABB bounds;final List<Entity> entities=new ArrayList<>();
-        final List<ChunkPos> forced=new ArrayList<>();final Set<UUID> originalDrops=new HashSet<>(),ownedDrops=new HashSet<>();final boolean oldLoot;
+        final List<ChunkPos> forced=new ArrayList<>();final Set<UUID> originalDrops=new HashSet<>(),ownedDrops=new HashSet<>(),originalXp=new HashSet<>();final boolean oldLoot;
         Check(GameTestHelper test) {
             f=new Fixture(test);origin=f.base.above(140);bounds=new AABB(origin).inflate(5);
             oldLoot=f.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
@@ -54,6 +55,7 @@ public final class TaintSwarmRuntimeChecks {
                     f.level.setBlock(pos,pos.getY()==origin.getY()-2?Blocks.STONE.defaultBlockState():Blocks.AIR.defaultBlockState(),2|16);
                 }
                 for(var drop:f.level.getEntitiesOfClass(ItemEntity.class,bounds))originalDrops.add(drop.getUUID());
+                for(var orb:f.level.getEntitiesOfClass(ExperienceOrb.class,bounds))originalXp.add(orb.getUUID());
                 f.level.getGameRules().getRule(GameRules.RULE_DOMOBLOOT).set(true,f.level.getServer());farPlayer();
             } catch(RuntimeException|Error failure) {close();throw failure;}
         }
@@ -64,7 +66,7 @@ public final class TaintSwarmRuntimeChecks {
             f.level.addFreshEntity(mob);entities.add(mob);return mob;
         }
         EntityTaintSwarm swarm() {return spawn(ThaumcraftTaint.TAINT_SWARM.get(),.25,0,.25);}
-        void clear() {entities.forEach(Entity::discard);entities.clear();for(UUID id:ownedDrops)if(f.level.getEntity(id) instanceof ItemEntity item)item.discard();ownedDrops.clear();farPlayer();}
+        void clear() {entities.forEach(Entity::discard);entities.clear();for(UUID id:ownedDrops)if(f.level.getEntity(id) instanceof ItemEntity item)item.discard();ownedDrops.clear();xp().forEach(Entity::discard);farPlayer();}
         List<ItemEntity> drops() {var values=f.level.getEntitiesOfClass(ItemEntity.class,bounds).stream().filter(item->!originalDrops.contains(item.getUUID())).toList();values.forEach(item->ownedDrops.add(item.getUUID()));return values;}
         void run() {
             EntityTaintSwarm swarm=swarm();
@@ -118,7 +120,7 @@ public final class TaintSwarmRuntimeChecks {
                     "refused native damage grants no Weakness but retains original preattack recent-hit mark and no-knockback cleanup");clear();
             swarm=swarm();victim=spawn(EntityType.PIG,2,0,.25);swarm.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,200,0));swarm.setTarget(victim);swarm.setNoAi(false);swarm.tick();
             f.check(Math.abs(victim.getHealth()-5.4F)<1E-5,"actual bite retains original Strength130-percent attribute multiplier: damage2×2.3=4.6, not native modern+3");clear();
-            loot();spawnRules();
+            loot();experience();spawnRules();
         }
         void resetBite(EntityTaintSwarm swarm,LivingEntity target) {target.tick();swarm.setPos(origin.getX()+.25,origin.getY(),origin.getZ()+.25);swarm.setDeltaMovement(Vec3.ZERO);target.setPos(origin.getX()+2,origin.getY(),origin.getZ()+.25);target.setDeltaMovement(Vec3.ZERO);}
         void loot() {
@@ -130,6 +132,20 @@ public final class TaintSwarmRuntimeChecks {
             }
             EntityTaintSwarm swarm=swarm();f.level.getGameRules().getRule(GameRules.RULE_DOMOBLOOT).set(false,f.level.getServer());swarm.hurt(f.level.damageSources().generic(),1000);
             f.check(drops().isEmpty(),"native doMobLoot=false refuses the actual original swarm death output");f.level.getGameRules().getRule(GameRules.RULE_DOMOBLOOT).set(true,f.level.getServer());clear();
+        }
+        List<ExperienceOrb> xp() {return f.level.getEntitiesOfClass(ExperienceOrb.class,bounds).stream().filter(orb->!originalXp.contains(orb.getUUID())).toList();}
+        void experience() {
+            EntityTaintSwarm swarm=swarm();swarm.hurt(f.level.damageSources().playerAttack(f.player),1000);drops();
+            f.check(xp().isEmpty(),"actual player-attributed swarm death does not grant modern immediate XP");
+            var expected=RandomSource.create(1710);f.level.random.setSeed(1710);
+            for(int tick=0;tick<19;tick++)swarm.tick();
+            f.check(swarm.deathTime==19&&!swarm.isRemoved()&&xp().isEmpty(),"nineteen actual native death ticks retain source and grant no original twentieth-tick XP");
+            swarm.tick();var orbs=xp();
+            f.check(swarm.deathTime==20&&swarm.isRemoved()&&orbs.size()==3&&orbs.stream().mapToInt(ExperienceOrb::getValue).sum()==5
+                            &&orbs.stream().allMatch(orb->{var tag=new CompoundTag();orb.addAdditionalSaveData(tag);return tag.getInt("Count")==1;})
+                            &&f.level.random.nextLong()==expected.nextLong(),
+                    "actual twentieth-tick original swarm XP5 splits3/1/1 as three canonical count1 native orbs without modern WORLD40 or constructor RNG draws");
+            clear();
         }
         void spawnRules() {
             long time=f.level.getDayTime();

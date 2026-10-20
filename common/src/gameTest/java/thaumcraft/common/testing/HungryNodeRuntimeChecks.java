@@ -199,11 +199,19 @@ public final class HungryNodeRuntimeChecks {
             f.check(node.getLock()==1 && Math.abs(locked.getDeltaMovement().x+.0375D)<1e-10,"actual basic lock1 does not suppress Hungry First on later ticks");locked.discard();hard(false);
         }
         void ray(int dx,int dy,int dz) { ray(dx,dy,dz,false); }
-        void ray(int dx,int dy,int dz,boolean fadingRepair) {
-            phase49();int[] draws={Math.max(0,dx),Math.max(0,-dx),Math.max(0,dy),Math.max(0,-dy),Math.max(0,dz),Math.max(0,-dz)};int[] cursor={0};
-            try(var rng=new InputRandom(f,bound->{if(fadingRepair && bound==12500 && cursor[0]==0)return 0;f.check(bound==16 && cursor[0]<6,"Hungry Second reads exactly its six original bound16 offsets");return draws[cursor[0]++];},true)) {
-                tick();var expected=new ArrayList<Integer>();if(fadingRepair)expected.add(12500);for(int n=0;n<6;n++)expected.add(16);
-                f.check(rng.bounds.equals(expected),"original stability precedes the one Second ray, outside hardNodes/lock gates");
+        void ray(int dx,int dy,int dz,boolean fadingRepair) { ray(dx,dy,dz,fadingRepair,false); }
+        void ray(int dx,int dy,int dz,boolean fadingRepair,boolean nativeChestDrop) {
+            phase49();int[] draws={Math.max(0,dx),Math.max(0,-dx),Math.max(0,dy),Math.max(0,-dy),Math.max(0,dz),Math.max(0,-dz)};int[] cursor={0},chestSplits={0};
+            try(var rng=new InputRandom(f,bound->{
+                if(fadingRepair && bound==12500 && cursor[0]==0)return 0;
+                if(cursor[0]<6){f.check(bound==16,"Hungry Second reads exactly its six original bound16 offsets; bound="+bound+", offset="+dx+","+dy+","+dz+", cursor="+cursor[0]);return draws[cursor[0]++];}
+                // Native Containers.dropItemStack splits the seven real chest contents with nextInt(21)+10.
+                // It occurs AFTER the ray; it is not a seventh Hungry offset or an aura draw.
+                f.check(nativeChestDrop && bound==21 && chestSplits[0]++==0,"only the actual seven-item chest permits one native split draw after the six original offsets; bound="+bound+", offset="+dx+","+dy+","+dz);
+                return 0;
+            },true)) {
+                tick();var expected=new ArrayList<Integer>();if(fadingRepair)expected.add(12500);for(int n=0;n<6;n++)expected.add(16);if(nativeChestDrop)expected.add(21);
+                f.check(cursor[0]==6 && chestSplits[0]==(nativeChestDrop?1:0) && rng.bounds.equals(expected),"original stability precedes the one Second ray and exact native chest material split, outside hardNodes/lock gates; actual="+rng.bounds);
             }
         }
         List<ItemEntity> nearDrops() { var result=world.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(18),entity->!oldEntities.contains(entity.getUUID()));for(var drop:result)if(!entities.contains(drop))entities.add(drop);return result; }
@@ -232,7 +240,7 @@ public final class HungryNodeRuntimeChecks {
             put(pos.offset(12,0,12),Blocks.STONE);ray(12,0,12);f.check(world.getBlockState(pos.offset(12,0,12)).is(Blocks.STONE),"first hit outside original strict16-block destruction sphere survives even though offset components are each valid");put(pos.offset(12,0,12),Blocks.AIR);
             put(pos.below(),ThaumcraftNodeDevices.NODE_STABILIZER.get());ray(0,-1,0,true);
             f.check(node.getLock()==1 && world.getBlockState(pos.below()).isAir(),"Second can eat the actual unpowered stabilizer AFTER this tick's lock1 sample, outside both gates");clearDrops();
-            put(pos.east(2),Blocks.CHEST);var chest=(ChestBlockEntity)world.getBlockEntity(pos.east(2));var contents=named(Items.IRON_INGOT,7,"hungry-destroyed-chest-stock");var expectedContents=contents.copy();chest.setItem(0,contents);ray(2,0,0);
+            put(pos.east(2),Blocks.CHEST);var chest=(ChestBlockEntity)world.getBlockEntity(pos.east(2));var contents=named(Items.IRON_INGOT,7,"hungry-destroyed-chest-stock");var expectedContents=contents.copy();chest.setItem(0,contents);ray(2,0,0,false,true);
             f.check(world.getBlockState(pos.east(2)).isAir() && chest.isRemoved() && nearDrops().stream().filter(e->ItemStack.isSameItemSameComponents(e.getItem(),expectedContents)).mapToInt(e->e.getItem().getCount()).sum()==7
                             && nearDrops().stream().filter(e->e.getItem().is(Items.CHEST)).mapToInt(e->e.getItem().getCount()).sum()==1,"actual native destruction preserves all seven named container inputs and emits one chest, rather than synthesizing only the block loot");clearDrops();
             f.check(HungryNodeTrace.hit(world,pos,pos)==null,"source-ignoring native ray does not hit or temporarily remove its actual node block");
@@ -246,9 +254,17 @@ public final class HungryNodeRuntimeChecks {
             int count=node.getTickCount(),regeneration=node.getRegenerationTicks();byte lock=node.getLock();String identity=node.getScanId();
             f.mode(GameType.CREATIVE);f.aim(Vec3.atCenterOf(pos));var pearl=named(ThaumcraftContent.PRIMORDIAL_PEARL.get(),1,"hungry-actual-paid-pearl");f.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,pearl);
             try(var rng=new InputRandom(f,bound->0,true)) { f.check(f.use(pos).consumesAction(),"actual native pearl item accepts a HUNGRY ordinary node"); }
-            f.check(pearl.isEmpty() && f.player.getMainHandItem().isEmpty() && world.getBlockEntity(pos)==node && node.getNodeType()==TileNode.NodeType.HUNGRY
+            // Native creative useItemOn restores its ORIGINAL argument's count AFTER item useOn returns.
+            // ItemPrimordialPearl has already detached that argument, so physical custody is the hand/inventory.
+            f.check(f.player.getMainHandItem().isEmpty() && f.player.getMainHandItem()!=pearl
+                            && f.player.getInventory().countItem(ThaumcraftContent.PRIMORDIAL_PEARL.get())==0 && pearl.getCount()==1,
+                    "one physical Pearl is spent; creative wrapper restores only its detached argument; hand="+f.player.getMainHandItem()
+                            +", aliasCount="+pearl.getCount()+", inventory="+f.player.getInventory().countItem(ThaumcraftContent.PRIMORDIAL_PEARL.get()));
+            f.check(world.getBlockEntity(pos)==node && node.getNodeType()==TileNode.NodeType.HUNGRY
                             && node.getScanId().equals(identity) && node.getTickCount()==count && node.getLock()==lock && node.getRegenerationTicks()==regeneration,
-                    "one physical Pearl changes staged capacities while preserving HUNGRY type, scan identity, transient phase, cached lock and regeneration through the real blast");clearDrops();
+                    "paid Pearl preserves HUNGRY type/identity/phase/lock/regeneration through real blast; sameBE="+(world.getBlockEntity(pos)==node)
+                            +", type="+node.getNodeType()+", scan="+node.getScanId()+"/"+identity+", tick="+node.getTickCount()+"/"+count
+                            +", lock="+node.getLock()+"/"+lock+", regeneration="+node.getRegenerationTicks()+"/"+regeneration);clearDrops();
             for(TileNode.NodeType type:List.of(TileNode.NodeType.UNSTABLE,TileNode.NodeType.HUNGRY)) {
                 put(pos,ThaumcraftContent.AURA_NODE.get());node=(TileNode)world.getBlockEntity(pos);node.initializeNatural(new AspectList().add(Aspect.AIR,25),type,TileNode.NodeModifier.FADING);
                 f.aim(Vec3.atCenterOf(pos));f.check(f.player.gameMode.destroyBlock(pos),"actual native creative block break succeeds for supported "+type);DeferredItemDrops.tick(world);

@@ -20,7 +20,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** Actual BlockCustomPlant metadata5: luminous Vishroom, confusion200 on
- * living contact, ordinary plains-soil/light survival and original wisps. */
+ * living contact, original Forge plains-soil survival and original wisps. */
 public final class BlockVishroom extends BushBlock {
     public static final MapCodec<BlockVishroom> CODEC = simpleCodec(BlockVishroom::new);
     private static final VoxelShape SHAPE = Block.box(1.6,0,1.6,14.4,12.8,14.4);
@@ -32,7 +32,7 @@ public final class BlockVishroom extends BushBlock {
         return soil.is(Blocks.GRASS_BLOCK)||soil.is(Blocks.DIRT)||soil.is(Blocks.COARSE_DIRT)||soil.is(Blocks.PODZOL)||soil.is(Blocks.FARMLAND);
     }
     @Override protected boolean canSurvive(BlockState state,LevelReader level,BlockPos pos) {
-        return mayPlaceOn(level.getBlockState(pos.below()),level,pos.below())&&(level.getRawBrightness(pos,0)>=8||level.canSeeSky(pos));
+        return mayPlaceOn(level.getBlockState(pos.below()),level,pos.below());
     }
     @Override protected void randomTick(BlockState state,ServerLevel level,BlockPos pos,RandomSource random) {
         if(!state.canSurvive(level,pos))level.destroyBlock(pos,true);

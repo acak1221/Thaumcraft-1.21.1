@@ -140,7 +140,10 @@ public final class ThaumcraftBiomeDecorationFeature extends Feature<NoneFeatureC
         return false;
     }
     private static int nextInt(RandomSource random,int bound) {return bound<=0?0:random.nextInt(bound);}
-    private static int height(WorldGenLevel level,int x,int z) {return level.getHeight(Heightmap.Types.WORLD_SURFACE_WG,x,z);}
+    // Native FEATURES writes update final heightmaps after CARVERS. WG maps
+    // retain old terrain and cannot represent original live getHeight queries
+    // after our own earlier trees/mushrooms have been committed.
+    private static int height(WorldGenLevel level,int x,int z) {return level.getHeight(Heightmap.Types.WORLD_SURFACE,x,z);}
     private static BlockPos top(WorldGenLevel level,int x,int z) {return new BlockPos(x,height(level,x,z),z);}
-    private static BlockPos ground(WorldGenLevel level,int x,int z) {return new BlockPos(x,level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG,x,z),z);}
+    private static BlockPos ground(WorldGenLevel level,int x,int z) {return new BlockPos(x,level.getHeight(Heightmap.Types.OCEAN_FLOOR,x,z),z);}
 }

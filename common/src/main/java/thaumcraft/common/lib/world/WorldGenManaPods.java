@@ -15,7 +15,10 @@ public final class WorldGenManaPods {
         int initialX=origin.getX(),initialZ=origin.getZ(),x=initialX,y=origin.getY(),z=initialZ;
         while(y<128&&y<level.getMaxBuildHeight()) {
             if(!level.hasChunkAt(new BlockPos(x,y,z)))return false;
-            if(y>=level.getHeight(Heightmap.Types.WORLD_SURFACE_WG,x,z))break;
+            // FEATURES runs after CARVERS: ProtoChunk now updates the final
+            // heightmaps, while WORLD_SURFACE_WG retains pre-tree terrain.
+            // The original getHeight must include the canopy just generated.
+            if(y>=level.getHeight(Heightmap.Types.WORLD_SURFACE,x,z))break;
             BlockPos pos=new BlockPos(x,y,z);
             if(!level.hasChunkAt(pos)||!level.ensureCanWrite(pos)||!level.hasChunkAt(pos.below()))return false;
             if(level.isEmptyBlock(pos)&&level.isEmptyBlock(pos.below())) {

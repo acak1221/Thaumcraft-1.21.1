@@ -15,12 +15,16 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -149,6 +153,89 @@ public final class TaintacleRuntimeChecks {
         double before=attacker.getAttributeValue(Attributes.ATTACK_DAMAGE);var effects=attacker.getAttribute(Attributes.ATTACK_DAMAGE).getModifiers();
         a.require(Math.abs(OriginalTaintCombat.mobDamage(attacker)-mob)<.00001F&&Math.abs(OriginalTaintCombat.tentacleDamage(attacker)-tentacle)<.00001F
                         &&attacker.getAttributeValue(Attributes.ATTACK_DAMAGE)==before&&attacker.getAttribute(Attributes.ATTACK_DAMAGE).getModifiers().equals(effects),label+"; native attribute/effects unchanged");
+    }
+    /** Actual native kills/death ticker, never a direct call to the XP adapter. Root timeout200. */
+    public static void originalExperienceWaitsForDeathTwenty(GameTestHelper test){
+        try(var a=new FocusUpgradeRuntimeChecks.Actor(test,new BlockPos(8,180,8));var terrain=new Terrain(a)){
+            terrain.open();
+            var main=terrain.tentacle(a.root);
+            fatal(a,main,true);
+            a.require(experience(a).isEmpty(),"real attributed lethal damage does not emit modern immediate XP");
+            tick(a,main,19);
+            a.require(main.deathTime==19&&!main.isRemoved()&&experience(a).isEmpty(),"real main tentacle has no XP before its twentieth native death update");
+            tick(a,main,1);
+            a.require(main.deathTime==20&&main.isRemoved()&&experience(a).stream().mapToInt(ExperienceOrb::getValue).sum()==10
+                            &&experience(a).stream().map(ExperienceOrb::getValue).sorted().toList().equals(List.of(3,7)),
+                    "twentieth native death update releases original base10 in genuine7+3 split orbs exactly once");
+            tick(a,main,1);a.require(experience(a).stream().mapToInt(ExperienceOrb::getValue).sum()==10,"retired native owner cannot release a second XP reward");a.purgeOutputs();
+
+            var equipped=terrain.tentacle(a.root);
+            equipped.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.STICK));equipped.setDropChance(EquipmentSlot.MAINHAND,1);
+            equipped.setItemSlot(EquipmentSlot.OFFHAND,new ItemStack(Items.BLAZE_ROD));equipped.setDropChance(EquipmentSlot.OFFHAND,0);
+            fatal(a,equipped,true);
+            a.require(equipped.getMainHandItem().isEmpty()&&!equipped.getOffhandItem().isEmpty()&&experience(a).isEmpty()
+                            &&a.items().stream().anyMatch(drop->drop.getItem().is(Items.STICK)),
+                    "actual native equipment death drop clears guaranteed mainhand slot while newer offhand remains; still no immediate XP");
+            tick(a,equipped,19);a.require(experience(a).isEmpty(),"externally equipped main reward still waits until actual death20");tick(a,equipped,1);
+            int equippedXp=experience(a).stream().mapToInt(ExperienceOrb::getValue).sum();
+            a.require(equipped.isRemoved()&&equippedXp>=11&&equippedXp<=13,
+                    "original mainhand equipment bonus1..3 survives native dropped-slot clearing");a.purgeOutputs();
+
+            var offhandOnly=terrain.tentacle(a.root);
+            offhandOnly.setItemSlot(EquipmentSlot.OFFHAND,new ItemStack(Items.BLAZE_ROD));offhandOnly.setDropChance(EquipmentSlot.OFFHAND,0);
+            fatal(a,offhandOnly,true);tick(a,offhandOnly,20);
+            a.require(offhandOnly.isRemoved()&&experience(a).stream().mapToInt(ExperienceOrb::getValue).sum()==10,
+                    "native offhand has no original five-slot counterpart and adds no original XP bonus");a.purgeOutputs();
+
+            var pending=terrain.tentacle(a.root);
+            pending.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.STICK));pending.setDropChance(EquipmentSlot.MAINHAND,1);
+            pending.setItemSlot(EquipmentSlot.OFFHAND,new ItemStack(Items.BLAZE_ROD));pending.setDropChance(EquipmentSlot.OFFHAND,0);
+            fatal(a,pending,true);tick(a,pending,19);
+            a.require(pending.deathTime==19&&!pending.isRemoved()&&pending.lastHurtByPlayerTime>0
+                            &&pending.getMainHandItem().isEmpty()&&!pending.getOffhandItem().isEmpty()&&experience(a).isEmpty(),
+                    "actual guaranteed mainhand drop precedes pending death19 save; player eligibility is still positive before reload");
+            var pendingNbt=pending.saveWithoutId(new net.minecraft.nbt.CompoundTag());
+            a.require(pendingNbt.getShort("DeathTime")==19,"public native NBT save records the actual pending death19 frame");
+            pending.discard();
+            a.require(a.level.getEntity(pending.getUUID())==null,"retired original pending owner leaves the native entity index before same-UUID reload");
+            var reloaded=new EntityTaintacle(a.level);reloaded.load(pendingNbt);terrain.owned.add(reloaded);
+            a.require(reloaded.getUUID().equals(pending.getUUID())&&reloaded.deathTime==19&&reloaded.isDeadOrDying()
+                            &&reloaded.lastHurtByPlayerTime==0&&reloaded.getMainHandItem().isEmpty()&&!reloaded.getOffhandItem().isEmpty(),
+                    "real native reload retains death/equipment/identity but loses unsaved recent-player attribution, as vanilla1.7 did");
+            a.require(a.level.addFreshEntity(reloaded),"actual native index admits the replacement pending-death entity with its saved identity");
+            tick(a,reloaded,1);
+            a.require(reloaded.deathTime==20&&reloaded.isRemoved()&&experience(a).isEmpty(),
+                    "actual pending-death reload reaches tick20 without XP: original eligibility was not persisted, regardless of dropped-slot history");
+            a.purgeOutputs();
+
+            var small=terrain.small(a.root);
+            small.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.STONE_SWORD));small.setDropChance(EquipmentSlot.MAINHAND,0);
+            small.setItemSlot(EquipmentSlot.HEAD,new ItemStack(Items.LEATHER_HELMET));small.setDropChance(EquipmentSlot.HEAD,0);
+            fatal(a,small,true);a.require(experience(a).isEmpty(),"player-killed Small has no immediate XP");tick(a,small,20);
+            a.require(small.isRemoved()&&small.deathTime==20&&experience(a).isEmpty(),"original Small base0 never gains the positive-base equipment bonus or a parent10 reward");a.purgeOutputs();
+
+            var unclaimed=terrain.tentacle(a.root);fatal(a,unclaimed,false);tick(a,unclaimed,20);
+            a.require(unclaimed.isRemoved()&&experience(a).isEmpty(),"actual never-player-hit environmental main death earns no XP even at20");a.purgeOutputs();
+
+            for(int livingTicks:new int[]{80,81}){
+                var delayed=terrain.tentacle(a.root);a.player.setPos(a.root.getX()+3.5,a.root.getY(),a.root.getZ()+.5);
+                a.require(delayed.hurt(a.level.damageSources().playerAttack(a.player),1),"real initial player hit establishes native100-tick recent-player timer");
+                a.player.setPos(a.root.getX()+100,a.root.getY(),a.root.getZ());tick(a,delayed,livingTicks);
+                fatal(a,delayed,false);a.require(experience(a).isEmpty(),"environmental lethal hit does not prematurely snapshot recent-player XP eligibility");tick(a,delayed,19);
+                a.require(experience(a).isEmpty(),"recent-player boundary still waits for actual death tick20");tick(a,delayed,1);
+                int expected=livingTicks==80?10:0;
+                a.require(delayed.isRemoved()&&experience(a).stream().mapToInt(ExperienceOrb::getValue).sum()==expected,
+                        "old recent-player timer is checked before decrement on death20: "+livingTicks+" living updates yields XP"+expected);a.purgeOutputs();
+            }
+        }
+        test.succeed();
+    }
+    private static List<ExperienceOrb> experience(FocusUpgradeRuntimeChecks.Actor a){return a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds);}
+    private static void fatal(FocusUpgradeRuntimeChecks.Actor a,EntityTaintacle source,boolean player){
+        a.player.setPos(a.root.getX()+3.5,a.root.getY(),a.root.getZ()+.5);
+        a.require(source.hurt(player?a.level.damageSources().playerAttack(a.player):a.level.damageSources().generic(),1000)
+                        &&source.isDeadOrDying()&&source.deathTime==0,"actual native lethal damage enters death state before its first death update");
+        a.player.setPos(a.root.getX()+100,a.root.getY(),a.root.getZ());
     }
     private static void tick(FocusUpgradeRuntimeChecks.Actor a,Entity entity,int count){for(int i=0;i<count;i++)a.level.tickNonPassenger(entity);}
     private static final class Terrain implements AutoCloseable{

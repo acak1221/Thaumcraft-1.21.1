@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -27,6 +28,7 @@ import thaumcraft.common.blocks.BlockTaintFibres;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftTaint;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
+import thaumcraft.common.lib.loot.OriginalTaintExperience;
 
 /** Original stationary growing spore. Only the current server entity may claim
  * one physical burst; client effects cannot spawn entities or edit fibres. */
@@ -49,6 +51,9 @@ public class EntityTaintSpore extends Monster implements ITaintedMob {
     public int getSporeSize(){return entityData.get(SIZE);}
     protected float physicalSize(){return Math.max(.15F*getSporeSize(),.5F);}
     @Override public EntityDimensions getDefaultDimensions(Pose pose){float size=physicalSize();return EntityDimensions.scalable(size,size);}
+    /** Original setSporeSize reapplies the SAME feet XYZ after resizing.
+     * Native growth instead preserves the old centre and shifts feet/support. */
+    @Override public boolean fudgePositionAfterSizeChange(EntityDimensions previous){return false;}
     @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key){
         super.onSyncedDataUpdated(key);
         if(SIZE.equals(key)){refreshDimensions();if(level().isClientSide&&tickCount==0)displaySize=getSporeSize();}
@@ -101,10 +106,17 @@ public class EntityTaintSpore extends Monster implements ITaintedMob {
     @Override protected SoundEvent getHurtSound(DamageSource source){return sound("gore");}
     @Override protected SoundEvent getDeathSound(){return sound("gore");}
     @Override public ItemEntity spawnAtLocation(ItemStack stack,float height){return OriginalMobLoot.spawn(this,stack,height);}
+    @Override protected void dropExperience(Entity killer){} // Original XP belongs to deathTime20, never die().
+    @Override protected void tickDeath(){
+        if(OriginalTaintExperience.finishDeathTick(this,()->lastHurtByPlayerTime>0||isAlwaysExperienceDropper(),
+                ()->OriginalTaintExperience.originalReward(this,getSporeSize(),this::getEquipmentDropChance)))return;
+        super.tickDeath();
+    }
     @Override protected void dropFromLootTable(DamageSource source,boolean recent){}
     protected int taintedDrops(){return 1;}
     @Override protected void dropCustomDeathLoot(ServerLevel level,DamageSource source,boolean recent){
         for(int i=0;i<taintedDrops();i++)spawnAtLocation(new ItemStack(ThaumcraftContent.MATERIALS.get(level.random.nextBoolean()?"tainted_goo":"taint_tendril").get()),getBbHeight()/2F);
+        OriginalTaintExperience.rememberEquipment(this);
         super.dropCustomDeathLoot(level,source,recent);
     }
 }

@@ -40,6 +40,7 @@ import thaumcraft.api.entities.ITaintedMob;
 import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
+import thaumcraft.common.lib.loot.OriginalTaintExperience;
 import thaumcraft.common.lib.loot.OriginalMobTargeting;
 
 /** Original particle-bodied2x2 taint swarm: old Creature action, asymmetric flight coefficients and no-knockback weakness bite. */
@@ -226,10 +227,16 @@ public class EntityTaintSwarm extends Monster implements ITaintedMob {
     }
     @Override public void addAdditionalSaveData(CompoundTag tag) { super.addAdditionalSaveData(tag);tag.putByte("Flags",entityData.get(FLAGS));tag.putByte("damBonus",(byte)damBonus); }
     @Override public void readAdditionalSaveData(CompoundTag tag) { super.readAdditionalSaveData(tag);entityData.set(FLAGS,tag.getByte("Flags"));damBonus=tag.getByte("damBonus"); }
+    @Override protected void dropExperience(Entity killer) {}
+    @Override protected void tickDeath() {
+        if(OriginalTaintExperience.finishDeathTick(this,()->lastHurtByPlayerTime>0,()->OriginalTaintExperience.originalReward(this,xpReward,this::getEquipmentDropChance)))return;
+        super.tickDeath();
+    }
     @Override protected void dropFromLootTable(DamageSource source,boolean recent) {}
     @Override public ItemEntity spawnAtLocation(ItemStack stack,float height) { return OriginalMobLoot.spawn(this,stack,height); }
     @Override protected void dropCustomDeathLoot(ServerLevel level,DamageSource source,boolean recent) {
         if(level.random.nextBoolean())spawnAtLocation(new ItemStack(ThaumcraftContent.MATERIALS.get("tainted_goo").get()),getBbHeight()/2);
+        OriginalTaintExperience.rememberEquipment(this);
         super.dropCustomDeathLoot(level,source,recent);
         if(recent)OriginalMobLoot.rare(OriginalMobLoot.looting(level,source),random::nextInt);
     }

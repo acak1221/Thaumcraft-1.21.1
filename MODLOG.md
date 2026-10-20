@@ -1,3 +1,25 @@
+## 2026-10-21 — Parallel port wave: 33 sub-agents over three waves
+
+The second (parallel) port line was stopped by the user and its whole scope taken over here. Three
+waves of sub-agents, each in its own git worktree with a disjoint file list: 20 content waves
+(eldritch bestiary, cultists, champion modifiers, tainted animals, the public API surface, the client
+renderers and gear models, the eldritch blocks and tiles, the remaining machine blocks, the device
+containers, the Outer Lands with its labyrinth, the villages, the recipe catalogue, the missing items,
+the runic accessories, the golem AI, the projectiles, the utility layer, the wand enchantments, the
+biome generators, the device screens), 5 repair waves (the cosmetic family consolidation, the assets
+of ~30 blocks that arrived without any, the server game tests, the dedicated server start, the golem
+goal audit) and 8 gap-closing waves that closed exactly what wave one had to defer.
+
+Fixed on the way: duplicated registry ids that would have crashed the game, two registration classes
+that were never called (the whole eldritch block family and the legacy items), a champion system whose
+init was never run, two copies of the golem orb, the key access-list format, and the goal priority
+order (1.21.1 keeps the lowest number as the highest precedence, like 1.7.10).
+
+The recipe catalogue now resolves 247 original keys; 19 stay deferred (11 need another mod's ores,
+8 need a block state a 1.21.1 recipe result cannot carry). Local: compile clean, 1494 JUnit tests,
+0 missing resource references, 84/84 Python. Client inspection, multiplayer, full survival
+progression and NeoForge parity are not confirmed by this checkpoint.
+
 ## 2026-10-20 — Fourth-group runtime corrections, Hover Girdle and Pech goals
 
 Fix incompatible test relay ticker, real typed-payload wire inspection, optional-potion fixture bytes,

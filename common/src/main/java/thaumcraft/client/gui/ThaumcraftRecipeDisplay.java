@@ -190,6 +190,12 @@ public final class ThaumcraftRecipeDisplay {
             alias("FocusExcavation", "arcane/focus_excavation"), // 251
             alias("FocusTrade", "arcane/focus_trade"),
             alias("FocusWarding", "infusion/focus_warding"),
+            alias("Deconstructor", "arcane/deconstruction_table"),
+            alias("LampGrowth", "infusion/growth_lamp"),
+            alias("LampFertility", "infusion/fertility_lamp"),
+            alias("KnowFrag", "unknown_research_note"),
+            alias("InfEnchRepair", "infusion_enchantment/repair"),
+            alias("InfEnchHaste", "infusion_enchantment/haste"),
             alias("InfEnch0", "infusion_enchantment/protection"), // ConfigRecipes:300
             alias("InfEnch1", "infusion_enchantment/fire_protection"), // ConfigRecipes:301
             alias("InfEnch2", "infusion_enchantment/blast_protection"), // ConfigRecipes:302

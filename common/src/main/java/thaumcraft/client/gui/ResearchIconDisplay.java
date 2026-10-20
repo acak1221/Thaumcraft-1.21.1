@@ -211,6 +211,7 @@ final class ResearchIconDisplay {
             case "ConfigBlocks.blockTable" -> switch (metadata) {
                 case 0 -> "table";
                 case 1, 2 -> "research_table";
+                case 14 -> "deconstruction_table";
                 case 15 -> "arcane_workbench";
                 default -> null;
             };
@@ -233,9 +234,11 @@ final class ResearchIconDisplay {
                 case 1 -> "alembic";
                 case 2 -> "vis_charge_relay";
                 case 7 -> "arcane_lamp";
+                case 8 -> "growth_lamp";
                 case 9 -> "alchemical_construct";
                 case 10, 11 -> "alchemical_construct";
                 case 12 -> "mnemonic_matrix";
+                case 13 -> "fertility_lamp";
                 case 14 -> "vis_relay";
                 default -> null;
             };

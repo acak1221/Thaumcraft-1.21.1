@@ -64,8 +64,9 @@ public final class ObjectAspectResolver {
 
     private ObjectAspectResolver() {}
 
-    /** Amounts are per ONE item, not multiplied by the supplied stack count. */
-    public static AspectList get(ItemStack stack, Level level) {
+    /** Original getObjectTags, per one item: capped base and dynamic wand/potion tags only.
+     * No container, equipment or enchantment bonuses and no six-aspect culling; every return is an independent mutable list. */
+    public static AspectList baseTags(ItemStack stack, Level level) {
         if (stack == null || stack.isEmpty() || level == null) return new AspectList();
         AspectList base = new Resolution(level, index(level)).base(stack.getItem());
         if (stack.getItem() instanceof ItemWandCasting) {
@@ -76,7 +77,13 @@ public final class ObjectAspectResolver {
             base.merge(Aspect.MAGIC, cost / 2).merge(Aspect.TOOL, cost / 3);
         }
         if (stack.getItem() instanceof PotionItem) potionTags(stack, base);
-        base = cap(base);
+        return cap(base);
+    }
+
+    /** Amounts are per ONE item, not multiplied by the supplied stack count. */
+    public static AspectList get(ItemStack stack, Level level) {
+        if (stack == null || stack.isEmpty() || level == null) return new AspectList();
+        AspectList base = baseTags(stack, level);
         AspectList result = new AspectList();
         if (stack.getItem() instanceof IEssentiaContainerItem container) {
             AspectList contained = container.getAspects(stack);

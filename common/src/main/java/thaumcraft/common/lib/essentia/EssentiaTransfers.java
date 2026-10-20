@@ -57,7 +57,7 @@ public final class EssentiaTransfers {
         return false;
     }
 
-    public enum BoreOperation { PREFILL, FINISH, EVACUATE, RECONCILE }
+    public enum BoreOperation { PREFILL, FINISH, EVACUATE, RECONCILE, REPAIR }
     public enum BoreOwnership { ARM, WITNESS, UNKNOWN, EVACUATE, DROP }
 
     /** Only this executor can create a scope. No callback/debit/output supplier. */
@@ -251,7 +251,7 @@ public final class EssentiaTransfers {
     }
 
     public record Attempt(boolean selected, int committedUnits, RuntimeException failure) {}
-    private enum Profile { COMPAT, TUBE, JAR, BUFFER, CENTRIFUGE, CRYSTALLIZER, RESERVOIR }
+    private enum Profile { COMPAT, TUBE, JAR, BUFFER, CENTRIFUGE, CRYSTALLIZER, RESERVOIR, LAMP }
 
     public static Attempt pullTubeOne(TileTube tube, Direction inputFace) { return transport(tube, inputFace, Profile.TUBE, null); }
     public static Attempt pullJarOne(TileJar jar) { return transport(jar, Direction.UP, Profile.JAR, null); }
@@ -259,6 +259,12 @@ public final class EssentiaTransfers {
     public static Attempt pullCentrifugeOne(TileCentrifuge centrifuge) { return transport(centrifuge, Direction.DOWN, Profile.CENTRIFUGE, null); }
     public static Attempt pullCrystallizerOne(TileEssentiaCrystalizer tile) { return transport(tile, tile.getFacing(), Profile.CRYSTALLIZER, null); }
     public static Attempt pullReservoirOne(TileEssentiaReservoir tile) { return transport(tile, tile.getFacing(), Profile.RESERVOIR, null); }
+    /** Closed native lamp draw. No general transport callback or arbitrary subclass can acquire this profile. */
+    public static Attempt pullLampOne(thaumcraft.common.tiles.TileEssentiaLamp tile) {
+        if (!(tile instanceof thaumcraft.common.tiles.TileArcaneLampGrowth || tile instanceof thaumcraft.common.tiles.TileArcaneLampFertility)
+                || !tile.isNativeDrawPhase()) return new Attempt(false, 0, null);
+        return transport(tile, tile.getFacing(), Profile.LAMP, tile.fuelAspect());
+    }
 
     /** Bulk native alembic debit paired with the actual private Alchemy job's cargo credit. */
     public static Attempt collectAlembic(EntityGolemBase golem, TileAlembic source, Direction output, Aspect aspect, int limit) {
@@ -433,6 +439,8 @@ public final class EssentiaTransfers {
         if (MUTATION.get() != null || !(receiver instanceof EssentiaAtomicEndpoint into) || !current(receiver, level)) return new Attempt(false, 0, null);
         if (profile == Profile.CENTRIFUGE && !((TileCentrifuge) receiver).isNativeDrawPhase()) return new Attempt(false, 0, null);
         if (profile == Profile.CRYSTALLIZER && !((TileEssentiaCrystalizer) receiver).isNativeFillPhase()) return new Attempt(false, 0, null);
+        if (profile == Profile.LAMP && (!(receiver instanceof thaumcraft.common.tiles.TileArcaneLampGrowth || receiver instanceof thaumcraft.common.tiles.TileArcaneLampFertility)
+                || !((thaumcraft.common.tiles.TileEssentiaLamp) receiver).isNativeDrawPhase())) return new Attempt(false, 0, null);
         BlockEntity source = neighbor(receiver, inputFace, level);
         if (!(source instanceof IEssentiaTransport from) || source == receiver) return new Attempt(false, 0, null);
         EssentiaAtomicEndpoint stockFrom = source instanceof EssentiaAtomicEndpoint endpoint ? endpoint : null;
@@ -446,6 +454,11 @@ public final class EssentiaTransfers {
             if (!from.isConnectable(output) || profile != Profile.BUFFER && (!into.isConnectable(inputFace) || !into.canInputFrom(inputFace))) return new Attempt(false, 0, null);
             Aspect wanted = requested;
             switch (profile) {
+                case LAMP -> {
+                    // Original growth/fertility lamps ask ONLY output and strictly lower pressure, then take fixed herba/victus.
+                    // No representative mixed-store type, stock-count or minimum-suction query belongs to this policy.
+                    if (!from.canOutputTo(output) || from.getSuctionAmount(output) >= into.getSuctionAmount(inputFace)) return new Attempt(false, 0, null);
+                }
                 case COMPAT -> {
                     if (stockFrom.prepareExtract(beforeFrom, wanted, 1) == null || into.prepareInsert(beforeInto, wanted, 1) == null) return new Attempt(false, 0, null);
                     if (!from.canOutputTo(output)) return new Attempt(false, 0, null);

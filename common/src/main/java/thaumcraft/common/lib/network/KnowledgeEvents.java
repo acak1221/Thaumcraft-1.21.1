@@ -58,9 +58,7 @@ public final class KnowledgeEvents {
 
     private static void restoreAutoUnlockResearch(ServerPlayer player) {
         for (var research : ResearchCatalog.all()) {
-            // Config-conditional entries are data only until their native config
-            // predicates are ported; do not grant them from a guessed condition.
-            if (research.isAutoUnlock() && research.conditions().isEmpty()) {
+            if (research.isAutoUnlock() && research.isEnabled()) {
                 KnowledgeAccess.get(player).addResearch(research.key());
             }
         }

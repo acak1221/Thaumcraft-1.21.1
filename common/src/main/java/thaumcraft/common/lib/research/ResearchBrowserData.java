@@ -86,10 +86,9 @@ public final class ResearchBrowserData {
                 if (definition != null && !definition.isEnabled()) continue;
                 if (!knowledge.addResearch(sibling)) continue;
                 changed = true;
-                // Original ResearchManager.completeResearch, default wuss=false.
-                // A native wuss config is still a separate port unit.
+                // Original completion awards warp only when wuss mode is disabled.
                 int warp = definition == null ? 0 : definition.warp();
-                if (warp > 0) {
+                if (warp > 0 && !thaumcraft.common.lib.WarpEvents.isWussMode()) {
                     knowledge.addWarpPerm(warp - warp / 2);
                     knowledge.addWarpSticky(warp / 2);
                     knowledge.setWarpCounter(knowledge.getTotalWarp());

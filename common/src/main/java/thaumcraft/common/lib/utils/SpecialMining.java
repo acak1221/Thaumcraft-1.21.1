@@ -18,13 +18,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import thaumcraft.common.items.equipment.ItemElementalPickaxe;
+import thaumcraft.api.wands.FocusUpgradeType;
+import thaumcraft.common.items.wands.ItemWandCasting;
+import thaumcraft.common.items.wands.foci.FocusData;
+import thaumcraft.common.items.wands.foci.FocusUpgradeData;
+import thaumcraft.common.items.wands.foci.ItemFocusExcavation;
 
 /**
  * Original special mining results ({@code Utils.addSpecialMiningResult} / {@code findSpecialMiningResult}, Config:799-801, applied by
  * {@code EventHandlerWorld.harvestEvent} and the Arcane Bore): what a block drops can be swapped for a native cluster. A drop listed here
  * becomes its cluster, with the same count, when a roll of {@code 0.2 + fortune x 0.075} (times the entry's own factor) succeeds. It runs on
  * the drop list of {@code Block.getDrops(.. entity, tool)} when a player mines with the Pickaxe of the Core. The Primal Crusher, a wand
- * focus upgraded with Dowsing and the Arcane Bore holding that pickaxe are the other original carriers: the first two are not ported, and
+ * focus upgraded with Dowsing and the Arcane Bore holding that pickaxe are the other original carriers: the Crusher is not ported, and
  * the Bore's work still refuses any pickaxe but the vanilla ones and the Thaumium pickaxe (its actor would pass this rule as it stands).
  */
 public final class SpecialMining {
@@ -42,6 +47,11 @@ public final class SpecialMining {
             // 1.21.1 iron and gold ore drop raw ore where 1.7.10's dropped the ore block itself; the raw items stand in for that drop.
             ResourceLocation.withDefaultNamespace("raw_iron"), new Result(thaumcraft("cluster_iron"), IRON),
             ResourceLocation.withDefaultNamespace("raw_gold"), new Result(thaumcraft("cluster_gold"), GOLD),
+            // The original harvest event also runs in the Silk branch, whose outputs remain actual ore blocks.
+            ResourceLocation.withDefaultNamespace("iron_ore"), new Result(thaumcraft("cluster_iron"), IRON),
+            ResourceLocation.withDefaultNamespace("deepslate_iron_ore"), new Result(thaumcraft("cluster_iron"), IRON),
+            ResourceLocation.withDefaultNamespace("gold_ore"), new Result(thaumcraft("cluster_gold"), GOLD),
+            ResourceLocation.withDefaultNamespace("deepslate_gold_ore"), new Result(thaumcraft("cluster_gold"), GOLD),
             thaumcraft("cinnabar_ore"), new Result(thaumcraft("cluster_cinnabar"), CINNABAR));
 
     private SpecialMining() {}
@@ -58,7 +68,11 @@ public final class SpecialMining {
     public static Result result(ItemStack stack) { return RESULTS.get(BuiltInRegistries.ITEM.getKey(stack.getItem())); }
 
     /** Whether this tool carries the original special mining. */
-    public static boolean carries(ItemStack tool) { return tool.getItem() instanceof ItemElementalPickaxe; }
+    public static boolean carries(ItemStack tool) { return tool.getItem() instanceof ItemElementalPickaxe || dowsing(tool); }
+    private static boolean dowsing(ItemStack tool) {
+        return tool.getItem() instanceof ItemWandCasting && FocusData.get(tool).getItem() instanceof ItemFocusExcavation
+                && FocusUpgradeData.level(FocusData.get(tool), FocusUpgradeType.dowsing) > 0;
+    }
 
     /**
      * Original {@code findSpecialMiningResult}: one roll per drop (taken even when nothing is listed, as the original does), and on success
@@ -73,15 +87,17 @@ public final class SpecialMining {
     }
 
     /**
-     * The drops of one broken block after the special mining. Only a player mining with a carrying tool without Silk Touch is affected
-     * (the Bore's own rule; the original player event had no Silk Touch check: declared deviation); the list is copied only when a swap
+     * The drops of one broken block after the special mining. Dowsing uses the focus's Treasure even for Silk output, as the original
+     * player event did. The accepted Pickaxe of the Core path retains its declared Silk exclusion. The list is copied only when a swap
      * happens, and each swap plays the original orb sound.
      */
     public static List<ItemStack> apply(List<ItemStack> drops, ServerLevel level, BlockPos pos, Entity miner, ItemStack tool) {
         if (!(miner instanceof Player) || drops.isEmpty() || !carries(tool)) return drops;
         var enchantments = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-        if (EnchantmentHelper.getItemEnchantmentLevel(enchantments.getOrThrow(Enchantments.SILK_TOUCH), tool) > 0) return drops;
-        int fortune = EnchantmentHelper.getItemEnchantmentLevel(enchantments.getOrThrow(Enchantments.FORTUNE), tool);
+        boolean dowsing = dowsing(tool);
+        if (!dowsing && EnchantmentHelper.getItemEnchantmentLevel(enchantments.getOrThrow(Enchantments.SILK_TOUCH), tool) > 0) return drops;
+        int fortune = dowsing ? FocusUpgradeData.level(FocusData.get(tool), FocusUpgradeType.treasure)
+                : EnchantmentHelper.getItemEnchantmentLevel(enchantments.getOrThrow(Enchantments.FORTUNE), tool);
         float chance = chance(fortune);
         List<ItemStack> swapped = null;
         for (int index = 0; index < drops.size(); ++index) {

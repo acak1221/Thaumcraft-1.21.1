@@ -3,6 +3,7 @@ package thaumcraft.common.lib.bore;
 import dev.architectury.event.events.common.BlockEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -26,6 +27,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.api.IRepairable;
+import thaumcraft.api.IRepairableExtended;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.IEssentiaTransport;
 import thaumcraft.api.visnet.VisNetHandler;
@@ -37,6 +40,10 @@ import thaumcraft.common.lib.essentia.EssentiaTransfers;
 import thaumcraft.common.lib.essentia.EssentiaTransfers.BoreOperation;
 import thaumcraft.common.lib.essentia.EssentiaTransfers.BoreOwnership;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
+import thaumcraft.common.lib.enchantment.EquipmentEnchantments;
+import thaumcraft.common.lib.enchantment.EquipmentEnchantmentRules;
+import thaumcraft.common.lib.foci.FocalUpgradeCosts;
+import thaumcraft.common.lib.research.ObjectAspectResolver;
 import thaumcraft.common.tiles.TileArcaneBore;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileTube;
@@ -57,6 +64,7 @@ public final class BoreWork {
 
     public static void prefill(TileArcaneBore top) { EssentiaTransfers.workBore(top, BoreOperation.PREFILL); }
     public static void finish(TileArcaneBore top) { EssentiaTransfers.workBore(top, BoreOperation.FINISH); }
+    public static void repair(TileArcaneBore top) { EssentiaTransfers.workBore(top, BoreOperation.REPAIR); }
     public static void evacuate(TileArcaneBore top) { if (!top.wasEvacuated()) EssentiaTransfers.workBore(top, BoreOperation.EVACUATE); }
     public static void reconcileLoaded(TileArcaneBore top) { EssentiaTransfers.workBore(top, BoreOperation.RECONCILE); }
     public static boolean isMutationActive() { return EssentiaTransfers.isMutationActive(); }
@@ -73,7 +81,7 @@ public final class BoreWork {
     }
 
     public static final class Change {
-        public enum Kind { PREFILL, ARM, REFUSE, WITNESS, UNKNOWN, EVACUATE, RECONCILE }
+        public enum Kind { PREFILL, ARM, REFUSE, WITNESS, UNKNOWN, EVACUATE, RECONCILE, REPAIR }
         private final Frame frame;
         private final Kind kind;
         private final long revision;
@@ -83,16 +91,18 @@ public final class BoreWork {
         private final boolean fenced, applyTop;
         private final DeferredItemDrops.BoreEscrow escrow;
         private final EssentiaAtomicEndpoint.Change debit;
+        private final BoreRepairState repairState;
         private boolean used, applied, notified;
         private Change(Frame frame, Kind kind, ItemStack pick, float credit, CompoundTag reference,
-                       boolean fenced, boolean applyTop, DeferredItemDrops.BoreEscrow escrow, EssentiaAtomicEndpoint.Change debit) {
+                       boolean fenced, boolean applyTop, DeferredItemDrops.BoreEscrow escrow, EssentiaAtomicEndpoint.Change debit, BoreRepairState repairState) {
             this.frame = frame; this.kind = kind; revision = frame.top.revision(); this.pick = pick;
             this.credit = credit; this.reference = reference; this.fenced = fenced; this.applyTop = applyTop;
-            this.escrow = escrow; this.debit = debit;
+            this.escrow = escrow; this.debit = debit; this.repairState = repairState;
         }
         public Kind kind() { return kind; }
         public long expectedRevision() { return revision; }
         public ItemStack preparedPick() { return pick; }
+        public BoreRepairState preparedRepairState() { return repairState; }
         public float effectiveCredit() { return credit; }
         public CompoundTag preparedReference() { return reference; }
         public boolean fenced() { return fenced; }
@@ -177,14 +187,17 @@ public final class BoreWork {
         }
         private void refresh(Change change) {
             expectedRevision = change.revision + 1;
-            if (change.kind == Change.Kind.ARM) pick = change.pick;
+            if (change.kind == Change.Kind.ARM || change.kind == Change.Kind.REPAIR) pick = change.pick;
             // ARM -> native delegate must have NO callback-bearing snapshot or
             // notification window. Rebind metadata only after an outcome exists.
             if (change.kind != Change.Kind.ARM && owned() && scope.operation() != BoreOperation.EVACUATE) before = top.workSnapshot();
         }
         private Change change(Change.Kind kind, ItemStack paidPick, float credit, CompoundTag reference,
                               boolean fenced, boolean applyTop, EssentiaAtomicEndpoint.Change debit) {
-            return new Change(this, kind, paidPick, credit, reference, fenced, applyTop, escrow, debit);
+            return new Change(this, kind, paidPick, credit, reference, fenced, applyTop, escrow, debit, null);
+        }
+        private Change repairChange(ItemStack repairedPick, BoreRepairState next) {
+            return new Change(this, Change.Kind.REPAIR, repairedPick, before.credit(), null, false, true, null, null, next);
         }
         private void commit(Change change, boolean notify) {
             prepared = change;
@@ -278,7 +291,7 @@ public final class BoreWork {
             if (frame.before.base() != null) EssentiaTransfers.lockBoreActor(frame, frame.before.base());
             switch (scope.operation()) {
                 case PREFILL -> prefillBound(frame); case FINISH -> finishBound(frame);
-                case EVACUATE -> evacuateBound(frame); case RECONCILE -> reconcileBound(frame);
+                case EVACUATE -> evacuateBound(frame); case RECONCILE -> reconcileBound(frame); case REPAIR -> repairBound(frame);
             }
         } catch (RuntimeException | Error failure) {
             if (scope.operation() == BoreOperation.EVACUATE) {
@@ -345,6 +358,59 @@ public final class BoreWork {
             }
         }
     }
+    /** TileArcaneBore195-253: original post-increment repair schedule and a separate raw-primal VisNet reserve. */
+    private static void repairBound(Frame f) {
+        if (!f.current() || f.before.phase() != TileArcaneBore.WorkPhase.REPAIR || !TileArcaneBore.validSlot(1, f.pick)) return;
+        BoreRepairState old = f.before.repairState(), next = old.advance();
+        ItemStack candidate = f.pick.copy();
+        if (old.isAttemptTick() && candidate.isDamaged()) {
+            int level = Math.min(2, EquipmentEnchantments.level(candidate, f.level, EquipmentEnchantments.REPAIR));
+            if (level > 0) {
+                if (candidate.getItem() instanceof IRepairable) {
+                    var base = ObjectAspectResolver.baseTags(candidate, f.level);
+                    if (base.size() > 0) {
+                        var primals = FocalUpgradeCosts.reduceToPrimals(base);
+                        var cost = new LinkedHashMap<String, Integer>();
+                        for (Aspect aspect : primals.getAspects()) cost.put(aspect.getTag(),
+                                EquipmentEnchantmentRules.repairCentivis(primals.getAmount(aspect), level));
+                        next = next.mergeCost(cost); // Original accumulates MAX, even across a later cheaper pick.
+                        boolean allowed = true;
+                        if (candidate.getItem() instanceof IRepairableExtended extended) {
+                            var platform = BorePlatform.required();
+                            ServerPlayer actor = platform.actor(f.level);
+                            actor.tickCount = (int)old.counter();
+                            ActorLease lease = new ActorLease(f.level, actor, platform);
+                            if (!f.current() || !lease.valid()) return;
+                            allowed = extended.doRepair(candidate, actor, level);
+                            if (!f.current() || !lease.valid()) return;
+                            candidate = canonical(f.level, candidate);
+                            if (!TileArcaneBore.validSlot(1, candidate) || !f.current()) return;
+                        }
+                        if (allowed && next.canPay()) {
+                            next = next.paid();
+                            candidate.setDamageValue(Math.max(0, candidate.getDamageValue() - level));
+                        }
+                    }
+                } else next = next.clearCost();
+            }
+        }
+        if (!f.current()) return;
+        boolean wornChanged = !ItemStack.matches(candidate, f.pick);
+        f.commit(f.repairChange(candidate, next), wornChanged);
+        if (!f.current() || !f.before.repairState().isFillTick()) return;
+        // This is direct VisNet funding, without wand discounts or essentia conversion.
+        // Ask the FULL stored cost when below it; the original reserve can overshoot the deficit.
+        for (var entry : f.before.repairState().cost().entrySet()) {
+            BoreRepairState reserve = f.before.repairState();
+            if (reserve.available(entry.getKey()) >= entry.getValue()) continue;
+            int actual = VisNetHandler.drainVis(f.level, f.before.topPos(), Aspect.getAspect(entry.getKey()), entry.getValue());
+            if (actual < 0 || actual > entry.getValue()) throw new IllegalStateException("Invalid Bore repair VisNet grant");
+            if (!f.current()) return; // A spent source grant is never refunded or credited to a replacement owner.
+            if (actual > 0) f.commit(f.repairChange(f.pick.copy(), reserve.addVis(entry.getKey(), actual)), false);
+            if (!f.current()) return;
+        }
+    }
+
     private static EssentiaAtomicEndpoint nativeSource(BlockEntity source) {
         return source.getClass() == TileJar.class || source.getClass() == TileTube.class || source.getClass() == TileTubeBuffer.class
                 ? (EssentiaAtomicEndpoint) source : null;

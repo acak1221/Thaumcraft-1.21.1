@@ -1,3 +1,11 @@
+## Следующая группа для удалённого прогона — 20.10.2026
+
+Рабочая группа R11/R12 + research settings, Repair/Haste/Bore repair, Ward/Excavation specials,
+Growth/Fertility/Deconstruction и Brainy/Giant zombies подготовлена; локально 620 JUnit/78 Python PASS.
+Полный Fabric build/GameTest выполняется на GitHub для нового commit. До его результата
+последний принятый полный серверный срез остаётся d508ada (582/186/78).
+Клиент, survival, multiplayer и NeoForge этой группой не подтверждены.
+
 # Полный перенос TC4 на Minecraft 1.21.1 — handoff
 
 **20.10 — интеграция `d508ada` прошла GitHub CI: 582 JUnit / 186 Fabric GameTest / 78 Python.**

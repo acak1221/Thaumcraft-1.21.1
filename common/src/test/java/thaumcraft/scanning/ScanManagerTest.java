@@ -123,6 +123,15 @@ public class ScanManagerTest {
         assertEquals(2, earnedAtPool(100, 8));
     }
 
+    @Test public void zeroAndNegativeConfiguredCapsKeepOriginalSoftCapArithmetic() {
+        for (int cap : new int[]{0, -1, Integer.MIN_VALUE}) {
+            var knowledge = new PlayerKnowledge();
+            var result = ScanManager.awardScan(knowledge, "cap:" + cap, new AspectList().add(Aspect.AIR, 9), ScanKind.ITEM, cap);
+            assertTrue(result.success()); assertEquals(1, result.awards().get("aer").intValue());
+            assertEquals(1, knowledge.getAspectPoolFor("aer"));
+        }
+    }
+
     @Test
     public void crossingThresholdDuringScanUsesPoolBeforeTheAward() {
         PlayerKnowledge knowledge = new PlayerKnowledge();

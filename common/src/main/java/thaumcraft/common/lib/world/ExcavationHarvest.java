@@ -327,6 +327,10 @@ public final class ExcavationHarvest {
             ItemStack focus = FocusData.get(wand);
             int fortune = FocusUpgradeData.level(focus, FocusUpgradeType.treasure);
             if (fortune > 0) lootTool.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE), fortune);
+            // Original Forge's default canSilkHarvest explicitly excludes tile entities. In particular, a spawner retains
+            // its ordinary XP path rather than receiving native Silk's unconditional XP suppression.
+            if (!snapshot.hasBlockEntity() && FocusUpgradeData.level(focus, FocusUpgradeType.silktouch) > 0)
+                lootTool.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH), 1);
         }
     }
 }

@@ -115,8 +115,9 @@ public final class FocusUpgradeRuntimeChecks {
         a.require(!FocusUpgradeData.supportedForFocus(illegal) && !FocusData.isSupportedFocus(illegal), "directly attached Treasure on Fire is not silently basic");
         boolean rejected = false;
         try { new FocusData(illegal); } catch (IllegalArgumentException expected) { rejected = true; }
-        a.require(rejected && FocusUpgradeType.get(8) == FocusUpgradeType.silktouch && FocusUpgradeType.get(20) == null,
-                "invalid nested data is rejected, Silk has its original id8, and deferred Dowsing stays unavailable");
+        a.require(rejected && FocusUpgradeType.get(8) == FocusUpgradeType.silktouch && FocusUpgradeType.get(20) == FocusUpgradeType.dowsing
+                        && FocusUpgradeType.get(21) == null,
+                "invalid nested data is rejected, Silk8/Dowsing20 retain original ids and unknown21 remains unavailable");
     }
 
     private static void casting(Actor a) {
@@ -178,7 +179,7 @@ public final class FocusUpgradeRuntimeChecks {
         }
     }
 
-    /** Shared only by these two NEW helpers, never a production test hook. */
+    /** Shared by the native focus-upgrade runtime helpers, never a production test hook. */
     static final class Actor implements AutoCloseable {
         final GameTestHelper test;
         final ServerLevel level;

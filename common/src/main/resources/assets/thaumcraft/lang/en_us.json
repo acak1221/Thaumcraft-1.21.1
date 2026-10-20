@@ -1913,7 +1913,7 @@
   "tc.port.research.failure.already_complete": "This research is already complete.",
   "tc.port.research.failure.missing_prerequisites": "Complete the prerequisite research first.",
   "tc.port.research.failure.missing_clue": "Discover a clue to this research first.",
-  "tc.port.research.failure.primary_requires_note": "Primary research requires a research note.",
+  "tc.port.research.failure.primary_requires_note": "This research requires a research note.",
   "tc.port.research.failure.insufficient_aspects": "Not enough research points in the required aspects.",
   "tc.port.research.note_forbidden": "Forbidden knowledge (%1$s)",
   "item.thaumcraft.inkwell": "Inkwell",
@@ -1933,7 +1933,7 @@
   "tc.port.note.failure.already_complete": "This research is already complete.",
   "tc.port.note.failure.missing_prerequisites": "Complete the prerequisite research first.",
   "tc.port.note.failure.missing_clue": "Discover a clue to this research first.",
-  "tc.port.note.failure.secondary_requires_purchase": "Learn this Secondary research with research points.",
+  "tc.port.note.failure.secondary_requires_purchase": "This research must be purchased from the Thaumonomicon.",
   "tc.port.note.failure.missing_paper": "You need one sheet of paper.",
   "tc.port.note.failure.missing_ink": "You need scribing tools with ink.",
   "tc.port.note.failure.delivery_failed": "The research note could not be delivered.",
@@ -2061,5 +2061,12 @@
   "tc.architect.axis.1": "X",
   "tc.architect.axis.2": "Z",
   "tc.architect.axis.3": "Y",
-  "tc.port.book_recipe.xp_levels": "%s levels"
+  "tc.port.book_recipe.xp_levels": "%s levels",
+  "block.thaumcraft.deconstruction_table": "Deconstruction Table",
+  "block.thaumcraft.growth_lamp": "Lamp of Growth",
+  "block.thaumcraft.fertility_lamp": "Lamp of Fertility",
+  "entity.thaumcraft.brainy_zombie": "Angry Zombie",
+  "entity.thaumcraft.giant_brainy_zombie": "Furious Zombie",
+  "item.thaumcraft.brainy_zombie_spawn_egg": "Angry Zombie Spawn Egg",
+  "item.thaumcraft.giant_brainy_zombie_spawn_egg": "Furious Zombie Spawn Egg"
 }

@@ -32,6 +32,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
+import thaumcraft.api.IRepairable;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.config.ThaumcraftInfusion;
@@ -89,6 +90,8 @@ public record InfusionEnchantmentRecipe(String research, ResourceLocation enchan
             case "minecraft:efficiency" -> item instanceof DiggerItem && !(item instanceof HoeItem) || item instanceof ShearsItem;
             case "minecraft:silk_touch", "minecraft:fortune" -> item instanceof DiggerItem && !(item instanceof HoeItem);
             case "minecraft:unbreaking" -> true;
+            case "thaumcraft:repair" -> item instanceof IRepairable;
+            case "thaumcraft:haste" -> item instanceof ArmorItem armor && armor.getEquipmentSlot() == EquipmentSlot.FEET;
             case "minecraft:power", "minecraft:punch", "minecraft:flame", "minecraft:infinity" -> item instanceof BowItem;
             default -> target.value().canEnchant(central);
         };

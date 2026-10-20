@@ -22,7 +22,7 @@ import thaumcraft.common.lib.research.ResearchNoteData;
 import thaumcraft.common.lib.research.ResearchNoteLearning;
 
 /** Native normal/discovery identities preserve presentation separately from solved state. */
-public final class ItemResearchNotes extends Item {
+public class ItemResearchNotes extends Item {
     public ItemResearchNotes(Properties properties) { super(properties.stacksTo(1)); }
 
     public static ResearchNoteData data(ItemStack stack) { return stack.get(ThaumcraftContent.RESEARCH_NOTE_DATA.get()); }

@@ -50,6 +50,7 @@ import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 import thaumcraft.common.items.wands.foci.ItemFocusExcavation;
 import thaumcraft.common.lib.bore.ArcaneBoreMath;
 import thaumcraft.common.lib.bore.BoreWork;
+import thaumcraft.common.lib.bore.BoreRepairState;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
 
 /** Stationary original bore scheduler and two-slot owner. REAL root BoreWork
@@ -60,7 +61,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
     private static final int SCHEMA = 1;
     private static final SoundEvent TOOL = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "tool"));
     private static final SoundEvent RUMBLE = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "rumble"));
-    public enum WorkPhase { PREFILL, COMPLETE, RECONCILE, RETIRE }
+    public enum WorkPhase { PREFILL, COMPLETE, RECONCILE, RETIRE, REPAIR }
     public enum CompletionState { READY, ARMED, REFUSED, WITNESSED, UNKNOWN }
     private ItemStack focus = ItemStack.EMPTY, pick = ItemStack.EMPTY;
     private ArcaneBoreMath.Stats stats = new ArcaneBoreMath.Stats(0, 0, 0);
@@ -73,6 +74,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
     private UUID lifetime = UUID.randomUUID(), identity = UUID.randomUUID();
     private int count;
     private float credit;
+    private BoreRepairState repairState = BoreRepairState.EMPTY;
     private Target pending;
     private Completion completion;
     private WorkPhase workPhase;
@@ -116,6 +118,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
     public float getAimZ() { return aimZ; }
     public int getCountdown() { return count; }
     public float getAccelerationCredit() { return credit; }
+    public BoreRepairState repairState() { return repairState; }
     public boolean hasFocus() { return validSlot(0, focus); }
     public boolean hasPickaxe() { return validSlot(1, pick); }
     public boolean isQuarantined() { return rejected != null || fenced; }
@@ -295,8 +298,14 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
         if (top.ticking || top.mutating || top.serializing || BoreWork.isMutationActive() || EssentiaTransfers.isMutationActive()
                 || !BoreWork.nativeTickAllowed(top)) return;
         top.ticking = true;
-        try { top.serverTick(); }
-        finally { top.ticking = false; top.selecting = false; top.workPhase = null; top.completion = null; }
+        try {
+            top.serverTick();
+            // Original repair runs after digging, including an ordinary early return for redstone OFF/no focus.
+            if (top.isCurrent() && !top.isQuarantined() && !top.needsReconciliation && top.revision < Long.MAX_VALUE - 16) {
+                top.workPhase = WorkPhase.REPAIR;
+                try { BoreWork.repair(top); } finally { top.workPhase = null; }
+            }
+        } finally { top.ticking = false; top.selecting = false; top.workPhase = null; top.completion = null; }
     }
     private void serverTick() {
         if (needsReconciliation) {
@@ -444,6 +453,13 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
                 if (!isNativePhase(WorkPhase.PREFILL)) throw new IllegalStateException("No native bore prefill");
                 credit = change.effectiveCredit();
             }
+            case REPAIR -> {
+                if (!isNativePhase(WorkPhase.REPAIR)) throw new IllegalStateException("No native bore repair");
+                ItemStack preparedPick = change.preparedPick();
+                BoreRepairState preparedRepair = change.preparedRepairState();
+                if (preparedPick == null || preparedRepair == null) throw new IllegalStateException("Incomplete native bore repair change");
+                pick = preparedPick; repairState = preparedRepair;
+            }
             case ARM -> {
                 requireUnconsumedCompletion();
                 // Extract ALL prepared fields before the first actual slot write.
@@ -532,6 +548,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
         private final ArcaneBoreMath.ScanCursor cursor = scan;
         private final long visualSerial = visualSequence;
         private final int remainingCount = count, creditBits = Float.floatToIntBits(credit);
+        private final BoreRepairState repairBefore = repairState;
         private WorkSnapshot(WorkPhase phase) { this.phase = phase; }
         public WorkPhase phase() { return phase; }
         public UUID lifetimeId() { return life; }
@@ -556,6 +573,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
         public BlockState targetState() { return target == null ? null : target.state(); }
         public int countdown() { return remainingCount; }
         public float credit() { return Float.intBitsToFloat(creditBits); }
+        public BoreRepairState repairState() { return repairBefore; }
         public ArcaneBoreMath.Rotation rotation() { return turns; }
         public boolean matchesCurrent() {
             if (phase == WorkPhase.RETIRE) {
@@ -578,7 +596,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
         private boolean metadataMatches() {
             if (!isCurrent() || !isNativePhase(phase) || !life.equals(lifetime) || !machine.equals(identity) || rev != revision
                     || state != getBlockState() || focusObject != focus || pickObject != pick || count != remainingCount
-                    || !turns.equals(rotation) || creditBits != Float.floatToIntBits(TileArcaneBore.this.credit)
+                    || !turns.equals(rotation) || creditBits != Float.floatToIntBits(TileArcaneBore.this.credit) || repairBefore != repairState
                     || queued != pending || !cursor.equals(scan) || visualSerial != visualSequence
                     || base != installedBase() || essentiaBound != (base != null && base == accelerationBase())
                     || base != null && (baseState != base.getBlockState()
@@ -699,6 +717,7 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
         clientOnlyPayload = false;
         lifetime = UUID.randomUUID(); identity = UUID.randomUUID(); revision = sequence = visualSequence = 0;
         focus = pick = ItemStack.EMPTY; credit = 0; count = 0; pending = null; completion = null; workPhase = null;
+        repairState = BoreRepairState.EMPTY; // Original counter, cost and accumulated repair vis are transient, not NBT.
         boundBase = null; boundBaseLifetime = null; scan = ArcaneBoreMath.ScanCursor.initial();
         rotation = ArcaneBoreMath.reorient(new ArcaneBoreMath.Rotation(0, 0, 0, 0, 0, 0), miningDirection(), true);
         rotationDirection = miningDirection();

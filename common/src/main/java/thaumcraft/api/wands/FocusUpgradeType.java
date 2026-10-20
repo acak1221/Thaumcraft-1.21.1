@@ -16,7 +16,8 @@ public final class FocusUpgradeType {
     public static final FocusUpgradeType architect = new FocusUpgradeType(6, "architect", Aspect.CRAFT);
     public static final FocusUpgradeType extend = new FocusUpgradeType(7, "extend", Aspect.EXCHANGE);
     public static final FocusUpgradeType silktouch = new FocusUpgradeType(8, "silktouch", Aspect.GREED);
-    private static final Map<Short, FocusUpgradeType> TYPES = catalogue(potency, frugal, treasure, enlarge, architect, extend, silktouch);
+    public static final FocusUpgradeType dowsing = new FocusUpgradeType(20, "dowsing", Aspect.MINE);
+    private static final Map<Short, FocusUpgradeType> TYPES = catalogue(potency, frugal, treasure, enlarge, architect, extend, silktouch, dowsing);
 
     public final short id;
     public final String name;

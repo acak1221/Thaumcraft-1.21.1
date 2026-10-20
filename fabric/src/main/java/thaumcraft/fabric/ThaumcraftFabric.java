@@ -20,6 +20,20 @@ public final class ThaumcraftFabric implements ModInitializer {
     @Override public void onInitialize() {
         Thaumcraft.init();
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftMonsters.BRAINY_ZOMBIE.get(),
+                thaumcraft.common.entities.monster.EntityBrainyZombie.createAttributes());
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                thaumcraft.common.config.ThaumcraftMonsters.GIANT_BRAINY_ZOMBIE.get(),
+                thaumcraft.common.entities.monster.EntityGiantBrainyZombie.createAttributes());
+        BiomeModifications.addSpawn(BiomeSelectors.tag(thaumcraft.common.config.ThaumcraftMonsters.BRAINY_SPAWNS),
+                net.minecraft.world.entity.MobCategory.MONSTER, thaumcraft.common.config.ThaumcraftMonsters.BRAINY_ZOMBIE.get(), 10, 1, 1);
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftMonsters.BRAINY_ZOMBIE.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityBrainyZombie::checkBrainySpawnRules);
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftMonsters.GIANT_BRAINY_ZOMBIE.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityBrainyZombie::checkBrainySpawnRules);
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftGolems.GOLEM.get(),
                 thaumcraft.common.entities.golems.EntityGolemBase.createAttributes());
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(

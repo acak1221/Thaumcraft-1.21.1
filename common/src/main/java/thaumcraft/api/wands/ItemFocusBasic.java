@@ -61,6 +61,10 @@ public class ItemFocusBasic extends Item {
     }
 
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
+        if (!FocusUpgradeData.supportedForFocus(stack)) {
+            tooltip.add(Component.translatable("tc.port.focus.upgrades.invalid").withStyle(ChatFormatting.RED));
+            return;
+        }
         AspectList cost = getVisCost(stack);
         if (cost != null && cost.size() > 0) {
             tooltip.add(Component.translatable(isVisCostPerTick(stack) ? "item.Focus.cost2" : "item.Focus.cost1"));
@@ -70,10 +74,6 @@ public class ItemFocusBasic extends Item {
                         .withStyle(ChatFormatting.getByCode(aspect.getChatcolor().charAt(0)))
                         .append(Component.literal(" x " + amount).withStyle(ChatFormatting.RESET)));
             }
-        }
-        if (!FocusUpgradeData.supportedForFocus(stack)) {
-            tooltip.add(Component.translatable("tc.port.focus.upgrades.invalid").withStyle(ChatFormatting.RED));
-            return;
         }
         LinkedHashMap<Short, Integer> levels = new LinkedHashMap<>();
         for (short id : getAppliedUpgrades(stack)) if (id >= 0) levels.merge(id, 1, Integer::sum);

@@ -37,6 +37,8 @@
     "thaumcraft:vis_charge_relay",
     "thaumcraft:thaumatorium",
     "thaumcraft:thaumatorium_top",
-    "thaumcraft:mnemonic_matrix"
+    "thaumcraft:mnemonic_matrix",
+    "thaumcraft:growth_lamp",
+    "thaumcraft:fertility_lamp"
   ]
 }

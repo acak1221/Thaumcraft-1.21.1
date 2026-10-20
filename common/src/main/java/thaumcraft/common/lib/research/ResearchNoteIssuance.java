@@ -124,7 +124,7 @@ public final class ResearchNoteIssuance {
             return Failure.UNAVAILABLE;
         }
         if (knowledge.isResearchComplete(key)) return Failure.ALREADY_COMPLETE;
-        if (research.isSecondary()) return Failure.SECONDARY_REQUIRES_PURCHASE;
+        if (thaumcraft.common.config.ThaumcraftSettings.current().purchases(research.isSecondary())) return Failure.SECONDARY_REQUIRES_PURCHASE;
         if (!research.hasPrerequisites(knowledge.getResearchComplete())) return Failure.MISSING_PREREQUISITES;
         if ((research.isHidden() || research.isLost()) && !knowledge.isResearchComplete("@" + key)) {
             return Failure.MISSING_CLUE;
@@ -151,7 +151,7 @@ public final class ResearchNoteIssuance {
         // including either flattened normal/discovery identity, before costs.
         for (int slot = 0; slot < MAIN_SIZE; slot++) {
             ItemStack stack = items.get(slot);
-            if (!stack.is(ThaumcraftContent.RESEARCH_NOTE.get()) && !stack.is(ThaumcraftContent.DISCOVERY.get())) continue;
+            if (!(stack.getItem() instanceof ItemResearchNotes)) continue;
             ResearchNoteData data = ItemResearchNotes.data(stack);
             if (data != null && key.equals(data.key())) return new Plan(Failure.NONE, key, true, -1, -1);
         }

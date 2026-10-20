@@ -45,6 +45,8 @@ public final class ClientSetup {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        thaumcraft.common.lib.network.ResearchSettingsNetworking.initClient();
+        thaumcraft.client.ThaumcraftMonsterClient.init();
         KnowledgeEvents.initClient();
         ThaumcraftArcaneClient.init();
         ThaumcraftNodeClient.init();
@@ -53,6 +55,7 @@ public final class ClientSetup {
         ThaumcraftAlchemyClient.init();
         ThaumcraftNaturalClient.init();
         ThaumcraftPlantClient.init();
+        ThaumcraftBiologicalLampClient.init();
         ThaumcraftDistillationClient.init();
         ThaumcraftAlembicClient.init();
         ThaumcraftWandClient.init();
@@ -76,6 +79,8 @@ public final class ClientSetup {
         thaumcraft.common.items.ItemCrystalEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftInfusion.TALLOW_CANDLE.get());
         MenuRegistry.registerScreenFactory(ThaumcraftContent.RESEARCH_TABLE_MENU.get(), GuiResearchTable::new);
+        MenuRegistry.registerScreenFactory(thaumcraft.common.config.ThaumcraftDeconstruction.MENU.get(), thaumcraft.client.gui.GuiDeconstructionTable::new);
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftDeconstruction.TILE.get(), thaumcraft.client.renderers.tile.TileDeconstructionTableRenderer::new);
         MenuRegistry.registerScreenFactory(thaumcraft.common.config.ThaumcraftThaumatorium.MENU.get(), thaumcraft.client.gui.GuiThaumatorium::new);
         BlockEntityRendererRegistry.register(ThaumcraftContent.TABLE_BLOCK_ENTITY.get(), TileTableRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftContent.RESEARCH_TABLE_BLOCK_ENTITY.get(), TileResearchTableRenderer::new);
@@ -120,7 +125,9 @@ public final class ClientSetup {
         ColorHandlerRegistry.registerItemColors((stack, tint) -> {
             var data = ItemResearchNotes.data(stack);
             return tint == 1 ? opaque(data == null ? 0x999999 : data.color()) : -1;
-        }, ThaumcraftContent.RESEARCH_NOTE, ThaumcraftContent.DISCOVERY);
+        }, ThaumcraftContent.RESEARCH_NOTE, ThaumcraftContent.DISCOVERY,
+                thaumcraft.common.config.ThaumcraftUnknownKnowledge.UNKNOWN_NOTE,
+                thaumcraft.common.config.ThaumcraftUnknownKnowledge.UNKNOWN_NOTE_24);
         // Original jar_side carries fractional glass alpha (centre84/255).
         // Cutout discards blending and writes an opaque blue depth shell,
         // hiding real essentia. TC4 jars use the translucent world render pass.

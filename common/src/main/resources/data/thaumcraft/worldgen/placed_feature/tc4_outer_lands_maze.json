@@ -1,0 +1,8 @@
+{
+  "feature": "thaumcraft:tc4_outer_lands_maze",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

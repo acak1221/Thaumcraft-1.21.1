@@ -47,9 +47,19 @@
     "ThaumatoriumChestInventoryMixin",
     "ThaumatoriumHopperInventoryMixin",
     "ThaumatoriumFurnaceInventoryMixin",
-    "WarpFoodMixin"
+    "WarpFoodMixin",
+    "PlayerRunicSaveMixin"
   ],
-  "client": ["client.TableOutlineMixin", "client.WandFocusKeyMixin", "client.MinecraftItemColorsAccess", "client.RobeArmorLayerMixin",
-    "client.WarpFogMixin", "client.WarpPostEffectsMixin", "client.WardedHitParticleMixin"],
-  "injectors": {"defaultRequire": 1}
+  "client": [
+    "client.TableOutlineMixin",
+    "client.WandFocusKeyMixin",
+    "client.MinecraftItemColorsAccess",
+    "client.RobeArmorLayerMixin",
+    "client.WarpFogMixin",
+    "client.WarpPostEffectsMixin",
+    "client.WardedHitParticleMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

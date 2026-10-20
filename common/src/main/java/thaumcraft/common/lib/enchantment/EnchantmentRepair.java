@@ -1,16 +1,11 @@
 package thaumcraft.common.lib.enchantment;
 
-import java.util.LinkedHashMap;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.api.IRepairable;
 import thaumcraft.api.IRepairableExtended;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
-import thaumcraft.common.config.ThaumcraftContent;
-import thaumcraft.common.crafting.ArcaneVis;
-import thaumcraft.common.items.wands.ItemWandCasting;
-import thaumcraft.common.items.wands.WandVisDiscount;
 import thaumcraft.common.lib.foci.FocalUpgradeCosts;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
 
@@ -38,31 +33,10 @@ public final class EnchantmentRepair {
         AspectList cost = cost(stack, player, level);
         if (cost.size() == 0) return false;
         if (stack.getItem() instanceof IRepairableExtended extended && !extended.doRepair(stack, player, level)) return false;
-        if (!consumeVisFromInventory(player, cost)) return false;
+        if (!thaumcraft.common.items.wands.WandManager.consumeVisFromInventory(player, cost)) return false;
         stack.setDamageValue(Math.max(0, stack.getDamageValue() - level));
         player.getInventory().setChanged();
         return true;
     }
-    private static boolean consumeVisFromInventory(Player player, AspectList rawCost) {
-        // Vis amulets/baubles have not been ported; their original priority is a visible pending integration.
-        // Each wand is tested independently, last main-inventory slot first. Costs never split across wands.
-        for (int slot = player.getInventory().items.size() - 1; slot >= 0; slot--) {
-            ItemStack wand = player.getInventory().items.get(slot);
-            if (!ArcaneVis.isCraftingWand(wand)) continue;
-            var current = ItemWandCasting.data(wand);
-            var prices = new LinkedHashMap<String, Integer>();
-            boolean canPay = true;
-            for (Aspect aspect : rawCost.getAspects()) {
-                int amount = EquipmentEnchantmentRules.repairPrice(rawCost.getAmount(aspect), WandVisDiscount.modifier(wand, player, aspect));
-                if (current.amount(aspect.getTag()) < amount) { canPay = false; break; }
-                prices.put(aspect.getTag(), amount);
-            }
-            if (!canPay) continue;
-            for (var entry : prices.entrySet()) current = current.withAmount(entry.getKey(), current.amount(entry.getKey()) - entry.getValue());
-            wand.set(ThaumcraftContent.WAND_DATA.get(), current);
-            player.getInventory().setChanged();
-            return true;
-        }
-        return false;
-    }
+
 }

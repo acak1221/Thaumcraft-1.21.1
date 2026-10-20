@@ -79,6 +79,8 @@ public record FocusUpgradeData(List<Short> ranks) {
                     || focus.getItem() instanceof ItemFocusTrade)) return false;
         if (focus.getItem() instanceof ItemFocusWarding && read(focus).level(FocusUpgradeType.enlarge) > 0
                 && read(focus).level(FocusUpgradeType.architect) == 0) return false;
+        if (focus.getItem() instanceof ItemFocusShock && read(focus).level(FocusUpgradeType.enlarge) > 0
+                && read(focus).level(FocusUpgradeType.chainlightning) == 0 && read(focus).level(FocusUpgradeType.earthshock) == 0) return false;
         ItemFocusBasic item = (ItemFocusBasic) focus.getItem();
         List<Short> ranks = read(focus).ranks;
         for (int slot = 0; slot < SLOTS; slot++) {

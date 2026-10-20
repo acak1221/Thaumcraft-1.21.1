@@ -1,6 +1,8 @@
 package thaumcraft.common.items.wands.foci;
 
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -21,36 +23,83 @@ import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.api.wands.FocusUpgradeType;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.crafting.ArcaneVis;
+import thaumcraft.common.entities.projectile.EntityShockOrb;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.FocusVis;
 import thaumcraft.common.items.wands.WandVisDiscount;
 import thaumcraft.common.lib.network.ShockFxNetworking;
 
-/** TC4 basic Shock plus Frugal/Potency. No orb, chain, Enlarge or ignition. */
+/** TC4 Shock with chain lightning and the earthshock orb. */
 public final class ItemFocusShock extends ItemFocusBasic {
     public static final int BASE_COST_CENTIVIS = 25;
     public static final int COOLDOWN_MILLIS = 250;
     public static final double ENTITY_RANGE = 20;
     private static final SoundEvent SHOCK = SoundEvent.createVariableRangeEvent(
             ResourceLocation.fromNamespaceAndPath("thaumcraft", "shock"));
+    private static final SoundEvent ZAP = SoundEvent.createVariableRangeEvent(
+            ResourceLocation.fromNamespaceAndPath("thaumcraft", "zap"));
 
     public ItemFocusShock(Properties properties) { super(properties); }
 
-    @Override public AspectList getVisCost(ItemStack focus) { return new AspectList().add(Aspect.AIR, BASE_COST_CENTIVIS); }
-    @Override public int getActivationCooldown(ItemStack focus) { return COOLDOWN_MILLIS; }
+    @Override public AspectList getVisCost(ItemStack focus) {
+        if (focus.getItem() instanceof ItemFocusShock) {
+            if (isUpgradedWith(focus, FocusUpgradeType.chainlightning)) return new AspectList().add(Aspect.AIR, 40).add(Aspect.WATER, 10);
+            if (isUpgradedWith(focus, FocusUpgradeType.earthshock)) return new AspectList().add(Aspect.AIR, 75).add(Aspect.EARTH, 25);
+        }
+        return new AspectList().add(Aspect.AIR, BASE_COST_CENTIVIS);
+    }
+    @Override public int getActivationCooldown(ItemStack focus) {
+        return isUpgradedWith(focus, FocusUpgradeType.chainlightning) ? 500 : isUpgradedWith(focus, FocusUpgradeType.earthshock) ? 1000 : COOLDOWN_MILLIS;
+    }
     @Override public int getFocusColor(ItemStack focus) { return 10466239; }
     @Override public String getSortingHelper(ItemStack focus) { return "BL" + super.getSortingHelper(focus); }
-    @Override public WandFocusAnimation getAnimation(ItemStack focus) { return WandFocusAnimation.CHARGE; }
+    @Override public WandFocusAnimation getAnimation(ItemStack focus) { return isUpgradedWith(focus, FocusUpgradeType.earthshock) ? WandFocusAnimation.WAVE : WandFocusAnimation.CHARGE; }
     @Override public FocusUpgradeType[] getPossibleUpgradesByRank(ItemStack focus, int rank) {
-        return rank >= 1 && rank <= 5 ? new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency} : new FocusUpgradeType[0];
+        return switch (rank) {
+            case 1, 2 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency};
+            case 3 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.chainlightning, FocusUpgradeType.earthshock};
+            case 4, 5 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.enlarge};
+            default -> new FocusUpgradeType[0];
+        };
+    }
+    @Override public boolean canApplyUpgrade(ItemStack focus, Player player, FocusUpgradeType type, int rank) {
+        return super.canApplyUpgrade(focus, player, type, rank) && (type != FocusUpgradeType.enlarge
+                || isUpgradedWith(focus, FocusUpgradeType.chainlightning) || isUpgradedWith(focus, FocusUpgradeType.earthshock));
     }
 
     @Override public ItemStack onFocusRightClick(ItemStack wand, Level level, Player player, InteractionHand hand) {
+        if (isUpgradedWith(FocusData.get(wand), FocusUpgradeType.earthshock)) {
+            if (level.isClientSide ? FocusVis.canPay(wand, Map.of("aer", pulseCost(wand, player)))
+                    : player instanceof ServerPlayer server && earthshock(wand, server, hand)) player.swing(hand);
+            return wand;
+        }
         // :135-136, not a research/affordability gate. The first held tick may
         // fire immediately; subsequent dispatches use the real 250ms clock.
         player.startUsingItem(hand);
         WandFocusActions.clearCooldown(player);
         return wand;
+    }
+
+    private static boolean earthshock(ItemStack wand, ServerPlayer player, InteractionHand hand) {
+        if (!player.server.isSameThread()) throw new IllegalStateException("Earthshock requires the server thread");
+        if (!player.isAlive() || player.isSpectator() || player.getItemInHand(hand) != wand || wand.getCount() != 1
+                || !ArcaneVis.isCraftingWand(wand) || !(FocusData.get(wand).getItem() instanceof ItemFocusShock)) return false;
+        ItemStack before = wand.copy(), paid = before.copy();
+        // Original :123 calls getVisCost(WAND), so the real debit remains25aer.
+        Map<String, Integer> costs = Map.of("aer", pulseCost(before, player));
+        if (!FocusVis.debit(paid, costs) || player.getItemInHand(hand) != wand || !ItemStack.matches(wand, before)
+                || !costs.equals(Map.of("aer", pulseCost(wand, player))) || !FocusVis.canPay(wand, costs)) return false;
+        wand.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(paid)); player.getInventory().setChanged();
+        ItemStack focus = FocusData.get(before);
+        var orb = new EntityShockOrb(player.level(), player);
+        orb.configure(4 + FocusUpgradeData.level(focus, FocusUpgradeType.enlarge) * 2,
+                (int)(5 + FocusUpgradeData.level(focus, FocusUpgradeType.potency) * 1.33));
+        player.serverLevel().addFreshEntity(orb);
+        player.serverLevel().playSound(null, orb.getX(), orb.getY(), orb.getZ(), ZAP, SoundSource.PLAYERS,
+                1F, 1F + (player.level().random.nextFloat() - player.level().random.nextFloat()) * .2F);
+        player.inventoryMenu.broadcastChanges();
+        if (player.containerMenu != player.inventoryMenu) player.containerMenu.broadcastChanges();
+        return true;
     }
 
     public static int pulseCost(ItemStack wand, Player player) {
@@ -68,6 +117,7 @@ public final class ItemFocusShock extends ItemFocusBasic {
                 || !ArcaneVis.isCraftingWand(wand) || !(FocusData.get(wand).getItem() instanceof ItemFocusShock)) return;
 
         ItemStack before = wand.copy(), paid = before.copy();
+        if (FocusUpgradeData.level(FocusData.get(before), FocusUpgradeType.earthshock) > 0) return;
         int price = pulseCost(before, player);
         Map<String, Integer> costs = Map.of("aer", price);
         // :147-151 pays before even resolving the ray. Creative is NOT free.
@@ -81,6 +131,8 @@ public final class ItemFocusShock extends ItemFocusBasic {
         player.getInventory().setChanged();
 
         int potency = FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.potency);
+        boolean chain = FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.chainlightning) > 0;
+        int jumps = chain ? 2 + FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.enlarge) * 2 : 0;
         ItemStack committed = wand.copy();
         var castLevel = player.serverLevel();
         Entity target = pointedEntity(player);
@@ -103,10 +155,35 @@ public final class ItemFocusShock extends ItemFocusBasic {
                 && target instanceof LivingEntity living && (!(target instanceof Player) || player.server.isPvpAllowed())) {
             // Native hurt owns protection events, armor, immunity frames and
             // player-team refusals. Never Player.attack(), magic or a bolt entity.
-            living.hurt(player.damageSources().playerAttack(player), 4F + potency);
+            living.hurt(player.damageSources().playerAttack(player), (chain ? 6F : 4F) + potency);
+            if (chain) chain(player, wand, hand, committed, living, jumps, potency);
         }
         player.inventoryMenu.broadcastChanges();
         if (player.containerMenu != player.inventoryMenu) player.containerMenu.broadcastChanges();
+    }
+
+    private static void chain(ServerPlayer player, ItemStack wand, InteractionHand hand, ItemStack committed,
+                              LivingEntity center, int jumps, int potency) {
+        var level = player.serverLevel();
+        Set<Integer> visited = new HashSet<>(); visited.add(center.getId());
+        while (jumps-- > 0) {
+            // An actual damage/protection callback cannot lend a paid channel to
+            // another held wand or dimension. A refused hurt still chains, as TC4.
+            if (player.level() != level || !player.isAlive() || !player.isUsingItem() || player.getUseItem() != wand
+                    || player.getItemInHand(hand) != wand || !ItemStack.matches(wand, committed)) return;
+            LivingEntity closest = null; double nearest = Double.MAX_VALUE;
+            AABB area = new AABB(center.position(), center.position()).inflate(8);
+            for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, area)) {
+                if (candidate == player || visited.contains(candidate.getId()) || candidate instanceof Player && !player.server.isPvpAllowed()) continue;
+                double distance = candidate.distanceToSqr(center);
+                if (distance < nearest) { closest = candidate; nearest = distance; }
+            }
+            if (closest == null) continue;
+            ShockFxNetworking.sendChain(player, center, closest);
+            visited.add(closest.getId());
+            closest.hurt(player.damageSources().playerAttack(player), 4F + potency);
+            center = closest;
+        }
     }
 
     /** EntityUtils:67-97: broadphase1.1, border>=.8, PER-CANDIDATE eye LOS.

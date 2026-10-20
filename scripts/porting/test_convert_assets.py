@@ -77,7 +77,7 @@ class FoundationAssetsTest(unittest.TestCase):
                 self.assertRegex(relative, r"^[a-z0-9/._-]+$")
         # Explicit native adapters only. Warp shaders have a separate deterministic
         # GLSL150 conversion; none are bulk-copied into Minecraft's namespace.
-        self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh",
+        self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh", "core/monster_lit_particle.json", "core/monster_lit_particle.fsh",
                           "post/warp_blurred.json", "post/warp_death_gaze.json", "post/warp_hunger.json", "post/warp_sun_scorned.json",
                           "program/bloom_color.json", "program/bloom_color.fsh", "program/bloom2.json", "program/bloom2.fsh",
                           "program/bloom_vertex_base.vsh", "program/color_convolve2.json", "program/color_convolve2.fsh"},
@@ -87,6 +87,20 @@ class FoundationAssetsTest(unittest.TestCase):
         pack = json.loads((converter.RESOURCE_ROOT / "pack.mcmeta").read_text(encoding="utf-8"))
         self.assertEqual(34, pack["pack"]["pack_format"])
         self.assertEqual({"min_inclusive": 34, "max_inclusive": 48}, pack["pack"]["supported_formats"])
+
+    def test_monster_lit_particle_keeps_native_lightmap_and_low_alpha_contract(self) -> None:
+        shader_root = converter.ASSETS / "shaders/core"
+        shader = json.loads((shader_root / "monster_lit_particle.json").read_text())
+        self.assertEqual("minecraft:particle", shader["vertex"])
+        self.assertEqual("thaumcraft:monster_lit_particle", shader["fragment"])
+        self.assertEqual({"Sampler0", "Sampler2"}, {sampler["name"] for sampler in shader["samplers"]})
+        self.assertTrue({"ModelViewMat", "ProjMat", "ColorModulator", "FogStart", "FogEnd", "FogColor", "FogShape"}
+                        <= {uniform["name"] for uniform in shader["uniforms"]})
+        fragment = (shader_root / "monster_lit_particle.fsh").read_text()
+        self.assertTrue(fragment.startswith("#version 150"))
+        self.assertIn("color.a <= 0.003921569", fragment)
+        self.assertIn("linear_fog(color, vertexDistance", fragment)
+        self.assertFalse((shader_root / "monster_lit_particle.vsh").exists())
 
     def test_warp_post_programs_are_reproducible_glsl150_conversions_with_resolved_links(self) -> None:
         spec = importlib.util.spec_from_file_location("warp_shader_converter", Path(__file__).with_name("convert_warp_shaders.py"))

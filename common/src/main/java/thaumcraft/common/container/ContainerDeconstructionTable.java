@@ -31,7 +31,12 @@ public final class ContainerDeconstructionTable extends AbstractContainerMenu {
     private ContainerDeconstructionTable(int id, Inventory inventory, Container input, BlockPos pos, TileDeconstructionTable table) {
         super(ThaumcraftDeconstruction.MENU.get(), id); this.table = table; viewer = inventory.player; this.pos = pos.immutable();
         data = table == null ? new SimpleContainerData(2) : new ContainerData() {
-            @Override public int get(int index) { return index == 0 ? table.breakTime() : PRIMALS.indexOf(table.reward()) + 1; }
+            @Override public int get(int index) {
+                if (index == 0) return table.breakTime();
+                if (index != 1) return 0;
+                Aspect reward = table.reward();
+                return reward == null ? 0 : PRIMALS.indexOf(reward) + 1;
+            }
             @Override public void set(int index, int value) {}
             @Override public int getCount() { return 2; }
         };

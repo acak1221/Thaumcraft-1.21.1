@@ -26,16 +26,22 @@ import thaumcraft.common.config.ThaumcraftNodeDevices;
 public final class ThaumcraftFabricClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
         CoreShaderRegistrationCallback.EVENT.register(context -> context.register(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "monster_lit_particle"),
+                DefaultVertexFormat.PARTICLE, thaumcraft.client.fx.particles.MonsterSpriteParticle::setLitShader));
+        CoreShaderRegistrationCallback.EVENT.register(context -> context.register(
                 net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "node_stabilizer_bubble"),
                 DefaultVertexFormat.POSITION_TEX_COLOR, shader -> {
                     TileNodeStabilizerRenderer.setBubbleShader(shader);
                     VisNetClientEffects.setShader(shader);
                 }));
         ClientSetup.init();
-        net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((graphics, ticks) ->
-                thaumcraft.client.ThaumcraftWarpClient.renderHud(graphics));
+        net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((graphics, ticks) -> {
+            thaumcraft.client.ThaumcraftWarpClient.renderHud(graphics);
+            thaumcraft.client.ThaumcraftRunicClient.renderHud(graphics);
+        });
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             thaumcraft.client.ThaumcraftWarpClient.reset();
+            thaumcraft.client.ThaumcraftRunicClient.reset();
             thaumcraft.common.config.ThaumcraftSettings.resetClient();
         });
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)
@@ -45,6 +51,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                     }
                     @Override public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager resources) {
                         thaumcraft.client.ThaumcraftWarpClient.reset();
+                        thaumcraft.client.ThaumcraftRunicClient.reset();
                     }
                 });
         // The retained shell is shared with blocks, but actual item contents

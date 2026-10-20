@@ -2068,5 +2068,9 @@
   "entity.thaumcraft.brainy_zombie": "Angry Zombie",
   "entity.thaumcraft.giant_brainy_zombie": "Furious Zombie",
   "item.thaumcraft.brainy_zombie_spawn_egg": "Angry Zombie Spawn Egg",
-  "item.thaumcraft.giant_brainy_zombie_spawn_egg": "Furious Zombie Spawn Egg"
+  "item.thaumcraft.giant_brainy_zombie_spawn_egg": "Furious Zombie Spawn Egg",
+  "item.thaumcraft.primordial_pearl": "Primordial Pearl",
+  "entity.thaumcraft.firebat": "Firebat",
+  "entity.thaumcraft.wisp": "Wisp",
+  "item.thaumcraft.wisp_spawn_egg": "Wisp Spawn Egg"
 }

@@ -10,6 +10,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.item.Item;
@@ -126,6 +127,8 @@ public final class ExcavationSpecialRuntimeChecks {
         prime(a,dowsingFocus(a,silk),ore);
         a.tick(1); // Prime the coordinate and its one initial rumble before the declared world-RNG seed sample.
         Item cluster = ThaumcraftContent.MATERIALS.get("cluster_iron").get();
+        ResourceLocation lootSequence = ResourceLocation.withDefaultNamespace(silk ? "blocks/deepslate_iron_ore" : "blocks/iron_ore");
+        long lootSeed = 0x544334D0L;
         List<ItemStack> expected = null; long chosen = -1;
         // LegacyRandomSource's first floats for seeds0..4095 are all .58..95,
         // above Treasure1's .275. Select a declared low-roll seed from a wider
@@ -133,6 +136,9 @@ public final class ExcavationSpecialRuntimeChecks {
         for (long seed = 0; seed < 100000; seed++) {
             if (RandomSource.create(seed).nextFloat() >= .05F) continue;
             a.level.random.setSeed(seed);
+            // Modern Fortune uses a separate named loot RNG. World seeding
+            // alone repeats Dowsing's chance but not the native raw-ore count.
+            a.level.getRandomSequence(lootSequence).setSeed(lootSeed);
             var drops = Block.getDrops(ore,a.level,a.root,null,a.player,lootTool(a,silk));
             if (drops.size() == 1 && drops.getFirst().is(cluster)) { chosen=seed;expected=drops;break; }
         }
@@ -145,10 +151,14 @@ public final class ExcavationSpecialRuntimeChecks {
             a.tick(1);
         }
         a.require(!a.level.isEmptyBlock(a.root) && a.vis("terra") == 100, "no payment or output before the completed original progress boundary");
-        a.level.random.setSeed(chosen); a.tick(1); a.player.stopUsingItem();
+        a.level.random.setSeed(chosen);
+        a.level.getRandomSequence(lootSequence).setSeed(lootSeed);
+        a.tick(1); a.player.stopUsingItem();
         a.require(a.level.isEmptyBlock(a.root) && count(a,cluster) == amount
                         && a.items().stream().mapToInt(entity -> entity.getItem().getCount()).sum() == amount && xp(a) == 0,
-                "actual Dowsing "+(silk?"Silk/deep ore":"raw ore/Fortune1")+" gives precisely its witnessed cluster count, once");
+                "actual Dowsing "+(silk?"Silk/deep ore":"raw ore/Fortune1")+" gives precisely its witnessed cluster count, once; worldSeed="+chosen
+                        +"; lootSequence="+lootSequence+"; lootSeed="+lootSeed+"; expected="+expected+"; actual="+a.items().stream().map(entity->entity.getItem().toString()).toList()
+                        +"; source="+a.level.getBlockState(a.root)+"; XP="+xp(a)+"; terra="+a.vis("terra"));
         exactPrice(a,1);
         a.tick(2);
         a.require(count(a,cluster) == amount, "completed special cast does not duplicate its cluster output on later player ticks");

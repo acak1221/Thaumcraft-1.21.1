@@ -2068,5 +2068,9 @@
   "entity.thaumcraft.brainy_zombie": "Злой зомби",
   "entity.thaumcraft.giant_brainy_zombie": "Яростный зомби",
   "item.thaumcraft.brainy_zombie_spawn_egg": "Яйцо призыва злого зомби",
-  "item.thaumcraft.giant_brainy_zombie_spawn_egg": "Яйцо призыва яростного зомби"
+  "item.thaumcraft.giant_brainy_zombie_spawn_egg": "Яйцо призыва яростного зомби",
+  "item.thaumcraft.primordial_pearl": "Изначальная жемчужина",
+  "entity.thaumcraft.firebat": "Огненная летучая мышь",
+  "entity.thaumcraft.wisp": "Висп",
+  "item.thaumcraft.wisp_spawn_egg": "Яйцо призыва виспа"
 }

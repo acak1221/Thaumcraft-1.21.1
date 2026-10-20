@@ -49,3 +49,5 @@ CI `d508ada` завершён SUCCESS: 582 JUnit,186/186 GameTest,78 Python; fre
 Run: https://github.com/acak1221/Thaumcraft-1.21.1/actions/runs/39398016295; first cold Gradle execution 7m6s, server56.67s. Agents worked on the next source window during this run.
 Active next groups: R11/R12, Repair/Haste+BoreRepair, Ward completion+Excavation specials,
 Growth/Fertility, Deconstruction, Brainy/Giant zombies, root R13 settings.
+
+Следующий immutable CI: ded7bef дал193/198 GameTest, общий Gradle3m32s; пять fixture failures исправлены в9359eb4 и отправлены на повторный GitHub-прогон. Новый active source window: Runic, UNSTABLE+orbs/Pearl, Cheat Sheet, R15 callback API, Firebat/Wisp, advanced foci; root admin commands. Advanced Furnace следующий unit, не часть предыдущего PASS.

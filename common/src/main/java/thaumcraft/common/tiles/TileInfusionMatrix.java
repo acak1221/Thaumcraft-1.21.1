@@ -32,6 +32,9 @@ import thaumcraft.common.config.ThaumcraftInfusion;
 import thaumcraft.common.crafting.InfusionComponentPredicate;
 import thaumcraft.common.crafting.InfusionRecipeInput;
 import thaumcraft.common.crafting.InfusionStackRecipe;
+import thaumcraft.common.crafting.InfusionRunicAugmentRecipe;
+import thaumcraft.common.config.ThaumcraftRunic;
+import thaumcraft.common.lib.runic.RunicRules;
 import thaumcraft.common.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.crafting.InfusionMatching;
@@ -190,6 +193,20 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
                 sendEffect(0, worldPosition, 0);
                 return true;
             }
+            for (var holder : server.getRecipeManager().getAllRecipesFor(ThaumcraftRunic.AUGMENT_TYPE.get())) {
+                InfusionRunicAugmentRecipe recipe = holder.value();
+                if (!KnowledgeAccess.get(player).isResearchComplete(recipe.research()) || !recipe.matches(offered,server) || !current()) continue;
+                ItemStack output = recipe.assemble(offered,server.registryAccess());
+                if (output.isEmpty() || !output.isItemEnabled(server.enabledFeatures()) || !current()) continue;
+                // Original runic recipe is an ordinary prepared STACK output, not an enchantment/XP ritual.
+                recipeInput = central.copy(); recipeIngredients.clear(); recipeIngredients.addAll(recipe.selectedComponents(central));
+                recipeOutput = output.copy(); recipeOutputLabel = ""; recipeInstability = recipe.instability(central);
+                recipeType = 0; recipeXP = 0; recipeEnchantment = null;
+                recipeEssentia = recipe.aspectCost(central); recipeCost = recipeEssentia.copy();
+                recipePlayer = player.getUUID(); recipePlayerName = player.getGameProfile().getName();
+                instability = symmetry + recipeInstability; ingredientTarget = null; crafting = true;
+                changed(); sendEffect(0,worldPosition,0); return true;
+            }
             return false;
         } finally {
             inCycle = false;
@@ -255,7 +272,9 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
         }
         if (recipeType == 1) countDelay = 10;
 
-        if (recipeEssentia.visSize() > 0) {
+        // Original visSize int sum overflows at runic finalCharge25 and grants free essence.
+        // Preserve each declared int amount, but never skip positive debt because its SUM wrapped.
+        if (RunicRules.hasDemand(recipeEssentia.aspects)) {
             ingredientTarget = null;
             // M453-473: insertion order; stop after the first successful unit.
             // The atomic operation has ALREADY reduced demand before callbacks.

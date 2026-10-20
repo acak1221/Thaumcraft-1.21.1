@@ -78,16 +78,8 @@ public final class FocusUpgradeRuntimeChecks {
                     && !focus.has(ThaumcraftFoci.FOCUS_UPGRADES.get()), "missing upgrades read empty without rewriting input");
             for (int rank = 1; rank <= 5; rank++) {
                 var choices = item.getPossibleUpgradesByRank(focus, rank);
-                FocusUpgradeType[] expected;
-                if (item instanceof ItemFocusExcavation) {
-                    expected = switch (rank) {
-                        case 2, 4 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.enlarge};
-                        case 3 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure, FocusUpgradeType.dowsing};
-                        case 5 -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure, FocusUpgradeType.silktouch};
-                        default -> new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency, FocusUpgradeType.treasure};
-                    };
-                } else expected = new FocusUpgradeType[]{FocusUpgradeType.frugal, FocusUpgradeType.potency};
-                a.require(java.util.Arrays.equals(choices, expected), "all four foci retain exact implemented original rank candidates: " + item + " rank" + rank);
+                a.require(java.util.Arrays.equals(choices, originalChoices(item, rank)),
+                        "all four foci retain exact original rank candidates and relative order: " + item + " rank" + rank);
             }
             a.require(item.applyUpgrade(focus, FocusUpgradeType.potency, 5) && item.applyUpgrade(focus, FocusUpgradeType.frugal, 1), "public API preserves ordered holes");
             for (int rank : new int[]{Integer.MIN_VALUE, 0, 6, Integer.MAX_VALUE})
@@ -124,6 +116,31 @@ public final class FocusUpgradeRuntimeChecks {
         a.require(rejected && FocusUpgradeType.get(8) == FocusUpgradeType.silktouch && FocusUpgradeType.get(20) == FocusUpgradeType.dowsing
                         && FocusUpgradeType.get(21) == null,
                 "invalid nested data is rejected, Silk8/Dowsing20 retain original ids and unknown21 remains unavailable");
+    }
+
+    private static FocusUpgradeType[] originalChoices(ItemFocusBasic item, int rank) {
+        var f = FocusUpgradeType.frugal; var p = FocusUpgradeType.potency;
+        if (item instanceof ItemFocusFire) return switch (rank) {
+            case 2, 4 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.alchemistsfire};
+            case 3 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.fireball,FocusUpgradeType.firebeam};
+            default -> new FocusUpgradeType[]{f,p};
+        };
+        if (item instanceof ItemFocusFrost) return switch (rank) {
+            case 1, 5 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.alchemistsfrost};
+            case 3 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.scattershot,FocusUpgradeType.iceboulder,FocusUpgradeType.alchemistsfrost};
+            default -> new FocusUpgradeType[]{f,p};
+        };
+        if (item instanceof ItemFocusShock) return switch (rank) {
+            case 3 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.chainlightning,FocusUpgradeType.earthshock};
+            case 4, 5 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.enlarge};
+            default -> new FocusUpgradeType[]{f,p};
+        };
+        return switch (rank) {
+            case 2, 4 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.enlarge};
+            case 3 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.treasure,FocusUpgradeType.dowsing};
+            case 5 -> new FocusUpgradeType[]{f,p,FocusUpgradeType.treasure,FocusUpgradeType.silktouch};
+            default -> new FocusUpgradeType[]{f,p,FocusUpgradeType.treasure};
+        };
     }
 
     private static void casting(Actor a) {
@@ -199,8 +216,9 @@ public final class FocusUpgradeRuntimeChecks {
         private final Set<UUID> previous = new HashSet<>();
         ItemStack wand = ItemStack.EMPTY;
 
-        Actor(GameTestHelper test) {
-            this.test = test; level = test.getLevel(); root = test.absolutePos(new BlockPos(4, 4, 4));
+        Actor(GameTestHelper test) { this(test, new BlockPos(4, 4, 4)); }
+        Actor(GameTestHelper test, BlockPos relativeRoot) {
+            this.test = test; level = test.getLevel(); root = test.absolutePos(relativeRoot);
             bounds = new AABB(Vec3.atLowerCornerOf(root.offset(-4, -4, -4)), Vec3.atLowerCornerOf(root.offset(6, 6, 5)));
             for (BlockPos cell : BlockPos.betweenClosed(root.offset(-4, -4, -4), root.offset(5, 5, 4))) {
                 var pos = cell.immutable(); blocks.put(pos, level.getBlockState(pos));

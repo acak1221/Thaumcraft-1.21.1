@@ -1,3 +1,11 @@
+## 2026-10-20 — Runic, special foci, nodes and scan API (CI pending)
+
+Native runic shield/augmentation, Fire/Frost/Shock specialisations, transient shock fields,
+UNSTABLE node/orb custody, Primordial Pearl node mutation, gated cheat sheet, Firebat/Wisp,
+scan callbacks/instance-specific sessions and original admin state commands. Local647JUnit/79Python
+and Fabric main/gameTest/clientTest compilation pass. New full server/client acceptance pending;
+previous two remaining runtime failures corrected without relabeling failed CI as green.
+
 ## 2026-10-20 — Next Fabric content group (remote runtime validation pending)
 
 Unknown knowledge and scan clues/entity variants; server research settings; Repair/Haste infusion

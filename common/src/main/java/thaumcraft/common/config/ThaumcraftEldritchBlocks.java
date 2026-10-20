@@ -144,10 +144,6 @@ public final class ThaumcraftEldritchBlocks {
                     BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
 
     /** The eldritch stairs of the original cosmetic stairs family. */
-    public static final RegistrySupplier<BlockStairsEldritch> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
-            () -> new BlockStairsEldritch(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0F, 10.0F).sound(SoundType.STONE)));
-
     public static final RegistrySupplier<BlockArcaneDoor> ARCANE_DOOR = BLOCKS.register("arcane_door",
             () -> new BlockArcaneDoor(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
                     .strength(15.0F, 999.0F).sound(SoundType.METAL).noOcclusion()));
@@ -243,7 +239,6 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ELDRITCH_ITEM = ITEMS.register("cosmetic_stone_slab_eldritch", () -> new BlockItem(COSMETIC_STONE_SLAB_ELDRITCH.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_GREATWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_greatwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_GREATWOOD.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_silverwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_SILVERWOOD.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> STAIRS_ELDRITCH_ITEM = ITEMS.register("eldritch_stairs", () -> new BlockItem(STAIRS_ELDRITCH.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> ARCANE_DOOR_ITEM = ITEMS.register("arcane_door", () -> new ItemArcaneDoor(new Item.Properties()));
     public static final RegistrySupplier<Item> MAGIC_BOX_ITEM = ITEMS.register("magic_box", () -> new BlockItem(MAGIC_BOX.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new BlockItem(MIRROR.get(), new Item.Properties()));
@@ -324,6 +319,13 @@ public final class ThaumcraftEldritchBlocks {
     /** The block entity type of the node inside the cosmetic solid. */
     private static BlockEntityType<TileNode> cosmeticNodeType() { return COSMETIC_NODE_TILE.get(); }
 
+    /** The eldritch stairs of the original: the cosmetic stairs over the cosmetic solid variant 11. */
+    public static final RegistrySupplier<BlockStairsEldritch> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
+            () -> new BlockStairsEldritch(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(2.0F, 10.0F).sound(SoundType.STONE)));
+
+    public static final RegistrySupplier<Item> STAIRS_ELDRITCH_ITEM = ITEMS.register("eldritch_stairs", () -> new BlockItem(STAIRS_ELDRITCH.get(), new Item.Properties()));
+
     private ThaumcraftEldritchBlocks() {}
 
     /** The original jar variants of the magic box family. */
@@ -377,8 +379,7 @@ public final class ThaumcraftEldritchBlocks {
                 COSMETIC_SOLID_ITEM, COSMETIC_SOLID_TOUGH_ITEM, COSMETIC_SOLID_THAUMIUM_ITEM, COSMETIC_OPAQUE_ITEM,
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,
-                STAIRS_ELDRITCH_ITEM,
-                ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
+                STAIRS_ELDRITCH_ITEM, ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
                 METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM,
                 AIRY_ITEM, AIRY_NODE_ITEM, JAR_BRAIN_ITEM, JAR_NODE_ITEM, ETHEREAL_BLOOM_ITEM);
     }

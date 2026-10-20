@@ -3,8 +3,6 @@ package thaumcraft.common.config;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -21,35 +19,54 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.common.blocks.BlockAiry;
+import thaumcraft.common.blocks.BlockCosmeticSolid;
+import thaumcraft.common.blocks.BlockEldritch;
+import thaumcraft.common.blocks.BlockLoot;
+import thaumcraft.common.blocks.BlockTaintFibres;
+import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.lib.world.DungeonRooms;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.lib.world.OuterLandsProvider;
+import thaumcraft.common.lib.world.OuterLandsWiringRules;
+import thaumcraft.common.tiles.TileBanner;
+import thaumcraft.common.tiles.TileEldritchAltar;
+import thaumcraft.common.tiles.TileEldritchCrabSpawner;
+import thaumcraft.common.tiles.TileEldritchCrystal;
 
 /**
  * Registration of the TC4 Outer Lands and of the blocks it needs from the eldritch content.
  *
- * The eldritch blocks, tiles and entities of the Outer Lands are ported by the eldritch content
- * groups in parallel. They are therefore referenced lazily through the registry ids below
- * instead of a compile time dependency: a missing block is reported by the generator instead of
- * breaking the whole build.
+ * <p>The eldritch blocks, tiles and entities of the Outer Lands are ported by the eldritch content
+ * groups, so they are resolved through their real registry suppliers here. The original 1.7
+ * metadata of a block family became a block state property, and because 1.21.1 binds the hardness
+ * and the blast resistance to the block, the metadata families that differ became small families
+ * of blocks: the generator asks {@link OuterLandsWiringRules} for the block that hosts a metadata
+ * and then sets the metadata on it.
  *
- * The contract for the parallel groups is:
+ * <p>The contract of the eldritch content groups is:
  * <ul>
- *   <li>{@code thaumcraft:eldritch} - the eldritch block with an integer "variant" property that
- *       accepts the original 1.7 metadata 0..10 (0 altar, 1 obelisk base, 2 obelisk shaft,
- *       3 cap, 4 decoration, 5 library desk, 7 door, 8 door lock, 9 crab spawner, 10 trap).</li>
- *   <li>{@code thaumcraft:cosmetic_solid} - the cosmetic solid with an integer "variant" property
- *       that accepts the original metadata 0..15 (1 ring floor, 11 wall, 12 rock, 13 no spawn,
- *       14 crust, 15 table).</li>
- *   <li>{@code thaumcraft:stairs_eldritch} - the eldritch stairs with a "facing" and a "half"
- *       property that reproduce the 1.7 stair metadata.</li>
+ *   <li>{@code thaumcraft:eldritch} - the eldritch altar, the obelisk, the obelisk middle and the
+ *       capstone. It carries the integer property {@code variant}.</li>
+ *   <li>{@code thaumcraft:eldritch_crust} - the glowing crust and the glyphed eldritch stone.</li>
+ *   <li>{@code thaumcraft:eldritch_deco} - the decorated eldritch stone.</li>
+ *   <li>{@code thaumcraft:eldritch_doorway} - the eldritch doorway and the eldritch lock.</li>
+ *   <li>{@code thaumcraft:eldritch_spawner} - the eldritch crab spawner and the runed eldritch trap.</li>
+ *   <li>{@code thaumcraft:eldritch_crystal} - the eldritch crystal of the rooms.</li>
+ *   <li>{@code thaumcraft:cosmetic_solid}, {@code thaumcraft:cosmetic_solid_tough} and
+ *       {@code thaumcraft:cosmetic_solid_thaumium} - the cosmetic solid family with its integer
+ *       property {@code variant}.</li>
+ *   <li>{@code thaumcraft:cosmetic_stone_slab_arcane} and
+ *       {@code thaumcraft:cosmetic_stone_slab_eldritch} - the two stone slabs of the library.</li>
+ *   <li>{@code thaumcraft:eldritch_stairs} - the eldritch stairs with their facing and half.</li>
  *   <li>{@code thaumcraft:eldritch_nothing}, {@code thaumcraft:airy},
- *       {@code thaumcraft:eldritch_portal}, {@code thaumcraft:loot_urn},
- *       {@code thaumcraft:loot_crate}, {@code thaumcraft:cosmetic_slab_stone} - plain blocks.</li>
+ *       {@code thaumcraft:airy_unbreakable}, {@code thaumcraft:eldritch_portal},
+ *       {@code thaumcraft:loot_urn}, {@code thaumcraft:loot_crate} - the plain blocks.</li>
  *   <li>{@code thaumcraft:eldritch_guardian} - the key room guardian entity.</li>
- *   <li>{@code thaumcraft:eldritch_object} - the item of the permanent item of the key room.</li>
+ *   <li>{@code thaumcraft:eldritch_tablet} - the item of the permanent item of the key room.</li>
  *   <li>{@code thaumcraft:mind_spider} - the entity of the mind spider spawner.</li>
  * </ul>
  */
@@ -71,190 +88,205 @@ public final class ThaumcraftOuterLands {
 
     private ThaumcraftOuterLands() {}
 
+    private static boolean eldritchRegistered;
+
     public static void register() {
+        // The eldritch content group owns the blocks; the Outer Lands owns the
+        // registration hook because the labyrinth and the ring are their only
+        // consumer. The class guards itself against a second registration.
+        if (!eldritchRegistered) {
+            eldritchRegistered = true;
+            ThaumcraftEldritchBlocks.register();
+        }
         FEATURES.register();
     }
 
     /* ------------------------------------------------------------------ */
-    /* The lazily resolved eldritch content                                 */
+    /* The eldritch content of the Outer Lands                              */
     /* ------------------------------------------------------------------ */
 
-    /** The registry id of an eldritch block of the Outer Lands. */
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, path);
-    }
-
-    /** The eldritch block, or null when the eldritch content group has not landed yet. */
-    public static Block block(String path) {
-        return BuiltInRegistries.BLOCK.get(id(path));
-    }
-
-    public static Block eldritch() {
-        return block("eldritch");
-    }
-
-    public static Block cosmeticSolid() {
-        return block("cosmetic_solid");
-    }
-
-    /**
-     * The eldritch stairs of the Outer Lands. The contract id is {@code stairs_eldritch}; the native
-     * registration of the eldritch stairs carries the id of the original block, {@code eldritch_stairs}.
-     */
-    public static Block stairsEldritch() {
-        Block block = block("stairs_eldritch");
-        return block == null ? block("eldritch_stairs") : block;
-    }
-
+    /** The invisible wall face of the rooms. */
     public static Block eldritchNothing() {
-        return block("eldritch_nothing");
+        return ThaumcraftEldritchBlocks.ELDRITCH_NOTHING.get();
     }
+
+    /** The eldritch stairs of the rooms. */
+    public static Block stairsEldritch() {
+        return ThaumcraftEldritchBlocks.STAIRS_ELDRITCH.get();
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* The native state of an original room placement                       */
+    /* ------------------------------------------------------------------ */
 
     /**
      * The native state of an original room placement.
      *
      * @param variant the original 1.7 metadata
      * @param facing the original direction ordinal, -1 when the block has no direction
-     * @return the native state, or null when the block does not exist yet
+     * @return the native state
      */
     public static BlockState state(DungeonRooms.Kind kind, int variant, int facing) {
-        switch (kind) {
-            case BEDROCK -> {
-                return Blocks.BEDROCK.defaultBlockState();
-            }
-            case AIR -> {
-                return Blocks.AIR.defaultBlockState();
-            }
-            case WEB -> {
-                return Blocks.COBWEB.defaultBlockState();
-            }
-            case MOB_SPAWNER -> {
-                return Blocks.SPAWNER.defaultBlockState();
-            }
-            case TAINT_FIBRES -> {
-                return ThaumcraftTaint.FIBRES.get().defaultBlockState();
-            }
+        return switch (kind) {
+            case BEDROCK -> Blocks.BEDROCK.defaultBlockState();
+            case AIR -> Blocks.AIR.defaultBlockState();
+            case WEB -> Blocks.COBWEB.defaultBlockState();
+            case MOB_SPAWNER -> Blocks.SPAWNER.defaultBlockState();
+            case TAINT_FIBRES -> ThaumcraftTaint.FIBRES.get().defaultBlockState()
+                    .setValue(BlockTaintFibres.TYPE, variant);
             case CRYSTAL -> {
-                // The original eldritch crystal uses the out of range metadata 7, which renders as
-                // the aspect free crystal. The native mixed crystal is the same block.
-                return ThaumcraftCrystalClusters.MIXED.get().defaultBlockState();
+                // Oracle BlockCrystal:117-125 - the metadata seven of the crystal block is the
+                // eldritch crystal, it is the eleventh metadata of the eldritch family here.
+                Block block = ThaumcraftEldritchBlocks.ELDRITCH_CRYSTAL.get();
+                yield block.defaultBlockState().setValue(BlockEldritch.VARIANT, EldritchBlockRules.ELDRITCH_CRYSTAL);
             }
-            case ELDRITCH_NOTHING -> {
-                Block block = eldritchNothing();
-                return block == null ? null : block.defaultBlockState();
-            }
+            case ELDRITCH_NOTHING -> ThaumcraftEldritchBlocks.ELDRITCH_NOTHING.get().defaultBlockState();
             case AIRY -> {
-                Block block = block("airy");
-                return block == null ? null : withVariant(block.defaultBlockState(), variant);
+                // Oracle GenCommon:88-92 - the invisible door of the rooms is the unbreakable airy.
+                Block block = airyBlock(variant);
+                yield block.defaultBlockState().setValue(BlockAiry.VARIANT, variant);
             }
-            case ELDRITCH_PORTAL -> {
-                Block block = block("eldritch_portal");
-                return block == null ? null : block.defaultBlockState();
-            }
-            case LOOT_URN -> {
-                Block block = block("loot_urn");
-                return block == null ? null : withVariant(block.defaultBlockState(), variant);
-            }
-            case LOOT_CRATE -> {
-                Block block = block("loot_crate");
-                return block == null ? null : withVariant(block.defaultBlockState(), variant);
-            }
+            case ELDRITCH_PORTAL -> ThaumcraftEldritchBlocks.ELDRITCH_PORTAL.get().defaultBlockState();
+            case LOOT_URN -> ThaumcraftEldritchBlocks.LOOT_URN.get().defaultBlockState()
+                    .setValue(BlockLoot.RARITY, OuterLandsWiringRules.lootRarity(variant));
+            case LOOT_CRATE -> ThaumcraftEldritchBlocks.LOOT_CRATE.get().defaultBlockState()
+                    .setValue(BlockLoot.RARITY, OuterLandsWiringRules.lootRarity(variant));
             case COSMETIC_SLAB_STONE -> {
-                // The contract id is cosmetic_slab_stone; the native registration splits the original
-                // slab into its two kinds, the arcane one and the eldritch one.
-                Block block = block("cosmetic_slab_stone");
-                if (block == null) block = block("cosmetic_stone_slab_eldritch");
-                return block == null ? null : withVariant(block.defaultBlockState(), variant);
+                // Oracle GenCommon:12 and GenLibraryRoom:78-98 - the slab metadata holds the
+                // variant in the lower bits and the upper half in the third bit.
+                Block block = slabBlock(variant);
+                yield block.defaultBlockState().setValue(BlockStateProperties.SLAB_TYPE,
+                        OuterLandsWiringRules.slabUpper(variant) ? SlabType.TOP : SlabType.BOTTOM);
             }
             case COSMETIC_SOLID -> {
-                Block block = cosmeticSolid();
-                return block == null ? null : withVariant(block.defaultBlockState(), variant);
+                Block block = cosmeticSolidBlock(variant);
+                yield block.defaultBlockState().setValue(BlockCosmeticSolid.VARIANT, variant);
             }
             case ELDRITCH -> {
-                Block block = eldritch();
-                return block == null ? null : withVariant(block.defaultBlockState(), variant);
+                Block block = eldritchBlock(variant);
+                yield block.defaultBlockState().setValue(BlockEldritch.VARIANT, variant);
             }
             case STAIRS -> {
-                Block block = stairsEldritch();
-                return block == null ? null : withStairs(block.defaultBlockState(), variant);
+                Block block = ThaumcraftEldritchBlocks.STAIRS_ELDRITCH.get();
+                yield block.defaultBlockState()
+                        .setValue(BlockStateProperties.FACING, OuterLandsWiringRules.stairsFacing(variant))
+                        .setValue(BlockStateProperties.HALF, OuterLandsWiringRules.stairsUpper(variant) ? Half.TOP : Half.BOTTOM);
             }
-            default -> {
-                return null;
-            }
-        }
-    }
-
-    /** Applies the original metadata to an integer "variant" property of the native block. */
-    private static BlockState withVariant(BlockState state, int variant) {
-        for (var property : state.getProperties()) {
-            if (!(property instanceof IntegerProperty intProperty)) continue;
-            String name = property.getName();
-            if (!"variant".equals(name) && !"type".equals(name)) continue;
-            java.util.Collection<Integer> values = intProperty.getPossibleValues();
-            if (values.isEmpty()) continue;
-            int min = java.util.Collections.min(values);
-            int max = java.util.Collections.max(values);
-            return state.setValue(intProperty, Math.min(Math.max(variant, min), max));
-        }
-        return state;
-    }
-
-    /** Applies the original 1.7 stair metadata (0 east, 1 west, 2 south, 3 north, 4..7 upside down). */
-    private static BlockState withStairs(BlockState state, int meta) {
-        Direction facing = switch (meta & 3) {
-            case 0 -> Direction.EAST;
-            case 1 -> Direction.WEST;
-            case 2 -> Direction.SOUTH;
-            default -> Direction.NORTH;
         };
-        if (state.hasProperty(BlockStateProperties.FACING)) state = state.setValue(BlockStateProperties.FACING, facing);
-        if (state.hasProperty(BlockStateProperties.HALF)) {
-            state = state.setValue(BlockStateProperties.HALF, (meta & 4) != 0 ? Half.TOP : Half.BOTTOM);
-        }
-        return state;
+    }
+
+    /** The eldritch block that hosts an original {@code BlockEldritch} metadata. */
+    public static Block eldritchBlock(int variant) {
+        return switch (OuterLandsWiringRules.eldritchBlock(variant)) {
+            case "thaumcraft:eldritch_crust" -> ThaumcraftEldritchBlocks.ELDRITCH_CRUST.get();
+            case "thaumcraft:eldritch_deco" -> ThaumcraftEldritchBlocks.ELDRITCH_DECO.get();
+            case "thaumcraft:eldritch_doorway" -> ThaumcraftEldritchBlocks.ELDRITCH_DOORWAY.get();
+            case "thaumcraft:eldritch_spawner" -> ThaumcraftEldritchBlocks.ELDRITCH_SPAWNER.get();
+            case "thaumcraft:eldritch_crystal" -> ThaumcraftEldritchBlocks.ELDRITCH_CRYSTAL.get();
+            default -> ThaumcraftEldritchBlocks.ELDRITCH.get();
+        };
+    }
+
+    /** The cosmetic solid block that hosts an original {@code BlockCosmeticSolid} metadata. */
+    public static Block cosmeticSolidBlock(int variant) {
+        return switch (OuterLandsWiringRules.cosmeticSolidBlock(variant)) {
+            case "thaumcraft:cosmetic_solid_tough" -> ThaumcraftEldritchBlocks.COSMETIC_SOLID_TOUGH.get();
+            case "thaumcraft:cosmetic_solid_thaumium" -> ThaumcraftEldritchBlocks.COSMETIC_SOLID_THAUMIUM.get();
+            default -> ThaumcraftEldritchBlocks.COSMETIC_SOLID.get();
+        };
+    }
+
+    /** The stone slab of an original slab metadata. */
+    public static Block slabBlock(int variant) {
+        return OuterLandsWiringRules.slabVariant(variant) == EldritchBlockRules.SLAB_STONE_ELDRITCH
+                ? ThaumcraftEldritchBlocks.COSMETIC_STONE_SLAB_ELDRITCH.get()
+                : ThaumcraftEldritchBlocks.COSMETIC_STONE_SLAB_ARCANE.get();
+    }
+
+    /** The airy block that hosts an original {@code BlockAiry} metadata. */
+    public static Block airyBlock(int variant) {
+        return switch (OuterLandsWiringRules.airyBlock(variant)) {
+            case "thaumcraft:airy_node" -> ThaumcraftEldritchBlocks.AIRY_NODE.get();
+            case "thaumcraft:airy_hole" -> ThaumcraftEldritchBlocks.AIRY_HOLE.get();
+            case "thaumcraft:airy_unbreakable" -> ThaumcraftEldritchBlocks.AIRY_UNBREAKABLE.get();
+            default -> ThaumcraftEldritchBlocks.AIRY.get();
+        };
+    }
+
+    /**
+     * True when the state belongs to the eldritch family.
+     *
+     * <p>The 1.7 original had a single eldritch block with eleven metadata, so every test of the
+     * original that looks for "the eldritch block" has to look for the whole native family.
+     */
+    public static boolean isEldritch(BlockState state) {
+        return state.is(ThaumcraftEldritchBlocks.ELDRITCH.get())
+                || state.is(ThaumcraftEldritchBlocks.ELDRITCH_CRUST.get())
+                || state.is(ThaumcraftEldritchBlocks.ELDRITCH_DECO.get())
+                || state.is(ThaumcraftEldritchBlocks.ELDRITCH_DOORWAY.get())
+                || state.is(ThaumcraftEldritchBlocks.ELDRITCH_SPAWNER.get())
+                || state.is(ThaumcraftEldritchBlocks.ELDRITCH_CRYSTAL.get());
+    }
+
+    /** True when the state belongs to the cosmetic solid family. */
+    public static boolean isCosmeticSolid(BlockState state) {
+        return state.is(ThaumcraftEldritchBlocks.COSMETIC_SOLID.get())
+                || state.is(ThaumcraftEldritchBlocks.COSMETIC_SOLID_TOUGH.get())
+                || state.is(ThaumcraftEldritchBlocks.COSMETIC_SOLID_THAUMIUM.get());
     }
 
     /* ------------------------------------------------------------------ */
     /* The eldritch altar and the banners                                  */
     /* ------------------------------------------------------------------ */
 
-    /** The banner device of the eldritch altar (the original blockWoodenDevice metadata 8). */
+    /**
+     * The banner device of the eldritch altar (the original blockWoodenDevice metadata 8).
+     *
+     * @param variant the original metadata of the wooden device
+     */
     public static BlockState bannerState(int variant) {
-        Block block = block("wooden_device");
-        return block == null ? null : withVariant(block.defaultBlockState(), variant);
+        return ThaumcraftEldritchBlocks.WOODEN_DEVICE.get().defaultBlockState()
+                .setValue(BlockWoodenDevice.VARIANT, variant);
     }
 
     /**
-     * Flags the eldritch altar as a spawner. The altar tile belongs to the parallel eldritch
-     * content group, so the setter is resolved by name instead of a compile time dependency.
+     * Flags the eldritch altar as a spawner.
      *
      * @param type 0 the original spawn type 0, 1 the original spawn type 1
      */
     public static boolean configureAltar(BlockEntity entity, boolean spawner, byte type) {
-        if (entity == null) return false;
-        boolean flagged = invoke(entity, "setSpawner", new Class<?>[] {boolean.class}, spawner);
-        return invoke(entity, "setSpawnType", new Class<?>[] {byte.class}, type) && flagged;
+        if (!(entity instanceof TileEldritchAltar altar)) return false;
+        altar.setSpawner(spawner);
+        altar.setSpawnType(type);
+        altar.setChanged();
+        return true;
     }
 
-    /** Points the banner of an eldritch altar to the original facing value. */
+    /**
+     * Points the banner of an eldritch altar to the original facing value.
+     *
+     * <p>Oracle {@code WorldGenEldritchRing:103-120} writes the values eight, zero, twelve and
+     * four; oracle {@code BlockWoodenDevice:264-290} puts the cloth of the banner into the
+     * quarter of the block that the value names.
+     */
     public static boolean configureBanner(BlockEntity entity, byte facing) {
-        if (entity == null) return false;
-        return invoke(entity, "setFacing", new Class<?>[] {byte.class}, facing);
+        if (!(entity instanceof TileBanner banner)) return false;
+        banner.setFacing(OuterLandsWiringRules.bannerDirection(facing));
+        return true;
     }
 
     /** Points the eldritch crab spawner into the original direction. */
     public static boolean configureFacing(BlockEntity entity, byte facing) {
-        if (entity == null) return false;
-        return invoke(entity, "setFacing", new Class<?>[] {byte.class}, facing);
+        if (!(entity instanceof TileEldritchCrabSpawner spawner)) return false;
+        spawner.setFacing(facing);
+        return true;
     }
 
-    private static boolean invoke(Object target, String name, Class<?>[] types, Object... arguments) {
-        try {
-            target.getClass().getMethod(name, types).invoke(target, arguments);
-            return true;
-        } catch (ReflectiveOperationException | RuntimeException exception) {
-            return false;
-        }
+    /** Points the crystal of a room into the original direction. */
+    public static boolean configureCrystal(BlockEntity entity, int facing) {
+        if (!(entity instanceof TileEldritchCrystal crystal)) return false;
+        crystal.setOrientation(OuterLandsWiringRules.crystalDirection(facing));
+        return true;
     }
 
     /* ------------------------------------------------------------------ */
@@ -262,14 +294,13 @@ public final class ThaumcraftOuterLands {
     /* ------------------------------------------------------------------ */
     /**
      * Creates the entities of a room (oracle GenKeyRoom:97-115 and GenPassage:244-258).
-     * The entity ids of the parallel eldritch content groups are resolved lazily.
      */
     public static void spawnRoomEntities(WorldGenLevel level, DungeonRooms.Builder builder) {
         for (DungeonRooms.Spawn spawn : builder.spawns) {
             BlockPos pos = new BlockPos(spawn.x(), spawn.y(), spawn.z());
             switch (spawn.kind()) {
-                case ELDRITCH_GUARDIAN -> spawnEntity(level, pos, "eldritch_guardian");
-                case PERMANENT_ITEM -> spawnPermanentItem(level, pos, spawn.variant());
+                case ELDRITCH_GUARDIAN -> spawnEntity(level, pos, ThaumcraftWarp.ELDRITCH_GUARDIAN.get());
+                case PERMANENT_ITEM -> spawnPermanentItem(level, pos);
                 case MIND_SPIDER -> spawnMindSpider(level, pos);
                 default -> {
                 }
@@ -277,9 +308,7 @@ public final class ThaumcraftOuterLands {
         }
     }
 
-    private static void spawnEntity(WorldGenLevel level, BlockPos pos, String entityId) {
-        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id(entityId));
-        if (type == null) return;
+    private static void spawnEntity(WorldGenLevel level, BlockPos pos, EntityType<?> type) {
         Entity entity = type.create(level.getLevel());
         if (entity == null) return;
         entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, level.getLevel().getRandom().nextFloat() * 360.0F, 0.0F);
@@ -287,11 +316,9 @@ public final class ThaumcraftOuterLands {
     }
 
     /** Oracle GenKeyRoom:97-101 - the permanent eldritch object of the key room. */
-    private static void spawnPermanentItem(WorldGenLevel level, BlockPos pos, int variant) {
-        Item item = BuiltInRegistries.ITEM.get(id("eldritch_object"));
-        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id("inventory_item"));
-        if (item == null || type == null) return;
-        Entity entity = type.create(level.getLevel());
+    private static void spawnPermanentItem(WorldGenLevel level, BlockPos pos) {
+        Item item = ThaumcraftLegacyItems.ELDRITCH_TABLET.get();
+        Entity entity = ThaumcraftContent.INVENTORY_ITEM.get().create(level.getLevel());
         if (!(entity instanceof ItemEntity carrier)) return;
         carrier.setItem(new ItemStack(item, 1));
         entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, 0.0F, 0.0F);
@@ -300,8 +327,7 @@ public final class ThaumcraftOuterLands {
 
     /** Oracle GenPassage:249-257 - the mind spider spawner of a spider passage. */
     private static void spawnMindSpider(WorldGenLevel level, BlockPos pos) {
-        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id("mind_spider"));
-        if (type == null) return;
+        EntityType<?> type = ThaumcraftWarp.MIND_SPIDER.get();
         if (!(level.getBlockEntity(pos) instanceof SpawnerBlockEntity spawner)) return;
         spawner.setEntityId(type, level.getLevel().getRandom());
     }

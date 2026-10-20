@@ -39,17 +39,14 @@ public class TileOwned extends BlockEntity {
 
     public TileOwned(BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type, pos, state); }
 
-    /** The owner name, as the original door and device blocks set it. */
-    public void setOwner(String owner) {
-        this.owner = owner == null ? "" : owner;
-        setChanged();
-    }
-
     /** TileOwned:30 - the owner of the block. */
     public String owner() { return owner; }
 
     /** TileOwned:30 - the owner of the block. */
     public String getOwner() { return owner; }
+
+    /** The owner of the block; an empty name means that the block has no owner. */
+    public void setOwner(String owner) { this.owner = owner == null ? "" : owner; }
 
     /** TileOwned:32-37 - the access list of the block. */
     public List<String> accessList() { return List.copyOf(accessList); }

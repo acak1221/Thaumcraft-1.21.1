@@ -1,30 +1,37 @@
 package thaumcraft.common.lib.world;
 
-import net.minecraft.util.RandomSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.Heightmap;
 import thaumcraft.common.config.ThaumcraftOuterLands;
 
 /**
  * The eldritch ring of the overworld, the structure that seeds a labyrinth.
  *
- * Oracle {@code thaumcraft/common/lib/world/WorldGenEldritchRing.java:28-146} builds the ring
- * and the oracle {@code ThaumcraftWorldGenerator.generateSurface:436-449} starts the
- * {@code MazeThread} that fills the labyrinth cells of the Outer Lands.
+ * <p>This is the single port of the original
+ * {@code thaumcraft/common/lib/world/WorldGenEldritchRing.java:28-146}. The oracle
+ * {@code ThaumcraftWorldGenerator.generateSurface:429-453} draws a position inside the chunk,
+ * rolls the structure chain, and hands the ring the size of the labyrinth it may not grow into.
+ * The ring then validates five ground samples, builds itself and seeds the labyrinth through
+ * {@code MazeHandler}, exactly like the native {@link OuterLandsProvider.MazeSavedData} does.
  *
- * The native port keeps the same decision order: the structure chain is rolled first (the mound
- * and the hilltop stones are not part of this port, but their rolls are consumed so the ring
- * keeps its original frequency), then the ring size, then the validity samples and finally the
- * labyrinth itself.
+ * <p>Oracle references:
+ * <ul>
+ *   <li>{@code WorldGenEldritchRing:35-62} - the valid ground blocks and the spawn samples.</li>
+ *   <li>{@code WorldGenEldritchRing:64-83} - the seven by seven footprint and its nine layers.</li>
+ *   <li>{@code WorldGenEldritchRing:84-142} - the altar, the banners, the obelisk and the ring stones.</li>
+ *   <li>{@code ThaumcraftWorldGenerator:423-449} - the position, the sea level test and the labyrinth.</li>
+ *   <li>{@code MazeThread:29-68} - the labyrinth seeding of the maze handler.</li>
+ * </ul>
  */
 public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration> {
     public EldritchRingFeature() {
@@ -37,29 +44,50 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         if (OuterLandsProvider.isOuterLands(level.getLevel())) return false;
         int x = context.origin().getX();
         int z = context.origin().getZ();
-        int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        int chunkX = x >> 4;
+        int chunkZ = z >> 4;
+        // The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
+        // footprint of the ring has to stay inside it. The centre is therefore pulled into the
+        // chunk when the draw put it on the border.
+        int centreX = inside(x, chunkX);
+        int centreZ = inside(z, chunkZ);
+        // Oracle ThaumcraftWorldGenerator:424 - the ring grows nine blocks below the surface.
+        int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, centreX, centreZ);
         int randPosY = surface - 9;
-        // Oracle ThaumcraftWorldGenerator:424 - the surface structures only grow below the sea level.
+        // Oracle ThaumcraftWorldGenerator:425 - the surface structures only grow below the sea level.
         if (randPosY >= level.getSeaLevel()) return false;
         RandomSource random = context.random();
         if (StructurePlacementRules.select(random) != StructurePlacementRules.Kind.ELDRITCH_RING) return false;
         int[] size = StructurePlacementRules.ringSize(random);
         int width = size[0];
         int height = size[1];
+        // Oracle ThaumcraftWorldGenerator:437 - the ring base is eight blocks above the roll.
         int j = randPosY + 8;
-        int chunkX = x >> 4;
-        int chunkZ = z >> 4;
         for (int[] sample : StructurePlacementRules.RING_SAMPLES) {
-            if (!validSpawn(level, x + sample[0], j, z + sample[1])) return false;
+            if (!validSpawn(level, centreX + sample[0], j, centreZ + sample[1])) return false;
         }
         OuterLandsProvider.MazeSavedData maze = OuterLandsProvider.maze(server);
         if (maze.mazesInRange(chunkX, chunkZ, width, height)) return false;
-        buildRing(level, random, x, j, z);
+        buildRing(level, random, centreX, j, centreZ);
+        // Oracle ThaumcraftWorldGenerator:447 - the ring seeds the labyrinth of the Outer Lands.
         long seed = random.nextLong();
         MazeGenerator generator = new MazeGenerator(width, height, seed);
         while (!generator.generate()) generator = new MazeGenerator(width, height, ++seed);
         maze.storeLabyrinth(generator, chunkX, chunkZ);
         return true;
+    }
+
+    /**
+     * The centre of the ring inside its chunk.
+     *
+     * <p>The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
+     * footprint of the ring has to stay inside the chunk of its centre.
+     */
+    private static int inside(int coordinate, int chunk) {
+        int base = chunk << 4;
+        int low = base + StructurePlacementRules.RING_RADIUS;
+        int high = base + 15 - StructurePlacementRules.RING_RADIUS;
+        return Math.min(Math.max(coordinate, low), high);
     }
 
     /** Oracle {@code WorldGenEldritchRing.LocationIsValidSpawn:39-62}. */
@@ -82,7 +110,7 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
 
     /** The 1.7 ground blocks of the ring (oracle WorldGenEldritchRing:35-37). */
     private static boolean isGroundBlock(BlockState state) {
-        return state.is(Blocks.STONE) || state.is(Blocks.GRAVEL) || state.is(Blocks.TERRACOTTA)
+        return state.is(Blocks.STONE) || state.is(Blocks.GRAVEL) || state.is(Blocks.PACKED_ICE)
                 || state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.SAND) || state.is(Blocks.DIRT);
     }
 
@@ -104,24 +132,34 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         }
     }
 
-    /** The floor and the cleared air above one ring column (oracle WorldGenEldritchRing:72-83). */
+    /**
+     * The floor and the cleared air above one ring column (oracle WorldGenEldritchRing:72-83).
+     *
+     * <p>The original fills the five layers at and below the ring base, one in four with obsidian,
+     * and clears the four layers above it.
+     */
     private static void buildColumn(WorldGenLevel level, RandomSource random, int x, int j, int z) {
-        for (int q = -StructurePlacementRules.RING_FLOOR_LAYERS; q <= StructurePlacementRules.RING_CLEARED_LAYERS; ++q) {
+        for (int q = 1 - StructurePlacementRules.RING_FLOOR_LAYERS; q <= StructurePlacementRules.RING_CLEARED_LAYERS; ++q) {
             BlockPos pos = new BlockPos(x, j + q, z);
-            BlockState state = level.getBlockState(pos);
+            boolean writable = !level.isOutsideBuildHeight(pos) && level.ensureCanWrite(pos);
+            BlockState state = writable ? level.getBlockState(pos) : Blocks.AIR.defaultBlockState();
             boolean floor = q <= 0;
+            // Oracle WorldGenEldritchRing:74 - the original fills the floor and everything that
+            // may be replaced above it. The 1.7 "material is not solid" test is the native
+            // "does not render as a full block" test.
             boolean clearable = state.canBeReplaced() || !state.isSolidRender(level, pos) || state.is(BlockTags.LEAVES);
             if (floor || clearable) {
+                // The original leaves one in four floor blocks empty.
                 if (random.nextInt(StructurePlacementRules.RING_FLOOR_AIR_CHANCE) == 0) {
-                    // The original leaves one in four floor blocks empty.
-                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_NONE);
+                    if (writable) level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_NONE);
                 } else {
                     BlockState solid = ThaumcraftOuterLands.state(DungeonRooms.Kind.COSMETIC_SOLID, 1, -1);
-                    if (solid != null) level.setBlock(pos, solid, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
+                    if (solid != null && writable) level.setBlock(pos, solid, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
                 }
             }
             if (q <= 0) continue;
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_NONE);
+            // Oracle WorldGenEldritchRing:82 - the space above the ring is cleared.
+            if (writable) level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_NONE);
         }
     }
 
@@ -143,19 +181,11 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
             ThaumcraftOuterLands.configureAltar(level.getBlockEntity(new BlockPos(x, j + 1, z)), true, (byte) (altar - 1));
             if (altar != 1) return;
             for (int direction = 2; direction < 6; ++direction) {
-                int offsetX = switch (direction) {
-                    case 2, 3 -> 0;
-                    case 4 -> -1;
-                    default -> 1;
-                };
-                int offsetZ = switch (direction) {
-                    case 2 -> -1;
-                    case 3 -> 1;
-                    default -> 0;
-                };
-                BlockPos bannerPos = new BlockPos(x - offsetX * 3, j + 1, z - offsetZ * 3);
+                int[] offset = OuterLandsWiringRules.bannerOffset(direction);
+                BlockPos bannerPos = new BlockPos(x + offset[0], j + 1, z + offset[1]);
                 BlockState banner = ThaumcraftOuterLands.bannerState(8);
                 if (banner == null) continue;
+                if (level.isOutsideBuildHeight(bannerPos) || !level.ensureCanWrite(bannerPos)) continue;
                 level.setBlock(bannerPos, banner, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
                 ThaumcraftOuterLands.configureBanner(level.getBlockEntity(bannerPos),
                         (byte) StructurePlacementRules.bannerFacing(direction));
@@ -168,6 +198,8 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
     private static void set(WorldGenLevel level, int x, int y, int z, DungeonRooms.Kind kind, int variant) {
         BlockState state = ThaumcraftOuterLands.state(kind, variant, -1);
         if (state == null) return;
-        level.setBlock(new BlockPos(x, y, z), state, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
+        BlockPos pos = new BlockPos(x, y, z);
+        if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) return;
+        level.setBlock(pos, state, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
     }
 }

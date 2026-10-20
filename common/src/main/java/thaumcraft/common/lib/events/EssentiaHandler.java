@@ -1,6 +1,5 @@
 package thaumcraft.common.lib.events;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.IAspectSource;
+import thaumcraft.common.lib.essentia.EssentiaSourceSearch;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
 import thaumcraft.common.tiles.TileInfusionMatrix;
 
@@ -54,20 +54,11 @@ public final class EssentiaHandler {
             if (retry > System.currentTimeMillis()) return;
             cache.retryAfter.remove(origin);
         }
-        List<BlockPos> found = new ArrayList<>();
         // H96-125 UNKNOWN -> UP with start=-12: x, then z, then y[-12,11].
         // This is a rectangular search, not distance/LOS/nearest-source sorting.
-        for (int dx = -RANGE; dx <= RANGE; dx++) {
-            for (int dz = -RANGE; dz <= RANGE; dz++) {
-                for (int dy = -RANGE; dy < RANGE; dy++) {
-                    if (dx == 0 && dz == 0 && dy == 0) continue;
-                    BlockPos pos = origin.offset(dx, dy, dz);
-                    if (!level.isInWorldBounds(pos) || !level.hasChunkAt(pos)) continue;
-                    BlockEntity source = level.getBlockEntity(pos);
-                    if (source instanceof IAspectSource && current(source, level)) found.add(pos);
-                }
-            }
-        }
+        // The shape is the shared one of the essentia helper, so the matrix and the
+        // public helper walk the very same cells in the very same order.
+        List<BlockPos> found = EssentiaSourceSearch.sources(level, origin, null, RANGE, source -> current(source, level));
         if (found.isEmpty()) cache.retryAfter.put(origin.immutable(), System.currentTimeMillis() + DELAY_MILLIS);
         else cache.sources.put(origin.immutable(), List.copyOf(found));
     }

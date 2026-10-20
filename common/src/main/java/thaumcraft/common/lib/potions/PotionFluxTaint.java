@@ -1,20 +1,18 @@
 package thaumcraft.common.lib.potions;
 
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
+import thaumcraft.api.damagesource.DamageSourceThaumcraft;
 import thaumcraft.api.entities.ITaintedMob;
 
 /** Only original PotionFluxTaint:52-64; no invented taint ecology or vanilla-poison substitute. */
 public final class PotionFluxTaint extends MobEffect {
-    public static final ResourceKey<DamageType> TAINT = ResourceKey.create(Registries.DAMAGE_TYPE,
-            ResourceLocation.fromNamespaceAndPath("thaumcraft", "taint"));
+    /** The original taint damage source (oracle DamageSourceThaumcraft:19), published by the public API. */
+    public static final ResourceKey<DamageType> TAINT = DamageSourceThaumcraft.TAINT;
 
     public PotionFluxTaint() { super(MobEffectCategory.HARMFUL, 0x663377); }
 
@@ -25,8 +23,8 @@ public final class PotionFluxTaint extends MobEffect {
         } else if (!target.getType().is(EntityTypeTags.UNDEAD)) {
             // Both original non-undead branches deal one, including below one
             // heart and players. This is not vanilla poison's nonlethal floor.
-            target.hurt(new DamageSource(target.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                    .getHolderOrThrow(TAINT)), 1);
+            // Oracle PotionFluxTaint:56/:58 - the damage source is the published taint source.
+            target.hurt(DamageSourceThaumcraft.taint(target.level()), 1);
         }
         return true;
     }

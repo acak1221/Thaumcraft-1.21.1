@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -11,6 +12,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -374,15 +377,27 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
             entity.hurt(world.damageSources().drown(), 1F);
             if (!current() || nodeType != NodeType.HUNGRY) return false;
             if (!entity.isAlive() && entity.level() == world
-                    && (actual == null || entity instanceof ItemEntity item && item.getItem() == actual && ItemStack.matches(actual, snapshot)))
-                return hungryMeal(entity, snapshot);
+                    && (actual == null || entity instanceof ItemEntity item && item.getItem() == actual && hungryItemDeathMatches(actual, snapshot)))
+                return hungryMeal(entity, snapshot, actual);
             return false;
         } finally { frames.remove(entity); }
+    }
+    /** Native BlockItem.onDestroyed clears CONTAINER even on ordinary dirt.
+     * Accept exactly that paid-death transition, retaining count and every other
+     * component; pricing still uses the original one-item receipt. Native child
+     * contents remain separate physical drops, never an additional meal here. */
+    private static boolean hungryItemDeathMatches(ItemStack actual, ItemStack before) {
+        if (ItemStack.matches(actual, before)) return true;
+        if (!(before.getItem() instanceof BlockItem)
+                || !ItemContainerContents.EMPTY.equals(actual.get(DataComponents.CONTAINER))) return false;
+        ItemStack expected = before.copy();
+        expected.set(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+        return ItemStack.matches(actual, expected);
     }
     private boolean hungryTarget(ServerLevel world, Entity entity) {
         return entity.level() == world && !entity.isRemoved() && world.hasChunkAt(entity.blockPosition()) && world.getEntity(entity.getUUID()) == entity;
     }
-    private boolean hungryMeal(Entity dead, ItemStack paidItem) {
+    private boolean hungryMeal(Entity dead, ItemStack paidItem, ItemStack consumedItem) {
         AspectList tags;
         if (paidItem != null) tags = ObjectAspectResolver.scanTags(paidItem.copyWithCount(1), level);
         else { var binding = EntityAspectBindings.describe(dead); tags = binding == null ? null : binding.aspects(); }
@@ -391,7 +406,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         AspectList currentRef = aspects, baseRef = aspectsBase, beforeCurrent = aspects.copy(), beforeBase = aspectsBase.copy();
         var meal = HungryNodeRules.meal(primals, beforeCurrent, beforeBase, level.random::nextInt);
         if (meal == null || !current() || nodeType != NodeType.HUNGRY || dead.level() != level || dead.isAlive()
-                || paidItem != null && (!(dead instanceof ItemEntity item) || !ItemStack.matches(item.getItem(),paidItem))
+                || paidItem != null && (!(dead instanceof ItemEntity item) || item.getItem() != consumedItem || !hungryItemDeathMatches(consumedItem, paidItem))
                 || aspects != currentRef || aspectsBase != baseRef
                 || !aspects.aspects.equals(beforeCurrent.aspects) || !aspectsBase.aspects.equals(beforeBase.aspects)) return false;
         if (meal.refill()) { aspects.add(meal.aspect(), 1); return true; }

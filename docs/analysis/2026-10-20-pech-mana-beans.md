@@ -82,6 +82,16 @@ Original nearest-player/watch policy follow-up:
   gates, exact watcher RNG/lifetime, actual retreat navigation, native Mob
   eye tracking/removal and ordinary Mob.tick driving the installed selector.
   It is implemented but has not yet compiled or run in the new checkpoint.
+- A native coordinate contract fix preserves the original flee endpoint gate:
+  vanilla1.7 RandomPositionGenerator (vx) returns integer XYZ Vec3, whereas
+  native1.21 RandomPos returns Vec3.atBottomCenterOf (X+.5/Z+.5). Applying the
+  old path-end `(int)` comparison directly to negative native centers rejects
+  valid negative-coordinate paths. PechAvoidGoal now converts the candidate to
+  its integer lower corner BEFORE the original distance and exact endpoint
+  checks. No endpoint condition is weakened. The actual installed goal is also
+  exercised at X/Z=-97 on a snapshotted/restored37x37 native floor, including
+  real navigation and original integer distance checks. This new fix awaits
+  native CI validation.
 - Natural MagicalForest/Eerie Pech spawning and pod survival/acquisition still
   depend on actual TC4 biome registration/world integration. No production
   vanilla biome is tagged magical to bypass that dependency.
@@ -139,8 +149,14 @@ Verification state:
   tryMergeToExisting nextInt40 draws (5XP splits3+1+1) AFTER the two original
   loot draws. Production death RNG and item physics were unchanged. Failures
   now report actual counts and next-RNG values for diagnosis.
-- The new fifth goals entrypoint and nearest/watch production changes await
-  compilation and native server validation; no pass is claimed for them.
+- Parent checkpointb7c7845 compiled with691 JUnit/84 Python passing. Its
+ 237-case CI run39415113101 completed with six failures across groups. Pech
+ entity/trade/curse/beans no longer appeared among failures; the new goals
+ check failed because its9x7 supported melee lane did not cover the native
+ flee-position search radius16. The new fixture snapshots/restores a real
+ 37x37 stone floor for that phase, with no block entities overwritten.
+ Production AI, bounded128 seed search and actual path/distance assertions
+ remain unchanged. This fixture fix awaits rerun; no full-suite pass is claimed.
 - No fresh-world magical-biome natural spawn/pod acquisition replay, no
   multiplayer/client visual acceptance, no NeoForge validation. Actual TC4
   MagicalForest/Eerie biomes and their world integration remain a later unit.

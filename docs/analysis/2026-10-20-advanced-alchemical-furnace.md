@@ -129,11 +129,15 @@ Focused validation sources (not yet claimed passing):
   no following-aspect charge. No final production class is subclassed.
 - `AdvancedFurnaceUnloadRuntimeChecks.run`: remote paid machine crosses a chunk
   boundary; ordinary tickets/player logout cause ACTUAL old-BE retirement and
-  getChunkNow absence. Radius0 FULL tickets keep only the core, which must pause
-  without loading its neighbor. Core removal leaves the saved shell unavailable;
-  actual native chunk reload must create a NEW BE retaining paid UUID, then
-  original material reversion. This is not loadStatic or a reflected visibility
-  fixture relabeled as full unload. Timeout1000 covers native unload delays.
+  getChunkNow absence for BOTH core and shell. A radius0 FULL core ticket retains
+  its neighboring holder at ticket34, so the earlier fixture could not require
+  old shell-BE retirement while retaining that core. After both truly unload,
+  a radius0 ticket reloads a NEW core retaining its UUID and paid inventory;
+  the unavailable shell pauses processing without forced loading. Breaking the
+  core before reloading the NEW saved shell proves original orphan reversion.
+  This is not loadStatic or a reflected visibility fixture relabeled as full
+  unload. Timeout1200 covers all three bounded native phases. The corrected
+  scenario is authored; acceptance awaits the next GitHub run.
 
 Server tests explicitly provide raw materials, late wand energy, ordinary node
 capacities and physical pearls. These are unit fixtures, not survival acquisition

@@ -50,7 +50,8 @@
     "WarpFoodMixin",
     "PlayerRunicSaveMixin",
     "PlayerAccessoriesMixin",
-    "ItemEntityPechDropMixin"
+    "ItemEntityPechDropMixin",
+    "PlayerTravelGearMixin"
   ],
   "client": [
     "client.TableOutlineMixin",
@@ -59,7 +60,8 @@
     "client.RobeArmorLayerMixin",
     "client.WarpFogMixin",
     "client.WarpPostEffectsMixin",
-    "client.WardedHitParticleMixin"
+    "client.WardedHitParticleMixin",
+    "client.ResearchPopupScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

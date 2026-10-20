@@ -46,15 +46,21 @@ public final class OriginalLootEnchantments {
     public static ItemStack enchant(ServerLevel level,ItemStack stack,RandomSource random,int power) {
         java.util.Objects.requireNonNull(level);java.util.Objects.requireNonNull(stack);java.util.Objects.requireNonNull(random);
         if(!level.getServer().isSameThread())throw new IllegalStateException("Loot enchantment requires server thread");
+        return enchant(level.registryAccess(),stack,random,power);
+    }
+    /** World generation uses its immutable registry snapshot and the generator's own RNG.
+     * This overload performs no level queries, chunk writes or access to a server RNG. */
+    public static ItemStack enchant(net.minecraft.core.HolderLookup.Provider registries,ItemStack stack,RandomSource random,int power) {
+        java.util.Objects.requireNonNull(registries);java.util.Objects.requireNonNull(stack);java.util.Objects.requireNonNull(random);
         if(stack.isEmpty())return stack;
         boolean book=stack.is(Items.BOOK);
         var selected=select(random,enchantability(stack),power,id->book||canApply(find(id),stack));
         ItemStack result=book?stack.transmuteCopy(Items.ENCHANTED_BOOK):stack;
-        var registry=level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        var registry=registries.lookupOrThrow(Registries.ENCHANTMENT);
         for(Pick pick:selected) {
             Rule rule=find(pick.id());
             var key=ResourceKey.<Enchantment>create(Registries.ENCHANTMENT,ResourceLocation.parse(rule.key().contains(":")?rule.key():"minecraft:"+rule.key()));
-            result.enchant(registry.getHolderOrThrow(key),pick.level());
+            result.enchant(registry.getOrThrow(key),pick.level());
         }
         return result;
     }

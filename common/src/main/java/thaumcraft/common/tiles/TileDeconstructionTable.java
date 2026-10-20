@@ -86,13 +86,18 @@ public final class TileDeconstructionTable extends BlockEntity implements Worldl
         if (!serverOwner() || working || claiming || reward == null || menu == null || !menu.owns(this, player)) return false;
         var knowledge = KnowledgeAccess.get(player);
         if (knowledge.getAspectPoolFor(reward.getTag()) == Integer.MAX_VALUE) return false;
+        Aspect paidReward = reward;
         var after = knowledge.copy();
         if (!after.addAspectPool(reward.getTag(), 1)) return false;
         claiming = true;
         try {
             // Both owners change before block/menu/network notifications can reenter.
             reward = null; breakTime = 0; knowledge.copyFrom(after);
-            try { changed(); KnowledgeEvents.sync(player); menu.broadcastChanges(); }
+            try {
+                changed(); KnowledgeEvents.sync(player);
+                thaumcraft.common.lib.network.KnowledgeNotificationNetworking.pool(player, paidReward.getTag(), 1);
+                menu.broadcastChanges();
+            }
             catch (RuntimeException feedbackFailure) { Thaumcraft.LOG.warn("Deconstruction reward was granted; feedback failed at {}", worldPosition, feedbackFailure); }
             return true;
         } finally { claiming = false; }

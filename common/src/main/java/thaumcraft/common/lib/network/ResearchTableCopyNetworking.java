@@ -51,7 +51,9 @@ public final class ResearchTableCopyNetworking {
         if (plan == null) return correct(player, menu);
         table.commitCopy(revision, discovery, plan, knowledge, player.getInventory().getItem(paperSlot), player.getInventory().getItem(inkSlot));
         player.getInventory().setChanged(); table.setChanged();
-        KnowledgeEvents.sync(player); menu.broadcastChanges();
+        KnowledgeEvents.sync(player);
+        for (String tag : plan.costs().keySet()) KnowledgeNotificationNetworking.pool(player, tag, 0);
+        menu.broadcastChanges();
         for (var viewer : player.server.getPlayerList().getPlayers()) {
             if (viewer != player && viewer.containerMenu instanceof ContainerResearchTable other && other.tile() == table && other.stillValid(viewer)) other.broadcastChanges();
         }

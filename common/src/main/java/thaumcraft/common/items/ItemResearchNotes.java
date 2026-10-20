@@ -43,7 +43,7 @@ public class ItemResearchNotes extends Item {
                 // Original decrements even in creative; this is not shrinkInSurvival.
                 stack.shrink(1);
                 KnowledgeEvents.sync(serverPlayer);
-                thaumcraft.common.lib.network.WarpMessageNetworking.research(serverPlayer, result.unlocked());
+                thaumcraft.common.lib.network.KnowledgeNotificationNetworking.completed(serverPlayer, result.unlocked());
                 level.playSound(null, player.blockPosition(),
                         SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "learn")),
                         SoundSource.PLAYERS, 0.75F, 1.0F);

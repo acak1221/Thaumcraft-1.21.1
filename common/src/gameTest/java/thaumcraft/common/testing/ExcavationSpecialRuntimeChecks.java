@@ -127,7 +127,11 @@ public final class ExcavationSpecialRuntimeChecks {
         a.tick(1); // Prime the coordinate and its one initial rumble before the declared world-RNG seed sample.
         Item cluster = ThaumcraftContent.MATERIALS.get("cluster_iron").get();
         List<ItemStack> expected = null; long chosen = -1;
-        for (long seed = 0; seed < 4096; seed++) {
+        // LegacyRandomSource's first floats for seeds0..4095 are all .58..95,
+        // above Treasure1's .275. Select a declared low-roll seed from a wider
+        // bounded domain, then still witness the ACTUAL native loot pipeline.
+        for (long seed = 0; seed < 100000; seed++) {
+            if (RandomSource.create(seed).nextFloat() >= .05F) continue;
             a.level.random.setSeed(seed);
             var drops = Block.getDrops(ore,a.level,a.root,null,a.player,lootTool(a,silk));
             if (drops.size() == 1 && drops.getFirst().is(cluster)) { chosen=seed;expected=drops;break; }

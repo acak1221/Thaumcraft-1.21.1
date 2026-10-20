@@ -74,6 +74,7 @@ survival player: focused actual Haste velocity/gates, затем **обычны�
 `CustomEnchantmentInfusionRuntimeChecks` выполняет оба ритуала **полностью обычными matrix ticks**:
 точные XP before essentia, native component payment, finite jar balances и actual enchantment outputs.
 Formed altar/stabilizers/resources/XP объявлены fixtures; готовые результаты не подставляются.
+Embedded transport для player-effect test включён в настоящий native connection loop: именно packetListener.tick вызывает doTick/Player.aiStep; world tickCount без этого не доказывает living hook.
 Все источники установлены до первого cache discovery. Наблюдатели регистрируются до обхода GameTest scheduled map.
 
 Итоговые build/JUnit/server результаты добавляет root после запуска. Client movement/UI, multiplayer,

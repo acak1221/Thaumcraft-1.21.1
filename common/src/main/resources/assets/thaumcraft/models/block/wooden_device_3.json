@@ -1,0 +1,42 @@
+{
+  "textures": {
+    "particle": "thaumcraft:blocks/applate2",
+    "texture": "thaumcraft:blocks/applate2"
+  },
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        15.0,
+        0.5,
+        15.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#texture",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#texture"
+        },
+        "north": {
+          "texture": "#texture"
+        },
+        "south": {
+          "texture": "#texture"
+        },
+        "west": {
+          "texture": "#texture"
+        },
+        "east": {
+          "texture": "#texture"
+        }
+      }
+    }
+  ]
+}

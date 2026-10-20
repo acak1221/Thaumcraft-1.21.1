@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "variant=1": {
+      "model": "thaumcraft:block/airy"
+    },
+    "variant=2": {
+      "model": "thaumcraft:block/airy"
+    },
+    "variant=3": {
+      "model": "thaumcraft:block/airy"
+    },
+    "variant=4": {
+      "model": "thaumcraft:block/airy"
+    },
+    "variant=6": {
+      "model": "thaumcraft:block/airy"
+    },
+    "variant=7": {
+      "model": "thaumcraft:block/airy"
+    },
+    "variant=8": {
+      "model": "thaumcraft:block/airy"
+    },
+    "variant=9": {
+      "model": "thaumcraft:block/airy"
+    }
+  }
+}

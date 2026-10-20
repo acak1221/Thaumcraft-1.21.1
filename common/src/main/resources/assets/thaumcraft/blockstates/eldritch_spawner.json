@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "variant=9": {
+      "model": "thaumcraft:block/eldritch_spawner"
+    },
+    "variant=10": [
+      {
+        "model": "thaumcraft:block/eldritch_spawner_10_0"
+      },
+      {
+        "model": "thaumcraft:block/eldritch_spawner_10_1"
+      },
+      {
+        "model": "thaumcraft:block/eldritch_spawner_10_2"
+      },
+      {
+        "model": "thaumcraft:block/eldritch_spawner_10_3"
+      }
+    ]
+  }
+}

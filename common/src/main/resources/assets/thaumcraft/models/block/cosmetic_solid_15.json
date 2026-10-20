@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "thaumcraft:blocks/es_p",
+    "top": "thaumcraft:blocks/es_1",
+    "bottom": "thaumcraft:blocks/es_1",
+    "particle": "thaumcraft:blocks/es_p"
+  }
+}

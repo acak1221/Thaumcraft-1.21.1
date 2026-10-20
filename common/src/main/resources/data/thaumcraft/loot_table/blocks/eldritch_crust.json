@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "thaumcraft:eldritch_crust"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "thaumcraft:eldritch_crust",
+          "properties": {
+            "variant": "4"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "thaumcraft:knowledge_fragment"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "thaumcraft:eldritch_crust",
+          "properties": {
+            "variant": "5"
+          }
+        }
+      ]
+    }
+  ]
+}

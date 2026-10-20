@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "thaumcraft:block/eldritch"
+    },
+    "variant=1": {
+      "model": "thaumcraft:block/eldritch_1"
+    },
+    "variant=2": {
+      "model": "thaumcraft:block/eldritch_2"
+    },
+    "variant=3": {
+      "model": "thaumcraft:block/eldritch_3"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "variant=10": {
+      "model": "thaumcraft:block/airy_hole"
+    },
+    "variant=11": {
+      "model": "thaumcraft:block/airy_hole"
+    }
+  }
+}

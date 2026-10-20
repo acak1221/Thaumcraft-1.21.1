@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "variant=6": {
+      "model": "thaumcraft:block/eldritch_deco"
+    }
+  }
+}

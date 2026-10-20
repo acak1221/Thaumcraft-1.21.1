@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=1": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=2": {
+      "model": "thaumcraft:block/wooden_device_2"
+    },
+    "variant=3": {
+      "model": "thaumcraft:block/wooden_device_3"
+    },
+    "variant=4": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=5": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=6": {
+      "model": "thaumcraft:block/wooden_device"
+    },
+    "variant=7": {
+      "model": "thaumcraft:block/wooden_device_7"
+    },
+    "variant=8": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=9": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=10": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=11": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=12": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=13": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=14": {
+      "model": "thaumcraft:block/wooden_device_base"
+    },
+    "variant=15": {
+      "model": "thaumcraft:block/wooden_device_base"
+    }
+  }
+}

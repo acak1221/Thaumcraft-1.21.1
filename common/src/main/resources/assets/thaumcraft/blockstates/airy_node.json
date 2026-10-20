@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "thaumcraft:block/airy_node"
+    },
+    "variant=5": {
+      "model": "thaumcraft:block/airy_node"
+    }
+  }
+}

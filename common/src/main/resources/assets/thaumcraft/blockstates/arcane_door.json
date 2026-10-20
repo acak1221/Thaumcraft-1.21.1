@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=east,open=false,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left"
+    },
+    "facing=east,open=false,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right",
+      "y": 90
+    },
+    "facing=east,open=true,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left_open",
+      "y": 270
+    },
+    "facing=east,open=true,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right_open"
+    },
+    "facing=east,open=false,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left"
+    },
+    "facing=east,open=false,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right",
+      "y": 90
+    },
+    "facing=east,open=true,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left_open",
+      "y": 270
+    },
+    "facing=east,open=true,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right_open"
+    },
+    "facing=north,open=false,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left",
+      "y": 270
+    },
+    "facing=north,open=false,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right"
+    },
+    "facing=north,open=true,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left_open",
+      "y": 270
+    },
+    "facing=north,open=true,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right_open",
+      "y": 180
+    },
+    "facing=north,open=false,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left",
+      "y": 270
+    },
+    "facing=north,open=false,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right"
+    },
+    "facing=north,open=true,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left_open",
+      "y": 270
+    },
+    "facing=north,open=true,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right_open",
+      "y": 180
+    },
+    "facing=south,open=false,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left",
+      "y": 90
+    },
+    "facing=south,open=false,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right",
+      "y": 180
+    },
+    "facing=south,open=true,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left_open",
+      "y": 90
+    },
+    "facing=south,open=true,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right_open"
+    },
+    "facing=south,open=false,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left",
+      "y": 90
+    },
+    "facing=south,open=false,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right",
+      "y": 180
+    },
+    "facing=south,open=true,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left_open",
+      "y": 90
+    },
+    "facing=south,open=true,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right_open"
+    },
+    "facing=west,open=false,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left",
+      "y": 180
+    },
+    "facing=west,open=false,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right",
+      "y": 270
+    },
+    "facing=west,open=true,half=bottom,flip=false": {
+      "model": "thaumcraft:block/arcane_door_bottom_left_open",
+      "y": 180
+    },
+    "facing=west,open=true,half=bottom,flip=true": {
+      "model": "thaumcraft:block/arcane_door_bottom_right_open",
+      "y": 90
+    },
+    "facing=west,open=false,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left",
+      "y": 180
+    },
+    "facing=west,open=false,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right",
+      "y": 270
+    },
+    "facing=west,open=true,half=top,flip=false": {
+      "model": "thaumcraft:block/arcane_door_top_left_open",
+      "y": 180
+    },
+    "facing=west,open=true,half=top,flip=true": {
+      "model": "thaumcraft:block/arcane_door_top_right_open",
+      "y": 90
+    }
+  }
+}

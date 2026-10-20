@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "variant=7": {
+      "model": "thaumcraft:block/eldritch_doorway"
+    },
+    "variant=8": {
+      "model": "thaumcraft:block/eldritch_doorway_8"
+    }
+  }
+}

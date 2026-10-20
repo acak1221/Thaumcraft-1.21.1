@@ -1,0 +1,79 @@
+{
+  "textures": {
+    "particle": "thaumcraft:blocks/grate",
+    "surface": "thaumcraft:blocks/grate",
+    "side": "thaumcraft:blocks/metalbase"
+  },
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [
+        0,
+        13,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#surface"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#surface",
+          "cullface": "up"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        }
+      }
+    }
+  ]
+}

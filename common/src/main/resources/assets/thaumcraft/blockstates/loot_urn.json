@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "rarity=0": {
+      "model": "thaumcraft:block/loot_urn_0"
+    },
+    "rarity=1": {
+      "model": "thaumcraft:block/loot_urn_1"
+    },
+    "rarity=2": {
+      "model": "thaumcraft:block/loot_urn_2"
+    }
+  }
+}

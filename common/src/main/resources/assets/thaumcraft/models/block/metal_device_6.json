@@ -1,0 +1,148 @@
+{
+  "textures": {
+    "particle": "thaumcraft:blocks/grate",
+    "surface": "thaumcraft:blocks/grate",
+    "side": "thaumcraft:blocks/metalbase",
+    "hatch": "thaumcraft:blocks/grate_hatch"
+  },
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [
+        0,
+        13,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#surface"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#surface",
+          "cullface": "up"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "#side"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        14,
+        1
+      ],
+      "to": [
+        15,
+        15,
+        15
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ],
+          "texture": "#hatch"
+        },
+        "up": {
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ],
+          "texture": "#hatch"
+        },
+        "north": {
+          "uv": [
+            1,
+            0,
+            15,
+            1
+          ],
+          "texture": "#hatch"
+        },
+        "south": {
+          "uv": [
+            1,
+            0,
+            15,
+            1
+          ],
+          "texture": "#hatch"
+        },
+        "west": {
+          "uv": [
+            1,
+            0,
+            15,
+            1
+          ],
+          "texture": "#hatch"
+        },
+        "east": {
+          "uv": [
+            1,
+            0,
+            15,
+            1
+          ],
+          "texture": "#hatch"
+        }
+      }
+    }
+  ]
+}

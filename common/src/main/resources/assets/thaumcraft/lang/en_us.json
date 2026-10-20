@@ -2034,5 +2034,6 @@
   "key.thaumcraft.misc_toggle": "Misc Wand Toggle",
   "tc.port.shovel.orientation.0": "Placing: across the face",
   "tc.port.shovel.orientation.1": "Placing: upright square",
-  "tc.port.shovel.orientation.2": "Placing: floor or upright square"
+  "tc.port.shovel.orientation.2": "Placing: floor or upright square",
+  "block.thaumcraft.arcane_ear": "Arcane Ear"
 }

@@ -2034,5 +2034,6 @@
   "key.thaumcraft.misc_toggle": "Доп. переключение жезла",
   "tc.port.shovel.orientation.0": "Укладка: поперёк грани",
   "tc.port.shovel.orientation.1": "Укладка: вертикальный квадрат",
-  "tc.port.shovel.orientation.2": "Укладка: пол или вертикальный квадрат"
+  "tc.port.shovel.orientation.2": "Укладка: пол или вертикальный квадрат",
+  "block.thaumcraft.arcane_ear": "Магическое ухо"
 }

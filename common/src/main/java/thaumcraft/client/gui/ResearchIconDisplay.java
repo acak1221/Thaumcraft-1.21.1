@@ -240,6 +240,7 @@ final class ResearchIconDisplay {
             // ConfigResearch:183 / ConfigBlocks wooden-device variants.
             case "ConfigBlocks.blockWoodenDevice" -> switch (metadata) {
                 case 0 -> "bellows";
+                case 1 -> "arcane_ear";
                 case 4 -> "arcane_bore_base";
                 case 5 -> "arcane_bore";
                 case 6 -> "greatwood_planks";

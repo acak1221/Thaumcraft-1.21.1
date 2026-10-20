@@ -116,6 +116,7 @@ public final class ThaumcraftRecipeDisplay {
             alias("EssentiaCrystalizer", "arcane/essentia_crystallizer"), // 293, dispenser/balanced shards
             alias("EssentiaReservoir", "infusion/essentia_reservoir"), // 372, buffer centre, two void ingots and four jars
             alias("Levitator", "arcane/levitator"), // 194, greatwood planks, earth and air shards, nitor, iron
+            alias("ArcaneEar", "arcane/arcane_ear"),
             alias("NodeStabilizer", "arcane/node_stabilizer"), // 199, quartz BLOCK / stone BRICKS / Nitor ITEM
             alias("NodeTransducer", "arcane/node_transducer"), // 200, literal iron/redstone BLOCK/comparator
             alias("NodeRelay", "arcane/vis_relay"), // 201, balanced shard, TWO relays

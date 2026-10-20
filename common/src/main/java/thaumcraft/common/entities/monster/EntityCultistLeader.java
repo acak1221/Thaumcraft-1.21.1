@@ -40,9 +40,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import thaumcraft.common.Thaumcraft;
-import thaumcraft.common.config.ThaumcraftEquipment;
 import thaumcraft.common.config.ThaumcraftLoot;
 import thaumcraft.common.lib.WarpEvents;
+import thaumcraft.common.lib.cult.CultistEquipmentRules;
 import thaumcraft.common.lib.cult.CultistRules;
 import thaumcraft.common.lib.loot.OriginalLootEnchantments;
 
@@ -166,16 +166,13 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
 
     /** Original EntityCultistLeader.addRandomArmor: the crimson praetor armour and the blade. */
     @Override protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
-        setItemSlot(EquipmentSlot.HEAD, EntityCultist.stack(CultistRules.ITEM_LEADER_HELM));
-        setItemSlot(EquipmentSlot.CHEST, EntityCultist.stack(CultistRules.ITEM_LEADER_CHESTPLATE));
-        setItemSlot(EquipmentSlot.LEGS, EntityCultist.stack(CultistRules.ITEM_LEADER_LEGGINGS));
-        setItemSlot(EquipmentSlot.FEET, EntityCultist.stack(CultistRules.ITEM_BOOTS));
-        if (CultistRules.leaderUsesVoidSword(level().getDifficulty() == Difficulty.EASY)) {
-            setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ThaumcraftEquipment.VOID_SWORD.get()));
-        } else {
-            ItemStack blade = EntityCultist.stack(CultistRules.ITEM_CRIMSON_SWORD);
-            if (!blade.isEmpty()) setItemSlot(EquipmentSlot.MAINHAND, blade);
-        }
+        CultistEquipmentRules.Loadout loadout = CultistEquipmentRules.praetor(level().getDifficulty() == Difficulty.EASY);
+        setItemSlot(EquipmentSlot.HEAD, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.HELM)));
+        setItemSlot(EquipmentSlot.CHEST, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.CHEST)));
+        setItemSlot(EquipmentSlot.LEGS, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.LEGS)));
+        setItemSlot(EquipmentSlot.FEET, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.FEET)));
+        ItemStack blade = EntityCultist.cultistWeapon(loadout.weapon());
+        if (!blade.isEmpty()) setItemSlot(EquipmentSlot.MAINHAND, blade);
     }
 
     /** Original EntityCultistLeader.enchantEquipment: the held blade with the original chance and power. */
@@ -220,7 +217,11 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
     /** Original EntityThaumcraftBoss.canDespawn is false. */
     @Override public boolean removeWhenFarAway(double distance) { return false; }
 
-    /** Original EntityCultistLeader.dropFewItems hands out a rare loot bag. */
+    /**
+     * Original EntityCultistLeader.dropFewItems hands out a rare loot bag. The praetor
+     * extends the boss base and not the cultist, so it never rolls the cultist resource
+     * and its rare drop stays empty as in the original.
+     */
     @Override protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         spawnAtLocation(new ItemStack(ThaumcraftLoot.LOOT_BAG_RARE.get()), 1.5F);

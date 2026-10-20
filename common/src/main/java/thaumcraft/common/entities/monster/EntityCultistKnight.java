@@ -16,10 +16,9 @@ import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import thaumcraft.common.config.ThaumcraftEquipment;
+import thaumcraft.common.lib.cult.CultistEquipmentRules;
 import thaumcraft.common.lib.cult.CultistRules;
 import thaumcraft.common.lib.loot.OriginalLootEnchantments;
 
@@ -54,21 +53,18 @@ public class EntityCultistKnight extends EntityCultist {
 
     /** Original EntityCultistKnight.addRandomArmor: the crimson plate and the rare blade. */
     @Override protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
-        setItemSlot(EquipmentSlot.HEAD, stack(CultistRules.ITEM_PLATE_HELM));
-        setItemSlot(EquipmentSlot.CHEST, stack(CultistRules.ITEM_PLATE_CHESTPLATE));
-        setItemSlot(EquipmentSlot.LEGS, stack(CultistRules.ITEM_PLATE_LEGGINGS));
-        setItemSlot(EquipmentSlot.FEET, stack(CultistRules.ITEM_BOOTS));
-        if (random.nextFloat() < CultistRules.knightRareChance(level().getDifficulty() == Difficulty.HARD)) {
-            if (CultistRules.knightRareWeapon(random.nextInt(5)) == CultistRules.KNIGHT_WEAPON_VOID) {
-                setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ThaumcraftEquipment.VOID_SWORD.get()));
-                setItemSlot(EquipmentSlot.HEAD, stack(CultistRules.ITEM_ROBE_HOOD));
-            } else {
-                setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ThaumcraftEquipment.THAUMIUM_SWORD.get()));
-                if (!CultistRules.knightKeepsHelm(random.nextBoolean())) setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-            }
-        } else {
-            setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-        }
+        CultistEquipmentRules.Loadout loadout = CultistEquipmentRules.knight(level().getDifficulty() == Difficulty.HARD,
+                new CultistEquipmentRules.Rolls() {
+                    @Override public float nextFloat() { return random.nextFloat(); }
+                    @Override public int nextInt(int bound) { return random.nextInt(bound); }
+                    @Override public boolean nextBoolean() { return random.nextBoolean(); }
+                });
+        setItemSlot(EquipmentSlot.HEAD, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.HELM)));
+        setItemSlot(EquipmentSlot.CHEST, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.CHEST)));
+        setItemSlot(EquipmentSlot.LEGS, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.LEGS)));
+        setItemSlot(EquipmentSlot.FEET, EntityCultist.cultistPiece(loadout.piece(CultistEquipmentRules.Slot.FEET)));
+        ItemStack blade = EntityCultist.cultistWeapon(loadout.weapon());
+        if (!blade.isEmpty()) setItemSlot(EquipmentSlot.MAINHAND, blade);
     }
 
     /** Original EntityCultistKnight.enchantEquipment: the held blade with the original chance and power. */

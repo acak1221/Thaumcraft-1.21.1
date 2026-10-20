@@ -882,7 +882,8 @@ public final class DungeonRooms {
                 }
                 if (!random.nextBoolean()) continue;
                 if (!view.isAir(x + a, y + 8, z + b)) continue;
-                out.placements.add(new Placement(x + a, y + 8, z + b, Kind.CRYSTAL, 7, 5));
+                // Oracle GenNestRoom:66-68 - the crystal points down.
+                out.placements.add(new Placement(x + a, y + 8, z + b, Kind.CRYSTAL, 7, 0));
             }
         }
         place(out, view, worldRandom, x + 8, y + 2, z + 8, 21, -1, cell);
@@ -987,25 +988,32 @@ public final class DungeonRooms {
             place(out, view, worldRandom, x + 12, y + 9, z + 6 + g, 11, 5, cell);
             place(out, view, worldRandom, x + 4, y + 9, z + 6 + g, 11, 4, cell);
         }
-        libraryDesk(out, x + 5, y + 4, z + 5);
-        libraryDesk(out, x + 5, y + 4, z + 11);
-        libraryDesk(out, x + 11, y + 4, z + 5);
-        libraryDesk(out, x + 11, y + 4, z + 11);
-        libraryDesk(out, x + 5, y + 7, z + 5);
-        libraryDesk(out, x + 5, y + 7, z + 11);
-        libraryDesk(out, x + 11, y + 7, z + 5);
-        libraryDesk(out, x + 11, y + 7, z + 11);
+        libraryDesk(out, x + 5, y + 4, z + 5, false);
+        libraryDesk(out, x + 5, y + 4, z + 11, false);
+        libraryDesk(out, x + 11, y + 4, z + 5, false);
+        libraryDesk(out, x + 11, y + 4, z + 11, false);
+        libraryDesk(out, x + 5, y + 7, z + 5, true);
+        libraryDesk(out, x + 5, y + 7, z + 11, true);
+        libraryDesk(out, x + 11, y + 7, z + 5, true);
+        libraryDesk(out, x + 11, y + 7, z + 11, true);
         out.placements.add(new Placement(x + 8, y + 2, z + 8, Kind.COSMETIC_SOLID, 15, -1));
-        libraryDesk(out, x + 8, y + 3, z + 8);
+        libraryDesk(out, x + 8, y + 3, z + 8, false);
         out.placements.add(new Placement(x + 8, y + 9, z + 8, Kind.COSMETIC_SOLID, 15, -1));
-        libraryDesk(out, x + 8, y + 8, z + 8);
+        libraryDesk(out, x + 8, y + 8, z + 8, true);
         connections(out, view, worldRandom, cx, cz, y, cell, 3, true, true);
     }
 
-    /** Oracle GenLibraryRoom:77-96 - a desk is an eldritch block over a stone slab. */
-    private static void libraryDesk(Builder out, int x, int y, int z) {
+    /**
+     * Oracle GenLibraryRoom:77-96 - a desk is an eldritch block over a stone slab.
+     *
+     * <p>The lower desks carry the slab above them, the upper desks carry it below them as the
+     * upper half of the slab, exactly like the original metadata one and nine.
+     *
+     * @param top true for the upper desks, whose slab hangs below the eldritch block
+     */
+    private static void libraryDesk(Builder out, int x, int y, int z, boolean top) {
         out.placements.add(new Placement(x, y, z, Kind.ELDRITCH, 5, -1));
-        out.placements.add(new Placement(x, y + 1, z, Kind.COSMETIC_SLAB_STONE, 1, -1));
+        out.placements.add(new Placement(x, top ? y - 1 : y + 1, z, Kind.COSMETIC_SLAB_STONE, top ? 9 : 1, -1));
     }
 
     /* ------------------------------------------------------------------ */

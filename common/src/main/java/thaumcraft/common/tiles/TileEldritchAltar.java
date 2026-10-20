@@ -18,6 +18,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.lib.world.MazeGenerator;
+import thaumcraft.common.lib.world.OuterLandsProvider;
+import thaumcraft.common.lib.world.OuterLandsWiringRules;
 
 /**
  * Original TileEldritchAltar: the eldritch altar. It counts the eldritch eyes
@@ -46,10 +49,29 @@ public final class TileEldritchAltar extends BlockEntity {
 
     /**
      * Original TileEldritchAltar:217-226 - the altar starts an eldritch maze.
-     * The maze generator belongs to the Outer Lands port; until it exists the
-     * altar reports a ready maze so the altar itself stays usable.
+     *
+     * <p>The labyrinth belongs to the Outer Lands, so the altar asks the native maze store of
+     * the overworld for the cells and writes the new labyrinth into it.
+     *
+     * @return true when a labyrinth already covers the altar, false when a new one was started
      */
-    public boolean checkForMaze() { return true; }
+    public boolean checkForMaze() {
+        if (level == null) return true;
+        net.minecraft.server.MinecraftServer server = level.getServer();
+        if (server == null) return true;
+        net.minecraft.util.RandomSource random = level.getRandom();
+        int width = OuterLandsWiringRules.altarMazeSize(random.nextInt(8));
+        int height = OuterLandsWiringRules.altarMazeSize(random.nextInt(8));
+        int chunkX = worldPosition.getX() >> 4;
+        int chunkZ = worldPosition.getZ() >> 4;
+        OuterLandsProvider.MazeSavedData maze = OuterLandsProvider.maze(server.overworld());
+        if (maze.mazesInRange(chunkX, chunkZ, width, height)) return true;
+        long seed = random.nextLong();
+        MazeGenerator generator = new MazeGenerator(width, height, seed);
+        while (!generator.generate()) generator = new MazeGenerator(width, height, ++seed);
+        maze.storeLabyrinth(generator, chunkX, chunkZ);
+        return false;
+    }
 
     /** Original TileEldritchAltar:92-107 - the spawn timer of the altar. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileEldritchAltar altar) {

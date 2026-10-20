@@ -39,7 +39,7 @@ public final class StructurePlacementRules {
 
     /** The eldritch ring radius in blocks: the ring spans -3..+3 around its centre. */
     public static final int RING_RADIUS = 3;
-    /** The ring floor is five blocks thick below the ring base (oracle WorldGenEldritchRing:72-83). */
+    /** The ring floor is five blocks thick, the ring base included (oracle WorldGenEldritchRing:72-83). */
     public static final int RING_FLOOR_LAYERS = 5;
     /** The ring clears this many layers above its base. */
     public static final int RING_CLEARED_LAYERS = 4;
@@ -62,7 +62,7 @@ public final class StructurePlacementRules {
 
     /** The 1.7 ground blocks an eldritch ring may stand on (oracle WorldGenEldritchRing:36). */
     public static final Set<String> RING_GROUND_BLOCKS = Set.of(
-            "minecraft:stone", "minecraft:gravel", "minecraft:terracotta",
+            "minecraft:stone", "minecraft:gravel", "minecraft:packed_ice",
             "minecraft:grass_block", "minecraft:sand", "minecraft:dirt");
     /** The 1.7 ground blocks a hilltop stone pile may stand on (oracle WorldGenHilltopStones:32). */
     public static final Set<String> HILLTOP_GROUND_BLOCKS = Set.of(

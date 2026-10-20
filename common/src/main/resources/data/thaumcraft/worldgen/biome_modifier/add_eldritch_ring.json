@@ -1,0 +1,12 @@
+{
+  "modifiers": [
+    {
+      "type": "minecraft:add_features",
+      "biomes": "#minecraft:is_overworld",
+      "features": [
+        "thaumcraft:tc4_eldritch_ring"
+      ],
+      "step": "minecraft:surface_structures"
+    }
+  ]
+}

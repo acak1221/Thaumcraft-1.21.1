@@ -93,7 +93,7 @@ class StructurePlacementRulesTest {
         assertArrayEquals(new int[] {0, 3}, StructurePlacementRules.RING_SAMPLES.get(4));
         assertEquals(2, StructurePlacementRules.MAX_DISTANCE_TO_AIR);
         assertTrue(StructurePlacementRules.RING_GROUND_BLOCKS.contains("minecraft:stone"));
-        assertTrue(StructurePlacementRules.RING_GROUND_BLOCKS.contains("minecraft:terracotta"));
+        assertTrue(StructurePlacementRules.RING_GROUND_BLOCKS.contains("minecraft:packed_ice"));
         assertTrue(StructurePlacementRules.RING_GROUND_BLOCKS.contains("minecraft:grass_block"));
         assertTrue(StructurePlacementRules.RING_GROUND_BLOCKS.contains("minecraft:sand"));
         assertTrue(StructurePlacementRules.RING_GROUND_BLOCKS.contains("minecraft:gravel"));

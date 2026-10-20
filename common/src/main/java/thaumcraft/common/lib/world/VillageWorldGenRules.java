@@ -710,7 +710,11 @@ public final class VillageWorldGenRules {
 
     /**
      * Oracle MazeHandler.mazesInRange:142-150 - the ring may not grow where an
-     * Outer Lands maze already is. The maze unit installs its own check.
+     * Outer Lands maze already is.
+     *
+     * <p>The eldritch ring is the single port of the original WorldGenEldritchRing and it
+     * belongs to the Outer Lands, because the ring seeds the labyrinth. The ring therefore
+     * asks the native maze store of the overworld directly, and this hook is gone.
      */
     public interface MazeRangeCheck {
         boolean mazesInRange(int chunkX, int chunkZ, int width, int height);

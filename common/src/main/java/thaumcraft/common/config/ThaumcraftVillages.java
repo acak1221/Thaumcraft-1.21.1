@@ -26,7 +26,6 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.lib.world.VillageBankerManager;
 import thaumcraft.common.lib.world.VillageWizardManager;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
-import thaumcraft.common.lib.world.WorldGenEldritchRing;
 import thaumcraft.common.lib.world.WorldGenHilltopStones;
 
 /**
@@ -53,13 +52,15 @@ public final class ThaumcraftVillages {
             FEATURES.register("village_wizard_towers", VillageWizardManager::new);
     public static final RegistrySupplier<WorldGenHilltopStones> HILLTOP_STONES =
             FEATURES.register("hilltop_stones", WorldGenHilltopStones::new);
-    public static final RegistrySupplier<WorldGenEldritchRing> ELDRITCH_RING =
-            FEATURES.register("eldritch_ring", WorldGenEldritchRing::new);
+    /**
+     * The eldritch ring is the single port of the original WorldGenEldritchRing and it belongs
+     * to the Outer Lands, because the ring seeds the labyrinth of the Outer Lands. It is
+     * registered by {@link ThaumcraftOuterLands} as {@code thaumcraft:tc4_eldritch_ring}.
+     */
 
     public static final ResourceKey<PlacedFeature> BANKER_HOMES_KEY = placed("village_banker_homes");
     public static final ResourceKey<PlacedFeature> WIZARD_TOWERS_KEY = placed("village_wizard_towers");
     public static final ResourceKey<PlacedFeature> HILLTOP_STONES_KEY = placed("hilltop_stones");
-    public static final ResourceKey<PlacedFeature> ELDRITCH_RING_KEY = placed("eldritch_ring");
 
     /** The eldritch stone family of the Outer Lands unit. */
     private static final ResourceLocation ELDRITCH = ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "eldritch");

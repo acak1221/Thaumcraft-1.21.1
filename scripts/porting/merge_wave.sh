@@ -16,8 +16,12 @@ MODE="${1:-}"
 shift || true
 
 git fetch origin work || exit 1
-BASE="$(git rev-parse origin/work)"
-echo "origin/work = $BASE ($(git log -1 --format=%s origin/work))"
+# The agent branches are cut from the LOCAL work head, so they must be rebased onto
+# the LOCAL work head as well: rebasing onto origin/work would replay every already
+# merged wave again.
+BASE="$(git rev-parse work)"
+echo "work = $BASE ($(git log -1 --format=%s work))"
+echo "origin/work = $(git rev-parse origin/work) ($(git log -1 --format=%s origin/work))"
 
 if [ "$MODE" = "--list" ]; then
   for b in $(git for-each-ref --format='%(refname:short)' refs/heads/port/); do
@@ -39,13 +43,13 @@ for n in "$@"; do
   # A branch that is checked out in a worktree must be rebased inside that worktree.
   WT="$(git worktree list --porcelain | awk -v br="refs/heads/$b" '
         $1=="worktree"{w=$2} $1=="branch" && $2==br {print w}')"
-  echo "=== rebasing $b onto origin/work (worktree: ${WT:-none}) ==="
+  echo "=== rebasing $b onto work (worktree: ${WT:-none}) ==="
   if [ -n "$WT" ]; then
-    ( cd "$WT" && git rebase "origin/work" ) || {
+    ( cd "$WT" && git rebase "$BASE" ) || {
       echo "!!! CONFLICT rebasing $b -- resolve inside $WT, then: git rebase --continue / --abort"; exit 1; }
   else
     git checkout -q "$b"
-    git rebase "origin/work" || { echo "!!! CONFLICT rebasing $b"; exit 1; }
+    git rebase "$BASE" || { echo "!!! CONFLICT rebasing $b"; exit 1; }
     git checkout -q work
   fi
   echo "=== merging $b into work ==="

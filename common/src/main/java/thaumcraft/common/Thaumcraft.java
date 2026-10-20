@@ -69,6 +69,7 @@ public final class Thaumcraft {
         thaumcraft.common.lib.network.WarpMessageNetworking.initServer();
         thaumcraft.common.lib.network.KnowledgeNotificationNetworking.initServer();
         ResearchCatalog.loadBundled();
+        thaumcraft.common.lib.mods.ChampionHooks.init();
         thaumcraft.common.lib.research.ResearchConditions.initializeNative();
         ObjectAspectCatalog.loadBundled();
         ThaumcraftLabels.register();
@@ -135,6 +136,7 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftMonsters.register();
         thaumcraft.common.config.ThaumcraftEldritchMobs.register();
         thaumcraft.common.config.ThaumcraftCultists.register();
+        thaumcraft.common.config.ThaumcraftEldritchBlocks.register();
         thaumcraft.common.config.ThaumcraftWarp.enableEvents();
         thaumcraft.common.config.ThaumcraftSpa.register();
         thaumcraft.common.config.ThaumcraftEldritchItems.register();
@@ -148,6 +150,7 @@ public final class Thaumcraft {
         ThaumcraftTubes.register();
         ThaumcraftInfusion.register();
         ThaumcraftEquipment.register();
+        thaumcraft.common.config.ThaumcraftLegacyItems.register();
         ThaumcraftEssences.register();
         ThaumcraftWearables.register();
         KnowledgeEvents.initServer();

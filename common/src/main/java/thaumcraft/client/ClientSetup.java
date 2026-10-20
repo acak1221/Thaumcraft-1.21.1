@@ -138,6 +138,7 @@ public final class ClientSetup {
         thaumcraft.client.ThaumcraftEldritchClient.init();
         thaumcraft.client.ThaumcraftDeviceGuiClient.init();
         thaumcraft.client.ThaumcraftGearModelsClient.init();
+        thaumcraft.client.ThaumcraftChampionClient.init();
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OpenThaumonomiconPayload.TYPE,
                 OpenThaumonomiconPayload.STREAM_CODEC, (payload, context) -> context.queue(() -> {
                     var minecraft = Minecraft.getInstance();

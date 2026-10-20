@@ -15,7 +15,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -90,33 +89,12 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         int variant = state.getValue(VARIANT);
         if (variant == EldritchBlockRules.COSMETIC_WARDING_STONE) {
-            return new TileWardingStone(wardingStoneType(state), pos, state);
+            return new TileWardingStone(pos, state);
         }
         if (variant == EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED) {
-            return new TileNode(nodeType(state), pos, state);
+            return new TileNode(ThaumcraftEldritchBlocks.COSMETIC_NODE_TILE.get(), pos, state);
         }
         return null;
-    }
-
-    /**
-     * The block entity type of the warding stone. The eldritch family and the legacy
-     * tile unit register the same original stone under two ids, and every block
-     * entity type only accepts the blocks it was registered for, so the type of the
-     * block decides which one is used.
-     */
-    private static BlockEntityType<?> wardingStoneType(BlockState state) {
-        if (state.is(thaumcraft.common.config.ThaumcraftLegacyTiles.PAVING_STONE_WARDING.get())) {
-            return thaumcraft.common.config.ThaumcraftLegacyTiles.PAVING_STONE_WARDING_BLOCK_ENTITY.get();
-        }
-        return ThaumcraftEldritchBlocks.WARDING_STONE_TILE.get();
-    }
-
-    /** The block entity type of the node of the obsidian totem base. */
-    private static BlockEntityType<?> nodeType(BlockState state) {
-        if (state.is(thaumcraft.common.config.ThaumcraftLegacyTiles.OBSIDIAN_TOTEM_BASE.get())) {
-            return thaumcraft.common.config.ThaumcraftLegacyTiles.COSMETIC_SOLID_NODE_BLOCK_ENTITY.get();
-        }
-        return ThaumcraftEldritchBlocks.COSMETIC_NODE_TILE.get();
     }
 
     /** BlockCosmeticSolid:360-370 - the golem stone toggles with the redstone power. */

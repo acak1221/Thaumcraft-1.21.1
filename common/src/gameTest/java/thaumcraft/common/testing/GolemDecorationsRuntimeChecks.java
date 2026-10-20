@@ -66,7 +66,7 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
  */
 public final class GolemDecorationsRuntimeChecks {
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
-    private static final int WOOD = 1, TALLOW = 2, IRON = 6, DEADLINE = 1500;
+    private static final int WOOD = 1, TALLOW = 2, IRON = 6, DEADLINE = 1500, RANGE_DELAY = 5;
     private static final List<ItemStack> NO_FILTERS = Collections.nCopies(GolemData.FILTER_SLOTS, ItemStack.EMPTY);
     private static final List<Integer> NO_COUNTS = Collections.nCopies(GolemData.FILTER_SLOTS, 0);
 
@@ -77,18 +77,29 @@ public final class GolemDecorationsRuntimeChecks {
         try {
             check.recipes();
             check.start();
+            check.holdRangeArea();
             check.installation();
             check.effects();
             check.persistence();
             check.recallAndDismantling();
             check.tooltip();
-            check.armLanes();
         } catch (RuntimeException failure) {
             check.finish();
             throw failure;
         }
-        test.onEachTick(() -> {
+        test.runAfterDelay(RANGE_DELAY, () -> {
             if (check.finished) return;
+            try {
+                check.range();
+                check.armLanes();
+                check.ready = true;
+            } catch (RuntimeException failure) {
+                check.finish();
+                throw failure;
+            }
+        });
+        test.onEachTick(() -> {
+            if (check.finished || !check.ready) return;
             try {
                 if (check.poll()) { check.finish(); test.succeed(); }
             } catch (RuntimeException failure) {
@@ -118,7 +129,7 @@ public final class GolemDecorationsRuntimeChecks {
         private final List<Entity> spawned = new ArrayList<>();
         private final List<ChunkPos> forced = new ArrayList<>();
         private final List<Lane> lanes = new ArrayList<>();
-        private boolean touched, finished;
+        private boolean touched, finished, ready;
 
         private Check(GameTestHelper test) {
             this.test = test;
@@ -304,7 +315,17 @@ public final class GolemDecorationsRuntimeChecks {
             test.assertTrue(use(late) == InteractionResult.CONSUME && late.getMaxHealth() == type.health + 5 && late.getHealth() == type.health - 3,
                     "a hat installed later raises the maximum but does not heal");
             clearGolems();
+        }
 
+        /** The Guard sees a spider only when the 48 blocks around both are loaded; where the test landed in its chunk is random. */
+        private void holdRangeArea() { forced.addAll(GolemChunks.hold(level, List.of(base, base.offset(22, 0, 0)))); }
+
+        /**
+         * Range, decided by a real Guard for real spiders: spectacles 16 -> 17.6, the advanced golem on top of that. Runs a few ticks
+         * after {@link #holdRangeArea}: a chunk that has just been forced is loaded at once but its entities stay hidden from the
+         * world's lookup (so no Guard can see them) until the chunk status has moved on, which takes a tick or two.
+         */
+        private void range() {
             // Range, decided by a real Guard for real spiders: spectacles 16 -> 17.6, the advanced golem on top of that.
             var guard = golem(TALLOW, GolemData.GUARD, "G");
             guard.setHome(base, Direction.UP);
@@ -312,12 +333,12 @@ public final class GolemDecorationsRuntimeChecks {
             List<Mob> targets = new ArrayList<>();
             for (int distance : distances) {
                 BlockPos pos = base.offset(distance, 0, 0);
-                level.getChunk(pos);
                 var spider = EntityType.SPIDER.create(level);
                 spider.moveTo(pos.getX() + .5, pos.getY(), pos.getZ() + .5, 0, 0);
                 spider.setNoAi(true);
                 spider.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(spider) && spider.isAlive() && level.hasChunkAt(pos), "a real spider stands " + distance + " blocks from the home");
+                test.assertTrue(level.addFreshEntity(spider) && spider.isAlive() && level.hasChunkAt(pos) && level.getEntity(spider.getId()) == spider,
+                        "a real spider stands " + distance + " blocks from the home and the world can look it up");
                 spawned.add(spider);
                 targets.add(spider);
             }

@@ -60,7 +60,7 @@ import thaumcraft.common.items.golems.GolemUseOptions;
  */
 public final class GolemDartRuntimeChecks {
     private static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
-    private static final int THAUMIUM = 7, DEADLINE = 1400, DISTANCE = 14, NEAR = 12, PLAIN_SHOTS = 3, QUICK_SHOTS = 5, IDLE_TICKS = 220;
+    private static final int THAUMIUM = 7, DEADLINE = 1400, DISTANCE = 14, NEAR = 12, CLOSE = 2, PLAIN_SHOTS = 3, QUICK_SHOTS = 5, IDLE_TICKS = 220;
     private static final float WALK = 0.12F; // about a tenth of a block per tick: slow enough for a few shots between the reach and the melee range
     private static final List<ItemStack> NO_FILTERS = Collections.nCopies(GolemData.FILTER_SLOTS, ItemStack.EMPTY);
     private static final List<Integer> NO_COUNTS = Collections.nCopies(GolemData.FILTER_SLOTS, 0);
@@ -271,15 +271,18 @@ public final class GolemDartRuntimeChecks {
         private void armLanes() {
             // Far from the lanes other tests use (z + 40, 80, 120, 160): a Guard targets the NEAREST hostile in its range, so a stray
             // spider of a neighbouring test would silently become its target.
-            List<BlockPos> bases = List.of(base.offset(0, 0, 240), base.offset(0, 0, 280), base.offset(0, 0, 320), base.offset(0, 0, 360), base.offset(0, 0, 400));
+            List<BlockPos> bases = List.of(base.offset(0, 0, 240), base.offset(0, 0, 280), base.offset(0, 0, 320), base.offset(0, 0, 360), base.offset(0, 0, 400),
+                    base.offset(0, 0, 440));
             for (BlockPos pos : bases) forceChunks(pos, 2);
             // PLAIN and INSTALLED-LATE start inside the reach (80% of 16 = 12.8 blocks), so their first dart tells the half-interval wait;
             // QUICK starts beyond it, so its first dart must wait until the golem has walked into the reach.
             lanes.add(new ShootLane("PLAIN", bases.get(0), List.of(), PLAIN_SHOTS, NEAR, false));
             lanes.add(new ShootLane("QUICK", bases.get(1), List.of(GolemUpgrade.AIR.id, GolemUpgrade.AIR.id), QUICK_SHOTS, DISTANCE, false));
             lanes.add(new ShootLane("INSTALLED-LATE", bases.get(2), List.of(), 2, NEAR, true));
-            lanes.add(new IdleLane("NO-LAUNCHER", bases.get(3), GolemData.GUARD, ""));
-            lanes.add(new IdleLane("FILL", bases.get(4), GolemData.FILL, "R"));
+            lanes.add(new IdleLane("NO-LAUNCHER", bases.get(3), GolemData.GUARD, "", DISTANCE, false));
+            lanes.add(new IdleLane("FILL", bases.get(4), GolemData.FILL, "R", DISTANCE, false));
+            // A spider two blocks away is melee range, not dart range: the launcher stays quiet and the Guard fights with its hands.
+            lanes.add(new IdleLane("TOO-CLOSE", bases.get(5), GolemData.GUARD, "R", CLOSE, true));
             for (Lane each : lanes) each.setup();
         }
 
@@ -389,9 +392,11 @@ public final class GolemDartRuntimeChecks {
                     test.assertTrue(maxArm > 0 && armReset, name + ": the left arm was raised by a shot and came down again");
                     if (hit > 0) {
                         // Whether a given dart happens to hit is the spread's business; when one did, it took what the arrow rule says.
-                        // The dart does 0.4 of the attack attribute times the speed it still has on arrival (1.2 to 1.6), rounded up.
+                        // The dart does 0.4 of the attack attribute times the speed it still has on arrival, rounded up. That speed is the
+                        // launch speed 1.6 less the drag of the flight, but the spread is added to the unit direction without renormalising,
+                        // so an inaccurate shot can arrive up to about 6% faster than it left (1.7): a hit of 5.0 for 2.4 was seen.
                         double damage = (float) guard.getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.4F;
-                        int low = (int) Math.ceil(1.2 * damage), high = (int) Math.ceil(1.6 * damage);
+                        int low = (int) Math.ceil(1.2 * damage), high = (int) Math.ceil(1.75 * damage);
                         test.assertTrue(hit >= low && hit <= high, name + ": a dart took " + hit + " health; ceil(speed * " + damage + ") lies between " + low + " and " + high);
                     }
                     Thaumcraft.LOG.info("Dart lane {}: shots at {} (minimum gap {}), nearest {} blocks, first dart wound {}", name, shots, minGap, Math.sqrt(nearest), hit);
@@ -405,22 +410,25 @@ public final class GolemDartRuntimeChecks {
             }
         }
 
-        /** A golem that must NOT shoot, standing against a spider it may well attack in melee. */
+        /** A golem that must NOT shoot, standing against a spider it may well attack in melee (and, when {@code fights}, must). */
         private final class IdleLane extends Lane {
             final int core;
             final String decoration;
+            final int distance;
+            final boolean fights;
             EntityGolemBase golem;
             Mob target;
             double nearest = Double.MAX_VALUE;
             int darts;
+            boolean fought;
 
-            IdleLane(String name, BlockPos b, int core, String decoration) {
+            IdleLane(String name, BlockPos b, int core, String decoration, int distance, boolean fights) {
                 super(name, b);
-                this.core = core; this.decoration = decoration;
+                this.core = core; this.decoration = decoration; this.distance = distance; this.fights = fights;
             }
 
             @Override void arm() {
-                target = spider(b.offset(0, 0, DISTANCE));
+                target = spider(b.offset(0, 0, distance));
                 golem = walker(core, decoration, List.of());
             }
 
@@ -429,8 +437,11 @@ public final class GolemDartRuntimeChecks {
                 nearest = Math.min(nearest, golem.distanceToSqr(target.getX(), target.getBoundingBox().minY, target.getZ()));
                 darts += level.getEntitiesOfClass(EntityDart.class, region, entity -> !existing.contains(entity.getUUID())).size();
                 test.assertTrue(darts == 0, name + ": no dart may leave");
+                fought |= target.getHealth() < target.getMaxHealth();
                 if (test.getTick() >= startedAt + IDLE_TICKS) {
                     test.assertTrue(golem.getLeftArmTimer() == 0, name + ": the left arm never rises without a shot");
+                    test.assertTrue(!fights || fought && golem.getTarget() == target,
+                            name + ": the Guard took the spider as its target and hurt it in melee (otherwise the quiet launcher proves nothing)");
                     done = true;
                 }
             }

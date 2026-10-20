@@ -1,3 +1,3 @@
-golem-fishing-burn
+wand-rods
 
-# request 6: the burning catch of a Fire fishing golem (dart run 5 and trunk run 4 are still being read)
+# request 7: the elemental wand rods and the wand model selection (dart run 5 and fishing-burn run 6 have been read)

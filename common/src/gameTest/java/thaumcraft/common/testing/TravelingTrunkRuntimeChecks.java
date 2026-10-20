@@ -152,11 +152,7 @@ public final class TravelingTrunkRuntimeChecks {
 
         private void start() {
             touched = true;
-            var center = new ChunkPos(base);
-            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                var chunk = new ChunkPos(center.x + dx, center.z + dz);
-                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
-            }
+            forced.addAll(GolemChunks.hold(level, original.keySet()));
             for (BlockPos mutable : original.keySet()) {
                 boolean floor = mutable.getY() == base.getY() - 1 || mutable.getY() == base.getY() - 1 + LAYER;
                 level.setBlock(mutable, floor ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET);

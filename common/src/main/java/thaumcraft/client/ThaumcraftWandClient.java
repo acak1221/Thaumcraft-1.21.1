@@ -5,6 +5,7 @@ import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import net.minecraft.resources.ResourceLocation;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.items.wands.ItemWandCasting;
+import thaumcraft.common.items.wands.WandModels;
 import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.items.wands.foci.FocusData;
 import thaumcraft.common.items.wands.foci.ItemFocusShock;
@@ -23,25 +24,17 @@ public final class ThaumcraftWandClient {
     public static void init() {
         if (initialized) return;
         initialized = true;
-        // Native ClampedItemPropertyFunction.call clamps to[0,1]. These must
-        // match wand.json; integer2 would silently become greatwood's old1.
+        // Native ClampedItemPropertyFunction.call clamps to [0,1]. The values come from WandModels, which the
+        // wand.json overrides are generated and checked against (WandModelAssetsTest).
         ItemPropertiesRegistry.register(ThaumcraftContent.WAND.get(), ROD_PROPERTY,
-                (stack, level, entity, seed) -> switch (ItemWandCasting.data(stack).rod()) {
-                    case "silverwood" -> 1F;
-                    case "greatwood" -> .5F;
-                    default -> 0F;
-                });
+                (stack, level, entity, seed) -> WandModels.rodValue(ItemWandCasting.data(stack).rod()));
         ItemPropertiesRegistry.register(ThaumcraftContent.WAND.get(), CAP_PROPERTY,
-                (stack, level, entity, seed) -> switch (ItemWandCasting.data(stack).cap()) {
-                    case "thaumium" -> 1F;
-                    case "gold" -> .5F;
-                    default -> 0F;
-                });
+                (stack, level, entity, seed) -> WandModels.capValue(ItemWandCasting.data(stack).cap()));
         ItemPropertiesRegistry.register(ThaumcraftContent.WAND.get(), FOCUS_PROPERTY,
                 (stack, level, entity, seed) -> {
                     var focus = FocusData.get(stack);
-                    return focus.getItem() instanceof ItemFocusShock ? 1F : focus.getItem() instanceof ItemFocusFrost ? .75F
-                            : focus.getItem() instanceof ItemFocusExcavation ? .5F : focus.isEmpty() ? 0F : .25F;
+                    return (focus.getItem() instanceof ItemFocusShock ? WandModels.SHOCK : focus.getItem() instanceof ItemFocusFrost ? WandModels.FROST
+                            : focus.getItem() instanceof ItemFocusExcavation ? WandModels.EXCAVATION : focus.isEmpty() ? WandModels.NONE : WandModels.OTHER).value();
                 });
         ColorHandlerRegistry.registerItemColors((stack, tint) -> {
             var focus = FocusData.get(stack);

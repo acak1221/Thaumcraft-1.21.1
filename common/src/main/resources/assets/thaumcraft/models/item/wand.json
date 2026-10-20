@@ -1,7 +1,1089 @@
 {
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "thaumcraft:items/wand_rod_greatwood",
-    "layer1": "thaumcraft:items/wand_cap_iron"
+ "parent": "minecraft:item/handheld",
+ "textures": {
+  "layer0": "thaumcraft:items/wand_rod_greatwood",
+  "layer1": "thaumcraft:items/wand_cap_iron"
+ },
+ "overrides": [
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_wood_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_wood_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_wood_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_wood_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_wood_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_wood_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_wood_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_wood_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_wood_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_wood_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_wood_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_wood_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_wood_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_wood_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_wood_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_greatwood_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_greatwood_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_greatwood_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_greatwood_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_greatwood_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_greatwood_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_greatwood_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_greatwood_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_greatwood_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_silverwood_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_silverwood_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_silverwood_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_silverwood_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_silverwood_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_silverwood_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_silverwood_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_silverwood_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_silverwood_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_obsidian_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_obsidian_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_obsidian_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_obsidian_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_obsidian_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_obsidian_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_obsidian_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_obsidian_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_obsidian_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_blaze_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_blaze_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_blaze_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_blaze_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_blaze_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_blaze_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_blaze_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_blaze_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_blaze_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_blaze_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_blaze_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_blaze_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_blaze_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_blaze_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_blaze_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_ice_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_ice_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_ice_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_ice_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_ice_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_ice_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_ice_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_ice_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_ice_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_ice_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_ice_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_ice_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_ice_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_ice_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_ice_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_quartz_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_quartz_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_quartz_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_quartz_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_quartz_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_quartz_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_quartz_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_quartz_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_quartz_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_quartz_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_quartz_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_quartz_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_quartz_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_quartz_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.75,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_quartz_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_bone_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_bone_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_bone_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_bone_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_bone_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_bone_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_bone_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_bone_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_bone_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_bone_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_bone_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_bone_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_bone_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_bone_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_bone_thaumium_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_reed_iron"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_reed_iron_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_reed_iron_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_reed_iron_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_reed_iron_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_reed_gold"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_reed_gold_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_reed_gold_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_reed_gold_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 0.5,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_reed_gold_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_reed_thaumium"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_reed_thaumium_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_reed_thaumium_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_reed_thaumium_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 1.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_reed_thaumium_shock"
   }
+ ]
 }

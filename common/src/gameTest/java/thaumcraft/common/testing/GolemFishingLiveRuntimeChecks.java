@@ -110,13 +110,7 @@ public final class GolemFishingLiveRuntimeChecks {
             }
             for (Lane lane : lanes) for (BlockPos pos : lane.region()) original.put(pos.immutable(), level.getBlockState(pos));
             touched = true;
-            for (Lane lane : lanes) {
-                var center = new ChunkPos(lane.home);
-                for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                    var chunk = new ChunkPos(center.x + dx, center.z + dz);
-                    if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
-                }
-            }
+            for (Lane lane : lanes) forced.addAll(GolemChunks.hold(level, lane.region()));
             for (Lane lane : lanes) lane.build();
         }
 

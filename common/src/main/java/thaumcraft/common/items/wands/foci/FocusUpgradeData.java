@@ -74,7 +74,8 @@ public record FocusUpgradeData(List<Short> ranks) {
         if (focus == null || focus.isEmpty() || focus.getCount() != 1
                 || focus.has(ThaumcraftFoci.WAND_FOCUS.get()) || focus.has(ThaumcraftContent.WAND_DATA.get())
                 || !(focus.getItem() instanceof ItemFocusFire || focus.getItem() instanceof ItemFocusFrost
-                    || focus.getItem() instanceof ItemFocusShock || focus.getItem() instanceof ItemFocusExcavation)) return false;
+                    || focus.getItem() instanceof ItemFocusShock || focus.getItem() instanceof ItemFocusExcavation
+                    || focus.getItem() instanceof ItemFocusPortableHole)) return false;
         ItemFocusBasic item = (ItemFocusBasic) focus.getItem();
         List<Short> ranks = read(focus).ranks;
         for (int slot = 0; slot < SLOTS; slot++) {

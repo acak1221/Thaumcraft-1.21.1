@@ -5,8 +5,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -40,6 +43,10 @@ public final class TileEldritchPortal extends BlockEntity {
     public int opencount = -1;
     private int count = 0;
 
+    /** The ambient sound of the gate, oracle TileEldritchPortal:57-59. */
+    private static final SoundEvent EVIL_PORTAL =
+            SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "evilportal"));
+
     /** The research the original completes when a player enters the Outer Lands. */
     public static final String OUTER_LANDS_RESEARCH = "ENTEROUTER";
 
@@ -54,6 +61,11 @@ public final class TileEldritchPortal extends BlockEntity {
     public static void tick(Level level, BlockPos pos, BlockState state, TileEldritchPortal portal) {
         portal.count++;
         if (level.isClientSide) {
+            // Oracle TileEldritchPortal:57-59 - the gate repeats its sound every 250 ticks.
+            if (portal.count % EldritchBlockRules.PORTAL_SOUND_PERIOD == 0 || portal.count == 0) {
+                level.playLocalSound(pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D,
+                        EVIL_PORTAL, SoundSource.AMBIENT, 1.0F, 1.0F, false);
+            }
             if (portal.opencount < EldritchBlockRules.PORTAL_OPEN_COUNT_MAX) portal.opencount++;
             return;
         }

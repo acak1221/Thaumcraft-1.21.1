@@ -3,16 +3,11 @@ package thaumcraft.common.lib.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +19,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.lib.mods.ChampionHooks;
+import thaumcraft.common.lib.mods.ChampionModifier;
+import thaumcraft.common.lib.mods.ChampionRules;
 import thaumcraft.common.entities.EntitySpecialItem;
 
 /**
@@ -36,14 +34,6 @@ import thaumcraft.common.entities.EntitySpecialItem;
  * in every direction.
  */
 public final class EntityUtils {
-    /**
-     * Original {@code CHAMPION_MOD}: the custom attribute that holds the champion modifier of a monster.
-     *
-     * <p>1.21.1 only knows attributes that were registered with the attribute registry, so the monster attribute
-     * supplier of the champion monsters has to carry this instance.
-     */
-    public static final Attribute CHAMPION_MOD = new RangedAttribute("tc.mobmod", -2.0, -2.0, 100.0);
-
     /** Original {@code CHAMPION_HEALTH}: the original modifier UUID a62bef38-48cc-42a6-ac5e-ef913841c4fd. */
     public static final AttributeModifier CHAMPION_HEALTH = modifier("a62bef38-48cc-42a6-ac5e-ef913841c4fd", 30.0, AttributeModifier.Operation.ADD_VALUE);
     /** Original {@code CHAMPION_DAMAGE}: the original modifier UUID a340d2db-d881-4c25-ac62-f0ad14cd63b0. */
@@ -71,27 +61,35 @@ public final class EntityUtils {
     /**
      * One champion modifier: the attribute modifier it applies and the name the original showed.
      *
-     * <p>The champion modifier table itself lives in the monster layer, so it is registered here by the owner of
-     * the champion monsters.
+     * <p>Forced 1.21.1 change: the original champion modifier table lived in the monster layer and was registered
+     * here by its owner. The native port owns the table in {@link ChampionModifier}, so this record only remains
+     * as the public shape of one table entry.</p>
      */
     public record ChampionMod(AttributeModifier attributeMod, String name) {}
-
-    private static final List<ChampionMod> championMods = new ArrayList<>();
 
     /** The original player's default eye height of 1.62, used by the client side ray prediction. */
     private static final float DEFAULT_EYE_HEIGHT = 1.62F;
 
     private EntityUtils() {}
 
-    /** Register one champion modifier of the champion modifier table. */
-    public static void registerChampionMod(ChampionMod mod) {
-        if (mod == null) return;
-        championMods.add(mod);
+    /**
+     * The original champion modifier table, read from the native champion modifier list.
+     *
+     * <p>The 1.7 original registered the table here; the native port keeps the table in
+     * {@link ChampionModifier}, so this method answers the same list without a second copy.</p>
+     */
+    public static List<ChampionMod> championMods() {
+        List<ChampionMod> mods = new ArrayList<>();
+        for (ChampionModifier modifier : ChampionModifier.mods) {
+            mods.add(new ChampionMod(modifierAttribute(modifier), modifier.displayName));
+        }
+        return List.copyOf(mods);
     }
 
-    /** The registered champion modifiers. */
-    public static List<ChampionMod> championMods() {
-        return List.copyOf(championMods);
+    /** The native attribute modifier of one original champion modifier. */
+    private static AttributeModifier modifierAttribute(ChampionModifier modifier) {
+        return new AttributeModifier(ResourceLocation.fromNamespaceAndPath("thaumcraft",
+                modifier.attributeModifierId.toString()), modifier.attributeAmount, AttributeModifier.Operation.ADD_VALUE);
     }
 
     /**
@@ -330,62 +328,43 @@ public final class EntityUtils {
      * <p>The original picked a random champion modifier, made a creeper always the first modifier, applied the
      * health and damage modifiers, healed the monster to 25 and renamed it. 1.21.1 keeps the modifiers as
      * permanent attribute modifiers and the health as the entity's health value.
+     *
+     * <p>Forced 1.21.1 change: the original kept the modifier id in the custom {@code tc.mobmod} attribute, an
+     * attribute 1.21.1 cannot register. The native port keeps the modifier id in the mob's own champion field
+     * ({@link ChampionHooks}), so this method writes the id there and lets {@link ChampionRules} apply the
+     * modifiers; the two systems therefore always agree on the champion state of a mob.</p>
      */
     public static void makeChampion(LivingEntity entity, boolean persist) {
         if (!(entity instanceof Monster mob)) return;
-        if (championMods.isEmpty()) return;
-        int type = mob.getRandom().nextInt(championMods.size());
-        if (mob instanceof Creeper) type = 0;
-        makeChampion(mob, type, persist);
+        int type = ChampionRules.Adapter.makeChampion(mob, mob.getRandom(), mob instanceof Creeper);
+        ChampionHooks.setChampionModifier(mob, type);
+        if (persist) mob.setPersistenceRequired();
     }
 
     /** The champion modifier of a given type applied to a monster. */
     public static void makeChampion(LivingEntity entity, int type, boolean persist) {
-        if (entity == null || type < 0 || type >= championMods.size()) return;
-        AttributeInstance mod = championModAttribute(entity);
-        if (mod != null) {
-            mod.removeModifier(championMods.get(type).attributeMod());
-            mod.addOrReplacePermanentModifier(championMods.get(type).attributeMod());
-        }
-        apply(entity, Attributes.MAX_HEALTH, CHAMPION_HEALTH);
-        apply(entity, Attributes.ATTACK_DAMAGE, CHAMPION_DAMAGE);
-        entity.setHealth(25.0f);
-        entity.setCustomName(Component.literal(championMods.get(type).name() + " " + entity.getName().getString()));
-        if (persist && entity instanceof net.minecraft.world.entity.Mob mob) mob.setPersistenceRequired();
-        switch (type) {
-            case 0: apply(entity, Attributes.MOVEMENT_SPEED, BOLDBUFF); break;
-            case 3: apply(entity, Attributes.ATTACK_DAMAGE, MIGHTYBUFF); break;
-            case 5: {
-                double max = entity.getAttributeValue(Attributes.MAX_HEALTH);
-                entity.setHealth((float) (entity.getHealth() + max / 2));
-                break;
-            }
-            default: break;
-        }
-    }
-
-    private static void apply(LivingEntity entity, net.minecraft.core.Holder<Attribute> attribute, AttributeModifier modifier) {
-        AttributeInstance instance = entity.getAttribute(attribute);
-        if (instance == null) return;
-        instance.removeModifier(modifier);
-        instance.addOrReplacePermanentModifier(modifier);
+        if (!(entity instanceof Monster mob)) return;
+        if (ChampionModifier.byId(type) == null) return;
+        ChampionRules.Adapter.promote(mob, type);
+        ChampionHooks.setChampionModifier(mob, type);
+        if (persist) mob.setPersistenceRequired();
     }
 
     /**
-     * The champion modifier attribute of an entity, or null when the monster does not carry the attribute.
+     * The champion modifier id of a mob, or {@link ChampionHooks#NOT_ROLLED} when the mob was never rolled.
      *
-     * <p>1.21.1 only knows the attributes of the monster attribute supplier, so the champion monsters have to
-     * carry {@link #CHAMPION_MOD}.
+     * <p>This is the answer the original {@code EntityUtils.CHAMPION_MOD} attribute gave: the 1.7 original kept
+     * the modifier id in a custom attribute of every {@code EntityMob}, the native port keeps it in the mob's own
+     * champion field and mirrors it into the synced entity data.</p>
      */
-    public static AttributeInstance championModAttribute(LivingEntity entity) {
-        if (entity == null) return null;
-        for (AttributeInstance instance : entity.getAttributes().getAttributesToSync()) {
-            if (instance.getAttribute().value() == CHAMPION_MOD) {
-                if (instance.getBaseValue() > -2.0) instance.setBaseValue(-2.0);
-                return instance;
-            }
-        }
-        return null;
+    public static int championId(LivingEntity entity) {
+        if (!(entity instanceof net.minecraft.world.entity.Mob mob)) return ChampionHooks.NOT_ROLLED;
+        return ChampionHooks.championId(mob);
+    }
+
+    /** Whether the mob carries a champion modifier. */
+    public static boolean isChampion(LivingEntity entity) {
+        return championId(entity) >= 0;
     }
 
     /** The UUID form of a modifier id, for the callers that still speak the original identifiers. */

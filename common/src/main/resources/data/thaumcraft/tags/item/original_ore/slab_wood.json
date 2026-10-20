@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#minecraft:wooden_slabs",
+      "required": false
+    },
+    "thaumcraft:greatwood_slab",
+    "thaumcraft:silverwood_slab"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:gold_ore",
+    "minecraft:deepslate_gold_ore",
+    {
+      "id": "#c:ores/gold",
+      "required": false
+    }
+  ]
+}

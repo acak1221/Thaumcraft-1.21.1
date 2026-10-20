@@ -125,12 +125,12 @@ public class EntityTaintSeed extends net.minecraft.world.entity.monster.Monster 
     }
     /** Original TC6 flux saturation has no1.21.1 counterpart: the native taint blocks are the growth supply. */
     private float growthSupply() {
-        if(EntityTaintacle.isTaintMaterial(level().getBlockState(blockPosition())))return 1.0F;
+        boolean self=EntityTaintacle.isTaintMaterial(level().getBlockState(blockPosition()));
+        int neighbours=0;
         for(Direction side:Direction.values()) {
-            var next=blockPosition().relative(side);
-            if(EntityTaintacle.isTaintMaterial(level().getBlockState(next)))return 1.0F;
+            if(EntityTaintacle.isTaintMaterial(level().getBlockState(blockPosition().relative(side))))neighbours++;
         }
-        return 0.0F;
+        return TaintAnimalRules.seedGrowthSupply(self,neighbours)?1.0F:0.0F;
     }
     /** Original TaintHelper.spreadFibres with the ignore flag. */
     private void spreadFibres(ServerLevel server) {

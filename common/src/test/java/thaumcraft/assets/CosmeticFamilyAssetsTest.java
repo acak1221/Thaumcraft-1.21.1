@@ -101,12 +101,17 @@ class CosmeticFamilyAssetsTest {
     }
 
     @Test void everyMetadataOfTheCosmeticSolidHasAModel() throws Exception {
-        for (String group : List.of("cosmetic_solid", "cosmetic_solid_tough", "cosmetic_solid_thaumium")) {
-            for (int variant = 0; variant <= 15; variant++) {
-                String reference = model(group, "variant=" + variant);
-                assertTrue(ResourceTree.exists("assets/thaumcraft/models/" + reference.substring("thaumcraft:".length()) + ".json"),
-                        group + " variant " + variant + " -> " + reference);
-            }
+        // The group design splits the original metadata over the three hardness groups, so every
+        // metadata looks its model up in the group that hosts it.
+        Map<Integer, String> owner = Map.ofEntries(
+                Map.entry(0, "cosmetic_solid_tough"), Map.entry(8, "cosmetic_solid_tough"),
+                Map.entry(4, "cosmetic_solid_thaumium"), Map.entry(6, "cosmetic_solid_thaumium"),
+                Map.entry(7, "cosmetic_solid_thaumium"));
+        for (int variant = 0; variant <= 15; variant++) {
+            String group = owner.getOrDefault(variant, "cosmetic_solid");
+            String reference = model(group, "variant=" + variant);
+            assertTrue(ResourceTree.exists("assets/thaumcraft/models/" + reference.substring("thaumcraft:".length()) + ".json"),
+                    group + " variant " + variant + " -> " + reference);
         }
     }
 

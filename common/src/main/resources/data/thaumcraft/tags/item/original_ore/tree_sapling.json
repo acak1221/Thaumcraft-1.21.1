@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#minecraft:saplings",
+      "required": false
+    },
+    "thaumcraft:greatwood_sapling",
+    "thaumcraft:silverwood_sapling"
+  ]
+}

@@ -68,22 +68,23 @@ public final class InventoryUtils {
 
     /**
      * The original {@code OreDictionary} shortcut: are the two items members of the same ore dictionary name?
+     *
+     * <p>Forced 1.21.1 change: the original asked the Forge ore dictionary for the FIRST ore id of the first stack
+     * and compared the second stack against the ores of that one id. The native port asks every registered original
+     * ore name, so the answer is the same for every material the original recipes use.</p>
      */
     public static boolean matchesOre(ItemStack stack0, ItemStack stack1) {
         if (stack0 == null || stack1 == null || stack0.isEmpty() || stack1.isEmpty()) return false;
         for (TagKey<Item> tag : oreTags.values()) {
-            var registry = net.minecraft.core.registries.BuiltInRegistries.ITEM;
-            var holder = registry.getTag(tag).orElse(null);
-            if (holder == null) continue;
-            boolean first = false;
-            boolean second = false;
-            for (var item : holder) {
-                if (item.value() == stack0.getItem()) first = true;
-                if (item.value() == stack1.getItem()) second = true;
-            }
-            if (first && second) return true;
+            if (!stack0.is(tag)) continue;
+            if (stack1.is(tag)) return true;
         }
         return false;
+    }
+
+    /** The original ore names this port knows, with their native item tags. */
+    public static Map<String, TagKey<Item>> registeredOreTags() {
+        return java.util.Collections.unmodifiableMap(oreTags);
     }
 
     // -------------------------------------------------------------------- insertion

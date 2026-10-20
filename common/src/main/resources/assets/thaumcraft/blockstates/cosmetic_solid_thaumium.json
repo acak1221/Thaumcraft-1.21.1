@@ -1,52 +1,13 @@
 {
   "variants": {
-    "variant=0": {
-      "model": "thaumcraft:block/obsidian_totem_base"
-    },
-    "variant=1": {
-      "model": "thaumcraft:block/obsidian_tile"
-    },
-    "variant=2": {
-      "model": "thaumcraft:block/paving_stone_travel"
-    },
-    "variant=3": {
-      "model": "thaumcraft:block/paving_stone_warding"
-    },
     "variant=4": {
       "model": "thaumcraft:block/thaumium_block"
-    },
-    "variant=5": {
-      "model": "thaumcraft:block/tallow_block"
     },
     "variant=6": {
       "model": "thaumcraft:block/arcane_pedestal"
     },
     "variant=7": {
       "model": "thaumcraft:block/arcane_stone"
-    },
-    "variant=8": {
-      "model": "thaumcraft:block/obsidian_totem_base"
-    },
-    "variant=9": {
-      "model": "thaumcraft:block/golem_fetter"
-    },
-    "variant=10": {
-      "model": "thaumcraft:block/golem_fetter_active"
-    },
-    "variant=11": {
-      "model": "thaumcraft:block/cosmetic_solid_ancient_stone"
-    },
-    "variant=12": {
-      "model": "thaumcraft:block/eldritch_stone"
-    },
-    "variant=13": {
-      "model": "thaumcraft:block/cosmetic_solid_ancient_stone"
-    },
-    "variant=14": {
-      "model": "thaumcraft:block/taint_crust"
-    },
-    "variant=15": {
-      "model": "thaumcraft:block/infused_stone_pillar"
     }
   }
 }

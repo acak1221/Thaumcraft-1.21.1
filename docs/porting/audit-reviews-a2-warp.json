@@ -1,0 +1,2333 @@
+{
+  "thaumcraft/api/IWarpingGear.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/api/IWarpingGear.java:13 public int getWarp(ItemStack var1, EntityPlayer var2);",
+      "native common/src/main/java/thaumcraft/api/IWarpingGear.java:11 int getWarp(ItemStack stack, Player player);",
+      "native common/src/main/java/thaumcraft/common/lib/WarpGear.java:16-19 WarpGear.of() reads the interface, WarpGear.fromGear() sums hand + 4 armor"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Only the EntityPlayer type changed (1.7 EntityPlayer -> 1.21 Player); the contract and the single method are identical.",
+      "The native javadoc still says 'the warp events are not ported yet' - that sentence is stale, WarpEvents/WarpRules implement the whole warp system.",
+      "The original WarpEvents.getWarpFromGear also summed the four bauble slots; the native WarpGear.fromGear has no accessory slots. No shipped TC4 bauble implements IWarpingGear (only void tools/armor, crimson sword, primal crusher, cultist and void robes), so the sum is unchanged in practice."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "ed1496cfb40d1b8ba7d7b78f3add866ea4b2ebf2c730680acc75e3d19a46b60c",
+      "tc4_4_2_3_5_oracle": "66cc5679ea0260acca3b9edabcb5b659faf1b38e9e4d7849285fc21d6728901d"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/api/entities/ITaintedMob.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/api/entities/ITaintedMob.java:3-4 public interface ITaintedMob {}",
+      "native common/src/main/java/thaumcraft/api/entities/ITaintedMob.java:4 public interface ITaintedMob {}",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionFluxTaint.java:23 target instanceof ITaintedMob -> heal 1",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSwarm.java:47 implements ITaintedMob"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Empty marker interface ported verbatim.",
+      "Consumers in the native port: the flux taint potion (heal instead of damage), the bottle of taint splash, the taint creeper explosion and the taint death conversion."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "5790570b26cd2c1bd2c6e85708e2a8b6bf50aab0a620ece5f5023718013d4e8b",
+      "tc4_4_2_3_5_oracle": "bd4d14a53280924b9af280cb4d8eb3a62a55dfcb99d83a424c89b301c9a88604"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/api/items/IWarpingGear.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/api/items/IWarpingGear.java:5-8 interface IWarpingGear { int getWarp(ItemStack, EntityPlayer); }",
+      "legacy src/main/java/thaumcraft/api/IWarpingGear.java:6 public interface IWarpingGear extends thaumcraft.api.items.IWarpingGear",
+      "native common/src/main/java/thaumcraft/api/IWarpingGear.java:10-12 the single native interface with the same single method"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Legacy-only duplicate interface: the 1.12 reference had the contract twice (api.items.IWarpingGear and api.IWarpingGear extending it).",
+      "The native port keeps one interface at thaumcraft.api.IWarpingGear, so the legacy path has no native counterpart of its own.",
+      "No gameplay difference: the same getWarp(ItemStack, Player) method is called by WarpGear."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "341cce6f2d125a9254cc931cbd74c114f8cf7bbcf22e3a0b9c92075b4c0a9a40"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/api/potions/PotionFluxTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/api/potions/PotionFluxTaint.java:52-60 applyEffectTick: ITaintedMob -> heal 1, non undead -> 1 taint damage",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionFluxTaint.java:21-32 applyEffectTick with the same branch order",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionFluxTaint.java:34-37 shouldApplyEffectTickThisTick: 40 >> amplifier",
+      "oracle thaumcraft/api/potions/PotionFluxTaint.java:62-65 func_76397_a: int k = 40 >> par2; return k > 0 ? par1 % k == 0 : true;"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the 1.7 Potion subclass became a registered MobEffect; the public class is now a handle for thaumcraft.common.lib.potions.PotionFluxTaint.",
+      "The original's third damage branch (max health > 1 or player) is unreachable for every vanilla mob, so the native's simpler 'not undead -> damage' is equivalent in practice."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "f5342ae6207a08f02ad4cc01db74efcc8ce8c4e0d7045895f813e35e6cd83d43",
+      "tc4_4_2_3_5_oracle": "5cd6df9da814d219c782bd2df72cd58944552ba729e4e75d9fe1107a1f84fb2f"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/api/potions/PotionVisExhaust.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/api/potions/PotionVisExhaust.java:48-49 applyEffectTick is empty",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionVisExhaust.java:5-10 the passive effect",
+      "native common/src/main/java/thaumcraft/api/potions/PotionVisExhaust.java:20-27 public handle for the registered effect"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect instead of a Potion subclass; the effect stays passive exactly as in the original."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "45f54308bcbf3d6c415435d701fa1683ae0b4fe52e60a860302b9cef7b4df503",
+      "tc4_4_2_3_5_oracle": "86c195e89c7c52bad9e87cfd77087b1841f0106983c584bba39c12b82614e023"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/client/fx/particles/FXWisp.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/fx/particles/FXWisp.java:34-140 six wisp types, tinkle sound, physics and push-out-of-blocks",
+      "native common/src/main/java/thaumcraft/client/fx/particles/PrimalWispParticle.java:37-49 the six-type primal wisp trail and impact",
+      "native common/src/main/java/thaumcraft/client/fx/particles/ResourceParticle.java:66-70 the aspect-coloured wisp particle",
+      "native common/src/main/java/thaumcraft/client/ThaumcraftPrimalFociClient.java:15 the primal orb trail/impact wiring"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.7 custom-entity particle was rebuilt on the 1.21.1 particle engine; the six aspect types, the size and the impact are reproduced.",
+      "Not verified: the per-tick 'tinkle' orb sound of the original FXWisp:188-189 and its exact push-out-of-blocks behaviour are not reproduced one to one."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "06392e96b1667eae30db2af216052f49e99ccd758adc50256dfffa97e307892c",
+      "tc4_4_2_3_5_oracle": "d6f2da2367083380361bb997cea13b8e96e5020ca2b0eb193d8cfd9f73fe6417"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/client/fx/particles/FXWispArcing.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/fx/particles/FXWispArcing.java:1-119 the arcing bolt between two points (ClientProxy.arcFX)",
+      "native common/src/main/java/thaumcraft/client/fx/particles/WispBoltParticle.java:18-33 the bolt particle between two entities",
+      "native common/src/main/java/thaumcraft/common/lib/network/WispZapNetworking.java the payload that replaces PacketFXWispZap"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The arcing bolt became a native particle; the packet that carried it became a CustomPacketPayload.",
+      "Not verified: the exact arc height, colour ramp and per-step draw of the original FXWispArcing."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "ffd5034e826cd7ee9a9f657f21ceec3b32a688170c1bcb8e48255b5fe93dfcd6",
+      "tc4_4_2_3_5_oracle": "818d5c6381213a16d06cf10d2bad2498fb3e18b8c6f6e04045225e5c277c994c"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/client/fx/particles/FXWispEG.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/fx/particles/FXWispEG.java:1-100 the eldritch-guardian spawn burst (ClientProxy:746)",
+      "native common/src/main/java/thaumcraft/client/fx/particles/WarpGuardianParticle.java the native guardian spawn burst"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The guardian spawn burst became a native particle; the visual is not pixel-identical to the 1.7 entity particle."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "b7df5818f3dab5a4d1c08d1f16cc84a2843c9cd16208f0d6a7233bc3aa9f4c4c",
+      "tc4_4_2_3_5_oracle": "35354547f6e8ef9b9c1d6b6953e51f27ba9139f3bb7e30680bb4652bd07d6502"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/client/gui/GuiPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/gui/GuiPech.java:71 the original pech GUI",
+      "native common/src/main/java/thaumcraft/client/gui/GuiPech.java:16-31 the native 175x232 screen with the 25x25 dice target at 67,24",
+      "native common/src/main/java/thaumcraft/common/container/ContainerPech.java:28 IMAGE_WIDTH=175,IMAGE_HEIGHT=232"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The GUI keeps the original 175x232 sheet and the 25x25 dice button; the trade itself is executed server side (the original also generated the contents on the server)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "afeb7231e9bc760ddeb9581f3922aca3f5a19c6b72eab00388c10cb26af93230",
+      "tc4_4_2_3_5_oracle": "a6214c26876cbb41a21f7e7853d2a09fb95e26f1659dbb28bdb5dcb2922d6d3e"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/block/BlockTaintFibreRenderer.java": {
+    "callsite_audit": "complete",
+    "disposition": "exclude",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/block/BlockTaintFibreRenderer.java:1-124 the ISimpleBlockRenderingHandler of the taint fibres",
+      "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:33-50 the overlay face pass of the fibres",
+      "native common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java:28-31 overlay(side,x,y,z) computes the original 95/5 overlay draw",
+      "no native caller of TaintSpreadRules.overlay exists (grep over common/src/main/java finds only the definition)"
+    ],
+    "native_coverage": "missing",
+    "notes": [
+      "1.7.10 ISBRH has no 1.21.1 equivalent; the taint fibres are drawn by the block model and the fibre shape (BlockTaintFibres.getShape).",
+      "The original's random overlay sheet on the fibre sides is not rendered: the rule is still computed in TaintSpreadRules.overlay but nothing calls it.",
+      "This is a client-visual gap, not a gameplay one; the fibres block, its spread and its poison are ported."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "6cb7ca0d1aefee60f6005c8ac822f41afdf7876ad0b6e67d432c445cad2d02ce"
+    },
+    "source_semantics": "not_applicable"
+  },
+  "thaumcraft/client/renderers/block/BlockTaintRenderer.java": {
+    "callsite_audit": "complete",
+    "disposition": "exclude",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:1-81 the ISBRH of the taint crust/soil/flesh blocks",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaint.java:113-116 the native droplet animation of the crust",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:40-41 the crust and soil are ordinary 1.21.1 blocks"
+    ],
+    "native_coverage": "missing",
+    "notes": [
+      "The 1.7.10 ISBRH has no 1.21.1 equivalent, so the three taint block variants are ordinary blocks with their own textures.",
+      "The crust droplet FX of BlockTaint.func_149734_b is reproduced through BlockTaint.clientEffects."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "d6be79c5c2969bbb26b6473c921d3b858e7a0c11c93e8745aab1a24b206a4f9e"
+    },
+    "source_semantics": "not_applicable"
+  },
+  "thaumcraft/client/renderers/entity/RenderBrainyZombie.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderBrainyZombie.java the zombie renderer with the two TC4 skins",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderBrainyZombie.java:20-21 textures/models/bzombie.png and bzombievil.png",
+      "oracle thaumcraft/client/renderers/entity/RenderBrainyZombie.java the same two texture names"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The native renderer keeps both original skins (normal and villager) and the brain model."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "9146893ec2f7c3278416cf0e25ddc70f726c47a47b7d8f838a9b193b1b215530",
+      "tc4_4_2_3_5_oracle": "95bb796ee84af049980b4147fd8b66aa0ecae6bb9cca4d64f047763c4cd5f362"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderFallingTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderFallingTaint.java the falling taint renderer",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderFallingTaint.java:17 the block atlas texture of the falling crust"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The native renderer draws the falling taint with the block atlas, the same visual the 1.7 renderer produced."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "0b509aed156da3f7fa9fdc70e315214332869efac6d36624461f3f7698b62e86",
+      "tc4_4_2_3_5_oracle": "38ce0b115617ee7879585bd5d140593ccdcbe99abbc5fd21c444111d35b8a6b3"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderInhabitedZombie.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderInhabitedZombie.java t1 = textures/models/czombie.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderInhabitedZombie.java:16 textures/models/czombie.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same skin, same 0.5 shadow radius."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "e91b6845d5fd330d29b341366afeeb444bb98d6994c2986c392e196089dbfb8d",
+      "tc4_4_2_3_5_oracle": "a79f65ac978e02644382abde09df24c1b8be09153c790457c4485c2fc3aefd2a"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderMindSpider.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderMindSpider.java the mind spider renderer",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderMindSpider.java:14-15 taint_spider.png plus the taint_spider_eyes.png layer"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The mind spider reuses the taint spider sheet and its glowing eyes layer, as in the original."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "9f471f97161b21e99ea2b54f9a11f0f2883c0381ab08111a34ef8867ffd21359",
+      "tc4_4_2_3_5_oracle": "9c8180bb6768beee43190aa63f47ae9f588c953b43dc004ba0165a27955771eb"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderPech.java the pech renderer with the three skins",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderPech.java:22-30 ModelPech plus the held-item layer"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The three pech skins (pech_forage/pech_thaum/pech_stalker) are kept by the native model layer."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "6abf719daa6b094d2297192b90d818b709743ad6468fdfb351533bcb2ceea8fb",
+      "tc4_4_2_3_5_oracle": "9ef24d99d2078098835ff9d08515f5a633a0e99c9735518e39d6c4030135e461"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderPechBlast.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderPechBlast.java:1-35 the pech blast renderer (no visible mesh)",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderPechBlast.java:14 the player placeholder texture"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The original pech blast has no mesh either, only particles."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "c8fac0e095af6720b24a0f327c4be48424be4f03fd57d64f820f1f2b4ba69f8d",
+      "tc4_4_2_3_5_oracle": "2da906b3cbdfcca3ce2eb1f5fc8d2e7d29866cc41614db8137f0f6d52a9a1aaa"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintChicken.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintChicken.java rl = textures/models/chicken.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintChicken.java:17 textures/models/chicken.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet; the taint sheet is the original texture."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "94903e62becbb0ab1b57e303609b5d7e207c6fa8b2f4242b2e6a59990b73c35e",
+      "tc4_4_2_3_5_oracle": "0e546ffbeeb969fbb11b7eb80daa9511e1456f6281bd18a0db8436811a7ff408"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintCow.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintCow.java rl = textures/models/cow.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintCow.java:12 textures/models/cow.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "d7fef5af9cba8a4031961e7ea5dfca109bd973addb5e09601a740be731c5e1e6",
+      "tc4_4_2_3_5_oracle": "664c5c494a0038af5cb98394bf1a608cb736edf9027d1822bf40117b876a7832"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintCreeper.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintCreeper.java rl = textures/models/creeper.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintCreeper.java:23 textures/models/creeper.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet; the native also keeps the charged-creeper overlay (creeper_armor.png) of the original."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "07f42f862678ee7c5ccf5a4175e18e1e3449fb7cfca63e30695970c92c45feb0",
+      "tc4_4_2_3_5_oracle": "7901071afe4d7d8bae8b3ed4b3f0829d5df535b16f74fddd70b6befda9ecd2be"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintPig.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintPig.java rl = textures/models/pig.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintPig.java:12 textures/models/pig.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "2d2c3824906733846fc8884969bd78352f9c32a98cfe0680d231355fa4fe364f",
+      "tc4_4_2_3_5_oracle": "7df4b1f8a106ababa716c64e0efe743964cfcc8522ba18ad22851b4e3bee0926"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintSheep.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintSheep.java the taint sheep renderer with the wool overlay pass",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintSheep.java:31-43 the WoolLayer that is skipped while the sheep is sheared"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The wool overlay pass and the sheared check are reproduced."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "0fed51e6e2209835b93e309c55462c2ee6b790ab43d91b62d94ce2c12f23f0ae",
+      "tc4_4_2_3_5_oracle": "b13a6bbf938d3564c37f9fe8f4bc15edcdc171480ad617def6c4427dd10a3e99"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintSpider.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintSpider.java the taint spider renderer",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintSpider.java:13-15 taint_spider.png and the eyes layer"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet and eyes layer."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "093467ba79e2f0a5cf823d65165b7ae252bb9d6c5853f3ad9e171a7abbaa7bd6",
+      "tc4_4_2_3_5_oracle": "1348fc8dc83c6f8c0c2189172039333c87e30a9c5a7aedd7f78865498a147004"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintSpore.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintSpore.java rl = textures/models/taint_spore.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintSpore.java:15 textures/models/taint_spore.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "b23a72b1bf4468111a078fd2a32003075e0f446f0c08f02d6702f53a238753b4",
+      "tc4_4_2_3_5_oracle": "3ab9f8939118f946eb07a0ec7e2045c65923549c73b33cfa0f8312f934fa41b4"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintSporeSwarmer.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintSporeSwarmer.java rl = textures/models/taint_spore.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintSporeSwarmer.java:11 textures/models/taint_spore.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet; the swarmer uses the spore model in the original too."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "06f66b79a323d9abb6e8dbf355f4938772e551a181b5cbf52830aee9b0ccc700",
+      "tc4_4_2_3_5_oracle": "41d9272836860a7726017d5351b99a2d829206978ae13dd9d6ae079b9f3bf1bb"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintSwarm.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintSwarm.java:19-26 the renderer draws nothing, the swarm particles are the body",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintSwarm.java:11-14 empty render(), player placeholder texture"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Both draw nothing; the native swarm particles are produced by TaintSwarmVisuals."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "131af757f86d06f2b4b8c5428aadc81119110320535bd7ccd03b20846e4705e0",
+      "tc4_4_2_3_5_oracle": "64534cb3a07bdae76e80c5e442e81d3e6a8b58395b54b8cdd73ac0cb8dc4b156"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintVillager.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintVillager.java rl = textures/models/villager.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintVillager.java:17 textures/models/villager.png"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "b661404a223f114557780df73a58d07be3311d8e8aadb82a3588c0f9324e6bee",
+      "tc4_4_2_3_5_oracle": "bd79bb5252c44a50f8d7653ed06c4f1156f23e8f4dc4dcffbb44ffe68282fe68"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderTaintacle.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderTaintacle.java rl = textures/models/taintacle.png",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintacle.java:11-12 textures/models/taintacle.png with the length parameter"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same sheet; the length parameter of the original model is kept."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "c92d553a23ed34fce2daeb5da47c763a4a1093bc89b8317cfa9a207da4eeffe1",
+      "tc4_4_2_3_5_oracle": "4fe06cb2af3e6a60f22f8d57b60aa59340add74338faabfe0800e21217fe856f"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/entity/RenderWisp.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/entity/RenderWisp.java the additive two-layer wisp billboard",
+      "native common/src/main/java/thaumcraft/client/renderers/entity/RenderWisp.java:30-34 the two additive quads, the 16 frame animation and the red hurt tint"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The native reproduces the unusual texture-width/64 UV nudge (0.249375 per frame of the 256x256 sheet) and the hurt-time red flash."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "f51db5326d963403843346d855beda3d497bf974d6f792d29b550f1df096d7a6",
+      "tc4_4_2_3_5_oracle": "20756fc1cae47389ca9b7750fd147812b3a9f5e5a92c2b4c68b0cece01b2c092"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/ModelPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelPech.java the pech model (the 1.7 tree had it in two packages)",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/ModelPech.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Original-only path in the oracle; the native port keeps one model class. The 1.7 package duplication was flattened into thaumcraft.client.renderers.models."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "4643cc12c8688ab5f3572fc1e39f6a623e9acef043a38b51f7adda73f9c90e2f"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/ModelRendererTaintacle.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelRendererTaintacle.java the taintacle body renderer",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelRendererTaintacle.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Original-only path in the oracle; the native has one class under models/entities."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "4fceb6538e75484d4c5304170ef2b107e7c16d730e944dd596d9500381849dca"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/ModelTaintSheep1.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelTaintSheep1.java the wool overlay of the taint sheep",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelTaintSheep1.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Original-only path in the oracle; the native has one class under models/entities."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "605b3b642e83cb7aa81522c15e6a90fc5f09728330f192484f8cae751a85285d"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/ModelTaintSheep2.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelTaintSheep2.java the body of the taint sheep",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelTaintSheep2.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Original-only path in the oracle; the native has one class under models/entities."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "70fd8bf36fb524e75c0f9191abaaaeef5f9aa479c7c6bde2a6f965b5d1a6a93f"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/ModelTaintSpore.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelTaintSpore.java the spore model",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/ModelTaintSpore.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Original-only path in the oracle; the native keeps the model in models/."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "7ffd824d197ce9a32d70c6e30ea0064cce876618d630b7e87c59b544bdc2878b"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/ModelTaintSporeSwarmer.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelTaintSporeSwarmer.java the swarmer model",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/ModelTaintSporeSwarmer.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Original-only path in the oracle; the native keeps the model in models/."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "f19129088002a0022748ad44c3c299566ea8596cebbd338203f3f2b526565511"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/ModelTaintacle.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/ModelTaintacle.java the taintacle model",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelTaintacle.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Original-only path in the oracle; the native has one class under models/entities."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "bbce03b21cf542dfe8bc0e3cbf559a879b981451a4d33791d8f9d7ffdc79c03f"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/entities/ModelPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/entities/ModelPech.java the pech model in the entities package",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/ModelPech.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The native keeps the model in thaumcraft.client.renderers.models (not models/entities); RenderPech imports it from there."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "78415b6fc87512d54e32398729939a23cf7498b38de88738a633caf42cc2eb0d",
+      "tc4_4_2_3_5_oracle": "8545c3346830c2456dee5fdb782f467602526e499d51bca050e99d82c6a8a573"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/entities/ModelRendererTaintacle.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/entities/ModelRendererTaintacle.java the taintacle body renderer",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelRendererTaintacle.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Ported with the segment count of the original taintacle; used by ModelTaintacle."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "6051bcf5bdbfebcf0717c7dd99531d12c46548ee77dfe483bbe7256b0eb5eaaa",
+      "tc4_4_2_3_5_oracle": "bfae7e0f4e316c6704e3e0db7165cac0032f07e06e02828a15a8876a9111c89f"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/entities/ModelTaintSheep1.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/entities/ModelTaintSheep1.java the wool overlay of the taint sheep",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelTaintSheep1.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Ported; RenderTaintSheep uses it as the wool overlay layer."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "6672768784a15abec0fff418e7abef216502c76598f6595316454061a094eecd",
+      "tc4_4_2_3_5_oracle": "9d167dcd52bb17ad9de7341257e56e99ee0d6334ea67dc78c0f89637118bd6d3"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/entities/ModelTaintSheep2.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/entities/ModelTaintSheep2.java the body of the taint sheep",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelTaintSheep2.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Ported; the body model of RenderTaintSheep."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "b13d621068c6d2407d301153aa36baba379f5e32d4bf635ba95c866a10de51e4",
+      "tc4_4_2_3_5_oracle": "2bf7359784d495493072ddf61f13fae8d726e938089a13fc4bbea48fc95dd1e0"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/entities/ModelTaintSpore.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/entities/ModelTaintSpore.java the spore model",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/ModelTaintSpore.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Ported; the native flattened the two 1.7 model packages into models/ and models/entities/, the spore model lives in models/."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "705dfca578efbb49c1ab4eb985bc7021a58a27eab365edcb28361648363e8c50",
+      "tc4_4_2_3_5_oracle": "6edf64e61ea00ec381e3565bccec77287e51341a534c75095e18a91c9882ca95"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/entities/ModelTaintSporeSwarmer.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/entities/ModelTaintSporeSwarmer.java the swarmer model",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/ModelTaintSporeSwarmer.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Ported; the native flattened the two 1.7 model packages into models/ and models/entities/, the swarmer model lives in models/."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "a80e41ec8783f2e9399f7cf63f81f0feb5ee4dfc68edef5f87eb544a94c78bcb",
+      "tc4_4_2_3_5_oracle": "6f40c29d7c623e967da5c8e2441f64b70583eb8490456955c79c4038ef8c2234"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/client/renderers/models/entities/ModelTaintacle.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/models/entities/ModelTaintacle.java the taintacle model",
+      "native native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelTaintacle.java (1.21.1 baked model layer, same geometry and skin)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Ported with the per-length segment geometry of the original."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "efec3e140c4a3a10ec75d71ba2b16832dba71dc1dac4386507d1b217c9672726",
+      "tc4_4_2_3_5_oracle": "01adf855bf24a6c7ea24ce738154571e9cabb312bf7d41aae09f94b62a682cd2"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/common/blocks/BlockTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockTaint.java:71-72 setHardness(2.0f) and setResistance(10.0f)",
+      "oracle thaumcraft/common/blocks/BlockTaint.java:248-260 getLightValue: 1.75 crust, 1.5 soil, 0.2 flesh",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaint.java:42 super(properties.strength(metadata==0?1.75F:metadata==1?1.5F:.2F,6F))",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:40-41 CRUST/SOIL registered with properties(2,6), the constructor overwrites them",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaint.java:87-90 the flux goo replacement, :189-196 the taint spore swarmer spawn (1/200), :80 the soil to dirt change"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "DEFECT (numbers): the original taint crust and soil have hardness 2.0 and blast resistance 10.0 and emit light 1.75/1.5.",
+      "The native puts the original light values into the hardness slot (1.75/1.5), uses resistance 6.0 and registers no light emission at all.",
+      "Verified equal: the 1/200 taint spore swarmer spawn, the flux goo replacement (quanta), the soil to dirt change (1/10), canFallBelow, the falling-taint start and the step-on poison (1% for a player / 5% for others, 80/160 ticks).",
+      "The original only ran its update in the random tick; the native also hooks Block.tick (scheduled ticks), which no taint block ever schedules, so the rate is unchanged."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "f64688ae36b3d89dd6ebaa91e004615743e93ed83981561ca7f07d735e5e32c1",
+      "tc4_4_2_3_5_oracle": "4d23e6aed71804f74c412dc2d504bfda7eb370193286cb6a9cbc95290243ec54"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/blocks/BlockTaintFibres.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockTaintFibres.java:194-212 spreadFibres: 1/10 stalk, then 9/10 type 1, else 10/12 type 2, else type 3",
+      "native common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java:11-17 fibreType() with the same lottery",
+      "oracle thaumcraft/common/blocks/BlockTaintFibres.java:214-223 taintBiomeSpread with nextInt(taintSpreadRate * 5)",
+      "native common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java:21-27 biomeChance() with the same bound",
+      "oracle thaumcraft/common/blocks/BlockTaintFibres.java:173-179 the crust (wood) and soil material sets",
+      "native common/src/main/java/thaumcraft/common/lib/world/TaintMaterialRules.java:16-18 crust() and soil()"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "Verified equal: the fibre lottery, the biome spread chance, getAdjacentTaint, isOnlyAdjacentToTaint, the 1/40 poison bound and the 80/160 tick poison, the stalk/spore lifecycle and the block shape of the 1.7 func_149719_a.",
+      "DEVIATION (block sets): the original converts a log or the 1.7 Material.field_151570_A into taint crust and the four materials field_151595_p/field_151578_c/field_151577_b/field_151571_B into taint soil.",
+      "The native maps the crust set to logs + cactus/pumpkin/melon and the soil set to dirt/sand/grass/mycelium/farmland/clay/gravel/soul sand; the retained 1.12 reference maps the same original expression to wood + leaves and to grass/ground/rock/sand/clay.",
+      "The 1.7 Material field identities could not be resolved from the oracle alone (no MCP mapping is available on this machine), so the exact block set of the conversion is unresolved."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "fbe784695acd09eaf509f2cc9945079e7b1ed2d6d0666acaf4f94ded0de07030",
+      "tc4_4_2_3_5_oracle": "792df3c3d0a45623f773f05e59557b6e224bd335f36f850ab96105be723acf2e"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/blocks/BlockTaintFibresItem.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockTaintFibresItem.java:1-49 the 1.7 fibre item",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaintFibresItem.java:14-30 the 1.21.1 BlockItem with the explicit fibre type",
+      "oracle thaumcraft/common/blocks/BlockTaintFibres.java:355-358 func_149742_c: the item may only be placed in the taint biome",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaintFibres.java:135 getStateForPlacement returns null outside the taint biome"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "Forced 1.21.1 change: the item became a BlockItem with an explicit type property; the biome gate of the original is preserved.",
+      "The 1.12 reference additionally required solid support for the non-zero fibre types; that rule is not in the oracle and is not in the port."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "822b239b7ca11a5c7f29a2a30265322223db97e1e9b95886b31c34f21f7d0a8d"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/blocks/BlockTaintItem.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/common/blocks/BlockTaintItem.java:1-31 the 1.7 taint item",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaintItem.java:8-9 the native BlockItem",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:46-47 the crust and soil items"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: 1.7.10 had no BlockItem and used the metadata of the stack; the native uses the block state."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "1dda054d97c4d112ed08f8fc8b24fbcb1011a077fe66367ff8ab9137afac7b84"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockTaintFibresItem.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockTaintFibresItem.java:1-49 the 1.12 fibre item",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaintFibresItem.java:14-30 the native fibre item"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Legacy-only path: the native port flattened the ItemBlocks sub package into thaumcraft.common.blocks.",
+      "The legacy's solid-support placement rule for the non-zero fibre types is not in the oracle and is not in the port (the biome gate is)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "d572e226766a1fe7fd71ee360cf4a5853af505af725aa23d70ccb7883dfb55b8"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/common/blocks/ItemBlocks/BlockTaintItem.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockTaintItem.java:1-23 the 1.12 taint item",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaintItem.java:8-9 the native taint item"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Legacy-only path: the native port flattened the ItemBlocks sub package into thaumcraft.common.blocks."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "9cd28f103f766afcb3e75fdcc40c79d13424c211fbc2d0d6ad4afc3154f39f93"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/common/blocks/world/taint/TaintHelper.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/blocks/world/taint/TaintHelper.java:14-24 addTaintSeed/spreadFibres facade",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaintFibres.java:84-93 the native spreadFibres(world,x,y,z)",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSeed.java the native taint seed uses the fibre spread"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "Legacy-only TC6 facade: the native port has no TaintHelper class; its two functions are the native BlockTaintFibres.spreadFibres.",
+      "The legacy facade was a thin wrapper over the same 1.12 taint fibre logic, so no behaviour was lost."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "4455df60a9eba38697c97038b1bc9a04d9ccc43c3c9ac5df83cd1ce293133c9d"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/config/MaterialTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "exclude",
+    "evidence": [
+      "oracle thaumcraft/common/config/MaterialTaint.java:1-52 the 1.7 Material subclass of the taint blocks",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:71 properties(): mapColor GRASS, sound, randomTicks, PushReaction.DESTROY",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockTaint.java:45 solidFamily() treats the taint blocks as solid"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "1.21.1 has no net.minecraft.block.material.Material; the observable traits of MaterialTaint (solid, not replaceable, not liquid, grass map colour) are expressed with BlockBehaviour.Properties and the taint block family.",
+      "The 'mobility flag' of MaterialTaint (func_76227_m == 1) has no 1.21.1 counterpart and is not reproduced."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "c9711e828d16979910698edf3330da17fdcfc31a9209539b08babe1729481734"
+    },
+    "source_semantics": "not_applicable"
+  },
+  "thaumcraft/common/entities/ContainerPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/ContainerPech.java:100-157 generateContents: the value roll, the 1/5 value bonus, the amount lottery, the pack copy, the 50 attempt dungeon chest and the tier table",
+      "native common/src/main/java/thaumcraft/common/lib/pech/PechTrade.java:25-65 prepare() with the same draw order",
+      "native common/src/main/java/thaumcraft/common/container/ContainerPech.java:46-69 clickMenuButton performs the paid trade on the server",
+      "oracle thaumcraft/common/entities/ContainerPech.java:155 inventory.setItem(0, 1) after the trade"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the container became an AbstractContainerMenu with a menu button; the client no longer generates the contents.",
+      "Verified equal: the untaming roll (nextInt(100) <= value/2), the value adjustment, the amount lottery min(5,max((value+1)/2,nextInt(value)+1)), the pack copy, the 50 attempt dungeon selection with weight<=5 and maxCount<=1, the tier table loop and the final input slot reset.",
+      "DEVIATION (documented in the native code): the original's unbounded retries are capped (128 rounds / 512 tier rejections) and a plan that does not fit is refused instead of silently discarding the remainder.",
+      "Not verified: the exact item stacks of the trade tables (PechTradeTables) against the original EntityPech.tradeInventory."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "c01c0e5f97c712b546d90bf7e82d1162bcac6c40120f10e7c16015f38290ee42",
+      "tc4_4_2_3_5_oracle": "2be0e9a5fb0db738be4aa7272ba75c7b8e00f96656bb966a3626733b0a1fd9db"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/EntityFallingTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/EntityFallingTaint.java:64-79 the 0.98x0.98 falling crust with the source coordinates",
+      "native common/src/main/java/thaumcraft/common/entities/EntityFallingTaint.java:52 the 0.98 bounding box centred on the position",
+      "oracle thaumcraft/common/entities/EntityFallingTaint.java:100-140 the fall (0.04 gravity, 0.98 damping) and the landing",
+      "native common/src/main/java/thaumcraft/common/entities/EntityFallingTaint.java:79-106 the same fall and landing rule",
+      "oracle thaumcraft/common/entities/EntityFallingTaint.java:141 the fall damage of 2.0 with a maximum of 40"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The falling taint keeps the original gravity, damping, landing rule and the 2.0/40 fall damage values (the native never applies fall damage, like the original's unused fields).",
+      "Forced 1.21.1 change: the block/metadata fields became a BlockState synched data value and the source is kept in the entity tag."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "03720c0477e5e616dc316aeb4187309c7a1b4af128d89185b7b243db359c60af",
+      "tc4_4_2_3_5_oracle": "8a667600b150fb246a5e4a99cacc40382606de554c056d3daeba07bc61211205"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/InventoryPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/InventoryPech.java:1-104 the 1.7 merchant inventory of the pech",
+      "native common/src/main/java/thaumcraft/common/entities/InventoryPech.java:1-87 the native SimpleContainer based inventory"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the 1.7 IInventory merchant inventory became a native container.",
+      "The pech itself keeps the nine loot slots (EntityPech.loot) that the original traded with."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "ad974ec11209188a8e49dc3ec6f514c0f87115a39a50672127e0ea503b55bc8a",
+      "tc4_4_2_3_5_oracle": "20cb4b9b399d36e779a3ce96b97bc6070a84221710339d90f3d238733701961d"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/ai/pech/AIPechItemEntityGoto.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/ai/pech/AIPechItemEntityGoto.java:1-100 the item pickup goal (16 block range, priority 3, golemDelay gate)",
+      "native common/src/main/java/thaumcraft/common/entities/ai/pech/PechItemGoal.java:17 PRIORITY = 3 and :23 the 16 block search box",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityPech.java:101 the goal is registered"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The 1.7 AI class became a native Goal (PechItemGoal); the priority, the 16 block range and the PechDrop exclusion are kept."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "98b09a9eaaf636ab6d9701e52c33eb9f9b98ae226c7c143a68477d328be6c94d",
+      "tc4_4_2_3_5_oracle": "022e10022240ab7ff6ed312905c213b97b56cda77ca254f0872a9beaef508907"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/common/entities/ai/pech/AIPechTradePlayer.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/ai/pech/AIPechTradePlayer.java:1-48 the trade goal",
+      "native common/src/main/java/thaumcraft/common/entities/ai/pech/PechTradePlayer.java:23 PRIORITY = 1",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityPech.java:100 the goal is registered"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The 1.7 AI class became a native Goal with the same priority."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "3543556cad2bee17dd01288b4575d5c4afcfcb8db9a76eac7823ef104e36f666",
+      "tc4_4_2_3_5_oracle": "2239a0f54385d41aa7fed5e4062b3795425189de256d59103a9c6c6baeccafaa"
+    },
+    "source_semantics": "equivalent"
+  },
+  "thaumcraft/common/entities/monster/EntityBrainyZombie.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityBrainyZombie.java:34-36 health 25, damage 5, no reinforcements",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityBrainyZombie.java:45-47 MAX_HEALTH 25, ATTACK_DAMAGE 5, SPAWN_REINFORCEMENTS_CHANCE 0"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The brainy zombie keeps the original attributes; it is a champion candidate (level 0 through the vanilla zombie whitelist)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "61d220d1b989684d1190d938d8bbb674626ef42297e180ea76e26653a717f30a",
+      "tc4_4_2_3_5_oracle": "259fe2f9d0c8f80652d99eec19a1519a46ae3f50100c1f1344a0fbe70b81a5c1"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityFireBat.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityFireBat.java:97-98 health 15 (devil) or 5, damage (summoned ? devil 3 : 2) + damBonus else 1",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityFireBat.java:60 health 5 / damage 1, :67 and :71 the summoned and devil damage updates",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:109 firebat.damBonus = wand.getFocusPotency(itemstack)",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityFireBat.java the damBonus field is written but never applied to the attribute"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The fire bat keeps the original attributes and the summoned/devil damage switch.",
+      "DEVIATION (numbers): the original attack damage is (summoned ? devil 3 : 2) + damBonus and the hellbat focus writes damBonus; the native registers the attribute without the bonus, so the focus potency does not reach the damage."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "d28bedf90df06b759875f037a8c92d03b0649a8488c61cd717dbf863226c4894",
+      "tc4_4_2_3_5_oracle": "361c6fdfa11bf62d5f574906eef9cd6f8941cddb06aadd50b407e3a6d49a2fc5"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityGiantBrainyZombie.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityGiantBrainyZombie.java:33-40 the giant scale (1.2 + anger)",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityGiantBrainyZombie.java the anger driven scale"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The class and the anger driven scale are ported, but the attribute row and the anger behaviour were not compared with the original line by line in this audit."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "ac4d9c6cbe279a6b33514e19e8d2724257979a1ae20bbb2598871ac2c34c864b",
+      "tc4_4_2_3_5_oracle": "13d0f76819aecee58006a61b6dc79b2a22fbe3c7a15af11fc8dc267834d94998"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityInhabitedZombie.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityInhabitedZombie.java:49-51 health 30, damage 5",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java:37 INHABITED_ZOMBIE = Stats(30F,5F,...)",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityInhabitedZombie.java:41-46 the attribute row"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The inhabited zombie keeps the original attributes and is a champion (level 3)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "6f9d1da2fde9d6d63a90aed512dc7888c5e66c80dc921c26781e23a6872ad2b3",
+      "tc4_4_2_3_5_oracle": "7bd06ecf40280a08c375d405bcbbbc7f7b9c87d488fccbfdb81abc26af43c7cd"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityMindSpider.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityMindSpider.java:43-44 health 1, damage 1",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityMindSpider.java:24-26 MAX_HEALTH 1, ATTACK_DAMAGE 1, FOLLOW_RANGE 12"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The mind spider keeps the original 1/1 attributes; it inherits the vanilla spider whitelist entry (champion level 0)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "43031957d8993a861bfd38460233dd893e5e51ff5729049ab5e03b2119f5d929",
+      "tc4_4_2_3_5_oracle": "aa0156336acdb345eabfe4335e22fb7deb0c4fb5e887f5a6a523f95c6adb80a2"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityPech.java:309-311 health 30, damage 6, speed 0.5",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityPech.java:96 the same three attributes",
+      "oracle thaumcraft/common/entities/monster/EntityPech.java:368-395 dropFewItems: 88% loot drop, 1..n mana beans, 1/10 gold coin",
+      "native common/src/main/java/thaumcraft/common/lib/pech/PechDrops.java the native drop table",
+      "oracle thaumcraft/common/entities/monster/EntityPech.java:400-408 getMaxSpawnedInChunk is 5 when fewer than 5 loot stacks are carried"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The pech is ported with the original attributes, the nine slot loot pack, the three skins, the taming/anger data and the trade flow.",
+      "Not verified line by line: the 787 line original (targeting, mumble, the villager gossip and the anger AI)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "5f5d57f141b74e0b48752912c3632526c2c30ad784c5e1c7e5a7e7503b2ccfea",
+      "tc4_4_2_3_5_oracle": "a0f221f412b3a7e2a2230f4e9d4b59961254fb373cb97c10db0baf81aa570a81"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintChicken.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintChicken.java:82-84 health 8, damage 3, speed 0.4",
+      "native common/src/main/java/thaumcraft/common/lib/taint/TaintAnimalRules.java:33-56 the same five tainted animal rows",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintChicken.java:44-49 the attribute row"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The tainted animals keep the original attributes, sizes, drops and the flap animation numbers (TaintAnimalRules.flapSpeed/flapAmplitude)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "96e276b94cd0632c64cf5c6297c7cc3535801e0d9d2db727ebcda134be346e8e",
+      "tc4_4_2_3_5_oracle": "016032090ff3b9129906b3a5be09727ae3ec2f43c7ef65ccdd03ece8017cd1a1"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintCow.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintCow.java:73-75 health 40, damage 6, speed 0.27",
+      "native common/src/main/java/thaumcraft/common/lib/taint/TaintAnimalRules.java:34-57 the tainted cow row"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the cow is the only tainted animal that despawns in peaceful (TaintAnimalRules.despawnsInPeaceful)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "336f743517c856e8b182e72c1dfdad6fda83659bb18f2379a282350f97817479",
+      "tc4_4_2_3_5_oracle": "89130bd4028d7f2c5fb727e6b0c86ce9aec737b057bae5931fb6cd6986fc8fa6"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintCreeper.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintCreeper.java:88-91 speed 0.25, health 30, damage 2",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintCreeper.java:94-99 the same attributes",
+      "oracle thaumcraft/common/entities/monster/EntityTaintCreeper.java:152-195 the swell, the 30 tick fuse, the 1.5 strength explosion that never breaks blocks, the taint poison of 100 ticks within 6 blocks and the ten taint fibre patches",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintCreeper.java:165-226 the same swell, fuse, explosion and spread"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Verified equal: attributes, goals, the fuse growth on landing (1.5 per block, capped at fuseTime-5), the 30 tick fuse, the explosion strength 1.5 without block damage, the 100 tick poison on non tainted non undead mobs within 6 blocks and the ten fibre patches.",
+      "Forced 1.21.1 change: the fall hook is emulated in move()."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "fd89d3e7c30c9970ce8a9961e8a9cba5ab61a13437008daa415d63f54cf8ebaf",
+      "tc4_4_2_3_5_oracle": "8219fd11d57bf1861cd5e542bef05fb33ca85ca9af5063d76217420d5334684b"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintPig.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintPig.java:73-75 health 20, damage 4, speed 0.275",
+      "native common/src/main/java/thaumcraft/common/lib/taint/TaintAnimalRules.java:36-57 the tainted pig row"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "724021266adf954d69c4bfca5299e7a83d5ddba119ccc06bf730a74e3c908206",
+      "tc4_4_2_3_5_oracle": "8f2c4bb9d48a120773c3c5aa25a2325ed53ad3db8a29477215bc56ad9463c5d7"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintSheep.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintSheep.java:84-86 health 20, damage 3, speed 0.25",
+      "native common/src/main/java/thaumcraft/common/lib/taint/TaintAnimalRules.java:36-57 the tainted sheep row"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the shear drop of one to three wool blocks is in TaintAnimalRules.shearWoolCount."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "2687f2b5daa40e62f73bc1c669d9e24b45a127d7742c3c3c8098de77e55e1ca1",
+      "tc4_4_2_3_5_oracle": "a9aaeb6500a494f2619f177ea5ac182f2ceeeb597bd7ef400e925f45a6385048"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintSpider.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintSpider.java:38-39 health 5, damage 2",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSpider.java:27 MAX_HEALTH 5, ATTACK_DAMAGE 2, FOLLOW_RANGE 12"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the taint spider is a champion (level 0)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "dabb836c1534f11205a91d8f2b054dc899fbfad9abb41ed259f67b71d60e2bbd",
+      "tc4_4_2_3_5_oracle": "6d6d4a63e582a0a6b0d196916359f7c8e4dec6984bd3b63e37a3532518cddba6"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintSpore.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintSpore.java:86-87 health 1, damage 1",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSpore.java:42 MAX_HEALTH 1, ATTACK_DAMAGE 1"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the spore is spawned by the mature spore stalk (BlockTaintFibres:181-185)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "102722510a17be54aa21868ab41c5fb07abbf4779a4a9b50fdcbe46becaf9fc4",
+      "tc4_4_2_3_5_oracle": "6a8d01ad740cedf29424824a43b3d77d939a00ab32f0407e4ce3d46336e67d8d"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintSporeSwarmer.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintSporeSwarmer.java:53-54 health 75, damage 1",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSporeSwarmer.java:19 MAX_HEALTH 75, ATTACK_DAMAGE 1"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the swarmer is spawned by the taint crust (BlockTaint:189-196) and splits into spores."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "e82e952ccd3d357dd2190b66db823d8271c04c328002e3aac72ef1380904bc22",
+      "tc4_4_2_3_5_oracle": "45fabac37823d5e80968096eb8b66f2d2da0abb300afb440c1bd58a377235596"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintSwarm.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintSwarm.java:56 size 2x2, :99-100 health 30, damage 2 + damBonus",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSwarm.java:62 MAX_HEALTH 30, ATTACK_DAMAGE 2",
+      "oracle thaumcraft/common/entities/monster/EntityTaintSwarm.java:144-172 the asymmetric flight steering (0.015 / 0.025)",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSwarm.java:122-128 the same coefficients",
+      "oracle thaumcraft/common/entities/monster/EntityTaintSwarm.java:203-212 the 10+nextInt(5) attack cooldown and the weakness effect"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Verified equal: the size, the health, the flight steering, the summoned self damage of 5, the attack cooldown and the weakness effect.",
+      "DEVIATION (numbers): the original attack damage is 2 + damBonus (the field is set by the hellbat focus, ItemFocusHellbat:109); the native registers a fixed damage of 2 and never applies damBonus to the attribute, so the hellbat focus's extra damage is lost.",
+      "The native also drops the 1.7 'old Creature' action into a hand written legacyCreatureAction (documented in the source)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "3a1b7918176254a2708dffedfb4e673375cf9f3b6159ada0f5644051f54bbef5",
+      "tc4_4_2_3_5_oracle": "30bc633d83647def4bad61002776f369135439b2182f58e166959aad7a287779"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintVillager.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintVillager.java:100-102 health 30, damage 4, speed 0.3",
+      "native common/src/main/java/thaumcraft/common/lib/taint/TaintAnimalRules.java:38-57 the tainted villager row"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the village search radius of 32 and the 70+draw delay are in TaintAnimalRules."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "a82aafe14917bf0e4c5d636cea6f2dc773b9ff69e78871c51dcb9e29129fcd50",
+      "tc4_4_2_3_5_oracle": "5a978b3de43d6674951d17e74bb21c0bb7084abb2004a98f49804a04c7d197fc"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintacle.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintacle.java:70-71 health 50, damage 7",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacle.java:58 MAX_HEALTH 50, ATTACK_DAMAGE 7",
+      "native common/src/main/java/thaumcraft/common/lib/taint/TaintacleRules.java the shared taintacle rules"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The taintacle keeps the original attributes and is a champion (level 2)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "d29fd199f3a8e114b11fc60983e60c505af57d0110420c0f9712ffbf9859bbc5",
+      "tc4_4_2_3_5_oracle": "50e55e4793e9006e682a4d604ed620a62a624ffde69c5d17eb032bcc42c1abcd"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityTaintacleSmall.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityTaintacleSmall.java:33-34 health 8, damage 2",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacleSmall.java:16 MAX_HEALTH 8, ATTACK_DAMAGE 2"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; it inherits the taintacle champion level 2 through the whitelist."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "e4669e8fd19e59c4d2de685def7cb14ddb40f7a0a4aad8209d839e359b9b6833",
+      "tc4_4_2_3_5_oracle": "61c26b12ef9f62bfd9b146e2b3086950c7cf8d291a1460ffeb9a68887865806d"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityThaumicSlime.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityThaumicSlime.java:100-105 setSlimeSize sets the max health to the size",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java:244 slimeHealth(size) = size",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityThaumicSlime.java:80-86 the native setSlimeSize"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The slime keeps the original size driven health, the size based attack strength and the xp of sqrt(size)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "1cf1dbb123e1bd3723e7771f6a21bf2a975fd7860f9538b8790954cda234f673",
+      "tc4_4_2_3_5_oracle": "b4641e34835c6d608c78a27c222c111e0c853828d1a9c6a152ae341723a7d0cd"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityWatcher.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityWatcher.java:101-104 damage 6, speed 0.5, follow range 16, health 30",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java:38 WATCHER = Stats(30F,6F,0F,.50F,16F,10,160)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the watcher is a champion (level 2)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "c38595a8939d7ec7ba870f40ded51a68fb67ba98750d281bdcb55afe944a0263",
+      "tc4_4_2_3_5_oracle": "9e1f95f43b8ab0eb763e8f6b598b8e6ab14b3a77557ea1230622412f096b722a"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/EntityWisp.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/EntityWisp.java:72-74 health 22, damage 3",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityWisp.java:56 MAX_HEALTH 22, ATTACK_DAMAGE 3",
+      "oracle thaumcraft/common/entities/monster/EntityWisp.java:130-160 the aspect roll (eerie biome, 9/10 primal, else compound)",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityWisp.java:80-88 the same aspect roll",
+      "oracle thaumcraft/common/entities/monster/EntityWisp.java:246-256 the course traversable test",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityWisp.java:126-136 isCourseTraversable"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Verified equal: the attributes, the aspect roll, the aggro cooldown of 200, the waypoint action and the attack counter (20 ticks, then -20+nextInt(20)) with the 0.4/0.66 damage rolls.",
+      "The wisp is a champion (level 1) and its zap packet became WispZapPayload."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "fab6d48aee120f4c35718e209b7c5342a6969ea50c37e1d421432c8dfde6d279",
+      "tc4_4_2_3_5_oracle": "49ccb459393f8865b83f782aa3ebdcb36b1f0ea0e1fb31489b9070e82a9050a7"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/boss/EntityTaintacleGiant.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/boss/EntityTaintacleGiant.java:53-54 health 125, damage 9",
+      "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java:40 TAINTACLE_GIANT = Stats(125F,9F,...)",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacleGiant.java:38-41 the attribute row"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same numbers; the 35 damage cap and the 200 tick enrage are in EldritchMobRules."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "ba239959498fec2918544233bbf7e09dc6504e5bf6547bcb8c0bbe68a0ac744d",
+      "tc4_4_2_3_5_oracle": "1b76bc2c922115d5f5257efc728f2cc9695cf5e4e61f889bffdf19d547c950cd"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/boss/EntityThaumcraftBoss.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/boss/EntityThaumcraftBoss.java:78-79 follow range 40, knockback resistance 0.95",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java:78-79 bossAttributes(): FOLLOW_RANGE 40 and the knockback resistance",
+      "oracle thaumcraft/common/entities/monster/boss/EntityThaumcraftBoss.java:60 the 50 point health bar of the boss",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java:76 the ServerBossEvent"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The 1.7 boss base class became the package private abstract class EntityThaumcraftBoss inside EntityEldritchWarden.java; the Warden and the Golem extend it, the Cultist Leader does not.",
+      "DEVIATION: in the original EntityCultistLeader extends EntityThaumcraftBoss and is therefore always a champion (whitelist level 200); in the native the cultist leader is a plain Monster and is missing from the champion whitelist, so it never becomes a champion."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "041b71c68fdbfff1c336f5985ced5796cae99a0a2f1ac30d5175d14a73054d86",
+      "tc4_4_2_3_5_oracle": "5c4608a290037b8ad624261c7372636d26e921a19354f6641dc9f2bc2266663c"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModArmored.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModArmored.java:18-22 if (!source.isUnblockable()) amount = amount * 19 / 25",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModArmored.java:10-13 the same 19/25 factor, only when the damage is not unblockable"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The armoured champion keeps the original 19/25 damage factor and the same particle request.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "be77354a2b10fa3a9a61ca9ca01a8fe2db412379177c311f3611904f88712f7e",
+      "tc4_4_2_3_5_oracle": "6938fdc7a02108a7fc5fd8b1068ee26a4d5a1651df548e3f91b00765ec1d6025"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModBold.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModBold.java:23-25 performEffect returns 0.0f (the modifier has no effect)",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModBold.java:10 Result.blocked()",
+      "oracle thaumcraft/common/lib/utils/EntityUtils.java:62 BOLDBUFF 0.3 with operation 1",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModifier.java:28 BOLD_SPEED_MULTIPLIER = 1.3"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Bold only carries the 30% movement speed bonus; the native applies it as ADD_MULTIPLIED_TOTAL 0.3, the original used operation 1 (multiply the base only).",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "345535ffc9611761999671bb02296482a85340adeb406ec7a5a5daf332711d8a",
+      "tc4_4_2_3_5_oracle": "ad0f6f2b05cddfb21b54c87d4490573d165e4070b121383a328b7c98342bcd78"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModDummy.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModDummy.java:17-20 performEffect returns the amount unchanged",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModDummy.java:10 Result.unchanged(context)"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The dummy modifier is unchanged in both.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "37457a4adcf145d3f5de680143630d039becb62d54d10c8ae176430233e9894e",
+      "tc4_4_2_3_5_oracle": "6674754fa50864c6d5788fe5232407ae6e4eeac4630079c06bf98bd5279f0bd1"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModFire.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModFire.java:22-27 nextFloat() < 0.4 -> target.setFire(4)",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModFire.java:11 the same 40% roll and four seconds of fire"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same probability and the same four second fire.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "4fda44a7abb5f6b7e094352cbec0b8e20434d4bee9923f279da73e3910995133",
+      "tc4_4_2_3_5_oracle": "5900fd0cfd15b39a2a5c4d0ee10615a3a5084a71b878a6dcb7156cb1324f8101"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModGrim.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModGrim.java:26-30 nextFloat() < 0.4 -> Potion.field_82731_v (wither) for 200 ticks",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModGrim.java:11 Status.WEAKNESS for 200 ticks",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:177 the same original potion field is mapped to MobEffects.WITHER in the death gaze"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "DEFECT (numbers): the original grim champion inflicts WITHER (Potion.field_82731_v, the same field the native death gaze maps to MobEffects.WITHER) for 200 ticks; the port inflicts WEAKNESS instead.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "e6e514c496ba46153bb4ebad24f44d8269bd55dc11fdd58baffea43f8b08d970",
+      "tc4_4_2_3_5_oracle": "f58cd6c5e69041e518004168271682850665d3e253da1b041b352401fd95473c"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModInfested.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModInfested.java:25-35 nextFloat() < 0.4 -> spawn an EntityTaintSpider next to the champion and play thaumcraft:gore",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModInfested.java:11 the 40% roll",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java:290-296 the spiderling is spawned and the gore sound is played"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same probability and the same spiderling plus gore sound.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "bb87e0457199443851d5635659b18ea82283db142a686fa218b78818faa93baf",
+      "tc4_4_2_3_5_oracle": "82d98fd50d7832206c73f3a07e4ff2db08cd82c47602eda23dc72ed4204b16e0"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModMighty.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModMighty.java:22-26 performEffect returns 0.0f",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModMighty.java:10 Result.blocked()",
+      "oracle thaumcraft/common/lib/utils/EntityUtils.java:63 MIGHTYBUFF 3.0 with operation 2",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModifier.java:30 MIGHTY_DAMAGE_MULTIPLIER = 3.0"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Mighty only carries the triple attack damage.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "4a99fa3ce442fe5404a81da78f2c0a13bbd56b8300c3eb25607af336369c5071",
+      "tc4_4_2_3_5_oracle": "063b1964a5b3b426dea034938ac2af65739ef0cc968fd71c4ab84666da4dc8d7"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModPoison.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModPoison.java:26-30 nextFloat() < 0.4 -> Potion.field_76436_u (poison) for 100 ticks",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModPoison.java:11 Status.POISON for 100 ticks"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same probability, same effect and same duration.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "7d75008cedc9cc5e3db7a7f947a19dc3101be3193b126fb33245eaf7911d19d7",
+      "tc4_4_2_3_5_oracle": "ab3bd6ff5018e2c6a1f281481aebe23c4a8365f53c6a8f295c18d246adb61f49"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModSickly.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModSickly.java:26-30 nextFloat() < 0.4 -> Potion.field_76438_s (hunger) for 500 ticks",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModSickly.java:11 Status.HUNGER for 500 ticks"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same probability, same effect and same duration.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "397cd941786f9fa9cd8b375e201e82f86e64a99c9b8bec87b9e19af8ef02d5ff",
+      "tc4_4_2_3_5_oracle": "28ace1acd8b24a1a533f1f3d183971bf4ae66b3b25ea908e2a15da37e4d68828"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModSpined.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModSpined.java:24-32 thorns damage of 1 + nextInt(3) back at the attacker, skipped for a thorns source",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModSpined.java:10-13 the same reflection and the same thorns exclusion"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same damage range and the same exclusion.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "9506e90f95fbc13705b9c7c5cb5f78acade6d356d54065de6583077ee56d6a21",
+      "tc4_4_2_3_5_oracle": "baa9c3283ac4588df1e56d81c61e686c23b48987201bfdf7a37efcd51b03db13"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModUndying.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModUndying.java:22-27 ticksExisted % 20 == 0 -> heal 1.0f",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModUndying.java:10 context.ticksExisted() % 20 == 0 -> heal 1.0f"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same cadence and the same heal.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "bc03de8aadf3a7345c102d79eb1af9361552d3edb6236d7705bfebb38c65fb28",
+      "tc4_4_2_3_5_oracle": "f4c6cc71c23aa8964ccfc7fbd3a100aa14c3f16f592d68e38716dfee2836b374"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModVampire.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModVampire.java:22-26 heal max(2.0f, amount / 2.0f)",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModVampire.java:11 Result.healing(context, Math.max(2.0f, context.amount() / 2.0f))"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same heal formula.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "e00cf7f0866ed380a1328f4c81f2185d3cb93a25e57dc55f522f61a6811e9652",
+      "tc4_4_2_3_5_oracle": "aa6311451a8afb365823fa45706679bebe1c35c1bd074c9a7d786dee501ba77a"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModWarded.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModWarded.java:24-34 hurtResistanceTime <= 0 and ticksExisted % 25 == 0 and health < (int)(max health)/2 -> heal 1",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModWarded.java:10-14 the same three conditions and the same heal of 1"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same conditions; the ward threshold uses the base max health in both (the original reads the attribute value here, the native the base value - the two differ only after a champion bonus, which a warded champion already received).",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "2bfdccf2289a29755ab4cc192c62ef562149c011294c79849988e3db45effb12",
+      "tc4_4_2_3_5_oracle": "0057024d635092b8d09318ca39776b927c187b101e1fdfc0e175e463591dc76b"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModWarp.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModWarp.java:24-29 nextFloat() < 0.33 and the target is a player -> add 1 + nextInt(3) warp",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModWarp.java:11 the same 33% roll and the same 1..3 warp"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Same probability and the same warp amount; the native applies it as temporary warp through WarpEvents.addTemporaryWarp.",
+      "The 1.7 effect class became a pure decision object; ChampionRules.Adapter applies the result to the world."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "5a09576336ff84bacc15f296053e37d80406a88c2d7f04512e8abb595ffb2f9f",
+      "tc4_4_2_3_5_oracle": "3d02c5f0e557cdb71faa30d7ff708c18a293fee64adca747dbb04b373325e1cc"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/ChampionModifier.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/ChampionModifier.java:34-35 the thirteen modifiers with their ids, names, trigger types and uuids",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModifier.java:64-77 the same thirteen modifiers, ids, names and uuids",
+      "oracle thaumcraft/common/lib/utils/EntityUtils.java:60-63 CHAMPION_HEALTH 30 (op 0), CHAMPION_DAMAGE 2 (op 2), BOLDBUFF 0.3 (op 1), MIGHTYBUFF 3 (op 2)",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModifier.java:24-30 the same four values",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java:221-238 promote() applies them with ADD_MULTIPLIED_TOTAL",
+      "oracle thaumcraft/common/config/ConfigEntities.java:195-208 the champion whitelist",
+      "oracle thaumcraft/common/lib/utils/EntityUtils.java:271-274 the warded promotion heal of (int)(max health attribute value)/2",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java:61-82 the native whitelist"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.7 ChampionModifier (data plus the tc.mobmod attribute) became a pure data class; the attribute was replaced by an int field on the mob (ChampionAccess) and the entity data mirror.",
+      "Verified equal: the thirteen ids/names/types, the four attribute modifiers and the promotion (heal 25, the champion name, the warded promotion heal).",
+      "DEVIATION (numbers): the original promotion heal of the warded champion (EntityUtils:271-274) is (int)(max health attribute value)/2, which includes the +30 champion health bonus; the native uses the base value, so it heals 10 instead of 25 for a zombie.",
+      "DEVIATION: the original whitelist contains EntityThaumcraftBoss (level 200) and the lookup is by class, so the cultist leader (a boss in the original) always became a champion; the native whitelist is by entity id and lists only eldritch_warden and eldritch_golem as bosses, so the cultist leader never becomes a champion.",
+      "The original rolled every EntityMob that entered the world (EventHandlerEntity:389-437); the native rolls every Enemy on the entity add event (ChampionHooks.onEntityAdded) with the same difficulty/dimension/biome/danger shifts."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "791bc62da58e04a15e704ac133c601c4b3b57505c33ac1d59f4f0776ec0d7c2a",
+      "tc4_4_2_3_5_oracle": "e4e0d9bf6411f6f9fee7a7616b36beecf2524a05432957d27fd07d6b322f2d0d"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/mods/IChampionModifierEffect.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/entities/monster/mods/IChampionModifierEffect.java:18-22 performEffect(boss, target, source, amount) and showFX(boss)",
+      "native common/src/main/java/thaumcraft/common/lib/mods/IChampionModifierEffect.java:24-69 the pure Context/Result/Fx records and the two methods",
+      "native common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java:247-296 the adapter that applies the result"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the effect interface no longer touches entities; it returns an immutable decision that the adapter applies.",
+      "The four original trigger kinds (-1 attribute, 0 tick, 1 attack, 2 damaged) are kept as TRIGGER_ATTRIBUTE/TICK/ATTACK/DAMAGED."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "6409bb1b82bb6e0c11a44870dbe0a0983a738d1e9a2f5944b59f9e20a4b0eed4",
+      "tc4_4_2_3_5_oracle": "b815e4ff51bb24a1fcca8542315101ecb1b745d492af6dc3f798f78108e951ca"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/tainted/EntityTaintCrawler.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/entities/monster/tainted/EntityTaintCrawler.java the 1.12 TC6 class",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintCrawler.java the native class in the flattened monster package"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.12 TC6 taint crawler exists in the native monster package with the original fibre cadence (40 ticks) and the flux taint durations (3 s normal, 6 s hard).",
+      "These classes have no counterpart in the TC4 4.2.3.5 oracle; they are 1.12/TC6 content that the port keeps in the TC4 tree.",
+      "The port's own TaintAnimalRules documents which numbers come from the oracle and which from the 1.12 classes (lines 9-13)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "37db71f89c78685dc19fffbdf109c5b4802ef822cde408287e6d8e64ad870e37"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/tainted/EntityTaintSeed.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/entities/monster/tainted/EntityTaintSeed.java the 1.12 TC6 class",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSeed.java the native class in the flattened monster package"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.12 TC6 taint seed exists in the native monster package; the seed numbers (max health 75, damage 4, xp 8, area 1) are in TaintAnimalRules.",
+      "These classes have no counterpart in the TC4 4.2.3.5 oracle; they are 1.12/TC6 content that the port keeps in the TC4 tree.",
+      "The port's own TaintAnimalRules documents which numbers come from the oracle and which from the 1.12 classes (lines 9-13)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "7ba457eecb94bff724b2ba25e71de6adbf456040fee7cca4952590f4c341ae14"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/tainted/EntityTaintSeedPrime.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/entities/monster/tainted/EntityTaintSeedPrime.java the 1.12 TC6 class",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSeedPrime.java the native class in the flattened monster package"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.12 TC6 prime taint seed exists in the native monster package (max health 150, damage 7, xp 12, area 2).",
+      "These classes have no counterpart in the TC4 4.2.3.5 oracle; they are 1.12/TC6 content that the port keeps in the TC4 tree.",
+      "The port's own TaintAnimalRules documents which numbers come from the oracle and which from the 1.12 classes (lines 9-13)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "381807e87f3fb62b841567ec46d9f7966a0e11134cabdcd9c58b57e137deef5d"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/tainted/EntityTaintSwarm.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/entities/monster/tainted/EntityTaintSwarm.java the 1.12 TC6 class",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSwarm.java the native class in the flattened monster package"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.12 TC6 taint swarm was merged into the TC4 EntityTaintSwarm of the native monster package.",
+      "These classes have no counterpart in the TC4 4.2.3.5 oracle; they are 1.12/TC6 content that the port keeps in the TC4 tree.",
+      "The port's own TaintAnimalRules documents which numbers come from the oracle and which from the 1.12 classes (lines 9-13)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "2b3cd10254ace7c2a7dbacb1a88c0ec791678f3abcba7810114c6b439aae39b4"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/tainted/EntityTaintacle.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/entities/monster/tainted/EntityTaintacle.java the 1.12 TC6 class",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacle.java the native class in the flattened monster package"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.12 TC6 taintacle was merged into the TC4 EntityTaintacle of the native monster package.",
+      "These classes have no counterpart in the TC4 4.2.3.5 oracle; they are 1.12/TC6 content that the port keeps in the TC4 tree.",
+      "The port's own TaintAnimalRules documents which numbers come from the oracle and which from the 1.12 classes (lines 9-13)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "9a4219a6c16cdfa12d40b56a8d5c3694c65e73e313eea9e160b8a80b4fa4a6b8"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/monster/tainted/EntityTaintacleSmall.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/entities/monster/tainted/EntityTaintacleSmall.java the 1.12 TC6 class",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacleSmall.java the native class in the flattened monster package"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "The 1.12 TC6 small taintacle was merged into the TC4 EntityTaintacleSmall of the native monster package.",
+      "These classes have no counterpart in the TC4 4.2.3.5 oracle; they are 1.12/TC6 content that the port keeps in the TC4 tree.",
+      "The port's own TaintAnimalRules documents which numbers come from the oracle and which from the 1.12 classes (lines 9-13)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "13b8c1279c150b0b41184bbf5de1cadea600cbe6f56bb5bc96609cce3eb67cf8"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/projectile/EntityBottleTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/projectile/EntityBottleTaint.java the thrown bottle (gravity 0.05, speed 0.5, pitch -20)",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:389-401 the same gravity, speed, pitch, 5 block spread, 10 patches and 100 tick poison",
+      "native common/src/main/java/thaumcraft/common/entities/projectile/EntityBottleTaint.java:60-140 the native throwable bottle",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:28-29 the bottle_taint entity type is registered"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The flying bottle is ported with the original gravity, launch speed, launch pitch, the 5 block poison splash, the ten fibre patches and the 100 tick taint poison; the tainted mob and the undead are skipped exactly as in the original.",
+      "DEFECT (wiring): nothing spawns this entity. ItemBottleTaint does not use it, so the registered bottle_taint entity type is dead code in the port."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "3227f68d9a165dc87e4d54b1e51d268f7acf37136044ad3474a42fd57753b307",
+      "tc4_4_2_3_5_oracle": "87df520c4fb332662a562bb1e1956be4376511d6ba3fe71cdf58c094a70c1589"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/entities/projectile/EntityPechBlast.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/entities/projectile/EntityPechBlast.java:1-134 the pech curse blast",
+      "native common/src/main/java/thaumcraft/common/entities/projectile/EntityPechBlast.java:1-112 the native blast",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPech.java:56 the focus spawns the blast"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The pech curse blast and its focus are ported; the focus keeps the 250 tick activation cooldown, the 0x229944 colour and the nightshade upgrade of the original ItemFocusPech."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "0ee6005c82a8ac754cd109bb03e7b2f702d3924f67fa1f916ec970d6bccb8a27",
+      "tc4_4_2_3_5_oracle": "100ab4971422cce2a45f5c21703f3b1c7acdcd86c6d860a43b2f2d8631ad6cb8"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/items/ItemBottleTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "adapt",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemBottleTaint.java:55-65 the item shrinks the stack, plays random.bow and spawns an EntityBottleTaint",
+      "native common/src/main/java/thaumcraft/common/items/ItemBottleTaint.java:38-47 the native use() shrinks the stack and plays the sound",
+      "native common/src/main/java/thaumcraft/common/items/ItemBottleTaint.java:50-75 the burst at the raycast point",
+      "native common/src/main/java/thaumcraft/common/entities/projectile/EntityBottleTaint.java the registered flying bottle that is never used"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "DEFECT (behaviour): the original throws a flying bottle that bursts where it lands; the port bursts at the block the thrower looks at (a four block clip) and never spawns the EntityBottleTaint that the port itself already registered.",
+      "The native class documentation still states that the EntityBottleTaint 'is not part of this port' - that comment is stale.",
+      "DEVIATION: the native burst does not skip the tainted mobs (the original skips ITaintedMob and the undead), so a tainted mob can be healed by the splash effect it should not receive."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "dcc2a785da06ce2af110850c3e2b71a38bc78755b2060c808eeb9f4538858558",
+      "tc4_4_2_3_5_oracle": "bd55e1d7974602ce2f2895b604dd4370f884831fbcea418fb3da12800af68189"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/items/ItemWispEssence.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemWispEssence.java:41-42 stack size 64, damage 0",
+      "native common/src/main/java/thaumcraft/common/items/ItemWispEssence.java:47 super(properties.stacksTo(64))",
+      "oracle thaumcraft/common/items/ItemWispEssence.java:58-66 the creative variants with two essentia per aspect",
+      "native common/src/main/java/thaumcraft/common/items/ItemWispEssence.java:71-76 creativeVariants()"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the aspect list moved from NBT to a data component (WispEssenceData); the creative variants, the tint colour and the aspect tooltip are reproduced."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "c3c97a05cc7e591bced0312f2fd276009d8a8156d4adf7074715d2d73ef49fd3",
+      "tc4_4_2_3_5_oracle": "040745cb4fea368a5435ca395f71db5f15a9f0d5515cee609d80ac46ba8cb329"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/items/ItemZombieBrain.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/items/ItemZombieBrain.java:35-36 ItemFood(4, 0.2f, true) with hunger for 30 ticks at 80%",
+      "native common/src/main/java/thaumcraft/common/items/ItemZombieBrain.java:22-24 nutrition 4, saturation 0.2, hunger 30*20 ticks at 0.8",
+      "oracle thaumcraft/common/items/ItemZombieBrain.java:50-60 nextFloat() < 0.1 -> sticky warp 1, else 1 + nextInt(3) temporary warp",
+      "native common/src/main/java/thaumcraft/common/items/ItemZombieBrain.java:38-45 the same 10% sticky and the same 1..3 temporary warp"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: ItemFood became a FoodProperties item.",
+      "Verified equal: the food values, the hunger effect and both warp branches."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "0e75d3c8f8cd94670870447a2c7ff3c15ab64fe791e95cbb67e72c18566eef36",
+      "tc4_4_2_3_5_oracle": "bfdcb8b450d0bc31ab631b459b4a5e13fff50bcfabbc141e5def5795f46717e1"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/items/wands/foci/FocusPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/items/wands/foci/FocusPech.java the 1.12 focus",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPech.java:23-60 the native focus",
+      "native common/src/main/java/thaumcraft/common/entities/projectile/EntityPechBlast.java the blast it spawns"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Legacy-only path: the 1.12 reference had FocusPech and ItemFocusPech as two classes; the native port has one class (ItemFocusPech) with the same contract."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "161468deedca3c952c59094c992c10515f8b6d65c9a61a424b14fce4b0e59f72"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusPech.java": {
+    "callsite_audit": "complete",
+    "disposition": "port",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPech.java:41-42,66-83 the 10/10/10 cost, the six aspect nightshade cost, the 250 tick cooldown and the 0x229944 colour",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPech.java:26-31 the same costs, cooldown and colour",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPech.java:71-77 the blast spawn and the thaumcraft:ice sound",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPech.java:56-58 the blast and the ice sound"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "The focus keeps the original vis costs, the cooldown, the colour and the nightshade upgrade; the trade is paid through the native focus payment."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "4db2cadf06924bbe12fe33b612e4e7ac0447ae3392c1f2059468b08eb745d3b7"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/WarpEvents.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/WarpEvents.java:67-235 checkWarpEvent",
+      "native common/src/main/java/thaumcraft/common/lib/WarpRules.java:23-33 the same gate, the same effective warp formula and the same counter decay",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:89-120 the same event ladder",
+      "oracle thaumcraft/common/lib/WarpEvents.java:82-215 the effect ladder with the exact durations and amplifiers",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:95-118 the same durations and amplifiers",
+      "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:288-289 the 2000 tick schedule and the warp ward gate",
+      "native common/src/main/java/thaumcraft/common/lib/WarpRules.java:19-21 the same schedule and ward gate",
+      "oracle thaumcraft/common/lib/WarpEvents.java:237-246 spawnMist with min(8, guardian) guardians",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:132-139 the same mist and guardian cap",
+      "oracle thaumcraft/common/lib/WarpEvents.java:277-305 suddenlySpiders with min(50, warp) spiders",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:140-149 the same spider cap and the harmless/viewer flags"
+    ],
+    "native_coverage": "partial",
+    "notes": [
+      "Forced 1.21.1 change: the 1.7 static helper class became a dispatcher plus a pure WarpRules class that owns the arithmetic (the decision, the event ladder, the research unlocks and the death gaze cone).",
+      "Verified equal: the roll order (nextInt(100) is consumed even when the gate fails), the effective warp formula min(100,(w+w+counter)/3), the counter decay max(5,sqrt(counter)*2), the severity roll, the devil mask -2-nextInt(4), every effect duration and amplifier (5000 vis exhaust, min(32000,10*w) thaumarhia, 5000/6000 hunger, min(32000,10*w) blurred, 5000 sun scorened, 1200 mining fatigue, 6000 infectious, min(40*w,6000) night vision, 6000 death gaze, min(32000,5*w) blindness, 5000/6000 hunger), the empty branches (0, 5..8, 85..88), the CLARITY branch at exactly 76 and the research unlocks at 10/25/50.",
+      "DEVIATION: the original getWarpFromGear also summed the four bauble slots; the native WarpGear.fromGear only sums the hand and the four armor pieces (no accessory slots exist in the port).",
+      "Not verified: the research unlock path adds the research warp (perm/sticky split) in the native, which is done by the research layer in the original; the exact split was not compared with ResearchManager.completeResearch."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "b680c01cf750a17bf11e2990aff40ee95f50307b4b337ec1e20ec1cba406f433",
+      "tc4_4_2_3_5_oracle": "cf34910599aa836e8e363f6c46e62ca08fab7448d7ef679892e7c62bb52219e9"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/network/fx/PacketFXWispZap.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/fx/PacketFXWispZap.java:36-63 two entity ids and the client side bolt",
+      "native common/src/main/java/thaumcraft/common/lib/network/WispZapPayload.java:9-11 the same two entity ids as a CustomPacketPayload",
+      "native common/src/main/java/thaumcraft/common/lib/network/WispZapNetworking.java the server to client send",
+      "native common/src/main/java/thaumcraft/common/entities/monster/EntityWisp.java:109 the wisp sends the zap"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the SimpleImpl message became a CustomPacketPayload with a StreamCodec; the client draws the same bolt particle."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "f12e235524999ccbb2f18557a74c9ba15ff0d87d2fad9a3631326e9f40686504",
+      "tc4_4_2_3_5_oracle": "c9c284eecf55fe242b2fd06aff96e3a55cd9323b06043e94c43ab6681c9ef240"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketSyncWarp.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketSyncWarp.java:1-70 the warp sync packet (three kinds)",
+      "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java the native full warp sync",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:79 KnowledgeEvents.sync(player) after every check"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the packet became a native payload that carries the whole knowledge state; the three original kinds (0, 1, 2) are answered by the same call sites."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "a5c27db34d710d3c0f49ca5c4107ad175294d44257d5575b20983d43666362d1",
+      "tc4_4_2_3_5_oracle": "c641aad7294868b9fd9bb9c9081a0d4104b1762044845ade9418b6eaffcd1cbd"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketWarpMessage.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketWarpMessage.java:1-82 the warp message packet (kind 1 sticky, kind 2 temporary)",
+      "native common/src/main/java/thaumcraft/common/lib/network/WarpMessageNetworking.java the native warp message payload",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:113 and :122 the sticky and the temporary message"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: the packet became a native payload with a kind and a delta."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "bf61f1ca500bb1cd2b7eaa47bc3008d9fa8706a0df927315490f767e325e7807",
+      "tc4_4_2_3_5_oracle": "3efd6ba684a8ca31929f2f292883dc2522952e8a2af7a1470fc05f5ff51944c7"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/potions/PotionBlurredVision.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/potions/PotionBlurredVision.java:48-49 an empty applyEffectTick",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionBlurredVision.java:5-7 a passive MobEffect"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect; the effect itself is passive in the original too."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "3459ac1a562994d02804454c6da11b2f80dfb59f251a2ccca8e1473d220097ae",
+      "tc4_4_2_3_5_oracle": "6c5cb0faef437e383a837c6be8bbed0ffbf5cfe0f756176ca83303ac94295598"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/potions/PotionDeathGaze.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/potions/PotionDeathGaze.java:48-49 an empty applyEffectTick",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionDeathGaze.java:5-7 a passive MobEffect",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:165-178 the server side ten tick gaze query of the original EventHandlerEntity"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect; the gaze itself is a server side query in both."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "74ddeedbb0cc675a002b307ba4c44441f05bdcd922c429681de026b403650c08",
+      "tc4_4_2_3_5_oracle": "60333faf18b66271a0ae935cbd173846aab85f022d4349df6a6cb262f910aed1"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/potions/PotionInfectiousVisExhaust.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/potions/PotionInfectiousVisExhaust.java:52-60 the 4 block spread, the amplifier decrement and the 6000 tick duration",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionInfectiousVisExhaust.java:10-23 the same spread, amplifier and duration",
+      "oracle thaumcraft/common/lib/potions/PotionInfectiousVisExhaust.java:66-68 func_76397_a: par1 % 40 == 0",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionInfectiousVisExhaust.java:10 shouldApplyEffectTickThisTick: duration % 40 == 0"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect; the 40 tick cadence, the 4 box spread, the amplifier decrement and the 6000 tick durations are reproduced."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "86b5a27cbe540ca24f813f9304bd5db56cf0037b1dff412734f87e7045600ddf",
+      "tc4_4_2_3_5_oracle": "953907e5b8221b3508f7a4cdfdc3343ca7c972fa9c07e57ea95e24f99b6a5033"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/potions/PotionSunScorned.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/potions/PotionSunScorned.java:50-59 light > 0.5 -> 30 * nextFloat() < (f - 0.4) * 2 -> setFire(4); light < 0.25 -> nextFloat() > f * 2 -> heal 1",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionSunScorned.java:12-19 the same two branches and the same numbers",
+      "oracle thaumcraft/common/lib/potions/PotionSunScorned.java:61-63 func_76397_a: par1 % 40 == 0"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect; the light thresholds, the 30x roll, the four second fire and the one point heal are reproduced."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "9c55cf319c2a263f6341778079f21bbad19f18fb4fe3ae55b8464f1905420a06",
+      "tc4_4_2_3_5_oracle": "0296aeed39dc514fb2e83900a5ae59133956f99f093cb2ca60af6428dcfd62bf"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/potions/PotionThaumarhia.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/potions/PotionThaumarhia.java:51-58 nextInt(15) == 0 -> flux goo in the feet cell",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionThaumarhia.java:13-19 the same 1/15 roll and the same block",
+      "oracle thaumcraft/common/lib/potions/PotionThaumarhia.java:60-62 func_76397_a: par1 % 20 == 0"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect; the 20 tick cadence, the 1/15 roll and the flux goo placement are reproduced."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "08535b089ba757ad34cf36c9d56d84058e581ba31257f9ce57be369698c299dd",
+      "tc4_4_2_3_5_oracle": "c71f2c8fc411b49586610b587140b950ffd20fd7fefa3db3de8c2ec44179baf9"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/potions/PotionUnnaturalHunger.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/potions/PotionUnnaturalHunger.java:50-54 exhaustion of 0.025 * (amplifier + 1) every tick for players",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionUnnaturalHunger.java:10-16 the same exhaustion every tick",
+      "oracle thaumcraft/common/lib/potions/PotionUnnaturalHunger.java:56-58 func_76397_a always true"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect; the per tick exhaustion of the original is preserved (not the vanilla hunger cadence)."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "3ec594bde1a3668acf8e0ff72cf25b7a91a01754def3d7ae813a77dd73a1c61c",
+      "tc4_4_2_3_5_oracle": "b80449d7d3cf6bd38616756f44436627e36c4fae14f684dc383f1c742a6ea329"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/potions/PotionWarpWard.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/potions/PotionWarpWard.java:48-49 an empty applyEffectTick",
+      "native common/src/main/java/thaumcraft/common/lib/potions/PotionWarpWard.java:5-7 a passive beneficial MobEffect",
+      "native common/src/main/java/thaumcraft/common/lib/WarpRules.java:19-21 the ward suppresses the whole 2000 tick warp check",
+      "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:43 playerTick skips the check while the ward is active"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: registered MobEffect.",
+      "Verified equal: the ward suppresses the whole check (including the temporary warp decay) exactly like the original EventHandlerEntity:288."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "128f3e803d591bf1e4a45b0312d8f24c2cc2383e968f88c21f62f36c4fd6175f",
+      "tc4_4_2_3_5_oracle": "81a952bdffee05ef5680a34eab3e5ca20cb9b92e76a8994abc8d9603ce603edb"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/world/biomes/BiomeGenTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "oracle thaumcraft/common/lib/world/biomes/BiomeGenTaint.java:36-53 the biome id, the -999 flower and reed counters, the grass colour and the taintacle spawn",
+      "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenTaint.java:27-78 the same generator facts",
+      "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeSurfaceRules.java the shared generator rules",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java the registered taint biome",
+      "common/src/main/resources/data/thaumcraft/worldgen/biome/taint.json the 1.21.1 biome document"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Forced 1.21.1 change: a 1.7 BiomeGenBase became a 1.21.1 biome document plus a rules class.",
+      "Verified equal: the -999 flower and reed counters, the one in eight big magic tree, the taint crust blobs (nextInt(3)), the ten surface fibres, the eight height fibre attempts and the taintacle spawn row."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "tc4_4_2_3_5_oracle": "34f40a02db067ff38e9d576c72467a6a9bb00956a309422c686f00d403c4df41"
+    },
+    "source_semantics": "adapted"
+  },
+  "thaumcraft/common/lib/world/biomes/BiomeTaint.java": {
+    "callsite_audit": "complete",
+    "disposition": "replace",
+    "evidence": [
+      "legacy src/main/java/thaumcraft/common/lib/world/biomes/BiomeTaint.java:26-30 the 1.12 Biome subclass",
+      "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenTaint.java the native generator class",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java the registered taint biome"
+    ],
+    "native_coverage": "parity_verified",
+    "notes": [
+      "Legacy-only path: the 1.12 reference had its own Biome subclass; the native port uses the shared generator rules and the datapack biome document.",
+      "The native BiomeGenTaint keeps the generator identity and the generator specific draws of the 1.7 class."
+    ],
+    "owner": "audit-a2-warp",
+    "reviewed_sha256": {
+      "legacy_foreva": "3f8df2d13174f45bb204d2e496ce2cd10ee909e22136bd652e3f22a3476098ee"
+    },
+    "source_semantics": "adapted"
+  }
+}

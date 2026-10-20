@@ -321,6 +321,8 @@ public final class ResearchRecipeCoverage {
         ids.put("NodeRelay", "thaumcraft:arcane/vis_relay");
         ids.put("NodeStabilizer", "thaumcraft:arcane/node_stabilizer");
         ids.put("NodeTransducer", "thaumcraft:arcane/node_transducer");
+        // The three recipes that produce ONE metadata value of a family block; the 1.21.1 port has one
+        // item per metadata value, so they resolve to their own variant item.
         ids.put("PaveTravel", "thaumcraft:arcane/paving_stone_travel");
         ids.put("PaveWard", "thaumcraft:arcane/paving_stone_warding");
         ids.put("Phial", "thaumcraft:phial_empty");

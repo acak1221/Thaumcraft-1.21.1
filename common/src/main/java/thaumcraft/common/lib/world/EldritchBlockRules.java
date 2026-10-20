@@ -1,5 +1,6 @@
 package thaumcraft.common.lib.world;
 
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -191,9 +192,14 @@ public final class EldritchBlockRules {
     public static final int COSMETIC_TAINT_CRUST = 14;
     public static final int COSMETIC_ELDRITCH_PILLAR = 15;
 
-    /** BlockCosmeticSolid:66-67 - family hardness 2 and blast resistance 10. */
+    /** BlockCosmeticSolid:66-67 - family hardness 2 and the blast resistance setter value 10. */
     public static final float COSMETIC_FAMILY_HARDNESS = 2.0F;
     public static final float COSMETIC_FAMILY_RESISTANCE = 10.0F;
+    /**
+     * The blast resistance of the family in native units. The 1.7.10 setter value 10 is stored as
+     * 30 and the vanilla getter divides the stored value by five, so the effective value is 6.
+     */
+    public static final float COSMETIC_FAMILY_NATIVE_RESISTANCE = 6.0F;
 
     /** BlockCosmeticSolid:213-225 - the per metadata hardness, -1 means unbreakable. */
     public static float cosmeticHardness(int variant) {
@@ -228,7 +234,7 @@ public final class EldritchBlockRules {
             case COSMETIC_ARCANE_STONE:
                 return 20.0F;
             default:
-                return COSMETIC_FAMILY_RESISTANCE;
+                return COSMETIC_FAMILY_NATIVE_RESISTANCE;
         }
     }
 
@@ -236,31 +242,6 @@ public final class EldritchBlockRules {
     public static boolean cosmeticBlocksSpawning(int variant) {
         return variant == COSMETIC_TRAVEL_STONE || variant == COSMETIC_WARDING_STONE
                 || variant == COSMETIC_ELDRITCH_TILE_ALT;
-    }
-
-    /** The hardness groups of the cosmetic solid family. */
-    public static int cosmeticGroup(int variant) {
-        if (variant == COSMETIC_OBSIDIAN_TILE || variant == COSMETIC_OBSIDIAN_TILE_SHADED) return 1;
-        if (variant == COSMETIC_THAUMIUM_BLOCK || variant == COSMETIC_PEDESTAL_TOP || variant == COSMETIC_ARCANE_STONE) return 2;
-        return 0;
-    }
-
-    public static final float[] COSMETIC_GROUP_HARDNESS = {2.0F, 30.0F, 4.0F};
-    public static final float[] COSMETIC_GROUP_RESISTANCE = {10.0F, 999.0F, 20.0F};
-
-    /** The hardness of a cosmetic group. */
-    public static float cosmeticGroupHardness(int group) { return COSMETIC_GROUP_HARDNESS[group]; }
-
-    /** The blast resistance of a cosmetic group. */
-    public static float cosmeticGroupResistance(int group) { return COSMETIC_GROUP_RESISTANCE[group]; }
-
-    /** The metadata values of a cosmetic group. */
-    public static java.util.List<Integer> cosmeticGroupVariants(int group) {
-        java.util.List<Integer> variants = new java.util.ArrayList<>();
-        for (int variant = 0; variant <= 15; variant++) {
-            if (cosmeticGroup(variant) == group) variants.add(variant);
-        }
-        return variants;
     }
 
     /** BlockCosmeticSolid:278-286 - warding stone and the node tile carry a block entity. */
@@ -281,6 +262,22 @@ public final class EldritchBlockRules {
     public static boolean cosmeticOpaqueHasTile(int variant) {
         return variant == COSMETIC_OPAQUE_OWNED;
     }
+
+    // -------------------------------------------------------------- variant items
+
+    /**
+     * The original recipes that produce ONE metadata value of a family block: the item id and the
+     * metadata value that it places (ConfigRecipes:192, 209 and 212).
+     *
+     * <p>A 1.21.1 recipe result cannot carry a block state, so every one of them has its own item.
+     */
+    public static final Map<String, Integer> VARIANT_ITEMS = Map.of(
+            "paving_stone_travel", COSMETIC_TRAVEL_STONE,
+            "paving_stone_warding", COSMETIC_WARDING_STONE,
+            "warded_glass", COSMETIC_OPAQUE_OWNED);
+
+    /** The metadata value that the variant item of that id places, or -1 when there is none. */
+    public static int variantOf(String item) { return VARIANT_ITEMS.getOrDefault(item, -1); }
 
     // ---------------------------------------------------------------------- airy
 

@@ -37,17 +37,27 @@ class GapRecipesAssetsTest {
     private record Infusion(String key, String file, String research, String input, List<String> components,
                             Map<String, Integer> aspects, int instability, String result, int count) {}
 
-    // ConfigRecipes:191 (ArcaneDoor), 193 (IronKey), 196 (GoldKey), 216 (BoneBow).
+    // ConfigRecipes:191 (ArcaneDoor), 192 (WardedGlass), 193 (IronKey), 196 (GoldKey), 209 (PaveTravel),
+    // 212 (PaveWard), 216 (BoneBow).
     private static final List<Arcane> ARCANE = List.of(
             new Arcane("ArcaneDoor", "arcane/arcane_door", "WARDEDARCANA", List.of("TDT", "DBD", "TDT"),
                     Map.of("T", "thaumcraft:thaumium_ingot", "B", "thaumcraft:zombie_brain", "D", "thaumcraft:greatwood_planks"),
                     "thaumcraft:arcane_door", 1, Map.of("aqua", 20, "ordo", 10, "terra", 10, "ignis", 5)),
+            new Arcane("WardedGlass", "arcane/warded_glass", "WARDEDARCANA", List.of("GGG", "WBW", "GGG"),
+                    Map.of("B", "thaumcraft:zombie_brain", "G", "minecraft:glass", "W", "thaumcraft:greatwood_planks"),
+                    "thaumcraft:warded_glass", 8, Map.of("aqua", 5, "ordo", 10, "terra", 5, "ignis", 5)),
             new Arcane("IronKey", "arcane/iron_key", "WARDEDARCANA", List.of("NNI", "N  "),
                     Map.of("I", "minecraft:iron_ingot", "N", "#c:nuggets/iron"),
                     "thaumcraft:key_iron", 2, Map.of("aqua", 5, "ordo", 5)),
             new Arcane("GoldKey", "arcane/gold_key", "WARDEDARCANA", List.of("NNI", "N  "),
                     Map.of("I", "minecraft:gold_ingot", "N", "minecraft:gold_nugget"),
                     "thaumcraft:key_gold", 2, Map.of("aqua", 5, "ordo", 5)),
+            new Arcane("PaveTravel", "arcane/paving_stone_travel", "PAVETRAVEL", List.of("SAS", "SBS"),
+                    Map.of("S", "thaumcraft:arcane_stone_bricks", "A", "thaumcraft:air_shard", "B", "thaumcraft:earth_shard"),
+                    "thaumcraft:paving_stone_travel", 4, Map.of("terra", 10, "aer", 10)),
+            new Arcane("PaveWard", "arcane/paving_stone_warding", "PAVEWARD", List.of("SAS", "SBS"),
+                    Map.of("S", "thaumcraft:arcane_stone_bricks", "A", "thaumcraft:fire_shard", "B", "thaumcraft:order_shard"),
+                    "thaumcraft:paving_stone_warding", 4, Map.of("ignis", 10, "ordo", 10)),
             new Arcane("BoneBow", "arcane/bone_bow", "BONEBOW", List.of("SB ", "SEB", "SB "),
                     Map.of("E", "thaumcraft:entropy_shard", "B", "minecraft:bone", "S", "minecraft:string"),
                     "thaumcraft:bone_bow", 1, Map.of("aer", 16, "perditio", 32)));

@@ -41,6 +41,13 @@ class EldritchAndDeviceAssetsTest {
     private static final List<String> ELDRITCH_GROUPS = List.of("eldritch", "eldritch_crust", "eldritch_deco",
             "eldritch_doorway", "eldritch_spawner", "eldritch_crystal");
 
+    /**
+     * The items that place ONE metadata value of a family block. They have no block of their own,
+     * because the original recipe result was a block with a metadata.
+     */
+    private static final Set<String> VARIANT_ITEMS = Set.of("paving_stone_travel", "paving_stone_warding",
+            "warded_glass");
+
     @Test void theTwoRegistrationClassesAreRead() {
         assertFalse(blockIds().isEmpty(), "no block was read from the two registration classes");
         assertFalse(itemIds().isEmpty(), "no item was read from the two registration classes");
@@ -79,7 +86,7 @@ class EldritchAndDeviceAssetsTest {
         for (String id : blocks) if (items.contains(id) && !ResourceTree.exists(ASSETS + "models/item/" + id + ".json")) {
             missing.add("item model " + id);
         }
-        for (String id : items) if (!blocks.contains(id)) missing.add("an item without a block: " + id);
+        for (String id : items) if (!blocks.contains(id) && !VARIANT_ITEMS.contains(id)) missing.add("an item without a block: " + id);
         assertEquals(List.of(), missing);
     }
 
@@ -160,13 +167,14 @@ class EldritchAndDeviceAssetsTest {
         }
     }
 
-    @Test void everySlabOfTheTwoFamiliesKnowsItsThreeStates() throws Exception {
+    @Test void everySlabOfTheTwoFamiliesKnowsItsTwoStates() throws Exception {
+        // The native slabs are vanilla slabs: the bottom and the top half. The original had separate
+        // single and double blocks, the 1.21.1 slab block carries the two halves.
         for (String id : List.of("cosmetic_stone_slab_arcane", "cosmetic_stone_slab_eldritch",
-                "cosmetic_wood_slab_greatwood", "cosmetic_wood_slab_silverwood", "cosmetic_stone_slab",
-                "cosmetic_wood_slab")) {
+                "cosmetic_wood_slab_greatwood", "cosmetic_wood_slab_silverwood")) {
             JsonObject variants = ResourceTree.object(ASSETS + "blockstates/" + id + ".json").getAsJsonObject("variants");
-            assertEquals(3, variants.size(), id + ": bottom, top and double");
-            for (String type : List.of("bottom", "top", "double")) {
+            assertEquals(2, variants.size(), id + ": the bottom and the top half");
+            for (String type : List.of("bottom", "top")) {
                 assertTrue(variants.has("type=" + type), id + " misses the state " + type);
             }
         }
@@ -195,21 +203,16 @@ class EldritchAndDeviceAssetsTest {
         }
     }
 
-    @Test void theCosmeticSolidFamilyKnowsTheOriginalMetadataOfItsGroup() throws Exception {
-        JsonObject plain = ResourceTree.object(ASSETS + "blockstates/cosmetic_solid.json").getAsJsonObject("variants");
-        assertEquals(11, plain.size(), "the cosmetic solid of the ordinary hardness group");
-        JsonObject tough = ResourceTree.object(ASSETS + "blockstates/cosmetic_solid_tough.json").getAsJsonObject("variants");
-        assertEquals(2, tough.size(), "the obsidian tile and its shaded variant");
-        JsonObject thaumium = ResourceTree.object(ASSETS + "blockstates/cosmetic_solid_thaumium.json").getAsJsonObject("variants");
-        assertEquals(3, thaumium.size(), "the thaumium block, the pedestal top and the arcane stone");
+    @Test void theCosmeticSolidKnowsEveryOriginalMetadataOfTheFamily() throws Exception {
+        JsonObject variants = ResourceTree.object(ASSETS + "blockstates/cosmetic_solid.json").getAsJsonObject("variants");
+        assertEquals(16, variants.size(), "the cosmetic solid is ONE block with the sixteen original metadata values");
         for (int variant = 0; variant <= 15; variant++) {
-            int owner = 0;
-            if (variant == 0 || variant == 8) owner = 1;
-            if (variant == 4 || variant == 6 || variant == 7) owner = 2;
-            String key = "variant=" + variant;
-            if (owner == 1) assertTrue(tough.has(key), "the obsidian tile misses " + key);
-            else if (owner == 2) assertTrue(thaumium.has(key), "the thaumium stone misses " + key);
-            else assertTrue(plain.has(key), "the ordinary cosmetic solid misses " + key);
+            assertTrue(variants.has("variant=" + variant), "the cosmetic solid misses variant=" + variant);
+        }
+        JsonObject opaque = ResourceTree.object(ASSETS + "blockstates/cosmetic_opaque.json").getAsJsonObject("variants");
+        assertEquals(3, opaque.size(), "the cosmetic opaque is ONE block with its three original metadata values");
+        for (int variant = 0; variant <= 2; variant++) {
+            assertTrue(opaque.has("variant=" + variant), "the cosmetic opaque misses variant=" + variant);
         }
     }
 

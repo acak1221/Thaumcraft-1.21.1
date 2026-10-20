@@ -6,22 +6,68 @@
       "entries": [
         {
           "type": "minecraft:item",
-<<<<<<<< HEAD:common/src/main/resources/data/thaumcraft/loot_table/blocks/cosmetic_stone_slab.json
-          "name": "thaumcraft:cosmetic_stone_slab",
+          "name": "thaumcraft:paving_stone_travel",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "thaumcraft:cosmetic_solid",
+              "properties": {
+                "variant": "2"
+              }
+            }
+          ],
           "functions": [
             {
-              "function": "minecraft:set_count",
-              "count": 2,
-              "conditions": [
-                {
-                  "condition": "minecraft:block_state_property",
-                  "block": "thaumcraft:cosmetic_stone_slab",
-                  "properties": {
-                    "type": "double"
+              "function": "minecraft:explosion_decay"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "thaumcraft:paving_stone_warding",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "thaumcraft:cosmetic_solid",
+              "properties": {
+                "variant": "3"
+              }
+            }
+          ],
+          "functions": [
+            {
+              "function": "minecraft:explosion_decay"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "thaumcraft:cosmetic_solid",
+          "conditions": [
+            {
+              "condition": "minecraft:inverted",
+              "term": {
+                "condition": "minecraft:any_of",
+                "terms": [
+                  {
+                    "condition": "minecraft:block_state_property",
+                    "block": "thaumcraft:cosmetic_solid",
+                    "properties": {
+                      "variant": "2"
+                    }
+                  },
+                  {
+                    "condition": "minecraft:block_state_property",
+                    "block": "thaumcraft:cosmetic_solid",
+                    "properties": {
+                      "variant": "3"
+                    }
                   }
-                }
-              ]
-            },
+                ]
+              }
+            }
+          ],
+          "functions": [
             {
               "function": "minecraft:explosion_decay"
             }
@@ -31,9 +77,6 @@
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
-========
-          "name": "thaumcraft:cosmetic_solid"
->>>>>>>> 721188f (Unify the TC4 cosmetic block family on the group design with the variant state):common/src/main/resources/data/thaumcraft/loot_table/blocks/cosmetic_solid.json
         }
       ]
     }

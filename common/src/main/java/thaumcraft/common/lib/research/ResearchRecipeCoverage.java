@@ -461,9 +461,9 @@ public final class ResearchRecipeCoverage {
         reasons.put("TransLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot");
         reasons.put("TransSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot");
         reasons.put("TransTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot");
-        reasons.put("WandCapCopper", "no native copper wand cap item; the original needs a third-party copper ingot");
-        reasons.put("WandCapSilver", "no native silver wand cap item; the original needs a third-party silver ingot");
-        reasons.put("WandCapSilverInert", "no native silver wand cap item; the original needs a third-party silver ingot");
+        reasons.put("WandCapCopper", "third-party ore: the original registers this arcane recipe only when Config.foundCopperIngot, and 1.21.1 has no copper wand cap item");
+        reasons.put("WandCapSilver", "third-party ore: the original registers this infusion recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item");
+        reasons.put("WandCapSilverInert", "third-party ore: the original registers this arcane recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item");
         reasons.put("WandPedFocus", "the original result is blockStoneDevice metadata 8, the focus that sits on the wand pedestal; the native wand_pedestal block keeps it as the focus block state and has no separate focus item, and a 1.21.1 recipe result cannot carry a block state");
         return Collections.unmodifiableMap(reasons);
     }

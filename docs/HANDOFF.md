@@ -4,6 +4,17 @@
 
 ## Приоритет пользователя18.10: контент; предварительный экспорт бура
 
+### Актуально20.10 (девятнадцатая группа: Кирка Огня и особая добыча кластеров, Claude): реализовано, собрано, game-tested 167/167
+
+Контракт и реализация: [elemental-pickaxe](analysis/2026-10-20-elemental-pickaxe.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.
+**Implemented:** `elemental_pickaxe` (1500 прочности, скорость 10, урон 5, зачаровываемость 18, rare, ремонт слитком таумия), поджог на 2 секунды при ударе (правило PvP), 5 прочности и звук `wandfail` за правый щелчок, инфузия `ELEMENTALPICK`,
+**особая добыча** (`SpecialMining` + миксин `SpecialMiningBlockMixin` в `Block.getDrops`): `raw_iron` / `raw_gold` / `cinnabar_ore` превращаются в кластеры с шансом `0,2 + удача × 0,075` (× 1,0 / 0,9 / 0,9), то же количество, без Silk Touch, только у игрока с этой киркой.
+**Built / game-tested:** `:common:test` **476 JUnit** (+6), `:fabric:remapJar`, `:fabric:runGameTest` **167/167** (+`pickaxeOfTheCoreBurnsWearsAndFindsClusters`: 400-кратные выборки `Block.getDrops` и 120 настоящих добыч), JAR SHA-256 `305d58b7…347b`; три команды шага CI с ресурсами зелёные. Один красный прогон по дороге — дорожка NO-LAUNCHER в тесте дротика насчитала чужой дротик; дорожки теперь считают только дротики своего голема (`getOwner()`), причина не доказана.
+**Мутации:** `elemental-pickaxe` (27): JUnit 13/13 локально, 14 GameTest у GitHub. `native-clusters` (24) на GitHub (9 GameTest) ещё идёт; `void-gear` (27) — результат не прочитан.
+**Seen:** нет. **Не проверено:** значок кирки, звуки, работа с Буром (Бур пока принимает только ванильные кирки и Thaumium Pickaxe), Excavation с Dowsing.
+**Не перенесено:** клиентский скан руд (правый щелчок), Primal Crusher, Dowsing.
+**Следующее:** Elemental Hoe / Shovel / Sword (мотыга растит деревья, лопата 3×3, меч подбрасывает), затем M01 R10–R16, M03/M08 фокусы, M07 enchant-инфузия, Thaumatorium.
+
 ### Актуально20.10 (восемнадцатая группа: самородные кластеры железа/золота/киновари, Claude): реализовано, собрано, game-tested 166/166
 
 Контракт и реализация: [native-clusters](analysis/2026-10-20-native-clusters.md). Коммиты — только на приватную ветку `claude/affectionate-brahmagupta-qgsfl3`.

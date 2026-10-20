@@ -1,3 +1,3 @@
-native-clusters
+elemental-pickaxe
 
-# request 11: native iron, gold and cinnabar clusters (void-gear run 10 may still be running)
+# request 12: the Pickaxe of the Core and the special mining (native-clusters run 11 and void-gear run 10 may still be running)

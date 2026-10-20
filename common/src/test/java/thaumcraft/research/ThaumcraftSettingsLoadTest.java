@@ -10,6 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import thaumcraft.common.config.ResearchSettings;
@@ -18,6 +21,11 @@ import thaumcraft.common.lib.WarpEvents;
 
 /** Loading the server research settings file: the first-run file, every option, and the fallback for an unreadable file. */
 class ThaumcraftSettingsLoadTest {
+    @BeforeAll static void bootstrap() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+    }
+
     @TempDir Path folder;
     private ResearchSettings before;
     private boolean wussBefore;

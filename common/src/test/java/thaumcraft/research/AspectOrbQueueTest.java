@@ -11,6 +11,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.lib.utils.AspectOrbQueue;
 
@@ -19,6 +22,11 @@ import thaumcraft.common.lib.utils.AspectOrbQueue;
  * Rows are only ever decoded, never delivered, so no world is needed.
  */
 class AspectOrbQueueTest {
+    @BeforeAll static void bootstrap() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+    }
+
     private static final UUID ID = UUID.fromString("00000000-0000-0000-0000-0000000000a1");
     private static final UUID OTHER = UUID.fromString("00000000-0000-0000-0000-0000000000a2");
 

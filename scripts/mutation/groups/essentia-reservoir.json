@@ -1,0 +1,434 @@
+{
+ "description": "Essentia Reservoir: the mixed 256-unit store, its one port and suction, persistence, pulls through the shared transfer executor, the infusion's wireless drain, wand turning, placement and the burst (docs/analysis/2026-10-20-essentia-reservoir.md)",
+ "watch": {
+  "junit": [
+   "ReservoirRulesTest",
+   "ReservoirAssetsTest"
+  ],
+  "gametests": [
+   "essentiaReservoirHoldsMixedEssentiaPullsAndBursts"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.ReservoirRulesTest",
+  "thaumcraft.assets.ReservoirAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "capacity-255",
+   "name": "the reservoir holds 255",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "CAPACITY = 256",
+   "new": "CAPACITY = 255"
+  },
+  {
+   "id": "suction-25",
+   "name": "its suction is 25",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "SUCTION = 24",
+   "new": "SUCTION = 25"
+  },
+  {
+   "id": "interval-4",
+   "name": "it pulls every fourth tick",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "PULL_INTERVAL = 5",
+   "new": "PULL_INTERVAL = 4"
+  },
+  {
+   "id": "burst-unit-15",
+   "name": "it bursts from 15 units",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "BURST_UNIT = 16",
+   "new": "BURST_UNIT = 15"
+  },
+  {
+   "id": "tries-49",
+   "name": "the burst tries 49 times",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "BURST_TRIES = 50",
+   "new": "BURST_TRIES = 49"
+  },
+  {
+   "id": "spread-4",
+   "name": "the burst reaches 3 blocks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "BURST_SPREAD = 5",
+   "new": "BURST_SPREAD = 4"
+  },
+  {
+   "id": "flux-7",
+   "name": "the flux is level 7",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "FLUX_LEVEL = 8",
+   "new": "FLUX_LEVEL = 7"
+  },
+  {
+   "id": "power-2",
+   "name": "the blast has power 2",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "BURST_POWER = 1.0F",
+   "new": "BURST_POWER = 2.0F"
+  },
+  {
+   "id": "suction-when-full",
+   "name": "a full reservoir still asks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return units < CAPACITY ? SUCTION : 0;",
+   "new": "return units <= CAPACITY ? SUCTION : 0;"
+  },
+  {
+   "id": "comparator-no-extra",
+   "name": "one unit reads 0",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "+ (units > 0 ? 1 : 0)",
+   "new": "+ 0"
+  },
+  {
+   "id": "comparator-ceil",
+   "name": "the comparator rounds up",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "(int) Math.floor(ratio * 14.0F)",
+   "new": "(int) Math.ceil(ratio * 14.0F)"
+  },
+  {
+   "id": "comparator-15-steps",
+   "name": "the comparator has 15 steps",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "ratio * 14.0F",
+   "new": "ratio * 15.0F"
+  },
+  {
+   "id": "sprays-17",
+   "name": "a spray per 17 units",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return units / BURST_UNIT;",
+   "new": "return units / (BURST_UNIT + 1);"
+  },
+  {
+   "id": "offset-sum",
+   "name": "the offset adds the draws",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return plus - nextInt.applyAsInt(BURST_SPREAD);",
+   "new": "return plus + nextInt.applyAsInt(BURST_SPREAD);"
+  },
+  {
+   "id": "goo-own-level",
+   "name": "its own level is goo",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return y < originY;",
+   "new": "return y <= originY;"
+  },
+  {
+   "id": "burst-one-less",
+   "name": "the burst stops one early",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return placedBefore >= sprays;",
+   "new": "return placedBefore > sprays;"
+  },
+  {
+   "id": "wand-sneak-inverted",
+   "name": "sneaking turns it away",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return sneaking ? clicked : clicked.getOpposite();",
+   "new": "return sneaking ? clicked.getOpposite() : clicked;"
+  },
+  {
+   "id": "placed-facing-clicked",
+   "name": "a placed one opens away from the click",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "public static Direction placedFacing(Direction clicked) { return clicked.getOpposite(); }",
+   "new": "public static Direction placedFacing(Direction clicked) { return clicked; }"
+  },
+  {
+   "id": "creak-bound-plus",
+   "name": "the creak is rarer when full",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "CREAK_BOUND - units",
+   "new": "CREAK_BOUND + units"
+  },
+  {
+   "id": "recipe-instability-5",
+   "name": "the infusion has instability 5",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/essentia_reservoir.json",
+   "old": "\"instability\": 6",
+   "new": "\"instability\": 5"
+  },
+  {
+   "id": "recipe-aqua-7",
+   "name": "the infusion costs 7 aqua",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/essentia_reservoir.json",
+   "old": "\"aqua\": 8",
+   "new": "\"aqua\": 7"
+  },
+  {
+   "id": "loot-buffer",
+   "name": "it drops a buffer",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/loot_table/blocks/essentia_reservoir.json",
+   "old": "\"name\": \"thaumcraft:essentia_reservoir\"",
+   "new": "\"name\": \"thaumcraft:essentia_buffer\""
+  },
+  {
+   "id": "tag-not-mineable",
+   "name": "a pickaxe does not mine it",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/block/mineable/pickaxe.json",
+   "old": "\"thaumcraft:essentia_reservoir\"",
+   "new": "\"thaumcraft:essentia_reservoirx\""
+  },
+  {
+   "id": "ru-name",
+   "name": "a short Russian name",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"block.thaumcraft.essentia_reservoir\": \"Резервуар эссенции\"",
+   "new": "\"block.thaumcraft.essentia_reservoir\": \"Резервуар\""
+  },
+  {
+   "id": "own-cell-target",
+   "name": "the burst may fill its own cell",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java",
+   "old": "return !ownCell && air;",
+   "new": "return air;"
+  },
+  {
+   "id": "port-inverted",
+   "name": "every side but the facing is a port",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "return !isQuarantined() && face == facing;",
+   "new": "return !isQuarantined() && face != facing;"
+  },
+  {
+   "id": "sided-type",
+   "name": "a sided query names the type",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "return face == null && !stock.isEmpty() ?",
+   "new": "return !stock.isEmpty() ?"
+  },
+  {
+   "id": "suction-always",
+   "name": "a full reservoir still has suction",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "return isQuarantined() ? 0 : ReservoirRules.suction(getAmount());",
+   "new": "return isQuarantined() ? 0 : ReservoirRules.SUCTION;"
+  },
+  {
+   "id": "insert-short",
+   "name": "it cannot be filled to the brim",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "units > MAX_AMOUNT - total(saved.stock())",
+   "new": "units >= MAX_AMOUNT - total(saved.stock())"
+  },
+  {
+   "id": "zero-take-fails",
+   "name": "a zero take fails",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "if (amount == 0) return true;",
+   "new": "if (amount == 0) return false;"
+  },
+  {
+   "id": "insert-all-or-nothing",
+   "name": "an insert is not partial",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": "units = insert ? Math.min(request.amount(), reservoir.getSpace()) : request.amount();",
+   "new": "units = request.amount();"
+  },
+  {
+   "id": "overflow-kept",
+   "name": "an overfull list is loaded",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "stock = total > MAX_AMOUNT ? Map.of() : Collections.unmodifiableMap(parsed);",
+   "new": "stock = Collections.unmodifiableMap(parsed);"
+  },
+  {
+   "id": "face-range-9",
+   "name": "a face of 9 is accepted",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "face < 0 || face > 5",
+   "new": "face < 0 || face > 9"
+  },
+  {
+   "id": "face-not-saved",
+   "name": "the face is not saved",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "tag.putByte(\"face\", (byte) facing.get3DDataValue());",
+   "new": "tag.putByte(\"face\", (byte) 0);"
+  },
+  {
+   "id": "face-default-up",
+   "name": "a missing face is up",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": ": Direction.DOWN.get3DDataValue();",
+   "new": ": Direction.UP.get3DDataValue();"
+  },
+  {
+   "id": "take-any-face",
+   "name": "takeEssentia ignores the port",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "return canOutputTo(face) && takeFromContainer(aspect, amount) ? amount : 0;",
+   "new": "return takeFromContainer(aspect, amount) ? amount : 0;"
+  },
+  {
+   "id": "add-any-face",
+   "name": "addEssentia ignores the port",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "return canInputFrom(face) ? amount - addToContainer(aspect, amount) : 0;",
+   "new": "return amount - addToContainer(aspect, amount);"
+  },
+  {
+   "id": "contains-list-loose",
+   "name": "a list is contained at equal or less",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaReservoir.java",
+   "old": "if (containerContains(aspect) < aspects.getAmount(aspect)) return false;",
+   "new": "if (containerContains(aspect) < aspects.getAmount(aspect) - 1) return false;"
+  },
+  {
+   "id": "profile-missing",
+   "name": "the draw has no profile",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": "case CRYSTALLIZER, RESERVOIR ->",
+   "new": "case CRYSTALLIZER ->"
+  },
+  {
+   "id": "pull-from-below",
+   "name": "it always draws from below",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": "return transport(tile, tile.getFacing(), Profile.RESERVOIR, null);",
+   "new": "return transport(tile, Direction.DOWN, Profile.RESERVOIR, null);"
+  },
+  {
+   "id": "infusion-two-units",
+   "name": "the infusion takes two units",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/essentia/EssentiaTransfers.java",
+   "old": "var change = reservoir.prepareExtract(before, wanted, 1);",
+   "new": "var change = reservoir.prepareExtract(before, wanted, 2);"
+  },
+  {
+   "id": "burst-gas-below",
+   "name": "goo and gas swapped",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+   "old": "ReservoirRules.gooAt(y, pos.getY()) ? ThaumcraftFlux.FLUX_GOO.get() : ThaumcraftFlux.FLUX_GAS.get()",
+   "new": "ReservoirRules.gooAt(y, pos.getY()) ? ThaumcraftFlux.FLUX_GAS.get() : ThaumcraftFlux.FLUX_GOO.get()"
+  },
+  {
+   "id": "burst-from-two",
+   "name": "a burst needs two sprays",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+   "old": "if (sprays > 0) burst(server, pos, sprays);",
+   "new": "if (sprays > 1) burst(server, pos, sprays);"
+  },
+  {
+   "id": "blast-no-power",
+   "name": "the blast has no power",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+   "old": "ReservoirRules.BURST_POWER, Level.ExplosionInteraction.MOB",
+   "new": "0.0F, Level.ExplosionInteraction.MOB"
+  },
+  {
+   "id": "wand-always-sneaks",
+   "name": "a wand always turns toward the click",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+   "old": "ReservoirRules.wandFacing(context.getClickedFace(), player.isShiftKeyDown())",
+   "new": "ReservoirRules.wandFacing(context.getClickedFace(), true)"
+  },
+  {
+   "id": "comparator-zero",
+   "name": "the comparator reads 0",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+   "old": "return level.getBlockEntity(pos) instanceof TileEssentiaReservoir reservoir ? reservoir.comparatorSignal() : 0;",
+   "new": "return 0;"
+  },
+  {
+   "id": "no-analog-output",
+   "name": "a comparator cannot read it",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+   "old": "protected boolean hasAnalogOutputSignal(BlockState state) { return true; }",
+   "new": "protected boolean hasAnalogOutputSignal(BlockState state) { return false; }"
+  },
+  {
+   "id": "invisible",
+   "name": "the block is invisible",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java",
+   "old": "protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }",
+   "new": "protected RenderShape getRenderShape(BlockState state) { return RenderShape.INVISIBLE; }"
+  },
+  {
+   "id": "placed-clicked-face",
+   "name": "a placed one opens away from the click",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java",
+   "old": "thaumcraft.common.lib.essentia.ReservoirRules.placedFacing(context.getClickedFace())",
+   "new": "context.getClickedFace()"
+  },
+  {
+   "id": "soft-resistance",
+   "name": "resistance 3 instead of 10.2",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java",
+   "old": ".strength(2.0F, 10.2F)",
+   "new": ".strength(2.0F, 3.0F)"
+  },
+  {
+   "id": "no-tool-needed",
+   "name": "any hand drops it",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java",
+   "old": ".strength(2.0F, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()",
+   "new": ".strength(2.0F, 10.2F).sound(SoundType.METAL).noOcclusion()"
+  },
+  {
+   "id": "wand-hook-off",
+   "name": "the wand item does not turn it",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java",
+   "old": "if (reservoir != InteractionResult.PASS) return reservoir;",
+   "new": "if (false) return reservoir;"
+  }
+ ]
+}

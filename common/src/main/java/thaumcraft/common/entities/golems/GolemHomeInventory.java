@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import thaumcraft.common.tiles.TileChestHungry;
 import thaumcraft.common.blocks.BlockFlesh;
+import thaumcraft.common.items.golems.GolemItemMatch;
 
 /** Finite native golem inventories, NOT a registry of arbitrary Container providers. */
 final class GolemHomeInventory {
@@ -108,7 +109,10 @@ final class GolemHomeInventory {
                     && (!(container instanceof WorldlyContainer sided) || sided.canTakeItemThroughFace(slot, stack, face));
         }
 
-        int firstExtractable(ItemStack exemplar, Direction face) {
+        int firstExtractable(ItemStack exemplar, Direction face) { return firstExtractable(exemplar, face, 0); }
+
+        /** The first exposed slot whose stack matches {@code exemplar} under Entropy's switches (original extractStack:190-208). */
+        int firstExtractable(ItemStack exemplar, Direction face, int match) {
             if (!current()) return -1;
             int[] exposed = slots(face);
             if (exposed == null) return -1;
@@ -116,12 +120,15 @@ final class GolemHomeInventory {
                 if (slot < 0 || slot >= container.getContainerSize()) continue;
                 ItemStack actual = container.getItem(slot);
                 if (extracts(slot, actual, face) && (exemplar.isEmpty()
-                        || ItemStack.isSameItemSameComponents(actual, exemplar))) return slot;
+                        || GolemItemMatch.matches(actual, exemplar, match))) return slot;
             }
             return -1;
         }
 
-        long countVisible(ItemStack exemplar, Direction face) {
+        long countVisible(ItemStack exemplar, Direction face) { return countVisible(exemplar, face, 0); }
+
+        /** Visible stock under Entropy's switches (original getMissingItems:186-196). */
+        long countVisible(ItemStack exemplar, Direction face, int match) {
             if (!current()) return 0;
             int[] exposed = slots(face);
             if (exposed == null) return 0;
@@ -130,7 +137,7 @@ final class GolemHomeInventory {
                 if (slot < 0 || slot >= container.getContainerSize()) continue;
                 ItemStack actual = container.getItem(slot);
                 // Fill counts visible stock even when extraction from it is denied.
-                if (!actual.isEmpty() && ItemStack.isSameItemSameComponents(actual, exemplar)) count += actual.getCount();
+                if (!actual.isEmpty() && GolemItemMatch.matches(actual, exemplar, match)) count += actual.getCount();
             }
             return count;
         }
@@ -151,11 +158,14 @@ final class GolemHomeInventory {
             return room;
         }
 
-        boolean hasSeedAndRoom(ItemStack exemplar, Direction face) {
+        boolean hasSeedAndRoom(ItemStack exemplar, Direction face) { return hasSeedAndRoom(exemplar, face, 0); }
+
+        boolean hasSeedAndRoom(ItemStack exemplar, Direction face, int match) {
             // Quantity is irrelevant; this is a read-only extraction probe of
             // actual destination stock, on the SAME face that accepts the cargo.
+            // The room is strict (it merges only identical stacks); the seed may be a look-alike under Entropy's switches.
             return !exemplar.isEmpty() && current() && roomFor(exemplar, face) > 0
-                    && firstExtractable(exemplar, face) >= 0;
+                    && firstExtractable(exemplar, face, match) >= 0;
         }
 
         boolean sharesStorage(Destination otherInventory) {

@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import thaumcraft.common.config.ThaumcraftArcane;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftWands;
+import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.items.wands.WandMaterials;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
@@ -79,7 +80,7 @@ public final class ArcaneWandRecipe implements NativeArcaneRecipe {
         // its ingredients. The real ordinary wood/iron recipe retains priority.
         if (materials == null || materials.rod() == WandMaterials.WOOD && materials.cap() == WandMaterials.IRON) return ItemStack.EMPTY;
         ItemStack output = new ItemStack(ThaumcraftContent.WAND.get());
-        output.set(ThaumcraftContent.WAND_DATA.get(), new WandData(materials.rod().tag(), materials.cap().tag(), Map.of()));
+        ItemWandCasting.withData(output, new WandData(materials.rod().tag(), materials.cap().tag(), Map.of()));
         output.set(ThaumcraftWands.WAND_CRAFT_COST.get(), materials.cost());
         return output;
     }

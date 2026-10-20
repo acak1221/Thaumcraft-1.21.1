@@ -17,6 +17,7 @@ import net.minecraft.world.level.material.MapColor;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockCrucible;
 import thaumcraft.common.crafting.CrucibleRecipe;
+import thaumcraft.common.crafting.StackSmeltingRecipe;
 import thaumcraft.common.tiles.TileCrucible;
 
 /** Native crucible slice. Resource outputs reuse ThaumcraftContent.MATERIALS. */
@@ -40,6 +41,9 @@ public final class ThaumcraftAlchemy {
             });
     public static final RegistrySupplier<RecipeSerializer<CrucibleRecipe>> CRUCIBLE_SERIALIZER = SERIALIZERS.register("crucible",
             CrucibleRecipe.Serializer::new);
+    /** Furnace recipe with a multi-item result (original FurnaceRecipes, ConfigRecipes:469-471); see {@link StackSmeltingRecipe}. */
+    public static final RegistrySupplier<RecipeSerializer<StackSmeltingRecipe>> STACK_SMELTING_SERIALIZER = SERIALIZERS.register("stack_smelting",
+            StackSmeltingRecipe.Serializer::new);
 
     private ThaumcraftAlchemy() {}
 

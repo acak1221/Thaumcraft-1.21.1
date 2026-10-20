@@ -110,13 +110,7 @@ public final class GolemFishingLiveRuntimeChecks {
             }
             for (Lane lane : lanes) for (BlockPos pos : lane.region()) original.put(pos.immutable(), level.getBlockState(pos));
             touched = true;
-            for (Lane lane : lanes) {
-                var center = new ChunkPos(lane.home);
-                for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                    var chunk = new ChunkPos(center.x + dx, center.z + dz);
-                    if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
-                }
-            }
+            for (Lane lane : lanes) forced.addAll(GolemChunks.hold(level, lane.region()));
             for (Lane lane : lanes) lane.build();
         }
 
@@ -170,8 +164,13 @@ public final class GolemFishingLiveRuntimeChecks {
                     boolean cooked = kind == Items.COOKED_COD || kind == Items.COOKED_SALMON;
                     if (group == Group.FIERY) {
                         test.assertTrue(!raw, "a Fire golem never delivers a raw fish: " + item.getItem());
+                        // Original setFire(2): the catch leaves the pond alight (two seconds, so 40 ticks minus the ones already gone).
+                        test.assertTrue(item.getRemainingFireTicks() > 0 && item.getRemainingFireTicks() <= 40, "a Fire golem's catch is alight: " + item.getItem()
+                                + " with " + item.getRemainingFireTicks() + " ticks of flame");
                     } else {
                         test.assertTrue(!cooked, group + ": a golem without Fire never delivers cooked fish: " + item.getItem());
+                        test.assertTrue(!item.isOnFire() && item.getRemainingFireTicks() <= 0, group + ": a catch without Fire is not alight: " + item.getItem()
+                                + " with " + item.getRemainingFireTicks() + " ticks of flame");
                     }
                 }
             }

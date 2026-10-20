@@ -13,11 +13,19 @@ import thaumcraft.common.items.golems.GolemUpgrade;
  * Fire upgrade of a Fishing golem (original AIFish:124-130): the paid catch is replaced by the result of the furnace
  * recipe for it, when one exists. The replacement is the recipe's own result stack, not scaled by the catch's count.
  * Registered 1.21 smelting recipes stand in for the old FurnaceRecipes table (cod and salmon cook; junk and treasure do not).
- * Not reproduced: the original also set the delivered item alight for two seconds (a purely visual flame that would need a
- * new field in the durable catch queue shared with other custody).
+ * The original (AIFish:127-129) also set the delivered item alight for two seconds; {@link #burningTicks} is that flame, carried
+ * with the paid catch through the durable drop queue.
  */
 public final class GolemFishingSmelting {
+    /** Original {@code entityitem.setFire(2)}: two seconds. */
+    public static final int BURNING_TICKS = 40;
+
     private GolemFishingSmelting() {}
+
+    /** How long the catch of this golem burns when it is delivered: two seconds with a Fire upgrade, otherwise not at all. */
+    public static int burningTicks(EntityGolemBase golem) {
+        return golem != null && golem.getUpgradeAmount(GolemUpgrade.FIRE) > 0 ? BURNING_TICKS : 0;
+    }
 
     /** The catch the golem actually publishes: smelted with at least one Fire upgrade, otherwise untouched. */
     public static ItemStack apply(ServerLevel level, EntityGolemBase golem, ItemStack rolled) {

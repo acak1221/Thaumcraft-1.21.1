@@ -221,8 +221,9 @@ public final class GogglesRuntimeChecks {
         player.doTick();
         test.assertTrue(player.getArmorValue() == 1 && player.getAttributeValue(Attributes.ARMOR_TOUGHNESS) == 0
                 && player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) == 0, "real equipped native defense1 has no invented toughness or knockback resistance");
-        int[] one = {105, 95, 85}, five = {525, 475, 424}, three = {315, 285, 254}, fire = {10, 9, 8};
-        int[] bare = {550, 500, 450};
+        // iron 1.1, gold 1.0, thaumium 0.9 and void 0.8, less the goggles' five points (0.75 for void is exact in float)
+        int[] one = {105, 95, 85, 75}, five = {525, 475, 424, 375}, three = {315, 285, 254, 225}, fire = {10, 9, 8, 7};
+        int[] bare = {550, 500, 450, 400};
         for (int index = 0; index < WandMaterials.CAPS.size(); index++) {
             ItemStack wand = wand(WandMaterials.CAPS.get(index).tag(), 2000);
             var fivePrices = ArcaneVis.price(whole(5), wand, player);

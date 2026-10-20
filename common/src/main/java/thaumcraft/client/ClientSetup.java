@@ -30,6 +30,7 @@ import thaumcraft.common.lib.network.KnowledgeEvents;
 import thaumcraft.common.items.ItemEssence;
 import thaumcraft.common.items.ItemWispEssence;
 import thaumcraft.common.items.ItemJar;
+import thaumcraft.common.config.ThaumcraftEquipment;
 import thaumcraft.common.config.ThaumcraftEssences;
 import thaumcraft.common.config.ThaumcraftWearables;
 import thaumcraft.common.items.armor.ItemRobeArmor;
@@ -57,6 +58,7 @@ public final class ClientSetup {
         ThaumcraftWandClient.init();
         ThaumcraftBellowsClient.init();
         ThaumcraftFocusClient.init();
+        ThaumcraftMiscKeyClient.init();
         ThaumcraftFocalClient.init();
         ThaumcraftBoreClient.init();
         ThaumcraftHungryChestClient.init();
@@ -107,6 +109,9 @@ public final class ClientSetup {
                 ThaumcraftContent.CRYSTAL_ESSENCE);
         ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(ItemRobeArmor.color(stack)) : -1,
                 ThaumcraftWearables.ROBE_CHESTPLATE, ThaumcraftWearables.ROBE_LEGGINGS, ThaumcraftWearables.ROBE_BOOTS);
+        // The void thaumaturge robes tint the plain pass (tint 0) with the same dye, the metal pass is untinted.
+        ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(ItemRobeArmor.color(stack)) : -1,
+                ThaumcraftEquipment.VOID_ROBE_HELMET, ThaumcraftEquipment.VOID_ROBE_CHESTPLATE, ThaumcraftEquipment.VOID_ROBE_LEGGINGS);
         ColorHandlerRegistry.registerItemColors((stack, tint) -> {
             var data = ItemResearchNotes.data(stack);
             return tint == 1 ? opaque(data == null ? 0x999999 : data.color()) : -1;
@@ -115,6 +120,7 @@ public final class ClientSetup {
         // Cutout discards blending and writes an opaque blue depth shell,
         // hiding real essentia. TC4 jars use the translucent world render pass.
         RenderTypeRegistry.register(RenderType.translucent(), ThaumcraftContent.JAR.get(), ThaumcraftContent.VOID_JAR.get());
+        RenderTypeRegistry.register(RenderType.translucent(), thaumcraft.common.config.ThaumcraftTubes.ESSENTIA_RESERVOIR.get());
         // These are original shard colors, which differ from aspect HUD colors.
         String[] tags = {"aer", "ignis", "aqua", "terra", "ordo", "perditio"};
         int[] colors = {0xffff7e, 0xff3c01, 0x0090ff, 0x00a000, 0xeeccff, 0x555577};

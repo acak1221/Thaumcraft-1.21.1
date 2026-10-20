@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Immutable, persistent/synchronized item component. Amounts are TC4 centivis. */
+/** Immutable, persistent/synchronized item component. Amounts are TC4 centivis; the largest capacity is a staff's 250 whole vis. */
 public record WandData(String rod, String cap, Map<String, Integer> vis) {
+    /** The most one aspect can hold: the silverwood and primal staves, 250 whole vis (original rod capacity x 100). */
+    public static final int MAX_CENTIVIS = 25000;
     public static final List<String> PRIMALS = List.of("aer", "terra", "ignis", "aqua", "ordo", "perditio");
     public static final WandData EMPTY = new WandData("wood", "iron", Map.of());
     private static final Codec<String> ROD_CODEC = Codec.STRING.comapFlatMap(
@@ -30,7 +32,7 @@ public record WandData(String rod, String cap, Map<String, Integer> vis) {
     private static final Codec<Encoded> ENCODED_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ROD_CODEC.optionalFieldOf("rod", "wood").forGetter(Encoded::rod),
             CAP_CODEC.optionalFieldOf("cap", "iron").forGetter(Encoded::cap),
-            Codec.unboundedMap(ASPECT_CODEC, Codec.intRange(0, 10000)).optionalFieldOf("vis", Map.of()).forGetter(Encoded::vis)
+            Codec.unboundedMap(ASPECT_CODEC, Codec.intRange(0, MAX_CENTIVIS)).optionalFieldOf("vis", Map.of()).forGetter(Encoded::vis)
     ).apply(instance, Encoded::new));
     public static final Codec<WandData> CODEC = ENCODED_CODEC.flatXmap(encoded -> {
         int capacity = WandMaterials.capacity(encoded.rod());

@@ -70,8 +70,31 @@ public final class ThaumcraftRecipeDisplay {
             alias("ThaumiumPick", "thaumium_pickaxe"),      // 464
             alias("ThaumiumAxe", "thaumium_axe"),           // 465
             alias("ElementalAxe", "infusion/elemental_axe"), // 364, pristine thaumium axe / two water shards / diamond / Greatwood log
+            alias("ElementalPick", "infusion/elemental_pickaxe"), // ConfigRecipes:346, pristine thaumium pickaxe / two fire shards / diamond / Greatwood log
+            alias("ElementalHoe", "infusion/elemental_hoe"), // ConfigRecipes:349, pristine thaumium hoe / order shard / entropy shard / diamond / Greatwood log
+            alias("ElementalShovel", "infusion/elemental_shovel"), // ConfigRecipes:348, pristine thaumium shovel / two earth shards / diamond / Greatwood log
+            alias("ElementalSword", "infusion/elemental_sword"), // ConfigRecipes:347, pristine thaumium sword / two air shards / diamond / Greatwood log
             alias("ThaumiumHoe", "thaumium_hoe"),           // 466
             alias("ThaumiumSword", "thaumium_sword"),       // 467
+            alias("VoidHelm", "void_helmet"),               // 449; ordinary, not research-gated crafting
+            alias("VoidChest", "void_chestplate"),          // 450
+            alias("VoidLegs", "void_leggings"),             // 451
+            alias("VoidBoots", "void_boots"),               // 452
+            alias("ThaumiumFortressHelm", "infusion/fortress_helm"),   // ConfigRecipes:360, pristine thaumium helmet / 2 thaumium ingots / 2 gold / emerald
+            alias("ThaumiumFortressChest", "infusion/fortress_chest"), // 361, pristine thaumium chestplate / 4 thaumium ingots / gold / leather
+            alias("ThaumiumFortressLegs", "infusion/fortress_legs"),   // 362, pristine thaumium leggings / 3 thaumium ingots / gold / leather
+            alias("HelmGoggles", "infusion/fortress_goggles"),         // 367, any fortress helm / slime ball / goggles
+            alias("MaskGrinningDevil", "infusion/fortress_mask_devil"),// 368
+            alias("MaskAngryGhost", "infusion/fortress_mask_ghost"),   // 369
+            alias("MaskSippingFiend", "infusion/fortress_mask_fiend"), // 370
+            alias("VoidRobeHelm", "infusion/void_robe_helm"),   // ConfigRecipes:363, pristine void helmet / goggles / 4 enchanted fabric / salis mundus
+            alias("VoidRobeChest", "infusion/void_robe_chest"), // 364, pristine void chestplate / robe chestplate / void and thaumium ingot / salis mundus / fabric / leather
+            alias("VoidRobeLegs", "infusion/void_robe_legs"),   // 365, the same with the robe leggings
+            alias("VoidShovel", "void_shovel"),             // 453
+            alias("VoidPick", "void_pickaxe"),              // 454
+            alias("VoidAxe", "void_axe"),                   // 455
+            alias("VoidHoe", "void_hoe"),                   // 456
+            alias("VoidSword", "void_sword"),               // 457
             alias("Tallow", "crucible/tallow"),                // 120
             alias("ArcaneStone1", "arcane/arcane_stone"),      // 205
             alias("ArcaneStone2", "arcane_stone_bricks"),      // 206
@@ -91,6 +114,8 @@ public final class ThaumcraftRecipeDisplay {
             alias("AlchemicalConstruct", "arcane/alchemical_construct"), // 290, FOUR basic tubes
             alias("Centrifuge", "arcane/centrifuge"),         // 292, no advanced-construct substitution
             alias("EssentiaCrystalizer", "arcane/essentia_crystallizer"), // 293, dispenser/balanced shards
+            alias("EssentiaReservoir", "infusion/essentia_reservoir"), // 372, buffer centre, two void ingots and four jars
+            alias("Levitator", "arcane/levitator"), // 194, greatwood planks, earth and air shards, nitor, iron
             alias("NodeStabilizer", "arcane/node_stabilizer"), // 199, quartz BLOCK / stone BRICKS / Nitor ITEM
             alias("NodeTransducer", "arcane/node_transducer"), // 200, literal iron/redstone BLOCK/comparator
             alias("NodeRelay", "arcane/vis_relay"), // 201, balanced shard, TWO relays
@@ -123,6 +148,17 @@ public final class ThaumcraftRecipeDisplay {
             alias("CoreAlchemy", "infusion/golem_core_alchemy"), // 370, Decanting center / empty jar + three real water potions
             alias("CoreButcher", "crucible/golem_core_butcher"), // 177, actual Guard catalyst / Corpus5 Bestia5
             alias("CoreUse", "infusion/golem_core_use"), // 374, Empty center / damage0 flint and steel + shears
+            alias("AdvancedGolem", "infusion/golem_advanced"), // 326, any golem placer patched with advanced / redstone, glowstone dust, gunpowder, empty jar, zombie brain
+            alias("TinyHat", "arcane/golem_decoration_tophat"), // 252, black wool / gold ingot
+            alias("TinyFez", "arcane/golem_decoration_fez"), // 253, red wool / string
+            alias("TinyBowtie", "arcane/golem_decoration_bowtie"), // 254, black wool / string
+            alias("TinyGlasses", "arcane/golem_decoration_glasses"), // 255, glass / iron ingot
+            alias("TinyVisor", "arcane/golem_decoration_visor"), // 257, iron ingots / any leather helmet
+            alias("TinyArmor", "arcane/golem_decoration_armor"), // 258, iron ingots / any leather tunic
+            alias("TinyDart", "arcane/golem_decoration_dart"), // 256, arrows around a dispenser
+            alias("TinyHammer", "arcane/golem_decoration_mace"), // 259, seven iron ingots
+            alias("TravelTrunk", "infusion/traveling_trunk"), // hungry chest / iron ingot, greatwood planks, wooden golem placer, greatwood planks
+            alias("GolemFetter", "arcane/golem_fetter"), // arcane stone / iron ingot / arcane stone bricks / redstone block
             alias("GolemBell", "arcane/golem_bell"), // 263, quartz items / stickWood
             alias("UpgradeAir", "arcane/golem_upgrade_air"), // 265, eight gold nuggets around the air shard (damage 0)
             alias("UpgradeEarth", "arcane/golem_upgrade_earth"), // 266, earth shard is damage 3, not 1
@@ -133,14 +169,38 @@ public final class ThaumcraftRecipeDisplay {
             alias("WandCapGold", "arcane/wand_cap_gold"),      // 229
             alias("WandCapThaumiumInert", "arcane/wand_cap_thaumium_inert"), // 236
             alias("WandCapThaumium", "infusion/wand_cap_thaumium"), // 328
+            alias("WandCapVoidInert", "arcane/wand_cap_void_inert"), // 218
+            alias("WandCapVoid", "infusion/wand_cap_void"), // 310
+            alias("VoidMetal", "crucible/void_ingot"), // 99
+            alias("VoidSeed", "crucible/void_seed"), // 100
+            alias("PureIron", "crucible/pure_iron"), // 112, iron ore -> native iron cluster
+            alias("PureGold", "crucible/pure_gold"), // 113, gold ore -> native gold cluster
+            alias("TransIron", "crucible/trans_iron"), // 126, one iron nugget -> three
+            alias("TransGold", "crucible/trans_gold"), // 127, one gold nugget -> three
             alias("WandRodGreatwood", "arcane/wand_rod_greatwood"), // 238
             alias("FocusFire", "arcane/focus_fire"),             // 247
             alias("FocusFrost", "arcane/focus_frost"),           // 248
             alias("FocusShock", "arcane/focus_shock"),           // 249
+            alias("FocusPortableHole", "infusion/focus_portable_hole"), // ConfigRecipes:320, ender pearl / 3 nether quartz / earth, air and entropy shards
             alias("FocusExcavation", "arcane/focus_excavation"), // 251
             alias("InfusionMatrix", "arcane/infusion_matrix"),  // 221
             alias("ArcanePedestal", "arcane/arcane_pedestal"),  // 222
             alias("WandRodSilverwood", "infusion/wand_rod_silverwood"), // 336
+            alias("WandRodObsidian", "infusion/wand_rod_obsidian"), // 311
+            alias("WandRodIce", "infusion/wand_rod_ice"), // 312
+            alias("WandRodQuartz", "infusion/wand_rod_quartz"), // 313
+            alias("WandRodReed", "infusion/wand_rod_reed"), // 314
+            alias("WandRodBlaze", "infusion/wand_rod_blaze"), // 315
+            alias("WandRodBone", "infusion/wand_rod_bone"), // 316
+            alias("WandRodGreatwoodStaff", "arcane/staff_rod_greatwood"), // 220
+            alias("WandRodObsidianStaff", "arcane/staff_rod_obsidian"), // 221
+            alias("WandRodSilverwoodStaff", "arcane/staff_rod_silverwood"), // 222
+            alias("WandRodIceStaff", "arcane/staff_rod_ice"), // 223
+            alias("WandRodQuartzStaff", "arcane/staff_rod_quartz"), // 224
+            alias("WandRodReedStaff", "arcane/staff_rod_reed"), // 225
+            alias("WandRodBlazeStaff", "arcane/staff_rod_blaze"), // 226
+            alias("WandRodBoneStaff", "arcane/staff_rod_bone"), // 227
+            alias("WandRodPrimalStaff", "infusion/staff_rod_primal"), // 318
             alias("TallowCandle", "tallow_candle"),            // 477
             alias("JarLabel", "jar_label"));                    // 416-418; dynamic bind/clear not static diagrams
 

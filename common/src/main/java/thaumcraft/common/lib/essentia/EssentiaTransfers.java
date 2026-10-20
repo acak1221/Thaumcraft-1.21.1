@@ -28,6 +28,7 @@ import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileCentrifuge;
 import thaumcraft.common.tiles.TileEssentiaCrystalizer;
+import thaumcraft.common.tiles.TileEssentiaReservoir;
 import thaumcraft.common.items.ItemCrystalEssence;
 import thaumcraft.common.tiles.TileArcaneBore;
 import thaumcraft.common.lib.bore.BoreWork;
@@ -250,13 +251,14 @@ public final class EssentiaTransfers {
     }
 
     public record Attempt(boolean selected, int committedUnits, RuntimeException failure) {}
-    private enum Profile { COMPAT, TUBE, JAR, BUFFER, CENTRIFUGE, CRYSTALLIZER }
+    private enum Profile { COMPAT, TUBE, JAR, BUFFER, CENTRIFUGE, CRYSTALLIZER, RESERVOIR }
 
     public static Attempt pullTubeOne(TileTube tube, Direction inputFace) { return transport(tube, inputFace, Profile.TUBE, null); }
     public static Attempt pullJarOne(TileJar jar) { return transport(jar, Direction.UP, Profile.JAR, null); }
     public static Attempt pullBufferOne(TileTubeBuffer buffer, Direction inputFace) { return transport(buffer, inputFace, Profile.BUFFER, null); }
     public static Attempt pullCentrifugeOne(TileCentrifuge centrifuge) { return transport(centrifuge, Direction.DOWN, Profile.CENTRIFUGE, null); }
     public static Attempt pullCrystallizerOne(TileEssentiaCrystalizer tile) { return transport(tile, tile.getFacing(), Profile.CRYSTALLIZER, null); }
+    public static Attempt pullReservoirOne(TileEssentiaReservoir tile) { return transport(tile, tile.getFacing(), Profile.RESERVOIR, null); }
 
     /** Bulk native alembic debit paired with the actual private Alchemy job's cargo credit. */
     public static Attempt collectAlembic(EntityGolemBase golem, TileAlembic source, Direction output, Aspect aspect, int limit) {
@@ -439,7 +441,9 @@ public final class EssentiaTransfers {
                     if (!EssentiaAtomicEndpoint.validAspect(wanted) || wanted.isPrimal()
                             || from.getSuctionAmount(output) >= into.getSuctionAmount(inputFace)) return new Attempt(true, 0, null);
                 }
-                case CRYSTALLIZER -> {
+                // Original TileEssentiaReservoir.fillReservoir asks the same questions as the crystallizer's draw: output side, stock,
+                // pressure and minimum suction, ONE type query, then the pressure again; any aspect, primal or compound, is taken.
+                case CRYSTALLIZER, RESERVOIR -> {
                     if (!from.canOutputTo(output) || from.getEssentiaAmount(output) <= 0
                             || from.getSuctionAmount(output) >= into.getSuctionAmount(inputFace)
                             || into.getSuctionAmount(inputFace) < from.getMinimumSuction()) return new Attempt(false, 0, null);
@@ -536,6 +540,18 @@ public final class EssentiaTransfers {
         return attempt.committedUnits();
     }
 
+    /** The reservoir's own container calls: units that moved (an insert takes what fits, an extract is all or nothing). */
+    public static int changeReservoir(TileEssentiaReservoir reservoir, Aspect aspect, int amount, boolean insert) {
+        if (!EssentiaAtomicEndpoint.validAspect(aspect) || amount <= 0 || !(reservoir.getLevel() instanceof ServerLevel level)) return 0;
+        if (!level.getServer().isSameThread()) throw new IllegalStateException("Reservoir changes require the server thread");
+        Attempt attempt = changeLocal(reservoir, new LocalRequest(insert ? LocalOperation.RESERVOIR_INSERT : LocalOperation.RESERVOIR_EXTRACT, aspect, amount, null, true));
+        if (attempt.failure() != null) {
+            if (attempt.committedUnits() == 0) throw attempt.failure();
+            thaumcraft.common.Thaumcraft.LOG.warn("Committed reservoir change notification failed at {}", reservoir.getBlockPos(), attempt.failure());
+        }
+        return attempt.committedUnits();
+    }
+
     /** Bounded native raw facades, not a public arbitrary credit-plan capability.
      * The transport/container facade owns side/exact-quantity distinctions. */
     public enum CentrifugeMutation { INPUT, OUTPUT_INSERT, OUTPUT_EXTRACT }
@@ -615,7 +631,7 @@ public final class EssentiaTransfers {
         }
     }
 
-    private enum LocalOperation { BUFFER_INSERT, BUFFER_EXTRACT, CENTRIFUGE_INPUT, CENTRIFUGE_OUTPUT_INSERT, CENTRIFUGE_OUTPUT_EXTRACT, CENTRIFUGE_COMPLETE, CRYSTALLIZER_INSERT, CRYSTALLIZER_EXTRACT }
+    private enum LocalOperation { BUFFER_INSERT, BUFFER_EXTRACT, CENTRIFUGE_INPUT, CENTRIFUGE_OUTPUT_INSERT, CENTRIFUGE_OUTPUT_EXTRACT, CENTRIFUGE_COMPLETE, CRYSTALLIZER_INSERT, CRYSTALLIZER_EXTRACT, RESERVOIR_INSERT, RESERVOIR_EXTRACT }
     private record LocalRequest(LocalOperation operation, Aspect aspect, int amount, Direction outputFace, boolean exact) {}
 
     /** One local scope for accepted buffers and the separate two-slot machine.
@@ -629,6 +645,8 @@ public final class EssentiaTransfers {
             if (!(owner instanceof TileTubeBuffer buffer) || buffer.isQuarantined()) return new Attempt(false, 0, null);
         } else if (request.operation() == LocalOperation.CRYSTALLIZER_INSERT || request.operation() == LocalOperation.CRYSTALLIZER_EXTRACT) {
             if (!(owner instanceof TileEssentiaCrystalizer tile) || tile.isQuarantined()) return new Attempt(false, 0, null);
+        } else if (request.operation() == LocalOperation.RESERVOIR_INSERT || request.operation() == LocalOperation.RESERVOIR_EXTRACT) {
+            if (!(owner instanceof TileEssentiaReservoir tile) || tile.isQuarantined()) return new Attempt(false, 0, null);
         } else if (!(owner instanceof TileCentrifuge centrifuge) || centrifuge.isQuarantined()) return new Attempt(false, 0, null);
         EssentiaAtomicEndpoint endpoint = (EssentiaAtomicEndpoint) owner;
         Mutation mutation = new Mutation(owner, owner); MUTATION.set(mutation);
@@ -644,6 +662,14 @@ public final class EssentiaTransfers {
                     units = request.operation() == LocalOperation.BUFFER_INSERT || request.exact() ? request.amount() : Math.min(request.amount(), buffer.containerContains(request.aspect()));
                     if (units <= 0) return new Attempt(false, 0, null);
                     change = request.operation() == LocalOperation.BUFFER_INSERT ? buffer.prepareInsert(before, request.aspect(), units) : buffer.prepareExtract(before, request.aspect(), units);
+                }
+                case RESERVOIR_INSERT, RESERVOIR_EXTRACT -> {
+                    TileEssentiaReservoir reservoir = (TileEssentiaReservoir) owner;
+                    // Original addToContainer takes what fits and returns the rest; takeFromContainer is all or nothing.
+                    boolean insert = request.operation() == LocalOperation.RESERVOIR_INSERT;
+                    units = insert ? Math.min(request.amount(), reservoir.getSpace()) : request.amount();
+                    if (units <= 0) return new Attempt(false, 0, null);
+                    change = insert ? reservoir.prepareInsert(before, request.aspect(), units) : reservoir.prepareExtract(before, request.aspect(), units);
                 }
                 case CENTRIFUGE_INPUT -> change = endpoint.prepareInsert(before, request.aspect(), 1);
                 case CENTRIFUGE_OUTPUT_INSERT -> change = ((TileCentrifuge) owner).prepareOutputInsert(before, request.aspect());
@@ -885,13 +911,15 @@ public final class EssentiaTransfers {
         if (wanted == null || source == consumer || !(consumer.getLevel() instanceof ServerLevel level)) return 0;
         if (!level.getServer().isSameThread()) throw new IllegalStateException("Infusion consumption requires the server thread");
         if (MUTATION.get() != null || !(consumer instanceof InfusionDemandEndpoint demand)
-                || !(source instanceof IAspectSource) || !(source instanceof EssentiaStorageEndpoint storage)
+                || !(source instanceof IAspectSource) || !(source instanceof EssentiaStorageEndpoint || source instanceof TileEssentiaReservoir)
                 || !current(consumer, level) || !current(source, level)) return 0;
         int dx = source.getBlockPos().getX() - consumer.getBlockPos().getX();
         int dy = source.getBlockPos().getY() - consumer.getBlockPos().getY();
         int dz = source.getBlockPos().getZ() - consumer.getBlockPos().getZ();
         // Original UNKNOWN/range12 search: dy -12..11, not a sphere or LOS.
         if (Math.abs(dx) > 12 || Math.abs(dz) > 12 || dy < -12 || dy >= 12) return 0;
+        if (source instanceof TileEssentiaReservoir reservoir) return consumeFromReservoir(level, demand, consumer, reservoir, wanted);
+        EssentiaStorageEndpoint storage = (EssentiaStorageEndpoint) source;
         Mutation mutation = new Mutation(consumer, source);
         MUTATION.set(mutation);
         try {
@@ -908,6 +936,33 @@ public final class EssentiaTransfers {
             mutation.raw = false;
             try {
                 storage.notifyEssentiaStorageChanged();
+            } finally {
+                demand.notifyInfusionEssentiaChanged();
+            }
+            return 1;
+        } finally {
+            mutation.raw = false;
+            MUTATION.remove();
+        }
+    }
+
+    /** The reservoir holds many aspects, so its unit comes out as a prepared per-aspect change, not as a singleton rewrite. */
+    private static int consumeFromReservoir(ServerLevel level, InfusionDemandEndpoint demand, BlockEntity consumer, TileEssentiaReservoir reservoir, Aspect wanted) {
+        Mutation mutation = new Mutation(consumer, reservoir);
+        MUTATION.set(mutation);
+        try {
+            int pending = demand.getPendingEssentia(wanted);
+            var before = reservoir.snapshotAtomicState();
+            var change = reservoir.prepareExtract(before, wanted, 1);
+            if (pending <= 0 || !prepared(change, reservoir, before, 1)) return 0;
+            if (!current(consumer, level) || !current(reservoir, level) || !reservoir.matchesAtomicState(before) || demand.getPendingEssentia(wanted) != pending) return 0;
+            mutation.sourceChange = change;
+            mutation.raw = true;
+            reservoir.applyAtomicRaw(change);
+            demand.consumeInfusionEssentiaRaw(wanted);
+            mutation.raw = false;
+            try {
+                reservoir.notifyEssentiaStorageChanged();
             } finally {
                 demand.notifyInfusionEssentiaChanged();
             }

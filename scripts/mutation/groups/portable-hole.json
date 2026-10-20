@@ -1,0 +1,290 @@
+{
+ "description": "Portable Hole: the focus, its payment and upgrades, the infusion, the hole block and its tile (docs/analysis/2026-10-20-portable-hole.md)",
+ "watch": {
+  "junit": [
+   "PortableHoleRulesTest",
+   "PortableHoleAssetsTest"
+  ],
+  "gametests": [
+   "portableHoleCutsTunnelsAndGivesBlocksBack"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.PortableHoleRulesTest",
+  "thaumcraft.assets.PortableHoleAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "cost-no-minimum",
+   "name": "a depth of 0 costs nothing",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "return Math.max(BASE_COST, BASE_COST * depth);",
+   "new": "return BASE_COST * depth;"
+  },
+  {
+   "id": "reach-34",
+   "name": "the reach is 34 blocks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "REACH = 33",
+   "new": "REACH = 34"
+  },
+  {
+   "id": "enlarge-seven",
+   "name": "Enlarge adds 7 blocks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "REACH_PER_ENLARGE = 8",
+   "new": "REACH_PER_ENLARGE = 7"
+  },
+  {
+   "id": "duration-100",
+   "name": "a hole lasts 100 ticks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "DURATION = 120",
+   "new": "DURATION = 100"
+  },
+  {
+   "id": "extend-fifty",
+   "name": "Extend adds 50 ticks",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "DURATION_PER_EXTEND = 60",
+   "new": "DURATION_PER_EXTEND = 50"
+  },
+  {
+   "id": "chain-no-extra",
+   "name": "the chain is only the measured depth",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "return depth + 1;",
+   "new": "return depth;"
+  },
+  {
+   "id": "step-flipped",
+   "name": "a hole runs out of the wall's bottom face",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "{{0, 1, 0}, {0, -1, 0},",
+   "new": "{{0, -1, 0}, {0, 1, 0},"
+  },
+  {
+   "id": "ring-with-centre",
+   "name": "the ring contains the centre",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "if (a / 3 == 1 && a % 3 == 1) continue;",
+   "new": "if (a / 3 == 1 && a % 3 == 2) continue;"
+  },
+  {
+   "id": "spread-every-tick",
+   "name": "every tick spreads",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "return countdown == 0 && count > 1 && side != -1;",
+   "new": "return count > 1 && side != -1;"
+  },
+  {
+   "id": "spread-last",
+   "name": "the last block spreads too",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "count > 1 && side",
+   "new": "count > 0 && side"
+  },
+  {
+   "id": "outer-lands-renamed",
+   "name": "the Outer Lands are called something else",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java",
+   "old": "OUTER_LANDS = \"thaumcraft:outer_lands\"",
+   "new": "OUTER_LANDS = \"thaumcraft:outer\""
+  },
+  {
+   "id": "tag-no-doors",
+   "name": "doors can be holes",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/tags/block/portable_hole_blacklist.json",
+   "old": "\"#minecraft:doors\",",
+   "new": ""
+  },
+  {
+   "id": "recipe-iter-24",
+   "name": "the infusion needs 24 travel",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/focus_portable_hole.json",
+   "old": "\"iter\": 25",
+   "new": "\"iter\": 24"
+  },
+  {
+   "id": "recipe-instability-2",
+   "name": "the infusion is steadier",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/focus_portable_hole.json",
+   "old": "\"instability\": 3",
+   "new": "\"instability\": 2"
+  },
+  {
+   "id": "recipe-snowball",
+   "name": "the infusion starts from a snowball",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/focus_portable_hole.json",
+   "old": "\"minecraft:ender_pearl\"",
+   "new": "\"minecraft:snowball\""
+  },
+  {
+   "id": "recipe-fire-shard",
+   "name": "the infusion takes a fire shard for earth",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/focus_portable_hole.json",
+   "old": "\"thaumcraft:earth_shard\"",
+   "new": "\"thaumcraft:fire_shard\""
+  },
+  {
+   "id": "lang-ru-name",
+   "name": "the Russian name is wrong",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"item.thaumcraft.focus_portable_hole\": \"Набалдашник: Червоточина\"",
+   "new": "\"item.thaumcraft.focus_portable_hole\": \"Набалдашник: Дыра\""
+  },
+  {
+   "id": "blockstate-node-model",
+   "name": "the hole shows the node's model",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/blockstates/hole.json",
+   "old": "\"model\": \"thaumcraft:block/hole\"",
+   "new": "\"model\": \"thaumcraft:block/aura_node\""
+  },
+  {
+   "id": "cost-air-only",
+   "name": "the focus costs only entropy",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java",
+   "old": ".add(Aspect.ENTROPY, PortableHoleRules.BASE_COST).add(Aspect.AIR, PortableHoleRules.BASE_COST);",
+   "new": ".add(Aspect.ENTROPY, PortableHoleRules.BASE_COST);"
+  },
+  {
+   "id": "cost-ignores-depth",
+   "name": "every shot costs one block's worth",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java",
+   "old": "int each = PortableHoleRules.cost(depth);",
+   "new": "int each = PortableHoleRules.cost(1);"
+  },
+  {
+   "id": "free-holes",
+   "name": "the vis is not taken",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java",
+   "old": "if (FocusVis.debit(paid, costs)) {",
+   "new": "if (FocusVis.debit(paid.copy(), costs) || true) {"
+  },
+  {
+   "id": "enlarge-ignored",
+   "name": "Enlarge adds no reach",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java",
+   "old": "PortableHoleRules.maxDepth(FocusUpgradeData.level(focus, FocusUpgradeType.enlarge))",
+   "new": "PortableHoleRules.maxDepth(0)"
+  },
+  {
+   "id": "extend-ignored",
+   "name": "Extend adds no time",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java",
+   "old": "PortableHoleRules.duration(FocusUpgradeData.level(focus, FocusUpgradeType.extend))",
+   "new": "PortableHoleRules.duration(0)"
+  },
+  {
+   "id": "direction-flipped",
+   "name": "the hole runs out of the wall",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java",
+   "old": "hit.getDirection().get3DDataValue()",
+   "new": "hit.getDirection().getOpposite().get3DDataValue()"
+  },
+  {
+   "id": "tiles-allowed",
+   "name": "a chest can be a hole",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/PortableHoles.java",
+   "old": "if (level.getBlockEntity(pos) != null || !passable(level, pos, state) || state.canBeReplaced()) return false;",
+   "new": "if (!passable(level, pos, state) || state.canBeReplaced()) return false;"
+  },
+  {
+   "id": "water-allowed",
+   "name": "water can be a hole",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/PortableHoles.java",
+   "old": "if (level.getBlockEntity(pos) != null || !passable(level, pos, state) || state.canBeReplaced()) return false;",
+   "new": "if (level.getBlockEntity(pos) != null || !passable(level, pos, state)) return false;"
+  },
+  {
+   "id": "air-passable",
+   "name": "the depth is measured through air",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/PortableHoles.java",
+   "old": "&& !state.isAir() && state.getDestroySpeed(level, pos) != -1.0F;",
+   "new": "&& state.getDestroySpeed(level, pos) != -1.0F;"
+  },
+  {
+   "id": "blacklist-ignored",
+   "name": "a piston is passable",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/world/PortableHoles.java",
+   "old": "return !state.is(BLACKLIST) && !state.is(Blocks.BEDROCK)",
+   "new": "return !state.is(Blocks.BEDROCK)"
+  },
+  {
+   "id": "no-ring",
+   "name": "a hole is one block across",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileHole.java",
+   "old": "for (int[] offset : PortableHoleRules.ring(hole.direction)) {",
+   "new": "for (int[] offset : new int[0][]) {"
+  },
+  {
+   "id": "ages-fast",
+   "name": "a hole ages three times as fast",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileHole.java",
+   "old": "hole.countdown = (short) (hole.countdown + 1);",
+   "new": "hole.countdown = (short) (hole.countdown + 3);"
+  },
+  {
+   "id": "restores-air",
+   "name": "a hole gives back air",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileHole.java",
+   "old": "BlockState back = hole.old;",
+   "new": "BlockState back = Blocks.AIR.defaultBlockState();"
+  },
+  {
+   "id": "restores-default-state",
+   "name": "a hole gives back the block's default state",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/tiles/TileHole.java",
+   "old": "BlockState back = hole.old;",
+   "new": "BlockState back = hole.old.getBlock().defaultBlockState();"
+  },
+  {
+   "id": "hole-dark",
+   "name": "the hole gives no light",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java",
+   "old": "lightLevel(state -> 10)",
+   "new": "lightLevel(state -> 0)"
+  },
+  {
+   "id": "fluid-flows-in",
+   "name": "water flows into a hole",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/blocks/BlockHole.java",
+   "old": ".noOcclusion().forceSolidOn()",
+   "new": ".noOcclusion()"
+  }
+ ]
+}

@@ -1,0 +1,34 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "TRAVELTRUNK",
+  "input": [
+    {
+      "item": "thaumcraft:hungry_chest"
+    }
+  ],
+  "components": [
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "thaumcraft:greatwood_planks"
+    },
+    {
+      "item": "thaumcraft:golem_wood"
+    },
+    {
+      "item": "thaumcraft:greatwood_planks"
+    }
+  ],
+  "aspects": {
+    "motus": 4,
+    "spiritus": 4,
+    "iter": 4,
+    "vacuos": 16
+  },
+  "instability": 3,
+  "result": {
+    "id": "thaumcraft:trunk_spawner",
+    "count": 1
+  }
+}

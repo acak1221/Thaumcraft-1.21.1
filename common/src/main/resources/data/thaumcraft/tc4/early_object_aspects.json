@@ -412,6 +412,24 @@
       "aspects": {"fabrico": 4}
     },
     {
+      "original_source_line": 360, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 16,
+      "identifier_evidence": "Native Iron Cluster, ItemNugget metadata 16; flattened to the native cluster item",
+      "modern_ids": ["thaumcraft:cluster_iron"],
+      "aspects": {"ordo": 1, "metallum": 6, "terra": 1}
+    },
+    {
+      "original_source_line": 361, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 31,
+      "identifier_evidence": "Native Gold Cluster, ItemNugget metadata 31; flattened to the native cluster item",
+      "modern_ids": ["thaumcraft:cluster_gold"],
+      "aspects": {"ordo": 1, "metallum": 4, "terra": 1, "lucrum": 2}
+    },
+    {
+      "original_source_line": 362, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 21,
+      "identifier_evidence": "Native Cinnabar Cluster, ItemNugget metadata 21; flattened to the native cluster item",
+      "modern_ids": ["thaumcraft:cluster_cinnabar"],
+      "aspects": {"ordo": 1, "metallum": 4, "terra": 1, "permutatio": 4, "venenum": 2}
+    },
+    {
       "original_source_line": 371, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 5,
       "identifier_evidence": "ItemNugget:41 nuggetquicksilver, explicitly flattened to quicksilver_drop for the original Tube recipe; not a whole-resource quicksilver or iron nugget",
       "modern_ids": ["thaumcraft:quicksilver_drop"],

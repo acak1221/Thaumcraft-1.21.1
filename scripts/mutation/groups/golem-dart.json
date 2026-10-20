@@ -1,0 +1,359 @@
+{
+  "description": "The golem dart launcher, decoration R (docs/analysis/2026-10-19-golem-dart.md)",
+  "watch": {
+    "junit": [
+      "GolemDartRulesTest",
+      "GolemDecorationsTest",
+      "GolemDartAssetsTest"
+    ],
+    "gametests": [
+      "golemDartLauncherShootsAtItsIntervalAndHurtsWhatItHits"
+    ]
+  },
+  "junit_tests": [
+    "thaumcraft.golems.*",
+    "thaumcraft.assets.*"
+  ],
+  "mutants": [
+    {
+      "id": "interval-base-32",
+      "name": "interval base is 32",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "BASE_INTERVAL = 30, INTERVAL_PER_AIR = 8;",
+      "new": "BASE_INTERVAL = 32, INTERVAL_PER_AIR = 8;"
+    },
+    {
+      "id": "air-takes-six",
+      "name": "each Air takes six ticks",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "BASE_INTERVAL = 30, INTERVAL_PER_AIR = 8;",
+      "new": "BASE_INTERVAL = 30, INTERVAL_PER_AIR = 6;"
+    },
+    {
+      "id": "first-delay-is-whole-interval",
+      "name": "first wait is a whole interval",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "return interval / 2; }",
+      "new": "return interval; }"
+    },
+    {
+      "id": "wait-goes-negative",
+      "name": "wait is not clamped at zero",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "return Math.max(timer - 1, 0); }",
+      "new": "return timer - 1; }"
+    },
+    {
+      "id": "spread-base-six",
+      "name": "spread base is 6",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "BASE_INACCURACY = 7.0F, INACCURACY_PER_WATER = 1.75F;",
+      "new": "BASE_INACCURACY = 6.0F, INACCURACY_PER_WATER = 1.75F;"
+    },
+    {
+      "id": "water-takes-one-and-a-half",
+      "name": "each Water narrows by 1.5",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "BASE_INACCURACY = 7.0F, INACCURACY_PER_WATER = 1.75F;",
+      "new": "BASE_INACCURACY = 7.0F, INACCURACY_PER_WATER = 1.5F;"
+    },
+    {
+      "id": "damage-factor-half",
+      "name": "dart damage factor is 0.5",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "DAMAGE_FACTOR = 0.4F;",
+      "new": "DAMAGE_FACTOR = 0.5F;"
+    },
+    {
+      "id": "dart-speed-1-5",
+      "name": "dart speed is 1.5",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "SPEED = 1.6F;",
+      "new": "SPEED = 1.5F;"
+    },
+    {
+      "id": "min-distance-sixteen",
+      "name": "minimum distance squared is 16",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "MIN_DISTANCE_SQ = 9.0;",
+      "new": "MIN_DISTANCE_SQ = 16.0;"
+    },
+    {
+      "id": "exactly-three-is-too-close",
+      "name": "exactly three blocks is too close",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "return distanceSq < MIN_DISTANCE_SQ; }",
+      "new": "return distanceSq <= MIN_DISTANCE_SQ; }"
+    },
+    {
+      "id": "reach-ninety-percent",
+      "name": "reach is 90% of the range",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "REACH_FACTOR = 0.8F;",
+      "new": "REACH_FACTOR = 0.9F;"
+    },
+    {
+      "id": "exactly-the-reach-is-out",
+      "name": "exactly the reach is out",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java",
+      "old": "return distanceSq <= (double) reach;",
+      "new": "return distanceSq < (double) reach;"
+    },
+    {
+      "id": "launcher-letter-unsupported",
+      "name": "the launcher letter is not honoured",
+      "tier": "junit",
+      "file": "common/src/main/java/thaumcraft/common/items/golems/GolemDecorations.java",
+      "old": "SUPPORTED = \"HGBFRVPM\";",
+      "new": "SUPPORTED = \"HGBFVPM\";"
+    },
+    {
+      "id": "recipe-research-wrong",
+      "name": "recipe needs another research",
+      "tier": "junit",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/golem_decoration_dart.json",
+      "old": "\"research\": \"TINYDART\"",
+      "new": "\"research\": \"TINYHAT\""
+    },
+    {
+      "id": "recipe-centre-is-a-dropper",
+      "name": "recipe centre is a dropper",
+      "tier": "junit",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/golem_decoration_dart.json",
+      "old": "\"item\": \"minecraft:dispenser\"",
+      "new": "\"item\": \"minecraft:dropper\""
+    },
+    {
+      "id": "recipe-vis-aer-five",
+      "name": "recipe costs five aer",
+      "tier": "junit",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/golem_decoration_dart.json",
+      "old": "\"aer\": 4",
+      "new": "\"aer\": 5"
+    },
+    {
+      "id": "recipe-gives-two",
+      "name": "recipe gives two launchers",
+      "tier": "junit",
+      "file": "common/src/main/resources/data/thaumcraft/recipe/arcane/golem_decoration_dart.json",
+      "old": "\"count\": 1",
+      "new": "\"count\": 2"
+    },
+    {
+      "id": "item-uses-the-mace-icon",
+      "name": "item shows the mace icon",
+      "tier": "junit",
+      "file": "common/src/main/resources/assets/thaumcraft/models/item/golem_decoration_dart.json",
+      "old": "items/golemdecodart",
+      "new": "items/golemdecomace"
+    },
+    {
+      "id": "english-name-missing",
+      "name": "English name is missing",
+      "tier": "junit",
+      "file": "common/src/main/resources/assets/thaumcraft/lang/en_us.json",
+      "old": "\"item.thaumcraft.golem_decoration_dart\": \"Golem Accessory: Dart Launcher\",\n",
+      "new": ""
+    },
+    {
+      "id": "launcher-goal-never-installed",
+      "name": "the dart goal is never installed",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "if (GolemDecorations.has(golem.getDecoration(), GolemDecorations.DART)) golem.addWorkGoal(2, dart);",
+      "new": "if (false) golem.addWorkGoal(2, dart);"
+    },
+    {
+      "id": "every-guard-shoots",
+      "name": "every Guard gets the dart goal",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "if (GolemDecorations.has(golem.getDecoration(), GolemDecorations.DART)) golem.addWorkGoal(2, dart);",
+      "new": "golem.addWorkGoal(2, dart);"
+    },
+    {
+      "id": "dart-goal-below-melee",
+      "name": "the dart goal has a lower priority than melee",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "golem.addWorkGoal(2, dart);",
+      "new": "golem.addWorkGoal(4, dart);"
+    },
+    {
+      "id": "dart-goal-never-paths",
+      "name": "the dart goal never asks for a path",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "boolean sees = golem.getSensing().hasLineOfSight(target);\n            golem.getNavigation().moveTo(target, 1);",
+      "new": "boolean sees = golem.getSensing().hasLineOfSight(target);"
+    },
+    {
+      "id": "start-without-waiting",
+      "name": "the first shot comes at once",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "running = true;\n            wait = GolemDartRules.firstDelay(interval());",
+      "new": "running = true;\n            wait = 0;"
+    },
+    {
+      "id": "no-wait-after-a-shot",
+      "name": "no wait after a shot",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "wait = interval();",
+      "new": "wait = 0;"
+    },
+    {
+      "id": "interval-ignores-air",
+      "name": "the interval ignores Air",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "GolemDartRules.interval(golem.getUpgradeAmount(GolemUpgrade.AIR))",
+      "new": "GolemDartRules.interval(0)"
+    },
+    {
+      "id": "too-close-still-shoots",
+      "name": "a target nearer than three blocks is still shot at",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "if (GolemDartRules.tooClose(distanceSq(target))) return false;",
+      "new": "if (false) return false;"
+    },
+    {
+      "id": "shoots-out-of-reach",
+      "name": "the shot ignores the reach",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "if (wait <= 0 && GolemDartRules.inReach(distance, golem.getRange())) {",
+      "new": "if (wait <= 0) {"
+    },
+    {
+      "id": "shoots-without-sight",
+      "name": "the wait counts down without sight",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java",
+      "old": "            if (!sees) return;\n",
+      "new": "",
+      "expect": "survives",
+      "reason": "the lanes have no wall between golem and target, so the sight rule is not exercised; it only decides whether the wait runs down"
+    },
+    {
+      "id": "dart-has-no-damage",
+      "name": "the dart keeps the default damage",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+      "old": "        dart.setBaseDamage(GolemDartRules.damage((float) getAttributeValue(Attributes.ATTACK_DAMAGE)));\n",
+      "new": ""
+    },
+    {
+      "id": "left-arm-not-raised",
+      "name": "the left arm is not raised by a shot",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+      "old": "        level().addFreshEntity(dart);\n        startLeftArm();",
+      "new": "        level().addFreshEntity(dart);"
+    },
+    {
+      "id": "left-arm-never-lowered",
+      "name": "the left arm never comes down",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+      "old": "        if (leftArm > 0) entityData.set(LEFT_ARM, leftArm - 1);\n",
+      "new": ""
+    },
+    {
+      "id": "launcher-fit-keeps-old-goals",
+      "name": "fitting the launcher does not rebuild the goals",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+      "old": "if (letter == GolemDecorations.DART) rebuildGoals();",
+      "new": "if (false) rebuildGoals();"
+    },
+    {
+      "id": "spread-ignores-water",
+      "name": "the spread ignores Water",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
+      "old": "GolemDartRules.inaccuracy(getUpgradeAmount(GolemUpgrade.WATER))",
+      "new": "GolemDartRules.inaccuracy(0)",
+      "expect": "survives",
+      "reason": "the launch spread is random; with two Water upgrades at most it cannot be told from none by a few darts, so only the rule (JUnit) and the call are checked by reading"
+    },
+    {
+      "id": "dart-has-no-owner",
+      "name": "the dart has no owner",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/projectile/EntityDart.java",
+      "old": "        setOwner(shooter);\n",
+      "new": ""
+    },
+    {
+      "id": "start-height-off",
+      "name": "the dart starts higher",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/projectile/EntityDart.java",
+      "old": "shooter.getEyeHeight() - 0.1F;",
+      "new": "shooter.getEyeHeight() - 0.2F;"
+    },
+    {
+      "id": "start-a-quarter-block-ahead",
+      "name": "the dart starts a quarter block ahead",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/projectile/EntityDart.java",
+      "old": "dx / horizontal / 5.0",
+      "new": "dx / horizontal / 4.0"
+    },
+    {
+      "id": "aim-at-the-eyes",
+      "name": "the dart aims at the eyes",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/projectile/EntityDart.java",
+      "old": "target.getEyeHeight() - 0.7F - y",
+      "new": "target.getEyeHeight() - 0.0F - y"
+    },
+    {
+      "id": "aim-lift-off",
+      "name": "the lift is a third of the distance",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/projectile/EntityDart.java",
+      "old": "(float) horizontal * 0.2F",
+      "new": "(float) horizontal * 0.3F"
+    },
+    {
+      "id": "launcher-item-unmapped",
+      "name": "letter R has no item",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java",
+      "old": "            case GolemDecorations.DART -> DECORATION_DART.get();\n",
+      "new": ""
+    },
+    {
+      "id": "dart-is-a-block-wide",
+      "name": "the dart entity is a block wide",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java",
+      "old": ".sized(.5F, .5F).clientTrackingRange(4).updateInterval(20).build(\"thaumcraft:dart\")",
+      "new": ".sized(1F, 1F).clientTrackingRange(4).updateInterval(20).build(\"thaumcraft:dart\")"
+    },
+    {
+      "id": "dart-saves-no-item",
+      "name": "the dart carries no pickup item",
+      "tier": "gametest",
+      "file": "common/src/main/java/thaumcraft/common/entities/projectile/EntityDart.java",
+      "old": "return new ItemStack(Items.ARROW); }",
+      "new": "return ItemStack.EMPTY; }"
+    }
+  ]
+}

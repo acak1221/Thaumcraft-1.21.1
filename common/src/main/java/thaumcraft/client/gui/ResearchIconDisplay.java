@@ -9,14 +9,16 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.config.ThaumcraftGolems;
+import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.wands.WandData;
 
 /** Client-only, explicit aliases for original icons whose native items exist. */
 final class ResearchIconDisplay {
     // Provenance is NOT executable Java. Only these fields, literal counts 1..64
     // and metadata 0..18 are accepted; every field/metadata pair is whitelisted below.
-    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemBell|itemZombieBrain)"
-            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCustomOre|blockChestHungry|blockTaint))"
+    private static final Pattern STACK = Pattern.compile("new ItemStack\\((ConfigItems\\.(?:itemResource|itemShard|itemNugget|itemWandRod|itemWandCap|itemInkwell|itemThaumonomicon|itemThaumometer|itemEssence|itemFocusFire|itemFocusPortableHole|itemFocusShock|itemFocusExcavation|itemFocusFrost|itemGoggles|itemChestRobe|itemLegsRobe|itemBootsRobe|itemSwordThaumium|itemPickThaumium|itemAxeThaumium|itemAxeElemental|itemPickElemental|itemHoeElemental|itemShovelElemental|itemSwordElemental|itemHelmetVoidRobe|itemHelmetFortress|itemShovelThaumium|itemHoeThaumium|itemHelmetThaumium|itemChestThaumium|itemLegsThaumium|itemBootsThaumium|itemGolemPlacer|itemGolemCore|itemGolemUpgrade|itemGolemDecoration|itemGolemBell|itemTrunkSpawner|itemZombieBrain)"
+            + "|ConfigBlocks\\.(?:blockTable|blockCosmeticSolid|blockMetalDevice|blockStoneDevice|blockWoodenDevice|blockJar|blockTube|blockMagicalLog|blockMagicalLeaves|blockCustomPlant|blockCustomOre|blockChestHungry|blockTaint|blockEssentiaReservoir|blockLifter))"
             + "(?:,\\s*([1-9][0-9]?)(?:,\\s*([0-9]|1[0-8]))?)?\\)");
 
     // Original ItemResource:81-100; native ThaumcraftContent.MATERIALS flattening.
@@ -30,6 +32,10 @@ final class ResearchIconDisplay {
     // Native ThaumcraftOres keeps original blockCustomOre metadata 0..7 in this order.
     private static final List<String> ORES = List.of("cinnabar_ore", "air_infused_stone", "fire_infused_stone",
             "water_infused_stone", "earth_infused_stone", "order_infused_stone", "entropy_infused_stone", "amber_ore");
+
+    // ConfigItems itemGolemPlacer damage 0..7 (the wildcard of ConfigResearch:344-345 cycles through every material).
+    private static final List<String> PLACERS = List.of("golem_straw", "golem_wood", "golem_tallow", "golem_clay",
+            "golem_flesh", "golem_stone", "golem_iron", "golem_thaumium");
 
     private ResearchIconDisplay() {}
 
@@ -57,6 +63,12 @@ final class ResearchIconDisplay {
             if (!stack.isEmpty()) stack.set(ThaumcraftContent.WAND_DATA.get(), WandData.EMPTY);
             return stack;
         }
+        // ConfigResearch:344-345: the ADVANCEDGOLEM icon is the placer wildcard tagged advanced = 1.
+        if (expression.equals("ag")) {
+            ItemStack stack = registered(PLACERS.get((int) (System.currentTimeMillis() / 1000L % PLACERS.size())), 1);
+            if (!stack.isEmpty()) stack.set(ThaumcraftGolems.GOLEM_DATA.get(), GolemData.EMPTY.withAdvanced(true));
+            return stack;
+        }
         // ConfigResearch:374 and InventoryUtils.cycleItemStack:481-488. Only
         // this literal wildcard is supported; never enumerate future item placeholders.
         if (expression.equals("new ItemStack(ConfigBlocks.blockCustomOre, 1, Short.MAX_VALUE)")) {
@@ -70,12 +82,35 @@ final class ResearchIconDisplay {
         String id = switch (match.group(1)) {
             case "ConfigItems.itemResource" -> variant(RESOURCES, metadata);
             case "ConfigItems.itemShard" -> variant(SHARDS, metadata);
-            case "ConfigItems.itemNugget" -> metadata == 6 ? "thaumium_nugget" : null;
+            // ItemNugget metadata 16 / 21 / 31 are the native iron / cinnabar / gold clusters (ConfigAspects:360-362); 0 is the other-mod iron nugget.
+            case "ConfigItems.itemNugget" -> switch (metadata) {
+                case 6 -> "thaumium_nugget";
+                case 7 -> "void_nugget";
+                case 16 -> "cluster_iron";
+                case 21 -> "cluster_cinnabar";
+                case 31 -> "cluster_gold";
+                default -> null;
+            };
             case "ConfigItems.itemZombieBrain" -> metadata == 0 ? "zombie_brain" : null;
-            // ConfigResearch:92,101; ConfigItems:302-307. Higher caps/rods remain unsupported.
+            // ConfigResearch:89-97; ConfigItems:292-313 (staff cores are metadata 50-57 and 100). The copper and silver caps (other-mod metals) remain unsupported.
             case "ConfigItems.itemWandRod" -> switch (metadata) {
                 case 0 -> "wand_rod_greatwood";
+                case 1 -> "wand_rod_obsidian";
                 case 2 -> "wand_rod_silverwood";
+                case 3 -> "wand_rod_ice";
+                case 4 -> "wand_rod_quartz";
+                case 5 -> "wand_rod_reed";
+                case 6 -> "wand_rod_blaze";
+                case 7 -> "wand_rod_bone";
+                case 50 -> "staff_rod_greatwood";
+                case 51 -> "staff_rod_obsidian";
+                case 52 -> "staff_rod_silverwood";
+                case 53 -> "staff_rod_ice";
+                case 54 -> "staff_rod_quartz";
+                case 55 -> "staff_rod_reed";
+                case 56 -> "staff_rod_blaze";
+                case 57 -> "staff_rod_bone";
+                case 100 -> "staff_rod_primal";
                 default -> null;
             };
             case "ConfigItems.itemWandCap" -> switch (metadata) {
@@ -83,6 +118,8 @@ final class ResearchIconDisplay {
                 case 1 -> "wand_cap_gold";
                 case 2 -> "wand_cap_thaumium";
                 case 6 -> "wand_cap_thaumium_inert";
+                case 7 -> "wand_cap_void";
+                case 8 -> "wand_cap_void_inert";
                 default -> null;
             };
             // ConfigResearch:172,249,367,369. No filled-phial aspect or potion is guessed.
@@ -95,6 +132,7 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemFocusShock" -> metadata == 0 ? "focus_shock" : null;
             case "ConfigItems.itemFocusExcavation" -> metadata == 0 ? "focus_excavation" : null;
             case "ConfigItems.itemFocusFrost" -> metadata == 0 ? "focus_frost" : null;
+            case "ConfigItems.itemFocusPortableHole" -> metadata == 0 ? "focus_portable_hole" : null;
             case "ConfigItems.itemChestRobe" -> metadata == 0 ? "robe_chestplate" : null;
             case "ConfigItems.itemLegsRobe" -> metadata == 0 ? "robe_leggings" : null;
             case "ConfigItems.itemBootsRobe" -> metadata == 0 ? "robe_boots" : null;
@@ -103,6 +141,12 @@ final class ResearchIconDisplay {
             case "ConfigItems.itemPickThaumium" -> metadata == 0 ? "thaumium_pickaxe" : null;
             case "ConfigItems.itemAxeThaumium" -> metadata == 0 ? "thaumium_axe" : null;
             case "ConfigItems.itemAxeElemental" -> metadata == 0 ? "elemental_axe" : null;
+            case "ConfigItems.itemPickElemental" -> metadata == 0 ? "elemental_pickaxe" : null;
+            case "ConfigItems.itemHoeElemental" -> metadata == 0 ? "elemental_hoe" : null;
+            case "ConfigItems.itemShovelElemental" -> metadata == 0 ? "elemental_shovel" : null;
+            case "ConfigItems.itemSwordElemental" -> metadata == 0 ? "elemental_sword" : null;
+            case "ConfigItems.itemHelmetVoidRobe" -> metadata == 0 ? "void_robe_helmet" : null;
+            case "ConfigItems.itemHelmetFortress" -> metadata == 0 ? "fortress_helmet" : null;
             case "ConfigItems.itemShovelThaumium" -> metadata == 0 ? "thaumium_shovel" : null;
             case "ConfigItems.itemHoeThaumium" -> metadata == 0 ? "thaumium_hoe" : null;
             case "ConfigItems.itemHelmetThaumium" -> metadata == 0 ? "thaumium_helmet" : null;
@@ -145,7 +189,20 @@ final class ResearchIconDisplay {
                 case 5 -> "golem_upgrade_entropy";
                 default -> null;
             };
+            // Original ItemGolemDecoration damage 0..7 (hat, spectacles, bowtie, fez, dart, visor, plating, mace).
+            case "ConfigItems.itemGolemDecoration" -> switch (metadata) {
+                case 0 -> "golem_decoration_tophat";
+                case 1 -> "golem_decoration_glasses";
+                case 2 -> "golem_decoration_bowtie";
+                case 3 -> "golem_decoration_fez";
+                case 4 -> "golem_decoration_dart";
+                case 5 -> "golem_decoration_visor";
+                case 6 -> "golem_decoration_armor";
+                case 7 -> "golem_decoration_mace";
+                default -> null;
+            };
             case "ConfigItems.itemGolemBell" -> metadata == 0 ? "golem_bell" : null;
+            case "ConfigItems.itemTrunkSpawner" -> metadata == 0 ? "trunk_spawner" : null;
             case "ConfigBlocks.blockTaint" -> metadata == 2 ? "flesh_block" : null;
             // ConfigResearch:169-171 uses metadata 1 for RESTABLE; original
             // BlockTableRenderer:42-54 renders both 1 and 2 as a research table.
@@ -161,6 +218,7 @@ final class ResearchIconDisplay {
                 case 5 -> "tallow_block";
                 case 6 -> "arcane_stone";
                 case 7 -> "arcane_stone_bricks";
+                case 9 -> "golem_fetter";
                 default -> null;
             };
             case "ConfigBlocks.blockMetalDevice" -> switch (metadata) {
@@ -225,6 +283,8 @@ final class ResearchIconDisplay {
             };
             case "ConfigBlocks.blockCustomOre" -> variant(ORES, metadata);
             case "ConfigBlocks.blockChestHungry" -> metadata == 0 ? "hungry_chest" : null;
+            case "ConfigBlocks.blockEssentiaReservoir" -> metadata == 0 ? "essentia_reservoir" : null;
+            case "ConfigBlocks.blockLifter" -> metadata == 0 ? "levitator" : null;
             default -> null;
         };
         return id == null ? ItemStack.EMPTY : registered(id, count);

@@ -7,9 +7,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
@@ -66,6 +71,43 @@ public final class ItemWandCasting extends Item {
         return amount - accepted;
     }
 
+    /**
+     * Original setRod: a staff rod writes an attribute modifier "Weapon modifier", +6 attack damage (operation 0) under the base-damage
+     * id, so a staff hits for 1 + 6 = 7 bare-handed-plus-staff and shows it in its tooltip like a sword. Here it is the native item
+     * component, set when the staff is made ({@link #withData}) and restored on the carrier's tick if a staff lacks it.
+     */
+    public static final ItemAttributeModifiers STAFF_MODIFIERS = ItemAttributeModifiers.builder()
+            .add(Attributes.ATTACK_DAMAGE, new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, 6.0, AttributeModifier.Operation.ADD_VALUE),
+                    EquipmentSlotGroup.MAINHAND).build();
+
+    /** Original {@code isStaff}: the rod is a {@code StaffRod}. */
+    public static boolean isStaff(ItemStack stack) { return WandMaterials.rod(data(stack).rod()).staff(); }
+
+    /** Writes the wand data and the weapon modifier that belongs to its rod (a staff has it, a wand has not). */
+    public static void withData(ItemStack stack, WandData data) {
+        stack.set(ThaumcraftContent.WAND_DATA.get(), data);
+        normalizeModifiers(stack);
+    }
+
+    private static void normalizeModifiers(ItemStack stack) {
+        // Every item has the (empty) modifier component by default; a custom one set by someone else is left alone.
+        ItemAttributeModifiers current = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        if (isStaff(stack)) {
+            if (current.modifiers().isEmpty()) stack.set(DataComponents.ATTRIBUTE_MODIFIERS, STAFF_MODIFIERS);
+        } else if (STAFF_MODIFIERS.equals(current)) {
+            stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY); // the default again: no patch left on the stack
+        }
+    }
+
+    /** Original ItemWandCasting.onUpdate: the server asks the rod to act on its carrier's tick (an elemental rod refills its primal). */
+    @Override public void inventoryTick(ItemStack stack, Level level, net.minecraft.world.entity.Entity entity, int slot, boolean selected) {
+        if (level.isClientSide || !(entity instanceof Player player)) return;
+        normalizeModifiers(stack);
+        WandData before = data(stack);
+        WandData after = WandRodPassive.tick(before, player.tickCount, player.getRandom()::nextInt);
+        if (after != before) stack.set(ThaumcraftContent.WAND_DATA.get(), after);
+    }
+
     @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return Integer.MAX_VALUE; }
     @Override public UseAnim getUseAnimation(ItemStack stack) { return UseAnim.BOW; }
 
@@ -82,6 +124,8 @@ public final class ItemWandCasting extends Item {
         if (tube != InteractionResult.PASS) return tube;
         InteractionResult buffer = thaumcraft.common.blocks.BlockTubeBuffer.tryWandInteraction(context);
         if (buffer != InteractionResult.PASS) return buffer;
+        InteractionResult reservoir = thaumcraft.common.blocks.BlockEssentiaReservoir.tryWandInteraction(context);
+        if (reservoir != InteractionResult.PASS) return reservoir;
         InteractionResult alembic = thaumcraft.common.blocks.BlockAlembic.tryWandInteraction(context);
         if (alembic != InteractionResult.PASS) return alembic;
         InteractionResult crucible = thaumcraft.common.blocks.BlockCrucible.tryCreate(context);
@@ -163,7 +207,9 @@ public final class ItemWandCasting extends Item {
     }
     @Override public Component getName(ItemStack stack) {
         WandData state = data(stack);
+        var rod = WandMaterials.rod(state.rod());
+        // Original getItemStackDisplayName: a staff is named after the plain rod ("greatwood_staff" -> Greatwood) with the staff noun.
         return Component.translatable("tc.port.wand.name", Component.translatable("item.Wand." + state.cap() + ".cap"),
-                Component.translatable("item.Wand." + state.rod() + ".rod"), Component.translatable("item.Wand.wand.obj"));
+                Component.translatable("item.Wand." + rod.baseTag() + ".rod"), Component.translatable("item.Wand." + (rod.staff() ? "staff" : "wand") + ".obj"));
     }
 }

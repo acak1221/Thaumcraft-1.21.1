@@ -817,4 +817,124 @@ public final class ThaumcraftGameTests implements FabricGameTest {
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void thaumometerBlockPickSharesDroppedItemIdentity(GameTestHelper test) { RuntimeChecks.thaumometerBlockPickSharesDroppedItemIdentity(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    public void advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag(GameTestHelper test) {
+        thaumcraft.common.testing.GolemAdvancedRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1700)
+    public void golemAccessoriesInstallChangeStatsAndSurviveTheBell(GameTestHelper test) {
+        thaumcraft.common.testing.GolemDecorationsRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1900)
+    public void entropySwitchesChangeWhatRealGolemsFetchEmptyAndSort(GameTestHelper test) {
+        thaumcraft.common.testing.GolemItemMatchRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1000)
+    public void entropyQueuesTheFarthestConnectedWaterForLiquidGolems(GameTestHelper test) {
+        thaumcraft.common.testing.GolemLiquidQueueRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600)
+    public void golemFetterHoldsGolemsWhileItsRedstoneSignalLasts(GameTestHelper test) {
+        thaumcraft.common.testing.GolemFetterRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    public void travelingTrunkItemUpgradesMenuBellDamageAndSaving(GameTestHelper test) {
+        thaumcraft.common.testing.TravelingTrunkRuntimeChecks.basics(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600)
+    public void travelingTrunkFollowsTeleportsDefendsAndPullsItems(GameTestHelper test) {
+        thaumcraft.common.testing.TravelingTrunkRuntimeChecks.behavior(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1500)
+    public void golemDartLauncherShootsAtItsIntervalAndHurtsWhatItHits(GameTestHelper test) {
+        thaumcraft.common.testing.GolemDartRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void fireGolemCatchesAreDeliveredAlightForTwoSeconds(GameTestHelper test) {
+        thaumcraft.common.testing.GolemFishingBurnRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void elementalWandRodsBrewAssembleAndRefillTheirOwnPrimal(GameTestHelper test) {
+        thaumcraft.common.testing.WandRodsRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void staffRodsBrewAssembleStrikeAndRefill(GameTestHelper test) {
+        thaumcraft.common.testing.StaffRodsRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void voidMetalAndTheVoidCapBrewCraftAndDiscount(GameTestHelper test) {
+        thaumcraft.common.testing.VoidCapRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    public void voidMetalGearMendsWithersAndWarps(GameTestHelper test) {
+        thaumcraft.common.testing.VoidGearRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void nativeClustersPurifyTripleAndMelt(GameTestHelper test) {
+        thaumcraft.common.testing.ClusterRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void pickaxeOfTheCoreBurnsWearsAndFindsClusters(GameTestHelper test) {
+        thaumcraft.common.testing.ElementalPickaxeRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void hoeOfGrowthTillsFertilisesAndGrowsSaplings(GameTestHelper test) {
+        thaumcraft.common.testing.ElementalHoeRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void shovelOfTheEarthmoverMinesAndLaysSquares(GameTestHelper test) {
+        thaumcraft.common.testing.ElementalShovelRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void swordOfTheZephyrLiftsBlowsAndSweeps(GameTestHelper test) {
+        thaumcraft.common.testing.ElementalSwordRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void voidThaumaturgeRobesMendWardAndDye(GameTestHelper test) {
+        thaumcraft.common.testing.VoidRobeRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    public void portableHoleCutsTunnelsAndGivesBlocksBack(GameTestHelper test) {
+        thaumcraft.common.testing.PortableHoleRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void thaumiumFortressWardsSetsAndMasks(GameTestHelper test) {
+        thaumcraft.common.testing.FortressRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600)
+    public void essentiaReservoirHoldsMixedEssentiaPullsAndBursts(GameTestHelper test) {
+        thaumcraft.common.testing.ReservoirRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    public void arcaneLevitatorLiftsItemsAndCreaturesAndStacks(GameTestHelper test) {
+        thaumcraft.common.testing.LevitatorRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void crystalBlocksDropSixOwnShards(GameTestHelper test) {
+        thaumcraft.common.testing.CrystalDropRuntimeChecks.run(test);
+    }
 }

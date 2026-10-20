@@ -36,9 +36,10 @@ class WandDataTest {
     }
     @Test void malformedJsonReturnsDecodeErrorsWithoutThrowing() {
         for (String json : List.of(
-                "{\"rod\":\"silverwood_staff\"}",
-                "{\"rod\":\"greatwood_staff\"}",
-                "{\"cap\":\"void\"}",
+                "{\"rod\":\"copper_staff\"}",
+                "{\"rod\":\"wood_staff\"}",
+                "{\"cap\":\"copper\"}",
+                "{\"cap\":\"void_inert\"}",
                 "{\"cap\":\"thaumium_inert\"}",
                 "{\"vis\":{\"vitium\":100}}",
                 "{\"vis\":{\"unknown\":100}}",
@@ -46,7 +47,9 @@ class WandDataTest {
                 "{\"vis\":{\"aer\":2501}}",
                 "{\"rod\":\"wood\",\"cap\":\"gold\",\"vis\":{\"aer\":5000}}",
                 "{\"rod\":\"greatwood\",\"vis\":{\"aer\":5001}}",
-                "{\"rod\":\"silverwood\",\"vis\":{\"aer\":10001}}")) {
+                "{\"rod\":\"silverwood\",\"vis\":{\"aer\":10001}}",
+                "{\"rod\":\"greatwood_staff\",\"vis\":{\"aer\":12501}}",
+                "{\"rod\":\"primal_staff\",\"vis\":{\"aer\":25001}}")) {
             var result = assertDoesNotThrow(() -> WandData.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)));
             assertTrue(result.error().isPresent(), json);
             assertTrue(result.result().isEmpty(), json);
@@ -67,7 +70,7 @@ class WandDataTest {
     }
     @Test void codecValidationDoesNotWeakenDirectConstruction() {
         assertThrows(IllegalArgumentException.class, () -> new WandData("unknown", "iron", Map.of()));
-        assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "void", Map.of()));
+        assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "silver", Map.of()));
         assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "gold", Map.of("aer", 2501)));
         assertThrows(IllegalArgumentException.class, () -> new WandData("greatwood", "gold", Map.of("aer", 5001)));
         assertThrows(IllegalArgumentException.class, () -> new WandData("silverwood", "gold", Map.of("aer", 10001)));

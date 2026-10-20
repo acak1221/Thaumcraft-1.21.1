@@ -26,6 +26,8 @@ The native Taint Poison status icon is a crop of Azanor's retained `textures/mis
 
 The native Thaumium armor layer paths `textures/models/armor/thaumium_layer_1.png` and `_2.png` are byte-for-byte aliases of Azanor's retained `textures/models/thaumium_1.png` and `_2.png`. Their hashes and path adaptation are documented in `docs/analysis/2026-10-16-thaumium-next-unit.md`; no donor-port artwork was copied and no new publication rights are inferred.
 
+The native Void armor layers `textures/models/armor/void_layer_1.png` (SHA-256 `e2f42ab4a94effcaf2c95dec3e0c453f03973fc2542e6947fae481bf74b8682d`) and `void_layer_2.png` (`1210c1368c0ff9bb77c937d359d2baa6707714994d567aaec9d32d94e59c5d10`) are byte-for-byte aliases of Azanor's retained `textures/models/void_1.png` and `_2.png` (64×32). The originals are unchanged; this path adaptation does not grant new artwork or publication rights.
+
 The native Goggles of Revealing layer `textures/models/armor/goggles_layer_1.png` is a byte-for-byte path alias of the retained `textures/models/goggles.png` (SHA-256 `cb117adf2d42d57767ce68110cf5d7ef3ae3458b67b376cd8c5e3f5e129cd73f`,128×64). The original is unchanged; this path adaptation does not grant new artwork or publication rights.
 
 The four native robe layers `textures/models/armor/robes_layer_{1,2}[_overlay].png` are byte-for-byte path aliases of the retained `textures/models/robes_{1,2}[_overlay].png`, all64×32. Their hashes are recorded in `docs/analysis/2026-10-16-robes-and-early-foci.md`. No donor-port art was copied; the base and untinted overlay remain Azanor's original artwork, with no new publication rights implied.

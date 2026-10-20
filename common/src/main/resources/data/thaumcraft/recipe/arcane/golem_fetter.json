@@ -1,0 +1,31 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "GOLEMFETTER",
+  "pattern": [
+    "SSS",
+    "IRI",
+    "BBB"
+  ],
+  "key": {
+    "S": {
+      "item": "thaumcraft:arcane_stone"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "B": {
+      "item": "thaumcraft:arcane_stone_bricks"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:golem_fetter",
+    "count": 1
+  },
+  "vis": {
+    "terra": 5,
+    "ordo": 5
+  }
+}

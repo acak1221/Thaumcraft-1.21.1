@@ -1,0 +1,234 @@
+{
+ "description": "Pickaxe of the Core: numbers, infusion, fire, wear and the special mining of native clusters through the block drop hook (docs/analysis/2026-10-20-elemental-pickaxe.md)",
+ "watch": {
+  "junit": [
+   "SpecialMiningRuleTest",
+   "ElementalPickaxeAssetsTest"
+  ],
+  "gametests": [
+   "pickaxeOfTheCoreBurnsWearsAndFindsClusters"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.SpecialMiningRuleTest",
+  "thaumcraft.assets.ElementalPickaxeAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "base-chance-quarter",
+   "name": "the base chance is a quarter",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "BASE_CHANCE = 0.2F",
+   "new": "BASE_CHANCE = 0.25F"
+  },
+  {
+   "id": "fortune-step-tenth",
+   "name": "fortune adds a tenth per level",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "FORTUNE_STEP = 0.075F",
+   "new": "FORTUNE_STEP = 0.1F"
+  },
+  {
+   "id": "threshold-strict",
+   "name": "a roll on the threshold fails",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "return roll <= chance * factor;",
+   "new": "return roll < chance * factor;"
+  },
+  {
+   "id": "gold-factor-one",
+   "name": "gold runs on the full chance",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "GOLD = 0.9F",
+   "new": "GOLD = 1.0F"
+  },
+  {
+   "id": "iron-factor-nine",
+   "name": "iron runs on nine tenths",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "IRON = 1.0F",
+   "new": "IRON = 0.9F"
+  },
+  {
+   "id": "mixin-unregistered",
+   "name": "the drop hook is not registered",
+   "tier": "junit",
+   "file": "common/src/main/resources/thaumcraft-common.mixins.json",
+   "old": "    \"StreamAxeItemMixin\",\n    \"SpecialMiningBlockMixin\"\n",
+   "new": "    \"StreamAxeItemMixin\"\n"
+  },
+  {
+   "id": "recipe-instability-two",
+   "name": "the infusion is unstable by 2",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_pickaxe.json",
+   "old": "\"instability\": 1",
+   "new": "\"instability\": 2"
+  },
+  {
+   "id": "recipe-no-diamond",
+   "name": "the infusion takes an emerald",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_pickaxe.json",
+   "old": "{\"item\": \"minecraft:diamond\"}",
+   "new": "{\"item\": \"minecraft:emerald\"}"
+  },
+  {
+   "id": "recipe-research-axe",
+   "name": "the infusion needs the axe research",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_pickaxe.json",
+   "old": "\"research\": \"ELEMENTALPICK\"",
+   "new": "\"research\": \"ELEMENTALAXE\""
+  },
+  {
+   "id": "recipe-less-mining",
+   "name": "the infusion takes 6 mining",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_pickaxe.json",
+   "old": "\"perfodio\": 8",
+   "new": "\"perfodio\": 6"
+  },
+  {
+   "id": "model-icon-axe",
+   "name": "the pickaxe shows the axe icon",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/elemental_pickaxe.json",
+   "old": "items/elementalpick",
+   "new": "items/elementalaxe"
+  },
+  {
+   "id": "lang-ru-axe",
+   "name": "the Russian pickaxe is named after the axe",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/ru_ru.json",
+   "old": "\"item.thaumcraft.elemental_pickaxe\": \"Кирка Огня\"",
+   "new": "\"item.thaumcraft.elemental_pickaxe\": \"Топор Потока\""
+  },
+  {
+   "id": "not-a-pickaxe",
+   "name": "the pickaxe leaves the pickaxes tag",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/item/pickaxes.json",
+   "old": "\"thaumcraft:elemental_pickaxe\",",
+   "new": ""
+  },
+  {
+   "id": "hook-does-nothing",
+   "name": "the drop hook returns the list untouched",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/mixin/SpecialMiningBlockMixin.java",
+   "old": "result.setReturnValue(SpecialMining.apply(result.getReturnValue(), level, pos, miner, tool));",
+   "new": "result.setReturnValue(result.getReturnValue());"
+  },
+  {
+   "id": "silk-ignored",
+   "name": "Silk Touch does not stop the swap",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "tool) > 0) return drops;",
+   "new": "tool) > 99) return drops;"
+  },
+  {
+   "id": "any-tool-carries",
+   "name": "every tool carries the special mining",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "return tool.getItem() instanceof ItemElementalPickaxe;",
+   "new": "return true;"
+  },
+  {
+   "id": "any-miner",
+   "name": "a mob or nobody can mine specially",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "if (!(miner instanceof Player) || drops.isEmpty() || !carries(tool)) return drops;",
+   "new": "if (drops.isEmpty() || !carries(tool)) return drops;"
+  },
+  {
+   "id": "fortune-ignored",
+   "name": "fortune does not raise the chance",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "int fortune = EnchantmentHelper.getItemEnchantmentLevel(enchantments.getOrThrow(Enchantments.FORTUNE), tool);",
+   "new": "int fortune = 0;"
+  },
+  {
+   "id": "count-lost",
+   "name": "a swap gives one cluster whatever the count",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "return new ItemStack(output, dropped.getCount());",
+   "new": "return new ItemStack(output, 1);"
+  },
+  {
+   "id": "no-draw-for-unlisted",
+   "name": "an unlisted drop takes no draw",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "        float roll = random.nextFloat();\n        Result result = result(dropped);\n        if (result == null || !succeeds(roll, chance, result.factor())) return dropped.copy();",
+   "new": "        Result result = result(dropped);\n        if (result == null) return dropped.copy();\n        float roll = random.nextFloat();\n        if (!succeeds(roll, chance, result.factor())) return dropped.copy();"
+  },
+  {
+   "id": "gold-gives-iron",
+   "name": "raw gold becomes an iron cluster",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "new Result(thaumcraft(\"cluster_gold\"), GOLD)",
+   "new": "new Result(thaumcraft(\"cluster_iron\"), GOLD)"
+  },
+  {
+   "id": "cinnabar-gives-gold",
+   "name": "cinnabar becomes a gold cluster",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java",
+   "old": "new Result(thaumcraft(\"cluster_cinnabar\"), CINNABAR)",
+   "new": "new Result(thaumcraft(\"cluster_gold\"), CINNABAR)"
+  },
+  {
+   "id": "fire-three-seconds",
+   "name": "a hit burns for three seconds",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalPickaxe.java",
+   "old": "FIRE_SECONDS = 2;",
+   "new": "FIRE_SECONDS = 3;"
+  },
+  {
+   "id": "click-wear-four",
+   "name": "a right click costs four uses",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalPickaxe.java",
+   "old": "CLICK_WEAR = 5;",
+   "new": "CLICK_WEAR = 4;"
+  },
+  {
+   "id": "pvp-ignored",
+   "name": "the fire ignores player-versus-player",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalPickaxe.java",
+   "old": "if (target.level() instanceof ServerLevel server && !(target instanceof Player && !server.getServer().isPvpAllowed())) {",
+   "new": "if (target.level() instanceof ServerLevel server) {"
+  },
+  {
+   "id": "damage-base-three",
+   "name": "the base damage is 3",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalPickaxe.java",
+   "old": "createAttributes(tier, 2, -2.8F)",
+   "new": "createAttributes(tier, 3, -2.8F)"
+  },
+  {
+   "id": "rarity-epic",
+   "name": "the pickaxe is epic",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalPickaxe.java",
+   "old": "Rarity.RARE",
+   "new": "Rarity.EPIC"
+  }
+ ]
+}

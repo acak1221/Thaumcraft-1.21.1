@@ -20,6 +20,7 @@
     "thaumcraft:essentia_buffer",
     "thaumcraft:centrifuge",
     "thaumcraft:essentia_crystallizer",
+    "thaumcraft:essentia_reservoir",
     "thaumcraft:node_stabilizer",
     "thaumcraft:node_transducer",
     "thaumcraft:vis_relay",
@@ -28,6 +29,7 @@
     "thaumcraft:arcane_pedestal",
     "thaumcraft:infusion_pillar",
     "thaumcraft:thaumium_block",
+    "thaumcraft:golem_fetter",
     "thaumcraft:tallow_block"
   ]
 }

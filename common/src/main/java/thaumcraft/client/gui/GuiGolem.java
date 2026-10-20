@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.common.container.ContainerGolem;
 import thaumcraft.common.items.golems.GolemGuardTargets;
+import thaumcraft.common.items.golems.GolemItemMatch;
 
 /** Ordinary core settings, one fluid ghost or six item ghosts; none for Sorting/Guard. An Order Guard shows its four target
  * switches (original GuiGolem:167-189) at the original positions. No client-side filter mutation, upgrade controls or
@@ -52,6 +53,13 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
             // Original190–202: checked means precise (any-amount is false).
             if (!menu.isFillAnyAmount()) graphics.blit(BACKGROUND, leftPos + 62, topPos + 54, 8, 176, 8, 8, 256, 256);
         }
+        if (menu.canSwitchItemMatch()) {
+            // Original GuiGolem:376-389: three boxes at the Sorting corner or beside the panel; a lit box is a switch that is on.
+            for (int i = 0; i < GolemItemMatch.BUTTON_COUNT; i++) {
+                graphics.blit(BACKGROUND, leftPos + matchX(), topPos + matchY(i), 8, 168, 8, 8, 256, 256);
+                if ((menu.itemMatch() & (1 << i)) != 0) graphics.blit(BACKGROUND, leftPos + matchX(), topPos + matchY(i), 8, 176, 8, 8, 256, 256);
+            }
+        }
         RenderSystem.disableBlend();
         if (golem != null && golem.isAlive()) {
             // Native helper saves/restores body/head rotations and render state.
@@ -88,6 +96,18 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
                 graphics.pose().scale(.5F, .5F, 1);
                 graphics.drawString(font, text, -font.width(text) / 2, 0, 0xfffdfdfd, false);
             } finally { graphics.pose().popPose(); }
+        }
+        if (menu.canSwitchItemMatch()) {
+            // Half-size captions beside the boxes (original GuiGolem:380-390), bright while the switch is on.
+            String[] keys = {"tc.port.golem.match.tags", "tc.port.golem.match.damage", "tc.port.golem.match.components"};
+            for (int i = 0; i < keys.length; i++) {
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(matchX() + 10, matchY(i) + 2, 0);
+                    graphics.pose().scale(.5F, .5F, 1);
+                    graphics.drawString(font, Component.translatable(keys[i]), 0, 0, (menu.itemMatch() & (1 << i)) != 0 ? 0xfffdfdfd : 0xff666666, false);
+                } finally { graphics.pose().popPose(); }
+            }
         }
         if (core == 4 && menu.canSwitchGuardTargets()) {
             // Original colours; full-size labels at x=122 like GuiGolem:185-188, localised.
@@ -127,6 +147,9 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
     }
 
     private static final int PAGER_Y = 72;
+    // Original GuiGolem:376-379: Sorting keeps them inside the panel, the others float beside it.
+    private int matchX() { return menu.core() == 10 ? 66 : 180; }
+    private int matchY(int index) { return 24 + 10 * index + (menu.core() == 10 ? 12 : 0); }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && menu.canSwitchGuardTargets() && minecraft != null && minecraft.gameMode != null) {
@@ -134,6 +157,15 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
             for (int i = 0; i < GolemGuardTargets.BUTTON_COUNT; i++) {
                 if (isHovering(104, 5 + 16 * i, 66, 8, mouseX, mouseY)) {
                     minecraft.gameMode.handleInventoryButtonClick(menu.containerId, ContainerGolem.GUARD_BUTTON + i);
+                    return true;
+                }
+            }
+        }
+        if (button == 0 && menu.canSwitchItemMatch() && minecraft != null && minecraft.gameMode != null) {
+            // Server state again: wait for the synced menu data, never flip a switch locally.
+            for (int i = 0; i < GolemItemMatch.BUTTON_COUNT; i++) {
+                if (isHovering(matchX(), matchY(i), 64, 8, mouseX, mouseY)) {
+                    minecraft.gameMode.handleInventoryButtonClick(menu.containerId, ContainerGolem.ITEM_MATCH_BUTTON + i);
                     return true;
                 }
             }

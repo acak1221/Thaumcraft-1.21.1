@@ -86,6 +86,8 @@ public final class Thaumcraft {
         ThaumcraftBellows.register();
         ThaumcraftFoci.register();
         ThaumcraftFocalManipulation.register();
+        thaumcraft.common.config.ThaumcraftHoles.register();
+        thaumcraft.common.config.ThaumcraftLevitator.register();
         thaumcraft.common.config.ThaumcraftArcaneBore.register();
         thaumcraft.common.config.ThaumcraftHungryChest.register();
         thaumcraft.common.config.ThaumcraftGolems.register();
@@ -103,11 +105,13 @@ public final class Thaumcraft {
         ResearchTableCombineNetworking.init();
         FocusSelectionNetworking.init();
         thaumcraft.common.lib.network.GolemBellNetworking.init();
+        thaumcraft.common.lib.network.ShovelOrientationNetworking.init();
         FocalManipulatorNetworking.init();
         InfusionFxNetworking.initServer();
         ShockFxNetworking.initServer();
         ExcavationFxNetworking.initServer();
         VisNetFxNetworking.initServer();
+        VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.
         PlayerEvent.PLAYER_QUIT.register(ItemFocusExcavation::clearPlayer);

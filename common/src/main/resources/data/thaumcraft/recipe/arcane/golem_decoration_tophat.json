@@ -1,0 +1,25 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "TINYHAT",
+  "pattern": [
+    " C ",
+    " G ",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:black_wool"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "id": "thaumcraft:golem_decoration_tophat",
+    "count": 1
+  },
+  "vis": {
+    "ordo": 8,
+    "ignis": 8
+  }
+}

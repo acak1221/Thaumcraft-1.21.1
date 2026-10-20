@@ -1,0 +1,330 @@
+{
+ "description": "Void Thaumaturge robes: numbers, mending, magic ward, infusions, dye and wash (docs/analysis/2026-10-20-void-robes.md)",
+ "watch": {
+  "junit": [
+   "MagicWardTest",
+   "VoidRobeAssetsTest"
+  ],
+  "gametests": [
+   "voidThaumaturgeRobesMendWardAndDye"
+  ]
+ },
+ "junit_tests": [
+  "thaumcraft.items.MagicWardTest",
+  "thaumcraft.assets.VoidRobeAssetsTest"
+ ],
+ "mutants": [
+  {
+   "id": "ward-divisor-25",
+   "name": "a piece absorbs its armor over 25",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "DIVISOR = 35.0",
+   "new": "DIVISOR = 25.0"
+  },
+  {
+   "id": "reduce-last-only",
+   "name": "only the last piece's ward counts",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "for (double ratio : ratios) total += ratio;",
+   "new": "for (double ratio : ratios) total = ratio;"
+  },
+  {
+   "id": "reduce-half",
+   "name": "the ward takes off half what it should",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "scaled -= scaled * total;",
+   "new": "scaled -= scaled * total / 2;"
+  },
+  {
+   "id": "wear-no-minimum",
+   "name": "a small blow wears nothing",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "return (int) (points < 1 ? 1 : points);",
+   "new": "return (int) points;"
+  },
+  {
+   "id": "wear-rounds",
+   "name": "wear is rounded, not truncated",
+   "tier": "junit",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "return (int) (points < 1 ? 1 : points);",
+   "new": "return (int) Math.round(points < 1 ? 1 : points);"
+  },
+  {
+   "id": "tag-no-taint",
+   "name": "taint is not magic damage",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/tags/damage_type/is_magic.json",
+   "old": ",\"thaumcraft:taint\"",
+   "new": ""
+  },
+  {
+   "id": "tag-no-indirect",
+   "name": "indirect magic is not magic damage",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/tags/damage_type/is_magic.json",
+   "old": "\"minecraft:indirect_magic\",",
+   "new": ""
+  },
+  {
+   "id": "tag-wither-too",
+   "name": "the wither is magic damage",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/tags/damage_type/is_magic.json",
+   "old": "\"minecraft:magic\",",
+   "new": "\"minecraft:magic\",\"minecraft:wither\","
+  },
+  {
+   "id": "mixin-unregistered",
+   "name": "the ward hook is not registered",
+   "tier": "junit",
+   "file": "common/src/main/resources/thaumcraft-common.mixins.json",
+   "old": "\"PlayerAttackSweepMixin\",\n    \"LivingEntityMagicWardMixin\"",
+   "new": "\"PlayerAttackSweepMixin\""
+  },
+  {
+   "id": "helm-instability-five",
+   "name": "the hood infusion is steadier",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_helm.json",
+   "old": "\"instability\": 6",
+   "new": "\"instability\": 5"
+  },
+  {
+   "id": "chest-vacuos-sixteen",
+   "name": "the robe infusion needs less void",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_chest.json",
+   "old": "\"vacuos\": 24",
+   "new": "\"vacuos\": 16"
+  },
+  {
+   "id": "legs-no-leather",
+   "name": "the leggings infusion takes string for leather",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_legs.json",
+   "old": "\"minecraft:leather\"",
+   "new": "\"minecraft:string\""
+  },
+  {
+   "id": "helm-damaged-centre",
+   "name": "a damaged void helmet is a centre",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_helm.json",
+   "old": "  \"input_damage\": 0,\n",
+   "new": ""
+  },
+  {
+   "id": "chest-damaged-robe",
+   "name": "the robe component may be worn",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_chest.json",
+   "old": "\"damage\": 0",
+   "new": "\"damage\": 1"
+  },
+  {
+   "id": "legs-wrong-centre",
+   "name": "the leggings infusion starts from the chestplate",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_legs.json",
+   "old": "\"item\": \"thaumcraft:void_leggings\"",
+   "new": "\"item\": \"thaumcraft:void_chestplate\""
+  },
+  {
+   "id": "helm-result-chest",
+   "name": "the hood infusion makes the robe",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_helm.json",
+   "old": "\"id\": \"thaumcraft:void_robe_helmet\"",
+   "new": "\"id\": \"thaumcraft:void_robe_chestplate\""
+  },
+  {
+   "id": "chest-research-fortress",
+   "name": "the robe infusion needs the thaumium fortress research",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/thaumcraft/recipe/infusion/void_robe_chest.json",
+   "old": "\"research\": \"ARMORVOIDFORTRESS\"",
+   "new": "\"research\": \"ARMORFORTRESS\""
+  },
+  {
+   "id": "model-chest-layers",
+   "name": "the robe tints its metal layer",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/models/item/void_robe_chestplate.json",
+   "old": "\"layer0\":\"thaumcraft:items/voidrobechestover\"",
+   "new": "\"layer0\":\"thaumcraft:items/voidrobechest\""
+  },
+  {
+   "id": "tag-hood-missing",
+   "name": "the hood is not head armor",
+   "tier": "junit",
+   "file": "common/src/main/resources/data/minecraft/tags/item/head_armor.json",
+   "old": ",\"thaumcraft:void_robe_helmet\"",
+   "new": ""
+  },
+  {
+   "id": "lang-en-hat",
+   "name": "the English name is a hat",
+   "tier": "junit",
+   "file": "common/src/main/resources/assets/thaumcraft/lang/en_us.json",
+   "old": "\"item.thaumcraft.void_robe_helmet\": \"Void Thaumaturge Hood\"",
+   "new": "\"item.thaumcraft.void_robe_helmet\": \"Void Thaumaturge Hat\""
+  },
+  {
+   "id": "vis-four",
+   "name": "a piece gives a 4 % vis discount",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "VIS_DISCOUNT = 5",
+   "new": "VIS_DISCOUNT = 4"
+  },
+  {
+   "id": "warp-one",
+   "name": "a piece adds one warp",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "WARP = 2",
+   "new": "WARP = 1"
+  },
+  {
+   "id": "durability-twelve",
+   "name": "the durability factor is 12",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "DURABILITY_FACTOR = 10",
+   "new": "DURABILITY_FACTOR = 12"
+  },
+  {
+   "id": "rarity-rare",
+   "name": "the robes are only rare",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": ".rarity(Rarity.EPIC)",
+   "new": ".rarity(Rarity.RARE)"
+  },
+  {
+   "id": "nodes-everywhere",
+   "name": "every piece shows the nodes",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "public boolean showNodes(ItemStack stack, LivingEntity wearer) { return type == Type.HELMET; }",
+   "new": "public boolean showNodes(ItemStack stack, LivingEntity wearer) { return true; }"
+  },
+  {
+   "id": "worn-mends-once",
+   "name": "a worn piece mends only once a second",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "VoidMetal.armorTick(stack, entity, getEquipmentSlot());",
+   "new": "VoidMetal.repair(stack, entity);"
+  },
+  {
+   "id": "ward-armor-zero",
+   "name": "the robes ward nothing",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "public int wardArmor(ItemStack stack) { return getDefense(); }",
+   "new": "public int wardArmor(ItemStack stack) { return 0; }"
+  },
+  {
+   "id": "ward-any-damage",
+   "name": "every damage source counts as magic",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "if (source.is(MAGIC_DAMAGE)) return Kind.MAGIC;",
+   "new": "if (true || source.is(MAGIC_DAMAGE)) return Kind.MAGIC;"
+  },
+  {
+   "id": "ward-no-wear",
+   "name": "the ward wears no piece",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "stack.hurtAndBreak(wearByRatio(damage, share(gear, stack, entity, kind)), entity, slot);",
+   "new": ";"
+  },
+  {
+   "id": "ward-main-hand",
+   "name": "a robe in the hand wards",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "EquipmentSlot.LEGS, EquipmentSlot.FEET};",
+   "new": "EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND};"
+  },
+  {
+   "id": "ward-no-head",
+   "name": "the hood does not ward",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/lib/MagicWard.java",
+   "old": "ARMOR = {EquipmentSlot.HEAD, ",
+   "new": "ARMOR = {"
+  },
+  {
+   "id": "mixin-bypassed",
+   "name": "the ward never reaches the damage",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/mixin/LivingEntityMagicWardMixin.java",
+   "old": "original.call(source, MagicWard.apply((LivingEntity) (Object) this, source, damage))",
+   "new": "original.call(source, damage)"
+  },
+  {
+   "id": "dye-enchanted-only",
+   "name": "only the enchanted robes can be dyed",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/RecipesRobeArmorDyes.java",
+   "old": "stack.getItem() instanceof DyedRobe",
+   "new": "stack.getItem() instanceof ItemRobeArmor"
+  },
+  {
+   "id": "wash-keeps-level",
+   "name": "a wash leaves the water as it was",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java",
+   "old": "            LayeredCauldronBlock.lowerFillLevel(state, level, pos);\n",
+   "new": ""
+  },
+  {
+   "id": "wash-keeps-color",
+   "name": "a wash leaves the dye on",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java",
+   "old": "            removeColor(context.getItemInHand());\n",
+   "new": ""
+  },
+  {
+   "id": "void-wash-missing",
+   "name": "a void robe cannot be washed",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "InteractionResult washed = ItemRobeArmor.wash(context);",
+   "new": "InteractionResult washed = null;"
+  },
+  {
+   "id": "default-red",
+   "name": "a fresh robe is red",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java",
+   "old": "new DyedItemColor(ItemRobeArmor.DEFAULT_COLOR, false)",
+   "new": "new DyedItemColor(0xFF0000, false)"
+  },
+  {
+   "id": "robe-chest-type",
+   "name": "the robe is made as leggings",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "new ItemVoidRobeArmor(VOID_ROBE_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE",
+   "new": "new ItemVoidRobeArmor(VOID_ROBE_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS"
+  },
+  {
+   "id": "repair-thaumium",
+   "name": "the robes mend with thaumium",
+   "tier": "gametest",
+   "file": "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java",
+   "old": "ThaumcraftEquipment::voidRepairIngredient,\n            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, \"void\"))), 0, 0));\n\n    public static final RegistrySupplier<ItemThaumiumSword>",
+   "new": "ThaumcraftEquipment::thaumiumRepairIngredient,\n            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, \"void\"))), 0, 0));\n\n    public static final RegistrySupplier<ItemThaumiumSword>"
+  }
+ ]
+}

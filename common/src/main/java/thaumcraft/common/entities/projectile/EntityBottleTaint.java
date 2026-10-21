@@ -97,26 +97,21 @@ public final class EntityBottleTaint extends ThrowableProjectile {
             return;
         }
         if (!(level() instanceof ServerLevel server)) return;
-        splashTaint(server, blockPosition(), getOwner() instanceof LivingEntity owner ? owner : null);
-        growTaintFibres(server, blockPosition());
+        burst(server);
         discard();
     }
 
-    /**
-     * The original impact of the broken bottle: it poisons everything around the spot and it
-     * grows the taint fibres there. The method is static so that the effect can be applied at a
-     * point, exactly like the original's onUpdate impact branch did at the bottle's position.
-     */
-    public static void burst(ServerLevel server, BlockPos spot, LivingEntity source) {
-        splashTaint(server, spot, source);
-        growTaintFibres(server, spot);
+    /** The original burst at the spot of the bottle: the taint splash and the fibres. */
+    public void burst(ServerLevel server) {
+        splashTaint(server);
+        growTaintFibres(server);
     }
 
     /** Original splash box: a zero size box at the impact point inflated by five on every axis. */
-    private static void splashTaint(ServerLevel server, BlockPos spot, LivingEntity source) {
-        AABB box = new AABB(spot.getX(), spot.getY(), spot.getZ(), spot.getX(), spot.getY(), spot.getZ())
+    private void splashTaint(ServerLevel server) {
+        AABB box = new AABB(getX(), getY(), getZ(), getX(), getY(), getZ())
                 .inflate(ProjectileRules.BOTTLE_TAINT_SPLASH_RADIUS);
-        for (Entity entity : server.getEntities(source, box)) {
+        for (Entity entity : server.getEntities(this, box)) {
             if (!(entity instanceof LivingEntity living)) continue;
             boolean tainted = living instanceof ITaintedMob;
             boolean undead = living.getType().is(EntityTypeTags.UNDEAD);
@@ -128,11 +123,10 @@ public final class EntityBottleTaint extends ThrowableProjectile {
     }
 
     /** Original biome conversion and taint fibre growth. */
-    private static void growTaintFibres(ServerLevel server, BlockPos spot) {
-        var random = server.getRandom();
-        int x = spot.getX();
-        int y = spot.getY();
-        int z = spot.getZ();
+    private void growTaintFibres(ServerLevel server) {
+        int x = (int) getX();
+        int y = (int) getY();
+        int z = (int) getZ();
         for (int attempt = 0; attempt < ProjectileRules.BOTTLE_TAINT_FIBRE_ATTEMPTS; attempt++) {
             int xx = x + ProjectileRules.bottleTaintFibreOffset(random.nextFloat(), random.nextFloat());
             int zz = z + ProjectileRules.bottleTaintFibreOffset(random.nextFloat(), random.nextFloat());

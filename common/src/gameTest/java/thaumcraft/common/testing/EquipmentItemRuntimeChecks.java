@@ -130,7 +130,7 @@ public final class EquipmentItemRuntimeChecks {
             victim.setNoAi(true);
             level.addFreshEntity(victim);
             var bottle = new ItemStack(ThaumcraftLegacyItems.BOTTLE_TAINT.get());
-            thaumcraft.common.entities.projectile.EntityBottleTaint.burst(level, lane.origin, player);
+            ItemBottleTaint.burst(level, lane.origin, player);
             test.assertTrue(victim.hasEffect(fluxTaint),
                     "the bottle of taint poisons every living thing around it: " + victim.getEffect(fluxTaint));
             int fibres = 0;

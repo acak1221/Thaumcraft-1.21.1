@@ -26,11 +26,13 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.pathfinder.Path;
+import thaumcraft.common.lib.entities.OriginalLightRules;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
 import thaumcraft.common.lib.loot.OriginalMobTargeting;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -217,11 +219,27 @@ public final class EntityFireBat extends Monster {
         if(recent) OriginalMobLoot.rare(looting,random::nextInt); // Original inherited rare hook is empty, but still consumes this draw.
     }
     /**
-     * Oracle EntityFireBat:350-352 - the original overrides {@code func_70814_o} (the
-     * {@code isValidLightLevel} of the mob) with a plain TRUE, so the fire bat has NO light
-     * restriction at all: the raw brightness roll of the port was invented.
+     * The original class gate of the fire bat, without the world.
+     *
+     * <p>Oracle {@code EntityFireBat.getCanSpawnHere:333-340}: the BLOCK light of the cell is
+     * rolled against {@code nextInt(7)} and the inherited spawn gate has to accept the cell.</p>
+     */
+    public static boolean originalSpawnGate(int blockLight,int roll,boolean peaceful) {
+        return !peaceful&&OriginalLightRules.validClassLightLevel(blockLight,roll);
+    }
+
+    /**
+     * Oracle EntityFireBat:333-340 - the original class gate of the fire bat reads the BLOCK
+     * light of the cell and rolls it against {@code nextInt(7)}.
+     *
+     * <p>The original overrides {@code isValidLightLevel} with a plain TRUE
+     * (oracle EntityFireBat:346-348), so the generic mob darkness gate does not apply to the
+     * fire bat, but the class own gate does: the port had dropped it completely and the fire bat
+     * spawned in a fully lit block.</p>
      */
     public static boolean checkFireBatSpawnRules(EntityType<? extends EntityFireBat> type,ServerLevelAccessor level,MobSpawnType reason,BlockPos pos,RandomSource random) {
-        return level.getDifficulty()!=Difficulty.PEACEFUL;
+        // The original draws its class roll before the inherited spawn gate.
+        int roll=random.nextInt(OriginalLightRules.CLASS_LIGHT_ROLL_BOUND);
+        return originalSpawnGate(level.getBrightness(LightLayer.BLOCK,pos),roll,level.getDifficulty()==Difficulty.PEACEFUL);
     }
 }

@@ -179,15 +179,18 @@ public final class FireBatWispRuntimeChecks {
             long time=level.getDayTime();
             try {
                 level.setDayTime(6000);level.updateSkyBrightness();
-                // Oracle EntityFireBat:350-352 - the original overrides the isValidLightLevel of
-                // the mob with a plain TRUE, so the fire bat has no light restriction at all. The
-                // Wisp keeps its own rule: the darkened sky light against nextInt(32) and the
+                // Oracle EntityFireBat:333-340 - the class gate of the fire bat reads the BLOCK
+                // light of the cell against a nextInt(7) roll. The original overrides
+                // isValidLightLevel with a plain TRUE (EntityFireBat:346-348), so the generic
+                // mob darkness gate does not apply to the fire bat, but its own class gate does.
+                // The Wisp keeps its own rule: the darkened sky light against nextInt(32) and the
                 // block light against nextInt(8).
                 boolean consistent=true;
                 for(long seed=0;seed<32;++seed){
-                    int sky=level.getBrightness(net.minecraft.world.level.LightLayer.SKY,origin);
                     int block=level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK,origin);
-                    if(!SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.FIREBAT.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed)))consistent=false;
+                    var batRoll=RandomSource.create(seed);int batClassRoll=batRoll.nextInt(7);
+                    boolean batExpected=block<=batClassRoll;
+                    if(SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.FIREBAT.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed))!=batExpected)consistent=false;
                     var wispRoll=RandomSource.create(seed);int wispSkyRoll=wispRoll.nextInt(32);
                     int darkened=thaumcraft.common.lib.entities.OriginalLightRules.darkenedSkyLight(level,origin);
                     // Oracle EntityWisp: the original refuses the spawn when eight wisps are near.
@@ -196,7 +199,7 @@ public final class FireBatWispRuntimeChecks {
                     boolean wispExpected=near>=8?false:(darkened>wispSkyRoll?false:block<=wispRoll.nextInt(8));
                     if(SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.WISP.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed))!=wispExpected)consistent=false;
                 }
-                test.assertTrue(consistent,"the fire bat has no light restriction of the original and the wisp follows its own darkened sky roll and the8 block light roll");
+                test.assertTrue(consistent,"the fire bat follows its own BLOCK-light nextInt7 class gate and the wisp follows its own darkened sky roll and the8 block light roll");
                 level.setDayTime(18000);level.updateSkyBrightness();boolean batAllowed=false,wispAllowed=false;
                 for(int seed=0;seed<1000;seed++) {batAllowed|=SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.FIREBAT.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed));wispAllowed|=SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.WISP.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed));}
                 test.assertTrue(batAllowed && wispAllowed,"both native placement predicates admit dark air without invented ground requirement");

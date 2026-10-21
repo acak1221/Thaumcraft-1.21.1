@@ -38,6 +38,31 @@ public final class OriginalLightRules {
     public static final int SKY_LIGHT_ROLL_BOUND = 32;
     /** The original block light roll of the mob rule: {@code rand.nextInt(8)}. */
     public static final int BLOCK_LIGHT_ROLL_BOUND = 8;
+    /**
+     * The original class gate of the fire bat and the taint swarm: the BLOCK light of the cell
+     * against a {@code nextInt(7)} roll.
+     *
+     * <p>Oracle {@code EntityFireBat.getCanSpawnHere:333-340} and
+     * {@code EntityTaintSwarm.getCanSpawnHere:226-233} read
+     * {@code world.getBlockLightValue(x, minY, z)} and compare it with
+     * {@code rand.nextInt(7)}. Both classes override {@code isValidLightLevel} with a plain
+     * {@code true}, so the generic mob darkness gate does not apply to them, but their own class
+     * gate does.</p>
+     */
+    public static final int CLASS_LIGHT_ROLL_BOUND = 7;
+
+    /**
+     * The original class gate: the block light of the cell against the {@code nextInt(7)} roll.
+     *
+     * <p>The port used the maximum raw brightness of the cell instead of the block light. The
+     * maximum raw brightness is {@code max(blockLight, skyLight - skyDarken)}, so under the open
+     * sky during the day it is the full sky light of fifteen and the gate refused every cell,
+     * while the original reads the block light, which is zero in the open air and therefore always
+     * passes the roll.</p>
+     */
+    public static boolean validClassLightLevel(int blockLight, int roll) {
+        return blockLight <= roll;
+    }
 
     /**
      * The original {@code EntityMob.isValidLightLevel}: the saved sky light of the cell against

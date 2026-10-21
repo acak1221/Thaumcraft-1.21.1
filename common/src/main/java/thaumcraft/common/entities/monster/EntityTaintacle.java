@@ -156,6 +156,16 @@ public class EntityTaintacle extends Monster implements ITaintedMob {
         setYRot(getYRot()+Mth.clamp(Mth.wrapDegrees(wanted-getYRot()),-speed,speed));
     }
     @Override public float getWalkTargetValue(BlockPos pos,LevelReader level){return .5F-level.getLightLevelDependentMagicValue(pos);}
+    /**
+     * The original light gate of the taintacle, without the world.
+     *
+     * <p>Oracle {@code EntityTaintacle.getCanSpawnHere:34-43}: the taintacle does not override
+     * {@code isValidLightLevel}, so it inherits the mob gate - the saved sky light of the cell
+     * against {@code nextInt(32)} and the BLOCK light of the cell against {@code nextInt(8)}.</p>
+     */
+    public static boolean originalLightGate(int skyLight,int blockLight,int skyRoll,int blockRoll) {
+        return skyLight<=skyRoll&&blockLight<=blockRoll;
+    }
     @Override public boolean checkSpawnRules(LevelAccessor level,MobSpawnType reason){
         return !(this instanceof EntityTaintacleSmall)&&level instanceof ServerLevelAccessor server&&checkSpawnRules(ThaumcraftTaint.TAINTACLE.get(),server,reason,blockPosition(),random);
     }
@@ -167,8 +177,14 @@ public class EntityTaintacle extends Monster implements ITaintedMob {
         if(!(state.is(ThaumcraftTaint.FIBRES.get())&&state.getValue(BlockTaintFibres.TYPE)==0||state.is(ThaumcraftTaint.SOIL.get())))return false;
         var area=new AABB(pos.getX()+.5,pos.getY(),pos.getZ()+.5,pos.getX()+.5,pos.getY(),pos.getZ()+.5).inflate(24,8,24);
         if(!level.getLevel().getEntitiesOfClass(EntityTaintacle.class,area).isEmpty())return false;
-        if(level.getBrightness(LightLayer.SKY,pos)>random.nextInt(32))return false;
-        var server=level.getLevel();return server.getMaxLocalRawBrightness(pos,server.isThundering()?10:server.getSkyDarken())<=random.nextInt(8)
+        // Oracle EntityTaintacle:34-43 - the taintacle does not override isValidLightLevel, so it
+        // inherits the mob gate: the saved sky light against nextInt(32) and the BLOCK light of the
+        // cell against nextInt(8). The port read the maximum raw brightness of the cell instead
+        // of the block light, so the taintacle could not spawn under the open sky of the day.
+        int skyRoll=random.nextInt(32);
+        if(level.getBrightness(LightLayer.SKY,pos)>skyRoll)return false;
+        int blockRoll=random.nextInt(8);
+        return originalLightGate(level.getBrightness(LightLayer.SKY,pos),level.getBrightness(LightLayer.BLOCK,pos),skyRoll,blockRoll)
                 &&.5F-level.getLightLevelDependentMagicValue(pos)>=0;
     }
     @Override public ItemEntity spawnAtLocation(ItemStack stack,float height) { return OriginalMobLoot.spawn(this,stack,height); }

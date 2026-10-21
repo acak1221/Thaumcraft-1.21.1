@@ -59,8 +59,55 @@ import thaumcraft.common.lib.essentia.EssentiaTransfers;
  * outputs, success booleans, mutable slot aliases or arbitrary commit callbacks. */
 public final class TileArcaneBore extends BlockEntity implements Container, MenuProvider {
     private static final int SCHEMA = 1;
+    /**
+     * Original TileArcaneBore:707-713 — the dig event of the bore reaches the
+     * players around the bore with a {@code NetworkRegistry.TargetPoint} of
+     * {@code 64.0} blocks, and the event itself carries the offset of the dig
+     * target as {@code (offset & 0xFF) - 64}, so the target can never be more
+     * than sixty four blocks away from the bore.
+     */
+    public static final int DIG_EVENT_RANGE = 64;
     private static final SoundEvent TOOL = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "tool"));
     private static final SoundEvent RUMBLE = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "rumble"));
+
+    /**
+     * The client half of the dig event of the original. The original packet
+     * (oracle {@code thaumcraft/common/lib/network/misc/PacketBoreDig.java:53-58})
+     * only carries the dig target to the client, and the client answers it with
+     * the dig sound and the dig particles of the target block.
+     */
+    public interface ClientEffects {
+        /**
+         * The dig event of the original: the client draws the dig of the target
+         * block and plays its break sound.
+         *
+         * @param level the client level of the bore
+         * @param bore the position of the bore
+         * @param mining the direction the bore digs in
+         * @param target the block the bore is digging
+         */
+        void dig(Level level, BlockPos bore, Direction mining, BlockPos target);
+    }
+
+    private static ClientEffects clientEffects = (level, bore, mining, target) -> {};
+
+    /** The client bootstrap installs the real dig effect. */
+    public static void setClientEffects(ClientEffects effects) {
+        clientEffects = java.util.Objects.requireNonNull(effects, "Bore client effects");
+    }
+
+    /**
+     * The dig event of the original only reaches the sixty four blocks around
+     * the bore.
+     *
+     * @param dx the offset of the target to the bore on the x axis
+     * @param dy the offset of the target to the bore on the y axis
+     * @param dz the offset of the target to the bore on the z axis
+     * @return true when the target is inside the range of the dig event
+     */
+    public static boolean inDigEventRange(int dx, int dy, int dz) {
+        return Math.abs(dx) <= DIG_EVENT_RANGE && Math.abs(dy) <= DIG_EVENT_RANGE && Math.abs(dz) <= DIG_EVENT_RANGE;
+    }
     public enum WorkPhase { PREFILL, COMPLETE, RECONCILE, RETIRE, REPAIR }
     public enum CompletionState { READY, ARMED, REFUSED, WITNESSED, UNKNOWN }
     private ItemStack focus = ItemStack.EMPTY, pick = ItemStack.EMPTY;
@@ -636,6 +683,10 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
             visualMaxPause = 10 + Math.max(10 - stats.speed(), (int) (hardness * 2.0F) - stats.speed() * 2);
             if (credit <= 0) visualMaxPause *= 4;
             visualPause = 0; beamLength = 64; visualPending = false;
+            // Original TileArcaneBore:496-501 - the dig event of the original
+            // makes the client play the break sound of the dug block and its
+            // dig particles, once per dig event.
+            clientEffects.dig(level, worldPosition, miningDirection(), visualTarget);
             double dx = worldPosition.getX() - visualTarget.getX(), dy = worldPosition.getY() - visualTarget.getY(), dz = worldPosition.getZ() - visualTarget.getZ();
             float rx = (float) (Math.atan2(dz, dx) * 180.0 / Math.PI);
             float rz = (float) (-(Math.atan2(dy, (float) Math.sqrt(dx * dx + dz * dz)) * 180.0 / Math.PI)) + 90.0F;
@@ -793,9 +844,8 @@ public final class TileArcaneBore extends BlockEntity implements Container, Menu
                     visualSequence = serial; visualTarget = null;
                     if (visual.contains("X", Tag.TAG_INT) && visual.contains("Y", Tag.TAG_INT) && visual.contains("Z", Tag.TAG_INT)) {
                         BlockPos target = new BlockPos(visual.getInt("X"), visual.getInt("Y"), visual.getInt("Z"));
-                        if (Math.abs((long) target.getX() - worldPosition.getX()) <= 70
-                                && Math.abs((long) target.getY() - worldPosition.getY()) <= 70
-                                && Math.abs((long) target.getZ() - worldPosition.getZ()) <= 70) {
+                        if (inDigEventRange(target.getX() - worldPosition.getX(), target.getY() - worldPosition.getY(),
+                                target.getZ() - worldPosition.getZ())) {
                             visualTarget = target; visualPending = true;
                         }
                     }

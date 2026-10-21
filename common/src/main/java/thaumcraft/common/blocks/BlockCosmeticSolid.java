@@ -84,6 +84,12 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
      * runs on the client as well.
      */
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (state.getValue(VARIANT) == EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED) {
+            // Oracle BlockCosmeticSolid:288-296 - the metadata eight hosts the node of the
+            // totem of the original, and the node of the original ticks there.
+            return createTickerHelper(type, ThaumcraftEldritchBlocks.COSMETIC_NODE_TILE.get(),
+                    TileNode::serverTick);
+        }
         if (state.getValue(VARIANT) != EldritchBlockRules.COSMETIC_WARDING_STONE) return null;
         return createTickerHelper(type, ThaumcraftEldritchBlocks.WARDING_STONE_TILE.get(),
                 (lvl, pos, st, tile) -> { if (tile instanceof TileWardingStone stone) TileWardingStone.tick(lvl, pos, st, stone); });

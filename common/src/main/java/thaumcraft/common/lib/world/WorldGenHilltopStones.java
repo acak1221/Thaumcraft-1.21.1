@@ -24,6 +24,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftMonsters;
 import thaumcraft.common.config.ThaumcraftVillages;
+import thaumcraft.common.lib.world.biomes.BiomeTopBlocks;
 
 /**
  * Oracle thaumcraft.common.lib.world.WorldGenHilltopStones, the TC4 hilltop
@@ -179,17 +180,12 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
 
     /**
      * The block the original replaces the snow, the flowers and the grass
-     * with: the top block of the biome. 1.21.1 has no biome top block, so
-     * the surface block of the middle column is used.
+     * with: the top block of the biome. The 1.7.10 biome carried it
+     * (oracle {@code BiomeGenBase:135}), 1.21.1 does not, so the native
+     * table of {@link BiomeTopBlocks} answers it.
      */
     private static BlockState groundBlock(WorldGenLevel level, int x, int z) {
-        int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
-        for (int y = surface - 1; y >= level.getMinBuildHeight(); y--) {
-            BlockState state = level.getBlockState(new BlockPos(x, y, z));
-            if (state.isAir() || state.is(Blocks.SNOW) || state.is(Blocks.SHORT_GRASS)) continue;
-            return state;
-        }
-        return Blocks.GRASS_BLOCK.defaultBlockState();
+        return BiomeTopBlocks.topBlock(level.getBiome(new BlockPos(x, level.getMinBuildHeight() + 1, z)));
     }
 
     /** Oracle WorldGenHilltopStones:68 - the vines only grow where it snows nowhere. */
@@ -202,11 +198,23 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
      * Oracle WorldGenHilltopStones:81 - the blocks the ground block replaces.
      *
      * <p>The original backfills the snow layer, the red and the yellow flower, the
-     * tall grass and the air below the cluster. The fern and the dead bush are not
-     * part of that list, so they stay where they are.
+     * tall grass and the air below the cluster. The red and the yellow flower of the
+     * original are the ten flowers of the 1.7.10 blocks {@code red_flower} and
+     * {@code yellow_flower}, not the whole flower tag of 1.21.1.
      */
     private static boolean replaceable(BlockState state) {
-        return state.isAir() || state.is(Blocks.SNOW) || state.is(Blocks.SHORT_GRASS) || state.is(BlockTags.FLOWERS);
+        return state.isAir() || state.is(Blocks.SNOW) || state.is(Blocks.SHORT_GRASS) || isOriginalFlower(state);
+    }
+
+    /**
+     * The ten flowers of the original: the nine of the block {@code red_flower} and the
+     * dandelion of the block {@code yellow_flower}.
+     */
+    private static boolean isOriginalFlower(BlockState state) {
+        return state.is(Blocks.POPPY) || state.is(Blocks.DANDELION) || state.is(Blocks.BLUE_ORCHID)
+                || state.is(Blocks.ALLIUM) || state.is(Blocks.AZURE_BLUET) || state.is(Blocks.RED_TULIP)
+                || state.is(Blocks.ORANGE_TULIP) || state.is(Blocks.WHITE_TULIP) || state.is(Blocks.PINK_TULIP)
+                || state.is(Blocks.OXEYE_DAISY);
     }
 
     private static boolean isAir(WorldGenLevel level, int x, int y, int z) {

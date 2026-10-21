@@ -24515,7 +24515,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "partial",
         "owner": "port-ledgerpartial",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/blocks/world/taint/TaintHelper.java the TC6 facade",
@@ -25113,7 +25113,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "partial",
         "owner": "port-ledgerpartial",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesInfusionDeviceSlice.java the legacy helper",
@@ -25197,7 +25197,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "partial",
         "owner": "port-ledgerpartial",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesInfusionSlice.java the legacy helper",
@@ -43218,7 +43218,7 @@
         "disposition": "needs_review",
         "source_semantics": "unreviewed",
         "callsite_audit": "partial",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenMound.java:1-2550 the original mound with its nineteen layers",

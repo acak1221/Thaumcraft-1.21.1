@@ -149,6 +149,8 @@ public final class ThaumcraftFabric implements ModInitializer {
         BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
                 GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftOuterLands.RING_PLACED);
         BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
+                GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.MOUND_KEY);
+        BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
                 GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.HILLTOP_STONES_KEY);
         BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
                 GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.BANKER_HOMES_KEY);

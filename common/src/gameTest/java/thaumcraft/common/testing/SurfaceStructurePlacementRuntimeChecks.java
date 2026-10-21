@@ -12,13 +12,18 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.config.ThaumcraftNodes;
 import thaumcraft.common.config.ThaumcraftOuterLands;
 import thaumcraft.common.config.ThaumcraftVillages;
 import thaumcraft.common.lib.world.StructurePlacementRules;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
+import thaumcraft.common.tiles.TileNode;
 
 /**
  * Checks that the TC4 surface structures really reach a generated overworld chunk.
@@ -51,7 +56,8 @@ public final class SurfaceStructurePlacementRuntimeChecks {
         var settings = generator.getBiomeGenerationSettings(
                 registries.registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS));
         var placed = registries.registryOrThrow(Registries.PLACED_FEATURE);
-        for (var feature : List.of(ThaumcraftOuterLands.RING_PLACED, ThaumcraftVillages.HILLTOP_STONES_KEY,
+        for (var feature : List.of(ThaumcraftOuterLands.RING_PLACED, ThaumcraftVillages.MOUND_KEY,
+                ThaumcraftVillages.HILLTOP_STONES_KEY,
                 ThaumcraftVillages.BANKER_HOMES_KEY, ThaumcraftVillages.WIZARD_TOWERS_KEY, ThaumcraftNodes.NODE_KEY,
                 ThaumcraftNodes.TOTEM_KEY)) {
             var holder = placed.getHolderOrThrow(feature);
@@ -68,6 +74,8 @@ public final class SurfaceStructurePlacementRuntimeChecks {
 
         eldritchRing(test, level, seed);
         hilltopStones(test, level, seed);
+        mound(test, level, seed);
+        totem(test, level, seed);
         test.succeed();
     }
 
@@ -172,6 +180,119 @@ public final class SurfaceStructurePlacementRuntimeChecks {
             }
         }
         return false;
+    }
+
+    /**
+     * The mound of the original, the first structure of the exclusive chain.
+     *
+     * <p>Oracle {@code WorldGenMound:63-2547} writes a nineteen by nineteen by sixteen block
+     * structure with a loot room, a chest and two mob spawners, and
+     * {@code ThaumcraftWorldGenerator:432} hangs a dark aura node over its centre.
+     */
+    private static void mound(GameTestHelper test, ServerLevel level, long seed) {
+        List<int[]> candidates = chainChunks(seed, StructurePlacementRules.Kind.MOUND, 12);
+        test.assertTrue(!candidates.isEmpty(), "the exclusive chain gives chunks to the mound");
+        for (int[] candidate : candidates) {
+            level.getChunk(candidate[0], candidate[1]);
+            var random = RandomSource.create(StructurePlacementRules.chunkSeed(seed, candidate[0], candidate[1]));
+            var draw = StructurePlacementRules.draw(random, candidate[0], candidate[1]);
+            int i = draw.x();
+            int k = draw.z();
+            // The chiselled stone bricks of the altar are the one block of the mound that
+            // no other block of the world has: they give the height of the base of the
+            // mound, and with it the position of every other block of the structure.
+            int altar = altarHeight(level, i + 2, k + 9);
+            if (altar < 0) continue;
+            int j = altar - 11;
+            // Oracle WorldGenMound:2526-2530 - the chest of the loot room.
+            BlockState chest = block(level, i + 10, j + 1, k + 9);
+            test.assertTrue(chest.is(Blocks.CHEST) || chest.is(Blocks.TRAPPED_CHEST),
+                    "the mound carries the chest of the loot room of the original");
+            // Oracle WorldGenMound:2538-2544 - the two mob spawners of the rooms.
+            test.assertTrue(block(level, i + 4, j + 5, k + 4).is(Blocks.SPAWNER),
+                    "the mound carries the spawner of the skeleton of the original");
+            test.assertTrue(block(level, i + 4, j + 5, k + 14).is(Blocks.SPAWNER),
+                    "the mound carries the spawner of the zombie of the original");
+            // Oracle WorldGenMound:2521-2524 - the two loot containers of the loot room.
+            BlockState loot = block(level, i + 9, j + 1, k + 7);
+            test.assertTrue(loot.is(ThaumcraftEldritchBlocks.LOOT_URN.get())
+                            || loot.is(ThaumcraftEldritchBlocks.LOOT_CRATE.get()),
+                    "the mound carries the loot container of the original");
+            // Oracle WorldGenMound:67-78 - the shell of the mound.
+            BlockState shell = block(level, i, j + 8, k + 4);
+            test.assertTrue(shell.is(Blocks.DIRT) || shell.is(Blocks.COBBLESTONE),
+                    "the mound carries the shell of the original");
+            // Oracle ThaumcraftWorldGenerator:432 - the dark aura node over the centre.
+            test.assertTrue(block(level, i + 9, j + 8, k + 9).is(ThaumcraftContent.AURA_NODE.get()),
+                    "the mound carries the dark aura node of the original");
+            return;
+        }
+        test.assertTrue(false, "no chunk the chain gave to the mound carries the mound");
+    }
+
+    /** The height of the altar of the mound, or -1 when the column carries no altar. */
+    private static int altarHeight(ServerLevel level, int x, int z) {
+        level.getChunk(x >> 4, z >> 4);
+        for (int y = level.getMaxBuildHeight() - 1; y >= level.getMinBuildHeight(); --y) {
+            if (level.getBlockState(new BlockPos(x, y, z)).is(Blocks.CHISELED_STONE_BRICKS)) return y;
+        }
+        return -1;
+    }
+
+    /**
+     * The aura totem of the original, one chunk in 360.
+     *
+     * <p>Oracle {@code ThaumcraftWorldGenerator:148-187}: the totem grows a column of the
+     * cosmetic solid with a dark aura node on top of it. The test dimension is a dimension
+     * of the overworld type, the native form of the overworld of the original.
+     */
+    private static void totem(GameTestHelper test, ServerLevel level, long seed) {
+        List<int[]> candidates = totemChunks(seed, 8);
+        test.assertTrue(!candidates.isEmpty(), "the roll of the totem gives chunks to the totem");
+        for (int[] candidate : candidates) {
+            level.getChunk(candidate[0], candidate[1]);
+            int x = candidate[2];
+            int z = candidate[3];
+            int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+            Block cosmetic = ThaumcraftVillages.state(VillageWorldGenRules.Material.COSMETIC_SOLID_0, 0).getBlock();
+            boolean grown = false;
+            boolean node = false;
+            for (int y = surface - 2; y <= surface + 8; ++y) {
+                BlockState state = level.getBlockState(new BlockPos(x, y, z));
+                if (state.is(cosmetic)) grown = true;
+                if (state.is(ThaumcraftContent.AURA_NODE.get()) || TileNode.isNodeHost(state)) node = true;
+            }
+            if (!grown) continue;
+            test.assertTrue(node, "the totem carries the dark aura node of the original");
+            return;
+        }
+        test.assertTrue(false, "no chunk the roll of the totem gave to the totem grows the column of the original");
+    }
+
+    /**
+     * The chunks the roll of the totem gives to the totem, with the column of the totem.
+     *
+     * <p>The roll is the same one the feature draws: the chain of the original first, then
+     * the one in 360 of the totem, then the position inside the chunk.
+     */
+    private static List<int[]> totemChunks(long seed, int limit) {
+        List<int[]> chunks = new ArrayList<>();
+        for (int chunkX = 0; chunkX < 2048 && chunks.size() < limit; ++chunkX) {
+            for (int chunkZ = 0; chunkZ < 64 && chunks.size() < limit; ++chunkZ) {
+                var random = RandomSource.create(StructurePlacementRules.chunkSeed(seed, chunkX, chunkZ));
+                var draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+                if (draw.kind() != StructurePlacementRules.Kind.NONE) continue;
+                if (random.nextInt(StructurePlacementRules.TOTEM_CHANCE) != 0) continue;
+                chunks.add(new int[] {chunkX, chunkZ, chunkX * 16 + random.nextInt(16), chunkZ * 16 + random.nextInt(16)});
+            }
+        }
+        return chunks;
+    }
+
+    /** The block of a position, the chunk of the position is loaded before it is read. */
+    private static BlockState block(ServerLevel level, int x, int y, int z) {
+        level.getChunk(x >> 4, z >> 4);
+        return level.getBlockState(new BlockPos(x, y, z));
     }
 
     /** The chunks of a region the exclusive chain gives to one structure. */

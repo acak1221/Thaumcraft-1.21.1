@@ -293,6 +293,11 @@ public final class VillageWorldGenRules {
         COSMETIC_SOLID_0("thaumcraft:cosmetic_solid_tough", 0),
         /** Oracle ConfigBlocks.blockCosmeticSolid metadata 1, the obsidian tile. */
         COSMETIC_SOLID_1("thaumcraft:cosmetic_solid_tough", 1),
+        /**
+         * Oracle ConfigBlocks.blockCosmeticSolid metadata 8, the host of the node of the
+         * totem of the original (ThaumcraftWorldGenerator:175,180).
+         */
+        COSMETIC_SOLID_NODE("thaumcraft:cosmetic_solid_tough", 8),
         /** Oracle ConfigBlocks.blockEldritch metadata 0, the eldritch altar. */
         ELDRITCH_ALTAR("thaumcraft:eldritch", 0),
         /** Oracle ConfigBlocks.blockEldritch metadata 1, the obelisk base. */
@@ -602,10 +607,16 @@ public final class VillageWorldGenRules {
     /** The tower chest content, oracle ComponentWizardTower:35. */
     public record ChestContent(String item, int min, int max, int weight) {}
 
-    /** The aspect shards of the native tree, in the original metadata order. */
+    /**
+     * The aspect shards of the native tree, in the original metadata order.
+     *
+     * <p>Oracle VillageWizardManager:46 - the shards of the original are the items of the
+     * metadata zero to five of {@code ConfigItems.itemShard}. The native ids of the shards
+     * carry the name of the element, not the name of the aspect.
+     */
     public static final List<String> ASPECT_SHARDS = List.of(
-            "thaumcraft:aer_shard", "thaumcraft:ignis_shard", "thaumcraft:aqua_shard",
-            "thaumcraft:terra_shard", "thaumcraft:ordo_shard", "thaumcraft:perditio_shard");
+            "thaumcraft:air_shard", "thaumcraft:fire_shard", "thaumcraft:water_shard",
+            "thaumcraft:earth_shard", "thaumcraft:order_shard", "thaumcraft:entropy_shard");
 
     /** The bauble blanks of the native tree, in the original metadata order. */
     public static final List<String> BAUBLE_BLANKS = List.of(
@@ -623,8 +634,9 @@ public final class VillageWorldGenRules {
         trades.add(new TradeSpec("thaumcraft:gold_coin", 2, 3, List.of("minecraft:arrow"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 6, 8, List.of("minecraft:white_wool"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 3, 4, List.of("minecraft:paper"), 1, 1));
-        // Oracle VillageBankerManager:47 - seven plus nextInt two, so seven to eight coins.
-        trades.add(new TradeSpec("thaumcraft:gold_coin", 7, 8, List.of("minecraft:book"), 1, 1));
+        // Oracle VillageBankerManager:47 - the book costs seven plus nextInt three coins,
+        // so seven to nine coins.
+        trades.add(new TradeSpec("thaumcraft:gold_coin", 7, 9, List.of("minecraft:book"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 16, 20, List.of("minecraft:experience_bottle"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 9, 12, List.of("minecraft:glowstone"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 2, 3, List.of("minecraft:coal"), 1, 1));
@@ -651,9 +663,13 @@ public final class VillageWorldGenRules {
         trades.add(new TradeSpec("minecraft:emerald", 1, 1, List.of("thaumcraft:alumentum"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:amber_gem", 4, 6, List.of("minecraft:emerald"), 1, 1));
         trades.add(new TradeSpec("minecraft:emerald", 1, 1, List.of("thaumcraft:nitor"), 1, 1));
-        trades.add(new TradeSpec("thaumcraft:chicken_nugget", 24, 31, List.of("minecraft:emerald"), 1, 1));
+        // Oracle VillageWizardManager:43 - the chicken nugget of the original, the native id
+        // of the edible nugget zero (ThaumcraftLegacyItems:168).
+        trades.add(new TradeSpec("thaumcraft:nugget_chicken", 24, 31, List.of("minecraft:emerald"), 1, 1));
         trades.add(new TradeSpec("minecraft:book", 4, 6, List.of("thaumcraft:knowledge_fragment"), 1, 1));
-        trades.add(new TradeSpec("thaumcraft:beef_nugget", 24, 31, List.of("minecraft:emerald"), 1, 1));
+        // Oracle VillageWizardManager:45 - the beef nugget of the original, the native id of
+        // the edible nugget one.
+        trades.add(new TradeSpec("thaumcraft:nugget_beef", 24, 31, List.of("minecraft:emerald"), 1, 1));
         trades.add(new TradeSpec("minecraft:emerald", 1, 1, ASPECT_SHARDS, 2, 3));
         trades.add(new TradeSpec("minecraft:emerald", 1, 1, List.of("thaumcraft:mana_bean"), 1, 2));
         trades.add(new TradeSpec("minecraft:emerald", 5, 7, List.of("thaumcraft:bath_salts"), 1, 1));

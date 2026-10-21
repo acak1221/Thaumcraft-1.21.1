@@ -89,6 +89,8 @@
   "entity.thaumcraft.pech.2.name": "Pech Stalker",
   "entity.Villager.wizard": "Wizard",
   "entity.Villager.banker": "Banker",
+  "entity.villager.wizard": "Wizard",
+  "entity.villager.banker": "Banker",
   "entity.thaumcraft.specialitem.name": "Magic Item",
   "entity.thaumcraft.permanentitem.name": "Permanent Item",
   "entity.thaumcraft.followitem.name": "Following Item",

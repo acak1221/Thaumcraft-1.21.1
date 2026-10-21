@@ -76,9 +76,13 @@ public final class VillageBankerHome {
     }
 
     /**
-     * The villager of the house. The native tree has no TC4 villager
-     * professions yet, so the villager is spawned plain; the banker trades
-     * live in {@link VillageBankerManager} until the villager unit binds them.
+     * The villager of the house.
+     *
+     * <p>Oracle {@code ComponentBankerHome:112} calls {@code spawnVillagers} of the
+     * village pieces, which gives the villager the profession of the piece. The native
+     * tree has the TC4 villager professions, so the banker of the original
+     * ({@code ConfigEntities.entBankerId}) is placed here and its trade table is bound to
+     * that profession.
      */
     static void spawnVillager(WorldGenLevel level, BlockPos pos) {
         if (!level.hasChunkAt(pos)) return;
@@ -86,6 +90,10 @@ public final class VillageBankerHome {
         if (villager == null) return;
         villager.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         if (villager instanceof Mob mob) mob.setPersistenceRequired();
+        if (villager instanceof net.minecraft.world.entity.npc.Villager entity) {
+            entity.setVillagerData(entity.getVillagerData()
+                    .setProfession(thaumcraft.common.config.ThaumcraftVillageProfessions.BANKER.get()));
+        }
         level.addFreshEntity(villager);
     }
 

@@ -65,6 +65,61 @@ successful, the ledger and the class inventory consistent. No client run: none o
 effects was inspected in the game, so every visual verdict stays partial.
 The report is `docs/analysis/2026-10-21-close-clientfx.md`.
 
+## 2026-10-21 — The world generation gaps of TC4 4.2.3.5: the mound, the village traders and the aura totem
+
+The domain report `docs/analysis/2026-10-21-openTC4-worldgen.md` had left the world generation
+of the overworld with seven declared gaps. This wave closed them against the oracle.
+
+The **mound** of the original (`WorldGenMound.java:29-2550`, one chunk in 150) had no
+generator at all: the roll of `StructurePlacementRules` ended without a structure. It is now
+ported. The original writes a fixed nineteen by nineteen by sixteen figure with 2441 explicit
+block calls, so the native port keeps that shape in a layer table; the table was rebuilt from
+the oracle with `scripts/porting/extract_mound_template.py` and compared cell by cell with the
+oracle (sha256 `93a2b6f8b8b1722733d5a005d02e25b92d0e2ba28d612b7f69409c5463a65433`, 2441 blocks,
+sixteen layers, no difference) and with the 1.12 reference of this repository (no difference
+either). The loot room, the chest with the dungeon loot, the two mob spawners and the dark
+aura node over the centre are written in the order of the original. The ledger unit
+`thaumcraft/common/lib/world/WorldGenMound.java` leaves `needs_review` for `port` with
+`parity_verified`; **no unit of the ledger is in `needs_review` any more**.
+
+The **village traders** now belong to a profession. The oracle gave the banker home a villager
+of the profession `ConfigEntities.entBankerId` and the managers added their recipes to the
+trade list of every villager of that profession; the native tree had the tables as data and no
+profession at all. The port registers `thaumcraft:banker` and `thaumcraft:wizard`, sets the
+profession of the spawned villager and adds the tables in `Villager#updateTrades`. Two more
+defects of the tables fell out of the new check that compares every item of both tables with
+the item registry: the wizard table named `thaumcraft:chicken_nugget` and
+`thaumcraft:beef_nugget`, which are not registered, and the six aspect shards
+`thaumcraft:aer_shard` and friends, while the registry carries `thaumcraft:nugget_chicken`,
+`thaumcraft:nugget_beef` and `thaumcraft:air_shard` and friends. The price of the book of the
+banker is seven to nine coins (`VillageBankerManager:47`, `7 + nextInt(3)`); the previous audit
+had shortened it to seven to eight by misreading the oracle.
+
+The **top block of the biome** is a table of its own now (`BiomeTopBlocks`), because 1.21.1 has
+no `topBlock` in the biome document; the hilltop stones fill their ground with it instead of
+with the surface block of the middle column, and their list of replaced flowers is the ten
+flowers of the 1.7.10 blocks again.
+
+The **aura totem** was checked against `ThaumcraftWorldGenerator:148-187` and fixed: the
+original puts the cosmetic solid of the metadata eight at the place of the node before it asks
+for a node, and the native port put nothing there, so its totem had no node at all, while its
+second branch created a node where the original has none. The jar of the original settles one
+question: `BlockCosmeticSolid` extends `Block` and not `BlockContainer` (`javap` over
+`Thaumcraft-1.7.10-4.2.3.5.jar`), so its `createTileEntity` is dead code and the totem of
+4.2.3.5 never carries a node. The native cosmetic solid follows the 1.12 reference, which
+fixed that, so the native totem carries the dark node the original asked for; the deviation is
+documented in the report.
+
+The claim that the `place()` of the village components is never called stays refuted: the game
+test builds the house and the tower in a generated chunk. The traders of the houses do reach
+the world with the profession of the original and with the trade table of the original.
+
+Verified in this tree: 1779 JUnit tests with no failure, and the three domain game tests
+`surfacestructuresreachtheoverworld`, `villagecomponentsreachtheoverworld` and the new
+`villagetradesreachthevillagers` pass. The full Fabric set is 313 scenarios with the four
+known unstable cases and no new failure. No client run, no multiplayer and no full survival
+progression.
+
 ## 2026-10-21 — The OpenTC4 comparison wave: nine agents, sixty-two defects
 
 The readable 1.7.10 sources settled what the SRG names of the oracle could not: the mapping of

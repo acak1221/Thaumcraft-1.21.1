@@ -176,6 +176,13 @@ if (this.func_70090_H() && (getGolemType() == STONE || IRON || THAUMIUM)) { spee
 движения этой ветки, то есть ровно то же удвоение того же движения. В 1.12-легаси это выросло
 в «heavy water golem» (плавание и приоритет узла воды), в 1.7.10 — именно в удвоение скорости.
 
+Побочная проверка той же формулы: задержка сбора урожая и рубки
+`max(10, (20−2·strength)·block.getBlockHardness)` (оракул `AIHarvestCrops.java:87`,
+`AIHarvestLogs`) перенесена в порт как `getDestroySpeed` — и это **правильный** аналог:
+в 1.21.1 `BlockState.getDestroySpeed` возвращает `properties.destroyTime`, то есть твёрдость
+блока (1.21.1 `BlockBehaviour`:816 `this.destroySpeed = $$3.destroyTime;`), а урожай имеет
+`instabreak()` (0.0) и брёвна `strength(2.0)` — как и в 1.7.10 (твёрдость 0.0 и 2.0).
+
 ## Что проверено и оказалось корректным (правок не потребовало)
 
 ### Модификаторы чемпионов

@@ -58,13 +58,16 @@ public final class ThaumcraftFlux {
 
     private ThaumcraftFlux() {}
 
+    /** The 1.21.1 counterpart of the mobility flag one of the original taint material. */
+    public static final PushReaction PUSH_REACTION = PushReaction.BLOCK;
+
     private static BlockBehaviour.Properties properties(boolean goo) {
         // Original MaterialTaint:func_76219_n() sets the mobility flag of the taint material to one
         // and Config:917 hands that material to the flux gas and the flux goo. The mobility flag one
         // is "the piston is stopped and the block survives"; the 1.21.1 push reaction BLOCK is the
         // counterpart. DESTROY would break the original block instead.
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).noCollission().noOcclusion()
-                .randomTicks().noLootTable().pushReaction(PushReaction.BLOCK)
+                .randomTicks().noLootTable().pushReaction(PUSH_REACTION)
                 .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)
                 // BlockFluidBase scales luminosity by metadata, NOT metadata+1.
                 .lightLevel(state -> state.getValue(FluxFiniteBlock.LEVEL) * 7 / 8);

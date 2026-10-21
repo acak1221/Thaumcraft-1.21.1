@@ -552,7 +552,7 @@ public final class VisNetHandler {
      * every primal aspect is taken in the order of {@code Aspect.getPrimalAspects()}, each of them
      * bounded by what is still requested.</p>
      */
-    public static int planPrimalDrain(int amount, java.util.function.IntUnaryOperator available) {
+    public static int planPrimalDrain(int amount, java.util.function.ToIntFunction<Aspect> available) {
         if (amount <= 0 || available == null) return 0;
         int remaining = amount, total = 0;
         for (Aspect aspect : Aspect.getPrimalAspects()) {

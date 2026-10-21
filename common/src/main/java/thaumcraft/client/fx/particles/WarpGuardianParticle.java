@@ -20,6 +20,11 @@ import thaumcraft.common.entities.monster.EntityEldritchGuardian;
 /** Original FXWispEG body haze: thirteen frames, downward drift, horizontal source following, age/distance fade and particle setting count. */
 public final class WarpGuardianParticle extends SingleQuadParticle {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
+    /**
+     * Original FXWispEG:25 and :53 - the particle scale is the fixed 0.4f and the half size of the quad is
+     * {@code 0.5f * 0.4f}, so the quad size of the 1.21.1 particle is the scale itself.
+     */
+    public static final float QUAD_SIZE = .4F;
     private static final Tesselator BUFFER = new Tesselator(256);
     private final EntityEldritchGuardian target;
     private WarpGuardianParticle(ClientLevel level, EntityEldritchGuardian target, double x, double y, double z) {
@@ -27,7 +32,7 @@ public final class WarpGuardianParticle extends SingleQuadParticle {
         xd = random.nextGaussian() * .03; yd = -.05; zd = random.nextGaussian() * .03;
         // The original FXWispEG:25 scales the particle by 0.4f and draws it with the half size 0.5f * 0.4f.
         // The original never randomises that size.
-        lifetime = (int)(40 / (random.nextDouble() * .3 + .7)); quadSize = .4F;
+        lifetime = (int)(40 / (random.nextDouble() * .3 + .7)); quadSize = QUAD_SIZE;
         setColor(random.nextFloat() * .05F, random.nextFloat() * .05F, random.nextFloat() * .05F);
         hasPhysics = true; setSize(.01F, .01F); xo = x; yo = y; zo = z;
     }
@@ -43,7 +48,8 @@ public final class WarpGuardianParticle extends SingleQuadParticle {
         xo = x; yo = y; zo = z;
         if (!onGround) { x += target.getDeltaMovement().x; z += target.getDeltaMovement().z; }
         // The original FXWispEG:97 pushes the mote out of the solid blocks it ends up inside.
-        ParticleDeflection.pushOutOfBlocks(this, level, x, y, z);
+        var motion=ParticleDeflection.pushOutOfBlocks(level,random,x,y,z,xd,yd,zd);
+        if(motion!=null){xd=motion.x();yd=motion.y();zd=motion.z();}
         move(xd, yd, zd); xd *= .98F; yd *= .98F; zd *= .98F;
         if (onGround) { xd *= .8500000190734863; zd *= .8500000190734863; }
         if (age++ >= lifetime) remove();

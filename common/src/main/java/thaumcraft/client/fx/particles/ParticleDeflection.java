@@ -1,8 +1,8 @@
 package thaumcraft.client.fx.particles;
 
-import net.minecraft.client.particle.Particle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -22,19 +22,23 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class ParticleDeflection {
     private ParticleDeflection() {}
 
+    /** The redirected motion of the mote. */
+    public record Motion(double x, double y, double z) {}
+
     /**
      * The original {@code pushOutOfBlocks(double, double, double)} of the oracle particles.
      *
-     * @return true when the mote was inside a solid block and its motion was redirected
+     * @return the new motion when the mote was inside a solid block, null when it was not
      */
-    public static boolean pushOutOfBlocks(Particle particle, Level level, double x, double y, double z) {
+    public static Motion pushOutOfBlocks(Level level, RandomSource random, double x, double y, double z,
+                                         double motionX, double motionY, double motionZ) {
         int blockX = Mth.floor(x);
         int blockY = Mth.floor(y);
         int blockZ = Mth.floor(z);
         double localX = x - blockX;
         double localY = y - blockY;
         double localZ = z - blockZ;
-        if (isOpen(level, blockX, blockY, blockZ)) return false;
+        if (isOpen(level, blockX, blockY, blockZ)) return null;
         boolean west = !isOpen(level, blockX - 1, blockY, blockZ);
         boolean east = !isOpen(level, blockX + 1, blockY, blockZ);
         boolean down = !isOpen(level, blockX, blockY - 1, blockZ);
@@ -49,22 +53,15 @@ public final class ParticleDeflection {
         if (up && 1.0D - localY < best) { best = 1.0D - localY; face = 3; }
         if (north && localZ < best) { best = localZ; face = 4; }
         if (south && 1.0D - localZ < best) { face = 5; }
-        float speed = particle.random.nextFloat() * 0.05F + 0.025F;
-        float jitter = (particle.random.nextFloat() - particle.random.nextFloat()) * 0.1F;
-        if (face == 0) {
-            particle.xd = -speed; particle.yd = jitter; particle.zd = jitter;
-        } else if (face == 1) {
-            particle.xd = speed; particle.yd = jitter; particle.zd = jitter;
-        } else if (face == 2) {
-            particle.yd = -speed; particle.xd = jitter; particle.zd = jitter;
-        } else if (face == 3) {
-            particle.yd = speed; particle.xd = jitter; particle.zd = jitter;
-        } else if (face == 4) {
-            particle.zd = -speed; particle.xd = jitter; particle.yd = jitter;
-        } else if (face == 5) {
-            particle.zd = speed; particle.xd = jitter; particle.yd = jitter;
-        }
-        return true;
+        float speed = random.nextFloat() * 0.05F + 0.025F;
+        float jitter = (random.nextFloat() - random.nextFloat()) * 0.1F;
+        if (face == 0) return new Motion(-speed, jitter, jitter);
+        if (face == 1) return new Motion(speed, jitter, jitter);
+        if (face == 2) return new Motion(jitter, -speed, jitter);
+        if (face == 3) return new Motion(jitter, speed, jitter);
+        if (face == 4) return new Motion(jitter, jitter, -speed);
+        if (face == 5) return new Motion(jitter, jitter, speed);
+        return new Motion(motionX, motionY, motionZ);
     }
 
     /** The original open block space: air or a block that does not block the movement. */

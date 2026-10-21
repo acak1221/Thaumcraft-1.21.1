@@ -16321,7 +16321,8 @@
           "the scale of 2.0 of the original particle needs the setScale of the original FXVent, which the native FXVent of the client layer does not have; the particle is therefore half as big (documented deviation, the client was not inspected in a game)"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit."
+          "1.21.1 renderer change; the geometry was not compared part by part in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "0031e93dea1786a8c1848a92875fa1c62bc501d05bbf90cb9756b2ba7dfc9028",
@@ -27520,7 +27521,8 @@
           "port common/src/main/java/thaumcraft/common/entities/monster/EntityCultist.java:366-410 keeps the goal with the follow range of the caller and the third of the ritualist"
         ],
         "notes": [
-          "1.21.1 rewrote the AI goal system; the target selection was moved into a rules class and was not compared goal by goal in this audit."
+          "1.21.1 rewrote the AI goal system; the target selection was moved into a rules class and was not compared goal by goal in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "14b2a8f2d01f9fe02fbd5574c1d1ff9ff630c487da4c8c930854d25d3b4b9e5a",
@@ -30372,7 +30374,8 @@
           "the numbers of the cultists were compared with the oracle in the report of the openTC4 audit of the 21.10.2026 (docs/analysis/2026-10-21-openTC4-entities.md, section 3) and they agree"
         ],
         "notes": [
-          "1.21.1 entity rewrite; the statistics live in CultistRules and were not compared line by line in this audit."
+          "1.21.1 entity rewrite; the statistics live in CultistRules and were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "079dd814e1257da745f2bb005e3e3f68377ed05a0b725ea96657adea73c957e8",
@@ -30420,7 +30423,8 @@
           "oracle EntityCultistCleric:31-176 (jar 4.2.3.5): thirty health, the crimson robe, the boots in a tenth of the spawns and two percent on the hard difficulty, the orb above 0.66 and three small fireballs below it with the spread of the square root of the distance, the ritualist flag in the saved data and the home area of the altar; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 entity rewrite; the ritualist flag and the altar home radius 8 are kept but the rest was not compared in this audit."
+          "1.21.1 entity rewrite; the ritualist flag and the altar home radius 8 are kept but the rest was not compared in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "0ceb8bf785f3fe9ca48d077d17c5639339f9c81ce9e5adc4e429d261b15c0aaf",
@@ -30468,7 +30472,8 @@
           "oracle EntityCultistKnight:30-72 (jar 4.2.3.5): thirty six health, the crimson plate armour, the rare gear in a twentieth of the spawns and one percent on the hard difficulty and the enchantment of the blade with a quarter of the tension; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 entity rewrite; not compared in detail in this audit."
+          "1.21.1 entity rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "dd29b251196afa968996d2d92afa9868d2f1cfeb219fd052d7358c60b07f511a",
@@ -31516,7 +31521,8 @@
           "oracle EntityCultistLeader:35-169 and EntityThaumcraftBoss:25-253 (jar 4.2.3.5): a hundred and twenty five health, five damage, 0.32 speed, forty experience, the fifteen titles, the crimson armour, the void sword on the easy difficulty, the regeneration of the cultists in eight blocks, the aggro table of the boss, the fifty health and half a point of damage per player and the enrage above thirty five points of damage; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 entity rewrite; not compared in detail in this audit."
+          "1.21.1 entity rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "d4b6e1937deae8a6c39a00a2381b9422fd747b1d3fa7128b58f24295c2daad53",
@@ -31566,7 +31572,8 @@
           "test common/src/test/java/thaumcraft/cult/CultistPortalRulesTest.java asserts the original numbers (authored, compiled and executed with a standalone JUnit 5 launcher: 27 of 27 green)"
         ],
         "notes": [
-          "1.21.1 entity rewrite; not compared in detail in this audit."
+          "1.21.1 entity rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "4ee289394cfde4d88537cbb3892fe31d02bd321b5b0ae3cb0bbb5ddb50dc85ce",
@@ -31656,7 +31663,8 @@
           "the numbers of the eldritch golem were compared with the oracle in the report of the openTC4 audit of the 21.10.2026 (docs/analysis/2026-10-21-openTC4-entities.md, section 3) and they agree"
         ],
         "notes": [
-          "The native moved the class out of the boss package; the boss rules live in EldritchMobRules and were not compared in detail in this audit."
+          "The native moved the class out of the boss package; the boss rules live in EldritchMobRules and were not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "e74ad148ac45022606becb31ef6572436f08c643bb183baa5d98d06858b30df6",
@@ -31704,7 +31712,8 @@
           "oracle EntityEldritchWarden:97-108, :290-327 and :282-287 (jar 4.2.3.5): two hundred health, ten damage, 0.33 speed, four points of armour, the ward of two thirds of the maximum health, the spawn timer of a hundred and fifty ticks, the title of the warden, the orb in four of the five hits with the arm angle of ninety or a hundred and eighty degrees and the screech with the wither and the weakness of four hundred ticks and the warp of three to five points; the port carries the same numbers"
         ],
         "notes": [
-          "The native moved the class out of the boss package; not compared in detail in this audit."
+          "The native moved the class out of the boss package; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "d9fc813eb3ffbe1a7c33c67f1aa91b330bc7114420f2c0fbd8f279863f625932",
@@ -33093,7 +33102,8 @@
           "the shadow size of 0.1 of the original has no counterpart in 1.21.1, where the entity has no shadow radius any more (documented deviation)"
         ],
         "notes": [
-          "1.21.1 projectile rewrite; not compared in detail in this audit."
+          "1.21.1 projectile rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "2de82f453ffd6e1ffacbd2b7c4e0bb21448e5266a8f68158d670a6f696b69787",
@@ -33905,7 +33915,8 @@
         ],
         "notes": [
           "The four original metadata values became separate items (the eye, the runed tablet, the obelisk placer and the lock key); the crimson rites and the primordial pearl are separate native items.",
-          "The key room spawns the permanent item without the original metadata 2, see the GenKeyRoom row."
+          "The key room spawns the permanent item without the original metadata 2, see the GenKeyRoom row.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "86fd0538390f3b99224b812d90cf4f64d6c5ecfa67d6a1ace9eb5d9be7538bf5",
@@ -34747,7 +34758,8 @@
           "oracle ItemCultistBoots:26-79 (jar 4.2.3.5): the boots of the cult add one point of warp, give one percent off every vis payment, are uncommon, are mended with an iron ingot and show the vis discount line and nothing else; the port carries the same numbers and the same tooltip without the call of the super method"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "f96f74bb2532c9b913ac833638dc825bdf218172d1317863e8d84f8d0f9c39f9",
@@ -34795,7 +34807,8 @@
           "oracle ItemCultistLeaderArmor:25-120 (jar 4.2.3.5): the armour of the praetor is rare, is mended with an iron ingot and has neither warp nor vis discount; the port carries the same rarity, the same repair and no warp and no vis discount"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "b62a9b4ecf63395f79cdb76a906cb9330cd0bbad97d3ea25732786ee1225e4cb",
@@ -34843,7 +34856,8 @@
           "oracle ItemCultistPlateArmor:26-130 (jar 4.2.3.5): the plate armour of the cult is uncommon, is mended with an iron ingot and has no vis discount; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "adff8a09de62c6675ae4b2a3ed024861eda5c86d79af118b27c3ed8c5bf15fe3",
@@ -34891,7 +34905,8 @@
           "oracle ItemCultistRobeArmor:26-129 (jar 4.2.3.5): the robe armour of the cult adds one point of warp, gives one percent off every vis payment, is uncommon, is mended with an iron ingot and shows the vis discount line before the lines of the super method; the port carries the same numbers and the same order of the tooltip"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "5eecde894c14868b6de448d9f25d834d0575e0bdd661c3b1a0c44ea7de3acb59",
@@ -44377,7 +44392,8 @@
           "port common/src/main/java/thaumcraft/common/lib/world/OuterLandsBossRooms.java:57-100 keeps the counter in the saved data of the dimension of the lock with the same rules"
         ],
         "notes": [
-          "The shared boss data object became the per quadrant generation; the boss room is built from the cell feature of the quadrant, so the shared object is not needed."
+          "The shared boss data object became the per quadrant generation; the boss room is built from the cell feature of the quadrant, so the shared object is not needed.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "52ca78d8e66596a28f72434de8d8acda7849ecd8c843e5db8019d6c74aedb5a5",
@@ -44580,7 +44596,8 @@
         ],
         "notes": [
           "The search radius, the arrival offset of plus or minus one block and the fallback above the ground are kept.",
-          "The native searches the block entities of the loaded chunks instead of the blocks of the world, so a gate in a chunk that is not loaded is not found."
+          "The native searches the block entities of the loaded chunks instead of the blocks of the world, so a gate in a chunk that is not loaded is not found.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "1fd4e5659f1a2c3f93258fb4d18d214664f59981a868ccfa8d07b8a2e5859f75",
@@ -45886,7 +45903,8 @@
           "port common/src/main/java/thaumcraft/common/tiles/TileEldritchCrabSpawner.java:52-146 carries the radius of the search, the block event, the sound of the gore, the vent of the client and the saved data of the original"
         ],
         "notes": [
-          "1.21.1 spawner rewrite; the spawn rules were not compared in detail in this audit."
+          "1.21.1 spawner rewrite; the spawn rules were not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "6abeeeaecd8b3437ef206dbf7758be231ed4c3bd8cacf1ca9efb2e42d8b60923",
@@ -45984,7 +46002,8 @@
           "the sparkle packet of the oracle for the removed barrier blocks (PacketFXBlockSparkle with the colour 0x400040) has no native counterpart in this wave and stays a documented gap"
         ],
         "notes": [
-          "1.21.1 tile rewrite; the counter, the facing and the unlock rule were not compared in detail in this audit."
+          "1.21.1 tile rewrite; the counter, the facing and the unlock rule were not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "f3cbb27e94f9f75cd7302635274dcc404a5327d8851c45fa9724f920aac23637",
@@ -46179,7 +46198,8 @@
           "test common/src/test/java/thaumcraft/eldritch/EldritchTileRulesTest.java asserts the original numbers (authored, compiled and executed with a standalone JUnit 5 launcher: 27 of 27 green)"
         ],
         "notes": [
-          "1.21.1 tile rewrite; the trap behaviour was not compared in detail in this audit."
+          "1.21.1 tile rewrite; the trap behaviour was not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "c8e7e606201d05598c4ef6490cc501f8f52d2a240d96d85ccfd17bb063fd7300",

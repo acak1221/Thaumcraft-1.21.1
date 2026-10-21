@@ -240,7 +240,13 @@ class FoundationAssetsTest(unittest.TestCase):
         for locale in ("en_us", "ru_ru"):
             lang = json.loads((converter.ASSETS / f"lang/{locale}.json").read_text())
             self.assertEqual(lang["tile.thaumcraft.tube.1.name"], lang["block.thaumcraft.essentia_valve"])
-            self.assertEqual(lang["item.thaumcraft.resonator.name"], lang["item.thaumcraft.resonator"])
+            # The original 1.7.10 language file calls the item "Essentia Resonator"
+            # (en_US.lang:510); the Russian file of the original has no name for it, so the
+            # port keeps the name of the legacy source there.
+            if locale == "en_us":
+                self.assertEqual("Essentia Resonator", lang["item.thaumcraft.resonator"])
+            else:
+                self.assertEqual(lang["item.thaumcraft.resonator.name"], lang["item.thaumcraft.resonator"])
 
     def test_later_tube_upgrades_use_real_shapeless_filter_gate_and_original_costs(self) -> None:
         recipes = converter.RESOURCE_ROOT / "data/thaumcraft/recipe/arcane"

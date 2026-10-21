@@ -6,6 +6,7 @@ logs
 .gradle/
 .gradle_home/
 .gradle-fix4/
+.gradle-fix9/
 build/
 out/
 run/

@@ -26,8 +26,69 @@ import thaumcraft.api.aspects.Aspect;
  *   <li>The potion ids of the original are the 1.7.10 ids of the {@code Potion} array; 1.21.1
  *   registers the effects in a registry, so the ids are kept as the original constants.</li>
  * </ul>
+ *
+ * <p>The options that a configuration replaces are the runtime values of the original, exactly
+ * like the original's own fields. Their <em>declared</em> defaults - the values of the original's
+ * static block - are published by {@link Defaults}, because the runtime values overwrite them
+ * as soon as a configuration is read.</p>
  */
 public class Config {
+    /**
+     * The declared defaults of the public options.
+     *
+     * <p>The original published the eighty-six public options in its static block (oracle
+     * {@code thaumcraft/common/config/Config.java:830-895}) and replaced only a part of them
+     * with the values of its configuration file ({@code :388-392} and
+     * {@code :457-459}) or with the snapshot the server sent to the client (oracle
+     * {@code thaumcraft/common/lib/network/misc/PacketConfig.java:33-53}). The public options
+     * of the native port carry the same runtime values, so the declared defaults of the
+     * original's static block are published here: they are the values the original published
+     * before it read its configuration, and they survive every configuration.</p>
+     *
+     * <p>One option of the original has a configuration default that differs from its
+     * declared default: the cheat sheet is declared {@code true} by the static block
+     * ({@code :869}) while the original's configuration file writes {@code false} for it
+     * ({@code :456}), so a configured server disables the cheat sheet.</p>
+     */
+    public static final class Defaults {
+        /** Original Config.java:869 - the static block declares the cheat sheet allowed. */
+        public static final boolean ALLOW_CHEAT_SHEET = true;
+        /** Original Config.java:882 - the cheat sheet copy the client reads. */
+        public static final boolean CALLOW_CHEAT_SHEET = true;
+        /** Original Config.java:871 - the warded stone. */
+        public static final boolean WARDED_STONE = true;
+        /** Original Config.java:880 - the warded stone copy the client reads. */
+        public static final boolean CWARDED_STONE = true;
+        /** Original Config.java:851 - the arcane mirrors. */
+        public static final boolean ALLOW_MIRRORS = true;
+        /** Original Config.java:879 - the mirrors copy the client reads. */
+        public static final boolean CALLOW_MIRRORS = true;
+        /** Original Config.java:841 - the hard mode of the nodes. */
+        public static final boolean HARD_NODE = true;
+        /** Original Config.java:878 - the hard node copy the client reads. */
+        public static final boolean CHARD_NODE = true;
+        /** Original Config.java:842 - the wuss mode. */
+        public static final boolean WUSS = false;
+        /** Original Config.java:877 - the wuss mode copy the client reads. */
+        public static final boolean CWUSS = false;
+        /** Original Config.java:887 - the research difficulty. */
+        public static final int RESEARCH_DIFFICULTY = 0;
+        /** Original Config.java:888 - the research difficulty copy the client reads. */
+        public static final int CRESEARCH_DIFFICULTY = 0;
+        /** Original Config.java:888 - the aspect cap of the research pool. */
+        public static final int ASPECT_TOTAL_CAP = 100;
+        /** Original Config.java:889 - the aspect cap copy the client reads. */
+        public static final int CASPECT_TOTAL_CAP = 100;
+        /** Original Config.java:836 - the spread rate of the taint. */
+        public static final int TAINT_SPREAD_RATE = 200;
+        /** Original Config.java:876 - the glowing taint. */
+        public static final boolean GLOWY_TAINT = true;
+        /** Original Config.java:894 - the taint spores. */
+        public static final boolean SPAWN_TAINT_SPORE = true;
+
+        private Defaults() {}
+    }
+
     /** The category names of the original configuration file. */
     public static final String CATEGORY_ENCH = "Enchantments";
     public static final String CATEGORY_ENTITIES = "Entities";
@@ -46,10 +107,10 @@ public class Config {
     public static int biomeEldritchID = 195;
     public static int biomeTaintWeight = 2;
     public static int biomeMagicalForestWeight = 5;
-    public static int taintSpreadRate = 200;
+    public static int taintSpreadRate = Defaults.TAINT_SPREAD_RATE;
     public static boolean taintFromFlux = true;
-    public static boolean hardNode = true;
-    public static boolean wuss = false;
+    public static boolean hardNode = Defaults.HARD_NODE;
+    public static boolean wuss = Defaults.WUSS;
     public static int dimensionOuterId = -42;
     public static boolean championMobs = true;
     public static int shieldRecharge = 2000;
@@ -60,7 +121,7 @@ public class Config {
     public static boolean crooked = true;
     public static boolean showTags = false;
     public static boolean blueBiome = false;
-    public static boolean allowMirrors = true;
+    public static boolean allowMirrors = Defaults.ALLOW_MIRRORS;
     public static boolean dialBottom = false;
     public static int nodeRefresh = 10;
     public static boolean genAura = true;
@@ -78,31 +139,31 @@ public class Config {
     public static boolean regenTrees = false;
     public static boolean regenTaint = false;
     public static String regenKey = "DEFAULT";
-    public static boolean wardedStone = true;
-    public static boolean allowCheatSheet = true;
+    public static boolean wardedStone = Defaults.WARDED_STONE;
+    public static boolean allowCheatSheet = Defaults.ALLOW_CHEAT_SHEET;
     public static boolean golemChestInteract = true;
     public static int nodeRarity = 36;
     public static int specialNodeRarity = 18;
     public static int notificationDelay = 5000;
     public static int notificationMax = 15;
-    public static boolean glowyTaint = true;
-    public static int researchDifficulty = 0;
-    public static int aspectTotalCap = 100;
+    public static boolean glowyTaint = Defaults.GLOWY_TAINT;
+    public static int researchDifficulty = Defaults.RESEARCH_DIFFICULTY;
+    public static int aspectTotalCap = Defaults.ASPECT_TOTAL_CAP;
     public static int golemDelay = 5;
     public static int golemIgnoreDelay = 10000;
     public static int golemLinkQuality = 16;
-    public static boolean CwardedStone = true;
-    public static boolean CallowCheatSheet = true;
-    public static boolean CallowMirrors = true;
-    public static boolean ChardNode = true;
-    public static boolean Cwuss = false;
-    public static int CresearchDifficulty = 0;
-    public static int CaspectTotalCap = 100;
+    public static boolean CwardedStone = Defaults.CWARDED_STONE;
+    public static boolean CallowCheatSheet = Defaults.CALLOW_CHEAT_SHEET;
+    public static boolean CallowMirrors = Defaults.CALLOW_MIRRORS;
+    public static boolean ChardNode = Defaults.CHARD_NODE;
+    public static boolean Cwuss = Defaults.CWUSS;
+    public static int CresearchDifficulty = Defaults.CRESEARCH_DIFFICULTY;
+    public static int CaspectTotalCap = Defaults.CASPECT_TOTAL_CAP;
     public static boolean spawnAngryZombie = true;
     public static boolean spawnFireBat = true;
     public static boolean spawnTaintacle = true;
     public static boolean spawnWisp = true;
-    public static boolean spawnTaintSpore = true;
+    public static boolean spawnTaintSpore = Defaults.SPAWN_TAINT_SPORE;
     public static boolean spawnPech = true;
     public static boolean spawnElder = true;
     public static int potionVisExhaustID = 18;

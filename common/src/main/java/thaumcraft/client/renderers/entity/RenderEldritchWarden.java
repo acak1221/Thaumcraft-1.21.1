@@ -3,6 +3,7 @@ package thaumcraft.client.renderers.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -54,8 +55,11 @@ public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWar
     /** Original doRenderLiving:60-79 sank the warden while it was still spawning. */
     @Override public Vec3 getRenderOffset(EntityEldritchWarden warden, float partial) {
         int timer = warden.getSpawnTimer();
-        if (timer <= 0) return Vec3.ZERO;
-        return new Vec3(0, -warden.getBbHeight() * (timer / 150F), 0);
+        // Original doRenderLiving:68-71 - the mesh of the warden was drawn one entity
+        // height below the position of the entity, and the spawning warden sank further
+        // by its own height times the share of the spawn timer that had passed.
+        float lift = 1.0F + (timer > 0 ? timer / 150.0F : 0.0F);
+        return new Vec3(0, -warden.getBbHeight() * lift, 0);
     }
 
     @Override public void render(EntityEldritchWarden warden, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
@@ -69,6 +73,20 @@ public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWar
             animate(warden, partial);
             VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(SKIN));
             root.render(pose, out, light, OverlayTexture.NO_OVERLAY, 0xffffffff);
+            // Original ModelEldritchGuardian:467-479 - the warden alone draws its hood eye
+            // a hundredth larger than the hood and with the pulsing light of the original.
+            ModelPart eye = root.getChild("HoodEye");
+            if (eye != null) {
+                pose.pushPose();
+                eye.visible = true;
+                try {
+                    pose.scale(1.01F, 1.01F, 1.01F);
+                    eye.render(pose, out, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xffffffff);
+                } finally {
+                    eye.visible = false;
+                    pose.popPose();
+                }
+            }
         } finally { pose.popPose(); }
     }
 

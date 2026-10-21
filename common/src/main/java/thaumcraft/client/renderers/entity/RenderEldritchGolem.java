@@ -33,4 +33,19 @@ public final class RenderEldritchGolem extends MobRenderer<EntityEldritchGolem, 
     @Override protected RenderType getRenderType(EntityEldritchGolem golem, boolean body, boolean translucent, boolean glow) {
         return RenderType.entityTranslucent(SKIN);
     }
+
+    /**
+     * Original doRenderLiving:57 - the model of the golem was drawn one entity height
+     * below the position of the entity, because the original mesh of the golem is built
+     * around its own middle and the vanilla 1.7.10 renderer already moves the model up
+     * by one and a half blocks.
+     */
+    @Override public void render(EntityEldritchGolem golem, float yaw, float partial, PoseStack pose,
+                                 MultiBufferSource buffers, int light) {
+        pose.pushPose();
+        try {
+            pose.translate(0.0F, -golem.getBbHeight(), 0.0F);
+            super.render(golem, yaw, partial, pose, buffers, light);
+        } finally { pose.popPose(); }
+    }
 }

@@ -16,6 +16,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.LootTableLoadEvent;
 import thaumcraft.common.config.ThaumcraftBaubles;
 import thaumcraft.common.config.ThaumcraftLoot;
+import thaumcraft.common.lib.utils.ChestLootPoolRules;
 
 /**
  * NeoForge half of the original TC4 chest rows.
@@ -58,9 +59,10 @@ final class NeoForgeLootTables {
         JsonElement encoded = LootTable.DIRECT_CODEC.encodeStart(ops, event.getTable()).result().orElse(null);
         if (encoded == null || !encoded.isJsonObject()) return;
         JsonObject root = encoded.getAsJsonObject();
-        if (!root.has("pools") || !root.getAsJsonArray("pools").isEmpty()) return;
-        JsonArray pools = root.getAsJsonArray("pools");
-        JsonObject pool = pools.get(0).getAsJsonObject();
+        // The rows are appended to the FIRST pool, exactly like the Fabric
+        // modifyPools adapter. A table without pools has nothing to extend.
+        JsonObject pool = ChestLootPoolRules.firstPool(root);
+        if (pool == null) return;
         if (!pool.has("entries")) return;
         JsonArray entries = pool.getAsJsonArray("entries");
         for (var row : additions) {

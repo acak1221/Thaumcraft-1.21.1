@@ -16,27 +16,33 @@ import thaumcraft.client.renderers.VisNetRender;
 /**
  * The original node bolt of the eldritch trap and the node (oracle
  * {@code thaumcraft/client/ClientProxy.java:798-803}, {@code nodeBolt(world, x, y, z, x2, y2, z2)}):
- * the {@code FXLightningBolt} with the type zero, the duration ten, the multiplier four and the fractal of
- * the original {@code FXLightningBoltCommon}.
+ * the {@code FXLightningBolt} with the type zero, the duration ten, the multiplier four, the age step five and
+ * the fractal of the original {@code FXLightningBoltCommon}.
  *
- * <p>The type zero colour of the original is the purple triple {@code 0.6, 0.3, 0.6} for both passes, with
- * the pass alpha of the original bolt rendering. The wisp bolt of this port draws the same fractal with a
- * brighter second pass; this bolt keeps the original type zero colour on both passes.</p>
+ * <p>The type zero colour of the original is the purple triple {@code 0.6, 0.3, 0.6} on the large pass and
+ * {@code 1.0, 0.6, 1.0} on the small pass, with the additive blend {@code (SRC_ALPHA, ONE)} of the original.</p>
  */
 public final class ThaumcraftBoltParticle extends Particle {
-    /** The original FXLightningBolt type zero colour. */
-    private static final int TYPE_ZERO = 0x994c99;
     /** The original nodeBolt duration. */
     private static final int DURATION = 10;
     /** The original nodeBolt multiplier. */
     private static final float MULTIPLIER = 4.0F;
+    /** The original nodeBolt age step. */
+    private static final int SPEED = 5;
+    /** The original FXLightningBolt type zero large pass colour. */
+    private static final int TYPE_ZERO_LARGE = 0x994c99;
+    /** The original FXLightningBolt type zero small pass colour. */
+    private static final int TYPE_ZERO_SMALL = 0xff99ff;
 
     private final WispLightningShape bolt;
     private int boltAge;
 
     private ThaumcraftBoltParticle(ClientLevel level, Vec3 from, Vec3 to, long seed) {
         super(level, from.x, from.y, from.z);
-        bolt = new WispLightningShape(from, to, seed, DURATION, MULTIPLIER);
+        // The original ClientProxy.nodeBolt(world, x, y, z, x2, y2, z2):
+        // FXLightningBolt(world, x, y, z, x2, y2, z2, seed, 10, 4.0f, 5) - the duration ten, the multiplier four
+        // and the age step five of the original FXLightningBoltCommon.
+        bolt = new WispLightningShape(from, to, seed, DURATION, MULTIPLIER, SPEED);
         boltAge = -(int) (bolt.length * 3);
         xd = yd = zd = 0;
         hasPhysics = false;
@@ -52,7 +58,7 @@ public final class ThaumcraftBoltParticle extends Particle {
     }
 
     @Override public void tick() {
-        boltAge = Math.min(bolt.maxAge, boltAge + 4);
+        boltAge = Math.min(bolt.maxAge, boltAge + bolt.increment);
         if (boltAge >= bolt.maxAge) remove();
     }
 
@@ -74,10 +80,15 @@ public final class ThaumcraftBoltParticle extends Particle {
         Vec3 view = new Vec3(look.x, look.y, look.z);
         for (int pass = 0; pass < 2; pass++) {
             final float alpha = pass == 0 ? (1 - fraction) * .4F : 1 - fraction * .5F;
+            final int rgb = pass == 0 ? TYPE_ZERO_LARGE : TYPE_ZERO_SMALL;
             VisNetRender.draw(pass == 0 ? VisNetRender.BOLT_LARGE : VisNetRender.BOLT_SMALL, GL11.GL_ONE, false,
                     GameRenderer.getPositionTexColorShader(), out -> {
                         for (var segment : bolt.segments) {
                             if (segment.number > reach) continue;
+                            // The original divides the ribbon width by the joint sine; a sine the normalised dot
+                            // product pushed out of the unit interval made the original vertex coordinates not a
+                            // number and the original rasteriser dropped the quad. The port drops the same segment.
+                            if (!segment.renderable()) continue;
                             Vec3 start = segment.start(), end = segment.end();
                             float dx = (float) player.getX() - (float) start.x;
                             float dy = (float) player.getY() - (float) start.y;
@@ -87,30 +98,30 @@ public final class ThaumcraftBoltParticle extends Particle {
                             Vec3 before = view.cross(segment.previousDirection()).scale(width / segment.sinPrevious());
                             Vec3 after = view.cross(segment.nextDirection()).scale(width / segment.sinNext());
                             float opacity = alpha * segment.light;
-                            vertex(out, pose, end.subtract(after), .5F, 0, opacity);
-                            vertex(out, pose, start.subtract(before), .5F, 0, opacity);
-                            vertex(out, pose, start.add(before), .5F, 1, opacity);
-                            vertex(out, pose, end.add(after), .5F, 1, opacity);
+                            vertex(out, pose, end.subtract(after), .5F, 0, rgb, opacity);
+                            vertex(out, pose, start.subtract(before), .5F, 0, rgb, opacity);
+                            vertex(out, pose, start.add(before), .5F, 1, rgb, opacity);
+                            vertex(out, pose, end.add(after), .5F, 1, rgb, opacity);
                             if (segment.last()) {
                                 Vec3 rounded = end.add(segment.direction().normalize().scale(width));
-                                vertex(out, pose, rounded.subtract(after), 0, 0, opacity);
-                                vertex(out, pose, end.subtract(after), .5F, 0, opacity);
-                                vertex(out, pose, end.add(after), .5F, 1, opacity);
-                                vertex(out, pose, rounded.add(after), 0, 1, opacity);
+                                vertex(out, pose, rounded.subtract(after), 0, 0, rgb, opacity);
+                                vertex(out, pose, end.subtract(after), .5F, 0, rgb, opacity);
+                                vertex(out, pose, end.add(after), .5F, 1, rgb, opacity);
+                                vertex(out, pose, rounded.add(after), 0, 1, rgb, opacity);
                             }
                             if (segment.first()) {
                                 Vec3 rounded = start.subtract(segment.direction().normalize().scale(width));
-                                vertex(out, pose, start.subtract(before), .5F, 0, opacity);
-                                vertex(out, pose, rounded.subtract(before), 0, 0, opacity);
-                                vertex(out, pose, rounded.add(before), 0, 1, opacity);
-                                vertex(out, pose, start.add(before), .5F, 1, opacity);
+                                vertex(out, pose, start.subtract(before), .5F, 0, rgb, opacity);
+                                vertex(out, pose, rounded.subtract(before), 0, 0, rgb, opacity);
+                                vertex(out, pose, rounded.add(before), 0, 1, rgb, opacity);
+                                vertex(out, pose, start.add(before), .5F, 1, rgb, opacity);
                             }
                         }
                     });
         }
     }
 
-    private static void vertex(VertexConsumer out, PoseStack pose, Vec3 point, float u, float v, float alpha) {
-        VisNetRender.vertex(out, pose, point, u, v, TYPE_ZERO, alpha);
+    private static void vertex(VertexConsumer out, PoseStack pose, Vec3 point, float u, float v, int rgb, float alpha) {
+        VisNetRender.vertex(out, pose, point, u, v, rgb, alpha);
     }
 }

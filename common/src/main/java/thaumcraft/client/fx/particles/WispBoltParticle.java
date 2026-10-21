@@ -20,7 +20,9 @@ public final class WispBoltParticle extends Particle {
     private int boltAge;
     private WispBoltParticle(ClientLevel level,Entity source,Entity target) {
         super(level,source.getX(),source.getY(),source.getZ());
-        bolt=new WispLightningShape(source.position(),new Vec3(target.getX(),target.getEyeY()-.7F,target.getZ()),level.random.nextLong());
+        // The original ClientProxy.bolt: FXLightningBolt(world, source, target, seed, 4), that is the entity to
+        // entity flavour of FXLightningBoltCommon with the age step four and the multiplier 0.4f.
+        bolt=new WispLightningShape(source.position(),new Vec3(target.getX(),target.getEyeY()-.7F,target.getZ()),level.random.nextLong(),4);
         boltAge=-(int)(bolt.length*3);xd=yd=zd=0;hasPhysics=false;setSize(.01F,.01F);
     }
     public static void accept(int sourceId,int targetId) {
@@ -32,7 +34,7 @@ public final class WispBoltParticle extends Particle {
         if(source.position().distanceToSqr(end)<1.0e-10)return;
         client.particleEngine.add(new WispBoltParticle(level,source,target));
     }
-    @Override public void tick() { boltAge=Math.min(bolt.maxAge,boltAge+4);if(boltAge>=bolt.maxAge)remove(); }
+    @Override public void tick() { boltAge=Math.min(bolt.maxAge,boltAge+bolt.increment);if(boltAge>=bolt.maxAge)remove(); }
     @Override public ParticleRenderType getRenderType() { return ParticleRenderType.CUSTOM; }
     @Override public void render(VertexConsumer unused,Camera camera,float partial) {
         var client=Minecraft.getInstance();var player=client.player;if(player==null)return;
@@ -48,6 +50,10 @@ public final class WispBoltParticle extends Particle {
             VisNetRender.draw(pass==0?VisNetRender.BOLT_LARGE:VisNetRender.BOLT_SMALL,GL11.GL_ONE,false,GameRenderer.getPositionTexColorShader(),out -> {
                 for(var segment:bolt.segments) {
                     if(segment.number>reach)continue;
+                    // The original divides the ribbon width by the joint sine; a sine the normalised dot product
+                    // pushed out of the unit interval made the original vertex coordinates not a number and the
+                    // original rasteriser dropped the quad. The port drops the same segment.
+                    if(!segment.renderable())continue;
                     Vec3 start=segment.start(),end=segment.end();
                     float dx=(float)player.getX()-(float)start.x,dy=(float)player.getY()-(float)start.y,dz=(float)player.getZ()-(float)start.z;
                     float distance=(float)Math.sqrt(dx*dx+dy*dy+dz*dz);

@@ -69,7 +69,10 @@ public final class ThaumcraftTaint {
     private static final RegistrySupplier<SpawnEggItem> SMALL_EGG=ITEMS.register("taintacle_small_spawn_egg",()->new SpawnEggItem(TAINTACLE_SMALL.get(),0xFFC0FF,0x800090,new Item.Properties()));
     private static boolean registered;
     private ThaumcraftTaint() {}
-    private static BlockBehaviour.Properties properties(float hardness,float resistance) {return BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).strength(hardness,resistance).sound(SOUND).randomTicks().pushReaction(PushReaction.DESTROY);}
+    // Original Config:918 and MaterialTaint:24-38 - the taint material carries the mobility flag one, so a
+    // piston cannot push the taint. The 1.21.1 push reaction BLOCK is the counterpart: the piston is stopped
+    // and the taint survives. DESTROY would break the original block instead.
+    private static BlockBehaviour.Properties properties(float hardness,float resistance) {return BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).strength(hardness,resistance).sound(SOUND).randomTicks().pushReaction(PushReaction.BLOCK);}
     public static void register() {
         if(registered)return;registered=true;BLOCKS.register();ENTITIES.register();ITEMS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB,CRUST_ITEM,SOIL_ITEM);

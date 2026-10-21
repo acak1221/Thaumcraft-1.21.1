@@ -18,7 +18,10 @@ public final class PrimalWispParticle extends SingleQuadParticle {
     private final Entity target;
     private PrimalWispParticle(ClientLevel level,double x,double y,double z,float size,int type,Entity target,boolean physics,float gravity){
         super(level,x,y,z);this.target=target;xd=yd=zd=0;xo=x;yo=y;zo=z;
-        initialSize=.5F*size*((random.nextFloat()*.5F+.5F)*2F);quadSize=initialSize;
+        // The original FXWisp:44 keeps the particle scale of the caller and draws the mote with the half size
+        // 0.5f * scale * ageScale. The vanilla particle engine halves the quad size, so the quad size is the
+        // scale itself. The original never randomises that size.
+        initialSize=size;quadSize=initialSize;
         lifetime=(int)(36/(Math.random()*.3+.7));alpha=.5F;this.gravity=gravity;hasPhysics=physics;setSize(.1F,.1F);
         destination=type==5?771:1;
         switch(type){

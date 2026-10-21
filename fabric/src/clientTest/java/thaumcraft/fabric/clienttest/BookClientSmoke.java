@@ -120,6 +120,7 @@ public final class BookClientSmoke implements ClientModInitializer {
     private final Map<String, Object> noteEvidence = new LinkedHashMap<>();
     private final Map<String, Object> issuanceEvidence = new LinkedHashMap<>();
     private final Map<String, Object> tableEvidence = new LinkedHashMap<>();
+    private final Map<String, Object> worldOpenEvidence = new LinkedHashMap<>();
     private final AtomicInteger noteRequestPackets = new AtomicInteger();
     private final long started = System.nanoTime();
     private final String runId = System.getProperty("thaumcraft.clientSmokeRunId", "client-smoke-" + UUID.randomUUID());
@@ -168,6 +169,7 @@ public final class BookClientSmoke implements ClientModInitializer {
     private FocalManipulatorClientSequence focal;
     private BoreClientSequence bore;
     private boolean capturePending, captureDispatched, finished;
+    private boolean worldConfirmationCapturePending, worldConfirmationCaptured;
     private long captureStartedNanos;
     private String pendingScreenshotName;
     private Stage pendingScreenshotStage;
@@ -204,6 +206,25 @@ public final class BookClientSmoke implements ClientModInitializer {
             }
         }
         writeResult("RUNNING", null);
+        // The vanilla world confirmation is captured from its own rendered frame
+        // so the run keeps an honest picture of what the player was asked.
+        ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
+            if (!(screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen)) return;
+            ScreenEvents.afterRender(screen).register((rendered, graphics, mouseX, mouseY, delta) -> {
+                if (!worldConfirmationCapturePending || worldConfirmationCaptured || finished) return;
+                worldConfirmationCapturePending = false;
+                worldConfirmationCaptured = true;
+                try {
+                    graphics.flush();
+                    String name = runId + "-00-vanilla-world-confirmation.png";
+                    worldOpenEvidence.put("dialog_screenshot", runDirectory.resolve("screenshots").resolve(name).toString());
+                    Screenshot.grab(client.gameDirectory, name, client.getMainRenderTarget(),
+                            message -> LOGGER.info("Client smoke: captured the vanilla world confirmation dialog ({})", message.getString()));
+                } catch (Throwable error) {
+                    fail(client, error);
+                }
+            });
+        });
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             if (!supportsCapture(screen)) return;
             ScreenEvents.afterRender(screen).register((rendered, graphics, mouseX, mouseY, delta) -> {
@@ -281,6 +302,17 @@ public final class BookClientSmoke implements ClientModInitializer {
             }
             if (client.screen instanceof net.minecraft.client.gui.screens.DisconnectedScreen) {
                 throw new IllegalStateException("Client disconnected during native login/play at " + stage + "; inspect the network error in this run's log");
+            }
+            if (client.screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen confirmation) {
+                // Vanilla 1.21.1 refuses to open any world whose level stems are not
+                // all vanilla-like (WorldDimensions.checkStability / bake), and the
+                // TC4 Outer Lands is a real fourth dimension, so the client asks the
+                // player to confirm before loading. Accept it exactly like a player.
+                if (stage != Stage.WAIT_WORLD) {
+                    throw new IllegalStateException("Unexpected vanilla world confirmation outside the world open stage: " + stage);
+                }
+                acceptVanillaWorldConfirmation(client, confirmation);
+                return;
             }
             if (capturePending) {
                 if (focal != null) focal.check();
@@ -560,7 +592,7 @@ public final class BookClientSmoke implements ClientModInitializer {
                     if (!serverSetup.isDone()) return;
                     serverSetup.join();
                     if (!purchaseMatches(client, false, 3, 2) || !ready(client, GuiResearchBrowser.class)) return;
-                    clickButton(client, Component.translatable("tc.research_category.ARTIFICE").getString());
+                    clickCategoryTab(client, "ARTIFICE");
                     var browser = (GuiResearchBrowser) client.screen;
                     int graphX = (int) field(browser, "graphLeft") + (int) field(browser, "graphWidth") / 2;
                     int graphY = (int) field(browser, "graphTop") + (int) field(browser, "graphHeight") / 2;
@@ -848,7 +880,7 @@ public final class BookClientSmoke implements ClientModInitializer {
                     issuanceEvidence.put("key", "NITOR");
                     issuanceEvidence.put("baseline_after_normal_book_use", true);
                     issuanceEvidence.put("knowledge_before_request", issuanceBaseline.state.toString());
-                    clickButton(client, Component.translatable("tc.research_category.ALCHEMY").getString());
+                    clickCategoryTab(client, "ALCHEMY");
                     var browser = (GuiResearchBrowser) client.screen;
                     int graphX = (int) field(browser, "graphLeft") + (int) field(browser, "graphWidth") / 2;
                     int graphY = (int) field(browser, "graphTop") + (int) field(browser, "graphHeight") / 2;
@@ -1529,6 +1561,42 @@ public final class BookClientSmoke implements ClientModInitializer {
         return stageTicks >= 10 && client.getOverlay() == null && expected.isInstance(client.screen);
     }
 
+    /**
+     * Accept the vanilla "Worlds using Experimental Settings are not supported"
+     * confirmation (net.minecraft.client.gui.screens.BackupConfirmScreen) that
+     * 1.21.1 shows before it opens a world with non vanilla level stems.
+     *
+     * <p>The screen and its buttons are the real vanilla widgets; the harness
+     * only presses the same "I know what I'm doing!" button a player presses.
+     * The dialog itself is captured as a separate diagnostic PNG so the run
+     * keeps its own exact screenshot contract untouched.
+     */
+    private void acceptVanillaWorldConfirmation(Minecraft client, net.minecraft.client.gui.screens.BackupConfirmScreen screen) {
+        String skipLabel = Component.translatable("selectWorld.backupJoinSkipButton").getString();
+        var buttons = screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast).toList();
+        Button skip = buttons.stream().filter(button -> button.getMessage().getString().equals(skipLabel)).findFirst().orElse(null);
+        if (skip == null) {
+            throw new IllegalStateException("The vanilla world confirmation has no usable 'join without backup' button; buttons="
+                    + buttons.stream().map(button -> button.getMessage().getString()).toList());
+        }
+        worldOpenEvidence.put("vanilla_confirmation_title", screen.getTitle().getString());
+        worldOpenEvidence.put("vanilla_confirmation_button", skipLabel);
+        worldOpenEvidence.put("vanilla_confirmation_buttons", buttons.stream().map(button -> button.getMessage().getString()).toList());
+        if (!worldConfirmationCaptured) {
+            // Let the dialog render one real frame first: the confirmation PNG
+            // must show the dialog, not the loading screen behind it.
+            worldConfirmationCapturePending = true;
+            return;
+        }
+        if (!skip.active || !skip.visible
+                || !screen.mouseClicked(skip.getX() + skip.getWidth() / 2.0, skip.getY() + skip.getHeight() / 2.0, 0)) {
+            throw new IllegalStateException("The vanilla world confirmation could not be accepted");
+        }
+        screen.mouseReleased(skip.getX() + 1, skip.getY() + 1, 0);
+        worldOpenEvidence.put("vanilla_confirmation_accepted", true);
+        LOGGER.warn("Client smoke: the vanilla client asked to confirm the experimental world settings; the harness accepted it like a player");
+    }
+
     private int[] editHexPoint(Minecraft client, int q, int r) {
         var point = new HexUtils.Hex(q, r).toPixel(9);
         return new int[]{(client.getWindow().getGuiScaledWidth() - 255) / 2 + 169 + (int) Math.round(point.x),
@@ -1888,6 +1956,30 @@ public final class BookClientSmoke implements ClientModInitializer {
         screen.mouseReleased(button.getX() + 1, button.getY() + 1, 0);
     }
 
+    /**
+     * The original research browser has no category buttons: the categories are
+     * drawn icons in the pane margin and picked by their own hit test
+     * (oracle GuiResearchBrowser:668-687). The harness therefore clicks the real
+     * tab icon instead of inventing a Button widget.
+     */
+    private void clickCategoryTab(Minecraft client, String key) throws ReflectiveOperationException {
+        if (!(client.screen instanceof GuiResearchBrowser browser)) throw new IllegalStateException("Expected browser");
+        Object tab = null;
+        for (Object candidate : (List<?>) field(browser, "tabs")) {
+            if (key.equals(field(candidate, "key"))) { tab = candidate; break; }
+        }
+        if (tab == null) throw new IllegalStateException("The native browser has no category tab " + key);
+        int x = (int) field(tab, "x") + 12;
+        int y = (int) field(tab, "y") + 12;
+        if (!browser.mouseClicked(x, y, 0)) {
+            throw new IllegalStateException("The native category tab did not accept the click: " + key);
+        }
+        if (!key.equals(field(browser, "category"))) {
+            throw new IllegalStateException("The native category tab did not select " + key);
+        }
+        browser.mouseReleased(x, y, 0);
+    }
+
     private boolean visibleIllustration(Screen screen) throws ReflectiveOperationException {
         int page = (int) field(screen, "page");
         var pages = (List<?>) field(screen, "pages");
@@ -2040,6 +2132,7 @@ public final class BookClientSmoke implements ClientModInitializer {
         report.put("research_note_learning", noteEvidence);
         report.put("research_note_issuance", issuanceEvidence);
         report.put("research_table", tableEvidence);
+        report.put("world_open", worldOpenEvidence);
         report.put("early_content", earlyContent == null ? Map.of() : earlyContent.evidence);
         report.put("alchemy", alchemy == null ? Map.of() : alchemy.evidence);
         report.put("distillation", distillation == null ? Map.of() : distillation.evidence);

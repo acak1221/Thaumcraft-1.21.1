@@ -35,6 +35,10 @@ public final class BlockMagicalLeaves extends LeavesBlock {
     // Old bit8 is NOT the same as native distance7. Undamaged generated leaves
     // do not decay spontaneously; placed leaves carry native persistent=true.
     public static final BooleanProperty CHECK_DECAY = BooleanProperty.create("check_decay");
+    /** Original BlockMagicalLeaves:248 - the one in two hundred roll of the greatwood sapling. */
+    public static final int SAPLING_ROLL_GREATWOOD = 200;
+    /** Original BlockMagicalLeaves:250 - the one in two hundred and fifty roll of the silverwood sapling. */
+    public static final int SAPLING_ROLL_SILVERWOOD = 250;
     private final boolean silverwood;
 
     public BlockMagicalLeaves(boolean silverwood, Properties properties) {
@@ -79,7 +83,12 @@ public final class BlockMagicalLeaves extends LeavesBlock {
         if (!supported(level, pos)) {
             dropResources(state, level, pos);
             level.removeBlock(pos, false);
-        } else level.setBlock(pos, state.setValue(CHECK_DECAY, false), Block.UPDATE_CLIENTS);
+        }
+        // Original BlockMagicalLeaves:213-219: a leaf that still has its support keeps
+        // the original metadata eight. The original writes the same metadata back
+        // (the line that would clear the bit is commented out at :216), so the leaf
+        // is checked again on every later random tick and the sapling roll of the
+        // original loot table keeps its condition.
     }
 
     @Override protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
@@ -130,7 +139,8 @@ public final class BlockMagicalLeaves extends LeavesBlock {
     public static final class SaplingChance extends LootItemConditionalFunction {
         private static final AtomicLong SOURCE_RANDOM_DRAWS = new AtomicLong();
         public static final MapCodec<SaplingChance> CODEC = RecordCodecBuilder.mapCodec(instance ->
-                commonFields(instance).and(Codec.intRange(200, 250).fieldOf("bound").forGetter(function -> function.bound))
+                commonFields(instance).and(Codec.intRange(SAPLING_ROLL_GREATWOOD, SAPLING_ROLL_SILVERWOOD)
+                        .fieldOf("bound").forGetter(function -> function.bound))
                         .apply(instance, SaplingChance::new));
         private final int bound;
 

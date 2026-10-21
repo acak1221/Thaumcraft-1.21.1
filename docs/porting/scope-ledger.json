@@ -1404,18 +1404,28 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "legacy src/main/java/thaumcraft/api/aura/AuraHelper.java the TC6 aura helper with the per chunk aura and the flux accessors",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:16 public final class AuraHelper",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:29 public static TileNode node(Level level, BlockPos pos)",
-          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 drainVis over the essence of the node at the position"
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 drainVis over the essence of the node at the position",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:27-33 drainVis delegates to VisNetHandler.drainVis(world, x, y, z, requested, simulate)",
+          "legacy src/main/java/thaumcraft/api/visnet/VisNetHandler.java:92-139 the aspect-less drain walks the primal aspects of every root source that is in range of the position",
+          "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java the new aspect-less drainVis(Level, BlockPos, int, boolean) walks the primal aspects in the original order and bounds every aspect by what is still requested",
+          "native common/src/main/java/thaumcraft/api/visnet/TileVisNode.java the read-only availableFromSource hook of a source",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNodeEnergized.java the source answers the same stock that its debit would take",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java the drain now reaches the vis network at the position",
+          "native common/src/test/java/thaumcraft/api/AuraHelperDrainTest.java the order of the six primal aspects and the bounded plan of the drain"
         ],
         "notes": [
           "Not an original TC4 class: a TC6 helper. The native projects it onto the aura node: the vis accessors read and write the node at the position.",
           "REMAINING GAP: the TC6 per-chunk aura, the per-chunk base and the flux accessors have no counterpart, because TC4 4.2.3.5 has no per-chunk aura at all (the aura is the aura node, oracle TileNodeEnergized:27,165).",
-          "REMAINING GAP (api lane): the one working method of the 1.12 handler drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis), while the native AuraHelper.drainVis drains the node AT the position. An add-on that expected the network wide drain sees a different result; the api lane owns AuraHelper."
+          "REMAINING GAP (api lane): the one working method of the 1.12 handler drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis), while the native AuraHelper.drainVis drains the node AT the position. An add-on that expected the network wide drain sees a different result; the api lane owns AuraHelper.",
+          "CLOSED 2026-10-23 (w2api): the one working method of the retained 1.12 surface drained the VIS NETWORK at the position, the native projection drained the essence of the node at the position. The native drain now walks the primal aspects of the network, in the original order of Aspect.getPrimalAspects(), and a dry run reports the same amount through a read-only availability probe.",
+          "The class is not a TC4 class: it is absent from the oracle, so the retained 1.12 source of this repository is the reference.",
+          "FORCED CHANGE: the amount of the retained surface was a float, the native surface uses an int. The getVis and addVis accessors of the retained surface threw UnsupportedOperationException because they addressed a per-chunk aura that TC4 does not have; the native ones read and write the aura node at the position, which is a superset of the original behaviour."
         ],
         "reviewed_sha256": {
           "legacy": "0165281eb205905d5cb51884d37399c40734c1011cf7b61dcc90d650f20f460b"
@@ -2645,7 +2655,8 @@
         "notes": [
           "The interface itself is ported member for member.",
           "REMAINING GAP (cross lane): the native game node does not implement INode; it is reachable only through the NodeAdapter view, and that view throws UnsupportedOperationException for setNodeType and setNodeModifier, because the native node fixes them when it is created. The native node also carries a UUID identity instead of the original dim:x:y:z string. The node (common/tiles/TileNode) and the adapter (api) must agree on the write path and on the identity, so the api lane owns the decision.",
-          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass."
+          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass.",
+          "PARTIAL 2026-10-23 (w2api): the native game node still does not implement INode; it is reachable through the NodeAdapter view. The view no longer throws for setNodeType and setNodeModifier (the native node accepts the published enums and translates them into its own nested enums, which carry the same constants), but the nested NodeType and NodeModifier of the native node are still used in 149 places, among them common/src/main/java/thaumcraft/client/** and common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The replacement of the nested enums by the published ones - the only way for TileNode to implement INode, as the original TileNode:75-77 does - needs those two lanes. The identity of the native node is also a UUID instead of the original dim:x:y:z string (oracle TileNode:105-116), which the scanning subsystem uses."
         ],
         "reviewed_sha256": {
           "original": "d47513d9a62b10a6117236d2a353ebf43e838f05f6c0a82ba729ee75a22798f9",
@@ -3323,7 +3334,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/api/research/ResearchItem.java:19-29 the fields of the entry",
@@ -3332,13 +3343,21 @@
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java the item triggers of the built in entries",
           "oracle thaumcraft/api/research/ResearchItem.java:90-169 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the builder API, the nine flags and the getItemTriggers/getEntityTriggers/getAspectTriggers accessors",
           "native common/src/main/java/thaumcraft/api/research/ResearchItem.java:81-109 the public view of a corpus entry copies every original flag, the parents, the hidden parents, the siblings, the entity triggers and the pages",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java:11-18 the item triggers of the corpus live in the common layer"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java:11-18 the item triggers of the corpus live in the common layer",
+          "oracle thaumcraft/api/research/ResearchItem.java:144-167 setItemTriggers, setEntityTriggers, setAspectTriggers and their three getters",
+          "oracle thaumcraft/common/config/ConfigAspects.java:107-109 the original registers the aspect triggers of its entries",
+          "native common/src/main/java/thaumcraft/api/research/ResearchItem.java the public view of a corpus entry copies the aspect triggers of the corpus",
+          "native common/src/main/java/thaumcraft/api/research/ResearchItem.java getItemTriggers resolves the bound item stacks of the entry and answers null without an item trigger",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java the ordered native identities of the bound item triggers, the four tiny clothing entries included",
+          "native common/src/test/java/thaumcraft/api/ResearchItemTriggerTest.java the executable aspect and item triggers are answered"
         ],
         "notes": [
           "The builder API is preserved and every original flag (special, stub, lost, concealed, hidden, virtual, round, auto unlock, secondary) is read from the corpus.",
           "REMAINING GAP: a corpus-backed ResearchItem never carries icon_item/icon_resource, itemTriggers or aspectTriggers: the bundled corpus keeps the per entry icon as a provenance string and the triggers live in the corpus and in ResearchTriggerBindings.",
           "An add-on that reads getItemTriggers()/getAspectTriggers() from a corpus entry sees null/empty instead of the original's executable triggers.",
-          "REMAINING GAP (blocked): a corpus backed ResearchItem still has no icon_item/icon_resource and no itemTriggers/aspectTriggers. The icon is restored at draw time by ResearchIconDisplay and the triggers are used by ResearchClues/ResearchTriggerBindings, but the original accessors of the public API return null/empty. The fix belongs to the public API owner (common/src/main/java/thaumcraft/api/**): ResearchItem.of(ResearchDefinition) has to copy definition.aspectTriggers() into aspectTriggers and the bound item stacks into itemTriggers."
+          "REMAINING GAP (blocked): a corpus backed ResearchItem still has no icon_item/icon_resource and no itemTriggers/aspectTriggers. The icon is restored at draw time by ResearchIconDisplay and the triggers are used by ResearchClues/ResearchTriggerBindings, but the original accessors of the public API return null/empty. The fix belongs to the public API owner (common/src/main/java/thaumcraft/api/**): ResearchItem.of(ResearchDefinition) has to copy definition.aspectTriggers() into aspectTriggers and the bound item stacks into itemTriggers.",
+          "CLOSED 2026-10-23 (w2api): a corpus backed ResearchItem answered null for getAspectTriggers() and getItemTriggers(), although the original registered both on every entry that has them. The public view now copies the aspect triggers of the corpus and resolves the bound item stacks; an entry without a trigger answers null, exactly like the original.",
+          "REMAINING GAP (documented): the public icon_item and icon_resource of a corpus entry are still null; the original icon of an entry is an arbitrary Java expression and the port restores it at draw time through the client side ResearchIconDisplay. The BANNERS and OUTERREV item triggers are still unbound, because their original trigger is a block metadata that 1.21.1 flattened into a distinct block id."
         ],
         "reviewed_sha256": {
           "original": "d65045e20143c2a10e087f3bc30801853d04f98801ded6f8e985a4571cf8eeb9",
@@ -3378,7 +3397,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/api/research/ResearchPage.java:25-32 the fields of a page",
@@ -3386,13 +3405,20 @@
           "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:128 of(ResearchDefinition.Page)",
           "oracle thaumcraft/api/research/ResearchPage.java:26-32 and the eleven page kinds of the original (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar)",
           "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:128-135 the public view of a corpus page",
-          "native common/src/main/resources/data/thaumcraft/tc4/research.json the 201 entries carry 294 text pages and the recipe references of the original"
+          "native common/src/main/resources/data/thaumcraft/tc4/research.json the 201 entries carry 294 text pages and the recipe references of the original",
+          "oracle thaumcraft/common/config/ConfigResearch.java:199 BANNERS, an arcane recipe array, and :374 ORE, a normal recipe array",
+          "native common/src/main/java/thaumcraft/api/research/ResearchPage.java legacyType answers the original page kind of the eight retained corpus expressions",
+          "native common/src/main/java/thaumcraft/api/research/ResearchItem.java every page of every corpus entry is reachable through the public entry",
+          "native common/src/test/java/thaumcraft/api/ResearchItemTriggerTest.java all 201 entries and their 591 pages are reachable and the eight array pages keep their original kind"
         ],
         "notes": [
           "Forced 1.21.1 changes: IRecipe became Recipe, the furnace lookup needs a Level, StatCollector became Component.",
           "Every page kind and every constructor of the original is present in the native class.",
           "REMAINING GAP: the bundled corpus only carries text / recipe_reference / legacy_expression pages, so the original's IMAGE, ASPECTS, SMELTING, NORMAL_CRAFTING, CRUCIBLE_CRAFTING, INFUSION_CRAFTING, COMPOUND_CRAFTING and INFUSION_ENCHANTMENT kinds are never produced from the corpus; of() maps legacy_expression to IMAGE, which is a lossy but presentation-only mapping.",
-          "REMAINING GAP (blocked): the bundled corpus only carries text, recipe_reference and legacy_expression pages, so the original IMAGE, ASPECTS, SMELTING, NORMAL_CRAFTING, CRUCIBLE_CRAFTING, INFUSION_CRAFTING, COMPOUND_CRAFTING and INFUSION_ENCHANTMENT kinds are never produced from the corpus; of() maps legacy_expression to IMAGE, a lossy but presentation-only mapping. The eight array pages of the original (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) need a renderer in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
+          "REMAINING GAP (blocked): the bundled corpus only carries text, recipe_reference and legacy_expression pages, so the original IMAGE, ASPECTS, SMELTING, NORMAL_CRAFTING, CRUCIBLE_CRAFTING, INFUSION_CRAFTING, COMPOUND_CRAFTING and INFUSION_ENCHANTMENT kinds are never produced from the corpus; of() maps legacy_expression to IMAGE, a lossy but presentation-only mapping. The eight array pages of the original (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) need a renderer in common/src/main/java/thaumcraft/client/**, which belongs to the client wave.",
+          "CLOSED 2026-10-23 (w2api): the public API reaches all 201 entries of the corpus and all 591 of their pages, and the eight array and smelting pages keep the page kind of their original expression instead of the blanket IMAGE of the port.",
+          "REMAINING GAP (client lane): the eight array pages have no renderer yet, so they are not drawn in the book; the page data and the recipe coverage are complete in the common layer and only the renderer is missing in common/src/main/java/thaumcraft/client/**.",
+          "REMAINING GAP (documented): the public icon of a corpus entry is still restored at draw time and not carried in the public ResearchItem."
         ],
         "reviewed_sha256": {
           "original": "7c3318b10863b86c671e0d804eea388b24e2f75ea1549b1915b0339dbb3c8669",
@@ -4318,7 +4344,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/api/wands/WandTriggerRegistry.java:25 registerWandBlockTrigger(IWandTriggerManager, int, Block, int, String)",
@@ -4327,13 +4353,21 @@
           "native common/src/main/java/thaumcraft/api/wands/WandTriggerRegistry.java the block and the block state keys",
           "oracle thaumcraft/common/items/wands/ItemWandCasting.java:389-390 the wand asks the public registry, so a registered trigger is reachable",
           "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the trigger dispatch of the wand (2026-10-23)",
-          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java hasBlockTrigger asks for the block and for the exact state"
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java hasBlockTrigger asks for the block and for the exact state",
+          "oracle thaumcraft/api/wands/WandTriggerRegistry.java:38-45 hasTrigger(Block, int) answers the exact registration OR the wildcard registration of the whole block",
+          "oracle thaumcraft/api/wands/WandTriggerRegistry.java:47-53 hasTrigger(Block, int, String) is the per mod answer",
+          "oracle thaumcraft/api/wands/WandTriggerRegistry.java:55-86 performTrigger looks the exact registration up first and the wildcard second",
+          "native common/src/main/java/thaumcraft/api/wands/WandTriggerRegistry.java the answer consults the exact state key AND the whole block key, so it agrees with the dispatch",
+          "native common/src/main/java/thaumcraft/api/wands/WandTriggerRegistry.java the original hasTrigger(Block, int, String) and the two original performTrigger(..., Block, int[, String]) signatures are restored",
+          "native common/src/test/java/thaumcraft/api/WandTriggerRegistryApiTest.java the answer and the dispatch agree on a block keyed registration"
         ],
         "notes": [
           "The registry, the modid separation, the -1 wildcard meaning 'any metadata' and the first successful trigger wins are all ported.",
           "CLOSED 2026-10-23: the wand asks the registry again (ItemWandCasting.useOn dispatches WandTriggerRegistry right after the IWandable contract, as ItemWandCasting:389-390 does), so the public extension point is reachable; before that the whole registry was dead code in the port.",
           "REMAINING GAP (api lane): hasTrigger(BlockState) only finds a trigger registered for that exact state, while performTrigger also accepts a trigger registered for the whole block. The original always agreed, because both were keyed by block and metadata. The wand works around it with ItemWandCasting.hasBlockTrigger, which asks for both forms; the registry itself is owned by the api lane (coremisc).",
-          "REMAINING GAP: 1.21.1 has no block metadata, so the trigger is keyed by a whole block or by one exact block state. The original metadata argument survives in the signature but is ignored, so a trigger registered for one metadata now fires for all states of that block."
+          "REMAINING GAP: 1.21.1 has no block metadata, so the trigger is keyed by a whole block or by one exact block state. The original metadata argument survives in the signature but is ignored, so a trigger registered for one metadata now fires for all states of that block.",
+          "CLOSED 2026-10-23 (w2api): the public answer and the public dispatch of the registry now agree. Before that, hasTrigger(BlockState) only found a trigger that was registered for that exact state, while performTrigger also accepted a trigger that was registered for the whole block; the original keyed both by block and metadata, so the two always agreed.",
+          "RESTORED 2026-10-23 (w2api): the original hasTrigger(Block, int, String) and the original performTrigger(..., Block, int) and performTrigger(..., Block, int, String) did not exist in the port at all. They are restored; the 1.21.1 signature has to name a Block instead of a block and a metadata, because 1.21.1 has no block metadata. The metadata argument survives in the signature and is ignored, and the exact state of the block is its default state."
         ],
         "reviewed_sha256": {
           "original": "74e78a6138c2283a093db7ccfda0c64ab4500c19670b067d27447300199c6f6c",
@@ -5011,7 +5045,8 @@
         "notes": [
           "Not a class-for-class port: the original single beam effect class became per-focus particle systems in 1.21.1.",
           "DEVIATION: the original FXBeamWand drawing routine has no single native counterpart, so an exact visual comparison is not possible from the source alone.",
-          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either."
+          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "4559e4022f06675edec351ba7719325e313414498c15dd37a44fdaff279c957c",
@@ -7163,7 +7198,8 @@
           "Deviation: the frame u-coordinate of a hidden research is always 86 in the native; the original uses 230 for a hidden research at researchDifficulty -1 or for a hidden secondary research at difficulty 0 (oracle GuiResearchBrowser:389-393).",
           "Deviation: the sibling connectors are missing.",
           "Unresolved icon expressions fall back to the thaumonomicon icon instead of drawing nothing (native GuiResearchBrowser:100-104).",
-          "The category icon data is no longer missing: ThaumcraftResearchCategories publishes the six original icons and backgrounds. Drawing them as tab icons is client work in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
+          "The category icon data is no longer missing: ThaumcraftResearchCategories publishes the six original icons and backgrounds. Drawing them as tab icons is client work in common/src/main/java/thaumcraft/client/**, which belongs to the client wave.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "b9d0562345cdbbda6d3688795456e8196b88831e6952304d28826338b0b69563",
@@ -7273,7 +7309,8 @@
           "The book renders the original text pages and every recipe page whose original recipe key resolves to a native recipe file (250 mapped keys, verified against the packaged data/thaumcraft/recipe tree).",
           "Deviation: six of the eight array/smelting pages (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) have no native renderer and are not shown at all.",
           "Deviation: the original's per-PageType renderers (aspect page, image page, infusion-enchantment page, the original's own recipe renderers) are replaced by one native recipe renderer.",
-          "REMAINING GAP (client, blocked): six of the eight array/smelting pages (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) have no native renderer and are not shown at all. The page data and the recipe coverage are complete in the common layer; only the renderer is missing in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
+          "REMAINING GAP (client, blocked): six of the eight array/smelting pages (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) have no native renderer and are not shown at all. The page data and the recipe coverage are complete in the common layer; only the renderer is missing in common/src/main/java/thaumcraft/client/**, which belongs to the client wave.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "c1494ae9ea784462097adadd94458ea893f759949dbab894a8e5d4386bdf39d9",
@@ -7329,7 +7366,8 @@
         "notes": [
           "The palette, the hex grid, drag and drop placement, erasing, the researcher bonus rolls, the aspect combination and the paid copy are implemented and the original RNG order and thresholds are preserved.",
           "Deviation: the original's rune/line drawing and the 6-parchment sheet look are replaced by the native sheet; the server-authoritative edit/combine/copy requests add a revision/session handshake that the original does not have.",
-          "REMAINING GAP (client, blocked): the original rune and line drawing of the table and the original six parchment sheet look are replaced by the native sheet in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
+          "REMAINING GAP (client, blocked): the original rune and line drawing of the table and the original six parchment sheet look are replaced by the native sheet in common/src/main/java/thaumcraft/client/**, which belongs to the client wave.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "3f53b3dd1aa87217248213f98ab149c2dc0fce8b8dc7342e3cc638ace0aca557",
@@ -8226,7 +8264,8 @@
         "notes": [
           "The held-F radial focus selection is ported as GuiFocusSelect, and the Architect block list became a server-side BlockPos list computed by WandArchitect.",
           "DEVIATION: the original REHWandHandler was a client-side handler that held the whole architect block list in the client and drew the selection overlays; the native moves the area to the server and to a bounded Area record.",
-          "REMAINING GAP (client lane): the selection overlay of the original is drawn by the client handler; the native computes the same area on the server and draws it in the client gui."
+          "REMAINING GAP (client lane): the selection overlay of the original is drawn by the client handler; the native computes the same area on the server and draws it in the client gui.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "c6a51c95a42eedf9d6ef600e763bee7cabfd31229fbe6a63034fe5d9c31a2342",
@@ -12295,7 +12334,8 @@
           "Consequence: the port renders the thaumometer as a normal item and offers no first-person scanner view; this is a visual gap, not a gameplay one.",
           "The thaumometer was a flat sprite before; it is now the three dimensional scanner of the original with its glowing screen.",
           "Two parts of the original stay open: the two rotations that follow the swing of the arm of the player need the private arm angles of 1.7.10, and the scan readout needs the client side of the research system, which the native port keeps on the server.",
-          "REMAINING GAP (forced): 1.21.1 removed IItemRenderer/IModelCustom, so the first person scanner view model of the original has no target API; the port renders the thaumometer as a normal item model and keeps the three dimensional scanner."
+          "REMAINING GAP (forced): 1.21.1 removed IItemRenderer/IModelCustom, so the first person scanner view model of the original has no target API; the port renders the thaumometer as a normal item model and keeps the three dimensional scanner.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "9d5454e08e83d70d4f7d287f4aa101aeb6315077a3b262d4ad35bdb3d9756a5e",
@@ -12441,7 +12481,8 @@
         "notes": [
           "The original class does not exist under that name in the native port.",
           "DEVIATION: the native port has one wand item renderer (PrimalWandFocusRenderer) plus a model catalogue, and no general ItemWandRenderer that draws every rod/cap/focus combination, so the wand item appearance of the non-primal combinations is not fully covered by the source alone.",
-          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either."
+          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "f2840cfa86a637fdce94f4e9181c9c35b4c47fd565775fdd39fb2d7700264c31",
@@ -12676,7 +12717,8 @@
         "notes": [
           "Not an original TC4 class: a 1.12 first person pose model, not carried over.",
           "The 1.21.1 item model carries the display transform that the 1.12 perspective model provided.",
-          "REMAINING GAP (client lane): the wand itself is still drawn with the flat item model of the native port instead of the three dimensional ModelWand of the original; that belongs to the ItemWandRenderer unit of the client lane."
+          "REMAINING GAP (client lane): the wand itself is still drawn with the flat item model of the native port instead of the three dimensional ModelWand of the original; that belongs to the ItemWandRenderer unit of the client lane.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "legacy": "5f73537a4c7d4ec49863f99904dfab1291ca375a60c1323aefd6c9059448f675"
@@ -15703,7 +15745,8 @@
         ],
         "notes": [
           "The original drew the aura node as a dropped item; the native node is a permanent block with no item form, so this renderer has no counterpart.",
-          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer."
+          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/client/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "a32db5242f6251429d3382b2cacb099fe43d0ec8301344e6764f346cdea0b5fb"
@@ -20576,7 +20619,8 @@
         "notes": [
           "The 1.7 CommonProxy is replaced by the Architectury layout: a common bootstrap plus one platform bootstrap per loader.",
           "REMAINING GAP: the proxy accessors (getResearchManager, getPlayerKnowledge, getClientWorld) became direct static calls in the common code, so an add-on that used the proxy has to use the new call sites.",
-          "REMAINING GAP: the original proxy carried about forty client effect entry points (the beams, the essentia trail, the infusion particles, the ward, the soul trail, the bottle of taint and others). The native port splits them over the dedicated client effect classes, and the client was never launched in this environment, so the visual parity of those entry points is NOT claimed here."
+          "REMAINING GAP: the original proxy carried about forty client effect entry points (the beams, the essentia trail, the infusion particles, the ward, the soul trail, the bottle of taint and others). The native port splits them over the dedicated client effect classes, and the client was never launched in this environment, so the visual parity of those entry points is NOT claimed here.",
+          "PARTIAL 2026-10-23 (w2api): the original proxy accessors (getResearchManager, getPlayerKnowledge and the four maps of the player knowledge) became direct static calls in the common code, and the original proxy carried about sixty client effect entry points. The port has no ResearchManager class: its research service is decomposed into ResearchCatalog, ResearchCategories, ResearchClues, PlayerKnowledge and ScanManager, so the original getResearchManager() cannot be answered without a compat facade that mirrors the thirty public methods of the original ResearchManager. The client effect entry points need the client package, which this wave does not own. The payload classes of the common/src/main/java/thaumcraft/common/lib/network/** directory are the native replacement of the original proxy channels."
         ],
         "reviewed_sha256": {
           "original": "0e2f04c9a47b0341eb38676ad821017457c26994ba083798265b5a5bc0efd549",
@@ -25092,7 +25136,7 @@
         "disposition": "replace",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/config/Config.java the ~70 configuration options of the original",
@@ -25102,14 +25146,22 @@
           "oracle thaumcraft/common/config/Config.java:82-140 the seventy configuration options of the original and their defaults",
           "oracle thaumcraft/common/config/Config.java:392-425 the effective defaults of the seven research facts that the original writes into its Forge configuration",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:54-86 the native properties file and the settings it loads",
-          "native common/src/main/java/thaumcraft/common/config/ResearchSettings.java:8-36 the native research settings and their original defaults"
+          "native common/src/main/java/thaumcraft/common/config/ResearchSettings.java:8-36 the native research settings and their original defaults",
+          "oracle thaumcraft/common/config/Config.java:102-200 the eighty-six public static options of the original",
+          "oracle thaumcraft/common/config/Config.java:830-895 the original defaults of every option",
+          "native common/src/main/java/thaumcraft/common/config/Config.java the original options with their original defaults",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java the seven research facts and the shaders switch are copied into the original options",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaintSettings.java the taint options are copied into the original options",
+          "native common/src/test/java/thaumcraft/common/config/ConfigDefaultsTest.java every original default is asserted"
         ],
         "notes": [
           "The native configuration keeps the research, the taint and the biome settings; the other ~70 original options (the golem delay and link quality, the champion mobs, the runic shield values, the node rarity, the notification limits, the potion ids, the dimension id, the world regeneration switches) have no native counterpart and are hard-coded or absent.",
           "The original golem_delay (5) and golem_ignore_delay (10000) values ARE reproduced as constants in the native golem code, so the default behaviour matches even though the option itself is gone.",
           "REMAINING GAP: the native file format is a properties file and not the original Forge configuration, and the option set of the original is not reproduced, so an add-on that reads or writes Config cannot.",
           "REMAINING GAP: the native configuration keeps the research, the taint and the biome settings; the other options of the original (the golem delay and link quality, the champion mobs, the runic shield values, the node rarity, the notification limits, the potion ids, the dimension id and the world regeneration switches) have no native counterpart and are hard coded or absent.",
-          "VERIFIED in this wave: the effective defaults of the seven research facts of the original (allow_cheat_sheet false, allow_warded_stone true, allow_mirrors true, hard_mode_nodes true, wuss_mode false, research_difficulty 0, aspect_total_cap 100) are the defaults of the native ResearchSettings."
+          "VERIFIED in this wave: the effective defaults of the seven research facts of the original (allow_cheat_sheet false, allow_warded_stone true, allow_mirrors true, hard_mode_nodes true, wuss_mode false, research_difficulty 0, aspect_total_cap 100) are the defaults of the native ResearchSettings.",
+          "CLOSED 2026-10-23 (w2api): the original Config class with its eighty-six public static options and their original defaults exists again, so an add-on that reads Config.hardNode or Config.dimensionOuterId finds them. The seven research facts, the taint options and the shaders switch are copied into it by the native settings loaders.",
+          "FORCED CHANGE: the Forge Configuration and its Property do not exist in 1.21.1, so the config field of the original is not carried over and the options are read from the native properties file. The 1.7 Material of the air, the flux goo and the taint do not exist either, so the three material fields are not carried over. The 1.7 Enchantment class does not exist, so the two enchantment fields keep their names with the type Object and stay null. The potion ids keep their original 1.7.10 values because 1.21.1 registers the effects in a registry and has no potion id."
         ],
         "reviewed_sha256": {
           "original": "74835b43cdc4c1f4b31c138b4db499f978bd60d957897e6eb16716ad8908802e",
@@ -35023,7 +35075,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/items/ItemResearchNotes.java:87-104 a solved note completes the research and its direct siblings and consumes one note",
@@ -35035,14 +35087,19 @@
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchHiddenSelection.java:13 new Random(dayTime/10L/5L)",
           "oracle thaumcraft/common/lib/research/ResearchManager.java:148 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the hidden research seed is new Random(player.worldObj.getWorldTime()/10L/5L), the world time counter; the native uses Level.getGameTime() through ResearchHiddenSelection.seed, so the audit claim of a getDayTime seed was wrong",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchHiddenSelection.java:12-27 the seed is the world time divided by 10 and 5",
-          "oracle thaumcraft/common/items/ItemResearchNotes.java:61-97 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) a solved note completes the research and its direct siblings, consumes one note and plays thaumcraft:learn; metadata 42/24 reveal a hidden research or drop 7 + rand(3) knowledge fragments"
+          "oracle thaumcraft/common/items/ItemResearchNotes.java:61-97 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) a solved note completes the research and its direct siblings, consumes one note and plays thaumcraft:learn; metadata 42/24 reveal a hidden research or drop 7 + rand(3) knowledge fragments",
+          "native common/src/main/java/thaumcraft/common/items/ItemResearchNotes.java:36-55 the same learning flow with the shrink and the thaumcraft:learn sound",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchCompletion.java the sibling pass of the original",
+          "native common/src/main/java/thaumcraft/common/lib/research/UnknownKnowledge.java the seven plus rand(3) fragment drop and the hidden research reveal"
         ],
         "notes": [
           "Deviation (behaviour): the hidden-note seed differs. The original seeds with the absolute world time (/10/5); the native seeds with the day time (/10/5), so the same world state can reveal a different random hidden research.",
           "Deviation: the original metadata 42/24 unknown note became two separate native items (unknown_research_note and unknown_research_note_24); the note tooltip and rarity are split accordingly.",
           "The original's sibling pass on learning is reproduced by ResearchCompletion.apply (native ResearchCompletion.java:19-23).",
           "CORRECTED in this wave: the hidden-note seed is not a deviation. The original seeds with World.getWorldTime() and the native uses the 1.21.1 equivalent Level.getGameTime(); only the comment of the port named the wrong original method.",
-          "REMAINING GAP (forced): the original metadata 42/24 unknown note became two separate native items (unknown_research_note and unknown_research_note_24); the note tooltip and rarity are split accordingly and ItemUnknownResearchNotes keeps the original metadata."
+          "REMAINING GAP (forced): the original metadata 42/24 unknown note became two separate native items (unknown_research_note and unknown_research_note_24); the note tooltip and rarity are split accordingly and ItemUnknownResearchNotes keeps the original metadata.",
+          "CLOSED 2026-10-23 (w2api): the learning flow of the original is reproduced. A solved note completes the research and its direct siblings, consumes one note (also in creative) and plays thaumcraft:learn; the hidden research reveal draws from the world time divided by ten and five, exactly like the original, and the unknown note drops seven plus rand(3) knowledge fragments.",
+          "FORCED CHANGE (documented): the original metadata 42 and 24 of the research note became two separate native items (unknown_research_note and unknown_research_note_24), because 1.21.1 has no item metadata. The tooltip and the rarity are split accordingly and the native unknown note keeps the original metadata."
         ],
         "reviewed_sha256": {
           "original": "8f601ffcf7f493a6a8b2e2cd20273955fa9da6066054220f4f265abfbb9e17c7",
@@ -37566,7 +37623,8 @@
           "Deviation (client feedback): the original plays \"thaumcraft:cameraticks\" every second tick of the scan and draws the rune particles at the target; the native port has neither.",
           "CLOSED in this wave: the scan was silent. The original plays thaumcraft:cameraticks every second tick of a stable scan at the scanner; the native scan is server owned, so the server broadcasts it at the same volume .2 and pitch .45-.55.",
           "DEVIATION (documented): the original played the sound on the scanning client only and drew its pitch from the CLIENT world random, so a scan never shifted the server world random that generates the research puzzles. The native plays the sound from the server and draws the pitch from its own generator, which keeps the server world random untouched.",
-          "REMAINING GAP (client, blocked): the original also draws the rune particles at the target every tick of the scan (Thaumcraft.proxy.blockRunes, oracle ItemThaumometer:73/85/115). The rune particles are a client side effect and common/src/main/java/thaumcraft/client/** belongs to the client wave, so the port still has no rune particles."
+          "REMAINING GAP (client, blocked): the original also draws the rune particles at the target every tick of the scan (Thaumcraft.proxy.blockRunes, oracle ItemThaumometer:73/85/115). The rune particles are a client side effect and common/src/main/java/thaumcraft/client/** belongs to the client wave, so the port still has no rune particles.",
+          "PARTIAL 2026-10-23 (w2api): unchanged by this wave. The use duration, the twenty tick completion window, the target order and the camera tick of the original are reproduced; the rune particles at the target are a client side effect and belong to the client wave."
         ],
         "reviewed_sha256": {
           "original": "f79250eb33a27e1948b031585184c1b34fa0a7eef8b3305df186a73a06573986",
@@ -40185,7 +40243,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:348-356 the owner protection of a golem",
@@ -40197,7 +40255,14 @@
           "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:454-470 the champion reward of five to seven experience and one loot bag with the tier min(2, floor((rand(9)+looting)/5))",
           "native common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java:231-236 the native champion experience and loot bag tier with the same numbers",
           "native common/src/main/java/thaumcraft/common/mixin/ChampionDeathLootMixin.java the native champion reward inside the death loot of the mob",
-          "native common/src/main/java/thaumcraft/common/mixin/ZombieBrainDropsMixin.java and native common/src/main/java/thaumcraft/common/mixin/WardedPearl.java the native brain and warded pearl rules"
+          "native common/src/main/java/thaumcraft/common/mixin/ZombieBrainDropsMixin.java and native common/src/main/java/thaumcraft/common/mixin/WardedPearl.java the native brain and warded pearl rules",
+          "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:508-516 the death aspect orbs: one roll per primal aspect, a fifty percent chance and the value 1 + nextInt(amount) of the world random",
+          "oracle thaumcraft/common/entities/EntityAspectOrb.java:57-68 the scatter of the orb uses Math.random, not the world random",
+          "oracle thaumcraft/common/lib/research/ResearchManager.java:466-495 the reduction to the primals, reproduced by AspectList.reduceToPrimals(false)",
+          "native common/src/main/java/thaumcraft/common/lib/entities/DeathAspectOrbRules.java the pure rule of the orb block",
+          "native common/src/main/java/thaumcraft/common/entities/DeathAspectOrbDrop.java the death hook with the original recently-hit gate and the world random",
+          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:108 the registration of the death hook",
+          "native common/src/test/java/thaumcraft/common/lib/entities/DeathAspectOrbRulesTest.java the reduced primals, one orb per primal and the value 1 + nextInt(amount)"
         ],
         "notes": [
           "The 1.7 Forge event handler became a mixin and platform-event architecture; most of its behaviours are present (the research save and load, the repair enchantment, the warp and death gaze checks, the champion spawn roll and drops, the zombie brain, the villager resource, the crystal essence on dissolve, the taint conversion on death, the aspect orbs, the primal arrow, the unnatural hunger, the bath salts, the special mining drops, the pure bucket, the note block and the travel gear).",
@@ -40205,7 +40270,12 @@
           "ADAPTED: the original wrote the thrower name into the dropped item NBT (ItemTossEvent) and TileCrucible.attemptSmelt read it for the crucible owner rule; the native resolves the thrower from the vanilla ItemEntity owner, so the rule survives with a different mechanism.",
           "NOT NEEDED: the original cancelled the item pickup of every fake player whose name starts with FakeThaumcraft; the native never adds a fake player to a level, so there is nothing to cancel.",
           "REMAINING GAP: the original world load and save of the research file has no counterpart, because a fresh 1.21 world is the only supported input.",
-          "REMAINING GAP: the original wrote the research of a player into a separate file of the world on the player load and save events. The native port keeps the same facts in the native player data (native common/src/main/java/thaumcraft/common/mixin/PlayerKnowledgeMixin.java), because only fresh 1.21.1 worlds are supported and no 1.7 world migration is authorised."
+          "REMAINING GAP: the original wrote the research of a player into a separate file of the world on the player load and save events. The native port keeps the same facts in the native player data (native common/src/main/java/thaumcraft/common/mixin/PlayerKnowledgeMixin.java), because only fresh 1.21.1 worlds are supported and no 1.7 world migration is authorised.",
+          "CLOSED 2026-10-23 (w2api): the death aspect orbs of the original are back. The port had no such branch at all, so no mob ever dropped vis. The rule class and the death hook consume the world random in the original order and with the original gate.",
+          "The order of the world random is the original one: the Forge 1.7.10 patch of EntityLivingBase.onDeath fires LivingDeathEvent at the top of the method, before the drop block, and the Architectury LIVING_DEATH of the port is injected at the head of the 1.21.1 LivingEntity.die, before dropAllDeathLoot. The two rolls of an aspect therefore happen before the loot of the same death, exactly like the original.",
+          "The gate is the original one: vanilla 1.7.10 sets EntityLivingBase.recentlyHit only when a player hurts the mob, and the native equivalent of that flag is the 1.21.1 lastHurtByPlayerTime, which the native taint swarm, the native fire bat and the native golem already use for the original EntityUtils.setRecentlyHit calls. The reverted implementation of wave 1 used the damage cooldown instead, which is set by every damage.",
+          "The world stream of such a death really is shifted: the port consumed no world random at a death, the original consumes two rolls per primal aspect of the dead mob before the loot. The three GameTests that lock that stream (TaintSporeRuntimeChecks, BrainyZombieRuntimeChecks and PechRuntimeChecks) were re-derived with an exact simulation of the 1.21.1 RandomSource, which reproduces the seeds that the suite already used.",
+          "REMAINING GAP: the original world load and save of the research file has no counterpart, because a fresh 1.21 world is the only supported input, and the original wrote the research of a player into a separate file of the world, which the native port keeps in the native player data."
         ],
         "reviewed_sha256": {
           "original": "a909ad4b5f57746757756d6b25f8894c300d33705973fcf9ddfe2c8eebe2390a",
@@ -40319,7 +40389,8 @@
           "REMAINING GAP: the block placement is still not cancelled near an active eldritch boss in the Outer Lands.",
           "REMAINING GAP: the original maze load and save on the world load and save events has no native counterpart (the Outer Lands maze is a different subsystem).",
           "REMAINING GAP: the original cancelled the placement of a block near an active eldritch boss in the Outer Lands (oracle EventHandlerWorld.java:197-224); the native port has no such rule.",
-          "REMAINING GAP: the chunk regeneration queue of the original has no counterpart, because 1.21.1 has no equivalent chunk data event."
+          "REMAINING GAP: the chunk regeneration queue of the original has no counterpart, because 1.21.1 has no equivalent chunk data event.",
+          "PARTIAL 2026-10-23 (w2api): the block placement near an active eldritch boss of the Outer Lands (oracle EventHandlerWorld:225-245) is still not cancelled. The rule needs the Outer Lands dimension, the cell of the labyrinth, the feature of the cell and an active IThaumcraftBoss within the thirty two blocks of the original EntityUtils.getEntitiesInRange, and a cancellation of the placement. The common layer has no cancellable placement event: the Architectury BlockEvent.Place has a different signature in the common artifact (Player, BlockPos, BlockState, BlockEntity) and in the NeoForge artifact (Level, BlockPos, BlockState, Entity), so a common handler would throw NoSuchMethodError on NeoForge. The rule therefore needs one loader hook per platform, in fabric/src/main/java and neoforge/src/main/java, which this wave does not own."
         ],
         "reviewed_sha256": {
           "original": "4b6666adeef69182a242a0d87fea122fd50805fb446b5ba84e1ebd2c44d3287b",
@@ -40464,7 +40535,8 @@
           "The 1.7 tick handler became the Architectury tick events plus the native excavation code.",
           "The excavation block swap and the note block clearing are implemented in the native excavation and arcane ear code.",
           "REMAINING GAP: the chunk regeneration queue is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row).",
-          "REMAINING GAP: the chunk regeneration queue of the original is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row)."
+          "REMAINING GAP: the chunk regeneration queue of the original is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row).",
+          "PARTIAL 2026-10-23 (w2api): unchanged by this wave. The chunk regeneration queue of the original has no counterpart, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row)."
         ],
         "reviewed_sha256": {
           "original": "e85740a36e29e290ec08158e3c2e2f71a11af1f299a0baa0f04330dc777999a2",
@@ -42175,7 +42247,8 @@
         "notes": [
           "The C2S scan packet is gone: the server derives the target itself, which removes the original's client-authority surface.",
           "Deviation (client feedback): because nothing crosses the wire any more, the original's client-side scan sound and rune particles are not reproduced (see the ItemThaumometer row).",
-          "CLOSED in this wave: the client feedback of the scan was completely absent. The camera tick sound of the original (thaumcraft:cameraticks every second tick, volume .2) is played again from the server; the rune particles of the original remain missing because they need a client side effect in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
+          "CLOSED in this wave: the client feedback of the scan was completely absent. The camera tick sound of the original (thaumcraft:cameraticks every second tick, volume .2) is played again from the server; the rune particles of the original remain missing because they need a client side effect in common/src/main/java/thaumcraft/client/**, which belongs to the client wave.",
+          "PARTIAL 2026-10-23 (w2api): unchanged by this wave. The C2S scan packet is gone: the server derives the target itself, which removes the original client authority surface. The rune particles of the original at the target are a client side effect and belong to the client wave."
         ],
         "reviewed_sha256": {
           "original": "1eec86b0ebd6816a9f542ab7251c89280cd68701038e0416802fe3de2b1b95b4",
@@ -43765,7 +43838,8 @@
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native keeps the twelve banker trades and the fifteen wizard trades as data.",
-          "1.21.1 has no villager profession registry yet, so the trade tables are not bound to a trader."
+          "1.21.1 has no villager profession registry yet, so the trade tables are not bound to a trader.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "legacy": "8d4971296e3685cc56725651ee1073ccd4417771c4e7b41b4f9b0d71d428f70a"
@@ -43865,7 +43939,8 @@
         ],
         "notes": [
           "The Forge village handler became a deterministic chunk feature; the piece weight, the profession id and the trade table are kept.",
-          "The feature never runs because no biome modifier places it."
+          "The feature never runs because no biome modifier places it.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "a35b07a30700dc876d158a754922ad1b466f1bfc25716bbb054b372e07fddfe9",
@@ -43913,7 +43988,8 @@
         ],
         "notes": [
           "The Forge village handler became a deterministic chunk feature; the numbers are kept.",
-          "The feature never runs because no biome modifier places it."
+          "The feature never runs because no biome modifier places it.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "128a302e8f62440ba47097c3bbed68285d19a6982d3f3b8fd6e61482e897096a",
@@ -44155,7 +44231,8 @@
           "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the native hilltop stones"
         ],
         "notes": [
-          "The generator, the footprint and the minimum height 85 are ported, but the placed feature is never added to a biome, so the stones never generate."
+          "The generator, the footprint and the minimum height 85 are ported, but the placed feature is never added to a biome, so the stones never generate.",
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
         ],
         "reviewed_sha256": {
           "original": "32f84ccdd45ce5ae2d34d6f699a84188fd376ff70218a0020426ae7c0156be8b",
@@ -48485,7 +48562,8 @@
           "CLOSED 2026-10-23: the discharge runs only in the invisible aura node block and drains only an unlocked invisible aura node, as TileNode:559-560,577-579 do. The silverwood knot and the totem host of the original never discharge; the native node discharged from and into every node host.",
           "REMAINING GAP (cross lane): the native node does not implement the public thaumcraft.api.nodes.INode and it keeps its own nested NodeType/NodeModifier enums. The public view is the api layer's NodeAdapter, whose setNodeType and setNodeModifier throw, and the node identity of the native node is a UUID instead of the original dim:x:y:z string. Closing the contract needs the api lane (coremisc), because the adapter and the node must agree on the write path and on the identity.",
           "DEVIATION: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself; the behaviour is the same.",
-          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have."
+          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have.",
+          "PARTIAL 2026-10-23 (w2api): the advanced node stabilizer is a real block and gives the lock two, the discharge only runs in and only drains the invisible aura node, and the published type and modifier of the node are written again through the thaumcraft.api.nodes.INode contract (the original TileNode:245-252). The node still does not implement INode itself and still keeps its own nested NodeType and NodeModifier enums; the replacement of those enums by the published ones touches 149 places, among them common/src/main/java/thaumcraft/client/** and common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own."
         ],
         "reviewed_sha256": {
           "original": "b672c7d42f8c9f2af611c6576235dbafa6a6ae4e96adf0b67809318e1a782348",
@@ -48813,7 +48891,8 @@
           "Deviation: the original's Material-based block classification is replaced by an explicit 1.21.1 block list plus tags (native TileResearchTable.java:285-301); the bonus pool is a bounded map instead of an AspectList with merge(max) semantics.",
           "Deviation: the original's client-side placeAspect packet became a server-authoritative, revision-checked edit request; the original's overwrite/hole/free-funding exploits are closed (documented in ResearchNoteEditing).",
           "Not reproduced: the original's replace-the-table-on-copy side effect (oracle TileResearchTable:415) - the native keeps the table and the copied note.",
-          "OPEN DEFECT (proved, blocked): the copy of a solved note costs an ink sac in the port, but the original costs one black dye (Items.dye metadata 0 in 1.7.10, minecraft:black_dye in 1.21.1). The fix is two lines - ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC - but common/src/main/java/thaumcraft/common/tiles/** belongs to the block entity wave, so the change was not made in this wave."
+          "OPEN DEFECT (proved, blocked): the copy of a solved note costs an ink sac in the port, but the original costs one black dye (Items.dye metadata 0 in 1.7.10, minecraft:black_dye in 1.21.1). The fix is two lines - ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC - but common/src/main/java/thaumcraft/common/tiles/** belongs to the block entity wave, so the change was not made in this wave.",
+          "PARTIAL 2026-10-23 (w2api): the copy of a solved note still costs an ink sac in the port, but the original costs one black dye (oracle TileResearchTable:407-441, Items.dye metadata 0, which is minecraft:black_dye in 1.21.1). The fix is two lines: ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC. The second line is in common/src/main/java/thaumcraft/common/tiles/**, which this wave owns, but the first line is in common/src/main/java/thaumcraft/common/lib/network/**, which this wave does not own, and the copy gate of the network refuses the copy before the commit when the player has no ink sac. The change was therefore not made: a half of it would break the copy of every solved note."
         ],
         "reviewed_sha256": {
           "original": "cfa85e36602963466912ff91217764ef5e8c0cd673b71ef521d04124012b3f37",
@@ -49717,7 +49796,8 @@
         ],
         "notes": [
           "TC4 has no per-chunk aura: the native keeps the essence in the aura node and projects the add-on accessors onto it, so the vis of the legacy chunk state is reachable.",
-          "REMAINING GAP: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well, so the holder itself has no native counterpart to point at."
+          "REMAINING GAP: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well, so the holder itself has no native counterpart to point at.",
+          "PARTIAL 2026-10-23 (w2api): the per-chunk base and the flux of the TC6 state have no TC4 counterpart, so the holder itself has no native counterpart to point at. The drain of the surface now reaches the vis network of the position, as the retained 1.12 handler did."
         ],
         "reviewed_sha256": {
           "legacy": "63c22abddf12b0f553991b5b91a25bc1fb9c98cb635c74102c2c32f9ce65c415"
@@ -49761,7 +49841,8 @@
         ],
         "notes": [
           "The vis drain of the 1.12 handler is projected onto the native aura node; the chunk state and the flux have no TC4 counterpart.",
-          "REMAINING GAP: the legacy drainVis drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis) and the native projection drains the node AT the position, so the two do not select the same source of vis. The api lane owns AuraHelper, the projection of this handler."
+          "REMAINING GAP: the legacy drainVis drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis) and the native projection drains the node AT the position, so the two do not select the same source of vis. The api lane owns AuraHelper, the projection of this handler.",
+          "PARTIAL 2026-10-23 (w2api): the chunk state and the flux have no TC4 counterpart. The drain of the surface now reaches the vis network of the position, as the retained 1.12 handler did, and not the essence of the node at the position."
         ],
         "reviewed_sha256": {
           "legacy": "11f597a010debe4d5ace27d99fdb588558f79a59b75591b2f89232a25e9c3db4"

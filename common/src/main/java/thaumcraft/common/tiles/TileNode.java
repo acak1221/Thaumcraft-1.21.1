@@ -37,6 +37,7 @@ import thaumcraft.common.lib.research.HungryNodeRules;
 import thaumcraft.common.lib.research.EntityAspectBindings;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
 import thaumcraft.common.lib.research.DeconstructionRules;
+import thaumcraft.common.lib.tiles.TileParityRules;
 import thaumcraft.common.lib.world.HungryNodeTrace;
 
 /**
@@ -517,7 +518,16 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         if (!level.hasChunkAt(below) || !TileNodeStabilizer.powerAreaLoaded(level, below)) return;
         boolean powered = level.hasNeighborSignal(below);
         BlockState support = powered ? null : level.getBlockState(below);
-        byte next = !powered && support.is(ThaumcraftNodeDevices.NODE_STABILIZER.get()) ? (byte) 1 : 0;
+        // Original TileNode:885-889 - the stone device of the ninth metadata locks the
+        // node with one, the device of the tenth metadata locks it with two. The native
+        // tree only knew the basic stabiliser, so the advanced stabiliser never locked
+        // its node at all and the lock value two was never produced.
+        byte next = 0;
+        if (!powered) {
+            next = (byte) TileParityRules.nodeStabilizerLock(
+                    support.is(ThaumcraftNodeDevices.NODE_STABILIZER.get()),
+                    support.is(ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER.get()));
+        }
         // Queries are call-outs, not permission to modify a retired/replaced node.
         // Abandon a changed observation, without a new between-samples lock poll.
         if (!current() || !level.hasChunkAt(below) || !TileNodeStabilizer.powerAreaLoaded(level, below) || level.hasNeighborSignal(below) != powered
@@ -596,7 +606,9 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
             case PALE -> 900;
             case FADING -> 0;
         };
-        return nodeLock == 1 ? interval * 2 : interval;
+        // Original TileNode:644-650 - a node that is locked with one regenerates twice
+        // as fast, a node that is locked with two regenerates twenty times as fast.
+        return TileParityRules.nodeRegenerationInterval(interval, nodeLock);
     }
 
     /** Original100-tick stability precedes its separate FADING repair roll. */
@@ -645,7 +657,10 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     private boolean repairFading() {
         if (count % 100 != 0 || nodeModifier != NodeModifier.FADING || nodeLock == 0) return false;
         int before = count;
-        if (level.random.nextInt(12500) != 69 || !current() || count != before || nodeModifier != NodeModifier.FADING || nodeLock == 0) return false;
+        // Original TileNode:781 - the roll of a locked node is 12500 divided by its lock,
+        // so the advanced stabiliser (lock two) repairs its fading node twice as often.
+        if (level.random.nextInt(TileParityRules.nodeFadingRepairBound(nodeLock)) != TileParityRules.NODE_FADING_REPAIR_ROLL
+                || !current() || count != before || nodeModifier != NodeModifier.FADING || nodeLock == 0) return false;
         nodeModifier = NodeModifier.PALE;
         return true;
     }

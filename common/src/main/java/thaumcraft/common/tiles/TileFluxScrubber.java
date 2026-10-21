@@ -15,10 +15,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.visnet.VisNetHandler;
-import thaumcraft.common.blocks.BlockFluxGoo;
 import thaumcraft.common.blocks.FluxFiniteBlock;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.essentia.EssentiaStorageEndpoint;
+import thaumcraft.common.lib.tiles.TileParityRules;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
@@ -113,9 +113,19 @@ public final class TileFluxScrubber extends BlockEntity implements EssentiaStora
         }
     }
 
-    /** Original TileFluxScrubber:90-93 - only the flux goo is removed. */
+    /**
+     * Original TileFluxScrubber:59-62 - the original matches the flux MATERIAL, and the
+     * flux goo and the flux gas are the two blocks that use it (oracle Config:876
+     * {@code fluxGoomaterial = new MaterialTaint(...)}, oracle BlockFluxGoo:32 and
+     * oracle BlockFluxGas:28 both pass that material to their constructor).
+     *
+     * <p>The native tree used to recognise the flux goo only, so the scrubber never
+     * removed a single block of flux gas. Both native flux blocks are the two
+     * subclasses of {@link FluxFiniteBlock}, which is the native port of the finite
+     * fluid of the original, so the material test is the whole flux family.</p>
+     */
     private boolean isFlux(Level level, BlockPos pos) {
-        return level.getBlockState(pos).getBlock() instanceof BlockFluxGoo;
+        return TileParityRules.fluxScrubberRemoves(level.getBlockState(pos));
     }
 
     /** The original shuffles its candidates with the random of the world. */

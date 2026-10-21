@@ -100,8 +100,11 @@ final class GolemDoorGoal extends Goal {
     }
 
     @Override public void tick() {
-        if (--openTicks <= 0) return;
-        // Original AIDoorInteract.func_75246_d:82 — the counter of the base class.
+        // Original AIOpenDoor.func_75246_d:167-170 and AIDoorInteract.func_75246_d:81-89 — both
+        // counters fall by one every tick. The dot product of the base class is not computed: the
+        // base startExecuting of the 4.2.3.5 jar is never called, so its two direction vectors stay
+        // zero and hasStoppedDoorInteraction is never set.
+        --openTicks;
         --count;
     }
 

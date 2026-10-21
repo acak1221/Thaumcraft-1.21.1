@@ -92,12 +92,13 @@ public class ItemSpawnerEgg extends SpawnEggItem {
         BlockPos clicked = context.getClickedPos();
         Direction direction = context.getClickedFace();
         BlockState state = server.getBlockState(clicked);
+        boolean creative = creative(context.getPlayer());
         if (server.getBlockEntity(clicked) instanceof Spawner spawner) {
             // The native spawn egg also fills a spawner block.
             spawner.setEntityId(getType(stack), server.getRandom());
             server.sendBlockUpdated(clicked, state, state, 3);
             server.gameEvent(context.getPlayer(), GameEvent.BLOCK_CHANGE, clicked);
-            stack.shrink(1);
+            if (spendsStack(creative)) stack.shrink(1);
             return InteractionResult.CONSUME;
         }
         BlockPos target = clicked.relative(direction);
@@ -105,9 +106,30 @@ public class ItemSpawnerEgg extends SpawnEggItem {
         Mob mob = spawnCreature(server, getType(stack), target.getX() + 0.5D, target.getY() + offset, target.getZ() + 0.5D,
                 stack, context.getPlayer());
         if (mob != null) {
-            stack.shrink(1);
+            if (spendsStack(creative)) stack.shrink(1);
             server.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, target);
         }
         return InteractionResult.CONSUME;
+    }
+
+    /**
+     * Original {@code ItemSpawnerEgg.java:99-101} —
+     * {@code if (!player.field_71075_bZ.field_75098_d) { --stack.field_77994_a; }}:
+     * the creative spawn egg of the original is never spent, because the
+     * creative mode of the player is the only thing that decides it. The
+     * 1.21.1 {@link SpawnEggItem} always spends the stack (its own
+     * {@code useOn} calls {@code itemstack.shrink(1)} in both of its branches),
+     * so the original rule has to be reproduced here.
+     *
+     * @param creative the creative mode of the player that used the egg
+     * @return true when the stack of the egg is spent
+     */
+    public static boolean spendsStack(boolean creative) {
+        return !creative;
+    }
+
+    /** The creative mode of the player; a player without abilities is never creative. */
+    private static boolean creative(Player player) {
+        return player != null && player.getAbilities().instabuild;
     }
 }

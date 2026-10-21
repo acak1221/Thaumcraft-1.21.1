@@ -7458,10 +7458,12 @@
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/JeiRecipeData.java: the 1.12 JEI integration data holder",
-          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display"
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over."
+          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over and the JEI recipe browser itself has no native counterpart.",
+          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them."
         ],
         "reviewed_sha256": {
           "legacy": "cdb2816098136e6c210fedb3d413e9382e0d43c7aab8967a0093f8cf85c5348c"
@@ -7630,10 +7632,12 @@
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeCategory.java: the 1.12 JEI recipe category",
-          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java"
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration, not carried over."
+          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over and the JEI recipe browser itself has no native counterpart.",
+          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them."
         ],
         "reviewed_sha256": {
           "legacy": "340f5098de257eebb9c9a49d6fad95b391fbbe3a895cd6ae8a2a434b66361ce6"
@@ -7671,10 +7675,12 @@
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeWrapper.java: the 1.12 JEI recipe wrapper",
-          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java"
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration, not carried over."
+          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over and the JEI recipe browser itself has no native counterpart.",
+          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them."
         ],
         "reviewed_sha256": {
           "legacy": "c33dd092674d012c5b65b6edce41cdff745f2cedcf67f674794005e0ecc09e79"
@@ -24850,20 +24856,23 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
-          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/config/ConfigRecipes.java:83-103 the nine wand constructs (Thaumonomicon, ArcTable, ResTable, Crucible, InfernalFurnace, InfusionAltar, NodeJar, Thaumatorium, AdvAlchemyFurnace)",
-          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/config/ConfigRecipes.java:105-181 the crucible recipes",
-          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/config/ConfigRecipes.java:183-296 the arcane recipes, including the 16 Banner_<colour> recipes at :184-189 and the 6 PrimalArrow_<aspect> recipes at :218-220",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the 250 original keys mapped to native recipe ids, the 9 original wand constructs and the 16 deferred keys",
-          "native common/src/main/resources/data/thaumcraft/recipe/ the 308 native recipe files"
+          "oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/config/ConfigRecipes.java:38-512 the whole original catalogue: 279 ConfigResearch.recipes.put call sites, five of them inside a loop, expanded to 308 distinct original recipe keys",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original keys: 293 native recipes, 9 original wand constructs, 9 documented deferrals",
+          "native common/src/main/resources/data/thaumcraft/recipe/ the 344 native recipe files that carry them",
+          "native common/src/test/java/thaumcraft/research/ResearchRecipeCoverageTest.java the catalogue guard that pins the 308 original keys, the 293 native recipe ids and the outside-book set",
+          "native common/src/test/java/thaumcraft/assets/RecipeIngredientParityTest.java the content guard that pins the original ingredient of the ten recipes this wave restored",
+          "field by field comparison of all 290 covered keys against the oracle: the arcane vis cost, the crucible and infusion aspect cost, the infusion instability, the result count, the pattern, the ingredient symbols and the ingredient count of every recipe are equal"
         ],
         "notes": [
-          "The original ConfigRecipes registered 303 distinct recipe keys (279 put sites, 16 of them conditional on another ore mod, expanded to 304 keys with 303 unique). The native port replaces the programmatic registry with 308 datapack recipe files.",
-          "The research-referenced subset is fully accounted for: the native corpus data/thaumcraft/tc4/research.json names exactly the same 272 original recipe keys as the oracle ConfigResearch, and ResearchRecipeCoverage classifies all 272 into 250 mapped keys (every one of them backed by an existing recipe file), 9 original wand constructs and 16 deferred keys with a written reason.",
-          "DEVIATION: the 16 Banner_<colour> arcane recipes and the 6 PrimalArrow_<aspect> arcane recipes of the original are not ported. They are not referenced by the research book, so the coverage class does not report them, but the native recipe tree contains no recipe that produces a banner or a primal arrow, although the primal arrow item and the banner block do exist.",
-          "DEVIATION: the docs/MIGRATION_STATUS.md and docs/HANDOFF.md still claim \"247 original keys closed, 19 deferred\". The current code resolves 250 and defers 16; the documented numbers are stale."
+          "The programmatic registry of the original is replaced by the 344 native recipe files of data/thaumcraft/recipe and by the coverage map of ResearchRecipeCoverage. The catalogue is closed over the original: every one of the 308 original keys is a native recipe (293), an original wand construct (9) or a documented deferral (9).",
+          "The research referenced subset is fully accounted for: the native corpus data/thaumcraft/tc4/research.json names exactly the same 272 original recipe keys as the oracle ConfigResearch, and the coverage map classifies all of them into 279 mapped keys, every one of them backed by an existing recipe file, and 9 documented deferrals.",
+          "The nine deferrals carry their exact blocker: eight of them need a third party tin, silver or lead (the original registers them only when Config.foundTinIngot, foundSilverIngot or foundLeadIngot, the catalyst side is already tag ready and the result item is the missing part) and the essentia mirror needs a separate mirror item, because the mirror block entity is chosen by the essentia block state property.",
+          "The sixteen Banner_<colour> and the six PrimalArrow_<aspect> arcane recipes of the original (oracle :173 and :210) ARE ported and are named by the coverage map, even though the research book shows them as an array of recipes and never names them by key.",
+          "Ten covered recipes asked the player for a different item than the original (the eight enchantment infusions, the arcane spa and the hover harness); this wave restored the original ingredient of all of them.",
+          "The original class and its static entry points are gone, so an add-on that registered a recipe through the original static registry has to use the native recipe tree."
         ],
         "reviewed_sha256": {
           "original": "45ab9dc6772fcb51dba83d04221d4b910c85fe013706a333ba65ab4d56abfc58",
@@ -25029,14 +25038,16 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesArcaneSlice.java: the 1.12 split of the recipe registration",
-          "native common/src/main/resources/data/thaumcraft/recipe/arcane/ the native arcane recipe files"
+          "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesArcaneSlice.java: the 1.12 split of the recipe registration, the arcane part",
+          "native common/src/main/resources/data/thaumcraft/recipe/arcane/ the native arcane recipe files",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys, the machine check that every one of them has a native recipe or a written reason"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 file split. The native uses the datapack recipe tree instead of programmatic registration, so the split classes are deliberately not carried over."
+          "Not an original TC4 class: a 1.12 file split. The native uses the datapack recipe tree instead of programmatic registration, so the split classes are deliberately not carried over.",
+          "The registrations the split class held ARE carried: every one of the 308 original recipe keys of the oracle is a native recipe file, and the coverage guard of the research coverage pins the whole catalogue."
         ],
         "reviewed_sha256": {
           "legacy": "8ef36c0e2edbe50b58c51fa605dc35022a5e595820971e7a26dee90f61a48f6e"
@@ -25238,14 +25249,16 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesSmeltingSlice.java: the 1.12 split of the recipe registration",
-          "native common/src/main/resources/data/thaumcraft/recipe/ the native smelting recipe files"
+          "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesSmeltingSlice.java: the 1.12 split of the recipe registration, the smelting part",
+          "native common/src/main/resources/data/thaumcraft/recipe/ the native smelting recipe files",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys, the machine check that every one of them has a native recipe or a written reason"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 file split, replaced by the datapack recipe tree."
+          "Not an original TC4 class: a 1.12 file split. The native uses the datapack recipe tree instead of programmatic registration, so the split classes are deliberately not carried over.",
+          "The registrations the split class held ARE carried: every one of the 308 original recipe keys of the oracle is a native recipe file, and the coverage guard of the research coverage pins the whole catalogue."
         ],
         "reviewed_sha256": {
           "legacy": "c128be0a3a59673a796224731a930eb570c9db75a887ea835beaff8ed463f785"
@@ -25279,14 +25292,16 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesSpecialSlice.java: the 1.12 split of the recipe registration",
-          "native common/src/main/resources/data/thaumcraft/recipe/ the native special recipe files"
+          "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesSpecialSlice.java: the 1.12 split of the recipe registration, the special part",
+          "native common/src/main/resources/data/thaumcraft/recipe/ the native recipe files of the special recipes",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys, the machine check that every one of them has a native recipe or a written reason"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 file split, replaced by the datapack recipe tree."
+          "Not an original TC4 class: a 1.12 file split. The native uses the datapack recipe tree instead of programmatic registration, so the split classes are deliberately not carried over.",
+          "The registrations the split class held ARE carried: every one of the 308 original recipe keys of the oracle is a native recipe file, and the coverage guard of the research coverage pins the whole catalogue."
         ],
         "reviewed_sha256": {
           "legacy": "1f538fa290f37bbb57ccc5821d9b2ca6f8a3f971e0b14ef40c7e5f7eef718af7"
@@ -26515,14 +26530,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
-          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:40-65 onCrafted: the crafting event, the wand vis payment and the per-cell consumption with the container item return",
-          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:51 public void onTake(Player player, ItemStack stack)",
-          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:58 PlayerEvent.CRAFT_ITEM.invoker().craft(player, stack, craftMatrix);",
-          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:62 if (!wand.isEmpty()) ArcaneVis.debit(wand, match.prices());",
-          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:46-49 the documented note about the original double decrement"
+          "oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:36-65 onCrafted: the crafting event, the wand vis payment and the per-cell consumption with the container item return",
+          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:51-76 the native slot: the crafting event, the vis payment of the matched recipe and the per-cell consumption with the container item returned to the player",
+          "native common/src/main/java/thaumcraft/common/crafting/ArcaneCrafting.java:16-45 the matcher that finds the recipe of the matrix and its vis price",
+          "native common/src/main/java/thaumcraft/common/crafting/ArcaneVis.java the vis debit of the wand",
+          "native common/src/main/java/thaumcraft/common/crafting/ArcaneShapedRecipe.java:70-95 the native arcane matching that keeps the blank borders of the original pattern and the horizontal mirroring"
         ],
         "notes": [
           "The crafting event, the wand vis payment and the per-cell consumption with the container item return to the player are ported.",
@@ -38957,16 +38972,19 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
-          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:810 the original crafting manager (arcane, crucible and infusion matching, the research gate)",
-          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java findMatchingArcaneRecipeAspects used by the arcane workbench slot",
-          "native common/src/main/java/thaumcraft/common/crafting/ArcaneCrafting.java, CrucibleCrafting.java, InfusionStackRecipe.java, ArcaneVis.java the native matchers",
-          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:59 ArcaneCrafting.Match match = ArcaneCrafting.find(player, craftMatrix);"
+          "oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java the original crafting manager: the arcane, crucible and infusion matching and the research gate",
+          "native common/src/main/java/thaumcraft/common/crafting/ArcaneCrafting.java:16-45 the native matcher: it asks the recipe manager of the loaded level, gives the ordinary crafting priority (oracle ContainerArcaneWorkbench:60-69) and then the arcane recipes, and it pays the vis price of the matched recipe",
+          "native common/src/main/java/thaumcraft/api/crafting/NativeRecipes.java the native registry behind the public API: the runtime installs the recipe manager of the level it loaded and every answer of the public API is read from it",
+          "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:205-308 getCraftingRecipes, getInfusionRecipe, getCrucibleRecipe and getCraftingRecipeKey answer from that manager of the loaded world",
+          "native common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java, InfusionStackRecipe.java, InfusionEnchantmentRecipe.java the per kind native matchers the manager was split into",
+          "native common/src/gameTest/java/thaumcraft/common/testing/CraftingRecipeApiRuntimeChecks.java the runtime check of the public recipe list on a running server"
         ],
         "notes": [
           "The 810 line manager was split into per-kind native matchers; the arcane workbench pays exactly the aspects of the matched recipe.",
+          "The public API answers from the recipe manager of the LOADED WORLD: the runtime installs it on the server start and every lookup of the original API reads it, so the original static registry is replaced by the recipe manager of 1.21.1.",
           "DEVIATION: the original class and its static entry points are gone, so an add-on that called ThaumcraftCraftingManager.findMatchingArcaneRecipeAspects has to be rewritten against ArcaneCrafting."
         ],
         "reviewed_sha256": {

@@ -103,7 +103,7 @@ class ResearchNoteIssuanceTest {
         before.set(4, new ItemStack(Items.AIR));
         assertEquals(-1, ResearchNoteIssuance.paperSlot(before));
         before.set(4, new ItemStack(Items.PAPER, 5));
-        // Original ResearchManager.createResearchNoteForPlayer:108-115 spends the paper
+        // Original ResearchManager.createResearchNoteForPlayer:120-135 spends the paper
         // and then the ink point; the staged inventory shows both halves of that rule.
         var staged = ResearchNoteIssuance.stage(before, 4, 9, new ScribingInk.Plan(true, 0, 1));
         assertEquals(4, staged.get(4).getCount(), "the original takes exactly one paper of the note");

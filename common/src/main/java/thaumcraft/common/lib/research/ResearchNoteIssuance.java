@@ -74,7 +74,7 @@ public final class ResearchNoteIssuance {
             return rejected(Failure.INVALID_GENERATION, plan.key);
         }
 
-        // Original ResearchManager.createResearchNoteForPlayer:108-115
+        // Original ResearchManager.createResearchNoteForPlayer:120-135
         //   consumeInkFromPlayer(player, false) && player.inventory.consumeInventoryItem(Items.paper)
         // The 1.7.10 JAR calls InventoryPlayer.func_146026_a(Item), which the official
         // mcp_stable-12-1.7.10 mapping names consumeInventoryItem ("removed one item of
@@ -181,11 +181,12 @@ public final class ResearchNoteIssuance {
 
     /**
      * The original spends one paper and one ink point:
-     * ResearchManager.createResearchNoteForPlayer:108-115 first calls
-     * InventoryPlayer.consumeInventoryItem(Items.paper) - which shrinks the first
-     * paper stack by one and clears the slot when it empties - and only then
-     * consumeInkFromPlayer(player, true) damages the first usable scribe tool.
-     * Staging therefore copies every unrelated stack unchanged.
+     * ResearchManager.createResearchNoteForPlayer:120-135 first calls
+     * InventoryPlayer.consumeInventoryItem(Items.paper) at line 126 - which
+     * shrinks the first paper stack by one and clears the slot when it empties -
+     * and only then consumeInkFromPlayer(player, true) at line 127 damages the
+     * first usable scribe tool. Staging therefore copies every unrelated stack
+     * unchanged.
      */
     static List<ItemStack> stage(List<ItemStack> before, int paperSlot, int inkSlot, ScribingInk.Plan ink) {
         List<ItemStack> staged = new ArrayList<>(MAIN_SIZE);

@@ -74,7 +74,8 @@ public final class ItemThaumometer extends Item {
         // every second tick of a stable scan, at the scanner, with volume .2 and a
         // pitch of .45 + worldRand.nextFloat()*.1. The original played it on the
         // scanning client only; the native scan is server owned, so the server
-        // broadcasts it. At volume .2 the native broadcast radius stays local.
+        // broadcasts the sound packet. The client attenuates it by distance, so
+        // in practice only the scanner and its immediate neighbours hear it.
         if (cameraTickDue(remaining)) cameraTick(level, player);
         if (level.getGameTime() - session.startTick() >= SCAN_TICKS) {
             ScanManager.completeScan(player, target.signature(), target.aspects(), target.kind(), target.clue());

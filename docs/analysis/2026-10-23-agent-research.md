@@ -119,9 +119,12 @@ with sharper evidence and an explicit blocker.
 * **Documented deviation.** The original played the sound on the scanning
   *client* and drew the pitch from the *client* world random, so a scan never
   shifted the server world random that generates the research puzzles. The
-  native scan is server owned, so the server plays the sound; the pitch is
-  drawn from a private generator so the **server world random stays untouched**
-  (`ItemThaumometer.java:91-99`).
+  native scan is server owned, so the server plays the sound (the 1.21.1
+  `Level.playSound` → `ServerLevel.playSeededSound` → `PlayerList.broadcast`
+  chain sends the sound packet to the dimension and the client attenuates it by
+  distance, so in practice only the scanner and its immediate neighbours hear
+  it); the pitch is drawn from a private generator so the **server world random
+  stays untouched** (`ItemThaumometer.java:91-99`).
 * **Still open (client).** The original also draws the rune particles at the
   target every tick of the scan (`ItemThaumometer.java:73/85/115`). That is a
   client side effect and `common/src/main/java/thaumcraft/client/**` belongs to

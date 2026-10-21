@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * The original material cost of a TC4 4.2.3.5 research note and the persistence
  * of the research progress of a player.
  *
- * <p>Oracle {@code thaumcraft/common/lib/research/ResearchManager.java:102-119}
- * {@code createResearchNoteForPlayer} spends the paper and the ink:
+ * <p>Oracle {@code thaumcraft/common/lib/research/ResearchManager.java:120-135}
+ * {@code createResearchNoteForPlayer} spends the paper and the ink: line 126 is
  * {@code consumeInkFromPlayer(player, false) && player.inventory.consumeInventoryItem(Items.paper)}.
  * The 1.7.10 JAR calls {@code InventoryPlayer.func_146026_a(Item)}; the official
  * {@code mcp_stable-12-1.7.10} mapping names that method {@code consumeInventoryItem}

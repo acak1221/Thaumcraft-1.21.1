@@ -48,7 +48,7 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             test.assertTrue(player.server.isSameThread(), "shared receiver is called on the server thread");
             var result = ResearchNoteRequestNetworking.handle(player, "NITOR");
             test.assertTrue(result.success() && !result.reused() && !result.dropped(), "actual receiver issues one normal primary note");
-            // Oracle ResearchManager.createResearchNoteForPlayer:108-115 - the original spends
+            // Oracle ResearchManager.createResearchNoteForPlayer:120-135 - the original spends
             // one paper (InventoryPlayer.consumeInventoryItem(Items.paper)) and one ink point.
             test.assertTrue(player.getInventory().getItem(0).getCount() == 2, "the original spends exactly one paper of the note");
             ItemStack tool = player.getInventory().getItem(1);

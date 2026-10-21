@@ -3,7 +3,8 @@
   "package": "thaumcraft.fabric.mixin.compat",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ArchitecturyFluidPatchMixin"
+    "ArchitecturyFluidPatchMixin",
+    "FabricExcavationRemovalMixin"
   ],
   "injectors": {
     "defaultRequire": 1

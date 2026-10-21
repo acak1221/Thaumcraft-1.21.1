@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -58,32 +57,18 @@ public abstract class ExcavationServerPlayerGameModeMixin implements ExcavationH
         return frame == null ? block.playerWillDestroy(world, pos, state, actor) : frame.snapshot();
     }
 
-    @Redirect(method = "destroyBlock(Lnet/minecraft/core/BlockPos;)Z", require = 1, allow = 1,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"))
-    private boolean thaumcraft$witnessNativeRemoval(ServerLevel world, BlockPos pos, boolean moving) {
-        var frame = thaumcraft$excavationFrame();
-        if (frame != null) return frame.remove(world, pos, moving);
-        boolean removed = world.removeBlock(pos, moving);
-        StreamAxeHarvest.witnessRemoval((ServerPlayerGameMode) (Object) this, world, pos, removed);
-        return removed;
-    }
-
-    @Redirect(method = "destroyBlock(Lnet/minecraft/core/BlockPos;)Z", require = 1, allow = 1,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;destroy(Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
-    private void thaumcraft$skipVirtualDestroyed(Block block, LevelAccessor world, BlockPos pos, BlockState state) {
-        if (thaumcraft$excavationFrame() == null) block.destroy(world, pos, state);
-    }
+    // The three removals below live in the loader specific mixins: the vanilla
+    // 1.21.1 call graph of destroyBlock and the NeoForge 21.1 call graph differ
+    // (NeoForge routes the removal through its own private removeBlock helper and
+    // BlockState.onDestroyedByPlayer, and replaces hasCorrectToolForDrops with
+    // BlockState.canHarvestBlock). Both variants keep require=1 and fail closed.
+    //   Fabric  : thaumcraft.fabric.mixin.compat.FabricExcavationRemovalMixin
+    //   NeoForge: thaumcraft.neoforge.mixin.NeoForgeExcavationRemovalMixin
 
     @Redirect(method = "destroyBlock(Lnet/minecraft/core/BlockPos;)Z", require = 1, allow = 1,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;isCreative()Z"))
     private boolean thaumcraft$onlyBypassCreativeEarlyReturn(ServerPlayerGameMode mode) {
         return thaumcraft$excavationFrame() == null && mode.isCreative();
-    }
-
-    @Redirect(method = "destroyBlock(Lnet/minecraft/core/BlockPos;)Z", require = 1, allow = 1,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;hasCorrectToolForDrops(Lnet/minecraft/world/level/block/state/BlockState;)Z"))
-    private boolean thaumcraft$spellDoesNotUseWandTier(ServerPlayer actor, BlockState state) {
-        return thaumcraft$excavationFrame() != null || actor.hasCorrectToolForDrops(state);
     }
 
     @Redirect(method = "destroyBlock(Lnet/minecraft/core/BlockPos;)Z", require = 1, allow = 1,

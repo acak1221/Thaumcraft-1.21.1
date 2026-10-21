@@ -27,3 +27,9 @@ ordering="AFTER"
 side="BOTH"
 [[mixins]]
 config="thaumcraft-common.mixins.json"
+[[mixins]]
+config="thaumcraft-neoforge.mixins.json"
+# NeoForge has no access widener. This file carries the exact three entries of
+# the shared Fabric access widener so the shared module keeps its behaviour.
+[[accessTransformers]]
+file="META-INF/accesstransformer.cfg"

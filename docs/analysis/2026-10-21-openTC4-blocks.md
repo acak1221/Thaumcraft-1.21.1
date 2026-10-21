@@ -385,13 +385,28 @@ for the warded block.
 export JAVA_HOME=/home/Acak/.jdk21
 export PATH=$JAVA_HOME/bin:$PATH
 export GRADLE_USER_HOME=/home/Acak/gradle-homes/ocblocks
-./gradlew --no-daemon --console=plain :common:test
+./gradlew --no-daemon --console=plain :common:test --rerun-tasks
 ```
 
-The result of the run is in the section "Test result" of the report of this task; the
-suite that ran was `1672 tests completed, 0 failed` after the fixes of this audit. The
-new test `common/src/test/java/thaumcraft/common/blocks/BlockFamilyParityTest.java`
-locks the values, the boxes and the drops of this audit.
+```
+> Task :common:compileJava
+> Task :common:processResources
+> Task :common:classes
+> Task :common:compileTestJava
+> Task :common:processResources
+> Task :common:testClasses
+> Task :common:test
+
+BUILD SUCCESSFUL in 35s
+5 actionable tasks: 5 executed
+```
+
+The result files of that run (`common/build/test-results/test`) hold 241 test suites
+with **1672 tests, 0 failures, 0 errors, 0 skipped**.
+
+The new test `common/src/test/java/thaumcraft/common/blocks/BlockFamilyParityTest.java`
+locks the values, the boxes and the drops of this audit, and the corrected comment of
+`DeviceWiringRulesTest` locks the open and the closed metadata of the item filter.
 
 No client run, no dedicated server run and no multiplayer acceptance was made for this
 audit.

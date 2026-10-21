@@ -2443,5 +2443,6 @@
   "container.thaumcraft.magic_box": "Magic Box",
   "container.thaumcraft": "Thaumcraft",
   "container.fake": "Fake Inventory",
-  "block.thaumcraft.arcane_pressure_plate": "Arcane Pressure Plate"
+  "block.thaumcraft.arcane_pressure_plate": "Arcane Pressure Plate",
+  "container.mirror": "Magic Mirror"
 }

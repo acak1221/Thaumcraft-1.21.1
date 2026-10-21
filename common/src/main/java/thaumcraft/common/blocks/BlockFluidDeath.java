@@ -53,6 +53,16 @@ import thaumcraft.common.lib.tiles.LegacyTileRules;
  * ({@code ConfigBlocks.FLUIDDEATH}). 1.21.1 has no viscosity of its own, so the death fluid keeps the native
  * liquid movement and never pushes an entity.
  * <p>
+ * The original death fluid was built over {@code Material.water} (oracle BlockFluidDeath:39,
+ * {@code super(ConfigBlocks.FLUIDDEATH, Material.field_151586_h)}; {@code Material.field_151586_h} is
+ * {@code Material.water}, see the readable 1.7.10 reference {@code RenderEventHandler:367}), so a 1.7.10
+ * entity that stood in it was an entity in water: it swam, it took no fall damage and it drowned after the
+ * air supply was gone. The native port therefore carries the death fluid in the vanilla
+ * {@code minecraft:water} tag ({@code data/minecraft/tags/fluid/water.json}), which is the 1.21.1
+ * counterpart of that material. The drowning of the original is unreachable in practice: the cell damages
+ * every living thing by its quanta, so a player dies in five ticks in the source cell, and the original
+ * drowned in the same way.
+ * <p>
  * Oracle: {@code thaumcraft/common/blocks/BlockFluidDeath.java}, lines 33-81 and
  * {@code thaumcraft/common/config/ConfigBlocks.java}:166.
  */
@@ -143,9 +153,42 @@ public final class BlockFluidDeath extends LiquidBlock {
         living.hurt(level.damageSources().magic(), damage(state.getValue(LEVEL)));
     }
 
-    /** The original death fluid does not push entities and does not drown them. */
+    /**
+     * The original death fluid is a liquid of {@code Material.water} and does not collide with an entity.
+     * The native cell is in the vanilla water tag, so the 1.21.1 engine owns the swim, the fall damage
+     * and the drowning of an entity that stands in it, exactly like the 1.7.10 material did.
+     */
     @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.empty();
+    }
+
+    /**
+     * The original random display tick of the death fluid: a slimy bubble over the cell and, in one
+     * of fifty, the pop of the lava (oracle BlockFluidDeath:65-80).
+     */
+    @FunctionalInterface public interface ClientEffects { void slimyBubble(Level level, double x, double y, double z, float size, float alpha); }
+    private static ClientEffects clientEffects = (level, x, y, z, size, alpha) -> {};
+
+    /** The client effect of the slimy bubble of the death fluid. */
+    public static void setClientEffects(ClientEffects effects) { clientEffects = java.util.Objects.requireNonNull(effects); }
+
+    /**
+     * Oracle BlockFluidDeath:65-80 - the random display tick of a cell of the death fluid draws the
+     * slimy bubble at the height of the cell and plays the lava pop in one of fifty rolls.
+     */
+    @Override public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        int meta = state.hasProperty(LEVEL) ? state.getValue(LEVEL) : 0;
+        float h = random.nextFloat() * 0.075F;
+        clientEffects.slimyBubble(level, pos.getX() + random.nextFloat(), pos.getY() + 0.1F + 0.225F * meta,
+                pos.getZ() + random.nextFloat(), 0.075F + h, 0.8F);
+        if (random.nextInt(50) == 0) {
+            double x = pos.getX() + random.nextFloat();
+            double y = pos.getY() + 1.0D;
+            double z = pos.getZ() + random.nextFloat();
+            level.playLocalSound(x, y, z, net.minecraft.sounds.SoundEvents.LAVA_POP,
+                    net.minecraft.sounds.SoundSource.BLOCKS, 0.1F + random.nextFloat() * 0.1F,
+                    0.9F + random.nextFloat() * 0.15F, false);
+        }
     }
 
     /**

@@ -43,6 +43,12 @@ import thaumcraft.common.tiles.TileManaPod;
  * initialized legacy NBT and are not rerolled. */
 public final class ItemManaBean extends Item implements IEssentiaContainerItem {
     private static final Aspect[] DISPLAY_ASPECTS=Aspect.aspects.values().toArray(Aspect[]::new);
+    /** Original ItemManaBean:68 - the random potion of a fresh bean lasts 160 ticks plus a random of eighty. */
+    public static final int EFFECT_DURATION = 160;
+    /** Original ItemManaBean:68 - the random part of the duration of the potion of a fresh bean. */
+    public static final int EFFECT_DURATION_RANDOM = 80;
+    /** Original ItemManaBean:71 - a quarter of the beans add their aspect to the pool of the player. */
+    public static final float ASPECT_POOL_CHANCE = 0.25F;
     private static Supplier<? extends Player> tooltipViewer=()->null;
     private final Random random=new Random();
     public ItemManaBean(Properties properties){super(properties.stacksTo(64).food(new FoodProperties.Builder().nutrition(1).saturationModifier(.5F).alwaysEdible().build()));}
@@ -80,9 +86,9 @@ public final class ItemManaBean extends Item implements IEssentiaContainerItem {
                     // handles Heal/Harm: keep its no-op and NO duration draw.
                     if(slot!=23)effect.value().applyInstantenousEffect(actor,actor,actor,2,3);
                 }
-                else actor.addEffect(new MobEffectInstance(effect,160+level.random.nextInt(80),0));
+                else actor.addEffect(new MobEffectInstance(effect,EFFECT_DURATION+level.random.nextInt(EFFECT_DURATION_RANDOM),0));
             }
-            if(level.random.nextFloat()<.25F&&contents!=null&&!contents.isEmpty()){
+            if(level.random.nextFloat()<ASPECT_POOL_CHANCE&&contents!=null&&!contents.isEmpty()){
                 KnowledgeAccess.get(actor).addAspectPool(contents.firstTag(),1);KnowledgeEvents.sync(actor);
                 thaumcraft.common.lib.network.KnowledgeNotificationNetworking.pool(actor,contents.firstTag(),1);
             }

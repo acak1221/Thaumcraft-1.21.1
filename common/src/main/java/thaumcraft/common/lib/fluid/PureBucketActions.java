@@ -35,7 +35,13 @@ public final class PureBucketActions {
     private static boolean canonical(ServerLevel level){return level.getServer().isSameThread()&&level.getServer().getLevel(level.dimension())==level;}
     private static boolean actor(ServerLevel level,Player player){return canonical(level)&&player instanceof ServerPlayer server&&server.server.getPlayerList().getPlayer(player.getUUID())==player&&player.level()==level&&!player.isRemoved()&&player.isAlive()&&!player.isSpectator();}
     private static boolean loaded(ServerLevel level,BlockPos pos){return !level.isOutsideBuildHeight(pos)&&level.getWorldBorder().isWithinBounds(pos)&&level.hasChunkAt(pos);}
-    private static boolean source(BlockState state){return state.getBlock() instanceof BlockFluidPure&&state.getValue(LiquidBlock.LEVEL)==0;}
+    private static boolean source(BlockState state){return state.getBlock() instanceof BlockFluidPure&&isSourceLevel(state.getValue(LiquidBlock.LEVEL));}
+    /**
+     * Original ItemBucketPure:103 and the original FillBucketEvent: the bucket of the pure fluid
+     * captures the cell of the metadata zero, the source cell only; the flowing cells one to
+     * seven stay in the world.
+     */
+    public static boolean isSourceLevel(int level){return level==0;}
     private static boolean claim(ServerLevel level,BlockPos pos){return CELLS.computeIfAbsent(level,ignored->new HashSet<>()).add(pos.immutable());}
     private static void release(ServerLevel level,BlockPos pos){var cells=CELLS.get(level);if(cells!=null){cells.remove(pos);if(cells.isEmpty())CELLS.remove(level);}}
 

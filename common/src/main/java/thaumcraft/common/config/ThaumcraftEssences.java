@@ -27,8 +27,6 @@ public final class ThaumcraftEssences {
         registered = true;
         COMPONENTS.register();
         ITEMS.register();
-        CreativeTabRegistry.modify(ThaumcraftContent.TAB, (flags, output, canUseGameMasterBlocks) -> {
-            for (var stack : ItemWispEssence.creativeVariants()) output.accept(stack);
-        });
+        ThaumcraftCreativeTabs.publish(ThaumcraftContent.TAB, ItemWispEssence::creativeVariants);
     }
 }

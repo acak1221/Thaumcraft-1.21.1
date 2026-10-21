@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "thaumcraft.neoforge.testing.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "GameTestHelperMockConnectionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

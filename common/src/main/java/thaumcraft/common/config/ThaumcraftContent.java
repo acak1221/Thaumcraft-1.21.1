@@ -191,9 +191,8 @@ public final class ThaumcraftContent {
     public static void register() {
         COMPONENTS.register(); BLOCKS.register(); ITEMS.register(); BLOCK_ENTITIES.register(); ENTITIES.register(); TABS.register(); MENUS.register();
         CreativeTabRegistry.append(TAB, THAUMOMETER, WAND, THAUMONOMICON, RESONATOR, PRIMORDIAL_PEARL);
-        CreativeTabRegistry.modify(TAB, (flags, output, canUseGameMasterBlocks) -> {
-            if (ThaumcraftSettings.current().cheatSheet()) output.accept(new ItemStack(THAUMONOMICON_CHEAT.get()));
-        });
+        ThaumcraftCreativeTabs.publish(TAB, () -> ThaumcraftSettings.current().cheatSheet()
+                ? java.util.List.of(new ItemStack(THAUMONOMICON_CHEAT.get())) : java.util.List.of());
         CreativeTabRegistry.append(TAB, INKWELL);
         CreativeTabRegistry.append(TAB, TABLE_ITEM);
         CreativeTabRegistry.append(TAB, EMPTY_PHIAL);

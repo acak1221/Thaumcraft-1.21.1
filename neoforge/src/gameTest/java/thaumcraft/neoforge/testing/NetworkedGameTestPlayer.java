@@ -45,6 +45,10 @@ final class NetworkedGameTestPlayer {
         // The vanilla GameTest helper skips negotiation. NeoForge's testing API supplies
         // the negotiated mod channels before placeNewPlayer fires the real JOIN event.
         NetworkRegistry.configureMockConnection(connection);
+        thaumcraft.common.Thaumcraft.LOG.info("DIAG after configure: channelId={} setupPresent={}",
+                System.identityHashCode(connection.channel()),
+                net.neoforged.neoforge.network.registration.ChannelAttributes.getPayloadSetup(connection) != null);
+        thaumcraft.common.Thaumcraft.LOG.info("DIAG connection identity = {}", System.identityHashCode(connection));
         var cookie = new CommonListenerCookie(profile, 0, information, false, ConnectionType.NEOFORGE);
         level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
 

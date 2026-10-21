@@ -19,6 +19,9 @@ import thaumcraft.client.ClientSetup;
 @Mod(Thaumcraft.MODID)
 public final class ThaumcraftNeoForge {
     public ThaumcraftNeoForge(IEventBus bus) {
+        // The native creative tab sink must be installed before the shared module
+        // publishes its tab stacks.
+        NeoForgeCreativeTabs.init(bus);
         // The shared module owns every deferred registry entry, menu, block entity,
         // creative tab and network packet; it must run before the loader wiring so the
         // platform bridges can already resolve the shared catalogues.
@@ -32,6 +35,19 @@ public final class ThaumcraftNeoForge {
         NeoForgeGolemHarvestPlatform.init();
         NeoForgeGolemUsePlatform.init();
         NeoForgeSpaStorage.init(bus);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                net.neoforged.bus.api.EventPriority.HIGHEST,
+                net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent.class,
+                event -> {
+                    var player = (net.minecraft.server.level.ServerPlayer) event.getEntity();
+                    var id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "research_settings");
+                    thaumcraft.common.Thaumcraft.LOG.info("DIAG login player={} connId={} channelId={} setupPresent={} hasChannel={}",
+                            player.getGameProfile().getName(),
+                            System.identityHashCode(player.connection.getConnection()),
+                            System.identityHashCode(player.connection.getConnection().channel()),
+                            net.neoforged.neoforge.network.registration.ChannelAttributes.getPayloadSetup(player.connection.getConnection()) != null,
+                            net.neoforged.neoforge.network.registration.NetworkRegistry.hasChannel(player.connection, id));
+                });
         if (FMLEnvironment.dist == Dist.CLIENT) {
             bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(ClientSetup::init));
             thaumcraft.neoforge.client.ThaumcraftNeoForgeClient.register(bus);

@@ -183,9 +183,13 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             // Original InventoryPlayer.addItemStackToInventory has a distinct
             // full-creative discard branch (official 1.7.10 yx.a, offsets56-83).
             test.assertTrue(creative.success() && creative.discarded() && !creative.dropped(), "full creative inventory preserves original silent discard");
+            // Vanilla 1.7.10 ItemStack.damageItem returns for a creative player before
+            // the damageability, the enchantments and the RNG (the audited bytecode of
+            // the method, docs/analysis/2026-10-15-scribing-ink-semantics.md:19), so the
+            // original spends the paper and leaves the usable inkwell untouched.
             test.assertTrue(mainNotes(player).isEmpty() && droppedNotes(test, player).isEmpty()
-                    && player.getInventory().getItem(4).getCount() == 1 && player.getInventory().getItem(7).getDamageValue() == 99,
-                    "creative overflow spends one paper and the ink, and creates no note entity");
+                    && player.getInventory().getItem(4).getCount() == 1 && player.getInventory().getItem(7).getDamageValue() == 98,
+                    "creative overflow spends one paper, keeps the ink and creates no note entity");
         });
     }
 

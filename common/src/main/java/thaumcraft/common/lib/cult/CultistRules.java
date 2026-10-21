@@ -321,11 +321,14 @@ public final class CultistRules {
     /** Original EntityCultistPortal: a player inside this range advances the fight. */
     public static final double PORTAL_ACTIVATION_RANGE = 48.0;
     /**
-     * Original EntityCultistPortal.onCollideWithPlayer - the portal hurts a player that
-     * stands within three blocks of it. The original asks for the distance and not for the
-     * squared distance, so the squared distance of the range is nine.
+     * Original EntityCultistPortal.onCollideWithPlayer - the portal hurts a player whose SQUARED
+     * distance to it is below three.
+     *
+     * <p>Oracle EntityCultistPortal:239 asks the squared distance
+     * ({@code this.func_70068_e((Entity)p) < 3.0}), so the range is the squared three of the
+     * original and not the square of a range of three blocks.</p>
      */
-    public static final double PORTAL_COLLISION_DISTANCE_SQ = 9.0;
+    public static final double PORTAL_COLLISION_DISTANCE_SQ = 3.0;
     /** Original EntityCultistPortal: cultists inside this range set the fight tempo. */
     public static final double PORTAL_MINION_RANGE = 32.0;
     /** Original EntityCultistPortal: the spawned minions anchor their home here. */

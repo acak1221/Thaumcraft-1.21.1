@@ -129,8 +129,8 @@ class LegacyUtilsTest {
         assertEquals(32.0, Utils.dotProd(new double[]{1, 2, 3}, new double[]{4, 5, 6}));
         assertArrayEquals(new double[]{-3, -3, -3}, Utils.dif(new double[]{1, 2, 3}, new double[]{4, 5, 6}));
         assertEquals(Math.sqrt(14), Utils.magn(new double[]{1, 2, 3}));
-        assertEquals(100.0, Utils.distanceSquared2d(new Vec3(0, 5, 0), new Vec3(6, 9, 8)));
-        assertEquals(116.0, Utils.distanceSquared3d(new Vec3(0, 5, 0), new Vec3(6, 9, 8)));
+        assertEquals(6.0 * 6.0 + 8.0 * 8.0, Utils.distanceSquared2d(new Vec3(0, 5, 0), new Vec3(6, 9, 8)));
+        assertEquals(6.0 * 6.0 + 4.0 * 4.0 + 8.0 * 8.0, Utils.distanceSquared3d(new Vec3(0, 5, 0), new Vec3(6, 9, 8)));
     }
 
     @Test void theLaunchVelocityIsTheOriginalOne() {

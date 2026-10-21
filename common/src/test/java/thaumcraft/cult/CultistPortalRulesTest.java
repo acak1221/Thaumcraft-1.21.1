@@ -22,10 +22,10 @@ class CultistPortalRulesTest {
         assertEquals(1.0D, CultistRules.PORTAL_KNOCKBACK_RESISTANCE);
     }
 
-    @Test void thePortalHurtsAPlayerThatStandsWithinThreeBlocks() {
-        // Oracle EntityCultistPortal:219-223 - the original asks for the distance and not for
-        // the squared distance, so the portal reaches three blocks.
-        assertEquals(9.0D, CultistRules.PORTAL_COLLISION_DISTANCE_SQ);
+    @Test void thePortalHurtsAPlayerThatStandsCloseEnough() {
+        // Oracle EntityCultistPortal:239 - the original asks for the SQUARED distance
+        // (func_70068_e) and compares it with three.
+        assertEquals(3.0D, CultistRules.PORTAL_COLLISION_DISTANCE_SQ);
     }
 
     @Test void thePortalBurnsItselfOnlyPastTheStageOfThePraetor() {

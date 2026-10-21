@@ -55,7 +55,7 @@ class TaintMaterialRulesTest {
     @Test void theHoleKeepsTheEffectiveBlastResistanceOfTheOriginal() {
         // Oracle BlockHole:53 - setResistance(6000000) stores 18000000 and the vanilla getter
         // divides the stored value by five, so the effective blast resistance is 3600000.
-        assertEquals(3600000.0F, HoleBlockRules.HOLE_RESISTANCE);
+        assertEquals(6000000.0F * 3 / 5, HoleBlockRules.HOLE_RESISTANCE);
         // Oracle BlockHole:55 - setLightLevel(0.7) stores (int)(15*0.7) = 10.
         assertEquals(10, HoleBlockRules.HOLE_LIGHT);
     }

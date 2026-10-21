@@ -30,6 +30,16 @@ import thaumcraft.common.tiles.TileNode;
  * <p>Forced 1.21.1 change: the native node keeps its own nested type and modifier enums, so
  * the published view of the node translates them by name. The test never constructs a block: it
  * only uses the already registered air block of the vanilla bootstrap.</p>
+ *
+ * <p>Forced 1.21.1 change: the original node has no type of its own — the 1.7.10
+ * {@code net.minecraft.tileentity.TileEntity} derives the type from the block the entity sits on
+ * (oracle {@code thaumcraft/common/tiles/TileNode.java:75-78} and
+ * {@code thaumcraft/api/TileThaumcraft.java:19-21}), so a node that is not in the world is
+ * type-less. 1.21.1's {@code BlockEntity} insists on a {@code BlockEntityType} and validates the
+ * state against it, so the port keeps a detached node possible with
+ * {@link TileNode#detached(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState)}:
+ * the node carries no type and accepts any state. The test builds no block and touches no
+ * registry.</p>
  */
 class NodeAdapterContractTest {
     @BeforeAll static void bootstrap() {
@@ -39,7 +49,15 @@ class NodeAdapterContractTest {
 
     /** A detached native node; the original creative fixture gives every primal twenty five. */
     private static TileNode nativeNode() {
-        return new TileNode(null, new BlockPos(0, 64, 0), Blocks.AIR.defaultBlockState());
+        return TileNode.detached(new BlockPos(0, 64, 0), Blocks.AIR.defaultBlockState());
+    }
+
+    @Test void aDetachedNodeHasNoTypeOfItsOwn() {
+        // The original node is type-less (oracle TileNode:75-78); a 1.21.1 BlockEntity that
+        // carries no type is the only shape a detached node of the original can take.
+        TileNode node = nativeNode();
+        assertNull(node.getType(), "the detached node of the original has no type");
+        assertNull(node.getLevel(), "the detached node of the original is not in a world");
     }
 
     @Test void thePublishedViewAnswersTheOriginalContract() {

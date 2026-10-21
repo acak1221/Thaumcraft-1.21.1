@@ -13,8 +13,6 @@ import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.blocks.BlockFluxGas;
@@ -47,12 +45,16 @@ class AdvancedDeviceParityTest {
      * (oracle BlockFluxGoo:32) and the flux gas (oracle BlockFluxGas:28) are the two blocks
      * that use {@code Config.fluxGoomaterial} (oracle Config:876), so the original removed
      * both. The native tree knew the flux goo only.
+     *
+     * <p>The rule is asked for the class of the block, so that no block is constructed here: a
+     * constructed block keeps an intrusive holder in the block registry and the freeze of the
+     * registry then refuses the whole test suite
+     * (Minecraft 1.21.1 {@code net/minecraft/core/MappedRegistry}:342-347).</p>
      */
     @Test void theFluxScrubberRemovesTheFluxGooAndTheFluxGas() {
-        BlockState goo = new BlockFluxGoo(BlockBehaviour.Properties.of()).defaultBlockState();
-        BlockState gas = new BlockFluxGas(BlockBehaviour.Properties.of()).defaultBlockState();
-        assertTrue(TileParityRules.fluxScrubberRemoves(goo), "the flux goo is flux");
-        assertTrue(TileParityRules.fluxScrubberRemoves(gas), "the flux gas shares the flux material of the original");
+        assertTrue(TileParityRules.fluxScrubberRemovesBlock(BlockFluxGoo.class), "the flux goo is flux");
+        assertTrue(TileParityRules.fluxScrubberRemovesBlock(BlockFluxGas.class),
+                "the flux gas shares the flux material of the original");
         assertFalse(TileParityRules.fluxScrubberRemoves(Blocks.AIR.defaultBlockState()));
         assertFalse(TileParityRules.fluxScrubberRemoves(Blocks.STONE.defaultBlockState()));
     }

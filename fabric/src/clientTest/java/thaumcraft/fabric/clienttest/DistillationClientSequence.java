@@ -502,7 +502,7 @@ final class DistillationClientSequence {
             }
             case BROWSER_CATEGORY -> {
                 if (!(client.screen instanceof GuiResearchBrowser) || ticks < 10) return false;
-                clickButton(client, Component.translatable("tc.research_category.THAUMATURGY").getString());
+                BookClientSmoke.clickCategoryTab(client, "THAUMATURGY");
                 next(Step.BROWSER_PAN);
             }
             case BROWSER_PAN -> {

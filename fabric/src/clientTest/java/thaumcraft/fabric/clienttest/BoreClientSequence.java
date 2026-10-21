@@ -741,9 +741,8 @@ public final class BoreClientSequence implements AutoCloseable {
                 if(state==0) {if(!choose.tick())return false;require(client.gameMode.useItem(client.player,InteractionHand.MAIN_HAND).consumesAction(),"Native book use");state=1;wait=clientTicks;return false;}
                 if(!(client.screen instanceof GuiResearchBrowser browser) || clientTicks-wait<4)return false;
                 if(!"ARTIFICE".equals(read(browser,"category"))) {
-                    String name=net.minecraft.network.chat.Component.translatable("tc.research_category.ARTIFICE").getString();
-                    Button button=browser.children().stream().filter(e->e instanceof Button b && b.getMessage().getString().equals(name)).map(e->(Button)e).findFirst().orElseThrow();
-                    require(browser.mouseClicked(button.getX()+3,button.getY()+3,0),"Real ARTIFICE category button");browser.mouseReleased(button.getX()+3,button.getY()+3,0);wait=clientTicks;return false;
+                    BookClientSmoke.clickCategoryTab(client,"ARTIFICE");
+                    wait=clientTicks;return false;
                 }
                 int[] point=researchPoint(browser);int left=(Integer)read(browser,"graphLeft"),top=(Integer)read(browser,"graphTop"),width=(Integer)read(browser,"graphWidth"),height=(Integer)read(browser,"graphHeight");
                 int dx=left+width/2-point[0],dy=top+height/2-point[1];

@@ -211,7 +211,9 @@ public final class BookClientSmoke implements ClientModInitializer {
         // The vanilla world confirmation is captured from its own rendered frame
         // so the run keeps an honest picture of what the player was asked.
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
-            if (!(screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen)) return;
+            if (!(screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen confirmation)) return;
+            worldConfirmationCapturePending = true;
+            worldOpenEvidence.put("vanilla_confirmation_title", confirmation.getTitle().getString());
             ScreenEvents.afterRender(screen).register((rendered, graphics, mouseX, mouseY, delta) -> {
                 if (!worldConfirmationCapturePending || worldConfirmationCaptured || finished) return;
                 worldConfirmationCapturePending = false;
@@ -224,7 +226,10 @@ public final class BookClientSmoke implements ClientModInitializer {
                             message -> LOGGER.info("Client smoke: captured the vanilla world confirmation dialog ({})", message.getString()));
                 } catch (Throwable error) {
                     fail(client, error);
+                    return;
                 }
+                fail(client, new IllegalStateException("The vanilla client asked to confirm the experimental world settings; "
+                        + "the TC4 port must open its own world without that question (the captured frame is the evidence)"));
             });
         });
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
@@ -306,15 +311,20 @@ public final class BookClientSmoke implements ClientModInitializer {
                 throw new IllegalStateException("Client disconnected during native login/play at " + stage + "; inspect the network error in this run's log");
             }
             if (client.screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen confirmation) {
-                // Vanilla 1.21.1 refuses to open any world whose level stems are not
-                // all vanilla-like (WorldDimensions.checkStability / bake), and the
-                // TC4 Outer Lands is a real fourth dimension, so the client asks the
-                // player to confirm before loading. Accept it exactly like a player.
-                if (stage != Stage.WAIT_WORLD) {
-                    throw new IllegalStateException("Unexpected vanilla world confirmation outside the world open stage: " + stage);
+                // Vanilla 1.21.1 asks the player to confirm a world whose level stems
+                // are not all vanilla-like (WorldOpenFlows.openWorldCheckWorldStem-
+                // Compatibility / WorldDimensions.bake). The TC4 port supports its
+                // own Outer Lands dimension completely, so the port reports the level
+                // stem registry as stable and this dialog must never appear.
+                // The dialog frame itself is captured by the screen hook, and the
+                // captured frame ends the run as a failure.
+                worldOpenEvidence.put("vanilla_confirmation_title", confirmation.getTitle().getString());
+                if (!worldConfirmationCaptured) {
+                    worldConfirmationCapturePending = true;
+                    return;
                 }
-                acceptVanillaWorldConfirmation(client, confirmation);
-                return;
+                throw new IllegalStateException("The vanilla client asked to confirm the experimental world settings; "
+                        + "the TC4 port must open its own world without that question (the captured frame is the evidence)");
             }
             if (capturePending) {
                 if (focal != null) focal.check();
@@ -1572,42 +1582,6 @@ public final class BookClientSmoke implements ClientModInitializer {
         return stageTicks >= 10 && client.getOverlay() == null && expected.isInstance(client.screen);
     }
 
-    /**
-     * Accept the vanilla "Worlds using Experimental Settings are not supported"
-     * confirmation (net.minecraft.client.gui.screens.BackupConfirmScreen) that
-     * 1.21.1 shows before it opens a world with non vanilla level stems.
-     *
-     * <p>The screen and its buttons are the real vanilla widgets; the harness
-     * only presses the same "I know what I'm doing!" button a player presses.
-     * The dialog itself is captured as a separate diagnostic PNG so the run
-     * keeps its own exact screenshot contract untouched.
-     */
-    private void acceptVanillaWorldConfirmation(Minecraft client, net.minecraft.client.gui.screens.BackupConfirmScreen screen) {
-        String skipLabel = Component.translatable("selectWorld.backupJoinSkipButton").getString();
-        var buttons = screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast).toList();
-        Button skip = buttons.stream().filter(button -> button.getMessage().getString().equals(skipLabel)).findFirst().orElse(null);
-        if (skip == null) {
-            throw new IllegalStateException("The vanilla world confirmation has no usable 'join without backup' button; buttons="
-                    + buttons.stream().map(button -> button.getMessage().getString()).toList());
-        }
-        worldOpenEvidence.put("vanilla_confirmation_title", screen.getTitle().getString());
-        worldOpenEvidence.put("vanilla_confirmation_button", skipLabel);
-        worldOpenEvidence.put("vanilla_confirmation_buttons", buttons.stream().map(button -> button.getMessage().getString()).toList());
-        if (!worldConfirmationCaptured) {
-            // Let the dialog render one real frame first: the confirmation PNG
-            // must show the dialog, not the loading screen behind it.
-            worldConfirmationCapturePending = true;
-            return;
-        }
-        if (!skip.active || !skip.visible
-                || !screen.mouseClicked(skip.getX() + skip.getWidth() / 2.0, skip.getY() + skip.getHeight() / 2.0, 0)) {
-            throw new IllegalStateException("The vanilla world confirmation could not be accepted");
-        }
-        screen.mouseReleased(skip.getX() + 1, skip.getY() + 1, 0);
-        worldOpenEvidence.put("vanilla_confirmation_accepted", true);
-        LOGGER.warn("Client smoke: the vanilla client asked to confirm the experimental world settings; the harness accepted it like a player");
-    }
-
     private int[] editHexPoint(Minecraft client, int q, int r) {
         var point = new HexUtils.Hex(q, r).toPixel(9);
         return new int[]{(client.getWindow().getGuiScaledWidth() - 255) / 2 + 169 + (int) Math.round(point.x),
@@ -1988,7 +1962,7 @@ public final class BookClientSmoke implements ClientModInitializer {
      * (oracle GuiResearchBrowser:668-687). The harness therefore clicks the real
      * tab icon instead of inventing a Button widget.
      */
-    private void clickCategoryTab(Minecraft client, String key) throws ReflectiveOperationException {
+    static void clickCategoryTab(Minecraft client, String key) throws ReflectiveOperationException {
         if (!(client.screen instanceof GuiResearchBrowser browser)) throw new IllegalStateException("Expected browser");
         Object tab = null;
         for (Object candidate : (List<?>) field(browser, "tabs")) {

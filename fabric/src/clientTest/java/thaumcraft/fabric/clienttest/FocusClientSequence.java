@@ -187,7 +187,7 @@ final class FocusClientSequence {
             }
             case BOOK_CATEGORY -> {
                 if (!(client.screen instanceof GuiResearchBrowser) || ticks < 10) return false;
-                clickButton(client, Component.translatable("tc.research_category.THAUMATURGY").getString());
+                BookClientSmoke.clickCategoryTab(client, "THAUMATURGY");
                 next(Step.BOOK_PAN);
             }
             case BOOK_PAN -> {

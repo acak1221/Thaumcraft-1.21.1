@@ -16,7 +16,7 @@
     "partial": 42,
     "pending": 892,
     "complete": 0,
-    "active_native_java_files": 1312
+    "active_native_java_files": 1316
   },
   "active_native_sources": [
     {
@@ -472,7 +472,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/ClientSetup.java",
       "role": "native_foundation",
-      "sha256": "bbd847a4c88701dba67cab693d1f5fc9f635b494574a76281bb0adfc5f1f2df0"
+      "sha256": "6db8c2a79e0b5184ead009e55a8f36455048ec52ce6cdfa2d1c8a71fc6323c20"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/CrystallizerClientEffects.java",
@@ -737,7 +737,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java",
       "role": "native_foundation",
-      "sha256": "96efcb5d2cacb492d8bf3d21bf8ab76811890b30689e5a27d6a9e564c5185521"
+      "sha256": "1385c76a5b11351d7d77c9c95bd7b951862d23b1c39d1b4b0d879804461015e9"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/VisNetClientEffects.java",
@@ -1062,7 +1062,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java",
       "role": "native_foundation",
-      "sha256": "6abb4c2d88e12e2dd37e54afa812e13c5a2b251f41dbf102cd32ad0320c20b33"
+      "sha256": "b9837cbdefd10a27a2fcf0b65b10f2c24264133077c742788958b745ac99016b"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/renderers/block/ArcaneFurnaceBakedModel.java",
@@ -1812,7 +1812,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
       "role": "native_foundation",
-      "sha256": "de1215a3625e462557e433dcd5b5f9ff96e9d0e551db6979191db809fdc65bdb"
+      "sha256": "2ccefc29568ce8d547b363932e00edb3d614d66852d042caa45801fc081157f3"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java",
@@ -2642,7 +2642,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java",
       "role": "native_foundation",
-      "sha256": "08db495d2105bdff03896a826fc3916168ba94a3707523defbb1df4d7240169a"
+      "sha256": "b697fef695d7f9eafb4baea78b82d65b996efd7f46350181d2f430c2bd614738"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftShockOrbs.java",
@@ -3207,7 +3207,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java",
       "role": "native_foundation",
-      "sha256": "8a73444eb2874b4005fa7ae597c56d3184ee2507ac69594c3e53e3c1d2cef5ad"
+      "sha256": "dead62ef6e986c0e77b29729fbb8a6a4b41af5b27803532984c009a33549ecdb"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityFireBat.java",
@@ -3807,7 +3807,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
       "role": "native_foundation",
-      "sha256": "8fb5d15812fe6f3e16dd8cd8df2557817ffae82bdfb5b3afe4a71ea4151b43da"
+      "sha256": "770d2c9c77fd5e3596aabc3464c1af1d43009213ccf07fa90225fd6c27e4d9cb"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalArrow.java",
@@ -6580,24 +6580,14 @@
       "sha256": "0a4c4dc96099ea3ab5b70f934b370fc9a926539eaff72d172c66342331f98831"
     },
     {
-      "path": "common/src/main/java/thaumcraft/client/ClientSetup.java",
-      "role": "native_foundation",
-      "sha256": "3e7642933b4cbe1396534dd4e09ad5bedfe2c59d8db059d7972588b7ec36bb56"
-    },
-    {
       "path": "common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java",
       "role": "native_foundation",
       "sha256": "e3cf6bbd734612ad6ec56fcf49a4ec2f433ae316ceacaeb5265cb567f0d48d03"
     },
     {
-      "path": "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java",
-      "role": "native_foundation",
-      "sha256": "1385c76a5b11351d7d77c9c95bd7b951862d23b1c39d1b4b0d879804461015e9"
-    },
-    {
       "path": "common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java",
       "role": "native_foundation",
-      "sha256": "d7b869bf8dee91ee0be978cfef4e05d12e2d77736d1350a56d223c36f32971c0"
+      "sha256": "61029e2289a7d765d7f7f1932c7b192ed80c01412749454338a6081566cefc5a"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java",
@@ -6605,54 +6595,9 @@
       "sha256": "1a6528fae4224462555770d9b5b0778e1588eea92f93a86e601e70fbbd050ef3"
     },
     {
-      "path": "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java",
-      "role": "native_foundation",
-      "sha256": "b9837cbdefd10a27a2fcf0b65b10f2c24264133077c742788958b745ac99016b"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/client/renderers/models/ModelBanner.java",
-      "role": "native_foundation",
-      "sha256": "b357b89c91bb0f58fa209388be98dbfe5e42544c7840bfde6a12f8d3db739f1f"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/client/renderers/tile/TileBannerRenderer.java",
-      "role": "native_foundation",
-      "sha256": "0591d63cd3427079953f13c946182297a26fa3c5ac39278d91dfc61fdb574f08"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
-      "role": "native_foundation",
-      "sha256": "2ccefc29568ce8d547b363932e00edb3d614d66852d042caa45801fc081157f3"
-    },
-    {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java",
       "role": "native_foundation",
       "sha256": "c81952c161d7f8fc6d2bce85050030c29f05c724ce15110373af1618ac0261f1"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java",
-      "role": "native_foundation",
-      "sha256": "b697fef695d7f9eafb4baea78b82d65b996efd7f46350181d2f430c2bd614738"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java",
-      "role": "native_foundation",
-      "sha256": "dead62ef6e986c0e77b29729fbb8a6a4b41af5b27803532984c009a33549ecdb"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
-      "role": "native_foundation",
-      "sha256": "770d2c9c77fd5e3596aabc3464c1af1d43009213ccf07fa90225fd6c27e4d9cb"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java",
-      "role": "native_foundation",
-      "sha256": "2becf674f6351ea9213f8d480da343551000a13237310dd6628e51b37143d581"
-    },
-    {
-      "path": "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java",
-      "role": "native_foundation",
-      "sha256": "12d554d45688c35bca73c4a633feec9180662036f62c4ce3b61016af906f5862"
     }
   ],
   "legacy_units": [
@@ -7518,45 +7463,9 @@
       "parity_verified": false
     },
     {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXArc.java",
-      "legacy_sha256": "05641e245a45e901018e08d2c59764c044935fcc1363365413f67149c0906678",
-      "legacy_lines": 145,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXBeam.java",
-      "legacy_sha256": "0be66fc5fe519f6e890d071857e42c8079b355cc1bd9fcd16017dc459c57a5b9",
-      "legacy_lines": 356,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
       "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXBeamBore.java",
       "legacy_sha256": "8ab1f6834a91d62c153093c793ace223ef2e8c8244b716a6de0fc5c6d21f9562",
       "legacy_lines": 39,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXBeamGolemBoss.java",
-      "legacy_sha256": "577e904f5e38ddfd6a5bb820592959751480f128ac7a1ff7612ef4f6696c8ea7",
-      "legacy_lines": 51,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXBeamPower.java",
-      "legacy_sha256": "34f982c954b4064082a6b5cc368a4c6e26f441684bd5bf7c6f15727f05984ced",
-      "legacy_lines": 131,
       "status": "pending",
       "native_paths": [],
       "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
@@ -7671,15 +7580,6 @@
       "parity_verified": false
     },
     {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXBubbleAlt.java",
-      "legacy_sha256": "e8ba26f78f2d5581b83f9d1b23d92a80870e0591fa1dd24049dacacfae55b1c3",
-      "legacy_lines": 79,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
       "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXBurst.java",
       "legacy_sha256": "2e969a78b1cbd27c3012b4c2b28f509339c61ec785790eeb50e560e747cfd022",
       "legacy_lines": 99,
@@ -7716,15 +7616,6 @@
       "parity_verified": false
     },
     {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXScorch.java",
-      "legacy_sha256": "d00da7fb40af33d8541a5cef4c6a89b3a30863f2df4afd6f3127e57cb35a055c",
-      "legacy_lines": 121,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
       "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXSlimyBubble.java",
       "legacy_sha256": "d910cda79326789e1cc4cabc718114493a3aee3a82cf8f55e3955921a1a789d8",
       "legacy_lines": 96,
@@ -7737,24 +7628,6 @@
       "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXSmokeDrift.java",
       "legacy_sha256": "c2dad4a9610015ec65521d07b40fba36b4c4990950aabb830735f26110bc6f29",
       "legacy_lines": 62,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java",
-      "legacy_sha256": "d8cf8e8af3b7aaa11b09b24829a25dbd184e810ac8eada3b788f64173b7cccab",
-      "legacy_lines": 99,
-      "status": "pending",
-      "native_paths": [],
-      "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
-      "parity_verified": false
-    },
-    {
-      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXSmokeTrail.java",
-      "legacy_sha256": "75cc2fd2ccf8cdfbda9e2c425267c63c4cff935139a519a1f3e667eb0d5d6425",
-      "legacy_lines": 100,
       "status": "pending",
       "native_paths": [],
       "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",

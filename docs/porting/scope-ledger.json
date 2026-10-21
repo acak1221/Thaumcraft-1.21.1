@@ -43764,11 +43764,17 @@
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/ComponentBankerHome.java:1-120 the village piece of the banker home",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerHome.java the native banker home builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerHome.java the native banker home builder",
+          "oracle thaumcraft/common/lib/world/ComponentBankerHome.java:68-93 the hollow interior, the cobble floor, the dirt floor, the log roof panel of the low and the high house, the four log corners, the plank walls and the ten roof edge logs",
+          "oracle thaumcraft/common/lib/world/ComponentBankerHome.java:94-97 the iron bar windows and the cobble wall with the stone pressure plate of the table",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java:347-405 the same block list, in the same order, with the same materials",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:156 the banker home feature is placed in the surface structure biomes on Fabric"
         ],
         "notes": [
           "1.21.1 has no village piece system, so the piece became a deterministic chunk feature; the block list is kept in VillageWorldGenRules.",
-          "The feature is registered but no biome modifier or biome references the placed feature, so the banker home never generates in a world."
+          "The feature is registered but no biome modifier or biome references the placed feature, so the banker home never generates in a world.",
+          "REMAINING DIFFERENCE 2026-10-23 (w2api): the block list of the native banker home reproduces the fillWithBlocks calls of the original one to one, with the same materials and the same order, and the feature is placed in the surface structure biomes by the Fabric loader (fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:156). The calls that the original places through placeBlockAtCurrentPosition (the ten roof edge logs, the two iron bar windows, the table and the door) depend on the 1.7.10 village coordinate mode of the piece, which the port resolved to its own local coordinates; that 1.7.10 mapping was not re-derived in this wave, because the vanilla 1.7.10 sources are not in this environment.",
+          "PLATFORM GAP 2026-10-23 (w2api): the NeoForge module has no worldgen feature wiring at all, so no banker home is generated on NeoForge. The NeoForge parity is deferred with the rest of the NeoForge module."
         ],
         "reviewed_sha256": {
           "original": "1d2a96ab3e59fd24d8a378feabf152e1938a4465190b9d6964ba3360c23e62f2",
@@ -43812,11 +43818,14 @@
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/ComponentWizardTower.java:1-114 the village piece of the wizard tower",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java the native wizard tower builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java the native wizard tower builder",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:158 the wizard tower feature is placed in the surface structure biomes on Fabric"
         ],
         "notes": [
           "1.21.1 has no village piece system, so the piece became a deterministic chunk feature.",
-          "The feature is registered but never placed, so the wizard tower never generates in a world."
+          "The feature is registered but never placed, so the wizard tower never generates in a world.",
+          "REMAINING DIFFERENCE 2026-10-23 (w2api): the native wizard tower keeps the original block list and the original tower chest pool, and the feature is placed in the surface structure biomes by the Fabric loader (fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:158).",
+          "PLATFORM GAP 2026-10-23 (w2api): the NeoForge module has no worldgen feature wiring at all, so no wizard tower is generated on NeoForge. The NeoForge parity is deferred with the rest of the NeoForge module."
         ],
         "reviewed_sha256": {
           "original": "59ded4f00b6a97364dab48a0274ff79aa618af14bf038b0e049f9af9be11495c",
@@ -43916,11 +43925,14 @@
           "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:481-546 the ore pass with 18 cinnabar, 20 amber and 8 infused stone attempts",
           "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:71-99 the same three ore passes",
           "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:95-100 the 1/150, 1/66 and 1/40 structure chain",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java the ring feature"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java the ring feature",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:149-161 the ore, the tree, the ring, the mound, the hilltop stones, the two village components, the aura node and the totem of the original surface pass are placed in the surface structure biomes on Fabric"
         ],
         "notes": [
           "The 1.7 world generator was replaced by a set of 1.21 features (ore, tree, node, decoration, ring and village features).",
-          "The totem of the original (one in 360 chunks) has no native counterpart, and the mound branch of the original has no native counterpart at all."
+          "The totem of the original (one in 360 chunks) has no native counterpart, and the mound branch of the original has no native counterpart at all.",
+          "REMAINING DIFFERENCE 2026-10-23 (w2api): the whole surface pass of the original world generator (the eldritch ring, the mound, the hilltop stones, the two village components, the aura nodes and the totem) is placed in the surface structure biomes by the Fabric loader (fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:149-161), so the earlier note that the totem and the mound have no native counterpart is obsolete.",
+          "PLATFORM GAP 2026-10-23 (w2api): the NeoForge module has no worldgen feature wiring at all, so none of the TC4 surface structures is generated on NeoForge. The NeoForge parity is deferred with the rest of the NeoForge module."
         ],
         "reviewed_sha256": {
           "original": "dcb6537b0dc809de1a6b738208e97b9480ce3c8ac4badc82397722bc8f136d28",
@@ -44276,11 +44288,14 @@
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenHilltopStones.java:29-131 the hilltop stones",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the native hilltop stones"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the native hilltop stones",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:155 the hilltop stones feature is placed in the surface structure biomes on Fabric"
         ],
         "notes": [
           "The generator, the footprint and the minimum height 85 are ported, but the placed feature is never added to a biome, so the stones never generate.",
-          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged.",
+          "REMAINING DIFFERENCE 2026-10-23 (w2api): the generator, the footprint and the minimum height 85 of the original are ported, and the placed feature is added to the surface structure biomes by the Fabric loader (fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:155), so the stones do generate on Fabric.",
+          "PLATFORM GAP 2026-10-23 (w2api): the NeoForge module has no worldgen feature wiring at all, so the stones never generate on NeoForge. The NeoForge parity is deferred with the rest of the NeoForge module."
         ],
         "reviewed_sha256": {
           "original": "32f84ccdd45ce5ae2d34d6f699a84188fd376ff70218a0020426ae7c0156be8b",

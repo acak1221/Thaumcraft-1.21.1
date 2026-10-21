@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.effect.MobEffect;
@@ -110,7 +112,10 @@ class AspectBonusParityTest {
     }
 
     private static ItemStack withEnchantment(ItemStack stack, ResourceKey<Enchantment> key, int level) {
-        Holder<Enchantment> holder = BuiltInRegistries.ENCHANTMENT.getHolderOrThrow(key);
+        // The 1.21.1 BuiltInRegistries has no ENCHANTMENT registry, the enchantments live in the
+        // dynamic registry of the Registries.ENCHANTMENT key.
+        Holder<Enchantment> holder = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)
+                .lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key);
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
         mutable.set(holder, level);
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());

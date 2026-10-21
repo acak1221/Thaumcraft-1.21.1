@@ -34,6 +34,12 @@ The four native robe layers `textures/models/armor/robes_layer_{1,2}[_overlay].p
 
 Private decompiled oracle output remains outside this repository and is not included in source/build outputs. Original/donor JARs and Minecraft classes are not included in the modern mod artifacts.
 
+## Vendored CodeChickenLib reference tree
+
+The retained 1.12 reference tree `src/main/java/thaumcraft/codechicken/lib/**` (40 files) is a vendored copy of ChickenBones' CodeChickenLib classes, repackaged into the `thaumcraft.codechicken` namespace by the audited Forge 1.12.2 baseline named above. Upstream CodeChickenLib (<https://github.com/Chicken-Bones/CodeChickenLib>) is published by ChickenBones under the LGPL (the upstream repository declares LGPL-2.1) and CodeChickenCore (<https://github.com/Chicken-Bones/CodeChickenCore>) under the MIT licence. The 1.7.10 mod additionally bundles CodeChickenCore's `core/launch/DepLoader.java` as its FML 1.6 coremod (`META-INF/MANIFEST.MF`: `FMLCorePlugin: thaumcraft.codechicken.core.launch.DepLoader`); that class is not retained in this repository, because the 1.12 baseline already dropped the coremod.
+
+The reference tree is not part of the 1.21.1 build: `settings.gradle` includes only `common`, `fabric` and `neoforge`, so no `src/` Java file is compiled, and no CodeChicken class is shipped in any artifact. The 1.21.1 port contains no CodeChicken code at all: `grep -rni codechicken common/src fabric/src neoforge/src` returns one hit, a comment in `common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21`. The tube ray trace, the cuboids and the shock-orb floor were re-implemented with the native 1.21.1 `AABB`, `Vec3`, `BlockPos` and `Mth` instead. Keeping the reference tree changes no ownership statement and grants no new distribution right.
+
 ## Tools and runtime dependencies
 
 - Architectury API: LGPL-3.0; referenced as an external runtime dependency, not shaded into the mod.

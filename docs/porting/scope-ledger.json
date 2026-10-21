@@ -18397,17 +18397,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/core/launch/DepLoader.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: DepLoader has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/core/launch/DepLoader.java: the class exists in the TC4 4.2.3.5 decompilation (635 lines, sha256_lf 293e08ea954ab769...)",
+          "the original jar's META-INF/MANIFEST.MF declares 'FMLCorePlugin: thaumcraft.codechicken.core.launch.DepLoader' and 'FMLCorePluginContainsFMLMod: true', so the class is the FML 1.6 coremod entry point of TC4 4.2.3.5; FML loads it reflectively by name, which is why no TC4 class references it in the bytecode",
+          "1.7.10 class hierarchy: DepLoader implements cpw.mods.fml.relauncher.IFMLLoadingPlugin and cpw.mods.fml.relauncher.IFMLCallHook; the oracle body of injectData(Map) is empty (a one-byte method) and call() only calls load() -> DepLoadInst.load(), the CodeChicken dependency downloader",
+          "1.21.1 has no FML coremod lifecycle: fabric/src/main/resources/fabric.mod.json declares only the 'main'/'client' entrypoints and neoforge/src/main/resources/META-INF/neoforge.mods.toml uses modLoader=\"javafml\"; neither loader has an FMLCorePlugin key or a runtime dependency downloader",
+          "the retained 1.12 reference tree never had the coremod: this unit has no legacy counterpart (src/main/java/thaumcraft/codechicken/core/launch/DepLoader.java does not exist) and the legacy resources carry only src/main/resources/mcmod.info, no META-INF/MANIFEST.MF"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenCore code, not TC4 gameplay, and not portable: the 4.2.3.5 coremod only provisioned the CodeChicken runtime for the bundled library; the 1.21.1 port carries none of that library, so the provision step has no counterpart and no gameplay behaviour is lost.",
+          "The previous 'dead code' verdict for this unit was wrong and is corrected here: the class is not referenced by any TC4 class, but it is bound by the original manifest as the FML coremod, so it was live in 4.2.3.5 as a launcher/dependency helper.",
+          "Nothing has to be removed: the class is already absent from the 1.21.1 port, from the retained 1.12 reference tree and from every loader metadata file of the port.",
+          "Complete callsite audit: the class is reachable only through the FML coremod manifest binding; there is no Java-level call site in the 942-class original."
         ],
         "reviewed_sha256": {
           "original": "293e08ea954ab769899b6d9b7636a5e3e7e1c9509d963cac92359df7db583e6e"
@@ -18446,17 +18449,21 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/colour/Colour.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Colour is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/colour/Colour.java: the class exists in the TC4 4.2.3.5 decompilation (136 lines, sha256_lf 7d333c157e938a58...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Colour has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Colour is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Colour method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "1.21.1 colours are packed ARGB integers (net.minecraft.world.item.ItemColors, 0xAARRGGBB), the same four-byte layout the CodeChickenLib colour classes wrap",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "7d333c157e938a58eaa0a50ded5f70645e7741fedcf5e021fd364ccdbcd97041",
@@ -18496,17 +18503,21 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/colour/ColourARGB.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: ColourARGB has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/colour/ColourARGB.java: the class exists in the TC4 4.2.3.5 decompilation (36 lines, sha256_lf 4a5586c063d30330...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): ColourARGB has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into ColourARGB is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no ColourARGB method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "1.21.1 colours are packed ARGB integers (net.minecraft.world.item.ItemColors, 0xAARRGGBB), the same four-byte layout the CodeChickenLib colour classes wrap",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "4a5586c063d303307680bb227afcaa68a18beac2ab7df75ccd7878ac33613768",
@@ -18546,17 +18557,21 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/colour/ColourRGBA.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: ColourRGBA is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/colour/ColourRGBA.java: the class exists in the TC4 4.2.3.5 decompilation (61 lines, sha256_lf 97b7c025dbd38a14...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): ColourRGBA has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into ColourRGBA is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no ColourRGBA method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "1.21.1 colours are packed ARGB integers (net.minecraft.world.item.ItemColors, 0xAARRGGBB), the same four-byte layout the CodeChickenLib colour classes wrap",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "97b7c025dbd38a14dc550414663134560fba62c4e1d84e46df859ff9c13cf479",
@@ -18596,17 +18611,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/lighting/LC.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: LC is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/lighting/LC.java: the class exists in the TC4 4.2.3.5 decompilation (100 lines, sha256_lf dc176ffb3043532e...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): LC has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into LC is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no LC method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "dc176ffb3043532e92eb89684c41c81e1f7bbea483966e518fe3ac09e5ed3170",
@@ -18646,17 +18664,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/lighting/LightMatrix.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: LightMatrix is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/lighting/LightMatrix.java: the class exists in the TC4 4.2.3.5 decompilation (125 lines, sha256_lf 527887d8f369090f...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): LightMatrix has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into LightMatrix is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no LightMatrix method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "527887d8f369090fd50e3763aa57c1ca4f88ea5242637096e28a9add7d392050",
@@ -18696,17 +18717,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/lighting/LightModel.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: LightModel is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/lighting/LightModel.java: the class exists in the TC4 4.2.3.5 decompilation (97 lines, sha256_lf 40796b799d2a8f82...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): LightModel has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into LightModel is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no LightModel method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "40796b799d2a8f826323f5f86371063b4011ea3538ce924862c61f74d88c6024",
@@ -18746,17 +18770,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/lighting/PlanarLightModel.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: PlanarLightModel is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/lighting/PlanarLightModel.java: the class exists in the TC4 4.2.3.5 decompilation (36 lines, sha256_lf 02dca67e92919a06...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): PlanarLightModel has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into PlanarLightModel is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no PlanarLightModel method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "02dca67e92919a06b22b3823ef078dc39747e98e528e0a55f944e19343004b24",
@@ -18992,17 +19019,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/CCModel.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: CCModel is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/CCModel.java: the class exists in the TC4 4.2.3.5 decompilation (873 lines, sha256_lf a851d44482bc2a48...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): CCModel has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into CCModel is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no CCModel method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "a851d44482bc2a48a50ecc4f4ac170a5b24f3bbf73198fb752c64a4956e7c559",
@@ -19042,17 +19072,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/CCModelLibrary.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: CCModelLibrary has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/CCModelLibrary.java: the class exists in the TC4 4.2.3.5 decompilation (74 lines, sha256_lf f1b64fb482fb1d4d...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): CCModelLibrary has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into CCModelLibrary is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no CCModelLibrary method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "f1b64fb482fb1d4d2ff4822cf927843bc2550d1a25729bf908523732b877e4a0",
@@ -19092,17 +19125,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/CCRenderPipeline.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: CCRenderPipeline is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/CCRenderPipeline.java: the class exists in the TC4 4.2.3.5 decompilation (144 lines, sha256_lf db634e11a3aa4c2d...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): CCRenderPipeline has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into CCRenderPipeline is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no CCRenderPipeline method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "db634e11a3aa4c2db17c33b09cb83ba8ee4be613939fe3fab71d39f347493d15",
@@ -19142,17 +19178,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/CCRenderState.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: CCRenderState is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/CCRenderState.java: the class exists in the TC4 4.2.3.5 decompilation (366 lines, sha256_lf be435b3b010bb6fc...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): CCRenderState has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into CCRenderState is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no CCRenderState method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "be435b3b010bb6fc4711ed97b11d21070ba3a1efad5a9f6f4b6948499cd00229",
@@ -19192,17 +19231,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/Vertex5.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Vertex5 is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/Vertex5.java: the class exists in the TC4 4.2.3.5 decompilation (79 lines, sha256_lf 71b6772be437f5bf...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Vertex5 has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Vertex5 is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Vertex5 method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "71b6772be437f5bf5087d5f73e1b599f26df561febcac40b55a6417fff6edfbc",
@@ -19242,17 +19284,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/uv/UV.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: UV is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/uv/UV.java: the class exists in the TC4 4.2.3.5 decompilation (85 lines, sha256_lf ed306a72d6c433bf...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): UV has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into UV is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no UV method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "ed306a72d6c433bfd4ddbf18ca3a5f27cdae5467400e1ba5d1afe3f1903f9590",
@@ -19292,17 +19337,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/uv/UVRotation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: UVRotation has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/uv/UVRotation.java: the class exists in the TC4 4.2.3.5 decompilation (53 lines, sha256_lf e7419309c40f5934...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): UVRotation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into UVRotation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no UVRotation method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "e7419309c40f59342a2021108d17696c9992bc285075e40e5f174b94e31cf1ae",
@@ -19342,17 +19390,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/uv/UVScale.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: UVScale has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/uv/UVScale.java: the class exists in the TC4 4.2.3.5 decompilation (42 lines, sha256_lf 32f5076a2eba8402...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): UVScale has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into UVScale is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no UVScale method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "32f5076a2eba84021b227db8f167897b41a203b8785213fa06edf63932b92739",
@@ -19392,17 +19443,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/uv/UVTransformation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: UVTransformation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/uv/UVTransformation.java: the class exists in the TC4 4.2.3.5 decompilation (42 lines, sha256_lf 92d3e72a2ee2e02a...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): UVTransformation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into UVTransformation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no UVTransformation method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "92d3e72a2ee2e02a54181c340ea37cbf599264fa3ff11c287c23767956e371e2",
@@ -19442,17 +19496,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/uv/UVTransformationList.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: UVTransformationList is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/uv/UVTransformationList.java: the class exists in the TC4 4.2.3.5 decompilation (107 lines, sha256_lf 7094f783b410bad1...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): UVTransformationList has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into UVTransformationList is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no UVTransformationList method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "7094f783b410bad168fa5227d4ff28eaa68d1690ac7f8a15db0e6d8f916cd827",
@@ -19492,17 +19549,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/render/uv/UVTranslation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: UVTranslation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/render/uv/UVTranslation.java: the class exists in the TC4 4.2.3.5 decompilation (58 lines, sha256_lf 7e2b79aab2ba6eb2...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): UVTranslation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into UVTranslation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no UVTranslation method ever runs",
+          "1.21.1 draws with the vanilla pipeline: native block/item models plus com.mojang.blaze3d.vertex.PoseStack/VertexConsumer, e.g. common/src/main/java/thaumcraft/client/renderers/tile/TileTubeRenderer.java:62-79; the original drew its blocks with the Forge 1.7.10 ISimpleBlockRenderingHandler (21 renderers in thaumcraft/client/renderers/block) and IItemRenderer (8), so the bundled CodeChickenLib pipeline, the light model and the colour/UV helpers were never wired up in 4.2.3.5",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites), so the port's behaviour is identical to the original's; the rendering that TC4 4.2.3.5 actually performed is the Forge 1.7.10 ISimpleBlockRenderingHandler path, reproduced by the port with the vanilla 1.21.1 pipeline.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "7e2b79aab2ba6eb23649c486edd478b9f6d9d08b867d6e55bac6b7f2ff8d1c87",
@@ -19542,17 +19602,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/util/Copyable.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Copyable is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/util/Copyable.java: the class exists in the TC4 4.2.3.5 decompilation (9 lines, sha256_lf cc6e062301bcb03b...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Copyable has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Copyable is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Copyable method ever runs",
+          "1.7.10 class hierarchy: Copyable is implemented only by bundled CodeChicken classes (Colour, LC, CCModel, Vertex5, UV, BlockCoord, Cuboid6, CuboidCoord, Matrix4, Quat and Vector3); no TC4 class implements it and no TC4 class calls copy(), so the contract has no native counterpart to port",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): only bundled CodeChicken classes implement the copy() contract, and no TC4 class calls it.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "cc6e062301bcb03bbcb23b6e9debac44ad50c698c723a0ca9083f6567032a0f7",
@@ -19592,17 +19655,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/AxisCycle.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: AxisCycle has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/AxisCycle.java: the class exists in the TC4 4.2.3.5 decompilation (47 lines, sha256_lf 5d95d0c14e20789e...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): AxisCycle has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into AxisCycle is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no AxisCycle method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "5d95d0c14e20789e3976b2d4978e83f881716a492b79c0beaa246235befcc7e8",
@@ -19739,17 +19805,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/CuboidCoord.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: CuboidCoord has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/CuboidCoord.java: the class exists in the TC4 4.2.3.5 decompilation (255 lines, sha256_lf 7a7d36448e7976a0...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): CuboidCoord has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into CuboidCoord is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no CuboidCoord method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "7a7d36448e7976a028bd0fa9cacd8eac239150758234ae9fe385d50686a6e733",
@@ -19789,17 +19858,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/ITransformation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: ITransformation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/ITransformation.java: the class exists in the TC4 4.2.3.5 decompilation (27 lines, sha256_lf 42232d858e91ed12...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): ITransformation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into ITransformation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no ITransformation method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "42232d858e91ed12968acf65744725190ec980bd8fc7cfe032bb08598b1376fc",
@@ -19839,17 +19911,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/IrreversibleTransformationException.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: IrreversibleTransformationException is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/IrreversibleTransformationException.java: the class exists in the TC4 4.2.3.5 decompilation (21 lines, sha256_lf 1fcaae580ca37728...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): IrreversibleTransformationException has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into IrreversibleTransformationException is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no IrreversibleTransformationException method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "1fcaae580ca37728a6f7b4f8315735b630f9616ddbbf3a90eee1c6fd4278d17c",
@@ -19889,17 +19964,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/Matrix4.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Matrix4 is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/Matrix4.java: the class exists in the TC4 4.2.3.5 decompilation (350 lines, sha256_lf 024185731ff88f99...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Matrix4 has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Matrix4 is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Matrix4 method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "024185731ff88f99d855988a09608b63b1ebcd33eea3268e4c6224ca87a26a84",
@@ -19939,17 +20017,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/Quat.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Quat is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/Quat.java: the class exists in the TC4 4.2.3.5 decompilation (139 lines, sha256_lf 928c3b8c9dd888a7...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Quat has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Quat is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Quat method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "928c3b8c9dd888a7bc9f7902d72d3c83f16609f831016006e35253b803696193",
@@ -19989,17 +20070,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/RedundantTransformation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: RedundantTransformation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/RedundantTransformation.java: the class exists in the TC4 4.2.3.5 decompilation (59 lines, sha256_lf ee321a2d6345ac12...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): RedundantTransformation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into RedundantTransformation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no RedundantTransformation method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "ee321a2d6345ac1204b420f05f6f988c7beacf4eaa9759530243b23f75ac1aaf",
@@ -20039,17 +20123,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/Rotation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Rotation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/Rotation.java: the class exists in the TC4 4.2.3.5 decompilation (269 lines, sha256_lf 1afa9a634d986a85...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Rotation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Rotation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Rotation method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "1afa9a634d986a85bb0439318ec14cc8c6317454cd87091f612533e0c8fd14ec",
@@ -20089,17 +20176,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/Scale.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Scale is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/Scale.java: the class exists in the TC4 4.2.3.5 decompilation (80 lines, sha256_lf 26d2e8bc179cbebf...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Scale has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Scale is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Scale method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "26d2e8bc179cbebfcad48ce667e952d46922fe904ce7c83043e1e4aa83e88331",
@@ -20139,17 +20229,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/SwapYZ.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: SwapYZ has ZERO references outside its own file",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/SwapYZ.java: the class exists in the TC4 4.2.3.5 decompilation (29 lines, sha256_lf 41d9e4afd54bfefb...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): SwapYZ has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into SwapYZ is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no SwapYZ method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Dead code in the original: the bundled CodeChicken class is never referenced by any TC4 class, so it had no effect in 4.2.3.5.",
-          "The native port therefore omits the whole bundled CodeChickenLib tree; nothing that TC4 actually used is lost.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "41d9e4afd54bfefb04fefb2d81ebb95e7ad46f6be80f93ec65536a1d2893c48d",
@@ -20189,17 +20282,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/Transformation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Transformation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/Transformation.java: the class exists in the TC4 4.2.3.5 decompilation (61 lines, sha256_lf 0b5e46263e72350c...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Transformation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Transformation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Transformation method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "0b5e46263e72350ce4008239d13ff668abb010ba0121cab7637d3b3387fe4906",
@@ -20239,17 +20335,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/TransformationList.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: TransformationList is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/TransformationList.java: the class exists in the TC4 4.2.3.5 decompilation (167 lines, sha256_lf 4709aa29fe9af90d...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): TransformationList has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into TransformationList is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no TransformationList method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "4709aa29fe9af90d823b91d8d1f81b20aafd033481e19fe60f6a3c6bda54c97c",
@@ -20289,17 +20388,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/Translation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: Translation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/Translation.java: the class exists in the TC4 4.2.3.5 decompilation (81 lines, sha256_lf b4cf12a866d1ae21...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): Translation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into Translation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no Translation method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "b4cf12a866d1ae21af34a089799f548f3335ebc6e8b7837ccac3f14dd19c85ea",
@@ -20339,17 +20441,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-codechicken",
         "evidence": [
-          "oracle thaumcraft/codechicken/lib/vec/VariableTransformation.java: the class exists in the TC4 4.2.3.5 decompilation",
-          "oracle tree-wide reference scan: VariableTransformation is only reachable from the dead CodeChicken render/lighting subtree (DepLoader, CCModelLibrary, UVRotation, UVScale, AxisCycle, SwapYZ, ColourARGB and CuboidCoord are its only roots and all have zero external references)",
-          "native common/src/main/java/thaumcraft/ has no thaumcraft/codechicken package at all"
+          "oracle thaumcraft/codechicken/lib/vec/VariableTransformation.java: the class exists in the TC4 4.2.3.5 decompilation (40 lines, sha256_lf 41d8d9448c39217e...)",
+          "TC4 4.2.3.5 bytecode call-site audit of Thaumcraft-1.7.10-4.2.3.5.jar (942 classes, 73 of them the bundled thaumcraft/codechicken tree; constant-pool scan plus a method-level invoke scan of every method body): VariableTransformation has ZERO invoke sites in the 869 non-codechicken classes",
+          "the only codechicken calls in the whole mod are MathHelper.floor_double, IndexedCuboid6.<init>, RayTracer.<init>, RayTracer.rayTraceCuboids, RayTracer.retraceBlock, BlockCoord.<init>, Cuboid6.<init> and Vector3.<init>, all of them from BlockTube, TileTube, TileTubeBuffer, TileTubeValve, ItemResonator and EntityShockOrb; no other bundled class is ever entered",
+          "the only path from TC4 code into VariableTransformation is the class-loading chain of the bundled library itself (Vector3.apply/rotate/translation and Cuboid6.apply call Transformation, Quat and Translation), and TC4 4.2.3.5 calls only the Vector3 and Cuboid6 constructors, so no VariableTransformation method ever runs",
+          "1.21.1 ships the same algebra natively: net.minecraft.world.phys.Vec3, org.joml.Matrix4f/Quaternionf/Vector3f and net.minecraft.core.BlockPos/Vec3i; the port's tube geometry uses the native AABB and BlockPos (common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32)",
+          "port grep: grep -rni codechicken common/src fabric/src neoforge/src returns exactly one hit, the comment at common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:21; the 1.21.1 port ships no thaumcraft/codechicken package and no CodeChicken class"
         ],
         "notes": [
-          "Transitively dead in the original: the bundled CodeChicken class is only reachable from CodeChickenLib's own unused model/lighting subsystem, which nothing in TC4 4.2.3.5 instantiates.",
-          "The native port omits the whole bundled CodeChickenLib tree; the only live CodeChicken users (the tube ray tracer and the shock orb floor) were re-implemented natively.",
-          "Complete callsite audit: the reference graph from every root of the CodeChicken model/lighting subtree was walked."
+          "Third-party CodeChickenLib code, not TC4 gameplay: the class is deliberately not carried over into the 1.21.1 port.",
+          "It had no observable effect in 4.2.3.5 (zero invoke sites): TC4 only used the Vector3 and Cuboid6 constructors, and the transform algebra is reached exclusively through Vector3.apply/rotate/translation and Cuboid6.apply, which TC4 never calls. The port reproduces the geometry with the native Vec3/AABB/BlockPos.",
+          "Complete callsite audit: 0 method-level call sites from any of the 869 TC4 classes; the class is only present inside the 1.7.10 jar as part of the bundled library."
         ],
         "reviewed_sha256": {
           "original": "41d8d9448c39217e6b68c432ad5f12534db99416af09ce9cb0c86f917c36ccec",

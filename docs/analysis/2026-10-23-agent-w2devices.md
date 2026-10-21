@@ -34,7 +34,8 @@ Unit list: `/home/cyberfox-kali/units/w2devices.txt` (13 units of the
 | `15976653` | `fix(devices)`: the creative spawn egg of the original is never spent |
 | `b1d9ca72` | `fix(bore)`: the dig event of the original reaches the client and digs with a flying sparkle |
 | `2471daa7` | `fix(devices)`: the cap of the flux scrubber turns around the vertical axis and bobs with the original phase |
-| (this wave) | `docs(devices)`: the scope ledger verdicts of the thirteen units |
+| `d8d6dc5a` | `docs(devices)`: this report |
+| `0c81cea7` | `docs(devices)`: the scope ledger verdicts of the thirteen units || `14c423ec` | `fix(bore)`: the dig effect only draws when the dug block is still there |
 
 ## 2. Defects: oracle -> port -> fix
 
@@ -332,3 +333,23 @@ random grey `0.33+rand*0.67`). The four senders above then call
 * `common/src/test/java/thaumcraft/client/renderers/tile/FluxScrubberRendererParityTest.java` —
   **new**.
 * `docs/porting/scope-ledger.json` — the verdicts of the thirteen units.
+
+## 9. What was verified in this wave and what was not
+
+* **Verified here (no Gradle needed):**
+  * `python3 scripts/porting/update_scope_ledger.py --check --original-root /home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle`
+    → `{"mode": "check", ..., "stale_review_fingerprints": 0}` (the ledger is fresh and the
+    fingerprints of the thirteen units still match the oracle).
+  * the ledger diff touches **only** the thirteen units of this lane and leaves `counts`
+    untouched (`git diff` of the JSON: 13 changed rows, `counts` identical).
+  * `javac -proc:none` over the eleven changed and new files reports **no syntax error**
+    (only the expected "cannot find symbol" of a classpath free parse).
+  * the 1.21.1 API of every new call was read out of the merged jar
+    (`~/.gradle/caches/fabric-loom/.../minecraft-merged-1.21.1...jar`): `EntityBlock.getTicker`
+    is the `(Level, BlockState, BlockEntityType)` method the native blocks override, and
+    `ClientLevel.tickEntities` calls `Level.tickBlockEntities`, so the client ticker of the
+    flux scrubber really runs on the client.
+* **NOT verified here (the wave forbids Gradle):** the build, the JUnit suite, the game test
+  suite and the client run. The three test classes are **authored but not executed**; the
+  client acceptance criteria of §7 are **not inspected**.
+

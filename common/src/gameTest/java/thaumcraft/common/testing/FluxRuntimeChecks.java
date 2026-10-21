@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
@@ -21,10 +22,13 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.entities.ITaintedMob;
 import thaumcraft.common.blocks.FluxFiniteBlock;
 import thaumcraft.common.config.ThaumcraftFlux;
+import thaumcraft.common.config.ThaumcraftTaint;
+import thaumcraft.common.entities.monster.EntityThaumicSlime;
 import thaumcraft.common.lib.potions.FluxEffects;
 
 /** One native, loader-neutral fixture. No stand-in fluids, injected effects, or mock block states. */
@@ -213,10 +217,22 @@ public final class FluxRuntimeChecks {
             put(level, pos, goo, amount);
             air(level, pos.above());
             tick(level, pos, RandomSource.create(seed(random -> random.nextInt(25) == 0)));
-            test.assertTrue(level.getBlockState(pos).is(goo) && amount(level, pos) == amount, "pending real Thaumic Slime branch does not silently consume goo (M11 not complete)");
+            // Oracle BlockFluxGoo:106-121 - the breed roll empties the cell and births a
+            // real thaumic slime: size one for the metadata two to five, size two from six.
+            int size = amount < 7 ? 1 : 2;
+            var slimes = level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(pos).inflate(2));
+            test.assertTrue(level.getBlockState(pos).isAir() && amount(level, pos) == 0 && slimes.size() == 1
+                            && slimes.getFirst().getSlimeSize() == size,
+                    "the real Thaumic Slime branch empties the cell and births the original slime");
+            slimes.forEach(Entity::discard);
         }
+        seal(level, pos);
+        put(level, pos, goo, 8);
+        air(level, pos.above());
         tick(level, pos, RandomSource.create(seed(random -> random.nextInt(25) != 0 && random.nextInt(50) == 0)));
-        test.assertTrue(level.getBlockState(pos).is(goo) && amount(level, pos) == 8, "pending taint biome/fibres conversion leaves its resource intact");
+        // Oracle BlockFluxGoo:121-124 - the taint roll takes the cell and its column.
+        test.assertTrue(level.getBlockState(pos).is(ThaumcraftTaint.FIBRES.get()),
+                "the taint roll turns the cell of the original into the taint fibres");
     }
 
     private static void exposureChecks(GameTestHelper test, ServerLevel level, BlockPos pos, ServerPlayer player) {

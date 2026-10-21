@@ -5374,7 +5374,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:20-49 runeIndex random(224..239) but rendered at UV row .375, rotation randomInt(4)*90, size 0.3*(1+gauss*.1), lifetime 3*duration, gravity-driven rise",
@@ -5384,14 +5384,24 @@
           "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:20-49 the rune particle, the rotation nextInt(4)*90, the size 0.3f * (1 + nextGaussian()*0.1f) and the lifetime 3 * duration",
           "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:96-104 the rise and fade profile and the drift 0.04 * gravity",
           "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:110-119 the rune particle with the original UV row .375, the original ninety degree rotation and the original 0.15 half extent",
-          "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:296-311 the same light strip quad of the original"
+          "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:296-311 the same light strip quad of the original",
+          "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:24-49 the rune particle: the rotation nextInt(4)*90, the lifetime 3*duration, the cell 224..239, the offsets nextFloat()*0.2 and -0.3+nextFloat()*0.6, the size 0.3f*(1+nextGaussian()*0.1f) and the alpha 0",
+          "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:80-93 the rise and fade profile with the threshold maxAge/5 and the drift 0.04*gravity",
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:332-337 the warding stone spawns two runes per random update with the colours 0.2+rand*0.4, rand*0.3 and 0.8+rand*0.2, the duration 20 and the gravity -0.02",
+          "oracle thaumcraft/common/blocks/BlockEldritch.java:302-304 the runed eldritch block spawns one rune in a neighbouring air block with the duration 16+rand(4)",
+          "oracle thaumcraft/client/ClientProxy.java:899-904 particleCount: no particle at the minimal setting, the base count at the decreased one and twice the base count at the full one",
+          "native common/src/main/java/thaumcraft/client/fx/particles/BlockRuneParticle.java:33-136 the original rune particle with the original numbers, the original cell, the original rotations and the original alpha",
+          "native common/src/main/java/thaumcraft/client/fx/RuneEffects.java:28-88 the original particle count rule, the warding stone runes and the runed eldritch rune, with the average rate of the original random update",
+          "native common/src/main/java/thaumcraft/common/tiles/TileWardingStone.java:40-50 the client tick of the warding stone spawns the runes",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:228-240 the client tick of the runed eldritch block spawns the rune"
         ],
         "notes": [
           "The rune particle itself is faithfully ported (same UV row quirk, same random 90 degree rotation, same 0.15 half-extent, same 3*duration lifetime, same gravity drift).",
           "Only the infusion-matrix pedestal use of blockRunes is ported (InfusionClientEffects:204).",
           "The other original callers (BlockCosmeticSolid:336/342/350 rune blocks, BlockEldritch:304, ItemThaumometer:92/103/128) have no native rune particle.",
           "Complete callsite audit: FXBlockRunes is instantiated only in ClientProxy.blockRunes, called from BlockCosmeticSolid, BlockEldritch, ItemThaumometer and TileInfusionMatrix.",
-          "REMAINING GAP: the original also draws the runes on the eldritch blocks and on the thaumometer. The native rune particle is only used by the infusion matrix, so those two call sites have no rune particle."
+          "REMAINING GAP: the original also draws the runes on the eldritch blocks and on the thaumometer. The native rune particle is only used by the infusion matrix, so those two call sites have no rune particle.",
+          "The rune particle of the original is now a native particle of its own and the two blocks that spawn it in the original spawn it in the native port as well."
         ],
         "reviewed_sha256": {
           "original": "5d80cc459c2d78d7820a22eaf5f6df89834880f71dcd2f96751fe29137463be1",
@@ -8726,13 +8736,16 @@
           "native common/src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java the warded glass baked model",
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:325-355 the rune particles of the rune blocks and of the mobs inside them",
           "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque.json and cosmetic_opaque_0.json the amber block model",
-          "native common/src/main/java/thaumcraft/client/renderers/block/ObsidianTotemBakedModel.java:30-48 the totem face and rune selection of the original"
+          "native common/src/main/java/thaumcraft/client/renderers/block/ObsidianTotemBakedModel.java:30-48 the totem face and rune selection of the original",
+          "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:60-91 the amber family with its three icons amberblock, amberbrick and amberblock_top, the original has no rune effect in this family",
+          "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque_0.json, cosmetic_opaque_1.json, cosmetic_opaque_2.json the three amber variants of the original family"
         ],
         "notes": [
           "The cosmetic opaque family is now JSON models plus baked models; the totem rune selection is a unit-testable helper that reproduces the original's side+variant rule.",
           "Deviation: the original BlockCosmeticSolid rune-block overlay effect (blockRunes particles on the rune blocks) has no native counterpart, because the native rune particle is only used by the infusion matrix.",
           "Complete callsite audit: BlockCosmeticOpaqueRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the original draws blockRunes particles on the rune blocks of the cosmetic solid family and on the mobs inside them. The native rune particle is only used by the infusion matrix, so the rune blocks have no rune effect."
+          "REMAINING GAP: the original draws blockRunes particles on the rune blocks of the cosmetic solid family and on the mobs inside them. The native rune particle is only used by the infusion matrix, so the rune blocks have no rune effect.",
+          "The rune particles of the wave-1 note belong to the cosmetic solid family, the warding stone, and not to the cosmetic opaque family; the warding stone now spawns them."
         ],
         "reviewed_sha256": {
           "original": "c4cdf9a2581ced262fb656a7f782fcd5b3742548ffe361f68a425f3f684b811e"

@@ -1,6 +1,9 @@
 package thaumcraft.eldritch;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -8,6 +11,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
 import org.junit.jupiter.api.Test;
 import thaumcraft.client.renderers.models.ModelEldritchGuardian;
 import thaumcraft.client.renderers.models.entities.ModelEldritchCrab;
@@ -19,10 +26,35 @@ import thaumcraft.client.renderers.models.entities.ModelEldritchGolem;
  *
  * <p>The oracle is the decompiled jar:
  * {@code thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java},
- * {@code ModelEldritchGolem.java} and {@code ModelEldritchGuardian.java}.
+ * {@code ModelEldritchGolem.java} and {@code ModelEldritchGuardian.java}.</p>
+ *
+ * <p>The cosine of the original is the lookup table of the 1.7.10 {@code MathHelper}
+ * (MCP {@code func_76134_b}), not {@link Math#cos(double)}: the original swung the eldritch
+ * mobs with a sine table of 65536 entries, and the native 1.21.1 {@code Mth.cos} is that
+ * same table. The expectations below therefore use {@link #originalCos(float)}.</p>
  */
 class EldritchClientModelParityTest {
     private static final float EPS = 1.0E-5F;
+
+    /**
+     * The sine table of the original 1.7.10 {@code MathHelper} (the static block of the class
+     * builds 65536 values of {@code (float) Math.sin(index * Math.PI * 2.0 / 65536.0)}).
+     */
+    private static final float[] ORIGINAL_SINE = new float[65536];
+
+    static {
+        for (int index = 0; index < 65536; index++) {
+            ORIGINAL_SINE[index] = (float) Math.sin(index * Math.PI * 2.0D / 65536.0D);
+        }
+    }
+
+    /**
+     * Original 1.7.10 {@code MathHelper.func_76134_b} - the cosine of the original, a lookup
+     * in the sine table above and not {@link Math#cos(double)}.
+     */
+    private static float originalCos(float value) {
+        return ORIGINAL_SINE[(int) (value * 10430.378F + 16384.0F) & 0xFFFF];
+    }
 
     // ------------------------------------------------------------- the crab
 
@@ -64,15 +96,16 @@ class EldritchClientModelParityTest {
 
     @Test void theCrabSwingsItsLegsWithTheOriginalCosine() {
         // Original ModelEldritchCrab:163-164 - the swing of the legs is
-        // -(cos(limb * 0.6662 * 2) * 0.4) * amount and not a sine.
+        // -(MathHelper.cos(limb * 0.6662f * 2.0f) * 0.4f) * amount and not a sine, and the
+        // cosine of the original is the lookup table of the 1.7.10 MathHelper.
         for (float limb : new float[]{0.0F, 0.5F, 1.0F, 3.0F, 7.5F}) {
-            float expected = -(float) (Math.cos(limb * .6662F * 2.0F) * .4F) * 1.0F;
+            float expected = -(originalCos(limb * .6662F * 2F) * .4F) * 1.0F;
             assertEquals(expected, ModelEldritchCrab.legSwing(limb, 1.0F), EPS, "the right legs at " + limb);
-            float expectedHalf = -(float) (Math.cos(limb * .6662F * 2.0F + Math.PI) * .4F) * 1.0F;
+            float expectedHalf = -(originalCos(limb * .6662F * 2F + (float) Math.PI) * .4F) * 1.0F;
             assertEquals(expectedHalf, ModelEldritchCrab.legSwingHalfPhase(limb, 1.0F), EPS, "the left legs at " + limb);
-            float expectedTail = (float) (Math.cos(limb * .6662F) * 2.0F * .125F);
+            float expectedTail = originalCos(limb * .6662F) * 2F * 1.0F * .125F;
             assertEquals(expectedTail, ModelEldritchCrab.tailSway(limb, 1.0F), EPS, "the tail at " + limb);
-            float expectedTilt = (float) (Math.cos(limb * .6662F) * .125F);
+            float expectedTilt = originalCos(limb * .6662F) * 1.0F * .125F;
             assertEquals(expectedTilt, ModelEldritchCrab.tailSwayTilt(limb, 1.0F), EPS, "the tail tilt at " + limb);
         }
         // The sine and the cosine differ: the legs of the crab start at their rest
@@ -112,19 +145,20 @@ class EldritchClientModelParityTest {
 
     @Test void theGolemSwingsWithTheOriginalCosine() {
         // Original ModelEldritchGolem:259-260, :312-313 and :323-324 - the golem
-        // swings with MathHelper.cos (MCP func_76134_b) and not with a sine.
+        // swings with MathHelper.cos (MCP func_76134_b), the lookup table of the
+        // 1.7.10 MathHelper, and not with a sine.
         for (float limb : new float[]{0.0F, 0.5F, 1.0F, 3.0F, 7.5F}) {
-            assertEquals((float) (Math.cos(limb * .4F) * 2.0F * .5F),
+            assertEquals(originalCos(limb * .4F) * 2.0F * 1.0F * .5F,
                     ModelEldritchGolem.armSwing(limb, 1.0F), EPS, "the left arm at " + limb);
-            assertEquals((float) (Math.cos(limb * .4F + Math.PI) * 2.0F * .5F),
+            assertEquals(originalCos(limb * .4F + (float) Math.PI) * 2.0F * 1.0F * .5F,
                     ModelEldritchGolem.armSwingHalfPhase(limb, 1.0F), EPS, "the right arm at " + limb);
-            assertEquals((float) (Math.cos(limb * .4662F) * 1.4F),
+            assertEquals(originalCos(limb * .4662F) * 1.4F * 1.0F,
                     ModelEldritchGolem.legSwing(limb, 1.0F), EPS, "the right leg at " + limb);
-            assertEquals((float) (Math.cos(limb * .4662F + Math.PI) * 1.4F),
+            assertEquals(originalCos(limb * .4662F + (float) Math.PI) * 1.4F * 1.0F,
                     ModelEldritchGolem.legSwingHalfPhase(limb, 1.0F), EPS, "the left leg at " + limb);
-            assertEquals((float) (Math.cos(limb * .44F) * 1.4F),
+            assertEquals(originalCos(limb * .44F) * 1.4F * 1.0F,
                     ModelEldritchGolem.clothSwing(limb, 1.0F), EPS, "the cloth at " + limb);
-            assertEquals((float) (Math.cos(limb * .44F + Math.PI) * 1.4F),
+            assertEquals(originalCos(limb * .44F + (float) Math.PI) * 1.4F * 1.0F,
                     ModelEldritchGolem.clothSwingHalfPhase(limb, 1.0F), EPS, "the second cloth at " + limb);
         }
         // The sine and the cosine differ: the arms of the golem start at their rest
@@ -137,16 +171,23 @@ class EldritchClientModelParityTest {
 
     @Test void theGuardianKeepsTheFiftyFourPartsOfTheOriginal() {
         ModelPart root = ModelEldritchGuardian.createBodyLayer().bakeRoot();
-        for (String part : new String[]{"BeltR", "Mbelt", "MbeltL", "MbeltR", "BeltL", "HoodEye", "Hood1",
-                "Hood2", "Hood3", "Hood4", "Backplate", "ShoulderplateTopR", "ShoulderplateR1", "ShoulderplateR2",
-                "ShoulderplateR3", "ShoulderR", "ArmL1", "ArmL2", "ArmL3", "ArmR1", "ArmR2", "ArmR3",
-                "ShoulderL", "ShoulderplateLtop", "ShoulderplateL1", "ShoulderplateL2", "ShoulderplateL3",
-                "LegpanelR4", "LegpanelR5", "LegpanelR6", "BackpanelR1", "BackpanelR2", "BackpanelR3",
-                "BackpanelL3", "LegpanelL4", "LegpanelL5", "LegpanelL6", "BackpanelL1", "BackpanelL2",
-                "SidepanelL1", "SidepanelR1", "SidepanelR2", "SidepanelR3", "SidepanelR4", "SidepanelL2",
-                "SidepanelL3", "SidepanelL4", "LegpanelC1", "LegpanelC2", "LegpanelC3", "Cloak1", "Cloak2",
-                "Cloak3"}) {
-            assertTrue(root.hasChild(part), "the original guardian has the part " + part);
+        // The original built fifty-four ModelRenderers and hung thirteen of them under a
+        // parent (oracle ModelEldritchGuardian:149-151, :202-203, :218-219 and :412-419):
+        // the hood parts under the hood, the arm parts under the arms, the leg panels under
+        // the centre panel, the side panels under the side panels and the cloak under the
+        // cloak. The paths below are the original's hierarchy.
+        for (String path : new String[]{"BeltR", "Mbelt", "MbeltL", "MbeltR", "BeltL", "Chestplate",
+                "HoodEye", "Hood1", "Hood1/Hood2", "Hood1/Hood3", "Hood1/Hood4", "Backplate",
+                "ShoulderplateTopR", "ShoulderplateR1", "ShoulderplateR2", "ShoulderplateR3", "ShoulderR",
+                "ArmL1", "ArmL1/ArmL2", "ArmL1/ArmL3", "ArmR1", "ArmR1/ArmR2", "ArmR1/ArmR3", "ShoulderL",
+                "ShoulderplateLtop", "ShoulderplateL1", "ShoulderplateL2", "ShoulderplateL3", "LegpanelR4",
+                "LegpanelR5", "LegpanelR6", "BackpanelR1", "BackpanelR2", "BackpanelR3", "BackpanelL3",
+                "LegpanelL4", "LegpanelL5", "LegpanelL6", "BackpanelL1", "BackpanelL2", "SidepanelL1",
+                "SidepanelR1", "SidepanelR2", "SidepanelR2/SidepanelR3", "SidepanelR2/SidepanelR3/SidepanelR4",
+                "SidepanelL2", "SidepanelL2/SidepanelL3", "SidepanelL2/SidepanelL3/SidepanelL4", "LegpanelC1",
+                "LegpanelC1/LegpanelC2", "LegpanelC1/LegpanelC2/LegpanelC3", "Cloak1", "Cloak1/Cloak2",
+                "Cloak1/Cloak2/Cloak3"}) {
+            assertNotNull(part(root, path), "the original guardian has the part " + path);
         }
         assertEquals(54, parts(root), "the original guardian has fifty-four parts");
     }
@@ -165,41 +206,57 @@ class EldritchClientModelParityTest {
      * Original ModelEldritchGuardian:220-222 - the mirror flag of the left shoulder
      * plate is set before its box, so the original really mirrored that box. Every
      * other mirror flag of the original comes after its box and never had an effect.
+     *
+     * <p>The 1.7.10 {@code ModelBox} reads the flag of its {@code ModelRenderer} while it
+     * is built, swaps the two x edges of the box and reverses the vertex order of every
+     * face; the native 1.21.1 {@code ModelPart.Cube} does the same for a mirrored
+     * {@code CubeListBuilder}. The test therefore compares the two plates of the model
+     * with the same boxes built with and without the mirror flag.</p>
      */
     @Test void theGuardianMirrorsOnlyTheLeftShoulderPlate() {
         ModelPart root = ModelEldritchGuardian.createBodyLayer().bakeRoot();
-        List<float[]> left = uvsOf(root.getChild("ShoulderL"));
-        List<float[]> right = uvsOf(root.getChild("ShoulderR"));
-        assertEquals(24, right.size(), "a box of the original has twenty-four corners");
-        assertEquals(24, left.size(), "a box of the original has twenty-four corners");
-        // The two boxes share their size and their texture offset, so the mirror only
-        // turns the u of every corner around inside the face.
-        float[] leftU = new float[left.size()];
-        float[] rightU = new float[right.size()];
-        for (int index = 0; index < left.size(); index++) {
-            leftU[index] = left.get(index)[0];
-            rightU[index] = right.get(index)[0];
-        }
-        float[] sortedLeft = leftU.clone();
-        float[] sortedRight = rightU.clone();
-        java.util.Arrays.sort(sortedLeft);
-        java.util.Arrays.sort(sortedRight);
-        for (int index = 0; index < sortedLeft.length; index++) {
-            assertEquals(sortedRight[index], sortedLeft[index], 1.0E-4F,
-                    "the mirrored box keeps the same texture coordinates at the corner " + index);
-        }
-        boolean same = true;
-        for (int index = 0; index < leftU.length; index++) {
-            if (Math.abs(leftU[index] - rightU[index]) > 1.0E-4F) { same = false; break; }
-        }
-        assertTrue(!same, "the original mirrored the left shoulder plate");
+        ModelPart left = root.getChild("ShoulderL");
+        ModelPart right = root.getChild("ShoulderR");
+        // The original left plate: the mirror flag before the box (oracle :221-222).
+        assertArrayEquals(cornersOf(shoulderPlate(left, -1.5F, true)), cornersOf(left), 1.0E-6F,
+                "the original mirrored the left shoulder plate");
+        // The original right plate: the mirror flag after the box (oracle :182-186).
+        assertArrayEquals(cornersOf(shoulderPlate(right, -3.5F, false)), cornersOf(right), 1.0E-6F,
+                "the original did not mirror the right shoulder plate");
+        // The mirror really changes the box, so the two expectations are not the same.
+        assertFalse(java.util.Arrays.equals(cornersOf(shoulderPlate(left, -1.5F, true)),
+                cornersOf(shoulderPlate(left, -1.5F, false))),
+                "the mirror of the original changes the box of the left shoulder plate");
     }
 
     // ------------------------------------------------------------------ tools
 
+    /** The part of the model at the given path, or null when the path does not exist. */
+    private static ModelPart part(ModelPart root, String path) {
+        ModelPart current = root;
+        for (String name : path.split("/")) {
+            if (!current.hasChild(name)) return null;
+            current = current.getChild(name);
+        }
+        return current;
+    }
+
     /** The number of the parts of a model without its own root. */
     private static long parts(ModelPart root) {
         return root.getAllParts().filter(part -> part != root).count();
+    }
+
+    /**
+     * The original shoulder plate with the box of the oracle, built with or without the
+     * mirror flag and with the pose of the part of the port.
+     */
+    private static ModelPart shoulderPlate(ModelPart part, float originX, boolean mirror) {
+        var builder = CubeListBuilder.create().texOffs(56, 35);
+        if (mirror) builder.mirror();
+        var mesh = new MeshDefinition();
+        mesh.getRoot().addOrReplaceChild("plate", builder.addBox(originX, -2.5F, -2.5F, 5, 5, 5),
+                PartPose.offsetAndRotation(part.x, part.y, part.z, part.xRot, part.yRot, part.zRot));
+        return LayerDefinition.create(mesh, 128, 64).bakeRoot().getChild("plate");
     }
 
     private static void assertPoint(ModelPart part, float x, float y, float z) {
@@ -208,21 +265,26 @@ class EldritchClientModelParityTest {
         assertEquals(z, part.z, EPS, "the z of " + part);
     }
 
-    /** The texture coordinates that a part would draw. */
-    private static List<float[]> uvsOf(ModelPart part) {
+    /** The corners that a part would draw: the position and the texture coordinates. */
+    private static float[] cornersOf(ModelPart part) {
         Recorder recorder = new Recorder();
         PoseStack pose = new PoseStack();
         part.render(pose, recorder, 15728640, 0, 0xffffffff);
-        return recorder.uvs;
+        float[] corners = new float[recorder.corners.size() * 5];
+        for (int index = 0; index < recorder.corners.size(); index++) {
+            System.arraycopy(recorder.corners.get(index), 0, corners, index * 5, 5);
+        }
+        return corners;
     }
 
-    /** A vertex consumer that only remembers the texture coordinates. */
+    /** A vertex consumer that only remembers the positions and the texture coordinates. */
     private static final class Recorder implements VertexConsumer {
-        private final List<float[]> uvs = new ArrayList<>();
+        private final List<float[]> corners = new ArrayList<>();
+        private float x, y, z;
 
-        @Override public VertexConsumer addVertex(float x, float y, float z) { return this; }
+        @Override public VertexConsumer addVertex(float x, float y, float z) { this.x = x; this.y = y; this.z = z; return this; }
         @Override public VertexConsumer setColor(int r, int g, int b, int a) { return this; }
-        @Override public VertexConsumer setUv(float u, float v) { uvs.add(new float[]{u, v}); return this; }
+        @Override public VertexConsumer setUv(float u, float v) { corners.add(new float[]{x, y, z, u, v}); return this; }
         @Override public VertexConsumer setUv1(int u, int v) { return this; }
         @Override public VertexConsumer setUv2(int u, int v) { return this; }
         @Override public VertexConsumer setNormal(float x, float y, float z) { return this; }

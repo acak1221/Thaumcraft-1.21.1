@@ -67,8 +67,11 @@ class DeathAspectOrbRulesTest {
         AspectList aspects = new AspectList().add(Aspect.TAINT, 2).add(Aspect.AIR, 2);
         // The reduced primals are air 4, entropy 4, order 2 and fire 2.
         assertEquals(4, aspects.reduceToPrimals(false).size());
-        // The first two primals refuse, the third one succeeds with the value zero.
-        Draws draws = new Draws(false, false, true, new Roll(2, 0));
+        // The first two primals refuse, the third one succeeds with the value zero and the
+        // fourth one refuses as well: the original draws one boolean per primal aspect
+        // (oracle EventHandlerEntity:508-516), so the fourth boolean is drawn even when the
+        // third one already dropped its orb.
+        Draws draws = new Draws(false, false, true, new Roll(2, 0), false);
         var drops = DeathAspectOrbRules.drops(aspects, draws::nextBoolean, draws::nextInt);
         assertEquals(1, drops.size(), "a refused roll drops no orb");
         assertEquals(Aspect.ORDER, drops.get(0).aspect());

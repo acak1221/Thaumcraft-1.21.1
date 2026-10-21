@@ -148,6 +148,9 @@ public final class ModelEldritchCrab extends EntityModel<EntityEldritchCrab> {
      *
      * <p>The original used {@code MathHelper.cos} (MCP {@code func_76134_b}) and not the
      * sine: the legs of the crab start at their rest angle when the phase is zero.
+     * {@code MathHelper.func_76134_b} is the lookup table of the 1.7.10 {@code MathHelper}
+     * - 65536 sine values - and the native {@code Mth.cos} is that same table, so the swing
+     * of the native crab is the exact swing of the original and not a {@code Math.cos}.</p>
      */
     public static float legSwing(float limb, float amount) {
         return -(Mth.cos(limb * .6662F * 2F) * .4F) * amount;

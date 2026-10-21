@@ -6,7 +6,13 @@ logs
 .gradle/
 .gradle_home/
 .gradle-fix4/
+# private Gradle homes of the parallel agents
 .gradle-float/
+.gradle-fix9/
+.gradle-fix4b/
+.gradle-neoforge/
+.gradle-client/
+.gradle-mp/
 build/
 out/
 run/

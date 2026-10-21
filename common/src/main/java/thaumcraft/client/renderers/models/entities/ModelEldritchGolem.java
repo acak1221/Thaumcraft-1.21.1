@@ -190,6 +190,9 @@ public final class ModelEldritchGolem extends EntityModel<EntityEldritchGolem> {
      *
      * <p>The original used {@code MathHelper.cos} (MCP {@code func_76134_b}) and not the
      * sine: the arm of the golem starts at its rest angle when the phase is zero.
+     * {@code MathHelper.func_76134_b} is the lookup table of the 1.7.10 {@code MathHelper}
+     * - 65536 sine values - and the native {@code Mth.cos} is that same table, so the swing
+     * of the native golem is the exact swing of the original and not a {@code Math.cos}.</p>
      */
     public static float armSwing(float limb, float amount) {
         return Mth.cos(limb * .4F) * 2.0F * amount * .5F;

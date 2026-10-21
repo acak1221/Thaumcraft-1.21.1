@@ -281,14 +281,16 @@ public final class Utils {
      * Original {@code useBonemealAtLoc}: apply bonemeal to the crop at the given position.
      *
      * <p>The original fired the Forge {@code BonemealEvent} first; 1.21.1 has no such event, so the crop's own
-     * {@code performBonemeal} is the growth. The original also refused a crop that could not grow any further;
-     * that check is kept by only accepting the crop blocks of the original {@code IGrowable} family.
+     * {@code performBonemeal} is the growth. The original also refused a crop that could not grow any further
+     * (its {@code IGrowable.canGrow} test) and answered {@code false} for it.</p>
      */
     public static boolean useBonemealAtLoc(Level level, Player player, int x, int y, int z) {
         if (level == null) return false;
         BlockPos pos = new BlockPos(x, y, z);
         BlockState state = level.getBlockState(pos);
         if (!CropUtils.isGrowable(state)) return false;
+        // Original IGrowable.canGrow: a crop that already reached its last stage is not grown again.
+        if (!CropUtils.canGrow(state)) return false;
         if (!level.isClientSide && level instanceof ServerLevel server
                 && state.getBlock() instanceof BonemealableBlock bonemealable) {
             bonemealable.performBonemeal(server, server.random, pos, state);

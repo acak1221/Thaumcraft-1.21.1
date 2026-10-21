@@ -45,6 +45,16 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
 public final class InventoryUtils {
     /** The native replacement of the Forge ore dictionary: the original ore names mapped to native item tags. */
     private static final Map<String, TagKey<Item>> oreTags = new HashMap<>();
+    /** The original hotbar size of 1.7.10 ({@code InventoryPlayer.getHotbarSize()}). */
+    private static final int HOTBAR_SIZE = 9;
+    /**
+     * The original "any damage" metadata of 1.7.10 ({@code Short.MAX_VALUE}).
+     *
+     * <p>The original compared the metadata of two stacks and treated 32767 as "any value" whenever the caller
+     * asked to ignore the damage. 1.21.1 has no metadata, but the damage value of a stack can still be 32767, so
+     * the wildcard rule of the original is kept.</p>
+     */
+    private static final int ANY_DAMAGE = 32767;
 
     private InventoryUtils() {}
 
@@ -336,10 +346,10 @@ public final class InventoryUtils {
         if (useOre && matchesOre(stack0, stack1)) return true;
         boolean t1 = true;
         if (!ignoreNBT) t1 = areItemStackTagsEqualForCrafting(stack0, stack1);
-        boolean t2 = stack0.getDamageValue() != stack1.getDamageValue();
-        if (ignoreDamage && stack0.isDamageableItem() && stack1.isDamageableItem()) t2 = false;
-        if (t2) return false;
-        return stack0.getItem() == stack1.getItem() && t1;
+        if (!damageMatches(stack0.getDamageValue(), stack1.getDamageValue(), ignoreDamage,
+                stack0.isDamageableItem(), stack1.isDamageableItem())) return false;
+        // The original also refused a slot whose stack was larger than the maximum stack size of the item.
+        return stack0.getItem() == stack1.getItem() && withinStackLimit(stack0.getCount(), stack0.getMaxStackSize()) && t1;
     }
 
     /** The original {@code ThaumcraftApiHelper.areItemStackTagsEqualForCrafting}. */
@@ -377,10 +387,33 @@ public final class InventoryUtils {
         if (useOre && matchesOre(stack0, stack1)) return true;
         boolean t1 = true;
         if (!ignoreNBT) t1 = ItemStack.isSameItemSameComponents(stack0, stack1);
-        boolean t2 = stack0.getDamageValue() != stack1.getDamageValue();
-        if (ignoreDamage && stack0.isDamageableItem() && stack1.isDamageableItem()) t2 = false;
-        if (t2) return false;
+        if (!damageMatches(stack0.getDamageValue(), stack1.getDamageValue(), ignoreDamage,
+                stack0.isDamageableItem(), stack1.isDamageableItem())) return false;
         return stack0.getItem() == stack1.getItem() && t1;
+    }
+
+    /**
+     * The original damage comparison of the two stack equalities.
+     *
+     * <p>Original {@code InventoryUtils.areItemStacksEqual} and {@code areItemStacksEqualForCrafting}
+     * (oracle {@code InventoryUtils.java:330-337} and {@code :366-373}) compared the metadata of the two
+     * stacks, ignored the difference when the caller asked to ignore the damage and both stacks were
+     * damageable, and treated the metadata 32767 as "any value" in the same case. The metadata of 1.21.1
+     * is the damage value, so the rule is kept with the damage value.</p>
+     */
+    static boolean damageMatches(int damage0, int damage1, boolean ignoreDamage, boolean damageable0, boolean damageable1) {
+        boolean different = damage0 != damage1;
+        if (ignoreDamage && damageable0 && damageable1) different = false;
+        if (different && ignoreDamage && (damage0 == ANY_DAMAGE || damage1 == ANY_DAMAGE)) different = false;
+        return !different;
+    }
+
+    /**
+     * The original stack-size condition of the crafting comparison
+     * ({@code stack0.stackSize <= stack0.getMaxStackSize()}, oracle {@code InventoryUtils.java:339}).
+     */
+    static boolean withinStackLimit(int count, int maxStackSize) {
+        return count <= maxStackSize;
     }
 
     // ------------------------------------------------------------------- the player
@@ -412,16 +445,37 @@ public final class InventoryUtils {
     /**
      * Original {@code isWandInHotbarWithRoom(Aspect, int, EntityPlayer)}.
      *
-     * <p>The original returned the hotbar slot of the first wand that could not hold the whole amount, or -1.
+     * <p>The original walked the nine hotbar slots and asked the first wand whose leftover was smaller
+     * than the request: {@code wand.addVis(stack, aspect, amount, false) < amount}. The original
+     * {@code addVis} returns the leftover of the request in WHOLE vis, so a wand that can still take at
+     * least one whole vis answers less than the request and its slot is returned, while a wand that is
+     * already full answers the whole request and is skipped. The native wand data works in centivis, so
+     * the leftover is computed exactly as the original did and compared in whole vis.</p>
      */
     public static int isWandInHotbarWithRoom(Aspect aspect, int amount, Player player) {
-        if (player == null || aspect == null) return -1;
-        for (int slot = 0; slot < player.getInventory().items.size(); ++slot) {
-            ItemStack stack = player.getInventory().items.get(slot);
+        if (player == null || aspect == null || amount <= 0) return -1;
+        for (int slot = 0; slot < HOTBAR_SIZE; slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
             if (stack == null || stack.isEmpty() || !(stack.getItem() instanceof ItemWandCasting)) continue;
-            if (ItemWandCasting.addRealVis(stack, aspect.getTag(), amount, false) > 0) return slot;
+            int leftover = visLeftover(ItemWandCasting.getVis(stack, aspect.getTag()),
+                    ItemWandCasting.getMaxVis(stack), amount);
+            if (leftover < amount) return slot;
         }
         return -1;
+    }
+
+    /**
+     * The original {@code ItemWandCasting.addVis} leftover, in whole vis.
+     *
+     * <p>Original {@code ItemWandCasting.addVis(is, aspect, amount, doit)} stored the amount in centivis
+     * ({@code amount * 100}), clamped it to the capacity of the wand and returned
+     * {@code max(storeAmount - maxVis, 0) / 100}. The computation is done in longs so a large request cannot
+     * wrap into a negative leftover.</p>
+     */
+    static int visLeftover(int currentCentivis, int maxCentivis, int amount) {
+        long wanted = (long) currentCentivis + (long) amount * 100L;
+        long leftover = Math.max(wanted - (long) maxCentivis, 0L);
+        return (int) Math.min(leftover / 100L, Integer.MAX_VALUE);
     }
 
     // ----------------------------------------------------------------------- drops

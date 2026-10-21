@@ -19,6 +19,12 @@ import thaumcraft.common.config.ThaumcraftNaturals;
  * Math sin/cos/floor are not a promise of old-world seed identity.
  */
 public final class WorldGenGreatwoodTrees {
+    /** Oracle WorldGenGreatwoodTrees:355 - the tree draws 11 + nextInt(11) as its height limit. */
+    public static final int MIN_HEIGHT_LIMIT = 11;
+    /** Oracle WorldGenGreatwoodTrees:355 - the tree draws 11 + nextInt(11) as its height limit. */
+    public static final int HEIGHT_LIMIT_ROLLS = 11;
+    /** Oracle WorldGenGreatwoodTrees:355 - the tree draws 11 + nextInt(11) as its height limit. */
+    public static final int MAX_HEIGHT_LIMIT = MIN_HEIGHT_LIMIT + HEIGHT_LIMIT_ROLLS - 1;
     private static final int[] OTHER_COORDS = {2, 0, 0, 1, 2, 1};
     private final RandomSource random = new LegacyRandomSource(0);
     private MagicalTreePlacement tree;
@@ -28,7 +34,6 @@ public final class WorldGenGreatwoodTrees {
     private double scaleWidth = 1.2;
     private int[][] leafNodes;
     private static final int TRUNK_SIZE = 2;
-    private static final int HEIGHT_LIMIT_LIMIT = 11;
     private static final int LEAF_DISTANCE_LIMIT = 4;
 
     // Notify differences are handled by the private atomic native canopy commit.
@@ -38,7 +43,7 @@ public final class WorldGenGreatwoodTrees {
         tree = new MagicalTreePlacement(level);
         random.setSeed(callerRandom.nextLong());
         base[0] = origin.getX(); base[1] = origin.getY(); base[2] = origin.getZ();
-        if (heightLimit == 0) heightLimit = HEIGHT_LIMIT_LIMIT + random.nextInt(HEIGHT_LIMIT_LIMIT);
+        if (heightLimit == 0) heightLimit = MIN_HEIGHT_LIMIT + random.nextInt(HEIGHT_LIMIT_ROLLS);
         boolean valid = false;
         search: for (int a = -1; a < 2; a++) {
             candidate: for (int b = -1; b < 2; b++) {
@@ -71,10 +76,22 @@ public final class WorldGenGreatwoodTrees {
     /** Retained compatibility metric: the original dungeon branch is now implemented. */
     public static long skippedSpiderDungeons() { return 0; }
 
+    /**
+     * The number of leaf nodes one layer of the canopy carries.
+     *
+     * <p>Oracle {@code WorldGenGreatwoodTrees:45}:
+     * {@code (int)(1.382 + Math.pow(this.leafDensity * (double)this.heightLimit / (double)13.0F, 2.0F))}
+     * with the field initialiser {@code leafDensity = 0.9}
+     * ({@code WorldGenGreatwoodTrees:29}).
+     */
+    public static int leafNodeCount(int heightLimit) {
+        return Math.max(1, (int) (1.382 + Math.pow(0.9 * heightLimit / 13.0, 2)));
+    }
+
     private void generateLeafNodeList() {
         height = (int)(heightLimit * .618);
         if (height >= heightLimit) height = heightLimit - 1;
-        int count = Math.max(1, (int)(1.382 + Math.pow(.9 * heightLimit / 13.0, 2)));
+        int count = leafNodeCount(heightLimit);
         int[][] nodes = new int[count * heightLimit][4];
         int y = base[1] + heightLimit - LEAF_DISTANCE_LIMIT;
         int used = 1;

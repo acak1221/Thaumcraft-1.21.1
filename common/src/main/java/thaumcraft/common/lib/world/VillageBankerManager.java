@@ -43,11 +43,17 @@ public final class VillageBankerManager extends Feature<NoneFeatureConfiguration
 
     /**
      * The minimum village size of the piece, oracle VillageBankerManager:59.
-     * The original draws it with {@code MathHelper.getIntWithMinMax(random, 0 + i, 1 + i)},
-     * a range one wide, so the draw is always the village size itself.
+     * The original draws it with {@code MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i)},
+     * that is {@code i + nextInt(2)}, so the piece is available in a village of
+     * the size {@code i} and in a village one size larger.
      */
     public static int pieceWeightMinSize(int villageSize) {
         return VillageWorldGenRules.pieceWeightMinSize(villageSize);
+    }
+
+    /** The minimum village size of the piece for one draw of the village random. */
+    public static int pieceWeightMinSize(int villageSize, int roll) {
+        return VillageWorldGenRules.pieceWeightMinSize(villageSize, roll);
     }
 
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {

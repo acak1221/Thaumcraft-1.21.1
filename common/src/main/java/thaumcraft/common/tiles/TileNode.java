@@ -91,6 +91,41 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     public int getNodeVisBase(Aspect aspect) { return aspectsBase.getAmount(aspect); }
     public String getScanId() { return scanId; }
     public NodeType getNodeType() { return nodeType; }
+    /**
+     * Original {@code TileNode:245-247}: the type of the node is written through the public
+     * {@code thaumcraft.api.nodes.INode} contract.
+     *
+     * <p>Forced 1.21.1 change: the native node keeps its own nested {@code NodeType} enum, so
+     * the published enum is translated into the native one by name. The published and the native
+     * enums carry the same six constants (oracle {@code thaumcraft/api/nodes/NodeType.java}).</p>
+     */
+    public void setNodeType(thaumcraft.api.nodes.NodeType type) {
+        if (type == null) return;
+        this.nodeType = nativeType(type);
+        changed();
+    }
+    /**
+     * Original {@code TileNode:250-252}: the modifier of the node is written through the public
+     * {@code thaumcraft.api.nodes.INode} contract. A {@code null} modifier clears it.
+     */
+    public void setNodeModifier(thaumcraft.api.nodes.NodeModifier modifier) {
+        this.nodeModifier = nativeModifier(modifier);
+        changed();
+    }
+    /**
+     * The native type of a published type.
+     *
+     * <p>Forced 1.21.1 change: the native node keeps its own nested {@code NodeType} enum, so the
+     * published enum is translated by name. The two enums carry the same six constants (oracle
+     * {@code thaumcraft/api/nodes/NodeType.java}).</p>
+     */
+    public static NodeType nativeType(thaumcraft.api.nodes.NodeType type) {
+        return type == null ? null : NodeType.valueOf(type.name());
+    }
+    /** The native modifier of a published modifier; the two enums carry the same three constants. */
+    public static NodeModifier nativeModifier(thaumcraft.api.nodes.NodeModifier modifier) {
+        return modifier == null ? null : NodeModifier.valueOf(modifier.name());
+    }
     /** Original ScanManager235-274, reading current stock without consuming it. */
     public AspectList getScanAspects() {
         return thaumcraft.common.lib.research.NodeScanAspects.get(aspects.copy(), nodeType);

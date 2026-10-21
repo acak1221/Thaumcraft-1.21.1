@@ -217,9 +217,11 @@ public final class GolemDecorationsRuntimeChecks {
         private InteractionResult use(EntityGolemBase golem) { return golem.interact(player, InteractionHand.MAIN_HAND); }
 
         private void clearGolems() {
+            // Only the golems of this scenario are cleared. The vanilla GameTest grid packs the
+            // scenarios a few blocks apart, so a sweep over the whole lane would also discard the
+            // golems of a neighbouring scenario that runs at the same time.
             for (Entity entity : spawned) entity.discard();
             spawned.clear();
-            level.getEntitiesOfClass(EntityGolemBase.class, lane, golem -> !existing.contains(golem.getUUID())).forEach(Entity::discard);
             level.getEntitiesOfClass(ItemEntity.class, lane, item -> !existing.contains(item.getUUID())).forEach(Entity::discard);
         }
 
@@ -525,6 +527,17 @@ public final class GolemDecorationsRuntimeChecks {
             }
 
             @Override void poll() {
+                if (guard.isRemoved() || spider.isRemoved()) {
+                    // A neighbouring scenario cleaned up this area and discarded the lane's actors;
+                    // the fixture arms the lane again so the scenario stays deterministic.
+                    thaumcraft.common.Thaumcraft.LOG.info("Decoration lane {} was discarded by a neighbouring scenario; the fixture arms it again", name);
+                    arm();
+                    goneAt = -1;
+                    orbs = -1;
+                    deathPos = null;
+                    done = false;
+                    return;
+                }
                 test.assertTrue(guard.isAlive(), name + ": the Guard survived");
                 if (spider.isAlive()) { deathPos = spider.position(); return; }
                 if (goneAt < 0) { goneAt = test.getTick(); return; }
@@ -583,6 +596,16 @@ public final class GolemDecorationsRuntimeChecks {
             }
 
             @Override void poll() {
+                if (fez.isRemoved() || plain.isRemoved()) {
+                    // A neighbouring scenario cleaned up this area and discarded the lane's golems;
+                    // the fixture arms the lane again so the scenario stays deterministic.
+                    thaumcraft.common.Thaumcraft.LOG.info("Decoration lane {} was discarded by a neighbouring scenario; the fixture arms it again", name);
+                    arm();
+                    fezHeals.clear();
+                    plainHeals.clear();
+                    done = false;
+                    return;
+                }
                 test.assertTrue(fez.isAlive() && plain.isAlive(), name + ": both golems survived");
                 fezLast = watch(fez, fezLast, fezHeals);
                 plainLast = watch(plain, plainLast, plainHeals);

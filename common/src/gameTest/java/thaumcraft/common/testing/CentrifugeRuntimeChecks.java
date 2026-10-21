@@ -171,8 +171,20 @@ public final class CentrifugeRuntimeChecks {
     }
 
     private static void plainConstruct(Fixture f) {
-        BlockPos pos = f.base.east(); f.put(pos.below(), Blocks.STONE); hand(f, removeInventory(f, ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT_ITEM.get(), 1)); f.aim(Vec3.atCenterOf(pos.below()));
-        f.check(f.use(pos.below(), Direction.UP, InteractionHand.MAIN_HAND).consumesAction() && f.player.getMainHandItem().isEmpty(), "ordinary native BlockItem placement pays ONE earned construct, without a crucible/assembly prerequisite");
+        // The vanilla GameTest grid packs the scenarios a few blocks apart, so an actor of a
+        // neighbouring scenario can stand in the spot this fixture wants to use; the native
+        // placement then refuses the block because that actor occupies it. The fixture therefore
+        // takes the first spot of its own area that no actor occupies, and it never touches an
+        // actor of another scenario.
+        BlockPos pos = null;
+        for (BlockPos candidate : List.of(f.base.east(), f.base.east(2), f.base.east(3), f.base.south(), f.base.south(2), f.base.south(3))) {
+            f.put(candidate.below(), Blocks.STONE);
+            if (f.level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, new AABB(candidate)).isEmpty()) { pos = candidate; break; }
+        }
+        if (pos == null) pos = f.base.east();
+        hand(f, removeInventory(f, ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT_ITEM.get(), 1)); f.aim(Vec3.atCenterOf(pos.below()));
+        var useResult = f.use(pos.below(), Direction.UP, InteractionHand.MAIN_HAND);
+        f.check(useResult.consumesAction() && f.player.getMainHandItem().isEmpty(), "ordinary native BlockItem placement pays ONE earned construct, without a crucible/assembly prerequisite");
         var state = f.level.getBlockState(pos); var full = new AABB(0, 0, 0, 1, 1, 1);
         f.check(state.is(ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT.get()) && !state.hasBlockEntity() && !(state.getBlock() instanceof EntityBlock)
                 && f.level.getBlockEntity(pos) == null && f.level.getChunkAt(pos).getBlockEntity(pos) == null

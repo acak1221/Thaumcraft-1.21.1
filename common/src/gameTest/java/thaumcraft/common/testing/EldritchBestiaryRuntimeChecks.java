@@ -178,7 +178,7 @@ public final class EldritchBestiaryRuntimeChecks {
 
             var crab = lane.add(ThaumcraftEldritchMobs.ELDRITCH_CRAB.get().create(level));
             crab.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
-            level.addFreshEntity(crab);
+            ChampionJoinRoll.join(level, crab);
             test.assertTrue(crab.getMaxHealth() == 20F && crab.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4F
                             && Math.abs(crab.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.30D) < 1e-6D
                             && crab.getAttributeValue(Attributes.FOLLOW_RANGE) == 16F && crab.getArmorValue() == 0,
@@ -194,7 +194,7 @@ public final class EldritchBestiaryRuntimeChecks {
 
             var watcher = lane.add(ThaumcraftEldritchMobs.WATCHER.get().create(level));
             watcher.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 2.5D, 0F, 0F);
-            level.addFreshEntity(watcher);
+            ChampionJoinRoll.join(level, watcher);
             test.assertTrue(watcher.getMaxHealth() == 30F && watcher.getAttributeValue(Attributes.ATTACK_DAMAGE) == 6F
                             && Math.abs(watcher.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.50D) < 1e-6D
                             && watcher.getAttributeValue(Attributes.FOLLOW_RANGE) == 16F,
@@ -214,7 +214,7 @@ public final class EldritchBestiaryRuntimeChecks {
             var slime = lane.add(ThaumcraftEldritchMobs.THAUMIC_SLIME.get().create(level));
             slime.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 4.5D, 0F, 0F);
             slime.setSlimeSize(4);
-            level.addFreshEntity(slime);
+            ChampionJoinRoll.join(level, slime);
             test.assertTrue(slime.getMaxHealth() == 4F && Math.abs(slime.getBbWidth() - 0.75F) < 1e-4F
                             && Math.abs(slime.getBbHeight() - 0.75F) < 1e-4F,
                     "the size four slime has four health and the original 0.75 body: " + slime.getMaxHealth() + " " + slime.getBbWidth());
@@ -224,7 +224,7 @@ public final class EldritchBestiaryRuntimeChecks {
             int crabsBefore = level.getEntitiesOfClass(EntityEldritchCrab.class, lane.area(8)).size();
             var zombie = lane.add(ThaumcraftEldritchMobs.INHABITED_ZOMBIE.get().create(level));
             zombie.moveTo(lane.origin.getX() + 2.5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
-            level.addFreshEntity(zombie);
+            ChampionJoinRoll.join(level, zombie);
             test.assertTrue(zombie.getMaxHealth() == 30F && zombie.getAttributeValue(Attributes.ATTACK_DAMAGE) == 5F
                             && Math.abs(zombie.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.23D) < 1e-6D
                             && zombie.getAttributeValue(Attributes.FOLLOW_RANGE) == 35F

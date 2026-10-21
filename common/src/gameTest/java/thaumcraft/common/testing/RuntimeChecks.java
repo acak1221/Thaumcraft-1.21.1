@@ -55,17 +55,31 @@ public final class RuntimeChecks {
         test.assertTrue(wand.getCount() == 1, "trigger retains wand");
         test.assertValueEqual(item.useOn(context), net.minecraft.world.InteractionResult.PASS, "repeated trigger on air does not create another book");
         test.assertValueEqual(test.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, bounds).size(), 1, "bookshelf drops no additional planks/books");
-        test.assertTrue(!book.hurt(test.getLevel().damageSources().inFire(), 100), "original special item resists fire");
+        // The original refuses every explosion and takes every other damage like a vanilla item
+        // entity (oracle EntitySpecialItem.java:45-49: `if (source.isExplosion()) return false`).
+        test.assertTrue(!book.hurt(test.getLevel().damageSources().explosion(null, null), 100) && book.isAlive(),
+                "original special item refuses an explosion instead of burning");
         CompoundTag saved = new CompoundTag();
         test.assertTrue(book.save(saved), "special output can be saved with native type id");
         var restored = net.minecraft.world.entity.EntityType.loadEntityRecursive(saved, test.getLevel(), java.util.function.Function.identity());
         test.assertTrue(restored instanceof thaumcraft.common.entities.EntitySpecialItem
                 && ((thaumcraft.common.entities.EntitySpecialItem)restored).getItem().is(ThaumcraftContent.THAUMONOMICON.get()), "native save/reload keeps type and book");
+        // The original creates the result at (x+0.5, y+0.3, z+0.5) with a zero motion
+        // (oracle WandManager.java:408-421) and its buoyancy adds 0.04 before the vanilla item
+        // gravity takes 0.04 again (oracle EntitySpecialItem.java:37-43 with the 1.7.10
+        // EntityItem.java:82), so the book hovers exactly where the wand left it.
+        test.assertTrue(book.getX() == absolute.getX() + 0.5 && book.getY() == absolute.getY() + 0.3 && book.getZ() == absolute.getZ() + 0.5
+                        && book.getDeltaMovement().lengthSqr() == 0.0, "the original creates the result at x+0.5/y+0.3/z+0.5 with a zero motion");
         double originalY = book.getY();
-        test.runAfterDelay(8, () -> {
-            test.assertTrue(book.isAlive() && Math.abs(book.getY() - originalY) < 0.001, "result floats without falling");
-            test.succeed();
-        });
+        // The fixture drives the entity's own ticks: a GameTest that waits for world ticks lets a
+        // neighbouring scenario's cleanup discard the result, and the hover of the original is a
+        // property of the entity's own tick, not of the surrounding world.
+        for (int tick = 0; tick < 8; tick++) book.tick();
+        test.assertTrue(book.isAlive() && Math.abs(book.getY() - originalY) < 0.001,
+                "result hovers where the original created it instead of sinking");
+        test.assertTrue(test.getLevel().getEntitiesOfClass(thaumcraft.common.entities.EntitySpecialItem.class, bounds).size() == 1
+                        && book.getItem().getCount() == 1, "the floating result is not picked up before the player can reach it");
+        test.succeed();
     }
 
     public static void normalBookOpensWithoutGrantingArbitraryResearch(GameTestHelper test, ServerPlayer player) {

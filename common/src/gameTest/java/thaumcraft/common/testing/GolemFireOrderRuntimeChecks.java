@@ -499,7 +499,7 @@ public final class GolemFireOrderRuntimeChecks {
                 spider.moveTo(Vec3.atBottomCenterOf(b.offset(3, 0, 0)));
                 spider.removeFreeWill();
                 spider.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(spider), "the target spider is admitted beside its golem");
+                test.assertTrue(ChampionJoinRoll.join(level, spider), "the target spider is admitted beside its golem");
                 entities.add(spider);
                 worker(IRON, GolemData.GUARD, b, fire > 0 ? List.of(FIRE) : List.of());
             }

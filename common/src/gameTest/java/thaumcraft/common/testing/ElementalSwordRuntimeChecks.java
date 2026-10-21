@@ -63,8 +63,10 @@ public final class ElementalSwordRuntimeChecks {
         recipe(test, level);
         // High above the small GameTest structure, as the other world-shaping checks do.
         BlockPos origin = test.absolutePos(new BlockPos(3, 64, 3));
+        // The sweep happens thirty blocks further along z, so the chunks of the sweep room belong to
+        // the fixture as well; a room whose chunk is not loaded does not hold its actors.
         for (int x = (origin.getX() - 18) >> 4; x <= ((origin.getX() + 18) >> 4); x++) {
-            for (int z = (origin.getZ() - 18) >> 4; z <= ((origin.getZ() + 18) >> 4); z++) level.getChunk(x, z);
+            for (int z = (origin.getZ() - 18) >> 4; z <= ((origin.getZ() + 40) >> 4); z++) level.getChunk(x, z);
         }
         var connection = new Connection(PacketFlow.SERVERBOUND);
         var channel = new EmbeddedChannel(connection);

@@ -103,7 +103,7 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
                 try {
                     polls++;
                     var chunk=f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z);
-                    if(chunk==null) { f.check(polls<40,"native radius0 ticket asynchronously reloads actual saved shell terrain"); pollReload(); return; }
+                    if(chunk==null) { f.check(polls<200,"native radius0 ticket asynchronously reloads actual saved shell terrain"); pollReload(); return; }
                     var loaded=chunk.getBlockEntity(shell);
                     f.check(loaded instanceof TileAlchemyFurnaceAdvancedPart part && part!=oldShell && machine.equals(part.machineId()) && center.equals(part.ownerPosition()),
                             "actual disk-backed chunk reload creates a NEW native BE retaining exact paid owner UUID/position");

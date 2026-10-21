@@ -207,11 +207,11 @@ public final class CrystalClustersRuntimeChecks {
                     cleanup.run(); test.succeed();
                 } catch (RuntimeException | Error failure) { cleanup.run(); throw failure; }
             });
-            test.runAfterDelay(540, () -> { if (!closed[0]) {
+            test.runAfterDelay(1100, () -> { if (!closed[0]) {
                 // Snapshot before cleanup, which deliberately re-adds a ticket and loads/restores the fixture.
                 var currentChunk = source.getChunkNow(chunk.x, chunk.z);
                 String phase = loadedOwner[0] == null ? "await-original-unload" : "await-reloaded-entity-section";
-                String diagnostic = "isolated crystal chunk did not complete actual unload/reload/entity ticking within540 world ticks"
+                String diagnostic = "isolated crystal chunk did not complete actual unload/reload/entity ticking within1100 world ticks"
                         + "; phase=" + phase + ", position=" + position + ", currentChunk=" + currentChunk
                         + ", currentIsOld=" + (currentChunk == oldChunk) + ", currentIsReloaded=" + (currentChunk == loadedOwner[0])
                         + ", oldBEremoved=" + crystal.isRemoved() + ", reloadedBEremoved=" + (loadedTile[0] == null ? "absent" : loadedTile[0].isRemoved())

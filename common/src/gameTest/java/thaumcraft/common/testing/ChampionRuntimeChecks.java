@@ -186,10 +186,15 @@ public final class ChampionRuntimeChecks {
             victim.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
             victim.setHealth(1000F);
             level.addFreshEntity(victim);
-            for (int hit = 0; hit < 20; hit++) {
-                victim.hurt(level.damageSources().mobAttack(venomous), 1F);
-                for (int tick = 0; tick < 12; tick++) level.tickNonPassenger(victim);
-            }
+            // The original venomous champion poisons its victim on four of every ten hits; the
+            // scenario declares that original roll of the world random, so the fixture never
+            // depends on the position of the world stream.
+            ChampionJoinRoll.declaredEffect(level, 0.1F, () -> {
+                for (int hit = 0; hit < 20; hit++) {
+                    victim.hurt(level.damageSources().mobAttack(venomous), 1F);
+                    for (int tick = 0; tick < 12; tick++) level.tickNonPassenger(victim);
+                }
+            });
             test.assertTrue(victim.hasEffect(net.minecraft.world.effect.MobEffects.POISON),
                     "the venomous champion poisons its victim: " + victim.getEffect(net.minecraft.world.effect.MobEffects.POISON));
 
@@ -205,10 +210,14 @@ public final class ChampionRuntimeChecks {
             attacker.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
             attacker.setHealth(1000F);
             level.addFreshEntity(attacker);
-            for (int hit = 0; hit < 20; hit++) {
-                infested.hurt(level.damageSources().mobAttack(attacker), 1F);
-                for (int tick = 0; tick < 12; tick++) level.tickNonPassenger(infested);
-            }
+            // The original infested champion answers every wound with a tainted spiderling on four
+            // of every ten wounds; the scenario declares that original roll of the world random.
+            ChampionJoinRoll.declaredEffect(level, 0.1F, () -> {
+                for (int hit = 0; hit < 20; hit++) {
+                    infested.hurt(level.damageSources().mobAttack(attacker), 1F);
+                    for (int tick = 0; tick < 12; tick++) level.tickNonPassenger(infested);
+                }
+            });
             var spiderlings = level.getEntitiesOfClass(EntityTaintSpider.class, lane.area(4));
             test.assertTrue(!spiderlings.isEmpty(),
                     "the infested champion answers a wound with a tainted spiderling: " + spiderlings.size());

@@ -1,3 +1,38 @@
+## 2026-10-21 — Closing wave: the client lanes of the scope ledger
+
+The OpenTC4 comparison left 126 units of the scope ledger without a native
+counterpart. The largest block of them was the client lane, and this wave closed
+45 of the 49 units of the client renderers and 12 of the client fx, gui and jei
+units.
+
+The client render lane gained the renderers the port never had: the cultist
+banner item (its colour and its aspect were lost, the model pointed at a wooden
+cube), the three dimensional thaumometer scanner of the original
+(`scanner.obj`) and the glowing faces of the levitator. The banner block
+renderer of the port was corrected as well: its height, its rotation, the cloth
+colour, the tab colours, the palette of `Utils.colors` and the 16x16 aspect
+icon.
+
+The client fx lane found a false gap: vanilla 1.21.1 DOES ship the post effect
+programs, and the warp chains failed to load only because a post program exists
+in the default namespace alone while the passes were named
+`minecraft:box_blur` and `thaumcraft:bloom2`. Three TC4 programs were ported to
+GLSL 150 under `assets/minecraft/shaders/program/`, the chains were renamed, the
+original `Config.shaders` came back and a regression test now pins it. The smoke
+spiral of the original was ported with its 720 degree turn, its polar angle, its
+radius, its 0.15 quad and its 0.66 alpha, and the additive power flash of the
+original was added.
+
+`scripts/porting/merge_wave_branch.py` merges a wave branch and resolves the two
+bookkeeping files by the union of the two sides, so the agents of a wave can
+update their own lane of the ledger without colliding.
+
+Verified in the integrated tree: the JUnit suite, `:fabric:compileClientJava`,
+the 84 Python tests and `convert_assets.py --verify` with
+`missing_references: 0`. The client itself does NOT run in this sandbox: the
+GLX context cannot be created with any Mesa driver, so no visual acceptance is
+claimed.
+
 ## 2026-10-21 — The warp post chains load again, and the client effects of the wave are closed
 
 The previous wave closed the four warp post effects as an impossible gap ("vanilla 1.21.1 ships no

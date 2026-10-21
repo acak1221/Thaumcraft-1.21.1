@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "27fecd2003024766ba9d46143a113bfbbca9c80151737f98f2d0e752d113b683",
+    "canonical_json_sha256": "b1c21f30bac72407ca5c6e000caf0ca52ec2c58dcbe991011d18567a44f0075d",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {
@@ -48,8 +48,8 @@
     "shared_path": 749,
     "original_only": 110,
     "legacy_only": 185,
-    "native_linked_rows": 34,
-    "unique_native_counterparts": 53,
+    "native_linked_rows": 37,
+    "unique_native_counterparts": 57,
     "dispositions": {
       "adapt": 263,
       "exclude": 165,
@@ -4638,11 +4638,13 @@
         "planned_milestone": "M14",
         "basis": "path_name_heuristic_unreviewed"
       },
-      "native_counterparts": [],
+      "native_counterparts": [
+        "common/src/main/java/thaumcraft/client/fx/particles/FXArc.java"
+      ],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "The native 1.21.1 particle in the fx/particles package is the port of the original beam ribbon: the same arc points (gravity 0.115, noise 0.25, fifty steps), the same crossed strips of textures/misc/beamh.png, the same half width 0.25, the same alpha 0.8 and the same UV of the point index over the arc length. The package differs because 1.21.1 has no EntityFX. The client visual was not inspected in a game."
       },
       "review": {
         "disposition": "exclude",
@@ -4693,9 +4695,9 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the packet that would show the beam is registered in the original packet handler but no class of the original ever sends it."
       },
       "review": {
         "disposition": "exclude",
@@ -4793,9 +4795,9 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the packet that would show the boss beam is registered in the original packet handler but no class of the original ever sends it; the headless golem shoots an EntityGolemOrb in the original as well."
       },
       "review": {
         "disposition": "replace",
@@ -4842,11 +4844,14 @@
         "planned_milestone": "M14",
         "basis": "path_name_heuristic_unreviewed"
       },
-      "native_counterparts": [],
+      "native_counterparts": [
+        "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
+        "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java"
+      ],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "The native relay beam reproduces the original numbers: the half width 0.105 (0.15 of the size 0.7), the scrolling of the texture, the opacity floor 0.3, the decay of 0.025 per tick, the pulse of 0.8, the ten times brighter beam of a viewer with a revealer and the additive flare of the particle sheet at the target with the half size 0.66 of the opacity. The original shows the beam as a particle that dies when the relay unlinks; the native keeps a per relay opacity instead. The client visual was not inspected in a game."
       },
       "review": {
         "disposition": "exclude",
@@ -5492,9 +5497,9 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the class is never instantiated anywhere in the TC4 4.2.3.5 decompilation."
       },
       "review": {
         "disposition": "exclude",
@@ -5742,9 +5747,9 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the only instantiation is in UtilsFX.shootFire and that method has zero callers in the TC4 4.2.3.5 decompilation."
       },
       "review": {
         "disposition": "exclude",
@@ -5882,11 +5887,13 @@
         "planned_milestone": "M14",
         "basis": "path_name_heuristic_unreviewed"
       },
-      "native_counterparts": [],
+      "native_counterparts": [
+        "common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java"
+      ],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "The native 1.21.1 particle is the port of the original smoke spiral: the same 720 degree turn, the same 90..-90 polar angle, the same radius, the same 0.15 scale quad, the same 0.66 alpha, the same first five cells of the particle sheet and the same mirrored cell order. The client visual was not inspected in a game."
       },
       "review": {
         "disposition": "exclude",
@@ -5934,9 +5941,9 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the only instantiation is in ClientProxy.soulTrail and that method has zero callers in the TC4 4.2.3.5 decompilation."
       },
       "review": {
         "disposition": "exclude",

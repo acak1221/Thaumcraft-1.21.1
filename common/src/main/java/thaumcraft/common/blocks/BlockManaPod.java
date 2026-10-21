@@ -34,7 +34,7 @@ import thaumcraft.common.tiles.TileManaPod;
  * replaces the original static coordinate cache; Fortune/Silk never replace the
  * typed one-or-two-bean harvest. Only original six vanilla log/wood species and the
  * two TC4 magical logs support planting (no stripped/plank/new-species expansion). */
-public final class BlockManaPod extends BaseEntityBlock {
+public final class BlockManaPod extends BaseEntityBlock implements OriginalPistonPushable {
     public static final MapCodec<BlockManaPod> CODEC=simpleCodec(BlockManaPod::new);
     public static final IntegerProperty AGE=IntegerProperty.create("age",0,7);
     private static final VoxelShape[] SHAPES={box(4,12,4,12,16,12),box(4,10,4,12,16,12),box(4,8,4,12,16,12),box(4,6,4,12,16,12),box(4,5,4,12,16,12),box(4,4,4,12,16,12),box(4,3,4,12,16,12),box(4,2,4,12,16,12)};
@@ -42,6 +42,20 @@ public final class BlockManaPod extends BaseEntityBlock {
     @Override protected MapCodec<BlockManaPod> codec(){return CODEC;}
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(AGE);}
     @Override public BlockEntity newBlockEntity(BlockPos pos,BlockState state){return new TileManaPod(pos,state);}
+
+    /**
+     * Oracle BlockManaPod:51-52 - the 1.7.10 class extended {@code net.minecraft.block.Block}
+     * and did not implement {@code ITileEntityProvider}, so the piston of the original moved the
+     * pod, whose tile existed for every metadata (BlockManaPod:232-238), and the move destroyed
+     * the tile.
+     *
+     * <p>Minecraft 1.21.1 refuses every block entity block ({@code PistonBaseBlock#isPushable}
+     * ends with {@code return !blockState.hasBlockEntity();}); the mixin {@code
+     * thaumcraft.common.mixin.PistonPushabilityMixin} asks this answer instead.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.MANA_POD.isPushableInOriginal(0);
+    }
     @Override protected RenderShape getRenderShape(BlockState state){return RenderShape.MODEL;}
     @Override protected VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){return SHAPES[state.getValue(AGE)];}
     @Override protected VoxelShape getCollisionShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){return SHAPES[state.getValue(AGE)];}

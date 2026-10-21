@@ -31,7 +31,7 @@ import thaumcraft.common.tiles.TileWardingStone;
  * hosts the metadata of its own hardness group. The two metadata values that carry a block entity,
  * the warding stone and the node, keep it.
  */
-public final class BlockCosmeticSolid extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
+public final class BlockCosmeticSolid extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity, OriginalPistonPushable {
     public static final MapCodec<BlockCosmeticSolid> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 2).fieldOf("group").forGetter(BlockCosmeticSolid::group),
             propertiesCodec()).apply(instance, BlockCosmeticSolid::new));
@@ -168,6 +168,21 @@ public final class BlockCosmeticSolid extends BaseEntityBlock implements StateDe
      */
     @Override public boolean hasBlockEntityForState(BlockState state) {
         return EldritchBlockRules.cosmeticHasTile(variant(state));
+    }
+
+    /**
+     * Oracle BlockCosmeticSolid:60-61 - the 1.7.10 class extended {@code
+     * net.minecraft.block.Block} and did not implement {@code ITileEntityProvider}, so the piston
+     * of the original moved the family for every metadata, the warding stone (the metadata three)
+     * and the node (the metadata eight) included, and the move destroyed the tile of the two.
+     *
+     * <p>Minecraft 1.21.1 refuses every block entity block ({@code PistonBaseBlock#isPushable}
+     * ends with {@code return !blockState.hasBlockEntity();}), so the port would refuse the whole
+     * family; the mixin {@code thaumcraft.common.mixin.PistonPushabilityMixin} asks this answer
+     * instead.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.COSMETIC_SOLID.isPushableInOriginal(variant(state));
     }
 
     /**

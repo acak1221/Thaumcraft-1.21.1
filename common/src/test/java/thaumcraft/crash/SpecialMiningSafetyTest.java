@@ -48,6 +48,9 @@ class SpecialMiningSafetyTest {
     /**
      * The replacement item is a registry lookup. When the runtime does not know the cluster, the
      * original drop is kept; the stack must never be built from a missing item.
+     *
+     * <p>The 1.21.1 item registry is defaulted, so the lookup of an unknown id answers the air item
+     * and never {@code null}; the drop may not be replaced by that empty stack.
      */
     @Test void anUnknownReplacementKeepsTheOriginalDrop() {
         ItemStack dropped = new ItemStack(Items.RAW_IRON, 3);
@@ -59,9 +62,15 @@ class SpecialMiningSafetyTest {
     }
 
     @Test void theRollBoundaryIsTheOriginalOne() {
-        // Original Utils.findSpecialMiningResult: a roll exactly on the threshold still succeeds.
-        assertTrue(SpecialMining.succeeds(0.2F, 1.0F, 1.0F));
-        assertFalse(SpecialMining.succeeds(0.20001F, 1.0F, 1.0F));
+        // Original Utils.findSpecialMiningResult (oracle Utils:178): the roll that lands exactly on
+        // the threshold still succeeds. The threshold is the chance of the tool times the factor of
+        // the entry, and the chance of the original is 0.2 + 0.075 per fortune level
+        // (oracle EventHandlerWorld:182).
+        assertTrue(SpecialMining.succeeds(0.2F, SpecialMining.BASE_CHANCE, 1.0F));
+        assertFalse(SpecialMining.succeeds(0.20001F, SpecialMining.BASE_CHANCE, 1.0F));
+        // The gold and the cinnabar cluster carry the factor 0.9, so their threshold is 0.18.
+        assertTrue(SpecialMining.succeeds(0.17F, SpecialMining.BASE_CHANCE, SpecialMining.GOLD));
+        assertFalse(SpecialMining.succeeds(0.19F, SpecialMining.BASE_CHANCE, SpecialMining.GOLD));
     }
 
     @Test void theChanceIsTheOriginalOne() {

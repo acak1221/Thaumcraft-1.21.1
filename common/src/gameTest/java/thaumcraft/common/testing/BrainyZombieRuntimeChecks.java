@@ -154,6 +154,34 @@ public final class BrainyZombieRuntimeChecks {
             }
             throw new AssertionError("No declared all-flesh world RNG seed found");
         }
+        /**
+         * The reduced primals of the original giant brainy zombie, in the original order.
+         *
+         * <p>Oracle {@code thaumcraft/common/config/ConfigAspects.java:89} registers UNDEAD 4,
+         * MAN 2, MIND 1 and EARTH 2; the reduction to the primals of
+         * {@code ResearchManager.reduceToPrimals} (oracle
+         * {@code thaumcraft/common/lib/research/ResearchManager.java:466-495}) leaves air 6,
+         * order 6, water 12, earth 14, entropy 7 and fire 3.</p>
+         */
+        private static final int[] GIANT_ORB_AMOUNTS = {6, 6, 12, 14, 7, 3};
+        /**
+         * The all-flesh seed of a death that drops the original aspect orbs.
+         *
+         * <p>Oracle {@code thaumcraft/common/lib/events/EventHandlerEntity.java:508-516}: the death
+         * of a mob that was hit by a player draws one world boolean per primal aspect of the mob
+         * and, for every true roll, the value of that aspect, BEFORE the loot of the same death.
+         * The seed of the fixture therefore has to start behind those draws.</p>
+         */
+        static long allFleshSeedAfterOrbs(int attempts, int[] orbAmounts) {
+            for (long seed = 0; seed < 1000000; seed++) {
+                RandomSource random = RandomSource.create(seed);
+                for (int amount : orbAmounts) if (random.nextBoolean()) random.nextInt(amount);
+                boolean all = true;
+                for (int i = 0; i < attempts; i++) if (!random.nextBoolean()) { all = false; break; }
+                if (all && random.nextInt(10) <= 4) return seed;
+            }
+            throw new AssertionError("No declared all-flesh world RNG seed found");
+        }
         void clearDrops() { level.getEntitiesOfClass(ItemEntity.class, bounds).forEach(Entity::discard); }
         int amount(net.minecraft.world.item.Item item) { return level.getEntitiesOfClass(ItemEntity.class, bounds).stream().map(ItemEntity::getItem).filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum(); }
         void deathLoot() {
@@ -181,7 +209,7 @@ public final class BrainyZombieRuntimeChecks {
             clearDrops(); var sword = new ItemStack(Items.DIAMOND_SWORD);
             // Explicit addon-level Looting input makes every original rare gate pass, irrespective of sound/equipment entity-RNG draws.
             sword.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LOOTING), 200); player.setItemInHand(InteractionHand.MAIN_HAND, sword);
-            var rare = spawn(ThaumcraftMonsters.GIANT_BRAINY_ZOMBIE.get(), 0); level.random.setSeed(allFleshSeed(12)); rare.hurt(level.damageSources().playerAttack(player), 1000);
+            var rare = spawn(ThaumcraftMonsters.GIANT_BRAINY_ZOMBIE.get(), 0); level.random.setSeed(allFleshSeedAfterOrbs(12, GIANT_ORB_AMOUNTS)); rare.hurt(level.damageSources().playerAttack(player), 1000);
             int extras = amount(Items.CARROT) + amount(Items.POTATO) + amount(ThaumcraftContent.MATERIALS.get("thaumium_ingot").get()) + amount(ThaumcraftContent.MATERIALS.get("amber_gem").get());
             test.assertTrue(amount(Items.ROTTEN_FLESH) == 24 && amount(brain) == 1 && extras == 1,
                     "native credited Giant death emits exactly one original rare-pool item; Looting never multiplies custom flesh");

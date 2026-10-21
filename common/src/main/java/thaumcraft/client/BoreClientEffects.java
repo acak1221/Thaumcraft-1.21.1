@@ -140,11 +140,16 @@ public final class BoreClientEffects {
     public static void dig(ClientLevel level, BlockPos bore, Direction mining, BlockPos target) {
         if (level == null || target == null || !level.hasChunkAt(target)) return;
         BlockState state = level.getBlockState(target);
+        // Original TileArcaneBore:496 - the original only draws the dig when the
+        // dug block is still there.
+        if (state.isAir()) return;
         // Original TileArcaneBore:497 - the break sound of the dug block, with
         // the volume (pitch+1)/2 and the pitch volume*0.8 of the original.
         SoundType sound = state.getSoundType();
-        level.playLocalSound(target.getX() + .5D, target.getY() + .5D, target.getZ() + .5D, sound.getBreakSound(),
-                SoundSource.BLOCKS, (sound.getPitch() + 1F) / 2F, sound.getVolume() * .8F, false);
+        if (sound.getBreakSound() != null) {
+            level.playLocalSound(target.getX() + .5D, target.getY() + .5D, target.getZ() + .5D, sound.getBreakSound(),
+                    SoundSource.BLOCKS, (sound.getPitch() + 1F) / 2F, sound.getVolume() * .8F, false);
+        }
         BlockPos mouth = bore.relative(mining);
         for (int attempt = 0; attempt < particleCount(10); attempt++) {
             if (level.random.nextInt(10) == 0) {

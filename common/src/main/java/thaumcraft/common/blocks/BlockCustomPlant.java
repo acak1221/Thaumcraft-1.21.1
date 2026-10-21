@@ -23,7 +23,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** Original BlockCustomPlant:62-68,119-143,174-182,194-211,224-229. */
-public final class BlockCustomPlant extends BushBlock {
+public final class BlockCustomPlant extends BushBlock implements OriginalPistonPushable {
     public static final MapCodec<BlockCustomPlant> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.BOOL.fieldOf("cinderpearl").forGetter(BlockCustomPlant::isCinderpearl), propertiesCodec()).apply(instance, BlockCustomPlant::new));
     private static final VoxelShape SHAPE = Block.box(1.6, 0, 1.6, 14.4, 12.8, 14.4);
@@ -103,6 +103,22 @@ public final class BlockCustomPlant extends BushBlock {
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below());
     }
+
+    /**
+     * Oracle BlockCustomPlant:55-56 - the 1.7.10 class extended {@code
+     * net.minecraft.block.BlockBush} and did not implement {@code ITileEntityProvider}, so the
+     * piston of the original moved the plant for every metadata, the ethereal bloom (the metadata
+     * four, the tile at BlockCustomPlant:97-108) included, and the move destroyed the tile of
+     * the bloom.
+     *
+     * <p>The port carries no tile for the bloom, so the answer of the vanilla code is already the
+     * answer of the original; the contract is written down so that the answer stays the answer
+     * of the original when the tile of the bloom is ported.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.CUSTOM_PLANT.isPushableInOriginal(0);
+    }
+
     @Override protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!state.canSurvive(level, pos)) level.destroyBlock(pos, true);
     }

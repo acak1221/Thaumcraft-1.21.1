@@ -5,6 +5,7 @@ logs
 # Gradle / Forge workspace
 .gradle/
 .gradle_home/
+.gradle-fix4/
 build/
 out/
 run/
@@ -55,3 +56,6 @@ neoforge/run/
 **/run-gametest/
 **/run-clienttest/
 %SystemDrive%/
+
+# javac argument files of the type check of the port
+javac.*.args

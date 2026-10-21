@@ -24,7 +24,7 @@ import thaumcraft.common.tiles.TileEldritchNothing;
  * drops nothing, only exists as a hidden block entity once it is exposed to air
  * and hurts everything that walks into it.
  */
-public final class BlockEldritchNothing extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
+public final class BlockEldritchNothing extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity, OriginalPistonPushable {
     public static final MapCodec<BlockEldritchNothing> CODEC = simpleCodec(BlockEldritchNothing::new);
     /** Original metadata 1 marks the exposed variant that carries the block entity. */
     public static final IntegerProperty EXPOSED = IntegerProperty.create("exposed", 0, 1);
@@ -59,6 +59,20 @@ public final class BlockEldritchNothing extends BaseEntityBlock implements State
      */
     @Override public boolean hasBlockEntityForState(BlockState state) {
         return state.getValue(EXPOSED) == 1;
+    }
+
+    /**
+     * Oracle BlockEldritchNothing:42-43 - the 1.7.10 class extended {@code
+     * net.minecraft.block.Block} and did not implement {@code ITileEntityProvider}, so the piston
+     * of the original moved the filler for every metadata, the exposed filler (the metadata one)
+     * included, and the move destroyed the tile of the exposed filler.
+     *
+     * <p>Minecraft 1.21.1 refuses every block entity block ({@code PistonBaseBlock#isPushable}
+     * ends with {@code return !blockState.hasBlockEntity();}); the mixin {@code
+     * thaumcraft.common.mixin.PistonPushabilityMixin} asks this answer instead.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.ELDRITCH_NOTHING.isPushableInOriginal(state.getValue(EXPOSED));
     }
 
     /** BlockEldritchNothing:69-71 - the block never has a selection box. */

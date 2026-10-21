@@ -4,6 +4,8 @@ import dev.architectury.registry.menu.MenuRegistry;
 import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -199,6 +201,16 @@ public final class ContainerGolem extends AbstractContainerMenu {
     @Override public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) { return slot.index >= ghostSlots; }
     @Override public boolean clickMenuButton(Player player, int button) {
         if (!active(player)) return false;
+        boolean handled = applyButton(button);
+        // Original ContainerGolem.func_75140_a:110 — EVERY menu button plays the click at the
+        // golem, also the ones that change nothing (the page arrow at the first or the last page).
+        serverGolem.level().playSound(null, serverGolem.blockPosition(),
+                SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER, 0.2F, 0.8F);
+        return handled;
+    }
+
+    /** The original's button handling, {@code ContainerGolem.func_75140_a}:82-109. */
+    private boolean applyButton(int button) {
         if (button == PREVIOUS_PAGE || button == NEXT_PAGE) {
             int pages = Math.max(1, (serverGolem.getSlotCount() + GHOSTS - 1) / GHOSTS);
             int next = serverPage[0] + (button == NEXT_PAGE ? 1 : -1);
@@ -230,14 +242,22 @@ public final class ContainerGolem extends AbstractContainerMenu {
     }
 
     /**
-     * The Order colour buttons of the original menu.
+     * The Order colour cycle of the original menu.
      *
-     * <p>Original {@code ContainerGolem.onButtonClick}:96-109 — a button id <em>below</em> the golem's slot count lowers the
-     * colour of that very slot, and an id from the slot count up to twice the slot count raises it. The colour wraps the
-     * original way: lowering turns {@code -1} (any) into {@code 15} and raises {@code 15} into {@code -1}.</p>
+     * <p>Original {@code ContainerGolem.onButtonClick}:97-108 — the left button lowers the colour of the slot
+     * ({@code colour - 1}, and {@code -1} wraps to {@code 15}) and the right button raises it
+     * ({@code colour + 1}, and {@code 15} wraps to {@code -1}).</p>
      *
-     * @return whether the button was an Order colour button of this golem
+     * @param current the colour of the slot ({@code -1} is "any marker")
+     * @param step    {@code -1} for the left button, {@code +1} for the right button
      */
+    public static int nextColour(int current, int step) {
+        int next = current + step;
+        if (step < 0 && next < GolemMarker.ANY) return GolemMarker.LAST_COLOR;
+        if (step > 0 && next > GolemMarker.LAST_COLOR) return GolemMarker.ANY;
+        return next;
+    }
+
     private boolean adjustColor(int button) {
         int slots = serverGolem.getSlotCount();
         if (slots <= 0 || !serverGolem.canColorSlots()) return false;
@@ -245,11 +265,7 @@ public final class ContainerGolem extends AbstractContainerMenu {
         if (button >= 0 && button < slots) { slot = button; step = -1; }
         else if (button >= slots && button < slots * 2) { slot = button - slots; step = 1; }
         else return false;
-        int current = serverGolem.getSlotColor(slot);
-        int next = current + step;
-        if (step < 0 && next < GolemMarker.ANY) next = GolemMarker.LAST_COLOR;
-        if (step > 0 && next > GolemMarker.LAST_COLOR) next = GolemMarker.ANY;
-        if (!serverGolem.setSlotColor(slot, next)) return false;
+        if (!serverGolem.setSlotColor(slot, nextColour(serverGolem.getSlotColor(slot), step))) return false;
         broadcastChanges();
         return true;
     }

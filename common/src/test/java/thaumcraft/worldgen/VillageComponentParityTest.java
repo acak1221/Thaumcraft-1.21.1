@@ -160,16 +160,18 @@ class VillageComponentParityTest {
     // ------------------------------------------------------------------ piece weight
 
     @Test void thePieceWeightDrawIsTheVillageSizeOrOneMore() {
-        // Oracle VillageBankerManager:38 and VillageWizardManager:38 use
+        // Oracle VillageBankerManager:59 and VillageWizardManager:56 use
         // MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i), and the 1.7.10 helper is
-        // min + random.nextInt(max - min + 1), so the draw is i + nextInt(2).
+        // min + random.nextInt(max - min + 1), so the draw is i + nextInt(2): the two values i
+        // and i + 1. The draw of the original is 0 or 1; the port folds any other draw by its
+        // parity, so an even draw is the village size and an odd draw is the village size plus one.
         for (int size = 1; size <= 12; size++) {
             assertEquals(size, VillageWorldGenRules.pieceWeightMinSize(size, 0));
             assertEquals(size + 1, VillageWorldGenRules.pieceWeightMinSize(size, 1));
             assertEquals(size, VillageWorldGenRules.pieceWeightMinSize(size, 2));
             assertEquals(size + 1, VillageWorldGenRules.pieceWeightMinSize(size, 3));
-            assertEquals(size, VillageWorldGenRules.pieceWeightMinSize(size, -1));
-            assertEquals(size + 1, VillageWorldGenRules.pieceWeightMinSize(size, -2));
+            assertEquals(size + 1, VillageWorldGenRules.pieceWeightMinSize(size, -1));
+            assertEquals(size, VillageWorldGenRules.pieceWeightMinSize(size, -2));
         }
     }
 
@@ -187,7 +189,7 @@ class VillageComponentParityTest {
     }
 
     @Test void theTradeTablesKeepTheOriginalRows() {
-        // Oracle VillageBankerManager:21-32 - the twelve banker trades.
+        // Oracle VillageBankerManager:41-55 - the twelve banker trades.
         List<VillageWorldGenRules.TradeSpec> banker = VillageBankerManager.trades();
         assertEquals(12, banker.size());
         assertEquals(20, banker.get(0).payMin());
@@ -197,14 +199,21 @@ class VillageComponentParityTest {
         assertEquals(List.of("minecraft:book"), banker.get(4).receiveItems());
         assertEquals(25, banker.get(11).payMin());
         assertEquals(32, banker.get(11).payMax());
-        // Oracle VillageWizardManager:19-33 - the fifteen wizard trades.
+        // Oracle VillageWizardManager:35-52 - the fifteen wizard trades. The original pays with
+        // one item and receives one item, so the pay item is a single id and not a list.
         List<VillageWorldGenRules.TradeSpec> wizard = VillageWizardManager.trades();
         assertEquals(15, wizard.size());
-        assertEquals(List.of("thaumcraft:quick_silver"), wizard.get(2).payItem());
-        assertEquals(List.of("thaumcraft:amber_gem"), wizard.get(4).payItem());
-        assertEquals(List.of("thaumcraft:nugget_chicken"), wizard.get(6).payItem());
-        assertEquals(List.of("thaumcraft:nugget_beef"), wizard.get(8).payItem());
+        // Oracle VillageWizardManager:39 - the resource metadata three, the quicksilver.
+        assertEquals("thaumcraft:quick_silver", wizard.get(2).payItem());
+        // Oracle VillageWizardManager:41 - the resource metadata six, the amber.
+        assertEquals("thaumcraft:amber_gem", wizard.get(4).payItem());
+        // Oracle VillageWizardManager:43 - the chicken nugget of the original.
+        assertEquals("thaumcraft:nugget_chicken", wizard.get(6).payItem());
+        // Oracle VillageWizardManager:45 - the beef nugget of the original.
+        assertEquals("thaumcraft:nugget_beef", wizard.get(8).payItem());
+        // Oracle VillageWizardManager:46 - the six metadata values of the aspect shard.
         assertEquals(6, wizard.get(9).receiveItems().size());
+        // Oracle VillageWizardManager:51 - the six metadata values of the bauble blank.
         assertEquals(6, wizard.get(14).receiveItems().size());
         assertNotNull(wizard.get(9).receiveItems());
         assertFalse(wizard.get(9).receiveItems().isEmpty());

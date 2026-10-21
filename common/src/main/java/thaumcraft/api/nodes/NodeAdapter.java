@@ -7,9 +7,17 @@ import thaumcraft.common.tiles.TileNode;
 /**
  * The public view of the native aura node.
  *
- * <p>Forced 1.21.1 change: the native node keeps its own {@code NodeType} and {@code NodeModifier} enums and
- * is final, so the type and the modifier cannot be written through this view; the native node fixes them
- * when it is created. The base essence can be written, because the native node accepts it.</p>
+ * <p>Forced 1.21.1 change: the native node keeps its own nested {@code NodeType} and {@code NodeModifier}
+ * enums, so the published enums are translated by name; the two enums carry the same constants (oracle
+ * {@code thaumcraft/api/nodes/NodeType.java} and {@code NodeModifier.java}). The type and the modifier
+ * of the native node are written through the published contract, exactly as the original
+ * {@code TileNode:245-252} does.</p>
+ *
+ * <p>Forced 1.21.1 change: the original node itself implements the published contract (oracle
+ * {@code thaumcraft/common/tiles/TileNode.java:75-77}), so an add-on casts the block entity of a
+ * node to {@link INode}. The native node cannot implement the published interface without
+ * unifying the two node type enums, so {@link #of(net.minecraft.world.level.block.entity.BlockEntity)}
+ * is the documented bridge to the same contract.</p>
  */
 public class NodeAdapter implements INode {
     private final TileNode node;
@@ -17,6 +25,16 @@ public class NodeAdapter implements INode {
     public NodeAdapter(TileNode node) {
         if (node == null) throw new IllegalArgumentException("A node view needs a native node");
         this.node = node;
+    }
+
+    /**
+     * The published view of a native node.
+     *
+     * @param entity the block entity of a node, or null
+     * @return the published view of the node, or null when the entity is not an aura node
+     */
+    public static INode of(net.minecraft.world.level.block.entity.BlockEntity entity) {
+        return entity instanceof TileNode node ? new NodeAdapter(node) : null;
     }
 
     /** The native node behind this view. */
@@ -33,11 +51,11 @@ public class NodeAdapter implements INode {
     @Override public NodeType getNodeType() { return NodeType.valueOf(node.getNodeType().name()); }
 
     @Override public void setNodeType(NodeType nodeType) {
-        throw new UnsupportedOperationException("The native aura node fixes its type when it is created");
+        node.setNodeType(nodeType);
     }
 
     @Override public void setNodeModifier(NodeModifier nodeModifier) {
-        throw new UnsupportedOperationException("The native aura node fixes its modifier when it is created");
+        node.setNodeModifier(nodeModifier);
     }
 
     @Override public NodeModifier getNodeModifier() {
@@ -48,20 +66,9 @@ public class NodeAdapter implements INode {
 
     /** The original rule: the base only grows, or it shrinks by the given amount. */
     @Override public void setNodeVisBase(Aspect aspect, short nodeVisBase) {
-        if (aspect == null) return;
-        AspectList base = node.getAspectsBase();
-        if (base.getAmount(aspect) < nodeVisBase) {
-            base.merge(aspect, nodeVisBase);
-        } else {
-            base.reduce(aspect, base.getAmount(aspect) - nodeVisBase);
-        }
-        AspectList current = node.getAspects();
-        node.setAspects(base);
-        for (Aspect held : current.getAspects()) {
-            int wanted = current.getAmount(held);
-            int now = node.getAspects().getAmount(held);
-            if (now > wanted) node.takeFromContainer(held, now - wanted);
-        }
+        // Original TileNode:265-271: only the base changes, the current essence of the node
+        // stays exactly as it is.
+        node.setNodeVisBase(aspect, nodeVisBase);
     }
 
     @Override public boolean doesContainerAccept(Aspect aspect) { return node.doesContainerAccept(aspect); }

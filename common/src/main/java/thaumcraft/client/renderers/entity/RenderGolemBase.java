@@ -1,6 +1,7 @@
 package thaumcraft.client.renderers.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -125,15 +126,15 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
         }
     }
 
-    /** Original G:170–191: core11 always displays a rod, independently of cargo
-     * or a live cast. This stack never enters equipment, saves, drops or stock. */
     /**
      * Original RenderGolemBase:116-141 — the installed upgrades are shown as small flat icons in a
-     * row on the golem's back. The original draws one icon per upgrade SLOT (the free slots show
-     * the blank "empty upgrade" icon); the native has no item for that blank icon, so only the
-     * installed upgrades are drawn, at the original's positions.
+     * row on the golem's back. The original draws one icon per upgrade SLOT: a free slot shows the
+     * blank "golem_upgrade_empty" icon (oracle ItemGolemUpgrade:45-57 — the icon of a negative
+     * damage value is the empty one), an installed slot the icon of its upgrade.
      */
     private static final class UpgradesLayer extends RenderLayer<EntityGolemBase, ModelGolem<EntityGolemBase>> {
+        private static final ResourceLocation EMPTY_ICON =
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/golem_upgrade_empty.png");
         private final ItemRenderer items;
 
         private UpgradesLayer(RenderGolemBase renderer, ItemRenderer items) { super(renderer); this.items = items; }
@@ -146,7 +147,7 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
             float shift = 0.08F;
             for (int a = 0; a < slots; a++) {
                 GolemUpgrade upgrade = GolemUpgrade.byId(entity.getUpgrade(a));
-                if (upgrade == null) continue; // A free slot shows the original's blank icon; the native has no item for it.
+                if (upgrade == null) { emptyIcon(pose, buffers, light, shift, slots, a); continue; }
                 Item item = ThaumcraftGolems.upgradeItem(upgrade);
                 if (item == null) continue;
                 pose.pushPose();
@@ -160,6 +161,31 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
                     renderItem(items, new ItemStack(item), entity, pose, buffers, light);
                 } finally { pose.popPose(); }
             }
+        }
+
+        /**
+         * The original's blank icon of a free upgrade slot: the same flat quad, the same place and
+         * the same scale as an installed upgrade, with the texture of the empty upgrade.
+         */
+        private static void emptyIcon(PoseStack pose, MultiBufferSource buffers, int light, float shift, int slots, int slot) {
+            pose.pushPose();
+            try {
+                pose.mulPose(Axis.XP.rotationDegrees(180));
+                pose.translate(-0.05F - shift * (slots - 1) / 2F + shift * slot, -1.106F, 0.099F);
+                pose.scale(0.1F, 0.1F, 0.1F);
+                VertexConsumer consumer = buffers.getBuffer(RenderType.entityTranslucent(EMPTY_ICON));
+                // Original RenderGolemBase:133-139 — the quad in the XY plane, the icon upright.
+                quad(consumer, pose, light, 0, 0, 1);
+                quad(consumer, pose, light, 1, 0, 1);
+                quad(consumer, pose, light, 1, 1, 0);
+                quad(consumer, pose, light, 0, 1, 0);
+            } finally { pose.popPose(); }
+        }
+
+        private static void quad(VertexConsumer consumer, PoseStack pose, int light, float x, float y, float v) {
+            consumer.addVertex(pose.last(), x, y, 0).setColor(255, 255, 255, 255).setUv(x, v)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
+                    .setNormal(pose.last(), 0, 0, 1);
         }
     }
 
@@ -191,6 +217,8 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
         }
     }
 
+    /** Original G:170–191: core11 always displays a rod, independently of cargo
+     * or a live cast. This stack never enters equipment, saves, drops or stock. */
     private static final class FishingRodLayer extends RenderLayer<EntityGolemBase, ModelGolem<EntityGolemBase>> {
         private final ItemRenderer items;
         private final ItemStack rod = new ItemStack(Items.FISHING_ROD);

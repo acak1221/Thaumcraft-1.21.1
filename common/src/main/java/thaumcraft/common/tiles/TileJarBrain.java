@@ -116,7 +116,7 @@ public final class TileJarBrain extends BlockEntity {
         ExperienceOrb orb = jar.xp < jar.xpMax ? closestOrb(level, pos) : null;
         net.minecraft.world.entity.Entity look = orb;
         if (look == null) {
-            Player player = level.getNearestPlayer(pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, 6.0D);
+            Player player = level.getNearestPlayer(pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, 6.0D, false);
             if (player != null && jar.lastSigh < System.currentTimeMillis()) {
                 level.playSound(null, pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, BRAIN,
                         SoundSource.BLOCKS, .15F, .8F + level.random.nextFloat() * .4F);

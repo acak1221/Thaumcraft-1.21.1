@@ -34,13 +34,14 @@ public final class ThaumcraftFlux {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(Thaumcraft.MODID, Registries.MOB_EFFECT);
 
-    public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties(false)));
-    public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties(true)));
     /**
      * Original BlockFluxGoo:50 - the custom sound type of the flux goo: the sound
      * {@code thaumcraft:gore} with the volume 1.0 and the pitch 1.0.
      */
     public static final SoundType FLUX_GOO_SOUND = new CustomSoundType("gore", 1.0F, 1.0F);
+
+    public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties(false)));
+    public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties(true)));
     /**
      * The original items of the two finite fluids.
      *
@@ -57,13 +58,16 @@ public final class ThaumcraftFlux {
 
     private ThaumcraftFlux() {}
 
+    /** The 1.21.1 counterpart of the mobility flag one of the original taint material. */
+    public static final PushReaction PUSH_REACTION = PushReaction.BLOCK;
+
     private static BlockBehaviour.Properties properties(boolean goo) {
         // Original MaterialTaint:func_76219_n() sets the mobility flag of the taint material to one
         // and Config:917 hands that material to the flux gas and the flux goo. The mobility flag one
         // is "the piston is stopped and the block survives"; the 1.21.1 push reaction BLOCK is the
         // counterpart. DESTROY would break the original block instead.
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).noCollission().noOcclusion()
-                .randomTicks().noLootTable().pushReaction(PushReaction.BLOCK)
+                .randomTicks().noLootTable().pushReaction(PUSH_REACTION)
                 .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)
                 // BlockFluidBase scales luminosity by metadata, NOT metadata+1.
                 .lightLevel(state -> state.getValue(FluxFiniteBlock.LEVEL) * 7 / 8);

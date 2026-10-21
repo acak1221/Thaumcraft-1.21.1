@@ -21,7 +21,7 @@ import thaumcraft.common.tiles.TileEldritchPortal;
  * Original BlockEldritchPortal: the light emitting eldritch gate. It is
  * unbreakable, has no collision and only survives between two eldritch blocks.
  */
-public final class BlockEldritchPortal extends BaseEntityBlock {
+public final class BlockEldritchPortal extends BaseEntityBlock implements OriginalPistonPushable {
     public static final MapCodec<BlockEldritchPortal> CODEC = simpleCodec(BlockEldritchPortal::new);
 
     public BlockEldritchPortal(Properties properties) {
@@ -40,6 +40,20 @@ public final class BlockEldritchPortal extends BaseEntityBlock {
 
     /** BlockEldritchPortal:115-121 - every portal tile exists. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileEldritchPortal(pos, state); }
+
+    /**
+     * Oracle BlockEldritchPortal:38-39 - the 1.7.10 class extended {@code
+     * net.minecraft.block.Block} and did not implement {@code ITileEntityProvider}, so the piston
+     * of the original moved the gate, whose tile existed for every metadata
+     * (BlockEldritchPortal:115-121), and the move destroyed the tile.
+     *
+     * <p>Minecraft 1.21.1 refuses every block entity block ({@code PistonBaseBlock#isPushable}
+     * ends with {@code return !blockState.hasBlockEntity();}); the mixin {@code
+     * thaumcraft.common.mixin.PistonPushabilityMixin} asks this answer instead.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.ELDRITCH_PORTAL.isPushableInOriginal(0);
+    }
 
     /**
      * Original TileEldritchPortal:41-54 - the gate tile updates every tick.

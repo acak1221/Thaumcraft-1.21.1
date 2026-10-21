@@ -72,7 +72,9 @@ public final class ThaumcraftTaint {
     // Original Config:918 and MaterialTaint:24-38 - the taint material carries the mobility flag one, so a
     // piston cannot push the taint. The 1.21.1 push reaction BLOCK is the counterpart: the piston is stopped
     // and the taint survives. DESTROY would break the original block instead.
-    private static BlockBehaviour.Properties properties(float hardness,float resistance) {return BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).strength(hardness,resistance).sound(SOUND).randomTicks().pushReaction(PushReaction.BLOCK);}
+    /** The 1.21.1 counterpart of the mobility flag one of the original taint material. */
+    public static final PushReaction PUSH_REACTION = PushReaction.BLOCK;
+    private static BlockBehaviour.Properties properties(float hardness,float resistance) {return BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).strength(hardness,resistance).sound(SOUND).randomTicks().pushReaction(PUSH_REACTION);}
     public static void register() {
         if(registered)return;registered=true;BLOCKS.register();ENTITIES.register();ITEMS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB,CRUST_ITEM,SOIL_ITEM);

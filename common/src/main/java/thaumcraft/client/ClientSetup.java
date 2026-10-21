@@ -71,6 +71,23 @@ public final class ClientSetup {
         EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE_SMALL,
                 context -> new thaumcraft.client.renderers.entity.RenderTaintacle(context, .2F, 6));
         thaumcraft.common.entities.monster.EntityTaintacle.setClientEffects(thaumcraft.client.fx.particles.TaintacleAriseParticle::arise);
+        // Original ClientProxy.smokeSpiral: the smoke of the Sword of the Zephyr and of the
+        // spawning eldritch warden (oracle ItemElementalSword.onUsingTick:128-141 and
+        // EntityEldritchWarden.onUpdate:186-194).
+        thaumcraft.common.items.equipment.ItemElementalSword.setClientEffects((player, floor, count) -> {
+            if (!(player.level() instanceof net.minecraft.client.multiplayer.ClientLevel level)) return;
+            for (int a = 0; a < count; ++a)
+                thaumcraft.client.fx.particles.FXSmokeSpiral.spiral(level, player.getX(),
+                        player.getY() + player.getBbHeight() / 2F, player.getZ(), 1.5F,
+                        level.random.nextInt(360), floor, 0xDDDDDD);
+        });
+        thaumcraft.common.entities.monster.EntityEldritchWarden.setClientEffects((warden, height, count) -> {
+            if (!(warden.level() instanceof net.minecraft.client.multiplayer.ClientLevel level)) return;
+            for (int a = 0; a < count; ++a)
+                thaumcraft.client.fx.particles.FXSmokeSpiral.spiral(level, warden.getX(),
+                        warden.getY() + height / 2F, warden.getZ(), height,
+                        level.random.nextInt(360), (int) Math.floor(warden.getY()) - 1, 0x22112F);
+        });
         thaumcraft.common.items.ItemManaBean.setTooltipViewer(() -> Minecraft.getInstance().player);
         ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? 0xff000000 | thaumcraft.common.items.ItemManaBean.color(stack) : -1,
                 thaumcraft.common.config.ThaumcraftManaBeans.MANA_BEAN);

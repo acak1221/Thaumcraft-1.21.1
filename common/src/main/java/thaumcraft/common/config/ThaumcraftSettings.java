@@ -14,10 +14,20 @@ public final class ThaumcraftSettings {
     private static volatile ResearchSettings server = ResearchSettings.DEFAULTS;
     private static volatile ResearchSettings remote = ResearchSettings.DEFAULTS;
     private static volatile Thread clientThread;
+    /**
+     * Original {@code Config.shaders} (oracle {@code thaumcraft/common/config/Config.java:410-412},
+     * default {@code true} in the static block at :847): "This setting will disable certain
+     * thaumcraft shaders for those who experience FPS drops." The original read it from the
+     * client's own Forge configuration file, so it is a local rendering option here as well and
+     * it is deliberately not part of the server snapshot.
+     */
+    private static volatile boolean shaders = true;
     private ThaumcraftSettings() {}
 
     public static ResearchSettings server() { return server; }
     public static ResearchSettings current() { return Thread.currentThread() == clientThread ? remote : server; }
+    /** Original {@code Config.shaders}: the local switch of the four warp post chains. */
+    public static boolean shaders() { return shaders; }
     public static void configureServer(ResearchSettings settings) {
         server = java.util.Objects.requireNonNull(settings);
         WarpEvents.setWussMode(settings.wuss());
@@ -57,17 +67,21 @@ public final class ThaumcraftSettings {
                         + "spawn_angry_zombies=true\nspawn_pechs=true\nspawn_fire_bats=true\nspawn_wisps=true\n"
                         + "spawn_eldercreatures=true\nspawn_taintacles=true\n"
                         + "generate_trees=true\ngenerate_taint=true\ngenerate_aura_nodes=true\n"
-                        + "generate_structures=true\ngenerate_cinnibar_ore=true\ngenerate_amber_ore=true\ngenerate_infused_stone=true\n",
+                        + "generate_structures=true\ngenerate_cinnibar_ore=true\ngenerate_amber_ore=true\ngenerate_infused_stone=true\n"
+                        + "shaders=true\n",
                         StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }
             configureServer(ResearchSettings.read(properties));
             ThaumcraftTaintSettings.load(properties);
             ThaumcraftBiomeSettings.configure(properties);
+            // Original Config.shaders: a local rendering switch, not a server fact.
+            shaders = !"false".equalsIgnoreCase(properties.getProperty("shaders", "true").strip());
         } catch (IOException | IllegalArgumentException failure) {
             Thaumcraft.LOG.error("Cannot read Thaumcraft configuration at {}; using original defaults", file, failure);
             configureServer(ResearchSettings.DEFAULTS);
             ThaumcraftTaintSettings.configure(ThaumcraftTaintSettings.DEFAULTS);
             ThaumcraftBiomeSettings.defaults();
+            shaders = true;
         }
     }
 }

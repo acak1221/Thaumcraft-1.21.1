@@ -4,8 +4,8 @@
     "srcrgb": "one",
     "dstrgb": "zero"
   },
-  "vertex": "thaumcraft:bloom_vertex_base",
-  "fragment": "thaumcraft:bloom2",
+  "vertex": "sobel",
+  "fragment": "thaumcraft_color_convolve2",
   "attributes": [
     "Position"
   ],
@@ -57,20 +57,71 @@
       ]
     },
     {
-      "name": "Time",
+      "name": "Gray",
       "type": "float",
-      "count": 1,
+      "count": 3,
       "values": [
+        0.3,
+        0.59,
+        0.11
+      ]
+    },
+    {
+      "name": "RedMatrix",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1.0,
+        0.0,
         0.0
       ]
     },
     {
-      "name": "ScreenSize",
+      "name": "GreenMatrix",
       "type": "float",
-      "count": 2,
+      "count": 3,
+      "values": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "name": "BlueMatrix",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "Offset",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "ColorScale",
+      "type": "float",
+      "count": 3,
       "values": [
         1.0,
+        1.0,
         1.0
+      ]
+    },
+    {
+      "name": "Saturation",
+      "type": "float",
+      "count": 1,
+      "values": [
+        1.8
       ]
     }
   ]

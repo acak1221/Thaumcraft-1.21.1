@@ -4,7 +4,7 @@
   ],
   "passes": [
     {
-      "name": "thaumcraft:color_convolve2",
+      "name": "thaumcraft_color_convolve2",
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "uniforms": [
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "name": "minecraft:blit",
+      "name": "blit",
       "intarget": "swap",
       "outtarget": "minecraft:main"
     }

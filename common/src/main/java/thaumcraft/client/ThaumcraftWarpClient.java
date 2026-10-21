@@ -37,22 +37,31 @@ import thaumcraft.client.renderers.entity.RenderMindSpider;
  * loader client bootstrap ({@code monster_lit_particle}, {@code node_stabilizer_bubble}).</li>
  * <li>{@code assets/thaumcraft/shaders/post/} - the four vanilla post chains of this class, the
  * native equivalent of the original's four OptiFine groups.</li>
- * <li>{@code assets/thaumcraft/shaders/program/} - the retained original OptiFine programs
- * ({@code bloom2}, {@code bloom_color}, {@code color_convolve2}, {@code bloom_vertex_base}).
- * DOCUMENTED GAP: 1.21.1 cannot load them. {@code EffectInstance} resolves a post program in the
- * DEFAULT namespace only ({@code minecraft:shaders/program/<name>.json}) and its GLSL uses the
- * 1.8 conventions ({@code texCoord} attribute, {@code oneTexel}), while 1.21.1 draws the post quad
- * with the {@code Position} attribute only. The native equivalent of those programs is a 1.21.1
- * rewrite in the default namespace, which is a separate porting task.</li>
- * </ul>
+ * <li>{@code assets/minecraft/shaders/program/} - the three original TC4 post programs
+ * ({@code thaumcraft_color_convolve2}, {@code thaumcraft_bloom_color}, {@code thaumcraft_bloom2}
+ * and their shared vertex program {@code thaumcraft_bloom_vertex_base}), ported to the GLSL 150
+ * dialect of 1.21.1.
  *
- * <p>Consequence, still open: the four chains below name their passes {@code minecraft:color_convolve},
- * {@code minecraft:blit}, {@code minecraft:box_blur}, {@code thaumcraft:color_convolve2},
- * {@code thaumcraft:bloom_color} and {@code thaumcraft:bloom2}. Vanilla 1.21.1 ships no post
- * program at all and the loader resolves programs in the default namespace without a namespace
- * prefix, so these chains cannot be loaded and the effect is dropped by the guard below, exactly
- * as the original dropped a missing shader group. The chain sources are kept unchanged so the
- * original pass order and uniforms stay visible. */
+ * <p>The programs live in the DEFAULT namespace because that is the only place 1.21.1 looks for
+ * them: {@code net.minecraft.client.renderer.EffectInstance} resolves the program description with
+ * {@code ResourceLocation.withDefaultNamespace("shaders/program/" + name + ".json")} and the
+ * vertex/fragment sources with the same default namespace and the {@code .vsh}/{@code .fsh}
+ * extension. A pass named {@code minecraft:box_blur} or {@code thaumcraft:bloom2} would be looked
+ * up as {@code minecraft:shaders/program/minecraft:box_blur.json} and could never be found; the
+ * chains therefore name the vanilla programs ({@code color_convolve}, {@code blit},
+ * {@code box_blur}) and the three ported TC4 programs by their plain names. The two chains that
+ * need no TC4 program are the original {@code desaturatetc} and {@code blurtc} ones: the original
+ * {@code hunger} chain used TC4's own {@code color_convolve2} and the original
+ * {@code sunscorned} chain used TC4's own {@code bloomColor} and {@code bloom2}.
+ *
+ * <p>The one deviation inside a chain: the original {@code blurtc} chain named OptiFine's
+ * {@code blur} program, which 1.21.1 does not have. The nearest vanilla program is
+ * {@code box_blur}; the original Radius of {@code 10.0} and the original two axis pass order
+ * ({@code BlurDir} {@code 1,0} and then {@code 0,1}) are kept unchanged.
+ *
+ * <p>The original switch {@code Config.shaders} (oracle
+ * {@code thaumcraft/common/config/Config.java:410-412}) gates the whole chain and is read from
+ * the local configuration file by {@link thaumcraft.common.config.ThaumcraftSettings#shaders()}. */
 public final class ThaumcraftWarpClient {
     private static final ResourceLocation VIGNETTE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/vignette.png");
     private static final Map<String, PostChain> CHAINS = new LinkedHashMap<>();
@@ -127,9 +136,16 @@ public final class ThaumcraftWarpClient {
     public static void renderPostEffects(float partialTick) {
         var client = Minecraft.getInstance();
         if (client.player == null || client.level == null) return;
+        // Original Config.shaders: the whole chain is off when the local setting is off.
+        if (!thaumcraft.common.config.ThaumcraftSettings.shaders()) {
+            for (String old : new ArrayList<>(CHAINS.keySet())) CHAINS.remove(old).close();
+            return;
+        }
         boolean resized = width != client.getWindow().getWidth() || height != client.getWindow().getHeight();
         width = client.getWindow().getWidth(); height = client.getWindow().getHeight();
         var active = new java.util.LinkedHashSet<String>();
+        // The original group order is the index order of its shader group map: 0 desaturatetc,
+        // 1 blurtc, 2 hunger, 3 sunscorned (oracle ClientTickEventsFML.java:114-118).
         if (client.player.hasEffect(ThaumcraftWarp.effect(ThaumcraftWarp.DEATH_GAZE))) active.add("warp_death_gaze");
         if (client.player.hasEffect(ThaumcraftWarp.effect(ThaumcraftWarp.BLURRED_VISION))) active.add("warp_blurred");
         if (client.player.hasEffect(ThaumcraftWarp.effect(ThaumcraftWarp.UNNATURAL_HUNGER))) active.add("warp_hunger");
@@ -147,8 +163,8 @@ public final class ThaumcraftWarpClient {
                 chain.process(partialTick);
             } catch (Exception failure) {
                 // A chain whose post program cannot be resolved is dropped once, exactly as the
-                // original dropped a missing OptiFine shader group. See the class documentation
-                // for the shader inventory and the open program gap.
+                // original dropped a missing OptiFine shader group (oracle
+                // ClientTickEventsFML.java:170-171 catches the JsonException of a missing group).
                 if (chain != null) chain.close(); CHAINS.remove(name); FAILED.add(name);
                 Thaumcraft.LOG.error("Unable to render warp post chain {}", name, failure);
             }

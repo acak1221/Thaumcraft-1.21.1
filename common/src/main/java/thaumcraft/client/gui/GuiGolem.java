@@ -97,8 +97,28 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
             // It renders this real entity; there is no tick/AI or NoAI change.
             // Original GuiGolem:267-317 draws the golem in the 320x240 viewport of the screen centre, which is the
             // centre of the panel: the preview belongs there, not in the top left corner.
-            InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
-                    leftPos + 63, topPos + 52, leftPos + 113, topPos + 114, 42, 0, mouseX, mouseY, golem);
+            // Original GuiGolem:289-303 — the preview is drawn with the body yaw of -20 and the head pitch of -5
+            // and it does NOT follow the mouse; the rotations are set for the frame and restored afterwards.
+            float body = golem.yBodyRot, bodyOld = golem.yBodyRotO;
+            float head = golem.yHeadRot, headOld = golem.yHeadRotO;
+            float yaw = golem.getYRot();
+            golem.yBodyRot = -20F;
+            golem.yBodyRotO = -5F;
+            golem.yHeadRot = 0F;
+            golem.yHeadRotO = -5F;
+            golem.setYRot(0F);
+            try {
+                // The mouse is pinned to the centre of the box, so the preview keeps the original's fixed pose.
+                InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
+                        leftPos + 63, topPos + 52, leftPos + 113, topPos + 114, 42,
+                        0F, (leftPos + 63 + leftPos + 113) / 2.0F, (topPos + 52 + topPos + 114) / 2.0F, golem);
+            } finally {
+                golem.yBodyRot = body;
+                golem.yBodyRotO = bodyOld;
+                golem.yHeadRot = head;
+                golem.yHeadRotO = headOld;
+                golem.setYRot(yaw);
+            }
         }
     }
 

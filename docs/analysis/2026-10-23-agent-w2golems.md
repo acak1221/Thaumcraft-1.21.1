@@ -157,6 +157,20 @@ python3 scripts/porting/update_scope_ledger.py --check --original-root /home/cyb
 * **Fix.** `GuiGolem.java:21-45, :128-140` — the threat line is decided once, when the menu opens, and the
   blurb is drawn for every core.
 
+### D13b — the preview of the golem followed the mouse
+
+* **Original.** `oracle thaumcraft/client/gui/GuiGolem.java:289-303` — the preview is drawn with the body yaw
+  of **-20** and the head pitch of **-5**; the rotations of the entity are set for the frame and restored
+  afterwards, so the preview does **not** follow the mouse.
+* **Port (before).** `common/src/main/java/thaumcraft/client/gui/GuiGolem.java` — the vanilla
+  `renderEntityInInventoryFollowsMouse` with the real mouse position, so the golem turned with the cursor.
+* **Fix.** `GuiGolem.java:77-100` — the rotations of the entity are set to the original's values for the frame
+  and restored afterwards, and the mouse is pinned to the centre of the box, so the preview keeps the
+  original's fixed pose.
+* **Remaining difference.** The camera: the original uses a 320x240 viewport with a perspective of 90 degrees
+  and a scale of 5, the native the vanilla inventory preview (a box of 50x62 pixels with a scale of 42). The
+  place and the pose of the preview are the original's.
+
 ### D14 — the marked containers of the golem were bound to the distance of the **home**
 
 * **Original.** `oracle thaumcraft/common/entities/golems/GolemHelper.java:54-64` — `getMarkedContainers`
@@ -312,7 +326,9 @@ wave touched:
 4. A golem with more than six slots (a Fill golem with a **Fire** upgrade) must show the **texture arrows** at
    the bottom right of the panel and the half-size page counter "1/2". The arrow of the end that cannot be
    used must be the dimmed sprite.
-5. The **golem preview** must stand in the **centre** of the panel.
+5. The **golem preview** must stand in the **centre** of the panel and must keep a **fixed pose**: the body
+   turned by -20 degrees and the head by -5 degrees. It must **not** turn with the cursor. (New in this
+   session.)
 6. **Every** button of the menu must play the **click** (the vanilla button click) **at the golem** — also the
    page arrow at the first or at the last page, which changes nothing. (New in this session.)
 7. The blurb of the core must be drawn for **every** core, and an **advanced** golem must show a **threat
@@ -347,7 +363,7 @@ wave touched:
 | unit | coverage | remaining difference |
 |---|---|---|
 | `api/entities/IGolemInfo.java` | `parity_verified` | none (the file is not in 4.2.3.5; the values are on the native entity) |
-| `client/gui/GuiGolem.java` | `partial` | the preview camera (the original's fixed 320x240 viewport) and the three switches of the Use core |
+| `client/gui/GuiGolem.java` | `partial` | the camera of the preview (the original's fixed 320x240 viewport with a perspective of 90 degrees; the pose and the place are the original's now) and the three switches of the Use core |
 | `client/renderers/entity/RenderGolemBase.java` | `parity_verified` | none (the blank icon of a free upgrade slot is drawn again) |
 | `client/renderers/entity/RenderGolemBobber.java` | `partial` | the texture of the quad: the 1.7.10 particle atlas does not exist in 1.21.1 |
 | `client/renderers/models/ModelGolem.java` | `parity_verified` | none |

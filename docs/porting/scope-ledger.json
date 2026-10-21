@@ -6902,13 +6902,16 @@
           "oracle thaumcraft/client/gui/GuiGolem.java:72-78 an advanced golem shows a random threat line in one case of four",
           "oracle thaumcraft/client/gui/GuiGolem.java:80-92 the blurb or the threat line, half sized at (80, 22) with a width of 110",
           "oracle thaumcraft/client/gui/GuiGolem.java:206-236 the Use core has three switches (Block or Empty space, Right click or Left click, Not sneaking or Sneaking) with the buttons 50, 51 and 52",
-          "oracle thaumcraft/client/gui/GuiGolem.java:267-317 the preview is drawn in the 320x240 viewport of the screen centre with a yaw of -20 and a pitch of -5",
+          "oracle thaumcraft/client/gui/GuiGolem.java:267-317 the preview is drawn in the 320x240 viewport of the screen centre",
+          "oracle thaumcraft/client/gui/GuiGolem.java:289-303 the preview is drawn with the body yaw of -20 and the head pitch of -5, the rotations are set for the frame and restored afterwards, and the preview does NOT follow the mouse",
           "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:21-45 the threat line of an advanced golem is drawn once, when the menu opens",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:128-140 the blurb of the core or the threat line"
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:128-140 the blurb of the core or the threat line",
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:77-100 the preview is drawn with the body yaw of -20 and the head pitch of -5, the mouse is pinned to the centre of the box and the rotations are restored afterwards"
         ],
         "notes": [
           "Fixed in this wave: the native never showed the threat line of an advanced golem and only drew the blurb of seven of the twelve cores; the original draws the blurb of every core (the harvest, the alchemy and the lumber core have the text '??') and replaces it in one case of four by a threat line.",
-          "REMAINING DIFFERENCE: the preview camera. The original draws the golem in the 320x240 viewport of the screen centre with a fixed yaw of -20 and a pitch of -5 and without following the mouse; the native uses the vanilla inventory preview helper, which follows the mouse.",
+          "Fixed in this wave: the preview of the golem followed the mouse; the original draws it with a fixed pose (the body yaw of -20, the head pitch of -5) and restores the rotations of the entity afterwards.",
+          "REMAINING DIFFERENCE: the camera of the preview. The original uses a 320x240 viewport with a perspective of 90 degrees and a scale of 5; the native uses the vanilla inventory preview, a box of 50x62 pixels with a scale of 42. The pose and the place of the preview are the original's.",
           "REMAINING DIFFERENCE: the three switches of the Use core (Block or Empty space, Right click or Left click, Not sneaking or Sneaking) are not drawn, because the native Use core performs the default use only; a switch that changes nothing would be a working-looking fake."
         ],
         "reviewed_sha256": {

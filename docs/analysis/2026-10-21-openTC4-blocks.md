@@ -372,7 +372,17 @@ for the warded block.
    `BlockCrystal`. The port hosts it as the metadata eleven of the eldritch family
    with the hardness 50 and the resistance 12000 of the family, which is the value the
    crystal block would have had.
-6. **The arcane pressure plate keeps the three sensitivity modes of the original**
+6. **The essentia mirror has no item and no recipe.** The oracle has the second infusion
+   recipe `MirrorEssentia` (`ConfigRecipes.java:362`), whose result is
+   `new ItemStack(ConfigBlocks.blockMirror, 1, 6)`, the essentia mirror. The port keeps
+   the essentia mirror as the `essentia` block state of the mirror block
+   (`BlockMirror.ESSENTIA`) with its own tile (`TileMirrorEssentia`), but there is no
+   item that places that state and no research page, so the essentia mirror cannot be
+   built. The gap is already tracked by the port in
+   `ResearchRecipeCoverage.java:528` ("MirrorEssentia"); the item, the model, the name
+   and the recipe of the essentia mirror belong to the research and recipe area and were
+   not added by this audit.
+7. **The arcane pressure plate keeps the three sensitivity modes of the original**
    (`BlockWoodenDevice.java:371-393`); the port reproduces the messages and the
    filter, but the plate does not schedule a tick of its own after the state change
    (the port uses the scheduled tick of the block).

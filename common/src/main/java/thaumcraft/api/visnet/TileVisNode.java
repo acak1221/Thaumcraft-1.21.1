@@ -49,6 +49,10 @@ public abstract class TileVisNode extends BlockEntity {
     /** Raw source hook: debit before return, without notification callbacks.
      * Alleging isSource=true without a real debit is an error, not a producer. */
     protected int consumeFromSource(Aspect aspect, int amount) { throw new IllegalStateException("Vis source has no native debit implementation"); }
+    /** Read-only availability of the source for an aspect; the default source holds none.
+     * A source that can debit has to report the same amount here, so that a dry
+     * run of a drain answers exactly what the real drain would take. */
+    protected int availableFromSource(Aspect aspect) { return 0; }
     public final int consumeVis(Aspect aspect, int amount) { return VisNetHandler.consume(this, aspect, amount); }
     public void triggerConsumeEffect(Aspect aspect) {}
     public void parentChanged() {}

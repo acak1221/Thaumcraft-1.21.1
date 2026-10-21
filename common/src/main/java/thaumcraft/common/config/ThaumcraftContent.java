@@ -218,7 +218,10 @@ public final class ThaumcraftContent {
         CreativeTabRegistry.append(TAB, IRON_WAND_CAP);
         for (Aspect aspect : Aspect.aspects.values()) CreativeTabRegistry.appendStack(TAB, () -> ItemEssence.filled(aspect.getTag()));
         CreativeTabRegistry.appendStack(TAB, () -> new ItemStack(JAR.get()), () -> new ItemStack(VOID_JAR.get()), () -> new ItemStack(AURA_NODE.get()));
-        for (RegistrySupplier<Item> item : MATERIALS.values()) CreativeTabRegistry.append(TAB, item);
+        for (Map.Entry<String, RegistrySupplier<Item>> material : MATERIALS.entrySet())
+            // Original ItemResource:132-137 - the creative listing of the resources skips the
+            // metadata five, the zombie brain; the brain is not in the tab of the original.
+            if (!"zombie_brain".equals(material.getKey())) CreativeTabRegistry.append(TAB, material.getValue());
         for (RegistrySupplier<Item> item : SHARDS.values()) CreativeTabRegistry.append(TAB, item);
         for (RegistrySupplier<Block> block : CRYSTALS.values()) CreativeTabRegistry.appendStack(TAB, () -> new ItemStack(block.get()));
     }

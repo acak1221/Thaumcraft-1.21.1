@@ -155,7 +155,10 @@ public final class ShockFocusRuntimeChecks {
             this.test = test; this.player = player; this.table = table; this.targets = targets; this.cleanup = cleanup;
             origin = new Vec3(table.getX() + .5, table.getY() + 1, table.getZ() + .5);
             deadline = test.getTick() + 30000;
-            wallDeadline = System.nanoTime() + 60_000_000_000L; // 10 s failed Frost's twin on a loaded CI runner; the wall bound only catches a hang
+            // The wall bound only catches a hang: the tick bound is the real limit of the case.
+            // A loaded runner stretches the eleven real 250ms cooldowns of the sequence,
+            // ten seconds were too few there and sixty seconds failed on the slowest run.
+            wallDeadline = System.nanoTime() + 180_000_000_000L;
         }
 
         private void guard(Runnable action, boolean begin) {
@@ -167,7 +170,7 @@ public final class ShockFocusRuntimeChecks {
 
         private void awaitCooldown(Runnable action) {
             if (test.getTick() >= deadline || System.nanoTime() >= wallDeadline) {
-                cleanup.run(); test.fail("real Shock cooldown sequence exceeded sixty wall seconds/30000 accelerated native ticks; phase=" + phase); return;
+                cleanup.run(); test.fail("real Shock cooldown sequence exceeded one hundred eighty wall seconds/30000 accelerated native ticks; phase=" + phase); return;
             }
             if (WandFocusActions.cooldownMillis(player) > 0) test.runAfterDelay(1, () -> guard(() -> awaitCooldown(action), false));
             else {

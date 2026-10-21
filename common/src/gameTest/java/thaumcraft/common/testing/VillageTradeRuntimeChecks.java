@@ -39,7 +39,7 @@ public final class VillageTradeRuntimeChecks {
     /** The chunk coordinates the scan of the village cells covers. */
     private static final int SCAN_RADIUS = 96;
     /** The number of component chunks that are generated at most. */
-    private static final int MAX_GENERATED = 24;
+    private static final int MAX_GENERATED = 12;
     /**
      * A ticket that keeps a generated chunk loaded while the check reads its entities.
      * The ticket of the original types ({@code TicketType.POST_TELEPORT}) expires after

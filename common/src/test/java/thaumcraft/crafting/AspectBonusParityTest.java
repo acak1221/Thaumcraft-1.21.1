@@ -110,7 +110,10 @@ class AspectBonusParityTest {
     }
 
     private static ItemStack withEnchantment(ItemStack stack, ResourceKey<Enchantment> key, int level) {
-        Holder<Enchantment> holder = BuiltInRegistries.ENCHANTMENT.getHolderOrThrow(key);
+        Holder<Enchantment> holder = net.minecraft.core.RegistryAccess
+                .fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)
+                .lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .getOrThrow(key);
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
         mutable.set(holder, level);
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());

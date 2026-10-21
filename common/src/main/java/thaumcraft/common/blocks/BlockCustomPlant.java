@@ -33,11 +33,25 @@ public final class BlockCustomPlant extends BushBlock {
     public boolean isCinderpearl() { return cinderpearl; }
     @Override protected MapCodec<BlockCustomPlant> codec() { return CODEC; }
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
-    @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {
-        // Forge1.7 first accepts the inherited BlockBush soils, then the
-        // Desert plant type adds sand (both old metadata variants).
+    /**
+     * Original BlockCustomPlant:62-68 - the soil that carries the plant type.
+     *
+     * <p>Forge 1.7 accepts the inherited {@code BlockBush} soils first, then the Desert plant
+     * type adds sand (both old metadata variants). The rule is a pure function of the plant
+     * type and the soil, so it can be asserted without a world and without constructing a
+     * block (a constructed block would leave an unregistered intrusive holder behind and
+     * break the registry freeze of the whole test suite).</p>
+     *
+     * @param cinderpearl the Desert plant type of the original metadata three
+     * @param soil        the block the plant would stand on
+     */
+    public static boolean soilSupports(boolean cinderpearl, BlockState soil) {
         return soil.is(Blocks.GRASS_BLOCK) || soil.is(Blocks.DIRT) || soil.is(Blocks.COARSE_DIRT) || soil.is(Blocks.PODZOL) || soil.is(Blocks.FARMLAND)
                 || cinderpearl && (soil.is(Blocks.SAND) || soil.is(Blocks.RED_SAND));
+    }
+
+    @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {
+        return soilSupports(cinderpearl, soil);
     }
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below());

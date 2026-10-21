@@ -35,7 +35,22 @@ public final class BlockCosmeticStairs extends StairBlock {
 
     // BlockCosmeticStairs:32 sets the light opacity of the original to zero.
     @Override protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
-        return state.getValue(WATERLOGGED) ? super.getLightBlock(state, level, pos) : 0;
+        return lightOpacity(state.getValue(WATERLOGGED), super.getLightBlock(state, level, pos));
+    }
+
+    /**
+     * BlockCosmeticStairs:32 - the original sets the light opacity of the stairs to zero, so a
+     * dry stair lets the light through; a waterlogged stair keeps the vanilla behaviour.
+     *
+     * <p>The rule is a pure function so that it can be asserted without constructing a block: a
+     * constructed block would leave an unregistered intrusive holder behind and break the
+     * registry freeze of the whole test suite.</p>
+     *
+     * @param waterlogged    the stair carries water
+     * @param vanillaOpacity the opacity the vanilla stair would have
+     */
+    public static int lightOpacity(boolean waterlogged, int vanillaOpacity) {
+        return waterlogged ? vanillaOpacity : 0;
     }
     @Override protected boolean useShapeForLightOcclusion(BlockState state) { return state.getValue(WATERLOGGED); }
     @Override protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) { return !state.getValue(WATERLOGGED); }

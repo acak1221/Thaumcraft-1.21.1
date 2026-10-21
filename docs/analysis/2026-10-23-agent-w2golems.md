@@ -96,6 +96,17 @@ python3 scripts/porting/update_scope_ledger.py --check --original-root /home/cyb
   **vanilla** `OpenDoorGoal`, which looks at the block in front of the golem, opens it whenever the golem
   walks, knows no fence gate and never closes a door again. A native goal with no flags can only start when
   no other goal runs in the 1.21.1 selector, so the goal was practically dead.
+* **The two blocks.** The 1.7.10 mappings name `Blocks.field_150466_ao` **wooden_door** and
+  `Blocks.field_150396_be` **fence_gate** (the `fields.csv` of the 1.7.10 MCP), so the original opens the
+  **oak door** and the **fence gate**. The 1.12.2 reference of this repository generalises the door to every
+  wooden door (`src/main/java/thaumcraft/common/entities/ai/misc/AIDoorInteract.java:91-96`), which the
+  4.2.3.5 oracle does not do — the native therefore knows `Blocks.OAK_DOOR` and `Blocks.OAK_FENCE_GATE`.
+* **What was really missing.** In 1.21.1 the **native pathfinder opens the doors itself**
+  (`GroundPathNavigation.setCanOpenDoors`, which the port sets at
+  `common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:980`), so the wooden door was
+  already covered by it. The part that was genuinely missing is the **fence gate**, which no native pathfinder
+  opens: in the original a golem that bumps into a closed fence gate opens it (the fallback of
+  `AIDoorInteract:58-65` looks at the golem's own block) and walks on; in the native it stays stuck.
 * **Effect.** A walking golem opened the doors in front of it; a riding golem (the original's case) never
   opened a door, and a fence gate was never opened at all.
 * **Fix.** The new `common/src/main/java/thaumcraft/common/entities/golems/GolemDoorGoal.java` reproduces the
@@ -233,6 +244,15 @@ python3 scripts/porting/update_scope_ledger.py --check --original-root /home/cyb
 * The same holds for the Butcher: `oracle …/combat/AINearestButcherTarget.java` has the same shadowed field
   and the same override, and the native re-picks the oldest animal in `tick()` as well
   (`GuardGolemGoals.java:279-316`).
+* **Why the shadowing is a bug and not a design.** TC4's own `AITarget`
+  (`oracle …/combat/AITarget.java:30-70`) is a **copy of the vanilla class**: it keeps the vanilla private
+  field names (`field_75303_a`, `field_75301_b`, `field_75302_c`, `field_75298_g`) and the vanilla method name
+  `func_75295_a`, and it reproduces the vanilla continuation rule — the alive check, the **squared** distance
+  against the distance field and the **sixty tick** unseen counter (the readable 1.12 copy of the same class:
+  `src/main/java/thaumcraft/common/entities/ai/combat/AITarget.java:38-51`,
+  `getDistanceSq(target) > (double)(this.targetDistance * this.targetDistance)`). The author of the nearest
+  goal wanted the vanilla `targetDistance` and got a **private** one of its own, so the vanilla field kept its
+  default of `0.0F`.
 * TC4's *own* `AITarget` (`oracle …/combat/AITarget.java:30-70`) has the distance check and the sixty tick
   unseen counter, but its only golem subclass `AIHurtByTarget` overrides the continuation rule
   (`oracle …/combat/AIHurtByTarget.java:30-33`), so **neither rule ever applied to a golem**.
@@ -315,8 +335,10 @@ wave touched:
 **C. The door goal (server side, visible in the world)**
 
 13. A golem that walks into a **closed oak door** must open it and close it again about a second later; a
-    golem that walks into a **fence gate** must open the gate and close it again. A golem that is **not**
+    golem that walks into a **closed fence gate** must open the gate and close it again. A golem that is **not**
     blocked horizontally must not open anything. (New in this session.)
+14. The native pathfinder opens the doors itself, so a golem that walks into a door must not be stuck and must
+    not see the door flicker; the fence gate is the part that only the new goal opens.
 
 ---
 
@@ -385,8 +407,10 @@ registry is never touched.
 * **The 1.7.10 vanilla `EntityAITarget` and `EntityAITasks`.** The vanilla classes are not part of the oracle
   (the oracle holds TC4's own sources only). Q2 therefore rests on (a) the **bytecode** of the shipped jar,
   which proves that the class extends the vanilla `EntityAITarget` and declares its own private
-  `targetDistance`, (b) the oracle's own copy of that class, and (c) the fact that the subclass **overrides**
-  `shouldExecute` completely, so the vanilla guard on the attack target never runs.
+  `targetDistance`, (b) TC4's own copy of that class (`oracle …/combat/AITarget.java:30-70`, and the readable
+  1.12 version `src/main/java/thaumcraft/common/entities/ai/combat/AITarget.java:38-51`), which shows the
+  distance rule and the sixty tick counter that the vanilla base carries, and (c) the fact that the subclass
+  **overrides** `shouldExecute` completely, so the vanilla guard on the attack target never runs.
 * **The 1.7.10 `GuiContainer` hit test.** The claim that the second (limit 1) ghost slot of the Fill core of
   the original is a no-op duplicate rests on the 1.7.10 `GuiContainer` taking the **first** slot under the
   mouse. That vanilla class is not in the oracle either; the consequence (the effective limit of the Fill

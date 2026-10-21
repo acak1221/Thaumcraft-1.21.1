@@ -28516,11 +28516,14 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/combat/AITarget.java:30-70 the base target goal with the distance check and the sixty tick unseen counter",
           "oracle thaumcraft/common/entities/ai/combat/AIHurtByTarget.java:30-33 the continuation rule of the only golem subclass that uses this class",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java:206-229 the retaliation goal and :231-274 the nearest goal"
+          "native common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java:206-229 the retaliation goal and :231-274 the nearest goal",
+          "oracle thaumcraft/common/entities/ai/combat/AITarget.java:30-70 the class of TC4 is a COPY of the vanilla one (it keeps the vanilla private field names field_75303_a, field_75301_b, field_75302_c and field_75298_g and the vanilla method name func_75295_a) and reproduces its continuation rule: the alive check, the squared distance against the distance field and the sixty tick unseen counter",
+          "src/main/java/thaumcraft/common/entities/ai/combat/AITarget.java:38-51 the readable 1.12 copy of the same class: getDistanceSq(target) > (double)(this.targetDistance * this.targetDistance) and the sixty tick counter"
         ],
         "notes": [
           "Fixed in this wave: the sixty tick unseen counter and the golem distance of the nearest goal were removed, because the original's AINearestAttackableTarget extends the VANILLA EntityAITarget and not this class, and because the only golem subclass of this class (AIHurtByTarget) overrides the continuation rule at AITarget.java:30-33.",
-          "The base class of the original is therefore dead code for the golems; the native reproduces the effective rules of the two goals that do apply."
+          "The base class of the original is therefore dead code for the golems; the native reproduces the effective rules of the two goals that do apply.",
+          "The copy of the vanilla class is the reason the shadowing of the nearest goal is a bug and not a design: the author wanted the vanilla targetDistance and got a private one of its own, so the vanilla field kept its default of 0.0F."
         ],
         "reviewed_sha256": {
           "original": "137e034e0c12db1bf1885543985531c191675b01d199dc30358e869e16d3107e",
@@ -29818,11 +29821,14 @@
           "oracle thaumcraft/common/entities/ai/misc/AIDoorInteract.java:91-94 only the plain wooden door and the fence gate are doors",
           "native common/src/main/java/thaumcraft/common/entities/golems/GolemDoorGoal.java:70-89 the native goal reproduces the blocked-golem rule, the unfinished path, the scan and the fallback",
           "native common/src/main/java/thaumcraft/common/lib/golems/GolemDoorRules.java:26-45 the scan bound, the squared distance of 2.25 and the counter of 200 are pure functions of the original",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GolemDoorGoal.java:117-123 the native knows the plain wooden door and the fence gate"
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemDoorGoal.java:117-123 the native knows the plain wooden door and the fence gate",
+          "mcp fields.csv of 1.7.10: field_150466_ao is wooden_door and field_150396_be is fence_gate, so the original opens the OAK door and the fence gate; the 1.12 reference of this repository generalises the door to every wooden door (src/main/java/thaumcraft/common/entities/ai/misc/AIDoorInteract.java:91-96), which the 4.2.3.5 oracle does not do",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:980 the native pathfinder opens the doors itself (GroundPathNavigation.setCanOpenDoors), which the 1.7.10 pathfinder could not do; the fence gate is the part that no native pathfinder opens"
         ],
         "notes": [
           "The native goal replaces the vanilla OpenDoorGoal, which opened the door in front of the golem whenever it walked, knew no fence gate and never closed the door again.",
-          "The 1.7.10 goal took no mutex bits; the 1.21.1 selector has no such goal, so the native takes the JUMP flag, which no other goal of the golem uses, and it is not interruptable."
+          "The 1.7.10 goal took no mutex bits; the 1.21.1 selector has no such goal, so the native takes the JUMP flag, which no other goal of the golem uses, and it is not interruptable.",
+          "The native pathfinder opens the doors itself, so the wooden door was already covered by it; the part that was really missing is the FENCE GATE, which no native pathfinder opens. The native goal now covers both."
         ],
         "reviewed_sha256": {
           "original": "817577dd30b5ff465a58638b14ef47e7278176ed02839e435a33db203394855b",
@@ -29871,11 +29877,14 @@
           "oracle thaumcraft/common/entities/ai/misc/AIOpenDoor.java:134-135 the base startExecuting is NOT called, so the counter stays at 200 and the two direction vectors stay zero",
           "native common/src/main/java/thaumcraft/common/entities/golems/GolemDoorGoal.java:96-100 the door is opened for the twenty ticks of the original",
           "native common/src/main/java/thaumcraft/common/entities/golems/GolemDoorGoal.java:125-160 the door, the fence gate, the direction order and the closing are reproduced",
-          "native common/src/main/java/thaumcraft/common/lib/golems/GolemDoorRules.java:47-77 the open window of twenty and the direction order of the 1.7 metadata are pure functions of the original"
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemDoorRules.java:47-77 the open window of twenty and the direction order of the 1.7 metadata are pure functions of the original",
+          "mcp fields.csv of 1.7.10: field_150466_ao is wooden_door and field_150396_be is fence_gate, so the original opens the OAK door and the fence gate; the 1.12 reference of this repository generalises the door to every wooden door (src/main/java/thaumcraft/common/entities/ai/misc/AIDoorInteract.java:91-96), which the 4.2.3.5 oracle does not do",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:980 the native pathfinder opens the doors itself (GroundPathNavigation.setCanOpenDoors), which the 1.7.10 pathfinder could not do; the fence gate is the part that no native pathfinder opens"
         ],
         "notes": [
           "The quirk of the 4.2.3.5 jar is reproduced on purpose: the base startExecuting is not called, the direction vectors stay zero, the dot product of the base class stays zero and the interaction therefore always lasts the full twenty ticks. The 1.12.2 reference does call the base method and ends the interaction as soon as the golem passes the door; the 4.2.3.5 jar wins.",
-          "The 1.7.10 fence gate keeps its direction in the metadata and the open bit above it; the 1.21.1 gate has a direction property, so the direction is turned with the property and the open bit with the boolean."
+          "The 1.7.10 fence gate keeps its direction in the metadata and the open bit above it; the 1.21.1 gate has a direction property, so the direction is turned with the property and the open bit with the boolean.",
+          "The native pathfinder opens the doors itself, so the wooden door was already covered by it; the part that was really missing is the FENCE GATE, which no native pathfinder opens. The native goal now covers both."
         ],
         "reviewed_sha256": {
           "original": "6fceb709b5352d917bad705f21154eae828a2d08a33983315a03ac0d79809c06",

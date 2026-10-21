@@ -28,8 +28,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.container.ContainerHandMirror;
-import thaumcraft.common.lib.crafting.DeviceWiringRules;
-import thaumcraft.common.lib.crafting.DeviceWiringRules.HandMirrorTarget;
+import thaumcraft.common.lib.crafting.DeviceContainerRules;
+import thaumcraft.common.lib.crafting.DeviceContainerRules.HandMirrorTarget;
 import thaumcraft.common.lib.items.EquipmentRules;
 import thaumcraft.common.tiles.TileMirror;
 
@@ -37,9 +37,10 @@ import thaumcraft.common.tiles.TileMirror;
  * The Hand Mirror (original ItemHandMirror). A relic of uncommon rarity that is linked to a mirror block: right clicking a mirror stores
  * the position and the dimension of that mirror on the item, and using the linked mirror again opens the mirror's view.
  *
- * <p>The link itself is kept in a data component instead of the original's NBT tags, and a link whose mirror has gone is cleared with the
- * original's message and sound. The item is the bridge of the hand mirror container: the container never guesses a destination, the item
- * knows its mirror and carries the item to it exactly as the original did (oracle ItemHandMirror:157-188).</p>
+ * <p>The view is the hand mirror screen, the original's gui number sixteen, and the item is the bridge of that screen: the screen never
+ * guesses a destination, the item knows its mirror and carries an item to it exactly as the original did (oracle ItemHandMirror:157-188).
+ * The link itself is kept in a data component instead of the original's NBT tags, and a link whose mirror has gone is cleared with the
+ * original's message and sound.</p>
  */
 public final class ItemHandMirror extends Item implements ContainerHandMirror.Bridge {
     /** The link of a hand mirror: the position and the dimension of the mirror it was linked to. */
@@ -69,7 +70,7 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
         Player player = context.getPlayer();
         if (player == null || level.isClientSide) return InteractionResult.PASS;
         if (!EquipmentRules.isMirrorBlock(blockId(level, pos))) return InteractionResult.PASS;
-        // Oracle ItemHandMirror:108 - only an item mirror can be linked, never an essentia mirror.
+        // Oracle ItemHandMirror:107-108 - only an item mirror can be linked, never an essentia mirror.
         if (!(level.getBlockEntity(pos) instanceof TileMirror)) return InteractionResult.PASS;
         String dimension = level.dimension().location().toString();
         context.getItemInHand().set(ThaumcraftLegacyItems.MIRROR_LINK.get(), MirrorLink.of(pos, dimension, level.dimension().location().getPath()));
@@ -81,27 +82,31 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
 
     /**
      * Original ItemHandMirror.func_77659_a: a linked mirror opens the mirror's view; a link whose mirror is gone is cleared with the
-     * original's sound and message. The view is the hand mirror container, which the item opens through its registered menu type.
+     * original's sound and message. The view is the hand mirror screen, the original's gui number sixteen.
      */
     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         MirrorLink link = link(stack);
-        if (level.isClientSide) return link == null ? InteractionResultHolder.pass(stack) : InteractionResultHolder.sidedSuccess(stack, true);
-        HandMirrorTarget target = target(level, link);
-        if (DeviceWiringRules.handMirrorClearsLink(target)) {
+        if (link == null) return InteractionResultHolder.pass(stack);
+        if (level.isClientSide) return InteractionResultHolder.sidedSuccess(stack, true);
+        ServerLevel target = targetWorld(level, link);
+        boolean mirrorFound = target != null && target.getBlockEntity(new BlockPos(link.x(), link.y(), link.z())) instanceof TileMirror;
+        HandMirrorTarget outcome = DeviceContainerRules.handMirrorTarget(true, target != null, mirrorFound);
+        if (DeviceContainerRules.handMirrorClearsLink(outcome)) {
             // Oracle ItemHandMirror:134-139 - the link dies with its mirror.
             stack.remove(ThaumcraftLegacyItems.MIRROR_LINK.get());
             level.playSound(null, player.getX(), player.getY(), player.getZ(), ZAP, SoundSource.PLAYERS, 1.0F, 0.8F);
             player.displayClientMessage(Component.translatable("tc.handmirrorerror").withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.ITALIC), false);
             return InteractionResultHolder.fail(stack);
         }
-        if (!DeviceWiringRules.handMirrorOpensScreen(target)) return InteractionResultHolder.pass(stack);
-        if (player instanceof ServerPlayer sender) openMenu(sender, hand);
+        if (!DeviceContainerRules.handMirrorOpensView(outcome)) return InteractionResultHolder.pass(stack);
+        // Oracle ItemHandMirror:140 - the mirror opens its own view.
+        if (player instanceof ServerPlayer sender) openView(sender, hand);
         return InteractionResultHolder.consume(stack);
     }
 
     /** The registered hand mirror menu reads the hand of the viewer from the network buffer. */
-    private void openMenu(ServerPlayer player, InteractionHand hand) {
+    private void openView(ServerPlayer player, InteractionHand hand) {
         MenuRegistry.openExtendedMenu(player, new SimpleMenuProvider(
                 (id, inventory, viewer) -> new ContainerHandMirror(id, inventory, hand),
                 Component.translatable("container.handmirror")),
@@ -118,16 +123,10 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
 
     /** Whether the mirror the hand mirror is linked to is still a mirror. */
     public static boolean mirrorStillThere(Level level, MirrorLink link) {
-        return target(level, link) == HandMirrorTarget.MIRROR;
-    }
-
-    /** The mirror the hand mirror looks for: the world of the link first, the mirror inside it second. */
-    private static HandMirrorTarget target(Level level, MirrorLink link) {
-        if (link == null) return HandMirrorTarget.NO_LINK;
+        if (link == null) return false;
         ServerLevel target = targetWorld(level, link);
-        boolean worldFound = target != null;
-        boolean mirrorFound = worldFound && target.getBlockEntity(new BlockPos(link.x(), link.y(), link.z())) instanceof TileMirror;
-        return DeviceWiringRules.handMirrorTarget(true, worldFound, mirrorFound);
+        boolean mirrorFound = target != null && target.getBlockEntity(new BlockPos(link.x(), link.y(), link.z())) instanceof TileMirror;
+        return DeviceContainerRules.handMirrorTarget(true, target != null, mirrorFound) == HandMirrorTarget.MIRROR;
     }
 
     /** The world the link points at, or null when that dimension does not exist. */
@@ -152,13 +151,12 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
      */
     @Override public boolean transport(ItemStack mirror, ItemStack items, Player player, Level level) {
         MirrorLink link = link(mirror);
+        if (link == null || items == null || items.isEmpty()) return false;
         ServerLevel target = targetWorld(level, link);
-        boolean worldFound = target != null;
-        BlockPos pos = link == null ? null : new BlockPos(link.x(), link.y(), link.z());
-        boolean mirrorFound = worldFound && target.getBlockEntity(pos) instanceof TileMirror;
-        HandMirrorTarget outcome = DeviceWiringRules.handMirrorTarget(link != null, worldFound, mirrorFound);
-        if (!DeviceWiringRules.handMirrorTransports(outcome)) {
-            if (DeviceWiringRules.handMirrorClearsLink(outcome)) {
+        boolean mirrorFound = target != null && target.getBlockEntity(new BlockPos(link.x(), link.y(), link.z())) instanceof TileMirror;
+        HandMirrorTarget outcome = DeviceContainerRules.handMirrorTarget(link != null, target != null, mirrorFound);
+        if (outcome != HandMirrorTarget.MIRROR) {
+            if (DeviceContainerRules.handMirrorClearsLink(outcome)) {
                 // Oracle ItemHandMirror:169-172 - the link dies with its mirror.
                 mirror.remove(ThaumcraftLegacyItems.MIRROR_LINK.get());
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), ZAP, SoundSource.PLAYERS, 1.0F, 0.8F);
@@ -166,14 +164,15 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
             }
             return false;
         }
-        TileMirror targetMirror = (TileMirror) target.getBlockEntity(pos);
-        Direction facing = targetMirror.getFacing();
+        BlockPos pos = new BlockPos(link.x(), link.y(), link.z());
+        Direction facing = ((TileMirror) target.getBlockEntity(pos)).getFacing();
         // Oracle ItemHandMirror:175-181 - the item appears in front of the mirror.
         ItemEntity item = new ItemEntity(target, pos.getX() + 0.5D - facing.getStepX() * EquipmentRules.MIRROR_PUSH_OFFSET,
                 pos.getY() + 0.5D - facing.getStepY() * EquipmentRules.MIRROR_PUSH_OFFSET,
                 pos.getZ() + 0.5D - facing.getStepZ() * EquipmentRules.MIRROR_PUSH_OFFSET, items.copy());
-        item.setDeltaMovement(facing.getStepX() * EquipmentRules.MIRROR_ITEM_SPEED, facing.getStepY() * EquipmentRules.MIRROR_ITEM_SPEED,
-                facing.getStepZ() * EquipmentRules.MIRROR_ITEM_SPEED);
+        item.setDeltaMovement(facing.getStepX() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
+                facing.getStepY() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
+                facing.getStepZ() * (float) EquipmentRules.MIRROR_ITEM_SPEED);
         item.setPickUpDelay(EquipmentRules.MIRROR_ITEM_LIFETIME);
         target.addFreshEntity(item);
         // Oracle ItemHandMirror:183-184 - the portal sound and the sound of the mirror.

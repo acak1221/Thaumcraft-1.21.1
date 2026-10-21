@@ -19,8 +19,8 @@
 
 | Метрика | Значение |
 |---|---|
-| Дефектов найдено и исправлено | **9** (6 — аспекты/ConfigAspects, 1 — поведение, 1 — ёмкость стека, 8 имён/переводов) |
-| Из них: числовых расхождений оригинала | 6 |
+| Дефектов найдено и исправлено | **10** (7 — аспекты/ConfigAspects, 2 — поведение/ёмкость, 8 имён/переводов) |
+| Из них: числовых расхождений оригинала | 7 |
 | Из них: расхождений поведения | 2 |
 | Из них: расхождений имён/переводов (en/ru) | 8 (в 8 строках, 3 предмета в двух языках) |
 | Пробелов, найденных и НЕ исправленных (чужой домен / риск регрессии) | 5 |
@@ -123,7 +123,21 @@
 * **Проверка:** `ObjectAspectCatalogTest.originalItemObjectTagsArePresentAndTheLegacyOnlyBalancedShardStaysRecipeDerived`
   фиксирует, что у `thaumcraft:balance_shard` нет прямого тега и его нет в `registeredIds()`.
 
-### D8. Рунная скрижаль складывалась в стек по 64
+### D8. Кольцо ученика (metadata 3) — потерян прямой объектный тег
+
+* **Оракул** `ConfigAspects.java:435`:
+  `registerObjectTag(new ItemStack(ConfigItems.itemBaubleBlanks, 1, 3), new AspectList().add(Aspect.MAGIC, 5));`
+  Metadata 3 — первое простое аспектное кольцо скидки (`ItemBaubleBlanks.func_77653_i:121-127`
+  сопоставляет metadata 3 первым простым аспектом, то есть воздухом).
+* **Порт:** `ThaumcraftBaubles.DISCOUNT_RINGS` регистрирует шесть отдельных предметов
+  `discount_ring_<аспект>`; строки корпуса по `itemBaubleBlanks` имеют пустые `modern_ids`,
+  а `itemBaubleBlanks` не входит в сглаживание → тегов нет.
+* **Фикс:** новая строка `original_source_line: 435`, `direct`, `ConfigItems.itemBaubleBlanks`,
+  metadata `3`, `modern_ids: ["thaumcraft:discount_ring_aer"]`, `praecantatio: 5`. Остальные пять
+  колец скидки в оригинале тега не имеют (рецепта у них тоже нет), поэтому они остаются
+  рецептурно-пустыми.
+
+### D9. Рунная скрижаль складывалась в стек по 64
 
 * **Оракул** `thaumcraft/common/items/ItemEldritchObject.java:56`: `this.func_77625_d(1);`
   — предел стека **один для всех** метаданных исходного предмета (глаз, обряды, скрижаль,
@@ -134,7 +148,7 @@
 * **Фикс:** `common/src/main/java/thaumcraft/common/items/ItemEldritchObject.java` —
   `properties.stacksTo(1)` для всех вариантов, с комментарием со ссылкой на оракул.
 
-### D9. Ключ не «блестел» после привязки
+### D10. Ключ не «блестел» после привязки
 
 * **Оракул** `thaumcraft/common/items/ItemKey.java:90-92`:
   `public boolean func_77636_d(ItemStack s) { return s.func_77942_o(); }`
@@ -144,7 +158,7 @@
 * **Фикс:** `common/src/main/java/thaumcraft/common/items/ItemKey.java` — переопределение
   `isFoil(stack)` через наличие компонента `KEY_LINK` (нативный эквивалент NBT-присутствия).
 
-### D10–D17. Имена и переводы (en/ru)
+### D11–D18. Имена и переводы (en/ru)
 
 Сверка `en_US.lang`/`ru_RU.lang` оригинала с `en_us.json`/`ru_ru.json` порта по всем предметам
 области (ключи оригинала → ключи порта):
@@ -257,12 +271,12 @@
 ## 6. Изменённые файлы
 
 ```
-common/src/main/java/thaumcraft/common/items/ItemEldritchObject.java   (D8: стек 1)
-common/src/main/java/thaumcraft/common/items/ItemKey.java                (D9: isFoil)
+common/src/main/java/thaumcraft/common/items/ItemEldritchObject.java   (D9: стек 1)
+common/src/main/java/thaumcraft/common/items/ItemKey.java                (D10: isFoil)
 common/src/main/java/thaumcraft/common/lib/research/ObjectAspectCatalog.java  (D7: 1.12-только тег)
-common/src/main/resources/data/thaumcraft/tc4/early_object_aspects.json (D1-D6: 11 новых строк)
-common/src/main/resources/assets/thaumcraft/lang/en_us.json              (D10-D17: 6 имён)
-common/src/main/resources/assets/thaumcraft/lang/ru_ru.json              (D10-D17: 3 имени)
+common/src/main/resources/data/thaumcraft/tc4/early_object_aspects.json (D1-D8: 12 новых строк)
+common/src/main/resources/assets/thaumcraft/lang/en_us.json              (D11-D18: 6 имён)
+common/src/main/resources/assets/thaumcraft/lang/ru_ru.json              (D11-D18: 3 имени)
 common/src/test/java/thaumcraft/aspects/EarlyObjectAspectBindingsTest.java  (счётчики, ветка новых строк)
 common/src/test/java/thaumcraft/aspects/ObjectAspectCatalogTest.java         (новый тест D1-D7)
 docs/analysis/2026-10-21-openTC4-items.md                                (этот отчёт)
@@ -296,7 +310,7 @@ tests 1666 skipped 0 failures 0 errors 0
 Новые/изменённые тесты:
 `thaumcraft.aspects.ObjectAspectCatalogTest.originalItemObjectTagsArePresentAndTheLegacyOnlyBalancedShardStaysRecipeDerived`,
 `thaumcraft.aspects.EarlyObjectAspectBindingsTest.pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged`
-(11 новых строк проверяются по отдельности, исторический ALL90-дайджест не изменён).
+(12 новых строк проверяются по отдельности, исторический ALL90-дайджест не изменён).
 
 **Не выполнялось в этой сессии:** клиентский прогон, серверный smoke, `:common:runGameTest`.
 Клиентскую приёмку не заявляю.

@@ -846,6 +846,12 @@
       "aspects": {"sensus": 4}
     },
     {
+      "original_source_line": 435, "registration": "direct", "original_target": "ConfigItems.itemBaubleBlanks", "original_metadata": 3,
+      "identifier_evidence": "Oracle ConfigAspects435 registers the discount ring metadata3 with praecantatio5; metadata3 is the air discount ring (ItemBaubleBlanks.func_77653_i maps metadata3 to the first primal aspect), flattened to the native discount_ring_aer item",
+      "modern_ids": ["thaumcraft:discount_ring_aer"],
+      "aspects": {"praecantatio": 5}
+    },
+    {
       "original_source_line": 436, "registration": "direct", "original_target": "ConfigItems.itemFocusPech", "original_metadata": 0,
       "identifier_evidence": "ConfigItems361-362 registers ItemFocusPech/FocusPech; original one-argument ItemStack(Item) selects count1 and metadata0, now the actual native focus_pech item",
       "modern_ids": ["thaumcraft:focus_pech"],

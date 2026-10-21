@@ -126,7 +126,7 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(138, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget and the native copper cluster, the three loot bags, the four edible nuggets, the eldritch eye and the runed tablet");
+        assertEquals(139, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget and the native copper cluster, the three loot bags, the four edible nuggets, the eldritch eye, the runed tablet and the air discount ring");
         assertEquals(12, complex.size(), "nine existing complex bindings plus the actual native Arcane Ear, the triple meat treat and the primal arrow");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
@@ -138,7 +138,7 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(121, rows.size());
+            assertEquals(122, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
@@ -212,7 +212,7 @@ class EarlyObjectAspectBindingsTest {
                     continue;
                 }
                 if (sourceLine >= 407 && sourceLine <= 414 || sourceLine == 432
-                        || sourceLine == 448 || sourceLine == 450) {
+                        || sourceLine == 435 || sourceLine == 448 || sourceLine == 450) {
                     // The item rows added after the ALL90 snapshot: the three loot bags, the four
                     // edible nuggets, the triple meat treat, the primal arrow and the two eldritch
                     // objects. They are checked on their own and do not enter the ALL90 digest.
@@ -229,6 +229,7 @@ class EarlyObjectAspectBindingsTest {
                         case 413 -> "thaumcraft:nugget_fish";
                         case 414 -> "thaumcraft:triple_meat_treat";
                         case 432 -> "thaumcraft:primal_arrow_air";
+                        case 435 -> "thaumcraft:discount_ring_aer";
                         case 448 -> "thaumcraft:eldritch_eye";
                         default -> "thaumcraft:eldritch_tablet";
                     };
@@ -243,6 +244,7 @@ class EarlyObjectAspectBindingsTest {
                         case 410, 411, 412, 413 -> new AspectList().add(Aspect.HUNGER, 1);
                         case 414 -> new AspectList().add(Aspect.HEAL, 1);
                         case 432 -> new AspectList().add(Aspect.WEAPON, 1);
+                        case 435 -> new AspectList().add(Aspect.MAGIC, 5);
                         case 448 -> new AspectList().add(Aspect.ELDRITCH, 5).add(Aspect.AURA, 3)
                                 .add(Aspect.MAGIC, 3).add(Aspect.SENSES, 3).add(Aspect.SOUL, 3);
                         default -> new AspectList().add(Aspect.TRAP, 4).add(Aspect.MIND, 4).add(Aspect.MECHANISM, 4);
@@ -306,7 +308,7 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(1, ears);
             assertEquals(1, pechFoci);
             assertEquals(1, crimsonRites);
-            assertEquals(11, itemRows);
+            assertEquals(12, itemRows);
             assertEquals(8, taintAndVishroom);
             assertEquals(3, clusters.size());
             assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");

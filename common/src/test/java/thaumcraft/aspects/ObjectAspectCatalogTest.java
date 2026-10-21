@@ -74,6 +74,8 @@ class ObjectAspectCatalogTest {
         for (String nugget : new String[]{"nugget_chicken", "nugget_beef", "nugget_pork", "nugget_fish"}) {
             assertEquals(1, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:" + nugget)).getAmount(Aspect.HUNGER), nugget);
         }
+        // Oracle ConfigAspects:435 registers the discount ring metadata3, the air discount ring.
+        assertEquals(5, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:discount_ring_aer")).getAmount(Aspect.MAGIC));
         assertEquals(0, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:balance_shard")).size());
         assertFalse(ObjectAspectCatalog.registeredIds().contains(ResourceLocation.parse("thaumcraft:balance_shard")));
         var complex = EarlyObjectAspectBindings.complex();

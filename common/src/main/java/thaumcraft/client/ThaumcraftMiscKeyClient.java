@@ -10,10 +10,19 @@ import thaumcraft.common.items.equipment.ItemElementalShovel;
 import thaumcraft.common.lib.network.ShovelOrientationNetworking;
 
 /**
- * The original "Misc Wand Toggle" key (KeyHandler.keyG, default G). Its wand toggle is not ported; for now it turns the placing orientation
- * of a Shovel of the Earthmover held in the main hand, one request per press.
+ * The original "Misc Wand Toggle" key (KeyHandler.keyG, LWJGL2 key 34, the G key).
+ * <p>
+ * The original action is {@code PacketItemKeyToServer(player, 1)} (oracle
+ * {@code thaumcraft/common/lib/network/misc/PacketItemKeyToServer.java:69-77}), which the server
+ * resolves against the main hand: an {@code ItemWandCasting} runs
+ * {@code WandManager.toggleMisc} and an {@code ItemElementalShovel} advances its placing
+ * orientation. Both branches are ported: the wand branch is the Architect area and axis toggle
+ * ({@code WandArchitect.Area.next}, oracle {@code WandManager.toggleMisc:568-609}) and the shovel
+ * branch is {@code ShovelOrientationNetworking}, the native replacement of the original's single
+ * item key packet.
  */
 public final class ThaumcraftMiscKeyClient {
+    // Original KeyHandler.keyG is LWJGL2 key 34, and the LWJGL2 key table makes 34 the G key.
     public static final KeyMapping MISC_TOGGLE = new KeyMapping("key.thaumcraft.misc_toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, KeyMapping.CATEGORY_MISC);
     private static boolean initialized;
 

@@ -23,7 +23,36 @@ import thaumcraft.client.renderers.entity.RenderEldritchGuardian;
 import thaumcraft.client.renderers.entity.RenderEldritchOrb;
 import thaumcraft.client.renderers.entity.RenderMindSpider;
 
-/** Original heartbeat/vignette100, mist2400/200, and the four effect post chains; no server-only class reaches client rendering. */
+/** Original heartbeat/vignette100, mist2400/200, and the four effect post chains; no server-only class reaches client rendering.
+ *
+ * <p>Original shader driver: the 1.7 TC4 built its four full screen effects with OptiFine's
+ * {@code ShaderGroup} (oracle {@code thaumcraft/client/lib/ClientTickEventsFML.java:118,168-231},
+ * rendered by {@code thaumcraft/client/lib/RenderEventHandler.java:161-197}). The groups read
+ * {@code assets/minecraft/shaders/post/{desaturatetc,blurtc,hunger,sunscorned}.json} and their
+ * programs from {@code assets/minecraft/shaders/program/}. Minecraft 1.21.1 has no OptiFine or
+ * Iris driver, so the native driver is the vanilla {@code PostChain}, and the shader inventory of
+ * this port is:
+ * <ul>
+ * <li>{@code assets/thaumcraft/shaders/core/} - native 1.21.1 core shaders, registered by the
+ * loader client bootstrap ({@code monster_lit_particle}, {@code node_stabilizer_bubble}).</li>
+ * <li>{@code assets/thaumcraft/shaders/post/} - the four vanilla post chains of this class, the
+ * native equivalent of the original's four OptiFine groups.</li>
+ * <li>{@code assets/thaumcraft/shaders/program/} - the retained original OptiFine programs
+ * ({@code bloom2}, {@code bloom_color}, {@code color_convolve2}, {@code bloom_vertex_base}).
+ * DOCUMENTED GAP: 1.21.1 cannot load them. {@code EffectInstance} resolves a post program in the
+ * DEFAULT namespace only ({@code minecraft:shaders/program/<name>.json}) and its GLSL uses the
+ * 1.8 conventions ({@code texCoord} attribute, {@code oneTexel}), while 1.21.1 draws the post quad
+ * with the {@code Position} attribute only. The native equivalent of those programs is a 1.21.1
+ * rewrite in the default namespace, which is a separate porting task.</li>
+ * </ul>
+ *
+ * <p>Consequence, still open: the four chains below name their passes {@code minecraft:color_convolve},
+ * {@code minecraft:blit}, {@code minecraft:box_blur}, {@code thaumcraft:color_convolve2},
+ * {@code thaumcraft:bloom_color} and {@code thaumcraft:bloom2}. Vanilla 1.21.1 ships no post
+ * program at all and the loader resolves programs in the default namespace without a namespace
+ * prefix, so these chains cannot be loaded and the effect is dropped by the guard below, exactly
+ * as the original dropped a missing shader group. The chain sources are kept unchanged so the
+ * original pass order and uniforms stay visible. */
 public final class ThaumcraftWarpClient {
     private static final ResourceLocation VIGNETTE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/vignette.png");
     private static final Map<String, PostChain> CHAINS = new LinkedHashMap<>();
@@ -117,6 +146,9 @@ public final class ThaumcraftWarpClient {
                 } else if (resized) chain.resize(width, height);
                 chain.process(partialTick);
             } catch (Exception failure) {
+                // A chain whose post program cannot be resolved is dropped once, exactly as the
+                // original dropped a missing OptiFine shader group. See the class documentation
+                // for the shader inventory and the open program gap.
                 if (chain != null) chain.close(); CHAINS.remove(name); FAILED.add(name);
                 Thaumcraft.LOG.error("Unable to render warp post chain {}", name, failure);
             }

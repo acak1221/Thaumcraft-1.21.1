@@ -29,7 +29,8 @@ public final class MonsterSpriteParticle extends SingleQuadParticle {
         originalSize=kind==Kind.BURST?base*size:kind==Kind.MOTE?base*.5F*size:.1F*size;
         quadSize=originalSize;
         lifetime=kind==Kind.BURST?31:kind==Kind.EXPLOSIVE?duration:(int)(36/(random.nextDouble()*.3+.7));
-        alpha=kind==Kind.MOTE?.5F:kind==Kind.EXPLOSIVE?.8F:1;
+        // Original FXBurst:45 uses glColor4f(1,1,1,0.75): the burst is drawn at three quarters opacity.
+        alpha=kind==Kind.MOTE?.5F:kind==Kind.EXPLOSIVE?.8F:.75F;
         setColor((rgb>>16&255)/255F,(rgb>>8&255)/255F,(rgb&255)/255F);
         if(kind==Kind.MOTE && rCol==0)rCol=1; // Original FXWisp's red==0 constructor quirk.
         gravity=kind==Kind.MOTE?.02F:0;hasPhysics=kind==Kind.MOTE;setSize(kind==Kind.BURST?.01F:.1F,kind==Kind.BURST?.01F:.1F);

@@ -45,6 +45,7 @@ import thaumcraft.common.lib.network.HoverNetworking;
 /** Native H input sends intent only. Audio, client damping, animated rings and
  * grounded visual sparks derive from the actual worn server-synced harness. */
 public final class ThaumcraftTravelGearClient {
+    // Original KeyHandler.keyH is LWJGL2 key 35, and the LWJGL2 key table makes 35 the H key.
     public static final KeyMapping HOVER=new KeyMapping("key.thaumcraft.hover",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_H,KeyMapping.CATEGORY_MISC);
     private static final ResourceLocation RING=ResourceLocation.fromNamespaceAndPath("thaumcraft","items/lightningring");
     private static final RenderType RING_TYPE=new RingRenderType();

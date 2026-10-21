@@ -1,6 +1,7 @@
 package thaumcraft.client;
 
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
+import thaumcraft.client.fx.particles.FXArc;
 import thaumcraft.client.renderers.entity.RenderCultist;
 import thaumcraft.client.renderers.entity.RenderCultistPortal;
 import thaumcraft.client.renderers.entity.RenderEldritchCrab;
@@ -17,6 +18,7 @@ import thaumcraft.client.renderers.entity.RenderWatcher;
 import thaumcraft.common.config.ThaumcraftCultists;
 import thaumcraft.common.config.ThaumcraftEldritchMobs;
 import thaumcraft.common.config.ThaumcraftTaintAnimals;
+import thaumcraft.common.entities.monster.EntityEldritchGolem;
 
 /**
  * Client registration for the eldritch, cultist and taint animal renderers.
@@ -46,5 +48,7 @@ public final class ThaumcraftEldritchClient {
         EntityRendererRegistry.register(ThaumcraftTaintAnimals.TAINT_PIG, RenderTaintPig::new);
         EntityRendererRegistry.register(ThaumcraftTaintAnimals.TAINT_SHEEP, RenderTaintSheep::new);
         EntityRendererRegistry.register(ThaumcraftTaintAnimals.TAINT_VILLAGER, RenderTaintVillager::new);
+        // Original Thaumcraft.proxy.arcLightning: the golem's lightning arc and its target sparkle.
+        EntityEldritchGolem.setClientEffects(FXArc::arc);
     }
 }

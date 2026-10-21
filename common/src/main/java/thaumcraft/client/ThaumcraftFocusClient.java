@@ -19,7 +19,9 @@ import thaumcraft.common.lib.network.GolemBellNetworking;
 
 /** Shared item-key input: wand selection or bell-link reset, both server-owned. */
 public final class ThaumcraftFocusClient {
-    // Original KeyHandler.keyF used LWJGL2 key 33: F, not the GLFW key code 33.
+    // Original KeyHandler.keyF is LWJGL2 key 33, and the LWJGL2 key table (Keyboard.KEY_F = 33,
+    // KEY_G = 34, KEY_H = 35, KEY_SEMICOLON = 39, KEY_LBRACKET = 26) makes 33 the F key: the
+    // original default is F, exactly as the original field name keyF says.
     public static final KeyMapping CHANGE_FOCUS = new KeyMapping("key.thaumcraft.change_focus",
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F, KeyMapping.CATEGORY_MISC);
     private static boolean initialized;

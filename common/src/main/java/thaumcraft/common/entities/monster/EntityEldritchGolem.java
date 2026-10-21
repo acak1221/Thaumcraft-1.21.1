@@ -56,6 +56,17 @@ import thaumcraft.common.lib.world.EldritchMobRules;
  * phase with its eldritch beam and the crushing melee that can lose its head.
  */
 public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedAttackMob, IEldritchMob {
+    /**
+     * Original {@code Thaumcraft.proxy.arcLightning} (oracle
+     * {@code thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302}): the client
+     * draws the lightning arc between the golem and the block it picked. The server never draws
+     * it, so the effect is a client hook installed by the loader client initializer.
+     */
+    public interface ClientEffects {
+        void arc(EntityEldritchGolem golem, double x, double y, double z, double tx, double ty, double tz,
+                 float red, float green, float blue, float heightGain);
+    }
+    private static ClientEffects clientEffects;
     private static final EntityDataAccessor<Boolean> HEADLESS=SynchedEntityData.defineId(EntityEldritchGolem.class,EntityDataSerializers.BOOLEAN);
     private int beamCharge;
     private boolean chargingBeam;
@@ -142,7 +153,17 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
         if(getSpawnTimer()==150)level().broadcastEntityEvent(this,(byte)18);
         if(getSpawnTimer()>0)heal(2F);
         super.tick();
-        if(level().isClientSide)return;
+        if(level().isClientSide) {
+            // Original EntityEldritchGolem:301-305: the client draws the arc while it lasts.
+            if(isHeadless()&&arcing>0) {
+                float fade=1F-arcing/10F;
+                if(clientEffects!=null)
+                    clientEffects.arc(this,getX(),getY()+getBbHeight()/2F,getZ(),arcX+.5D,arcY+1,arcZ+.5D,
+                            .65F+level().random.nextFloat()*.1F,1F,fade,fade);
+                --arcing;
+            }
+            return;
+        }
         if(isHeadless()&&beamCharge<=0)chargingBeam=true;
         if(isHeadless()&&chargingBeam) {
             ++beamCharge;
@@ -254,6 +275,8 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
                     arcY=y;
                     arcZ=z;
                     arcing=EldritchMobRules.golemArcTicks(level().random.nextInt(5));
+                    // Original EntityEldritchGolem:270: the arc starts with the golem's voice.
+                    playSound(sound("jacobs"),.8F,1F+(level().random.nextFloat()-level().random.nextFloat())*.05F);
                 }
             }
         } else super.handleEntityEvent(event);
@@ -261,6 +284,12 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
 
     public int getAttackTimer() { return attackTimer; }
     public int getBeamCharge() { return beamCharge; }
+    /** The remaining lifetime of the client side lightning arc. */
+    public int getArcing() { return arcing; }
+    public int getArcX() { return arcX; }
+    public int getArcY() { return arcY; }
+    public int getArcZ() { return arcZ; }
+    public static void setClientEffects(ClientEffects effects) { clientEffects=java.util.Objects.requireNonNull(effects); }
 
     /**
      * Original EntityEldritchGolem.generateName: the name of its champion modifier. The 1.7

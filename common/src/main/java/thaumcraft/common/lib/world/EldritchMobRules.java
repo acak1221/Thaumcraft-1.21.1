@@ -1,6 +1,10 @@
 package thaumcraft.common.lib.world;
 
+import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
+import thaumcraft.common.lib.utils.Utils;
 
 /**
  * Original TC4 eldritch bestiary numbers, cooldowns and special-state transitions.
@@ -165,6 +169,41 @@ public final class EldritchMobRules {
     public static boolean golemBeheads(float damage,float health,boolean headless) { return !headless&&damage>health; }
     /** Original golem arcing lightning lasts eight to twelve ticks. */
     public static int golemArcTicks(int nextInt5) { return GOLEM_ARC_MIN+nextInt5%GOLEM_ARC_SPAN; }
+    /** Original FXArc:54, the gravity of the arc's projectile maths. */
+    public static final double GOLEM_ARC_GRAVITY=0.115;
+    /** Original FXArc:55, the noise of every emitted arc point. */
+    public static final double GOLEM_ARC_NOISE=0.25;
+    /** Original FXArc:63, the arc walks at most fifty steps. */
+    public static final int GOLEM_ARC_STEPS=50;
+    /**
+     * Original FXArc:57-71: the arc points relative to the arc's origin.
+     *
+     * <p>The launch velocity comes from {@code Utils.calculateVelocity} with the arc's gravity and
+     * the requested height gain, the walk continues while the remaining distance to the target is
+     * longer than that velocity, and every emitted point is displaced by the arc's noise while the
+     * walked position itself stays clean.
+     *
+     * @param target     the arc target relative to the arc's origin
+     * @param heightGain the original's height gain, {@code 1 - arcing/10} for the golem
+     * @param random     the noise source of the arc
+     */
+    public static List<Vec3> golemArcPoints(Vec3 target,double heightGain,RandomSource random) {
+        List<Vec3> points=new ArrayList<>();
+        Vec3 current=Vec3.ZERO;
+        Vec3 velocity=Utils.calculateVelocity(Vec3.ZERO,target,heightGain,GOLEM_ARC_GRAVITY);
+        double limit=Utils.distanceSquared3d(Vec3.ZERO,velocity);
+        points.add(current);
+        for(int c=0;c<GOLEM_ARC_STEPS&&Utils.distanceSquared3d(target,current)>limit;++c) {
+            Vec3 next=current.add(velocity);
+            current=next;
+            points.add(new Vec3(next.x+(random.nextDouble()-random.nextDouble())*GOLEM_ARC_NOISE,
+                    next.y+(random.nextDouble()-random.nextDouble())*GOLEM_ARC_NOISE,
+                    next.z+(random.nextDouble()-random.nextDouble())*GOLEM_ARC_NOISE));
+            velocity=new Vec3(velocity.x,velocity.y-GOLEM_ARC_GRAVITY/1.9,velocity.z);
+        }
+        points.add(target);
+        return points;
+    }
 
     // ------------------------------------------------------------------ eldritch crab
     public static final float CRAB_HELMET_ARMOR=5F;

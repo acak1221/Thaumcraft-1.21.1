@@ -42,7 +42,7 @@ public final class VisNetRender {
     }
     /** Additive caller with the ordinary alpha threshold, e.g. original Wisp's first billboard layer. */
     public static void draw(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,Consumer<VertexConsumer> vertices){
-        drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,vertices);
+        drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.QUADS,vertices);
     }
     /** Same owned state transaction, native lightmap particle format and the original low-alpha threshold. */
     public static void drawParticle(ResourceLocation texture,ShaderInstance selected,Consumer<VertexConsumer> vertices){
@@ -50,13 +50,17 @@ public final class VisNetRender {
     }
     /** Original particle layers also use standard-alpha smoke (destination771). */
     public static void drawParticle(ResourceLocation texture,int destination,ShaderInstance selected,Consumer<VertexConsumer> vertices){
-        drawFormat(texture,destination,false,selected,DefaultVertexFormat.PARTICLE,vertices);
+        drawFormat(texture,destination,false,selected,DefaultVertexFormat.PARTICLE,VertexFormat.Mode.QUADS,vertices);
     }
-    private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,Consumer<VertexConsumer> vertices){
+    /** Original FXArc ribbon: a triangle strip, the caller owns the strip order. */
+    public static void drawStrip(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.TRIANGLE_STRIP,vertices);
+    }
+    private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,VertexFormat.Mode mode,Consumer<VertexConsumer> vertices){
         Objects.requireNonNull(selected,"Native effect shader must be registered before drawing");
         try(NativeState ignored=new NativeState()){
             RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,destination);RenderSystem.enableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);RenderSystem.disableCull();
-            var mesh=MESH.begin(VertexFormat.Mode.QUADS,format);vertices.accept(mesh);BufferUploader.drawWithShader(mesh.buildOrThrow());
+            var mesh=MESH.begin(mode,format);vertices.accept(mesh);BufferUploader.drawWithShader(mesh.buildOrThrow());
         }
     }
     /** UtilsFX facing-strip UVs. Positions supplied by a caller-owned pose. */

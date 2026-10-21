@@ -37,6 +37,27 @@ public final class WorldGenBigMagicTree {
         synchronized (state) { return new Generator().generate(level, callerRandom, origin, state); }
     }
 
+    /**
+     * The number of leaf nodes one layer of the canopy carries.
+     *
+     * <p>Oracle {@code WorldGenBigMagicTree:39}:
+     * {@code (int)(1.382 + Math.pow(this.leafDensity * (double)this.heightLimit / (double)13.0F, 2.0F))}
+     * with {@code leafDensity} of the field initialiser, {@code 1.0F}
+     * ({@code WorldGenBigMagicTree:23}). The {@code 0.8} of
+     * {@code setScale}({@code WorldGenBigMagicTree:343}) is only the scale
+     * factor of the removed 1.6 tree, and {@code setScale} is never called for
+     * the TC4 tree: {@code new WorldGenBigMagicTree(false)} is the only
+     * construction of the original. The factor 0.8 therefore shrank the canopy
+     * of every tree whose height was 11, 12, 17, 18, 19, 20 or 22 by one leaf
+     * node per layer.</p>
+     *
+     * <p>The rule lives on the outer class so that it is reachable from the
+     * parity test; the nested generator calls it.</p>
+     */
+    public static int leafNodeCount(int heightLimit) {
+        return Math.max(1, (int) (1.382 + Math.pow(heightLimit / 13.0, 2)));
+    }
+
     private static final class Generator {
     private final Random random = new Random(0);
     private MagicalTreePlacement tree;
@@ -72,10 +93,6 @@ public final class WorldGenBigMagicTree {
      * of every tree whose height was 11, 12, 17, 18, 19, 20 or 22 by one leaf
      * node per layer.
      */
-    public static int leafNodeCount(int heightLimit) {
-        return Math.max(1, (int) (1.382 + Math.pow(heightLimit / 13.0, 2)));
-    }
-
     private void generateLeafNodeList() {
         height = (int)(heightLimit * .6618);
         if (height >= heightLimit) height = heightLimit - 1;

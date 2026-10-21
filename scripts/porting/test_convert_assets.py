@@ -96,12 +96,17 @@ class FoundationAssetsTest(unittest.TestCase):
         # Explicit native adapters only. Warp shaders have a separate deterministic
         # GLSL150 conversion; none are bulk-copied into Minecraft's namespace.
         self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh", "core/monster_lit_particle.json", "core/monster_lit_particle.fsh",
-                          "post/warp_blurred.json", "post/warp_death_gaze.json", "post/warp_hunger.json", "post/warp_sun_scorned.json",
-                          "program/bloom_color.json", "program/bloom_color.fsh", "program/bloom2.json", "program/bloom2.fsh",
-                          "program/bloom_vertex_base.vsh", "program/color_convolve2.json", "program/color_convolve2.fsh"},
+                          "post/warp_blurred.json", "post/warp_death_gaze.json", "post/warp_hunger.json", "post/warp_sun_scorned.json"},
                          {path.relative_to(converter.ASSETS / "shaders").as_posix()
                           for path in (converter.ASSETS / "shaders").rglob("*") if path.is_file()})
-        self.assertFalse((converter.RESOURCE_ROOT / "assets/minecraft/shaders").exists())
+        # 1.21.1 resolves a post program in the DEFAULT namespace only
+        # (net.minecraft.client.renderer.EffectInstance), so the three original TC4
+        # programs are ported into assets/minecraft/shaders/program and nowhere else.
+        self.assertEqual({"thaumcraft_bloom2.fsh", "thaumcraft_bloom2.json", "thaumcraft_bloom_color.fsh",
+                          "thaumcraft_bloom_color.json", "thaumcraft_bloom_vertex_base.vsh",
+                          "thaumcraft_color_convolve2.fsh", "thaumcraft_color_convolve2.json"},
+                         {path.name for path in (converter.RESOURCE_ROOT / "assets/minecraft/shaders/program").glob("*") if path.is_file()})
+        self.assertFalse((converter.RESOURCE_ROOT / "assets/minecraft/shaders/post").exists())
         pack = json.loads((converter.RESOURCE_ROOT / "pack.mcmeta").read_text(encoding="utf-8"))
         self.assertEqual(34, pack["pack"]["pack_format"])
         self.assertEqual({"min_inclusive": 34, "max_inclusive": 48}, pack["pack"]["supported_formats"])
@@ -126,31 +131,40 @@ class FoundationAssetsTest(unittest.TestCase):
         assert spec.loader is not None
         spec.loader.exec_module(warp)
         shader_root = converter.ASSETS / "shaders"
-        with tempfile.TemporaryDirectory() as tmp, patch.object(warp, "TARGET", Path(tmp)):
+        program_root = converter.RESOURCE_ROOT / "assets/minecraft/shaders/program"
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(warp, "POST_TARGET", Path(tmp) / "post"), \
+                patch.object(warp, "PROGRAM_TARGET", Path(tmp) / "program"), \
+                patch.object(warp, "STALE_PROGRAM_DIR", Path(tmp) / "stale"):
             warp.main()
             for produced in Path(tmp).rglob("*"):
                 if produced.is_file():
-                    native = shader_root / produced.relative_to(tmp)
+                    native = (program_root if produced.parent.name == "program" else shader_root / "post") / produced.name
                     self.assertEqual(produced.read_bytes(), native.read_bytes(), f"stale converted shader: {native}")
-        for stage in (shader_root / "program").glob("*sh"):
+        for stage in program_root.glob("*sh"):
             text = stage.read_text()
             self.assertTrue(text.startswith("#version 150"), stage)
             self.assertNotRegex(text, r"\b(attribute|varying|gl_FragColor|texture2D)\b")
             if stage.suffix == ".fsh": self.assertIn("out vec4 fragColor;", text)
-        bloom = (shader_root / "program/bloom_color.fsh").read_text()
+        bloom = (program_root / "thaumcraft_bloom_color.fsh").read_text()
         self.assertLess(bloom.index("void main()"), bloom.index("vec4 averageColor="), "uniform texture reads belong inside main in core GLSL")
-        builtins = {"minecraft:box_blur", "minecraft:blit", "minecraft:sobel", "minecraft:color_convolve"}
+        # 1.21.1 resolves a post program in the DEFAULT namespace only, so a pass
+        # name never carries a namespace and every program it names has to exist.
+        vanilla = {"blit", "box_blur", "color_convolve", "blur", "invert", "bits",
+                   "entity_outline", "entity_outline_box_blur", "entity_sobel", "spiderclip", "transparency"}
+        # The vanilla vertex programs of 1.21.1 (sobel, screenquad, blit, blur, rotscale).
+        vanilla_vertex = {"sobel", "screenquad", "blit", "blur", "rotscale"}
         for post in (shader_root / "post").glob("warp_*.json"):
             data = json.loads(post.read_text()); targets = {"minecraft:main", *data["targets"]}
             for step in data["passes"]:
                 self.assertIn(step["intarget"], targets); self.assertIn(step["outtarget"], targets)
-                if step["name"] in builtins: continue
-                self.assertRegex(step["name"], r"^thaumcraft:[a-z0-9_]+$")
-                program = json.loads((shader_root / "program" / (step["name"].split(":")[1] + ".json")).read_text())
+                self.assertNotIn(":", step["name"], "a namespaced post program can never be resolved")
+                if step["name"] in vanilla: continue
+                program = json.loads((program_root / (step["name"] + ".json")).read_text())
                 for kind, extension in (("vertex", ".vsh"), ("fragment", ".fsh")):
-                    namespace, name = program[kind].split(":")
-                    self.assertIn(namespace, {"minecraft", "thaumcraft"})
-                    if namespace == "thaumcraft": self.assertTrue((shader_root / "program" / (name + extension)).is_file(), program[kind])
+                    self.assertNotIn(":", program[kind])
+                    if not (program_root / (program[kind] + extension)).is_file():
+                        self.assertIn(program[kind], vanilla if kind == "fragment" else vanilla_vertex, program[kind])
 
     def test_warp_effect_icons_use_original_gui_y198_origin_and_visible_pixels(self) -> None:
         from PIL import Image

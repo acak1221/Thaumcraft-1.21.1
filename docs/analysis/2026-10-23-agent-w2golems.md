@@ -166,15 +166,41 @@ python3 scripts/porting/update_scope_ledger.py --check --original-root /home/cyb
 ### D6 — the door goal of the original is not a native door goal
 
 * **Original.** `oracle …/ai/misc/AIDoorInteract.java:27-83` scans the **next points of the current path** within
-  a squared distance of 2.25 for an oak door or a fence gate, keeps it open while the golem passes it (the
+  a squared distance of 2.25 for a door or a fence gate, keeps it open while the golem passes it (the
   direction dot product, `:63-72`), and falls back to the golem's own block. `AIOpenDoor.java:16-58` opens the
   door and the fence gate and closes them again after a twenty tick window.
-* **Port.** `common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:36-39` — the vanilla
+  The two blocks are named by the 1.7.10 mappings: `Blocks.field_150466_ao` is **wooden_door** and
+  `Blocks.field_150396_be` is **fence_gate** (the `fields.csv` of the 1.7.10 MCP), so the original opens the
+  **oak door** and the **fence gate** — the 1.12 reference of this repository generalises the door to every
+  wooden door (`src/main/java/thaumcraft/common/entities/ai/misc/AIDoorInteract.java:91-96`), which the 4.2.3.5
+  oracle does not do.
+* **Port.** `common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:60-64` — the vanilla
   `OpenDoorGoal`, which opens the door **in front of** the golem and knows no fence gate.
-* **Why not changed.** A native door goal would have to reproduce the 1.7.10 path API, the fence gate's own
-  opening logic and the 1.7.10 sound. This wave may not run Gradle, so a new goal of that size could not be
-  compiled or tested here; a broken goal would be worse than the documented difference. The difference is
-  recorded in the two door rows.
+* **What is really missing.** In 1.21.1 the **native pathfinder opens the doors itself**
+  (`GroundPathNavigation.setCanOpenDoors`, which the port sets at
+  `common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:980`), so the door half of the
+  original goal is already covered. The part that is genuinely missing is the **fence gate**, which no native
+  pathfinder opens: in the original a golem that bumps into a closed fence gate opens it (the fallback of
+  `AIDoorInteract:57-66` looks at the golem's own block) and walks on; in the native it stays stuck.
+* **Why not changed.** A native goal would have to reproduce the 1.7.10 path API, the fence gate's own opening
+  logic (the original opens the gate *toward* the golem, `AIOpenDoor:44-49`) and the 1.7.10 sound. This wave
+  may not run Gradle, so a new goal of that size could not be compiled or tested here; a broken goal would be
+  worse than the documented difference. The difference is recorded in the two door rows with the exact
+  consequence (the fence gate).
+
+### D6a — the 1.7.10 vanilla `EntityAITarget` (the base of D3)
+
+* The vanilla classes are **not** part of the oracle, but TC4's own `AITarget`
+  (`oracle …/combat/AITarget.java:30-70`) is a **copy of that vanilla class**: it keeps the vanilla private
+  field names (`field_75303_a`, `field_75301_b`, `field_75302_c`, `field_75298_g`) and the vanilla method name
+  `func_75295_a`, and it reproduces the vanilla continuation rule — the alive check, the **squared** distance
+  against the distance field and the **sixty tick** unseen counter. The 1.12 reference of this repository shows
+  the same class with readable names (`src/main/java/thaumcraft/common/entities/ai/combat/AITarget.java:38-51`:
+  `getDistanceSq(target) > (double)(this.targetDistance * this.targetDistance)` and the sixty tick counter).
+* That copy is the reason the shadowing of D3 is a bug and not a design: the author wanted the vanilla
+  `targetDistance` and got a **private** one of its own, so the vanilla field kept its default of `0.0F`.
+* Whether the vanilla field holds the distance or its square, the consequence is the same: a zero makes the
+  inherited rule fail for every target that is not at distance zero.
 
 ### D7 — the Fill/Empty/Sorting goal ladder is one route goal per core, not five goals per core
 
@@ -285,7 +311,7 @@ acceptance criteria are:
 | `ai/fluid/AILiquidGoto.java` | `partial` | the route of the native is a water route |
 | `ai/interact/AIUseItem.java` | `partial` | any item on any marked block; the native performs the default use only |
 | `ai/inventory/AIEmptyDrop.java` … `ai/inventory/AISortingPlace.java` (12 rows) | `partial` | the structure: five selector entries per core with the numbers 0..4, the native has one route goal per core |
-| `ai/misc/AIDoorInteract.java` | `partial` | the path point scan, the oak door and the fence gate; the native uses the vanilla `OpenDoorGoal` |
+| `ai/misc/AIDoorInteract.java` | `partial` | the path point scan and the fence gate; the native uses the vanilla `OpenDoorGoal` and the native pathfinder opens the doors itself |
 | `ai/misc/AIOpenDoor.java` | `partial` | the fence gate; the vanilla goal knows only the door in front of the golem |
 | `common/entities/golems/ContainerGolem.java` | `parity_verified` | none |
 | `common/entities/golems/EntityGolemBase.java` | `partial` | the inventory goal structure, the door goal and the fluid set |
@@ -312,11 +338,13 @@ No Gradle was run in this worktree; the leader has to run `:common:test` and the
 * **No build, no test run, no GameTest, no client.** The wave was told not to run Gradle.
 * **The 1.7.10 vanilla `EntityAITarget`.** The vanilla classes are not part of the oracle (the oracle holds TC4's
   own sources only). D3 therefore rests on (a) the **bytecode** of the shipped jar, which proves that the class
-  extends the vanilla `EntityAITarget` and declares its own private `targetDistance`, (b) the oracle's own copy of
-  that class (`oracle …/combat/AITarget.java:30-70`), which shows the distance rule and the sixty tick counter
-  that the vanilla base carries, and (c) the fact that TC4's only golem subclass of that copy overrides the
-  continuation rule. The conclusion — that the nearest goal of the original never continues and the golem's
-  target is the nearest valid target at all times — is written down in the two combat rows with its evidence.
+  extends the vanilla `EntityAITarget` and declares its own private `targetDistance`, (b) TC4's own copy of that
+  class (`oracle …/combat/AITarget.java:30-70`, and the readable 1.12 version
+  `src/main/java/thaumcraft/common/entities/ai/combat/AITarget.java:38-51`), which shows the distance rule and
+  the sixty tick counter that the vanilla base carries, and (c) the fact that TC4's only golem subclass of that
+  copy overrides the continuation rule. The conclusion — that the nearest goal of the original never continues
+  and the golem's target is the nearest valid target at all times — is written down in the two combat rows with
+  its evidence.
 * **The 1.7.10 `GuiContainer` hit test.** The claim that the second (limit 1) ghost slot of the Fill core of the
   original is a no-op duplicate rests on the 1.7.10 `GuiContainer` taking the **first** slot under the mouse. That
   vanilla class is not in the oracle either; the consequence (the effective limit of the Fill ghost is 256) is

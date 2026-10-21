@@ -29814,10 +29814,13 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/misc/AIDoorInteract.java:27-83 the path point scan of the next two points within the squared distance of 2.25, the fallback at the golem's own block, the count of 200 and the stop when the golem passed the door",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:347 registered at the number five",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:36-39 the vanilla OpenDoorGoal at the number five"
+          "native common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:60-64 the vanilla OpenDoorGoal at the number five",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:980 the native pathfinder opens the doors itself (setCanOpenDoors), which the 1.7.10 pathfinder could not do",
+          "mcp fields.csv of 1.7.10: field_150466_ao is wooden_door and field_150396_be is fence_gate, so the original opens the oak door and the fence gate"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the original scans the next points of the current path for a wooden door or a fence gate and keeps it open while the golem passes it; the native uses the vanilla OpenDoorGoal, which opens the door in front of the golem only. The original's door is the OAK door and the fence gate, the vanilla goal knows no fence gate at all.",
+          "REMAINING DIFFERENCE: the original scans the next points of the current path for an oak door or a fence gate and keeps it open while the golem passes it; the native uses the vanilla OpenDoorGoal, which opens the door in front of the golem and knows no fence gate at all.",
+          "PART OF THE DIFFERENCE IS NOT REPRODUCIBLE: in 1.21.1 the native pathfinder opens the doors itself (GroundPathNavigation.setCanOpenDoors, EntityGolemBase:980), so the door half of the original goal is covered by the pathfinder. The part that is really missing is the FENCE GATE, which no native pathfinder opens: in the original a golem that bumps into a closed fence gate opens it (the fallback of AIDoorInteract:57-66 looks at the golem's own block) and walks on; in the native it stays stuck.",
           "The twenty tick open window and the fact that neither goal takes a mutex bit are the same."
         ],
         "reviewed_sha256": {
@@ -29863,10 +29866,12 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/misc/AIOpenDoor.java:16-58 the opening of the wooden door and of the fence gate and the closing after the twenty tick window",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:347 registered at the number five",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:36-39 the vanilla OpenDoorGoal at the number five"
+          "native common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:60-64 the vanilla OpenDoorGoal at the number five",
+          "mcp fields.csv of 1.7.10: field_150396_be is fence_gate, the block the original opens besides the wooden door"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the original opens the fence gate as well and closes it again, the vanilla goal knows only the wooden and the iron door of the block in front of the golem."
+          "REMAINING DIFFERENCE: the original opens the fence gate as well and closes it again, the vanilla goal knows only the wooden and the iron door of the block in front of the golem.",
+          "The native pathfinder opens the doors itself, so only the fence gate is really missing; the original's 'the gate opens toward the golem' refinement (AIOpenDoor:44-49) has no counterpart either."
         ],
         "reviewed_sha256": {
           "original": "6fceb709b5352d917bad705f21154eae828a2d08a33983315a03ac0d79809c06",

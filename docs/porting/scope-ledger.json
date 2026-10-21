@@ -20212,11 +20212,16 @@
         "evidence": [
           "oracle thaumcraft/common/CommonProxy.java the proxy with the research, the knowledge and the client world accessors",
           "native common/src/main/java/thaumcraft/common/Thaumcraft.java the common bootstrap",
-          "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java the platform bootstrap"
+          "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java the platform bootstrap",
+          "oracle thaumcraft/common/CommonProxy.java:74-152 the proxy with the player knowledge, the research manager and the numeric window routing of the server",
+          "oracle thaumcraft/common/CommonProxy.java:158-327 the forty client effect entry points of the proxy",
+          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:57-238 the native bootstrap and the per-domain registries that replaced the static proxy fields",
+          "native common/src/main/java/thaumcraft/common/lib/network/ the native payload classes that replaced the proxy channels"
         ],
         "notes": [
           "The 1.7 CommonProxy is replaced by the Architectury layout: a common bootstrap plus one platform bootstrap per loader.",
-          "REMAINING GAP: the proxy accessors (getResearchManager, getPlayerKnowledge, getClientWorld) became direct static calls in the common code, so an add-on that used the proxy has to use the new call sites."
+          "REMAINING GAP: the proxy accessors (getResearchManager, getPlayerKnowledge, getClientWorld) became direct static calls in the common code, so an add-on that used the proxy has to use the new call sites.",
+          "REMAINING GAP: the original proxy carried about forty client effect entry points (the beams, the essentia trail, the infusion particles, the ward, the soul trail, the bottle of taint and others). The native port splits them over the dedicated client effect classes, and the client was never launched in this environment, so the visual parity of those entry points is NOT claimed here."
         ],
         "reviewed_sha256": {
           "original": "0e2f04c9a47b0341eb38676ad821017457c26994ba083798265b5a5bc0efd549",
@@ -20258,17 +20263,23 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/Thaumcraft.java the @Mod singleton with the static registry fields",
           "native common/src/main/java/thaumcraft/common/Thaumcraft.java the bootstrap with the init sequence",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftBlocks.java and the other per-domain registries"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftBlocks.java and the other per-domain registries",
+          "oracle thaumcraft/common/Thaumcraft.java:22-50 the @Mod singleton with the static registry fields (ConfigItems, ConfigBlocks, ConfigEntities, Thaumcraft.proxy) and the four event handler instances",
+          "oracle thaumcraft/common/Thaumcraft.java:56-120 the init sequence: the configuration, the internal methods, the player knowledge, the research manager, the event handlers and the content registration",
+          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:57-238 the native bootstrap with the explicit init sequence: the settings, the network registrations, the research catalog, the content registries, the event wiring and the server lifecycle",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java and the other per-domain registries the static fields of the original were split into"
         ],
         "notes": [
           "The 1.7 @Mod singleton became a plain bootstrap class; the original static registry fields (ConfigItems, ConfigBlocks, ConfigEntities, Thaumcraft.proxy) were split into the per-domain Thaumcraft* config classes.",
           "The original init order (aspects, blocks, items, research, entities) is kept as an explicit init sequence.",
-          "REMAINING GAP: the public static fields of the original class are gone; an add-on that read Thaumcraft.proxy or Thaumcraft.ConfigItems has to use the new registry classes."
+          "REMAINING GAP: the public static fields of the original class are gone; an add-on that read Thaumcraft.proxy or Thaumcraft.ConfigItems has to use the new registry classes.",
+          "The init order of the original (aspects, blocks, items, research, entities) is kept as an explicit sequence in the native bootstrap; the registry singletons of the original became the per-domain Thaumcraft* configuration classes.",
+          "Forced 1.21.1 change: the public static fields of the original are gone, so an add-on that read Thaumcraft.proxy or Thaumcraft.ConfigItems has to use the new registry classes. That is an API surface change, not a behaviour gap."
         ],
         "reviewed_sha256": {
           "original": "de0f3775486b65304929bc4bd09064ab7b8d75cc7286aee4f6ad5c9a0bbfc46b",
@@ -24611,12 +24622,18 @@
           "oracle thaumcraft/common/config/Config.java the ~70 configuration options of the original",
           "native common/src/main/java/thaumcraft/common/config/ResearchSettings.java the native settings of the research",
           "native common/src/main/java/thaumcraft/common/config/BiomeSettings.java the native biome settings",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaintSettings.java the native taint settings"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaintSettings.java the native taint settings",
+          "oracle thaumcraft/common/config/Config.java:82-140 the seventy configuration options of the original and their defaults",
+          "oracle thaumcraft/common/config/Config.java:392-425 the effective defaults of the seven research facts that the original writes into its Forge configuration",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:54-86 the native properties file and the settings it loads",
+          "native common/src/main/java/thaumcraft/common/config/ResearchSettings.java:8-36 the native research settings and their original defaults"
         ],
         "notes": [
           "The native configuration keeps the research, the taint and the biome settings; the other ~70 original options (the golem delay and link quality, the champion mobs, the runic shield values, the node rarity, the notification limits, the potion ids, the dimension id, the world regeneration switches) have no native counterpart and are hard-coded or absent.",
           "The original golem_delay (5) and golem_ignore_delay (10000) values ARE reproduced as constants in the native golem code, so the default behaviour matches even though the option itself is gone.",
-          "REMAINING GAP: the native file format is a properties file and not the original Forge configuration, and the option set of the original is not reproduced, so an add-on that reads or writes Config cannot."
+          "REMAINING GAP: the native file format is a properties file and not the original Forge configuration, and the option set of the original is not reproduced, so an add-on that reads or writes Config cannot.",
+          "REMAINING GAP: the native configuration keeps the research, the taint and the biome settings; the other options of the original (the golem delay and link quality, the champion mobs, the runic shield values, the node rarity, the notification limits, the potion ids, the dimension id and the world regeneration switches) have no native counterpart and are hard coded or absent.",
+          "VERIFIED in this wave: the effective defaults of the seven research facts of the original (allow_cheat_sheet false, allow_warded_stone true, allow_mirrors true, hard_mode_nodes true, wuss_mode false, research_difficulty 0, aspect_total_cap 100) are the defaults of the native ResearchSettings."
         ],
         "reviewed_sha256": {
           "original": "74835b43cdc4c1f4b31c138b4db499f978bd60d957897e6eb16716ad8908802e",
@@ -24945,7 +24962,7 @@
         "disposition": "exclude",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/commonleft",
         "evidence": [
           "oracle thaumcraft/common/config/MaterialAiry.java:13 a 1.7 Block.Material subclass: not solid, not replaceable, does not block light, blocks movement and carries the no-push mobility flag 1",
@@ -24954,11 +24971,19 @@
           "oracle thaumcraft/common/blocks/BlockAiry.java:82 and oracle thaumcraft/common/blocks/BlockEldritchPortal.java:43 the two consumers of the material",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:298-303 the native airy properties (noOcclusion, noCollission, the original hardness and blast resistance)",
           "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:76-88 the native per-metadata shape of the airy family",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:47-55 the native portal has neither a selection nor a collision box"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:47-55 the native portal has neither a selection nor a collision box",
+          "oracle thaumcraft/common/config/MaterialAiry.java:11-13 the constructor calls this.setRequiresTool() and this.setNoPushMobility()",
+          "oracle thaumcraft/common/config/MaterialAiry.java:31-33 the class OVERRIDES setRequiresTool() with an empty body, so the virtual call of the constructor never sets the flag: the airy material does NOT require a tool",
+          "oracle thaumcraft/common/config/MaterialAiry.java:15-21 isSolid false, isReplaceable false and getCanBlockGrass false",
+          "oracle thaumcraft/common/config/MaterialAiry.java:35-39 the mobility flag 1 of setNoPushMobility",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:253-264 the four airy blocks and common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:290-303 their noOcclusion/noCollission properties: no requiresCorrectToolForDrops, which is exactly the original behaviour because the original's own setRequiresTool() override is a no-op",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:81-93 the per-metadata shape of the airy family and the native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:47-55 the portal with neither a selection nor a collision box"
         ],
         "notes": [
           "1.21.1 has no Block.Material class, so the material flags became modern block properties and the class itself has no counterpart.",
-          "Partial: the light, collision and replaceable rules of the two consumers are reproduced, but the requires-a-tool flag of the original material has no native counterpart - the airy blocks declare no requiresCorrectToolForDrops."
+          "Partial: the light, collision and replaceable rules of the two consumers are reproduced, but the requires-a-tool flag of the original material has no native counterpart - the airy blocks declare no requiresCorrectToolForDrops.",
+          "CORRECTED: the previous review recorded the requires-a-tool flag as a remaining gap. The original class overrides setRequiresTool() with an empty body (oracle MaterialAiry.java:31-33), so the constructor call never sets the flag and the airy material never required a tool. The native airy blocks declare no requiresCorrectToolForDrops, which is therefore the original behaviour and not a deviation.",
+          "The light, the collision, the replaceability and the grass rules of the original material are reproduced by the native block properties; 1.21.1 has no Block.Material, so the class itself has no counterpart."
         ],
         "reviewed_sha256": {
           "original": "518a291876c3533c4d497dad5cd8924798c4de3e5532f24b59e7a618d42a628a",
@@ -38210,16 +38235,23 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/FakeThaumcraftPlayer.java the fake player",
           "oracle thaumcraft/common/lib/events/EventHandlerEntity.java the pickup event of the fake player",
-          "native common/src/main/java/thaumcraft/common/lib/FakeThaumcraftPlayer.java the native fake player"
+          "native common/src/main/java/thaumcraft/common/lib/FakeThaumcraftPlayer.java the native fake player",
+          "oracle thaumcraft/common/lib/FakeThaumcraftPlayer.java:9-29 the fake player: a silent addChatMessage, a refused canCommandSenderUseCommand, a fixed getPlayerCoordinates() of (0,0,0) and an empty openGui",
+          "oracle thaumcraft/common/Thaumcraft.java:297-298 and :326-327 the only two consumers: addWarpToPlayer and addStickyWarpToPlayer refuse a FakeThaumcraftPlayer",
+          "native common/src/main/java/thaumcraft/common/lib/FakeThaumcraftPlayer.java:23-65 the native fake player: a silent sendSystemMessage, a refused canUseGameMasterBlocks, an empty openMenu and no equipment",
+          "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:181-198 the native warp entry points take a ServerPlayer, so the fake player can never reach them, which is the original's rule",
+          "oracle tree-wide reference scan: the 4.2.3.5 tree never constructs a FakeThaumcraftPlayer, so the original's own rule about the item pickup of a player whose name starts with FakeThaumcraft has no target in the original either"
         ],
         "notes": [
           "The 1.7 EntityPlayer subclass became a native fake player; the silence, the command refusal and the fixed origin are kept.",
-          "REMAINING GAP: the original also blocked the item pickup event for every player whose name starts with FakeThaumcraft; the native never adds a fake player to a level, so there is nothing to cancel and the rule is not reproduced."
+          "REMAINING GAP: the original also blocked the item pickup event for every player whose name starts with FakeThaumcraft; the native never adds a fake player to a level, so there is nothing to cancel and the rule is not reproduced.",
+          "CORRECTED: the previous review recorded the name based pickup cancellation as a remaining gap. That rule is not part of this class: it is a rule of EventHandlerEntity about any player whose name starts with FakeThaumcraft, and neither the original nor the native ever creates such a player.",
+          "Forced 1.21.1 change: a player has no chunk coordinates and no command permission in 1.21.1, so the fixed getPlayerCoordinates() has no counterpart and the command refusal is the native game master block permission."
         ],
         "reviewed_sha256": {
           "original": "288c255c27145c74ab8cee7eaed58183aab638c0009585c9fded23eaaf24d495"
@@ -38336,15 +38368,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/RefGui.java the numeric gui ids of the original",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftDeviceMenus.java the native menu types"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftDeviceMenus.java the native menu types",
+          "oracle thaumcraft/common/lib/RefGui.java:3-21 the seventeen numeric window ids of the original, with the gaps 4, 6, 7 and 14 unused",
+          "native common/src/main/java/thaumcraft/common/lib/RefGui.java:11-27 the same seventeen constants with the same values and the same gaps",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftDeviceMenus.java the native menu types that replaced the numeric ids"
         ],
         "notes": [
           "The 1.7 GUI id constants are gone: 1.21.1 menus are identified by their own MenuType, so the numeric ids have no counterpart.",
-          "REMAINING GAP: every menu the original listed has a native menu class, but the id numbering itself is not reproduced, so an add-on that opened a menu by its number has to use the native MenuType."
+          "REMAINING GAP: every menu the original listed has a native menu class, but the id numbering itself is not reproduced, so an add-on that opened a menu by its number has to use the native MenuType.",
+          "CORRECTED: the previous review said the id numbering was not reproduced. It is: all seventeen constants of the original are present with their original values, including the gaps.",
+          "1.21.1 identifies a window by its MenuType and not by a number, so the numeric ids are only the identifiers of the original; the native windows themselves are the per-domain menu classes."
         ],
         "reviewed_sha256": {
           "original": "114e0a438e80968d0e37a5e53092990e891aa41554ba56e06f58108450dbed78"
@@ -39363,14 +39400,20 @@
           "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:358-379 the ender pearl that a warded object destroys",
           "native common/src/main/java/thaumcraft/common/items/golems/GolemOwnership.java the owner rule",
           "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2297 the refused interaction of a golem",
-          "native common/src/main/java/thaumcraft/common/lib/ward/WardedPearl.java the warded pearl rule"
+          "native common/src/main/java/thaumcraft/common/lib/ward/WardedPearl.java the warded pearl rule",
+          "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:112-680 the sixteen event handlers of the original",
+          "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:454-470 the champion reward of five to seven experience and one loot bag with the tier min(2, floor((rand(9)+looting)/5))",
+          "native common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java:231-236 the native champion experience and loot bag tier with the same numbers",
+          "native common/src/main/java/thaumcraft/common/mixin/ChampionDeathLootMixin.java the native champion reward inside the death loot of the mob",
+          "native common/src/main/java/thaumcraft/common/mixin/ZombieBrainDropsMixin.java and native common/src/main/java/thaumcraft/common/mixin/WardedPearl.java the native brain and warded pearl rules"
         ],
         "notes": [
           "The 1.7 Forge event handler became a mixin and platform-event architecture; most of its behaviours are present (the research save and load, the repair enchantment, the warp and death gaze checks, the champion spawn roll and drops, the zombie brain, the villager resource, the crystal essence on dissolve, the taint conversion on death, the aspect orbs, the primal arrow, the unnatural hunger, the bath salts, the special mining drops, the pure bucket, the note block and the travel gear).",
           "CORRECTED: the first audit reported the golem owner protection and the warded ender pearl as missing. Both are implemented: the owner rule refuses the interaction of a non owner with the original message (GolemOwnership) and the warded pearl dies next to an owned block with the original message (WardedPearl).",
           "ADAPTED: the original wrote the thrower name into the dropped item NBT (ItemTossEvent) and TileCrucible.attemptSmelt read it for the crucible owner rule; the native resolves the thrower from the vanilla ItemEntity owner, so the rule survives with a different mechanism.",
           "NOT NEEDED: the original cancelled the item pickup of every fake player whose name starts with FakeThaumcraft; the native never adds a fake player to a level, so there is nothing to cancel.",
-          "REMAINING GAP: the original world load and save of the research file has no counterpart, because a fresh 1.21 world is the only supported input."
+          "REMAINING GAP: the original world load and save of the research file has no counterpart, because a fresh 1.21 world is the only supported input.",
+          "REMAINING GAP: the original wrote the research of a player into a separate file of the world on the player load and save events. The native port keeps the same facts in the native player data (native common/src/main/java/thaumcraft/common/mixin/PlayerKnowledgeMixin.java), because only fresh 1.21.1 worlds are supported and no 1.7 world migration is authorised."
         ],
         "reviewed_sha256": {
           "original": "a909ad4b5f57746757756d6b25f8894c300d33705973fcf9ddfe2c8eebe2390a",
@@ -39471,14 +39514,20 @@
           "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:227-244 the block placement near an active eldritch boss",
           "oracle thaumcraft/common/lib/events/EventHandlerWorld.java the chunk regeneration queue",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:31 the burn time 400 of the magical log",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:102 the fuel registration of the magical log"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:102 the fuel registration of the magical log",
+          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:139-146 the burn time of the alumentum (6400) and of the magical log (400)",
+          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:197-224 the block placement cancellation near an active eldritch boss of the Outer Lands",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java the native burn times",
+          "native common/src/main/java/thaumcraft/common/mixin/SpecialMiningBlockMixin.java and native common/src/main/java/thaumcraft/common/mixin/DeathBucketFillMixin.java the native special mining and bucket rules"
         ],
         "notes": [
           "The world handler was split into mixins and platform events; the special mining drops, the note block events, the pure and death bucket fills, the vis effect and the sticky warp on crafting are all present.",
           "CORRECTED: the first audit reported the magical log fuel rule as missing. The burn time 400 of the magical log is registered (ThaumcraftNaturals) next to the burn time 6400 of the alumentum.",
           "REMAINING GAP: the chunk regeneration queue (the original re-generated the chunks whose Thaumcraft chunk tag was absent) has no counterpart, because 1.21.1 has no equivalent chunk data event.",
           "REMAINING GAP: the block placement is still not cancelled near an active eldritch boss in the Outer Lands.",
-          "REMAINING GAP: the original maze load and save on the world load and save events has no native counterpart (the Outer Lands maze is a different subsystem)."
+          "REMAINING GAP: the original maze load and save on the world load and save events has no native counterpart (the Outer Lands maze is a different subsystem).",
+          "REMAINING GAP: the original cancelled the placement of a block near an active eldritch boss in the Outer Lands (oracle EventHandlerWorld.java:197-224); the native port has no such rule.",
+          "REMAINING GAP: the chunk regeneration queue of the original has no counterpart, because 1.21.1 has no equivalent chunk data event."
         ],
         "reviewed_sha256": {
           "original": "4b6666adeef69182a242a0d87fea122fd50805fb446b5ba84e1ebd2c44d3287b",
@@ -39509,15 +39558,25 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/events/KeyHandler.java the key bindings of the original",
-          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java the key binding registration"
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java the key binding registration",
+          "oracle thaumcraft/common/lib/events/KeyHandler.java:34-38 the three key bindings of the original: keyF, keyH and keyG",
+          "oracle thaumcraft/common/lib/events/KeyHandler.java:45-75 the F key: the radial focus menu of a wand and the reset of a golem bell",
+          "oracle thaumcraft/common/lib/events/KeyHandler.java:76-97 the H key: the hover harness of the chest slot",
+          "oracle thaumcraft/common/lib/events/KeyHandler.java:99-115 the G key: the misc item key",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java:23-25 the F binding (LWJGL2 key 33) with the wand focus selection and the golem bell reset",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftMiscKeyClient.java:24-25 the G binding (LWJGL2 key 34) with the Architect toggle and the shovel orientation",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftTravelGearClient.java:70 the H key (LWJGL2 key 35) with the hover harness toggle",
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:114-122 the registration of the three client key handlers"
         ],
         "notes": [
           "The 1.7 key input handler became the Architectury key binding registration.",
-          "REMAINING GAP: the bindings themselves are not part of this audit, and the original's own key handling (the wand toggle and the node view) lives in the client lane."
+          "REMAINING GAP: the bindings themselves are not part of this audit, and the original's own key handling (the wand toggle and the node view) lives in the client lane.",
+          "CORRECTED: the previous review left the bindings unaudited. All three original bindings exist with their original LWJGL2 key codes and their original actions.",
+          "The binding registration goes through the Architectury client key mapping registry, so both loaders receive the bindings."
         ],
         "reviewed_sha256": {
           "original": "ec4eae0259004b816109e5af8b5c4f9f53977400f564edf71e4ecaf4eef7ce68"
@@ -39605,12 +39664,15 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java the server tick handler and the chunk regeneration queue",
-          "native common/src/main/java/thaumcraft/common/lib/events/ the native tick events"
+          "native common/src/main/java/thaumcraft/common/lib/events/ the native tick events",
+          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:198-203 the native server tick wiring of the shared tick helpers",
+          "native common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java the native delivery of the deferred item drops"
         ],
         "notes": [
           "The 1.7 tick handler became the Architectury tick events plus the native excavation code.",
           "The excavation block swap and the note block clearing are implemented in the native excavation and arcane ear code.",
-          "REMAINING GAP: the chunk regeneration queue is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row)."
+          "REMAINING GAP: the chunk regeneration queue is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row).",
+          "REMAINING GAP: the chunk regeneration queue of the original is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row)."
         ],
         "reviewed_sha256": {
           "original": "e85740a36e29e290ec08158e3c2e2f71a11af1f299a0baa0f04330dc777999a2",
@@ -39650,16 +39712,24 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:16-64 the login sync (wipe, research, scanned items/entities/phenomena, aspects, warp 0..2, config) and the client logout restore",
           "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java, KnowledgeSyncPayload.java, AspectDiscoveryPayload.java, AspectPoolPayload.java the native login sync",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:25-34 the native client/server settings split"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:25-34 the native client/server settings split",
+          "oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:26-41 the login sync of the original: the wipe, the research, the scanned items, entities and phenomena, the aspects, the three warp counters and the configuration",
+          "oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:44-50 the client login reset of the completed research",
+          "oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:53-65 the client logout restore of the seven client configuration values",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:25-35 the native login sync: the join, the respawn and the dimension change send the whole knowledge snapshot",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:42-48 the client receiver that replaces the client knowledge with the server snapshot, which is the native form of the wipe and of the client login reset",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:47-50 the client restore of the settings on disconnect"
         ],
         "notes": [
           "The 1.7 network event handler became the Architectury player events and the native payload classes; the login sync of the wipe, the research, the aspects and the settings is present.",
-          "The original also reset the client research cache and restored the client configuration on disconnect; the native does the settings part (ThaumcraftSettings.resetClient) but the original research cache reset has no counterpart."
+          "The original also reset the client research cache and restored the client configuration on disconnect; the native does the settings part (ThaumcraftSettings.resetClient) but the original research cache reset has no counterpart.",
+          "The nine original login packets are replaced by one native knowledge snapshot that carries the same facts; the settings are sent before the snapshot so that the client already knows the research rules when the knowledge arrives.",
+          "CORRECTED: the previous review said the client research cache reset has no counterpart. The native knowledge snapshot REPLACES the client state on every join, which is the same effect as the original's wipe and reset."
         ],
         "reviewed_sha256": {
           "original": "cd145f2598f837645d3b9a8ba40b27efae66668fd04d1500d12faa4b728eabc4",
@@ -39743,15 +39813,21 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/PacketHandler.java:12-99 the SimpleNetworkWrapper channel with about forty registrations",
-          "native common/src/main/java/thaumcraft/common/lib/network/ (the native payload classes and their registrations)"
+          "native common/src/main/java/thaumcraft/common/lib/network/ (the native payload classes and their registrations)",
+          "oracle thaumcraft/common/lib/network/PacketHandler.java:54-99 the single SimpleNetworkWrapper channel thaumcraft with about forty registrations and the numeric discriminators of 1.7.10",
+          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:57-238 the native registration of the payload types, one identifier per message",
+          "native common/src/test/java/thaumcraft/common/lib/network/PayloadRegistryTest.java the guard test of the identifier set: uniqueness, the separation of the two directions and the canonical spelling",
+          "docs/analysis/2026-10-21-openTC4-network.md the packet by packet inventory of the thirty nine original registrations and their native counterparts"
         ],
         "notes": [
           "The 1.7 SimpleNetworkWrapper channel became one Architectury payload class per message; the channel id and the message set changed.",
-          "The packets of this worklist were ported one by one (see the individual rows)."
+          "The packets of this worklist were ported one by one (see the individual rows).",
+          "Forced 1.21.1 change: the numeric discriminator of 1.7.10 is replaced by the CustomPacketPayload.Type and its ResourceLocation; the order of the registrations no longer carries meaning but is fixed so that the login sync stays reproducible.",
+          "Every original message has a native counterpart; the three packets that the original never sends (PacketFXBlockDig, PacketFXBeamPulse and PacketFXBeamPulseGolemBoss) are dead code in the original and need no counterpart."
         ],
         "reviewed_sha256": {
           "original": "6c3f5948b3de945c40e71015dc2b585b67bac15e4aff6bedac62df4a60295d5b",
@@ -39791,14 +39867,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulse.java:1-87 the vis net beam pulse",
-          "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxNetworking.java, VisNetFxPayload.java the native vis net beam payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxNetworking.java, VisNetFxPayload.java the native vis net beam payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulse.java:9-42 the beam pulse between two entity ids with a colour",
+          "oracle tree-wide reference scan: the 4.2.3.5 tree registers the packet in PacketHandler (oracle PacketHandler.java:74) but never constructs it, so the packet is dead code in the original",
+          "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxPayload.java and common/src/main/java/thaumcraft/common/lib/network/ExcavationFxPayload.java the native beam geometries that the original produced with its own beam channels"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload; the beam pulse is ported."
+          "The 1.7 IMessage became an Architectury payload; the beam pulse is ported.",
+          "The packet is registered but never sent in the original 4.2.3.5 tree, so it carries no behaviour that a port could lose. The native beam payloads keep the two beam geometries that the original really used (the excavation focus and the vis drain)."
         ],
         "reviewed_sha256": {
           "original": "f109f330032843ad85d328e5618caa3af5beba3b3e9075ca815cb37abd0fd259",
@@ -39892,14 +39972,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:1-69 the arc effect",
-          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java, ExcavationFxPayload.java the native arc payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java, ExcavationFxPayload.java the native arc payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:9-45 the arc lightning from an entity id to a block position",
+          "oracle thaumcraft/common/entities/monster/boss/EntityCultistPortal.java:140,154 and oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:194 the three original senders",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxPayload.java:22-74 the native arc payload with its kind, its target and its source entity id",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxNetworking.java:50-57 the native sender with the original radius of thirty two blocks",
+          "native common/src/main/java/thaumcraft/common/entities/monster/boss/EntityCultistPortal.java:138,162 and native common/src/main/java/thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:422 the three native senders"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The original sent the packet to the players around the effect with a TargetPoint radius of thirty two; the native sender walks the players of the level and uses the same radius."
         ],
         "reviewed_sha256": {
           "original": "66de591624fcca6195c5f1e103ba3cf6649120e29097af9f645f766d485da514",
@@ -39939,14 +40025,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockBubble.java:1-65 the bubble effect",
-          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java the native payload set"
+          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java the native payload set",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBlockBubble.java:9-42 the crucible bubbles of a block with a colour",
+          "oracle thaumcraft/common/items/equipment/ItemElementalAxe.java:145 the only original sender",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxPayload.java:22-74 the native bubble payload",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxNetworking.java:68-75 the native sender with the original radius of thirty two blocks",
+          "native common/src/main/java/thaumcraft/common/lib/world/StreamAxeHarvest.java:77 the native sender"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload; the bubble effect is part of the native excavation fx set."
+          "The 1.7 IMessage became an Architectury payload; the bubble effect is part of the native excavation fx set.",
+          "The colour of the original is the ARGB colour of the crucible; the native payload carries a validated 24 bit RGB, so a malformed colour can no longer reach the client renderer."
         ],
         "reviewed_sha256": {
           "original": "a16d63cb868cbdf25fc626b46354a2582abf392d8c048ee9f6f2b73440dc8a81",
@@ -39986,14 +40078,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockDig.java:1-107 the dig effect",
-          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java, ExcavationFxPayload.java the native dig payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java, ExcavationFxPayload.java the native dig payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBlockDig.java:9-79 the bore dig particles of a block with an item id, a metadata and a particle origin",
+          "oracle tree-wide reference scan: the 4.2.3.5 tree registers the packet in PacketHandler (oracle PacketHandler.java:76) but never constructs it, so the packet is dead code in the original",
+          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxPayload.java the native excavation geometry and crack stage that replaced the bore dig channel"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The packet is registered but never sent in the original 4.2.3.5 tree, so it carries no behaviour that a port could lose."
         ],
         "reviewed_sha256": {
           "original": "a5e603735d686f78d0b560d312608fd8fe692891df3b3c079f8306ed6dbf0357",
@@ -40081,14 +40177,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockZap.java:1-64 the zap effect",
-          "native common/src/main/java/thaumcraft/common/lib/network/ShockFxNetworking.java, ShockFxPayload.java the native zap payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/ShockFxNetworking.java, ShockFxPayload.java the native zap payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBlockZap.java:9-38 the node bolt between two points plus the thaumcraft:zap sound",
+          "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:537,606, oracle thaumcraft/common/tiles/TileEldritchTrap.java:29 and oracle thaumcraft/common/tiles/TileNode.java:612 the three original senders",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxPayload.java:22-74 the native zap payload with its two points",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxNetworking.java:59-66 the native sender with the original radius of thirty two blocks",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchTrap.java:46 the native sender of the eldritch trap"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "KNOWN GAP in the call sites, not in the channel: the native TileNode and TileInfusionMatrix do not send the bolt, so two of the three original senders have no native counterpart. The payload, its validation and the third sender are native."
         ],
         "reviewed_sha256": {
           "original": "0f392b47079575a61215d7799036cce72a1d0c06ec80d822a213153aec0585b8",
@@ -40128,14 +40230,19 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXEssentiaSource.java:1-80 the essentia source effect",
-          "native common/src/main/java/thaumcraft/common/lib/events/EssentiaHandler.java:43 matrix.sendEffect(1, sourcePos, aspect.getColor())"
+          "native common/src/main/java/thaumcraft/common/lib/events/EssentiaHandler.java:43 matrix.sendEffect(1, sourcePos, aspect.getColor())",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXEssentiaSource.java:9-46 the essentia source highlight of a source and its target cell",
+          "oracle thaumcraft/common/lib/events/EssentiaHandler.java:44 the only original sender",
+          "native common/src/main/java/thaumcraft/common/lib/events/EssentiaHandler.java:43 the native sendEffect(1, sourcePos, aspect.getColor()) of the same source",
+          "native common/src/main/java/thaumcraft/common/lib/events/EssentiaHandler.java:36-56 the native scan with the original break rule of a missing source"
         ],
         "notes": [
-          "The 1.7 IMessage became a native effect call; the packet class itself is gone."
+          "The 1.7 IMessage became a native effect call; the packet class itself is gone.",
+          "The original packet updated a client side map of the source highlights; the native code highlights the source directly, so the packet class itself has no counterpart and no behaviour is lost."
         ],
         "reviewed_sha256": {
           "original": "da9b0794859deea48b3196f5f97e703ff8c8a4d4cfa39435c65a2100f698a7fc",
@@ -40272,14 +40379,19 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXSonic.java:1-59 the sonic effect",
-          "native common/src/main/java/thaumcraft/common/lib/network/GuardianSonicPayload.java the native sonic payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/GuardianSonicPayload.java the native sonic payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXSonic.java:9-31 the sonic effect of one entity id",
+          "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:312 and oracle thaumcraft/common/entities/monster/boss/EntityEldritchGuardian.java:282 the two original senders",
+          "native common/src/main/java/thaumcraft/common/lib/network/GuardianSonicPayload.java the native sonic payload of one entity id",
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java:496 the native sender"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The payload carries the entity id of the original; the client resolves it in its own level, exactly as the original did."
         ],
         "reviewed_sha256": {
           "original": "01d2eb8166e17e48748625ea0a68fcb29ee3e99d80d9e0474641ddaf38217635",
@@ -40319,14 +40431,21 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXVisDrain.java:1-82 the vis drain effect",
-          "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxPayload.java the native vis drain payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxPayload.java the native vis drain payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXVisDrain.java:9-45 the vis drain between two cells with a primal aspect index as the colour",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXVisDrain.java:38 the original decoder reads Aspect.getPrimalAspects().get(color) WITHOUT a range check, so a colour outside the list crashes the client",
+          "oracle thaumcraft/common/lib/utils/Utils.java:283-296 the only original sender with the throttle of five hundred plus one hundred milliseconds and the radius of sixty four",
+          "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxPayload.java:12-28 the native payload with a validated 24 bit RGB and a bounded geometry",
+          "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java:362-381 the native sender with the same throttle and the same radius"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The original could crash a client with a malformed colour index; the native payload carries a validated RGB, so that class of client crash is closed.",
+          "The native payload bounds the drain to sixty four blocks and rejects a degenerate point, which the original did not; this is a documented strengthening of an appearance only channel."
         ],
         "reviewed_sha256": {
           "original": "bce37fdd63497729d6ef5167dab67fbd667f861c75bfe5fd91db564045d60e10",
@@ -40412,14 +40531,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXZap.java:1-77 the zap effect",
-          "native common/src/main/java/thaumcraft/common/lib/network/ShockFxPayload.java the native zap payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/ShockFxPayload.java the native zap payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXZap.java:9-49 the lightning bolt between two entity ids",
+          "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:184 the only original sender",
+          "native common/src/main/java/thaumcraft/common/lib/network/ShockFxPayload.java the native payload with the source geometry, the target geometry and the seed of the bolt"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The native payload replaces the two entity ids with the geometry of the pulse and its seed, so the client cannot be pointed at an entity it does not own; the server sends it only after the committed pulse."
         ],
         "reviewed_sha256": {
           "original": "7cec005d8ea2d1cdd8f0a6d93d41b26120b6c32ecc0bf55136b140f44bb30c03",
@@ -40459,14 +40582,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/misc/PacketBiomeChange.java:1-54 the biome change packet",
-          "native common/src/main/java/thaumcraft/common/lib/world/BiomeColumns.java the native biome column replacement"
+          "native common/src/main/java/thaumcraft/common/lib/world/BiomeColumns.java the native biome column replacement",
+          "oracle thaumcraft/common/lib/network/misc/PacketBiomeChange.java:9-33 the biome column change of a single cell with a numeric biome id",
+          "oracle thaumcraft/common/lib/utils/Utils.java:176-196 the only original sender, which wrote the biome array of the chunk and then sent the packet",
+          "native common/src/main/java/thaumcraft/common/lib/world/BiomeColumns.java the native biome column mechanism"
         ],
         "notes": [
-          "The 1.7 IMessage became the native biome column mechanism; the packet class is gone."
+          "The 1.7 IMessage became the native biome column mechanism; the packet class is gone.",
+          "Forced 1.21.1 change: the numeric biome id of 1.7.10 does not exist in 1.21.1, whose biomes are registry objects; the native biome columns replace the packet and the client receives them with the native biome synchronisation."
         ],
         "reviewed_sha256": {
           "original": "fea0cf0ffe3474f6505ee553c19f03532d100d4642e719b1734eea25d3aa31b2",
@@ -40555,14 +40682,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/misc/PacketConfig.java:1-63 the config sync packet",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:29-31 receive(settings) the native settings sync"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:29-31 receive(settings) the native settings sync",
+          "oracle thaumcraft/common/lib/network/misc/PacketConfig.java:9-38 the seven server facts of the original: five booleans, the research difficulty byte and the aspect cap",
+          "oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:39 the original sender, the last of the ten login packets",
+          "native common/src/main/java/thaumcraft/common/lib/network/ResearchSettingsPayload.java the native settings payload of the same seven facts",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:29-41 the native client snapshot of the received settings"
         ],
         "notes": [
-          "The 1.7 IMessage became the native settings sync."
+          "The 1.7 IMessage became the native settings sync.",
+          "The native payload packs the five booleans into one byte of flags and keeps the difficulty and the cap as full integers, so the original truncation of the difficulty byte is gone.",
+          "The native settings are sent BEFORE the knowledge snapshot, the original sent them last; the order change is deliberate and documented in docs/analysis/2026-10-21-openTC4-network.md."
         ],
         "reviewed_sha256": {
           "original": "ac47ae53f9238ab0a3fa5f11f93721b149e48bd050ccad26cf293f14ad57547a",
@@ -40602,14 +40735,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/misc/PacketFlyToServer.java:1-49 the fly-to-server packet",
-          "native common/src/main/java/thaumcraft/common/lib/network/HoverNetworking.java, HoverTogglePayload.java the native hover payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/HoverNetworking.java, HoverTogglePayload.java the native hover payload",
+          "oracle thaumcraft/common/lib/network/misc/PacketFlyToServer.java:9-31 the hover toggle with a player id and a boolean, WITHOUT any check on the server",
+          "oracle thaumcraft/common/lib/utils/EntityUtils.java:37-47 the original Hover.setHover wrote into a global map by the arbitrary entity id",
+          "native common/src/main/java/thaumcraft/common/lib/network/HoverTogglePayload.java the native intent without a player id and without a boolean",
+          "native common/src/main/java/thaumcraft/common/lib/network/HoverNetworking.java:14-16 the native receiver that only accepts the sender of the connection",
+          "native common/src/main/java/thaumcraft/common/items/armor/Hover.java the native toggle that checks the harness, the charge and the fuel before it changes the state"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The original let a client change the hover state of an arbitrary entity id. The native intent carries neither a player nor a state, and the server derives both from the connection of the sender."
         ],
         "reviewed_sha256": {
           "original": "28729603fbbd2de1896f47c2a551245a22edbc2215bb5d8805d675e813ce3bd0",
@@ -40698,14 +40837,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/misc/PacketItemKeyToServer.java:1-82 the item key packet",
-          "native common/src/main/java/thaumcraft/common/lib/network/GolemBellResetPayload.java the native item key payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/GolemBellResetPayload.java the native item key payload",
+          "oracle thaumcraft/common/lib/network/misc/PacketItemKeyToServer.java:9-49 the item key of the original with a dimension, a player id and a key number",
+          "oracle thaumcraft/common/lib/network/misc/PacketItemKeyToServer.java:38-47 the original handler, which did NOT check the player id and only read the held item",
+          "native common/src/main/java/thaumcraft/common/lib/network/GolemBellResetPayload.java, ShovelOrientationPayload.java and WandArchitectPayload.java the three native intents, one per original key",
+          "native common/src/main/java/thaumcraft/common/lib/network/GolemBellNetworking.java:28-37 the native bell handler that checks the hand, the item, the dimension, the existence of the golem and the ownership",
+          "native common/src/main/java/thaumcraft/common/lib/network/ShovelOrientationNetworking.java:24-34 and common/src/main/java/thaumcraft/common/lib/network/WandArchitectNetworking.java:21-33 the shovel and the Architect handlers that only read the real main hand"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload (the golem bell reset)."
+          "The 1.7 IMessage became an Architectury payload (the golem bell reset).",
+          "The original packet multiplexed three actions behind one numeric key; the native port has one intent per action, and every handler derives the addressed object from the connection of the sender instead of from a client supplied id."
         ],
         "reviewed_sha256": {
           "original": "e536b2bf5b5f9e53603c2d6df4027911af1d862e06b6b76f48739de41289a2cf",
@@ -40745,14 +40890,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/misc/PacketMiscEvent.java:1-74 the misc event packet",
-          "native common/src/main/java/thaumcraft/common/lib/network/ (the native payload classes)"
+          "native common/src/main/java/thaumcraft/common/lib/network/ (the native payload classes)",
+          "oracle thaumcraft/common/lib/network/misc/PacketMiscEvent.java:9-40 the multiplexed event of the original: the warp vignette, the fog and the heart sound",
+          "native common/src/main/java/thaumcraft/common/lib/network/WarpEventPayload.java the native payload of the three original event kinds with a validated kind",
+          "native common/src/main/java/thaumcraft/common/lib/network/WarpEventNetworking.java the native sender and receiver"
         ],
         "notes": [
-          "The 1.7 IMessage became the native payload set; the original packet multiplexed several events."
+          "The 1.7 IMessage became the native payload set; the original packet multiplexed several events.",
+          "The original multiplexed three unrelated events behind one numeric type; the native payload keeps the three kinds and rejects an unknown one in its constructor."
         ],
         "reviewed_sha256": {
           "original": "63a8e476994bcad0fee5e4bf67885ccd153c4f0660021ece5d15eaf2dceedecf",
@@ -40792,14 +40941,19 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/misc/PacketNote.java:1-105 the note packet",
-          "native common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java, common/mixin/ArcaneEarNoteMixin.java the native note handling"
+          "native common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java, common/mixin/ArcaneEarNoteMixin.java the native note handling",
+          "oracle thaumcraft/common/lib/network/misc/PacketNote.java:9-72 the note of the original: the server variant read the tile at an arbitrary position and the client variant played the note",
+          "oracle thaumcraft/common/lib/network/misc/PacketNote.java:39-52 the original SERVER handler, which took the position and the dimension from the packet and read any tile with it",
+          "native common/src/main/java/thaumcraft/common/lib/ArcaneEarNotes.java the native note bookkeeping",
+          "native common/src/main/java/thaumcraft/common/mixin/ArcaneEarNoteMixin.java the native note event, and the native block event of 1.21.1 that carries the tone to the client"
         ],
         "notes": [
-          "The 1.7 IMessage became the native arcane ear note handling."
+          "The 1.7 IMessage became the native arcane ear note handling.",
+          "The original server variant let a client name any tile in any dimension and read it. The native port removed the channel and uses the native block event and the block entity synchronisation, so the arbitrary tile access is closed."
         ],
         "reviewed_sha256": {
           "original": "d1e47908d07c25afde3aa247716535171c019d7f1aed9eaac7217b055fdc8e2c",
@@ -40839,14 +40993,19 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketAspectCombinationToServer.java:1-129 the aspect combination",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchAspectCombination.java the native combination rules"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchAspectCombination.java the native combination rules",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketAspectCombinationToServer.java:9-96 the combination request of the original with a dimension, a player id, the table position and the two aspects",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketAspectCombinationToServer.java:56-84 the original handler, which took the table position from the packet and charged one research point per aspect",
+          "native common/src/main/java/thaumcraft/common/lib/network/ResearchTableCombinePayload.java the native intent with a menu generation, a session token and the table revision",
+          "native common/src/main/java/thaumcraft/common/lib/network/ResearchTableCombineNetworking.java:18-22 the native receiver, and native common/src/main/java/thaumcraft/common/lib/research/ResearchAspectCombination.java:54-62 the native payment rule"
         ],
         "notes": [
-          "The 1.7 IMessage became the native research combination code."
+          "The 1.7 IMessage became the native research combination code.",
+          "The native intent carries no position, no player and no bonus flag: the table comes from the open menu of the sender and the payment comes from the table itself, so the arbitrary position of the original is closed."
         ],
         "reviewed_sha256": {
           "original": "943898cacd07e2dab43d6aaec306bd174003f111e5a24605f0ffc79b3461fe86",
@@ -40886,14 +41045,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketAspectDiscovery.java:1-65 the aspect discovery sync",
-          "native common/src/main/java/thaumcraft/common/lib/network/AspectDiscoveryPayload.java the native payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/AspectDiscoveryPayload.java the native payload",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketAspectDiscovery.java:9-35 the aspect discovery notice of the original",
+          "native common/src/main/java/thaumcraft/common/lib/network/AspectDiscoveryPayload.java the native payload of the same aspect tag",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeNotificationNetworking.java the native sender"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The notice is an appearance only channel that is sent by the server after the aspect was really opened; the client never asks for it."
         ],
         "reviewed_sha256": {
           "original": "9c7b35d1cb41a6ac8d5f693d3762dc1108510bc6beff21e6d49f5f373f4b87e9",
@@ -40936,14 +41099,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketAspectPlaceToServer.java:1-95 the aspect placement",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteLearning.java the native aspect placement"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteLearning.java the native aspect placement",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketAspectPlaceToServer.java:9-60 the aspect placement request of the original with the table position, the aspect and the cell",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketAspectPlaceToServer.java:37-56 the original handler, which wrote into the table at the position of the packet",
+          "native common/src/main/java/thaumcraft/common/lib/network/ResearchTableEditPayload.java the native intent with a menu generation, a session token, the table revision, the action, the cell and the aspect tag",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:101-183 the native preflight of the note, the ink, the cell kind, the opened aspect and the payment",
+          "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:355-381 the native commit of the edit in one block without listeners"
         ],
         "notes": [
-          "The 1.7 IMessage became the native research note learning code."
+          "The 1.7 IMessage became the native research note learning code.",
+          "The native intent carries no world position: the table comes from the open menu of the sender, and every check of the original (note, ink, cell, opened aspect, payment) happens before any mutation."
         ],
         "reviewed_sha256": {
           "original": "523d0f6953d74cc7b92b819539e12b81eb6464a2d47b4e112521be2ad18aa6c0",
@@ -40983,14 +41152,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketAspectPool.java:1-78 the aspect pool sync",
-          "native common/src/main/java/thaumcraft/common/lib/network/AspectPoolPayload.java the native payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/AspectPoolPayload.java the native payload",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketAspectPool.java:9-46 the aspect pool notice of the original with a key, an amount and a total",
+          "native common/src/main/java/thaumcraft/common/lib/network/AspectPoolPayload.java the native payload of the same three fields",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeNotificationNetworking.java the native sender"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The client no longer treats the total of the notice as an authority: the knowledge snapshot is the only authority, which closes the original's possibility of a desynchronised pool."
         ],
         "reviewed_sha256": {
           "original": "b9ad3bf015fcd55c6f68f9a9ec7e3def67249af20f4a1b903cac2d5e48266ad6",
@@ -41035,14 +41208,21 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketPlayerCompleteToServer.java:1-110 the research completion",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchCompletion.java, ResearchPurchase.java the native completion"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchCompletion.java, ResearchPurchase.java the native completion",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketPlayerCompleteToServer.java:9-77 the research completion request of the original with a key, a dimension, a user name and a type",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketPlayerCompleteToServer.java:36-72 the original handler, which checked the user name but NOT the price of the research",
+          "native common/src/main/java/thaumcraft/common/lib/network/ResearchPurchasePayload.java and common/src/main/java/thaumcraft/common/lib/network/ResearchNoteRequestPayload.java the two native intents of the two original types",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchPurchase.java:79-102 the native preflight of the existence, the mode, the prerequisites, the clue and the price",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteIssuance.java:48-113 the native note issuance, which generates and validates the note BEFORE it spends the ink"
         ],
         "notes": [
-          "The 1.7 IMessage became the native research completion code."
+          "The 1.7 IMessage became the native research completion code.",
+          "The original server did not check the price of a research, the GUI did. The native server repeats the whole preflight before it spends a single research point.",
+          "The native note request generates the note first and spends the ink afterwards, so a failing generation cannot destroy the ink of the player."
         ],
         "reviewed_sha256": {
           "original": "6f6305dcfacd9c86ba98387320d26fa677c4378b1b0f77f7310b5650a3bff895",
@@ -41230,14 +41410,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketSyncAspects.java:1-73 the aspect sync",
-          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java the native payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java the native payload",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketSyncAspects.java:9-45 the aspect snapshot of the original with the list of the open aspects and their pools",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java the native knowledge snapshot that carries the open aspects with their pools",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:51-57 the native sender of the snapshot"
         ],
         "notes": [
-          "The 1.7 IMessage became an Architectury payload."
+          "The 1.7 IMessage became an Architectury payload.",
+          "The native snapshot replaces the whole client knowledge in one native NBT payload; the facts of the original snapshot are all present in it."
         ],
         "reviewed_sha256": {
           "original": "27a52692c77132d5c54fa9477d678a0140252059c413f95648a2ff1be25c6f07",
@@ -41515,14 +41699,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketSyncWipe.java:1-39 the wipe packet",
-          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java the native login wipe"
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java the native login wipe",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketSyncWipe.java:9-28 the empty wipe packet of the original, the first of the ten login packets",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:25-35 the native login sync, whose snapshot REPLACES the client knowledge instead of erasing it",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:42-48 the native client receiver"
         ],
         "notes": [
-          "The 1.7 IMessage became the native login wipe."
+          "The 1.7 IMessage became the native login wipe.",
+          "The native snapshot replaces the client knowledge, so the original's wipe and its following nine snapshots are one native operation with the same result."
         ],
         "reviewed_sha256": {
           "original": "a854a1221cb0e0c9254d22575f0f4942d14e4a9d29d9396da27cd1de446f7cc3",
@@ -42288,10 +42476,17 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/utils/EntityUtils.java the entity helpers of the original",
-          "native common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java the native helpers"
+          "native common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java the native helpers",
+          "oracle thaumcraft/common/lib/utils/EntityUtils.java:78 the original minimum range test compares the LINEAR distance (Entity.getDistanceToEntity) with the range",
+          "oracle thaumcraft/common/lib/utils/EntityUtils.java:79 the original pick padding is Math.max(0.8F, entity.getCollisionBorderSize()), and 1.7.10 getCollisionBorderSize is width/2",
+          "oracle thaumcraft/common/lib/utils/EntityUtils.java:199-200 the original visible points are boundingBox.minY + height/2 and boundingBox.minY + eyeHeight",
+          "native common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java:128 the native now compares the squared distance with the squared range",
+          "native common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java:131 the native now pads the candidate box with max(0.8, width/2)",
+          "native common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java:319-345 the native visible points are anchored at the bottom of the box again"
         ],
         "notes": [
-          "Every original method name is present; the champion attribute of the original became the native champion data (championId, modifier, modifierAttribute, modifierUuid)."
+          "Every original method name is present; the champion attribute of the original became the native champion data (championId, modifier, modifierAttribute, modifierUuid).",
+          "CORRECTED in the 2026-10-23 sharedinfra wave: the previous parity_verified verdict was wrong. The native compared the SQUARED distance with the minimum range, padded the pick box with the entity height instead of the collision border size and anchored the two visible points at the TOP of the bounding box, which moved the vision cone a whole entity height too high. All three are fixed and pinned by the new test common/src/test/java/thaumcraft/common/lib/utils/EntityUtilsParityTest.java (authored, not executed)."
         ],
         "reviewed_sha256": {
           "original": "0e85778cdd1337ac6b2f47f793879b445f69b018654022dbbd72b6f61f22c49c",
@@ -42391,11 +42586,18 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/utils/InventoryUtils.java the inventory helpers of the original",
-          "native common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java the native helpers"
+          "native common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java the native helpers",
+          "oracle thaumcraft/common/lib/utils/InventoryUtils.java:446-464 the original hotbar wand query walks the nine hotbar slots and asks for the first wand whose leftover is smaller than the request",
+          "oracle thaumcraft/common/items/wands/ItemWandCasting.java:331-343 the original addVis returns the leftover of the request in WHOLE vis",
+          "oracle thaumcraft/common/lib/utils/InventoryUtils.java:330-337 and :366-373 the original damage comparison treats the metadata 32767 as any value when the caller ignores the damage",
+          "oracle thaumcraft/common/lib/utils/InventoryUtils.java:339 the original crafting comparison also needs stack0.stackSize <= stack0.getMaxStackSize()",
+          "native common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java:445-478 the native hotbar query with the original leftover and the nine hotbar slots",
+          "native common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java:396-417 the native damage and stack size rules of the two comparisons"
         ],
         "notes": [
           "Every original method name is present in the native class and the native adds the ore tag helpers (matchesOre, oresOf, registerOreTag) that replace the 1.7 ore dictionary.",
-          "Forced 1.21.1 change: the 1.7 ore dictionary had no 1.21.1 equivalent, so the comparison had to be rebuilt (see GolemItemMatch)."
+          "Forced 1.21.1 change: the 1.7 ore dictionary had no 1.21.1 equivalent, so the comparison had to be rebuilt (see GolemItemMatch).",
+          "CORRECTED in the 2026-10-23 sharedinfra wave: the previous parity_verified verdict was wrong. The native hotbar wand query had the inverted condition (it returned the first wand WITHOUT room), scanned all thirty six inventory slots instead of the nine hotbar slots, mixed the centivis unit of the native wand with the whole vis unit of the original and could overflow. The two stack comparisons had lost the 32767 any-metadata wildcard and the crafting stack size limit. All are fixed and pinned by the new test common/src/test/java/thaumcraft/common/lib/utils/InventoryUtilsParityTest.java (authored, not executed)."
         ],
         "reviewed_sha256": {
           "original": "9e4f3ec4f90eb70136d8b87a2872df72c74b6089f34a6c21315c25db77aeb8aa",
@@ -42550,11 +42752,14 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/utils/Utils.java the helpers of the original",
-          "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java the native helpers"
+          "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java the native helpers",
+          "oracle thaumcraft/common/lib/utils/Utils.java:65-86 the original useBonemealAtLoc refuses a crop that cannot grow any further with its IGrowable.canGrow test",
+          "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java:281-303 the native useBonemealAtLoc keeps the canGrow refusal"
         ],
         "notes": [
           "The native class keeps every original helper except the three that were moved into their own classes, and it says so in its own header (SpecialMining, LootTables, BiomeColumns).",
-          "The world-gen helpers of the original (genGear, getGearItemForSlot, generateLoot) live in the native LootTables and travel gear code."
+          "The world-gen helpers of the original (genGear, getGearItemForSlot, generateLoot) live in the native LootTables and travel gear code.",
+          "CORRECTED in the 2026-10-23 sharedinfra wave: the native useBonemealAtLoc grew a crop that had already reached its last stage; the original refused it with its IGrowable.canGrow test. The fix restores the refusal."
         ],
         "reviewed_sha256": {
           "original": "71354950b20076e4a09f38ace318cb8b20cfa628ff4f98c97a15355fe95880a4",

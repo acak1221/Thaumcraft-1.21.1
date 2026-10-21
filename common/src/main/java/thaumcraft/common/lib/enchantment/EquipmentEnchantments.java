@@ -16,9 +16,13 @@ public final class EquipmentEnchantments {
         return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath("thaumcraft", path));
     }
     public static int level(ItemStack stack, Level world, ResourceKey<Enchantment> enchantment) {
-        if (stack.isEmpty()) return 0;
-        return world.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment)
-                .map(holder -> stack.getEnchantments().getLevel(holder)).orElse(0);
+        // A missing stack, a detached world or an unknown enchantment is "no
+        // enchantment", never a crash in the living tick of a player.
+        if (stack == null || stack.isEmpty() || world == null || enchantment == null) return 0;
+        return world.registryAccess().lookup(Registries.ENCHANTMENT)
+                .flatMap(lookup -> lookup.get(enchantment))
+                .map(holder -> stack.getEnchantments().getLevel(holder))
+                .orElse(0);
     }
     /** The original LivingUpdateEvent runs on both sides before movement. Repair alone is server-side. */
     public static void playerLivingTick(Player player) {

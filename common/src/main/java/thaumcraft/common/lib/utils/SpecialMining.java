@@ -65,7 +65,12 @@ public final class SpecialMining {
     public static boolean succeeds(float roll, float chance, float factor) { return roll <= chance * factor; }
 
     /** What the table says a dropped item turns into, if anything. */
-    public static Result result(ItemStack stack) { return RESULTS.get(BuiltInRegistries.ITEM.getKey(stack.getItem())); }
+    public static Result result(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return null;
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        // Map.of rejects a null key, so an unregistered item is no listed result.
+        return key == null ? null : RESULTS.get(key);
+    }
 
     /** Whether this tool carries the original special mining. */
     public static boolean carries(ItemStack tool) { return tool.getItem() instanceof ItemElementalPickaxe || dowsing(tool); }
@@ -83,6 +88,8 @@ public final class SpecialMining {
         Result result = result(dropped);
         if (result == null || !succeeds(roll, chance, result.factor())) return dropped.copy();
         Item output = BuiltInRegistries.ITEM.get(result.output());
+        // A cluster that the registry does not know keeps the original drop.
+        if (output == null) return dropped.copy();
         return new ItemStack(output, dropped.getCount());
     }
 

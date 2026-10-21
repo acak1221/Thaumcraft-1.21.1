@@ -63,6 +63,7 @@
     "PureWaterMaterialMixin",
     "PureVanillaWaterFlowMixin",
     "PureBucketFillMixin",
+    "DeathBucketFillMixin",
     "ChampionEntityDataMixin",
     "ChampionMobMixin",
     "ChampionTickMixin",

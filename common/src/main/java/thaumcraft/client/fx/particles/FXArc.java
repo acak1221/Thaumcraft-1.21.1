@@ -11,6 +11,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11;
 import thaumcraft.client.renderers.VisNetRender;
@@ -70,8 +71,19 @@ public final class FXArc extends Particle {
     public static void arc(EntityEldritchGolem golem, double x, double y, double z,
                            double tx, double ty, double tz, float red, float green, float blue, float heightGain) {
         if (!(golem.level() instanceof ClientLevel level)) return;
-        FXArcSparkle.emit(level, tx, ty, tz, red, green, blue);
-        Minecraft.getInstance().particleEngine.add(new FXArc(level, x, y, z, tx, ty, tz, red, green, blue, heightGain));
+        arc(level, x, y, z, tx, ty, tz, red, green, blue, heightGain);
+    }
+
+    /**
+     * The original arc lightning of any source (oracle {@code thaumcraft/client/ClientProxy.java:1152-1159}):
+     * the target sparkle is created first, then the arc itself. The block arc of the original
+     * {@code PacketFXBlockArc} is exactly this call with the height gain of one half.
+     */
+    public static void arc(Level level, double x, double y, double z,
+                           double tx, double ty, double tz, float red, float green, float blue, double heightGain) {
+        if (!(level instanceof ClientLevel clientLevel)) return;
+        FXArcSparkle.emit(clientLevel, tx, ty, tz, red, green, blue);
+        Minecraft.getInstance().particleEngine.add(new FXArc(clientLevel, x, y, z, tx, ty, tz, red, green, blue, heightGain));
     }
 
     /** Original FXArc:112-121 and :127-136, the vertical and the horizontal crossed strip. */

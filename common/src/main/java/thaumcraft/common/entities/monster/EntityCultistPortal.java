@@ -133,6 +133,9 @@ public class EntityCultistPortal extends Monster {
             level().setBlock(at, state, 3);
             // Original EntityCultistPortal:157 - the banner shows its face to the portal.
             if (level().getBlockEntity(at) instanceof TileBanner tile) tile.setFacing(banner.facing());
+            // Original EntityCultistPortal:157 - the banner draws the arc lightning of the portal.
+            if (level() instanceof ServerLevel server)
+                thaumcraft.common.lib.network.BlockFxNetworking.sendArc(server, this, at);
             playSound(EntityCultist.sound("wandfail"), 1.0F, 1.0F);
         }
     }
@@ -154,6 +157,9 @@ public class EntityCultistPortal extends Monster {
         int variant = CultistRoomRules.crateRarity(level().getRandom().nextFloat());
         level().broadcastEntityEvent(this, (byte) 16);
         level().setBlock(at, lootCrateState(variant), 3);
+        // Original EntityCultistPortal:169 - the crate draws the arc lightning of the portal.
+        if (level() instanceof ServerLevel server)
+            thaumcraft.common.lib.network.BlockFxNetworking.sendArc(server, this, at);
         playSound(EntityCultist.sound("wandfail"), 1.0F, 1.0F);
     }
 

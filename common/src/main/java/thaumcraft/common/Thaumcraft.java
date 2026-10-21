@@ -177,6 +177,8 @@ public final class Thaumcraft {
         ShockFxNetworking.initServer();
         ExcavationFxNetworking.initServer();
         VisNetFxNetworking.initServer();
+        // The original block visual channels: the arc lightning, the node bolt and the crucible bubbles.
+        thaumcraft.common.lib.network.BlockFxNetworking.initServer();
         VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.

@@ -63,16 +63,10 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
             if (Minecraft.getInstance().screen == null) thaumcraft.client.gui.GuiResearchPopup.renderHud(graphics);
         });
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            thaumcraft.client.ThaumcraftWarpClient.reset();
-            thaumcraft.client.ThaumcraftRunicClient.reset();
-            thaumcraft.client.lib.PlayerNotifications.reset();
-            thaumcraft.client.ThaumcraftTravelGearClient.reset();
-            thaumcraft.client.ThaumcraftTaintSporesClient.reset();
-            // The common network layer owns the original's client-config restore
-            // (oracle EventHandlerNetwork.clientLogsOut) through the Architectury
-            // client event; this call is the loader's own belt-and-braces path
-            // and is idempotent.
-            thaumcraft.common.config.ThaumcraftSettings.resetClient();
+            // The common layer owns the original's client restore (oracle
+            // EventHandlerNetwork.clientLogsOut) through the Architectury client event; this call is the
+            // loader's own belt-and-braces path and is idempotent.
+            thaumcraft.client.ClientStateReset.reset();
         });
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)
                 .registerReloadListener(new net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener() {

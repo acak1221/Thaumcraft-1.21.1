@@ -836,6 +836,41 @@ public class EntityGolemBase extends AbstractGolem {
         public static final int ESSENTIA_GOTO = 3;
         /** Original {@code AIHomeReplace}: the home replacement of the Fill, the Empty, the Gather and the Use. */
         public static final int HOME_REPLACE = 0;
+        /**
+         * Original {@code AIHomePlace}: the placement of the Fill cargo into the home inventory.
+         * Oracle EntityGolemBase:272.
+         */
+        public static final int HOME_PLACE = 1;
+        /**
+         * Original {@code AIHomeDrop}: the drop of the Fill cargo at the home.
+         * Oracle EntityGolemBase:273.
+         */
+        public static final int HOME_DROP = 2;
+        /**
+         * Original {@code AIFillTake}: the take of the Fill golem from a marked container.
+         * Oracle EntityGolemBase:274.
+         */
+        public static final int FILL_TAKE = 3;
+        /**
+         * Original {@code AIEmptyPlace}: the placement of the Empty cargo into a marked container.
+         * Oracle EntityGolemBase:280.
+         */
+        public static final int EMPTY_PLACE = 1;
+        /**
+         * Original {@code AIEmptyDrop}: the drop of the Empty cargo at a marked target.
+         * Oracle EntityGolemBase:281.
+         */
+        public static final int EMPTY_DROP = 2;
+        /**
+         * Original {@code AISortingPlace}: the placement of the Sorting cargo into a marked container.
+         * Oracle EntityGolemBase:337.
+         */
+        public static final int SORTING_PLACE = 1;
+        /**
+         * Original {@code AIHomeTakeSorting}: the take of the Sorting golem from the home.
+         * Oracle EntityGolemBase:339.
+         */
+        public static final int HOME_TAKE_SORTING = 4;
         /** Original {@code AIUseItem}: the click of the Use, together with the home replacement. */
         public static final int USE_ITEM = 0;
         /** Original {@code AIHomeTake}: the take of the Use. */

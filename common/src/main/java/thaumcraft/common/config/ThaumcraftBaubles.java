@@ -41,6 +41,9 @@ public final class ThaumcraftBaubles {
     public static final RegistrySupplier<ItemRunicBauble> RUNIC_GIRDLE = runic("runic_girdle", BaubleType.BELT, 10, ItemRunicBauble.Upgrade.NONE, Rarity.RARE);
     public static final RegistrySupplier<ItemRunicBauble> RUNIC_GIRDLE_KINETIC = runic("runic_girdle_kinetic", BaubleType.BELT, 9, ItemRunicBauble.Upgrade.KINETIC, Rarity.RARE);
     public static final java.util.Map<String,RegistrySupplier<ItemBaubleBlank>> DISCOUNT_RINGS=discountRings();
+    /** The three blank baubles the original creative tab showed, by their original flattened id. */
+    public static final java.util.Map<String,RegistrySupplier<ItemBaubleBlank>> MUNDANE_BLANKS=java.util.Map.of(
+            "mundane_amulet",MUNDANE_AMULET,"mundane_ring",MUNDANE_RING,"mundane_belt",MUNDANE_BELT);
     private static java.util.Map<String,RegistrySupplier<ItemBaubleBlank>> discountRings() {
         var result=new java.util.LinkedHashMap<String,RegistrySupplier<ItemBaubleBlank>>();
         for(var aspect:thaumcraft.api.aspects.Aspect.getPrimalAspects())result.put(aspect.getTag(),ITEMS.register("discount_ring_"+aspect.getTag(),()->new ItemBaubleBlank(props(Rarity.COMMON),BaubleType.RING,aspect)));
@@ -57,10 +60,20 @@ public final class ThaumcraftBaubles {
     public static void register() {
         if (initialized) return; initialized = true;
         COMPONENTS.register(); ITEMS.register(); MENUS.register();
-        for (RegistrySupplier<? extends Item> item : java.util.List.of(VIS_AMULET_LESSER, VIS_AMULET, HOVER_GIRDLE, MUNDANE_AMULET, MUNDANE_RING, MUNDANE_BELT,
+        for (RegistrySupplier<? extends Item> item : java.util.List.of(VIS_AMULET_LESSER, VIS_AMULET, HOVER_GIRDLE,
                 RUNIC_RING_LESSER, RUNIC_RING, RUNIC_RING_CHARGED, RUNIC_RING_HEALING, RUNIC_AMULET, RUNIC_AMULET_EMERGENCY, RUNIC_GIRDLE, RUNIC_GIRDLE_KINETIC))
             CreativeTabRegistry.append(ThaumcraftContent.TAB, item);
-        for(var item:DISCOUNT_RINGS.values())CreativeTabRegistry.append(ThaumcraftContent.TAB,item);
+        // The discount rings are NOT in the creative tab. The original ItemBaubleBlanks is one item with the
+        // metadata 0 the amulet, 1 the ring, 2 the belt and 3..8 the six discount rings, and its
+        // func_150895_a (getSubItems) lists ONLY the metadata 0, 1 and 2 (oracle
+        // thaumcraft/common/items/baubles/ItemBaubleBlanks.java:73-77). The discount rings reach the player
+        // through the loot bags (oracle Config.java:536-538 and 572) and through the wizard trade (oracle
+        // VillageWizardManager.java:51), never through the tab.
+        for (var blank : thaumcraft.common.lib.baubles.RunicBaubleRules.creativeTabBlanks()) {
+            var supplier = MUNDANE_BLANKS.get(blank.id());
+            if (supplier == null) throw new IllegalStateException("The original creative tab blank is not registered: " + blank.id());
+            CreativeTabRegistry.append(ThaumcraftContent.TAB, supplier);
+        }
         thaumcraft.common.lib.network.AccessoryNetworking.init();
     }
 }

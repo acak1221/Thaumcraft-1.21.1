@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import thaumcraft.common.config.ThaumcraftLegacyTiles;
+import thaumcraft.common.blocks.BlockFluidDeath;
 import thaumcraft.common.lib.items.EquipmentRules;
 
 /**
@@ -58,7 +58,18 @@ public final class ItemBucketDeath extends Item {
         if (!level.isClientSide && EquipmentRules.bucketDeathClearsSpot(air, solid, liquid)) {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
         }
-        level.setBlock(pos, ThaumcraftLegacyTiles.DEATH_FLUID.get().defaultBlockState(), Block.UPDATE_ALL);
+        // Original ItemBucketDeath:103 - the death fluid is poured with the metadata three, the cell that
+        // still holds all four quanta. The original finite fluid keeps the quanta of a cell in its metadata,
+        // so the metadata three IS the source cell, the native level zero.
+        level.setBlock(pos, BlockFluidDeath.bucketCellState(), Block.UPDATE_ALL);
         return true;
+    }
+
+    /**
+     * The original Item.rayTrace of the bucket: the source-only hit of the eye ray, the same hit the native
+     * empty bucket uses.
+     */
+    public static BlockHitResult fullHit(Level level, Player player) {
+        return getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
     }
 }

@@ -169,12 +169,18 @@ Minecraft 1.21.1** (декомпиляция `minecraft-merged-1.21.1` из кэ
 
 | Проверка | Результат |
 |---|---|
-| `javac` всего `common/src/main/java` (1329 файлов) против `minecraft-merged-1.21.1` из кэша Loom | **105 ошибок, ровно те же, что и на чистом `HEAD`** (посимвольное сравнение списков ошибок): ни одной новой. Ошибки чужие — доступ, который даёт `thaumcraft.accesswidener`, и более старый `datafixerupper` в рукописном classpath |
-| `javac` `common/src/test/java/thaumcraft/blocks/BlockVisibilityAndPistonTest.java` вместе с main | **0 ошибок в тесте** (105 чужих — те же) |
+| `javac` всего `common/src/main/java` (1329 файлов) + нового теста против `minecraft-merged-1.21.1` из кэша Loom с применённым `thaumcraft.accesswidener` | **0 ошибок** |
+| Тот же `javac` против **ванильного** jar без access widener'а | **105 ошибок, ровно те же, что и на чистом `HEAD`** (посимвольное сравнение списков ошибок): ни одной новой. Ошибки чужие — доступ, который даёт `thaumcraft.accesswidener`, и приватный в ванилле `BlockEntityType.BlockEntitySupplier` |
+| **JUnit 5, 13 наборов, реальный прогон** (Gradle не запускался: собраны `javac`-ом классы `common` и теста, запущен `junit-platform-launcher` против тех же классов Minecraft 1.21.1) | **13 найдено, 13 пройдено, 0 падений** |
+| Мутации теста (правится и откатывается) | снятая форма рендера камня → падает `theCosmeticStonesAreDrawnAsTheirModel` («expected MODEL but was INVISIBLE»); снятое правило тайла эльдрича → падают три набора («the eldritch stones the piston moves: expected 5 but was 0»); снятое правило тайла «ничто» → падают два набора («the covered filler holds no tile») |
 | `python3 scripts/porting/convert_assets.py --verify` | `missing_references: 0` (2903 локальные ссылки, 3879 текстур) |
 | `python3 scripts/porting/update_scope_ledger.py --check` | **не запускается в этой среде**: локальный снимок оракула (`/home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle`) не совпадает с отпечатками, на которых построен ledger (703 устаревших отпечатка). На чистом `HEAD` — тот же самый отказ, то есть причина не в этой правке. `counts` не тронут, `stale_review_fingerprints` в нём остался `0` |
-| JUnit | **не выполнены** (Gradle запускать нельзя) |
 | Игра/клиент | **не запускались** |
+
+Оговорка к прогону JUnit: он выполнялся **вне загрузчика**, поэтому миксин
+`PerStateBlockEntityMixin` в нём не применялся. Набор проверяет контракт
+(`PerStateBlockEntity`), который миксин читает, и то, что миксин зарегистрирован в общей
+конфигурации; само действие миксина в мире проверяется только игровым тестом (рекомендация в §6).
 
 ## 6. Что осталось незакрытым (и почему)
 
@@ -204,9 +210,12 @@ Minecraft 1.21.1** (декомпиляция `minecraft-merged-1.21.1` из кэ
    (`BlockAiry.java:171-174`), поэтому узел в банке-узле остаётся без тайла. В 1.7.10 у md 0 был
    `TileNode` (`BlockAiry:275-283`). Это домен тайлов, здесь не трогал.
 
-## 7. Тесты (авторованы, **не выполнены**)
+## 7. Тесты (авторованы и **выполнены** вне Gradle)
 
-`common/src/test/java/thaumcraft/blocks/BlockVisibilityAndPistonTest.java` (JUnit 5, 13 наборов):
+`common/src/test/java/thaumcraft/blocks/BlockVisibilityAndPistonTest.java` (JUnit 5, 13 наборов)
+и `common/src/test/java/thaumcraft/blocks/BlockVisibilityTestRegistry.java` (слушатель сессии
+JUnit, который строит блоки порта до того, как ванильный bootstrap заморозит реестры — тот же
+приём, что у `thaumcraft.world.EldritchTestRegistry`):
 
 * `theCosmeticStonesAreDrawnAsTheirModel`, `theEldritchStonesAreDrawnAsTheirModel`,
   `theDeviceFamiliesAndTheMagicBoxAreDrawnAsTheirModel` — форма рендера **не** `INVISIBLE`
@@ -226,8 +235,14 @@ Minecraft 1.21.1** (декомпиляция `minecraft-merged-1.21.1` из кэ
 * `theStonesAreSelectedAsTheFullCubeOfTheOriginal`, `theFillerWithoutASelectionBoxHasNone` — рамка
   выделения совпадает с оригиналом.
 
-Ни один из них **не запускался**: Gradle в этой волне запускать нельзя, а JUnit-прогон требует
-собранных классов. Компиляция теста проверена `javac`-ом (0 ошибок в файле теста).
+**Прогон:** Gradle в этой волне запускать нельзя, поэтому набор собран и выполнен вручную:
+`javac` (common + тест, classpath — настоящие классы Minecraft 1.21.1 из кэша Loom с
+применённым `thaumcraft.accesswidener`) и `junit-platform-launcher` с запуском сессии.
+Результат: **13 наборов, 13 пройдено, 0 падений**. Мутации (см. §5) показывают, что набор
+падает на обоих дефектах.
+
+Чего прогон **не** покрывает: сам миксин в нём не применялся (вне загрузчика), поэтому его
+действие в мире проверяется только игровым тестом — рекомендация в §6.
 
 ## 8. Файлы
 
@@ -238,7 +253,10 @@ Minecraft 1.21.1** (декомпиляция `minecraft-merged-1.21.1` из кэ
 `BlockSilverwoodNode.java`, `BlockStoneDevice.java`, `BlockWoodenDevice.java`.
 
 Добавлены (3): `blocks/PerStateBlockEntity.java`, `mixin/PerStateBlockEntityMixin.java`,
-`common/src/test/java/thaumcraft/blocks/BlockVisibilityAndPistonTest.java`.
+`common/src/test/java/thaumcraft/blocks/BlockVisibilityAndPistonTest.java` (+ `…/blocks/
+BlockVisibilityTestRegistry.java` и одна строка в
+`common/src/test/resources/META-INF/services/org.junit.platform.launcher.LauncherSessionListener`).
 
-Изменены (2): `common/src/main/resources/thaumcraft-common.mixins.json` (одна строка),
-`docs/porting/scope-ledger.json` (доказательства и заметки 12 единиц; `counts` не тронут).
+Изменены (3): `common/src/main/resources/thaumcraft-common.mixins.json` (одна строка),
+`common/src/test/resources/META-INF/services/org.junit.platform.launcher.LauncherSessionListener`
+(одна строка), `docs/porting/scope-ledger.json` (доказательства и заметки 12 единиц; `counts` не тронут).

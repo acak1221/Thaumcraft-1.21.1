@@ -1,0 +1,1955 @@
+{
+  "thaumcraft/api/IRepairable.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/IRepairable.java:6 empty marker interface",
+      "native common/src/main/java/thaumcraft/api/IRepairable.java:4 empty marker interface"
+    ],
+    "notes": [
+      "Both are empty eligibility markers; the native keeps the same public name and package."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "60919744f97d5602851b3a32b4f97926ab039c4fc6b989420666e68f7f607adc",
+      "legacy": "9e534dde816fe683e40ca02afa255f6d0c490665c02f93a6f75f601ed493a204"
+    }
+  },
+  "thaumcraft/api/IRepairableExtended.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/IRepairableExtended.java:16 boolean doRepair(ItemStack, EntityPlayer, int)",
+      "native common/src/main/java/thaumcraft/api/IRepairableExtended.java:8 boolean doRepair(ItemStack, Player, int)",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentRepair.java:248 calls doRepair before the vis payment"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: EntityPlayer became Player; the call order (hook first, then vis payment) is preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "89c43ba209c9260786e51eb51c7a29074de820b762fb8cbb7f38a29b69a428f5",
+      "legacy": "58b1423360b7c69d795fd1da14e883037ca46423ed369f71930e8d16351f852b"
+    }
+  },
+  "thaumcraft/api/IRunicArmor.java": {
+    "disposition": "port",
+    "source_semantics": "equivalent",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/IRunicArmor.java:12 int getRunicCharge(ItemStack)",
+      "native common/src/main/java/thaumcraft/api/IRunicArmor.java:6 int getRunicCharge(ItemStack)",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicArmor.java finalCharge() adds the RS.HARDEN byte as the original did"
+    ],
+    "notes": [
+      "Signature unchanged; the runic charge is answered by the same armour/bauble items."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "49d86026ff7fdb2bd2f1fc5923680735c81135ce54ce440509c10be56c84dec4",
+      "legacy": "ebbf95608b410839d887b3c4c8c4e4211dd6faed2c5378c72ebf0b140b5bf824"
+    }
+  },
+  "thaumcraft/api/ItemRunic.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/ItemRunic.java:19 ItemRunic(int charge) with a fixed runic charge",
+      "native common/src/main/java/thaumcraft/api/ItemRunic.java:16 ItemRunic(int charge) with stacksTo(1)",
+      "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java RUNIC table keeps the original charges 8/7, 1/5/4/4, 10/9"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: an item needs Properties and the native stack size was pinned to 1 (the original base ItemRunic allowed 64; every concrete accessory set 1 itself).",
+      "The original 1.7 metadata variants became separate native items; the charge table is preserved in RunicBaubleRules."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "9c84e849d6e864218effcec85b2bbaa1b6e5481513d239d7c67b457b5aace00d",
+      "legacy": "6b8fb24b7bbdff3b0ccb5794345818bc5985c45e311dc55f0ec7e63a45a33902"
+    }
+  },
+  "thaumcraft/api/crafting/IInfusionStabiliser.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/crafting/IInfusionStabiliser.java:12 canStabaliseInfusion(World, int, int, int)",
+      "native common/src/main/java/thaumcraft/api/crafting/IInfusionStabiliser.java:8 canStabaliseInfusion(Level, BlockPos)",
+      "native common/src/main/java/thaumcraft/common/lib/infusion/InfusionStructure.java:122 calls the hook for every surrounding block",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockCrystal.java:59 and BlockTallowCandle.java:59 return true, the original answer"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the three int coordinates became a BlockPos; the original spelling of the method is kept.",
+      "The original also accepted Blocks.field_150465_bP unconditionally; the native accepts AbstractSkullBlock (standing and wall skull), a documented wider 1.21 block family."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "775310dd5cef263a0d47641545666a0ba4113eba82de4f264a8100f8a07d9779",
+      "legacy": "3d48635c3d02ad938b749ee4c3d93c89df3decd127cd26bdf208c5db19b67967"
+    }
+  },
+  "thaumcraft/api/crafting/InfusionEnchantmentRecipe.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/crafting/InfusionEnchantmentRecipe.java:167 constructor, recipeXP = max(1, getMinCost(1)/3)",
+      "native common/src/main/java/thaumcraft/api/crafting/InfusionEnchantmentRecipe.java:166 recipeXP = max(1, getMinCost(1)/3)",
+      "native common/src/main/java/thaumcraft/common/crafting/InfusionEnchantmentRecipe.java is the real recipe the api view delegates to"
+    ],
+    "notes": [
+      "The api class is now a thin view over the native recipe; the numeric enchantment id became a registry holder.",
+      "calcInstability/calcXP/getEssentiaMod keep the original formulas (sum/2 + instability, recipeXP*(1+level), level + 0.1 per other enchantment)."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "90b20a289e2785e3230fdd486d772513754e0a2f18d1e2123f33bdf074ad2bff",
+      "legacy": "6a1fe71b1d4a8eb251da2dfd77019ff5e7817ae9b43b66f16e1cd906ce8417ab"
+    }
+  },
+  "thaumcraft/api/crafting/InfusionRecipe.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/crafting/InfusionRecipe.java:37 matches(ArrayList, ItemStack, World, EntityPlayer)",
+      "native common/src/main/java/thaumcraft/api/crafting/InfusionRecipe.java:54 matches delegates to InfusionStackRecipe",
+      "native common/src/main/java/thaumcraft/common/crafting/InfusionStackRecipe.java:104 removes the first matching component, not a sorted list"
+    ],
+    "notes": [
+      "The native api view delegates to the data-driven InfusionStackRecipe; the Object[] result form became named result patches (ADVANCEDGOLEM, HELMGOGGLES, the three masks).",
+      "The original's areItemStacksEqual lost the Forge ore-dictionary shortcut (no 1.21 equivalent); the tag comparison and the damage rule are kept."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "038651988e808872d36cc701cee5163a70f0affe0cb226e03c246f6954990197",
+      "legacy": "72f7a92ef8f444eebd9d7fe84d6e066f176fc2e3920414153e1ceb4e8563d8bc"
+    }
+  },
+  "thaumcraft/api/wands/FocusUpgradeType.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/wands/FocusUpgradeType.java:24-32 the nine core upgrade types with their aspects",
+      "native common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java:12-32 all twenty-one types with the same ids and aspects",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFire.java:46-47 and the sibling foci define ids 9..20",
+      "native common/src/main/java/thaumcraft/api/wands/FocusUpgradeType.java:21-32 hoisted the twelve focus specific types into the api catalogue"
+    ],
+    "notes": [
+      "The twelve focus specific upgrade types were hoisted from the focus classes into the api catalogue; ids, names, textures and aspect lists match the oracle exactly.",
+      "The public mutable types[] array became a private immutable map with get(id); equals still compares the id."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "50ea5138ecd8a68c86d2694878b7bc502b9f43ce73a86b797920070ece60ec04",
+      "legacy": "b69004ae46d34ea729833e00e033513ced431d141622cad3eaea1c7749053653"
+    }
+  },
+  "thaumcraft/api/wands/IWandFocus.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/wands/IWandFocus.java:20-49 the focus contract",
+      "native common/src/main/java/thaumcraft/api/wands/IWandFocus.java:15-48 the same contract",
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentFrugal.java:40 the only consumer tests instanceof IWandFocus"
+    ],
+    "notes": [
+      "Forced 1.21.1 changes: IIcon became ResourceLocation, MovingObjectPosition became BlockHitResult, EntityPlayer/World became Player/Level and the numeric enchantment id became a ResourceKey.",
+      "Like the original, no class implements the interface; the three wand enchantments therefore only accept books, which the native reproduces."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "c47ee7944e284fee41d33c11a8caa545c5a537199c3538b22c20c672a7a93611",
+      "legacy": "22d3c5d2990c2d36c39e593db2c1328b6a80be6229be72d79d5ed1eaded28748"
+    }
+  },
+  "thaumcraft/api/wands/ItemFocusBasic.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/api/wands/ItemFocusBasic.java:140-160 getAppliedUpgrades/applyUpgrade over the NBT list upgrade",
+      "native common/src/main/java/thaumcraft/api/wands/ItemFocusBasic.java:41-61 getAppliedUpgrades/canApplyUpgrade/applyUpgrade",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/FocusUpgradeData.java:18 the five ordered rank slots",
+      "oracle thaumcraft/api/wands/ItemFocusBasic.java:64-90 the tooltip (cost per aspect, upgrade names with levels)"
+    ],
+    "notes": [
+      "The native api class is a thin view; the upgrade data moved into FocusUpgradeData (a five slot component instead of an NBT list) and the focus specific upgrade tables stayed in the focus items.",
+      "applyUpgrade now checks the rank bounds and the item specific upgrade table before writing, which removes the original's out of range crash.",
+      "The original's getOrnament/getFocusDepthLayerIcon null stubs are not on the native base class; the ornament is a second model layer (models/item/focus_hellbat.json) and the depth icon a layer0 texture."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "a0833679fa091700cfcc39034015d6c7f8829a83d11e852f6e30a30028404e14",
+      "legacy": "93657233a67dc65e7ac94e688bad05b933eb963a5ddb22ffb69bf54fa3dd565b"
+    }
+  },
+  "thaumcraft/client/fx/other/FXShieldRunes.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/fx/other/FXShieldRunes.java:33 the entity FX that follows the target's body midpoint",
+      "native common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java:22 the native particle with the same hemis.obj mesh",
+      "native common/src/main/java/thaumcraft/client/fx/particles/RunicHitParticle.java:65 frame = min(15, (int)(14*fade)+1), the original frame rule"
+    ],
+    "notes": [
+      "The 1.7 EntityFX became a 1.21 Particle with a hand-built OBJ mesh; the retained textures hemis1..15.png are used.",
+      "The original's ripple frame set for a non cultist mob is not reproduced; the native always uses the hemis frames."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "9987d7e822f96a2ce838a142ead9677517279b849bc79aabb5f0c8a66d7db936",
+      "legacy": "98666f037d5b31a2cbdc590146a85f5a443f8c3d2de7e765058684bf4fa6f15d"
+    }
+  },
+  "thaumcraft/client/gui/GuiFocalManipulator.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/gui/GuiFocalManipulator.java:68-69 the 192x233 layout",
+      "native common/src/main/java/thaumcraft/client/gui/GuiFocalManipulator.java:55-56 the 192x233 layout",
+      "oracle thaumcraft/client/gui/GuiFocalManipulator.java:311-313 the 200 * 2^(rank-1) upgrade price",
+      "native common/src/main/java/thaumcraft/common/lib/foci/FocalUpgradeCosts.java:49 int amount = 200 << (rank - 1)"
+    ],
+    "notes": [
+      "The gui is a native AbstractContainerScreen with the same texture, the same icon positions and the same rank*8 xp cost.",
+      "The original's direct client side startCraft call became a session/revision bound START request with a server ACK."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "124d33b964312449861fed3cbaf81c51004275dd8efb7a67c21049e052131853",
+      "legacy": "4bb1375222f9e7cc1f44b6bc85ef16e1026667a3a40a3a513bde215e5c90cc8e"
+    }
+  },
+  "thaumcraft/client/gui/GuiFocusPouch.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/gui/GuiFocusPouch.java:176-177 the 175x232 gui",
+      "native common/src/main/java/thaumcraft/client/gui/GuiFocusPouch.java:88 the 175x232 gui",
+      "oracle thaumcraft/client/gui/GuiFocusPouch.java:185 the locked hotbar marker",
+      "native common/src/main/java/thaumcraft/client/gui/GuiFocusPouch.java:90 the locked hotbar marker"
+    ],
+    "notes": [
+      "The 1.7 GuiContainer became a native AbstractContainerScreen; the art size and the locked slot marker are unchanged."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "32a658e84efccc936255a3858a1de51ab8bcc3bb15c4776efeff8d103bf419cf",
+      "legacy": "c5cd272b640a264878b3b4528e437cfe2a84156db20b3521658ad37b48aac3db"
+    }
+  },
+  "thaumcraft/client/renderers/models/ModelInfusionPillar.java": {
+    "disposition": "port",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelInfusionPillar.java the native pillar model",
+      "oracle thaumcraft/client/renderers/models/ModelInfusionPillar.java has no 1.7 oracle counterpart; the pillar geometry lives in BlockInfusionPillar/ConfigBlocks"
+    ],
+    "notes": [
+      "Legacy only row: the 1.12 reference class was ported to the native model class; the oracle has no counterpart, so there is no original semantics to compare."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "f4cb74bdf58326cbe8747720aa4e09bbce01bffd3fb680b4ad0440ef685dcbcc"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileFocalManipulatorRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileFocalManipulatorRenderer.java the tile entity renderer of the focal manipulator",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileFocalManipulatorRenderer.java the native renderer",
+      "native common/src/main/java/thaumcraft/client/FocalManipulatorClientEffects.java the particle effect that belongs to it"
+    ],
+    "notes": [
+      "The 1.7 TileEntitySpecialRenderer became a native block entity renderer; the effect work moved into the dedicated client effects class."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "f2c3187ff79cffe867b3989f202bb247b62dc77ff8d44b12f2f5c2baeae3cc3d",
+      "legacy": "00feb65d60df8b0d4efe2a52fd06c31eb137137e6ee187e2f9ec7bf2c420a94c"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileInfusionPillarRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileInfusionPillarRenderer.java the pillar renderer",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileInfusionPillarRenderer.java the native pillar renderer",
+      "native common/src/main/java/thaumcraft/client/renderers/models/ModelInfusionPillar.java the retained pillar model"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the 1.7 IModelCustom renderer became the native model/block entity renderer pair; the model and its textures are retained."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "6f1ce2eb9d456046448ceb1028ac7341d751d437695a9e92b7aa81531b0d8d76",
+      "legacy": "62ca4897c701530cac15b9c33161440388bf6fe5ce32da1562eb6dc24c823e83"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TilePedestalRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TilePedestalRenderer.java the pedestal renderer",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TilePedestalRenderer.java the native pedestal renderer"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the renderer mechanism differs (native block entity renderer); the rendered object is the same pedestal."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "452f165c64a89efadbb64593cf54fe897e6836cb82387f44f5a13a8da0dcf7b9",
+      "legacy": "207d8e7d0ab2010f3f0828eb9e2669ab741acbe9e04e24b434a0d35c0b97c326"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileRunicMatrixRenderer.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileRunicMatrixRenderer.java:33 renders the infusion matrix and its halo",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileInfusionMatrixRenderer.java:72 renders the halo when the matrix crafts",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileInfusionMatrixRenderer.java:24 the retained infuser.png texture"
+    ],
+    "notes": [
+      "The original class name calls the matrix 'runic matrix'; the native renamed it to TileInfusionMatrixRenderer and kept the halo effect."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "9384e0bea4f44ebffa42bdf24b15eb8d4819bf04320376e27b7323a6df277db3",
+      "legacy": "5f59f0b03827bbbe63523898f6d8959ea209f5edc548297359f89db7ef6ad9f2"
+    }
+  },
+  "thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java the wand pedestal renderer",
+      "native common/src/main/java/thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java the native wand pedestal renderer"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the renderer mechanism differs; the wand, the focus and the draining beam are the same objects."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "109523fc3019b776058d1a227e393aec5b18064a01ce2646dbd0ae2adf507d22",
+      "legacy": "f3fd5810ef64dc80fb6884139172282bacbee8c84c9e67101c84448ddda8a387"
+    }
+  },
+  "thaumcraft/common/config/recipes/ConfigRecipesInfusionDeviceSlice.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "evidence": [
+      "native common/src/main/resources/data/thaumcraft/recipe/infusion/ holds the data driven infusion recipes",
+      "oracle thaumcraft/common/config/ConfigRecipes.java:340-348 the original device infusion recipes (wand pedestal, node stabilizer adv, jar brain, golem cores)"
+    ],
+    "notes": [
+      "Legacy only helper (no 1.7 oracle counterpart): the native replaced the code registered recipes with data files.",
+      "The original NODESTABILIZERADV recipe has no native infusion recipe file; the advanced node stabilizer belongs to the advanced device family (M09).",
+      "The original WANDPEDFOC (the wand pedestal with the focus block) has no separate native recipe file; only the plain wand pedestal exists."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "1608686098b8c47b5afd91a1960044f0ce251a6e5ca55edd5d83b1578c1fcff3"
+    }
+  },
+  "thaumcraft/common/config/recipes/ConfigRecipesInfusionEquipmentSlice.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "native common/src/main/resources/data/thaumcraft/recipe/infusion/elemental_axe.json, fortress_helm.json, void_robe_chest.json, boots_traveller.json and the other equipment recipes",
+      "oracle thaumcraft/common/config/ConfigRecipes.java:340-352 the original equipment infusion recipes with their instability and aspect costs"
+    ],
+    "notes": [
+      "Legacy only helper (no 1.7 oracle counterpart): the native replaced the code registered recipes with data files; the aspect costs, the instability and the research keys were checked against the oracle (for example focus_warding: terra/tutamen/ordo 25 and cognitio 10, instability 4, research FOCUSWARDING)."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "04a9d162d211a64a398f4b0d520630f8c909e6fb3c7f1896de4821380d98c010"
+    }
+  },
+  "thaumcraft/common/config/recipes/ConfigRecipesInfusionSlice.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "evidence": [
+      "native common/src/main/resources/data/thaumcraft/recipe/infusion/wand_cap_thaumium.json, wand_cap_void.json, wand_rod_*.json, staff_rod_primal.json",
+      "oracle thaumcraft/common/config/ConfigRecipes.java:340 the original wand cap and rod infusion recipes"
+    ],
+    "notes": [
+      "Legacy only helper (no 1.7 oracle counterpart): the native replaced the code registered recipes with data files.",
+      "The original CAP_silver recipe only exists when another mod supplies a silver ingot; the native has no copper or silver cap recipe, so the add-on caps are not ported."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "f342516e853c010b3c08013bb5d7e204df17c62ff85d53f2325eee95e98276eb"
+    }
+  },
+  "thaumcraft/common/container/ContainerFocalManipulator.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/container/ContainerFocalManipulator.java the container of the focal manipulator",
+      "native common/src/main/java/thaumcraft/common/container/ContainerFocalManipulator.java the native container",
+      "native common/src/main/java/thaumcraft/common/tiles/TileFocalManipulator.java:110 startCraft(id, player, revision) is the only start path"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the container is an AbstractContainerMenu with an extended menu payload; the single focus slot and the start admission are preserved.",
+      "The native adds a session and revision fence (a declared safety addition) and the FOCALMANIPULATION research check."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "f113d57f181190079a35912056a85896c0cc50101547dd60464113bf851cf69f",
+      "legacy": "f1c9592ed120fc1f4903175be0c10c9e547b1203baef8dce786adbb269aaf542"
+    }
+  },
+  "thaumcraft/common/container/ContainerFocusPouch.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/container/ContainerFocusPouch.java:143 the eighteen focus slots at 37+slot%6*18, 51+slot/6*18",
+      "native common/src/main/java/thaumcraft/common/container/ContainerFocusPouch.java:37 the same eighteen slot coordinates",
+      "oracle thaumcraft/common/container/ContainerFocusPouch.java:162 the player inventory rows at 8+column*18, 151+row*18",
+      "native common/src/main/java/thaumcraft/common/container/ContainerFocusPouch.java:40 the same player inventory coordinates"
+    ],
+    "notes": [
+      "The slot layout, the locked source slot and the 1.7 reverse return order are preserved; the native adds a physical pouch binding so a stale close cannot copy another pouch."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "5b07b33596b583f17e88d363dd1b42f01320e420e64ec3c8f261c74f10380ba6",
+      "legacy": "b54e5e40b1b14496b3f44299bb51e5334c0ce203033ef833a5259e02dc685a61"
+    }
+  },
+  "thaumcraft/common/container/InventoryFocusPouch.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/container/InventoryFocusPouch.java:18 an eighteen slot inventory with an ItemFocusBasic filter",
+      "native common/src/main/java/thaumcraft/common/container/InventoryFocusPouch.java:103 an eighteen slot SimpleContainer with the same filter",
+      "native common/src/main/java/thaumcraft/common/container/InventoryFocusPouch.java:112 canPlaceItem requires an ItemFocusBasic"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the 1.7 IInventory became a native SimpleContainer; the eighteen slots, the focus only filter and the max stack size one are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "66776fd336ae2c298014bb4067c098fc25c0f5ec9d732c2c930f8ba4900443d7"
+    }
+  },
+  "thaumcraft/common/items/armor/Hover.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/Hover.java the hover state of a player",
+      "native common/src/main/java/thaumcraft/common/items/armor/Hover.java the native hover state"
+    ],
+    "notes": [
+      "The hover flag moved from a static map to the native player state; the callers (the traveller boots, the hover harness and the hover girdle) use it unchanged."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "661397ebbb3f5b38e08275713d2d988c613431e5cbd9ba213116d77e4d4a0d22",
+      "legacy": "3463e0e1293bc592c661fd11fca06d4ad67f420a4b2dc3d643860b49f5c0603c"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemBootsTraveller.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemBootsTraveller.java:44 the 350 durability",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemBootsTraveller.java:14 durability(350), rarity rare",
+      "oracle thaumcraft/common/items/armor/ItemBootsTraveller.java:76-86 the step height 1.0, the 0.055 ground bonus and the 0.03/0.05 air bonus",
+      "native common/src/main/java/thaumcraft/common/items/armor/TravelGearRules.java:8-10 the same numbers"
+    ],
+    "notes": [
+      "The worn tick moved into TravellerBoots and the native movement hooks; the fall distance reduction of 0.25 and the water quarter bonus are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "aec037084b4fdce6686e2b042fdffc992678d467eba16a6801ed05445a43d020",
+      "legacy": "f39391f11eb06ec56d9517072acf4ee7c626c793190255317805d05ad3c51ba1"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemFortressArmor.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemFortressArmor.java:154-172 the special armour ratios armor/25, armor/35 (magic) and armor/20 (fire/explosion) and the set multiplier 0.875+0.125 per piece+0.05 per mask",
+      "native common/src/main/java/thaumcraft/common/items/armor/FortressRules.java:6 SET_BASE 0.875, SET_PER_PIECE 0.125, SET_PER_MASK 0.05",
+      "native common/src/main/java/thaumcraft/common/lib/MagicWard.java:27-30 DIVISOR 35 and FIRE_DIVISOR 20",
+      "oracle thaumcraft/common/items/armor/ItemFortressArmor.java:122-135 the goggles and mask NBT",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:110 FORTRESS_GOGGLES and FORTRESS_MASK components"
+    ],
+    "notes": [
+      "The 1.7 ISpecialArmor contract has no 1.21 equivalent; the first pass was reproduced as the MagicWard hook with the same ratios, the same set multiplier and the same points of wear.",
+      "The fortress material keeps protection 3/7/6/3, durability factor 40, enchantability 25 and the thaumium ingot repair."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "47d18bd36233dfde2356eaa715ea72627568b7edeec75e92aa4edee4849f361d",
+      "legacy": "573013210fdc8d8d0a69b78c2c9fefab5b61994a753a620fe8f587dd5028beb4"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemGoggles.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemGoggles.java:48 the 350 durability",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemGoggles.java:24 durability(350), rarity rare",
+      "oracle thaumcraft/common/items/armor/ItemGoggles.java:97 the 5 percent vis discount",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemGoggles.java:28 the 5 percent vis discount"
+    ],
+    "notes": [
+      "The node sight and the in-world popups are always on, as in the original; the repair material is the gold ingot (the native SPECIAL material)."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "56a1947f9d9583f8e4b1cc3f14f634ca7c47e814e945d9a0742971ae9f1f3575",
+      "legacy": "c937522c02a44223013498511d79d3356572ab400a37332527eb2a99605bd55b"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemHoverHarness.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemHoverHarness.java:63 the 400 durability, epic rarity",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemHoverHarness.java:34 durability(400), rarity epic",
+      "oracle thaumcraft/common/items/armor/ItemHoverHarness.java:106 the 5 percent air and 2 percent other vis discount",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemHoverHarness.java:37 the same discount"
+    ],
+    "notes": [
+      "The jar of fuel, the right click menu and the fuel counter moved into HarnessData and the native hover harness container; the discount and the durability are unchanged."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "be1fe254bba6d31a220f24c155ad63e71bcea270a9bce92e5ce0af49a85c1cfc",
+      "legacy": "475c3525c73865cfcf085e53c0fc14b2428d60dae44f782100803eb173bf7e53"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemRobeArmor.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:97 the default colour 6961280 (0x6A3880)",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:28 DEFAULT_COLOR 0x6A3880",
+      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:139 the 1 percent (boots) and 2 percent vis discount",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:42 the same discount",
+      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:154-160 the water cauldron wash",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:83 the same wash"
+    ],
+    "notes": [
+      "The 1.7 display NBT became the DataComponents.DYED_COLOR component; the durability 400/375/325 (SPECIAL 25 times the vanilla 16/15/13) is preserved.",
+      "The native deliberately does not use the vanilla DYED_ITEM semantics, so the colour maths stays the original's."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "fcd68d0481ceb0a1c17fa35d5db591e3c3e4be437622110695a9c186bee5b627",
+      "legacy": "f8b513f72be6bca5240638da906e52a61f56ad7d212deb5bbf0132d7b2231dc9"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemThaumiumArmor.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemThaumiumArmor.java:45 the runic charge 0",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemThaumiumArmor.java:17 the runic charge 0",
+      "oracle thaumcraft/api/ThaumcraftApi.java:51 armorMatThaumium durability 25, protection 2/6/5/2, enchantability 25",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:88 the same material numbers"
+    ],
+    "notes": [
+      "The 1.7 ItemArmor became a native ArmorItem with a registry backed material; the protection, the durability and the enchantability are unchanged.",
+      "The armour texture and the four per slot icons became the native layer textures."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "80b4288b0fbfb5ce7b40821993c25f2e59835805f4046493b4e52a4bf813ccf7",
+      "legacy": "e40a004788ffabce6b6bd8c9bb1d48b3b11f1961f0f52e24865703739404078e"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemVoidArmor.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemVoidArmor.java:168-180 the self repair (once per inventory tick and once per worn tick) and the one warp",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidArmor.java:47-52 the same repair and warp",
+      "native common/src/main/java/thaumcraft/common/items/VoidMetal.java:36-39 armorTick repairs a worn piece twice"
+    ],
+    "notes": [
+      "The 1.7 onUpdate/onArmorTick hooks became the native inventoryTick; a worn piece mends two points a second, exactly as the original."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "6b8541a2ccf676e3ddee8f0bf579a04e6212a6c9fe811e28927eee77ca52249b",
+      "legacy": "c94fc9226f421b143d0f04b13755a6656b3131dcbdb0546ec4af57ab7af46f22"
+    }
+  },
+  "thaumcraft/common/items/armor/ItemVoidRobeArmor.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "partial",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the void thaumaturge hood, robe and leggings",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java:28 the 5 percent discount, two warp, the 0x6A3880 default colour",
+      "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the armour texture of the void robes"
+    ],
+    "notes": [
+      "The worn look is an explicit interim: the native uses the void armour layers, the original ModelRobe is not ported (declared in ThaumcraftEquipment).",
+      "The 1.7 ItemArmor material became the native ArmorMaterial; the protection 3/7/6, the durability factor 10 and the enchantability 10 are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "a8f6a6817993c759a90e9f04cb5aad79ddd946aeadb35f0e825318e35b1b46f6",
+      "legacy": "a6ac808d99fc740b9119d7daf88cb84cb6e20d25bc5555c60e02defd8bc3b95b"
+    }
+  },
+  "thaumcraft/common/items/armor/RecipesRobeArmorDyes.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/RecipesRobeArmorDyes.java:52-110 the dye colour arithmetic",
+      "native common/src/main/java/thaumcraft/common/items/armor/RecipesRobeArmorDyes.java:25-30 the 1.7 sheep colour table",
+      "native common/src/main/java/thaumcraft/common/items/armor/RecipesRobeArmorDyes.java:18 one recipe serves both robe families"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the 1.7 IRecipe became a native CustomRecipe; the sheep colour table and the average/max normalisation are the original's.",
+      "The single native recipe covers the original's two recipe classes (the enchanted robes and the void robes) through the DyedRobe marker."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "69cb894ca4bb08a512f604a39ebdbac4dd56691a7ce4253d8d9d1119db52b821",
+      "legacy": "75b70a9c68c241ba7c03ed8e2ece84a3068cd3985cfed6b0faa5afd6e7536af4"
+    }
+  },
+  "thaumcraft/common/items/armor/RecipesVoidRobeArmorDyes.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/armor/RecipesVoidRobeArmorDyes.java:37-110 the void robe dye recipe (identical to the enchanted robe recipe)",
+      "native common/src/main/java/thaumcraft/common/items/armor/RecipesRobeArmorDyes.java:46 the DyedRobe marker accepts both robe families"
+    ],
+    "notes": [
+      "The original's second, identical recipe class was merged into the single native RecipesRobeArmorDyes recipe."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "3595af08e93b25b7a84c623403c869fd0085707a8465601e296bb2b66c8fd9b3",
+      "legacy": "fd07ea9822ee4ef54adebc679209b6fac1806252e9b00706519d3134ccac9f11"
+    }
+  },
+  "thaumcraft/common/items/baubles/ItemAmuletRunic.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/baubles/ItemAmuletRunic.java:80 the runic charge 8 (metadata 0) and 7 (metadata 1)",
+      "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the amulet charges 8 and 7",
+      "native common/src/main/java/thaumcraft/common/items/baubles/ItemRunicBauble.java the flattened bauble item"
+    ],
+    "notes": [
+      "The 1.7 metadata variants became separate native items (runic_amulet, runic_amulet_emergency); the charge table and the rarity are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "5594e2cbb985bd582b00de922b9189ee693904c71c3127eeec3813d8b0d90637",
+      "legacy": "642368e64fbfe6cec6b55669c11e9cf1a87036296e834236ce01acb47b861664"
+    }
+  },
+  "thaumcraft/common/items/baubles/ItemAmuletVis.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/baubles/ItemAmuletVis.java:143 the capacities 25000 (metadata 1) and 2500 (metadata 0) centivis",
+      "native common/src/main/java/thaumcraft/common/items/baubles/ItemAmuletVis.java:26 the same capacities",
+      "oracle thaumcraft/common/items/baubles/ItemAmuletVis.java:99-105 the transfer of at most five vis every fifth tick",
+      "native common/src/main/java/thaumcraft/common/items/baubles/ItemAmuletVis.java:58-69 the same transfer"
+    ],
+    "notes": [
+      "The metadata variants became two native items (lesser and full); the NBT vis map became a data component.",
+      "The VISAMULET research gate is kept in canEquip."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "38d1f18a68a445a531dac16d62e3bf697f149c009ac49e953e914024753775b5",
+      "legacy": "9858636d5a750d1c22b8098c05d059cc4a76226d105ddc19c4b5f634ced5a09c"
+    }
+  },
+  "thaumcraft/common/items/baubles/ItemBaubleBlanks.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/baubles/ItemBaubleBlanks.java the nine blank baubles",
+      "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the nine blank baubles and their one percent discount",
+      "native common/src/main/java/thaumcraft/common/items/baubles/ItemBaubleBlank.java the flattened blank item"
+    ],
+    "notes": [
+      "The nine metadata blanks (amulet, ring, belt and the six discount rings) became separate native items; the one percent per primal discount is preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "711cee7c6da2f8e1bd9a09a2b05b0effde2921a46fd6fdaa6bca8c6d4f55da07",
+      "legacy": "a0032e98ca8f5f80768db9d0c7288b501c4fab82ccf80688083657e9dd0e7e9c"
+    }
+  },
+  "thaumcraft/common/items/baubles/ItemGirdleHover.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/baubles/ItemGirdleHover.java:92 the runic charge 0",
+      "native common/src/main/java/thaumcraft/common/items/baubles/ItemGirdleHover.java the native hover girdle"
+    ],
+    "notes": [
+      "The 1.7 metadata item became a single native item; the runic charge is 0 as in the original and the hover behaviour lives in the native hover state."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "bd090644e567f85ef5c46a205c723def166ffa763f5ed2b538053b9f661317f3",
+      "legacy": "8d845a71a7cb18430d3493e86916ffac69bc50c33df04c218b4d62cbb94ee2ff"
+    }
+  },
+  "thaumcraft/common/items/baubles/ItemGirdleRunic.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/baubles/ItemGirdleRunic.java:66 the runic charge 10 (metadata 0) and 9 (kinetic)",
+      "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the girdle charges 10 and 9",
+      "oracle thaumcraft/common/items/baubles/ItemGirdleRunic.java:73 the belt bauble slot",
+      "native common/src/main/java/thaumcraft/common/items/baubles/ItemGirdleRunic.java:30 BaubleType.BELT"
+    ],
+    "notes": [
+      "The metadata variants became two native items; the charge table and the belt slot are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "4741478a9b1d581a02f5b6dbd9724640432776c45182267ae090aa85c60c8a5e",
+      "legacy": "7bbb94a6a138ebfa78f76cb389f4456a2873bdf10cbcd3a16297320586cae388"
+    }
+  },
+  "thaumcraft/common/items/baubles/ItemRingRunic.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/baubles/ItemRingRunic.java:94 the runic charge 1 (lesser), 5 (runic) and 4 (charged and healing)",
+      "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the ring charges 1, 5, 4, 4",
+      "oracle thaumcraft/common/items/baubles/ItemRingRunic.java:78 the uncommon rarity of the lesser ring only",
+      "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the same rarity table"
+    ],
+    "notes": [
+      "The four metadata variants became four native items; the charges and the rarity table are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "02ca73757b08344168e16ccea4fe4810541a648b7a3ad0828d5e2cdd0ee3090d",
+      "legacy": "3eda64a4c47afd4a8e2f7ee045765911669357a9f5b2963ddf34985d8c952f63"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemBowBone.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemBowBone.java:52 the 512 durability and the stack size 1",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:26-48 the 512 uses, the enchantability 3, the draw divisor 10, the eighteen tick release and the arrow speed 2.5",
+      "oracle thaumcraft/common/items/equipment/ItemBowBone.java:79-91 the power formula and the arrow damage 2.5 plus the power bonus",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:70-82 the same formula"
+    ],
+    "notes": [
+      "The 1.7 ItemBow copy became a native BowItem with the original differences (the charge time divided by ten, the arrow speed and the damage bonus, the auto release after eighteen ticks)."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "d26e827fa2b2f2b65d61d22f9a356f5ba6379676fdfff4598900cf59696c2052",
+      "legacy": "dc951529d94790c8b95d690ee9410c5dfad560ff4e6e44455544ef83064966a2"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemCrimsonSword.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemCrimsonSword.java:54 the CVOID material 4/200/8.0/3.5/20",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:104-121 the same material and the 7.5 attack damage",
+      "oracle thaumcraft/common/items/equipment/ItemCrimsonSword.java:92-96 the sap (weakness 60, hunger 120) and the pvp exemption",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:126-139 the same rules",
+      "oracle thaumcraft/common/items/equipment/ItemCrimsonSword.java:81-85 the self repair every twenty ticks and the two warp",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemCrimsonSword.java:35-46 the same repair and warp"
+    ],
+    "notes": [
+      "The 1.7 ItemSword became a native SwordItem; the material, the damage, the sap, the self repair, the warp and the rarity are the original's."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "83b9642594385d91bea5406ad775a8d261c57e28d1c535070df49f8366c013ad",
+      "legacy": "257570e65848681fbab967bc14ba7b92754de0e2363cdf87e1e6e9ad363b9465"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemElementalAxe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemElementalAxe.java:111-136 the item vacuum (range 10, the 0.35 motion clamp)",
+      "native common/src/main/java/thaumcraft/common/lib/world/StreamAxeItemMotion.java:26 VACUUM_RANGE 10 and the pull geometry",
+      "oracle thaumcraft/api/ThaumcraftApi.java:49 toolMatElemental tier 3, 1500 uses, speed 10, damage 3, enchantability 18",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java the elemental tier with the same numbers"
+    ],
+    "notes": [
+      "The 1.7 tool became a native DiggerItem; the held right click vacuum and the chopping harvest are the original's.",
+      "The comment about an unimplemented repair self repair is stale: the native EnchantmentRepair does repair IRepairable items."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "56cca3ea1bd8ac286581bc3e299497444a24b22f4acadd6a308a80b799494520",
+      "legacy": "7a805b3833a4306678a13746a9eb6a8a8c5513ed96326c520996393d14cf22ed"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemElementalHoe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemElementalHoe.java:87-122 the 3 x 3 tilling, the bone meal and the sapling growth",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java:12-26 the same numbers (one use for the bone meal, 20/5 and 150/25 for the saplings)",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java:53-88 the same behaviour"
+    ],
+    "notes": [
+      "The 1.7 ItemHoe became a native HoeItem; the tilling square, the bone meal fallback, the sapling growth and the wear are the original's.",
+      "The original's sparkle effects are client particles that the native does not port."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "ca9d0f5cd9bfb2f63fb392feffca3fc7271b488e679b4fbbcec1c30e40be5e07",
+      "legacy": "30464d1393f4b6908a468e429250bf6f80d1f28a7e5fd680977d2e4650e0d81f"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemElementalPickaxe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemElementalPickaxe.java:75-80 the two seconds of fire on a left click and the pvp exemption",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalPickaxe.java:28-44 FIRE_SECONDS 2 and the same pvp rule",
+      "oracle thaumcraft/common/items/equipment/ItemElementalPickaxe.java:82-84 the five uses of a right click",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalPickaxe.java:30 CLICK_WEAR 5"
+    ],
+    "notes": [
+      "The 1.7 onLeftClickEntity became the native hurtEnemy (a landed hit), a declared adaptation as for the void tools.",
+      "The original's client ore scan overlay is not ported."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "19a8f8f357a98807d861fceeb864df2d6c4c80abff2deeb26c894b94398eed9d",
+      "legacy": "b69403f7b7053a95766458256c96f8a1c665bb578a35ae89fe8c062e154d5a20"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemElementalShovel.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemElementalShovel.java:100-170 the 3 x 3 copy square, the orientation and the one use per block",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ElementalShovelGeometry.java:18-43 the three orientations and the same layout",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalShovel.java:41-52 the orientation component"
+    ],
+    "notes": [
+      "The 1.7 ItemShovel became a native ShovelItem; the square, the orientation, the inventory consumption and the wear are the original's.",
+      "The original's ghost preview of the squares and the sparkles are not ported."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "bf901a74caa43413cd522d1617a0ae76428397b6601d04429815307afc068d02",
+      "legacy": "3d758f5f8f8269a1e6fac119deb9a660afe9b79236446fd605a323cd85316dc4"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemElementalSword.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemElementalSword.java:98-121 the lift (0.08 per tick, the 0.5 ceiling and the 0.2 reset), the 1.2 fall damping and the 2.5 block push",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java:12-22 the same numbers",
+      "oracle thaumcraft/common/items/equipment/ItemElementalSword.java:136-138 one point of wear every twentieth tick",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java:65-68 the same wear and sound"
+    ],
+    "notes": [
+      "The 1.7 use-tick loop became the native use tick; the lift, the damping, the push and the wear period are the original's.",
+      "The original's smoke spirals are client particles that the native does not port, and the sword block pose became the bow pose (a declared 1.21 adapter)."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "6e55a07fe7316483893e0def9b7388e7b3935a39358dcd1609cc54a51522ae5d",
+      "legacy": "0a82113ed0930ab9b37b03aa3af57dc041eb252685a748f761923c31e3298d8d"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemPrimalArrow.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemPrimalArrow.java:31-40 the six metadata arrows",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalArrow.java:35-55 the six native arrow items and the arrow creation hook",
+      "oracle thaumcraft/common/entities/projectile/EntityPrimalArrow.java:355-367 the damage 2.1, the earth factor 1.5 and the weak factor 0.8",
+      "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:222-228 the same damage factors"
+    ],
+    "notes": [
+      "The six metadata variants became six native items; the aspect of the element and the damage travel with the arrow instead of a metadata value."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "fb3093699e02933056878aea1ea46a38dff43735d8cf88cfb4d1d28cc26096b1",
+      "legacy": "77b9aec8c1426544b6cbb408487cffe7d29a3f22c38d9a5ff4acfcfa19fb8207"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemPrimalCrusher.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemPrimalCrusher.java:111-150 the eight neighbours in the plane across the looked at face and one use per neighbour",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalCrusher.java:58-92 the same neighbour harvest",
+      "oracle thaumcraft/common/items/equipment/ItemPrimalCrusher.java:151-159 the enchantability 20 and the two warp",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalCrusher.java the same enchantability and warp"
+    ],
+    "notes": [
+      "The 1.7 ItemTool became a native DiggerItem with the union of the pickaxe and the shovel mine tags; the neighbour harvest, the wear, the warp and the self repair are the original's."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "f07134b02353a53c3a45b3512a6074b6a399da9c3c2082518f13a1fc6eb9c028",
+      "legacy": "4c1d8fba8667b479d51722f2e1182191e1bb821f084af82347d83daf3be8c3bc"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemThaumiumAxe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemThaumiumAxe.java:37 the vanilla 1.7 axe of the thaumium material",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemThaumiumAxe.java the native axe (legacy 3 + material 2)",
+      "oracle thaumcraft/api/ThaumcraftApi.java:48 toolMatThaumium tier 3, 400 uses, speed 7, damage 2, enchantability 22",
+      "native common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java the thaumium tier with the same numbers"
+    ],
+    "notes": [
+      "The legacy additive damage (axe 3 + material 2) is kept instead of the modern vanilla axe damage; the rarity, the repair ingredient and the tier are the original's."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "1060fac440f3ccd3ab9119ebe9de5522eb84a8e1318d4525b05580766c95d264",
+      "legacy": "4f6fe643166b3b8b71a6a2c1af6d5e8c4f5ed0155b9761873a86cf5e05b179bf"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemThaumiumHoe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemThaumiumHoe.java:48 the enchantability 5",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemThaumiumHoe.java the enchantability 5 and no attack damage entry",
+      "oracle thaumcraft/common/items/equipment/ItemThaumiumHoe.java the 1.7 hoe extends Item, so its hit hook spends no durability",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemThaumiumHoe.java hurtEnemy returns false"
+    ],
+    "notes": [
+      "The 1.7 ItemHoe extended Item, not ItemTool: the native keeps the missing attack damage and the free hit."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "35ab66e12f8478657a8f8852020efea2c431a5a8c70b480f02fa37c4bd8c8031",
+      "legacy": "4a21bc92dfd678ec5025b2362ba775634cfbaf0bd0818304b5af6989702f9a68"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemThaumiumPickaxe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemThaumiumPickaxe.java:37 the vanilla 1.7 pickaxe of the thaumium material",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemThaumiumPickaxe.java the native pickaxe (legacy 2 + material 2)"
+    ],
+    "notes": [
+      "The legacy additive damage is kept; the rarity, the repair ingredient and the tier are the original's."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "fbd250e9f058b6dd1e640832d9c6ffc9add372c9d79963fe4d262383126dfc99",
+      "legacy": "de809f7f6cbcf32c93d6d62ea440d39a090799c3bd2bbba328fc3aead01dfe9a"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemThaumiumShovel.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemThaumiumShovel.java:37 the vanilla 1.7 shovel of the thaumium material",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemThaumiumShovel.java the native shovel (legacy 1 + material 2)"
+    ],
+    "notes": [
+      "The legacy additive damage is kept; the rarity, the repair ingredient and the tier are the original's."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "4582fdb2efb960c49926e482c69e79ba1ae9e3192680cc16ae19d8fb01302968",
+      "legacy": "57a2381d3bd75e87cf614c618b65d85d4ed211089bcf2e4cc6ca00068df4944c"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemThaumiumSword.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemThaumiumSword.java:33 the vanilla 1.7 sword of the thaumium material (damage 4 + 2)",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemThaumiumSword.java SwordItem.createAttributes(tier, 4, -2.4F)"
+    ],
+    "notes": [
+      "The 1.7 attack speed 1.6 became the 1.21 modifier -2.4 on the base 4, so the numbers agree; the rarity and the repair ingredient are the original's."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "185f16609649fae9e03b8ba994430456be988a10f8adceffae1e972a9a447c5e",
+      "legacy": "ac6f01c1b1ec787725321fee073c5d5f8deb3aab68b29cd74a7b140e6528a5d2"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemVoidAxe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemVoidAxe.java:85-89 the wither of 80 ticks on a left click",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidAxe.java:33 the wither through VoidMetal.wither",
+      "native common/src/main/java/thaumcraft/common/items/VoidMetal.java:17 TOOL_WITHER 80 and the self repair every 20 ticks"
+    ],
+    "notes": [
+      "The original's onLeftClickEntity became the native hurtEnemy: a landed hit is the native equivalent of the 1.7 left click hook (a declared approximation).",
+      "The legacy additive damage (axe 3 + material 3) and the one warp are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "d656b3c58a3d2d9f50873a78f12ce4922a81707badf8df194ed366a8096fce52",
+      "legacy": "14b614c2e95df4fde7aead42d6516abf42982d88322a999dbceec972b800a5b5"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemVoidHoe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemVoidHoe.java:35 the enchantability 5 and the wither of 80 ticks",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidHoe.java the enchantability 5 and the wither"
+    ],
+    "notes": [
+      "The 1.7 hoe extends Item, so its hit hook spends no durability; the native keeps that."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "79149b571910473ac8023b009d97dbd38acc0ae321ae1a40cb73dc9e493ec2f1",
+      "legacy": "93c68201291a8c100c869ac015acfea60437a543b4a97e12d95891dff1c57b54"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemVoidPickaxe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemVoidPickaxe.java:85-89 the wither of 80 ticks on a left click",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidPickaxe.java:33 the wither through VoidMetal.wither"
+    ],
+    "notes": [
+      "The legacy additive damage (pickaxe 2 + material 3), the self repair and the one warp are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "b94102016fafa9f3339858844dd32a13f7cb19a8c6abea257127078802ad4642",
+      "legacy": "9f00143d9d6c7521e37c4d6a3afd3540def8aeb3ca5bd2091f07409b401ce08f"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemVoidShovel.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemVoidShovel.java:85-89 the wither of 80 ticks on a left click",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidShovel.java:33 the wither through VoidMetal.wither"
+    ],
+    "notes": [
+      "The legacy additive damage (shovel 1 + material 3), the self repair and the one warp are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "ede585e051850a7333ada3bd42b5fb49814d9d6a50bf5685a9ef53559e4718f5",
+      "legacy": "8a1079e8d9ab3ff6b48866a8164bd3c3c322126ccb1e549b4a85a79ec450d978"
+    }
+  },
+  "thaumcraft/common/items/equipment/ItemVoidSword.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/equipment/ItemVoidSword.java:88-92 the wither of 60 ticks on a hit",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidSword.java:26 the wither through VoidMetal.wither",
+      "native common/src/main/java/thaumcraft/common/items/VoidMetal.java:17 SWORD_WITHER 60"
+    ],
+    "notes": [
+      "The sword withers for 60 ticks and the other void tools for 80, as in the original; the legacy additive damage (4 + 3) and the one warp are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "753ea1e6fa3823902039f7f71566ba5f245966bfbc0cb3ea17d4b7839ea924ce",
+      "legacy": "704ce3353ac7be4d2803d566c3127a033c3e9d3a379b857ef13c19c647f7d551"
+    }
+  },
+  "thaumcraft/common/items/equipment/ToolAttributeHelper.java": {
+    "disposition": "port",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "native common/src/main/java/thaumcraft/common/items/equipment/ToolAttributeHelper.java the native attribute helper",
+      "oracle thaumcraft/common/items/equipment/ToolAttributeHelper.java has no 1.7 oracle counterpart; the original tools carry their modifiers directly"
+    ],
+    "notes": [
+      "Legacy only helper (no 1.7 oracle counterpart): the helper that rebuilds the tool attribute modifiers for the 1.21 attribute component."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "b8ef261c53b3f984f0a7fd417a69c78aba24ddaa6869ba9a13b5589a52bae228"
+    }
+  },
+  "thaumcraft/common/items/wands/ItemFocusPouch.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/ItemFocusPouch.java:76-99 the eighteen slot inventory in the NBT",
+      "native common/src/main/java/thaumcraft/common/items/wands/ItemFocusPouch.java:26-47 the eighteen slots in the container component",
+      "oracle thaumcraft/common/items/wands/ItemFocusPouch.java:40-45 the stack size 1, no damage and no repair",
+      "native common/src/main/java/thaumcraft/common/items/wands/ItemFocusPouch.java:22 stacksTo(1), rarity rare"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the NBT inventory list became DataComponents.CONTAINER.",
+      "The original's one registered pouch (the bauble subclass) is the only native pouch identity; the plain ItemFocusPouch is its base."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "605478b21f7a8290803494b7258a9db9b65e08cc97fa884dfb881a9f5f6230ad",
+      "legacy": "9fdb26deafd542796fa6fcacc4b48f26f374d0b1d1dac10b42679fc04882c0db"
+    }
+  },
+  "thaumcraft/common/items/wands/ItemFocusPouchBauble.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/ItemFocusPouchBauble.java:21 BaubleType.BELT",
+      "native common/src/main/java/thaumcraft/common/items/wands/ItemFocusPouchBauble.java:74 BaubleType.BELT"
+    ],
+    "notes": [
+      "The native class keeps the original name and the belt slot; the empty bauble hooks are inherited from the native IBauble."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "35a1bf5b82bfda4d85cfce8395694d6a24552e9157cc3b8c675f31ec74802731",
+      "legacy": "0c55f794b791cb4ad7da0775d84e40f5d20dbe74ac9d81d9a64ec67a292334e1"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusExcavation.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the vis costs, the speeds and the upgrade tables were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "92979c92591011db5aca28bf990ac8028a09b150a88d7e2492596ece917e3b0c"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusFire.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFire.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the vis costs, the fireball and the beam branches were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "a8edacae64169e3e79dbcac31a1520b17b6aaeb8b5d69bd98fb42c96c7c881e0"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusFrost.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFrost.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the vis costs, the cooldowns and the shard damage were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "0df785648c027e943a5045f0514430b0fb5c36bd35ae64665f0abea3564604f6"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusHellbat.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusHellbat.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the vis costs, the cooldown and the bat flags were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "c30843bf3726fa4bfd81871d8d22672efa0a2abfa8f3b3e93f6dac59928b5b25"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusPortableHole.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the depth, the price and the hole duration were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "5a4dfbc9e0398be1452b1ae3347f1daa020aafa4238fd12fd7130c8ab8c951a3"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusPrimal.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPrimal.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the six clocked costs were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "55db6e828e7934429961c28987ad3e463a685072973c5a0265377e8e296ad69b"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusShock.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the vis costs, the cooldowns and the chain lightning were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "be3ff65fea285388ebe706229c3454ee9ccd02cb8b1046d1fa1cfde683f2fc7f"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusTrade.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the vis cost, the area size and the swap delay were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "41ed65f3b23fae1f926c24af805350029d3553546ab627497c66b307b4798f9c"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/FocusWarding.java": {
+    "disposition": "replace",
+    "source_semantics": "not_applicable",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "N + common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusWarding.java the native focus",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java the original focus of the same content"
+    ],
+    "notes": [
+      "The 1.12 reference class was renamed to the oracle name in the native port; the vis cost, the area size and the retry fence were verified against the oracle class.",
+      "The 1.7 metadata of the focus family became separate native items; the original metadata is not reachable as metadata any more."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "legacy": "252d71f0b07a8725b98b5c90d11a4241e1afc7a4d08687ecae2550592af1fb05"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusExcavation.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:70-104 the vis costs (earth 15, the silk and dowsing surcharges)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:56-63 the same costs",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:172-186 the break speeds 0.05+potency*0.1, 0.25+potency*0.25 and the obsidian triple",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:155-157 the same speeds",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:246-257 the upgrade tables per rank",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:69-76 the same tables"
+    ],
+    "notes": [
+      "The original's wrong-stack pricing (the wand is priced with the base 15 earth, never the focus surcharge) is reproduced and documented.",
+      "The original's static per player progress maps became a server owned weak keyed progress with the same coordinate only behaviour."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "e070741d52df567dc05f7a14a3ad9cf86d2d35557f66a857cd47b88464451592"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusFire.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFire.java:42-44 the vis costs (fire 10, fire 10 + order 3, fire 66 + entropy 33)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:34-40 the same costs",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFire.java:95 the fireball strength 1 + potency*0.4",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:86 the same strength",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFire.java:124-131 the 2+potency embers and the beam damage and duration",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:145-150 the same numbers"
+    ],
+    "notes": [
+      "The original's per tick base price (the wand is priced with fire 10 even for the beam and the ball) is reproduced.",
+      "The alchemist's fire level became the native ember ignition seconds 3+level, which is the original's EntityEmber 3+firey rule."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "5980686ed2b42c8c26b48618060db122cbac6281e0c7093e104fbc323efa02a7"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusFrost.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:38-40 the vis costs (water 5 + fire 2 + entropy 2, the scatter and the boulder surcharges)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFrost.java:30-38 the same costs",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:86-88 the cooldowns 200 and 500",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFrost.java:39-41 the same cooldowns",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:48-67 the shard count and damage",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFrost.java:92-99 the same numbers"
+    ],
+    "notes": [
+      "The original's wrong-stack pricing is reproduced (every activation pays the base 5/2/2)."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "4c5e8627fa4ddc467486278cf0136cf7bd9f343dd4a628e9f0ef02795614fa3b"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusHellbat.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:47-49 the vis costs (fire 200 + entropy 100 + air 100 and the bomb and devil branches)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:42-49 the same costs",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:154 the 1000 millisecond cooldown",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:41 the same cooldown",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:165-166 the VAMPBAT research gate on the vampire upgrade",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:63 the same research gate"
+    ],
+    "notes": [
+      "The original's wrong-stack pricing is reproduced: a bomb or devil bat still spends the base 200/100/100.",
+      "The original's null player exception of canApplyUpgrade is kept deliberately."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "f7afdc64ce5a92c70efe8d4268f48a30bd7bfcd606771ebf694890d2d19a292c"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:41 the vis cost (entropy 10 + air 10)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:40 the same cost",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:117-118 the reach 33 + 8 per enlarge and the duration 120 + 60 per extend",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java:11-13 the same numbers",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:127-131 the price per depth and the chain length",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java:27-30 the same price and length"
+    ],
+    "notes": [
+      "The original's merge semantics (a depth of zero still costs one block's worth) are reproduced.",
+      "The Outer Lands refusal is preserved; the native adds the 1.21 protection check."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "0d389a8226465d18521c26cd31a185041c3bc12b9a6f1c506ef013c396c160ae"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusPrimal.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:96-98 the six clocked costs 50 + random(5)*50",
+      "native common/src/main/java/thaumcraft/common/lib/primal/PrimalFocusRules.java:10-14 the same clock",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:84 the 500 millisecond cooldown",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:33 the same cooldown"
+    ],
+    "notes": [
+      "The original's new Random(currentTimeMillis()/200) per call is reproduced exactly, including the six independent rolls."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "1455a6a0dcfcca98fe0f79e0ac84dbcf2f5c2d9821198cf9e0a5752173fdbc0a"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusShock.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:59-61 the vis costs (air 25, air 40 + water 10, air 75 + earth 25)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:44-50 the same costs",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:105-107 the cooldowns 250, 500 and 1000",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:51-53 the same cooldowns",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:136-137 the orb area 4 + enlarge*2 and the damage 5 + potency*1.33",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:95-96 the same numbers",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:186-192 the chain damage (4 or 6) + potency and the 4 + potency chain hits",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:158-184 the same numbers"
+    ],
+    "notes": [
+      "The original's wrong-stack pricing is reproduced (the pulse always costs the base 25 air).",
+      "The enlarge upgrade requires chain lightning or earthshock, as in the original."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "6a88061ed168c311ad22d0efa5b12bd67cbc94d2179a1043020351a64f66a908"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusTrade.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:53 the vis cost (entropy 5 + earth 5 + order 5, the silk surcharge)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java:23-29 the same cost",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:239 the area size 3 + enlarge*2",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java:38 the same area",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:156 the swap delay 3 + enlarge",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java:51 the same delay"
+    ],
+    "notes": [
+      "The original's five block reach ray became the native player.pick(5); the original used Forge's block reach distance for a player, which the native fixes at five.",
+      "The architect area plan moved into the native WandArchitect."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "f0556978a49961b1c503ff6cf77a3726a8b25fd0220b9086a39c991f400a66ba"
+    }
+  },
+  "thaumcraft/common/items/wands/foci/ItemFocusWarding.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:48 the vis cost (earth 25 + order 25 + water 10)",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusWarding.java:20-22 the same cost",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:170-173 the area size 3 + enlarge and the enlarge requires architect",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusWarding.java:34-37 the same rules",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:99-100 the 500 millisecond coordinate retry fence",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/WardingRules.java:51 RETRY_TICKS 10 (half a second)"
+    ],
+    "notes": [
+      "The original's owner undo, the light value and the warded block metadata moved into the native WardingCasts."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "e5d3b606c555b8623e214e5ef1b20ef757941bb8f961f5395c128b93d989fceb"
+    }
+  },
+  "thaumcraft/common/lib/crafting/InfusionRunicAugmentRecipe.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/crafting/InfusionRunicAugmentRecipe.java:113-119 the price (int)(32 * 2^charge), the aspects ARMOR/MAGIC/ENERGY and the instability 5 + charge/2",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicRules.java:40-48 the same price, aspects and instability",
+      "native common/src/main/java/thaumcraft/common/crafting/InfusionRunicAugmentRecipe.java:39-54 the same components and cost",
+      "oracle thaumcraft/common/lib/crafting/InfusionRunicAugmentRecipe.java:96-100 the hardening byte output",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicArmor.java augment() writes the hardening component"
+    ],
+    "notes": [
+      "The 1.7 code registered dynamic recipe became a native recipe type whose components and cost depend on the centre's final charge; the RUNICAUGMENTATION research gate is kept."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "710bb793a36d2cb410655e00ea5567ea5bf76e5e371d503d74a8ab14b14f5220",
+      "legacy": "2d3de65c4cef14118580cbc0b03510579dfac60c8a0db98f6082bd0b66d67bc7"
+    }
+  },
+  "thaumcraft/common/lib/enchantment/EnchantmentFrugal.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentFrugal.java:27-37 the costs 5 + 11*(level-1), the maximum cost +50 and the maximum level 3",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/WandEnchantmentRules.java:27-51 the same numbers",
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentFrugal.java:47-50 the damage chance 1 - level/5",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/WandEnchantmentRules.java:78-81 the same chance",
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentFrugal.java:39-41 the applicability (a focus that accepts it, or a book)",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentFrugal.java:53-55 only the book branch, as in the original"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: an enchantment is a datapack record, so the definition is data/thaumcraft/enchantment/frugal.json and the class owns the level lookup and the original rules.",
+      "The original only instantiates Haste and Repair; the frugal, potency and wand fortune definitions are kept but stay inert, exactly as in 4.2.3.5."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "170353d76de91158d3c0185c4e45aa3544aa2eb4a3a8242d92f05ff0fb2ab185",
+      "legacy": "a267ad75b88415e506a1c9f2a53c441cee72d6ec641363b8b30caced23b7a186"
+    }
+  },
+  "thaumcraft/common/lib/enchantment/EnchantmentHaste.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentHaste.java:25-37 the cost 15 + 9*(level-1), the maximum cost +50 and the maximum level 3",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EquipmentEnchantmentRules.java the haste cost and level rules",
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentHaste.java:43-45 the applicability (boots or the hover harness, or a book)",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EquipmentEnchantments.java the haste tag and the level lookup"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the enchantment is a datapack record with a tag; the class keeps the original cost progression and the applicability.",
+      "The original's effect is the forward acceleration in the movement code, which the native EnchantmentHaste.tick reproduces."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "034b8a0d4a9da272ad9d4005ed0d9185e7581d33be57bb815ba2b1ed12d5aca5",
+      "legacy": "617b1e09840ba09ad0abf4dde0df5bc3659bb8d3f6f198d4335b90b7605f8251"
+    }
+  },
+  "thaumcraft/common/lib/enchantment/EnchantmentPotency.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentPotency.java:25-35 the cost 10 + 11*(level-1) and the maximum level 3",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/WandEnchantmentRules.java:32-35 the same numbers",
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentPotency.java:37-39 the applicability (a focus that accepts it, or a book)",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentPotency.java:114-116 only the book branch"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: a datapack record with a tag.",
+      "The original never reads the enchantment level: only the potency focus UPGRADE raises a focus power, so the native states that the multiplier is exactly one."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "452054611e0ff2f91d49838329fc78836d4ff2dea78dc013d345e66416c92877",
+      "legacy": "44281bfe28c367d1640e63b4e797388d7883e4891cdc6d179160ee47a524649d"
+    }
+  },
+  "thaumcraft/common/lib/enchantment/EnchantmentRepair.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentRepair.java:31-39 the cost 20 + 10*(level-1) and the maximum level 2",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EquipmentEnchantmentRules.java the repair cost and level rules",
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentRepair.java:45-47 the applicability (a damageable IRepairable item, or a book)",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentRepair.java:241-253 the same repair path"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: a datapack record with a tag; the numeric enchantment id became a holder.",
+      "The original's exclusion of Mending is kept by the tag definition, and the repair hook still runs before the vis payment."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "7bc58c70fbeb8160f9c84172abc6e828ba4e9a9d0f97e8097e803024b0ea2d7f",
+      "legacy": "96a0f26342eb031744cdb7a5b5aa01926e53ea767507950560f05995aa7b2def"
+    }
+  },
+  "thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java:25-35 the cost 15 + 9*(level-1) and the maximum level 3",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/WandEnchantmentRules.java:35-36 the same numbers",
+      "oracle thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java:37-39 the applicability (a focus that accepts it, or a book)",
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java:178-180 only the book branch"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: a datapack record with a tag; the registry name is the original 'wandfortune'.",
+      "The original never reads the level: the treasure focus UPGRADE hands the fortune level to the loot, so the native states that the extra drop count is zero."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "2e4d64843ba838b7a2ee472358f4cce6d7272aa733bc52613875b63b1c1ab9ef",
+      "legacy": "6606208682a7d2c373b14c88a967b7cd20675a2d30b0e8edd0b970245d694447"
+    }
+  },
+  "thaumcraft/common/lib/events/EventHandlerRunic.java": {
+    "disposition": "replace",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:77-145 the runic charge, the 40 tick refresh and the recharge",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicShield.java:56-92 the same state machine",
+      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:154-157 the interval shieldRecharge - charged*500",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicRules.java:53 the same interval",
+      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:203-222 the kinetic (1.5+kinetic*0.5), the healing (240 ticks) and the emergency (8*emergency) upgrades with the 20/20/60 second cooldowns",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicShield.java:108-121 the same upgrades and cooldowns",
+      "oracle thaumcraft/common/config/Config.java:843-845 the defaults 2000/80/50",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicSettings.java:12 the same defaults and clamps"
+    ],
+    "notes": [
+      "The event handler became the RunicShield server state class with a client HUD snapshot; the numbers, the cooldowns and the config clamps are preserved.",
+      "The original's ignored damage sources (out of world, magic, starve, suffocate) map to the native FELL_OUT_OF_WORLD, WITHER, STARVE and DROWN; the 1.7 'magic' source has no exact 1.21 equivalent."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "15d1eed8308d8763854d6b60045c2176f3bafe5e3e5fa4aeb8445314bcf84f12",
+      "legacy": "802c33389185a44f73f0f654dcccf400cd8f95b077cef41c219977e08aa1111d"
+    }
+  },
+  "thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java:33 the matrix, the offset and the colour",
+      "native common/src/main/java/thaumcraft/common/lib/network/InfusionFxPayload.java:11 the native payload (dimension, matrix, event, target, data)",
+      "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java sendEffect() is the only sender"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the SimpleImpl message became a CustomPacketPayload; the payload carries the dimension so a stale packet cannot address another world.",
+      "The original's 15/60 tick source highlight is reproduced by the native event ids."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "c3d14e67615305fa55db17f81468bc2689b87c70dba3b30c587146256cfd3880",
+      "legacy": "41bc18736d13f154614ec0318c807079f4b0eef1be135157e882dc29ee7f6fd4"
+    }
+  },
+  "thaumcraft/common/lib/network/fx/PacketFXShield.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/fx/PacketFXShield.java:56-91 the victim/attacker ids and the -1/-2/-3 hemisphere modes",
+      "native common/src/main/java/thaumcraft/common/lib/network/RunicHitPayload.java:9 the native payload",
+      "native common/src/main/java/thaumcraft/client/ThaumcraftRunicClient.java:48-65 the same four modes"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: a CustomPacketPayload instead of a SimpleImpl message; the four hemisphere modes and the yaw/pitch computation are preserved."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "de362159423df87be56102030ab18040aecf4d5bc413ee9733e7756118febdb4",
+      "legacy": "d3bdc5f718f6e61d6a5af328e7643c14acc8b23f3d91cd425a421e57856ceec3"
+    }
+  },
+  "thaumcraft/common/lib/network/misc/PacketFocusChangeToServer.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/misc/PacketFocusChangeToServer.java:52-67 the server side focus change",
+      "native common/src/main/java/thaumcraft/common/lib/network/FocusSelectionPayload.java:14 the native payload (hand plus a physical slot)",
+      "native common/src/main/java/thaumcraft/common/items/wands/FocusSelectionSources.java the accepted physical sources"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the client may no longer name a focus by a string; it addresses a physical slot, which the native validates.",
+      "The original's sceptre exclusion is preserved in the native selection path."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "0882da982df26bf5e25c21e0be828058c790ff8b2c04b0676f08b0a69d47f4d0",
+      "legacy": "43a9c831b032660b0f644510ba869a0623d4ef0ad7901764007de5c513d121da"
+    }
+  },
+  "thaumcraft/common/lib/network/playerdata/PacketRunicCharge.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/lib/network/playerdata/PacketRunicCharge.java the charge/maximum pair to the owning player",
+      "native common/src/main/java/thaumcraft/common/lib/network/RunicChargePayload.java:9 the native payload",
+      "native common/src/main/java/thaumcraft/client/ThaumcraftRunicClient.java:68-85 the ten icon hud bar"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: a CustomPacketPayload; the original's two shorts became two ints and the hud bar is unchanged."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "288945d7617af538145059be0ec9fc373a3ac419176df6c4a13d55164501ce00",
+      "legacy": "f0646dcc853d6712500b423e90eec5d371901aa867864f6fe420cac4166443fc"
+    }
+  },
+  "thaumcraft/common/tiles/TileFocalManipulator.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileFocalManipulator.java:124-172 startCraft (the rank*8 xp, the 200*2^(rank-1) price and the research free admission)",
+      "native common/src/main/java/thaumcraft/common/tiles/TileFocalManipulator.java:110-142 the same admission",
+      "oracle thaumcraft/common/tiles/TileFocalManipulator.java:96-103 the drain of at most 100 vis every fifth tick",
+      "native common/src/main/java/thaumcraft/common/tiles/TileFocalManipulator.java:167-184 the same drain"
+    ],
+    "notes": [
+      "The 1.7 TileThaumcraftInventory became a native BlockEntity with a menu provider; the job, the debt and the xp are the original's.",
+      "Declared safety deviation: an external slot change cancels the paid job instead of upgrading a replacement item for free.",
+      "The native adds the FOCALMANIPULATION research check to the menu admission."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "20513911293259a239335bc18a67f257ebc33bd19648fbc1979021c4426e8b2e",
+      "legacy": "13d819c4cb13ab353b83559e4881e7f5fca42bd93746bccacb0f73e98780ccb7"
+    }
+  },
+  "thaumcraft/common/tiles/TileInfusionMatrix.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:207-228 the tick, the 20/100 tick structure check and the count delay",
+      "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java:216-237 the same tick",
+      "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:349 the instability roll nextInt(500) <= instability",
+      "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java:251 the same roll",
+      "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:352-394 the 21 outcome table and the hazard events",
+      "native common/src/main/java/thaumcraft/common/lib/infusion/InfusionInstability.java the same 21 outcomes",
+      "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:455-471 the essentia drain and the instability growth (100 - recipeInstability*3, 50 - recipeInstability*2, the cap 25)",
+      "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java:285-286 and :328-329 the same rolls",
+      "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:421-451 the enchantment xp drain (one level, the 1/3 shortage roll, the count delay 20)",
+      "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java:268-273 and :344-369 the same rules"
+    ],
+    "notes": [
+      "The whole cycle, the 21 outcome hazard table, the instability growth and the xp rules are reproduced.",
+      "The recipe catalogue is data driven; the original's Object[] result became named result patches and the user name attribution became a UUID attribution.",
+      "The original's structure failure clears the active state but keeps the session; the native keeps that behaviour."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "496b0fccd1d7c96cbf4ac3abb404dc8d90e3d4faa1c8fa29e543a54d0217ba24",
+      "legacy": "5710743239763522d6afe3cc10e47f685557590e58103d65900dd46a1cceab16"
+    }
+  },
+  "thaumcraft/common/tiles/TileInfusionPillar.java": {
+    "disposition": "adapt",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileInfusionPillar.java:18-39 the orientation byte and the render bounding box",
+      "native common/src/main/java/thaumcraft/common/tiles/TileInfusionPillar.java:12-20 the native facing and half",
+      "native common/src/main/java/thaumcraft/common/blocks/BlockInfusionPillar.java the native pillar block"
+    ],
+    "notes": [
+      "Forced 1.21.1 change: the orientation byte became the native block state (facing and half); the tile is now only the block entity of that state."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "32500d0f8e7d73408e23e1aadee3170725ec0f6c11ec2f5b8e06bb8dd6336bfc",
+      "legacy": "b6d10059c9e8c65bb8c1e73dbfa9076229d10706abe7eabe15cb70bce7006d75"
+    }
+  },
+  "thaumcraft/common/tiles/TilePedestal.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TilePedestal.java:83-91 the ordinary setter clamps the stack size to one",
+      "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:60-66 the same clamp",
+      "oracle thaumcraft/common/tiles/TilePedestal.java:93-100 the infusion setter keeps the whole stack",
+      "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:68-72 the same behaviour",
+      "oracle thaumcraft/common/tiles/TilePedestal.java:199 the 64 block use range",
+      "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:84 the same range"
+    ],
+    "notes": [
+      "The 1.7 TileThaumcraftInventory became a native WorldlyContainer; the one slot, the stack clamp and the infusion output are preserved.",
+      "The original's comparator sparkles (event 11 and 12) have no 1.21 equivalent in the native tile."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "a57be229e5206f561c88685a58c13d2fa7bc99b286d5e0cde92d1cdf9ecba06d",
+      "legacy": "a24521c9d83859344a9786fbe8f377423e8588efc3efb6134dd8c07edca72d7d"
+    }
+  },
+  "thaumcraft/common/tiles/TileWandPedestal.java": {
+    "disposition": "port",
+    "source_semantics": "adapted",
+    "callsite_audit": "complete",
+    "native_coverage": "parity_verified",
+    "evidence": [
+      "oracle thaumcraft/common/tiles/TileWandPedestal.java:194-211 the draw every fifth tick and the one vis reserve",
+      "native common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java:94-97 and :103-127 the same draw",
+      "oracle thaumcraft/common/tiles/TileWandPedestal.java:199 the iron cap and the wooden rod keep no reserve",
+      "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:243 the same rule",
+      "oracle thaumcraft/common/tiles/TileWandPedestal.java:298-310 the node search over plus and minus eight blocks",
+      "native common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java:155-160 the same search"
+    ],
+    "notes": [
+      "The 1.7 tile became a native tile entity; the draw period (5), the rescan period (100), the update period (20), the one vis transfer and the reserve rule are preserved.",
+      "The original's focus block (hasThingy) branch that also takes the primal parts of a compound aspect is not reproduced in the native drain."
+    ],
+    "owner": "audit-a4-foci",
+    "reviewed_sha256": {
+      "original": "4f8395cde82d1a63a09258d1a9cc91af6aa24f117896b2c7c557a4d6ba45b6ed",
+      "legacy": "99b3d47b78bcaa765ec6fb3e5312ca8872dcb2651902830a6ed388c8dd6ce431"
+    }
+  }
+}

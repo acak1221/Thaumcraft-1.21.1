@@ -129,6 +129,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--print", dest="show", action="store_true",
                         help="print the sixteen layers as the Java string literals")
+    parser.add_argument("--flat", dest="flat", action="store_true",
+                        help="print the sixteen layers as one flat string each, the shape of the "
+                             "1.12 reference template (src/main/java/thaumcraft/common/lib/world/"
+                             "WorldGenMoundTemplate.java)")
     parser.add_argument("--source", default=SOURCE, help="the WorldGenMound.java of the oracle")
     arguments = parser.parse_args()
 
@@ -138,7 +142,10 @@ def main() -> int:
     print("layers  : " + str(len(layers)))
     print("blocks  : " + str(blocks))
     print("sha256  : " + checksum(layers))
-    if arguments.show:
+    if arguments.flat:
+        for layer in layers:
+            print('        "' + layer + '",')
+    elif arguments.show:
         for index, layer in enumerate(layers):
             print(f"        // layer {index}")
             for row in range(SIZE):

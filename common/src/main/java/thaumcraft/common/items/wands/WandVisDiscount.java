@@ -47,9 +47,18 @@ public final class WandVisDiscount {
 
     /** Shared native arcane/focus pricing; callers must supply the actual aspect. */
     public static float modifier(ItemStack wand, Player player, Aspect aspect) {
-        float cap = !wand.isEmpty() && wand.getItem() instanceof ItemWandCasting
-                ? WandMaterials.capModifier(ItemWandCasting.data(wand).cap()) : 1.0F;
-        return modifier(cap, percentagePoints(player, aspect), ItemWandCasting.isSceptre(wand));
+        return modifier(capModifier(wand, aspect), percentagePoints(player, aspect), ItemWandCasting.isSceptre(wand));
+    }
+
+    /**
+     * Original ItemWandCasting:249 - the cap of the wand decides the consumption modifier: the special one when the cap has a
+     * special aspect list that holds the aspect, the base one otherwise. The copper cap pays one for order and entropy and
+     * 1.1 for every other aspect (ConfigItems:331).
+     */
+    public static float capModifier(ItemStack wand, Aspect aspect) {
+        if (wand.isEmpty() || !(wand.getItem() instanceof ItemWandCasting)) return 1.0F;
+        WandMaterials.Cap cap = WandMaterials.cap(ItemWandCasting.data(wand).cap());
+        return cap.modifierFor(aspect == null ? null : aspect.getTag());
     }
 
     /** Original arithmetic reducer: convert the integer net discount only once. */
@@ -71,9 +80,7 @@ public final class WandVisDiscount {
 
     /** Separate casting path: Frugal must NEVER discount arcane recipes. */
     public static float focusModifier(ItemStack wand, Player player, Aspect aspect) {
-        float cap = !wand.isEmpty() && wand.getItem() instanceof ItemWandCasting
-                ? WandMaterials.capModifier(ItemWandCasting.data(wand).cap()) : 1F;
-        return focusModifier(cap, percentagePoints(player, aspect), FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.frugal),
+        return focusModifier(capModifier(wand, aspect), percentagePoints(player, aspect), FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.frugal),
                 ItemWandCasting.isSceptre(wand));
     }
 

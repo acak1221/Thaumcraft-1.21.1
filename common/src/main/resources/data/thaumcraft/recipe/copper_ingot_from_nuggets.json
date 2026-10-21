@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["###", "###", "###"],
+  "key": {"#": {"item": "thaumcraft:copper_nugget"}},
+  "result": {"id": "minecraft:copper_ingot", "count": 1}
+}

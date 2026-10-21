@@ -47,7 +47,7 @@ class BlockResourceCoverageTest {
     private static final Set<String> NAMELESS_ITEMS = Set.of(
             "crimson_sword", "discount_ring_aer", "discount_ring_aqua", "discount_ring_ignis",
             "discount_ring_ordo", "discount_ring_perditio", "discount_ring_terra", "eldritch_placer",
-            "eldritch_tablet", "nugget_beef", "nugget_chicken", "nugget_fish", "nugget_pork",
+            "eldritch_tablet",
             "thaumonomicon_cheat", "unknown_research_note",
             "unknown_research_note_24");
 

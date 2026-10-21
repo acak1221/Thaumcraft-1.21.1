@@ -108,7 +108,8 @@ public final class VisNodeFailures {
         BlockState bs = level.getBlockState(below), as = level.getBlockState(above);
         BlockEntity be = existing(level, below), ae = existing(level, above);
         boolean powered = level.hasNeighborSignal(below);
-        boolean coherent = !powered && bs.is(ThaumcraftNodeDevices.NODE_STABILIZER.get())
+        boolean coherent = !powered && (bs.is(ThaumcraftNodeDevices.NODE_STABILIZER.get())
+                || bs.is(ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER.get()))
                 && be instanceof TileNodeStabilizer && installed(be)
                 && as.is(ThaumcraftNodeDevices.NODE_TRANSDUCER.get()) && ae instanceof TileNodeConverter && installed(ae);
         if (!installed(source) || !loaded(level, below) || !loaded(level, above) || !powerAreaLoaded(level, below)

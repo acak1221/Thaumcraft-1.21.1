@@ -41,6 +41,7 @@ STATIC_MODEL_SPRITES = {
     "models/wand_rod_obsidian": (32, 32), "models/wand_rod_blaze": (32, 32), "models/wand_rod_ice": (32, 32),
     "models/wand_rod_quartz": (32, 32), "models/wand_rod_bone": (32, 32), "models/wand_rod_reed": (32, 32),
     "models/wand_rod_primal": (48, 64), "models/trunk": (64, 64), "models/wand_cap_void": (32, 32),
+    "models/wand_cap_copper": (32, 32),
     "models/infuser": (64, 64),
     "models/wandtable": (128, 64),
 }

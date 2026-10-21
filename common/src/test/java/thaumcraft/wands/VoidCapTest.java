@@ -19,12 +19,12 @@ class VoidCapTest {
         assertEquals(.8F, cap.modifier(), 0F, "a fifth off every vis the wand pays");
         assertEquals(9, cap.craftCost());
         assertEquals("CAP_void", cap.research());
-        assertEquals(List.of("iron", "gold", "thaumium", "void"), WandMaterials.CAPS.stream().map(WandMaterials.Cap::tag).toList(),
-                "the earlier caps keep their places, the void cap follows them");
+        assertEquals(List.of("iron", "gold", "thaumium", "void", "copper"), WandMaterials.CAPS.stream().map(WandMaterials.Cap::tag).toList(),
+                "the earlier caps keep their places, the void cap follows them and the copper cap is the fifth");
         assertTrue(WandMaterials.supportsCap("void"));
         assertEquals(.8F, WandMaterials.capModifier("void"), 0F);
         for (var other : List.of("iron", "gold", "thaumium")) assertTrue(cap.modifier() < WandMaterials.cap(other).modifier(), other);
-        assertThrows(IllegalArgumentException.class, () -> WandMaterials.cap("copper"), "the other-mod caps stay unsupported");
+        assertThrows(IllegalArgumentException.class, () -> WandMaterials.cap("silver"), "the silver cap stays unsupported");
     }
 
     @Test void aWandIsAssembledAtRodTimesNinePerPrimal() {

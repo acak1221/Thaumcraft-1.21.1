@@ -42,7 +42,7 @@ class WandDataTest {
         for (String json : List.of(
                 "{\"rod\":\"copper_staff\"}",
                 "{\"rod\":\"wood_staff\"}",
-                "{\"cap\":\"copper\"}",
+                "{\"cap\":\"silver\"}",
                 "{\"cap\":\"void_inert\"}",
                 "{\"cap\":\"thaumium_inert\"}",
                 "{\"vis\":{\"vitium\":100}}",

@@ -39,6 +39,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockAiry;
 import thaumcraft.common.blocks.BlockArcaneDoor;
+import thaumcraft.common.blocks.BlockCosmeticDoubleSlab;
 import thaumcraft.common.blocks.BlockCosmeticOpaque;
 import thaumcraft.common.blocks.BlockCosmeticStairs;
 import thaumcraft.common.blocks.BlockCosmeticSolid;
@@ -169,6 +170,25 @@ public final class ThaumcraftEldritchBlocks {
             () -> new BlockCosmeticWoodSlab(EldritchBlockRules.SLAB_WOOD_SILVERWOOD,
                     BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
 
+    // The original blockCosmeticDoubleSlabWood and blockCosmeticDoubleSlabStone (ConfigBlocks:300-301): the double halves of the
+    // four cosmetic slabs. The original registered two blocks with the metadata of their single slab; the native port keeps the
+    // four double slabs in one block with the four metadata values, and the double half is the double value of the slab type.
+    public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_WOOD_GREATWOOD = BLOCKS.register("cosmetic_double_slab_wood_greatwood",
+            () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_WOOD_GREATWOOD,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
+
+    public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_WOOD_SILVERWOOD = BLOCKS.register("cosmetic_double_slab_wood_silverwood",
+            () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_WOOD_SILVERWOOD,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F, 5.0F).sound(SoundType.WOOD)));
+
+    public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_STONE_ARCANE = BLOCKS.register("cosmetic_double_slab_stone_arcane",
+            () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_STONE_ARCANE,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(2.0F, 10.0F).sound(SoundType.STONE)));
+
+    public static final RegistrySupplier<BlockCosmeticDoubleSlab> COSMETIC_DOUBLE_SLAB_STONE_ELDRITCH = BLOCKS.register("cosmetic_double_slab_stone_eldritch",
+            () -> new BlockCosmeticDoubleSlab(EldritchBlockRules.SLAB_DOUBLE_STONE_ELDRITCH,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(2.0F, 10.0F).sound(SoundType.STONE)));
+
     public static final RegistrySupplier<BlockArcaneDoor> ARCANE_DOOR = BLOCKS.register("arcane_door",
             () -> new BlockArcaneDoor(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
                     // Original BlockArcaneDoor:68 - setResistance(999) stores 2997 and the getter
@@ -291,6 +311,23 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ELDRITCH_ITEM = ITEMS.register("cosmetic_stone_slab_eldritch", () -> new BlockItem(COSMETIC_STONE_SLAB_ELDRITCH.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_GREATWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_greatwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_GREATWOOD.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM = ITEMS.register("cosmetic_wood_slab_silverwood", () -> new BlockItem(COSMETIC_WOOD_SLAB_SILVERWOOD.get(), new Item.Properties()));
+    // The original never offered the double slabs in the creative tab (BlockCosmeticWoodSlab:68-74).
+    public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_WOOD_GREATWOOD_ITEM = ITEMS.register("cosmetic_double_slab_wood_greatwood", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_WOOD_GREATWOOD.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_WOOD_SILVERWOOD_ITEM = ITEMS.register("cosmetic_double_slab_wood_silverwood", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_WOOD_SILVERWOOD.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_STONE_ARCANE_ITEM = ITEMS.register("cosmetic_double_slab_stone_arcane", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_STONE_ARCANE.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> COSMETIC_DOUBLE_SLAB_STONE_ELDRITCH_ITEM = ITEMS.register("cosmetic_double_slab_stone_eldritch", () -> new BlockItem(COSMETIC_DOUBLE_SLAB_STONE_ELDRITCH.get(), new Item.Properties()));
+    /**
+     * The flux scrubber is the original blockStoneDevice metadata fourteen (ConfigRecipes:194). A 1.21.1 recipe result cannot carry a
+     * block state, so the variant of the stone device family needs an item of its own.
+     */
+    public static final RegistrySupplier<Item> FLUX_SCRUBBER_ITEM = ITEMS.register("flux_scrubber",
+            () -> new ItemVariantBlock(STONE_DEVICE.get(), EldritchBlockRules.DEVICE_STONE_FLUX_SCRUBBER, "flux_scrubber", new Item.Properties()));
+    /**
+     * The arcane pressure plate is the original blockWoodenDevice metadata two (ConfigRecipes:197). A 1.21.1 recipe result cannot carry
+     * a block state, so the variant of the wooden device family needs an item of its own.
+     */
+    public static final RegistrySupplier<Item> ARCANE_PRESSURE_PLATE_ITEM = ITEMS.register("arcane_pressure_plate",
+            () -> new ItemVariantBlock(WOODEN_DEVICE.get(), EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE, "arcane_pressure_plate", new Item.Properties()));
     public static final RegistrySupplier<Item> ARCANE_DOOR_ITEM = ITEMS.register("arcane_door", () -> new ItemArcaneDoor(new Item.Properties()));
     public static final RegistrySupplier<Item> MAGIC_BOX_ITEM = ITEMS.register("magic_box", () -> new BlockItem(MAGIC_BOX.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new BlockItem(MIRROR.get(), new Item.Properties()));
@@ -506,8 +543,10 @@ public final class ThaumcraftEldritchBlocks {
                 COSMETIC_OPAQUE_ITEM,
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,
+                FLUX_SCRUBBER_ITEM, ARCANE_PRESSURE_PLATE_ITEM,
                 STAIRS_ELDRITCH_ITEM, ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
                 METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM, BANNER_ITEM,
                 AIRY_ITEM, AIRY_NODE_ITEM, JAR_BRAIN_ITEM, JAR_NODE_ITEM, ETHEREAL_BLOOM_ITEM);
+        // The original listed the sixteen coloured banners in the creative tab (BlockWoodenDevice:117-125).
     }
 }

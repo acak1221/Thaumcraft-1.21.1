@@ -103,12 +103,18 @@ class CrucibleRecipeParityTest {
                     aspects("metallum", "1", "ordo", "1"), 131),
             new Recipe("pure_gold", 23, "PUREGOLD", List.of("#c:ores/gold", "#c:raw_materials/gold"), "thaumcraft:cluster_gold", 1,
                     aspects("metallum", "1", "ordo", "1"), 132),
-            // The four Pure and four Trans recipes of the third-party ores (lines 134-157) are absent, so the registration order
-            // continues with the two unconditional Trans recipes (145-146).
-            new Recipe("trans_iron", 24, "TRANSIRON", List.of("#c:nuggets/iron"), "minecraft:iron_nugget", 3,
+            // Copper is vanilla in 1.21.1, so the original branch Config.foundCopperIngot (line 133) is
+            // live and the PureCopper recipe of line 134 is registered. Tin, silver and lead still need
+            // a third-party mod, so their Pure recipes (lines 136, 138 and 140) stay absent and the
+            // registration order continues with the Trans recipes of lines 145, 146 and 148.
+            new Recipe("pure_copper", 24, "PURECOPPER", List.of("#thaumcraft:original_ore/ore_copper", "#c:raw_materials/copper"),
+                    "thaumcraft:cluster_copper", 1, aspects("metallum", "1", "ordo", "1"), 134),
+            new Recipe("trans_iron", 25, "TRANSIRON", List.of("#c:nuggets/iron"), "minecraft:iron_nugget", 3,
                     aspects("metallum", "2"), 145),
-            new Recipe("trans_gold", 25, "TRANSGOLD", List.of("minecraft:gold_nugget"), "minecraft:gold_nugget", 3,
+            new Recipe("trans_gold", 26, "TRANSGOLD", List.of("minecraft:gold_nugget"), "minecraft:gold_nugget", 3,
                     aspects("metallum", "2", "lucrum", "1"), 146),
+            new Recipe("trans_copper", 27, "TRANSCOPPER", List.of("#thaumcraft:original_ore/nugget_copper"), "thaumcraft:copper_nugget", 3,
+                    aspects("metallum", "2", "permutatio", "1"), 148),
             new Recipe("ethereal_bloom", 159, "ETHEREALBLOOM", List.of("thaumcraft:shimmerleaf"), "thaumcraft:ethereal_bloom", 1,
                     aspects("praecantatio", "16", "herba", "16", "sano", "16", "vitium", "8"), 159),
             new Recipe("bucket_of_death", 160, "LIQUIDDEATH", List.of("minecraft:bucket"), "thaumcraft:bucket_death", 1,
@@ -152,9 +158,13 @@ class CrucibleRecipeParityTest {
             new Recipe("sanity_soap", 180, "SANESOAP", List.of("thaumcraft:tallow_block"), "thaumcraft:sanity_soap", 1,
                     aspects("cognitio", "16", "alienis", "16", "ordo", "16", "sano", "16"), 180));
 
-    /** The eight oracle crucible recipes that only exist with a third-party copper, tin, silver or lead ore mod (lines 133-157). */
+    /**
+     * The six oracle crucible recipes that only exist with a third-party tin, silver or lead ore mod
+     * (lines 135-144 and 149-157). Copper is vanilla in 1.21.1, so its two recipes (lines 134 and 148)
+     * are registered and shipped.
+     */
     private static final List<String> THIRD_PARTY_ORE = List.of(
-            "pure_copper", "pure_tin", "pure_silver", "pure_lead", "trans_copper", "trans_tin", "trans_silver", "trans_lead");
+            "pure_tin", "pure_silver", "pure_lead", "trans_tin", "trans_silver", "trans_lead");
 
     private static List<String> catalysts(JsonElement catalyst) {
         List<String> found = new ArrayList<>();
@@ -190,7 +200,7 @@ class CrucibleRecipeParityTest {
         List<String> shipped = ResourceTree.stems(CRUCIBLE, ".json");
         List<String> expected = new ArrayList<>();
         for (Recipe recipe : ORACLE) expected.add(recipe.file());
-        assertEquals(expected.size(), shipped.size(), "the original registers 54 crucible recipes, 8 of them behind a third-party ore mod");
+        assertEquals(expected.size(), shipped.size(), "the original registers 54 crucible recipes, 6 of them behind a third-party ore mod");
         assertTrue(shipped.containsAll(expected), "missing native crucible recipes: " + expected.stream().filter(name -> !shipped.contains(name)).toList());
         assertTrue(expected.containsAll(shipped), "native crucible recipes the original does not register: " + shipped.stream().filter(name -> !expected.contains(name)).toList());
         for (String name : THIRD_PARTY_ORE) assertFalse(shipped.contains(name), name + " needs a third-party ore mod");

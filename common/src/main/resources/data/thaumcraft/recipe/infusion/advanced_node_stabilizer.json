@@ -1,0 +1,14 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "NODESTABILIZERADV",
+  "input": {"item": "thaumcraft:node_stabilizer"},
+  "components": [
+    {"item": "thaumcraft:nitor"}, {"item": "minecraft:redstone_block"},
+    {"item": "thaumcraft:alumentum"}, {"item": "minecraft:redstone_block"},
+    {"item": "thaumcraft:nitor"}, {"item": "minecraft:redstone_block"},
+    {"item": "thaumcraft:alumentum"}, {"item": "minecraft:redstone_block"}
+  ],
+  "aspects": {"auram": 32, "praecantatio": 16, "ordo": 16, "potentia": 16},
+  "instability": 10,
+  "result": {"id": "thaumcraft:advanced_node_stabilizer", "count": 1}
+}

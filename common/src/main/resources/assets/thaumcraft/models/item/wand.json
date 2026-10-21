@@ -359,6 +359,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_wood_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_wood_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_wood_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_wood_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_wood_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_wood_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_wood_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_wood_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_wood_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_wood_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_wood_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.03125,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -708,6 +796,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_greatwood_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.03125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_copper_shock"
   },
   {
    "predicate": {
@@ -1063,6 +1239,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.0625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.09375,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -1412,6 +1676,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_obsidian_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.09375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_copper_shock"
   },
   {
    "predicate": {
@@ -1767,6 +2119,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_blaze_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_blaze_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.15625,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -2116,6 +2556,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_ice_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_ice_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_ice_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_ice_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_ice_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_ice_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_ice_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_ice_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_ice_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.15625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_ice_copper_shock"
   },
   {
    "predicate": {
@@ -2471,6 +2999,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_quartz_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.1875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_quartz_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.21875,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -2820,6 +3436,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_bone_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_bone_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_bone_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_bone_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_bone_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_bone_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_bone_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_bone_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_bone_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.21875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_bone_copper_shock"
   },
   {
    "predicate": {
@@ -3175,6 +3879,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_reed_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_reed_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_reed_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_reed_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_reed_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_reed_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_reed_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_reed_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.25,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_reed_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.28125,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -3524,6 +4316,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_greatwood_staff_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.28125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_greatwood_staff_copper_shock"
   },
   {
    "predicate": {
@@ -3879,6 +4759,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.3125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_obsidian_staff_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.34375,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -4228,6 +5196,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_blaze_staff_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.34375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_blaze_staff_copper_shock"
   },
   {
    "predicate": {
@@ -4583,6 +5639,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_ice_staff_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.40625,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -4932,6 +6076,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_quartz_staff_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.40625,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_quartz_staff_copper_shock"
   },
   {
    "predicate": {
@@ -5287,6 +6519,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.4375,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_bone_staff_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.46875,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -5636,6 +6956,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_reed_staff_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.46875,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_reed_staff_copper_shock"
   },
   {
    "predicate": {
@@ -5991,6 +7399,94 @@
   },
   {
    "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.5,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_silverwood_staff_copper_shock"
+  },
+  {
+   "predicate": {
     "thaumcraft:wand_rod": 0.53125,
     "thaumcraft:wand_cap": 0.0,
     "thaumcraft:wand_focus": 0.0
@@ -6340,6 +7836,94 @@
     "thaumcraft:wand_focus": 1.0
    },
    "model": "thaumcraft:item/wand_primal_staff_void_shock"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.0
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.25
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_fire"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.5
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_excavation"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.75
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_frost"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.8125
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_warding"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.875
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_trade"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.9375
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_portable_hole"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.953125
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_hellbat"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.96875
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_pech"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 0.984375
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_primal"
+  },
+  {
+   "predicate": {
+    "thaumcraft:wand_rod": 0.53125,
+    "thaumcraft:wand_cap": 1.0,
+    "thaumcraft:wand_focus": 1.0
+   },
+   "model": "thaumcraft:item/wand_primal_staff_copper_shock"
   }
  ]
 }

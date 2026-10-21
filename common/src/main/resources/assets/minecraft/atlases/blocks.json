@@ -136,6 +136,10 @@
     {
       "type": "minecraft:single",
       "resource": "thaumcraft:models/wand_cap_void"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "thaumcraft:models/wand_cap_copper"
     }
   ]
 }

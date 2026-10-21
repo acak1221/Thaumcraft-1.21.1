@@ -36,6 +36,16 @@ public final class ThaumcraftNodeDevices {
                     // Original BlockStoneDevice:94 - setResistance(25) stores 75 and the getter
                     // divides it by five, so the effective blast resistance is 15.
                     .strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+    /**
+     * The advanced node stabilizer, the original blockStoneDevice metadata ten (ConfigRecipes:343). It shares the block entity of the
+     * ordinary node stabilizer and differs in the lock it reports: the original TileNodeStabilizer:24 gives the lock one for the
+     * metadata nine and the lock two for the metadata ten.
+     */
+    public static final RegistrySupplier<BlockNodeStabilizer> ADVANCED_NODE_STABILIZER = BLOCKS.register("advanced_node_stabilizer",
+            () -> new BlockNodeStabilizer(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+                    // Original BlockStoneDevice:94 - the same hardness and blast resistance as the
+                    // ordinary node stabilizer.
+                    .strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
     public static final RegistrySupplier<Item> NODE_STABILIZER_ITEM = ITEMS.register("node_stabilizer",
             () -> new BlockItem(NODE_STABILIZER.get(), new Item.Properties()) {
                 @Override public void appendHoverText(ItemStack stack, TooltipContext context,
@@ -46,8 +56,11 @@ public final class ThaumcraftNodeDevices {
                             .withStyle(net.minecraft.ChatFormatting.GRAY));
                 }
             });
+    /** The advanced node stabilizer of the original blockStoneDevice metadata ten. */
+    public static final RegistrySupplier<Item> ADVANCED_NODE_STABILIZER_ITEM = ITEMS.register("advanced_node_stabilizer",
+            () -> new BlockItem(ADVANCED_NODE_STABILIZER.get(), new Item.Properties()));
     public static final RegistrySupplier<BlockEntityType<TileNodeStabilizer>> NODE_STABILIZER_BLOCK_ENTITY = BLOCK_ENTITIES.register("node_stabilizer",
-            () -> BlockEntityType.Builder.of(TileNodeStabilizer::new, NODE_STABILIZER.get()).build(null));
+            () -> BlockEntityType.Builder.of(TileNodeStabilizer::new, NODE_STABILIZER.get(), ADVANCED_NODE_STABILIZER.get()).build(null));
 
     public static final RegistrySupplier<BlockNodeConverter> NODE_TRANSDUCER = BLOCKS.register("node_transducer",
             () -> new BlockNodeConverter(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
@@ -81,6 +94,7 @@ public final class ThaumcraftNodeDevices {
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITIES.register();
-        CreativeTabRegistry.append(ThaumcraftContent.TAB, NODE_STABILIZER_ITEM, NODE_TRANSDUCER_ITEM, VIS_RELAY_ITEM);
+        CreativeTabRegistry.append(ThaumcraftContent.TAB, NODE_STABILIZER_ITEM, NODE_TRANSDUCER_ITEM, VIS_RELAY_ITEM,
+                ADVANCED_NODE_STABILIZER_ITEM);
     }
 }

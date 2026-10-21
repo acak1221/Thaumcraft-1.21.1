@@ -19,7 +19,7 @@ public final class ItemWandCap {
     public static final int GOLD = 1;
     /** The original damage value of the thaumium cap. */
     public static final int THAUMIUM = 2;
-    /** The original damage value of the copper cap; it needs another mod's copper ingot. */
+    /** The original damage value of the copper cap; copper is vanilla in 1.21.1, so the cap is registered. */
     public static final int COPPER = 3;
     /** The original damage value of the silver cap; it needs another mod's silver ingot. */
     public static final int SILVER = 4;
@@ -55,18 +55,19 @@ public final class ItemWandCap {
     /**
      * The registered native item of an original metadata value.
      *
-     * @throws IllegalStateException when the cap needs another mod's copper or silver ingot and is therefore not registered
+     * @throws IllegalStateException when the cap needs another mod's silver ingot and is therefore not registered
      */
     public static ItemStack stack(int metadata) {
         return switch (metadata) {
             case IRON -> ThaumcraftWands.capItem("iron");
             case GOLD -> ThaumcraftWands.capItem("gold");
             case THAUMIUM -> ThaumcraftWands.capItem("thaumium");
+            case COPPER -> ThaumcraftWands.capItem("copper");
             case THAUMIUM_INERT -> new ItemStack(ThaumcraftWands.THAUMIUM_WAND_CAP_INERT.get());
             case VOID -> ThaumcraftWands.capItem("void");
             case VOID_INERT -> new ItemStack(ThaumcraftWands.VOID_WAND_CAP_INERT.get());
-            case COPPER, SILVER, SILVER_INERT -> throw new IllegalStateException(
-                    "The " + variant(metadata).tag() + " cap needs another mod's " + (metadata == COPPER ? "copper" : "silver") + " ingot");
+            case SILVER, SILVER_INERT -> throw new IllegalStateException(
+                    "The " + variant(metadata).tag() + " cap needs another mod's silver ingot");
             default -> throw new IllegalArgumentException("No wand cap with metadata " + metadata);
         };
     }

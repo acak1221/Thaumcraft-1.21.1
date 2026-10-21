@@ -48,13 +48,15 @@ class ClusterAssetsTest {
         }
     }
 
-    @Test void theFourCrucibleRecipesKeepTheirOriginalNumbers() throws Exception {
+    @Test void theSixCrucibleRecipesKeepTheirOriginalNumbers() throws Exception {
         // path, research, original recipe order, result, count, aspects
         Object[][] recipes = {
                 {"pure_iron", "PUREIRON", 22, "thaumcraft:cluster_iron", 1, "{\"metallum\":1,\"ordo\":1}"},
                 {"pure_gold", "PUREGOLD", 23, "thaumcraft:cluster_gold", 1, "{\"metallum\":1,\"ordo\":1}"},
-                {"trans_iron", "TRANSIRON", 24, "minecraft:iron_nugget", 3, "{\"metallum\":2}"},
-                {"trans_gold", "TRANSGOLD", 25, "minecraft:gold_nugget", 3, "{\"metallum\":2,\"lucrum\":1}"}};
+                {"pure_copper", "PURECOPPER", 24, "thaumcraft:cluster_copper", 1, "{\"metallum\":1,\"ordo\":1}"},
+                {"trans_iron", "TRANSIRON", 25, "minecraft:iron_nugget", 3, "{\"metallum\":2}"},
+                {"trans_gold", "TRANSGOLD", 26, "minecraft:gold_nugget", 3, "{\"metallum\":2,\"lucrum\":1}"},
+                {"trans_copper", "TRANSCOPPER", 27, "thaumcraft:copper_nugget", 3, "{\"metallum\":2,\"permutatio\":1}"}};
         for (Object[] row : recipes) {
             var recipe = json("data/thaumcraft/recipe/crucible/" + row[0] + ".json");
             assertEquals("thaumcraft:crucible", recipe.get("type").getAsString(), (String) row[0]);

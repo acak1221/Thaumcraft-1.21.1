@@ -18,6 +18,7 @@ import thaumcraft.common.blocks.BlockArcaneFurnace;
 import thaumcraft.common.blocks.BlockArcaneFurnaceNozzle;
 import thaumcraft.common.blocks.BlockFluidDeath;
 import thaumcraft.common.blocks.BlockWandPedestal;
+import thaumcraft.common.blocks.ItemWandPedestalFocus;
 import thaumcraft.common.lib.tiles.LegacyTileRules;
 import thaumcraft.common.tiles.TileArcaneFurnace;
 import thaumcraft.common.tiles.TileArcaneFurnaceNozzle;
@@ -108,6 +109,9 @@ public final class ThaumcraftLegacyTiles {
         List<RegistrySupplier<Item>> items = new ArrayList<>();
         // The arcane furnace and the death fluid have no item in the original either.
         items.add(ITEMS.register("wand_pedestal", () -> new BlockItem(WAND_PEDESTAL.get(), new Item.Properties())));
+        // The compound recharge focus, the original blockStoneDevice metadata eight: a 1.21.1 recipe result cannot carry the focus
+        // block state, so the focus needs an item of its own (ConfigRecipes:342).
+        items.add(ITEMS.register("wand_pedestal_focus", () -> new ItemWandPedestalFocus(WAND_PEDESTAL.get(), new Item.Properties())));
         CreativeTabRegistry.append(ThaumcraftContent.TAB, items.toArray(new RegistrySupplier[0]));
     }
 }

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "thaumcraft:copper_nugget",
     {
       "id": "#c:nuggets/copper",
       "required": false

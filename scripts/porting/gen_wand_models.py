@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MODELS = ROOT / "common/src/main/resources/assets/thaumcraft/models/item"
 ROD_TAGS = ["wood", "greatwood", "silverwood", "obsidian", "blaze", "ice", "quartz", "bone", "reed",
             "greatwood_staff", "obsidian_staff", "blaze_staff", "ice_staff", "quartz_staff", "bone_staff", "reed_staff", "silverwood_staff", "primal_staff"]
-CAP_TAGS = ["iron", "gold", "thaumium", "void"]
+CAP_TAGS = ["iron", "gold", "thaumium", "void", "copper"]
 FOCI = [("", 0.0), ("fire", 0.25), ("excavation", 0.5), ("frost", 0.75), ("warding", 0.8125), ("trade", 0.875), ("portable_hole", 0.9375), ("hellbat", 0.953125), ("pech", 0.96875), ("primal", 0.984375), ("shock", 1.0)]
 
 

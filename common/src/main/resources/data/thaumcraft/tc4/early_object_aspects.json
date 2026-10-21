@@ -63,13 +63,14 @@
     "complex": "Only raw supplied additions for the no-existing-original-tag branch. The caller supplies the 0.75-scaled recipe base. Never add these to an existing original direct tag: API269-273 max-merges the old amount with itself, not the supplied amount.",
     "identifiers": "All modern_ids are explicit existing item identifiers. No wildcard/path-pattern expansion and no inferred future Thaumcraft registrations. The caller validates against completed target registries.",
     "iron_nugget_adaptation": "minecraft:iron_nugget replaces the original modded nuggetIron / ConfigItems.itemNugget metadata 0. This is an explicit identifier adaptation using original line136 metallum1, not an assertion that vanilla 1.7.10 had iron nuggets.",
+    "copper_nugget_adaptation": "thaumcraft:copper_nugget replaces the original modded nuggetCopper / ConfigItems.itemNugget metadata 1 and thaumcraft:cluster_copper the original native copper cluster of metadata 17. The original registered both only when Config.foundCopperIngot, and copper is vanilla in 1.21.1.",
     "torch_and_workbench": "Original line244 torch is direct lux1, not complex recipe energy; line340 crafting_table is direct fabrico4. The retained legacy torch registration is not the specification.",
     "phials": "phial_empty is direct vacuos1; phial_filled has an explicitly empty direct base. PhialData's 8 contained aspects are the caller's stack bonus, never a static binding here.",
     "piston_mechanical_prerequisite": "Only minecraft:piston receives the ORIGINAL raw complex machina2/motus4 addition, never a replacement direct list or a precomputed final yield. Recipe derivation, cap/bonus/cull and legacy-fallback suppression reuse the existing complex path. Wooden trapdoor336 is separately included for Hungry Chest; sticky piston333 and other unselected mechanical rows remain outside these bounded additions."
   },
   "unsupported_branches": [
     "No invented direct tags for raw_iron, raw_gold, raw_copper, raw metal blocks, copper, netherite, deepslate ores, nether gold ore, or post-1.7 wood families.",
-    "Conditional mod-metal branches ConfigAspects148-175 are not enabled or generalized to modern vanilla copper.",
+    "Conditional mod-metal branches ConfigAspects148-175 are enabled for copper only, because copper is vanilla in 1.21.1; the tin, silver and lead branches stay unmapped, because 1.21.1 has no tin, no silver and no lead at all.",
     "Blaze powder, magma cream and other recipe outputs without an original literal direct registration remain recipe-derived; no guessed base or additions are supplied.",
     "Original lit_redstone_ore line130 and lit_furnace line337 are distinct legacy blocks, not extra overrides for the modern unlit item. The modern item uses original oreRedstone line129 and furnace line338 respectively.",
     "No general tool/boot/enchantment bonuses: those depend on runtime item/material state and max-merge semantics outside this data unit.",
@@ -230,6 +231,18 @@
       "identifier_evidence": "Blocks.field_150426_aN / ajn/aN / glowstone",
       "modern_ids": ["minecraft:glowstone"],
       "aspects": {"sensus": 3, "lux": 10}
+    },
+    {
+      "original_source_line": 149, "registration": "direct", "original_target": "ore_dictionary:nuggetCopper",
+      "identifier_evidence": "Explicit modern identifier adaptation from ConfigItems.itemNugget metadata1: config_items:277 and item_nugget:40; the original registers the branch only when Config.foundCopperIngot, and copper is vanilla in 1.21.1",
+      "modern_ids": ["thaumcraft:copper_nugget"],
+      "aspects": {"metallum": 1}
+    },
+    {
+      "original_source_line": 153, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 17,
+      "identifier_evidence": "Native Copper Cluster, ItemNugget metadata 17; flattened to the native cluster item; the original registers the branch only when Config.foundCopperIngot, and copper is vanilla in 1.21.1",
+      "modern_ids": ["thaumcraft:cluster_copper"],
+      "aspects": {"ordo": 1, "metallum": 5, "terra": 1, "permutatio": 2}
     },
     {
       "original_source_line": 180, "registration": "direct", "original_target": "Blocks.field_150354_m", "original_metadata": "wildcard:32767",

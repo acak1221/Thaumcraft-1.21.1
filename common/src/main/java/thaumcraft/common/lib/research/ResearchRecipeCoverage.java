@@ -222,6 +222,7 @@ public final class ResearchRecipeCoverage {
         ids.put("ArcaneEar", "thaumcraft:arcane/arcane_ear");
         ids.put("ArcaneLamp", "thaumcraft:arcane/arcane_lamp");
         ids.put("ArcanePedestal", "thaumcraft:arcane/arcane_pedestal");
+        ids.put("ArcanePressurePlate", "thaumcraft:arcane/arcane_pressure_plate");
         ids.put("ArcaneSpa", "thaumcraft:arcane/arcane_spa");
         ids.put("ArcaneStone1", "thaumcraft:arcane/arcane_stone");
         ids.put("ArcaneStone2", "thaumcraft:arcane_stone_bricks");
@@ -280,6 +281,7 @@ public final class ResearchRecipeCoverage {
         ids.put("EtherealBloom", "thaumcraft:crucible/ethereal_bloom");
         ids.put("Filter", "thaumcraft:arcane/vis_filter");
         ids.put("FocalManipulator", "thaumcraft:arcane/focal_manipulator");
+        ids.put("FluxScrubber", "thaumcraft:arcane/flux_scrubber");
         ids.put("FocusExcavation", "thaumcraft:arcane/focus_excavation");
         ids.put("FocusFire", "thaumcraft:arcane/focus_fire");
         ids.put("FocusFrost", "thaumcraft:arcane/focus_frost");
@@ -357,6 +359,7 @@ public final class ResearchRecipeCoverage {
         ids.put("NodeChargeRelay", "thaumcraft:arcane/vis_charge_relay");
         ids.put("NodeRelay", "thaumcraft:arcane/vis_relay");
         ids.put("NodeStabilizer", "thaumcraft:arcane/node_stabilizer");
+        ids.put("NodeStabilizerAdv", "thaumcraft:infusion/advanced_node_stabilizer");
         ids.put("NodeTransducer", "thaumcraft:arcane/node_transducer");
         // The three recipes that produce ONE metadata value of a family block; the 1.21.1 port has one
         // item per metadata value, so they resolve to their own variant item.
@@ -375,6 +378,7 @@ public final class ResearchRecipeCoverage {
         ids.put("PrimalArrow_4", "thaumcraft:arcane/primal_arrow_order");
         ids.put("PrimalArrow_5", "thaumcraft:arcane/primal_arrow_entropy");
         ids.put("PrimalCrusher", "thaumcraft:infusion/primal_crusher");
+        ids.put("PureCopper", "thaumcraft:crucible/pure_copper");
         ids.put("PureGold", "thaumcraft:crucible/pure_gold");
         ids.put("PureIron", "thaumcraft:crucible/pure_iron");
         ids.put("Resonator", "thaumcraft:arcane/resonator");
@@ -420,6 +424,7 @@ public final class ResearchRecipeCoverage {
         ids.put("TinyHammer", "thaumcraft:arcane/golem_decoration_mace");
         ids.put("TinyHat", "thaumcraft:arcane/golem_decoration_tophat");
         ids.put("TinyVisor", "thaumcraft:arcane/golem_decoration_visor");
+        ids.put("TransCopper", "thaumcraft:crucible/trans_copper");
         ids.put("TransGold", "thaumcraft:crucible/trans_gold");
         ids.put("TransIron", "thaumcraft:crucible/trans_iron");
         ids.put("TravelTrunk", "thaumcraft:infusion/traveling_trunk");
@@ -451,6 +456,7 @@ public final class ResearchRecipeCoverage {
         ids.put("VoidShovel", "thaumcraft:void_shovel");
         ids.put("VoidSword", "thaumcraft:void_sword");
         ids.put("WandBasic", "thaumcraft:wand_wood_iron");
+        ids.put("WandCapCopper", "thaumcraft:arcane/wand_cap_copper");
         ids.put("WandCapGold", "thaumcraft:arcane/wand_cap_gold");
         ids.put("WandCapIron", "thaumcraft:wand_cap_iron");
         ids.put("WandCapThaumium", "thaumcraft:infusion/wand_cap_thaumium");
@@ -458,6 +464,7 @@ public final class ResearchRecipeCoverage {
         ids.put("WandCapVoid", "thaumcraft:infusion/wand_cap_void");
         ids.put("WandCapVoidInert", "thaumcraft:arcane/wand_cap_void_inert");
         ids.put("WandPed", "thaumcraft:infusion/wand_pedestal");
+        ids.put("WandPedFocus", "thaumcraft:infusion/wand_pedestal_focus");
         ids.put("WandRodBlaze", "thaumcraft:infusion/wand_rod_blaze");
         ids.put("WandRodBlazeStaff", "thaumcraft:arcane/staff_rod_blaze");
         ids.put("WandRodBone", "thaumcraft:infusion/wand_rod_bone");
@@ -518,22 +525,19 @@ public final class ResearchRecipeCoverage {
 
     private static Map<String, String> buildDeferred() {
         Map<String, String> reasons = new LinkedHashMap<>();
-        reasons.put("ArcanePressurePlate", "the original result is blockWoodenDevice metadata 2, the arcane pressure plate; the native wooden_device family keeps it as a variant state and has no separate arcane pressure plate item, and a 1.21.1 recipe result cannot carry a block state");
-        reasons.put("FluxScrubber", "the original result is blockStoneDevice metadata 14, the flux scrubber; the native stone_device family keeps it as a variant state and has no separate flux scrubber item, and a 1.21.1 recipe result cannot carry a block state");
         reasons.put("MirrorEssentia", "the original result is blockMirror metadata 6, the essentia mirror; the native mirror block keeps it as the essentia block state and has no separate essentia mirror item, and a 1.21.1 recipe result cannot carry a block state");
-        reasons.put("NodeStabilizerAdv", "no native advanced node stabilizer; ThaumcraftNodeDevices registers only the ordinary node stabilizer");
-        reasons.put("PureCopper", "third-party ore: the original registers this crucible recipe only when Config.foundCopperIngot, and 1.21.1 has no pure-copper item");
+        // The original registers these eight recipes only when another mod supplies the matching metal
+        // (Config.foundTinIngot, foundSilverIngot, foundLeadIngot). Vanilla 1.21.1 has no tin, no silver
+        // and no lead at all, so the original never registers them either. Copper is vanilla, so its
+        // recipes (PureCopper, TransCopper and WandCapCopper) are carried by this port.
         reasons.put("PureLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot, and 1.21.1 has no lead at all");
         reasons.put("PureSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot, and 1.21.1 has no silver at all");
         reasons.put("PureTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot, and 1.21.1 has no tin at all");
-        reasons.put("TransCopper", "third-party ore: the original registers this crucible recipe only when Config.foundCopperIngot");
-        reasons.put("TransLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot");
-        reasons.put("TransSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot");
-        reasons.put("TransTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot");
-        reasons.put("WandCapCopper", "third-party ore: the original registers this arcane recipe only when Config.foundCopperIngot, and 1.21.1 has no copper wand cap item");
+        reasons.put("TransLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot, and 1.21.1 has no lead at all");
+        reasons.put("TransSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot, and 1.21.1 has no silver at all");
+        reasons.put("TransTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot, and 1.21.1 has no tin at all");
         reasons.put("WandCapSilver", "third-party ore: the original registers this infusion recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item");
         reasons.put("WandCapSilverInert", "third-party ore: the original registers this arcane recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item");
-        reasons.put("WandPedFocus", "the original result is blockStoneDevice metadata 8, the focus that sits on the wand pedestal; the native wand_pedestal block keeps it as the focus block state and has no separate focus item, and a 1.21.1 recipe result cannot carry a block state");
         return Collections.unmodifiableMap(reasons);
     }
 

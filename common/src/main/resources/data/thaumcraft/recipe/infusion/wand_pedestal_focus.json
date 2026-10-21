@@ -1,0 +1,14 @@
+{
+  "type": "thaumcraft:infusion_stack",
+  "research": "WANDPEDFOC",
+  "input": {"item": "minecraft:comparator"},
+  "components": [
+    {"item": "thaumcraft:earth_shard"}, {"item": "thaumcraft:vis_filter"},
+    {"item": "thaumcraft:earth_shard"}, {"item": "thaumcraft:vis_filter"},
+    {"item": "thaumcraft:earth_shard"}, {"item": "thaumcraft:vis_filter"},
+    {"item": "thaumcraft:earth_shard"}, {"item": "thaumcraft:vis_filter"}
+  ],
+  "aspects": {"ordo": 10, "praecantatio": 15, "permutatio": 10},
+  "instability": 4,
+  "result": {"id": "thaumcraft:wand_pedestal_focus", "count": 1}
+}

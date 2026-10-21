@@ -24,47 +24,39 @@ class ResearchRecipeCoverageTest {
      *
      * <p>Two groups remain:
      * <ul>
-     *   <li>{@link #THIRD_PARTY_ORE} - the eleven original recipes the oracle registers only when another mod
-     *       supplies the matching ore (Config.foundCopperIngot, foundTinIngot, foundSilverIngot, foundLeadIngot).
-     *       Without another mod's ingots there is no copper, lead, silver or tin item in 1.21.1, so the original
-     *       never registers them either. They stay deferred on purpose.</li>
-     *   <li>The remaining entries are blocked on a native BLOCK or ITEM that still does not exist; the reason for
-     *       each one is kept in {@link ResearchRecipeCoverage#deferredRecipes()}.</li>
+     *   <li>{@link #THIRD_PARTY_ORE} - the eight original recipes the oracle registers only when another mod
+     *       supplies the matching ore (Config.foundTinIngot, foundSilverIngot, foundLeadIngot).
+     *       Vanilla 1.21.1 has no tin, no silver and no lead at all, so the original never registers them
+     *       either. They stay deferred on purpose. Copper is vanilla, so its three original recipes
+     *       (PureCopper, TransCopper and WandCapCopper) are carried by this port.</li>
+     *   <li>The remaining entry is blocked on a native BLOCK that still does not exist; the reason for
+     *       it is kept in {@link ResearchRecipeCoverage#deferredRecipes()}.</li>
      * </ul>
      */
     private static final List<String> EXPECTED_MISSING = List.of(
-            "ArcanePressurePlate",
-            "FluxScrubber",
             "MirrorEssentia",
-            "NodeStabilizerAdv",
-            "PureCopper",
             "PureLead",
             "PureSilver",
             "PureTin",
-            "TransCopper",
             "TransLead",
             "TransSilver",
             "TransTin",
-            "WandCapCopper",
             "WandCapSilver",
-            "WandCapSilverInert",
-            "WandPedFocus");
+            "WandCapSilverInert");
 
     /**
-     * The eleven original recipes the oracle registers only when another mod supplies copper, lead, silver or tin.
+     * The original recipes that the oracle registers only when another mod supplies tin, silver or lead.
      * They are the part of the remainder that no amount of native content can close.
      */
     private static final List<String> THIRD_PARTY_ORE = List.of(
-            "PureCopper", "PureLead", "PureSilver", "PureTin",
-            "TransCopper", "TransLead", "TransSilver", "TransTin",
-            "WandCapCopper", "WandCapSilver", "WandCapSilverInert");
+            "PureLead", "PureSilver", "PureTin",
+            "TransLead", "TransSilver", "TransTin",
+            "WandCapSilver", "WandCapSilverInert");
 
     /** The research entries whose pages still show an unresolved original recipe. */
     private static final List<String> EXPECTED_RESEARCH = List.of(
-            "CAP_copper", "CAP_silver", "FLUXSCRUB", "MIRRORESSENTIA", "NODESTABILIZERADV",
-            "PURECOPPER", "PURELEAD", "PURESILVER", "PURETIN",
-            "TRANSCOPPER", "TRANSLEAD", "TRANSSILVER", "TRANSTIN",
-            "WANDPEDFOC", "WARDEDARCANA");
+            "CAP_silver", "MIRRORESSENTIA", "PURELEAD", "PURESILVER", "PURETIN",
+            "TRANSLEAD", "TRANSSILVER", "TRANSTIN");
 
     /** The original keys the corpus itself stores as a plain List, not as a recipe. */
     private static final List<String> EXPECTED_CONSTRUCTS = List.of(
@@ -75,7 +67,8 @@ class ResearchRecipeCoverageTest {
      * The original recipes that produce ONE metadata value of a family block. The 1.21.1 port has one
      * item per metadata value, so they resolve instead of staying deferred.
      */
-    private static final List<String> VARIANT_RECIPES = List.of("PaveTravel", "PaveWard", "WardedGlass");
+    private static final List<String> VARIANT_RECIPES = List.of("PaveTravel", "PaveWard", "WardedGlass",
+            "ArcanePressurePlate", "FluxScrubber", "WandPedFocus");
 
     @BeforeAll
     static void load() { ResearchCatalog.loadBundled(); }
@@ -107,7 +100,7 @@ class ResearchRecipeCoverageTest {
     @Test
     void everyMappedOriginalKeyResolvesToAPackagedNativeRecipe() {
         Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
-        assertEquals(272, ids.size());
+        assertEquals(279, ids.size());
         Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
         for (Map.Entry<String, String> entry : ids.entrySet()) {
             String id = entry.getValue();
@@ -239,6 +232,25 @@ class ResearchRecipeCoverageTest {
         assertEquals("thaumcraft:arcane/paving_stone_travel", ids.get("PaveTravel"));
         assertEquals("thaumcraft:arcane/paving_stone_warding", ids.get("PaveWard"));
         assertEquals("thaumcraft:arcane/warded_glass", ids.get("WardedGlass"));
+        assertEquals("thaumcraft:arcane/arcane_pressure_plate", ids.get("ArcanePressurePlate"));
+        assertEquals("thaumcraft:arcane/flux_scrubber", ids.get("FluxScrubber"));
+        assertEquals("thaumcraft:infusion/wand_pedestal_focus", ids.get("WandPedFocus"));
+    }
+
+    /**
+     * The copper content of the original is carried because copper is vanilla in 1.21.1: the copper
+     * nugget, the native copper cluster, the copper wand cap and their three original recipes.
+     */
+    @Test
+    void theVanillaCopperContentOfTheOriginalIsCarried() {
+        Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
+        assertEquals("thaumcraft:arcane/wand_cap_copper", ids.get("WandCapCopper"));
+        assertEquals("thaumcraft:crucible/pure_copper", ids.get("PureCopper"));
+        assertEquals("thaumcraft:crucible/trans_copper", ids.get("TransCopper"));
+        for (String key : List.of("WandCapCopper", "PureCopper", "TransCopper")) {
+            assertFalse(ResearchRecipeCoverage.deferredRecipes().containsKey(key), key + " must not stay deferred");
+            assertTrue(ResearchRecipeCoverage.isResolved(key), key);
+        }
     }
 
     @Test

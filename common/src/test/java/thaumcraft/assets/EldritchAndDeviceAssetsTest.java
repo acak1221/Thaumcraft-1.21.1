@@ -47,7 +47,7 @@ class EldritchAndDeviceAssetsTest {
      * because the original recipe result was a block with a metadata.
      */
     private static final Set<String> VARIANT_ITEMS = Set.of("paving_stone_travel", "paving_stone_warding",
-            "warded_glass", "banner");
+            "warded_glass", "banner", "flux_scrubber", "arcane_pressure_plate", "wand_pedestal_focus");
 
     @Test void theTwoRegistrationClassesAreRead() {
         assertFalse(blockIds().isEmpty(), "no block was read from the two registration classes");
@@ -168,16 +168,44 @@ class EldritchAndDeviceAssetsTest {
         }
     }
 
-    @Test void everySlabOfTheTwoFamiliesKnowsItsTwoStates() throws Exception {
+    @Test void everySlabOfTheTwoFamiliesKnowsItsThreeStates() throws Exception {
         // The native slabs are vanilla slabs: the bottom and the top half. The original had separate
-        // single and double blocks, the 1.21.1 slab block carries the two halves.
+        // single and double blocks; the 1.21.1 slab block carries the two halves and the double half.
         for (String id : List.of("cosmetic_stone_slab_arcane", "cosmetic_stone_slab_eldritch",
                 "cosmetic_wood_slab_greatwood", "cosmetic_wood_slab_silverwood")) {
             JsonObject variants = ResourceTree.object(ASSETS + "blockstates/" + id + ".json").getAsJsonObject("variants");
-            assertEquals(2, variants.size(), id + ": the bottom and the top half");
-            for (String type : List.of("bottom", "top")) {
+            assertEquals(3, variants.size(), id + ": the bottom half, the top half and the double half");
+            for (String type : List.of("bottom", "top", "double")) {
                 assertTrue(variants.has("type=" + type), id + " misses the state " + type);
             }
+        }
+    }
+
+    /**
+     * The original double slabs are four blocks of the two families (ConfigBlocks:300-301); they drop the single
+     * slab, two wooden ones and one stone one (BlockCosmeticWoodSlab:56-58, BlockCosmeticStoneSlab:56-58).
+     */
+    @Test void everyDoubleSlabHasItsOwnBlockStateModelAndLootTable() throws Exception {
+        JsonObject en = ResourceTree.object(EN);
+        JsonObject ru = ResourceTree.object(RU);
+        for (String id : List.of("cosmetic_double_slab_wood_greatwood", "cosmetic_double_slab_wood_silverwood",
+                "cosmetic_double_slab_stone_arcane", "cosmetic_double_slab_stone_eldritch")) {
+            assertTrue(ResourceTree.exists(ASSETS + "blockstates/" + id + ".json"), id);
+            assertTrue(ResourceTree.exists(ASSETS + "models/block/" + id + ".json"), id);
+            assertTrue(ResourceTree.exists(ASSETS + "models/item/" + id + ".json"), id);
+            assertTrue(ResourceTree.exists("data/thaumcraft/loot_table/blocks/" + id + ".json"), id);
+            assertTrue(en.has("block.thaumcraft." + id), id);
+            assertTrue(ru.has("block.thaumcraft." + id), id);
+            JsonObject loot = ResourceTree.object("data/thaumcraft/loot_table/blocks/" + id + ".json");
+            JsonObject entry = loot.getAsJsonArray("pools").get(0).getAsJsonObject()
+                    .getAsJsonArray("entries").get(0).getAsJsonObject();
+            int count = 1;
+            for (var function : entry.getAsJsonArray("functions")) {
+                if (function.getAsJsonObject().get("function").getAsString().equals("minecraft:set_count")) {
+                    count = function.getAsJsonObject().get("count").getAsInt();
+                }
+            }
+            assertEquals(id.startsWith("cosmetic_double_slab_wood") ? 2 : 1, count, id);
         }
     }
 

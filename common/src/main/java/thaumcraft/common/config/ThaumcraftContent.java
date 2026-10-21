@@ -121,12 +121,20 @@ public final class ThaumcraftContent {
         // one ninth of a resource quicksilver, not a whole-quicksilver alias.
         MATERIALS.put("quicksilver_drop", ITEMS.register("quicksilver_drop",
                 () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_QUICKSILVER)));
-        // Original ItemNugget metadata 16 (iron), 31 (gold) and 21 (cinnabar): the "Native Clusters" that purified ore becomes
-        // (ConfigRecipes:112-113) and that a furnace melts into two ingots (ConfigRecipes:469-471).
-        String[] clusterIds = {"cluster_iron", "cluster_gold", "cluster_cinnabar"};
+        // Original ItemNugget metadata 1: the copper nugget. The original registers the item and its
+        // icon unconditionally (ItemNugget:46-49) and only gates the creative listing and the
+        // crucible recipes on Config.foundCopperIngot. Copper is vanilla in 1.21.1, so the item and
+        // its ore dictionary name "nuggetCopper" (ConfigItems:277) are carried by this port.
+        MATERIALS.put("copper_nugget", ITEMS.register("copper_nugget",
+                () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_COPPER)));
+        // Original ItemNugget metadata 16 (iron), 17 (copper), 31 (gold) and 21 (cinnabar): the "Native
+        // Clusters" that purified ore becomes (ConfigRecipes:131-134) and that a furnace melts into two
+        // ingots (ConfigRecipes:488-490). Copper is vanilla in 1.21.1, so its cluster is carried too.
+        String[] clusterIds = {"cluster_iron", "cluster_gold", "cluster_cinnabar", "cluster_copper"};
         int[] clusterTypes = {thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_IRON,
                 thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_GOLD,
-                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_CINNABAR};
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_CINNABAR,
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_COPPER};
         for (int cluster = 0; cluster < clusterIds.length; cluster++) {
             String id = clusterIds[cluster];
             int type = clusterTypes[cluster];

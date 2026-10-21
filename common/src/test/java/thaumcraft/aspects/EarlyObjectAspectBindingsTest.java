@@ -126,7 +126,7 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(127, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom and Crimson Rites");
+        assertEquals(129, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget and the native copper cluster");
         assertEquals(10, complex.size(), "nine existing complex bindings plus the actual native Arcane Ear");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
@@ -138,7 +138,7 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(108, rows.size());
+            assertEquals(110, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
@@ -148,6 +148,7 @@ class EarlyObjectAspectBindingsTest {
             int crimsonRites = 0;
             int taintAndVishroom = 0;
             Map<Integer, JsonObject> clusters = new java.util.TreeMap<>();
+            Map<Integer, JsonObject> copper = new java.util.TreeMap<>();
             for (int index = 0; index < rows.size(); index++) {
                 var row = rows.get(index).getAsJsonObject();
                 int sourceLine = row.get("original_source_line").getAsInt();
@@ -222,6 +223,12 @@ class EarlyObjectAspectBindingsTest {
                     clusters.put(sourceLine, row);
                     continue;
                 }
+                if (sourceLine == 149 || sourceLine == 153) {
+                    // The copper nugget and the native copper cluster (ConfigAspects:149 and :153); copper is vanilla in
+                    // 1.21.1, so the original conditional branch is carried. Checked on their own, outside the ALL90 digest.
+                    copper.put(sourceLine, row);
+                    continue;
+                }
                 if (row.get("original_source_line").getAsInt() == 224) {
                     ++wheat;
                     assertEquals("direct", row.get("registration").getAsString());
@@ -262,6 +269,18 @@ class EarlyObjectAspectBindingsTest {
             assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
             assertCluster(clusters.get(361), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");
             assertCluster(clusters.get(362), 21, "thaumcraft:cluster_cinnabar", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"permutatio\":4,\"venenum\":2}");
+            // The copper nugget and the native copper cluster: copper is vanilla in 1.21.1, so the original
+            // conditional branch ConfigAspects148-153 is carried (ConfigItems:277 and ConfigAspects:149).
+            assertEquals(2, copper.size());
+            JsonObject copperNugget = copper.get(149);
+            assertEquals("direct", copperNugget.get("registration").getAsString());
+            assertEquals("ore_dictionary:nuggetCopper", copperNugget.get("original_target").getAsString());
+            assertEquals(JsonParser.parseString("[\"thaumcraft:copper_nugget\"]"), copperNugget.get("modern_ids"));
+            assertEquals(JsonParser.parseString("{\"metallum\":1}"), copperNugget.get("aspects"));
+            assertAspects(direct, "thaumcraft:copper_nugget", new AspectList().add(Aspect.METAL, 1));
+            assertCluster(copper.get(153), 17, "thaumcraft:cluster_copper", "{\"ordo\":1,\"metallum\":5,\"terra\":1,\"permutatio\":2}");
+            assertAspects(direct, "thaumcraft:cluster_copper", new AspectList().add(Aspect.ORDER, 1)
+                    .add(Aspect.METAL, 5).add(Aspect.EARTH, 1).add(Aspect.EXCHANGE, 2));
             // Pre-change compact JSON of ALL90 rows, not merely family counts.
             // This pins their exact targets, metadata, values, source anchors and order.
             String digest = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")

@@ -1,7 +1,7 @@
 {
   "type": "thaumcraft:crucible",
   "research": "TRANSGOLD",
-  "source_order": 25,
+  "source_order": 26,
   "catalyst": {"item": "minecraft:gold_nugget"},
   "result": {"id": "minecraft:gold_nugget", "count": 3},
   "aspects": {"metallum": 2, "lucrum": 1}

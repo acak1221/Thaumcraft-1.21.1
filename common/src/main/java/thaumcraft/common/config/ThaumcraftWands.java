@@ -43,6 +43,8 @@ public final class ThaumcraftWands {
     public static final RegistrySupplier<Item> BONE_STAFF_ROD = ITEMS.register("staff_rod_bone", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> PRIMAL_STAFF_ROD = ITEMS.register("staff_rod_primal", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> GOLD_WAND_CAP = ITEMS.register("wand_cap_gold", () -> new Item(new Item.Properties()));
+    /** Original ItemWandCap metadata 3: the copper cap (ConfigItems:331). */
+    public static final RegistrySupplier<Item> COPPER_WAND_CAP = ITEMS.register("wand_cap_copper", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> THAUMIUM_NUGGET = ITEMS.register("thaumium_nugget", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> THAUMIUM_WAND_CAP_INERT = ITEMS.register("wand_cap_thaumium_inert", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> THAUMIUM_WAND_CAP = ITEMS.register("wand_cap_thaumium", () -> new Item(new Item.Properties()));
@@ -65,7 +67,7 @@ public final class ThaumcraftWands {
         SERIALIZERS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB, GREATWOOD_WAND_ROD, SILVERWOOD_WAND_ROD, OBSIDIAN_WAND_ROD, BLAZE_WAND_ROD, ICE_WAND_ROD,
                 QUARTZ_WAND_ROD, BONE_WAND_ROD, REED_WAND_ROD, GREATWOOD_STAFF_ROD, OBSIDIAN_STAFF_ROD, BLAZE_STAFF_ROD, ICE_STAFF_ROD,
-                QUARTZ_STAFF_ROD, BONE_STAFF_ROD, REED_STAFF_ROD, SILVERWOOD_STAFF_ROD, PRIMAL_STAFF_ROD, GOLD_WAND_CAP,
+                QUARTZ_STAFF_ROD, BONE_STAFF_ROD, REED_STAFF_ROD, SILVERWOOD_STAFF_ROD, PRIMAL_STAFF_ROD, GOLD_WAND_CAP, COPPER_WAND_CAP,
                 THAUMIUM_NUGGET, THAUMIUM_WAND_CAP_INERT, THAUMIUM_WAND_CAP, VOID_NUGGET, VOID_WAND_CAP_INERT, VOID_WAND_CAP);
     }
 
@@ -101,6 +103,7 @@ public final class ThaumcraftWands {
             case "iron" -> ThaumcraftContent.IRON_WAND_CAP.get();
             case "gold" -> GOLD_WAND_CAP.get();
             case "thaumium" -> THAUMIUM_WAND_CAP.get();
+            case "copper" -> COPPER_WAND_CAP.get();
             case "void" -> VOID_WAND_CAP.get();
             default -> throw new IllegalArgumentException("Unsupported wand cap: " + tag);
         });

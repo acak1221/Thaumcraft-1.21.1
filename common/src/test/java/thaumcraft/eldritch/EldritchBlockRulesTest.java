@@ -450,13 +450,18 @@ class EldritchBlockRulesTest {
     }
 
     @Test void theVariantItemsPlaceTheirOriginalMetadataValue() {
-        // ConfigRecipes:192, 209 and 212 - the result is a block with a metadata, so every one of
-        // them has its own item that places that metadata value.
+        // ConfigRecipes:192, 194, 197, 209 and 212 - the result is a block with a metadata, so every
+        // one of them has its own item that places that metadata value.
         assertEquals(2, EldritchBlockRules.variantOf("paving_stone_travel"));
         assertEquals(3, EldritchBlockRules.variantOf("paving_stone_warding"));
         assertEquals(2, EldritchBlockRules.variantOf("warded_glass"));
+        assertEquals(EldritchBlockRules.DEVICE_STONE_FLUX_SCRUBBER, EldritchBlockRules.variantOf("flux_scrubber"));
+        assertEquals(EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE, EldritchBlockRules.variantOf("arcane_pressure_plate"));
+        // The original blockWoodenDevice metadata eight: one item that carries its colour in a
+        // data component, so one entry is enough.
+        assertEquals(EldritchBlockRules.DEVICE_WOOD_BANNER, EldritchBlockRules.variantOf("banner"));
         assertEquals(-1, EldritchBlockRules.variantOf("cosmetic_solid"));
-        assertEquals(3, EldritchBlockRules.VARIANT_ITEMS.size());
+        assertEquals(6, EldritchBlockRules.VARIANT_ITEMS.size());
     }
 
     @Test void theHardnessGroupsKeepTheOriginalPerMetadataValues() {

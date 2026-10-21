@@ -32,8 +32,20 @@ public final class WandMaterials {
         public boolean hasRunes() { return runes; }
     }
 
-    public record Cap(String tag, float modifier, int craftCost) {
+    /**
+     * One original wand cap: the tag, the base cost modifier, the craft cost and the special aspects with their modifier.
+     *
+     * <p>Original WandCap: the four ordinary caps have no special aspects, the copper cap (ConfigItems:331) has order and entropy
+     * with the special modifier one, and the silver cap (ConfigItems:334) has air, earth, fire and water with the special
+     * modifier 0.95.
+     */
+    public record Cap(String tag, float modifier, int craftCost, List<String> specialAspects, float specialModifier) {
+        public Cap(String tag, float modifier, int craftCost) { this(tag, modifier, craftCost, List.of(), 0F); }
         public String research() { return "CAP_" + tag; }
+        /** The cost modifier of one aspect: the special one when the cap has it, the base one otherwise. */
+        public float modifierFor(String aspectTag) {
+            return aspectTag != null && specialAspects.contains(aspectTag) ? specialModifier : modifier;
+        }
     }
 
     // Capacities are centivis, like WandData and the native wand's addRealVis path.
@@ -60,12 +72,19 @@ public final class WandMaterials {
     public static final Cap IRON = new Cap("iron", 1.1F, 1);
     public static final Cap GOLD = new Cap("gold", 1.0F, 3);
     public static final Cap THAUMIUM = new Cap("thaumium", .9F, 6);
+    /**
+     * Original {@code WandCap("copper", 1.1f, Arrays.asList(Aspect.ORDER, Aspect.ENTROPY), 1.0f, ..., 2)}
+     * (ConfigItems:331): the base cost modifier is the one of the iron cap, the special aspects are order
+     * and entropy with the special modifier one, and the craft cost is two. The original registered the cap
+     * only when another mod supplied a copper ingot; copper is vanilla in 1.21.1, so the cap is carried.
+     */
+    public static final Cap COPPER = new Cap("copper", 1.1F, 2, List.of("ordo", "perditio"), 1.0F);
     /** Original {@code WandCap("void", 0.8f, ..., 9)} (ConfigItems:297): the dearest cap and the cheapest wand to use. */
     public static final Cap VOID = new Cap("void", .8F, 9);
     /** The order is part of the client model selector: appending keeps the earlier rods' values. */
     public static final List<Rod> RODS = List.of(WOOD, GREATWOOD, SILVERWOOD, OBSIDIAN, BLAZE, ICE, QUARTZ, BONE, REED,
             GREATWOOD_STAFF, OBSIDIAN_STAFF, BLAZE_STAFF, ICE_STAFF, QUARTZ_STAFF, BONE_STAFF, REED_STAFF, SILVERWOOD_STAFF, PRIMAL_STAFF);
-    public static final List<Cap> CAPS = List.of(IRON, GOLD, THAUMIUM, VOID);
+    public static final List<Cap> CAPS = List.of(IRON, GOLD, THAUMIUM, VOID, COPPER);
 
     private WandMaterials() {}
 
@@ -75,10 +94,7 @@ public final class WandMaterials {
     }
 
     public static Cap cap(String tag) {
-        if (IRON.tag().equals(tag)) return IRON;
-        if (GOLD.tag().equals(tag)) return GOLD;
-        if (THAUMIUM.tag().equals(tag)) return THAUMIUM;
-        if (VOID.tag().equals(tag)) return VOID;
+        for (Cap cap : CAPS) if (cap.tag().equals(tag)) return cap;
         throw new IllegalArgumentException("Unsupported wand cap: " + tag);
     }
 

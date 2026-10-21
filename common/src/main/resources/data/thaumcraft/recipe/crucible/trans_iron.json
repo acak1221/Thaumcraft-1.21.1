@@ -1,7 +1,7 @@
 {
   "type": "thaumcraft:crucible",
   "research": "TRANSIRON",
-  "source_order": 24,
+  "source_order": 25,
   "catalyst": {"tag": "c:nuggets/iron"},
   "result": {"id": "minecraft:iron_nugget", "count": 3},
   "aspects": {"metallum": 2}

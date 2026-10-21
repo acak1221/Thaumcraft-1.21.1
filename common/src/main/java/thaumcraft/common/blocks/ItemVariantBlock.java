@@ -18,7 +18,7 @@ import thaumcraft.common.Thaumcraft;
  * {@code blockCosmeticOpaque} with the metadata two. A 1.21.1 recipe result cannot carry a block
  * state, so every such metadata gets its own item that places the block with the variant set.
  */
-public final class ItemVariantBlock extends BlockItem {
+public class ItemVariantBlock extends BlockItem {
     private final int variant;
     private final String name;
 

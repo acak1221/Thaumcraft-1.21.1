@@ -15,9 +15,16 @@ import thaumcraft.common.config.ThaumcraftNodeDevices;
 public final class TileNodeStabilizer extends BlockEntity {
     private int animationCount;
     private boolean ticking;
+    /** Original TileNodeStabilizer:24 - the lock is one for the node stabilizer and two for the advanced one. */
+    private final int lock;
 
-    public TileNodeStabilizer(BlockPos pos, BlockState state) { super(ThaumcraftNodeDevices.NODE_STABILIZER_BLOCK_ENTITY.get(), pos, state); }
-    public int getLock() { return 1; }
+    public TileNodeStabilizer(BlockPos pos, BlockState state) {
+        super(ThaumcraftNodeDevices.NODE_STABILIZER_BLOCK_ENTITY.get(), pos, state);
+        this.lock = state.getBlock() == ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER.get() ? 2 : 1;
+    }
+    public int getLock() { return lock; }
+    /** Whether this is the advanced node stabilizer, the original blockStoneDevice metadata ten. */
+    public boolean isAdvanced() { return lock == 2; }
     public int getAnimationCount() { return animationCount; }
     public int getCount() { return animationCount; }
     public boolean isPowered() { return level != null && powerAreaLoaded(level, worldPosition) && level.hasNeighborSignal(worldPosition); }
@@ -44,7 +51,8 @@ public final class TileNodeStabilizer extends BlockEntity {
     private boolean current() {
         Level world = level;
         BlockState state = getBlockState();
-        return world != null && !isRemoved() && state.is(ThaumcraftNodeDevices.NODE_STABILIZER.get())
+        return world != null && !isRemoved() && (state.is(ThaumcraftNodeDevices.NODE_STABILIZER.get())
+                || state.is(ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER.get()))
                 && !world.isOutsideBuildHeight(worldPosition) && world.hasChunkAt(worldPosition)
                 && world.getBlockEntity(worldPosition) == this && world.getBlockState(worldPosition) == state
                 && !isRemoved() && level == world && getBlockState() == state;

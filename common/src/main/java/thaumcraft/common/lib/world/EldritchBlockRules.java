@@ -323,14 +323,25 @@ public final class EldritchBlockRules {
 
     /**
      * The original recipes that produce ONE metadata value of a family block: the item id and the
-     * metadata value that it places (ConfigRecipes:192, 209 and 212).
+     * metadata value that it places (ConfigRecipes:192, 194, 197, 209 and 212).
      *
      * <p>A 1.21.1 recipe result cannot carry a block state, so every one of them has its own item.
      */
-    public static final Map<String, Integer> VARIANT_ITEMS = Map.of(
-            "paving_stone_travel", COSMETIC_TRAVEL_STONE,
-            "paving_stone_warding", COSMETIC_WARDING_STONE,
-            "warded_glass", COSMETIC_OPAQUE_OWNED);
+    public static final Map<String, Integer> VARIANT_ITEMS = variantItems();
+
+    private static Map<String, Integer> variantItems() {
+        Map<String, Integer> items = new java.util.LinkedHashMap<>();
+        items.put("paving_stone_travel", COSMETIC_TRAVEL_STONE);
+        items.put("paving_stone_warding", COSMETIC_WARDING_STONE);
+        items.put("warded_glass", COSMETIC_OPAQUE_OWNED);
+        // The original blockStoneDevice metadata fourteen and blockWoodenDevice metadata two and eight.
+        items.put("flux_scrubber", DEVICE_STONE_FLUX_SCRUBBER);
+        items.put("arcane_pressure_plate", DEVICE_WOOD_PRESSURE_PLATE);
+        // The original blockWoodenDevice metadata eight: one item that carries its colour and its
+        // aspect in a data component.
+        items.put("banner", DEVICE_WOOD_BANNER);
+        return Map.copyOf(items);
+    }
 
     /** The metadata value that the variant item of that id places, or -1 when there is none. */
     public static int variantOf(String item) { return VARIANT_ITEMS.getOrDefault(item, -1); }
@@ -1060,4 +1071,20 @@ public final class EldritchBlockRules {
     /** BlockCosmeticWoodSlab - the slab variants are greatwood and silverwood. */
     public static final int SLAB_WOOD_GREATWOOD = 0;
     public static final int SLAB_WOOD_SILVERWOOD = 1;
+
+    /**
+     * The original blockCosmeticDoubleSlabWood and blockCosmeticDoubleSlabStone (ConfigBlocks:300-301):
+     * two double slab blocks that carry the metadata of their single slab. The native port keeps the
+     * four double slabs of the two families in one block with the four metadata values.
+     */
+    public static final int SLAB_DOUBLE_WOOD_GREATWOOD = 0;
+    public static final int SLAB_DOUBLE_WOOD_SILVERWOOD = 1;
+    public static final int SLAB_DOUBLE_STONE_ARCANE = 2;
+    public static final int SLAB_DOUBLE_STONE_ELDRITCH = 3;
+
+    /** BlockCosmeticWoodSlab:56-58 and BlockCosmeticStoneSlab:56-58 - the double slab drops the single slab. */
+    public static boolean doubleSlabIsWooden(int variant) { return variant <= SLAB_DOUBLE_WOOD_SILVERWOOD; }
+
+    /** The double wooden slab drops two single slabs, the double stone slab drops one. */
+    public static int doubleSlabDropCount(int variant) { return doubleSlabIsWooden(variant) ? 2 : 1; }
 }

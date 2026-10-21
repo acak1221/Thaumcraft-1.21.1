@@ -184,14 +184,18 @@ dedicated server smoke в этом разделе не проводился. В�
   в интегрированном сервере обе стороны живут в одной JVM, регистрация общая.
   C2S-приёмники регистрируются в общем `Thaumcraft.init()`, поэтому тип C2S зарегистрирован и у клиента
   (нужно для кодирования), и у сервера (нужно для декодирования).
-* Порядок регистрации S2C-типов на сервере (для воспроизводимости):
-  `ResearchSettings` → `WarpMessage` → `AspectPool`/`AspectDiscovery`/`ResearchNotice` →
-  `KnowledgeSync`/`OpenThaumonomicon` → `WarpEvent`/`GuardianSonic` → `RunicCharge`/`RunicHit` →
-  `WispZap` → `VisNetFx` → `InfusionFx` → `ShockFx` → `ExcavationFx` → `GrowthLampFx` →
-  `AccessoryContents` → `ResearchTableState` → `FocalManipulatorAck`.
-  C2S: `AccessoryOpen`, `FocusSelection`, `HoverToggle`, `GolemBellReset`, `ShovelOrientation`,
-  `WandArchitect`, `ResearchPurchase`, `ResearchNoteRequest`, `ResearchTableEdit`,
-  `ResearchTableCombine`, `ResearchTableCopy`, `FocalManipulatorStart`.
+* Порядок регистрации S2C-типов на сервере (по `common/src/main/java/thaumcraft/common/Thaumcraft.java`):
+  `research_settings` (:68) → `warp_message` (:69) → `aspect_pool`/`aspect_discovery`/`research_notice` (:70) →
+  `runic_charge`/`runic_hit` (:88) → `accessories_contents` (:89) → `growth_lamp_fx` (:138) →
+  `warp_event`/`guardian_sonic` (:145) → `wisp_zap` (:146) → `knowledge_sync`/`open_thaumonomicon` (:166) →
+  `research_table_state` (:169) → `focal_manipulator_ack` (:175) → `infusion_fx` (:176) →
+  `shock_fx` (:177) → `excavation_fx` (:178) → `vis_net_fx` (:179).
+  C2S: `accessories_open` (:89) → `hover_toggle` (:92) → `architect_toggle` (:154) →
+  `research_purchase` (:167) → `research_note_request` (:168) → `research_table_edit` (:169) →
+  `research_table_combine` (:170) → `research_table_copy` (:171) → `focus_selection` (:172) →
+  `golem_bell_reset` (:173) → `shovel_orientation` (:174) → `focal_manipulator_start` (:175).
+  Порядок в 1.21.1 не влияет на адресацию (её задаёт `Type`), но фиксирован, чтобы порядок
+  синхронизации входа был воспроизводим: настройки исследования уходят раньше снимка знаний.
 * Новый guard-тест `PayloadRegistryTest` фиксирует: уникальность id, раздельность направлений,
   точный набор id, каноничность написания (`[a-z0-9_]+`), пространство имён.
   Это эквивалент оригинальной проверки числа регистраций (`PacketHandler.java:98-100` в 1.12-порте),

@@ -24976,7 +24976,7 @@
           "oracle thaumcraft/common/config/MaterialAiry.java:31-33 the class OVERRIDES setRequiresTool() with an empty body, so the virtual call of the constructor never sets the flag: the airy material does NOT require a tool",
           "oracle thaumcraft/common/config/MaterialAiry.java:15-21 isSolid false, isReplaceable false and getCanBlockGrass false",
           "oracle thaumcraft/common/config/MaterialAiry.java:35-39 the mobility flag 1 of setNoPushMobility",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:253-264 the four airy blocks and common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:290-303 their noOcclusion/noCollission properties: no requiresCorrectToolForDrops, which is exactly the original behaviour because the original's own setRequiresTool() override is a no-op",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:252-264 the four airy blocks and common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:303-308 their noOcclusion/noCollission properties: no requiresCorrectToolForDrops, which is exactly the original behaviour because the original's own setRequiresTool() override is a no-op",
           "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:81-93 the per-metadata shape of the airy family and the native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:47-55 the portal with neither a selection nor a collision box"
         ],
         "notes": [

@@ -26,7 +26,7 @@ Unit list: `/home/cyberfox-kali/units/w2devices.txt` (13 units of the
 **7 units moved `partial -> parity_verified`, 6 stay `partial` with a written reason.**
 
 * **4 defects found and fixed** (2 of them in the shared common layer).
-* **3 new test classes** with 13 test methods, **authored but NOT executed** (no Gradle run is
+* **3 new test classes** with 12 test methods, **authored but NOT executed** (no Gradle run is
   allowed in this wave; the leader has to run `:common:test`).
 
 | commit | content |

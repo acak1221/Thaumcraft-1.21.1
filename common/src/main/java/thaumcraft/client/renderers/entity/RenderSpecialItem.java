@@ -13,15 +13,24 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import thaumcraft.common.entities.EntitySpecialItem;
+import net.minecraft.world.entity.item.ItemEntity;
 
 /**
  * Original TC4 RenderSpecialItem: the rotating three ray additive star behind the item.
  * The original star was drawn with fixed function GL and a fixed random seed; the native
  * port keeps the same geometry, colours and seed with native vertex buffers. The item
  * itself keeps the vanilla item entity rendering the original delegated to.
+ *
+ * <p>The native renderer accepts any {@link ItemEntity} and not only the special item
+ * class: Minecraft 1.21.1 renders the item pickup animation with a copy of the picked
+ * entity, and {@code ItemEntity.copy()} keeps the entity <em>type</em> but not the entity
+ * <em>class</em> (Minecraft 1.21.1 {@code ItemEntity(ItemEntity)} calls
+ * {@code super(itemEntity.getType(), ...)}), so the copy of a special item is a plain item
+ * entity that still carries the {@code thaumcraft:special_item} type. A renderer typed to
+ * the special item class would throw a {@code ClassCastException} in the bridge method
+ * and crash the client as soon as the player picks the item up.
  */
-public final class RenderSpecialItem extends EntityRenderer<EntitySpecialItem> {
+public final class RenderSpecialItem extends EntityRenderer<ItemEntity> {
     private static final RenderType RAYS = new Rays();
     private final ItemEntityRenderer itemRenderer;
 
@@ -31,11 +40,11 @@ public final class RenderSpecialItem extends EntityRenderer<EntitySpecialItem> {
         itemRenderer = new ItemEntityRenderer(context);
     }
 
-    @Override public ResourceLocation getTextureLocation(EntitySpecialItem entity) {
+    @Override public ResourceLocation getTextureLocation(ItemEntity entity) {
         return ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/potions.png");
     }
 
-    @Override public void render(EntitySpecialItem entity, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+    @Override public void render(ItemEntity entity, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
         pose.pushPose();
         try {
             // Original doRenderItem: the star sits above the item and bobs slowly.
@@ -47,7 +56,7 @@ public final class RenderSpecialItem extends EntityRenderer<EntitySpecialItem> {
     }
 
     /** The original rotating star: five seeded three ray fans. */
-    private static void drawStar(EntitySpecialItem entity, PoseStack pose, MultiBufferSource buffers) {
+    private static void drawStar(ItemEntity entity, PoseStack pose, MultiBufferSource buffers) {
         var random = new Random(245L);
         float spin = entity.tickCount / 500.0F;
         VertexConsumer out = buffers.getBuffer(RAYS);

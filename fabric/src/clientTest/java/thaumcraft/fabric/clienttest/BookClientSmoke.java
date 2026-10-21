@@ -89,6 +89,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class BookClientSmoke implements ClientModInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger("thaumcraft-client-smoke");
     private static final long CAPTURE_TIMEOUT_NANOS = 10_000_000_000L;
+    /** How long a stage may wait for a vanilla screen button that is not built yet. */
+    private static final int SCREEN_RETRY_TICKS = 200;
     private enum Stage {
         WAIT_WORLD, WAIT_RESTART_PROBE, ENGLISH_RELOAD, WAIT_ITEM, BROWSER, OPEN_BOOK, BOOK, BACK_TO_BROWSER, OPEN_RESEARCH,
         RESEARCH, NEXT_RESEARCH, ILLUSTRATED, PREVIOUS_RESEARCH, PREVIOUS_CAPTURE,
@@ -120,6 +122,7 @@ public final class BookClientSmoke implements ClientModInitializer {
     private final Map<String, Object> noteEvidence = new LinkedHashMap<>();
     private final Map<String, Object> issuanceEvidence = new LinkedHashMap<>();
     private final Map<String, Object> tableEvidence = new LinkedHashMap<>();
+    private final Map<String, Object> worldOpenEvidence = new LinkedHashMap<>();
     private final AtomicInteger noteRequestPackets = new AtomicInteger();
     private final long started = System.nanoTime();
     private final String runId = System.getProperty("thaumcraft.clientSmokeRunId", "client-smoke-" + UUID.randomUUID());
@@ -168,6 +171,7 @@ public final class BookClientSmoke implements ClientModInitializer {
     private FocalManipulatorClientSequence focal;
     private BoreClientSequence bore;
     private boolean capturePending, captureDispatched, finished;
+    private boolean worldConfirmationCapturePending, worldConfirmationCaptured;
     private long captureStartedNanos;
     private String pendingScreenshotName;
     private Stage pendingScreenshotStage;
@@ -204,6 +208,30 @@ public final class BookClientSmoke implements ClientModInitializer {
             }
         }
         writeResult("RUNNING", null);
+        // The vanilla world confirmation is captured from its own rendered frame
+        // so the run keeps an honest picture of what the player was asked.
+        ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
+            if (!(screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen confirmation)) return;
+            worldConfirmationCapturePending = true;
+            worldOpenEvidence.put("vanilla_confirmation_title", confirmation.getTitle().getString());
+            ScreenEvents.afterRender(screen).register((rendered, graphics, mouseX, mouseY, delta) -> {
+                if (!worldConfirmationCapturePending || worldConfirmationCaptured || finished) return;
+                worldConfirmationCapturePending = false;
+                worldConfirmationCaptured = true;
+                try {
+                    graphics.flush();
+                    String name = runId + "-00-vanilla-world-confirmation.png";
+                    worldOpenEvidence.put("dialog_screenshot", runDirectory.resolve("screenshots").resolve(name).toString());
+                    Screenshot.grab(client.gameDirectory, name, client.getMainRenderTarget(),
+                            message -> LOGGER.info("Client smoke: captured the vanilla world confirmation dialog ({})", message.getString()));
+                } catch (Throwable error) {
+                    fail(client, error);
+                    return;
+                }
+                fail(client, new IllegalStateException("The vanilla client asked to confirm the experimental world settings; "
+                        + "the TC4 port must open its own world without that question (the captured frame is the evidence)"));
+            });
+        });
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             if (!supportsCapture(screen)) return;
             ScreenEvents.afterRender(screen).register((rendered, graphics, mouseX, mouseY, delta) -> {
@@ -281,6 +309,22 @@ public final class BookClientSmoke implements ClientModInitializer {
             }
             if (client.screen instanceof net.minecraft.client.gui.screens.DisconnectedScreen) {
                 throw new IllegalStateException("Client disconnected during native login/play at " + stage + "; inspect the network error in this run's log");
+            }
+            if (client.screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen confirmation) {
+                // Vanilla 1.21.1 asks the player to confirm a world whose level stems
+                // are not all vanilla-like (WorldOpenFlows.openWorldCheckWorldStem-
+                // Compatibility / WorldDimensions.bake). The TC4 port supports its
+                // own Outer Lands dimension completely, so the port reports the level
+                // stem registry as stable and this dialog must never appear.
+                // The dialog frame itself is captured by the screen hook, and the
+                // captured frame ends the run as a failure.
+                worldOpenEvidence.put("vanilla_confirmation_title", confirmation.getTitle().getString());
+                if (!worldConfirmationCaptured) {
+                    worldConfirmationCapturePending = true;
+                    return;
+                }
+                throw new IllegalStateException("The vanilla client asked to confirm the experimental world settings; "
+                        + "the TC4 port must open its own world without that question (the captured frame is the evidence)");
             }
             if (capturePending) {
                 if (focal != null) focal.check();
@@ -560,7 +604,7 @@ public final class BookClientSmoke implements ClientModInitializer {
                     if (!serverSetup.isDone()) return;
                     serverSetup.join();
                     if (!purchaseMatches(client, false, 3, 2) || !ready(client, GuiResearchBrowser.class)) return;
-                    clickButton(client, Component.translatable("tc.research_category.ARTIFICE").getString());
+                    clickCategoryTab(client, "ARTIFICE");
                     var browser = (GuiResearchBrowser) client.screen;
                     int graphX = (int) field(browser, "graphLeft") + (int) field(browser, "graphWidth") / 2;
                     int graphY = (int) field(browser, "graphTop") + (int) field(browser, "graphHeight") / 2;
@@ -848,7 +892,7 @@ public final class BookClientSmoke implements ClientModInitializer {
                     issuanceEvidence.put("key", "NITOR");
                     issuanceEvidence.put("baseline_after_normal_book_use", true);
                     issuanceEvidence.put("knowledge_before_request", issuanceBaseline.state.toString());
-                    clickButton(client, Component.translatable("tc.research_category.ALCHEMY").getString());
+                    clickCategoryTab(client, "ALCHEMY");
                     var browser = (GuiResearchBrowser) client.screen;
                     int graphX = (int) field(browser, "graphLeft") + (int) field(browser, "graphWidth") / 2;
                     int graphY = (int) field(browser, "graphTop") + (int) field(browser, "graphHeight") / 2;
@@ -1520,6 +1564,15 @@ public final class BookClientSmoke implements ClientModInitializer {
                     client.stop();
                 }
             }
+        } catch (ScreenNotReadyException notReady) {
+            // A vanilla screen that has not built its button yet is not a defect of
+            // the port: the stage waits for the real widget and only reports when
+            // the screen never offers it.
+            if (stageTicks > SCREEN_RETRY_TICKS) {
+                fail(client, notReady);
+                return;
+            }
+            LOGGER.info("Client smoke: {} waits for its screen button ({})", stage, notReady.getMessage());
         } catch (Throwable error) {
             fail(client, error);
         }
@@ -1878,14 +1931,53 @@ public final class BookClientSmoke implements ClientModInitializer {
 
     private void clickButton(Minecraft client, String label) {
         Screen screen = client.screen;
-        Button button = client.screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast)
-                .filter(widget -> widget.getMessage().getString().equals(label)).findFirst().orElseThrow();
+        var buttons = screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast).toList();
+        Button button = buttons.stream().filter(widget -> widget.getMessage().getString().equals(label)).findFirst().orElse(null);
+        if (button == null) {
+            // The vanilla button of the screen is built while the screen initialises
+            // and the language of the label can change between two ticks, so a
+            // missing button is a "not ready yet" answer, not a defect of the port.
+            // The stage retries until SCREEN_RETRY_TICKS and only then reports.
+            throw new ScreenNotReadyException("Screen button is not present yet: " + label
+                    + "; available=" + buttons.stream().map(widget -> widget.getMessage().getString()).toList());
+        }
         if (!button.active || !button.visible
                 || !client.screen.mouseClicked(button.getX() + button.getWidth() / 2.0,
                         button.getY() + button.getHeight() / 2.0, 0)) {
             throw new IllegalStateException("Screen button is unavailable: " + label);
         }
         screen.mouseReleased(button.getX() + 1, button.getY() + 1, 0);
+    }
+
+    /** The screen has not built the wanted button yet; the stage may retry. */
+    private static final class ScreenNotReadyException extends RuntimeException {
+        ScreenNotReadyException(String message) {
+            super(message, null, false, false);
+        }
+    }
+
+    /**
+     * The original research browser has no category buttons: the categories are
+     * drawn icons in the pane margin and picked by their own hit test
+     * (oracle GuiResearchBrowser:668-687). The harness therefore clicks the real
+     * tab icon instead of inventing a Button widget.
+     */
+    static void clickCategoryTab(Minecraft client, String key) throws ReflectiveOperationException {
+        if (!(client.screen instanceof GuiResearchBrowser browser)) throw new IllegalStateException("Expected browser");
+        Object tab = null;
+        for (Object candidate : (List<?>) field(browser, "tabs")) {
+            if (key.equals(field(candidate, "key"))) { tab = candidate; break; }
+        }
+        if (tab == null) throw new IllegalStateException("The native browser has no category tab " + key);
+        int x = (int) field(tab, "x") + 12;
+        int y = (int) field(tab, "y") + 12;
+        if (!browser.mouseClicked(x, y, 0)) {
+            throw new IllegalStateException("The native category tab did not accept the click: " + key);
+        }
+        if (!key.equals(field(browser, "category"))) {
+            throw new IllegalStateException("The native category tab did not select " + key);
+        }
+        browser.mouseReleased(x, y, 0);
     }
 
     private boolean visibleIllustration(Screen screen) throws ReflectiveOperationException {
@@ -2040,6 +2132,7 @@ public final class BookClientSmoke implements ClientModInitializer {
         report.put("research_note_learning", noteEvidence);
         report.put("research_note_issuance", issuanceEvidence);
         report.put("research_table", tableEvidence);
+        report.put("world_open", worldOpenEvidence);
         report.put("early_content", earlyContent == null ? Map.of() : earlyContent.evidence);
         report.put("alchemy", alchemy == null ? Map.of() : alchemy.evidence);
         report.put("distillation", distillation == null ? Map.of() : distillation.evidence);

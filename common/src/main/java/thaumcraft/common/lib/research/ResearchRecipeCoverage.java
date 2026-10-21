@@ -44,6 +44,8 @@ import java.util.stream.Stream;
  *       blueprint description instead of a recipe id.</li>
  *   <li>{@link #deferredRecipes()} - original recipes whose result item/block does not exist in the 1.21.1 port
  *       yet, or whose original registration was conditional on a third-party ore mod. Each entry states why.</li>
+ *   <li>{@link #documentedDuplicateRecipes()} - original registrations the port carries as an identical copy of
+ *       another recipe, because the original registration itself can never fire. Each entry states why.</li>
  * </ul>
  *
  * <p>Everything here is pure data plus classpath scanning, so it runs in a plain unit test without a game runtime.
@@ -59,6 +61,8 @@ public final class ResearchRecipeCoverage {
     private static final Map<String, String> CONSTRUCT_BLUEPRINTS = buildConstructBlueprints();
     /** Original TC4 recipe key without a native recipe yet, to the reason why. */
     private static final Map<String, String> DEFERRED = buildDeferred();
+    /** Original TC4 recipe key the port carries as an identical copy of another recipe, to the reason why. */
+    private static final Map<String, String> DOCUMENTED_DUPLICATES = buildDocumentedDuplicates();
     /** The original research pages that show an ARRAY of recipes instead of one recipe. */
     private static final Map<String, List<String>> PAGE_RECIPE_ARRAYS = buildPageRecipeArrays();
     /** The original recipe keys that the research book never names by key. */
@@ -76,6 +80,15 @@ public final class ResearchRecipeCoverage {
 
     /** Original recipe keys with no native recipe yet, with the reason why each one is still open. */
     public static Map<String, String> deferredRecipes() { return DEFERRED; }
+
+    /**
+     * Original registrations the port carries as an identical copy of another recipe.
+     *
+     * <p>Every entry names an original recipe that the original itself could never fire, so the native
+     * recipe of the port is a byte-identical copy of the native recipe of its living twin. The port keeps
+     * the copy, because the original registered it, and documents it here instead of dropping it silently.</p>
+     */
+    public static Map<String, String> documentedDuplicateRecipes() { return DOCUMENTED_DUPLICATES; }
 
     /**
      * The original research pages that show an ARRAY of recipes.
@@ -521,6 +534,34 @@ public final class ResearchRecipeCoverage {
         blueprints.put("Thaumatorium", "original 1x3x1 wand construct, anchored on the native arcane/alchemical_construct blueprint (ConfigRecipes:97)");
         blueprints.put("Thaumonomicon", "original 1x2x1 wand construct: wand + book (ConfigRecipes:83)");
         return Collections.unmodifiableMap(blueprints);
+    }
+
+    /**
+     * The original registrations the port carries as an identical copy of another recipe.
+     *
+     * <p>Oracle ConfigRecipes:356 registers the second kinetic runic girdle with the potion metadata 24620
+     * (0x602C) while ConfigRecipes:355 registers the first one with the metadata 16428 (0x402C). The two
+     * metadata values differ in the bit 0x2000, the flag that 1.7.10 sets on every BREWED potion and clears
+     * again when gunpowder turns it into a splash potion ({@code PotionHelper.gunpowderEffect} is
+     * {@code "+14&13-13"}, so the splash bit 0x4000 can only be set when the brewed bit is clear). The
+     * loot bag of the original only ever hands out {@code i | 0x2000} (a brewed potion) or
+     * {@code i | 0x4000} (a splash potion), never both flags at once (oracle Config.java:552-568), and the
+     * creative listing of 1.7.10 builds the same two forms (ItemPotion.getSubItems). No item of 1.7.10 can
+     * therefore carry the metadata 24620: the original registration is dead in the original itself, and the
+     * research book only ever names the first one (oracle ConfigResearch.java:178). 1.21.1 potions have no
+     * metadata at all, so the port has to carry the same recipe twice; both native files are the same
+     * splash potion of harming II.</p>
+     */
+    private static Map<String, String> buildDocumentedDuplicates() {
+        Map<String, String> duplicates = new LinkedHashMap<>();
+        duplicates.put("RunicGirdleKinetic_2",
+                "the original registration is dead: the potion metadata 24620 (0x602C) carries the brewed flag 0x2000 "
+                        + "and the splash flag 0x4000 at the same time, and 1.7.10 brewing clears 0x2000 when it sets 0x4000 "
+                        + "(PotionHelper.gunpowderEffect \"+14&13-13\") while the loot bag only issues \"i | 0x2000\" or "
+                        + "\"i | 0x4000\" (oracle Config.java:552-568), so no item of 1.7.10 ever carries it. "
+                        + "1.21.1 potions have no metadata, so the port carries the identical recipe twice "
+                        + "(thaumcraft:infusion/runic_girdle_kinetic and thaumcraft:infusion/runic_girdle_kinetic_2)");
+        return Collections.unmodifiableMap(duplicates);
     }
 
     private static Map<String, String> buildDeferred() {

@@ -222,6 +222,10 @@ public final class ThaumcraftRecipeDisplay {
             alias("RunicRingHealing", "infusion/runic_ring_healing"),
             alias("RunicGirdle", "infusion/runic_girdle"),
             alias("RunicGirdleKinetic", "infusion/runic_girdle_kinetic"),
+            // Documented gap: the original registration of ConfigRecipes:356 is dead in the original itself
+            // (the potion metadata 24620 carries the brewed flag 0x2000 and the splash flag 0x4000 at the same
+            // time, and 1.7.10 never produces such an item), so the native file is an identical copy of the
+            // file above. The reason is kept in ResearchRecipeCoverage.documentedDuplicateRecipes().
             alias("RunicGirdleKinetic_2", "infusion/runic_girdle_kinetic_2"),
             alias("Deconstructor", "arcane/deconstruction_table"),
             alias("LampGrowth", "infusion/growth_lamp"),

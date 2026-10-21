@@ -17,9 +17,11 @@ import org.junit.jupiter.api.Test;
  * The whole crucible catalogue of the port, pinned against the TC4 4.2.3.5 oracle
  * ({@code thaumcraft/common/config/ConfigRecipes.java}, method {@code initializeAlchemyRecipes}, lines 105-181).
  *
- * <p>The oracle registers 54 crucible recipes; 8 of them exist only when a third-party mod supplies copper, tin, silver or lead
- * ({@code Config.foundCopperIngot} and friends, lines 133-157), so the port ships the other 46. The registration order is part of the
- * original behaviour: the crucible keeps the first registered recipe among the matches with the most distinct aspects
+ * <p>The oracle registers 54 crucible recipes at run time (49 registration sites, of which the balanced shard loop of line 113 runs
+ * six times); 8 of them exist only when a third-party mod supplies copper, tin, silver or lead ({@code Config.foundCopperIngot} and
+ * friends, lines 133-157). Copper is vanilla in 1.21.1, so its two recipes (lines 134 and 148) are live and the port ships them:
+ * 54 minus the six recipes that need a third-party tin, silver or lead mod are the 48 native recipes of the port. The registration
+ * order is part of the original behaviour: the crucible keeps the first registered recipe among the matches with the most distinct aspects
  * ({@code ThaumcraftCraftingManager.java:127-145}), so the rows below are listed in the original registration order and the native
  * {@code source_order} has to reproduce it.
  *
@@ -216,6 +218,59 @@ class CrucibleRecipeParityTest {
         List<String> shipped = new ArrayList<>(orders.keySet());
         shipped.sort(java.util.Comparator.comparingInt(orders::get));
         assertEquals(expected, shipped, "the crucible keeps the first registered of the equally matching recipes");
+    }
+
+    /**
+     * The number of the crucible recipes of the original and of the port.
+     *
+     * <p>The oracle registers 54 crucible recipes at run time: 49 registration sites, of which the balanced
+     * shard loop of line 113 runs six times. Eight of them are conditional on a third-party ore mod
+     * ({@code Config.foundCopperIngot}, {@code foundTinIngot}, {@code foundSilverIngot} and
+     * {@code foundLeadIngot}, lines 133-157). Copper is vanilla in 1.21.1, so the port ships the two copper
+     * recipes and documents the six tin, silver and lead recipes as skips: 54 - 6 = 48 native recipes.</p>
+     */
+    @Test void theCountsAreTheOriginalOnes() throws Exception {
+        assertEquals(48, ORACLE.size(), "the port ships the 48 crucible recipes the 1.21.1 world can carry");
+        assertEquals(48, ResourceTree.stems(CRUCIBLE, ".json").size(), "the packaged crucible recipes");
+        assertEquals(6, THIRD_PARTY_ORE.size(), "the six recipes that need a third-party tin, silver or lead mod");
+        // The oracle registers six balanced shards, one of them per primal, and the rest one by one.
+        long shards = ORACLE.stream().filter(recipe -> recipe.file().startsWith("balanced_shard_")).count();
+        assertEquals(6, shards, "the balanced shard loop of oracle line 113 runs six times");
+        // The eight conditional registrations of the oracle are the four Pure and the four Trans recipes of
+        // copper, tin, silver and lead (lines 134, 137, 140, 143 and 148, 151, 154, 157). The two copper ones
+        // are live in 1.21.1 and are shipped, the six others are documented as skips.
+        assertTrue(ORACLE.stream().anyMatch(recipe -> recipe.file().equals("pure_copper") && recipe.oracleLine() == 134),
+                "the copper purification of oracle line 134 is carried, copper is vanilla in 1.21.1");
+        assertTrue(ORACLE.stream().anyMatch(recipe -> recipe.file().equals("trans_copper") && recipe.oracleLine() == 148),
+                "the copper multiplication of oracle line 148 is carried, copper is vanilla in 1.21.1");
+        for (String third : THIRD_PARTY_ORE) {
+            assertFalse(ORACLE.stream().anyMatch(recipe -> recipe.file().equals(third)),
+                    third + " needs a third-party ore mod and is not part of the shipped set");
+        }
+    }
+
+    /**
+     * The native {@code source_order} grows with the original registration order.
+     *
+     * <p>The crucible sorts its recipes by this number and keeps the first registered of the equally
+     * matching ones, so the number has to grow with the oracle lines. The port numbers the first recipes
+     * with their registration index and the rest with the line of the oracle; both schemes are accepted,
+     * a value that breaks the order is not.</p>
+     */
+    @Test void theSourceOrderFollowsTheLinesOfTheOracle() throws Exception {
+        int previousOrder = -1;
+        int previousLine = -1;
+        for (int index = 0; index < ORACLE.size(); ++index) {
+            Recipe recipe = ORACLE.get(index);
+            int order = ResourceTree.object(CRUCIBLE + recipe.file() + ".json").get("source_order").getAsInt();
+            assertTrue(order > previousOrder, recipe.file() + " keeps the original registration order");
+            // The six balanced shards come from one loop of the oracle, so they share its line.
+            assertTrue(recipe.oracleLine() >= previousLine, recipe.file() + " keeps the original line order");
+            assertTrue(order == index || order == recipe.oracleLine(),
+                    recipe.file() + " is numbered with its registration index or with its oracle line: " + order);
+            previousOrder = order;
+            previousLine = recipe.oracleLine();
+        }
     }
 
     @Test void theGolemCoresRunFromTheBlankCoreToTheGuardCoreAndOnToTheButcherCore() throws Exception {

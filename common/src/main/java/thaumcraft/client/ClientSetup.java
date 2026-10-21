@@ -128,6 +128,8 @@ public final class ClientSetup {
         BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftLamps.ARCANE_LAMP_TILE.get(), thaumcraft.client.renderers.tile.TileArcaneLampRenderer::new);
         BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftVisCharging.VIS_CHARGE_RELAY_TILE.get(), thaumcraft.client.renderers.tile.TileMagicWorkbenchChargerRenderer::new);
         BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftWards.WARDED_TILE.get(), thaumcraft.client.renderers.tile.TileWardedRenderer::new);
+        // Original BlockLifterRenderer:66-92 - the glowing faces of the levitator.
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftLevitator.LEVITATOR_BLOCK_ENTITY.get(), thaumcraft.client.renderers.tile.TileLevitatorRenderer::new);
         TileNodeConverter.setClientEffects(VisNetClientEffects.CONVERTER_EFFECTS);
         VisNetFxNetworking.initClient(payload -> {
             var client = Minecraft.getInstance();

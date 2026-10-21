@@ -90,8 +90,10 @@ public final class ThaumcraftContent {
     public static final RegistrySupplier<Item> WAND = ITEMS.register("wand", () -> new ItemWandCasting(new Item.Properties().stacksTo(1).component(WAND_DATA.get(), WandData.EMPTY)));
     // Original BlockJar:71 and :299-305 - the ordinary and the void jar emit NO light
     // and the original jar sets no blast resistance at all, so the effective value is 0.
-    public static final RegistrySupplier<BlockJar> JAR = BLOCKS.register("jar", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion()));
-    public static final RegistrySupplier<BlockJar> VOID_JAR = BLOCKS.register("jar_void", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion(), true));
+    // Oracle BlockJar:90 - the original calls setLightLevel(0.66f), and 1.7.10 stores
+    // (int)(15.0f * 0.66f), which is the light nine of the native block.
+    public static final RegistrySupplier<BlockJar> JAR = BLOCKS.register("jar", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> 9).sound(SoundType.GLASS).noOcclusion()));
+    public static final RegistrySupplier<BlockJar> VOID_JAR = BLOCKS.register("jar_void", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> 9).sound(SoundType.GLASS).noOcclusion(), true));
     public static final RegistrySupplier<BlockAuraNode> AURA_NODE = BLOCKS.register("aura_node", () -> new BlockAuraNode(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).noOcclusion().noCollission().lightLevel(state -> 8)));
     public static final RegistrySupplier<thaumcraft.common.blocks.BlockSilverwoodNode> SILVERWOOD_KNOT = BLOCKS.register("silverwood_knot",
             () -> new thaumcraft.common.blocks.BlockSilverwoodNode(BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).strength(2.5F).sound(SoundType.WOOD).lightLevel(state -> 7)));

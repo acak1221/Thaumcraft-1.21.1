@@ -68,7 +68,10 @@ public final class OreRuntimeChecks {
             ores.add(ThaumcraftOres.AMBER.get());
             for (BlockCustomOre ore : ores) {
                 var state = ore.defaultBlockState();
-                test.assertTrue(state.getDestroySpeed(level, pos) == 1.5F && ore.getExplosionResistance() == 5.0F,
+                // Oracle BlockCustomOre:59-60 - the hardness is 1.5 and the setter value of the blast
+                // resistance is 5, which 1.7.10 stores three times and divides by five again, so the
+                // effective resistance is 3.
+                test.assertTrue(state.getDestroySpeed(level, pos) == 1.5F && ore.getExplosionResistance() == 3.0F,
                         "source ore hardness/resistance: " + ore);
                 test.assertTrue(iron.isCorrectToolForDrops(state) && wood.isCorrectToolForDrops(state) == (ore.aspectTag() != null),
                         "iron tier for cinnabar/amber only; wooden pick for all infused stone: " + ore);

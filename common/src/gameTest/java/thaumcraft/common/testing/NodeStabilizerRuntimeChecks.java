@@ -277,8 +277,10 @@ public final class NodeStabilizerRuntimeChecks {
                             && tile.getAnimationCount() == 0 && tile.getCount() == 0
                             && state.getShape(f.level, pos, CollisionContext.empty()).bounds().equals(new AABB(0, 0, 0, 1, 1, 1))
                             && state.getCollisionShape(f.level, pos, CollisionContext.of(f.player)).bounds().equals(new AABB(0, 0, 0, 1, 1, 1))
-                            && state.getDestroySpeed(f.level, pos) == 3.0F && state.getBlock().getExplosionResistance() == 25.0F,
-                    "original basic1 FULLCUBE outline AND entity collision, hardness3/resistance25, no invented facing property");
+                            && state.getDestroySpeed(f.level, pos) == 3.0F && state.getBlock().getExplosionResistance() == 15.0F,
+                    // Oracle BlockStoneDevice:94 - the hardness is 3 and the setter value of the blast resistance is 25, which
+                    // 1.7.10 stores three times and divides by five again, so the effective resistance is 15.
+                    "original basic1 FULLCUBE outline AND entity collision, hardness3/effective resistance15, no invented facing property");
             f.check(state.getTicker(f.level, ThaumcraftNodeDevices.NODE_STABILIZER_BLOCK_ENTITY.get()) == null,
                     "storage-less original stabilizer has no server animation/processing ticker");
             var saved = tile.saveWithFullMetadata(f.level.registryAccess());

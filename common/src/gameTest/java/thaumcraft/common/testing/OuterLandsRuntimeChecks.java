@@ -129,7 +129,8 @@ public final class OuterLandsRuntimeChecks {
         try {
             ServerLevel level = lane.level;
             var features = level.getServer().registryAccess().registryOrThrow(Registries.FEATURE);
-            for (String id : new String[]{"village_banker_homes", "village_wizard_towers", "hilltop_stones", "eldritch_ring"}) {
+            // The eldritch ring is registered as thaumcraft:tc4_eldritch_ring (ThaumcraftOuterLands:76).
+            for (String id : new String[]{"village_banker_homes", "village_wizard_towers", "hilltop_stones", "tc4_eldritch_ring"}) {
                 test.assertTrue(features.containsKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", id)),
                         "the server registered the original village feature " + id);
             }

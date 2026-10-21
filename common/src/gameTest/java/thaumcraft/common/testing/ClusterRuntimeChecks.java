@@ -48,10 +48,15 @@ public final class ClusterRuntimeChecks {
 
     public static void run(GameTestHelper test) {
         ServerLevel level = test.getLevel();
+        // The registration order of the original ConfigRecipes:131-148. Copper is vanilla in 1.21.1,
+        // so the original branch Config.foundCopperIngot (line 133) is live and the copper recipes
+        // of lines 134 and 148 take their places in the order.
         purify(test, level, "pure_iron", "PUREIRON", 22, "thaumcraft:cluster_iron", "minecraft:iron_ore", "minecraft:deepslate_iron_ore", "minecraft:raw_iron", "minecraft:gold_ore");
         purify(test, level, "pure_gold", "PUREGOLD", 23, "thaumcraft:cluster_gold", "minecraft:gold_ore", "minecraft:deepslate_gold_ore", "minecraft:raw_gold", "minecraft:iron_ore");
-        triple(test, level, "trans_iron", "TRANSIRON", 24, "minecraft:iron_nugget", Map.of("metallum", 2), brew("metallum", 2), brew("metallum", 1), "minecraft:gold_nugget");
-        triple(test, level, "trans_gold", "TRANSGOLD", 25, "minecraft:gold_nugget", Map.of("metallum", 2, "lucrum", 1), brew("metallum", 2, "lucrum", 1), brew("metallum", 2), "minecraft:iron_nugget");
+        purify(test, level, "pure_copper", "PURECOPPER", 24, "thaumcraft:cluster_copper", "minecraft:copper_ore", "minecraft:deepslate_copper_ore", "minecraft:raw_copper", "minecraft:iron_ore");
+        triple(test, level, "trans_iron", "TRANSIRON", 25, "minecraft:iron_nugget", Map.of("metallum", 2), brew("metallum", 2), brew("metallum", 1), "minecraft:gold_nugget");
+        triple(test, level, "trans_gold", "TRANSGOLD", 26, "minecraft:gold_nugget", Map.of("metallum", 2, "lucrum", 1), brew("metallum", 2, "lucrum", 1), brew("metallum", 2), "minecraft:iron_nugget");
+        triple(test, level, "trans_copper", "TRANSCOPPER", 27, "thaumcraft:copper_nugget", Map.of("metallum", 2, "permutatio", 1), brew("metallum", 2, "permutatio", 1), brew("metallum", 2), "minecraft:iron_nugget");
         aspects(test);
         furnaces(test, level);
     }
@@ -80,7 +85,12 @@ public final class ClusterRuntimeChecks {
         test.assertTrue(recipe.matches(new CrucibleRecipeInput(new ItemStack(item(nugget)), full), level), "a nugget in a full brew makes three");
         test.assertTrue(!recipe.matches(new CrucibleRecipeInput(new ItemStack(item(nugget)), thin), level), "a thin brew does not");
         test.assertTrue(!recipe.matches(new CrucibleRecipeInput(new ItemStack(item(foreign)), full), level), foreign + " does not");
-        test.assertTrue(!recipe.matches(new CrucibleRecipeInput(new ItemStack(item(nugget.replace("nugget", "ingot"))), full), level), "an ingot is not a nugget");
+        // The native copper nugget has no native ingot, so the ingot of the check is the one of the
+        // vanilla metal when the nugget is the native one.
+        String ingot = nugget.startsWith("thaumcraft:")
+                ? nugget.replace("thaumcraft:copper_nugget", "minecraft:copper_ingot")
+                : nugget.replace("nugget", "ingot");
+        test.assertTrue(!recipe.matches(new CrucibleRecipeInput(new ItemStack(item(ingot)), full), level), "an ingot is not a nugget");
     }
 
     private static void aspects(GameTestHelper test) {

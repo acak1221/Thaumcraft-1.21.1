@@ -48,7 +48,9 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             test.assertTrue(player.server.isSameThread(), "shared receiver is called on the server thread");
             var result = ResearchNoteRequestNetworking.handle(player, "NITOR");
             test.assertTrue(result.success() && !result.reused() && !result.dropped(), "actual receiver issues one normal primary note");
-            test.assertTrue(player.getInventory().getItem(0).getCount() == 2, "request consumes exactly one paper");
+            // Oracle ResearchManager.createResearchNoteForPlayer:126-127 - the original only CHECKS
+            // that the player carries paper (InventoryPlayer.inventoryContains) and never takes it.
+            test.assertTrue(player.getInventory().getItem(0).getCount() == 3, "the original never spends the paper");
             ItemStack tool = player.getInventory().getItem(1);
             test.assertTrue(tool.getCount() == 1 && tool.getDamageValue() == 100, "last ink point retains the exhausted inkwell");
             var notes = mainNotes(player);
@@ -129,8 +131,8 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             player.getInventory().armor.set(0, new ItemStack(ThaumcraftContent.INKWELL.get()));
             var result = ResearchNoteIssuance.issue(player, "NITOR", new Random(42));
             test.assertTrue(result.success(), "ordered main-inventory resources issue a note");
-            test.assertTrue(player.getInventory().getItem(3).getCount() == 1 && player.getInventory().getItem(5).getCount() == 3,
-                    "only first main paper stack is debited");
+            test.assertTrue(player.getInventory().getItem(3).getCount() == 2 && player.getInventory().getItem(5).getCount() == 3,
+                    "the paper stacks are located but never debited");
             test.assertTrue(player.getInventory().getItem(1).getDamageValue() == 100
                     && player.getInventory().getItem(4).getDamageValue() == 13 && player.getInventory().getItem(6).getDamageValue() == 41,
                     "first usable main tool is debited, depleted and later tools remain");
@@ -152,11 +154,14 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             knowledge.addResearch("CRUCIBLE");
             fillMain(player); paper(player, 4, 1); ink(player, 7, 99);
             var freed = ResearchNoteIssuance.issue(player, "NITOR", new Random(42));
-            test.assertTrue(freed.success() && !freed.dropped(), "last paper frees a destination before overflow is considered");
-            test.assertTrue(player.getInventory().getItem(4).is(ThaumcraftContent.RESEARCH_NOTE.get()), "note occupies its consumed paper slot");
+            // The original never takes the paper, so its slot is never freed and the note is
+            // dropped exactly like the overflow below.
+            test.assertTrue(freed.success() && freed.dropped(), "the unspent paper never frees a destination");
+            test.assertTrue(player.getInventory().getItem(4).is(Items.PAPER) && player.getInventory().getItem(4).getCount() == 1,
+                    "the paper stays in its slot");
             test.assertTrue(player.getInventory().getItem(7).getDamageValue() == 100 && player.getInventory().getItem(7).getCount() == 1,
                     "full inventory retains depleted ink as well");
-            test.assertTrue(droppedNotes(test, player).isEmpty(), "freed destination does not drop a duplicate");
+            test.assertTrue(droppedNotes(test, player).size() == 1, "the note is dropped, not delivered");
 
             fillMain(player); paper(player, 4, 2); ink(player, 7, 98);
             var overflow = ResearchNoteIssuance.issue(player, "NITOR", new Random(42));
@@ -193,7 +198,9 @@ public final class ResearchNoteIssuanceRuntimeChecks {
                 CompoundTag before = knowledge.save();
                 var result = ResearchNoteIssuance.issue(player, "NITOR", new Random(42));
                 test.assertTrue(result.success(), "creative or native Unbreakable tool permits issue");
-                test.assertTrue(player.getInventory().getItem(0).is(ThaumcraftContent.RESEARCH_NOTE.get()), "paper is spent even in creative");
+                test.assertTrue(player.getInventory().getItem(0).is(Items.PAPER) && player.getInventory().getItem(0).getCount() == 1
+                        && player.getInventory().getItem(2).is(ThaumcraftContent.RESEARCH_NOTE.get()),
+                        "the paper is not spent even in creative and the note takes the first free slot");
                 test.assertTrue(player.getInventory().getItem(1).getDamageValue() == 99
                         && player.getInventory().getItem(1).getCount() == 1, "native no-damage branch preserves the inkwell");
                 test.assertTrue(player.getRandom().nextLong() == expected.nextLong(), "no player random draw when damage is bypassed");
@@ -222,7 +229,7 @@ public final class ResearchNoteIssuanceRuntimeChecks {
                 test.assertTrue(player.getInventory().getItem(1).getDamageValue() == 12 + (roll == 0 ? 1 : 0),
                         "native Unbreaking uses old zero-roll damage rule");
                 test.assertTrue(player.getRandom().nextLong() == expected.nextLong(), "exactly one bounded-int draw comes from player's RNG");
-                test.assertTrue(player.getInventory().getItem(0).getCount() == 1, "prevented ink damage does not prevent paper consumption");
+                test.assertTrue(player.getInventory().getItem(0).getCount() == 2, "the paper is never spent, whatever the ink does");
             }
         });
     }

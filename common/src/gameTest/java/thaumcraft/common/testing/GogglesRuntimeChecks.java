@@ -221,19 +221,32 @@ public final class GogglesRuntimeChecks {
         player.doTick();
         test.assertTrue(player.getArmorValue() == 1 && player.getAttributeValue(Attributes.ARMOR_TOUGHNESS) == 0
                 && player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) == 0, "real equipped native defense1 has no invented toughness or knockback resistance");
-        // iron 1.1, gold 1.0, thaumium 0.9 and void 0.8, less the goggles' five points (0.75 for void is exact in float)
-        int[] one = {105, 95, 85, 75}, five = {525, 475, 424, 375}, three = {315, 285, 254, 225}, fire = {10, 9, 8, 7};
-        int[] bare = {550, 500, 450, 400};
+        // iron 1.1, gold 1.0, thaumium 0.9, void 0.8 and the copper cap 1.1, less the goggles'
+        // five points (0.75 for void is exact in float). The copper cap pays the special modifier
+        // 1.0 for order and entropy (ConfigItems:331), so its prices are the iron ones for the
+        // four other aspects and the gold ones for the two special ones.
+        int[] one = {105, 95, 85, 75, 105}, five = {525, 475, 424, 375, 525},
+                three = {315, 285, 254, 225, 315}, fire = {10, 9, 8, 7, 10};
+        int[] bare = {550, 500, 450, 400, 550};
+        // The null actor pays the cap modifier alone: ten centivis times the modifier.
+        int[] focus = {11, 10, 9, 8, 11};
         for (int index = 0; index < WandMaterials.CAPS.size(); index++) {
             ItemStack wand = wand(WandMaterials.CAPS.get(index).tag(), 2000);
             var fivePrices = ArcaneVis.price(whole(5), wand, player);
             var onePrices = ArcaneVis.price(whole(1), wand, player);
             var threePrices = ArcaneVis.price(whole(3), wand, player);
             var nullPrices = ArcaneVis.price(whole(5), wand, null);
-            for (String tag : WandData.PRIMALS) test.assertTrue(WandVisDiscount.percentagePoints(player, Aspect.getAspect(tag)) == 5
-                    && onePrices.get(tag) == one[index] && fivePrices.get(tag) == five[index] && threePrices.get(tag) == three[index] && nullPrices.get(tag) == bare[index],
-                    "per-aspect original float multiplication then truncation:1vis85 but3vis254/5vis424, and null-actor cap-only pricing: " + tag);
-            test.assertTrue(ItemFocusFire.tickCost(wand, player) == fire[index] && ItemFocusFire.tickCost(wand, null) == 11 - index,
+            for (String tag : WandData.PRIMALS) {
+                boolean copperSpecial = "copper".equals(WandMaterials.CAPS.get(index).tag())
+                        && ("ordo".equals(tag) || "perditio".equals(tag));
+                test.assertTrue(WandVisDiscount.percentagePoints(player, Aspect.getAspect(tag)) == 5
+                        && onePrices.get(tag) == (copperSpecial ? 95 : one[index])
+                        && fivePrices.get(tag) == (copperSpecial ? 475 : five[index])
+                        && threePrices.get(tag) == (copperSpecial ? 285 : three[index])
+                        && nullPrices.get(tag) == (copperSpecial ? 500 : bare[index]),
+                        "per-aspect original float multiplication then truncation:1vis85 but3vis254/5vis424, and null-actor cap-only pricing: " + tag);
+            }
+            test.assertTrue(ItemFocusFire.tickCost(wand, player) == fire[index] && ItemFocusFire.tickCost(wand, null) == focus[index],
                     "basic Fire uses the same FIRE-specific modifier in centivis; null actor retains cap-only pricing");
         }
         player.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));

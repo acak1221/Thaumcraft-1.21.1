@@ -329,6 +329,14 @@ public final class ThaumcraftEldritchBlocks {
     /** The warded glass is the metadata two of the cosmetic opaque (ConfigRecipes:192). */
     public static final RegistrySupplier<Item> WARDED_GLASS_ITEM = ITEMS.register("warded_glass",
             () -> new ItemVariantBlock(COSMETIC_OPAQUE_WARDED.get(), EldritchBlockRules.variantOf("warded_glass"), "warded_glass", new Item.Properties()));
+    /**
+     * The obsidian tile is the metadata one of the cosmetic solid: the original language file names it
+     * "tile.blockCosmeticSolid.1.name" = "Obsidian Tile", and the original makes four of them out of four
+     * obsidian (oracle ConfigRecipes:449). A 1.21.1 recipe result cannot carry a block state, so the
+     * variant of the cosmetic solid family needs an item of its own.
+     */
+    public static final RegistrySupplier<Item> OBSIDIAN_TILE_ITEM = ITEMS.register("obsidian_tile",
+            () -> new ItemVariantBlock(COSMETIC_SOLID_TOUGH.get(), EldritchBlockRules.variantOf("obsidian_tile"), "obsidian_tile", new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_OPAQUE_ITEM = ITEMS.register("cosmetic_opaque", () -> new BlockItem(COSMETIC_OPAQUE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ARCANE_ITEM = ITEMS.register("cosmetic_stone_slab_arcane", () -> new BlockItem(COSMETIC_STONE_SLAB_ARCANE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ELDRITCH_ITEM = ITEMS.register("cosmetic_stone_slab_eldritch", () -> new BlockItem(COSMETIC_STONE_SLAB_ELDRITCH.get(), new Item.Properties()));
@@ -583,7 +591,7 @@ public final class ThaumcraftEldritchBlocks {
         CreativeTabRegistry.append(ThaumcraftContent.TAB, ELDRITCH_ITEM, ELDRITCH_CRUST_ITEM, ELDRITCH_DECO_ITEM,
                 ELDRITCH_DOORWAY_ITEM, ELDRITCH_SPAWNER_ITEM, ELDRITCH_CRYSTAL_ITEM,
                 COSMETIC_SOLID_ITEM, COSMETIC_SOLID_TOUGH_ITEM, COSMETIC_SOLID_THAUMIUM_ITEM,
-                PAVING_STONE_TRAVEL_ITEM, PAVING_STONE_WARDING_ITEM, WARDED_GLASS_ITEM,
+                PAVING_STONE_TRAVEL_ITEM, PAVING_STONE_WARDING_ITEM, WARDED_GLASS_ITEM, OBSIDIAN_TILE_ITEM,
                 COSMETIC_OPAQUE_ITEM,
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,

@@ -370,6 +370,12 @@ public final class EldritchBlockRules {
         items.put("paving_stone_travel", COSMETIC_TRAVEL_STONE);
         items.put("paving_stone_warding", COSMETIC_WARDING_STONE);
         items.put("warded_glass", COSMETIC_OPAQUE_OWNED);
+        // The original metadata one of the cosmetic solid: the obsidian tile. The original language file
+        // names it "tile.blockCosmeticSolid.1.name" = "Obsidian Tile" and the original makes four of them
+        // out of four obsidian (oracle ConfigRecipes:449). The port keeps the TEXTURE names of the original
+        // in COSMETIC_OBSIDIAN_TILE (zero) and COSMETIC_OBSIDIAN_TOTEM_BASE (one), and the original crosses
+        // them against its item names, so the metadata one is the constant with the base texture.
+        items.put("obsidian_tile", COSMETIC_OBSIDIAN_TOTEM_BASE);
         // The original blockStoneDevice metadata fourteen and blockWoodenDevice metadata two and eight.
         items.put("flux_scrubber", DEVICE_STONE_FLUX_SCRUBBER);
         // The original blockWoodenDevice metadata eight: one item that carries its colour and its

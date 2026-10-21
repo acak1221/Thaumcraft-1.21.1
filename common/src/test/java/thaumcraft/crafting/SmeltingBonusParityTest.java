@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import thaumcraft.common.lib.crafting.SmeltingBonusCatalog;
 
 /**
  * The original TC4 4.2.3.5 smelting bonus catalogue, pinned against the oracle.
@@ -123,5 +124,36 @@ class SmeltingBonusParityTest {
         List<Integer> expected = new ArrayList<>();
         for (int line = 493; line <= 510; ++line) expected.add(line);
         assertEquals(expected, lines, "the original registration lines 493-510");
+    }
+
+    /**
+     * The runtime catalogue keeps the six third-party entries visible instead of dropping them silently.
+     *
+     * <p>The corpus is the only place the port knows that the original registered a tin, a silver and a
+     * lead bonus. If the loader dropped them, the gap would be invisible in the game and in the report,
+     * so the loaded catalogue has to name all six of them with their reason.</p>
+     */
+    @Test void theLoadedCatalogueNamesTheSixThirdPartyEntriesWithTheirReason() {
+        List<SmeltingBonusCatalog.Entry> entries = SmeltingBonusCatalog.entries();
+        assertEquals(12, entries.size(), "the twelve original entries the port can fire");
+        List<Integer> lines = new ArrayList<>();
+        for (SmeltingBonusCatalog.Entry entry : entries) lines.add(entry.sourceLine());
+        assertEquals(List.of(493, 494, 495, 496, 500, 501, 502, 503, 507, 508, 509, 510), lines,
+                "the original registration order of the twelve live entries");
+        List<SmeltingBonusCatalog.Skipped> skipped = SmeltingBonusCatalog.skipped();
+        assertEquals(6, skipped.size(), "the six entries that need a third-party ore mod");
+        List<Integer> skippedLines = new ArrayList<>();
+        for (SmeltingBonusCatalog.Skipped skip : skipped) {
+            skippedLines.add(skip.sourceLine());
+            assertFalse(skip.reason().isBlank(), "every skipped entry states why it cannot fire");
+            assertTrue(skip.ore() != null || skip.item() != null, "every skipped entry names its input");
+        }
+        assertEquals(List.of(497, 498, 499, 504, 505, 506), skippedLines, "the original registration lines");
+        assertEquals("oreTin", skipped.get(0).ore());
+        assertEquals("oreSilver", skipped.get(1).ore());
+        assertEquals("oreLead", skipped.get(2).ore());
+        assertEquals("thaumcraft:cluster_tin", skipped.get(3).item());
+        assertEquals("thaumcraft:cluster_silver", skipped.get(4).item());
+        assertEquals("thaumcraft:cluster_lead", skipped.get(5).item());
     }
 }

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  */
 class CosmeticFamilyAssetsTest {
     /** The block ids of the per metadata wave that the hardness group design replaced. */
-    private static final List<String> OLD_BLOCK_IDS = List.of("obsidian_tile", "obsidian_totem_base",
+    private static final List<String> OLD_BLOCK_IDS = List.of("obsidian_totem_base",
             "eldritch_stone", "infused_stone_pillar", "cosmetic_stone_slab", "cosmetic_wood_slab");
 
     /** The block ids of the hardness group design. */
@@ -71,13 +71,15 @@ class CosmeticFamilyAssetsTest {
     private static final Map<String, String> VARIANT_ITEMS = Map.of(
             "paving_stone_travel", "thaumcraft:arcane/paving_stone_travel",
             "paving_stone_warding", "thaumcraft:arcane/paving_stone_warding",
-            "warded_glass", "thaumcraft:arcane/warded_glass");
+            "warded_glass", "thaumcraft:arcane/warded_glass",
+            "obsidian_tile", "thaumcraft:obsidian_tile");
 
     /** The Russian names of the variant items from the original 1.7.10 jar. */
     private static final Map<String, String> VARIANT_ITEM_NAMES = Map.of(
             "paving_stone_travel", "Камень путешественника",
             "paving_stone_warding", "Камень сдерживания",
-            "warded_glass", "Усиленное стекло");
+            "warded_glass", "Усиленное стекло",
+            "obsidian_tile", "Обсидиановая основа");
 
     /** The block id of the hardness group that hosts the original metadata. */
     private static String blockOf(int variant) {

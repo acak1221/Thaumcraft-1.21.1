@@ -906,6 +906,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void thePublicRecipeListHoldsEveryRecipeOfTheLevel(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingRecipeApiRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void pickaxeOfTheCoreBurnsWearsAndFindsClusters(GameTestHelper test) {
         thaumcraft.common.testing.ElementalPickaxeRuntimeChecks.run(test);
     }

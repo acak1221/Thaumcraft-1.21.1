@@ -13,6 +13,16 @@ import thaumcraft.common.lib.world.VillageWizardManager;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
 import thaumcraft.common.lib.world.EldritchRingFeature;
 import thaumcraft.common.lib.world.WorldGenHilltopStones;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.world.OuterLandsDimension;
+import thaumcraft.common.lib.world.OuterLandsDimensionRules;
+import thaumcraft.common.lib.world.StructurePlacementRules;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import thaumcraft.common.lib.world.OuterLandsBiomes;
 
 /**
  * The original TC4 Outer Lands and village components inside a real dedicated server: the
@@ -184,6 +194,106 @@ public final class OuterLandsRuntimeChecks {
             throw failure;
         }
         lane.clean();
+        test.succeed();
+    }
+
+    /** The chunk generation of the Outer Lands builds the labyrinth of the eldritch ring. */
+    public static void labyrinth(GameTestHelper test) {
+        ServerLevel outer = OuterLandsDimension.level(test.getLevel().getServer());
+        test.assertTrue(outer != null, "the Outer Lands level exists in the running server");
+        int[] room = seedLabyrinth(outer, 512, 512);
+        // The shell floor of a room sits one block below the room base.
+        test.assertTrue(outer.getBlockState(new BlockPos(room[0], OuterLandsRules.MAZE_FLOOR_Y - 1, room[1])).is(Blocks.BEDROCK),
+                "the labyrinth room floor is generated in the Outer Lands");
+        test.assertTrue(outer.getBlockState(new BlockPos(room[0], OuterLandsRules.MAZE_FLOOR_Y + 3, room[1]))
+                .is(ThaumcraftEldritchBlocks.ELDRITCH_PORTAL.get()), "the eldritch gate of the labyrinth portal room is generated");
+        test.assertTrue(outer.getBlockState(new BlockPos(room[0], OuterLandsRules.MAZE_FLOOR_Y + 2, room[1]))
+                .is(ThaumcraftEldritchBlocks.ELDRITCH.get()), "the obelisk base of the labyrinth portal room is generated");
+        test.succeed();
+    }
+
+    public static void portal(GameTestHelper test) {
+        ServerLevel overworld = test.getLevel();
+        ServerLevel outer = OuterLandsDimension.level(overworld.getServer());
+        test.assertTrue(outer != null, "the Outer Lands level exists in the running server");
+        ServerPlayer player = test.makeMockServerPlayerInLevel();
+        BlockPos overGate = player.blockPosition();
+        gate(overworld, overGate);
+        // The gate of the Outer Lands stands on the floor of a labyrinth room.
+        int gateY = OuterLandsRules.MAZE_FLOOR_Y + 3;
+        BlockPos outerGate = new BlockPos(overGate.getX(), gateY, overGate.getZ());
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dz = -1; dz <= 1; ++dz) {
+                outer.setBlock(new BlockPos(outerGate.getX() + dx, OuterLandsRules.MAZE_FLOOR_Y - 1, outerGate.getZ() + dz),
+                        Blocks.BEDROCK.defaultBlockState(), Block.UPDATE_ALL);
+            }
+        }
+        gate(outer, outerGate);
+        // The gate scans every fifth tick (oracle TileEldritchPortal:63).
+        test.runAfterDelay(20, () -> {
+            test.assertTrue(player.level() == outer, "the eldritch gate moved the player into the Outer Lands");
+            test.assertTrue(player.isAlive() && !player.isDeadOrDying(), "the player survived the transfer into the Outer Lands");
+            test.assertTrue(Math.abs(player.getX() - (outerGate.getX() + .5D)) <= 1.5D
+                    && Math.abs(player.getZ() - (outerGate.getZ() + .5D)) <= 1.5D, "the player lands one block beside the gate");
+            test.assertTrue(player.getY() == OuterLandsDimensionRules.gateLandingHeight(gateY),
+                    "the player lands at the height of the gate");
+            // The gate of the Outer Lands stands on the floor of a labyrinth room, so the player
+            // never falls into the void of the Outer Lands.
+            test.assertTrue(player.getY() >= OuterLandsRules.MAZE_FLOOR_Y, "the player does not fall out of the world");
+            test.assertTrue(!outer.getBlockState(new BlockPos(outerGate.getX(), OuterLandsRules.MAZE_FLOOR_Y - 1, outerGate.getZ())).isAir(),
+                    "the gate of the Outer Lands stands on solid ground");
+            test.succeed();
+        });
+    }
+
+    private static int[] seedLabyrinth(ServerLevel outer, int ringChunkX, int ringChunkZ) {
+        int width = 15;
+        int height = 15;
+        long seed = 20261021L;
+        MazeGenerator generator = new MazeGenerator(width, height, seed);
+        while (!generator.generate()) generator = new MazeGenerator(width, height, ++seed);
+        // The portal cell is the centre of the labyrinth (oracle MazeGenerator:159-161).
+        int[] portalChunk = StructurePlacementRules.mazeCellChunk(1 + width / 2, 1 + height / 2,
+                ringChunkX, ringChunkZ, width, height);
+        OuterLandsProvider.maze(outer).storeLabyrinth(generator, ringChunkX, ringChunkZ);
+        outer.getChunk(portalChunk[0], portalChunk[1]);
+        return new int[] {portalChunk[0] * 16 + 8, portalChunk[1] * 16 + 8};
+    }
+
+    /** The eldritch gate with the two eldritch blocks that keep it alive. */
+    private static void gate(ServerLevel level, BlockPos pos) {
+        level.setBlock(pos.below(), ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(pos.above(), ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(pos, ThaumcraftEldritchBlocks.ELDRITCH_PORTAL.get().defaultBlockState(), Block.UPDATE_ALL);
+    }
+
+    /** The Outer Lands exists in the running server and keeps the original values. */
+    public static void levelStemKeepsTheOriginalValues(GameTestHelper test) {
+        ServerLevel overworld = test.getLevel();
+        ServerLevel outer = OuterLandsDimension.level(overworld.getServer());
+        test.assertTrue(outer != null, "the Outer Lands level exists in the running server");
+        test.assertTrue(outer.dimension().equals(OuterLandsProvider.DIMENSION), "the Outer Lands carries the registered dimension key");
+        var expected = OuterLandsDimensionRules.dimensionTypeValues();
+        var type = outer.dimensionType();
+        test.assertTrue(type.hasSkyLight() == expected.hasSkyLight(), "the Outer Lands has no sky light");
+        test.assertTrue(type.ambientLight() == expected.ambientLight(), "the Outer Lands keeps the original ambient light of zero");
+        test.assertTrue(type.height() == expected.height() && type.minY() == expected.minY()
+                && type.logicalHeight() == expected.logicalHeight(), "the Outer Lands keeps the original 256 block tall world");
+        test.assertTrue(type.fixedTime().orElse(-1L) == expected.fixedTime(), "the sun never moves in the Outer Lands");
+        test.assertTrue(type.coordinateScale() == expected.coordinateScale(), "the Outer Lands keeps the original coordinate scale");
+        test.assertTrue(type.bedWorks() == expected.bedWorks() && type.respawnAnchorWorks() == expected.respawnAnchorWorks(),
+                "the Outer Lands refuses beds and respawn anchors");
+        test.assertTrue(type.monsterSpawnBlockLightLimit() == expected.monsterSpawnBlockLightLimit(),
+                "the Outer Lands keeps the original monster spawn light limit");
+        var generator = outer.getChunkSource().getGenerator();
+        test.assertTrue(generator instanceof FlatLevelSource, "the Outer Lands uses the flat generator of the void chunks");
+        var settings = ((FlatLevelSource) generator).settings();
+        test.assertTrue(settings.getLayersInfo().size() == 1
+                && settings.getLayersInfo().get(0).getHeight() == OuterLandsDimensionRules.LAYER_HEIGHT,
+                "the Outer Lands is a single air layer over the void");
+        test.assertTrue(settings.getBiome().is(OuterLandsBiomes.ELDRITCH), "the Outer Lands uses the single eldritch biome");
+        test.assertTrue(outer.getChunk(0, 0).getBlockState(new BlockPos(8, 0, 8)).isAir(),
+                "the flat air layer of the Outer Lands is empty above the void");
         test.succeed();
     }
 }

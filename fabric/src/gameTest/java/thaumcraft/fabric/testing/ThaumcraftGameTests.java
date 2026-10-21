@@ -1604,4 +1604,18 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.RunicBaubleRuntimeChecks.cultistArmourKeepsItsOriginalNumbers(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "m13_outer_lands")
+    public void eldritchGateMovesThePlayerIntoTheOuterLands(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.portal(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m13_outer_lands")
+    public void outerLandsGeneratesTheLabyrinthOfTheEldritchRing(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.labyrinth(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m13_outer_lands")
+    public void outerLandsIsARealRegisteredDimension(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.levelStemKeepsTheOriginalValues(test);
+    }
 }

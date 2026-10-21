@@ -86,6 +86,9 @@ public final class ThaumcraftOuterLands {
 
     public static void register() {
         FEATURES.register();
+        // The dimension itself is a data pack level stem, so the server only learns about it
+        // when the world loads. The server start reports the level that was created.
+        thaumcraft.common.lib.world.OuterLandsDimension.registerLogging();
     }
 
     /* ------------------------------------------------------------------ */

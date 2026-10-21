@@ -40,6 +40,21 @@
         "settings": "minecraft:overworld",
         "biome_source": {"type": "minecraft:multi_noise", "preset": "minecraft:overworld"}
       }
+    },
+    "thaumcraft:outer_lands": {
+      "type": "thaumcraft:outer_lands",
+      "generator": {
+        "type": "minecraft:flat",
+        "settings": {
+          "biome": "thaumcraft:eldritch_lands",
+          "features": true,
+          "lakes": false,
+          "layers": [
+            {"block": "minecraft:air", "height": 1}
+          ],
+          "structure_overrides": []
+        }
+      }
     }
   }
 }

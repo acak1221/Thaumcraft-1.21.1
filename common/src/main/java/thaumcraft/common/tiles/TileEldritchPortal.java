@@ -25,6 +25,7 @@ import thaumcraft.common.lib.network.WarpMessageNetworking;
 import thaumcraft.common.lib.research.PlayerKnowledge;
 import thaumcraft.common.lib.research.ResearchCatalog;
 import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.lib.world.OuterLandsDimensionRules;
 import thaumcraft.common.lib.world.OuterLandsProvider;
 import thaumcraft.common.lib.world.OuterLandsWiringRules;
 import dev.architectury.networking.NetworkManager;
@@ -101,9 +102,9 @@ public final class TileEldritchPortal extends BlockEntity {
         double z;
         if (destination != null) {
             // Oracle TeleporterThaumcraft:102-108 - the player lands one block beside the gate.
-            x = destination.getX() + .5D + (target.getRandom().nextBoolean() ? 1.0D : -1.0D);
-            y = destination.getY();
-            z = destination.getZ() + .5D + (target.getRandom().nextBoolean() ? 1.0D : -1.0D);
+            x = destination.getX() + .5D + OuterLandsDimensionRules.gateLandingOffset(target.getRandom().nextBoolean());
+            y = OuterLandsDimensionRules.gateLandingHeight(destination.getY());
+            z = destination.getZ() + .5D + OuterLandsDimensionRules.gateLandingOffset(target.getRandom().nextBoolean());
         } else {
             // Oracle TeleporterThaumcraft:45-51 - without a gate the player lands above the ground.
             x = player.getX();

@@ -257,7 +257,7 @@ every screenshot file present with the recorded size.
 | this session, run A (four-dimension world, **without** the port fix) | 03:41 | `SCRIPT_FAILED` (harness: the research category tabs are not vanilla buttons) | 42 | `DISTILLATION` |
 | this session, run B (the **probe** world with three level stems) | 03:31 | `SCRIPT_FAILED` (the same harness defect, later) | 39 | `DISTILLATION` |
 | this session, run C (four-dimension world, **with** the port fix) | 03:52 | `SCRIPT_FAILED` (harness: the focus sequence timed out) | 34 | `DISTILLATION` |
-| the leader's run in this worktree (`.tmp/cr-smoke7.log`) | 04:14 | see §5 | | |
+| the leader's runs in this worktree (`.tmp/cr-smoke2..8.log`) | 03:05-04:29 | every one of them ended in `SCRIPT_FAILED` (harness) or was killed by the OOM killer (exit 137) while three other clients and several Gradle daemons shared the 15 GB of RAM of this sandbox | 5-8 | `PURCHASE_LOW_SYNC`, `ISSUANCE_BASELINE`, `DISTILLATION` |
 
 **Run C is the proof of the port fix**: the world opened directly — the run produced no
 `00-vanilla-world-confirmation.png` at all and the vanilla `BackupConfirmScreen` never
@@ -274,7 +274,13 @@ come from another machine and never exercised the `full` sequence):
    label of a research *category*; the browser draws the categories as icons and picks them
    with its own hit test, so the button can never exist. Fixed by using the real tab hit
    test (`BookClientSmoke.clickCategoryTab`).
-2. The focus sequence then timed out in `CANCEL_PRESS` (1800 ticks). The step is an
+2. The focus sequence then timed out in `CANCEL_PRESS` (1800 ticks). The sandbox itself
+   makes that stage fragile: three Minecraft clients were open at the same time (this
+   agent, the leader and the `multiplayer` agent) and two `xfocus.py` loops
+   (`while true; do python3 .tmp/xfocus.py :0 Minecraft; sleep 3; done`) fight over the
+   X focus of the window named "Minecraft", and the RAM of the machine (15 GB) was
+   exhausted, so several runs were killed with exit 137 (SIGKILL) before they could
+   finish. The step is an
    *input* step and the harness only performs it while `client.isWindowActive()`; another
    agent's `xfocus.py` loop (`while true; do python3 .tmp/xfocus.py :0 Minecraft; sleep 3; done`)
    steals the X focus of one of the two Minecraft windows that are open in this sandbox,

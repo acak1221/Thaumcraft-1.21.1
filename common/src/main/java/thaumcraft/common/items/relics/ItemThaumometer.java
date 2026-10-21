@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -88,9 +89,13 @@ public final class ItemThaumometer extends Item {
     }
 
     private static void cameraTick(Level level, ServerPlayer player) {
+        // The original drew the pitch from the CLIENT world random, so the scan
+        // never shifted the server world random that generates the research
+        // puzzles. The native scan is server owned, so the pitch uses its own
+        // generator and leaves the world random of the server untouched.
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "cameraticks")),
-                SoundSource.PLAYERS, CAMERA_VOLUME, CAMERA_PITCH + level.random.nextFloat() * CAMERA_PITCH_SPREAD);
+                SoundSource.PLAYERS, CAMERA_VOLUME, CAMERA_PITCH + RandomSource.create().nextFloat() * CAMERA_PITCH_SPREAD);
     }
 
     @Override public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remaining) {

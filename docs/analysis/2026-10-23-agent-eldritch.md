@@ -237,8 +237,12 @@ Gradle test suite were not run** (the leader runs them).
 the private oracle root that the script needs (`<repo>/../work/thaumcraft-4.2.3.5-oracle`)
 does not exist here, so the script stops with
 `Missing source root: /home/cyberfox-kali/wt/work/thaumcraft-4.2.3.5-oracle` before it
-compares anything. The invariants that the check computes were verified by hand on the
-edited ledger:
+compares anything. The oracle cannot be rebuilt here either: a fresh CFR 0.152
+decompilation of `thaumcraft/common/entities/monster/EntityCultist.java` of the jar gives
+117 lines without the comments and 131 lines with them, while the ledger records **128**
+lines and the hash `079dd814…`, so the private oracle was written with another tool or
+another version and its fingerprints cannot be reproduced. The invariants that the check
+computes were verified by hand on the edited ledger:
 
 * the schema of every review is valid (the allowed values of the four verdicts, the
   non-empty evidence of a `parity_verified` row, the exclusion rules),

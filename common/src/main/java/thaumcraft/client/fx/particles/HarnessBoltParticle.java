@@ -19,13 +19,15 @@ public final class HarnessBoltParticle extends Particle {
     private final WispLightningShape bolt;
     private int boltAge;
     private HarnessBoltParticle(ClientLevel level,Vec3 from,Vec3 to,long seed) {
-        super(level,from.x,from.y,from.z);bolt=new WispLightningShape(from,to,seed,1,2F);boltAge=-(int)(bolt.length*3);
+        super(level,from.x,from.y,from.z);
+        // The original ModelHoverHarness: FXLightningBolt(world, x, y, z, px, py, pz, seed, 1, 2.0f, 3).
+        bolt=new WispLightningShape(from,to,seed,1,2F,3);boltAge=-(int)(bolt.length*3);
         xd=yd=zd=0;hasPhysics=false;setSize(.01F,.01F);
     }
     public static void emit(ClientLevel level,Vec3 from,Vec3 to,long seed) {
         if(from.distanceToSqr(to)<1e-10)return;Minecraft.getInstance().particleEngine.add(new HarnessBoltParticle(level,from,to,seed));
     }
-    @Override public void tick() {boltAge=Math.min(bolt.maxAge,boltAge+3);if(boltAge>=bolt.maxAge)remove();}
+    @Override public void tick() {boltAge=Math.min(bolt.maxAge,boltAge+bolt.increment);if(boltAge>=bolt.maxAge)remove();}
     @Override public ParticleRenderType getRenderType() {return ParticleRenderType.CUSTOM;}
     @Override public void render(VertexConsumer unused,Camera camera,float partial) {
         var player=Minecraft.getInstance().player;if(player==null)return;int range=Minecraft.useFancyGraphics()?100:50;if(player.distanceToSqr(x,y,z)>range*range)return;
@@ -36,7 +38,11 @@ public final class HarnessBoltParticle extends Particle {
             float alpha=pass==0?(1-fraction)*.4F:1-fraction*.5F;
             VisNetRender.draw(pass==0?VisNetRender.BOLT_LARGE:VisNetRender.BOLT_SMALL,GL11.GL_ONE_MINUS_SRC_ALPHA,false,GameRenderer.getPositionTexColorShader(),out->{
                 for(var segment:bolt.segments) {
-                    if(segment.number>reach)continue;Vec3 start=segment.start(),end=segment.end();
+                    if(segment.number>reach)continue;
+                    // The original divides the ribbon width by the joint sine; a sine the normalised dot product
+                    // pushed out of the unit interval made the original vertex coordinates not a number and the
+                    // original rasteriser dropped the quad. The port drops the same segment.
+                    if(!segment.renderable())continue;Vec3 start=segment.start(),end=segment.end();
                     float dx=(float)player.getX()-(float)start.x,dy=(float)player.getY()-(float)start.y,dz=(float)player.getZ()-(float)start.z;
                     float distance=(float)Math.sqrt(dx*dx+dy*dy+dz*dz),width=.015F*(distance/5+1)*(1+segment.light)*.5F;
                     Vec3 before=view.cross(segment.previousDirection()).scale(width/segment.sinPrevious()),after=view.cross(segment.nextDirection()).scale(width/segment.sinNext());float opacity=alpha*segment.light;

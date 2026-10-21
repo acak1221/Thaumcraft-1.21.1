@@ -4,15 +4,25 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 
 /**
  * Original TileJarBrain: the brain jar. It swallows the experience orbs that
  * come close to it and keeps them.
+ *
+ * <p>Oracle TileJarBrain.java:53-113 - the jar pulls the CLOSEST orb of the
+ * six blocks around it towards its middle with the strength
+ * {@code (1 - distance/7)^2}, and it swallows every orb that lies inside its
+ * own block. The stored experience is capped at two thousand at the start of
+ * the next tick; the block that empties the jar sets the eat delay to forty.</p>
  */
 public final class TileJarBrain extends BlockEntity {
     /** Original TileJarBrain:24 - the stored experience. */
@@ -34,36 +44,60 @@ public final class TileJarBrain extends BlockEntity {
     public int getXp() { return xp; }
     public int getXpMax() { return xpMax; }
 
-    /** Original TileJarBrain:31-79 - the jar pulls the experience orbs to itself. */
+    /** Original TileJarBrain:31-79 - the jar pulls the closest orb to itself. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileJarBrain jar) {
         if (level.isClientSide) return;
         if (jar.xp > jar.xpMax) jar.xp = jar.xpMax;
-        if (jar.xp >= jar.xpMax) return;
+        ExperienceOrb closest = closestOrb(level, pos);
+        if (jar.xp < jar.xpMax && closest != null && jar.eatDelay == 0) {
+            double dx = (pos.getX() + .5D - closest.getX()) / 7.0D;
+            double dy = (pos.getY() + .5D - closest.getY()) / 7.0D;
+            double dz = (pos.getZ() + .5D - closest.getZ()) / 7.0D;
+            double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            double pull = 1.0D - length;
+            if (pull > 0.0D) {
+                pull *= pull;
+                closest.setDeltaMovement(closest.getDeltaMovement().add(
+                        dx / length * pull * .15D, dy / length * pull * .33D, dz / length * pull * .15D));
+            }
+        }
         if (jar.eatDelay > 0) {
             jar.eatDelay--;
             return;
         }
-        double cx = pos.getX() + .5D;
-        double cy = pos.getY() + .5D;
-        double cz = pos.getZ() + .5D;
+        if (jar.xp >= jar.xpMax) return;
+        // Oracle TileJarBrain:107-113 - every orb inside the block is swallowed.
+        boolean eaten = false;
         for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class,
-                new net.minecraft.world.phys.AABB(cx - 7.0D, cy - 7.0D, cz - 7.0D, cx + 7.0D, cy + 7.0D, cz + 7.0D))) {
-            double dx = cx - orb.getX();
-            double dy = cy - orb.getY();
-            double dz = cz - orb.getZ();
-            double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            if (distance <= 0.0D) continue;
-            double pull = 1.0D - distance / 7.0D;
-            pull *= pull;
-            orb.setDeltaMovement(orb.getDeltaMovement().add(dx / distance * pull * .15D,
-                    dy / distance * pull * .33D, dz / distance * pull * .15D));
-            if (distance < 1.0D) {
-                jar.xp = Math.min(jar.xpMax, jar.xp + orb.getValue());
-                orb.discard();
-                jar.setChanged();
-                jar.eatDelay = 5;
-            }
+                new AABB(pos.getX() - .1D, pos.getY() - .1D, pos.getZ() - .1D,
+                        pos.getX() + 1.1D, pos.getY() + 1.1D, pos.getZ() + 1.1D))) {
+            jar.xp += orb.getValue();
+            level.playSound(null, orb.getX(), orb.getY(), orb.getZ(), SoundEvents.GENERIC_EAT,
+                    SoundSource.BLOCKS, .1F, (level.random.nextFloat() - level.random.nextFloat()) * .2F + 1.0F);
+            orb.discard();
+            eaten = true;
         }
+        if (eaten) {
+            jar.setChanged();
+            level.sendBlockUpdated(pos, jar.getBlockState(), jar.getBlockState(), Block.UPDATE_CLIENTS);
+        }
+    }
+
+    /** Oracle TileJarBrain:114-130 - the closest orb of the six blocks around the jar. */
+    private static ExperienceOrb closestOrb(Level level, BlockPos pos) {
+        AABB box = new AABB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1).inflate(6, 6, 6);
+        ExperienceOrb closest = null;
+        double best = Double.MAX_VALUE;
+        for (ExperienceOrb orb : level.getEntitiesOfClass(ExperienceOrb.class, box)) {
+            double dx = pos.getX() + .5D - orb.getX();
+            double dy = pos.getY() + .5D - orb.getY();
+            double dz = pos.getZ() + .5D - orb.getZ();
+            double distance = dx * dx + dy * dy + dz * dz;
+            if (distance >= best) continue;
+            closest = orb;
+            best = distance;
+        }
+        return closest;
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -75,7 +109,6 @@ public final class TileJarBrain extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.putInt("XP", xp);
     }
-
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveWithoutMetadata(registries); }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
 }

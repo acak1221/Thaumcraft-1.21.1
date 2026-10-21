@@ -127,10 +127,30 @@ Every fix below is committed in `port/octiles` with the oracle file and line in 
   of `EntityItem`; the original's `ie2.field_71088_bW = 20` (`TileMirror.java:221`) only set the
   *portal* cooldown and therefore never delayed the pickup.
 
+### 1.7 The brain jar pulled every orb and swallowed them too late
+
+* **Oracle** `thaumcraft/common/tiles/TileJarBrain.java:53-113`:
+  * the pull is applied to the **closest** orb of the six blocks around the jar
+    (`getClosestXPOrb()`, lines 114-130) with the strength `(1 − distance/7)²`
+    (lines 58-63);
+  * the jar swallows **every** orb that lies inside its own block
+    (`AxisAlignedBB(x−0.1 … x+1.1)`, line 108) and the sound is `random.eat` with the volume 0.1;
+  * the eat delay is only ever set to forty by the block that empties the jar
+    (`BlockJar.java:241`); the tile itself never invents a delay.
+* **Port (before)** `TileJarBrain.java`:
+  * every orb of a ±7 box around the centre was pulled at once (the original pulls only the closest);
+  * an orb was swallowed when it came within one block of the centre (the original swallows the orbs
+    that are inside the block);
+  * the jar invented an `eatDelay = 5` after every meal (the original has no such delay) and it
+    clamped the stored experience while it ate (the original caps it at the start of the next tick).
+* **Fix** `TileJarBrain.java`: the closest orb is found in the block box inflated by six and pulled
+  with the original formula, the orbs inside the block are swallowed with the original sound, the
+  eat delay is only the one the block sets, and the cap of two thousand is applied where the original
+  applies it.
+
 ---
 
 ## 2. Numbers that were verified against the oracle and found correct
-
 | Tile | Oracle | Value | Port |
 |---|---|---|---|
 | Crucible | `TileCrucible.java:71` | 1000 mB water | `TileCrucible.CAPACITY` |
@@ -196,6 +216,9 @@ Every fix below is committed in `port/octiles` with the oracle file and line in 
 | | `:62-104` | cube of 33³, 16 cells a pass, 5 power a block | `FLUX_SCAN_*` |
 | Deconstruction table | `TileDeconstructionTable.java:151, 186` | 40 ticks, 1/80 chance | `DeconstructionRules` |
 | Grate | `TileGrate.java:41-47` | the item leaves at 0.6 with a fall of 0.1 | `GrateRules` |
+| Brain jar | `TileJarBrain.java:24-25` | at most 2000 experience | `TileJarBrain.xpMax` |
+| | `:58-63` | the pull is `(1 − distance/7)²` on 0.15/0.33/0.15 | `TileJarBrain.tick` (**fixed**) |
+| | `:114-130` | the closest orb of the six blocks around the jar | `TileJarBrain.closestOrb` (**fixed**) |
 | Banner / brainbox / pressure plate / eldritch nothing | `TileBanner.java:63-77`, `TileBrainbox.java:23-30`, `TileArcanePressurePlate.java:26-33` | the NBT fields `facing`, `color`, `aspect`, `wall` / `facing` / `setting` | port |
 
 ---
@@ -251,7 +274,11 @@ Every fix below is committed in `port/octiles` with the oracle file and line in 
 4. **Not audited line by line in this pass:** TileArcaneBore (40 kB oracle file, already covered by
    `port/ocblocks`), TileResearchTable, TileNodeConverter, TileArcaneWorkbench, TileEldritchPortal,
    TileAlchemyFurnaceAdvanced, TileArcaneDoor, TileFocus*.
-5. **No client acceptance.** Nothing in this pass was verified in a running client; only the server
+5. **The node jar has no `IAspectContainer` surface.** The original `TileJarNode` implements it
+   (`TileJarNode.java:110-131`: the stored aspects may not exceed the stored base), the port's
+   `TileJarNode` does not. Nothing in the original flow calls it (the jar is only filled through
+   `setAspects`), but the API is missing.
+6. **No client acceptance.** Nothing in this pass was verified in a running client; only the server
    unit suite and the compilation of the game-test harness were executed.
 
 ---
@@ -288,4 +315,5 @@ New test coverage added by this pass:
 
 | Commit | Content |
 |---|---|
-| `port/octiles` | the six fixes of section 1, the new `TileParityRules` and its test |
+| `7804b2a` | the six fixes of section 1.1–1.6, the new `TileParityRules` and its test |
+| follow-up commit | the brain jar fix of section 1.7 and the report update |

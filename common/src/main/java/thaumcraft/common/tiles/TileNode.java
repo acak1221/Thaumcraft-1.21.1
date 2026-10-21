@@ -86,6 +86,37 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         for (Aspect aspect : Aspect.getPrimalAspects()) aspects.add(aspect, 25);
         aspectsBase = aspects.copy();
     }
+
+    /**
+     * A detached native node, exactly as the original can build one.
+     *
+     * <p>Original {@code thaumcraft/common/tiles/TileNode.java:75-78} — the original node extends
+     * {@code TileThaumcraft} (oracle {@code thaumcraft/api/TileThaumcraft.java:19-21}), which extends
+     * the 1.7.10 {@code net.minecraft.tileentity.TileEntity}. That entity carries <b>no</b> type: the
+     * 1.7.10 game derives the type from the block the entity sits on, so a node that is not in the
+     * world has no type at all. The 1.21.1 {@code BlockEntity} insists on a
+     * {@code BlockEntityType}, so the detached node of the original is built here without one.</p>
+     *
+     * @param pos   the position of the node
+     * @param state the state of the node
+     * @return the detached node, with the creative fixture of the original
+     */
+    public static TileNode detached(BlockPos pos, BlockState state) {
+        return new TileNode(null, pos, state);
+    }
+
+    /**
+     * A node without a type accepts any state; a node with a type keeps the native rule.
+     *
+     * <p>1.21.1's {@code BlockEntity} constructor validates the state against the type
+     * ({@code BlockEntity.validateBlockState} calls {@code BlockEntityType.isValid}), which
+     * dereferences the type. The original has no type at all, so the detached node of the original
+     * has to survive its own construction; a node that the game builds always carries the real
+     * {@code BlockEntityType} and keeps the native validation.</p>
+     */
+    @Override public boolean isValidBlockState(BlockState state) {
+        return getType() == null || super.isValidBlockState(state);
+    }
     @Override public AspectList getAspects() { return aspects.copy(); }
     public AspectList getAspectsBase() { return aspectsBase.copy(); }
     public int getNodeVisBase(Aspect aspect) { return aspectsBase.getAmount(aspect); }

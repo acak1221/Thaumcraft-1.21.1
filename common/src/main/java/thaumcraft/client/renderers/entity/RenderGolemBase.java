@@ -13,14 +13,17 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import thaumcraft.client.renderers.models.ModelGolem;
+import thaumcraft.client.renderers.models.entities.ModelGolemAccessories;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.entities.golems.EntityGolemBase;
 import thaumcraft.common.items.ItemJar;
+import thaumcraft.common.items.golems.GolemUpgrade;
 
 /** Active original RenderGolemBase: seven materials and ordinary inventory cores.
  * All poses and cargo come from the rendered entity, never equipment or AI. */
@@ -34,6 +37,7 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
     private static final ResourceLocation IRON = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/golem_iron.png");
     private static final ResourceLocation THAUMIUM = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/golem_thaumium.png");
     private static final ResourceLocation DAMAGE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/golem_damage.png");
+    private static final ResourceLocation DECORATION = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/golem_decoration.png");
     // Neutral feet end at pixel61; the frozen model owns its original0.4 scale.
     // This hook is after native Y-flip, before its -1.501 model translation.
     private static final float FOOT_OFFSET = 1.501F - 61.0F * .4F / 16.0F;
@@ -41,6 +45,8 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
     public RenderGolemBase(EntityRendererProvider.Context context) {
         super(context, new ModelGolem<>(ModelGolem.createBodyLayer().bakeRoot()), .25F);
         addLayer(new CoreLayer(this, context.getItemRenderer()));
+        addLayer(new UpgradesLayer(this, context.getItemRenderer()));
+        addLayer(new AccessoriesLayer(this));
         addLayer(new FishingRodLayer(this, context.getItemRenderer()));
         addLayer(new WaterBucketLayer(this, context.getItemRenderer()));
         addLayer(new CarriedLayer(this, context.getItemRenderer()));
@@ -121,6 +127,70 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
 
     /** Original G:170–191: core11 always displays a rod, independently of cargo
      * or a live cast. This stack never enters equipment, saves, drops or stock. */
+    /**
+     * Original RenderGolemBase:116-141 — the installed upgrades are shown as small flat icons in a
+     * row on the golem's back. The original draws one icon per upgrade SLOT (the free slots show
+     * the blank "empty upgrade" icon); the native has no item for that blank icon, so only the
+     * installed upgrades are drawn, at the original's positions.
+     */
+    private static final class UpgradesLayer extends RenderLayer<EntityGolemBase, ModelGolem<EntityGolemBase>> {
+        private final ItemRenderer items;
+
+        private UpgradesLayer(RenderGolemBase renderer, ItemRenderer items) { super(renderer); this.items = items; }
+
+        @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, EntityGolemBase entity,
+                                     float walkPhase, float walkSpeed, float partialTick, float age, float headYaw, float headPitch) {
+            if (entity.isInvisible()) return;
+            int slots = entity.getUpgradeSlotCount();
+            if (slots <= 0) return;
+            float shift = 0.08F;
+            for (int a = 0; a < slots; a++) {
+                GolemUpgrade upgrade = GolemUpgrade.byId(entity.getUpgrade(a));
+                if (upgrade == null) continue; // A free slot shows the original's blank icon; the native has no item for it.
+                Item item = ThaumcraftGolems.upgradeItem(upgrade);
+                if (item == null) continue;
+                pose.pushPose();
+                try {
+                    pose.mulPose(Axis.XP.rotationDegrees(180));
+                    pose.translate(-0.05F - shift * (slots - 1) / 2F + shift * a, -1.106F, 0.099F);
+                    pose.scale(0.1F, 0.1F, 0.1F);
+                    // The original draws a flat quad; the native item sprite is centred and 1/16 thick.
+                    pose.translate(.5F, .5F, 0F);
+                    pose.scale(1F, 1F, .001F);
+                    renderItem(items, new ItemStack(item), entity, pose, buffers, light);
+                } finally { pose.popPose(); }
+            }
+        }
+    }
+
+    /**
+     * Original RenderGolemBase:145-149 — the worn accessories are a second pass over the golem
+     * model, drawn with the decoration texture whenever the golem wears something or is advanced.
+     * The bow tie and the head jar of the original are blended, every other piece is cut out.
+     */
+    private static final class AccessoriesLayer extends RenderLayer<EntityGolemBase, ModelGolem<EntityGolemBase>> {
+        private final ModelGolemAccessories accessories;
+
+        private AccessoriesLayer(RenderGolemBase renderer) {
+            super(renderer);
+            accessories = new ModelGolemAccessories(ModelGolemAccessories.createBodyLayer(30F).bakeRoot(), 30F);
+        }
+
+        @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, EntityGolemBase entity,
+                                     float walkPhase, float walkSpeed, float partialTick, float age, float headYaw, float headPitch) {
+            if (entity.isInvisible()) return;
+            String decoration = entity.getDecoration();
+            if ((decoration == null || decoration.isEmpty()) && !entity.isAdvanced()) return;
+            accessories.prepareMobModel(entity, walkPhase, walkSpeed, partialTick);
+            accessories.setupAnim(entity, walkPhase, walkSpeed, age, headYaw, headPitch);
+            int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0);
+            accessories.setBlendPass(false);
+            accessories.renderToBuffer(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(DECORATION)), light, overlay, 0xFFFFFFFF);
+            accessories.setBlendPass(true);
+            accessories.renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(DECORATION)), light, overlay, 0xFFFFFFFF);
+        }
+    }
+
     private static final class FishingRodLayer extends RenderLayer<EntityGolemBase, ModelGolem<EntityGolemBase>> {
         private final ItemRenderer items;
         private final ItemStack rod = new ItemStack(Items.FISHING_ROD);

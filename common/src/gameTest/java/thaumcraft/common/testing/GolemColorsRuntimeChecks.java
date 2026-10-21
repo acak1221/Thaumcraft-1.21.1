@@ -161,7 +161,10 @@ public final class GolemColorsRuntimeChecks {
             var plainMenu = new ContainerGolem(901, player.getInventory(), plain);
             player.containerMenu = plainMenu;
             try {
-                test.assertTrue(!plainMenu.canColorSlots() && !plainMenu.clickMenuButton(player, ContainerGolem.COLOR_BUTTON),
+                // Original ContainerGolem:96-109: the colour buttons are the golem's own slot ids (below the slot
+                // count) and the slot count plus the slot id (above it).
+                test.assertTrue(!plainMenu.canColorSlots() && !plainMenu.clickMenuButton(player, 0)
+                                && !plainMenu.clickMenuButton(player, plain.getSlotCount()),
                         "the menu of a golem without Order offers no colour button");
             } finally { plainMenu.removed(player); player.containerMenu = player.inventoryMenu; }
 
@@ -185,13 +188,18 @@ public final class GolemColorsRuntimeChecks {
                 int expected = -1;
                 for (int click = 0; click < 17; click++) {
                     expected = expected == 15 ? -1 : expected + 1;
-                    test.assertTrue(menu.clickMenuButton(player, ContainerGolem.COLOR_BUTTON + 2), "colour button click " + click);
+                    test.assertTrue(menu.clickMenuButton(player, ordered.getSlotCount() + 2), "colour button click " + click);
                     test.assertTrue(ordered.getSlotColor(2) == expected && menu.slotColor(2) == expected && ordered.getSlotColor(1) == -1,
                             "click " + click + " cycles slot two to " + expected + " (golem " + ordered.getSlotColor(2) + ", menu " + menu.slotColor(2) + ")");
                 }
-                test.assertTrue(!menu.clickMenuButton(player, ContainerGolem.COLOR_BUTTON + ContainerGolem.GHOSTS)
-                                && !menu.clickMenuButton(player, ContainerGolem.COLOR_BUTTON - 1),
-                        "only buttons for the six ghosts of the page exist");
+                // Original ContainerGolem:97-101: the left button lowers the colour, -1 wraps to 15.
+                test.assertTrue(menu.clickMenuButton(player, 2) && ordered.getSlotColor(2) == 15,
+                        "the left colour button turns any into fifteen");
+                test.assertTrue(menu.clickMenuButton(player, 2) && ordered.getSlotColor(2) == 14,
+                        "the left colour button lowers the colour");
+                test.assertTrue(!menu.clickMenuButton(player, 2 * ordered.getSlotCount())
+                                && !menu.clickMenuButton(player, -1),
+                        "only the two colour buttons of every slot exist");
             } finally { menu.removed(player); player.containerMenu = player.inventoryMenu; }
 
             var paged = golem(GolemData.FILL, List.of(FIRE, ORDER), base.east(5));
@@ -201,7 +209,7 @@ public final class GolemColorsRuntimeChecks {
             try {
                 test.assertTrue(paged.getSlotCount() == 12, "Fire and Order on one golem: twelve slots");
                 test.assertTrue(pagedMenu.clickMenuButton(player, ContainerGolem.NEXT_PAGE) && pagedMenu.page() == 1
-                                && pagedMenu.clickMenuButton(player, ContainerGolem.COLOR_BUTTON + 1),
+                                && pagedMenu.clickMenuButton(player, paged.getSlotCount() + 7),
                         "the second page's chip is clickable");
                 test.assertTrue(paged.getSlotColor(7) == 0 && paged.getSlotColor(1) == -1 && pagedMenu.slotColor(1) == 0,
                         "page two index one is golem slot seven: " + paged.getSlotColor(7) + "/" + paged.getSlotColor(1));

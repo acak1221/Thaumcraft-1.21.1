@@ -230,42 +230,49 @@ final class GuardGolemGoals {
 
     private final class Nearest extends Goal {
         private LivingEntity chosen;
-        private int unseen;
 
         Nearest() { setFlags(EnumSet.of(Flag.TARGET)); }
         @Override public boolean requiresUpdateEveryTick() { return true; }
         @Override public boolean canUse() {
             if (golem.getGolemCore() != GolemData.GUARD || !working() || !(golem.level() instanceof ServerLevel server)) return false;
+            chosen = nearestGuardTarget(server);
+            return chosen != null;
+        }
+        @Override public boolean canContinueToUse() {
+            // Original AINearestAttackableTarget: the class extends the VANILLA EntityAITarget and never overrides its
+            // continuation rule; it only writes its own PRIVATE targetDistance, so the parent's distance stays 0 and
+            // the inherited rule (the squared distance against the parent's distance) never holds. The goal is therefore
+            // re-evaluated on every tick and the golem's attack target is the nearest valid target at all times.
+            // The port keeps the goal alive and re-picks the target in tick() instead - the same observable rule.
+            // The 60 tick unseen counter and the extra golem distance of the previous port version belong to no
+            // original rule of this goal: TC4's own AITarget has them, but both of its golem subclasses
+            // (AIHurtByTarget, AINearestAttackableTarget) override the continuation rule.
+            return chosen != null && golem.getTarget() == chosen && golem.isGuardTarget(chosen);
+        }
+        @Override public void start() {
+            if (golem.isGuardTarget(chosen)) golem.setTarget(chosen);
+        }
+        @Override public void tick() {
+            if (!working() || !(golem.level() instanceof ServerLevel server)) return;
+            LivingEntity nearest = nearestGuardTarget(server);
+            if (nearest == null) return; // The original keeps the old target when nothing valid is left.
+            if (nearest != chosen) { chosen = nearest; golem.setTarget(nearest); }
+        }
+        @Override public void stop() {
+            if (chosen != null && golem.getTarget() == chosen) golem.setTarget(null);
             chosen = null;
+        }
+        /** Original AINearestAttackableTarget.shouldExecute:47-60 - the nearest valid target of the inflated box. */
+        private LivingEntity nearestGuardTarget(ServerLevel server) {
+            LivingEntity result = null;
             double distance = Double.MAX_VALUE;
             // Original actor BOX, not an actor-distance sphere, random gate or five-tick scan.
             for (LivingEntity candidate : server.getEntitiesOfClass(LivingEntity.class,
                     golem.getBoundingBox().inflate(golem.getRange(), 4, golem.getRange()), golem::isGuardTarget)) {
                 double next = golem.distanceToSqr(candidate);
-                if (next < distance) { distance = next; chosen = candidate; }
+                if (next < distance) { distance = next; result = candidate; }
             }
-            return chosen != null;
-        }
-        @Override public boolean canContinueToUse() {
-            // Original AITarget.func_75253_b:31-42 and AINearestAttackableTarget:41 - the keep distance is the GOLEM's
-            // own range, not the vanilla FOLLOW_RANGE attribute.
-            double follow = golem.getRange();
-            return golem.getTarget() == chosen && golem.isGuardTarget(chosen)
-                    && golem.distanceToSqr(chosen) <= follow * follow && unseen <= 60;
-        }
-        @Override public void start() {
-            unseen = 0;
-            if (golem.isGuardTarget(chosen)) golem.setTarget(chosen);
-        }
-        @Override public void tick() {
-            if (!golem.isGuardTarget(chosen)) return;
-            if (golem.loadedNavigationArea(chosen.blockPosition()) && golem.getSensing().hasLineOfSight(chosen)) unseen = 0;
-            else ++unseen;
-        }
-        @Override public void stop() {
-            if (chosen != null && golem.getTarget() == chosen) golem.setTarget(null);
-            chosen = null;
-            unseen = 0;
+            return result;
         }
     }
 

@@ -26,6 +26,8 @@ public final class ModelGolemAccessories extends EntityModel<EntityGolemBase> {
     private final ModelPart headHatRim, dartgun, mace, bowtie, headJar, headBrain, evilHead;
     /** The original head offsets use the golem's head height, thirty units in the original renderer. */
     private final float headOffset;
+    /** The decoration flags of the last {@link #setupAnim}, applied per render pass. */
+    private boolean hasDartgun, hasFez, hasHat, hasBowtie, hasPlate, hasGlasses, hasVisor, hasMace, advanced, coreAtLeastZero;
 
     public ModelGolemAccessories(ModelPart root, float headOffset) {
         this.root = root;
@@ -120,34 +122,46 @@ public final class ModelGolemAccessories extends EntityModel<EntityGolemBase> {
         headFez.xRot = headGlasses.xRot = headJar.xRot = headBrain.xRot = evilHead.xRot = visor.xRot
                 = headHat.xRot = headHatRim.xRot = headPitch;
         String decoration = golem.getDecoration();
-        boolean hasDartgun = decoration != null && decoration.contains("R");
-        boolean hasFez = decoration != null && decoration.contains("F");
-        boolean hasHat = decoration != null && decoration.contains("H");
-        boolean hasBowtie = decoration != null && decoration.contains("B");
-        boolean hasPlate = decoration != null && decoration.contains("P");
-        boolean hasGlasses = decoration != null && decoration.contains("G");
-        boolean hasVisor = decoration != null && decoration.contains("V");
-        boolean hasMace = decoration != null && decoration.contains("M");
-        boolean advanced = golem.isAdvanced();
+        hasDartgun = decoration != null && decoration.contains("R");
+        hasFez = decoration != null && decoration.contains("F");
+        hasHat = decoration != null && decoration.contains("H");
+        hasBowtie = decoration != null && decoration.contains("B");
+        hasPlate = decoration != null && decoration.contains("P");
+        hasGlasses = decoration != null && decoration.contains("G");
+        hasVisor = decoration != null && decoration.contains("V");
+        hasMace = decoration != null && decoration.contains("M");
+        advanced = golem.isAdvanced();
+        coreAtLeastZero = golem.getGolemCore() >= 0;
         // The original advanced golem nudged the head wear down by one hundredth of a unit.
         float nudge = advanced ? -.01F : 0;
-        headFez.visible = hasFez;
         headFez.setPos(headFez.x, headOffset + nudge, headFez.z);
-        headHat.visible = hasHat;
         headHat.setPos(headHat.x, headOffset + nudge, headHat.z);
-        headHatRim.visible = hasHat;
         headHatRim.setPos(headHatRim.x, headOffset + nudge, headHatRim.z);
-        bowtie.visible = hasBowtie;
-        plate.visible = hasPlate;
-        plateLeft.visible = hasPlate;
-        plateRight.visible = hasPlate;
-        headGlasses.visible = hasGlasses;
-        visor.visible = hasVisor;
-        dartgun.visible = hasDartgun;
-        mace.visible = hasMace;
-        headBrain.visible = advanced;
-        headJar.visible = advanced;
-        evilHead.visible = advanced && golem.getGolemCore() >= 0;
+        applyVisibility(false);
+    }
+
+    /**
+     * The original draws the bow tie and the head jar with blending and every other piece cut out
+     * (oracle {@code ModelGolemAccessories.func_78088_a}:98-152). The native renderer keeps both
+     * passes, so the pieces of the other pass are hidden while a pass is drawn.
+     */
+    public void setBlendPass(boolean blended) { applyVisibility(blended); }
+
+    private void applyVisibility(boolean blended) {
+        headFez.visible = hasFez && !blended;
+        headHat.visible = hasHat && !blended;
+        headHatRim.visible = hasHat && !blended;
+        bowtie.visible = hasBowtie && blended;
+        plate.visible = hasPlate && !blended;
+        plateLeft.visible = hasPlate && !blended;
+        plateRight.visible = hasPlate && !blended;
+        headGlasses.visible = hasGlasses && !blended;
+        visor.visible = hasVisor && !blended;
+        dartgun.visible = hasDartgun && !blended;
+        mace.visible = hasMace && !blended;
+        headBrain.visible = advanced && !blended;
+        headJar.visible = advanced && blended;
+        evilHead.visible = advanced && !blended && coreAtLeastZero;
         // The original evil head was scaled by 1.01 on X and Z to sit outside the head.
         evilHead.xScale = evilHead.zScale = evilHead.visible ? 1.01F : 1.0F;
     }

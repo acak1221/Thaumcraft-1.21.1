@@ -78,7 +78,16 @@ public class ContainerGhostSlots extends AbstractContainerMenu {
                         }
                     } else if (accepts) {
                         int count = DeviceContainerRules.ghostClickCount(current.getCount(), carried.getCount(), carried.getMaxStackSize(), limit, same, button == 1);
-                        if (count != current.getCount()) slot.set(count <= 0 ? ItemStack.EMPTY : current.copyWithCount(count));
+                        if (count <= 0) {
+                            slot.set(ItemStack.EMPTY);
+                        } else if (DeviceContainerRules.ghostTakesHeldItem(same, carried.getCount(), limit)) {
+                            // Oracle ContainerGhostSlots:129-134 - a different item
+                            // replaces the preview with a copy of the whole held
+                            // stack, the item and its amount.
+                            slot.set(carried.copyWithCount(count));
+                        } else if (count != current.getCount()) {
+                            slot.set(current.copyWithCount(count));
+                        }
                     } else if (same && carried.getMaxStackSize() > 1
                             && current.getCount() + carried.getCount() <= carried.getMaxStackSize()) {
                         // Oracle ContainerGhostSlots:96-110 - a ghost whose slot

@@ -13,6 +13,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockItemGrate;
+import thaumcraft.common.blocks.BlockMetalDevice;
+import thaumcraft.common.entities.EntityItemGrate;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileGrate;
 
 /**
@@ -47,6 +50,15 @@ public final class ThaumcraftGrate {
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITIES.register();
+        // Oracle EntityItemGrate:26-36 - the item filter is the metal device of
+        // the fifth and the sixth metadata. The native tree carries that filter
+        // as the dedicated item grate block and as the two metal device
+        // variants, so the item entity is told about both of them. Without this
+        // test the item entity never left the filter block.
+        EntityItemGrate.setGrateTest(state -> EldritchBlockRules.itemFilterBlock(
+                state.getBlock() instanceof BlockItemGrate,
+                state.getBlock() instanceof BlockMetalDevice,
+                state.getBlock() instanceof BlockMetalDevice ? BlockMetalDevice.variant(state) : 0));
         CreativeTabRegistry.append(ThaumcraftContent.TAB, ITEM_GRATE_ITEM);
     }
 }

@@ -13,14 +13,23 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.aspects.IAspectSource;
+import thaumcraft.common.blocks.BlockMirror;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.events.EssentiaHandler;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
- * Original TileMirrorEssentia: the essentia mirror. It pulls essentia out of
- * the tube network of its twin and hands it to the tube network it faces.
+ * Original TileMirrorEssentia: the essentia mirror. It is an aspect source:
+ * a single unit of an aspect is taken from the network in front of its twin
+ * and handed to whoever asks the mirror for it.
+ *
+ * <p>The original keeps no stock of its own. The amount and the direction come
+ * from the twin: the request is refused above one unit and the network that
+ * pays is the one the twin looks at.</p>
  */
-public final class TileMirrorEssentia extends BlockEntity {
+public final class TileMirrorEssentia extends BlockEntity implements IAspectSource {
     public boolean linked = false;
     public int linkX;
     public int linkY;
@@ -30,16 +39,12 @@ public final class TileMirrorEssentia extends BlockEntity {
     public Direction linkedFacing = null;
     int count = 0;
     int inc = EldritchBlockRules.MIRROR_LINK_RETRY;
-    private Aspect aspect;
-    private int amount;
 
     public TileMirrorEssentia(BlockPos pos, BlockState state) {
         super(ThaumcraftEldritchBlocks.MIRROR_ESSENTIA_TILE.get(), pos, state);
     }
 
     public boolean isLinked() { return linked; }
-    public Aspect getAspect() { return aspect; }
-    public int getAmount() { return amount; }
     public Direction getLinkedFacing() { return linkedFacing; }
 
     /** The link data of the mirror, used by the dropped item. */
@@ -129,32 +134,50 @@ public final class TileMirrorEssentia extends BlockEntity {
         return !mirror.isLinkValid();
     }
 
+    // ------------------------------------------------------- the aspect source
+
     /**
-     * Original TileMirrorEssentia:178-197 - a single unit may be taken and the
-     * twin provides at most eight units at a time.
+     * Original TileMirrorEssentia:186-201 - the mirror is an aspect source: a
+     * single unit of the aspect is taken from the network in front of the twin,
+     * in the direction the twin looks at. A larger request is refused.
      */
-    public int takeEssentia(Aspect requested, int requestedAmount) {
-        if (!isLinkValid() || !EldritchBlockRules.mirrorEssentiaTakeAllowed(requestedAmount)) return 0;
+    @Override public boolean takeFromContainer(Aspect aspect, int amount) {
+        if (!isLinkValid() || !EldritchBlockRules.mirrorEssentiaTakeAllowed(amount)) return false;
         ServerLevel target = targetWorld();
-        if (target == null) return 0;
-        if (linkedFacing == null) {
-            linkedFacing = getFacing();
-        }
-        if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirrorEssentia mirror)) return 0;
-        if (mirror.aspect != requested || mirror.amount <= 0) return 0;
-        int drained = Math.min(mirror.amount, EldritchBlockRules.mirrorEssentiaDrainAmount(mirror.amount));
-        mirror.amount -= drained;
-        if (mirror.amount <= 0) {
-            mirror.amount = 0;
-            mirror.aspect = null;
-        }
-        mirror.setChanged();
-        target.sendBlockUpdated(mirror.getBlockPos(), mirror.getBlockState(), mirror.getBlockState(), 3);
-        amount += drained;
-        if (amount > 64) amount = 64;
-        if (aspect == null) aspect = requested;
-        setChanged();
-        return drained;
+        if (target == null) return false;
+        if (linkedFacing == null) linkedFacing = twinFacing(target);
+        if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirrorEssentia twin)) return false;
+        return EssentiaHandler.drainEssentiaForMirror(twin, aspect, linkedFacing, EldritchBlockRules.MIRROR_ESSENTIA_DRAIN, true);
+    }
+
+    /** Original TileMirrorEssentia:168-171 - the mirror holds no aspects of its own. */
+    @Override public AspectList getAspects() { return new AspectList(); }
+
+    /** Original TileMirrorEssentia:173-175 - the aspects of the mirror cannot be set. */
+    @Override public void setAspects(AspectList aspects) {}
+
+    /** Original TileMirrorEssentia:177-180 - the mirror never accepts an aspect. */
+    @Override public boolean doesContainerAccept(Aspect aspect) { return false; }
+
+    /** Original TileMirrorEssentia:182-185 - the mirror never stores an aspect. */
+    @Override public int addToContainer(Aspect aspect, int amount) { return 0; }
+
+    /** Original TileMirrorEssentia:203-206 - a list of aspects is never taken. */
+    @Override @Deprecated public boolean takeFromContainer(AspectList aspects) { return false; }
+
+    /** Original TileMirrorEssentia:208-211 - the mirror never holds an amount. */
+    @Override public boolean doesContainerContainAmount(Aspect aspect, int amount) { return false; }
+
+    /** Original TileMirrorEssentia:213-216 - a list of aspects is never held. */
+    @Override @Deprecated public boolean doesContainerContain(AspectList aspects) { return false; }
+
+    /** Original TileMirrorEssentia:218-221 - the mirror never holds an amount. */
+    @Override public int containerContains(Aspect aspect) { return 0; }
+
+    /** Original TileMirrorEssentia:194-196 - the direction of the twin, its metadata modulo six. */
+    private Direction twinFacing(ServerLevel target) {
+        BlockState state = target.getBlockState(new BlockPos(linkX, linkY, linkZ));
+        return state.getBlock() instanceof BlockMirror ? state.getValue(BlockMirror.FACING) : Direction.NORTH;
     }
 
     /** Original TileMirrorEssentia:213-222 - the retry of a broken link. */
@@ -175,7 +198,7 @@ public final class TileMirrorEssentia extends BlockEntity {
     /** The face the mirror is attached to. */
     public Direction getFacing() {
         if (level == null) return Direction.NORTH;
-        return level.getBlockState(worldPosition).getValue(thaumcraft.common.blocks.BlockMirror.FACING);
+        return level.getBlockState(worldPosition).getValue(BlockMirror.FACING);
     }
 
     /** The world of the linked mirror. */
@@ -201,8 +224,6 @@ public final class TileMirrorEssentia extends BlockEntity {
         linkY = tag.getInt("linkY");
         linkZ = tag.getInt("linkZ");
         linkDim = tag.getString("linkDim");
-        aspect = Aspect.getAspect(tag.getString("Aspect"));
-        amount = tag.getInt("Amount");
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -212,8 +233,6 @@ public final class TileMirrorEssentia extends BlockEntity {
         tag.putInt("linkY", linkY);
         tag.putInt("linkZ", linkZ);
         tag.putString("linkDim", linkDim);
-        if (aspect != null) tag.putString("Aspect", aspect.getTag());
-        tag.putInt("Amount", amount);
     }
 
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveWithoutMetadata(registries); }

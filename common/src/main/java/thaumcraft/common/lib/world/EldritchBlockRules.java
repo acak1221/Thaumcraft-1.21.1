@@ -612,6 +612,14 @@ public final class EldritchBlockRules {
     /** TileMirror:365 - the instability decays by one every twenty ticks. */
     public static final int MIRROR_INSTABILITY_DECAY_PERIOD = 20;
 
+    /** TileMirror:314 - the instability is paid with at most one ORDER vis per call. */
+    public static final int MIRROR_INSTABILITY_VIS_MAX = 1;
+
+    /** TileMirror:314 - the vis that pays for the instability of a mirror. */
+    public static int mirrorInstabilityVisPayment(int instability) {
+        return instability > 0 ? Math.min(instability, MIRROR_INSTABILITY_VIS_MAX) : 0;
+    }
+
     /** TileMirror:341 - the ejection rate is the square of the instability over fifty. */
     public static int mirrorEjectTickRate(int instability) {
         int rate = instability / 50;
@@ -633,7 +641,7 @@ public final class EldritchBlockRules {
     /** TileMirrorEssentia:186-190 - only a single unit may be taken per request. */
     public static final int MIRROR_ESSENTIA_MAX_TAKE = 1;
 
-    /** TileMirrorEssentia:191 - the essentia mirror pulls at most eight units at once. */
+    /** TileMirrorEssentia:191 - the essentia mirror reaches eight units at once. */
     public static final int MIRROR_ESSENTIA_DRAIN = 8;
 
     /** TileMirrorEssentia:187-188 - a larger request is refused outright. */
@@ -644,6 +652,21 @@ public final class EldritchBlockRules {
     /** TileMirrorEssentia:194 - the drain amount is capped at eight. */
     public static int mirrorEssentiaDrainAmount(int available) {
         return Math.min(available, MIRROR_ESSENTIA_DRAIN);
+    }
+
+    /**
+     * TileMirrorEssentia:194-201 - the network that pays for a unit is the slab
+     * in front of the twin: eight blocks deep in the direction the twin looks at
+     * and seventeen blocks wide in the other two axes.
+     */
+    public static int[] mirrorEssentiaSlabOffset(net.minecraft.core.Direction facing, int first, int second, int depth) {
+        if (facing.getAxis() == net.minecraft.core.Direction.Axis.Y) {
+            return new int[] {first, depth * facing.getStepY(), second};
+        }
+        if (facing.getAxis() == net.minecraft.core.Direction.Axis.Z) {
+            return new int[] {first, second, depth * facing.getStepZ()};
+        }
+        return new int[] {depth * facing.getStepX(), first, second};
     }
 
     /** TileMirrorEssentia:129-139 - the link is only valid when both mirrors point at each other. */
@@ -779,6 +802,16 @@ public final class EldritchBlockRules {
         return freeInFront;
     }
 
+    /**
+     * EntityItemGrate:26-36 - the item filter is the metal device of the fifth
+     * and the sixth metadata. The native tree carries that filter twice: as the
+     * dedicated item grate block and as the two metal device variants.
+     */
+    public static boolean itemFilterBlock(boolean dedicatedGrate, boolean metalDevice, int variant) {
+        if (dedicatedGrate) return true;
+        return metalDevice && (variant == DEVICE_METAL_GRATE_CLOSED || variant == DEVICE_METAL_GRATE_OPEN);
+    }
+
     // -------------------------------------------------------------- flux scrubber
 
     /** TileFluxScrubber:41-47 - four charges produce essentia, at most four are stored. */
@@ -812,6 +845,14 @@ public final class EldritchBlockRules {
     /** TileFluxScrubber:78-84 - a flux block loses one level, or vanishes at level zero. */
     public static int fluxScrubberReducedLevel(int level) {
         return level > 0 ? level - 1 : -1;
+    }
+
+    /**
+     * TileFluxScrubber:92 - only the flux blocks whose squared distance to the
+     * scrubber is below the squared radius of sixteen are cleaned.
+     */
+    public static boolean fluxScrubberInRange(int dx, int dy, int dz) {
+        return dx * dx + dy * dy + dz * dz < FLUX_SCAN_DISTANCE * FLUX_SCAN_DISTANCE;
     }
 
     // ------------------------------------------------------------ ethereal bloom

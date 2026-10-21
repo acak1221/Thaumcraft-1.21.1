@@ -39,4 +39,10 @@ class ThaumatoriumRulesTest {
         assertEquals(128, ThaumatoriumRules.SUCTION);
         assertEquals(40, ThaumatoriumRules.HEAT_INTERVAL);
     }
+    @Test void anOrphanedTopBecomesTheAlchemicalConstruct() {
+        // Oracle TileThaumatoriumTop:36-47 - only a top without its lower half
+        // turns into the construct.
+        assertTrue(ThaumatoriumRules.orphanBecomesConstruct(false));
+        assertFalse(ThaumatoriumRules.orphanBecomesConstruct(true));
+    }
 }

@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -12,6 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import thaumcraft.common.blocks.BlockItemGrate;
 import thaumcraft.common.config.ThaumcraftGrate;
+import thaumcraft.common.entities.EntityItemGrate;
 import thaumcraft.common.lib.GrateRules;
 
 /**
@@ -37,7 +37,9 @@ public final class TileGrate extends BlockEntity implements WorldlyContainer {
 
     @Override public void setItem(int slot, ItemStack stack) {
         if (!(level instanceof ServerLevel server) || stack.isEmpty()) return;
-        ItemEntity item = new ItemEntity(server, worldPosition.getX() + 0.5D, worldPosition.getY() + GrateRules.SPAWN_HEIGHT, worldPosition.getZ() + 0.5D, stack.copy());
+        // Oracle TileGrate:41-47 - the original drops the item as an
+        // EntityItemGrate, the item that is pushed out of the filter block.
+        EntityItemGrate item = new EntityItemGrate(server, worldPosition.getX() + 0.5D, worldPosition.getY() + GrateRules.SPAWN_HEIGHT, worldPosition.getZ() + 0.5D, stack.copy());
         // A new ItemEntity starts with a random sideways drift; the original overwrote it with a straight fall.
         item.setDeltaMovement(0.0D, GrateRules.FALL_SPEED, 0.0D);
         server.addFreshEntity(item);

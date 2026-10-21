@@ -15,4 +15,10 @@ public final class ThaumatoriumRules {
                 .filter(aspect -> aspect != null && stock.getAmount(aspect) < cost.get(aspect.getTag())).findFirst().orElse(null);
     }
     public static boolean workTick(int counter, boolean heat, boolean powered) { return heat && !powered && counter % WORK_INTERVAL == 0; }
+
+    /**
+     * Original TileThaumatoriumTop:36-47 - the upper half watches the lower one
+     * and turns into the alchemical construct when the lower half is gone.
+     */
+    public static boolean orphanBecomesConstruct(boolean lowerHalfIsThaumatorium) { return !lowerHalfIsThaumatorium; }
 }

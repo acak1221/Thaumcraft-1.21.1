@@ -65,6 +65,25 @@ class DeviceContainerRulesTest {
         assertFalse(DeviceContainerRules.handMirrorShowsLinkedInventory(false, false));
         assertTrue(DeviceContainerRules.handMirrorShowsLinkedInventory(false, true));
     }
+    @Test void theHandMirrorAsksForTheWorldFirstAndTheMirrorSecond() {
+        // Oracle ItemHandMirror:123-143.
+        assertEquals(DeviceContainerRules.HandMirrorTarget.NO_LINK,
+                DeviceContainerRules.handMirrorTarget(false, false, false));
+        assertEquals(DeviceContainerRules.HandMirrorTarget.NO_WORLD,
+                DeviceContainerRules.handMirrorTarget(true, false, false));
+        assertEquals(DeviceContainerRules.HandMirrorTarget.NO_MIRROR,
+                DeviceContainerRules.handMirrorTarget(true, true, false));
+        assertEquals(DeviceContainerRules.HandMirrorTarget.MIRROR,
+                DeviceContainerRules.handMirrorTarget(true, true, true));
+        // A mirror that is gone clears the link, a missing world does not.
+        assertTrue(DeviceContainerRules.handMirrorClearsLink(DeviceContainerRules.HandMirrorTarget.NO_MIRROR));
+        assertFalse(DeviceContainerRules.handMirrorClearsLink(DeviceContainerRules.HandMirrorTarget.NO_WORLD));
+        assertFalse(DeviceContainerRules.handMirrorClearsLink(DeviceContainerRules.HandMirrorTarget.MIRROR));
+        // The view only opens for a mirror that is really there.
+        assertTrue(DeviceContainerRules.handMirrorOpensView(DeviceContainerRules.HandMirrorTarget.MIRROR));
+        assertFalse(DeviceContainerRules.handMirrorOpensView(DeviceContainerRules.HandMirrorTarget.NO_MIRROR));
+        assertFalse(DeviceContainerRules.handMirrorOpensView(DeviceContainerRules.HandMirrorTarget.NO_LINK));
+    }
     @Test void handMirrorQuickMoveUsesTheInputSlotAndThePlayerInventory() {
         assertEquals(new Range(1, 37), DeviceContainerRules.handMirrorQuickMove(0).get(0));
         assertEquals(new Range(0, 1), DeviceContainerRules.handMirrorQuickMove(5).get(0));
@@ -149,6 +168,18 @@ class DeviceContainerRulesTest {
         assertEquals(32, DeviceContainerRules.ghostClickCount(5, 32, 64, 256, false, false));
         // Nothing at all leaves the ghost empty.
         assertEquals(0, DeviceContainerRules.ghostClickCount(0, 0, 64, 256, false, false));
+    }
+    @Test void aDifferentHeldItemReplacesThePreviewItself() {
+        // Oracle ContainerGhostSlots:129-134 - the preview becomes the held
+        // item, with the amount of the held stack.
+        assertTrue(DeviceContainerRules.ghostTakesHeldItem(false, 32, 256));
+        assertTrue(DeviceContainerRules.ghostTakesHeldItem(false, 256, 256));
+        // The same item only changes the amount of the preview.
+        assertFalse(DeviceContainerRules.ghostTakesHeldItem(true, 32, 256));
+        // An empty cursor never replaces the preview item.
+        assertFalse(DeviceContainerRules.ghostTakesHeldItem(false, 0, 256));
+        // A held stack that does not fit the slot leaves the preview alone.
+        assertFalse(DeviceContainerRules.ghostTakesHeldItem(false, 257, 256));
     }
 
     // -------------------------------------------------------- limited by rules

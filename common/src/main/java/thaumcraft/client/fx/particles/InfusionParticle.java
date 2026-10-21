@@ -83,7 +83,8 @@ public final class InfusionParticle extends SingleQuadParticle {
             quadSize = .1F * (Mth.sin(phase / 2F) * .1F + 1) * scale;
             alpha = .5F;
             int base = Math.max(1, (int)(from.distanceTo(destination) * 30));
-            lifetime = Math.max(1, Math.min(600, base / 2 + random.nextInt(base)));
+            // The original FXEssentiaTrail:60 has no upper bound on the lifetime.
+            lifetime = Math.max(1, base / 2 + random.nextInt(base));
             xd = Mth.sin(phase / 4F) * .015F + random.nextGaussian() * .002F;
             yd = .1F + Mth.sin(phase / 3F) * .01F;
             zd = Mth.sin(phase / 2F) * .015F + random.nextGaussian() * .002F;
@@ -191,6 +192,8 @@ public final class InfusionParticle extends SingleQuadParticle {
             return;
         }
         if (kind == Kind.ESSENTIA) yd += .002;
+        // The original FXEssentiaTrail:115 pushes the mote out of the solid blocks it ends up inside.
+        if (kind == Kind.ESSENTIA) ParticleDeflection.pushOutOfBlocks(this, level, x, y, z);
         moveLoaded();
         xd *= .985; yd *= .985; zd *= .985;
         Vec3 offset = destination.subtract(x, y, z);

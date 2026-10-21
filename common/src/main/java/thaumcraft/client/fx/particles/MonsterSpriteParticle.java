@@ -25,8 +25,9 @@ public final class MonsterSpriteParticle extends SingleQuadParticle {
     private final float originalSize;
     private MonsterSpriteParticle(ClientLevel level,double x,double y,double z,Kind kind,float size,int rgb,int duration) {
         super(level,x,y,z);this.kind=kind;xd=yd=zd=0;xo=x;yo=y;zo=z;
-        float base=(random.nextFloat()*.5F+.5F)*2;
-        originalSize=kind==Kind.BURST?base*size:kind==Kind.MOTE?base*.5F*size:.1F*size;
+        // The original FXBurst:32 keeps the particle scale of the caller and draws it with that half size, and
+        // the original FXWisp:44 keeps the same scale for the mote. The original never randomises the size.
+        originalSize=kind==Kind.BURST?size:kind==Kind.MOTE?.5F*size:.1F*size;
         quadSize=originalSize;
         lifetime=kind==Kind.BURST?31:kind==Kind.EXPLOSIVE?duration:(int)(36/(random.nextDouble()*.3+.7));
         // Original FXBurst:45 uses glColor4f(1,1,1,0.75): the burst is drawn at three quarters opacity.
@@ -65,7 +66,12 @@ public final class MonsterSpriteParticle extends SingleQuadParticle {
     private static float spread(ClientLevel level,float scale) { return(level.random.nextFloat()-level.random.nextFloat())*scale; }
     @Override public void tick() {
         xo=x;yo=y;zo=z;if(age++>=lifetime){remove();return;}
-        if(kind!=Kind.BURST) { yd-=.04*gravity;move(xd,yd,zd);xd*=.98F;yd*=.98F;zd*=.98F;if(onGround){xd*=.7F;zd*=.7F;} }
+        if(kind!=Kind.BURST) {
+            yd-=.04*gravity;
+            // The original FXWisp:194-196 pushes the mote out of the solid blocks it ends up inside.
+            ParticleDeflection.pushOutOfBlocks(this,level,x,y,z);
+            move(xd,yd,zd);xd*=.98F;yd*=.98F;zd*=.98F;if(onGround){xd*=.7F;zd*=.7F;}
+        }
     }
     @Override public float getQuadSize(float partial) {
         if(kind!=Kind.MOTE)return originalSize;

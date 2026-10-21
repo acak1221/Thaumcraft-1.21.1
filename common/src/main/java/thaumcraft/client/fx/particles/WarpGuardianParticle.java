@@ -25,7 +25,9 @@ public final class WarpGuardianParticle extends SingleQuadParticle {
     private WarpGuardianParticle(ClientLevel level, EntityEldritchGuardian target, double x, double y, double z) {
         super(level, x, y, z); this.target = target;
         xd = random.nextGaussian() * .03; yd = -.05; zd = random.nextGaussian() * .03;
-        lifetime = (int)(40 / (random.nextDouble() * .3 + .7)); quadSize = .4F * (random.nextFloat() * .5F + .5F);
+        // The original FXWispEG:25 scales the particle by 0.4f and draws it with the half size 0.5f * 0.4f.
+        // The original never randomises that size.
+        lifetime = (int)(40 / (random.nextDouble() * .3 + .7)); quadSize = .4F;
         setColor(random.nextFloat() * .05F, random.nextFloat() * .05F, random.nextFloat() * .05F);
         hasPhysics = true; setSize(.01F, .01F); xo = x; yo = y; zo = z;
     }
@@ -40,6 +42,8 @@ public final class WarpGuardianParticle extends SingleQuadParticle {
     @Override public void tick() {
         xo = x; yo = y; zo = z;
         if (!onGround) { x += target.getDeltaMovement().x; z += target.getDeltaMovement().z; }
+        // The original FXWispEG:97 pushes the mote out of the solid blocks it ends up inside.
+        ParticleDeflection.pushOutOfBlocks(this, level, x, y, z);
         move(xd, yd, zd); xd *= .98F; yd *= .98F; zd *= .98F;
         if (onGround) { xd *= .8500000190734863; zd *= .8500000190734863; }
         if (age++ >= lifetime) remove();

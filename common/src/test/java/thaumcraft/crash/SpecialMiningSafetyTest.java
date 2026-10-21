@@ -74,7 +74,8 @@ class SpecialMiningSafetyTest {
     }
 
     @Test void theChanceIsTheOriginalOne() {
-        assertEquals(0.2F, SpecialMining.chance(0), 1.0E-6F);
-        assertEquals(0.2F + 0.075F, SpecialMining.chance(1), 1.0E-6F);
+        // Oracle EventHandlerWorld:181: float chance = 0.2f + (float)fortune * 0.075f, in float.
+        assertEquals(0.2F + 0 * 0.075F, SpecialMining.chance(0));
+        assertEquals(0.2F + 1 * 0.075F, SpecialMining.chance(1));
     }
 }

@@ -29,7 +29,7 @@ class CosmeticAndPlantParityTest {
      */
     @Test void theCosmeticFamilyKeepsTheOriginalHardnessAndEffectiveBlastResistance() {
         assertEquals(2.0F, EldritchBlockRules.COSMETIC_FAMILY_HARDNESS, "BlockCosmeticSolid:67 - setHardness(2.0f)");
-        assertEquals(6.0F, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE,
+        assertEquals(10.0F * 3 / 5, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE,
                 "BlockCosmeticSolid:66 - setResistance(10.0f) is stored three times and divided by five");
     }
 
@@ -52,10 +52,10 @@ class CosmeticAndPlantParityTest {
     @Test void theStairsOfTheCosmeticFamilyCopyTheHardnessAndTheResistanceOfTheirBlock() {
         // The eldritch stairs and the arcane stone stairs copy the cosmetic solid.
         assertEquals(2.0F, EldritchBlockRules.COSMETIC_FAMILY_HARDNESS);
-        assertEquals(6.0F, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE);
+        assertEquals(10.0F * 3 / 5, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE);
         // The greatwood and the silverwood stairs copy the wooden device.
         assertEquals(2.5F, EldritchBlockRules.DEVICE_WOOD_HARDNESS, "BlockWoodenDevice:83 - setHardness(2.5f)");
-        assertEquals(6.0F, EldritchBlockRules.DEVICE_WOOD_RESISTANCE, "BlockWoodenDevice:82 - setResistance(10.0f) is 10 * 3 / 5");
+        assertEquals(10.0F * 3 / 5, EldritchBlockRules.DEVICE_WOOD_RESISTANCE, "BlockWoodenDevice:82 - setResistance(10.0f) is 10 * 3 / 5");
         // The eldritch stairs are the only seamless ones of the family.
         assertTrue(EldritchBlockRules.stairsAreSeamless(11), "the eldritch stairs copy the metadata eleven");
         assertFalse(EldritchBlockRules.stairsAreSeamless(7), "the arcane stone stairs copy the metadata seven");

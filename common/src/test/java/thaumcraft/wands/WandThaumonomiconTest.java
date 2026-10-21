@@ -28,14 +28,16 @@ class WandThaumonomiconTest {
     @Test void theTooltipConsumptionIsTheAspectDependentCapModifier() {
         // Original ItemWandCasting:236-241 - the copper cap pays one for order and entropy and 1.1
         // for every other aspect (ConfigItems:331).
-        assertEquals(1.0F, WandMaterials.COPPER.modifierFor("ordo"), 1.0E-5F);
-        assertEquals(1.0F, WandMaterials.COPPER.modifierFor("perditio"), 1.0E-5F);
-        assertEquals(1.1F, WandMaterials.COPPER.modifierFor("aer"), 1.0E-5F);
-        assertEquals(1.1F, WandMaterials.COPPER.modifierFor("ignis"), 1.0E-5F);
+        assertEquals(1.0F, WandMaterials.COPPER.modifierFor("ordo"));
+        assertEquals(1.0F, WandMaterials.COPPER.modifierFor("perditio"));
+        assertEquals(1.1F, WandMaterials.COPPER.modifierFor("aer"));
+        assertEquals(1.1F, WandMaterials.COPPER.modifierFor("ignis"));
         // Original ItemWandCasting:247-259 - the sceptre takes another tenth off.
-        assertEquals(0.9F, WandVisDiscount.focusModifier(WandMaterials.COPPER.modifierFor("ordo"), 0, 0, true), 1.0E-5F);
-        assertEquals(1.0F, WandVisDiscount.focusModifier(WandMaterials.COPPER.modifierFor("aer"), 0, 0, true), 1.0E-5F);
+        // Oracle ItemWandCasting:247-261: the frugal discount, then the sceptre discount of 0.1f,
+        // never below a tenth.
+        assertEquals(1.0F - 0 / 100F - 0 / 10F - 0.1F, WandVisDiscount.focusModifier(WandMaterials.COPPER.modifierFor("ordo"), 0, 0, true));
+        assertEquals(1.1F - 0 / 100F - 0 / 10F - 0.1F, WandVisDiscount.focusModifier(WandMaterials.COPPER.modifierFor("aer"), 0, 0, true));
         // The frugal discount of the focus belongs to the tooltip as well (crafting is false there).
-        assertEquals(0.9F, WandVisDiscount.focusModifier(WandMaterials.COPPER.modifierFor("aer"), 0, 1, true), 1.0E-5F);
+        assertEquals(1.1F - 0 / 100F - 1 / 10F - 0.1F, WandVisDiscount.focusModifier(WandMaterials.COPPER.modifierFor("aer"), 0, 1, true));
     }
 }

@@ -178,7 +178,8 @@ public final class TileCrucible extends BlockEntity {
     }
 
     public float getFluidHeight() {
-        float base = .3F + .5F * water / CAPACITY;
+        // Oracle TileCrucible:316-317 divides the amount by the capacity first and multiplies by the half afterwards.
+        float base = .3F + .5F * (water / (float) CAPACITY);
         float height = base + tagAmount() / 100F * (1 - base);
         if (height > 1) height = 1.001F;
         if (height == 1) height = .9999F;

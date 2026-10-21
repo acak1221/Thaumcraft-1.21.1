@@ -33,15 +33,18 @@ class WandBlockTriggerTest {
             seen[0] = event;
             return true;
         };
-        // A block of its own, so that the static registry of the other tests cannot interfere.
-        WandTriggerRegistry.registerWandBlockTrigger(manager, 4, Blocks.COBBLESTONE, "wanddispatchtest");
-        assertTrue(ItemWandCasting.hasBlockTrigger(Blocks.COBBLESTONE.defaultBlockState()),
+        // The registry is a global static and both the answer and the dispatch of the wand are not
+        // mod scoped, so this test needs a block that no other test of the suite registers. COBBLESTONE
+        // is registered by WandTriggerRegistryApiTest and CLAY as well, and the dispatch of the first
+        // successful trigger would then answer with the event of the other test.
+        WandTriggerRegistry.registerWandBlockTrigger(manager, 4, Blocks.SAND, "wanddispatchtest");
+        assertTrue(ItemWandCasting.hasBlockTrigger(Blocks.SAND.defaultBlockState()),
                 "the wand asks the registry about the clicked block");
-        assertTrue(ItemWandCasting.hasBlockTrigger(Blocks.COBBLESTONE.defaultBlockState()));
-        assertFalse(ItemWandCasting.hasBlockTrigger(Blocks.CLAY.defaultBlockState()),
+        assertTrue(ItemWandCasting.hasBlockTrigger(Blocks.SAND.defaultBlockState()));
+        assertFalse(ItemWandCasting.hasBlockTrigger(Blocks.GRAVEL.defaultBlockState()),
                 "a block without a trigger is not one");
         assertTrue(WandTriggerRegistry.performTrigger(null, net.minecraft.world.item.ItemStack.EMPTY, null,
-                1, 2, 3, 0, Blocks.COBBLESTONE.defaultBlockState()));
+                1, 2, 3, 0, Blocks.SAND.defaultBlockState()));
         assertTrue(seen[0] == 4, "the first successful trigger wins");
     }
 }

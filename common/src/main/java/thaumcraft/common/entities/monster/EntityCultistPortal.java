@@ -202,8 +202,8 @@ public class EntityCultistPortal extends Monster {
     /** Original EntityCultistPortal.onCollideWithPlayer: eight points of magic damage. */
     private void damageNearbyPlayers() {
         for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(3.0))) {
-            // Original EntityCultistPortal:220 - the original asks for the distance and not for
-            // the squared distance, so the portal reaches three blocks and not one and a half.
+            // Original EntityCultistPortal:239 - the original asks for the SQUARED distance and
+            // compares it with three, so the portal reaches one and three quarter blocks.
             if (distanceToSqr(player) >= CultistRules.PORTAL_COLLISION_DISTANCE_SQ) continue;
             if (player.hurt(damageSources().indirectMagic(this, this), 8.0F)) {
                 playSound(EntityCultist.sound("zap"), 1.0F, (random.nextFloat() - random.nextFloat()) * 0.1F + 1.0F);

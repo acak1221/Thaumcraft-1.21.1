@@ -138,20 +138,34 @@ public final class TaintAnimalRules {
     /** Original tainted sheep onSheared: one to three magenta wool blocks. */
     public static int shearWoolCount(IntUnaryOperator nextInt) { return 1+nextInt.applyAsInt(3); }
 
-    /** Original1.7 EntityTaintChicken flap speed: three tenths up while airborne, one tenth down. */
+    /**
+     * Original1.7 EntityTaintChicken:103 flap speed: four tenths up while airborne, three tenths down on the ground.
+     *
+     * <p>The original computes the step in {@code double} and only then narrows it into the float field:
+     * {@code this.destPos = (float)((double)this.destPos + (double)(this.field_70122_E ? -1 : 4) * 0.3);}.
+     * The single precision step {@code 0.3f} is a different float, so the port keeps the double.</p>
+     */
     public static float flapSpeed(float speed,boolean onGround) {
-        float next=speed+(onGround ? -1.0F : 4.0F)*0.3F;
+        float next=(float)((double)speed+(double)(onGround?-1:4)*0.3);
         return next<0.0F ? 0.0F : (next>1.0F ? 1.0F : next);
     }
-    /** Original1.7 EntityTaintChicken flap amplitude: one while airborne, then nine tenths per tick. */
+    /**
+     * Original1.7 EntityTaintChicken:113 flap amplitude: one while airborne, then nine tenths per tick.
+     *
+     * <p>The original damps in {@code double} and narrows: {@code this.field_755_h = (float)((double)this.field_755_h * 0.9);}.</p>
+     */
     public static float flapAmplitude(float amplitude,boolean onGround) {
         float next=(!onGround&&amplitude<1.0F) ? 1.0F : amplitude;
-        return next*0.9F;
+        return (float)((double)next*0.9);
     }
-    /** Original1.7 EntityTaintChicken flap phase. */
+    /** Original1.7 EntityTaintChicken flap phase: {@code this.field_752_b += this.field_755_h * 2.0f}, in float. */
     public static float flapPhase(float phase,float amplitude) { return phase+amplitude*2.0F; }
-    /** Original1.7 EntityTaintChicken fall damping: nine tenths, not the vanilla0.6. */
-    public static float fallDamping(float motionY) { return motionY*0.9F; }
+    /**
+     * Original1.7 EntityTaintChicken fall damping: nine tenths, not the vanilla0.6.
+     *
+     * <p>The original multiplies the double motion by the double {@code 0.9}.</p>
+     */
+    public static float fallDamping(float motionY) { return (float)((double)motionY*0.9); }
 
     /** Original AIConvertGrass trigger: one tick in250. */
     public static final int GRASS_TRIGGER_INTERVAL=250;

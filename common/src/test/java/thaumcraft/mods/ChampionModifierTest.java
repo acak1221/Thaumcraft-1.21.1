@@ -102,10 +102,11 @@ class ChampionModifierTest {
 
     @Test void originalArmouredChampionTakesNineteenTwentyFifthsUnlessTheDamageBypassesArmour() {
         IChampionModifierEffect.Result reduced = new ChampionModArmored().performEffect(damaged(10.0f, false, false), new ScriptedRandom(0.5f, 0));
-        assertEquals(7.6f, reduced.amount(), 1.0e-6f);
+        // Oracle ChampionModArmored:20-21: amount = amount * 19.0f / 25.0f, in float.
+        assertEquals(10.0f * 19.0f / 25.0f, reduced.amount());
         assertEquals(0.0f, reduced.heal(), 0.0f);
         IChampionModifierEffect.Result unblockable = new ChampionModArmored().performEffect(damaged(10.0f, true, false), new ScriptedRandom(0.5f, 0));
-        assertEquals(10.0f, unblockable.amount(), 1.0e-6f);
+        assertEquals(10.0f, unblockable.amount());
     }
 
     @Test void originalSpinedChampionReflectsOneToThreeThornsDamage() {

@@ -22,19 +22,19 @@ class EntityParityRulesTest {
     @Test void theCallForHelpReachesTheFollowRangeOfTheCaller() {
         // Original AICultistHurtByTarget:35-40 - the radius is the original
         // EntityAITarget.getTargetDistance(), which is the follow range attribute.
-        assertEquals(32.0D, CultistRules.callForHelpRange(32.0D), 1E-9D);
-        assertEquals(40.0D, CultistRules.callForHelpRange(40.0D), 1E-9D);
+        assertEquals(32.0D, CultistRules.callForHelpRange(32.0D));
+        assertEquals(40.0D, CultistRules.callForHelpRange(40.0D));
     }
 
     @Test void aMobWithoutAFollowRangeCallsToSixteenBlocks() {
         // Original EntityAITarget.getTargetDistance returns sixteen without the attribute.
-        assertEquals(16.0D, CultistRules.callForHelpRange(null), 1E-9D);
-        assertEquals(16.0D, CultistRules.DEFAULT_TARGET_DISTANCE, 1E-9D);
+        assertEquals(16.0D, CultistRules.callForHelpRange(null));
+        assertEquals(16.0D, CultistRules.DEFAULT_TARGET_DISTANCE);
     }
 
     @Test void theCultistFollowsToThirtyTwoBlocks() {
-        assertEquals(32.0D, CultistRules.CULTIST_FOLLOW_RANGE, 1E-9D);
-        assertEquals(40.0D, CultistRules.BOSS_FOLLOW_RANGE, 1E-9D);
+        assertEquals(32.0D, CultistRules.CULTIST_FOLLOW_RANGE);
+        assertEquals(40.0D, CultistRules.BOSS_FOLLOW_RANGE);
     }
 
     // ------------------------------------------------------------------

@@ -36,10 +36,17 @@ public final class RenderTravelingTrunk extends MobRenderer<EntityTravelingTrunk
         return new float[] {sides * overall, 0.5F / sides * overall};
     }
 
-    /** Original lid angle from the lid animation value: {@code -(1 - (1 - lidrot)^3) * pi / 2}. */
+    /**
+     * Original lid angle from the lid animation value.
+     *
+     * <p>Oracle RenderTravelingTrunk:46-48 computes {@code f1 = 1.0f - entity.lidrot; f1 = 1.0f - f1 * f1 * f1;}
+     * and then {@code this.trunkModel.chestLid.field_78795_f = -(f1 * 3.141593f / 2.0f);}. The original
+     * uses the float literal {@code 3.141593f}, which is not the same float as {@code (float) Math.PI}
+     * (bits {@code 0x40490fdc} against {@code 0x40490fdb}), so the port keeps the literal.</p>
+     */
     public static float lidAngle(float lidrot) {
         float shut = 1.0F - lidrot;
-        return -((1.0F - shut * shut * shut) * (float) Math.PI / 2.0F);
+        return -((1.0F - shut * shut * shut) * 3.141593F / 2.0F);
     }
 
     @Override protected void scale(EntityTravelingTrunk entity, PoseStack pose, float partialTick) {

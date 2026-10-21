@@ -8,18 +8,27 @@ import thaumcraft.common.lib.MagicWard;
 /** The magic pass of the void thaumaturge robes (original ItemVoidRobeArmor.getProperties and Forge's ApplyArmor) without a world. */
 class MagicWardTest {
     @Test void aPieceAbsorbsItsArmorOverThirtyFive() {
+        // Oracle ItemVoidRobeArmor:229-240: double ratio = (double)this.field_77879_b / 35.0;
         assertEquals(35.0, MagicWard.DIVISOR);
-        assertEquals(3 / 35.0, MagicWard.ratio(3), 1e-12);
-        assertEquals(0.2, MagicWard.ratio(7), 1e-12);
-        assertEquals(6 / 35.0, MagicWard.ratio(6), 1e-12);
+        assertEquals(3 / 35.0, MagicWard.ratio(3));
+        assertEquals(7 / 35.0, MagicWard.ratio(7));
+        assertEquals(6 / 35.0, MagicWard.ratio(6));
     }
 
     @Test void theFullSetTakesSixteenThirtyFifthsOfTheDamageInOneStep() {
-        // 16 / 35 = 0.4571...: 20 damage becomes 20 * 19 / 35.
-        assertEquals(20 * 19 / 35.0, MagicWard.reduce(20F, 3, 7, 6), 1e-5);
-        assertEquals(20 * 28 / 35.0, MagicWard.reduce(20F, 7), 1e-5, "the robe alone absorbs a fifth");
-        assertEquals(20F, MagicWard.reduce(20F), 0F, "no ward, no change");
-        assertEquals(0F, MagicWard.reduce(0F, 3, 7, 6), 0F);
+        // Forge's ApplyArmor scales the damage by twenty five, takes the shares off in one step and
+        // divides by twenty five again; the shares are the armor over thirty five.
+        assertEquals(wardedDamage(20F, 3 / 35.0 + 7 / 35.0 + 6 / 35.0), MagicWard.reduce(20F, 3, 7, 6));
+        assertEquals(wardedDamage(20F, 7 / 35.0), MagicWard.reduce(20F, 7), "the robe alone absorbs a fifth");
+        assertEquals(20F, MagicWard.reduce(20F), "no ward, no change");
+        assertEquals(0F, MagicWard.reduce(0F, 3, 7, 6));
+    }
+
+    /** Forge's own step: the damage is scaled by twenty five, the share comes off, the scale comes off again. */
+    private static float wardedDamage(float damage, double total) {
+        double scaled = damage * 25.0;
+        scaled -= scaled * Math.min(total, 1.0);
+        return (float) (scaled / 25.0);
     }
 
     @Test void aPieceIsWornByWhatItAbsorbedButAtLeastOnePoint() {

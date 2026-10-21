@@ -35,7 +35,7 @@ class BlockFamilyParityTest {
      * getter divides it by five, so the effective blast resistance is 3600000.
      */
     @Test void theEldritchNothingKeepsItsBlastResistance() {
-        assertEquals(3600000.0F, EldritchBlockRules.ELDRITCH_NOTHING_RESISTANCE);
+        assertEquals(6000000.0F * 3 / 5, EldritchBlockRules.ELDRITCH_NOTHING_RESISTANCE);
     }
 
     /**

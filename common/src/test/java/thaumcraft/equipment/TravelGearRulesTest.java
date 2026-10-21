@@ -21,9 +21,12 @@ class TravelGearRulesTest {
         for(int invalid:new int[]{-1,65,Integer.MAX_VALUE})assertThrows(IllegalArgumentException.class,()->TravelGearRules.expend(invalid,0,false));
     }
     @Test void originalFloatMovementAndUnclampedFallArePreserved() {
+        // Oracle ItemBootsTraveller:78-89: the ground bonus is 0.055f, divided by 4.0f in the water,
+        // the air speed is 0.03f or 0.05f and the fall distance loses 0.25f.
         assertEquals(.055F,TravelGearRules.groundAcceleration(false));assertEquals(.055F/4F,TravelGearRules.groundAcceleration(true));
         assertEquals(.05F,TravelGearRules.airAcceleration(false));assertEquals(.03F,TravelGearRules.airAcceleration(true));assertEquals((double).275F,TravelGearRules.jumpBonus());
-        assertEquals(-.125F,TravelGearRules.afterBootFall(.125F));assertEquals(-.5F,TravelGearRules.afterBootFall(-.5F));
-        assertEquals(.7F,TravelGearRules.damping(0,false));assertEquals(Float.intBitsToFloat(0x3f68f5c2),TravelGearRules.damping(0,true));assertEquals(1F,TravelGearRules.damping(3,true));
+        assertEquals(.125F-.25F,TravelGearRules.afterBootFall(.125F));assertEquals(-.5F,TravelGearRules.afterBootFall(-.5F));
+        // Oracle Hover:97-103: mod = 0.7f + 0.075f * haste, plus 0.21f for the girdle, capped at one.
+        assertEquals(.7F+.075F*0,TravelGearRules.damping(0,false));assertEquals(Float.intBitsToFloat(0x3f68f5c2),TravelGearRules.damping(0,true));assertEquals(1F,TravelGearRules.damping(3,true));
     }
 }

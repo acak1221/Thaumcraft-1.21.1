@@ -81,9 +81,10 @@ class WandModelAssetsTest {
         assertEquals(8 / 32F, WandModels.rodValue("reed"), 0F);
         assertEquals(17 / 32F, WandModels.rodValue("primal_staff"), 0F);
         assertEquals(0F, WandModels.capValue("iron"), 0F);
-        assertEquals(.25F, WandModels.capValue("gold"), 0F);
-        assertEquals(.5F, WandModels.capValue("thaumium"), 0F);
-        assertEquals(.75F, WandModels.capValue("void"), 0F);
+        // The cap value is the index of the cap divided by the scale of the cap table.
+        assertEquals(1 / 4F, WandModels.capValue("gold"));
+        assertEquals(2 / 4F, WandModels.capValue("thaumium"));
+        assertEquals(3 / 4F, WandModels.capValue("void"));
         assertEquals(1F, WandModels.capValue("copper"), 0F, "the copper cap is the fifth one and takes the last value of the scale");
         assertEquals(List.of(0F, .25F, .5F, .75F, .8125F, .875F, .9375F, .953125F, .96875F, .984375F, 1F), WandModels.FOCI.stream().map(WandModels.Focus::value).toList());
     }

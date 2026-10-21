@@ -393,7 +393,7 @@ class EldritchBlockRulesTest {
     @Test void deviceFamilyHardnessAndResistanceMatchTheOriginal() {
         assertEquals(3.0F, EldritchBlockRules.DEVICE_METAL_HARDNESS);
         // The 1.7.10 setter values 17, 10 and 25 are stored three times and the getter divides by five.
-        assertEquals(10.2F, EldritchBlockRules.DEVICE_METAL_RESISTANCE);
+        assertEquals(17.0F * 3 / 5, EldritchBlockRules.DEVICE_METAL_RESISTANCE);
         // Oracle BlockWoodenDevice:82 - the hardness of the wooden device family is 2.5.
         assertEquals(2.5F, EldritchBlockRules.DEVICE_WOOD_HARDNESS);
         assertEquals(6.0F, EldritchBlockRules.DEVICE_WOOD_RESISTANCE);
@@ -403,7 +403,7 @@ class EldritchBlockRulesTest {
         assertEquals(2.0F, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_HARDNESS);
         assertEquals(999.0F, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_RESISTANCE);
         assertEquals(3.0F, EldritchBlockRules.DEVICE_STONE_HARDNESS);
-        assertEquals(15.0F, EldritchBlockRules.DEVICE_STONE_RESISTANCE);
+        assertEquals(25.0F * 3 / 5, EldritchBlockRules.DEVICE_STONE_RESISTANCE);
     }
 
     @Test void theWardedGlassKeepsItsOriginalHardnessAndBlastResistance() {
@@ -420,7 +420,7 @@ class EldritchBlockRulesTest {
     @Test void theEldritchFamilyKeepsTheEffectiveResistanceOfItsSetterValue() {
         // BlockEldritch:68 - setResistance(20000) stores 60000; the getter divides it by five.
         assertEquals(20000.0F, EldritchBlockRules.ELDRITCH_FAMILY_RESISTANCE);
-        assertEquals(12000.0F, EldritchBlockRules.ELDRITCH_FAMILY_NATIVE_RESISTANCE);
+        assertEquals(20000.0F * 3 / 5, EldritchBlockRules.ELDRITCH_FAMILY_NATIVE_RESISTANCE);
     }
 
     // ---------------------------------------------------------------- cosmetic
@@ -440,7 +440,7 @@ class EldritchBlockRulesTest {
         assertEquals(20.0F, EldritchBlockRules.cosmeticExplosionResistance(EldritchBlockRules.COSMETIC_THAUMIUM_BLOCK));
         // The 1.7.10 setter value 10 is stored as 30 and the vanilla getter divides it by five.
         assertEquals(10.0F, EldritchBlockRules.COSMETIC_FAMILY_RESISTANCE);
-        assertEquals(6.0F, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE);
+        assertEquals(10.0F * 3 / 5, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE);
         assertEquals(6.0F, EldritchBlockRules.cosmeticExplosionResistance(EldritchBlockRules.COSMETIC_ELDRITCH_TILE));
         assertEquals(2.0F, EldritchBlockRules.COSMETIC_FAMILY_HARDNESS);
     }

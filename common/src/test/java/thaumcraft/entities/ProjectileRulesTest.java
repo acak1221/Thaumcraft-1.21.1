@@ -65,21 +65,22 @@ class ProjectileRulesTest {
 
     @Test void theGolemOrbHomingDividesByTheSquaredDistanceAndTheOriginalAcceleration() {
         // Oracle EntityGolemOrb:95-102 - the original divides the delta by
-        // getDistanceSqToEntity, the SQUARED distance to the target.
-        assertEquals(0.2D, ProjectileRules.golemOrbHoming(0D, 1D, 1D), 1E-9D);
-        assertEquals(0.4D, ProjectileRules.golemOrbHoming(0.2D, 1D, 1D), 1E-9D);
-        assertEquals(0.1D, ProjectileRules.golemOrbHoming(0D, 1D, 2D), 1E-9D);
-        assertEquals(0.025D, ProjectileRules.golemOrbHoming(0D, 1D, 8D), 1E-9D);
+        // getDistanceSqToEntity, the SQUARED distance to the target, and scales it by 0.2 in double.
+        assertEquals(0D + (1D / 1D) * 0.2D, ProjectileRules.golemOrbHoming(0D, 1D, 1D));
+        assertEquals(0.2D + (1D / 1D) * 0.2D, ProjectileRules.golemOrbHoming(0.2D, 1D, 1D));
+        assertEquals(0D + (1D / 2D) * 0.2D, ProjectileRules.golemOrbHoming(0D, 1D, 2D));
+        assertEquals(0D + (1D / 8D) * 0.2D, ProjectileRules.golemOrbHoming(0D, 1D, 8D));
     }
 
     @Test void theGolemOrbHomingStopsOnAZeroDistance() {
-        assertEquals(0.3D, ProjectileRules.golemOrbHoming(0.3D, 1D, 0D), 1E-9D);
+        assertEquals(0.3D, ProjectileRules.golemOrbHoming(0.3D, 1D, 0D));
     }
 
     @Test void theGolemOrbMotionIsClampedToAQuarter() {
-        assertEquals(0.25D, ProjectileRules.clampGolemOrbSpeed(0.9D), 1E-9D);
-        assertEquals(-0.25D, ProjectileRules.clampGolemOrbSpeed(-0.9D), 1E-9D);
-        assertEquals(0.2D, ProjectileRules.clampGolemOrbSpeed(0.2D), 1E-9D);
+        // Oracle EntityGolemOrb:103-105 clamps the float of the motion between -0.25f and 0.25f.
+        assertEquals((double) 0.25F, ProjectileRules.clampGolemOrbSpeed(0.9D));
+        assertEquals((double) -0.25F, ProjectileRules.clampGolemOrbSpeed(-0.9D));
+        assertEquals((double) 0.2F, ProjectileRules.clampGolemOrbSpeed(0.2D));
     }
 
     // ------------------------------------------------------------------
@@ -94,9 +95,10 @@ class ProjectileRulesTest {
     }
 
     @Test void theHeavyPrimalArrowDealsOneAndAHalfAndTheOrderAndWitherArrowsFourFifths() {
-        assertEquals(3.15D, ProjectileRules.primalArrowDamage(ProjectileRules.PRIMAL_ARROW_TYPE_HEAVY), 1E-9D);
-        assertEquals(1.68D, ProjectileRules.primalArrowDamage(ProjectileRules.PRIMAL_ARROW_TYPE_ORDER), 1E-9D);
-        assertEquals(1.68D, ProjectileRules.primalArrowDamage(ProjectileRules.PRIMAL_ARROW_TYPE_WITHER), 1E-9D);
+        // Oracle EntityPrimalArrow:355-368: the damage is the double 2.1 times 1.5 or times 0.8.
+        assertEquals(2.1D * 1.5D, ProjectileRules.primalArrowDamage(ProjectileRules.PRIMAL_ARROW_TYPE_HEAVY));
+        assertEquals(2.1D * 0.8D, ProjectileRules.primalArrowDamage(ProjectileRules.PRIMAL_ARROW_TYPE_ORDER));
+        assertEquals(2.1D * 0.8D, ProjectileRules.primalArrowDamage(ProjectileRules.PRIMAL_ARROW_TYPE_WITHER));
     }
 
     @Test void thePrimalArrowHitDamageIsTheCeilingOfSpeedTimesDamage() {
@@ -121,9 +123,10 @@ class ProjectileRulesTest {
     }
 
     @Test void thePrimalArrowLaunchSpeedIsTheChargeTimesTheDamageTimesOneAndAHalf() {
-        assertEquals(3F, ProjectileRules.primalArrowLaunchSpeed(2F));
-        assertEquals(3.75F, ProjectileRules.primalArrowLaunchSpeed(2.5F));
-        assertEquals(2F, ProjectileRules.primalArrowChargeDamage(1F, 2F));
+        // Oracle EntityPrimalArrow:135 creates the arrow with par3 * 1.5f, in float.
+        assertEquals(2F * 1.5F, ProjectileRules.primalArrowLaunchSpeed(2F));
+        assertEquals(2.5F * 1.5F, ProjectileRules.primalArrowLaunchSpeed(2.5F));
+        assertEquals(1F * 2F, ProjectileRules.primalArrowChargeDamage(1F, 2F));
     }
 
     @Test void thePrimalArrowTypesKeepTheirOriginalEffects() {
@@ -159,8 +162,8 @@ class ProjectileRulesTest {
     }
 
     @Test void theFollowingItemMovesOneBlockPerDivisor() {
-        assertEquals(0.05D, ProjectileRules.followItemSpeed(20), 1E-9D);
-        assertEquals(1D, ProjectileRules.followItemSpeed(1), 1E-9D);
+        assertEquals(1D / 20D, ProjectileRules.followItemSpeed(20));
+        assertEquals(1D / 1D, ProjectileRules.followItemSpeed(1));
     }
 
     @Test void theFollowingItemStopsInsideHalfABlock() {
@@ -170,8 +173,8 @@ class ProjectileRulesTest {
     }
 
     @Test void theFollowingItemAimsAtTheMiddleOfItsTarget() {
-        assertEquals(11D, ProjectileRules.followItemTargetY(10D, 2D), 1E-9D);
-        assertEquals(0.04D, ProjectileRules.FOLLOW_ITEM_GRAVITY, 1E-9D);
+        assertEquals(10D + 2D * 0.5D, ProjectileRules.followItemTargetY(10D, 2D));
+        assertEquals(0.04D, ProjectileRules.FOLLOW_ITEM_GRAVITY);
     }
 
     // ------------------------------------------------------------------

@@ -63,11 +63,11 @@ class LevitatorGlowParityTest {
         // The original draws the +X panel at x + 0.99 and the -X panel at
         // x + 0.01, the port keeps the opaque cube of the levitator and draws
         // them one hundredth of a block outside their own face.
-        assertEquals(1.01F, TileLevitatorRenderer.panelOffset(Direction.EAST), 1.0E-6F);
-        assertEquals(-0.01F, TileLevitatorRenderer.panelOffset(Direction.WEST), 1.0E-6F);
-        assertEquals(1.01F, TileLevitatorRenderer.panelOffset(Direction.SOUTH), 1.0E-6F);
-        assertEquals(-0.01F, TileLevitatorRenderer.panelOffset(Direction.NORTH), 1.0E-6F);
-        assertEquals(1.01F, TileLevitatorRenderer.panelOffset(Direction.UP), 1.0E-6F);
+        assertEquals(1.0F + 0.01F, TileLevitatorRenderer.panelOffset(Direction.EAST));
+        assertEquals(-0.01F, TileLevitatorRenderer.panelOffset(Direction.WEST));
+        assertEquals(1.0F + 0.01F, TileLevitatorRenderer.panelOffset(Direction.SOUTH));
+        assertEquals(-0.01F, TileLevitatorRenderer.panelOffset(Direction.NORTH));
+        assertEquals(1.0F + 0.01F, TileLevitatorRenderer.panelOffset(Direction.UP));
     }
 
     @Test void theActiveLevitatorKeepsTheOriginalLightmapCoordinate() {

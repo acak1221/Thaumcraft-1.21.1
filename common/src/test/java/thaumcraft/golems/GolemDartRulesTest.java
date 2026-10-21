@@ -40,19 +40,20 @@ class GolemDartRulesTest {
     }
 
     @Test void theSpreadNarrowsByOneAndThreeQuartersForEveryWaterUpgrade() {
-        assertEquals(7.0F, GolemDartRules.inaccuracy(0), 0F);
-        assertEquals(5.25F, GolemDartRules.inaccuracy(1), 0F);
-        assertEquals(3.5F, GolemDartRules.inaccuracy(2), 0F);
-        assertEquals(0.0F, GolemDartRules.inaccuracy(4), 0F);
-        assertEquals(-1.75F, GolemDartRules.inaccuracy(5), 0F, "no clamping: the original spread simply changes sign");
+        // Oracle EntityGolemBase:1182: 7.0f - (float)this.getUpgradeAmount(3) * 1.75f, in float.
+        assertEquals(7.0F - 0 * 1.75F, GolemDartRules.inaccuracy(0));
+        assertEquals(7.0F - 1 * 1.75F, GolemDartRules.inaccuracy(1));
+        assertEquals(7.0F - 2 * 1.75F, GolemDartRules.inaccuracy(2));
+        assertEquals(7.0F - 4 * 1.75F, GolemDartRules.inaccuracy(4));
+        assertEquals(7.0F - 5 * 1.75F, GolemDartRules.inaccuracy(5), "no clamping: the original spread simply changes sign");
     }
 
     @Test void theDartDoesFourTenthsOfTheAttackAsAFloatProduct() {
-        assertEquals((double) (6F * 0.4F), GolemDartRules.damage(6F), 0D);
-        assertEquals((double) (8F * 0.4F), GolemDartRules.damage(8F), 0D);
-        assertEquals((double) (2.5F * 0.4F), GolemDartRules.damage(2.5F), 0D);
+        assertEquals((double) (6F * 0.4F), GolemDartRules.damage(6F));
+        assertEquals((double) (8F * 0.4F), GolemDartRules.damage(8F));
+        assertEquals((double) (2.5F * 0.4F), GolemDartRules.damage(2.5F));
         assertTrue(GolemDartRules.damage(6F) != 2.4D, "the float product 2.4000000953... is what the arrow receives");
-        assertEquals(1.6F, GolemDartRules.SPEED, 0F);
+        assertEquals(1.6F, GolemDartRules.SPEED);
     }
 
     @Test void aTargetNearerThanThreeBlocksIsLeftToTheMeleeGoal() {

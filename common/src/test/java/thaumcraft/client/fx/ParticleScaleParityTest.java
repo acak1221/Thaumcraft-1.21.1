@@ -38,19 +38,20 @@ import thaumcraft.common.tiles.TileCrucible;
 class ParticleScaleParityTest {
     @Test void theWispMoteKeepsTheOriginalHalfSize() {
         // The original wisp entity trail uses the size 0.1f, the primal orb trail the size 0.4f.
-        assertEquals(0.05F, MonsterSpriteParticle.moteHalfSize(.1F), 1.0E-6);
-        assertEquals(0.2F, MonsterSpriteParticle.moteHalfSize(.4F), 1.0E-6);
+        // Oracle FXWisp:44 - the mote is drawn with the half size 0.5f * scale, in float.
+        assertEquals(.5F * .1F, MonsterSpriteParticle.moteHalfSize(.1F));
+        assertEquals(.5F * .4F, MonsterSpriteParticle.moteHalfSize(.4F));
         // The 1.21.1 particle engine halves the quad size, so the quad size is the particle scale itself.
-        assertEquals(.4F, PrimalWispParticle.moteQuadSize(.4F), 1.0E-6);
+        assertEquals(.4F, PrimalWispParticle.moteQuadSize(.4F));
     }
 
     @Test void theBurstKeepsTheOriginalHalfSize() {
-        assertEquals(1.0F, MonsterSpriteParticle.burstHalfSize(1.0F), 1.0E-6);
-        assertEquals(0.25F, MonsterSpriteParticle.burstHalfSize(.25F), 1.0E-6);
+        assertEquals(1.0F, MonsterSpriteParticle.burstHalfSize(1.0F));
+        assertEquals(0.25F, MonsterSpriteParticle.burstHalfSize(.25F));
     }
 
     @Test void theGuardianHazeKeepsTheOriginalConstantSize() {
-        assertEquals(.4F, WarpGuardianParticle.QUAD_SIZE, 1.0E-6);
+        assertEquals(.4F, WarpGuardianParticle.QUAD_SIZE);
     }
 
     @Test void theCrucibleIsHeatedByTheFireBlockAlone() {

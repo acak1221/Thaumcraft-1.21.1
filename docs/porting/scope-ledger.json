@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "b1c21f30bac72407ca5c6e000caf0ca52ec2c58dcbe991011d18567a44f0075d",
+    "canonical_json_sha256": "fa0814cddb046d5eae4c1ddd0c771871736909c9b44ebb3e73279d77c2683011",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {
@@ -52,10 +52,9 @@
     "unique_native_counterparts": 57,
     "dispositions": {
       "adapt": 263,
-      "exclude": 168,
-      "needs_review": 1,
-      "port": 288,
-      "replace": 324
+      "exclude": 165,
+      "port": 289,
+      "replace": 327
     },
     "milestone_queue": {
       "M00": 75,
@@ -24512,7 +24511,7 @@
         "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
       },
       "review": {
-        "disposition": "exclude",
+        "disposition": "replace",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "partial",
@@ -25110,7 +25109,7 @@
         "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
       },
       "review": {
-        "disposition": "exclude",
+        "disposition": "replace",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "partial",
@@ -25194,7 +25193,7 @@
         "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
       },
       "review": {
-        "disposition": "exclude",
+        "disposition": "replace",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "partial",
@@ -43215,18 +43214,27 @@
         "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
       },
       "review": {
-        "disposition": "needs_review",
-        "source_semantics": "unreviewed",
-        "callsite_audit": "partial",
+        "disposition": "port",
+        "source_semantics": "adapted",
+        "callsite_audit": "complete",
         "native_coverage": "parity_verified",
-        "owner": "audit-a5-eldritch",
+        "owner": "worldgengap",
         "evidence": [
-          "oracle thaumcraft/common/lib/world/WorldGenMound.java:1-2550 the original mound with its nineteen layers",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java:569 the note that the mound branch is reserved",
-          "native common/src/main/java has no WorldGenMound class"
+          "oracle thaumcraft/common/lib/world/WorldGenMound.java:35-58 the ground samples of the mound",
+          "oracle thaumcraft/common/lib/world/WorldGenMound.java:63-2549 the 2441 block table of the structure",
+          "oracle thaumcraft/common/lib/world/WorldGenMound.java:2520-2547 the loot room, the chest and the two spawners",
+          "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:423-434 the position, the sea level test and the dark aura node of the mound",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenMoundTemplate.java the layer table of the mound, rebuilt from the oracle",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenMound.java the native mound feature, the loot room and the spawners",
+          "native common/src/test/java/thaumcraft/world/WorldGenMoundTemplateTest.java the sha256 of the native table against the table of the oracle",
+          "native scripts/porting/extract_mound_template.py rebuilds the table from the oracle and prints its checksum",
+          "native common/src/gameTest/java/thaumcraft/common/testing/SurfaceStructurePlacementRuntimeChecks.java the runtime check of the mound in a generated chunk"
         ],
         "notes": [
-          "The original mound (one chunk in 150) has no native counterpart. The native port keeps the one in 150 roll in StructurePlacementRules but has no generator behind it, so the roll always ends without a structure."
+          "The original mound (one chunk in 150) is ported: the block table of the original is kept cell by cell in the layer template, the loot containers, the chest and the two mob spawners are written in the order of the original, and the dark aura node over the centre is created.",
+          "The table of the native was compared with the table of the oracle cell by cell: all sixteen layers and all 2441 cells are equal, and the table of the 1.12 legacy reference is equal too.",
+          "Forced 1.21.1 change: the 1.7.10 world generator became a per chunk feature, and the nineteen block wide structure reaches into the neighbouring chunk, which the 1.21.1 generation may write.",
+          "The chest of the loot room holds the native dungeon loot table instead of the chest hook of the 1.7.10 forge, the same way the hilltop stones of the original do it."
         ],
         "reviewed_sha256": {
           "original": "087d13f346af8b5e5e66d954f9926ca5f49fa0622a2a827b6191e2d8ea5d3366",

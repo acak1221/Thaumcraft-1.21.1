@@ -56,6 +56,11 @@ def merge_ledger(ours: dict, theirs: dict) -> dict:
             elif base[key] != value and key == "native_coverage":
                 if COVERAGE_RANK.get(value, 0) > COVERAGE_RANK.get(base[key], 0):
                     base[key] = value
+            elif base[key] != value and key in ("disposition", "source_semantics", "callsite_audit"):
+                # A branch that closed a unit replaces the open verdict of the audit with its own.
+                OPEN = (None, "needs_review", "unreviewed", "partial")
+                if base[key] in OPEN or value in ("port", "replace", "adapt"):
+                    base[key] = value
     for key, value in theirs.items():
         if key != "units" and key not in ours:
             ours[key] = value

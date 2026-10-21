@@ -16,7 +16,7 @@
     "partial": 42,
     "pending": 892,
     "complete": 0,
-    "active_native_java_files": 1316
+    "active_native_java_files": 1334
   },
   "active_native_sources": [
     {
@@ -72,7 +72,7 @@
     {
       "path": "common/src/main/java/thaumcraft/api/ThaumcraftApi.java",
       "role": "native_foundation",
-      "sha256": "bddcc7ff63159fbd0fc26018ef9b6607aafdba238a6148cbec96619105cfd10b"
+      "sha256": "dac0dfac8d0006791e922787664e61e3004a387b595ecb9d02e775b0faac298b"
     },
     {
       "path": "common/src/main/java/thaumcraft/api/ThaumcraftApiHelper.java",
@@ -82,7 +82,7 @@
     {
       "path": "common/src/main/java/thaumcraft/api/ThaumcraftMaterials.java",
       "role": "native_foundation",
-      "sha256": "fd6f4de1d780a13f13421f8156fd91ec019c7bb164ee99daae4c4d63ee3d459b"
+      "sha256": "2739d86fc7c03457f17c68699f4c61f5178d0fc0f1f0e1b0692de01dc5fc5a11"
     },
     {
       "path": "common/src/main/java/thaumcraft/api/TileThaumcraft.java",
@@ -97,7 +97,7 @@
     {
       "path": "common/src/main/java/thaumcraft/api/aspects/Aspect.java",
       "role": "native_foundation",
-      "sha256": "c2a12b6faf6dc646c2cb71e359d07b9bf2bfc53cc28a8f23373265cc5005e157"
+      "sha256": "083fb4c06b5e895d77e65a2c3a472276170f3c0ace23a04c70bdf6c73f8cefc7"
     },
     {
       "path": "common/src/main/java/thaumcraft/api/aspects/AspectEventProxy.java",
@@ -112,7 +112,7 @@
     {
       "path": "common/src/main/java/thaumcraft/api/aspects/AspectList.java",
       "role": "native_foundation",
-      "sha256": "e6da7db6eeee11506a4ce1426728a9b385991e8ef3b5d7ea822f2b10b6d50a01"
+      "sha256": "d7ddb2a97f7a82e105010193960b6e81f9c86db9dcf808695ef9a3c36d1358f0"
     },
     {
       "path": "common/src/main/java/thaumcraft/api/aspects/AspectRegistryEvent.java",
@@ -263,6 +263,21 @@
       "path": "common/src/main/java/thaumcraft/api/internal/WeightedRandomLoot.java",
       "role": "native_foundation",
       "sha256": "39e5f38f6588cc4847e7327b7385e8932b3831ef82fb19e67d419b27c1d4080d"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/api/items/IGoggles.java",
+      "role": "native_foundation",
+      "sha256": "5e037f4b86f11f7f5d85a31aa77f00c453998f4b4d814261be07ed22327a32e0"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/api/items/IRevealer.java",
+      "role": "native_foundation",
+      "sha256": "70b666d6a16b2ed2fe7a899fe646deb1180626a14fc429cc79b6d53ee026255a"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/api/items/IVisDiscountGear.java",
+      "role": "native_foundation",
+      "sha256": "2daf69fe5db08997acdeb0fb9ad2737e2a75ae5b5b050c158e4c85b4caea0b68"
     },
     {
       "path": "common/src/main/java/thaumcraft/api/items/ItemsTC.java",
@@ -472,7 +487,12 @@
     {
       "path": "common/src/main/java/thaumcraft/client/ClientSetup.java",
       "role": "native_foundation",
-      "sha256": "6db8c2a79e0b5184ead009e55a8f36455048ec52ce6cdfa2d1c8a71fc6323c20"
+      "sha256": "8e500d621cd133d34bbff30597b82dcba9ae881800a56bf8be9f11d45e6f228c"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/ClientStateReset.java",
+      "role": "native_foundation",
+      "sha256": "efeded67233e0262eaa5941c9d522a6db66ed779b57ea76dc76f2d0ced53b2c7"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/CrystallizerClientEffects.java",
@@ -497,7 +517,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/ThaumcraftAlchemyClient.java",
       "role": "native_foundation",
-      "sha256": "df90c6ac78a7e168bcbb3c003936bbdd25c7d748cf99ad65dbe15fcfec5efec3"
+      "sha256": "07c24a416c9eddf52326e92973774ae10ac0eb430502a92fbabd4a5f7e2b4f3d"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/ThaumcraftAlembicClient.java",
@@ -543,6 +563,11 @@
       "path": "common/src/main/java/thaumcraft/client/ThaumcraftColoredCandlesClient.java",
       "role": "native_foundation",
       "sha256": "e8edada2c3946b5e966390de9a92aa2855474fdece9367be00744c88f0b39bb7"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java",
+      "role": "native_foundation",
+      "sha256": "e3cf6bbd734612ad6ec56fcf49a4ec2f433ae316ceacaeb5265cb567f0d48d03"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/ThaumcraftCrystalClustersClient.java",
@@ -745,9 +770,19 @@
       "sha256": "28ba84f14bf5c04f2f8f58ea9d8c9c22739b1945dd829e1af0597cf4270d19bd"
     },
     {
+      "path": "common/src/main/java/thaumcraft/client/fx/BlockFxClientEffects.java",
+      "role": "native_foundation",
+      "sha256": "1245a9cac5dc9bc0555dc9b81452299f646f79a34b779da895b5b6f5832dbd4d"
+    },
+    {
       "path": "common/src/main/java/thaumcraft/client/fx/InfusionClientEffects.java",
       "role": "native_foundation",
       "sha256": "b655deee8bd263854980db40e6427af3e5148fa3538af45634eed98731d865ef"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/fx/ThaumatoriumClientEffects.java",
+      "role": "native_foundation",
+      "sha256": "cddadef0cd49574f86adc8424d4894208e57fdc9194d4b6eaaeffe2e81c0a6a3"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/fx/bolt/WispLightningShape.java",
@@ -762,7 +797,7 @@
     {
       "path": "common/src/main/java/thaumcraft/client/fx/particles/FXArc.java",
       "role": "native_foundation",
-      "sha256": "331e14b026fcde892cd7c6d9657836877b42cbf25e712fd1b5ae3fb2f3444c54"
+      "sha256": "6ce058e54c6bdc0fb9cb16695d4df39eaed200f07ec5fc82b97d7d5fe7f21096"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/fx/particles/FXArcSparkle.java",
@@ -770,9 +805,14 @@
       "sha256": "524ef8105fbca6d735171c14e8ce908696c4b4fb40c8f89bfc06823251fd0c1c"
     },
     {
+      "path": "common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java",
+      "role": "native_foundation",
+      "sha256": "61029e2289a7d765d7f7f1932c7b192ed80c01412749454338a6081566cefc5a"
+    },
+    {
       "path": "common/src/main/java/thaumcraft/client/fx/particles/FXVent.java",
       "role": "native_foundation",
-      "sha256": "a4fd7dcfa7f4a918b404492a14e3978e0a6d477ee82432e4d74bdc7a8988be5a"
+      "sha256": "34057535d24ac89a4708d4d9c3f320099613205edac8947455e355379be1d3cf"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java",
@@ -873,6 +913,11 @@
       "path": "common/src/main/java/thaumcraft/client/fx/particles/TaintacleAriseParticle.java",
       "role": "native_foundation",
       "sha256": "4eae4d3aad01f693c79b3bcda3d8a485bf2dfa89eb676f32c24e7a7ebafc8f88"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/fx/particles/ThaumcraftBoltParticle.java",
+      "role": "native_foundation",
+      "sha256": "f9994f8f2e942262f264d956499d800f3d39a404fa3d61bd91b0654446c31d03"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/fx/particles/WardHitParticle.java",
@@ -1030,9 +1075,14 @@
       "sha256": "99ae96902dd6039d0ab71ba26365160083c944a5a0b2e9a3f4ef1f462460ad90"
     },
     {
+      "path": "common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java",
+      "role": "native_foundation",
+      "sha256": "1a6528fae4224462555770d9b5b0778e1588eea92f93a86e601e70fbbd050ef3"
+    },
+    {
       "path": "common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java",
       "role": "native_foundation",
-      "sha256": "69db1fa0f6bfa99cb08c5a7c4e4114d5a185f1d0185cfbb2cb40375cefd7dd91"
+      "sha256": "d36b3a93d0756fe9f38165ab1d770c71f57470445680779b079fa75bee1de378"
     },
     {
       "path": "common/src/main/java/thaumcraft/client/lib/AspectFlightQueue.java",
@@ -1832,7 +1882,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/Thaumcraft.java",
       "role": "native_foundation",
-      "sha256": "ce88f9c68a06a672ca56a3b3d8f33b2a2de5da28d4bc6128adae2a011c61be1f"
+      "sha256": "3e2a5cc5a601e8f8c31fbfe84f02cdf3253ff27fb7e778b55e541a15bc725e19"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BannerData.java",
@@ -1962,7 +2012,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockCosmeticSolid.java",
       "role": "native_foundation",
-      "sha256": "68ee49a9bf4138e205a22739cebef8fd9ed2b75afb78ab3980747be5e95c571a"
+      "sha256": "a8640724e5dab0077b59fb273d6777168523545e90390f614bab3c86b16ee760"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java",
@@ -2052,7 +2102,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java",
       "role": "native_foundation",
-      "sha256": "7f070f7f7840ccebedc010f1e36ce9b79daf59c938b3971a563d220d0166fa45"
+      "sha256": "e4345c93f60351d87c11cfbf2bdc79e5e1d7c0c2638c36cd8d07dae4b0d27d95"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java",
@@ -2082,7 +2132,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockHole.java",
       "role": "native_foundation",
-      "sha256": "ad6b59f5b1d1d2a11a3ad3cb9e56d765efa4f7012f3ce3d80fa845fe8b873f96"
+      "sha256": "ec85fa0d462b7565fa768c1598c0aac36efdab4630dda4f0f9ff86d67033ab59"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockInfusionMatrix.java",
@@ -2102,7 +2152,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockJar.java",
       "role": "native_foundation",
-      "sha256": "b1ad0a4369878010813100a873373ea93d1963a2938abff0799d5f03cb55e38a"
+      "sha256": "4640ee53fc318e179945d4a432d6b87f37820fe7d966ad8e596738a6d7a84385"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockLevitator.java",
@@ -2247,7 +2297,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockThaumatorium.java",
       "role": "native_foundation",
-      "sha256": "35c68c4322837dface9035ee84a73f88fb9d8d36302401fe275e5a05fed10f3b"
+      "sha256": "b07bac2db85d3979e37a022f989257a7757ac4d8586d34338e4b2d6271c1ee7b"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/blocks/BlockTube.java",
@@ -2372,7 +2422,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftBaubles.java",
       "role": "native_foundation",
-      "sha256": "5d195156fe26a827cce5d13dd675155bf9eae8e4390270873cf1a12cca190633"
+      "sha256": "f223f10d01051ea04ce768fe78358c5d95b52ee834b3e9d6c641977b7588b740"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftBellows.java",
@@ -2400,9 +2450,14 @@
       "sha256": "4224c3d848ecd4eec452624f5c780799f63606a01814c70e5ee65ffa3eea8f0d"
     },
     {
+      "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java",
+      "role": "native_foundation",
+      "sha256": "c81952c161d7f8fc6d2bce85050030c29f05c724ce15110373af1618ac0261f1"
+    },
+    {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java",
       "role": "native_foundation",
-      "sha256": "e64f38273a33f0d31d218136cefaef41cc6e54979ca155ca19b08922ae79d00d"
+      "sha256": "9f8ecf2c5ed5a984c4589f50c8e4906c5e866dd759fcfcb1fc8063a610e9247d"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java",
@@ -2437,7 +2492,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java",
       "role": "native_foundation",
-      "sha256": "97c01519b6f5680c6edf90e387e1503215468224191e79a94c3fc0071fd82438"
+      "sha256": "772c5a85a6ea19f78f16b5148a5ecff4164775e2e79e931679e077a1802163ae"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchItems.java",
@@ -2517,7 +2572,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftHoles.java",
       "role": "native_foundation",
-      "sha256": "e9f1a0b83bccc141d38b3c0b422dc42a8289ddad33df1196cdd4a24d501f5bbd"
+      "sha256": "95872468ae8445cad626c6373d8a1481f005e6b42261242381ac9706084bc5cc"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftHungryChest.java",
@@ -2695,9 +2750,14 @@
       "sha256": "b40066640f1faec59e3ba34118c78f4b01200bd38bb85ec3347f5c6d26c21842"
     },
     {
+      "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftVillageProfessions.java",
+      "role": "native_foundation",
+      "sha256": "dac44c4fa20af559d0dbc8a09382eb6de42066ce7dabfadcd99ca90fbac10e5c"
+    },
+    {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftVillages.java",
       "role": "native_foundation",
-      "sha256": "0003c61bcc4f25136eb2f921481fb0c34f8001bdc57810c2e7141b75b85834e0"
+      "sha256": "76c574bca434b13202ce9efb61db1618534e8c6f102acbf114a48ab8bdf4f36a"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftVisCharging.java",
@@ -2992,7 +3052,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/EntitySpecialItem.java",
       "role": "native_foundation",
-      "sha256": "0658a6cea398db51622064a52ff383a9045b9ee4e8436443eafae1e5ea2b66b0"
+      "sha256": "aaee52c44b27ac26a2bbced31b6a18bb0a70a66ac61c57b23bfacaa211091f74"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/InventoryMob.java",
@@ -3052,7 +3112,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java",
       "role": "native_foundation",
-      "sha256": "0baaad3094cbfffed62d5b20e35c03c9528ba4e76383f9cdee5cb9ad1f4f9571"
+      "sha256": "6d8a55577d13c874ca377881c64c669f64c434da60c3e82987ee00a440879626"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBobber.java",
@@ -3162,27 +3222,27 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityCultist.java",
       "role": "native_foundation",
-      "sha256": "f229104cf0e12501977751616a74fe81e3e07ab8cd7b782f9a17a1a888caa9cc"
+      "sha256": "35759d81bdd19d1304a6468714522b30957d80d604939828e1facc1fc0f820fe"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityCultistCleric.java",
       "role": "native_foundation",
-      "sha256": "e15f014f094afc1e709986a09a1007fa8f681cac0b327dbe114e618f645efb7c"
+      "sha256": "4a5298629b94752067ce4ee3988d086eb52f7024a6def040c6de10086ed6d37e"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityCultistKnight.java",
       "role": "native_foundation",
-      "sha256": "d6e89b495b31b96e5721f5d0d51a172eb0356cc406dff166ac346bc55c8bfedc"
+      "sha256": "74d7c0161a00fceb5c0bf37adc3ecdac41e3b06c4f2474ec0e0d2ea3a2b7d02e"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityCultistLeader.java",
       "role": "native_foundation",
-      "sha256": "a0d7fe25a06d5fdd96974d4ac632ff0f97e2acc08f43c44e3320322aba1b8342"
+      "sha256": "14929faa6e3e87c5c16c08a189e173c764becd5b5f31bfe49ff160e79c39f086"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityCultistPortal.java",
       "role": "native_foundation",
-      "sha256": "b6c6cd4da45093186cbe04ca2b9c5d42f1d5a2b5eac4f9cb22b27397ba073d9f"
+      "sha256": "c23c96258918ee58bdbfa7fcde3cd93c0f2e58db865b073e02bbd94a256be73c"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityCultistPortalGreater.java",
@@ -3207,7 +3267,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java",
       "role": "native_foundation",
-      "sha256": "dead62ef6e986c0e77b29729fbb8a6a4b41af5b27803532984c009a33549ecdb"
+      "sha256": "fa0c33bfa99044d2af511247ca5aab3d07f098041bbd80937be6ea30058599b2"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityFireBat.java",
@@ -3232,7 +3292,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityPech.java",
       "role": "native_foundation",
-      "sha256": "ef3c2e46556c96133b04cffc55b8f8167ca7876fefd9e9604c99b5c5cc9f691f"
+      "sha256": "56da2e4e7dc27c03cc1d31a5dcf799b9acc6546589fb222a3131dd679ad33b62"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintChicken.java",
@@ -3247,7 +3307,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintCrawler.java",
       "role": "native_foundation",
-      "sha256": "84b57098d26fc1c749e40f72ca2b54438a162e34da3527724f303da0606aaa69"
+      "sha256": "f1ec3f4140c3ecc7088b9ff7c2ef351f6597b068441169e20aae73d714eeb56c"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintCreeper.java",
@@ -3262,12 +3322,12 @@
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSeed.java",
       "role": "native_foundation",
-      "sha256": "c92135fa611c3cbd2addc73c24650d501468ddf9ab1f99e8372a0ceebab45395"
+      "sha256": "02570123f69a5943bd25b454d37bb2935441cd34e325ea2ac2af42b68a088713"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSeedPrime.java",
       "role": "native_foundation",
-      "sha256": "0675e4c035742cfc0d9ef43e6358d1d0c28e78e96805958f664dd39c31e062aa"
+      "sha256": "8bf7f32917f9c516a4316280ac8bc3e0cf9796f689951034da80019170b03653"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityTaintSheep.java",
@@ -3452,7 +3512,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/items/ItemBucketDeath.java",
       "role": "native_foundation",
-      "sha256": "b450da85dcb040b58a2f36c3d3e6a2037daf75a3d79a773eaeae6c1a93b2564f"
+      "sha256": "e25bc4f98c8630dcbb1c7f36265197b68685a5c88fa20a70ccfa0e2e3d90d509"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/items/ItemBucketPure.java",
@@ -3982,7 +4042,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java",
       "role": "native_foundation",
-      "sha256": "8e406110334baecb731f916e72453416f474df9d67e52469f2d0c9fbb01619ef"
+      "sha256": "2fa043c75db2eca954cb9a4346709f8fdbca75b519efab23290dcb9635585ffc"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java",
@@ -4307,7 +4367,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java",
       "role": "native_foundation",
-      "sha256": "297d73b1cb1fba0e340a287def5b33644ed4fb84efa11d7df9d24e12ed2a37a5"
+      "sha256": "ae3208a699489cc94a593d916d31272ce4cd7f482609606953ffe53aed34ff70"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/bore/ArcaneBoreMath.java",
@@ -4352,7 +4412,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java",
       "role": "native_foundation",
-      "sha256": "ab6279e886b7c678814dae37a3099af95f828ab1d9c1265652b8796cc75e2d60"
+      "sha256": "9453463e4c8a2040ab155ce3424fbaa998e9a5f1d231ad09976d838ac2f0323b"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/crafting/InfusionMatching.java",
@@ -4387,7 +4447,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/cult/CultistRules.java",
       "role": "native_foundation",
-      "sha256": "1e1208684d72b97b769ae7047df1b04679c8267e0affb5af855cc1bb6208314f"
+      "sha256": "074325bb6ef6e950a6534241e6e150f182fde14267d2d402b5a8f73212112d1e"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentFrugal.java",
@@ -4513,6 +4573,11 @@
       "path": "common/src/main/java/thaumcraft/common/lib/events/ThaumcraftCommands.java",
       "role": "native_foundation",
       "sha256": "7e06a706008b25a0a4d73f34dae06f2e645aa5cce523b7a811f19f9c879976ff"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/fluid/DeathBucketActions.java",
+      "role": "native_foundation",
+      "sha256": "a4844af65d72e81c165e7c493d070b04f0835dab2d8c13730aac1e2de0b3d08b"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/fluid/FluidPure.java",
@@ -4743,6 +4808,16 @@
       "path": "common/src/main/java/thaumcraft/common/lib/network/AspectPoolPayload.java",
       "role": "native_foundation",
       "sha256": "d34fb6b9ef52960da7754e105b873fc5db74820d00b174b49e1ec03de2e014ff"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/network/BlockFxNetworking.java",
+      "role": "native_foundation",
+      "sha256": "6fdc80cff32c4c8a5bf97d3b63210cbf9e8dc5dc31a71f560aab739181835537"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/network/BlockFxPayload.java",
+      "role": "native_foundation",
+      "sha256": "94ef05abf70c61664cb3f8167f3c3d1d198d1761f07e15d99684bc7eb85a5650"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java",
@@ -5137,7 +5212,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java",
       "role": "native_foundation",
-      "sha256": "d38d3f22777b8271a39675666e6d8259efaff4862d0a45686b952b57c7e151bb"
+      "sha256": "280f7a3238b0cc1502d94f99c7328fc976b8d40077b7baf4b6e54c145717091f"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/research/PrimalCharmRules.java",
@@ -5242,7 +5317,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java",
       "role": "native_foundation",
-      "sha256": "0ab6ccad441ef9b3b633c7dbf84d38b32f084d42bdfbea85983afaa0044dbecc"
+      "sha256": "97c7cbf013cc5f6df7ec7fe6aaf0cbf9d81f345353c66fb76ae30c89b14352f9"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/research/ResearchRegistrationOrder.java",
@@ -5322,12 +5397,12 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java",
       "role": "native_foundation",
-      "sha256": "dbd491f354699826fa7fe3e79b17ce8bd7a920620b40e5dd501b1044398f11c1"
+      "sha256": "fc8e54e539b4cad5490820952f6f79230a5fe369127748f74647dbbaf9dfb831"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/tiles/TileParityRules.java",
       "role": "native_foundation",
-      "sha256": "e109b2325e7e2ccfcdc627d268a24de66d9b269868b6d22e684b9d8948544ce0"
+      "sha256": "fb9bec54b26d1ee3a4acb55b1b321da56ffc46f91e24406b2024b5f9807d193e"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/utils/AspectOrbQueue.java",
@@ -5347,7 +5422,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java",
       "role": "native_foundation",
-      "sha256": "06e88b9c22d8b2330678289d42f2252226845d079905ad35c5cee2e9335cf95b"
+      "sha256": "b375bdbdb1615133913d4b01fe2f308a465f47c59fe0f78b35d8583438225671"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/utils/EntityUtils.java",
@@ -5447,7 +5522,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java",
       "role": "native_foundation",
-      "sha256": "014ff76f4fb900b046dc0f0697388e518aaceae048f28e095e182184d650e8e6"
+      "sha256": "248d91fa2479288c3021d13193127048cd625b29b3da60cc87d7cd24a8527759"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java",
@@ -5478,6 +5553,11 @@
       "path": "common/src/main/java/thaumcraft/common/lib/world/GreatwoodDungeon.java",
       "role": "native_foundation",
       "sha256": "e484c7b44e14fe421ede63ab47b883152453cbae91b6d646c05551b6aec7825c"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/world/HoleBlockRules.java",
+      "role": "native_foundation",
+      "sha256": "4809f08f719c32ffdf69d150a5260a1584798d33750ed47e6006fb62f99be9a7"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/HungryNodeTrace.java",
@@ -5517,7 +5597,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java",
       "role": "native_foundation",
-      "sha256": "ee610899d10b0fec79dfe0b7bdcb6b576a4857fd2b3f2a0be6af7f25e301c71b"
+      "sha256": "cf26c95c4e0858265434e52ebabf92b0c9a3221d5b8d9b949e34947362812384"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/NormalNodeBiomeAdapter.java",
@@ -5572,7 +5652,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/StreamAxeHarvest.java",
       "role": "native_foundation",
-      "sha256": "663e165e81b75bec02a025cf1e316d67498c0c38879767f0d52ae6c2b48ec032"
+      "sha256": "01900f9d62bddadbef1482576a3a1b08e2fb3dc5b56059688b84025d5dd1982e"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/StreamAxeItemMotion.java",
@@ -5592,7 +5672,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/TaintMaterialRules.java",
       "role": "native_foundation",
-      "sha256": "2e52194d50beae48b65e98bcc9cf9b7fdd8ed40189d222880215a9503d286eeb"
+      "sha256": "9db8af00c012a194aeaba983cdf9b134ef1cadbfe84e09e61a8a0fbe503c3fb8"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java",
@@ -5617,7 +5697,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTotemFeature.java",
       "role": "native_foundation",
-      "sha256": "8c80e418fdf810c723fdcf3b6691d44fb225927ba45dff3e18ae773306c4c921"
+      "sha256": "a94e2bdefdabd500fc952136219ec3fe0fa0d9733c46f00900985093f57c0263"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTreeFeature.java",
@@ -5637,12 +5717,17 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/VillageBankerHome.java",
       "role": "native_foundation",
-      "sha256": "64dcbbe297af2f16ecdf714d892c1df615968a94c52e0b59acd43c89109573e9"
+      "sha256": "aeea8d8aadb7031affb151faff3d65f53c4b869fced9f3a779814cdacf6c7ed8"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/VillageBankerManager.java",
       "role": "native_foundation",
       "sha256": "72490bf9316191d70933c21066857820c2973277d672c25f75a76189b573dbea"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/world/VillageTradeRules.java",
+      "role": "native_foundation",
+      "sha256": "df1c8a3629ae76f234ed580bf00d901882a05a62742fb2aba120ddf38f3ce9bc"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/VillageWizardManager.java",
@@ -5657,7 +5742,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java",
       "role": "native_foundation",
-      "sha256": "4c8f715f1549e26a406cae32ed67eb2d276041bc97a50c0857951243edb1ec37"
+      "sha256": "4235eed038eff467d0d544e941388aaf963e92a20373fa7136a14736b874ea4e"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/WardedBehaviour.java",
@@ -5692,12 +5777,22 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java",
       "role": "native_foundation",
-      "sha256": "0fe1ca43a1617167ebb3c06b600f957590b144e46ef3276dcc8869810366bab8"
+      "sha256": "4f009b6b3b8e5ecd16b531d5a395a9aeaf86d0ed62e39272752b42e4ad88770a"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/WorldGenManaPods.java",
       "role": "native_foundation",
       "sha256": "5cdd4bd8b24c544a7ac5485df27a29d6b5d43ec32927939b658bb8392e55ee7e"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/world/WorldGenMound.java",
+      "role": "native_foundation",
+      "sha256": "98ea537e6fceaff302f0c6686fb4d8031e0dcce2370d0a3ed7324e8e78768757"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/world/WorldGenMoundTemplate.java",
+      "role": "native_foundation",
+      "sha256": "0c15dcef179a3bf37a2016a0602562b914ff108d04253d75eb6d59340d5296a2"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java",
@@ -5743,6 +5838,11 @@
       "path": "common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeSurfaceRules.java",
       "role": "native_foundation",
       "sha256": "662bfb39eff352e385e3e03114466640147146430e11a6d99ddc7e5d29d76154"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeTopBlocks.java",
+      "role": "native_foundation",
+      "sha256": "22bee99b6f7692e962a5ff5b7ce46ece535cef2b5078df68cdc03bab6b6f8895"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/world/biomes/OriginalSpawnRules.java",
@@ -5843,6 +5943,11 @@
       "path": "common/src/main/java/thaumcraft/common/mixin/CrystalHopperInventoryMixin.java",
       "role": "native_foundation",
       "sha256": "f32f6b8285a4c48d7d75a5b264a9450fb230bcac889a6d1a58f398cb2be547a8"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/mixin/DeathBucketFillMixin.java",
+      "role": "native_foundation",
+      "sha256": "bd7e273748bf8db34216b9175be0a203f3cd688c069fce34b264c7d1a9b4a57a"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/mixin/DeferredDropPickupMixin.java",
@@ -6038,6 +6143,11 @@
       "path": "common/src/main/java/thaumcraft/common/mixin/VanillaFurnaceBellowsAccess.java",
       "role": "native_foundation",
       "sha256": "8fd9c15637bb739dd433f59a772455ab8ffd026dbe1bbfab8104e50fc9aa27c0"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/mixin/VillagerVillageTradesMixin.java",
+      "role": "native_foundation",
+      "sha256": "cfc04661437912922b9948d8ca5164b855d3968e2c4cfb6ba18d97b6126c752c"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/mixin/WardedBeaconMixin.java",
@@ -6292,12 +6402,12 @@
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java",
       "role": "native_foundation",
-      "sha256": "6659068973508098974cf0d41216c51f0a4227ce7709bab6d8589dd7bcad5dd0"
+      "sha256": "e81889ef20b9278ea910ead6325b18aeb99a6901f2cd0a850e92724f2e242989"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileEldritchTrap.java",
       "role": "native_foundation",
-      "sha256": "58f97690f96c2fa5702ba81501b53f5feacb4ddba34b76a3f0fee8bce7bc39f6"
+      "sha256": "7a5a5d2ad4e10f201d0cb2a475642bf4647bc43b9cf5c8ec1e63d60279951550"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileEssentiaCrystalizer.java",
@@ -6362,7 +6472,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileJarNode.java",
       "role": "native_foundation",
-      "sha256": "4b5458086d66ca4fb7c55cd41c00c438efc36c6f098ca5efb84a93428a3d3bd4"
+      "sha256": "33b1d3df23c8f4555ba724b74afb785a329a94eafc1185b12c1b5d74426492fd"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileLevitator.java",
@@ -6392,7 +6502,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileMirror.java",
       "role": "native_foundation",
-      "sha256": "cd6b141d3757bca4b9ef938c2a383906633b128e4bcb8e27023d8c4231ef37aa"
+      "sha256": "26525a6ae27220825069bccbd18328d5819583dfa3a4e5918633328c8a3fe973"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileMirrorEssentia.java",
@@ -6407,7 +6517,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileNode.java",
       "role": "native_foundation",
-      "sha256": "e1eb3fab0cfc7c215ee0b34b77b9397ca2737b82db7f8af3d3bee227d95a4985"
+      "sha256": "b3fdb3b35f157ddec20fe0a83767dae35ea26171a42fb34c2460f9c71d5a1615"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileNodeConverter.java",
@@ -6457,7 +6567,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java",
       "role": "native_foundation",
-      "sha256": "a59b4545ba184ce3d380f48cd0ed76cb2b34fa80af20949d1f4e4698c18dd117"
+      "sha256": "68d550aeb088247cbaf5c8a35f6f5f8d80bb7833ad8caedf92e19f136ade40e2"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/tiles/TileThaumatoriumTop.java",
@@ -6512,12 +6622,12 @@
     {
       "path": "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java",
       "role": "native_foundation",
-      "sha256": "86d75968e8d661b5e84782b9141b8d056d4e2a2ca5e8e34ca865520b10712a76"
+      "sha256": "02b58204c7a0590499b9f5d2efbae6eb035974f414e58bf1fc0b0ad6e1b395a9"
     },
     {
       "path": "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java",
       "role": "native_foundation",
-      "sha256": "e8dfd0f3126c935e95301d9ff6eefeecc3774534534072cbfa9ae1dfc897e875"
+      "sha256": "8f34a4199e80bf67483f3482737c86267b907bfb2d4465669108c65126080a75"
     },
     {
       "path": "fabric/src/main/java/thaumcraft/fabric/bore/FabricBorePlatform.java",
@@ -6578,26 +6688,6 @@
       "path": "neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java",
       "role": "native_foundation",
       "sha256": "0a4c4dc96099ea3ab5b70f934b370fc9a926539eaff72d172c66342331f98831"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java",
-      "role": "native_foundation",
-      "sha256": "e3cf6bbd734612ad6ec56fcf49a4ec2f433ae316ceacaeb5265cb567f0d48d03"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java",
-      "role": "native_foundation",
-      "sha256": "61029e2289a7d765d7f7f1932c7b192ed80c01412749454338a6081566cefc5a"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java",
-      "role": "native_foundation",
-      "sha256": "1a6528fae4224462555770d9b5b0778e1588eea92f93a86e601e70fbbd050ef3"
-    },
-    {
-      "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java",
-      "role": "native_foundation",
-      "sha256": "c81952c161d7f8fc6d2bce85050030c29f05c724ce15110373af1618ac0261f1"
     }
   ],
   "legacy_units": [

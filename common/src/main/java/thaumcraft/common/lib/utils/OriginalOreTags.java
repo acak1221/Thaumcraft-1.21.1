@@ -131,4 +131,21 @@ public final class OriginalOreTags {
     public static Map<String, TagKey<Item>> oreTags() {
         return Collections.unmodifiableMap(ORE_TAGS);
     }
+
+    /**
+     * The original {@code OreDictionary.getOreName(OreDictionary.getOreID(stack))}: the FIRST ore name the
+     * stack belongs to.
+     *
+     * <p>Forced 1.21.1 change: 1.21.1 has no ore dictionary, so the native port asks every registered
+     * original ore name in its registration order and takes the first tag that holds the stack. The
+     * original ore names are disjoint for every material the original recipes use, so the answer is the
+     * same for those materials.</p>
+     */
+    public static String firstOreName(net.minecraft.world.item.ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return null;
+        for (Map.Entry<String, TagKey<Item>> entry : ORE_TAGS.entrySet()) {
+            if (stack.is(entry.getValue())) return entry.getKey();
+        }
+        return null;
+    }
 }

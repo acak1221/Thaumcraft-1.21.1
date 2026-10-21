@@ -250,15 +250,18 @@ public class TileArcaneFurnace extends BlockEntity {
         entity.setDeltaMovement(mx, 0D, mz);
         level.addFreshEntity(entity);
         ItemStack bonus = bonusProvider.bonusFor(furnaceItemStack);
-        if (bonus != null && !bonus.isEmpty()) {
+        // The registry entry only carries the identity of the bonus; the amount
+        // is decided by the bellows rolls below (oracle TileArcaneFurnace.java:237-259).
+        if (bonus != null) {
             int count = 0;
             int rolls = LegacyTileRules.bonusRolls(bellows);
             float chance = LegacyTileRules.bonusChance(bellows);
             RandomSource random = level.random;
             for (int roll = 0; roll < rolls; roll++) if (random.nextFloat() < chance) ++count;
             if (count > 0) {
-                ItemStack bonusStack = bonus.copy();
-                bonusStack.setCount(count);
+                // Build the paid stack from the item, so a registry entry without
+                // an amount can never turn into the shared empty stack.
+                ItemStack bonusStack = new ItemStack(bonus.getItem(), count);
                 mx = LegacyTileRules.ejectMomentum(facingX);
                 mz = LegacyTileRules.ejectMomentum(facingZ);
                 ItemEntity bonusEntity = new ItemEntity(level, worldPosition.getX() + lx, worldPosition.getY() + .4F, worldPosition.getZ() + lz, bonusStack);

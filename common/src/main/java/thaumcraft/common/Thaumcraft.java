@@ -220,10 +220,17 @@ public final class Thaumcraft {
             ObjectAspectCatalog.validateAgainstRegistries();
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);
+            // The original smelting bonus catalogue is bound to the data pack
+            // tags of the level (oracle ConfigRecipes:493-510).
+            thaumcraft.api.ThaumcraftApi.reloadOriginalSmeltingBonuses();
             // The public recipe API answers from the recipe manager of the loaded world.
             thaumcraft.api.ThaumcraftApi.installRecipeManager(server.getRecipeManager(), server.registryAccess());
         });
         thaumcraft.common.lib.utils.OriginalOreTags.register();
+        // The original arcane furnace asks the api for the smelting bonus of the
+        // item it ejects (oracle thaumcraft/common/tiles/TileArcaneFurnace.java:237-259).
+        thaumcraft.common.tiles.TileArcaneFurnace.setSmeltingBonus(thaumcraft.api.ThaumcraftApi::getSmeltingBonus);
+        thaumcraft.common.lib.crafting.SmeltingBonusCatalog.load();
         thaumcraft.api.ThaumcraftApi.refreshPortableHoleBlackList();
         thaumcraft.api.aspects.AspectRegistryEvent.post();
         ThaumcraftCommands.register();

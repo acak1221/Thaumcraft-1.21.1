@@ -901,6 +901,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    public void theOriginalSmeltingBonusesAreRegistered(GameTestHelper test) {
+        thaumcraft.common.testing.SmeltingBonusRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
     public void pickaxeOfTheCoreBurnsWearsAndFindsClusters(GameTestHelper test) {
         thaumcraft.common.testing.ElementalPickaxeRuntimeChecks.run(test);
     }

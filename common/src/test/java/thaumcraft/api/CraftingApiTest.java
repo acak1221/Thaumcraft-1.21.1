@@ -107,6 +107,11 @@ class CraftingApiTest {
         ItemStack bonus = ThaumcraftApi.getSmeltingBonus(new ItemStack(Items.RAW_IRON));
         assertNotNull(bonus);
         assertEquals(Items.IRON_INGOT, bonus.getItem());
+        // The original stores the amount zero (oracle thaumcraft/api/ThaumcraftApi.java:80-82),
+        // because the arcane furnace decides the amount with its own bellows rolls
+        // (oracle TileArcaneFurnace.java:237-259). 1.21.1 cannot hold an amount-zero
+        // stack: ItemStack.copy() of it returns the shared ItemStack.EMPTY, so the
+        // native registry keeps the amount the addon registered.
         assertEquals(2, bonus.getCount());
     }
 }

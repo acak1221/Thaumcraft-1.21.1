@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "comment": "The original TC4 4.2.3.5 smelting bonus catalogue, oracle thaumcraft/common/config/ConfigRecipes.java:493-510. The arcane furnace pays this extra output when it ejects a smelted item (oracle thaumcraft/common/tiles/TileArcaneFurnace.java:237-259). Every entry names the original registration it replaces.",
+  "bonus": [
+    {"source_line": 493, "ore": "oreGold", "output": "minecraft:gold_nugget", "original": "addSmeltingBonus(\"oreGold\", new ItemStack(Items.gold_nugget, 0, 0))"},
+    {"source_line": 494, "ore": "oreIron", "output": "minecraft:iron_nugget", "original": "addSmeltingBonus(\"oreIron\", new ItemStack(ConfigItems.itemNugget, 0, 0))"},
+    {"source_line": 495, "ore": "oreCinnabar", "output": "thaumcraft:quicksilver_drop", "original": "addSmeltingBonus(\"oreCinnabar\", new ItemStack(ConfigItems.itemNugget, 0, 5))"},
+    {"source_line": 496, "ore": "oreCopper", "output": "thaumcraft:copper_nugget", "original": "addSmeltingBonus(\"oreCopper\", new ItemStack(ConfigItems.itemNugget, 0, 1))"},
+    {"source_line": 500, "item": "thaumcraft:cluster_gold", "output": "minecraft:gold_nugget", "original": "addSmeltingBonus(new ItemStack(ConfigItems.itemNugget, 1, 31), new ItemStack(Items.gold_nugget, 0, 0))"},
+    {"source_line": 501, "item": "thaumcraft:cluster_iron", "output": "minecraft:iron_nugget", "original": "addSmeltingBonus(new ItemStack(ConfigItems.itemNugget, 1, 16), new ItemStack(ConfigItems.itemNugget, 0, 0))"},
+    {"source_line": 502, "item": "thaumcraft:cluster_cinnabar", "output": "thaumcraft:quicksilver_drop", "original": "addSmeltingBonus(new ItemStack(ConfigItems.itemNugget, 1, 21), new ItemStack(ConfigItems.itemNugget, 0, 5))"},
+    {"source_line": 503, "item": "thaumcraft:cluster_copper", "output": "thaumcraft:copper_nugget", "original": "addSmeltingBonus(new ItemStack(ConfigItems.itemNugget, 1, 17), new ItemStack(ConfigItems.itemNugget, 0, 1))"},
+    {"source_line": 507, "item": "minecraft:chicken", "output": "thaumcraft:nugget_chicken", "original": "addSmeltingBonus(new ItemStack(Items.chicken), new ItemStack(ConfigItems.itemNuggetChicken))"},
+    {"source_line": 508, "item": "minecraft:beef", "output": "thaumcraft:nugget_beef", "original": "addSmeltingBonus(new ItemStack(Items.beef), new ItemStack(ConfigItems.itemNuggetBeef))"},
+    {"source_line": 509, "item": "minecraft:porkchop", "output": "thaumcraft:nugget_pork", "original": "addSmeltingBonus(new ItemStack(Items.porkchop), new ItemStack(ConfigItems.itemNuggetPork))"},
+    {"source_line": 510, "item_tag": "thaumcraft:original_raw_fish", "output": "thaumcraft:nugget_fish", "original": "addSmeltingBonus(new ItemStack(Items.fish, 1, Short.MAX_VALUE), new ItemStack(ConfigItems.itemNuggetFish))"}
+  ],
+  "skipped": [
+    {"source_line": 497, "ore": "oreTin", "reason": "1.21.1 has no tin at all, so the original entry needs a third-party tin mod and can never fire"},
+    {"source_line": 498, "ore": "oreSilver", "reason": "1.21.1 has no silver at all, so the original entry needs a third-party silver mod and can never fire"},
+    {"source_line": 499, "ore": "oreLead", "reason": "1.21.1 has no lead at all, so the original entry needs a third-party lead mod and can never fire"},
+    {"source_line": 504, "item": "thaumcraft:cluster_tin", "reason": "the original tin cluster needs a third-party tin mod"},
+    {"source_line": 505, "item": "thaumcraft:cluster_silver", "reason": "the original silver cluster needs a third-party silver mod"},
+    {"source_line": 506, "item": "thaumcraft:cluster_lead", "reason": "the original lead cluster needs a third-party lead mod"}
+  ]
+}

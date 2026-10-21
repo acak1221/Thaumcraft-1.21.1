@@ -79,27 +79,105 @@ public final class ThaumcraftApi {
     private static final Map<Object, ItemStack> smeltingBonus = new HashMap<>();
     private static final Map<Object, Integer> warpMap = new HashMap<>();
     private static final Map<List<?>, Object[]> keyCache = new HashMap<>();
+    private static boolean originalSmeltingBonusesLoaded;
     private ThaumcraftApi() {}
 
     // ------------------------------------------------------------------ smelting bonus
 
-    /** Original bonus registry: the exact input identity pays the extra output. */
+    /**
+     * Original bonus registry: the exact input identity pays the extra output.
+     *
+     * <p>Forced 1.21.1 change: the original stores {@code new ItemStack(out.getItem(), 0, out.getItemDamage())}
+     * (oracle {@code thaumcraft/api/ThaumcraftApi.java:80-82}), so the registry amount is always zero: the
+     * arcane furnace decides how many units it pays with its own bellows rolls (oracle
+     * {@code thaumcraft/common/tiles/TileArcaneFurnace.java:237-259}). 1.21.1 cannot hold an amount-zero
+     * stack as a real stack, because {@code ItemStack.copy()} of an amount-zero stack returns the shared
+     * {@code ItemStack.EMPTY} and the entry would lose its item. The native registry therefore keeps the
+     * amount the addon registered; the furnace still ignores it and pays its own amount.</p>
+     */
     public static void addSmeltingBonus(ItemStack in, ItemStack out) {
         if (in == null || in.isEmpty() || out == null || out.isEmpty()) return;
         smeltingBonus.put(List.of(in.getItem(), in.getDamageValue()), out.copy());
     }
 
-    /** Original ore-name shortcut. 1.21.1 has no ore dictionary, so the name is a native item tag path. */
+    /**
+     * Original ore-name shortcut. 1.21.1 has no ore dictionary, so the name is an original ore name that
+     * {@link thaumcraft.common.lib.utils.OriginalOreTags#firstOreName(ItemStack)} resolves through the
+     * native item tags of the original ore names.
+     */
     public static void addSmeltingBonus(String in, ItemStack out) {
         if (in == null || out == null || out.isEmpty()) return;
         smeltingBonus.put(in, out.copy());
     }
 
+    /**
+     * The original lookup: the exact (item, damage) entry, then the wildcard (item, 32767) entry, then the
+     * entry of the FIRST original ore name the input belongs to (oracle
+     * {@code thaumcraft/api/ThaumcraftApi.java:88-99}).
+     *
+     * <p>The original registrations of the catalogue {@code ConfigRecipes:493-510} live in the same
+     * registry, so they are folded into it before the first answer.</p>
+     */
     public static ItemStack getSmeltingBonus(ItemStack in) {
         if (in == null || in.isEmpty()) return null;
+        loadOriginalSmeltingBonuses();
         ItemStack out = smeltingBonus.get(List.of(in.getItem(), in.getDamageValue()));
         if (out == null) out = smeltingBonus.get(List.of(in.getItem(), Short.MAX_VALUE));
+        if (out == null) {
+            String ore = thaumcraft.common.lib.utils.OriginalOreTags.firstOreName(in);
+            if (ore != null) out = smeltingBonus.get(ore);
+        }
         return out == null ? null : out.copy();
+    }
+
+    /**
+     * Folds the original catalogue of {@code ConfigRecipes:493-510} into the registry.
+     *
+     * <p>Forced 1.21.1 change: the original registered its entries during the mod construction, when the
+     * item registry already held the items. The native port parses the bundled corpus during the
+     * bootstrap and resolves the items on the first lookup, so the registry stays one map and keeps the
+     * original precedence: an exact entry wins over an ore-name entry. An addon entry that is already
+     * registered is never overwritten.</p>
+     */
+    private static void loadOriginalSmeltingBonuses() {
+        if (originalSmeltingBonusesLoaded) return;
+        synchronized (ThaumcraftApi.class) {
+            if (originalSmeltingBonusesLoaded) return;
+            originalSmeltingBonusesLoaded = true;
+            foldOriginalSmeltingBonuses();
+        }
+    }
+
+    /**
+     * Resolves the original catalogue again.
+     *
+     * <p>The tag based entries need the data pack tags of the level, which are bound after the data packs
+     * are loaded. The server start hook calls this so the raw fish entries exist even when something asked
+     * for a bonus before the tags were bound.</p>
+     */
+    public static void reloadOriginalSmeltingBonuses() {
+        synchronized (ThaumcraftApi.class) {
+            originalSmeltingBonusesLoaded = false;
+            foldOriginalSmeltingBonuses();
+            originalSmeltingBonusesLoaded = true;
+        }
+    }
+
+    private static void foldOriginalSmeltingBonuses() {
+        for (thaumcraft.common.lib.crafting.SmeltingBonusCatalog.Entry entry
+                : thaumcraft.common.lib.crafting.SmeltingBonusCatalog.entries()) {
+            Item item = thaumcraft.common.lib.crafting.SmeltingBonusCatalog.resolve(entry.output());
+            if (item == null) continue;
+            ItemStack out = new ItemStack(item);
+            if (entry.isOre()) {
+                if (!smeltingBonus.containsKey(entry.ore())) smeltingBonus.put(entry.ore(), out.copy());
+                continue;
+            }
+            for (ItemStack input : thaumcraft.common.lib.crafting.SmeltingBonusCatalog.inputs(entry)) {
+                Object key = List.of(input.getItem(), input.getDamageValue());
+                if (!smeltingBonus.containsKey(key)) smeltingBonus.put(key, out.copy());
+            }
+        }
     }
 
     // ------------------------------------------------------------------ crafting recipes

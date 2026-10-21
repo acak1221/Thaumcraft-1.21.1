@@ -619,3 +619,42 @@ block, and with *all* four and two.
 
 All twenty two of the client fx tests of this branch pass with the plain JUnit platform launcher. The
 leader still has to run the Gradle suite of the whole repository; this agent may not start a daemon.
+
+## 8.11 The two original bodies of the floaty line, and the state of the leader's tree
+
+The cultist does **not** use the body of the library: it has its own copy of the helper (oracle
+`thaumcraft/client/renderers/entity/RenderCultist.java:83-163`):
+
+| | the library body (`UtilsFX.java:733-817`) | the body of the cultist (`RenderCultist.java:83-163`) |
+|---|---|---|
+| the blend | `(770, 1)`, additive | `(770, 771)`, the ordinary alpha blend |
+| the depth write | `glDepthMask(false)` | the depth write stays on |
+| the vertex alpha | the fade `f3` of every step | the constant `0.8f` |
+| the width | `0.15f` (the callers) | `0.25f` |
+| the speed | `-0.02f` (the callers) | `-0.03f` |
+
+`common/src/main/java/thaumcraft/client/fx/FloatyLine.java:49-60` keeps the two bodies apart in the
+`Flavour` enum, and the two callers use the right one.
+
+**The state of the leader's tree when this session ended.** The leader merged this branch up to
+`6946f45f` (which already carries the compile fix of the previous session, `9789f92e`), and the
+leader's `work` tree now compiles with **zero** errors against the project classpath. The leader has
+also fixed the enchantment holder of `AspectBonusParityTest` on their own (with a stand alone
+`Holder.Reference`), and this branch now carries that version, so that file does not conflict.
+
+The merge of this branch into `work` has **two conflicts**:
+
+1. `common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java` — the leader's tree
+   already has an inline implementation of the two ribbons of the ritualist cleric (it is faithful:
+   the two ribbons, the width `0.25f`, the speed `-0.03f`, the quality sixteen, the constant alpha
+   `0.8f` and the ordinary alpha blend). This branch keeps the same file but routes the line through
+   the shared helper, so that the cultist and the wand pedestal share one implementation.
+   **Resolution: take the version of this branch.**
+2. `common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:119` — the leader's tree uses
+   `getNearestPlayer(x, y, z, 6.0D, false)` and this branch uses `true`. The fifth argument of the
+   1.21.1 method is `excludeCreativePlayers`: with `true` the search uses
+   `EntitySelector.NO_CREATIVE_OR_SPECTATOR` and with `false` it uses `NO_SPECTORS`. The original
+   (oracle `thaumcraft/common/tiles/TileJarBrain.java:69`) calls the 1.7.10
+   `world.getClosestPlayer(x, y, z, 6.0)`, which is the 1.7.10 search that **skips the creative
+   players and the spectators**, so the faithful value is `true`.
+   **Resolution: take the version of this branch (`true`).**

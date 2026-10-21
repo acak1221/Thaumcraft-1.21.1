@@ -1,6 +1,7 @@
 package thaumcraft.common.lib.utils;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
@@ -23,10 +24,11 @@ public final class ChestLootPoolRules {
      * @return the first pool, or null when the table has no pools at all
      */
     public static JsonObject firstPool(JsonObject encoded) {
-        if (encoded == null || !encoded.has("pools")) return null;
-        JsonArray pools = encoded.getAsJsonArray("pools");
-        if (pools == null || pools.isEmpty()) return null;
-        if (!pools.get(0).isJsonObject()) return null;
-        return pools.get(0).getAsJsonObject();
+        if (encoded == null) return null;
+        JsonElement pools = encoded.get("pools");
+        if (pools == null || !pools.isJsonArray()) return null;
+        JsonArray array = pools.getAsJsonArray();
+        if (array.isEmpty() || !array.get(0).isJsonObject()) return null;
+        return array.get(0).getAsJsonObject();
     }
 }

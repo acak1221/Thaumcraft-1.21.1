@@ -8846,16 +8846,22 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:1-91 renders the eldritch block with the tile field helper",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchRenderer.java:1-120 renders the eldritch block entity",
-          "native common/src/main/resources/assets/thaumcraft/blockstates/eldritch.json:2-17 variant 0..3"
+          "native common/src/main/resources/assets/thaumcraft/blockstates/eldritch.json:2-17 variant 0..3",
+          "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:35-81 draws the metadata four, five, six, seven, eight, nine and ten and nothing else; the metadata zero, one, two and three are drawn by the block entity renderers of the altar, the obelisk and the capstone only",
+          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch.json, eldritch_1.json, eldritch_2.json and eldritch_3.json: the four stones of the group have no element, so the port no longer draws a cube of the obsidian tile where the original draws nothing",
+          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 and eldritch_crust_5.json:1-30 the two to fourteen sixteenths cube of the original BlockEldritchRenderer:22-32 and :46-63 with the es_i_1 and the es_i_2 sheet",
+          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_deco.json, eldritch_doorway.json, eldritch_doorway_8.json, eldritch_spawner.json and eldritch_spawner_10_0.json the deco_1, deco_3, deco_2, crust and es_5 sheets of the original BlockEldritch:93"
         ],
         "notes": [
           "1.21.1 has no per-block renderer; the original class became the tile entity renderer of the eldritch block entity.",
-          "Not verified pixel by pixel: the client visual result of the 1.7 icon table was not compared against the native baked models."
+          "Not verified pixel by pixel: the client visual result of the 1.7 icon table was not compared against the native baked models.",
+          "The four stones that the original renderer never draws are now drawn by their block entity renderer alone, like in 1.7.10.",
+          "The remaining difference of the neighbour dependent bounds of the crust is owned by the unit of the EldritchCrustBakedModel."
         ],
         "reviewed_sha256": {
           "original": "be4c1ddc08be29de626167615daac247431624c9b42aaa1a80ae00cfb7bedf5c"
@@ -9530,10 +9536,15 @@
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:1-80 1.12 baked model of the glowing crust",
           "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:1-60 1.21 baked model of the crust",
-          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the 2..14 cube of the original es_i_1 crust"
+          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the 2..14 cube of the original es_i_1 crust",
+          "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:46-63 the crust is inset by two sixteenths on every side without an eldritch neighbour",
+          "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:37-44 the same rule as a pure helper, checked by the test eldritchCrustInsetsOnlyTheExposedSides",
+          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the cube of the isolated crust, from two to fourteen sixteenths"
         ],
         "notes": [
-          "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 baked model that reproduces the original inset cube of the glowing crust."
+          "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 baked model that reproduces the original inset cube of the glowing crust.",
+          "The isolated crust is the two to fourteen sixteenths cube of the original and the helper computes the bounds of the joined crust as well.",
+          "Blocker: a 1.21.1 baked model has no access to the world, so the cube of the crust cannot be merged with the cube of a solid neighbour; the port keeps the isolated cube of the original."
         ],
         "reviewed_sha256": {
           "legacy": "d6d838f41b40546552b7b61b1b5f16bd606cfc1a5a4176769a9831815729fcac"
@@ -9807,11 +9818,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderCultist.java:1-165 the cultist render model",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:1-120 the native cultist render model"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:1-120 the native cultist render model",
+          "oracle thaumcraft/client/renderers/entity/RenderCultist.java:83-163 the link line of the ritualist cleric is a scrolling ribbon of the wispy.png sheet that is drawn twice, once widened in y and once widened in x",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java the two ribbons with the wave of the world lattice, the scroll speed of -0.03, the half width of 0.25 and the colour 0x110011 with the alpha of 0.8",
+          "oracle thaumcraft/client/renderers/entity/RenderCultist.java:69 the random phase of the float is seeded from the entity id (MCP func_145782_y) and native RenderCultist.java:71 from the entity id as well",
+          "oracle thaumcraft/client/renderers/entity/RenderCultist.java:77 the line starts at the eye height of the cleric and native RenderCultist.java:132 at the eye height as well"
         ],
         "notes": [
           "1.21.1 entity renderers are built on the entity model system; the numbers of the model were not compared in detail in this audit."
@@ -9858,10 +9873,14 @@
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderCultistPortal.java:1-126 the cultist portal render model",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java:1-110 the native cultist portal render model"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java:1-110 the native cultist portal render model",
+          "oracle thaumcraft/client/renderers/entity/RenderCultistPortal.java:97-110 the quad of the portal is built from the camera vectors of the 1.7.10 ActiveRenderInfo, so its size depends on the camera",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java:56-65 the same camera facing quad with the same frame, the same scale and the same alpha of the original"
         ],
         "notes": [
-          "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit."
+          "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit.",
+          "The frame of the sixteen sheet, the scale of the age, the wobble of the damage, the fade with the health and the camera facing of the quad are kept.",
+          "Blocker: the camera vectors of the 1.7.10 ActiveRenderInfo (rotationX, rotationZ, rotationXY, rotationXZ and rotationYZ) have no equivalent in 1.21.1, so the size of the quad of the original cannot be reproduced; the port draws a quad of one block that always faces the camera."
         ],
         "reviewed_sha256": {
           "original": "ab525da687cc5425126ea27c7ddf7835d64a3e1a7a903e6a871ec6ff37e1d75d",
@@ -9952,14 +9971,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderEldritchCrab.java:1-72 the crab render model",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchCrab.java:1-60 the native crab render model"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchCrab.java:1-60 the native crab render model",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchCrab.java:33 the crab sheet and the overlay sheet, and :48-66 the second pass with the alpha blending",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchCrab.java:35-40 the second pass over the craboverlay.png sheet with the translucent render type"
         ],
         "notes": [
-          "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit."
+          "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit.",
+          "The light map of the original is the fixed value 200 of the 256 wide light map of 1.7.10; the closest cell of the 1.21.1 light map is the full bright one that the port uses."
         ],
         "reviewed_sha256": {
           "original": "4d98eb1d9e2db58f9c44d0f714a0660a890241e9d2a54f7cf3bd7453d708d9d8",
@@ -9999,11 +10021,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderEldritchGolem.java:1-67 the golem render model",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGolem.java:1-60 the native golem render model"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGolem.java:1-60 the native golem render model",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGolem.java:57 the mesh of the golem is drawn at the position of the entity, the offset of the original is the yOffset of the entity and not its height",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGolem.java:29-30 the scale of 2.15 of the original and the alpha blending of the body",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGolem.java:59 the scale of 2.15 and native RenderEldritchGolem.java:30 the same scale"
         ],
         "notes": [
           "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit."
@@ -10046,11 +10071,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:1-85 the guardian render model",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:1-70 the native guardian render model"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:1-70 the native guardian render model",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:68 the mesh of the guardian is drawn at the position of the entity, the offset of the original is the yOffset of the entity and not its height",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:18-24 the same fade of the guardian with the distance to the player and the difficulty",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:70-80 the fade of the guardian with the distance to the player and the difficulty and native RenderEldritchGuardian.java:18-24 the same rule"
         ],
         "notes": [
           "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit."
@@ -10093,11 +10121,13 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderEldritchOrb.java:1-118 the eldritch orb render model",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchOrb.java:1-90 the native orb render model"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchOrb.java:1-90 the native orb render model",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchOrb.java the twelve seeded fans with the growth of the age and the billboard of the particle sheet",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchOrb.java:25-41 the same twelve fans, the same growth of the age and the same end colour 0xEECCFF of the original BlockCustomOreItem:17"
         ],
         "notes": [
           "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit."
@@ -10135,11 +10165,15 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:1-60 1.12 warden render model",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:1-60 the native warden render model"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:1-60 the native warden render model",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:60-79 the warden is the guardian mesh with the warden sheet, the scale of 1.5 and the lift out of the floor while it spawns, the height of the entity times the share of the spawn timer",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:55-61 the same lift of the original",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:467-479 the warden alone draws its hood eye a hundredth larger and with the light of the original",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:78-90 the same hood eye with the full bright light"
         ],
         "notes": [
           "Legacy-only helper (the 4.2.3.5 oracle has no warden renderer); the native keeps a 1.21 version of it."
@@ -13695,11 +13729,13 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelEldritchCap.java:1-60 1.12 model of the eldritch cap",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCap.java:1-60 the native model of the eldritch cap"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCap.java:1-60 the native model of the eldritch cap",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:42 and :50 the cap is the Cap group of the wavefront file thaumcraft/textures/models/obelisk_cap.obj",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCap.java:13-110 the twenty vertices, the eighteen texture coordinates, the twelve normals and the twenty triangles of the Cap group of the original file, read from the same file"
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 version of the model."
@@ -13736,11 +13772,13 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 1.12 model of the eldritch crystal",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 the native model of the eldritch crystal"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 the native model of the eldritch crystal",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:27 and :37 the crystal is the Crystal and the Base group of the wavefront file thaumcraft/textures/models/vcrystal.obj",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java the one hundred and four vertices, the twenty texture coordinates, the one hundred and eighty normals and the one hundred and eighty triangles of the two groups of the original file, read from the same file"
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 version of the model."
@@ -14698,11 +14736,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java:1-189 the crab model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java:1-150 the native crab model"
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java:1-150 the native crab model",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java:42-117 the twenty-one parts of the crab with their texture offsets, their boxes and their rotation points",
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java:52-99 the same twenty-one parts with the same values",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java:163-164 and :181-182 the legs and the tail of the crab swing with MathHelper.cos (MCP func_76134_b)",
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java the same cosine, checked by the test theCrabSwingsItsLegsWithTheOriginalCosine"
         ],
         "notes": [
           "1.21.1 model system change; the model was not compared part by part in this audit."
@@ -14745,11 +14787,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java:1-338 the golem model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java:1-300 the native golem model"
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java:1-300 the native golem model",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java:47-253 the thirty-six parts of the golem with their texture offsets, their boxes and their rotation points",
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java:65-141 the same thirty-six parts with the same values",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java:259-260, :312-313 and :323-324 the arms, the legs and the cloth of the golem swing with MathHelper.cos (MCP func_76134_b)",
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java the same cosine, checked by the test theGolemSwingsWithTheOriginalCosine",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java:230-253 the mirror flag of the torso, of the three left waist pieces, of the left back panel and of the left leg comes after the box, where the 1.7.10 ModelBox has already read it, so those six boxes are not mirrored in the original"
         ],
         "notes": [
           "1.21.1 model system change; the model was not compared part by part in this audit."
@@ -14792,11 +14839,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:1-519 the guardian model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:1-450 the native guardian model"
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:1-450 the native guardian model",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:47-419 the fifty-four parts of the guardian with their texture offsets, their boxes and their rotation points",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchGuardian.java:76-130 the same fifty-four parts with the same values",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:220-222 the mirror flag of the left shoulder plate comes before its box, so the original really mirrors that box",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchGuardian.java:99 the same mirror, checked by the test theGuardianMirrorsOnlyTheLeftShoulderPlate",
+          "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:484-510 the hood, the arms, the leg panels, the cloak and the side panels of the guardian move with the original sine",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchGuardian.java:132-147 the same sine with the same periods of ten, eight and seven ticks"
         ],
         "notes": [
           "1.21.1 model system change; the model was not compared part by part in this audit."
@@ -16649,11 +16702,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:1-101 the cap renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:1-80 the native cap renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:1-80 the native cap renderer",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:57-74 the cap is drawn in the middle of the block and turned by ninety degrees, with the second sheet in the Outer Lands",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:47-60 the same translation, the same turn and the same second sheet",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:75-97 the eyes of the altar stand on a circle of the radius 0.46 and the height 0.2 with a quarter turn each and a tilt of eighteen degrees",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java:66-88 the same circle, the same height, the same quarter turns and the same tilt"
         ],
         "notes": [
           "1.21.1 renderer change; the geometry was not compared part by part in this audit."
@@ -16751,10 +16808,14 @@
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:1-82 the crystal renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:1-70 the native crystal renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:1-70 the native crystal renderer",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:37-52 the crystal stands in the middle of the block, turns with the orientation of the crystal and by a quarter turn per position, the base uses the crust sheet and the crystal the vcrystal sheet with the alpha of 0.7",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:48-56 the same translation, the same turns, the same sheets and the same alpha"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit."
+          "1.21.1 renderer change; the geometry was not compared part by part in this audit.",
+          "The geometry, the sheets and the alpha of the crystal are kept.",
+          "Blocker: the original overwrites the global light map with the value 210 times the shade of the pulse (TileEldritchCrystalRenderer:48-52); the light map of 1.21.1 holds sixteen steps, so the pulse of the crystal cannot be reproduced and the crystal keeps the light of its block."
         ],
         "reviewed_sha256": {
           "original": "5a5c3471f2debbcd1b0768cda4aa4db3bffd76c51df88e8b77624c0e229e9229",
@@ -16794,11 +16855,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java:1-536 the lock renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java:1-450 the native lock renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java:1-450 the native lock renderer",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java:57-83 four rings of cubes around the axis of the facing, one cube less for every five ticks of the countdown, the wobble of a tenth and the scale of the cube",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java:48-72 the same four rings, the same countdown, the same wobble and the same scale",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java:85-120 the runed tablet in front of a lock that is not counting down and the tunnel of the face the lock points at",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java:74-106 the same tablet and the same tunnel"
         ],
         "notes": [
           "1.21.1 renderer change; the geometry was not compared part by part in this audit."
@@ -16841,14 +16906,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:1-649 the eldritch nothing field renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:1-520 the native field renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:1-520 the native field renderer",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:60-80 the tunnel is drawn on every face of the filler that touches a solid block",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:40-56 the same faces with the same rule",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelTunnelField.java the sixteen layers of the tunnel with the tunnel, the particle field and the particle field far sheet of the original and with the seed 31100, checked by the test tunnelFieldKeepsTheOriginalLayers"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit."
+          "1.21.1 renderer change; the geometry was not compared part by part in this audit.",
+          "The fixed function tunnel of 1.7.10 is replaced by the native model of the tunnel with the same sixteen layers, the same sheets and the same seed."
         ],
         "reviewed_sha256": {
           "original": "fbcce554fde59da87e23df98e8bbe54fd106eceaa606c65864b14a6ed94720be",
@@ -16888,14 +16957,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:1-529 the obelisk renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:1-450 the native obelisk renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:1-450 the native obelisk renderer",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:56-111 the obelisk draws four glass walls of three blocks around the tower, two octagonal plates and the tunnel of the four planes, with a bob of a tenth of the count of the player",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:46-103 the same four walls, the same two plates, the same four tunnel planes and the same bob",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:48 and :81 the second sheet of the Outer Lands",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:53-55 the same second sheet"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit."
+          "1.21.1 renderer change; the geometry was not compared part by part in this audit.",
+          "The fixed function tunnel of 1.7.10 is replaced by the native model of the tunnel with the same sixteen layers, the same sheets and the same seed."
         ],
         "reviewed_sha256": {
           "original": "6c2d99734bebff268ed410d31c30ef4bb797e936200369f5dcca390bbfbcb97c",
@@ -16935,11 +17009,13 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:1-92 the portal renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:1-80 the native portal renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:1-80 the native portal renderer",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:63-104 the gate is a camera facing quad of the sixteen frame sheet, the height follows the opening counter up to thirty and the width up to five, and the colour is magenta",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:37-71 the same quad, the same frame, the same counters and the same colour"
         ],
         "notes": [
           "1.21.1 renderer change; the geometry was not compared part by part in this audit."
@@ -32450,14 +32526,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/entities/monster/boss/EntityCultistPortalGreater.java 1.12 greater cultist portal",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultistPortalGreater.java the native greater cultist portal"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultistPortalGreater.java the native greater cultist portal",
+          "legacy src/main/java/thaumcraft/common/entities/monster/boss/EntityCultistPortalGreater.java the 1.12 greater cultist portal",
+          "native common/src/main/java/thaumcraft/common/entities/EntityCultistPortalGreater.java the same greater portal of the flat entity package"
         ],
         "notes": [
-          "Legacy-only helper (no oracle counterpart); the native keeps the entity in the flat entity package."
+          "Legacy-only helper (no oracle counterpart); the native keeps the entity in the flat entity package.",
+          "The 4.2.3.5 oracle has no greater cultist portal: the unit is a legacy helper that the native port keeps."
         ],
         "reviewed_sha256": {
           "legacy": "3844c5c1d4911479a09bbf60d36d72a7509f9d7dd9b0bc6ea33e794c6c76d980"
@@ -44317,7 +44396,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenEldritchRing.java:35-62 the six valid ground blocks and the five spawn samples",
@@ -44325,13 +44404,17 @@
           "oracle thaumcraft/common/lib/world/WorldGenEldritchRing.java:84-142 the altar, the four banners, the obelisk and the cap stones",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:94-114 the same ground blocks and samples",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:141-164 the five floor layers and the four cleared layers",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:175-196 the altar, the banners and the obelisk"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:175-196 the altar, the banners and the obelisk",
+          "oracle thaumcraft/common/lib/world/WorldGenEldritchRing.java:69-142 the ring of seven by seven, the altar, the four banners, the obelisk and the cap stones",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:78-88 the dark aura node above the altar and the labyrinth seed that the original draws after the node",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:185-200 the altar of the ring with the four banners"
         ],
         "notes": [
           "The ring itself is faithful: the radius 3, the five floor layers, the four cleared layers, the one in four empty floor block, the altar roll 1..4/6..7, the four banners with the original facing values 8/0/12/4 and the one base plus four shaft obelisk.",
           "The original also creates an eerie aura node above the altar (oracle ThaumcraftWorldGenerator:446); the native ring does not create it.",
           "The original draws the labyrinth seed after the node creation, so its seed value differs from the native one.",
-          "The centre of the ring is clamped into the chunk instead of being drawn uniformly over the sixteen block chunk."
+          "The centre of the ring is clamped into the chunk instead of being drawn uniformly over the sixteen block chunk.",
+          "The centre of the ring is clamped into the chunk that is generated, because the generation of 1.21.1 writes into one chunk at a time; the original draws the ring over the whole sixteen block chunk."
         ],
         "reviewed_sha256": {
           "original": "6d2f520f9a040d46112f256d7def3dd6c8b2a4f83c518706a6bab76a0db152d0",
@@ -44796,16 +44879,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/biomes/BiomeEldritch.java the 1.12 eldritch biome",
           "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java the native eldritch biome rules",
-          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eldritch_lands.json the native biome document"
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eldritch_lands.json the native biome document",
+          "oracle thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:36-38 the eldritch biome is the biome of the Outer Lands and it is the only one",
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eldritch_lands.json the biome document of the Outer Lands",
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:73 the biome fog colour of the document is the zero of the rules, so the fog of the dimension is used, like in the original"
         ],
         "notes": [
           "Legacy-only class (no oracle counterpart); the native keeps the eldritch biome as a rules class plus a biome document.",
-          "The biome document writes the fog colour, the grass colour and the foliage colour as zero while the rules of OuterLandsRules keep the original 1.7 defaults."
+          "The biome document writes the fog colour, the grass colour and the foliage colour as zero while the rules of OuterLandsRules keep the original 1.7 defaults.",
+          "The document writes the fog, the grass and the foliage colour as zero, and the rules of OuterLandsRules:66-73 name the same zero: in 1.21.1 a zero biome colour means the default, and the original BiomeGenEldritch only overrode the sky colour."
         ],
         "reviewed_sha256": {
           "legacy": "355d463ed22310f19ada48887fae4c895143dcc95128e514eae24a7f3b062152"
@@ -44875,17 +44962,22 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:27-37 the cleared spawn lists and the two monster rows",
           "oracle thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:40-45 the black sky colour and the empty decoration",
           "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:84 the two monster rows with weight one",
-          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eldritch_lands.json the biome document with the two monster spawners"
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eldritch_lands.json the biome document with the two monster spawners",
+          "oracle thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:10-13 the eldritch biome has exactly two monster rows, the inhabited zombie and the eldritch guardian, both with the weight one and the count one to one, and no other row",
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eldritch_lands.json the two monster rows with the weight one and the count one to one and the four empty lists",
+          "oracle thaumcraft/common/lib/world/biomes/BiomeGenEldritch.java:40-42 the sky of the Outer Lands is black and the biome has no decoration",
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eldritch_lands.json the sky colour zero, the rain off and the decoration of the biome empty"
         ],
         "notes": [
           "The spawn lists, the monster rows, the black sky, the disabled rain and the empty decoration are kept.",
-          "The biome document sets the fog colour, the grass colour and the foliage colour to zero instead of the 1.7 defaults of OuterLandsRules."
+          "The biome document sets the fog colour, the grass colour and the foliage colour to zero instead of the 1.7 defaults of OuterLandsRules.",
+          "The labyrinth of the Outer Lands is drawn by the feature of the biome, because 1.21.1 has no chunk provider that could run the labyrinth of the original."
         ],
         "reviewed_sha256": {
           "original": "ab4b7ab8b67c09f695f9f5720eb0182c71882a09ea2d53595318e1d6021961d9"
@@ -45230,16 +45322,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/ChunkProviderOuter.java:55-76 the empty chunk of the outer lands",
           "oracle thaumcraft/common/lib/world/dim/ChunkProviderOuter.java:82-91 the population that only runs the biome decoration",
-          "native common/src/main/resources/data/thaumcraft/dimension/outer_lands.json the flat generator with one air layer and the eldritch biome"
+          "native common/src/main/resources/data/thaumcraft/dimension/outer_lands.json the flat generator with one air layer and the eldritch biome",
+          "oracle thaumcraft/common/lib/world/dim/ChunkProviderOuter.java:40-53 the chunk of the Outer Lands is empty and carries the one biome of the dimension"
         ],
         "notes": [
           "The void chunk provider became the flat generator of the datapack level stem; the empty chunk and the single biome are reproduced.",
-          "The flat generator also runs the biome features, which is how the maze feature is triggered in the native port."
+          "The flat generator also runs the biome features, which is how the maze feature is triggered in the native port.",
+          "The void chunk provider of 1.7.10 became the flat generator of the level stem of 1.21.1; the empty chunk and the single biome are reproduced.",
+          "The flat generator also runs the features of the biome, and that is how the labyrinth of the Outer Lands is drawn in the native port."
         ],
         "reviewed_sha256": {
           "original": "5775911cfdb360da6be2e89f24603bf9e1abba92154443d5f7ae54e4139baa9a",
@@ -45326,12 +45421,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenBossRoom.java:22 the seven by seven doorway pattern",
           "oracle thaumcraft/common/lib/world/dim/GenBossRoom.java:69-84 the lock, the door and the void door of the doorway",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1039-1072 the native doorway loop"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1039-1072 the native doorway loop",
+          "oracle thaumcraft/common/lib/world/dim/GenBossRoom.java:22 the seven by seven pattern of the doorway and :69-84 the lock, the door and the invisible door",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1082-1088 the lock of the doorway takes the direction of the side of the room it stands on, like the original"
         ],
         "notes": [
           "The doorway pattern and the three block kinds are kept.",
@@ -45375,17 +45472,21 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenCommon.java:34-49 the block id table and the eleven by eleven connection pattern",
           "oracle thaumcraft/common/lib/world/dim/GenCommon.java:279-317 the decoration pass with the urn, the common decoration and the crab spawner",
           "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:39-67 the same block ids and the same connection pattern",
-          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:207-251 the native decoration pass"
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:207-251 the native decoration pass",
+          "oracle thaumcraft/common/lib/world/dim/GenCommon.java:34-49 the block table and the eleven by eleven connection pattern and :279-317 the decoration pass",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:55-67 the same block table and the same connection pattern",
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:207-251 the decoration pass with the urn, the common decoration and the crab spawner"
         ],
         "notes": [
           "The block table, the connection pattern and the decoration pass are ported; the original decoration meta roll 4/5/10 with the 1/12 crystal chance is kept.",
-          "The native splits the decoration pass per chunk while the original keeps a static list, which is forced by the 1.21 chunk local generation."
+          "The native splits the decoration pass per chunk while the original keeps a static list, which is forced by the 1.21 chunk local generation.",
+          "The native splits the decoration pass per chunk, because the generation of 1.21.1 is local to the chunk; the decoration itself is the original one."
         ],
         "reviewed_sha256": {
           "original": "a5262f595966a070b5e1cffeb53e610ea646a2698fe993a36f18f3fd3a11e8c5",
@@ -45432,12 +45533,17 @@
           "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:105-107 the guardian offset (1..3) times (-1..0)",
           "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:111-113 the champion of the first guardian on hard",
           "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:180-192 the guardian count and the champion rule",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:819-825 the native guardian placement"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:819-825 the native guardian placement",
+          "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:102-107 the count of the guardians and the offset of one to three times minus one to one",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:826-832 the same count and the same offset",
+          "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:97-100 the permanent item of the key room carries the metadata two of the eldritch object",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:825 the permanent item with the metadata two"
         ],
         "notes": [
           "The guardian count per difficulty and the champion rule are kept.",
           "The guardian offset of the native is (1..3) times (-1..1); the original never places a guardian more than zero blocks to the positive side, so the native may place it three blocks further away.",
-          "The permanent item of the key room is spawned without the original metadata 2 of the eldritch object and the guardian home is not anchored at the room centre."
+          "The permanent item of the key room is spawned without the original metadata 2 of the eldritch object and the guardian home is not anchored at the room centre.",
+          "Blocker: the original anchors the guardian of the key room at the centre of the room with a radius of sixteen (oracle GenKeyRoom:110) and the native spawn record of the world package carries no home, so the guardian of the port has no AI home. The fix needs a home field in DungeonRooms.Spawn and a restrictTo call in ThaumcraftOuterLands.spawnRoomEntities."
         ],
         "reviewed_sha256": {
           "original": "ee88eb80d4c28a4303718a417e8fdf54199096e2146b79a83cc2a7868c6d164b",
@@ -45477,12 +45583,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenLibraryRoom.java:77-98 the eight desks and the two centre desks",
           "oracle thaumcraft/common/lib/world/dim/GenLibraryRoom.java:86 the slab metadata 9 of the upper desks",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1014-1017 the native desk builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1014-1017 the native desk builder",
+          "oracle thaumcraft/common/lib/world/dim/GenLibraryRoom.java:77-98 the eight desks and the two centre desks with the slab metadata one and nine",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1015-1024 the same desks with the slab metadata one and nine",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:270-275 the metadata nine of the slab becomes the upper half of the native slab"
         ],
         "notes": [
           "The desks keep their positions and their eldritch metadata 5.",
@@ -45526,12 +45635,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenNestRoom.java:113-119 the loot density 0.15, the urn rarity 0.15/0.4 and the crate chance 0.2",
           "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:913-921 the native nest loot",
-          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:199-211 the shared urn rarity and the nest density"
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:199-211 the shared urn rarity and the nest density",
+          "oracle thaumcraft/common/lib/world/dim/GenNestRoom.java:113-119 the loot density of 0.15, the rarity of the urn of 0.15 and 0.4 and the crate chance of 0.2",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:920-929 the same density, the same rarity table and the same crate chance"
         ],
         "notes": [
           "The loot density of 0.15 and the crate chance of 0.2 are kept.",
@@ -45575,12 +45686,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenPassage.java:26-259 the passage, the four connections and the three special features",
           "oracle thaumcraft/common/lib/world/dim/GenPassage.java:54-56 the trapped stone roll that is drawn twice",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:412-567 the native passage"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:412-567 the native passage",
+          "oracle thaumcraft/common/lib/world/dim/GenPassage.java:26-259 the passage, the four connections and the three special features and :54-56 the trapped stone that the floor and the ceiling draw separately",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:412-567 the same passage with the two rolls of the trapped stone"
         ],
         "notes": [
           "The passage shell, the four connections with the depth 4 and the three special features 12, 13 and 14 are ported.",
@@ -45624,11 +45737,13 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenPortal.java:81-89 the air replacement of the portal room",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:697-705 the native air replacement"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:697-705 the native air replacement",
+          "oracle thaumcraft/common/lib/world/dim/GenPortal.java:81-89 the portal room is cleared in all four corners",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:700-712 the same four corners"
         ],
         "notes": [
           "The portal room keeps its thirteen by thirteen by fifteen shell, its stairs and its obelisk.",
@@ -45722,14 +45837,17 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/MazeGenerator.java:329-362 the last pass that marks the dead ends and the special passages",
           "oracle thaumcraft/common/lib/world/dim/MazeGenerator.java:332 the condition that skips a cell without any exit",
           "native common/src/main/java/thaumcraft/common/lib/world/MazeGenerator.java:328-345 the native last pass",
           "harness: the oracle and the native generator were compiled side by side and compared over the sizes 15..29 and forty seeds each (159821 cells): 45347 cells differ and every difference is in the feature byte",
-          "harness: with the oracle condition restored in the native file the two generators are byte identical over the same 159821 cells"
+          "harness: with the oracle condition restored in the native file the two generators are byte identical over the same 159821 cells",
+          "oracle thaumcraft/common/lib/world/dim/MazeGenerator.java:332 the cell without a single exit is skipped without drawing a random number",
+          "native common/src/main/java/thaumcraft/common/lib/world/MazeGenerator.java:334-336 the same short circuit condition",
+          "native common/src/test/java/thaumcraft/world/MazeFidelityTest.java the comparison of the two generators over the eight sizes and the forty seeds, 159821 cells, with zero difference"
         ],
         "notes": [
           "The wall bits of the labyrinth are identical, but the feature markers are not: the native assigns a random room feature to every cell without an exit, the original leaves those cells without a feature.",
@@ -45773,17 +45891,20 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/MazeHandler.java:152-186 the dispatch of the cell feature to the room generators",
           "oracle thaumcraft/common/lib/world/dim/MazeHandler.java:142-150 the mazes in range test",
           "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:129-138 the same dispatch",
-          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:151-158 the same mazes in range test"
+          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:151-158 the same mazes in range test",
+          "oracle thaumcraft/common/lib/world/dim/MazeHandler.java:142-150 the mazes in range and :152-186 the dispatch of the cell feature to the room generators",
+          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:151-158 the same test and the same dispatch"
         ],
         "notes": [
           "The dispatch of the features 1 to 8 and the reservation test are kept.",
-          "The static map and the labyrinth.dat file became the saved data of the overworld, which is the forced 1.21 data format change."
+          "The static map and the labyrinth.dat file became the saved data of the overworld, which is the forced 1.21 data format change.",
+          "The static map and the labyrinth.dat file of the original became the saved data of the overworld, which is the data format of 1.21.1."
         ],
         "reviewed_sha256": {
           "original": "ec1adf2da314f937bce651328b9f06ac98698447fbe223aac55c0ccede44888c",
@@ -45926,7 +46047,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/WorldProviderOuter.java:64-68 the eldritch biome and the dimension id",
@@ -45934,7 +46055,12 @@
           "oracle thaumcraft/common/lib/world/dim/WorldProviderOuter.java:125-127 the average ground level 50",
           "native common/src/main/resources/data/thaumcraft/dimension/outer_lands.json the level stem of the outer lands",
           "native common/src/main/resources/data/thaumcraft/dimension_type/outer_lands.json the dimension type with fixed_time 0, ambient_light 0, has_skylight false and height 256",
-          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:37-58 the ground level 50, the celestial angle 0 and the fog colour"
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:37-58 the ground level 50, the celestial angle 0 and the fog colour",
+          "oracle thaumcraft/common/lib/world/dim/WorldProviderOuter.java:74-97 the fixed celestial angle of zero and the fog colour 0xA080A0 scaled by 0.15, that is 0x181318",
+          "native common/src/main/resources/data/thaumcraft/dimension_type/outer_lands.json the dimension type with the fixed time zero, the ambient light zero and no sky light",
+          "native common/src/main/resources/data/thaumcraft/dimension_effects/outer_lands.json the dimension effects with the fog colour 1577752, that is 0x181318, and no sky",
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:37-50 the ground level fifty and the celestial angle of zero",
+          "native common/src/main/java/thaumcraft/client/OuterLandsDimensionEffects.java:34-42 the client fog of the dimension with the colour of the rules"
         ],
         "notes": [
           "The outer lands is a real 1.21.1 dimension: the datapack level stem creates the level at server start (vanilla MinecraftServer.createLevels iterates the level stem registry) and the portal tile moves the player into it, so it is not only a biome and an unread document.",
@@ -47422,11 +47548,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileEldritchObelisk.java:1-65 the obelisk that slows the eldritch mobs",
-          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java the native obelisk"
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java the native obelisk",
+          "oracle thaumcraft/common/tiles/TileEldritchObelisk.java:47-55 the obelisk buffs every eldritch mob that comes within six blocks with a damage boost and a regeneration of forty ticks, and it skips a mob that still carries a regeneration",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java:32-44 the same range, the same two effects, the same duration and the same guard",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:44-49 the tower of the obelisk is drawn off screen, because 1.21.1 has no render bounding box for a block entity any more",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java:48-54 the same five blocks"
         ],
         "notes": [
           "The slow down of the eldritch mobs has a native game test (eldritch_obelisk_slows_only_the_eldritch_mobs); the numbers were not compared line by line in this audit."
@@ -47469,13 +47599,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileEldritchPortal.java:52-79 the transfer of the player between the dimensions",
           "oracle thaumcraft/common/tiles/TileEldritchPortal.java:30 the open counter",
           "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:94-119 the native transfer",
-          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:161-183 the research that completes on the first visit"
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:161-183 the research that completes on the first visit",
+          "oracle thaumcraft/common/tiles/TileEldritchPortal.java:63-82 the gate scans every five ticks, refuses a player that travels or that rides, refuses a player that is still on its cooldown of a hundred ticks and moves the player between the two dimensions",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:62-84 the same period, the same refusals and the same cooldown",
+          "oracle thaumcraft/common/tiles/TileEldritchPortal.java:75-78 the first visit to the Outer Lands completes the research ENTEROUTER",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:161-185 the same research with the same warp of the original ResearchManager:510-528",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:36-41 the gate is drawn off screen, because 1.21.1 has no render bounding box for a block entity any more",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:200-206 the same cube"
         ],
         "notes": [
           "The scan period, the portal cooldown, the research ENTEROUTER and the transfer are kept.",

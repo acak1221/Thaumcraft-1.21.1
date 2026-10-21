@@ -108,8 +108,8 @@ public final class ModelEldritchCrab extends EntityModel<EntityEldritchCrab> {
         rFLeg0.setRotation(0, -.2094395F, .4363323F);
         lFLeg0.setRotation(0, -.2094395F, -.4363323F);
         lRLeg0.setRotation(0, .2094395F, -.4363323F);
-        float f9 = -(Mth.sin(limb * .6662F * 2F) * .4F) * amount;
-        float f10 = -(Mth.sin(limb * .6662F * 2F + (float) Math.PI) * .4F) * amount;
+        float f9 = legSwing(limb, amount);
+        float f10 = legSwingHalfPhase(limb, amount);
         rRLeg1.yRot += f9;
         rRLeg0.yRot += f9;
         lFLeg1.yRot += -f9;
@@ -126,8 +126,9 @@ public final class ModelEldritchCrab extends EntityModel<EntityEldritchCrab> {
         rFLeg0.zRot += f10;
         lRLeg1.zRot += -f10;
         lRLeg0.zRot += -f10;
-        tailBare.yRot = tailHelm.yRot = Mth.sin(limb * .6662F) * 2F * amount * .125F;
-        tailBare.zRot = tailHelm.zRot = Mth.sin(limb * .6662F) * amount * .125F;
+        // Original ModelEldritchCrab:181-182 - MathHelper.cos (MCP func_76134_b), not sin.
+        tailBare.yRot = tailHelm.yRot = tailSway(limb, amount);
+        tailBare.zRot = tailHelm.zRot = tailSwayTilt(limb, amount);
         float ticks = crab.tickCount;
         rClaw2.xRot = .3141593F - Mth.sin(ticks / 4F) * .25F;
         lClaw2.xRot = .3141593F + Mth.sin(ticks / 4.1F) * .25F;
@@ -140,5 +141,30 @@ public final class ModelEldritchCrab extends EntityModel<EntityEldritchCrab> {
 
     @Override public void renderToBuffer(PoseStack pose, VertexConsumer out, int light, int overlay, int color) {
         root.render(pose, out, light, overlay, color);
+    }
+
+    /**
+     * Original ModelEldritchCrab:163 - the swing of the right legs of the crab.
+     *
+     * <p>The original used {@code MathHelper.cos} (MCP {@code func_76134_b}) and not the
+     * sine: the legs of the crab start at their rest angle when the phase is zero.
+     */
+    public static float legSwing(float limb, float amount) {
+        return -(Mth.cos(limb * .6662F * 2F) * .4F) * amount;
+    }
+
+    /** Original ModelEldritchCrab:164 - the swing of the left legs of the crab. */
+    public static float legSwingHalfPhase(float limb, float amount) {
+        return -(Mth.cos(limb * .6662F * 2F + (float) Math.PI) * .4F) * amount;
+    }
+
+    /** Original ModelEldritchCrab:181 - the sway of the tail of the crab around its axis. */
+    public static float tailSway(float limb, float amount) {
+        return Mth.cos(limb * .6662F) * 2F * amount * .125F;
+    }
+
+    /** Original ModelEldritchCrab:182 - the tilt of the tail of the crab. */
+    public static float tailSwayTilt(float limb, float amount) {
+        return Mth.cos(limb * .6662F) * amount * .125F;
     }
 }

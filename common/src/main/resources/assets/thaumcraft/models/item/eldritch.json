@@ -1,3 +1,7 @@
 {
-  "parent": "thaumcraft:block/eldritch"
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "thaumcraft:blocks/obsidiantile",
+    "particle": "thaumcraft:blocks/obsidiantile"
+  }
 }

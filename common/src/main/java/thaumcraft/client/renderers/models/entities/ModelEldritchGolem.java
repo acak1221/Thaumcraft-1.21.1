@@ -95,7 +95,7 @@ public final class ModelEldritchGolem extends EntityModel<EntityEldritchGolem> {
                 .addBox(-1F, 1.5F, -3.5F, 6, 6, 1), PartPose.offsetAndRotation(-2F, 12F, 0, -.1047198F, 0, 0));
         root.addOrReplaceChild("front_cloth2", CubeListBuilder.create().texOffs(114, 47)
                 .addBox(-1F, 8.5F, -1.5F, 6, 3, 1), PartPose.offsetAndRotation(-2F, 11F, 0, -.3316126F, 0, 0));
-        root.addOrReplaceChild("torso", CubeListBuilder.create().texOffs(34, 45).mirror()
+        root.addOrReplaceChild("torso", CubeListBuilder.create().texOffs(34, 45)
                 .addBox(-5F, 2.5F, -3F, 10, 10, 6), PartPose.offsetAndRotation(0, 0, -2.5F, .1745329F, 0, 0));
         var armR = root.addOrReplaceChild("arm_r", CubeListBuilder.create().texOffs(78, 32)
                 .addBox(-3.5F, 1.5F, -2F, 4, 13, 5), PartPose.offsetAndRotation(-5F, 3F, -2F, 0, 0, .1047198F));
@@ -127,15 +127,15 @@ public final class ModelEldritchGolem extends EntityModel<EntityEldritchGolem> {
                 .addBox(-2F, 2.5F, -2.5F, 2, 3, 5), PartPose.offsetAndRotation(-2F, 12F, 0, 0, 0, .1396263F));
         root.addOrReplaceChild("leg_r", CubeListBuilder.create().texOffs(79, 19)
                 .addBox(-2.5F, 2.5F, -2F, 4, 9, 4), PartPose.offsetAndRotation(-2F, 12.5F, 0, 0, 0, 0));
-        root.addOrReplaceChild("waist_l1", CubeListBuilder.create().texOffs(96, 14).mirror()
+        root.addOrReplaceChild("waist_l1", CubeListBuilder.create().texOffs(96, 14)
                 .addBox(-2F, -.5F, -2.5F, 5, 3, 5), PartPose.offsetAndRotation(2F, 12F, 0, 0, 0, -.1396263F));
-        root.addOrReplaceChild("waist_l2", CubeListBuilder.create().texOffs(116, 13).mirror()
+        root.addOrReplaceChild("waist_l2", CubeListBuilder.create().texOffs(116, 13)
                 .addBox(2F, 2.5F, -2.5F, 1, 4, 5), PartPose.offsetAndRotation(2F, 12F, 0, 0, 0, -.1396263F));
-        root.addOrReplaceChild("waist_l3", CubeListBuilder.create().texOffs(114, 5).mirror()
+        root.addOrReplaceChild("waist_l3", CubeListBuilder.create().texOffs(114, 5)
                 .addBox(0F, 2.5F, -2.5F, 2, 3, 5), PartPose.offsetAndRotation(2F, 12F, 0, 0, 0, -.1396263F));
-        root.addOrReplaceChild("back_panel_l1", CubeListBuilder.create().texOffs(96, 7).mirror()
+        root.addOrReplaceChild("back_panel_l1", CubeListBuilder.create().texOffs(96, 7)
                 .addBox(-2F, 2.5F, -2.5F, 2, 2, 5), PartPose.offsetAndRotation(2F, 12F, 0, 0, 0, -.1396263F));
-        root.addOrReplaceChild("leg_l", CubeListBuilder.create().texOffs(79, 19).mirror()
+        root.addOrReplaceChild("leg_l", CubeListBuilder.create().texOffs(79, 19)
                 .addBox(-1.5F, 2.5F, -2F, 4, 9, 4), PartPose.offsetAndRotation(2F, 12.5F, 0, 0, 0, 0));
         return LayerDefinition.create(mesh, 128, 64);
     }
@@ -146,8 +146,9 @@ public final class ModelEldritchGolem extends EntityModel<EntityEldritchGolem> {
         if (attack > 0) {
             armR.xRot = armL.xRot = -2.0F + 1.5F * triangleWave(attack - partialTick, 10.0F);
         } else {
-            armR.xRot = Mth.sin(limb * .4F + (float) Math.PI) * 2.0F * amount * .5F;
-            armL.xRot = Mth.sin(limb * .4F) * 2.0F * amount * .5F;
+            // Original ModelEldritchGolem:323-324 - MathHelper.cos (MCP func_76134_b), not sin.
+            armR.xRot = armSwingHalfPhase(limb, amount);
+            armL.xRot = armSwing(limb, amount);
         }
     }
 
@@ -162,10 +163,12 @@ public final class ModelEldritchGolem extends EntityModel<EntityEldritchGolem> {
             head2.yRot = yaw / 57.295776F;
             head2.xRot = pitch / 57.295776F;
         }
-        legR.xRot = Mth.sin(limb * .4662F) * 1.4F * amount;
-        legL.xRot = Mth.sin(limb * .4662F + (float) Math.PI) * 1.4F * amount;
-        float a = Mth.sin(limb * .44F) * 1.4F * amount;
-        float b = Mth.sin(limb * .44F + (float) Math.PI) * 1.4F * amount;
+        // Original ModelEldritchGolem:312-313 - MathHelper.cos (MCP func_76134_b), not sin.
+        legR.xRot = legSwing(limb, amount);
+        legL.xRot = legSwingHalfPhase(limb, amount);
+        // Original ModelEldritchGolem:259-260 - MathHelper.cos (MCP func_76134_b), not sin.
+        float a = clothSwing(limb, amount);
+        float b = clothSwingHalfPhase(limb, amount);
         float c = Math.min(a, b);
         frontCloth1.xRot = c - .1047198F;
         frontCloth2.xRot = c - .3316126F;
@@ -180,6 +183,41 @@ public final class ModelEldritchGolem extends EntityModel<EntityEldritchGolem> {
     /** Original doAbs:219-221; a triangle wave, not a cosine swing. */
     private static float triangleWave(float phase, float period) {
         return (Math.abs(phase % period - period * .5F) - period * .25F) / (period * .25F);
+    }
+
+    /**
+     * Original ModelEldritchGolem:324 - the idle swing of the left arm of the golem.
+     *
+     * <p>The original used {@code MathHelper.cos} (MCP {@code func_76134_b}) and not the
+     * sine: the arm of the golem starts at its rest angle when the phase is zero.
+     */
+    public static float armSwing(float limb, float amount) {
+        return Mth.cos(limb * .4F) * 2.0F * amount * .5F;
+    }
+
+    /** Original ModelEldritchGolem:323 - the idle swing of the right arm of the golem. */
+    public static float armSwingHalfPhase(float limb, float amount) {
+        return Mth.cos(limb * .4F + (float) Math.PI) * 2.0F * amount * .5F;
+    }
+
+    /** Original ModelEldritchGolem:312 - the swing of the right leg of the golem. */
+    public static float legSwing(float limb, float amount) {
+        return Mth.cos(limb * .4662F) * 1.4F * amount;
+    }
+
+    /** Original ModelEldritchGolem:313 - the swing of the left leg of the golem. */
+    public static float legSwingHalfPhase(float limb, float amount) {
+        return Mth.cos(limb * .4662F + (float) Math.PI) * 1.4F * amount;
+    }
+
+    /** Original ModelEldritchGolem:259 - the swing of the cloth of the golem. */
+    public static float clothSwing(float limb, float amount) {
+        return Mth.cos(limb * .44F) * 1.4F * amount;
+    }
+
+    /** Original ModelEldritchGolem:260 - the swing of the cloth of the golem, half a phase later. */
+    public static float clothSwingHalfPhase(float limb, float amount) {
+        return Mth.cos(limb * .44F + (float) Math.PI) * 1.4F * amount;
     }
 
     @Override public void renderToBuffer(PoseStack pose, VertexConsumer out, int light, int overlay, int color) {

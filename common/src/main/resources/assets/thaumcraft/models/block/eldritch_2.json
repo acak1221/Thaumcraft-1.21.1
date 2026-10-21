@@ -1,7 +1,7 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "ambientocclusion": false,
   "textures": {
-    "all": "thaumcraft:blocks/obsidiantile",
     "particle": "thaumcraft:blocks/obsidiantile"
-  }
+  },
+  "elements": []
 }

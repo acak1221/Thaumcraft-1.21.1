@@ -22,8 +22,10 @@ import thaumcraft.common.lib.network.ShovelOrientationNetworking;
  * item key packet.
  */
 public final class ThaumcraftMiscKeyClient {
-    // Original KeyHandler.keyG is LWJGL2 key 34, and the LWJGL2 key table makes 34 the G key.
-    public static final KeyMapping MISC_TOGGLE = new KeyMapping("key.thaumcraft.misc_toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, KeyMapping.CATEGORY_MISC);
+    // Original Keys.keyG (oracle thaumcraft/api/Keys.java:9) is bound to
+    // Keyboard.KEY_NONE, so the key of the original is NOT bound by default.
+    // The port keeps that: the player assigns the key in the vanilla controls.
+    public static final KeyMapping MISC_TOGGLE = new KeyMapping("key.thaumcraft.misc_toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, KeyMapping.CATEGORY_MISC);
     private static boolean initialized;
 
     private ThaumcraftMiscKeyClient() {}

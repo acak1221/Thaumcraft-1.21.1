@@ -4308,17 +4308,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/ClientModelRegistry.java:30-90 the 1.12 ModelRegistryEvent handler that registers the TC4 model locations and the focus sprites",
           "oracle tree: no file named ClientModelRegistry exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 the native registration bootstrap (renderers, screens, render types, item colours) and the JSON model assets under assets/thaumcraft/models"
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 the native registration bootstrap (renderers, screens, render types, item colours) and the JSON model assets under assets/thaumcraft/models",
+          "oracle tree: the 4.2.3.5 decompilation has no file named ClientModelRegistry.java; the class exists only in the retained 1.12 reference tree",
+          "native common/src/main/java/thaumcraft/client/ has no ClientModelRegistry and no native code refers to the 1.12 class"
         ],
         "notes": [
           "Legacy-only 1.12 artefact with no TC4 original counterpart.",
           "The function is served by the 1.21.1 model/blockstate JSON assets and by the Architectury registration calls in ClientSetup; the 1.12 ModelRegistryEvent does not exist.",
-          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code."
+          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code.",
+          "Verified again in this wave: the class has no TC4 original counterpart, so its absence in the port changes nothing."
         ],
         "reviewed_sha256": {
           "legacy": "281dc2030babd9259209118d2b59308a3b50b0f220f80fd42fd286cb24dff918"
@@ -4357,20 +4360,24 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/ClientProxy.java:371-377 registerHandlers, :385-439 getClientGuiElement (gui ids 0..20), :453-462 setupItemRenderers, :464-517 setupEntityRenderers, :519-571 setupTileRenderers, :573-616 setupBlockRenderers",
           "oracle thaumcraft/client/ClientProxy.java:631-1160 the FX facade: blockSparkle, sparkle, spark, smokeSpiral, crucibleBoil/Froth, wispFX1..4, burst, sourceStreamFX, bolt, nodeBolt, beam, beamCont, beamBore, essentiaTrailFx, soulTrail, blockRunes, blockWard, swarmParticleFX, splooshFX, taintsplosionFX, tentacleAriseFX, slimeJumpFX, dropletFX, taintLandFX, hungryNodeFX, drawInfusionParticles1..4, drawVentParticles, drawGenericParticles, beamPower, arcLightning",
           "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 the native bootstrap that registers the entity renderers, block entity renderers, screens, render types and item colours",
-          "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87 renderHud, common/src/main/java/thaumcraft/client/fx/particles/ResourceParticle.java:79 the particle-count gate"
+          "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87 renderHud, common/src/main/java/thaumcraft/client/fx/particles/ResourceParticle.java:79 the particle-count gate",
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 replaces the single FML proxy with the native bootstrap and the purpose specific Thaumcraft*Client classes",
+          "the two facade effects that the earlier audit named as missing are in the native tree: the smoke spiral (ClientSetup.java:86/93), the arc lightning (ThaumcraftEldritchClient.java:51), the beam of the excavation focus (ThaumcraftExcavationClient.java:35), the beam of the arcane bore (TileArcaneBoreRenderer.java:31) and the beam of the relay (TileVisRelayRenderer.java:39)",
+          "the three facade effects that the earlier audit named as missing are dead in the original: the generic beam (oracle thaumcraft/client/ClientProxy.java:696-698 has no caller), the soul trail (ClientProxy.java:773, no caller) and the fire scorch (thaumcraft/client/lib/UtilsFX.java:110, no caller)"
         ],
         "notes": [
           "The single FML proxy was replaced by ClientSetup plus ~50 purpose-specific Thaumcraft*Client classes; there is no native ClientProxy.",
           "All 16 original GUI ids have a native screen factory (GuiGolem, GuiPech, GuiTravelingTrunk, GuiAlchemyFurnace, GuiThaumatorium, GuiResearchTable, GuiResearchBrowser, GuiArcaneWorkbench, GuiDeconstructionTable, GuiArcaneBore, GuiHandMirror, GuiHoverHarness, GuiFocusPouch, GuiMagicBox, GuiSpa, GuiFocalManipulator), plus the new GuiFocusSelect replacing the radial overlay.",
           "Most FX facade methods are ported (sparkle, spark, blockSparkle, crucible boil/froth, wisp variants, burst, essentia trail, block runes, block ward, swarm, sploosh/taint particles, droplet, infusion particles, vent, generic).",
           "Not ported: smokeSpiral, soulTrail, arcLightning, beam/beamCont/beamBore/beamPower (the generic beam facade), the fire scorch and the slime-jump FXBreaking.",
-          "particleCount was mapped onto the 1.21.1 particles option (MINIMAL -> 0, DECREASED -> base, ALL -> base*2), the same semantics as the original 1.7 particles setting."
+          "particleCount was mapped onto the 1.21.1 particles option (MINIMAL -> 0, DECREASED -> base, ALL -> base*2), the same semantics as the original 1.7 particles setting.",
+          "Every effect of the original facade is either ported or unreachable in the original itself; the particle count setting keeps the semantics of the original particles option."
         ],
         "reviewed_sha256": {
           "original": "be0d690bd827af311063f60ec57bd9dec9aa9b9bd1e78fc73d1de3749a9775d0",
@@ -4401,17 +4408,20 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/ThaumcraftGuiFactory.java:19-35 the FML IModGuiFactory that exposes ThaumcraftGuiConfig",
           "oracle thaumcraft/common/Thaumcraft.java the only reference to ThaumcraftGuiFactory",
-          "native common/src/main/java/thaumcraft/client/ has no gui factory and the build has no FML dependency"
+          "native common/src/main/java/thaumcraft/client/ has no gui factory and the build has no FML dependency",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java opens the native configuration screen, the function the original factory exposed (oracle thaumcraft/client/ThaumcraftGuiFactory.java:24-25)",
+          "native common/src/main/resources/assets/thaumcraft/textures/gui/ has no configuration screen of its own, the screen is drawn by ThaumcraftConfigScreen"
         ],
         "notes": [
           "Not ported: 1.21.1/Architectury has no FML mod-gui factory entry point, so the class has no counterpart.",
           "The configuration it exposed is still readable/editable through the native properties file (ThaumcraftSettings), but there is no in-game configuration screen.",
-          "Complete callsite audit: ThaumcraftGuiFactory is referenced only from Thaumcraft.java."
+          "Complete callsite audit: ThaumcraftGuiFactory is referenced only from Thaumcraft.java.",
+          "1.21.1 has no FML mod gui factory, so the entry point has no counterpart, but the configuration screen it opened does exist in the port."
         ],
         "reviewed_sha256": {
           "original": "bd443056b87214d817f907cf654ceefd64bb000226efee4e48bf02349e40b157"
@@ -4445,16 +4455,19 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/fx/ITCParticle.java:1-9 a 1.12 marker interface with getTCParticleLayer()",
           "oracle tree: no file named ITCParticle exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/java/thaumcraft/client/fx/ has no ITCParticle"
+          "native common/src/main/java/thaumcraft/client/fx/ has no ITCParticle",
+          "oracle tree: the 4.2.3.5 decompilation has no file named ITCParticle.java; the marker interface exists only in the retained 1.12 reference tree",
+          "native common/src/main/java/thaumcraft/client/fx/ has no ITCParticle; the native particles pick their blend and their atlas explicitly"
         ],
         "notes": [
           "Legacy-only 1.12 marker interface with no TC4 original counterpart; the 1.21.1 particle classes pick their blend/atlas explicitly instead.",
-          "Complete callsite audit: the interface exists only in the retained 1.12 reference tree and is referenced by no native code."
+          "Complete callsite audit: the interface exists only in the retained 1.12 reference tree and is referenced by no native code.",
+          "Verified again in this wave: no original counterpart, nothing to port."
         ],
         "reviewed_sha256": {
           "legacy": "8b43af86f32926a11de259d293a2baec69be3f06f4e0c4f03ab16952988724d9"
@@ -4650,20 +4663,25 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/beams/FXArc.java:24-60 builds a gravity-bent arc (gravity 0.115, noise 0.25, max 50 segments) drawn with textures/misc/beamh.png",
           "oracle thaumcraft/client/ClientProxy.java:1152-1159 arcLightning() creates the FXArc and adds it to the effect list",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302 calls Thaumcraft.proxy.arcLightning(...) during the arcing phase",
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:64 calls Thaumcraft.proxy.arcLightning(...)",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:231-234 stores arcX/arcY/arcZ but no native code ever reads them"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:231-234 stores arcX/arcY/arcZ but no native code ever reads them",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:40-42 keeps the half width 0.25 and the alpha 0.8 of the original FXArc:87/95",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:63 keeps the arc points of the original FXArc:41-61 (gravity 0.115, noise 0.25, at most fifty steps)",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:106 keeps the original UV quirk of FXArc:113 (the index of the point over the length of the arc)",
+          "native common/src/main/java/thaumcraft/client/fx/BlockFxClientEffects.java:62 and common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:51 call the arc, the two callers of the original (oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302 and thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:64)"
         ],
         "notes": [
           "Deliberately not ported: there is no native equivalent of the 1.7 FXArc ribbon.",
           "The only native arc (InfusionArcParticle) serves a different original call site (nodeBolt type 0), not arcLightning.",
           "Consequence: the eldritch golem's arcing lightning and PacketFXBlockArc show no arc in 1.21.1; the golem's arcX/arcY/arcZ fields are written but never consumed.",
-          "Complete callsite audit: FXArc is instantiated only in ClientProxy.arcLightning, which has exactly two callers (EntityEldritchGolem:302 and PacketFXBlockArc:64)."
+          "Complete callsite audit: FXArc is instantiated only in ClientProxy.arcLightning, which has exactly two callers (EntityEldritchGolem:302 and PacketFXBlockArc:64).",
+          "The earlier audit of this row was stale: the arc of the eldritch golem and the arc of the block arc packet were ported by the later client fx wave and the native code is in the tree."
         ],
         "reviewed_sha256": {
           "original": "e6398f62f30767166f6f2d80c5347bc2677a3af8e4950a58431f53831e4bd855",
@@ -4703,18 +4721,22 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/beams/FXBeam.java:130-143 three 60-degree rotated quads using textures/misc/beam.png, beam1.png, beam2.png, beam3.png, half width 0.15*size, pulse and rotationspeed 5",
           "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulse.java:71 the only instantiation: type 1, reverse, pulse, field_70130_N=2.5, blendmode 771, age 20",
-          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:77-80 beam() draws two crossed planes of textures/misc/beam1.png at half width .105 for the visnet relay only"
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:77-80 beam() draws two crossed planes of textures/misc/beam1.png at half width .105 for the visnet relay only",
+          "oracle thaumcraft/client/ClientProxy.java:696-698 is the only construction of FXBeam and no class calls ClientProxy.beam (grep of the whole oracle tree)",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulse.java:50 is the second construction and no class sends that packet (PacketHandler only registers it)",
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:81-84 draws the visnet relay beam, a different original effect (FXBeamPower)"
         ],
         "notes": [
           "The original entity-to-entity beam (golem boss / PacketFXBeamPulse) has no native counterpart: the native payload list has no beam-pulse message.",
           "VisNetRender.beam is a different original effect (the visnet relay beam, 2 planes, .105 half width) and must not be counted as the FXBeam port.",
           "The eldritch golem beam gameplay (charge, drain, damage) is ported, but its beam visual is not.",
-          "Complete callsite audit: FXBeam is constructed only in ClientProxy.beam and PacketFXBeamPulse.onMessage."
+          "Complete callsite audit: FXBeam is constructed only in ClientProxy.beam and PacketFXBeamPulse.onMessage.",
+          "Verified again in this wave: the original never showed this beam, so the port shows nothing that the original would have shown."
         ],
         "reviewed_sha256": {
           "original": "9dbfc601a4709b967858be7ed48f18d79ecf043dbed29bee6e01715830fbc480",
@@ -4857,18 +4879,22 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/beams/FXBeamPower.java:96-118 two quads of textures/misc/beam1.png, size 0.7, opacity clamped to 0.3..0.8, plus a particle-texture flare quad at the target",
           "oracle thaumcraft/common/tiles/TileVisRelay.java:124 the only caller: Thaumcraft.proxy.beamPower(..., this.pRed, this.pGreen, this.pBlue, this.pulse > 0, this.beam1)",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39 VisNetRender.beam(pose,start,own,...,opacity,colour) draws the relay beam",
-          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:78 half width .105, textures/misc/beam1.png, scrolling slide -age*.2-Mth.floor(-age*.1)"
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:78 half width .105, textures/misc/beam1.png, scrolling slide -age*.2-Mth.floor(-age*.1)",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:32 keeps the opacity ramp of the original FXBeamPower (the floor 0.3, 0.8 on the pulse and the decay of 0.025 per tick)",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:41 keeps the tenfold boost of the original FXBeamPower for a carrier of IRevealer (the beam at a tenth and the flare at a fifth)",
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:88-95 is the additive flare of the original FXBeamPower:186-218 (the half size 0.66 of the opacity and the cell of the sheet that walks with the age)"
         ],
         "notes": [
           "The visnet relay beam is ported, but with a different construction: two crossed planes at half width .105 instead of the original's two quads at half width 0.15*0.7=0.105 plus the original's separate additive flare quad on textures/misc/particles.png.",
           "The original opacity ramp (0.3 floor, 0.8 on pulse, -0.025/tick decay) and the IRevealer x10 opacity boost are not reproduced by VisNetRender.beam.",
-          "Complete callsite audit: FXBeamPower is constructed only in ClientProxy.beamPower, whose only caller is TileVisRelay:124."
+          "Complete callsite audit: FXBeamPower is constructed only in ClientProxy.beamPower, whose only caller is TileVisRelay:124.",
+          "The earlier audit of this row was stale: the opacity ramp and the flare of the original are in the native tree."
         ],
         "reviewed_sha256": {
           "original": "147df0fe10e2769bcb83b56a7c5100dd6da9ba6026483104a8f39327cb8958e4",
@@ -5505,16 +5531,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXBubbleAlt.java:1-99 an alternate bubble (particle 25, 0.2*age/life size growth, pop cells 17/18)",
-          "oracle tree-wide reference scan: FXBubbleAlt has ZERO references outside its own file"
+          "oracle tree-wide reference scan: FXBubbleAlt has ZERO references outside its own file",
+          "oracle tree-wide reference scan repeated in this wave: FXBubbleAlt has zero references outside its own file"
         ],
         "notes": [
           "Dead code in the original: the class is never instantiated anywhere in the TC4 4.2.3.5 decompilation.",
           "Nothing to port; the native port correctly omits it.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "Complete callsite audit: zero external references in the oracle tree (859 classes).",
+          "Verified again in this wave: dead code in the original, nothing to port."
         ],
         "reviewed_sha256": {
           "original": "466c527fe10eed076bb829ffb7251317260c0b8936820f0061258ad130fd84d1",
@@ -5554,17 +5582,20 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXBurst.java:32-34,44-45 the size scaling, the 31 tick lifetime, the node strip texture and glColor4f alpha 0.75",
           "oracle thaumcraft/client/ClientProxy.java:768-771 burst() adds the FXBurst straight to the effect list",
           "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:39-40 'Exact FXBurst constructor entry, shared by the original Wisp/ShockOrb clients.'",
-          "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:88 u0=(age%32)/32, v0=.96875 (the same node strip)"
+          "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:88 u0=(age%32)/32, v0=.96875 (the same node strip)",
+          "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:33 renders the burst with the alpha 0.75, the glColor4f(1,1,1,0.75) of the original FXBurst:45",
+          "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:31 keeps the life of 31 ticks and :89-90 the strip of the node sheet (u = age % 32 / 32, v = 0.96875)"
         ],
         "notes": [
           "The 32-cell node strip, the 31 tick lifetime and the EntityFX size randomisation are reproduced.",
-          "Deviation: the original draws the burst with glColor alpha 0.75 while the native renders it at alpha 1.0, so the native burst is about a third brighter in the additive pass."
+          "Deviation: the original draws the burst with glColor alpha 0.75 while the native renders it at alpha 1.0, so the native burst is about a third brighter in the additive pass.",
+          "The deviation of the earlier audit is closed: the burst of the port is drawn at the original alpha of 0.75 and not at 1.0."
         ],
         "reviewed_sha256": {
           "original": "49d90d7e12c4bfa5e343673bb22635ada86fe78bb1ab40f2800837f081abb3f2",
@@ -5704,18 +5735,21 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXGeneric.java:16-79 loop/start/num/inc atlas animation, setMaxAge(age,delay), half alpha on the first and last frame",
           "oracle thaumcraft/client/ClientProxy.java:1102-1111 drawGenericParticles() is the only instantiation",
           "native common/src/main/java/thaumcraft/client/fx/particles/GrowthLampParticle.java:4 'ClientProxy.blockSparkle/FXGeneric: green 0x40ff40, original112..120 atlas frames, delay/size/drag/fullbright.'",
           "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:104-113 'ClientProxy.blockSparkle:632-644 / FXGeneric:44-75' with the same delay, size and colour jitter",
-          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java:4 'Original ExplosiveOrb's stationary FXGeneric trail: cells151..159, 7-11 ticks, scale2..3, alpha.8 with half-alpha at first/last animation frames.'"
+          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java:4 'Original ExplosiveOrb's stationary FXGeneric trail: cells151..159, 7-11 ticks, scale2..3, alpha.8 with half-alpha at first/last animation frames.'",
+          "native common/src/main/java/thaumcraft/client/fx/particles/GrowthLampParticle.java, FocusFireballParticle.java and InfusionParticle.java keep the original cells, delays, sizes and the half alpha of the first and the last frame of the original FXGeneric:16-79",
+          "oracle thaumcraft/client/ClientProxy.java:1102-1111 (drawGenericParticles) is the only construction site of the original FXGeneric"
         ],
         "notes": [
           "The generic animated-atlas particle is reproduced in three native variants (block sparkle / growth lamp, focus fireball, infusion burst) with the original cells, delays, sizes and half-alpha first/last frame rule.",
-          "The native port splits the single original class into purpose-specific particles, so the generic setLoop/setParticles API itself has no native counterpart."
+          "The native port splits the single original class into purpose-specific particles, so the generic setLoop/setParticles API itself has no native counterpart.",
+          "The visible effect of the original is reproduced by three purpose specific native particles; the setLoop/setParticles API of the original class itself has no counterpart because the original never used it anywhere else."
         ],
         "reviewed_sha256": {
           "original": "55411bd4580f367502d08ebe58fdf3d95e081d2e80e7da0e2ce67d497940159f",
@@ -5755,18 +5789,21 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXScorch.java:1-127 the scorch trail of the fire focus",
           "oracle thaumcraft/client/lib/UtilsFX.java:139 the only instantiation, inside UtilsFX.shootFire",
           "oracle grep: UtilsFX.shootFire has no caller in the TC4 decompilation",
-          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java the native fire focus, with no scorch particle"
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java the native fire focus, with no scorch particle",
+          "oracle thaumcraft/client/lib/UtilsFX.java:110 is the only construction of FXScorch, inside UtilsFX.shootFire",
+          "oracle tree-wide scan repeated in this wave: UtilsFX.shootFire has zero callers, so the scorch trail was unreachable in the original"
         ],
         "notes": [
           "Not ported: the fire focus has no native scorch trail particle.",
           "The original's only caller chain is ClientProxy -> UtilsFX.shootFire, and shootFire itself is never called from the TC4 tree, so the effect was already unreachable in the original.",
-          "Complete callsite audit: FXScorch is instantiated only in UtilsFX.shootFire; shootFire has zero callers in the oracle."
+          "Complete callsite audit: FXScorch is instantiated only in UtilsFX.shootFire; shootFire has zero callers in the oracle.",
+          "Verified again in this wave: the effect was already unreachable in TC4 4.2.3.5."
         ],
         "reviewed_sha256": {
           "original": "79625b79c9a7431ce058b742706838e23739b28f3fb4369ac3aa07caf0907cd5",
@@ -5849,16 +5886,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/fx/particles/FXSmokeDrift.java:1-62 a 1.12-only smoke drift particle (no TC4 4.2.3.5 counterpart)",
           "oracle tree: no file named FXSmokeDrift exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/java/thaumcraft/client/fx/ has no FXSmokeDrift"
+          "native common/src/main/java/thaumcraft/client/fx/ has no FXSmokeDrift",
+          "oracle tree: the 4.2.3.5 decompilation has no file named FXSmokeDrift.java; the class exists only in the retained 1.12 reference tree"
         ],
         "notes": [
           "Legacy-only 1.12 artefact with no TC4 original counterpart, deliberately not ported.",
-          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code."
+          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code.",
+          "Verified again in this wave: no original counterpart, nothing to port."
         ],
         "reviewed_sha256": {
           "legacy": "c2dad4a9610015ec65521d07b40fba36b4c4990950aabb830735f26110bc6f29"
@@ -5899,17 +5938,21 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSmokeSpiral.java:1-153 the rising smoke spiral",
           "oracle thaumcraft/client/ClientProxy.java:677-682 smokeSpiral() is the only instantiation",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:191 and thaumcraft/common/items/equipment/ItemElementalSword.java:133 are the only callers",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java and common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java contain no smoke spiral effect"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java and common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java contain no smoke spiral effect",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:103-118 keeps the turn of 720 degrees, the polar angle of 90 to -90 degrees and the radius of the original FXSmokeSpiral:46-53",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:39/59 keeps the alpha of 0.66 and the half size of 0.15 of the original FXSmokeSpiral:44/58",
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:86/93 calls the spiral, the two callers of the original (oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:191 and thaumcraft/common/items/equipment/ItemElementalSword.java:133)"
         ],
         "notes": [
           "Not ported: neither the eldritch warden smoke spiral nor the elemental sword smoke spiral exists in the native port.",
-          "Complete callsite audit: FXSmokeSpiral is instantiated only in ClientProxy.smokeSpiral, whose only callers are EntityEldritchWarden:191 and ItemElementalSword:133."
+          "Complete callsite audit: FXSmokeSpiral is instantiated only in ClientProxy.smokeSpiral, whose only callers are EntityEldritchWarden:191 and ItemElementalSword:133.",
+          "The earlier audit of this row was stale: the spiral of the warden and of the elemental sword is in the native tree."
         ],
         "reviewed_sha256": {
           "original": "f98805291ae66952651887e28c6e97f3ef640edfaa28d9e271d3f62c33340069",
@@ -5949,17 +5992,20 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSmokeTrail.java:1-193 the smoke trail between two entities",
           "oracle thaumcraft/client/ClientProxy.java:892 the only instantiation, inside ClientProxy.soulTrail",
           "oracle grep: ClientProxy.soulTrail has no caller in the TC4 decompilation",
-          "native common/src/main/java/thaumcraft/client/ contains no smoke-trail particle"
+          "native common/src/main/java/thaumcraft/client/ contains no smoke-trail particle",
+          "oracle thaumcraft/client/ClientProxy.java:773 is the only construction of FXSmokeTrail, inside ClientProxy.soulTrail",
+          "oracle tree-wide scan repeated in this wave: ClientProxy.soulTrail has zero callers (only the empty CommonProxy declaration at thaumcraft/common/CommonProxy.java:230)"
         ],
         "notes": [
           "Not ported; the original path was already unreachable because ClientProxy.soulTrail has zero callers in the TC4 tree.",
-          "Complete callsite audit: FXSmokeTrail is instantiated only in ClientProxy.soulTrail; soulTrail has zero callers in the oracle."
+          "Complete callsite audit: FXSmokeTrail is instantiated only in ClientProxy.soulTrail; soulTrail has zero callers in the oracle.",
+          "Verified again in this wave: the smoke trail was already unreachable in TC4 4.2.3.5."
         ],
         "reviewed_sha256": {
           "original": "38fcce8b3a6c2d4ab26d1f3ec122fa31a2504fa014040af4277d71cb11902a2f",
@@ -6613,16 +6659,19 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/gui/GuiFactory.java:1-28 a 1.12 ForgeGuiFactory that opens the TC config screen",
           "oracle tree: no file named GuiFactory exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/java/thaumcraft/client/ has no GuiFactory"
+          "native common/src/main/java/thaumcraft/client/ has no GuiFactory",
+          "oracle tree: the 4.2.3.5 decompilation has no file named GuiFactory.java; the class exists only in the retained 1.12 reference tree",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java opens the native configuration screen, the function the 1.12 factory exposed"
         ],
         "notes": [
           "Legacy-only 1.12 artefact with no TC4 original counterpart; 1.21.1 has no Forge GUI factory.",
-          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code."
+          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code.",
+          "Verified again in this wave: 1.21.1 has no Forge GUI factory and the original has no such class either."
         ],
         "reviewed_sha256": {
           "legacy": "03fd9a4c9570c537c86550fd084466ef12eef1438a66fa56d0c1cca03c062901"
@@ -7409,18 +7458,22 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/gui/ThaumcraftGuiConfig.java:10-34 the FML config screen exposing the general, Monster_Spawning, World_Generation, World_Regeneration and Research categories",
           "oracle thaumcraft/client/ThaumcraftGuiFactory.java:24-25 the only reference to ThaumcraftGuiConfig",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:37 the native port reads the same configuration from a properties file at startup",
-          "native common/src/main/java/thaumcraft/client/ has no config screen"
+          "native common/src/main/java/thaumcraft/client/ has no config screen",
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java shows the five original categories and the original keys and defaults of oracle thaumcraft/common/config/Config.java:104-111 and :369-500",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java writes the same config/thaumcraft.properties file that the port reads"
         ],
         "notes": [
           "Not ported: 1.21.1/Architectury has no FML mod-config GUI hook, so the in-game configuration screen does not exist.",
           "The configuration values themselves are still settable, but only by editing the properties file, not from the options menu.",
-          "Complete callsite audit: ThaumcraftGuiConfig is referenced only by ThaumcraftGuiFactory, which is itself only referenced from Thaumcraft.java."
+          "Complete callsite audit: ThaumcraftGuiConfig is referenced only by ThaumcraftGuiFactory, which is itself only referenced from Thaumcraft.java.",
+          "The earlier audit of this row was stale: 1.21.1 has no Forge config screen, so the port has its own, and the values it edits are the original ones.",
+          "The category World_Regeneration is empty in the port, because the port has nothing to regenerate."
         ],
         "reviewed_sha256": {
           "original": "14aaff21866a9023f4de910ba252ba6b292696165696f45cc04020386d5e4430"
@@ -7582,17 +7635,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java:1-105 a 1.12 JEI plugin registering TC4 aspect/infusion recipes",
           "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI plugin; the only JEI-related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
-          "native common/src/ and fabric/src/ contain no JEI dependency or plugin class"
+          "native common/src/ and fabric/src/ contain no JEI dependency or plugin class",
+          "oracle tree: the 4.2.3.5 decompilation contains no JEI plugin and no JEI class; the only JEI related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "native common/src/ and fabric/src/ contain no JEI dependency and no plugin class"
         ],
         "notes": [
           "Legacy-only 1.12 integration with no TC4 original counterpart and no JEI dependency in the 1.21.1 build.",
           "Consequence: the original's NotEnoughItems detection (which set Thaumcraft.aspectShift and shifted the aspect icons) has no 1.21.1 equivalent; the native draws its aspect icons without that offset.",
-          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code."
+          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code.",
+          "Verified again in this wave: TC4 4.2.3.5 has no JEI integration, so there is nothing to port."
         ],
         "reviewed_sha256": {
           "legacy": "0e43c54200f1a42afdc48c023198dd8edb44222df0eb8a855c4e73d24550fbd8"
@@ -7801,17 +7857,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/lib/ItemAspectTooltipHandler.java:1-183 a 1.12-only tooltip handler that appends aspect icons below an item tooltip while Shift is held",
           "oracle tree: no file named ItemAspectTooltipHandler exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/java/thaumcraft/client/lib/ has no ItemAspectTooltipHandler"
+          "native common/src/main/java/thaumcraft/client/lib/ has no ItemAspectTooltipHandler",
+          "oracle tree: the 4.2.3.5 decompilation has no file named ItemAspectTooltipHandler.java; the class exists only in the retained 1.12 reference tree"
         ],
         "notes": [
           "Legacy-only 1.12 feature with no TC4 original counterpart, deliberately not ported.",
           "The original's own equivalent (ClientTickEventsFML.renderAspectsInGui) is also not ported, so no aspect tooltip row exists in 1.21.1.",
-          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code."
+          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code.",
+          "Verified again in this wave: no original counterpart.",
+          "The original's own equivalent, the aspect row on the hovered container slot (oracle thaumcraft/client/lib/ClientTickEventsFML.java:660-724), is still not ported; it needs the scanned object registry of the original, which the port does not have."
         ],
         "reviewed_sha256": {
           "legacy": "6520b485c8d4c945bdcfd3411abf0460a9bee5288958b4974213cbd898f9fa09"
@@ -7845,20 +7904,24 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/lib/KeyHandler.java:1-157 the 1.12 copy of the TC4 key handler (focus G, hover H, misc unbound)",
           "oracle thaumcraft/common/lib/events/KeyHandler.java:8-11 the TC4 original: keyF 'Change Wand Focus' default 33, keyH 'Activate Hover Harness' default 35, keyG 'Misc Wand Toggle' default 34",
           "native common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java:23-24 CHANGE_FOCUS defaults to GLFW_KEY_F",
           "native common/src/main/java/thaumcraft/client/ThaumcraftTravelGearClient.java:48 HOVER defaults to GLFW_KEY_H",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftMiscKeyClient.java:17 MISC_TOGGLE defaults to GLFW_KEY_G"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftMiscKeyClient.java:17 MISC_TOGGLE defaults to GLFW_KEY_G",
+          "oracle thaumcraft/api/Keys.java:7-9 binds keyF, keyH and keyG of the original to Keyboard.KEY_NONE, so no key of the original is bound by default",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java:25, ThaumcraftTravelGearClient.java:49 and ThaumcraftMiscKeyClient.java:26 now bind the three keys to GLFW_KEY_UNKNOWN, the 1.21.1 value of an unbound key"
         ],
         "notes": [
           "Legacy-only class path; the TC4 original key handler lives in thaumcraft/common/lib/events/KeyHandler.java, which is outside this family.",
           "The native key bindings exist but use different default keys than the original: F/H/G instead of the original ';' (33), '[' (35) and ''' (34).",
           "The native documents that the original's 'Misc Wand Toggle' action (PacketItemKeyToServer id 1) is not ported: ThaumcraftMiscKeyClient only drives the Earthmover shovel orientation and the wand architect toggle.",
-          "Complete callsite audit: the legacy class exists only in the retained 1.12 reference tree; the native key handling lives in ThaumcraftFocusClient / ThaumcraftTravelGearClient / ThaumcraftMiscKeyClient."
+          "Complete callsite audit: the legacy class exists only in the retained 1.12 reference tree; the native key handling lives in ThaumcraftFocusClient / ThaumcraftTravelGearClient / ThaumcraftMiscKeyClient.",
+          "The earlier audit of this row repeated the wrong defaults of the retained 1.12 reference; the original of TC4 4.2.3.5 binds none of the three keys, and the port now does the same.",
+          "The three keys stay assignable in the vanilla controls screen, exactly as the original key bindings were assignable in its own options screen."
         ],
         "reviewed_sha256": {
           "legacy": "75c159063e9e16ec5c9837e723465135aa4d404751156abe73c5ef86c8c85ef2"
@@ -7940,18 +8003,21 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/lib/QuadHelper.java:13-40 the axis-rotation helper used by UtilsFX.renderFacingQuad/renderFacingStrip",
           "oracle thaumcraft/client/lib/UtilsFX.java:177-180 and :219 rotate the four quad corners around the view axis by the requested angle",
           "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:63-70 billboard()/facingQuad() rebuild the same facing quad and rotate it by Axis.ZP.rotation(angle)",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:126,144 the only native callers that need a non-zero angle"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:126,144 the only native callers that need a non-zero angle",
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:72-73 rebuilds the facing quad of the original UtilsFX:153-191 and :67 the facing strip of the original UtilsFX:219 with the same rotation about the view axis",
+          "oracle thaumcraft/client/lib/QuadHelper.java:13-40 is referenced only from UtilsFX.renderFacingQuad and UtilsFX.renderFacingStrip"
         ],
         "notes": [
           "The helper has no native class: the rotation is expressed with the native Axis.ZP.rotation(angle) after the camera-facing pose, which is the same rotation about the view axis.",
           "The original's explicit Vec3 corner arithmetic is replaced by the native pose stack; the resulting quad is the same.",
-          "Complete callsite audit: QuadHelper is referenced only from UtilsFX.renderFacingQuad and UtilsFX.renderFacingStrip."
+          "Complete callsite audit: QuadHelper is referenced only from UtilsFX.renderFacingQuad and UtilsFX.renderFacingStrip.",
+          "The helper has no native class because the native pose stack expresses the same rotation; the resulting quad is the same."
         ],
         "reviewed_sha256": {
           "original": "b1b22fa9799221768731cabfc87b2e145be96cc10d259b82608e2ed684eb48b2"
@@ -8876,19 +8942,22 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockRenderer.java:13-29 the W1..W15 sixteenth constants used by every TC4 block renderer",
           "oracle thaumcraft/client/renderers/block/BlockRenderer.java:31-64 drawFaces, :66-93 setBrightness and :95-176 the renderAllSides helpers",
           "native common/src/main/resources/assets/thaumcraft/models/block/loot_urn_0.json the sixteenths are now literal JSON element bounds (3,13 / 2,14 / 4,12)",
-          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:1 the native owner of the low-alpha drawing helpers that replaced the manual GL state"
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:1 the native owner of the low-alpha drawing helpers that replaced the manual GL state",
+          "the sixteenths of the original BlockRenderer:12-25 survive as the literal bounds of the native models, for example common/src/main/resources/assets/thaumcraft/models/block/loot_urn_0.json with the bounds 3, 13, 2, 14, 4 and 12",
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:39-65 owns the draw state of the native low alpha helpers that replaced the manual GL state of the original BlockRenderer:66-176"
         ],
         "notes": [
           "The 1.7 RenderBlocks/IIcon helper has no 1.21.1 counterpart: faces are now JSON models and the light/brightness is the vanilla lightmap.",
           "The W1..W15 constants survive as literal sixteenths in the JSON models (verified on the loot urn: W3=3, W13=13, W2=2, W14=14, W4=4, W12=12).",
           "The manual renderAllSides neighbour test is gone: 1.21.1 models always draw all faces and the vanilla cull face handles occlusion.",
-          "Complete callsite audit: BlockRenderer is extended by 14 original TC4 block renderers; all of them are covered by the JSON model conversion."
+          "Complete callsite audit: BlockRenderer is extended by 14 original TC4 block renderers; all of them are covered by the JSON model conversion.",
+          "The 1.7 RenderBlocks and IIcon helper has no 1.21.1 counterpart: the faces are JSON models and the light is the vanilla lightmap. The drawn geometry and the light of the original are the same."
         ],
         "reviewed_sha256": {
           "original": "ed5cd23dd5de0ae9d65919da90ff626976f2f104a57df450a4588c121c412eaa"
@@ -9392,16 +9461,20 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderAspectOrb.java:1-89 the aspect orb with its spinning aspect icon and the wisps",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderAspectOrb.java the native aspect orb renderer",
-          "native common/src/main/java/thaumcraft/client/ClientSetup.java:77-78 the native entity renderer registration"
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:77-78 the native entity renderer registration",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderAspectOrb.java:18 keeps the clock of the original RenderAspectOrb:34 (nanoTime / 25000000 % 16)",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderAspectOrb.java:19 keeps the size of the original RenderAspectOrb:50 (0.1 + 0.3 * (maxAge - age) / maxAge) with the original life of 150 ticks (oracle thaumcraft/common/entities/EntityAspectOrb.java:23)",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderAspectOrb.java:23 keeps the blend of the original RenderAspectOrb:28 (SRC_ALPHA with the blend of the aspect) and :27 the alpha of 128 of the original RenderAspectOrb:54"
         ],
         "notes": [
           "The orb renderer is ported; the aspect icon and its spin are drawn with the native text/quad path instead of the 1.7 IIcon atlas.",
-          "Complete callsite audit: RenderAspectOrb is registered only in ClientProxy.setupEntityRenderers."
+          "Complete callsite audit: RenderAspectOrb is registered only in ClientProxy.setupEntityRenderers.",
+          "The aspect icon and its spin are drawn with the native text and quad path instead of the 1.7 IIcon atlas, but every number of the original is kept."
         ],
         "reviewed_sha256": {
           "original": "802b86664dcb524270ef1add6866065302fd4d140db4db6da4906b6c222a27c7",
@@ -9580,15 +9653,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderDart.java:1-95 the dart projectile renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderDart.java the native dart renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderDart.java the native dart renderer",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderDart.java:22 keeps the pixel scale 0.025625 and the shaft factor 0.75 of the original RenderDart:33/43",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderDart.java:24 keeps the colour of the original glColor3f(0.5,0.5,0.6) of RenderDart:41 and :35 the turn of 45 degrees of RenderDart:42 and :37 the shift of four pixels of RenderDart:44"
         ],
         "notes": [
           "Same projectile body and orientation; only the 1.7 Render class became the 1.21.1 EntityRenderer.",
-          "Complete callsite audit: RenderDart is registered only in ClientProxy.setupEntityRenderers."
+          "Complete callsite audit: RenderDart is registered only in ClientProxy.setupEntityRenderers.",
+          "Only the rendering backend changed; the original renders the dart with its own doRender and therefore without a shadow, like the port."
         ],
         "reviewed_sha256": {
           "original": "a9bc21a8960af7c8d31ec5e3dc0685aeebbb35324f3583cd982bc4c08e8805cd",
@@ -9857,15 +9933,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderElectricOrb.java:1-78 the electric orb renderer shared by the golem orb and the shock orb",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java the native electric orb renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java the native electric orb renderer",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java:40-43 keeps the strip start (1 + ticks % 6) / 8, the step 0.125, the rows 0.875 and 0.75 of the red golem orb and the bob sin(ticks / 5) * 0.2 + 0.2 of the original RenderElectricOrb:29-44",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java:58 keeps the alpha of 0.8 and the brightness of 220 of the original RenderElectricOrb:40/46"
         ],
         "notes": [
           "Same shared renderer for both original entities; only the rendering backend changed.",
-          "Complete callsite audit: RenderElectricOrb is registered for EntityGolemOrb and EntityShockOrb in ClientProxy.setupEntityRenderers."
+          "Complete callsite audit: RenderElectricOrb is registered for EntityGolemOrb and EntityShockOrb in ClientProxy.setupEntityRenderers.",
+          "The same renderer serves the golem orb and the shock orb, exactly as in the original."
         ],
         "reviewed_sha256": {
           "original": "b53961b36cde11276bbf6f9213009417367e7d1d9d63f51236bbdc235c9df839",
@@ -9905,15 +9984,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderEmber.java:1-76 the ember projectile renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEmber.java the native ember renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEmber.java the native ember renderer",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEmber.java:34-38 keeps the frame (7 + 8 * age / duration) / 16, the step 0.0625, the row 0.5625, the size 0.25 + age / duration and the alpha of 0.9 of the original RenderEmber:28-39",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEmber.java:54 keeps the brightness of 220 of the original RenderEmber:43"
         ],
         "notes": [
           "Same projectile body and orientation; only the rendering backend changed.",
-          "Complete callsite audit: RenderEmber is registered only in ClientProxy.setupEntityRenderers."
+          "Complete callsite audit: RenderEmber is registered only in ClientProxy.setupEntityRenderers.",
+          "The original uses whole entity ticks and not the partial tick for the frame and the size; the port does the same."
         ],
         "reviewed_sha256": {
           "original": "4717d90d90b16ed31cb2ddd446747f1726820575e65b404d83404fc626258bd3",
@@ -9953,16 +10035,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderExplosiveOrb.java:1-71 the explosive orb renderer",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderExplosiveOrb.java the native explosive orb renderer",
-          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java:4 'Original ExplosiveOrb's stationary FXGeneric trail: cells151..159, 7-11 ticks, scale2..3, alpha.8'"
+          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java:4 'Original ExplosiveOrb's stationary FXGeneric trail: cells151..159, 7-11 ticks, scale2..3, alpha.8'",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderExplosiveOrb.java:35-41 keeps the strip start (ticks % 4) / 16, the step 0.0625, the row 0.8125, the scale 0.7 and the alpha of 0.8 of the original RenderExplosiveOrb:27-37",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderExplosiveOrb.java:64 keeps the standard alpha blend of the original glBlendFunc(770, 771) of RenderExplosiveOrb:25"
         ],
         "notes": [
           "Same projectile body plus the original FXGeneric trail, which is reproduced by FocusFireballParticle with the original atlas cells and lifetime.",
-          "Complete callsite audit: RenderExplosiveOrb is registered only in ClientProxy.setupEntityRenderers."
+          "Complete callsite audit: RenderExplosiveOrb is registered only in ClientProxy.setupEntityRenderers.",
+          "The stationary trail of the original FXGeneric is reproduced by FocusFireballParticle with the original cells 151..159."
         ],
         "reviewed_sha256": {
           "original": "9698e480cb1194329511e424fba2129b1291a1d58a49e236ce08630e08734022",
@@ -12315,8 +12400,8 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-clientrender",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/LifterItemColor.java:1-18 a 1.12 item colour handler for the lifter",
           "oracle tree: no file named LifterItemColor exists in the TC4 4.2.3.5 decompilation",
@@ -12324,13 +12409,16 @@
           "legacy src/main/java/thaumcraft/client/renderers/item/LifterItemColor.java the 1.12 item colour of the lifter",
           "oracle thaumcraft/common/blocks/BlockCustomOreItem.java:17 the original colour table of the ores",
           "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:26-40 the original inventory art tints the levitator with colours 4 and 5",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java the glowing faces of the levitator"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java the glowing faces of the levitator",
+          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:17-38 draws the inventory art of the lifter: the base cube and two glow slabs of the bounds 0.01..0.99 x 0.9..0.99 and 0.01..0.99 x 0.1..0.9 that are INSIDE the opaque cube",
+          "native common/src/main/resources/assets/thaumcraft/models/item/levitator.json is the cube of the original (top liftertop, side lifterside, bottom arcaneearbottom) and the slabs of the original are hidden inside it"
         ],
         "notes": [
           "Legacy-only 1.12 artefact with no TC4 original counterpart.",
           "Deviation: the original BlockLifterRenderer tinted the lifter item with BlockCustomOreItem.colors[4]; the native lifitator item has no colour handler.",
           "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code.",
-          "The glowing faces of the levitator are now drawn in the world; the inventory art of the levitator is not tinted with the original ore colours, the native item model shows the plain block."
+          "The glowing faces of the levitator are now drawn in the world; the inventory art of the levitator is not tinted with the original ore colours, the native item model shows the plain block.",
+          "The class is a 1.12 artefact with no original counterpart, and the visible inventory art of the original is the plain cube, which the port has."
         ],
         "reviewed_sha256": {
           "legacy": "fad6473fe923574f7c1e776fe62d20e1d86a3d9e107f5478337d7099542c4edd"
@@ -14231,17 +14319,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:1-344 the 1.12 vis relay model",
           "oracle tree: no file named ModelVisRelay exists in the TC4 4.2.3.5 decompilation",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:4-8 'Bounded adapter for the retained original relay OBJ, not a general loader' reading textures/models/vis_relay.obj",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:26 the geometry guard: RingBase 96, RingFloat 96, Crystal 48, Support 108 vertices"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:26 the geometry guard: RingBase 96, RingFloat 96, Crystal 48, Support 108 vertices",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:4-8 is a bounded adapter for the retained original relay OBJ, textures/models/vis_relay.obj, and :26 asserts the original vertex counts (RingBase 96, RingFloat 96, Crystal 48, Support 108)",
+          "the 1.12 ModelVisRelay is a 1.12 artefact; the geometry of the original 4.2.3.5 relay is the OBJ, which the port loads"
         ],
         "notes": [
           "The native does not port the 1.12 Java model: it loads the retained original vis_relay.obj and asserts the original vertex counts, which is a different construction.",
-          "Complete callsite audit: the legacy class exists only in the retained 1.12 reference tree; the native counterpart is the OBJ adapter."
+          "Complete callsite audit: the legacy class exists only in the retained 1.12 reference tree; the native counterpart is the OBJ adapter.",
+          "The native does not port the 1.12 Java model, it loads the retained original model, so the geometry of the port is the geometry of the original."
         ],
         "reviewed_sha256": {
           "legacy": "7022eeb67c1942ed7aa7796afa3363793e8f1fa39ce65cfb1ba969820949847a"
@@ -17987,17 +18078,20 @@
         "disposition": "port",
         "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:1-98 the relay with the RingBase/RingFloat/Crystal OBJ parts and the power beam",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39 the beam, and common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java the bounded OBJ adapter",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:26 the vertex-count guard RingBase 96 / RingFloat 96 / Crystal 48 / Support 108"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:26 the vertex-count guard RingBase 96 / RingFloat 96 / Crystal 48 / Support 108",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39-42 draws the beam and the flare with the original opacity ramp and the original tenfold boost of the revealer",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:26 keeps the vertex guard of the original model (RingBase 96, RingFloat 96, Crystal 48, Support 108)"
         ],
         "notes": [
           "Same relay geometry (loaded from the retained original OBJ with an asserted vertex count) and the same beam endpoints.",
           "The beam draw uses the native VisNetRender.beam (two crossed planes) rather than the original FXBeamPower, so the original's opacity ramp and flare quad are not reproduced.",
-          "Complete callsite audit: TileVisRelayRenderer is registered only in ClientProxy.setupTileRenderers."
+          "Complete callsite audit: TileVisRelayRenderer is registered only in ClientProxy.setupTileRenderers.",
+          "The earlier audit of this row was stale: the opacity ramp and the flare of the original FXBeamPower are in the native tree."
         ],
         "reviewed_sha256": {
           "original": "3e634097ec6a15aca462352bde5eace1914c03acfac29662c156595d2af9fef4",

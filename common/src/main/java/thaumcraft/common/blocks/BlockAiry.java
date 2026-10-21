@@ -10,6 +10,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -29,7 +30,7 @@ import thaumcraft.common.tiles.TileWardingStoneFence;
  * fence; the node, the nitor and the energised node of the original family
  * already exist as their own native blocks.
  */
-public final class BlockAiry extends BaseEntityBlock implements StateDependentBlockEntity {
+public final class BlockAiry extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
     public static final MapCodec<BlockAiry> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 3).fieldOf("group").forGetter(BlockAiry::group),
             propertiesCodec()).apply(instance, BlockAiry::new));
@@ -105,6 +106,14 @@ public final class BlockAiry extends BaseEntityBlock implements StateDependentBl
         if (pending != null) builder.add(pending);
     }
 
+    /**
+     * The original BlockAiry is not drawn as a block: the 1.7.10 block answers the render type
+     * minus one (OpenTC4 BlockAiry:196-197) and the family is the invisible filler of the aura
+     * nodes. The port keeps the invisible answer on purpose, and the state that carries the
+     * warding fence is drawn by its own tile.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.INVISIBLE; }
+
     public static int variant(BlockState state) {
         Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
         if (property != null) return (Integer) state.getValue(property);
@@ -164,6 +173,18 @@ public final class BlockAiry extends BaseEntityBlock implements StateDependentBl
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         if (variant(state) != EldritchBlockRules.AIRY_WARDING_FENCE) return null;
         return new TileWardingStoneFence(pos, state);
+    }
+
+    /**
+     * BlockAiry:275-289 - the original created a tile for the metadata zero (the node), one
+     * (the nitor) and five (the energised node) and no tile for the other metadata, although
+     * the 1.7.10 class is a {@code BlockContainer} and claims a tile for every metadata. The
+     * port owns the warding fence only, the node, the nitor and the energised node are native
+     * blocks of their own, so the port answers the question per state: only the fence has a
+     * tile, and the other airy blocks are moved by a piston like in the original.
+     */
+    @Override public boolean hasBlockEntityForState(BlockState state) {
+        return variant(state) == EldritchBlockRules.AIRY_WARDING_FENCE;
     }
 
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

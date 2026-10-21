@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -23,6 +24,13 @@ public final class BlockSilverwoodNode extends RotatedPillarBlock implements Ent
     public static final MapCodec<BlockSilverwoodNode> CODEC = simpleCodec(BlockSilverwoodNode::new);
     public BlockSilverwoodNode(Properties properties) { super(properties); }
     @Override public MapCodec<BlockSilverwoodNode> codec() { return CODEC; }
+    /**
+     * The original blockMagicalLog metadata two is a full log with a node in it, and the log
+     * is drawn as the model of the pillar. The port extends {@code RotatedPillarBlock}, whose
+     * render shape is already the model, so the block entity default of 1.21.1 does not touch
+     * it; the answer is written down here to keep it that way.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), pos, state);
     }

@@ -71,7 +71,8 @@
     "ChampionDeathLootMixin",
     "VillagerVillageTradesMixin",
     "WorldGenRegionStepAccess",
-    "LevelChunkPendingBlockEntityMixin"
+    "LevelChunkPendingBlockEntityMixin",
+    "PerStateBlockEntityMixin"
   ],
   "client": [
     "client.OuterLandsDimensionEffectsMixin",

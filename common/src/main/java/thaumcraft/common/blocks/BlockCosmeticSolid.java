@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -30,7 +31,7 @@ import thaumcraft.common.tiles.TileWardingStone;
  * hosts the metadata of its own hardness group. The two metadata values that carry a block entity,
  * the warding stone and the node, keep it.
  */
-public final class BlockCosmeticSolid extends BaseEntityBlock implements StateDependentBlockEntity {
+public final class BlockCosmeticSolid extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
     public static final MapCodec<BlockCosmeticSolid> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 2).fieldOf("group").forGetter(BlockCosmeticSolid::group),
             propertiesCodec()).apply(instance, BlockCosmeticSolid::new));
@@ -107,6 +108,17 @@ public final class BlockCosmeticSolid extends BaseEntityBlock implements StateDe
         if (pending != null) builder.add(pending);
     }
 
+    /**
+     * The original BlockCosmeticSolid is an ordinary block: the 1.7.10 class extends
+     * {@code net.minecraft.block.Block} (OpenTC4 BlockCosmeticSolid:52) and it does not
+     * override {@code getRenderType()}, so the vanilla render type zero draws its model.
+     * The 1.21.1 port carries a block entity for the warding stone and for the node, and
+     * {@code BaseEntityBlock} answers {@code RenderShape.INVISIBLE} for every block entity
+     * block (Minecraft 1.21.1 BaseEntityBlock:22-25), which made the whole family invisible.
+     * The stone is drawn as the model of the variant.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+
     /** The original metadata value of a state. */
     public static int variant(BlockState state) {
         Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
@@ -146,6 +158,16 @@ public final class BlockCosmeticSolid extends BaseEntityBlock implements StateDe
             return new TileNode(ThaumcraftEldritchBlocks.COSMETIC_NODE_TILE.get(), pos, state);
         }
         return null;
+    }
+
+    /**
+     * BlockCosmeticSolid:259-265 - the original created the tile for the metadata three (the
+     * warding stone) and for the metadata eight (the node) only, and answered
+     * {@code hasTileEntity(int)} with exactly that. The port answers the question per state, so
+     * the fourteen other stones of the family are moved by a piston like in the original.
+     */
+    @Override public boolean hasBlockEntityForState(BlockState state) {
+        return EldritchBlockRules.cosmeticHasTile(variant(state));
     }
 
     /**

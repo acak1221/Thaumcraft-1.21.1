@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -29,6 +30,15 @@ public final class BlockMagicBox extends BaseEntityBlock {
     }
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
+
+    /**
+     * The original BlockMagicBox is an ordinary visible block: the 1.7.10 class extends
+     * {@code net.minecraft.block.BlockContainer} (OpenTC4 BlockMagicBox:22) and it does not
+     * override {@code getRenderType()}, so the vanilla render type zero draws its model.
+     * {@code BaseEntityBlock} answers {@code RenderShape.INVISIBLE} for every block entity
+     * block (Minecraft 1.21.1 BaseEntityBlock:22-25), so the port has to say it again.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
     /** BlockMagicBox:87-91 - every magic box carries the inventory block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

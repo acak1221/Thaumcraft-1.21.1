@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -48,7 +49,7 @@ import thaumcraft.common.tiles.TileEldritchTrap;
  * family. The original metadata became the {@link #VARIANT} block state
  * property; every number comes from {@link EldritchBlockRules}.
  */
-public final class BlockEldritch extends BaseEntityBlock implements StateDependentBlockEntity {
+public final class BlockEldritch extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
     public static final MapCodec<BlockEldritch> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 5).fieldOf("group").forGetter(BlockEldritch::group),
             propertiesCodec()).apply(instance, BlockEldritch::new));
@@ -127,6 +128,18 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
         if (pending != null) builder.add(pending);
     }
 
+    /**
+     * The original BlockEldritch is drawn by the renderer of the family: the 1.7.10 block
+     * answers the render id of the family (OpenTC4 BlockEldritch:140-141) and the client
+     * registers {@code BlockEldritchRenderer} for it (OpenTC4
+     * {@code client/renderers/block/BlockEldritchRenderer.java:86}), so the eldritch stone
+     * itself is visible; only the parts that the tile renderer draws (the cap of the altar,
+     * the lock, the crab spawner) are added by the block entity renderer of the port.
+     * {@code BaseEntityBlock} answers {@code RenderShape.INVISIBLE} for every block entity
+     * block (Minecraft 1.21.1 BaseEntityBlock:22-25), so the port has to say it again.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+
     /** The original metadata value of the state, read through the property of that state. */
     public static int variant(BlockState state) {
         Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
@@ -184,6 +197,17 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
 
     /** BlockEldritch:155-175 - the six original block entities. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return createTile(pos, state); }
+
+    /**
+     * BlockEldritch:120-122 - the original created the tile for the metadata zero (the altar),
+     * one (the obelisk), three (the cap), eight (the lock), nine (the crab spawner) and ten
+     * (the runed trap) only, and answered {@code hasTileEntity(int)} with exactly that. The
+     * port answers the question per state, so the stones of the family that never had a tile
+     * are moved by a piston like in the original.
+     */
+    @Override public boolean hasBlockEntityForState(BlockState state) {
+        return EldritchBlockRules.eldritchHasTile(variant(state));
+    }
 
     /** The dispatching factory of the shared eldritch block entity type. */
     public static BlockEntity createTile(BlockPos pos, BlockState state) {

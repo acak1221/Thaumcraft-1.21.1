@@ -137,6 +137,11 @@ found the seven defects below, which no earlier report lists.
    a single tick. The native tree compares the mod identifier and the name of each slot
    separately (`TileMagicBox.swopSlots`), so the sort always terminates. The original
    comparator is **not** copied; the deviation is written into the ledger note of the unit.
+   The second, smaller difference of the same method: the original appends the hash code of
+   the tag compound of a stack to the sort key of the sort by name, so two stacks with the
+   same display name are ordered by their tags. The 1.21.1 hash of a tag is not the 1.7.10
+   hash, so the native tree leaves the tie to the order of the list instead of pretending a
+   value it cannot reproduce.
 2. **`TileArcaneLampLight` is dead code in the original.** The oracle
    `thaumcraft/common/tiles/TileArcaneLampLight.java` is not registered as a block entity
    (`ConfigBlocks.java:343-415` registers seventy three tiles, this one is not among them), no

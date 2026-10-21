@@ -18,6 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.visnet.VisNetHandler;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
@@ -202,6 +204,14 @@ public final class TileMirror extends BlockEntity {
             instability--;
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
+        if (instability <= 0) return;
+        // Original TileMirror:314 - the instability is paid with ORDER vis of the
+        // vis network the mirror stands in, at most one unit per call.
+        int paid = VisNetHandler.drainVis(level, worldPosition, Aspect.ORDER,
+                EldritchBlockRules.mirrorInstabilityVisPayment(instability));
+        if (paid <= 0) return;
+        // Original TileMirror:315-317 - both mirrors of the pair lose the paid units.
+        addInstability(targetWorld(), -paid);
     }
 
     /** Original TileMirror:349-356 - the output stacks of the mirror. */

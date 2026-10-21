@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.IAspectSource;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileInfusionMatrix;
+import thaumcraft.common.tiles.TileMirrorEssentia;
 
 /** TC4's unsided range-12 infusion source search, with level-local coordinate caches. */
 public final class EssentiaHandler {
@@ -72,6 +75,64 @@ public final class EssentiaHandler {
         else cache.sources.put(origin.immutable(), List.copyOf(found));
     }
 
+    /**
+     * Oracle EssentiaHandler:39-60 with the slab of the essentia mirror: the
+     * sources in front of the twin pay for the unit the mirror hands out. The
+     * scan is the original one: a rectangle that is eight blocks deep in the
+     * direction of the twin and seventeen blocks wide in the other two axes.
+     */
+    public static boolean drainEssentiaForMirror(BlockEntity source, Aspect aspect, Direction direction, int range, boolean ignoreMirror) {
+        if (source == null || aspect == null || direction == null || range <= 0) return false;
+        if (!(source.getLevel() instanceof ServerLevel level)) return false;
+        if (!level.getServer().isSameThread()) throw new IllegalStateException("Mirror essentia drains require the server thread");
+        BlockPos origin = source.getBlockPos();
+        for (BlockPos sourcePos : mirrorSources(level, origin, direction, range)) {
+            // Original H49-53: a missing/non-source entry BREAKS the scan.
+            if (!level.hasChunkAt(sourcePos)) break;
+            BlockEntity candidate = level.getBlockEntity(sourcePos);
+            if (!(candidate instanceof IAspectSource aspectSource) || !current(candidate, level)) break;
+            // The original skips every mirror when the mirror asks, so a pair of
+            // mirrors never pays for itself.
+            if (ignoreMirror && candidate instanceof TileMirrorEssentia) continue;
+            if (!aspectSource.takeFromContainer(aspect, 1)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    /** Oracle EssentiaHandler:96-125 - the slab of the direction the twin looks at. */
+    private static List<BlockPos> mirrorSources(ServerLevel level, BlockPos origin, Direction direction, int range) {
+        LevelSources cache = LEVELS.computeIfAbsent(level, ignored -> new LevelSources());
+        List<BlockPos> cached = cache.mirrorSources.get(origin);
+        if (cached != null) return cached;
+        Long retry = cache.mirrorRetryAfter.get(origin);
+        if (retry != null) {
+            if (retry > System.currentTimeMillis()) return List.of();
+            cache.mirrorRetryAfter.remove(origin);
+        }
+        List<BlockPos> found = new ArrayList<>();
+        for (int first = -range; first <= range; first++) {
+            for (int second = -range; second <= range; second++) {
+                for (int depth = 0; depth < range; depth++) {
+                    if (first == 0 && second == 0 && depth == 0) continue;
+                    BlockPos pos = slabCell(origin, direction, first, second, depth);
+                    if (!level.isInWorldBounds(pos) || !level.hasChunkAt(pos)) continue;
+                    BlockEntity source = level.getBlockEntity(pos);
+                    if (source instanceof IAspectSource && current(source, level)) found.add(pos);
+                }
+            }
+        }
+        if (found.isEmpty()) cache.mirrorRetryAfter.put(origin.immutable(), System.currentTimeMillis() + DELAY_MILLIS);
+        else cache.mirrorSources.put(origin.immutable(), List.copyOf(found));
+        return found;
+    }
+
+    /** The original places the slab along the direction the twin looks at. */
+    private static BlockPos slabCell(BlockPos origin, Direction direction, int first, int second, int depth) {
+        int[] offset = EldritchBlockRules.mirrorEssentiaSlabOffset(direction, first, second, depth);
+        return origin.offset(offset[0], offset[1], offset[2]);
+    }
+
     /** Original H136-137 clears coordinates only, NEVER the wall-clock delay. */
     public static void refreshSources(TileInfusionMatrix matrix) {
         if (!(matrix.getLevel() instanceof ServerLevel level)) return;
@@ -96,5 +157,7 @@ public final class EssentiaHandler {
     private static final class LevelSources {
         final Map<BlockPos, List<BlockPos>> sources = new HashMap<>();
         final Map<BlockPos, Long> retryAfter = new HashMap<>();
+        final Map<BlockPos, List<BlockPos>> mirrorSources = new HashMap<>();
+        final Map<BlockPos, Long> mirrorRetryAfter = new HashMap<>();
     }
 }

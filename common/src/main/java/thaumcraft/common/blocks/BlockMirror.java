@@ -7,7 +7,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -27,6 +31,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.items.relics.ItemHandMirror;
 import thaumcraft.common.tiles.TileMirror;
 import thaumcraft.common.tiles.TileMirrorEssentia;
 
@@ -83,6 +88,19 @@ public final class BlockMirror extends BaseEntityBlock {
         return new TileMirror(pos, state);
     }
 
+    /**
+     * BlockMirror:92-104 - both mirror tiles update. The item mirror ejects its
+     * items, decays its instability and repairs a broken link, the essentia
+     * mirror repairs its own broken link. Without the ticker neither tile ever
+     * ran.
+     */
+    @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide) return null;
+        return state.getValue(ESSENTIA)
+                ? createTickerHelper(type, ThaumcraftEldritchBlocks.MIRROR_ESSENTIA_TILE.get(), TileMirrorEssentia::tick)
+                : createTickerHelper(type, ThaumcraftEldritchBlocks.MIRROR_TILE.get(), TileMirror::tick);
+    }
+
     /** BlockMirror:150-176 - the mirror breaks when it loses its support. */
     @Override protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos neighbourPos, boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighbor, neighbourPos, movedByPiston);
@@ -121,5 +139,18 @@ public final class BlockMirror extends BaseEntityBlock {
     /** BlockMirror:227-235 - the original right click is consumed without opening a container. */
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         return InteractionResult.CONSUME;
+    }
+
+    /**
+     * BlockMirror:227-235 with ItemHandMirror:100-121 - the original ran the
+     * item hook before the mirror consumed the click, so the hand mirror skips
+     * the default block interaction of 1.21.1 and every other item is still
+     * refused by the mirror.
+     */
+    @Override protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!stack.isEmpty() && stack.getItem() instanceof ItemHandMirror) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        }
+        return ItemInteractionResult.CONSUME;
     }
 }

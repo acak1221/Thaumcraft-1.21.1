@@ -2,6 +2,7 @@ package thaumcraft.eldritch;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import static org.junit.jupiter.api.Assertions.*;
@@ -160,6 +161,26 @@ class EldritchBlockRulesTest {
         assertEquals(3, EldritchBlockRules.mirrorEssentiaDrainAmount(3));
     }
 
+    @Test void theEssentiaMirrorPaysFromTheSlabInFrontOfItsTwin() {
+        // Oracle TileMirrorEssentia:194-201 - the network that pays is the slab
+        // in front of the twin, eight blocks deep in the direction it looks at.
+        assertArrayEquals(new int[] {0, 0, 0}, EldritchBlockRules.mirrorEssentiaSlabOffset(Direction.NORTH, 0, 0, 0));
+        assertArrayEquals(new int[] {3, -2, -1}, EldritchBlockRules.mirrorEssentiaSlabOffset(Direction.NORTH, 3, -2, 1));
+        assertArrayEquals(new int[] {2, 4, 1}, EldritchBlockRules.mirrorEssentiaSlabOffset(Direction.SOUTH, 2, 4, 1));
+        assertArrayEquals(new int[] {2, 1, 5}, EldritchBlockRules.mirrorEssentiaSlabOffset(Direction.EAST, 1, 5, 2));
+        assertArrayEquals(new int[] {-2, 1, 5}, EldritchBlockRules.mirrorEssentiaSlabOffset(Direction.WEST, 1, 5, 2));
+        assertArrayEquals(new int[] {2, 6, 3}, EldritchBlockRules.mirrorEssentiaSlabOffset(Direction.UP, 2, 3, 6));
+        assertArrayEquals(new int[] {2, -6, 3}, EldritchBlockRules.mirrorEssentiaSlabOffset(Direction.DOWN, 2, 3, 6));
+    }
+
+    @Test void theInstabilityIsPaidWithAtMostOneOrderVis() {
+        // Oracle TileMirror:314 - the payment is min(instability, 1) ORDER vis.
+        assertEquals(1, EldritchBlockRules.mirrorInstabilityVisPayment(1));
+        assertEquals(1, EldritchBlockRules.mirrorInstabilityVisPayment(50));
+        assertEquals(0, EldritchBlockRules.mirrorInstabilityVisPayment(0));
+        assertEquals(0, EldritchBlockRules.mirrorInstabilityVisPayment(-3));
+    }
+
     @Test void mirrorLinkIsOnlyValidWhenBothSidesPointAtEachOther() {
         assertTrue(EldritchBlockRules.mirrorLinksMatch(true, true, 1, 2, 3, 0, 1, 2, 3, 0));
         assertFalse(EldritchBlockRules.mirrorLinksMatch(false, true, 1, 2, 3, 0, 1, 2, 3, 0));
@@ -257,6 +278,28 @@ class EldritchBlockRulesTest {
         assertEquals(-1, EldritchBlockRules.fluxScrubberReducedLevel(0));
         assertEquals(16, EldritchBlockRules.FLUX_SCAN_DISTANCE);
         assertEquals(5, EldritchBlockRules.FLUX_POWER_PER_BLOCK);
+    }
+
+    @Test void theFluxScrubberOnlyCleansTheSquaredRadiusOfSixteen() {
+        // Oracle TileFluxScrubber:92 - only the flux whose squared distance to
+        // the scrubber is below 256 is cleaned.
+        assertTrue(EldritchBlockRules.fluxScrubberInRange(0, 0, 0));
+        assertTrue(EldritchBlockRules.fluxScrubberInRange(15, 0, 0));
+        assertTrue(EldritchBlockRules.fluxScrubberInRange(9, 9, 9));
+        assertFalse(EldritchBlockRules.fluxScrubberInRange(16, 0, 0));
+        assertFalse(EldritchBlockRules.fluxScrubberInRange(0, 0, 16));
+        assertFalse(EldritchBlockRules.fluxScrubberInRange(12, 12, 12));
+        assertFalse(EldritchBlockRules.fluxScrubberInRange(16, 16, 16));
+    }
+
+    @Test void theItemFilterIsTheOpenAndTheClosedGrate() {
+        // Oracle EntityItemGrate:26-36 - the item filter is the metal device of
+        // the fifth and the sixth metadata.
+        assertTrue(EldritchBlockRules.itemFilterBlock(true, false, 0));
+        assertTrue(EldritchBlockRules.itemFilterBlock(false, true, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED));
+        assertTrue(EldritchBlockRules.itemFilterBlock(false, true, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN));
+        assertFalse(EldritchBlockRules.itemFilterBlock(false, true, 0));
+        assertFalse(EldritchBlockRules.itemFilterBlock(false, false, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN));
     }
 
     // ---------------------------------------------------------- ethereal bloom

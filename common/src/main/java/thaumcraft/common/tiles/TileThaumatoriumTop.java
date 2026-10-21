@@ -6,12 +6,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
+import thaumcraft.common.config.ThaumcraftDistillation;
 import thaumcraft.common.config.ThaumcraftThaumatorium;
+import thaumcraft.common.lib.ThaumatoriumRules;
 import thaumcraft.common.lib.essentia.EssentiaAtomicEndpoint;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
 
@@ -20,6 +23,17 @@ public final class TileThaumatoriumTop extends BlockEntity implements WorldlyCon
     public TileThaumatoriumTop(BlockPos pos, BlockState state) { super(ThaumcraftThaumatorium.TOP_TILE.get(), pos, state); }
     public TileThaumatorium main() { return level != null && !isRemoved() && level.hasChunkAt(worldPosition.below())
             && level.getBlockEntity(worldPosition.below()) instanceof TileThaumatorium main && main.structureValid() ? main : null; }
+
+    /**
+     * Original TileThaumatoriumTop:36-47 - the upper half watches the lower one.
+     * A top without its lower half becomes the alchemical construct, exactly as
+     * the original turned its orphaned half into the construct of metadata nine.
+     */
+    public static void tick(Level level, BlockPos pos, BlockState state, TileThaumatoriumTop top) {
+        if (level.isClientSide || !level.hasChunkAt(pos.below())) return;
+        if (!ThaumatoriumRules.orphanBecomesConstruct(level.getBlockEntity(pos.below()) instanceof TileThaumatorium)) return;
+        level.setBlock(pos, ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT.get().defaultBlockState(), Block.UPDATE_ALL);
+    }
     @Override public boolean isConnectable(Direction face) { return main() != null && main().isConnectable(face); }
     @Override public boolean canInputFrom(Direction face) { return isConnectable(face); }
     @Override public boolean canOutputTo(Direction face) { return false; }

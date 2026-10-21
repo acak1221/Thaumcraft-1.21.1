@@ -29,6 +29,7 @@ import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileCentrifuge;
 import thaumcraft.common.tiles.TileEssentiaCrystalizer;
 import thaumcraft.common.tiles.TileEssentiaReservoir;
+import thaumcraft.common.tiles.TileMirrorEssentia;
 import thaumcraft.common.items.ItemCrystalEssence;
 import thaumcraft.common.tiles.TileArcaneBore;
 import thaumcraft.common.lib.bore.BoreWork;
@@ -995,7 +996,8 @@ public final class EssentiaTransfers {
         if (wanted == null || source == consumer || !(consumer.getLevel() instanceof ServerLevel level)) return 0;
         if (!level.getServer().isSameThread()) throw new IllegalStateException("Infusion consumption requires the server thread");
         if (MUTATION.get() != null || !(consumer instanceof InfusionDemandEndpoint demand)
-                || !(source instanceof IAspectSource) || !(source instanceof EssentiaStorageEndpoint || source instanceof TileEssentiaReservoir)
+                || !(source instanceof IAspectSource) || !(source instanceof EssentiaStorageEndpoint || source instanceof TileEssentiaReservoir
+                        || source instanceof TileMirrorEssentia)
                 || !current(consumer, level) || !current(source, level)) return 0;
         int dx = source.getBlockPos().getX() - consumer.getBlockPos().getX();
         int dy = source.getBlockPos().getY() - consumer.getBlockPos().getY();
@@ -1003,6 +1005,9 @@ public final class EssentiaTransfers {
         // Original UNKNOWN/range12 search: dy -12..11, not a sphere or LOS.
         if (Math.abs(dx) > 12 || Math.abs(dz) > 12 || dy < -12 || dy >= 12) return 0;
         if (source instanceof TileEssentiaReservoir reservoir) return consumeFromReservoir(level, demand, consumer, reservoir, wanted);
+        // The essentia mirror is an aspect source without a stock of its own: it
+        // pays with one unit of the network in front of its twin.
+        if (source instanceof TileMirrorEssentia mirror) return consumeFromMirror(level, demand, consumer, mirror, wanted);
         EssentiaStorageEndpoint storage = (EssentiaStorageEndpoint) source;
         Mutation mutation = new Mutation(consumer, source);
         MUTATION.set(mutation);
@@ -1050,6 +1055,34 @@ public final class EssentiaTransfers {
             } finally {
                 demand.notifyInfusionEssentiaChanged();
             }
+            return 1;
+        } finally {
+            mutation.raw = false;
+            MUTATION.remove();
+        }
+    }
+
+    /**
+     * The essentia mirror keeps no stock of its own: it pays the matrix with a
+     * single unit of the network in front of its twin. The original pays the
+     * source first, so the unit leaves the twin's network before the matrix
+     * forgets its demand.
+     */
+    private static int consumeFromMirror(ServerLevel level, InfusionDemandEndpoint demand, BlockEntity consumer,
+                                          TileMirrorEssentia mirror, Aspect wanted) {
+        if (!current(consumer, level) || !current(mirror, level)) return 0;
+        int pending = demand.getPendingEssentia(wanted);
+        if (pending <= 0) return 0;
+        // The mirror pays outside the raw scope: the network of the twin is a
+        // normal stock that must not be written inside a foreign mutation.
+        if (!mirror.takeFromContainer(wanted, 1)) return 0;
+        Mutation mutation = new Mutation(consumer, mirror);
+        MUTATION.set(mutation);
+        try {
+            mutation.raw = true;
+            demand.consumeInfusionEssentiaRaw(wanted);
+            mutation.raw = false;
+            demand.notifyInfusionEssentiaChanged();
             return 1;
         } finally {
             mutation.raw = false;

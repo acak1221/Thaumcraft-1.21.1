@@ -61,6 +61,35 @@ public final class DeviceContainerRules {
     /** Oracle ContainerHandMirror:65 - an equal stack opens the player inventory. */
     public static boolean handMirrorShowsLinkedInventory(boolean slotEmpty, boolean slotEqualsMirror) { return !slotEmpty && slotEqualsMirror; }
 
+    /** What the hand mirror found when it looked for the mirror it is linked to. */
+    public enum HandMirrorTarget {
+        /** Oracle ItemHandMirror:158 - the hand mirror carries no link at all. */
+        NO_LINK,
+        /** Oracle ItemHandMirror:129-132 - the dimension of the link does not exist. */
+        NO_WORLD,
+        /** Oracle ItemHandMirror:133-139 - the mirror is gone, the link dies with it. */
+        NO_MIRROR,
+        /** Oracle ItemHandMirror:140 - the mirror is there and its view opens. */
+        MIRROR
+    }
+
+    /**
+     * Oracle ItemHandMirror:123-143 - the world of the link is asked first, the
+     * mirror inside that world second.
+     */
+    public static HandMirrorTarget handMirrorTarget(boolean linked, boolean worldFound, boolean mirrorFound) {
+        if (!linked) return HandMirrorTarget.NO_LINK;
+        if (!worldFound) return HandMirrorTarget.NO_WORLD;
+        if (!mirrorFound) return HandMirrorTarget.NO_MIRROR;
+        return HandMirrorTarget.MIRROR;
+    }
+
+    /** Oracle ItemHandMirror:140 - the view of the hand mirror only opens for a mirror that is there. */
+    public static boolean handMirrorOpensView(HandMirrorTarget target) { return target == HandMirrorTarget.MIRROR; }
+
+    /** Oracle ItemHandMirror:134-139 - a mirror that is gone clears the link of the hand mirror. */
+    public static boolean handMirrorClearsLink(HandMirrorTarget target) { return target == HandMirrorTarget.NO_MIRROR; }
+
     // --------------------------------------------------------------- focus pouch
     // Oracle ContainerFocusPouch, InventoryFocusPouch.
     public static final int FOCUS_POUCH_SLOTS = 18;
@@ -134,6 +163,16 @@ public final class DeviceContainerRules {
         // Oracle ContainerGhostSlots:93-95 - a different item replaces the ghost
         // with the whole held stack, unclamped by the slot limit.
         return heldCount;
+    }
+
+    /**
+     * Oracle ContainerGhostSlots:129-134 - the preview of a ghost slot keeps the
+     * item it had, unless a different item is held: then the preview becomes the
+     * held item itself, with the amount of the held stack. A held stack that
+     * does not fit the slot leaves the preview alone.
+     */
+    public static boolean ghostTakesHeldItem(boolean sameItem, int heldCount, int limit) {
+        return !sameItem && heldCount > 0 && heldCount <= limit;
     }
 
     // -------------------------------------------------------- limited-by rules

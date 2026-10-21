@@ -105,6 +105,17 @@ public final class ThaumcraftEldritchBlocks {
 
     // ------------------------------------------------------------------ blocks
 
+    /**
+     * Original BlockMirror:68 - the custom sound type of the mirror: the sound
+     * {@code thaumcraft:jar} with the volume 0.5 and the pitch 2.0.
+     */
+    public static final SoundType MIRROR_SOUND = new CustomSoundType("jar", 0.5F, 2.0F);
+    /**
+     * Original ConfigBlocks:302 - the custom sound type of the loot urn: the sound
+     * {@code thaumcraft:urnbreak} with the volume 1.0 and the pitch 0.7.
+     */
+    public static final SoundType LOOT_URN_SOUND = new CustomSoundType("urnbreak", 1.0F, 0.7F);
+
     /** The eldritch altar, obelisk, obelisk middle and capstone. */
     public static final RegistrySupplier<BlockEldritch> ELDRITCH = BLOCKS.register("eldritch",
             () -> BlockEldritch.group(0, eldritchProperties(0)));
@@ -219,7 +230,7 @@ public final class ThaumcraftEldritchBlocks {
                     // Original BlockMirror:68 - the mirror plays the custom sound "thaumcraft:jar"
                     // with the volume 0.5 and the pitch 2.0 (CustomStepSound), not the vanilla
                     // glass sound.
-                    .strength(1.0F, 6.0F).sound(new CustomSoundType("jar", 0.5F, 2.0F)).noOcclusion()));
+                    .strength(1.0F, 6.0F).sound(MIRROR_SOUND).noOcclusion()));
 
     public static final RegistrySupplier<BlockMetalDevice> METAL_DEVICE = BLOCKS.register("metal_device",
             () -> new BlockMetalDevice(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
@@ -251,7 +262,7 @@ public final class ThaumcraftEldritchBlocks {
             // Original ConfigBlocks:302 - the loot urn plays the custom sound "thaumcraft:urnbreak"
             // with the volume 1.0 and the pitch 0.7 (CustomStepSound), not the vanilla stone sound.
             () -> new BlockLoot(BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.15F, 0.0F)
-                    .sound(new CustomSoundType("urnbreak", 1.0F, 0.7F)).noOcclusion()));
+                    .sound(LOOT_URN_SOUND).noOcclusion()));
 
     public static final RegistrySupplier<BlockLoot> LOOT_CRATE = BLOCKS.register("loot_crate",
             () -> new BlockLoot(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.15F, 0.0F).sound(SoundType.WOOD).noOcclusion()));

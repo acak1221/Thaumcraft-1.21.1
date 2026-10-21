@@ -53,6 +53,16 @@ import thaumcraft.common.lib.tiles.LegacyTileRules;
  * ({@code ConfigBlocks.FLUIDDEATH}). 1.21.1 has no viscosity of its own, so the death fluid keeps the native
  * liquid movement and never pushes an entity.
  * <p>
+ * The original death fluid was built over {@code Material.water} (oracle BlockFluidDeath:39,
+ * {@code super(ConfigBlocks.FLUIDDEATH, Material.field_151586_h)}; {@code Material.field_151586_h} is
+ * {@code Material.water}, see the readable 1.7.10 reference {@code RenderEventHandler:367}), so a 1.7.10
+ * entity that stood in it was an entity in water: it swam, it took no fall damage and it drowned after the
+ * air supply was gone. The native port therefore carries the death fluid in the vanilla
+ * {@code minecraft:water} tag ({@code data/minecraft/tags/fluid/water.json}), which is the 1.21.1
+ * counterpart of that material. The drowning of the original is unreachable in practice: the cell damages
+ * every living thing by its quanta, so a player dies in five ticks in the source cell, and the original
+ * drowned in the same way.
+ * <p>
  * Oracle: {@code thaumcraft/common/blocks/BlockFluidDeath.java}, lines 33-81 and
  * {@code thaumcraft/common/config/ConfigBlocks.java}:166.
  */
@@ -143,7 +153,11 @@ public final class BlockFluidDeath extends LiquidBlock {
         living.hurt(level.damageSources().magic(), damage(state.getValue(LEVEL)));
     }
 
-    /** The original death fluid does not push entities and does not drown them. */
+    /**
+     * The original death fluid is a liquid of {@code Material.water} and does not collide with an entity.
+     * The native cell is in the vanilla water tag, so the 1.21.1 engine owns the swim, the fall damage
+     * and the drowning of an entity that stands in it, exactly like the 1.7.10 material did.
+     */
     @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.empty();
     }

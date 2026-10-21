@@ -13,6 +13,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
@@ -35,6 +36,11 @@ public final class ThaumcraftFlux {
 
     public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties(false)));
     public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties(true)));
+    /**
+     * Original BlockFluxGoo:50 - the custom sound type of the flux goo: the sound
+     * {@code thaumcraft:gore} with the volume 1.0 and the pitch 1.0.
+     */
+    public static final SoundType FLUX_GOO_SOUND = new CustomSoundType("gore", 1.0F, 1.0F);
     /**
      * The original items of the two finite fluids.
      *
@@ -61,7 +67,7 @@ public final class ThaumcraftFlux {
         // with the volume 1.0 and the pitch 1.0 (CustomSoundType). The flux gas of the
         // original (BlockFluxGas:46) has no custom sound of its own and keeps the sound
         // of its material, so nothing is set here.
-        if (goo) properties = properties.sound(new CustomSoundType("gore", 1.0F, 1.0F));
+        if (goo) properties = properties.sound(FLUX_GOO_SOUND);
         return properties;
     }
 

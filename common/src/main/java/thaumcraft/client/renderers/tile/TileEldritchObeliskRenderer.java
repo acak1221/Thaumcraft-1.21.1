@@ -51,6 +51,12 @@ public final class TileEldritchObeliskRenderer implements BlockEntityRenderer<Ti
      */
     @Override public boolean shouldRenderOffScreen(TileEldritchObelisk tile) { return true; }
 
+    /**
+     * Original TileEldritchObelisk:37-39 - the obelisk is drawn up to ninety six blocks
+     * away, the square root of the 9216 of the original.
+     */
+    @Override public int getViewDistance() { return 96; }
+
     @Override public void render(TileEldritchObelisk tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (tile.getLevel() == null) return;
         var player = Minecraft.getInstance().player;

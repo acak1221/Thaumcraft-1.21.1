@@ -5,7 +5,7 @@ eldritch models, the eldritch block models and block states, the eldritch tiles 
 Outer Lands units of the world package.
 
 **Result.** 33 units moved `partial -> parity_verified`, 4 stay `partial` with a precise
-blocker. Nine defects were found and fixed. The client was **not** run (no Gradle in this
+blocker. Six defects were found and fixed. The client was **not** run (no Gradle in this
 wave): the acceptance criteria for the frames are in §7.
 
 ---
@@ -135,31 +135,28 @@ What the family was still missing was the **geometry** of the stones: see §3.1.
   bakes the guardian and compares the texture coordinates of the two shoulder plates: the
   mirrored plate keeps the same coordinates but in the opposite order.
 
-### 3.4 The eldritch golem, the guardian and the warden floated above the floor
-
-* **Original.** `RenderEldritchGolem.java:57` and `RenderEldritchGuardian.java:68` draw the
-  mesh **one entity height below** the position of the entity
-  (`d3 = par4 - golem.height`), because the original mesh of the three mobs is built around
-  its own middle while the vanilla 1.7.10 renderer already lifts the model by 1.5 blocks
-  (`RendererLivingEntity`: `glTranslatef(0, -24 * 0.0625 - 0.0078125, 0)`). The warden sinks
-  further while it spawns (`RenderEldritchGuardian.java:69-71`).
-* **Port.** `RenderEldritchGolem`, `RenderEldritchGuardian` and `RenderEldritchWarden` had
-  lost that offset, so the three mobs floated 2.25 to 3.5 blocks above the ground.
-* **Fix.** The three renderers translate by `-getBbHeight()`; the warden adds the share of
-  the spawn timer of the original.
-* **Evidence.** the sizes of the entities are the original ones
-  (`EntityEldritchGuardian:111` `setSize(0.8, 2.25)`, `EntityEldritchWarden:110`
-  `setSize(1.5, 3.5)`, `EntityEldritchGolem:92` `setSize(1.75, 3.5)`) and the port
-  registers the same sizes.
-
-### 3.5 The warden never drew its hood eye
+### 3.4 The warden never drew its hood eye
 
 * **Original.** `ModelEldritchGuardian.java:467-479`: the warden alone draws the hood eye a
   hundredth larger than the hood and with the pulsing light of the original.
 * **Port.** `RenderEldritchWarden` hid the part and never drew it again.
 * **Fix.** the warden draws the eye again, with the full bright light of the 1.21.1 lightmap.
 
-### 3.6 The link line of the ritualist cleric was a coloured line instead of a ribbon
+> **A claim of an earlier draft of this report was wrong and is not a defect of the
+> port.** The offset of the original renderers of the golem and of the guardian
+> (`RenderEldritchGolem.java:57` and `RenderEldritchGuardian.java:68`) is
+> `par4 - entity.field_70129_M`, and `field_70129_M` is **`yOffset`** (MCP
+> `fields.csv`: `field_70129_m,yOffset`), which is zero for a mob — **not** the height
+> (`field_70131_O` is the height). The three mobs are therefore drawn at the position of
+> the entity, and the port already did that. The warden alone sinks, by its height times
+> the share of its spawn timer (`RenderEldritchGuardian.java:69-71`), which the port
+> reproduces.
+* **Evidence.** the sizes of the entities are the original ones
+  (`EntityEldritchGuardian:111` `setSize(0.8, 2.25)`, `EntityEldritchWarden:110`
+  `setSize(1.5, 3.5)`, `EntityEldritchGolem:92` `setSize(1.75, 3.5)`) and the port
+  registers the same sizes.
+
+### 3.5 The link line of the ritualist cleric was a coloured line instead of a ribbon
 
 * **Original.** `RenderCultist.java:83-163` draws the link as a scrolling ribbon of
   `textures/misc/wispy.png`, twice: once widened in y and once widened in x. The wave uses
@@ -176,7 +173,7 @@ What the family was still missing was the **geometry** of the stones: see §3.1.
   segment count, the phase is seeded from the entity id and the line starts at the eye
   height.
 
-### 3.7 The obelisk and the gate were culled by the frustum
+### 3.6 The obelisk and the gate were culled by the frustum
 
 * **Original.** `TileEldritchObelisk.java:40-43`: the render bounding box of the obelisk is
   five blocks high. `TileEldritchPortal.java:34-37`: the gate is drawn in a cube of three
@@ -186,8 +183,13 @@ What the family was still missing was the **geometry** of the stones: see §3.1.
   1.21.1 has no render bounding box for a block entity any more
   (`net/minecraft/world/level/block/entity/BlockEntity` has no `getRenderBoundingBox`); the
   1.21.1 way to say the same is `BlockEntityRenderer.shouldRenderOffScreen`.
+  The original also draws the two tiles up to ninety six blocks away
+  (`TileEldritchObelisk.java:37-39` and `TileEldritchPortal.java:31-33`,
+  `getMaxRenderDistanceSquared` of 9216), while the 1.21.1 default of
+  `BlockEntityRenderer.getViewDistance` is sixty four.
 * **Fix.** `TileEldritchObeliskRenderer.shouldRenderOffScreen` and
-  `TileEldritchPortalRenderer.shouldRenderOffScreen` answer `true`.
+  `TileEldritchPortalRenderer.shouldRenderOffScreen` answer `true` and their
+  `getViewDistance` answers 96.
 
 ---
 
@@ -324,8 +326,8 @@ in this wave (no Gradle, no client).
    rest angle (the arm raised forward) when the phase is zero, and the cloth of the golem
    swings with the same phase as the legs.
 6. **The three eldritch mobs stand on the floor.** The eldritch golem, the eldritch guardian
-   and the eldritch warden have to stand on the ground with their feet, not float two or
-   three blocks above it. The warden has to rise out of the floor while it spawns and sink
+   and the eldritch warden have to stand on the ground with their feet, not float above it
+   and not sink into it. The warden has to rise out of the floor while it spawns and sink
    back.
 7. **The warden shows its glowing eye.** The hood of the warden shows a bright eye that the
    guardian does not have.

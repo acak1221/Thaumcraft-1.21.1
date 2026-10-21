@@ -9913,8 +9913,8 @@
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderEldritchGolem.java:1-67 the golem render model",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGolem.java:1-60 the native golem render model",
-          "oracle thaumcraft/client/renderers/entity/RenderEldritchGolem.java:57 the mesh of the golem is drawn one entity height below the position of the entity",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGolem.java:38-47 the same offset with the height of the entity",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGolem.java:57 the mesh of the golem is drawn at the position of the entity, the offset of the original is the yOffset of the entity and not its height",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGolem.java:29-30 the scale of 2.15 of the original and the alpha blending of the body",
           "oracle thaumcraft/client/renderers/entity/RenderEldritchGolem.java:59 the scale of 2.15 and native RenderEldritchGolem.java:30 the same scale"
         ],
         "notes": [
@@ -9963,8 +9963,8 @@
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:1-85 the guardian render model",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:1-70 the native guardian render model",
-          "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:68 the mesh of the guardian is drawn one entity height below the position of the entity",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:25-31 the same offset with the height of the entity",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:68 the mesh of the guardian is drawn at the position of the entity, the offset of the original is the yOffset of the entity and not its height",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:18-24 the same fade of the guardian with the distance to the player and the difficulty",
           "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:70-80 the fade of the guardian with the distance to the player and the difficulty and native RenderEldritchGuardian.java:18-24 the same rule"
         ],
         "notes": [
@@ -10057,8 +10057,8 @@
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:1-60 1.12 warden render model",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:1-60 the native warden render model",
-          "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:60-79 the warden is the guardian mesh with the warden sheet, the scale of 1.5 and the lift out of the floor while it spawns",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:55-60 the same lift and the same height of the entity",
+          "oracle thaumcraft/client/renderers/entity/RenderEldritchGuardian.java:60-79 the warden is the guardian mesh with the warden sheet, the scale of 1.5 and the lift out of the floor while it spawns, the height of the entity times the share of the spawn timer",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:55-61 the same lift of the original",
           "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:467-479 the warden alone draws its hood eye a hundredth larger and with the light of the original",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderEldritchWarden.java:78-90 the same hood eye with the full bright light"
         ],

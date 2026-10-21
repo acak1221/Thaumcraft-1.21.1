@@ -52,14 +52,13 @@ public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWar
 
     @Override public ResourceLocation getTextureLocation(EntityEldritchWarden warden) { return SKIN; }
 
-    /** Original doRenderLiving:60-79 sank the warden while it was still spawning. */
+    /** Original doRenderLiving:69-71 sank the warden while it was still spawning. */
     @Override public Vec3 getRenderOffset(EntityEldritchWarden warden, float partial) {
         int timer = warden.getSpawnTimer();
-        // Original doRenderLiving:68-71 - the mesh of the warden was drawn one entity
-        // height below the position of the entity, and the spawning warden sank further
-        // by its own height times the share of the spawn timer that had passed.
-        float lift = 1.0F + (timer > 0 ? timer / 150.0F : 0.0F);
-        return new Vec3(0, -warden.getBbHeight() * lift, 0);
+        if (timer <= 0) return Vec3.ZERO;
+        // The original sinks the warden by its own height times the share of the spawn
+        // timer that has passed.
+        return new Vec3(0, -warden.getBbHeight() * (timer / 150F), 0);
     }
 
     @Override public void render(EntityEldritchWarden warden, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {

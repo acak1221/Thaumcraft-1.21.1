@@ -22,12 +22,6 @@ public final class RenderEldritchGuardian extends MobRenderer<EntityEldritchGuar
             alpha=distance<256?.6F:(float)(1-Math.min(cap-256,distance-256)/(cap-256))*.6F;
         }
         final float opacity=alpha;
-        // Original doRenderLiving:68 - the guardian mesh was drawn one entity height below
-        // the position of the entity; the original mesh is built around its own middle.
-        pose.pushPose();
-        try {
-            pose.translate(0.0F, -entity.getBbHeight(), 0.0F);
-            super.render(entity,yaw,partial,pose,type->new WarpAlphaVertex(buffers.getBuffer(type),opacity),light);
-        } finally { pose.popPose(); }
+        super.render(entity,yaw,partial,pose,type->new WarpAlphaVertex(buffers.getBuffer(type),opacity),light);
     }
 }

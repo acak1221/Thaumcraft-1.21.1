@@ -381,3 +381,13 @@ expressed on the class of a block; the rule that the scrubber uses at runtime
 * The class order of the suite is now random. The leader may prefer the default order; the
   file `common/src/test/resources/junit-platform.properties` is the only place that has to
   be deleted for that.
+* **The shared Loom cache.** During one verification run the Gradle daemon of this
+  worktree found a stale lock file of the shared cache
+  (`~/.gradle/caches/fabric-loom/.18aaeb….lock`, the owner process was gone) and therefore
+  **rebuilt** the cache; the rebuild of the NeoForge part of the cache needs the network
+  and the run failed with *"Failed to setup Minecraft … Failed download after 3 attempts"*.
+  The next run rebuilt the part successfully and the suite was green. The artifacts that
+  the build actually consumes (`~/.gradle/caches/fabric-loom/minecraftMaven/**`) were not
+  touched, but the NeoForge directory of the cache
+  (`~/.gradle/caches/fabric-loom/1.21.1/neoforge/21.1.259/`) was rebuilt. The lesson for
+  the leader: **one Gradle at a time on this machine**, the cache lock is shared.

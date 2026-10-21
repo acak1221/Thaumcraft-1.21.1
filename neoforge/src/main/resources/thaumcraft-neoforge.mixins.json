@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "thaumcraft.neoforge.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "NeoForgeExcavationRemovalMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

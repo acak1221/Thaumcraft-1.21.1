@@ -1378,11 +1378,13 @@
         "evidence": [
           "legacy src/main/java/thaumcraft/api/aura/AuraHelper.java the TC6 aura helper with the per chunk aura and the flux accessors",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:16 public final class AuraHelper",
-          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:29 public static TileNode node(Level level, BlockPos pos)"
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:29 public static TileNode node(Level level, BlockPos pos)",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 drainVis over the essence of the node at the position"
         ],
         "notes": [
           "Not an original TC4 class: a TC6 helper. The native projects it onto the aura node: the vis accessors read and write the node at the position.",
-          "REMAINING GAP: the TC6 per-chunk aura and the flux accessors have no counterpart, because TC4 has no per-chunk aura."
+          "REMAINING GAP: the TC6 per-chunk aura, the per-chunk base and the flux accessors have no counterpart, because TC4 4.2.3.5 has no per-chunk aura at all (the aura is the aura node, oracle TileNodeEnergized:27,165).",
+          "REMAINING GAP (api lane): the one working method of the 1.12 handler drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis), while the native AuraHelper.drainVis drains the node AT the position. An add-on that expected the network wide drain sees a different result; the api lane owns AuraHelper."
         ],
         "reviewed_sha256": {
           "legacy": "0165281eb205905d5cb51884d37399c40734c1011cf7b61dcc90d650f20f460b"
@@ -2593,11 +2595,12 @@
         "evidence": [
           "oracle thaumcraft/api/nodes/INode.java:14-28 the nine members of the contract",
           "native common/src/main/java/thaumcraft/api/nodes/INode.java the nine members of the contract",
-          "native common/src/main/java/thaumcraft/api/nodes/NodeAdapter.java setNodeType and setNodeModifier throw UnsupportedOperationException"
+          "native common/src/main/java/thaumcraft/api/nodes/NodeAdapter.java setNodeType and setNodeModifier throw UnsupportedOperationException",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java the native node keeps its own nested NodeType/NodeModifier enums (2026-10-23 review)"
         ],
         "notes": [
           "The interface itself is ported member for member.",
-          "REMAINING GAP: the native game node does not implement INode; it is reachable only through the NodeAdapter view, and that view throws UnsupportedOperationException for setNodeType and setNodeModifier, because the native node fixes them when it is created.",
+          "REMAINING GAP (cross lane): the native game node does not implement INode; it is reachable only through the NodeAdapter view, and that view throws UnsupportedOperationException for setNodeType and setNodeModifier, because the native node fixes them when it is created. The native node also carries a UUID identity instead of the original dim:x:y:z string. The node (common/tiles/TileNode) and the adapter (api) must agree on the write path and on the identity, so the api lane owns the decision.",
           "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass."
         ],
         "reviewed_sha256": {
@@ -4269,10 +4272,15 @@
           "oracle thaumcraft/api/wands/WandTriggerRegistry.java:25 registerWandBlockTrigger(IWandTriggerManager, int, Block, int, String)",
           "oracle thaumcraft/api/wands/WandTriggerRegistry.java:38 hasTrigger(Block, int)",
           "oracle thaumcraft/api/wands/WandTriggerRegistry.java:55 performTrigger(..., Block, int)",
-          "native common/src/main/java/thaumcraft/api/wands/WandTriggerRegistry.java the block and the block state keys"
+          "native common/src/main/java/thaumcraft/api/wands/WandTriggerRegistry.java the block and the block state keys",
+          "oracle thaumcraft/common/items/wands/ItemWandCasting.java:389-390 the wand asks the public registry, so a registered trigger is reachable",
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the trigger dispatch of the wand (2026-10-23)",
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java hasBlockTrigger asks for the block and for the exact state"
         ],
         "notes": [
           "The registry, the modid separation, the -1 wildcard meaning 'any metadata' and the first successful trigger wins are all ported.",
+          "CLOSED 2026-10-23: the wand asks the registry again (ItemWandCasting.useOn dispatches WandTriggerRegistry right after the IWandable contract, as ItemWandCasting:389-390 does), so the public extension point is reachable; before that the whole registry was dead code in the port.",
+          "REMAINING GAP (api lane): hasTrigger(BlockState) only finds a trigger registered for that exact state, while performTrigger also accepts a trigger registered for the whole block. The original always agreed, because both were keyed by block and metadata. The wand works around it with ItemWandCasting.hasBlockTrigger, which asks for both forms; the registry itself is owned by the api lane (coremisc).",
           "REMAINING GAP: 1.21.1 has no block metadata, so the trigger is keyed by a whole block or by one exact block state. The original metadata argument survives in the signature but is ignored, so a trigger registered for one metadata now fires for all states of that block."
         ],
         "reviewed_sha256": {
@@ -4917,7 +4925,8 @@
         ],
         "notes": [
           "Not a class-for-class port: the original single beam effect class became per-focus particle systems in 1.21.1.",
-          "DEVIATION: the original FXBeamWand drawing routine has no single native counterpart, so an exact visual comparison is not possible from the source alone."
+          "DEVIATION: the original FXBeamWand drawing routine has no single native counterpart, so an exact visual comparison is not possible from the source alone.",
+          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either."
         ],
         "reviewed_sha256": {
           "original": "4559e4022f06675edec351ba7719325e313414498c15dd37a44fdaff279c957c",
@@ -4956,10 +4965,12 @@
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/fx/beams/WandEffectOrigin.java: the 1.12 beam origin helper",
-          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java, ItemFocusFrost.java, ItemFocusShock.java the native focus entry points"
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java, ItemFocusFrost.java, ItemFocusShock.java the native focus entry points",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java, ShockSparkParticle.java, FrostSparkleParticle.java the native per focus beam particles (2026-10-23 review)"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 helper, deliberately not carried over; the native foci compute their own origin."
+          "Not an original TC4 class: a 1.12 helper, deliberately not carried over; the native foci compute their own origin.",
+          "REMAINING GAP (client lane): the native beam of a focus starts at the player, while the original drew it from the wand tip. The origin of the original beam belongs to the FXBeamWand unit, not to this 1.12 helper."
         ],
         "reviewed_sha256": {
           "legacy": "c3ad507ffbbd1cac9aa1f463a78e683028b8161ca66a88ec008c1b7a96b01247"
@@ -8052,7 +8063,8 @@
         ],
         "notes": [
           "The held-F radial focus selection is ported as GuiFocusSelect, and the Architect block list became a server-side BlockPos list computed by WandArchitect.",
-          "DEVIATION: the original REHWandHandler was a client-side handler that held the whole architect block list in the client and drew the selection overlays; the native moves the area to the server and to a bounded Area record."
+          "DEVIATION: the original REHWandHandler was a client-side handler that held the whole architect block list in the client and drew the selection overlays; the native moves the area to the server and to a bounded Area record.",
+          "REMAINING GAP (client lane): the selection overlay of the original is drawn by the client handler; the native computes the same area on the server and draws it in the client gui."
         ],
         "reviewed_sha256": {
           "original": "c6a51c95a42eedf9d6ef600e763bee7cabfd31229fbe6a63034fe5d9c31a2342",
@@ -11521,7 +11533,7 @@
         "notes": [
           "Not an original TC4 class: a 1.12 helper, folded into the native wand item renderer.",
           "Open gap: the native port draws no beam from the wand tip, so the origin helper has no counterpart.",
-          "The beam itself belongs to the client effect lane, not to the renderer lane of this review."
+          "REMAINING GAP (client lane): the tip origin of the original beam is the business of the original FXBeamWand class, whose row carries the same gap; this 1.12 helper has no original counterpart of its own."
         ],
         "reviewed_sha256": {
           "legacy": "75b565e70c2c932bfcb563930f5186f117afca31796bcae4276574dcd6e8fbf7"
@@ -12233,7 +12245,8 @@
         ],
         "notes": [
           "The original class does not exist under that name in the native port.",
-          "DEVIATION: the native port has one wand item renderer (PrimalWandFocusRenderer) plus a model catalogue, and no general ItemWandRenderer that draws every rod/cap/focus combination, so the wand item appearance of the non-primal combinations is not fully covered by the source alone."
+          "DEVIATION: the native port has one wand item renderer (PrimalWandFocusRenderer) plus a model catalogue, and no general ItemWandRenderer that draws every rod/cap/focus combination, so the wand item appearance of the non-primal combinations is not fully covered by the source alone.",
+          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either."
         ],
         "reviewed_sha256": {
           "original": "f2840cfa86a637fdce94f4e9181c9c35b4c47fd565775fdd39fb2d7700264c31",
@@ -12463,7 +12476,7 @@
         "notes": [
           "Not an original TC4 class: a 1.12 first person pose model, not carried over.",
           "The 1.21.1 item model carries the display transform that the 1.12 perspective model provided.",
-          "The wand itself is still drawn with the flat item model of the native port instead of the three dimensional ModelWand of the original; that belongs to the ItemWandRenderer unit of another lane."
+          "REMAINING GAP (client lane): the wand itself is still drawn with the flat item model of the native port instead of the three dimensional ModelWand of the original; that belongs to the ItemWandRenderer unit of the client lane."
         ],
         "reviewed_sha256": {
           "legacy": "5f73537a4c7d4ec49863f99904dfab1291ca375a60c1323aefd6c9059448f675"
@@ -12509,7 +12522,7 @@
         "notes": [
           "Not an original TC4 class: a 1.12 pose helper, not carried over.",
           "Open gap: the native port does not raise the wand while the player uses a focus, so the pose has no counterpart.",
-          "The wand item renderer itself belongs to the ItemWandRenderer unit of another lane."
+          "REMAINING GAP (client lane): the use pose of the original ItemWandRenderer:63-93 is a client renderer duty; this 1.12 helper has no original counterpart of its own."
         ],
         "reviewed_sha256": {
           "legacy": "7337cc98c361cb4d1dedc6f4ce9cf30ff9d183d52b6ae525caa70d47742a45d3"
@@ -12599,7 +12612,7 @@
         "notes": [
           "Not an original TC4 class: a 1.12 pose enum, not carried over.",
           "Open gap: the native port does not raise the wand while the player uses a focus, so the pose has no counterpart.",
-          "The wand item renderer itself belongs to the ItemWandRenderer unit of another lane."
+          "REMAINING GAP (client lane): the use pose of the original ItemWandRenderer:63-93 is a client renderer duty; this 1.12 helper has no original counterpart of its own."
         ],
         "reviewed_sha256": {
           "legacy": "d476f5a6d3b599e829063cbcf9353e5206800f50a03260bfcf5f07556fe419be"
@@ -12645,7 +12658,7 @@
         "notes": [
           "Not an original TC4 class: a 1.12 sampler, not carried over.",
           "Open gap: the native port does not raise the wand while the player uses a focus, so the sampler has no counterpart.",
-          "The wand item renderer itself belongs to the ItemWandRenderer unit of another lane."
+          "REMAINING GAP (client lane): the use pose of the original ItemWandRenderer:63-93 is a client renderer duty; this 1.12 helper has no original counterpart of its own."
         ],
         "reviewed_sha256": {
           "legacy": "75cc7d717ffcc1e3ab5cec59ed1960bdbc790ce05dec1caa7b8e6abb44f7b14d"
@@ -15468,10 +15481,12 @@
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/tile/ItemNodeRenderer.java:172 the item form of the node (the block that drops a node item)",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java the native node renderer",
-          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java: the node has no item form in the native port"
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java: the node has no item form in the native port",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279"
         ],
         "notes": [
-          "The original drew the aura node as a dropped item; the native node is a permanent block with no item form, so this renderer has no counterpart."
+          "The original drew the aura node as a dropped item; the native node is a permanent block with no item form, so this renderer has no counterpart.",
+          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer."
         ],
         "reviewed_sha256": {
           "original": "a32db5242f6251429d3382b2cacb099fe43d0ec8301344e6764f346cdea0b5fb"
@@ -37053,7 +37068,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/items/wands/ItemWandCasting.java:120 public int getMaxVis(ItemStack stack) { return this.getRod(stack).getCapacity() * (this.isSceptre(stack) ? 150 : 100); }",
@@ -37064,12 +37079,22 @@
           "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java:65 public static int getMaxVis(ItemStack stack) {{ return data(stack).capacity(); }}",
           "native common/src/main/java/thaumcraft/common/items/wands/WandVisDiscount.java:51 public static float modifier(float capModifier, int netPercentagePoints) {{ return Math.max(capModifier - netPercentagePoints / 100.0F, .1F); }}",
           "native common/src/main/java/thaumcraft/common/items/wands/WandVisDiscount.java:64 public static float focusModifier(float capModifier, int netPercentagePoints, int frugalLevel) {{ return Math.max(capModifier - netPercentagePoints / 100F - frugalLevel / 10F, .1F); }}",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftWandEnchantments.java:55 public static boolean isSceptre(ItemStack stack)"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftWandEnchantments.java:55 public static boolean isSceptre(ItemStack stack)",
+          "oracle thaumcraft/common/items/wands/ItemWandCasting.java:119-121 the sceptre capacity is the rod capacity times 150 instead of 100",
+          "oracle thaumcraft/common/items/wands/ItemWandCasting.java:247-259 the consumption modifier: the cap, the gear, the focus and the sceptre, never below a tenth",
+          "oracle thaumcraft/common/items/wands/ItemWandCasting.java:389-390 the public WandTriggerRegistry answers the wand click right after the IWandable contract",
+          "oracle thaumcraft/common/items/wands/ItemWandCasting.java:132-183 the tooltip shows the consumption modifier of every stored aspect and their average",
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java:78 getMaxVis uses WandMaterials.capacity(rod, isSceptre(stack))",
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the public block trigger dispatch of the wand (2026-10-23)",
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the tooltip with the per aspect consumption and the average (2026-10-23)",
+          "native common/src/main/java/thaumcraft/common/items/wands/WandVisDiscount.java:75-99 the cap, the gear, the frugal and the sceptre discounts"
         ],
         "notes": [
-          "The wand became a data-component item (WandData holds the rod, the cap and the per-aspect centivis), and the consumption modifier, the frugal discount, the 0.1 floor and the node drain are ported with the original arithmetic.",
-          "DEVIATION: the sceptre marker exists as a data component, but the reader side of the original is missing. The original gave a sceptre 1.5x the vis capacity (rod capacity * 150 instead of * 100) and a flat -0.1 consumption discount; the native getMaxVis ignores the sceptre and the native modifier never subtracts 0.1 for it.",
-          "DEVIATION: the original class was an Item with a large public surface (setCap, setRod, getCap, getRod, getFocus, addVis, getAllVis, getAspectsWithRoom, the tooltip). The native splits that surface over WandData, FocusData, WandVisDiscount and the component accessors, so an add-on that called the original methods has to be rewritten."
+          "The wand became a data-component item: WandData holds the rod, the cap and the per-aspect centivis, FocusData the focus and FocusUpgradeData the five upgrade ranks. The sceptre capacity (the rod capacity times 150) and the sceptre discount (minus a tenth) are the original ones.",
+          "CLOSED 2026-10-23: the public block trigger registry of the original is asked again. ItemWandCasting dispatches WandTriggerRegistry right after the IWandable contract, as ItemWandCasting:389-390 does; before that the whole registry was dead code in the port.",
+          "CLOSED 2026-10-23: the tooltip carries the original numbers. The consumption modifier of every stored aspect is the ASPECT dependent cap modifier, the discount of the focus and the discount of the sceptre (ItemWandCasting:232-256), and the capacity line carries their average (ItemWandCasting:168-172). The port showed only the base modifier of the cap, so it was wrong for the copper cap and for every sceptre.",
+          "DEVIATION: the original class was an Item with a large public surface (setCap, setRod, getCap, getRod, getFocus, addVis, getAllVis, getAspectsWithRoom, the tooltip). The native splits that surface over WandData, FocusData, FocusUpgradeData, WandVisDiscount and WandMaterials, so an add-on that called the original methods has to be rewritten.",
+          "DEVIATION: the 1.21.1 tooltip has no player, so the equipment discount of the original (ItemWandCasting:244-245) is not shown; the per aspect listing of the original shift mode is always shown instead of the compact line."
         ],
         "reviewed_sha256": {
           "original": "63d5fd97854fc04829e0bdfec2a348ed9c1e2a8a627be2c3055a9c7d4557a7ac",
@@ -37159,7 +37184,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/items/wands/WandManager.java:806 the original wand manager (focus selection, architect area, vis discount, wand construction)",
@@ -37167,10 +37192,16 @@
           "native common/src/main/java/thaumcraft/common/items/wands/WandManager.java present (85 lines)",
           "native common/src/main/java/thaumcraft/common/items/wands/WandVisDiscount.java the vis discount rules",
           "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java the architect area rules",
-          "native common/src/main/java/thaumcraft/common/items/wands/FocusSelectionSources.java the focus selection rules"
+          "native common/src/main/java/thaumcraft/common/items/wands/FocusSelectionSources.java the focus selection rules",
+          "oracle thaumcraft/common/items/wands/WandManager.java:459-478 createThaumonomicon refuses a wand with an installed focus",
+          "oracle thaumcraft/common/items/wands/WandManager.java:661-709 toggleMisc and the areax/areay/areaz/aread of the architect area",
+          "oracle thaumcraft/common/items/wands/WandManager.java:75-101 the total vis discount over the gear",
+          "native common/src/main/java/thaumcraft/common/items/wands/WandManager.java the focus gate of the Thaumonomicon (2026-10-23)",
+          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java the areax/areay/areaz/aread area and the bounded traversal of the original toggleMisc"
         ],
         "notes": [
-          "The 806 line manager was split into WandManager, WandVisDiscount, WandArchitect, FocusSelectionSources, FocusData, FocusUpgradeData and WandMaterials, each with the original arithmetic.",
+          "The 806 line manager was split into WandManager, WandVisDiscount, WandArchitect, FocusSelectionSources, FocusData, FocusUpgradeData and WandMaterials, each with the original arithmetic; the architect area of the original toggleMisc is the WandArchitect.Area record.",
+          "CLOSED 2026-10-23: the focus gate of the original is restored. A wand with an installed focus leaves the bookshelf alone (WandManager:459-478); the port made a Thaumonomicon from a bookshelf in every case.",
           "DEVIATION: the class no longer exposes the original public static entry points, so an add-on that called e.g. WandManager.toggleMisc or the architect area helpers has to be rewritten against the new classes."
         ],
         "reviewed_sha256": {
@@ -47340,13 +47371,20 @@
           "native common/src/main/java/thaumcraft/common/lib/research/AspectOrbRules.java:10 EMISSION_INTERVAL = 100, STABILITY_ROLL = 42",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:610 if (level.random.nextInt(12500) != 69 ...)",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:309 public void drainIntoWand(ServerPlayer player, ItemStack stack)",
-          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:325 int tap = 1; if (knowledge.isResearchComplete(\"NODETAPPER1\")) tap++; if (knowledge.isResearchComplete(\"NODETAPPER2\")) tap++;"
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:325 int tap = 1; if (knowledge.isResearchComplete(\"NODETAPPER1\")) tap++; if (knowledge.isResearchComplete(\"NODETAPPER2\")) tap++;",
+          "oracle thaumcraft/common/tiles/TileNode.java:879-897 checkLock: the node stabilizer gives the lock one and the advanced node stabilizer the lock two",
+          "oracle thaumcraft/common/tiles/TileNode.java:644-650 the regeneration interval multiplied by two for the lock one and by twenty for the lock two",
+          "oracle thaumcraft/common/tiles/TileNode.java:559-560,577-579 the discharge only runs in and only drains the invisible aura node block",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeStabilizerRules.java the lock, the interval multipliers and the two repair bounds",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeDischargeRules.java the conditions of the discharge",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java the advanced stabilizer lock and the discharge host (2026-10-23)"
         ],
         "notes": [
           "The 600/400/900/0 regeneration ladder, the x2 lock multiplier, the 2/1/3 discharge interval, the 1+(base/1.5) roll for a bright node, the 1200 tick pruning, the 100/42 and 100/69 stability rolls and the fifth-tick wand tap are all ported with the original numbers.",
-          "DEVIATION: the lock level 2 (the advanced node stabilizer) does not exist, so the original x20 regeneration multiplier has no counterpart. The native lock is only 0 or 1.",
-          "DEVIATION: the native node does not implement thaumcraft.api.nodes.INode and it keeps its own nested NodeType/NodeModifier enums.",
-          "DEVIATION: the original handleDarkNode and handlePureNode biome effects have no counterpart in the native node; the native moves the taint ecology into NodeEcology.",
+          "CLOSED 2026-10-23: the advanced node stabilizer is a real block in the native tree (ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER, the original blockStoneDevice metadata ten) and it now locks the node with the lock two, so the regeneration interval is multiplied by twenty (TileNode:644-650) and the two repair rolls are halved (TileNode:775,781). Before that the advanced stabilizer was a dead feature: checkLock never produced the lock two.",
+          "CLOSED 2026-10-23: the discharge runs only in the invisible aura node block and drains only an unlocked invisible aura node, as TileNode:559-560,577-579 do. The silverwood knot and the totem host of the original never discharge; the native node discharged from and into every node host.",
+          "REMAINING GAP (cross lane): the native node does not implement the public thaumcraft.api.nodes.INode and it keeps its own nested NodeType/NodeModifier enums. The public view is the api layer's NodeAdapter, whose setNodeType and setNodeModifier throw, and the node identity of the native node is a UUID instead of the original dim:x:y:z string. Closing the contract needs the api lane (coremisc), because the adapter and the node must agree on the write path and on the identity.",
+          "DEVIATION: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself; the behaviour is the same.",
           "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have."
         ],
         "reviewed_sha256": {
@@ -48555,7 +48593,7 @@
         ],
         "notes": [
           "TC4 has no per-chunk aura: the native keeps the essence in the aura node and projects the add-on accessors onto it, so the vis of the legacy chunk state is reachable.",
-          "Partial: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well."
+          "REMAINING GAP: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well, so the holder itself has no native counterpart to point at."
         ],
         "reviewed_sha256": {
           "legacy": "63c22abddf12b0f553991b5b91a25bc1fb9c98cb635c74102c2c32f9ce65c415"
@@ -48599,7 +48637,7 @@
         ],
         "notes": [
           "The vis drain of the 1.12 handler is projected onto the native aura node; the chunk state and the flux have no TC4 counterpart.",
-          "Partial for the same reason as the AuraChunk row."
+          "REMAINING GAP: the legacy drainVis drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis) and the native projection drains the node AT the position, so the two do not select the same source of vis. The api lane owns AuraHelper, the projection of this handler."
         ],
         "reviewed_sha256": {
           "legacy": "11f597a010debe4d5ace27d99fdb588558f79a59b75591b2f89232a25e9c3db4"

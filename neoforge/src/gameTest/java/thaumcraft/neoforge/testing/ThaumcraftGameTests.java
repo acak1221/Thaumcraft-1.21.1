@@ -336,7 +336,7 @@ public final class ThaumcraftGameTests {
         return NetworkedGameTestPlayer.createSession(test);
     }
 
-    @GameTest(template = "empty", templateNamespace = "thaumcraft")
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", batch = "tc_isolated_bookshelf_wand")
     public void bookshelfWandCreatesOneFloatingBook(GameTestHelper test) { RuntimeChecks.bookshelfWandCreatesOneFloatingBook(test); }
 
     @GameTest(template = "empty", templateNamespace = "thaumcraft")

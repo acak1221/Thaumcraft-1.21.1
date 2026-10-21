@@ -338,7 +338,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         CrystallizerOutputRuntimeChecks.durableEscrowCallbacksAndSpawnRetries(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1200)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1200, batch = "tc_isolated_construct_centrifuge")
     public void constructAndCentrifugeRecipesAndPlainNativeBlocks(GameTestHelper test) {
         CentrifugeRuntimeChecks.recipesAndPlainNativeBlocks(test);
     }
@@ -515,7 +515,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         InfusionRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "tc_isolated_infusion_altar")
     public void infusionAltarFormsAndExecutesAllInstabilityOutcomes(GameTestHelper test) {
         InfusionStructureRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
@@ -687,7 +687,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         ResearchTableRuntimeChecks.tableInventoryComponentsAndCountsPersist(test, test.makeMockServerPlayerInLevel());
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc_isolated_table_break")
     public void tableBreakEvacuatesEachHalfOnce(GameTestHelper test) {
         ResearchTableRuntimeChecks.tableBreakEvacuatesEachHalfOnce(test, test.makeMockServerPlayerInLevel());
     }
@@ -702,7 +702,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         ResearchTableRuntimeChecks.tablePairActuallyUnloadsAndReloads(test, test.makeMockServerPlayerInLevel());
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc_isolated_table_orphan_repair")
     public void tableFirstNativeTickRepairsReloadedOrphans(GameTestHelper test) {
         ResearchTableRuntimeChecks.tableFirstNativeTickRepairsReloadedOrphans(test, test.makeMockServerPlayerInLevel());
     }
@@ -801,7 +801,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         ResearchPurchaseRuntimeChecks.secondaryPurchaseWarpAndPlayerPersistence(test, test.makeMockServerPlayerInLevel(), null);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "tc_isolated_bookshelf_wand")
     public void bookshelfWandCreatesOneFloatingBook(GameTestHelper test) { RuntimeChecks.bookshelfWandCreatesOneFloatingBook(test); }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -835,7 +835,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.GolemAdvancedRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1700)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1700, batch = "tc_isolated_golem_decorations")
     public void golemAccessoriesInstallChangeStatsAndSurviveTheBell(GameTestHelper test) {
         thaumcraft.common.testing.GolemDecorationsRuntimeChecks.run(test);
     }
@@ -850,22 +850,22 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.GolemLiquidQueueRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600, batch = "tc_isolated_golem_fetter")
     public void golemFetterHoldsGolemsWhileItsRedstoneSignalLasts(GameTestHelper test) {
         thaumcraft.common.testing.GolemFetterRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 400, batch = "tc_isolated_traveling_trunk_item")
     public void travelingTrunkItemUpgradesMenuBellDamageAndSaving(GameTestHelper test) {
         thaumcraft.common.testing.TravelingTrunkRuntimeChecks.basics(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1600, batch = "tc_isolated_traveling_trunk_phases")
     public void travelingTrunkFollowsTeleportsDefendsAndPullsItems(GameTestHelper test) {
         thaumcraft.common.testing.TravelingTrunkRuntimeChecks.behavior(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1500)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1500, batch = "tc_isolated_golem_dart")
     public void golemDartLauncherShootsAtItsIntervalAndHurtsWhatItHits(GameTestHelper test) {
         thaumcraft.common.testing.GolemDartRuntimeChecks.run(test);
     }
@@ -920,7 +920,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.ElementalShovelRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "tc_isolated_zephyr_sword")
     public void swordOfTheZephyrLiftsBlowsAndSweeps(GameTestHelper test) {
         thaumcraft.common.testing.ElementalSwordRuntimeChecks.run(test);
     }
@@ -940,7 +940,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.FortressRuntimeChecks.run(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "tc_isolated_essentia_reservoir")
     public void essentiaReservoirHoldsMixedEssentiaPullsAndBursts(GameTestHelper test) {
         thaumcraft.common.testing.ReservoirRuntimeChecks.run(test);
     }

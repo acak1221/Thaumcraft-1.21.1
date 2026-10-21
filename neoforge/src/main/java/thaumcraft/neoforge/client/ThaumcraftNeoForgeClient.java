@@ -97,6 +97,14 @@ public final class ThaumcraftNeoForgeClient {
     private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
         // The original wand uses the TC4 model, not the vanilla baked item model.
         event.registerItem(renderer(thaumcraft.client.ThaumcraftGearModelsClient::renderWand), ThaumcraftContent.WAND.get());
+        // Original ItemThaumometerRenderer: the thaumometer is the three dimensional
+        // scanner of the original, not a flat sprite.
+        event.registerItem(renderer(thaumcraft.client.renderers.item.ItemThaumometerRenderer::render),
+                ThaumcraftContent.THAUMOMETER.get());
+        // Original ItemBannerRenderer: the banner item carries its colour and its
+        // aspect and is drawn with the banner model instead of a plain cube.
+        event.registerItem(renderer(thaumcraft.client.renderers.item.ItemBannerRenderer::render),
+                thaumcraft.common.config.ThaumcraftEldritchBlocks.BANNER_ITEM.get());
         event.registerItem(renderer(TileAlchemyFurnaceAdvancedRenderer::renderItem),
                 ThaumcraftAdvancedFurnace.FURNACE_ITEM.get());
         for (var crystal : ThaumcraftCrystalClusters.blocks())

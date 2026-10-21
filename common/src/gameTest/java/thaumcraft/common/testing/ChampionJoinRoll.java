@@ -80,9 +80,30 @@ public final class ChampionJoinRoll {
      * draw.
      */
     public static <T> T declared(ServerLevel level, int roll, java.util.function.Supplier<T> action) {
-        var declared = new Roll(level, roll, -1);
+        var declared = new Roll(level, roll, -1, null);
         try {
             return action.get();
+        } finally {
+            declared.close();
+        }
+    }
+
+    /**
+     * Declares the original roll of the champion effects of the given window.
+     *
+     * <p>The original rolled the effect of a champion from the same world random (oracle
+     * {@code EntityUtils.makeChampion:236} and the modifier effects, for example
+     * {@code ChampionModPoison}), so a fixture that asserts the effect of a champion declares
+     * that draw here: the declared value keeps the effect of the original and the real world
+     * stream still advances by the original single draw, so no other scenario loses a world draw.
+     *
+     * @param value the declared roll of the effect; a value under the original threshold of four
+     *              in ten keeps the effect of the original.
+     */
+    public static void declaredEffect(ServerLevel level, float value, Runnable action) {
+        var declared = new Roll(level, DECLARED, -1, value);
+        try {
+            action.run();
         } finally {
             declared.close();
         }
@@ -102,7 +123,7 @@ public final class ChampionJoinRoll {
         // The original rolled the modifier of a promoted mob from the same world random, but a
         // creeper never rolled one: the original always made a creeper champion bold.
         int expectedModifiers = modifierId < 0 || entity instanceof Creeper ? 0 : 1;
-        var declared = new Roll(level, roll, modifierId);
+        var declared = new Roll(level, roll, modifierId, null);
         boolean added;
         try {
             added = level.addFreshEntity(entity);
@@ -128,13 +149,15 @@ public final class ChampionJoinRoll {
         private final RandomSource input;
         private final int roll;
         private final int modifierId;
+        private final Float effect;
         private int draws;
         private int modifiers;
 
-        Roll(ServerLevel level, int roll, int modifierId) {
+        Roll(ServerLevel level, int roll, int modifierId, Float effect) {
             this.level = level;
             this.roll = roll;
             this.modifierId = modifierId;
+            this.effect = effect;
             this.previous = level.random;
             this.input = new LegacyRandomSource(0) {
                 @Override public int nextInt() { return previous.nextInt(); }
@@ -151,7 +174,12 @@ public final class ChampionJoinRoll {
                 }
                 @Override public long nextLong() { return previous.nextLong(); }
                 @Override public boolean nextBoolean() { return previous.nextBoolean(); }
-                @Override public float nextFloat() { return previous.nextFloat(); }
+                @Override public float nextFloat() {
+                    // The original rolled the effect of a champion from the same world random, so
+                    // the declared effect wins while the real stream still advances by that draw.
+                    float drawn = previous.nextFloat();
+                    return effect == null ? drawn : effect;
+                }
                 @Override public double nextDouble() { return previous.nextDouble(); }
                 @Override public double nextGaussian() { return previous.nextGaussian(); }
             };

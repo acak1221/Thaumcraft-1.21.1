@@ -40,7 +40,10 @@ class ResearchItemTriggerTest {
         assertEquals("ADVALCHEMYFURNACE", entry.key);
         assertEquals("ELDRITCH", entry.category);
         assertTrue(entry.isSecondary(), "the original Secondary flag survives");
-        assertEquals(3, entry.getComplexity());
+        // Original ConfigResearch:403 - the advanced alchemy furnace is created with the
+        // complexity one, and the original clamps the complexity to one..three
+        // (oracle thaumcraft/api/research/ResearchItem.java:63-69).
+        assertEquals(1, entry.getComplexity());
     }
 
     @Test void theExecutableAspectTriggersOfAnEntryAreAnswered() {

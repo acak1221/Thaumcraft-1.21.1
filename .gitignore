@@ -55,3 +55,6 @@ neoforge/run/
 **/run-gametest/
 **/run-clienttest/
 %SystemDrive%/
+
+# javac argument files of the type check of the port
+javac.*.args

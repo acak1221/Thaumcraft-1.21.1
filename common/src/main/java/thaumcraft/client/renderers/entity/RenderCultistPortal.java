@@ -59,9 +59,15 @@ public final class RenderCultistPortal<T extends EntityCultistPortal> extends En
             float u0 = frame / 16.0F;
             float u1 = u0 + .0625F;
             VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(PORTAL));
-            vertex(out, pose, -1, -1, u1, 1.0F, alpha);
+            // Oracle RenderCultistPortal.java:93-108 - the four corners of the quad
+            // are the bottom right, the top right, the top left and the bottom left
+            // of the camera frame and they carry the texture coordinates
+            // (uMax, 0), (uMax, 1), (u, 1) and (u, 0). The frame of the sheet is
+            // therefore upright, its u runs from the left to the right and its v
+            // from the bottom to the top.
+            vertex(out, pose, -1, -1, u0, 0.0F, alpha);
             vertex(out, pose, 1, -1, u1, 0.0F, alpha);
-            vertex(out, pose, 1, 1, u0, 0.0F, alpha);
+            vertex(out, pose, 1, 1, u1, 1.0F, alpha);
             vertex(out, pose, -1, 1, u0, 1.0F, alpha);
         } finally { pose.popPose(); }
     }

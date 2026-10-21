@@ -554,7 +554,10 @@ public final class ModelEldritchCrystal {
         float[] normal = NORMALS[triangle[offset + 2] - 1];
         buffer.addVertex(pose.last(), pos[0], pos[1], pos[2])
                 .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, color >>> 24)
-                .setUv(uv[0], uv[1]).setOverlay(overlay).setLight(light)
+                // The wavefront file is loaded by the same loader as the cap of the
+                // obelisk and its v runs from the bottom of the image, so the v of
+                // the model is the complement of the v of the file.
+                .setUv(uv[0], 1.0F - uv[1]).setOverlay(overlay).setLight(light)
                 .setNormal(pose.last(), normal[0], normal[1], normal[2]);
     }
 }

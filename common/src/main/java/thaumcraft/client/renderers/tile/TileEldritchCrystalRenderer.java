@@ -2,11 +2,14 @@ package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import thaumcraft.client.renderers.models.ModelEldritchCrystal;
 import thaumcraft.common.tiles.TileEldritchCrystal;
 
@@ -18,10 +21,14 @@ import thaumcraft.common.tiles.TileEldritchCrystal;
  * texture. The native tree already carries the converted wavefront model in
  * {@link ModelEldritchCrystal}, so the geometry is reused as it is.
  *
- * <p>Deviation: the original overwrites the global light texture with a value
- * of {@code 210 * shade} to make the crystal pulse. Minecraft 1.21.1 has no
- * global light texture override in the block entity pass, so the crystal keeps
- * the light of the block.
+ * <p>Oracle {@code TileEldritchCrystalRenderer.java:44-50}: the original
+ * overwrites the light map of the crystal with a fixed texel that pulses with
+ * the tick counter of the player, so the crystal keeps its own brightness and
+ * does not follow the light of the block. The native port reproduces the pulse
+ * with a packed light of its own: the light level of the block light of the
+ * original texel is {@code (int) (210 * shade) / 16}, that is eleven, twelve or
+ * thirteen, and the crystal is drawn with that light instead of the light of the
+ * block.
  */
 public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<TileEldritchCrystal> {
     /** The original texture of the base of the crystal. */
@@ -30,6 +37,14 @@ public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<Ti
     public static final ResourceLocation CRYSTAL = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/vcrystal.png");
     /** The original alpha of the crystal. */
     private static final int CRYSTAL_COLOR = 0xb2ffffff;
+    /** The original divisor of the tick counter of the pulse, oracle :45. */
+    private static final float PULSE_PERIOD = 6.0F;
+    /** The original amplitude of the pulse, oracle :45. */
+    private static final float PULSE_AMPLITUDE = 0.075F;
+    /** The original offset of the pulse, oracle :45. */
+    private static final float PULSE_OFFSET = 0.925F;
+    /** The original brightness of the crystal, oracle :46. */
+    private static final float PULSE_BRIGHTNESS = 210.0F;
 
     private final ModelEldritchCrystal model = new ModelEldritchCrystal();
 
@@ -44,10 +59,26 @@ public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<Ti
             // The original turns the crystal by a quarter turn per position.
             pose.mulPose(Axis.ZP.rotationDegrees(90.0F * (Math.abs(tile.getBlockPos().hashCode()) % 4)));
             model.renderBase(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(CRUST)), light, overlay, 0xffffffff);
-            model.renderCrystal(pose, buffers.getBuffer(RenderType.entityTranslucent(CRYSTAL)), light, overlay, CRYSTAL_COLOR);
+            model.renderCrystal(pose, buffers.getBuffer(RenderType.entityTranslucent(CRYSTAL)), crystalLight(), overlay, CRYSTAL_COLOR);
         } finally {
             pose.popPose();
         }
+    }
+
+    /**
+     * The light of the crystal of the original: the pulse of the light map.
+     *
+     * <p>Oracle {@code TileEldritchCrystalRenderer.java:45-49}: the shade is
+     * {@code sin(ticks / 6) * 0.075 + 0.925} and the light map is set to the texel
+     * {@code (int) (210 * shade)}, whose light level of the block light is the
+     * texel divided by sixteen.
+     */
+    public static int crystalLight() {
+        var player = Minecraft.getInstance().player;
+        float ticks = player == null ? 0.0F : player.tickCount;
+        float shade = Mth.sin(ticks / PULSE_PERIOD) * PULSE_AMPLITUDE + PULSE_OFFSET;
+        int level = (int) (PULSE_BRIGHTNESS * shade) / 16;
+        return LightTexture.pack(level, 0);
     }
 
     /** The original translateFromOrientation of the crystal and the crab vent. */

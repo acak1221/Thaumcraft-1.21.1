@@ -29,6 +29,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
@@ -47,6 +49,7 @@ import thaumcraft.common.blocks.BlockCosmeticSolid;
 import thaumcraft.common.blocks.BlockCosmeticStoneSlab;
 import thaumcraft.common.blocks.BlockCosmeticWoodSlab;
 import thaumcraft.common.blocks.BlockEldritch;
+import thaumcraft.common.blocks.BlockJar;
 import thaumcraft.common.blocks.BlockEldritchNothing;
 import thaumcraft.common.blocks.BlockEldritchPortal;
 import thaumcraft.common.blocks.BlockLoot;
@@ -260,13 +263,15 @@ public final class ThaumcraftEldritchBlocks {
             () -> new BlockAiry(3, airyProperties(3)));
 
     public static final RegistrySupplier<JarBlock> JAR_BRAIN = BLOCKS.register("jar_brain",
-            // Original BlockJar:71 - hardness 0.3 and NO setResistance, so the effective blast
-            // resistance is 0; the original jar emits no light.
-            () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion()));
+            // Original BlockJar:87-90 - the jar block sets hardness 0.3, no blast resistance and
+            // the light level 0.66; the 1.7.10 setter stores (int)(15*0.66) = 9. Every metadata
+            // value of the original jar block, the brain jar and the node jar included, emits 9.
+            () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
 
     public static final RegistrySupplier<JarBlock> JAR_NODE = BLOCKS.register("jar_node",
-            // Original BlockJar:299-305 - the node jar is the only jar that emits light, level 11.
-            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 11)));
+            // Original BlockJar:87-90 - the node jar is the same block as the ordinary jar and
+            // emits the same light level 9. The original has no per metadata light override.
+            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
 
     public static final RegistrySupplier<EtherealBloomBlock> ETHEREAL_BLOOM = BLOCKS.register("ethereal_bloom",
             () -> new EtherealBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
@@ -517,6 +522,24 @@ public final class ThaumcraftEldritchBlocks {
                 dropExperience(level, pos.getX(), pos.getY(), pos.getZ(), jar.getXp());
             }
             super.onRemove(state, level, pos, newState, movedByPiston);
+        }
+
+        /**
+         * Original BlockJar:184-193 - the node jar drops the node it holds: the aspects, the node
+         * type, the node modifier and the identity of the node travel with the dropped item.
+         *
+         * <p>The original dropped the {@code itemJarNode} item with its NBT; the native node jar
+         * is a block, so the dropped block item carries the block entity data of the tile. The
+         * vanilla {@code applyComponentsFromItemStack} reads it back when the item is placed.</p>
+         */
+        @Override protected java.util.List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+            if (kind != 1) return super.getDrops(state, params);
+            ItemStack drop = new ItemStack(state.getBlock());
+            BlockEntity tile = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+            if (tile instanceof TileJarNode node && node.drop) {
+                node.saveToItem(drop, params.getLevel().registryAccess());
+            }
+            return java.util.List.of(drop);
         }
 
         /** The original splits the experience into orbs of the vanilla orb value. */

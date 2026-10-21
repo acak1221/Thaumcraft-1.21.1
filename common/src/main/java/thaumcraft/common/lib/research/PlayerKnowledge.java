@@ -113,6 +113,11 @@ public final class PlayerKnowledge {
     public void addWarpSticky(int value) { setWarpSticky(warpSticky + value); }
     public void addWarpTemp(int value) { setWarpTemp(warpTemp + value); }
 
+    /**
+     * Original PlayerKnowledge:24-34 - the wipe of a player drops the research, the discovered
+     * aspects, the scanned objects, entities and phenomena and the three warp values, but it
+     * keeps the warp counter of the player.
+     */
     public void reset() {
         discoveredAspects.clear();
         completedResearch.clear();
@@ -120,7 +125,7 @@ public final class PlayerKnowledge {
         scannedEntities.clear();
         scannedPhenomena.clear();
         initializedAspects = false;
-        warpPerm = warpSticky = warpTemp = warpCounter = 0;
+        warpPerm = warpSticky = warpTemp = 0;
         addDiscoveredPrimalAspects();
     }
 

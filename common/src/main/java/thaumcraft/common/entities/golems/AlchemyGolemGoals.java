@@ -95,7 +95,7 @@ final class AlchemyGolemGoals {
             BlockPos upper = pos.above(height);
             if (!permitted(server, upper, query)) break;
             BlockEntity tile = server.getBlockEntity(upper);
-            if (!current(server, tile) || tile.getClass() != TileAlembic.class) break; // Contiguous real stack only.
+            if (!current(server, tile) || tile.getClass() != TileAlembic.class) continue; // Original AIEssentiaGather:51-67 scans the levels cY+5..cY+0 without a break: a gap in the column does not stop the search.
             TileAlembic alembic = (TileAlembic) tile;
             Source next = candidate(base, alembic);
             if (next != null && alembic.getAmount() >= largest) {

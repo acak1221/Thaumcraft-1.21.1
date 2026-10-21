@@ -34,13 +34,14 @@ public final class ThaumcraftFlux {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(Thaumcraft.MODID, Registries.MOB_EFFECT);
 
-    public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties(false)));
-    public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties(true)));
     /**
      * Original BlockFluxGoo:50 - the custom sound type of the flux goo: the sound
      * {@code thaumcraft:gore} with the volume 1.0 and the pitch 1.0.
      */
     public static final SoundType FLUX_GOO_SOUND = new CustomSoundType("gore", 1.0F, 1.0F);
+
+    public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties(false)));
+    public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties(true)));
     /**
      * The original items of the two finite fluids.
      *

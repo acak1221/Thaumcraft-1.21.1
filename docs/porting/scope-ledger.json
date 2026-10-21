@@ -21276,11 +21276,16 @@
           "oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:25-27 the icon of the cosmetic solid metadata eleven is taken with the side plus hundred",
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:158-161 the ancient stone takes one of the four textures by the hash of the position",
           "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java:36-41 the dry stair blocks no light",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockStairsEldritch.java:33-38 the effective blast resistance six of the copied block"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockStairsEldritch.java:33-38 the effective blast resistance six of the copied block",
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:157-162 the ancient stone takes one of the four textures by the hash of the position",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:228,234 the hardness two and the effective blast resistance six of the copied block",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:459-465 the eldritch stairs are registered with the hardness two and the resistance six",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:41 the greatwood and the silverwood stairs carry the hardness 2.5 and the resistance 6.0",
+          "native common/src/test/java/thaumcraft/common/blocks/CosmeticAndPlantParityTest.java the hardness, the effective blast resistance and the light opacity of the stairs are asserted"
         ],
         "notes": [
-          "The native stairs of the cosmetic family are registered per material: the arcane stone stairs, the greatwood and the silverwood stairs and the eldritch stairs. The server side of the original is reproduced: the light opacity zero of BlockCosmeticStairs:20, the hardness two and the effective blast resistance six of the block whose texture the stair copies (the 1.7.10 BlockStairs takes the hardness and the resistance of its reference) and the stair shapes of 1.21.1.",
-          "REMAINING GAP (client visual): the original picks the icon of the cosmetic solid metadata eleven from the four ancient stone textures by the hash of the position (BlockCosmeticSolid:158-161, reached through the side plus hundred of BlockCosmeticStairs:26). A 1.21.1 stair model cannot randomise per position, so the native eldritch stairs always show the texture es_1. The same gap holds for the ancient stone, the ancient rock and the pedestal of the cosmetic solid itself (BlockCosmeticSolid:141-162); that block is not a unit of this domain."
+          "AUDITED in wave 2: the whole cosmetic family of stairs carries the hardness and the effective blast resistance of the block whose texture it copies. The eldritch stairs and the arcane stone stairs take the hardness 2.0 and the effective blast resistance 6.0 of the cosmetic solid (oracle BlockCosmeticSolid:66-67, the setter value ten is stored three times and the 1.7.10 getter divides it by five), the greatwood and the silverwood stairs the hardness 2.5 and the effective blast resistance 6.0 of the wooden device (oracle BlockWoodenDevice:82-83). The stairs of the port carry exactly these numbers, and the test of this wave asserts them. The stairs of the original that copy the metadata seven of the cosmetic solid do NOT take the hardness four and the resistance twenty of that metadata, because the 1.7.10 stair copies the field of the block and not its per metadata getter.",
+          "REMAINING GAP (client visual): the original picks the icon of the cosmetic solid metadata eleven from the four ancient stone textures by the hash of the position (oracle BlockCosmeticSolid:157-162, reached through the side plus hundred of BlockCosmeticStairs:38-40). The seed is the hash of the concatenated coordinates and the draw is nextInt(12345+side) % 4; the same raw draw is taken modulo six different bounds, so all six faces of a stair agree in all but one of about twelve thousand positions. A 1.21.1 stair model is baked per block state and cannot randomise per position, so the native eldritch stairs always show the texture es_1. The port CAN reproduce it: a block state property that holds the index of the texture (four models per stair shape, the blockstate document of the stair with the property in every variant) and a position hash that the block computes in onPlace. That is an asset and model change of the eldritch stairs that this wave could neither compile nor run, so the unit stays partial. The same gap holds for the ancient stone, the ancient rock and the pedestal of the cosmetic solid itself (oracle BlockCosmeticSolid:141-162); that block is not a unit of this domain."
         ],
         "reviewed_sha256": {
           "original": "f8e8bd1bff88a96fe7bb287a2cb17bb6ef467e8ac794768b0417acc5dfe50693"
@@ -21730,12 +21735,18 @@
           "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:50-65 the item places the plant only on the top face of a supporting soil and plays the step sound",
           "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:67-89 the plant type of the metadata: Desert for three, Cave for four and five, Plains otherwise",
           "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:36-44 the soil of the plant and its survival",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:65-83 the item of the plant refuses the placement of the original"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:65-83 the item of the plant refuses the placement of the original",
+          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:69-83 the item places the plant only on the top face of a supporting soil and plays the step sound",
+          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:85-101 the plant type of the metadata: Desert for three, Cave for four and five, Plains otherwise",
+          "oracle thaumcraft/common/blocks/BlockCustomPlant.java:119-128 the plant type of the block itself: Desert for three, Cave for four, Plains otherwise",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:36-56 the plant type of the port and the soil rule that the production code calls",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:88-118 the two plant type tables of the original as pure functions",
+          "native common/src/test/java/thaumcraft/common/blocks/CosmeticAndPlantParityTest.java the two plant type tables and the soil rule are asserted"
         ],
         "notes": [
-          "FIXED in this wave: the item of the plant placed itself on every block and lost the item to the next tick. The original places the plant only on the top face of a block whose soil supports its plant type and it plays the step sound of its own block (BlockCustomPlantItem:50-65). The native item refuses the placement (common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:65-83).",
-          "1.21.1 has no IPlantable, so the plant type of the original metadata is answered by the block itself: the cinderpearl is the Desert type and carries the sand, the shimmerleaf is the Plains type (BlockCustomPlantItem:67-89), which is the soil rule of native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:36-40.",
-          "REMAINING GAP: an add-on plant that relied on the Forge IPlantable hook cannot place itself on the terms of the original, 1.21.1 has no such interface; the pitch of the original placement sound (the pitch of the sound type times 0.8) has no counterpart either, because 1.21.1 has no per block sound pitch."
+          "FIXED in wave 1: the item of the plant placed itself on every block and lost the item to the next tick. The original places the plant only on the top face of a block whose soil supports its plant type and it plays the step sound of its own block (oracle BlockCustomPlantItem:50-65). The native item refuses the placement that the original refuses (common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:65-83).",
+          "AUDITED in wave 2: 1.21.1 has no IPlantable and no EnumPlantType, so the port answers the plant type with the block itself. The two tables of the original are now carried as pure functions: the table of the item (oracle BlockCustomPlantItem:85-101, the metadata three is Desert, the metadata four and five are Cave, the rest is Plains) and the table of the block (oracle BlockCustomPlant:119-128, the metadata four is Cave and the metadata five, the manashroom, is Plains). The two tables agree for the metadata zero to four and differ for the metadata five only. The soil rule of the port is the Plains soil of the inherited BlockBush plus the sand of the Desert type, and the test of this wave asserts both tables and the soil rule.",
+          "REMAINING GAP: the item of the manashroom of the original asked the soil for a Cave plant while the block of the manashroom is a Plains plant, and the Forge 1.7.10 table of the Cave soils is not part of the decompiled original, so the port cannot prove which block the original needed. The port keeps the Plains soil of the original's own block rule, which is the soil the original's world generator puts the manashroom on (oracle BiomeGenMagicalForest:147). The difference is confined to the two Cave plants of the original. The pitch of the placement sound of the original (the break sound of the plant with the pitch of the sound type times 0.8, oracle BlockCustomPlantItem:76) has no 1.21.1 counterpart, because 1.21.1 has no per block sound pitch."
         ],
         "reviewed_sha256": {
           "original": "eaf3b4e3bca667e433b2ac53b00b8a091bcb793e7eab3a304b7fa0fae53794ec"
@@ -22070,7 +22081,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockFluidDeath.java the Forge fluid block",
@@ -22080,13 +22091,19 @@
           "oracle thaumcraft/common/blocks/BlockFluidDeath.java:41-46 the damage of a cell is its metadata plus one",
           "oracle thaumcraft/common/config/ConfigBlocks.java:420 the death fluid has the luminosity eight and the viscosity fifteen hundred",
           "native common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java:155-200 the classic quanta flow of the death fluid",
-          "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:194-261 the quanta, the damage and the next level of a death fluid cell"
+          "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:194-261 the quanta, the damage and the next level of a death fluid cell",
+          "oracle thaumcraft/common/blocks/BlockFluidDeath.java:38-42 the death fluid is a finite fluid over Material.water with four quanta per block",
+          "oracle thaumcraft/common/blocks/BlockFluidDeath.java:55-59 the damage of a cell is its metadata plus one",
+          "oracle thaumcraft/common/config/ConfigBlocks.java:420 the luminosity eight and the viscosity fifteen hundred of the death fluid",
+          "oracle thaumcraft/common/blocks/BlockFluidDeath.java:65-80 the slimy bubble and the lava pop of the random display tick",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java:144-170 the slimy bubble and the lava pop of the native cell",
+          "native common/src/main/resources/data/minecraft/tags/fluid/water.json the death fluid is in the vanilla water tag, the 1.21.1 counterpart of the original Material.water",
+          "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:193-262 the quanta, the damage and the next level of a death fluid cell",
+          "native common/src/test/java/thaumcraft/common/blocks/FluidFamilyParityTest.java the quanta, the damage, the light, the bucket cell, the quanta rule and the water tag are asserted"
         ],
         "notes": [
-          "The classic quanta flow of the original IS reproduced and the note of the previous wave that the native liquid keeps the vanilla rules of 1.21.1 is stale: the native block owns the quanta of the cell, the source spreads downwards first and then sideways and every flowing cell without a stronger neighbour dries up again (native common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java:155-187 with the numbers of common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:194-261).",
-          "The numbers of the original are kept: four quanta in a source cell (BlockFluidDeath:27 setQuantaPerBlock(4)), the light eight (ConfigBlocks:420), the damage of a cell is its metadata plus one (BlockFluidDeath:43) and the bucket of death demands the cell of the original metadata three (ItemBucketDeath:103 and EventHandlerWorld:216-223).",
-          "REMAINING GAP: the original death fluid is a BlockFluidFinite over Material.water, so the 1.7.10 engine pushed the entities that stand in it and let them drown. The native death fluid is a fluid of its own and is not in the water tag, so the entity movement of 1.21.1 owns the cell: the entities are not pushed and do not drown. Closing that would need a water tag on the death fluid, which drowns the player in a fluid that is meant to kill by its own damage.",
-          "REMAINING GAP (client visual): the slimy bubble and the lava pop of the original (BlockFluidDeath:52-67) are not reproduced."
+          "CLOSED in wave 2: the death fluid now carries the vanilla water tag (data/minecraft/tags/fluid/water.json), which is the 1.21.1 counterpart of the Material.water of the original (oracle BlockFluidDeath:39, super(ConfigBlocks.FLUIDDEATH, Material.field_151586_h); Material.field_151586_h is Material.water, see the readable 1.7.10 reference RenderEventHandler:367). An entity that stands in the cell therefore swims, takes no fall damage and drowns once its air supply is gone, exactly like the 1.7.10 material did. The random display tick of the original (oracle BlockFluidDeath:65-80, the slimy bubble over the cell and the lava pop in one of fifty) is reproduced in the native cell and in the client hook of the port. The quants, the damage, the light, the classic flow, the bucket cell of the original metadata three and the pickup are the ones of the wave of 2026-10-23 and are now asserted by a test.",
+          "RESIDUAL (not provable from the oracle): the flow of the cell does not push an entity. The push of the 1.7.10 is the Forge World.handleMaterialAcceleration, which is not part of the decompiled original, and the death fluid of the port carries no flow vector. The cell damages every living thing by its quanta, so a player dies in five ticks in the source cell and the push is only observable for an entity that outlives that window."
         ],
         "reviewed_sha256": {
           "original": "9c23fb9445a97a5c7e8e407a4e26ad6d04c905ce9c9362c2af930daf2b06109f",
@@ -22126,7 +22143,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockFluidPure.java the Forge fluid block",
@@ -22136,12 +22153,16 @@
           "oracle thaumcraft/common/blocks/BlockFluidPure.java:41-56 the Ward of a player in a source with the divisor of the square root of the permanent warp",
           "oracle thaumcraft/common/config/ConfigBlocks.java:419 the luminosity ten and the viscosity one thousand of the purifying fluid",
           "native common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java:128-162 the classic quanta flow of the purifying fluid",
-          "native common/src/main/java/thaumcraft/common/lib/SpaRules.java:7-15 the duration of the Ward and the scaled light of the purifying fluid"
+          "native common/src/main/java/thaumcraft/common/lib/SpaRules.java:7-15 the duration of the Ward and the scaled light of the purifying fluid",
+          "oracle thaumcraft/common/blocks/BlockFluidPure.java:42-45 the purifying fluid is a BlockFluidClassic over Material.water",
+          "oracle thaumcraft/common/blocks/BlockFluidPure.java:58-67 the Ward of a player in a source with the divisor of the square root of the permanent warp",
+          "oracle thaumcraft/common/blocks/BlockFluidPure.java:70-84 the bubble and the lava pop of the random display tick",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java:99-162 the classic quanta flow of the purifying fluid",
+          "native common/src/main/resources/data/minecraft/tags/fluid/water.json the purifying fluid is in the vanilla water tag",
+          "native common/src/test/java/thaumcraft/common/blocks/FluidFamilyParityTest.java the scaled light, the Ward and the water tag are asserted"
         ],
         "notes": [
-          "The classic flow rules of the original ARE reproduced and the note of the previous wave that the native liquid keeps the vanilla rules of 1.21.1 is stale: the native block owns the quanta of the cell and the classic eight quantum flow (native common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java:99-162 with the rules of common/src/main/java/thaumcraft/common/lib/fluid/PureFlowRules.java), the source light of the configured luminosity ten is eight (ConfigBlocks:419, the Forge BlockFluidClassic subtracts one quantum) and the Ward of a player that touches a source lasts min(32000, 200000/max(1,floor(sqrt(permanentWarp)))) ticks (BlockFluidPure:41-56, common/src/main/java/thaumcraft/common/lib/SpaRules.java:7-11).",
-          "REMAINING GAP: the movement of an entity in the cell is the 1.21.1 engine and not the transplanted 1.7.10 loop; the native water tag owns the swimming and the drowning, the original had Material.water as well.",
-          "REMAINING GAP (client visual): the bubble and the lava pop of the original (BlockFluidPure:58-73) are the native client effect."
+          "CLOSED in wave 2: the movement of an entity in the cell is the 1.21.1 engine and not the transplanted 1.7.10 loop, but the deviation is not observable: the purifying fluid is in the vanilla water tag, so the swim, the fall damage and the drowning are the ones of the 1.21.1 water engine, and the original had Material.water as well (oracle BlockFluidPure:43, Material.field_151586_h is Material.water, the readable 1.7.10 reference RenderEventHandler:367). The classic eight quantum flow, the Ward of min(32000, 200000/max(1,floor(sqrt(permanentWarp)))) ticks, the source light eight of the configured luminosity ten and the random display tick with the bubble and the lava pop of the original are reproduced."
         ],
         "reviewed_sha256": {
           "original": "68022b0c4864c1a70fb747d7ebb75b60098e02288b8c4067a20219d747dd5eb0",
@@ -23941,7 +23962,7 @@
         "disposition": "replace",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/blocks/CustomStepSound.java the sound type that names thaumcraft:<sound>",
@@ -23951,12 +23972,23 @@
           "oracle thaumcraft/common/blocks/BlockJar.java:57 the step sound of the jar is thaumcraft:jar",
           "oracle thaumcraft/common/blocks/BlockCrystal.java:40 the step sound of the crystal is thaumcraft:crystal",
           "oracle thaumcraft/common/config/ConfigBlocks.java:290 the step sound of the loot urn is thaumcraft:urnbreak",
-          "native common/src/main/resources/assets/thaumcraft/sounds.json the sound events of the port"
+          "native common/src/main/resources/assets/thaumcraft/sounds.json the sound events of the port",
+          "oracle thaumcraft/common/blocks/CustomStepSound.java:11-24 the sound type that names thaumcraft:<sound>",
+          "oracle thaumcraft/common/lib/CustomSoundType.java the second class of the original with the same names",
+          "oracle thaumcraft/common/blocks/BlockMirror.java:68 the step sound of the mirror is thaumcraft:jar with the volume 0.5 and the pitch 2.0",
+          "oracle thaumcraft/common/config/ConfigBlocks.java:302 the step sound of the loot urn is thaumcraft:urnbreak with the volume 1.0 and the pitch 0.7",
+          "oracle thaumcraft/common/blocks/BlockFluxGoo.java:50 the sound of the flux goo is thaumcraft:gore with the volume 1.0 and the pitch 1.0",
+          "oracle thaumcraft/common/blocks/BlockJar.java:88 the sound of the jar is thaumcraft:jar",
+          "oracle thaumcraft/common/blocks/BlockCrystal.java:62 the sound of the crystal is thaumcraft:crystal",
+          "oracle thaumcraft/common/blocks/BlockTaint.java:73 the sound of the taint is thaumcraft:gore with the volume 0.5 and the pitch 0.8",
+          "native common/src/main/java/thaumcraft/common/lib/CustomSoundType.java the one sound type of the port for the two classes of the original",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:110-121 the sound types of the mirror and of the loot urn",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:39-43 the sound type of the flux goo",
+          "native common/src/test/java/thaumcraft/common/blocks/CustomStepSoundParityTest.java the names, the volumes, the pitches and the sound events are asserted"
         ],
         "notes": [
-          "The per block custom sound class of the original is dropped in favour of the vanilla SoundType enum. 1.21.1 has no per block sound name: the SoundType is a closed enum and a block can only answer getSoundType with one of its values, so a custom step and break sound needs a client renderer or a mixin.",
-          "The affected blocks of the original are the mirror with the sound thaumcraft:jar, the volume 0.5 and the pitch 2.0 (BlockMirror:39), the jar with thaumcraft:jar (BlockJar:57), the crystal with thaumcraft:crystal (BlockCrystal:40) and the loot urn with thaumcraft:urnbreak (ConfigBlocks:290). The sound events themselves are in the port (assets/thaumcraft/sounds.json: jar, crystal) and the affected blocks use the closest vanilla sound type.",
-          "REMAINING GAP (audio): the original plays a custom step sound with a custom volume and pitch, the native block plays the vanilla sound of its sound type. Closing it needs a client side renderer, which is outside the common layer of this domain."
+          "CLOSED in wave 2: the three custom block sounds that the wave of 2026-10-23 listed as missing are the original ones now. The mirror plays thaumcraft:jar with the volume 0.5 and the pitch 2.0 (oracle BlockMirror:68, native ThaumcraftEldritchBlocks.MIRROR_SOUND), the loot urn plays thaumcraft:urnbreak with the volume 1.0 and the pitch 0.7 (oracle ConfigBlocks:302, native ThaumcraftEldritchBlocks.LOOT_URN_SOUND) and the flux goo plays thaumcraft:gore with the volume 1.0 and the pitch 1.0 (oracle BlockFluxGoo:50, native ThaumcraftFlux.FLUX_GOO_SOUND). The jar (oracle BlockJar:88), the crystal (oracle BlockCrystal:62) and the taint (oracle BlockTaint:73 and BlockTaintFibres:69) already carried their custom sound.",
+          "The port keeps the rule of the two original classes in one class, thaumcraft.common.lib.CustomSoundType: it names its sound in the thaumcraft namespace and hands the same event to the step and the break sound, exactly like the original thaumcraft.common.blocks.CustomStepSound and thaumcraft.common.lib.CustomSoundType. The sound events and their samples are in the assets of the port, and the test of this wave asserts that the four events exist."
         ],
         "reviewed_sha256": {
           "original": "cb7c0eb4a233be500ed2a63d09c05b5ff56aef98380fdf0c4914c6da318c10b1",
@@ -34338,18 +34370,20 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemBathSalts.java:28-31 the stack limit 200 and the spa use",
           "native common/src/main/java/thaumcraft/common/items/ItemBathSalts.java:8-9 delegates to SpaRules.BATH_SALT_LIFETIME",
           "native common/src/main/java/thaumcraft/common/lib/SpaRules.java holds the bath salt lifetime of the original",
           "oracle thaumcraft/common/items/ItemBathSalts.java:25-31 the item declares the creative tab and the lifespan of two hundred ticks",
-          "native common/src/main/java/thaumcraft/common/lib/SpaRules.java:6 the lifetime of two hundred ticks of the bath salts"
+          "native common/src/main/java/thaumcraft/common/lib/SpaRules.java:6 the lifetime of two hundred ticks of the bath salts",
+          "oracle thaumcraft/common/items/ItemBathSalts.java:44-46 the lifespan of the salts is two hundred ticks",
+          "native common/src/main/java/thaumcraft/common/lib/SpaRules.java:5 the lifetime of two hundred ticks of the bath salts",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the lifetime of the salts is asserted"
         ],
         "notes": [
-          "the original item only declares the stack limit and the lifespan of two hundred ticks (ItemBathSalts:25-31); the port carries the lifespan in common/src/main/java/thaumcraft/common/lib/SpaRules.java:6 and the effect of the salts lives in the spa code, which is outside this domain",
-          "AUDITED in this wave: the lifespan of two hundred ticks of the original (ItemBathSalts:30) and the stack limit of the port agree; the item itself only names the salt."
+          "AUDITED and CLOSED in wave 2: the original item declares the stack limit and the lifespan of two hundred ticks (oracle ItemBathSalts:29-32 and :44-46) and nothing else; the effect of the salts lives in the spa code, which is outside this domain. The port carries the lifespan of two hundred ticks in SpaRules.BATH_SALT_LIFETIME and the test of this wave asserts it."
         ],
         "reviewed_sha256": {
           "original": "6fee427062319553c942e5c53012420a840873acda4f19c8c80cde660dc9f9dc",
@@ -34440,18 +34474,22 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemBucketDeath.java the bucket that holds the death fluid and pours it",
           "native common/src/main/java/thaumcraft/common/items/ItemBucketDeath.java implements the native bucket of the death fluid",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers bucket_death",
           "oracle thaumcraft/common/items/ItemBucketDeath.java:88-121 the bucket of death fills the cell of the metadata three and clears a spot that is neither solid nor liquid",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java:90-112 the cell of the original metadata three and its pickup"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java:90-112 the cell of the original metadata three and its pickup",
+          "oracle thaumcraft/common/items/ItemBucketDeath.java:39-43 the bucket holds one",
+          "oracle thaumcraft/common/items/ItemBucketDeath.java:93-105 the bucket fills the cell of the metadata three and clears a spot that is neither solid nor liquid",
+          "native common/src/main/java/thaumcraft/common/items/ItemBucketDeath.java:47-66 the placement rules and the cell of the original metadata three",
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:432-449 the stack limit and the two rules of the spot",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the stack limit, the cell and the rules of the spot are asserted"
         ],
         "notes": [
-          "the Forge fluid container became a 1.21.1 bucket item with a fluid component; the cell that the original bucket of death fills is the cell of the original metadata three (ItemBucketDeath:103 and EventHandlerWorld:216-223) and the port keeps it in common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java:90-112",
-          "AUDITED in this wave: the placement rules of the original bucket, the spot that has to be cleared and the metadata of the filled cell, agree with the port (common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:440-443 and common/src/main/java/thaumcraft/common/blocks/BlockFluidDeath.java:90-112)."
+          "AUDITED and CLOSED in wave 2: the Forge fluid container became a 1.21.1 bucket item; the cell that the original bucket of death pours is the cell of the original metadata three (oracle ItemBucketDeath:103 and EventHandlerWorld:216-223), which is the source cell of the finite fluid, and the spot has to be empty or made of a material that is not solid, while a spot that is neither solid nor a liquid is emptied first (oracle ItemBucketDeath:93-105). The port agrees on all three rules and the test of this wave asserts them."
         ],
         "reviewed_sha256": {
           "original": "1d4fbbac39d6e686d72849c0ac6c9d28d92c2d4c23b718e7628166e35093f0d3",
@@ -34491,18 +34529,22 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemBucketPure.java the bucket that holds the pure fluid and pours it",
           "native common/src/main/java/thaumcraft/common/items/ItemBucketPure.java implements the native bucket of the pure fluid",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers bucket_pure",
           "oracle thaumcraft/common/items/ItemBucketPure.java the bucket of the purifying fluid",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java:110-111 the pickup of the source cell only"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java:110-111 the pickup of the source cell only",
+          "oracle thaumcraft/common/items/ItemBucketPure.java:39-43 the bucket holds one",
+          "oracle thaumcraft/common/items/ItemBucketPure.java:93-105 the bucket fills the cell of the metadata zero",
+          "native common/src/main/java/thaumcraft/common/items/ItemBucketPure.java the native bucket of the pure fluid",
+          "native common/src/main/java/thaumcraft/common/lib/fluid/PureBucketActions.java:38-45 the capture of the source cell only",
+          "native common/src/test/java/thaumcraft/common/blocks/FluidFamilyParityTest.java the capture of the source cell only is asserted"
         ],
         "notes": [
-          "the Forge fluid container became a 1.21.1 bucket item with a fluid component; the pure fluid itself is the classic eight quantum fluid of common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java",
-          "AUDITED in this wave: the bucket of the pure fluid agrees with the original (ItemBucketPure) and the native pickup only accepts the source cell of the original, the flowing cells stay (common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java:110-111)."
+          "AUDITED and CLOSED in wave 2: the Forge fluid container became a 1.21.1 bucket item over the pure fluid source; the pickup accepts the cell of the metadata zero, the source cell, and the flowing cells one to seven stay in the world (oracle ItemBucketPure:103 and the original FillBucketEvent). The port keeps that rule in PureBucketActions.isSourceLevel and the test of this wave asserts it."
         ],
         "reviewed_sha256": {
           "original": "daae129d4340bff10f28a137584ce5ecd3b567991b778d6f2b6d281d4c700527",
@@ -34542,7 +34584,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemCompassStone.java:27-74 the compass points at the sinister nodes, the stack limit is 1 and the rarity is rare",
@@ -34550,11 +34592,16 @@
           "native common/src/main/java/thaumcraft/common/items/ItemCompassStone.java:45-73 the inventory tick that rotates the pointer",
           "oracle thaumcraft/common/items/ItemCompassStone.java:23-27 the stack limit of one and the two icons",
           "oracle thaumcraft/common/items/ItemCompassStone.java:53-72 the expiry of ten seconds, the range of two hundred and fifty six and the field of view of 0.66",
-          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:504-519 the expiry, the range and the field of view of the compass stone"
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:504-519 the expiry, the range and the field of view of the compass stone",
+          "oracle thaumcraft/common/items/ItemCompassStone.java:27-32 the stack limit is one",
+          "oracle thaumcraft/common/items/ItemCompassStone.java:45-61 the expiry of ten seconds, the range of two hundred and fifty six and the field of view of 0.66",
+          "oracle thaumcraft/common/items/ItemCompassStone.java:74-76 the rarity of the original is rare",
+          "native common/src/main/java/thaumcraft/common/items/ItemCompassStone.java:28-45 the stack limit one, the rarity rare and the sinister node registry",
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:509-526 the expiry, the range and the field of view",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the expiry, the range and the field of view are asserted"
         ],
         "notes": [
-          "1.21.1 items have no damage value; the original's second metadata (the pointing needle) became a state of the item and the node list of the original (a static map with a ten second expiry) became a native rule in common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:504-519",
-          "AUDITED in this wave: the expiry of ten thousand milliseconds, the range of two hundred and fifty six and the field of view of 0.66 of the original (ItemCompassStone:53-72) agree with the port; the rarity of the original (EnumRarity.rare) has no counterpart in 1.21.1."
+          "AUDITED and CLOSED in wave 2: the note of the wave of 2026-10-23 that the rarity of the original has no counterpart in 1.21.1 is stale: 1.21.1 has Rarity, and the port carries Rarity.RARE (native ItemCompassStone:28-45). The expiry of ten thousand milliseconds, the range of two hundred and fifty six and the field of view of 0.66 of the original (oracle ItemCompassStone:45-61) agree with the port, and the test of this wave asserts them."
         ],
         "reviewed_sha256": {
           "original": "e454a35d7651c6c97b42755268944f6f00d1f49e0dab55ef2bd486ff5e89651d",
@@ -34797,7 +34844,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemKey.java:62-72 the iron and the gold key with the metadata suffix name and the uncommon rarity",
@@ -34805,11 +34852,16 @@
           "native common/src/main/java/thaumcraft/common/items/ItemKey.java:30-95 keeps the two key types, the KEY_LINK component and the access grant",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers key_iron and key_gold",
           "oracle thaumcraft/common/items/ItemKey.java the iron and the gold key and their access list of the owned block",
-          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:446-470 the access entry and the rule of the iron key"
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:446-470 the access entry and the rule of the iron key",
+          "oracle thaumcraft/common/items/ItemKey.java:39-47 the stack limit of sixty four",
+          "oracle thaumcraft/common/items/ItemKey.java:75-77 the rarity of the original is uncommon",
+          "oracle thaumcraft/common/items/ItemKey.java:99-128 the access entry is the kind of the key followed by the name of the player and only the iron key of the owner opens a door that he does not own",
+          "native common/src/main/java/thaumcraft/common/items/ItemKey.java:30-95 the two key types, the KEY_LINK component and the access grant",
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:455-490 the access entry and the rule of the iron key",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the access entry and the rule of the iron key are asserted"
         ],
         "notes": [
-          "the NBT of the linked location became the KEY_LINK data component; the original's access list of the owned block is stored per block entity in the native tree (common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:446-470)",
-          "AUDITED in this wave: the access entry of the original, the kind of the key followed by the name of the player (ItemKey.onItemUseFirst), and the rule that only the iron key of the owner opens a door that he does not own, agree with the port (common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:451-470)."
+          "AUDITED and CLOSED in wave 2: the NBT of the linked location became the KEY_LINK data component; the access list of the owned block is stored per block entity in the native tree. The access entry of the original is the kind of the key followed by the name of the player (oracle ItemKey:124), the gold key carries the access of the owner (oracle ItemKey:99) and only the iron key of the owner opens a door that he does not own (oracle ItemKey:99). The port agrees and the test of this wave asserts the rules."
         ],
         "reviewed_sha256": {
           "original": "c7ebfe01da75402c8f36ac1f84340f6037148e8847693bd15be8763007150681",
@@ -34900,7 +34952,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemManaBean.java:92-100 a random potion effect for 160 + rand(80) ticks and a 0.25 chance to consume the bean",
@@ -34909,11 +34961,17 @@
           "native common/src/test/java/thaumcraft/items/ManaBeanEffectTest.java covers the effect numbers",
           "oracle thaumcraft/common/items/ItemManaBean.java:36-42 the food of one hunger and the saturation of one half",
           "oracle thaumcraft/common/items/ItemManaBean.java:52-63 the random potion with a duration of 160 plus a random of eighty ticks and the quarter that fills the aspect pool",
-          "native common/src/main/java/thaumcraft/common/items/ItemManaBean.java:83 the duration of the random potion of the port"
+          "native common/src/main/java/thaumcraft/common/items/ItemManaBean.java:83 the duration of the random potion of the port",
+          "oracle thaumcraft/common/items/ItemManaBean.java:46-54 the food of one hunger and the saturation of one half",
+          "oracle thaumcraft/common/items/ItemManaBean.java:60-77 a random potion effect for 160 + rand(80) ticks and a 0.25 chance to fill the aspect pool",
+          "oracle thaumcraft/common/items/ItemManaBean.java:143-157 a fresh bean gets a random display aspect",
+          "native common/src/main/java/thaumcraft/common/items/ItemManaBean.java:45-51 the duration, the random part and the chance of the aspect pool",
+          "native common/src/main/java/thaumcraft/common/items/ItemManaBean.java:83 the random potion of the port",
+          "native common/src/test/java/thaumcraft/items/ManaBeanEffectTest.java the forty slots of the lottery of the original",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the duration and the chance are asserted"
         ],
         "notes": [
-          "the NBT aspect list became the MANA_BEAN_DATA component; the random potion effect selection and its 160..240 tick duration were not re-verified line by line in this audit",
-          "AUDITED in this wave: the random potion is drawn from the vanilla potions, an instant potion is applied at once and every other potion lasts 160 + rand(80) ticks (ItemManaBean:52-63), and a quarter of the beans adds one of the first aspect of the bean to the pool of the player; the port agrees (common/src/main/java/thaumcraft/common/items/ItemManaBean.java:83)."
+          "AUDITED and CLOSED in wave 2: the NBT aspect list became the MANA_BEAN_DATA component. The random potion is drawn from the forty slots of the original, an instant potion is applied at once and every other potion lasts 160 + rand(80) ticks (oracle ItemManaBean:60-77), and a quarter of the beans adds the first aspect of the bean to the pool of the player. The port agrees; the numbers are now constants of the item and the test of this wave asserts them."
         ],
         "reviewed_sha256": {
           "original": "beaabbe9508a509bdd95171cae6658e197b4eebee3366f291f99023a6ddb8bcd",
@@ -34962,11 +35020,15 @@
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:120-131 registers quicksilver_drop and the three clusters",
           "oracle thaumcraft/common/items/ItemNugget.java:36-57 the icons of the nuggets and of the clusters",
           "oracle thaumcraft/common/items/ItemNugget.java:69-93 the creative listing of the nuggets and of the clusters of the other mods",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:120-141 the native nugget and cluster items"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:120-141 the native nugget and cluster items",
+          "oracle thaumcraft/common/items/ItemNugget.java:62-88 the creative listing of the nuggets and of the clusters of the other mods",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:140-162 the native nugget and cluster items",
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:281-311 the metadata of the nuggets and of the clusters",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the metadata and the native ids are asserted"
         ],
         "notes": [
-          "1.21.1 items have no metadata, so every nugget type became its own item id; the original's 64 icon slots are not reproduced one by one; only the types that the recipes use exist as ids",
-          "AUDITED in this wave: the original registers the nuggets of iron, copper, tin, silver, lead, quicksilver, thaumium and void metal and the clusters of iron, copper, tin, silver, lead, cinnabar and gold (ItemNugget:36-57 and the creative listing of :69-93). The port carries the quicksilver drop, the copper nugget, the iron, gold, cinnabar and copper clusters and the thaumium and void nuggets; the tin, the silver and the lead nuggets and their clusters do not exist in 1.21.1, that is the documented gap of the catalogue."
+          "AUDITED in wave 2: 1.21.1 items have no metadata, so every nugget type became its own item id. The original registers the nuggets of iron, copper, tin, silver, lead, quicksilver, thaumium and void metal and the clusters of iron, copper, tin, silver, lead, cinnabar and gold (oracle ItemNugget:39-52 and the creative listing of :62-88) and the port carries the quicksilver drop, the copper nugget, the iron, the gold, the cinnabar and the copper clusters (native ThaumcraftContent:140-162). The test of this wave asserts the metadata of every nugget and of every cluster and the ids that exist.",
+          "REMAINING GAP (catalogue): the tin, the silver and the lead nuggets and their three clusters do not exist in 1.21.1, because the ores of the tin, the silver and the lead are the content of other mods and not of vanilla. The original only offered them when the other mods were found (oracle ItemNugget:72-85, Config.foundTinIngot and the two next), so the catalogue of the port is the documented difference of this unit."
         ],
         "reviewed_sha256": {
           "original": "81e45f297f56cd07bb06d8f23169e5692896a2b76070b0ad199cd862f0abaa95",
@@ -35006,18 +35068,21 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemNuggetEdible.java the edible meat nuggets of the golems",
           "native common/src/main/java/thaumcraft/common/items/ItemNuggetEdible.java implements the native edible nugget",
           "oracle thaumcraft/common/items/ItemNuggetEdible.java:15-17 the food of one hunger and the saturation of three tenths",
           "oracle thaumcraft/common/items/ItemNuggetEdible.java:25-27 the use duration of ten ticks",
-          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:307-319 the food values of the edible nuggets"
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:307-319 the food values of the edible nuggets",
+          "oracle thaumcraft/common/items/ItemNuggetEdible.java:28-33 the food of one hunger and the saturation of three tenths and the use duration of ten ticks",
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:312-325 the food values of the edible nuggets",
+          "native common/src/main/java/thaumcraft/common/items/ItemNuggetEdible.java:13-29 the native edible nugget",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the food values and the use duration are asserted"
         ],
         "notes": [
-          "the four food nuggets became separate item ids; the food values were not re-verified in this audit",
-          "AUDITED in this wave: the original food of the edible nuggets is one hunger and three tenths of a point of saturation with a use duration of ten ticks (ItemNuggetEdible:15-17 and :25-27); the port agrees (common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:307-319)."
+          "AUDITED and CLOSED in wave 2: the four food nuggets became separate item ids, the metadata zero chicken, one beef, two pork and three fish. The original food of the edible nuggets is one hunger and three tenths of a point of saturation with a use duration of ten ticks (oracle ItemNuggetEdible:28-37) and the port agrees; the test of this wave asserts the values."
         ],
         "reviewed_sha256": {
           "original": "95c6c4098b5220881336e8b8b462bc99112aa4d3fd6aaa9635043c6294c8e633",
@@ -35118,7 +35183,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemResource.java:54-86 the 19 resource metadata values from the alumentum (0) to the gold coin (18)",
@@ -35129,12 +35194,19 @@
           "native common/src/main/java/thaumcraft/common/items/ItemResource.java implements the tainted goo and the taint tendril",
           "oracle thaumcraft/common/items/ItemResource.java the nineteen metadata values of the resource of the original",
           "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:322-389 the mapping of the nineteen resources and the tainted ones",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:144-160 the registration of the nineteen native resources"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:144-160 the registration of the nineteen native resources",
+          "oracle thaumcraft/common/items/ItemResource.java:69-78 the 19 resource metadata values from the alumentum to the gold coin",
+          "oracle thaumcraft/common/items/ItemResource.java:132-137 the creative listing of the resources skips the metadata five, the zombie brain",
+          "oracle thaumcraft/common/items/ItemResource.java:143-150 the tainted resources of the metadata eleven and twelve infect their carrier",
+          "oracle thaumcraft/common/items/ItemResource.java:196-249 the nitor resource of the metadata one places the nitor block and the alumentum of the metadata zero throws the entity",
+          "oracle thaumcraft/common/items/ItemResource.java:251-275 the knowledge fragment of the metadata nine fills the aspect pool of the primal aspects",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:168-186 the 19 resources as separate items",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:221-224 the creative listing of the resources without the zombie brain",
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:327-369 the mapping of the 19 resources and the tainted ones",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the 19 resources, their metadata and the taint roll are asserted"
         ],
         "notes": [
-          "the 19 metadata values became 19 separate item ids; nine of them are still plain items without the original's behaviour",
-          "the native source itself notes that the behavioural resource items stay pending in MIGRATION_STATUS",
-          "AUDITED in this wave: the mapping of the nineteen metadata values is carried in common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:322-358 and agrees with the original (ConfigItems). The two tainted resources of the metadata eleven and twelve poison their carrier, the knowledge fragment of the metadata nine is a real item and the filter, the mirrored glass, the salis mundus, the primal charm, the void ingot, the void seed and the gold coin are the plain items that the original also treats as a plain resource. The behaviours of the filter, the mirrored glass and the salis mundus live in the tile and the block code of the original and are not part of the item class."
+          "AUDITED and CLOSED in wave 2: the nineteen metadata values became nineteen separate item ids and the port carries the behaviour of every resource that has one. The nitor of the metadata one places the nitor block (oracle ItemResource:196-249), the alumentum of the metadata zero throws the alumentum entity and the knowledge fragment of the metadata nine fills the aspect pool of the primal aspects (oracle ItemResource:251-275), the two tainted resources of the metadata eleven and twelve infect their carrier once in 4321 ticks with a taint poison of 120 ticks (oracle ItemResource:143-150). The other resources are plain items in the original as well. The creative listing of the original skips the metadata five, the zombie brain (oracle ItemResource:132-137) and the port now skips it as well. The test of this wave asserts the nineteen ids and the metadata."
         ],
         "reviewed_sha256": {
           "original": "a320df79f4963a45a0d636e8e192ecbd1d7c688ccc6e5082229daf6712a1efb2",
@@ -35174,7 +35246,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemSanitySoap.java:36-46 the stack limit 200, the BLOCK use animation and the 195 tick lather",
@@ -35182,11 +35254,12 @@
           "native common/src/main/java/thaumcraft/common/lib/warp/SanitySoapRules.java holds the duration and the warp effect",
           "oracle thaumcraft/common/items/ItemSanitySoap.java:35-39 the use duration of two hundred ticks and the action of the block",
           "oracle thaumcraft/common/items/ItemSanitySoap.java:76-95 the chances of the sticky warp of 0.33, 0.25 and 0.25",
-          "native common/src/main/java/thaumcraft/common/items/ItemSanitySoap.java the native use duration and the chances"
+          "native common/src/main/java/thaumcraft/common/items/ItemSanitySoap.java the native use duration and the chances",
+          "native common/src/main/java/thaumcraft/common/lib/warp/SanitySoapRules.java the duration and the chances",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the duration and the four chances are asserted"
         ],
         "notes": [
-          "the NBT free use duration became the native use duration; the client lather particles use the native client effect hook",
-          "AUDITED in this wave: the original uses the soap for two hundred ticks, cancels the use in the first five of them and gives the sticky warp with a chance of 0.33, plus 0.25 with the Ward and plus 0.25 in the pure fluid (ItemSanitySoap:35-39 and :76-95); the port agrees."
+          "AUDITED and CLOSED in wave 2: the NBT free use duration became the native use duration; the original uses the soap for two hundred ticks, cancels the use in the first five of them and gives the sticky warp with a chance of 0.33, plus 0.25 with the Ward and plus 0.25 in the pure fluid (oracle ItemSanitySoap:35-39 and :76-95). The port agrees and the test of this wave asserts the duration and the four chances."
         ],
         "reviewed_sha256": {
           "original": "334cf09f21fa88228c5eb192c84b7f3584adffad1f207e400cb18985608ad0d8",
@@ -35274,7 +35347,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/ItemTripleMeatTreat.java:23-26 the food values 6 hunger, 0.8 saturation, always edible and the regeneration effect for 5 seconds with a 0.66 chance",
@@ -35283,12 +35356,15 @@
           "oracle thaumcraft/common/items/ItemTripleMeatTreat.java:17-21 the food of six hunger, the saturation of four fifths and the regeneration with a chance of 0.66",
           "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:491-497 the numbers of the treat",
           "native common/src/main/resources/assets/thaumcraft/lang/en_us.json:1652 the name of the treat in English",
-          "native common/src/main/resources/assets/thaumcraft/lang/ru_ru.json:1652 the name of the treat in Russian"
+          "native common/src/main/resources/assets/thaumcraft/lang/ru_ru.json:1652 the name of the treat in Russian",
+          "oracle thaumcraft/common/items/ItemTripleMeatTreat.java:26-31 the food values 6 hunger, 0.8 saturation, always edible and the regeneration effect for 5 seconds with a 0.66 chance",
+          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:496-503 TREAT_HUNGER 6, TREAT_SATURATION 0.8, TREAT_EFFECT_CHANCE 0.66, TREAT_REGENERATION_TICKS 100",
+          "native common/src/main/resources/assets/thaumcraft/lang/en_us.json the name of the treat in English",
+          "native common/src/main/resources/assets/thaumcraft/lang/ru_ru.json the name of the treat in Russian",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the four numbers and the two names are asserted"
         ],
         "notes": [
-          "the effect duration is expressed in ticks (100) instead of the original's seconds (5)",
-          "DEFECT: thaumcraft:triple_meat_treat is registered but has no name in en_us.json or ru_ru.json (see the report)",
-          "AUDITED in this wave: the DEFECT of the previous audit is closed, both languages carry item.thaumcraft.triple_meat_treat. The numbers of the original agree with the port: six hunger, four fifths of a point of saturation and the regeneration of five seconds with a chance of two thirds (ItemTripleMeatTreat:17-21, common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:491-497)."
+          "AUDITED and CLOSED in wave 2: the effect duration is expressed in ticks (100) instead of the seconds of the original (5). The defect of the previous audit, the missing name of the treat in en_us.json and in ru_ru.json, is closed. The numbers of the original agree with the port: six hunger, four fifths of a point of saturation and the regeneration of five seconds with a chance of two thirds (oracle ItemTripleMeatTreat:26-31), and the test of this wave asserts the numbers and the name in both languages."
         ],
         "reviewed_sha256": {
           "original": "180c6127e9858dd9a35959e242015bf2e690ff053c190c20aff26b156039ce33",
@@ -37477,18 +37553,22 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/relics/ItemResonator.java the resonator that scans the nearby nodes",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java implements the native resonator",
           "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java:69-78 routes the resonator use into the inspection",
           "oracle thaumcraft/common/items/relics/ItemResonator.java the resonator only opens the screen of the original",
-          "native common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java the inspection action of the port"
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java the inspection action of the port",
+          "oracle thaumcraft/common/items/relics/ItemResonator.java:45-51 the stack limit is one and the relic is not damageable",
+          "oracle thaumcraft/common/items/relics/ItemResonator.java:74-76 the rarity of the original is uncommon",
+          "oracle thaumcraft/common/items/relics/ItemResonator.java:79-112 the inspection of a transport: the messages tc.resonator1 and tc.resonator2, the name of the suction or tc.resonator3 and the sound thaumcraft:alembicknock with the volume 0.5 and the pitch 1.9 + rand(0.1)",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java:53-102 the inspection action of the port with the same messages and the same sound",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java:34 the stack limit one and the rarity uncommon"
         ],
         "notes": [
-          "the original's GUI was replaced by an inspection action; the node scan itself belongs to the research domain",
-          "AUDITED in this wave: the resonator of the original only opens its screen (ItemResonator) and the scan itself lives in the research code, so the native inspection action keeps the player facing behaviour while the GUI of the original has no 1.21.1 counterpart without a client screen."
+          "AUDITED and CLOSED in wave 2: the note of the wave of 2026-10-23 that the original only opened a screen is stale. The 4.2.3.5 original of the oracle does not open a screen at all: onItemUseFirst (oracle ItemResonator:79-112) reads the transport of the clicked block, prints tc.resonator1 with the stored aspect and its amount (or the sorted aspects of a buffer), prints tc.resonator2 with the suction amount and the name of the suction (or tc.resonator3) and plays thaumcraft:alembicknock with the volume 0.5 and the pitch 1.9 + rand(0.1). The native inspection action does exactly that, so the unit reproduces the original."
         ],
         "reviewed_sha256": {
           "original": "12a972aa162606194af53e6bb48cbddac4a2271cd54779592d434236697e09d7",
@@ -37535,11 +37615,13 @@
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers sanity_checker",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java implements the native checker",
           "oracle thaumcraft/common/items/relics/ItemSanityChecker.java the sanity checker only opens the screen of the original",
-          "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java the native relic"
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java the native relic",
+          "oracle thaumcraft/common/items/relics/ItemSanityChecker.java:16-40 the stack limit 1, the uncommon rarity and no use behaviour at all",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java:21-40 the native relic and the reading of the warp"
         ],
         "notes": [
-          "1.21.1 items have no metadata; the sanity display itself belongs to the warp domain",
-          "AUDITED in this wave: the sanity checker of the original only opens its screen (ItemSanityChecker), the display of the sanity of the player belongs to the warp code, so the native item keeps the identity of the relic and the display of the original is a client screen that this domain does not own."
+          "AUDITED in wave 2: the identity of the relic agrees with the original: the stack limit of one and the uncommon rarity (oracle ItemSanityChecker:24-30, native ItemSanityChecker:23). The 4.2.3.5 original has no use behaviour at all for the sanity checker, the reading of the warp was added to the item in a later version of Thaumcraft, and the native item keeps that later reading because the relic is pointless without it (the deviation is written down in the javadoc of the native class).",
+          "REMAINING GAP: the native checker reads the warp on use, the original of the 4.2.3.5 does nothing when it is used. The reading itself belongs to the warp domain; the identity of the relic is reproduced."
         ],
         "reviewed_sha256": {
           "original": "3f7a196d734b3b46ac983d9585f38f3e73fe305e1bcbd04f68639513b8598c34",

@@ -6,7 +6,8 @@
   "mixins": [
     "NeoForgeExcavationRemovalMixin",
     "NeoForgeFluidPureMixin",
-    "NeoForgeFluidDeathMixin"
+    "NeoForgeFluidDeathMixin",
+    "NeoForgeDamageContainerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

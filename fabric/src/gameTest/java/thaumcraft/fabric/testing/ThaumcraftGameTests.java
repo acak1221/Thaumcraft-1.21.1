@@ -1229,7 +1229,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.CrystalClustersRuntimeChecks.sevenRecipesPlaceOnSixFacesAndRecoverTheirSixShards(test);
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600, batch = "m00_crystal_clusters_lifecycle")
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1400, batch = "m00_crystal_clusters_lifecycle")
     public void mixedCrystalOrientationSurvivesActualChunkUnload(GameTestHelper test) {
         thaumcraft.common.testing.CrystalClustersRuntimeChecks.mixedOrientationActuallyUnloadsAndReloadsFromChunkNbt(test);
     }

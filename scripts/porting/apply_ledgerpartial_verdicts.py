@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -777,6 +778,11 @@ def main() -> int:
         print(json.dumps({"unknown": unknown}, ensure_ascii=False))
         return 2
 
+    # The disposition counter of the header is derived from the rows, exactly like
+    # scripts/porting/update_scope_ledger.py computes it.
+    dispositions = Counter(unit["review"]["disposition"] for unit in data["units"])
+    data["counts"]["dispositions"] = dict(sorted(dispositions.items()))
+
     text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
     if args.check:
         current = LEDGER.read_text(encoding="utf-8")
@@ -785,7 +791,6 @@ def main() -> int:
     LEDGER.write_text(text, encoding="utf-8", newline="\n")
     print(json.dumps({"applied": changed}, ensure_ascii=False))
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

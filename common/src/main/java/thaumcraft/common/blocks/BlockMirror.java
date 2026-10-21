@@ -129,7 +129,11 @@ public final class BlockMirror extends BaseEntityBlock {
         super.entityInside(state, level, pos, entity);
         if (level.isClientSide) return;
         if (state.getValue(ESSENTIA)) return;
-        if (!(entity instanceof ItemEntity item) || item.isRemoved() || item.hasPickUpDelay()) return;
+        // Oracle BlockMirror:163 - the 1.7.10 name `field_71088_bW` belongs to
+        // Entity (it is `timeUntilPortal` in the 1.7.10 mapping), not to the
+        // pickup delay of the item. The original therefore takes the item as
+        // soon as it enters the mirror; it never waits for the pickup delay.
+        if (!(entity instanceof ItemEntity item) || item.isRemoved()) return;
         if (!(level.getBlockEntity(pos) instanceof TileMirror mirror)) return;
         mirror.transport(item);
     }

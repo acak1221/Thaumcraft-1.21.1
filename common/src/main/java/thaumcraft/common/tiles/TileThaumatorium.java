@@ -235,14 +235,16 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
     private void changed() { setChanged(); if (current()) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS); }
     public void refreshUpgrades() {
         if (!current() || level.isClientSide || finishing || EssentiaTransfers.isMutationActive()) return;
-        int capacity = 1;
+        int matrices = 0;
         for (int y = 0; y <= 1; y++) for (Direction side : Direction.values()) {
             if (side == Direction.DOWN || side == facing()) continue;
             BlockPos pos = worldPosition.above(y).relative(side);
             if (!level.hasChunkAt(pos)) continue;
             BlockState state = level.getBlockState(pos);
-            if (state.is(ThaumcraftThaumatorium.MNEMONIC_MATRIX.get()) && state.getValue(thaumcraft.common.blocks.BlockMnemonicMatrix.FACING) == side.getOpposite()) capacity += 2;
+            if (state.is(ThaumcraftThaumatorium.MNEMONIC_MATRIX.get()) && state.getValue(thaumcraft.common.blocks.BlockMnemonicMatrix.FACING) == side.getOpposite()) ++matrices;
         }
+        // Oracle TileThaumatorium:494-516 - one free formula, two per matrix.
+        int capacity = ThaumatoriumRules.recipeCapacity(matrices);
         if (capacity == maxRecipes) return;
         maxRecipes = capacity;
         if (jobs.size() > capacity) jobs = List.copyOf(jobs.subList(0, capacity));
@@ -291,13 +293,13 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
             if (tag.contains("PendingOutput")) physicalOutput = ItemStack.parse(registries, tag.get("PendingOutput")).orElseThrow();
             if (tag.contains("Recipe")) selected = ResourceLocation.parse(tag.getString("Recipe"));
             if (tag.contains("Recipes")) {
-                if (!(tag.get("Recipes") instanceof ListTag list) || !list.isEmpty() && list.getElementType() != Tag.TAG_COMPOUND || list.size() > 19) throw new IllegalArgumentException("Invalid selected formulas");
+                if (!(tag.get("Recipes") instanceof ListTag list) || !list.isEmpty() && list.getElementType() != Tag.TAG_COMPOUND || list.size() > ThaumatoriumRules.MAX_RECIPES) throw new IllegalArgumentException("Invalid selected formulas");
                 var parsedJobs = new java.util.ArrayList<Job>(); var seen = new java.util.HashSet<ResourceLocation>();
                 for (Tag raw : tag.getList("Recipes", Tag.TAG_COMPOUND)) { var row = (CompoundTag) raw; ResourceLocation id = ResourceLocation.parse(row.getString("id"));
                     if (!seen.add(id)) throw new IllegalArgumentException("Duplicate selected formula"); parsedJobs.add(new Job(id, row.hasUUID("author") ? row.getUUID("author") : null)); }
                 jobs = List.copyOf(parsedJobs);
             } else if (selected != null) jobs = List.of(new Job(selected, tag.hasUUID("Author") ? tag.getUUID("Author") : null));
-            maxRecipes = Math.clamp(tag.getInt("MaxRecipes"), 1, 19);
+            maxRecipes = Math.clamp(tag.getInt("MaxRecipes"), 1, ThaumatoriumRules.MAX_RECIPES);
             if (tag.contains("Essentia") && (!(tag.get("Essentia") instanceof ListTag list) || !list.isEmpty() && list.getElementType() != Tag.TAG_COMPOUND)) throw new IllegalArgumentException("Invalid essentia rows");
             var parsed = new LinkedHashMap<Aspect, Integer>();
             for (Tag raw : tag.getList("Essentia", Tag.TAG_COMPOUND)) {

@@ -9,7 +9,16 @@ import thaumcraft.api.aspects.AspectList;
 public final class ThaumatoriumRules {
     public static final int WORK_INTERVAL = 5, HEAT_INTERVAL = 40, SUCTION = 128;
     public static final Map<String, Integer> FORM_VIS = Map.of("ignis", 15, "ordo", 30, "aqua", 30);
+    /**
+     * Oracle TileThaumatorium.java:494-516 - one formula is free and every
+     * mnemonic matrix adds two. The matrix may stand on the ten cells the
+     * original scans (two levels, every direction but down and the front),
+     * so the machine holds at most twenty one formulas.
+     */
+    public static final int BASE_RECIPES = 1, RECIPES_PER_MATRIX = 2, MAX_MATRIX_SLOTS = 10, MAX_RECIPES = 21;
     private ThaumatoriumRules() {}
+    /** The number of formulas of a Thaumatorium with the given number of mnemonic matrices. */
+    public static int recipeCapacity(int matrices) { return BASE_RECIPES + RECIPES_PER_MATRIX * matrices; }
     public static Aspect missing(Map<String, Integer> cost, AspectList stock) {
         return cost.keySet().stream().sorted().map(Aspect::getAspect)
                 .filter(aspect -> aspect != null && stock.getAmount(aspect) < cost.get(aspect.getTag())).findFirst().orElse(null);

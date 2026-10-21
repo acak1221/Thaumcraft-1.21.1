@@ -88,7 +88,7 @@ public final class EldritchBlockRuntimeChecks {
         test.succeed();
     }
 
-    /** The original eldritch obelisk only slows the eldritch mobs around it. */
+    /** The original eldritch obelisk only buffs the eldritch mobs around it. */
     public static void obeliskSlowsOnlyTheEldritchMobs(GameTestHelper test) {
         var lane = new WaveLane(test, 3, 2, 3);
         try {
@@ -117,14 +117,16 @@ public final class EldritchBlockRuntimeChecks {
                 level.tickNonPassenger(crab);
                 level.tickNonPassenger(pig);
             }
-            test.assertTrue(crab.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && crab.hasEffect(MobEffects.DIG_SLOWDOWN),
-                    "the obelisk slows the eldritch crab: " + crab.getEffect(MobEffects.MOVEMENT_SLOWDOWN));
-            test.assertTrue(crab.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getDuration() <= EldritchBlockRules.OBELISK_EFFECT_DURATION
-                            && crab.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() == EldritchBlockRules.OBELISK_EFFECT_AMPLIFIER,
+            // Oracle TileEldritchObelisk:51-52 - damage boost and regeneration,
+            // never a slowdown: the obelisk empowers the eldritch mobs.
+            test.assertTrue(crab.hasEffect(MobEffects.DAMAGE_BOOST) && crab.hasEffect(MobEffects.REGENERATION),
+                    "the obelisk empowers the eldritch crab: " + crab.getEffect(MobEffects.DAMAGE_BOOST));
+            test.assertTrue(crab.getEffect(MobEffects.DAMAGE_BOOST).getDuration() <= EldritchBlockRules.OBELISK_EFFECT_DURATION
+                            && crab.getEffect(MobEffects.DAMAGE_BOOST).getAmplifier() == EldritchBlockRules.OBELISK_EFFECT_AMPLIFIER,
                     "the obelisk effect is the original forty ticks of amplifier zero: "
-                            + crab.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getDuration());
-            test.assertTrue(!pig.hasEffect(MobEffects.MOVEMENT_SLOWDOWN),
-                    "the obelisk never touches a mob that is not an eldritch mob: " + pig.getEffect(MobEffects.MOVEMENT_SLOWDOWN));
+                            + crab.getEffect(MobEffects.DAMAGE_BOOST).getDuration());
+            test.assertTrue(!pig.hasEffect(MobEffects.DAMAGE_BOOST) && !pig.hasEffect(MobEffects.REGENERATION),
+                    "the obelisk never touches a mob that is not an eldritch mob: " + pig.getEffect(MobEffects.DAMAGE_BOOST));
         } catch (RuntimeException | Error failure) {
             lane.clean();
             throw failure;

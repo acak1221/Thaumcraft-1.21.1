@@ -50,6 +50,13 @@ public final class TileCrucible extends BlockEntity {
     private short heat;
     private long counter = -100L;
     private boolean processing;
+    /**
+     * Original TileCrucible:69 - the bellows count is found once, on the first
+     * server tick, and then kept. The original never looks at the neighbours
+     * again, so a bellows that is placed or removed later is only noticed when
+     * the chunk is read again. The furnace, in contrast, counts them every tick.
+     */
+    private int bellows = -1;
 
     /** Client-only implementation is installed without linking client classes from common/server code. */
     public interface ClientEffects {
@@ -109,10 +116,12 @@ public final class TileCrucible extends BlockEntity {
     private void serverTick(ServerLevel server) {
         ++counter;
         short previous = heat;
+        // Original TileCrucible:98-100 - the bellows are counted once.
+        if (bellows < 0) bellows = countBellows();
         if (water > 0 && isHeatSource(server.getBlockState(worldPosition.below()))) {
             // Intentionally do not clamp: original short heat can overshoot 200
             // by a bellows step before the heat<200 guard closes.
-            if (heat < 200) heat = (short) (heat + 1 + bellows() * 2);
+            if (heat < 200) heat = (short) (heat + 1 + bellows * 2);
         } else if (heat > 0) --heat;
         if (heat != previous) {
             setChanged();
@@ -148,7 +157,7 @@ public final class TileCrucible extends BlockEntity {
                 || BuiltInRegistries.BLOCK.getKey(state.getBlock()).equals(NITOR);
     }
 
-    private int bellows() {
+    private int countBellows() {
         int count = 0;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos pos = worldPosition.relative(direction);

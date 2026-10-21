@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.LightLayer;
 import thaumcraft.common.blocks.BlockArcaneLamp;
 import thaumcraft.common.config.ThaumcraftLamps;
 import thaumcraft.common.lib.ArcaneLampRules;
@@ -39,7 +40,8 @@ public final class TileArcaneLamp extends BlockEntity {
         BlockPos candidate = new BlockPos(x, y, z);
         BlockState existing = server.getBlockState(candidate);
         if (server.isOutsideBuildHeight(candidate) || !existing.isAir() || existing.is(ThaumcraftLamps.ARCANE_LIGHT.get())
-                || !ArcaneLampRules.darkEnough(server.getRawBrightness(candidate, 0))) return false;
+                || !ArcaneLampRules.darkEnough(server.getBrightness(LightLayer.BLOCK, candidate),
+                        server.getBrightness(LightLayer.SKY, candidate))) return false;
         return server.setBlock(candidate, ThaumcraftLamps.ARCANE_LIGHT.get().defaultBlockState(), Block.UPDATE_ALL);
     }
 

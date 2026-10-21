@@ -121,7 +121,7 @@ class EldritchBlockRulesTest {
     @Test void obeliskOnlyAffectsLivingEldritchMobsInRange() {
         assertEquals(6.0D, EldritchBlockRules.OBELISK_RANGE);
         assertEquals(40, EldritchBlockRules.OBELISK_EFFECT_DURATION);
-        assertEquals(20, EldritchBlockRules.OBELISK_TICK_PERIOD);
+        assertEquals(1, EldritchBlockRules.OBELISK_TICK_PERIOD);
         assertTrue(EldritchBlockRules.obeliskAffects(true, true));
         assertFalse(EldritchBlockRules.obeliskAffects(false, true));
         assertFalse(EldritchBlockRules.obeliskAffects(true, false));

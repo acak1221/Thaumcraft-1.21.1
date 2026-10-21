@@ -181,21 +181,26 @@ public final class TileMirror extends BlockEntity {
         }
     }
 
-    /** Original TileMirror:263-287 - the mirror ejects, decays and repairs its link. */
+    /** Original TileMirror:287-306 - the mirror ejects, decays and repairs its link. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileMirror mirror) {
         if (level.isClientSide) return;
-        mirror.count++;
+        // Original TileMirror:295 - the counter is READ before it is raised, so
+        // the ejection, the decay and the link repair all run on the tick the
+        // counter stands on. The port used the raised counter and shifted all
+        // three schedules by one tick.
         if (EldritchBlockRules.mirrorShouldEject(mirror.count, mirror.instability)) mirror.eject();
         mirror.checkInstability(level);
-        if (mirror.count % mirror.inc != 0) return;
-        if (!mirror.isLinkValidSimple()) {
-            if (mirror.inc < EldritchBlockRules.MIRROR_LINK_RETRY_MAX) {
-                mirror.inc = EldritchBlockRules.mirrorLinkRetryInterval(mirror.inc);
+        if (mirror.count % mirror.inc == 0) {
+            if (!mirror.isLinkValidSimple()) {
+                if (mirror.inc < EldritchBlockRules.MIRROR_LINK_RETRY_MAX) {
+                    mirror.inc = EldritchBlockRules.mirrorLinkRetryInterval(mirror.inc);
+                }
+                mirror.restoreLink();
+            } else {
+                mirror.inc = EldritchBlockRules.MIRROR_LINK_RETRY;
             }
-            mirror.restoreLink();
-        } else {
-            mirror.inc = EldritchBlockRules.MIRROR_LINK_RETRY;
         }
+        mirror.count++;
     }
 
     /** Original TileMirror:289-300 - the instability decays and can be paid with vis. */

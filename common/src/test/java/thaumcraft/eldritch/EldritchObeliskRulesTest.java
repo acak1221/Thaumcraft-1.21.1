@@ -32,8 +32,9 @@ class EldritchObeliskRulesTest {
         assertEquals(6.0D, EldritchBlockRules.OBELISK_RANGE);
     }
 
-    @Test void theObeliskOnlySlowsTheEldritchMobsThatAreNotSlowedYet() {
-        // TileEldritchObelisk:49 - a mob that already carries the dig slowdown is skipped.
+    @Test void theObeliskOnlyEmpowersTheEldritchMobsThatAreNotRegeneratingYet() {
+        // TileEldritchObelisk:49 - a mob that already carries regeneration is skipped.
+        // The obelisk BUFFS the eldritch mobs: damage boost and regeneration.
         assertTrue(EldritchBlockRules.obeliskAffects(true, true, false));
         assertFalse(EldritchBlockRules.obeliskAffects(true, true, true));
         assertFalse(EldritchBlockRules.obeliskAffects(false, true, false));
@@ -42,6 +43,7 @@ class EldritchObeliskRulesTest {
         assertFalse(EldritchBlockRules.obeliskAffects(false, true));
         assertEquals(40, EldritchBlockRules.OBELISK_EFFECT_DURATION);
         assertEquals(0, EldritchBlockRules.OBELISK_EFFECT_AMPLIFIER);
-        assertEquals(20, EldritchBlockRules.OBELISK_TICK_PERIOD);
+        // The original never raises its counter, so the offer is made every tick.
+        assertEquals(1, EldritchBlockRules.OBELISK_TICK_PERIOD);
     }
 }

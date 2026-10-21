@@ -9,5 +9,14 @@ public final class ArcaneLampRules {
     public static int candidateY(int sampled, int columnHeight, int minY) {
         return Math.max(minY + 5, Math.min(sampled, columnHeight + 4));
     }
-    public static boolean darkEnough(int rawLight) { return rawLight < DARKNESS_LIMIT; }
+
+    /**
+     * Oracle TileArcaneLamp.java:35 - the original asks the world for its light
+     * value, which is the LARGER of the block light and the sky light. A cell
+     * that a torch lights up is therefore not dark enough, even when the sky
+     * light above it is zero.
+     */
+    public static boolean darkEnough(int blockLight, int skyLight) {
+        return Math.max(blockLight, skyLight) < DARKNESS_LIMIT;
+    }
 }

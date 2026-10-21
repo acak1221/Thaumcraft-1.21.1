@@ -667,8 +667,12 @@ public final class EldritchBlockRules {
     public static final int OBELISK_EFFECT_DURATION = 40;
     public static final int OBELISK_EFFECT_AMPLIFIER = 0;
 
-    /** TileEldritchObelisk:69 - the effect is refreshed every twenty ticks. */
-    public static final int OBELISK_TICK_PERIOD = 20;
+    /**
+     * TileEldritchObelisk:45-63 - the original's counter is never raised, so the
+     * obelisk offers its pair of effects on EVERY server tick. What actually
+     * limits the effect is the guard on the regeneration of the mob.
+     */
+    public static final int OBELISK_TICK_PERIOD = 1;
 
     /** TileEldritchObelisk:72 - only eldritch mobs are affected. */
     public static boolean obeliskAffects(boolean eldritchMob, boolean living) {
@@ -676,11 +680,13 @@ public final class EldritchBlockRules {
     }
 
     /**
-     * TileEldritchObelisk:49 - the original skips an eldritch mob that is already slowed down,
-     * so the two effects are only handed out again after they ran out.
+     * TileEldritchObelisk:49 - the original skips an eldritch mob that already
+     * carries regeneration, so the pair of effects is only handed out again
+     * after the forty ticks ran out. The obelisk BUFFS the eldritch mobs: it
+     * gives them damage boost and regeneration, never a slowdown.
      */
-    public static boolean obeliskAffects(boolean eldritchMob, boolean living, boolean alreadySlowed) {
-        return obeliskAffects(eldritchMob,living) && !alreadySlowed;
+    public static boolean obeliskAffects(boolean eldritchMob, boolean living, boolean alreadyRegenerating) {
+        return obeliskAffects(eldritchMob, living) && !alreadyRegenerating;
     }
 
     // ------------------------------------------------------------------- portal

@@ -16,9 +16,15 @@ class ArcaneLampRulesTest {
         assertEquals(30,ArcaneLampRules.candidateY(30,80,0));
     }
     @Test void theSafetyThresholdStopsExactlyAtNine() {
-        assertTrue(ArcaneLampRules.darkEnough(8));
-        assertFalse(ArcaneLampRules.darkEnough(9));
-        assertFalse(ArcaneLampRules.darkEnough(15));
+        // The original asks the world for its light value, which is the larger
+        // of the block light and the sky light.
+        assertTrue(ArcaneLampRules.darkEnough(8, 0));
+        assertTrue(ArcaneLampRules.darkEnough(0, 8));
+        assertFalse(ArcaneLampRules.darkEnough(9, 0));
+        assertFalse(ArcaneLampRules.darkEnough(0, 9));
+        assertFalse(ArcaneLampRules.darkEnough(15, 0));
+        assertFalse(ArcaneLampRules.darkEnough(0, 15));
+        assertFalse(ArcaneLampRules.darkEnough(4, 10), "a torch lit cell is not dark enough");
     }
     @Test void theBoreUsesTheOriginalEvenDistancesAndFourStepSidePattern() {
         BlockPos top=BlockPos.ZERO;

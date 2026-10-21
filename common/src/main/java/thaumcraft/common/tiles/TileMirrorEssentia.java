@@ -183,16 +183,19 @@ public final class TileMirrorEssentia extends BlockEntity implements IAspectSour
     /** Original TileMirrorEssentia:213-222 - the retry of a broken link. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileMirrorEssentia mirror) {
         if (level.isClientSide) return;
-        mirror.count++;
-        if (mirror.count % mirror.inc != 0) return;
-        if (!mirror.isLinkValidSimple()) {
-            if (mirror.inc < EldritchBlockRules.MIRROR_LINK_RETRY_MAX) {
-                mirror.inc = EldritchBlockRules.mirrorLinkRetryInterval(mirror.inc);
+        // Original TileMirrorEssentia:224 - the counter is READ before it is
+        // raised, so the first link check happens on the very first tick.
+        if (mirror.count % mirror.inc == 0) {
+            if (!mirror.isLinkValidSimple()) {
+                if (mirror.inc < EldritchBlockRules.MIRROR_LINK_RETRY_MAX) {
+                    mirror.inc = EldritchBlockRules.mirrorLinkRetryInterval(mirror.inc);
+                }
+                mirror.restoreLink();
+            } else {
+                mirror.inc = EldritchBlockRules.MIRROR_LINK_RETRY;
             }
-            mirror.restoreLink();
-        } else {
-            mirror.inc = EldritchBlockRules.MIRROR_LINK_RETRY;
         }
+        mirror.count++;
     }
 
     /** The face the mirror is attached to. */

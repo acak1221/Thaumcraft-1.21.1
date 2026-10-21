@@ -92,6 +92,10 @@ public final class VillageWorldGenRules {
      * <p>The 1.12 reference renamed the helper to {@code getIntWithMinMax} and
      * kept the same body, so the draw is the same there.
      *
+     * <p>The draw of the original is {@code nextInt(2)}, so it is 0 or 1. The port
+     * folds any other draw by its parity: an even draw is the village size itself and
+     * an odd draw is the village size plus one.
+     *
      * @param villageSize the size {@code i} of the village
      * @param roll the draw of the village random
      */

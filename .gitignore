@@ -5,6 +5,7 @@ logs
 # Gradle / Forge workspace
 .gradle/
 .gradle_home/
+.gradle-fix4/
 build/
 out/
 run/

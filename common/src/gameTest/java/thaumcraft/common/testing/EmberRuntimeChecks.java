@@ -246,7 +246,9 @@ public final class EmberRuntimeChecks {
 
     private static void blocks(GameTestHelper test, ServerPlayer player, BlockPos pos, List<EntityEmber> shots) {
         ServerLevel level = player.serverLevel();
-        BlockPos wall = pos.east(), ignition = wall.west();
+        // The wall stands one block south of the cow of the combat lane, so the ember of this
+        // lane really reaches the wall and not the cow.
+        BlockPos wall = pos.east().south(), ignition = wall.west();
         level.setBlock(wall, Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
         level.setBlock(ignition.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
         for (boolean grief : new boolean[]{false, true}) {

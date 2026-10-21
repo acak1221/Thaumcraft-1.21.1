@@ -196,7 +196,7 @@ public final class GolemGuardTargetsRuntimeChecks {
             golem.setHome(at, Direction.UP);
             golem.setOwnerName(owner.name());
             golem.setPersistenceRequired();
-            test.assertTrue(level.addFreshEntity(golem) && golem.hasSupportedCore(), "a real Guard is admitted");
+            test.assertTrue(ChampionJoinRoll.join(level, golem) && golem.hasSupportedCore(), "a real Guard is admitted");
             spawned.add(golem);
             return golem;
         }
@@ -289,7 +289,7 @@ public final class GolemGuardTargetsRuntimeChecks {
             fill.applyConfiguration(new GolemData(GolemData.FILL, NO_FILTERS, NO_COUNTS, false, List.of(), GolemUseOptions.DEFAULT, List.of(ORDER)));
             fill.setPos(Vec3.atBottomCenterOf(base));
             fill.setHome(base, Direction.UP);
-            test.assertTrue(level.addFreshEntity(fill), "a Fill golem with Order is admitted");
+            test.assertTrue(ChampionJoinRoll.join(level, fill), "a Fill golem with Order is admitted");
             spawned.add(fill);
             var fillMenu = new ContainerGolem(903, owner.player.getInventory(), fill);
             owner.player.containerMenu = fillMenu;

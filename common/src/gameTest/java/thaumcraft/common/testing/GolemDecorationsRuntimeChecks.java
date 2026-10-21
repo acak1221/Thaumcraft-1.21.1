@@ -202,7 +202,7 @@ public final class GolemDecorationsRuntimeChecks {
             golem.setGolemMaterial(material);
             golem.applyConfiguration(config(core, decoration));
             golem.setPos(Vec3.atBottomCenterOf(base));
-            test.assertTrue(level.addFreshEntity(golem), "the golem is admitted");
+            test.assertTrue(ChampionJoinRoll.join(level, golem), "the golem is admitted");
             spawned.add(golem);
             return golem;
         }
@@ -337,7 +337,7 @@ public final class GolemDecorationsRuntimeChecks {
                 spider.moveTo(pos.getX() + .5, pos.getY(), pos.getZ() + .5, 0, 0);
                 spider.setNoAi(true);
                 spider.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(spider) && spider.isAlive() && level.hasChunkAt(pos) && level.getEntity(spider.getId()) == spider,
+                test.assertTrue(ChampionJoinRoll.join(level, spider) && spider.isAlive() && level.hasChunkAt(pos) && level.getEntity(spider.getId()) == spider,
                         "a real spider stands " + distance + " blocks from the home and the world can look it up");
                 spawned.add(spider);
                 targets.add(spider);
@@ -351,7 +351,7 @@ public final class GolemDecorationsRuntimeChecks {
             advancedGuard.applyConfiguration(config(GolemData.GUARD, "G").withAdvanced(true));
             advancedGuard.setPos(Vec3.atBottomCenterOf(base));
             advancedGuard.setHome(base, Direction.UP);
-            test.assertTrue(level.addFreshEntity(advancedGuard), "an advanced Guard in spectacles is admitted");
+            test.assertTrue(ChampionJoinRoll.join(level, advancedGuard), "an advanced Guard in spectacles is admitted");
             spawned.add(advancedGuard);
             view.clear();
             for (var target : targets) view.add(advancedGuard.isGuardTarget(target));
@@ -511,7 +511,7 @@ public final class GolemDecorationsRuntimeChecks {
                 spider.moveTo(Vec3.atBottomCenterOf(b.offset(3, 0, 0)));
                 spider.setNoAi(true);
                 spider.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(spider), "a real spider is admitted");
+                test.assertTrue(ChampionJoinRoll.join(level, spider), "a real spider is admitted");
                 spawned.add(spider);
                 guard = new EntityGolemBase(ThaumcraftGolems.GOLEM.get(), level);
                 guard.setGolemMaterial(IRON);
@@ -520,7 +520,7 @@ public final class GolemDecorationsRuntimeChecks {
                 guard.setHome(b, Direction.UP);
                 guard.setOwnerName(player.getGameProfile().getName());
                 guard.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(guard) && guard.hasSupportedCore(), "a real Guard is admitted");
+                test.assertTrue(ChampionJoinRoll.join(level, guard) && guard.hasSupportedCore(), "a real Guard is admitted");
                 spawned.add(guard);
             }
 
@@ -566,7 +566,7 @@ public final class GolemDecorationsRuntimeChecks {
                 golem.setPos(Vec3.atBottomCenterOf(at));
                 golem.setHome(at, Direction.UP);
                 golem.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(golem), "a real golem is admitted");
+                test.assertTrue(ChampionJoinRoll.join(level, golem), "a real golem is admitted");
                 spawned.add(golem);
                 golem.setHealth(golem.getMaxHealth() - 5);
                 return golem;

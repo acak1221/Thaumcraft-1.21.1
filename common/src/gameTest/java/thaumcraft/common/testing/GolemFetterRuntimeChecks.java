@@ -235,7 +235,7 @@ public final class GolemFetterRuntimeChecks {
                     List.of(new GolemMarker(OVERWORLD, lane.source.getBlockPos(), Direction.NORTH, GolemMarker.ANY)), GolemUseOptions.DEFAULT, List.of()));
             golem.setPos(Vec3.atBottomCenterOf(lane.standing));
             golem.setHome(lane.standing, Direction.EAST);
-            test.assertTrue(level.addFreshEntity(golem), "the golem is admitted");
+            test.assertTrue(ChampionJoinRoll.join(level, golem), "the golem is admitted");
             spawned.add(golem);
             lane.golem = golem;
             lane.start = golem.position();

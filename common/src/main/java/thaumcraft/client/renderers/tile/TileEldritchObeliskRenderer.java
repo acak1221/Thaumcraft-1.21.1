@@ -43,6 +43,14 @@ public final class TileEldritchObeliskRenderer implements BlockEntityRenderer<Ti
 
     public TileEldritchObeliskRenderer(BlockEntityRendererProvider.Context context) {}
 
+    /**
+     * Original TileEldritchObelisk:40-43 - the obelisk is five blocks high, so the
+     * renderer of the obelisk is only culled when the whole tower is outside of the
+     * view. Minecraft 1.21.1 has no render bounding box for a block entity any more, so
+     * the tower is drawn off screen.
+     */
+    @Override public boolean shouldRenderOffScreen(TileEldritchObelisk tile) { return true; }
+
     @Override public void render(TileEldritchObelisk tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (tile.getLevel() == null) return;
         var player = Minecraft.getInstance().player;

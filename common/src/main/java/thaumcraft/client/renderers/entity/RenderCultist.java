@@ -167,11 +167,11 @@ public final class RenderCultist<T extends Mob> extends MobRenderer<T, HumanoidM
     private static void vertex(VertexConsumer out, PoseStack pose, double x, double y, double z,
                                float u, float v, double normalX, double normalY, double normalZ,
                                int red, int green, int blue, int light) {
-        out.addVertex(pose.last(), x, y, z)
+        out.addVertex(pose.last(), (float) x, (float) y, (float) z)
                 .setColor(red, green, blue, (int) (LINK_ALPHA * 255.0F))
                 .setUv(u, v)
                 .setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
                 .setLight(light)
-                .setNormal(pose.last(), normalX, normalY, normalZ);
+                .setNormal(pose.last(), (float) normalX, (float) normalY, (float) normalZ);
     }
 }

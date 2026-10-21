@@ -181,9 +181,13 @@ What the family was still missing was the **geometry** of the stones: see §3.1.
 * **Original.** `TileEldritchObelisk.java:40-43`: the render bounding box of the obelisk is
   five blocks high. `TileEldritchPortal.java:34-37`: the gate is drawn in a cube of three
   blocks around itself.
-* **Port.** neither tile overrode `getRenderBoundingBox()`, so the tall obelisk and the
-  wide gate were cut off when the block itself left the view.
-* **Fix.** both tiles now answer the original box.
+* **Port.** neither of the two renderers asked for the off screen drawing, so the tall
+  obelisk and the wide gate were cut off when the block itself left the view. Minecraft
+  1.21.1 has no render bounding box for a block entity any more
+  (`net/minecraft/world/level/block/entity/BlockEntity` has no `getRenderBoundingBox`); the
+  1.21.1 way to say the same is `BlockEntityRenderer.shouldRenderOffScreen`.
+* **Fix.** `TileEldritchObeliskRenderer.shouldRenderOffScreen` and
+  `TileEldritchPortalRenderer.shouldRenderOffScreen` answer `true`.
 
 ---
 
@@ -238,8 +242,8 @@ What the family was still missing was the **geometry** of the stones: see §3.1.
 * `common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchGuardian.java`
 * `common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchCrab.java`
 * `common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java`
-* `common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java`
-* `common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java`
+* `common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java`
+* `common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java`
 * `common/src/main/resources/assets/thaumcraft/models/block/eldritch.json`,
   `eldritch_1.json`, `eldritch_2.json`, `eldritch_3.json`
 * `common/src/main/resources/assets/thaumcraft/models/item/eldritch.json`
@@ -337,5 +341,6 @@ in this wave (no Gradle, no client).
 |---|---|
 | `python3 scripts/porting/convert_assets.py --verify` | `missing_references: 0` (3877 texture references, 2904 model references) |
 | `python3 scripts/porting/update_scope_ledger.py --check --original-root /home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle` | `stale_review_fingerprints: 0` |
+| `javac` of the nine changed sources and of the two new tests against the real `minecraft-merged-1.21.1` of the Loom cache | **no error in a changed file**; the only errors of the run are the known ones of the plain jar (the three members of `thaumcraft.accesswidener` and the private `BlockEntityType.BlockEntitySupplier`), all of them in files this wave did not touch |
 | the JUnit suites of this wave | **authored, NOT executed** — the leader has to run them with Gradle |
 | the client | **not run** — the acceptance criteria of §7 are open |

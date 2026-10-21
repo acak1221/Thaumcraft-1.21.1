@@ -47364,7 +47364,7 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java the native obelisk",
           "oracle thaumcraft/common/tiles/TileEldritchObelisk.java:47-55 the obelisk buffs every eldritch mob that comes within six blocks with a damage boost and a regeneration of forty ticks, and it skips a mob that still carries a regeneration",
           "native common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java:32-44 the same range, the same two effects, the same duration and the same guard",
-          "oracle thaumcraft/common/tiles/TileEldritchObelisk.java:40-43 the render bounding box of the obelisk is five blocks high",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java:44-49 the tower of the obelisk is drawn off screen, because 1.21.1 has no render bounding box for a block entity any more",
           "native common/src/main/java/thaumcraft/common/tiles/TileEldritchObelisk.java:48-54 the same five blocks"
         ],
         "notes": [
@@ -47419,7 +47419,7 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:62-84 the same period, the same refusals and the same cooldown",
           "oracle thaumcraft/common/tiles/TileEldritchPortal.java:75-78 the first visit to the Outer Lands completes the research ENTEROUTER",
           "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:161-185 the same research with the same warp of the original ResearchManager:510-528",
-          "oracle thaumcraft/common/tiles/TileEldritchPortal.java:34-37 the render bounding box of the gate is a cube of three blocks around itself",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:36-41 the gate is drawn off screen, because 1.21.1 has no render bounding box for a block entity any more",
           "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:200-206 the same cube"
         ],
         "notes": [

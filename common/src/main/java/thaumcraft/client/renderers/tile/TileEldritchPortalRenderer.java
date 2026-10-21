@@ -29,6 +29,14 @@ public final class TileEldritchPortalRenderer implements BlockEntityRenderer<Til
 
     public TileEldritchPortalRenderer(BlockEntityRendererProvider.Context context) {}
 
+    /**
+     * Original TileEldritchPortal:34-37 - the gate is drawn in a cube of three blocks
+     * around itself, so the renderer of the gate is only culled when the whole cube is
+     * outside of the view. Minecraft 1.21.1 has no render bounding box for a block entity
+     * any more, so the gate is drawn off screen.
+     */
+    @Override public boolean shouldRenderOffScreen(TileEldritchPortal tile) { return true; }
+
     @Override public void render(TileEldritchPortal tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (tile.getLevel() == null) return;
         int open = tile.getOpenCount();

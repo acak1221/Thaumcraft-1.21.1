@@ -4,7 +4,7 @@
   "enchantment": "minecraft:feather_falling",
   "components": [
     {
-      "item": "minecraft:string"
+      "item": "minecraft:feather"
     },
     {
       "item": "thaumcraft:salis_mundus"

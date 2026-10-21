@@ -4,7 +4,7 @@
   "enchantment": "minecraft:thorns",
   "components": [
     {
-      "item": "minecraft:cactus"
+      "item": "minecraft:dead_bush"
     },
     {
       "item": "minecraft:quartz"

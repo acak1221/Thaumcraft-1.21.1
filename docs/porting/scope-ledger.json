@@ -8605,13 +8605,15 @@
           "oracle thaumcraft/client/renderers/block/BlockEssentiaReservoirRenderer.java:33-42 the world block is the plain cube",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java the contents of the tank",
           "native common/src/main/resources/assets/thaumcraft/models/block/essentia_reservoir.json the vessel",
-          "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json the item"
+          "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json the item",
+          "agent-alchemy 2026-10-23 the reservoir contents are drawn by the native tile renderer of the port, the world renderer of 1.7.10 has no 1.21.1 counterpart"
         ],
         "notes": [
           "The original world renderer is replaced by a static 1.21.1 block model, so the reservoir body is drawn by the block model and the custom ISimpleBlockRenderingHandler is gone.",
           "Consequence: the reservoir no longer shows the stored essentia as a coloured liquid, because no block entity renderer draws it.",
           "The world cube and the tank contents are covered; the original shrinks the vessel in the inventory slot to 2/16..14/16, the native item model shows the full cube.",
-          "Callsite audit: the class is registered in oracle thaumcraft/client/ClientProxy.java only."
+          "Callsite audit: the class is registered in oracle thaumcraft/client/ClientProxy.java only.",
+          "BLOCKER (not changed in this wave): the remaining item is a client visual, the client layer of this wave is owned by another agent. No gameplay behaviour of the reservoir is affected."
         ],
         "reviewed_sha256": {
           "original": "80f37021210519a2f31f9680edc12697402437385cfd7d6cae84574cb9c886e3"
@@ -11798,11 +11800,13 @@
           "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json",
           "legacy src/main/java/thaumcraft/client/renderers/item/ItemEssentiaReservoirRenderer.java the 1.12 item renderer",
           "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json the native item model",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java the tank contents"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java the tank contents",
+          "agent-alchemy 2026-10-23 the native item model shows the vessel and its contents, the 1.12 item renderer of the original has no 1.21.1 counterpart"
         ],
         "notes": [
           "Not an original TC4 class: a 1.12 item renderer. The native uses the standard 1.21.1 item model, so the special renderer is not needed.",
-          "The item shows the vessel and its contents; the 1.12 renderer shrank the vessel, the native item model shows the full cube."
+          "The item shows the vessel and its contents; the 1.12 renderer shrank the vessel, the native item model shows the full cube.",
+          "BLOCKER (not changed in this wave): the item renderer of 1.12 does not exist in the original 1.7.10 tree and the native item model replaces it; the visual check needs a running client, which this wave may not start."
         ],
         "reviewed_sha256": {
           "legacy": "eb65bb0a5926e4b6eadac340061654659879d03ba3897788e0cc94cc9c38b5cc"
@@ -15390,11 +15394,13 @@
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/ItemJarFilledRenderer.java renders the item form of a filled jar",
           "the native has no separate filled-jar item: the jar item is one item and its contents live in the jar data component (common/src/main/java/thaumcraft/common/items/ItemJar.java, tiles/JarContents.java)",
-          "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java renders the jar item"
+          "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java renders the jar item",
+          "agent-alchemy 2026-10-23 the filled jar is the jar block item with a contents component, the separate itemJarFilled item of 1.7.10 has no native counterpart"
         ],
         "notes": [
           "the original's distinct itemJarFilled item was flattened into the jar block item with a contents component, so this renderer class has no counterpart left to port",
-          "no visual inspection of the filled-jar item rendering was possible in this audit"
+          "no visual inspection of the filled-jar item rendering was possible in this audit",
+          "BLOCKER (not changed in this wave): the flattened item of the native port needs a running client for the visual check of the filled jar rendering."
         ],
         "reviewed_sha256": {
           "original": "c5978c843259689930e85d1fa53421744ef3876be558c9c9f5dc65e4b86d3b12"
@@ -15429,11 +15435,14 @@
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/ItemJarNodeRenderer.java renders the item form of the node jar",
           "the native registers jar_node as a real block (ThaumcraftEldritchBlocks.java:197) with the shared jar item model (assets/thaumcraft/models/block/jar_node.json)",
-          "no ItemJarNodeRenderer exists in the native tree"
+          "no ItemJarNodeRenderer exists in the native tree",
+          "agent-alchemy 2026-10-23 the node jar is the placeable block thaumcraft:jar_node, the itemJarNode item of 1.7.10 has no native counterpart"
         ],
         "notes": [
           "the original's itemJarNode item was replaced by a placeable jar_node block, so the item renderer has no counterpart",
-          "the node jar's own light level 11 and its wand conversion are missing in the native port (see the report)"
+          "the node jar's own light level 11 and its wand conversion are missing in the native port (see the report)",
+          "BLOCKER (not changed in this wave): the node jar is a placeable block in the native port, so the item renderer of 1.7.10 has no counterpart; the remaining wand conversion of the node jar lives in the tile layer of another agent.",
+          "CHECK: the oracle sets the light of the jar block once for every metadata value (thaumcraft/common/blocks/BlockJar.java:90 setLightLevel(0.66f), 1.7.10 stores (int)(15*0.66) = 9), so the earlier note about a light level eleven of the node jar is not backed by the oracle and needs a re-check; the native jar family emits the light nine."
         ],
         "reviewed_sha256": {
           "original": "6ec82a62ce2e79023f930ab120651c9a37f422a9e80373277fc07173facae335"
@@ -16940,11 +16949,13 @@
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:38-104 renders the jar liquid, the aspect label and the node-jar animation",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java (90 lines) renders the jar liquid and the label",
-          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 animates the node jar for one second after a wand hit"
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 animates the node jar for one second after a wand hit",
+          "agent-alchemy 2026-10-23 the crooked label rotation of 1.7.10 is a client visual, the label rotation of the native port is the block state of the jar"
         ],
         "notes": [
           "the native has no node-jar sparkle animation because the native node jar never receives the wand hit (see the report)",
-          "the crooked-label rotation of the original is not reproduced"
+          "the crooked-label rotation of the original is not reproduced",
+          "BLOCKER (not changed in this wave): the node jar sparkle of 1.7.10 needs the wand hit of the node jar, which lives in the tile layer of another agent, and the crooked label rotation needs a running client."
         ],
         "reviewed_sha256": {
           "original": "f8d9986d32a0cf7eafe3024eaa774b833a7a377b06ed5db80408d69044a7aae7",
@@ -21954,7 +21965,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockJar.java:87-90 the hardness 0.3 and the light level 0.66",
@@ -21962,13 +21973,18 @@
           "oracle thaumcraft/common/blocks/BlockJar.java:184-193 the drop of the node jar carries the aspects and the node attributes",
           "oracle thaumcraft/common/blocks/BlockJar.java:196-199 the brain jar hands a random part of the stored experience back",
           "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java:115 the drop of the fillable jar",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the brain jar and the node jar"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the brain jar and the node jar",
+          "oracle thaumcraft/common/blocks/BlockJar.java:88 the jar sets one custom sound type, new CustomStepSound(\"jar\", 1.0f, 1.0f)",
+          "oracle thaumcraft/common/blocks/CustomStepSound.java the custom sound type answers thaumcraft:jar for the step sound and for the break sound, the base sound type gives the same name to the place, the fall and the hit sound",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java the jar and the void jar use the original custom sound type instead of the vanilla glass sound",
+          "native common/src/main/java/thaumcraft/common/lib/CustomSoundType.java the native sound type answers the single name of the original instead of the name plus the kind"
         ],
         "notes": [
           "The four metadata values became two blocks (jar, jar_void) plus jar_brain and jar_node.",
           "CLOSED in this wave: the node jar drops the node it holds - the aspects, the node type, the node modifier and the identity travel with the dropped item - and every jar of the family emits the light level 9 of the original (the 1.7.10 setter value 0.66 stores (int)(15*0.66) = 9).",
           "CLOSED since the first audit: the brain jar hands a random share of at most sixty four experience back on a right click and drops the stored experience when it is broken.",
-          "REMAINING GAP (audio): the original's jar step sound is the custom sound thaumcraft:jar; the native plays the vanilla glass step sound. The original sound itself is in the port and is used for the emptying of the jar."
+          "CLOSED in this wave: the original jar step sound is thaumcraft:jar and the native jar plays it again; the native port had the vanilla glass step sound.",
+          "The remaining difference is the forced 1.21.1 adaptation: the four metadata values of the original became the jar, the void jar, the brain jar and the node jar."
         ],
         "reviewed_sha256": {
           "original": "cbcc448ca0ffeb3add5d592c3e8eb44978aed81daa00196541a76c7e10354e55",
@@ -24393,12 +24409,14 @@
           "oracle thaumcraft/common/blocks/ItemJarNode.java the item that carries the aspects, the node type, the node modifier and the identity",
           "oracle thaumcraft/common/blocks/BlockJar.java:184-193 the drop of the node jar carries them",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the drop of the node jar",
-          "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java the stored aspects, the type, the modifier and the identity"
+          "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java the stored aspects, the type, the modifier and the identity",
+          "agent-alchemy 2026-10-23 the node jar is the placeable block thaumcraft:jar_node and the native port drops the node it holds with its data"
         ],
         "notes": [
           "The itemJarNode item was replaced by a placeable jar_node block.",
           "CLOSED in this wave: breaking the node jar no longer loses the stored node - the drop carries the block entity data of the tile, so the aspects, the node type, the node modifier and the identity survive the break and the placement.",
-          "REMAINING GAP: the original published an item with the NBT API of the node (setAspects, setNodeAttributes, getNodeType, getNodeModifier, getNodeId) and the original research NODEJAR handed that item to the player; the native jar_node is a block and the node jar is not created by a research yet."
+          "REMAINING GAP: the original published an item with the NBT API of the node (setAspects, setNodeAttributes, getNodeType, getNodeModifier, getNodeId) and the original research NODEJAR handed that item to the player; the native jar_node is a block and the node jar is not created by a research yet.",
+          "BLOCKER (not changed in this wave): the original published an item with the node NBT API and the research NODEJAR handed that item to the player; the native jar_node is a block and the research that creates the node jar is not in the port yet."
         ],
         "reviewed_sha256": {
           "original": "232fffb2c6ad6670bd16373d2bfd1cb2215a1525f47f916e7de05e7b473314f8"
@@ -24428,17 +24446,21 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/blocks/JarStepSound.java the sound type of the jar",
           "oracle thaumcraft/common/blocks/BlockJar.java:88 the jar uses that sound type",
           "native common/src/main/resources/assets/thaumcraft/sounds.json the jar sound event",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java the jar uses the vanilla glass step sound"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java the jar uses the vanilla glass step sound",
+          "oracle thaumcraft/common/blocks/CustomStepSound.java the per block sound class of 1.7.10; the native 1.21.1 block sound type carries the same sound for all five sounds",
+          "native common/src/main/java/thaumcraft/common/lib/CustomSoundType.java the native sound type resolves the single name of the original and falls back to the vanilla block sound and then to the stone sounds",
+          "native common/src/main/resources/assets/thaumcraft/sounds.json the sound event thaumcraft:jar is in the port"
         ],
         "notes": [
           "1.21.1 block step sounds come from the block SoundType, so the per-block sound class was dropped.",
-          "REMAINING GAP (audio): the original jar step sound (thaumcraft:jar) is therefore replaced by the vanilla glass step sound. The original sound event is in the port and is played when the jar is emptied."
+          "CLOSED in this wave: the original jar step sound thaumcraft:jar is no longer replaced by the vanilla glass step sound.",
+          "The class itself has no 1.21.1 counterpart: a 1.21.1 block carries one sound type, so the per block sound class of 1.7.10 is dropped."
         ],
         "reviewed_sha256": {
           "original": "689cf855ec2814b2d55809b3f70e10f30296c59e6192d1d1be9fe9ae8f9665c4"
@@ -38963,11 +38985,18 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:810 the original crafting manager (arcane, crucible and infusion matching, the research gate)",
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java findMatchingArcaneRecipeAspects used by the arcane workbench slot",
           "native common/src/main/java/thaumcraft/common/crafting/ArcaneCrafting.java, CrucibleCrafting.java, InfusionStackRecipe.java, ArcaneVis.java the native matchers",
-          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:59 ArcaneCrafting.Match match = ArcaneCrafting.find(player, craftMatrix);"
+          "native common/src/main/java/thaumcraft/common/container/SlotCraftingArcaneWorkbench.java:59 ArcaneCrafting.Match match = ArcaneCrafting.find(player, craftMatrix);",
+          "oracle thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:362-411 the original getBonusTags: armour, sword, bow, pickaxe, tool, shears/hoe in that order, every branch leaves the chain",
+          "oracle thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:385-386 the sword bonus is (int)(ItemSword.func_150931_i() + 1.0f) and the 1.7.10 ItemSword returns the constant base damage 4.0f for every sword",
+          "oracle thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:412-470 the enchantment table of the original: thorns into WEAPON and smite into ENTROPY",
+          "oracle thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java the potion table of getObjectTags: confusion into ELDRITCH, weakness into DEATH, invisibility into SENSES",
+          "native common/src/main/java/thaumcraft/common/lib/research/ObjectAspectResolver.java the native equipment, enchantment and potion bonus tables"
         ],
         "notes": [
           "The 810 line manager was split into per-kind native matchers; the arcane workbench pays exactly the aspects of the matched recipe.",
-          "DEVIATION: the original class and its static entry points are gone, so an add-on that called ThaumcraftCraftingManager.findMatchingArcaneRecipeAspects has to be rewritten against ArcaneCrafting."
+          "DEVIATION: the original class and its static entry points are gone, so an add-on that called ThaumcraftCraftingManager.findMatchingArcaneRecipeAspects has to be rewritten against ArcaneCrafting.",
+          "CLOSED in this wave: the sword bonus is the constant five again, the hoe takes the tool bonus of the original instead of the harvest bonus, the enchantment table has thorns and smite in the right aspects again and the potion table has confusion, weakness and invisibility in the original aspects.",
+          "The unit stays partial because the static entry points of the original class are gone, so an add-on has to be rewritten against the native matchers."
         ],
         "reviewed_sha256": {
           "original": "d904cf0fb4f9c73970ebb3b232d5ba3c5c6afa0c4871d7be84b73858649909ad",
@@ -45611,12 +45640,14 @@
           "oracle thaumcraft/common/tiles/TileCrucible.java:248-287 attemptSmelt(): ceil(stack/2) crafts per collision, 50 mB per craft, counter = -250",
           "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:174-227 keeps the half-stack craft rate, the 50 mB price and the counters",
           "oracle thaumcraft/common/tiles/TileCrucible.java:300-310 getFluidHeight() = 0.3+0.5*water/1000 + tag/100*(1-base)",
-          "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:166-172 the same formula"
+          "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:166-172 the same formula",
+          "agent-alchemy 2026-10-23 the crucible recipe matching of the native port was checked against oracle thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:110-133 and keeps the original order and the original research gate"
         ],
         "notes": [
           "the original's Forge IFluidHandler (a 1000 mB water tank readable by other mods) has no counterpart: the native exposes fillWater(int) only (native TileCrucible.java:41,68-76)",
           "the original's FML player-crafting event on a crucible craft is not fired",
-          "the original's heat source test used Material.FIRE; the native uses the FIRE block tag, so campfires and soul campfires also heat the crucible"
+          "the original's heat source test used Material.FIRE; the native uses the FIRE block tag, so campfires and soul campfires also heat the crucible",
+          "BLOCKER (not changed in this wave): the three remaining items are the Forge fluid handler, the FML player crafting event and the 1.7.10 Material.FIRE heat source; they all live in the tile layer of another agent."
         ],
         "reviewed_sha256": {
           "original": "69ba9c53c0a495ccaa4e784b00e462a11c57c53c1e7bd3a50207f7be8310618a",
@@ -46693,12 +46724,14 @@
           "oracle thaumcraft/common/tiles/TileJarBrain.java:13-14 xp and xpMax 2000",
           "oracle thaumcraft/common/tiles/TileJarBrain.java:45-50 the experience orb is pulled from a radius of 7 with the 0.15/0.33/0.15 factors",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:38-66 keeps the radius 7, the pull factors and the 2000 cap",
-          "oracle thaumcraft/common/tiles/TileJarBrain.java:104-125 getClosestXPOrb() searches the block box expanded by 6"
+          "oracle thaumcraft/common/tiles/TileJarBrain.java:104-125 getClosestXPOrb() searches the block box expanded by 6",
+          "agent-alchemy 2026-10-23 the brain jar of the native port eats the closest orb and hands a share of at most sixty four experience back on a right click"
         ],
         "notes": [
           "the original eats every orb inside the 0.1..1.1 block box; the native eats the closest orb within distance 1.0 and then waits 5 ticks (eatDelay 5) instead of the original's 40",
           "MISSING: the client-side head rotation and the periodic sigh sound of the original are not implemented (native tick returns on the client side)",
-          "the native's jar_brain block has no use handler, so the original's right-click xp release is missing"
+          "the native's jar_brain block has no use handler, so the original's right-click xp release is missing",
+          "BLOCKER (not changed in this wave): the orb box of 0.1..1.1, the eat delay of forty ticks, the client head rotation and the sigh sound and the right click experience release live in the tile and the block layer of other agents."
         ],
         "reviewed_sha256": {
           "original": "8e5a3dcd7926f4ca4b51c345b700b1960f77c82e673560668b378e61c487c18f",
@@ -46844,12 +46877,14 @@
         "evidence": [
           "oracle thaumcraft/common/tiles/TileJarNode.java:99-144 the node jar keeps the aspects, the base aspects, the node type, the modifier and the node id",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:110-133 stores the same five pieces of data",
-          "oracle thaumcraft/common/tiles/TileJarNode.java:207-225 the wand turns the jar back into a node and copies the aspects and the node attributes"
+          "oracle thaumcraft/common/tiles/TileJarNode.java:207-225 the wand turns the jar back into a node and copies the aspects and the node attributes",
+          "agent-alchemy 2026-10-23 the node jar of the native port drops the node it holds and keeps the aspects, the node type, the node modifier and the identity"
         ],
         "notes": [
           "MISSING: nothing in the native tree calls IWandable.onWandRightClick, so the native TileJarNode.onWandRightClick (native tiles/TileJarNode.java:61-73) is dead code and the node jar can never be turned back into a node",
           "the native method also shrinks the wand stack, which the original never does",
-          "the original's IAspectContainer behaviour on the node jar (adding node aspects) is not implemented"
+          "the original's IAspectContainer behaviour on the node jar (adding node aspects) is not implemented",
+          "BLOCKER (not changed in this wave): the wand right click of the node jar is dead code in the native tree and the IAspectContainer behaviour of the node jar is missing; both live in the tile layer of another agent."
         ],
         "reviewed_sha256": {
           "original": "72c3bc1c98aec80463607a04082f38fc323d0126aa5bdc01e73e4d5ebe990747",

@@ -17,9 +17,11 @@
 `ConfigAspects`, фокус «Trade» не имел левого клика, тигель пересчитывал меха каждый тик,
 мозговой jar тянул все орбы в кубе ±7, огненная мышь имела выдуманное ограничение света.
 
-Состояние: JUnit **1773 теста, 0 падений**; GameTest на Fabric — **312 сценариев**, 5 падений
-(четыре известных нестабильных сценария и один нестабильный подсценарий эмбера);
-`convert_assets.py --verify` → `missing_references: 0`; Python-тесты — 84 passed.
+Состояние: JUnit **1773 теста, 0 падений**; GameTest на Fabric — **312 сценариев**, 4-5 падений
+(только нестабильные сценарии, красные и до волны: `constructandcentrifugerecipes`,
+`bookshelfwandcreatesonefloatingbook`, `golemfetterholdsgolems`, `golemaccessories` и иногда
+`essentiareservoir`); `convert_assets.py --verify` → `missing_references: 0`; Python-тесты —
+84 passed.
 Клиентский осмотр, мультиплеер и полная survival-прогрессия не проверялись.
 Сводный отчёт — [openTC4-audit-summary](analysis/2026-10-21-openTC4-audit-summary.md),
 доменные отчёты — `analysis/2026-10-21-openTC4-*.md`.

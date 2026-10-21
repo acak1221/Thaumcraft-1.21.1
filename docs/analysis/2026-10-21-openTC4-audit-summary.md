@@ -89,11 +89,13 @@
 ## Состояние после волны
 
 - JUnit: **1773 теста, 0 падений** (254 набора).
-- GameTest на Fabric: **312 сценариев**, 5 падений: четыре известных нестабильных сценария
-  (`constructandcentrifugerecipesandplainnativeblocks`, `bookshelfwandcreatesonefloatingbook`,
-  `golemfetterholdsgolemswhileitsredstonesignallasts`,
-  `golemaccessoriesinstallchangestatsandsurvivethebell` — последний зависит от броска
-  чемпиона) и один нестабильный подсценарий эмбера (поджиг блока).
+- GameTest на Fabric: **312 сценариев**, 4-5 падений — только нестабильные сценарии, которые
+  красные и до этой волны: `constructandcentrifugerecipesandplainnativeblocks`,
+  `bookshelfwandcreatesonefloatingbook`, `golemfetterholdsgolemswhileitsredstonesignallasts`
+  и `golemaccessoriesinstallchangestatsandsurvivethebell` (последний зависит от броска
+  чемпиона), плюс иногда `essentiareservoirholdsmixedessentiapullsandbursts`. Подсценарий
+  эмбера (поджиг блока стеной) в этой волне починен: стена теперь стоит на блок южнее коровы,
+  и эмбер её действительно достигает.
 - `convert_assets.py --verify` → `missing_references: 0`; Python-тесты: 84 passed.
 
 ## Пробелы, оставшиеся открытыми

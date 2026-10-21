@@ -4,8 +4,8 @@
     "srcrgb": "one",
     "dstrgb": "zero"
   },
-  "vertex": "thaumcraft:bloom_vertex_base",
-  "fragment": "thaumcraft:bloom_color",
+  "vertex": "thaumcraft_bloom_vertex_base",
+  "fragment": "thaumcraft_bloom_color",
   "attributes": [
     "Position"
   ],

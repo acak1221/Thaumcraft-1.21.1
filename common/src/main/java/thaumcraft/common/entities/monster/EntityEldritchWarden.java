@@ -251,6 +251,7 @@ abstract class EntityThaumcraftBoss extends Monster implements IEldritchMob, ITh
  */
 public class EntityEldritchWarden extends EntityThaumcraftBoss implements RangedAttackMob, IEldritchMob {
     private static final EntityDataAccessor<Integer> TITLE=SynchedEntityData.defineId(EntityEldritchWarden.class,EntityDataSerializers.INT);
+    private static ClientEffects clientEffects;
     private boolean frenzy;
     private int frenzyCounter;
     private boolean lastBlast;
@@ -355,8 +356,23 @@ public class EntityEldritchWarden extends EntityThaumcraftBoss implements Ranged
         if(level().isClientSide) {
             if(armLiftL>0F)armLiftL-=.05F;
             if(armLiftR>0F)armLiftR-=.05F;
+            // Original EntityEldritchWarden:186-194 - the spawn animation of the warden is a
+            // smoke spiral that grows with the height of the boss while it wakes up.
+            if(spawnTimer>0&&clientEffects!=null) {
+                float height=Math.max(1F,getBbHeight()*((150-spawnTimer)/150F));
+                clientEffects.smokeSpiral(this,height,33);
+            }
         }
     }
+
+    /** Original EntityEldritchWarden:190, the client side smoke spiral of the spawn animation. */
+    public interface ClientEffects {
+        /** The smoke spirals of one tick of the spawn animation. */
+        void smokeSpiral(EntityEldritchWarden warden, float height, int count);
+    }
+
+    /** The client bootstrap owns the client effects; the server never sees them. */
+    public static void setClientEffects(ClientEffects value) { clientEffects = value; }
 
     /** Original warden field and field frenzy, both server side only. */
     @Override public void aiStep() {

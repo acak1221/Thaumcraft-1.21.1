@@ -4,7 +4,7 @@
   ],
   "passes": [
     {
-      "name": "minecraft:box_blur",
+      "name": "box_blur",
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "uniforms": [
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "name": "minecraft:box_blur",
+      "name": "box_blur",
       "intarget": "swap",
       "outtarget": "minecraft:main",
       "uniforms": [

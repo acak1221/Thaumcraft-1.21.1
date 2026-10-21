@@ -4401,7 +4401,7 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "partial",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/ThaumcraftGuiFactory.java:19-35 the FML IModGuiFactory that exposes ThaumcraftGuiConfig",
@@ -4648,7 +4648,7 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "partial",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/fx/beams/FXArc.java:24-60 builds a gravity-bent arc (gravity 0.115, noise 0.25, max 50 segments) drawn with textures/misc/beamh.png",
@@ -5892,7 +5892,7 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "partial",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSmokeSpiral.java:1-153 the rising smoke spiral",
@@ -7402,7 +7402,7 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "partial",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/gui/ThaumcraftGuiConfig.java:10-34 the FML config screen exposing the general, Monster_Spawning, World_Generation, World_Regeneration and Research categories",

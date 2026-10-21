@@ -4,12 +4,12 @@
   ],
   "passes": [
     {
-      "name": "thaumcraft:bloom_color",
+      "name": "thaumcraft_bloom_color",
       "intarget": "minecraft:main",
       "outtarget": "swap"
     },
     {
-      "name": "thaumcraft:bloom2",
+      "name": "thaumcraft_bloom2",
       "intarget": "swap",
       "outtarget": "minecraft:main"
     }

@@ -13,8 +13,8 @@
   "mapping_policy": "Identical canonical src/main/java paths under common/ and explicitly authored scoped adaptation paths are mapped conservatively as partial; no unit is complete without explicit parity evidence.",
   "counts": {
     "legacy_units": 934,
-    "partial": 34,
-    "pending": 900,
+    "partial": 42,
+    "pending": 892,
     "complete": 0,
     "active_native_java_files": 1312
   },
@@ -6578,6 +6578,81 @@
       "path": "neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java",
       "role": "native_foundation",
       "sha256": "0a4c4dc96099ea3ab5b70f934b370fc9a926539eaff72d172c66342331f98831"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/ClientSetup.java",
+      "role": "native_foundation",
+      "sha256": "3e7642933b4cbe1396534dd4e09ad5bedfe2c59d8db059d7972588b7ec36bb56"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java",
+      "role": "native_foundation",
+      "sha256": "e3cf6bbd734612ad6ec56fcf49a4ec2f433ae316ceacaeb5265cb567f0d48d03"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java",
+      "role": "native_foundation",
+      "sha256": "1385c76a5b11351d7d77c9c95bd7b951862d23b1c39d1b4b0d879804461015e9"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java",
+      "role": "native_foundation",
+      "sha256": "d7b869bf8dee91ee0be978cfef4e05d12e2d77736d1350a56d223c36f32971c0"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java",
+      "role": "native_foundation",
+      "sha256": "1a6528fae4224462555770d9b5b0778e1588eea92f93a86e601e70fbbd050ef3"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java",
+      "role": "native_foundation",
+      "sha256": "b9837cbdefd10a27a2fcf0b65b10f2c24264133077c742788958b745ac99016b"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/renderers/models/ModelBanner.java",
+      "role": "native_foundation",
+      "sha256": "b357b89c91bb0f58fa209388be98dbfe5e42544c7840bfde6a12f8d3db739f1f"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/renderers/tile/TileBannerRenderer.java",
+      "role": "native_foundation",
+      "sha256": "0591d63cd3427079953f13c946182297a26fa3c5ac39278d91dfc61fdb574f08"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
+      "role": "native_foundation",
+      "sha256": "2ccefc29568ce8d547b363932e00edb3d614d66852d042caa45801fc081157f3"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java",
+      "role": "native_foundation",
+      "sha256": "c81952c161d7f8fc6d2bce85050030c29f05c724ce15110373af1618ac0261f1"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java",
+      "role": "native_foundation",
+      "sha256": "b697fef695d7f9eafb4baea78b82d65b996efd7f46350181d2f430c2bd614738"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java",
+      "role": "native_foundation",
+      "sha256": "dead62ef6e986c0e77b29729fbb8a6a4b41af5b27803532984c009a33549ecdb"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java",
+      "role": "native_foundation",
+      "sha256": "770d2c9c77fd5e3596aabc3464c1af1d43009213ccf07fa90225fd6c27e4d9cb"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java",
+      "role": "native_foundation",
+      "sha256": "2becf674f6351ea9213f8d480da343551000a13237310dd6628e51b37143d581"
+    },
+    {
+      "path": "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java",
+      "role": "native_foundation",
+      "sha256": "12d554d45688c35bca73c4a633feec9180662036f62c4ce3b61016af906f5862"
     }
   ],
   "legacy_units": [
@@ -15072,6 +15147,85 @@
       "status": "pending",
       "native_paths": [],
       "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXArc.java",
+      "legacy_sha256": "05641e245a45e901018e08d2c59764c044935fcc1363365413f67149c0906678",
+      "legacy_lines": 145,
+      "status": "partial",
+      "native_paths": [
+        "common/src/main/java/thaumcraft/client/fx/particles/FXArc.java"
+      ],
+      "basis": "The native 1.21.1 particle in the fx/particles package is the port of the original beam ribbon: the same arc points (gravity 0.115, noise 0.25, fifty steps), the same crossed strips of textures/misc/beamh.png, the same half width 0.25, the same alpha 0.8 and the same UV of the point index over the arc length. The package differs because 1.21.1 has no EntityFX. The client visual was not inspected in a game.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXBeam.java",
+      "legacy_sha256": "0be66fc5fe519f6e890d071857e42c8079b355cc1bd9fcd16017dc459c57a5b9",
+      "legacy_lines": 356,
+      "status": "partial",
+      "native_paths": [],
+      "basis": "Dead code in the original: the packet that would show the beam is registered in the original packet handler but no class of the original ever sends it.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXBeamGolemBoss.java",
+      "legacy_sha256": "577e904f5e38ddfd6a5bb820592959751480f128ac7a1ff7612ef4f6696c8ea7",
+      "legacy_lines": 51,
+      "status": "partial",
+      "native_paths": [],
+      "basis": "Dead code in the original: the packet that would show the boss beam is registered in the original packet handler but no class of the original ever sends it; the headless golem shoots an EntityGolemOrb in the original as well.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/beams/FXBeamPower.java",
+      "legacy_sha256": "34f982c954b4064082a6b5cc368a4c6e26f441684bd5bf7c6f15727f05984ced",
+      "legacy_lines": 131,
+      "status": "partial",
+      "native_paths": [
+        "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
+        "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java"
+      ],
+      "basis": "The native relay beam reproduces the original numbers: the half width 0.105 (0.15 of the size 0.7), the scrolling of the texture, the opacity floor 0.3, the decay of 0.025 per tick, the pulse of 0.8, the ten times brighter beam of a viewer with a revealer and the additive flare of the particle sheet at the target with the half size 0.66 of the opacity. The original shows the beam as a particle that dies when the relay unlinks; the native keeps a per relay opacity instead. The client visual was not inspected in a game.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXBubbleAlt.java",
+      "legacy_sha256": "e8ba26f78f2d5581b83f9d1b23d92a80870e0591fa1dd24049dacacfae55b1c3",
+      "legacy_lines": 79,
+      "status": "partial",
+      "native_paths": [],
+      "basis": "Dead code in the original: the class is never instantiated anywhere in the TC4 4.2.3.5 decompilation.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXScorch.java",
+      "legacy_sha256": "d00da7fb40af33d8541a5cef4c6a89b3a30863f2df4afd6f3127e57cb35a055c",
+      "legacy_lines": 121,
+      "status": "partial",
+      "native_paths": [],
+      "basis": "Dead code in the original: the only instantiation is in UtilsFX.shootFire and that method has zero callers in the TC4 4.2.3.5 decompilation.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java",
+      "legacy_sha256": "d8cf8e8af3b7aaa11b09b24829a25dbd184e810ac8eada3b788f64173b7cccab",
+      "legacy_lines": 99,
+      "status": "partial",
+      "native_paths": [
+        "common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java"
+      ],
+      "basis": "The native 1.21.1 particle is the port of the original smoke spiral: the same 720 degree turn, the same 90..-90 polar angle, the same radius, the same 0.15 scale quad, the same 0.66 alpha, the same first five cells of the particle sheet and the same mirrored cell order. The client visual was not inspected in a game.",
+      "parity_verified": false
+    },
+    {
+      "legacy_path": "src/main/java/thaumcraft/client/fx/particles/FXSmokeTrail.java",
+      "legacy_sha256": "75cc2fd2ccf8cdfbda9e2c425267c63c4cff935139a519a1f3e667eb0d5d6425",
+      "legacy_lines": 100,
+      "status": "partial",
+      "native_paths": [],
+      "basis": "Dead code in the original: the only instantiation is in ClientProxy.soulTrail and that method has zero callers in the TC4 4.2.3.5 decompilation.",
       "parity_verified": false
     }
   ],

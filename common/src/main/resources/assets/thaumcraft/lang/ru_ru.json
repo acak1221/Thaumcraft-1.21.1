@@ -2040,6 +2040,7 @@
   "block.thaumcraft.cinderpearl": "Огненный жемчуг",
   "item.thaumcraft.focus_fire": "Набалдашник: Огонь",
   "entity.thaumcraft.ember": "Огонёк",
+  "key.thaumcraft.config": "Настройки Thaumcraft",
   "key.thaumcraft.change_focus": "Сменить набалдашник",
   "tc.port.focus.previous": "Назад",
   "tc.port.focus.next": "Далее",

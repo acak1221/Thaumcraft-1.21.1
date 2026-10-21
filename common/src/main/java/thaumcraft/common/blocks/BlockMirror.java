@@ -32,6 +32,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.items.relics.ItemHandMirror;
+import thaumcraft.common.lib.world.BlockFamilyShapes;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileMirror;
 import thaumcraft.common.tiles.TileMirrorEssentia;
 
@@ -49,13 +51,9 @@ public final class BlockMirror extends BaseEntityBlock {
     private static final VoxelShape[] SHAPES = new VoxelShape[6];
 
     static {
-        double w = 0.0625D;
-        SHAPES[Direction.DOWN.ordinal()] = Block.box(0.0D, 0.0D, 0.0D, 16.0D, w * 16.0D, 16.0D);
-        SHAPES[Direction.UP.ordinal()] = Block.box(0.0D, 16.0D - w * 16.0D, 0.0D, 16.0D, 16.0D, 16.0D);
-        SHAPES[Direction.NORTH.ordinal()] = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, w * 16.0D);
-        SHAPES[Direction.SOUTH.ordinal()] = Block.box(0.0D, 0.0D, 16.0D - w * 16.0D, 16.0D, 16.0D, 16.0D);
-        SHAPES[Direction.WEST.ordinal()] = Block.box(16.0D - w * 16.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
-        SHAPES[Direction.EAST.ordinal()] = Block.box(0.0D, 0.0D, 0.0D, w * 16.0D, 16.0D, 16.0D);
+        // The table holds the plate of the side it is indexed by: the bottom, the top, the
+        // north (-Z), the south (+Z), the west (-X) and the east (+X) side of the block.
+        for (Direction side : Direction.values()) SHAPES[side.ordinal()] = BlockFamilyShapes.mirrorPlate(side);
     }
 
     public BlockMirror(Properties properties) {
@@ -71,9 +69,21 @@ public final class BlockMirror extends BaseEntityBlock {
     public static Direction facingOf(BlockState state) { return state.getValue(FACING); }
     public static boolean isEssentia(BlockState state) { return state.getValue(ESSENTIA); }
 
-    /** BlockMirror:87-93 - the mirror is a thin plate on its facing side. */
+    /**
+     * BlockMirror:168-175 - the original adds the clicked side to the metadata of the item,
+     * so the side of the block the player clicked becomes the direction the mirror looks at
+     * and the wall it hangs on is the opposite side.
+     */
+    @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+        return defaultBlockState().setValue(FACING, context.getClickedFace());
+    }
+
+    /**
+     * BlockMirror:268-295 - the plate of the mirror is the thin square on the side opposite
+     * to the direction it looks at, that is the side of the wall it hangs on.
+     */
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPES[state.getValue(FACING).ordinal()];
+        return SHAPES[EldritchBlockRules.mirrorWallSide(state.getValue(FACING)).ordinal()];
     }
 
     @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
@@ -101,12 +111,15 @@ public final class BlockMirror extends BaseEntityBlock {
                 : createTickerHelper(type, ThaumcraftEldritchBlocks.MIRROR_TILE.get(), TileMirror::tick);
     }
 
-    /** BlockMirror:150-176 - the mirror breaks when it loses its support. */
+    /**
+     * BlockMirror:177-203 - the mirror breaks when the wall behind it, the side opposite to
+     * the direction it looks at, is gone.
+     */
     @Override protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos neighbourPos, boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighbor, neighbourPos, movedByPiston);
         Direction facing = state.getValue(FACING);
-        BlockPos support = pos.relative(facing);
-        if (!level.getBlockState(support).isFaceSturdy(level, support, facing.getOpposite())) {
+        BlockPos support = pos.relative(EldritchBlockRules.mirrorWallSide(facing));
+        if (!level.getBlockState(support).isFaceSturdy(level, support, facing)) {
             level.destroyBlock(pos, false);
         }
     }

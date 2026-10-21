@@ -124,7 +124,11 @@ public final class ThaumcraftEldritchBlocks {
             () -> new BlockEldritchNothing(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     // Original BlockEldritchNothing:49 - setResistance(6000000) stores 18000000 and
                     // the getter divides it by five, so the effective blast resistance is 3600000.
-                    .strength(-1.0F, 3600000.0F).sound(SoundType.STONE).noOcclusion().noCollission()));
+                    .strength(-1.0F, EldritchBlockRules.ELDRITCH_NOTHING_RESISTANCE)
+                    .sound(SoundType.STONE).noOcclusion().noCollission()
+                    // Original BlockEldritchNothing:51 - setLightLevel(0.2) is the 1.7.10 setter that
+                    // stores (int)(15 * 0.2) = 3, so the filler emits the light level three.
+                    .lightLevel(state -> EldritchBlockRules.ELDRITCH_NOTHING_LIGHT)));
 
     public static final RegistrySupplier<BlockEldritchPortal> ELDRITCH_PORTAL = BLOCKS.register("eldritch_portal",
             () -> new BlockEldritchPortal(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_MAGENTA)
@@ -442,7 +446,10 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<BlockCosmeticStairs> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
             () -> new BlockCosmeticStairs(COSMETIC_SOLID.get().defaultBlockState().setValue(BlockCosmeticSolid.VARIANT, 11),
                     BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                            .strength(2.0F, 10.0F).sound(SoundType.STONE)));
+                            // The 1.7.10 BlockStairs copies the hardness and the blast resistance of
+                            // the block it copies the texture of: the cosmetic solid family, the
+                            // hardness two and the effective resistance six of the setter value ten.
+                            .strength(2.0F, EldritchBlockRules.COSMETIC_FAMILY_NATIVE_RESISTANCE).sound(SoundType.STONE)));
 
     public static final RegistrySupplier<Item> STAIRS_ELDRITCH_ITEM = ITEMS.register("eldritch_stairs",
             () -> new BlockItem(STAIRS_ELDRITCH.get(), new Item.Properties()));

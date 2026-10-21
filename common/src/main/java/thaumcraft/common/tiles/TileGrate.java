@@ -10,9 +10,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import thaumcraft.common.blocks.BlockItemGrate;
+import thaumcraft.common.blocks.BlockMetalDevice;
 import thaumcraft.common.config.ThaumcraftGrate;
 import thaumcraft.common.entities.EntityItemGrate;
 import thaumcraft.common.lib.GrateRules;
+import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
  * Original TileGrate: a one-slot, always empty inventory. Whatever a hopper or dropper pushes into it from above while the grate is open
@@ -24,7 +26,20 @@ public final class TileGrate extends BlockEntity implements WorldlyContainer {
 
     public TileGrate(BlockPos pos, BlockState state) { super(ThaumcraftGrate.GRATE_BLOCK_ENTITY.get(), pos, state); }
 
-    private boolean closed() { return getBlockState().getValue(BlockItemGrate.CLOSED); }
+    /**
+     * The original filter is closed while the block metadata is six and open while it is
+     * five (oracle BlockMetalDevice:677-686 and TileGrate:65-67). The native tree carries
+     * the filter twice: the dedicated item grate block with its own closed property and the
+     * two metal device variants.
+     */
+    private boolean closed() {
+        net.minecraft.world.level.block.state.BlockState state = getBlockState();
+        if (state.hasProperty(BlockItemGrate.CLOSED)) return state.getValue(BlockItemGrate.CLOSED);
+        if (state.getBlock() instanceof BlockMetalDevice) {
+            return state.getValue(BlockMetalDevice.VARIANT) == EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED;
+        }
+        return false;
+    }
 
     @Override public int getContainerSize() { return 1; }
     @Override public boolean isEmpty() { return true; }

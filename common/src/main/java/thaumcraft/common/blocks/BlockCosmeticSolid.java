@@ -100,6 +100,20 @@ public final class BlockCosmeticSolid extends BaseEntityBlock {
         }
     }
 
+    /**
+     * BlockCosmeticSolid:263-276 - a living entity that walks over the paving stone of travel
+     * gets the speed effect for forty ticks and the jump effect for forty ticks.
+     */
+    @Override public void stepOn(Level level, BlockPos pos, BlockState state, net.minecraft.world.entity.Entity entity) {
+        super.stepOn(level, pos, state, entity);
+        if (state.getValue(VARIANT) != EldritchBlockRules.COSMETIC_TRAVEL_STONE) return;
+        if (!(entity instanceof net.minecraft.world.entity.LivingEntity living)) return;
+        living.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED, 40, 1, false, false));
+        living.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                net.minecraft.world.effect.MobEffects.JUMP, 40, 0, false, false));
+    }
+
     /** BlockCosmeticSolid:182-188 - the decorative stone is a full block. */
     @Override protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) {
         return true;

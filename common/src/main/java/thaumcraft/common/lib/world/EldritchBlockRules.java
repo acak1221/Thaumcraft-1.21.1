@@ -15,6 +15,15 @@ import java.util.Random;
 public final class EldritchBlockRules {
     private EldritchBlockRules() {}
 
+    /**
+     * BlockEldritchNothing:51 - the original calls {@code setLightLevel(0.2)}, the 1.7.10 setter
+     * that stores {@code (int)(15 * 0.2)} = 3, so the blank filler emits the light level three.
+     */
+    public static final int ELDRITCH_NOTHING_LIGHT = 3;
+
+    /** BlockEldritchNothing:49 - the setter value 6000000 is the effective 3600000. */
+    public static final float ELDRITCH_NOTHING_RESISTANCE = 3600000.0F;
+
     // ------------------------------------------------------------------ eldritch
 
     /** BlockEldritch metadata 0..10, in the original order. */
@@ -155,6 +164,14 @@ public final class EldritchBlockRules {
     /** BlockEldritch:207-214 - metadata 5 drops the knowledge fragment resource. */
     public static boolean eldritchDropsResource(int variant) {
         return variant == ELDRITCH_GLYPHED;
+    }
+
+    /**
+     * BlockCrystal:149-151 - the eldritch crystal, the original metadata seven of the
+     * crystal block, drops one balanced shard (the original itemShard metadata six).
+     */
+    public static boolean eldritchDropsBalancedShard(int variant) {
+        return variant == ELDRITCH_CRYSTAL;
     }
 
     /** BlockEldritch:197-205 - metadata 5/10 drop 1..4 xp, metadata 9 drops 6..10 xp. */
@@ -481,8 +498,14 @@ public final class EldritchBlockRules {
     // ------------------------------------------------------------ device families
 
     /** The metal device metadata values owned by this port. */
-    public static final int DEVICE_METAL_GRATE_CLOSED = 5;
-    public static final int DEVICE_METAL_GRATE_OPEN = 6;
+    /**
+     * BlockMetalDevice:677-686 and :711-720 - the metadata five is the OPEN item filter and
+     * the metadata six is the CLOSED one: a right click on five sets six and the other way
+     * round, and a powered filter becomes six, an unpowered one five. TileGrate:65-67 accepts
+     * an item only while the metadata is five.
+     */
+    public static final int DEVICE_METAL_GRATE_OPEN = 5;
+    public static final int DEVICE_METAL_GRATE_CLOSED = 6;
     public static final int DEVICE_METAL_BRAINBOX = 12;
 
     /** The wooden device metadata values owned by this port. */
@@ -681,6 +704,19 @@ public final class EldritchBlockRules {
 
     // ------------------------------------------------------------------- mirror
 
+    /**
+     * BlockMirror:168-175 - the original adds the side the player clicked to the metadata of
+     * the item, so the metadata of the placed mirror is the direction it looks at.
+     * BlockMirror:268-295 - its plate is the thin square on the opposite side, the side of the
+     * wall it hangs on, and BlockMirror:177-203 - the wall behind it is the opposite side too.
+     */
+    public static net.minecraft.core.Direction mirrorWallSide(net.minecraft.core.Direction facing) {
+        return facing.getOpposite();
+    }
+
+    /** BlockMirror:268-295 - the plate of the mirror is a sixteenth thick. */
+    public static final double MIRROR_PLATE_WIDTH = 0.0625D;
+
     /** TileMirror:64 - the mirror retries a broken link every 40 ticks. */
     public static final int MIRROR_LINK_RETRY = 40;
 
@@ -877,6 +913,14 @@ public final class EldritchBlockRules {
     /** BlockWoodenDevice:559-576 - the detection box of the plate. */
     public static final double PLATE_INSET = 0.125D;
     public static final double PLATE_HEIGHT = 0.25D;
+
+    /**
+     * BlockWoodenDevice:249-256 - the box of the plate itself is inset by a sixteenth on every
+     * side. The unpressed plate is a sixteenth high, the pressed one only half of that.
+     */
+    public static final double PLATE_BOX_INSET = 0.0625D;
+    public static final double PLATE_BOX_HEIGHT = 0.0625D;
+    public static final double PLATE_BOX_HEIGHT_PRESSED = 0.03125D;
 
     /**
      * BlockWoodenDevice:568-571 - the original filter skips dead entities and, depending on

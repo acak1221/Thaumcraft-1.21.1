@@ -1,4 +1,10 @@
 {
   "replace": false,
-  "values": ["thaumcraft:arcane_stone", "thaumcraft:arcane_stone_bricks"]
+  "values": [
+    "thaumcraft:arcane_stone",
+    "thaumcraft:arcane_stone_bricks",
+    "thaumcraft:cosmetic_solid",
+    "thaumcraft:cosmetic_solid_tough",
+    "thaumcraft:cosmetic_solid_thaumium"
+  ]
 }

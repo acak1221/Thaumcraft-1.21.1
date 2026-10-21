@@ -18,6 +18,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.world.BlockFamilyShapes;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileFluxScrubber;
 import thaumcraft.common.tiles.TileWandPedestal;
@@ -32,7 +33,9 @@ public final class BlockStoneDevice extends BaseEntityBlock {
     /** Original BlockStoneDevice metadata 0..14. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
     /** The wand pedestal is a small pillar in the middle of the block. */
-    private static final VoxelShape WAND_PEDESTAL = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 10.0D, 14.0D);
+    private static final VoxelShape WAND_PEDESTAL = BlockFamilyShapes.wandPedestal();
+    /** BlockStoneDevice:449-461 - the pedestal stands on a base and carries the focus in the middle. */
+    private static final VoxelShape WAND_PEDESTAL_COLLISION = BlockFamilyShapes.wandPedestalCollision();
 
     public BlockStoneDevice(Properties properties) {
         super(properties);
@@ -64,12 +67,20 @@ public final class BlockStoneDevice extends BaseEntityBlock {
                 };
     }
 
-    /** BlockStoneDevice - the wand pedestal is a pillar, the scrubber a full block. */
+    /** BlockStoneDevice:464-480 - the wand pedestal is the half wide column in the middle. */
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         if (EldritchBlockRules.stoneDeviceKind(state.getValue(VARIANT)) == EldritchBlockRules.DEVICE_KIND_WAND_PEDESTAL) {
             return WAND_PEDESTAL;
         }
         return Shapes.block();
+    }
+
+    /** BlockStoneDevice:449-461 - the pedestal stands on a base and carries the focus in the middle. */
+    @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        if (EldritchBlockRules.stoneDeviceKind(state.getValue(VARIANT)) == EldritchBlockRules.DEVICE_KIND_WAND_PEDESTAL) {
+            return WAND_PEDESTAL_COLLISION;
+        }
+        return super.getCollisionShape(state, level, pos, context);
     }
 
     /** BlockStoneDevice - the wand pedestal keeps the original facing of the placer. */

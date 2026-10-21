@@ -30,7 +30,9 @@ public final class BlockStairsEldritch extends StairBlock {
     @Override protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) { return !state.getValue(WATERLOGGED); }
 
     @Override public float getExplosionResistance() {
-        // The original stair delegates to the cosmetic solid base resistance of ten.
-        return 10.0F;
+        // Vanilla1.7 BlockStairs copies the hardness and the blast resistance of the block it
+        // copies the texture of: the cosmetic solid family, the hardness two and the effective
+        // resistance six of the setter value ten (10 * 3 / 5).
+        return 6.0F;
     }
 }

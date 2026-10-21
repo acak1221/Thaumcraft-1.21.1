@@ -17,9 +17,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.GrateRules;
+import thaumcraft.common.lib.world.BlockFamilyShapes;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileBrainbox;
 import thaumcraft.common.tiles.TileGrate;
@@ -34,13 +37,13 @@ public final class BlockMetalDevice extends BaseEntityBlock {
     /** Original BlockMetalDevice metadata 0..14. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
     /** The open grate, the items of a hopper pass through it. */
-    private static final VoxelShape GRATE_PLATE = Block.box(0.0D, 13.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+    private static final VoxelShape GRATE_PLATE = BlockFamilyShapes.itemFilterPlate();
     /** The brainbox is a cube inset by three sixteenths. */
-    private static final VoxelShape BRAINBOX = Block.box(3.0D, 3.0D, 3.0D, 13.0D, 13.0D, 13.0D);
+    private static final VoxelShape BRAINBOX = BlockFamilyShapes.brainbox();
 
     public BlockMetalDevice(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(VARIANT, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED));
+        registerDefaultState(stateDefinition.any().setValue(VARIANT, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN));
     }
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
@@ -64,26 +67,42 @@ public final class BlockMetalDevice extends BaseEntityBlock {
         return null;
     }
 
-    /** BlockMetalDevice - the grate is a plate, the brainbox an inset cube. */
+    /**
+     * BlockMetalDevice:264-268 - both filter metadata values keep the same selection box, the
+     * metal plate across the top three sixteenths of the block.
+     */
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         int kind = EldritchBlockRules.metalDeviceKind(state.getValue(VARIANT));
         if (kind == EldritchBlockRules.DEVICE_KIND_GRATE) {
-            return state.getValue(VARIANT) == EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED ? GRATE_PLATE : Shapes.empty();
+            return GRATE_PLATE;
         }
         if (kind == EldritchBlockRules.DEVICE_KIND_BRAINBOX) return BRAINBOX;
         return Shapes.block();
     }
 
-    /** BlockMetalDevice:464-526 - the grate follows the redstone power. */
+    /**
+     * BlockMetalDevice:330-337 - the closed filter always stops what walks into it, the open
+     * one stops everything that is not a dropped item, and it stops nothing at all when it is
+     * asked without an entity.
+     */
+    @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        int kind = EldritchBlockRules.metalDeviceKind(state.getValue(VARIANT));
+        if (kind != EldritchBlockRules.DEVICE_KIND_GRATE) return super.getCollisionShape(state, level, pos, context);
+        boolean closed = state.getValue(VARIANT) == EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED;
+        Entity entity = context instanceof EntityCollisionContext entityContext ? entityContext.getEntity() : null;
+        return GrateRules.collides(closed, entity != null, entity instanceof ItemEntity) ? GRATE_PLATE : Shapes.empty();
+    }
+
+    /** BlockMetalDevice:711-720 - the grate follows the redstone power. */
     @Override protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighbor, BlockPos neighbourPos, boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighbor, neighbourPos, movedByPiston);
         int variant = state.getValue(VARIANT);
         if (variant == EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED || variant == EldritchBlockRules.DEVICE_METAL_GRATE_OPEN) {
             boolean powered = level.hasNeighborSignal(pos);
-            if (variant == EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED && powered) {
-                level.setBlock(pos, state.setValue(VARIANT, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN), Block.UPDATE_ALL);
-            } else if (variant == EldritchBlockRules.DEVICE_METAL_GRATE_OPEN && !powered) {
+            if (variant == EldritchBlockRules.DEVICE_METAL_GRATE_OPEN && powered) {
                 level.setBlock(pos, state.setValue(VARIANT, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED), Block.UPDATE_ALL);
+            } else if (variant == EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED && !powered) {
+                level.setBlock(pos, state.setValue(VARIANT, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN), Block.UPDATE_ALL);
             }
             return;
         }

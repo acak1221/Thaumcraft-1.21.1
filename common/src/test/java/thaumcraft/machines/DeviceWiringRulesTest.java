@@ -61,12 +61,13 @@ class DeviceWiringRulesTest {
         assertTrue(EldritchBlockRules.itemFilterBlock(true, false, 0));
         assertTrue(EldritchBlockRules.itemFilterBlock(false, true, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN));
         assertTrue(EldritchBlockRules.itemFilterBlock(false, true, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED));
-        // Oracle TileGrate:66 - the metal device metadata five is the closed filter: it answers
-        // isSideSolid with true and gives its slot to the top side only. The metadata six is the
-        // open one, and damageDropped (oracle BlockMetalDevice:389-392) turns a dropped metadata six
-        // into a metadata five.
-        assertEquals(5, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED);
-        assertEquals(6, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN);
+        // Oracle TileGrate:65-67 - the metal device metadata five is the OPEN filter: it takes an
+        // item only while it is five and it gives its slot to the top side only. The metadata six
+        // is the closed one, a powered filter becomes six and an unpowered one five
+        // (oracle BlockMetalDevice:711-720), and damageDropped (oracle BlockMetalDevice:388-396)
+        // turns a dropped metadata six into a metadata five.
+        assertEquals(5, EldritchBlockRules.DEVICE_METAL_GRATE_OPEN);
+        assertEquals(6, EldritchBlockRules.DEVICE_METAL_GRATE_CLOSED);
     }
     @Test void itemFilterIsNoOtherBlock() {
         assertFalse(EldritchBlockRules.itemFilterBlock(false, false, 0));

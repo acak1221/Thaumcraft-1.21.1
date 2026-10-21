@@ -21,6 +21,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.config.ThaumcraftSettings;
+import thaumcraft.common.lib.world.BlockFamilyShapes;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileArcanePressurePlate;
 
@@ -42,8 +43,14 @@ public final class BlockArcanePressurePlate extends BaseEntityBlock {
      * The values are the original metadata values, so the rules of the family keep working.
      */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 2, 3);
-    /** The arcane pressure plate is a thin plate at the bottom of the block. */
-    private static final VoxelShape PLATE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
+    /**
+     * BlockWoodenDevice:249-256 - the selection box of the plate is the thin square that is
+     * inset by a sixteenth on every side. The unpressed plate is a sixteenth high, the pressed
+     * one only half of that.
+     */
+    private static final VoxelShape PLATE = BlockFamilyShapes.arcanePressurePlate(EldritchBlockRules.PLATE_BOX_HEIGHT);
+    /** BlockWoodenDevice:254-256 - the pressed plate is half as high. */
+    private static final VoxelShape PLATE_PRESSED = BlockFamilyShapes.arcanePressurePlate(EldritchBlockRules.PLATE_BOX_HEIGHT_PRESSED);
 
     public BlockArcanePressurePlate(Properties properties) {
         super(properties);
@@ -58,8 +65,21 @@ public final class BlockArcanePressurePlate extends BaseEntityBlock {
     /** BlockWoodenDevice:403 - the plate carries the owned block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileArcanePressurePlate(pos, state); }
 
-    /** BlockWoodenDevice:552-604 - the plate is a thin plate at the bottom of the block. */
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return PLATE; }
+    /**
+     * BlockWoodenDevice:249-256 - the plate is a thin square that is inset by a sixteenth on
+     * every side; the pressed plate is only half as high.
+     */
+    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return state.getValue(VARIANT) == EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_PRESSED ? PLATE_PRESSED : PLATE;
+    }
+
+    /**
+     * BlockWoodenDevice:305-306 - the original adds no collision box at all for the metadata
+     * two and three, so nothing ever stands on the plate.
+     */
+    @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return Shapes.empty();
+    }
 
     /**
      * Original BlockWoodenDevice:196-203 - the hardness of the plate is two, and none at all

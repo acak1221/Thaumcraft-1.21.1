@@ -86,7 +86,7 @@ public final class BlockEldritch extends BaseEntityBlock {
     /** BlockEldritch:120-135 - the per metadata light level. */
     public static int lightOf(BlockState state) { return EldritchBlockRules.eldritchLight(state.getValue(VARIANT)); }
 
-    /** BlockEldritch:189-214 - only the glowing crust and the glyphed variant drop anything. */
+    /** BlockEldritch:189-214 - only the glowing crust, the glyphed variant and the crystal drop anything. */
     @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         int variant = state.getValue(VARIANT);
         if (EldritchBlockRules.eldritchDropsResource(variant)) {
@@ -95,6 +95,10 @@ public final class BlockEldritch extends BaseEntityBlock {
         }
         if (EldritchBlockRules.eldritchDropsSelf(variant)) {
             return List.of(new ItemStack(this));
+        }
+        if (EldritchBlockRules.eldritchDropsBalancedShard(variant)) {
+            // BlockCrystal:149-151 - the eldritch crystal drops one balanced shard.
+            return List.of(new ItemStack(ThaumcraftContent.SHARDS.get("balanced").get()));
         }
         // BlockEldritch:190 - every other variant drops nothing.
         return List.of();

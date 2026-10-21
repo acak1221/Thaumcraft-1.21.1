@@ -4,13 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/** Original findHiddenResearch category insertion order, per-category HashMap values, and DAY-time-seeded private RNG. */
+/** Original findHiddenResearch category insertion order, per-category HashMap values, and WORLD-time-seeded private RNG. */
 public final class ResearchHiddenSelection {
     private ResearchHiddenSelection() {}
 
-    public static String choose(PlayerKnowledge actor, long dayTime) {
+    /**
+     * The original seed: ResearchManager.findHiddenResearch:154 draws
+     * {@code new Random(player.worldObj.getTotalWorldTime()/10L/5L)}. The basis is
+     * the absolute world time, not the time of day, so the same world state always
+     * reveals the same hidden research.
+     */
+    public static long seed(long totalWorldTime) { return totalWorldTime / 10L / 5L; }
+
+    /**
+     * @param totalWorldTime the absolute world time (1.7.10 {@code World.getTotalWorldTime()},
+     *                       1.21.1 {@code Level.getGameTime()}), never the time of day.
+     */
+    public static String choose(PlayerKnowledge actor, long totalWorldTime) {
         List<String> keys = eligible(actor);
-        Random privateChoice = new Random(dayTime / 10L / 5L);
+        Random privateChoice = new Random(seed(totalWorldTime));
         return keys.isEmpty() ? null : keys.get(privateChoice.nextInt(keys.size()));
     }
     public static List<String> eligible(PlayerKnowledge actor) {

@@ -4,12 +4,12 @@ import dev.architectury.networking.NetworkManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.items.ItemInkwell;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.network.ResearchPurchasePayload;
@@ -20,6 +20,7 @@ import thaumcraft.common.lib.research.ResearchPurchase;
 import thaumcraft.common.lib.research.ResearchNoteIssuance;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -28,12 +29,13 @@ public final class GuiResearchBrowser extends Screen {
     private static final Pattern TEXTURE = Pattern.compile("new ResourceLocation\\(\"thaumcraft\",\\s*\"([^\"]+)\"\\)");
     private static final ResourceLocation FRAME = texture("textures/gui/gui_research.png");
     private final List<Node> nodes = new ArrayList<>();
+    private final List<Tab> tabs = new ArrayList<>();
     private String category = thaumcraft.client.lib.ResearchNotifications.selectedCategory();
-    private final java.util.Map<String, Button> categoryButtons = new java.util.LinkedHashMap<>();
     private static final ResourceLocation HIGHLIGHT = texture("textures/misc/particles.png");
     private int left, top, panelWidth, panelHeight, graphLeft, graphTop, graphWidth, graphHeight;
     private double panX, panY;
     private record Node(ResearchDefinition research, int x, int y) {}
+    private record Tab(String key, int x, int y, ResourceLocation icon) {}
 
     public GuiResearchBrowser() {
         super(Component.translatable("item.thaumcraft.thaumonomicon"));
@@ -52,16 +54,15 @@ public final class GuiResearchBrowser extends Screen {
         left = (width - panelWidth) / 2; top = (height - panelHeight) / 2;
         graphLeft = left + 116; graphTop = top + 28;
         graphWidth = panelWidth - 126; graphHeight = panelHeight - 58;
-        int y = top + 30; categoryButtons.clear();
+        tabs.clear();
         var categories = ResearchBrowserData.categories(completed());
         if (!categories.contains(category)) category = "BASICS";
+        int y = top + 30;
         for (String key : categories) {
-            Button button = Button.builder(Component.translatable("tc.research_category." + key), b -> {
-                category = key; thaumcraft.client.lib.ResearchNotifications.selectCategory(key); panX = panY = 0; rebuildWidgets();
-            }).bounds(left + 8, y, 102, 20).build();
-            button.active = !key.equals(category);
-            button.setTooltip(Tooltip.create(Component.translatable("tc.research_category." + key)));
-            addRenderableWidget(button); categoryButtons.put(key, button); y += 24;
+            // Original GuiResearchBrowser:460-509 draws one tab per visible
+            // category, 24 pixels apart, each with the icon of its category.
+            tabs.add(new Tab(key, left + 8, y, categoryIcon(key)));
+            y += 24;
         }
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
                 .bounds(left + panelWidth - 88, top + panelHeight - 24, 80, 20).build());
@@ -93,8 +94,13 @@ public final class GuiResearchBrowser extends Screen {
         for (Node node : nodes) {
             boolean unlocked = completed.contains(node.research.key());
             boolean available = node.research.hasPrerequisites(completed);
-            int frameX = node.research.flags().contains("Round") ? 54 : node.research.isHidden() ? 86 : purchases(node.research) ? 110 : 0;
+            int frameX = badgeFrame(node.research, purchases(node.research));
             graphics.blit(FRAME, node.x - 2, node.y - 2, frameX, 230, 26, 26, 256, 256);
+            // Original GuiResearchBrowser:400-402 draws the corner brackets of a
+            // special research over the cell of the research.
+            if (node.research.flags().contains("Special")) {
+                graphics.blit(FRAME, node.x - 2, node.y - 2, 26, 230, 26, 26, 256, 256);
+            }
             if (thaumcraft.client.lib.ResearchNotifications.highlighted(node.research.key())) highlight(graphics, node.x - 5, node.y - 5);
             if (!ResearchIconDisplay.render(graphics, font, node.research.iconExpression(), node.x + 3, node.y + 3)) {
                 var expression = TEXTURE.matcher(node.research.iconExpression() == null ? "" : node.research.iconExpression());
@@ -107,17 +113,56 @@ public final class GuiResearchBrowser extends Screen {
             if (unlocked) graphics.fill(node.x + 17, node.y + 17, node.x + 22, node.y + 22, 0xFF75AD45);
         }
         graphics.disableScissor();
+        renderTabs(graphics);
         super.render(graphics, mouseX, mouseY, delta);
-        categoryButtons.forEach((key, button) -> {
-            if (thaumcraft.client.lib.ResearchNotifications.highlighted(key)) highlight(graphics, button.getX() - 5, button.getY() - 5);
-        });
         Node hover = nodeAt(mouseX, mouseY);
-        if (hover != null) {
+        Tab hovered = tabAt(mouseX, mouseY);
+        if (hovered != null) {
+            graphics.renderTooltip(font, Component.translatable("tc.research_category." + hovered.key()), mouseX, mouseY);
+        } else if (hover != null) {
             int tooltipWidth = Math.max(120, Math.min(300, width - 24));
             var lines = tooltip(hover.research).stream()
                     .flatMap(line -> font.split(line, tooltipWidth).stream()).toList();
             graphics.renderTooltip(font, lines, mouseX, mouseY);
         }
+    }
+
+    /**
+     * Original GuiResearchBrowser:460-509: the tab of a category is its frame, the
+     * highlight, the icon of the category and, for every tab but the selected one,
+     * the dim overlay. The unselected shape and its icon sit eight pixels to the
+     * right, exactly as the original draws them.
+     */
+    private void renderTabs(GuiGraphics graphics) {
+        for (Tab tab : tabs) {
+            boolean selected = tab.key().equals(category);
+            int shift = selected ? 0 : 8;
+            graphics.blit(FRAME, tab.x(), tab.y(), selected ? 152 : 176, 232, 24, 24, 256, 256);
+            if (thaumcraft.client.lib.ResearchNotifications.highlighted(tab.key())) {
+                highlight(graphics, tab.x() - 3 + shift, tab.y() - 4);
+            }
+            ResourceLocation icon = tab.icon();
+            if (icon != null) graphics.blit(icon, tab.x() + 5 + shift, tab.y() + 4, 16, 16, 0, 0, 32, 32, 32, 32);
+            if (!selected) graphics.blit(FRAME, tab.x(), tab.y(), 200, 232, 24, 24, 256, 256);
+        }
+    }
+
+    /** The original category icon; the corpus keeps it apart from the entry icons. */
+    private static ResourceLocation categoryIcon(String key) {
+        var list = thaumcraft.api.research.ResearchCategories.getResearchList(key);
+        return list == null ? null : list.icon;
+    }
+
+    /**
+     * Original GuiResearchBrowser:387-399: the four frames of a research cell.
+     * A round cell always uses 54, a hidden cell uses 230 when the research is
+     * bought instead of written on a note and 86 otherwise, and a normal cell
+     * uses 110 when it is bought and 0 otherwise.
+     */
+    public static int badgeFrame(ResearchDefinition research, boolean purchases) {
+        if (research.flags().contains("Round")) return 54;
+        if (research.isHidden()) return purchases ? 230 : 86;
+        return purchases ? 110 : 0;
     }
 
     private static boolean purchases(ResearchDefinition research) {
@@ -156,21 +201,33 @@ public final class GuiResearchBrowser extends Screen {
         var preview = ResearchPurchase.preview(knowledge, research.key());
         if (purchases(research) && !preview.costs().isEmpty()) {
             lines.add(Component.translatable("tc.port.research.cost_header").withStyle(ChatFormatting.GRAY));
-            preview.costs().entrySet().stream().sorted((first, second) -> {
-                int amount = Integer.compare(second.getValue(), first.getValue());
-                return amount != 0 ? amount : first.getKey().compareTo(second.getKey());
-            }).forEach(cost -> {
+            // Original GuiResearchBrowser:584 draws the price tags in the order of
+            // AspectList.getAspectsSortedAmount: by decreasing amount, and in the
+            // declared order for equal amounts. The name of the aspect is never a
+            // tie breaker.
+            AspectList tags = new AspectList();
+            List<Map.Entry<String, Integer>> unresolved = new ArrayList<>();
+            for (var cost : preview.costs().entrySet()) {
                 Aspect aspect = Aspect.getAspect(cost.getKey());
-                if (aspect == null || !knowledge.hasDiscoveredAspect(cost.getKey())) {
+                if (aspect == null) unresolved.add(cost);
+                else tags.add(aspect, cost.getValue());
+            }
+            for (Aspect aspect : tags.getAspectsSortedAmount()) {
+                String tag = aspect.getTag();
+                int price = preview.costs().getOrDefault(tag, 0);
+                int pool = knowledge.getAspectPoolFor(tag);
+                if (!knowledge.hasDiscoveredAspect(tag)) {
                     // Original TC4 draws an anonymous icon without an amount for
                     // an undiscovered aspect. Do not reveal its name or price.
                     lines.add(Component.translatable("tc.port.research.cost_unknown").withStyle(ChatFormatting.DARK_GRAY));
                 } else {
-                    int pool = knowledge.getAspectPoolFor(cost.getKey());
-                    lines.add(Component.translatable("tc.port.research.cost", aspect.getName(), pool, cost.getValue())
-                            .withStyle(pool >= cost.getValue() ? ChatFormatting.GREEN : ChatFormatting.RED));
+                    lines.add(Component.translatable("tc.port.research.cost", aspect.getName(), pool, price)
+                            .withStyle(pool >= price ? ChatFormatting.GREEN : ChatFormatting.RED));
                 }
-            });
+            }
+            for (var cost : unresolved) {
+                lines.add(Component.translatable("tc.port.research.cost_unknown").withStyle(ChatFormatting.DARK_GRAY));
+            }
         }
         lines.add(preview.success()
                 ? Component.translatable("tc.port.research.buy").withStyle(ChatFormatting.GREEN)
@@ -196,7 +253,20 @@ public final class GuiResearchBrowser extends Screen {
         for (Node node : nodes) if (x >= node.x - 2 && y >= node.y - 2 && x < node.x + 24 && y < node.y + 24) return node;
         return null;
     }
+    /** Original GuiResearchBrowser:668-687 picks the category of the tab under the mouse. */
+    private Tab tabAt(double x, double y) {
+        for (Tab tab : tabs) if (x >= tab.x() && x < tab.x() + 24 && y >= tab.y() && y < tab.y() + 24) return tab;
+        return null;
+    }
     @Override public boolean mouseClicked(double x, double y, int button) {
+        Tab tab = tabAt(x, y);
+        if (button == 0 && tab != null) {
+            category = tab.key();
+            thaumcraft.client.lib.ResearchNotifications.selectCategory(category);
+            panX = panY = 0;
+            rebuildWidgets();
+            return true;
+        }
         Node node = nodeAt(x, y);
         if (button == 0 && node != null && minecraft.player != null) {
             var knowledge = KnowledgeAccess.get(minecraft.player);

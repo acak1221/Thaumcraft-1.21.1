@@ -13,7 +13,7 @@ import thaumcraft.common.items.ItemUnknownResearchNotes;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
-/** Original unknown-note use: a privately DAY-time-seeded hidden choice, then actual world-RNG note generation or seven to nine fragments. */
+/** Original unknown-note use: a privately WORLD-time-seeded hidden choice, then actual world-RNG note generation or seven to nine fragments. */
 public final class UnknownKnowledge {
     private UnknownKnowledge() {}
     public static ItemStack reveal(ServerPlayer player, InteractionHand hand) {
@@ -21,7 +21,10 @@ public final class UnknownKnowledge {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemUnknownResearchNotes)) return stack;
         var level = player.serverLevel();
-        String key = ResearchHiddenSelection.choose(KnowledgeAccess.get(player), level.getDayTime());
+        // Original ResearchManager.findHiddenResearch:154 seeds the private RNG with
+        // the absolute world time (1.7.10 World.getTotalWorldTime), not the time of
+        // day; the same world state must reveal the same hidden research.
+        String key = ResearchHiddenSelection.choose(KnowledgeAccess.get(player), level.getGameTime());
         if (key == null) {
             ItemStack fragments = new ItemStack(ThaumcraftContent.MATERIALS.get("knowledge_fragment").get(), 7 + level.random.nextInt(3));
             // Original EntityItem(xk) samples Math.random for hover, yaw and float-rounded X/Z motion.

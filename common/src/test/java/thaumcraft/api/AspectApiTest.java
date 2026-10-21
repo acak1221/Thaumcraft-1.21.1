@@ -73,4 +73,25 @@ class AspectApiTest {
         assertFalse(Aspect.VOID.isPrimal());
         assertEquals(Aspect.VOID, Aspect.getCombinationResult(Aspect.VOID.getComponents()[0], Aspect.VOID.getComponents()[1]));
     }
+
+    @Test void theAspectsAreSortedByAmountWithoutMovingAnAspectWithoutAmount() {
+        // Original AspectList.getAspectsSortedAmount:100-123 sorts by decreasing
+        // amount, keeps the declared order of equal amounts and never moves an
+        // aspect whose amount is not positive.
+        AspectList aspects = new AspectList()
+                .add(Aspect.FIRE, 3)
+                .add(Aspect.AIR, 3)
+                .add(Aspect.WATER, 6)
+                .add(Aspect.EARTH, 0);
+        assertEquals(List.of(Aspect.WATER, Aspect.FIRE, Aspect.AIR, Aspect.EARTH),
+                List.of(aspects.getAspectsSortedAmount()));
+        // An aspect without an amount is a barrier: the aspects behind it are
+        // sorted among themselves only.
+        AspectList barred = new AspectList()
+                .add(Aspect.FIRE, 3)
+                .add(Aspect.EARTH, 0)
+                .add(Aspect.AIR, 6);
+        assertEquals(List.of(Aspect.FIRE, Aspect.EARTH, Aspect.AIR),
+                List.of(barred.getAspectsSortedAmount()));
+    }
 }

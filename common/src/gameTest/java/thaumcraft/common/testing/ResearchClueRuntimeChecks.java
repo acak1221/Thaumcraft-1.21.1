@@ -18,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.config.ThaumcraftPrimalFoci;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.research.EntityAspectBindings;
 import thaumcraft.common.lib.research.ResearchClues;
@@ -45,6 +46,11 @@ public final class ResearchClueRuntimeChecks {
                 test.assertTrue(ResearchTriggerBindings.matches("TINYFEZ", ResearchClues.Context.item(new ItemStack(wool))), "old wool metadata wildcard maps to native dye identities");
             var namedWool = new ItemStack(Items.RED_WOOL); namedWool.set(DataComponents.CUSTOM_NAME, Component.literal("named wool"));
             test.assertTrue(!ResearchTriggerBindings.matches("TINYFEZ", ResearchClues.Context.item(namedWool)), "default original wool has no ore shortcut and retains NBT equality");
+            // Original ConfigResearch:414 binds the primal focus to the primal staff rod.
+            test.assertTrue(ResearchTriggerBindings.matches("ROD_primal_staff", ResearchClues.Context.item(new ItemStack(ThaumcraftPrimalFoci.FOCUS_PRIMAL.get()))),
+                    "the primal focus is the original item trigger of the primal staff rod research");
+            test.assertTrue(!ResearchTriggerBindings.matches("ROD_primal_staff", ResearchClues.Context.item(new ItemStack(Items.NETHER_STAR))),
+                    "an unrelated item never triggers the primal staff rod research");
 
             test.assertTrue(ScanManager.completeScan(player, "@thaumcraft:quick_silver", new AspectList().add(Aspect.AIR, 1), ScanManager.ScanKind.ITEM, ResearchClues.Context.item(silver)),
                     "actual production scan receiver awards a natural direct item clue");

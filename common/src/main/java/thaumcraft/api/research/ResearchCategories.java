@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import thaumcraft.common.config.ThaumcraftResearchCategories;
 import thaumcraft.common.lib.research.ResearchCatalog;
 import thaumcraft.common.lib.research.ResearchDefinition;
 
@@ -32,7 +33,10 @@ public class ResearchCategories {
             ResearchCatalog.loadBundled();
             for (ResearchDefinition definition : ResearchCatalog.all()) {
                 if (!researchCategories.containsKey(definition.category())) {
-                    researchCategories.put(definition.category(), new ResearchCategoryList(null, null));
+                    // Original ConfigResearch.initCategories:67-73 registers every
+                    // category with the texture of its tab icon and its background
+                    // before the first research entry is added.
+                    researchCategories.put(definition.category(), ThaumcraftResearchCategories.create(definition.category()));
                 }
             }
             for (ResearchDefinition definition : ResearchCatalog.all()) {

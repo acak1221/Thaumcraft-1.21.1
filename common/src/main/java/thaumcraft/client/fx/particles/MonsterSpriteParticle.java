@@ -27,7 +27,7 @@ public final class MonsterSpriteParticle extends SingleQuadParticle {
         super(level,x,y,z);this.kind=kind;xd=yd=zd=0;xo=x;yo=y;zo=z;
         // The original FXBurst:32 keeps the particle scale of the caller and draws it with that half size, and
         // the original FXWisp:44 keeps the same scale for the mote. The original never randomises the size.
-        originalSize=kind==Kind.BURST?size:kind==Kind.MOTE?.5F*size:.1F*size;
+        originalSize=kind==Kind.BURST?burstHalfSize(size):kind==Kind.MOTE?moteHalfSize(size):.1F*size;
         quadSize=originalSize;
         lifetime=kind==Kind.BURST?31:kind==Kind.EXPLOSIVE?duration:(int)(36/(random.nextDouble()*.3+.7));
         // Original FXBurst:45 uses glColor4f(1,1,1,0.75): the burst is drawn at three quarters opacity.
@@ -38,6 +38,10 @@ public final class MonsterSpriteParticle extends SingleQuadParticle {
     }
     public static void setLitShader(ShaderInstance shader) { litShader=java.util.Objects.requireNonNull(shader); }
     public static ShaderInstance litShader() { return java.util.Objects.requireNonNull(litShader,"Monster lit particle shader not registered"); }
+    /** Original FXWisp:44 and :180 - the half size of the wisp mote is 0.5f * the particle scale. */
+    public static float moteHalfSize(float scale) { return .5F*scale; }
+    /** Original FXBurst:32 and :50 - the half size of the burst is the particle scale itself. */
+    public static float burstHalfSize(float scale) { return scale; }
     /** Exact FXBurst constructor entry, shared by the original Wisp/ShockOrb clients. */
     public static void burst(ClientLevel level,double x,double y,double z,float size) { Minecraft.getInstance().particleEngine.add(new MonsterSpriteParticle(level,x,y,z,Kind.BURST,size,0xffffff,0)); }
     public static void fireBat(EntityFireBat bat) {
@@ -69,7 +73,8 @@ public final class MonsterSpriteParticle extends SingleQuadParticle {
         if(kind!=Kind.BURST) {
             yd-=.04*gravity;
             // The original FXWisp:194-196 pushes the mote out of the solid blocks it ends up inside.
-            ParticleDeflection.pushOutOfBlocks(this,level,x,y,z);
+            var motion=ParticleDeflection.pushOutOfBlocks(level,random,x,y,z,xd,yd,zd);
+            if(motion!=null){xd=motion.x();yd=motion.y();zd=motion.z();}
             move(xd,yd,zd);xd*=.98F;yd*=.98F;zd*=.98F;if(onGround){xd*=.7F;zd*=.7F;}
         }
     }

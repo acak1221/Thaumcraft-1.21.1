@@ -22366,7 +22366,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockJar.java:87-90 the hardness 0.3 and the light level 0.66",
@@ -24865,7 +24865,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/blocks/JarStepSound.java the sound type of the jar",
@@ -30292,7 +30292,7 @@
         "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
       },
       "review": {
-        "disposition": "replace",
+        "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "parity_verified",

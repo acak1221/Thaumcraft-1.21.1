@@ -323,7 +323,7 @@ public final class FortressRuntimeChecks {
         zombie.setNoAi(true);
         zombie.setNoGravity(true);
         zombie.setPersistenceRequired();
-        level.addFreshEntity(zombie);
+        ChampionJoinRoll.join(level, zombie);
         spawned.add(zombie);
         lost(ghosted, damage.mobAttack(zombie), 10F);
         test.assertTrue(!zombie.hasEffect(MobEffects.WITHER), "the Angry Ghost's mask works for a player wearer only");
@@ -377,7 +377,7 @@ public final class FortressRuntimeChecks {
         zombie.setNoGravity(true);
         zombie.setPersistenceRequired();
         zombie.getAttribute(Attributes.MAX_HEALTH).setBaseValue(500);
-        level.addFreshEntity(zombie);
+        ChampionJoinRoll.join(level, zombie);
         spawned.add(zombie);
         dress(player, masked(FortressRules.MASK_GHOST));
         lost(player, damage.mobAttack(zombie), 10F);

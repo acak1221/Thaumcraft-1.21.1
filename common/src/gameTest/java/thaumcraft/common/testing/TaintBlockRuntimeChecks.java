@@ -154,7 +154,7 @@ public final class TaintBlockRuntimeChecks {
             ThaumcraftTaintSettings.configure(new ThaumcraftTaintSettings.Values(0,false,true));set(base,source);set(target.above(),Blocks.AIR.defaultBlockState());set(target.north(),Blocks.AIR.defaultBlockState());set(target,Blocks.AIR.defaultBlockState());
         }
         void poison(){
-            LivingEntity sheep=EntityType.SHEEP.create(level),zombie=EntityType.ZOMBIE.create(level);sheep.moveTo(Vec3.atCenterOf(base));zombie.moveTo(Vec3.atCenterOf(base).add(3,0,0));level.addFreshEntity(sheep);level.addFreshEntity(zombie);entities.add(sheep);entities.add(zombie);
+            LivingEntity sheep=EntityType.SHEEP.create(level),zombie=EntityType.ZOMBIE.create(level);sheep.moveTo(Vec3.atCenterOf(base));zombie.moveTo(Vec3.atCenterOf(base).add(3,0,0));level.addFreshEntity(sheep);ChampionJoinRoll.join(level, zombie);entities.add(sheep);entities.add(zombie);
             var effect=BuiltInRegistries.MOB_EFFECT.wrapAsHolder(ThaumcraftInfusion.FLUX_TAINT.get());
             try(var input=new Input(level,0)){BlockTaintFibres.poison(level,sheep,true);test.assertTrue(input.bounds.equals(List.of(500))&&sheep.hasEffect(effect)&&sheep.getEffect(effect).getDuration()==160,"actual fibre contact poisons non-undead native living target at500/160");}
             sheep.removeEffect(effect);try(var input=new Input(level,0)){ThaumcraftTaint.CRUST.get().stepOn(level,base,ThaumcraftTaint.CRUST.get().defaultBlockState(),sheep);test.assertTrue(input.bounds.equals(List.of(20))&&sheep.hasEffect(effect),"actual walking native hook uses independent bound20");}

@@ -72,7 +72,7 @@ public final class ProjectileRuntimeChecks {
             var thrower = lane.add(EntityType.ZOMBIE.create(level));
             thrower.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
             thrower.setNoAi(true);
-            level.addFreshEntity(thrower);
+            ChampionJoinRoll.join(level, thrower);
             var victim = lane.add(EntityType.PIG.create(level));
             victim.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 4.5D, 0F, 0F);
             victim.setNoAi(true);
@@ -114,7 +114,7 @@ public final class ProjectileRuntimeChecks {
             var shooter = lane.add(EntityType.ZOMBIE.create(level));
             shooter.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
             shooter.setNoAi(true);
-            level.addFreshEntity(shooter);
+            ChampionJoinRoll.join(level, shooter);
             var victim = lane.add(EntityType.PIG.create(level));
             victim.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 3.5D, 0F, 0F);
             victim.setNoAi(true);

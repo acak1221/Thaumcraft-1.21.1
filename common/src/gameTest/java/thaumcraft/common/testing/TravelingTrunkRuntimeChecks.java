@@ -479,7 +479,7 @@ public final class TravelingTrunkRuntimeChecks {
                 target.setNoAi(true);
                 target.setPos(Vec3.atBottomCenterOf(base.offset(3, 0, 1)));
                 target.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(target), "the attacker is admitted");
+                test.assertTrue(ChampionJoinRoll.join(level, target), "the attacker is admitted");
                 spawned.add(target);
                 owner.setLastHurtByMob(target);
             }, () -> target.getHealth() < target.getMaxHealth() || !target.isAlive()));
@@ -495,7 +495,7 @@ public final class TravelingTrunkRuntimeChecks {
                 target.setNoAi(true);
                 target.setPos(Vec3.atBottomCenterOf(base.offset(3, 0, 1)));
                 target.setPersistenceRequired();
-                level.addFreshEntity(target);
+                ChampionJoinRoll.join(level, target);
                 spawned.add(target);
                 owner.setLastHurtByMob(target);
             }, () -> {

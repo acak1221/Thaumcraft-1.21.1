@@ -156,7 +156,7 @@ public final class GolemDartRuntimeChecks {
             spider.setPersistenceRequired();
             spider.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);
             spider.setHealth(1000);
-            test.assertTrue(level.addFreshEntity(spider), "a real spider is admitted");
+            test.assertTrue(ChampionJoinRoll.join(level, spider), "a real spider is admitted");
             spawned.add(spider);
             return spider;
         }

@@ -362,7 +362,7 @@ public final class GolemAdvancedRuntimeChecks {
                 spider.moveTo(pos.getX() + .5, pos.getY(), pos.getZ() + .5, 0, 0);
                 spider.setNoAi(true);
                 spider.setPersistenceRequired();
-                test.assertTrue(level.addFreshEntity(spider) && spider.isAlive() && level.hasChunkAt(pos), "a real hostile spider stands " + distance + " blocks from the home");
+                test.assertTrue(ChampionJoinRoll.join(level, spider) && spider.isAlive() && level.hasChunkAt(pos), "a real hostile spider stands " + distance + " blocks from the home");
                 attackers.add(spider);
                 targets.add(spider);
             }

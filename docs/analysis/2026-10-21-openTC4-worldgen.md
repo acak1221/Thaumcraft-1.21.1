@@ -300,21 +300,22 @@ fabric/src/gameTest/java/thaumcraft/fabric/testing/ThaumcraftGameTests.java  р�
 ```
 $ export JAVA_HOME=/home/Acak/.jdk21; export PATH=$JAVA_HOME/bin:$PATH
 $ export GRADLE_USER_HOME=/home/Acak/gradle-homes/ocworldgen
-$ ./gradlew --no-daemon --console=plain :common:test
+$ rm -rf common/build/test-results/test
+$ ./gradlew --no-daemon --console=plain --no-build-cache :common:test --rerun
 > Task :common:test
-BUILD SUCCESSFUL in 20s
-5 actionable tasks: 2 executed, 3 up-to-date
+BUILD SUCCESSFUL in 17s
+5 actionable tasks: 1 executed, 4 up-to-date
 (результаты: tests 1678, failures 0, errors 0, skipped 0)
 
 $ rm -rf fabric/run-gametest/world
 $ ./gradlew --no-daemon --console=plain \
     -PgameTestFilter=surfacestructuresreachtheoverworld,villagecomponentsreachtheoverworld \
     :fabric:runGameTest
-[12:5x:xx] [Server thread/INFO] (Minecraft) All 2 required tests passed :)
-BUILD SUCCESSFUL in 45s
+[13:03:13] [Server thread/INFO] (Minecraft) All 2 required tests passed :)
+BUILD SUCCESSFUL in 47s
 gametest-focused-results.xml:
-  thaumcraftgametests.surfacestructuresreachtheoverworld  4.628 PASSED
-  thaumcraftgametests.villagecomponentsreachtheoverworld 1.807 PASSED
+  thaumcraftgametests.surfacestructuresreachtheoverworld  4.743 PASSED
+  thaumcraftgametests.villagecomponentsreachtheoverworld 1.296 PASSED
 ```
 
 Клиентскую приёмку не проводил: изменения затрагивают только серверную генерацию, визуальная

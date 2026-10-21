@@ -95,7 +95,10 @@ public final class ReservoirRuntimeChecks {
         numbers(test, level);
         recipe(test, level);
         // Far above the other tests' rooms, as the Portable Hole test does; fixtures are spread so no blast reaches another.
-        BlockPos origin = test.absolutePos(new BlockPos(3, 100, 3));
+        // The band is its own: the other high scenarios (Portable Hole, Deconstructor, Thaumatorium) use the
+        // hundred band, and the vanilla GameTest grid puts the scenarios about twenty five blocks apart, so a
+        // fixture of this scenario would land on the room of a neighbour there.
+        BlockPos origin = test.absolutePos(new BlockPos(3, 140, 3));
         for (int x = (origin.getX() - 16) >> 4; x <= ((origin.getX() + 120) >> 4); x++) {
             for (int z = (origin.getZ() - 16) >> 4; z <= ((origin.getZ() + 100) >> 4); z++) level.getChunk(x, z);
         }
@@ -103,7 +106,9 @@ public final class ReservoirRuntimeChecks {
         // Entities (pigs, drops, the player) only exist where the chunk is entity-ticking; force the columns the fixtures use (and only
         // those nobody else forced, so that the unforcing below never takes another test's).
         Set<ChunkPos> forced = new LinkedHashSet<>();
-        for (BlockPos spot : List.of(origin.offset(30, 0, 0), origin.offset(44, 0, 0), origin.offset(58, 0, 0), origin.offset(72, 0, 0), origin.offset(0, 0, 90), origin.offset(10, 0, 90))) {
+        for (BlockPos spot : List.of(origin.offset(30, 0, 0), origin.offset(44, 0, 0), origin.offset(58, 0, 0), origin.offset(72, 0, 0),
+                origin.offset(0, 0, 48), origin.offset(0, 0, 56), origin.offset(0, 0, 64), origin.offset(0, 0, 72), origin.offset(0, 0, 80),
+                origin.offset(0, 0, 90), origin.offset(10, 0, 90))) {
             for (int x = (spot.getX() - 3) >> 4; x <= ((spot.getX() + 3) >> 4); x++) for (int z = (spot.getZ() - 3) >> 4; z <= ((spot.getZ() + 3) >> 4); z++) {
                 ChunkPos chunk = new ChunkPos(x, z);
                 if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }

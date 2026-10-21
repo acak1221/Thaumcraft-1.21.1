@@ -44208,7 +44208,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenEldritchRing.java:35-62 the six valid ground blocks and the five spawn samples",
@@ -44216,13 +44216,17 @@
           "oracle thaumcraft/common/lib/world/WorldGenEldritchRing.java:84-142 the altar, the four banners, the obelisk and the cap stones",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:94-114 the same ground blocks and samples",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:141-164 the five floor layers and the four cleared layers",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:175-196 the altar, the banners and the obelisk"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:175-196 the altar, the banners and the obelisk",
+          "oracle thaumcraft/common/lib/world/WorldGenEldritchRing.java:69-142 the ring of seven by seven, the altar, the four banners, the obelisk and the cap stones",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:78-88 the dark aura node above the altar and the labyrinth seed that the original draws after the node",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java:185-200 the altar of the ring with the four banners"
         ],
         "notes": [
           "The ring itself is faithful: the radius 3, the five floor layers, the four cleared layers, the one in four empty floor block, the altar roll 1..4/6..7, the four banners with the original facing values 8/0/12/4 and the one base plus four shaft obelisk.",
           "The original also creates an eerie aura node above the altar (oracle ThaumcraftWorldGenerator:446); the native ring does not create it.",
           "The original draws the labyrinth seed after the node creation, so its seed value differs from the native one.",
-          "The centre of the ring is clamped into the chunk instead of being drawn uniformly over the sixteen block chunk."
+          "The centre of the ring is clamped into the chunk instead of being drawn uniformly over the sixteen block chunk.",
+          "The centre of the ring is clamped into the chunk that is generated, because the generation of 1.21.1 writes into one chunk at a time; the original draws the ring over the whole sixteen block chunk."
         ],
         "reviewed_sha256": {
           "original": "6d2f520f9a040d46112f256d7def3dd6c8b2a4f83c518706a6bab76a0db152d0",
@@ -45229,12 +45233,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenBossRoom.java:22 the seven by seven doorway pattern",
           "oracle thaumcraft/common/lib/world/dim/GenBossRoom.java:69-84 the lock, the door and the void door of the doorway",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1039-1072 the native doorway loop"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1039-1072 the native doorway loop",
+          "oracle thaumcraft/common/lib/world/dim/GenBossRoom.java:22 the seven by seven pattern of the doorway and :69-84 the lock, the door and the invisible door",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1082-1088 the lock of the doorway takes the direction of the side of the room it stands on, like the original"
         ],
         "notes": [
           "The doorway pattern and the three block kinds are kept.",
@@ -45278,17 +45284,21 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenCommon.java:34-49 the block id table and the eleven by eleven connection pattern",
           "oracle thaumcraft/common/lib/world/dim/GenCommon.java:279-317 the decoration pass with the urn, the common decoration and the crab spawner",
           "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:39-67 the same block ids and the same connection pattern",
-          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:207-251 the native decoration pass"
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:207-251 the native decoration pass",
+          "oracle thaumcraft/common/lib/world/dim/GenCommon.java:34-49 the block table and the eleven by eleven connection pattern and :279-317 the decoration pass",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:55-67 the same block table and the same connection pattern",
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:207-251 the decoration pass with the urn, the common decoration and the crab spawner"
         ],
         "notes": [
           "The block table, the connection pattern and the decoration pass are ported; the original decoration meta roll 4/5/10 with the 1/12 crystal chance is kept.",
-          "The native splits the decoration pass per chunk while the original keeps a static list, which is forced by the 1.21 chunk local generation."
+          "The native splits the decoration pass per chunk while the original keeps a static list, which is forced by the 1.21 chunk local generation.",
+          "The native splits the decoration pass per chunk, because the generation of 1.21.1 is local to the chunk; the decoration itself is the original one."
         ],
         "reviewed_sha256": {
           "original": "a5262f595966a070b5e1cffeb53e610ea646a2698fe993a36f18f3fd3a11e8c5",
@@ -45335,12 +45345,17 @@
           "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:105-107 the guardian offset (1..3) times (-1..0)",
           "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:111-113 the champion of the first guardian on hard",
           "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:180-192 the guardian count and the champion rule",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:819-825 the native guardian placement"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:819-825 the native guardian placement",
+          "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:102-107 the count of the guardians and the offset of one to three times minus one to one",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:826-832 the same count and the same offset",
+          "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:97-100 the permanent item of the key room carries the metadata two of the eldritch object",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:825 the permanent item with the metadata two"
         ],
         "notes": [
           "The guardian count per difficulty and the champion rule are kept.",
           "The guardian offset of the native is (1..3) times (-1..1); the original never places a guardian more than zero blocks to the positive side, so the native may place it three blocks further away.",
-          "The permanent item of the key room is spawned without the original metadata 2 of the eldritch object and the guardian home is not anchored at the room centre."
+          "The permanent item of the key room is spawned without the original metadata 2 of the eldritch object and the guardian home is not anchored at the room centre.",
+          "Blocker: the original anchors the guardian of the key room at the centre of the room with a radius of sixteen (oracle GenKeyRoom:110) and the native spawn record of the world package carries no home, so the guardian of the port has no AI home. The fix needs a home field in DungeonRooms.Spawn and a restrictTo call in ThaumcraftOuterLands.spawnRoomEntities."
         ],
         "reviewed_sha256": {
           "original": "ee88eb80d4c28a4303718a417e8fdf54199096e2146b79a83cc2a7868c6d164b",
@@ -45380,12 +45395,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenLibraryRoom.java:77-98 the eight desks and the two centre desks",
           "oracle thaumcraft/common/lib/world/dim/GenLibraryRoom.java:86 the slab metadata 9 of the upper desks",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1014-1017 the native desk builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1014-1017 the native desk builder",
+          "oracle thaumcraft/common/lib/world/dim/GenLibraryRoom.java:77-98 the eight desks and the two centre desks with the slab metadata one and nine",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1015-1024 the same desks with the slab metadata one and nine",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftOuterLands.java:270-275 the metadata nine of the slab becomes the upper half of the native slab"
         ],
         "notes": [
           "The desks keep their positions and their eldritch metadata 5.",
@@ -45429,12 +45447,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenNestRoom.java:113-119 the loot density 0.15, the urn rarity 0.15/0.4 and the crate chance 0.2",
           "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:913-921 the native nest loot",
-          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:199-211 the shared urn rarity and the nest density"
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:199-211 the shared urn rarity and the nest density",
+          "oracle thaumcraft/common/lib/world/dim/GenNestRoom.java:113-119 the loot density of 0.15, the rarity of the urn of 0.15 and 0.4 and the crate chance of 0.2",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:920-929 the same density, the same rarity table and the same crate chance"
         ],
         "notes": [
           "The loot density of 0.15 and the crate chance of 0.2 are kept.",
@@ -45478,12 +45498,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenPassage.java:26-259 the passage, the four connections and the three special features",
           "oracle thaumcraft/common/lib/world/dim/GenPassage.java:54-56 the trapped stone roll that is drawn twice",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:412-567 the native passage"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:412-567 the native passage",
+          "oracle thaumcraft/common/lib/world/dim/GenPassage.java:26-259 the passage, the four connections and the three special features and :54-56 the trapped stone that the floor and the ceiling draw separately",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:412-567 the same passage with the two rolls of the trapped stone"
         ],
         "notes": [
           "The passage shell, the four connections with the depth 4 and the three special features 12, 13 and 14 are ported.",
@@ -45527,11 +45549,13 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenPortal.java:81-89 the air replacement of the portal room",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:697-705 the native air replacement"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:697-705 the native air replacement",
+          "oracle thaumcraft/common/lib/world/dim/GenPortal.java:81-89 the portal room is cleared in all four corners",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:700-712 the same four corners"
         ],
         "notes": [
           "The portal room keeps its thirteen by thirteen by fifteen shell, its stairs and its obelisk.",
@@ -45625,14 +45649,17 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/MazeGenerator.java:329-362 the last pass that marks the dead ends and the special passages",
           "oracle thaumcraft/common/lib/world/dim/MazeGenerator.java:332 the condition that skips a cell without any exit",
           "native common/src/main/java/thaumcraft/common/lib/world/MazeGenerator.java:328-345 the native last pass",
           "harness: the oracle and the native generator were compiled side by side and compared over the sizes 15..29 and forty seeds each (159821 cells): 45347 cells differ and every difference is in the feature byte",
-          "harness: with the oracle condition restored in the native file the two generators are byte identical over the same 159821 cells"
+          "harness: with the oracle condition restored in the native file the two generators are byte identical over the same 159821 cells",
+          "oracle thaumcraft/common/lib/world/dim/MazeGenerator.java:332 the cell without a single exit is skipped without drawing a random number",
+          "native common/src/main/java/thaumcraft/common/lib/world/MazeGenerator.java:334-336 the same short circuit condition",
+          "native common/src/test/java/thaumcraft/world/MazeFidelityTest.java the comparison of the two generators over the eight sizes and the forty seeds, 159821 cells, with zero difference"
         ],
         "notes": [
           "The wall bits of the labyrinth are identical, but the feature markers are not: the native assigns a random room feature to every cell without an exit, the original leaves those cells without a feature.",
@@ -45676,17 +45703,20 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/MazeHandler.java:152-186 the dispatch of the cell feature to the room generators",
           "oracle thaumcraft/common/lib/world/dim/MazeHandler.java:142-150 the mazes in range test",
           "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:129-138 the same dispatch",
-          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:151-158 the same mazes in range test"
+          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:151-158 the same mazes in range test",
+          "oracle thaumcraft/common/lib/world/dim/MazeHandler.java:142-150 the mazes in range and :152-186 the dispatch of the cell feature to the room generators",
+          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:151-158 the same test and the same dispatch"
         ],
         "notes": [
           "The dispatch of the features 1 to 8 and the reservation test are kept.",
-          "The static map and the labyrinth.dat file became the saved data of the overworld, which is the forced 1.21 data format change."
+          "The static map and the labyrinth.dat file became the saved data of the overworld, which is the forced 1.21 data format change.",
+          "The static map and the labyrinth.dat file of the original became the saved data of the overworld, which is the data format of 1.21.1."
         ],
         "reviewed_sha256": {
           "original": "ec1adf2da314f937bce651328b9f06ac98698447fbe223aac55c0ccede44888c",

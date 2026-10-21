@@ -83,10 +83,26 @@ public final class VillageWorldGenRules {
 
     /**
      * Oracle VillageBankerManager:59 and VillageWizardManager:56 both build
-     * their piece weight with {@code MathHelper.getIntWithMinMax(random, 0 + i, 1 + i)}.
-     * That helper is {@code min + random.nextInt(max - min)}, so the range is
-     * one wide and the draw is always {@code i}: the piece is available in a
-     * village of exactly the size the village was created with.
+     * their piece weight with {@code MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i)}.
+     * The 1.7.10 helper is {@code min + random.nextInt(max - min + 1)}, so the
+     * range is two wide and the draw is {@code i} or {@code i + 1}: the piece is
+     * available in a village of the size the village was created with and in a
+     * village one size larger.
+     *
+     * <p>The 1.12 reference renamed the helper to {@code getIntWithMinMax} and
+     * kept the same body, so the draw is the same there.
+     *
+     * @param villageSize the size {@code i} of the village
+     * @param roll the draw of the village random
+     */
+    public static int pieceWeightMinSize(int villageSize, int roll) {
+        return villageSize + Math.floorMod(roll, 2);
+    }
+
+    /**
+     * The lowest value the original draw of the minimum village size can take.
+     *
+     * @see #pieceWeightMinSize(int, int)
      */
     public static int pieceWeightMinSize(int villageSize) {
         return villageSize;
@@ -448,13 +464,22 @@ public final class VillageWorldGenRules {
                 out.add(new Placement(x, y, 5, Material.COBBLESTONE));
             }
         }
-        // The cobble corners on the three floors.
-        for (int y : new int[]{0, 5, 10}) {
-            out.add(new Placement(1, y, 1, Material.COBBLESTONE));
-            out.add(new Placement(1, y, 5, Material.COBBLESTONE));
-            out.add(new Placement(5, y, 1, Material.COBBLESTONE));
-            out.add(new Placement(5, y, 5, Material.COBBLESTONE));
-        }
+        // The cobble corners of the three floors.
+        // Oracle ComponentWizardTower:53-64 - twelve placeBlockAtCurrentPosition
+        // calls with the metadata 3. Two of them repeat the corners of the
+        // middle floor, so the original leaves the two corners of the ground
+        // floor at local x 5 without a block. The native port keeps that quirk
+        // instead of closing the gap.
+        out.add(new Placement(1, 0, 1, Material.COBBLESTONE));
+        out.add(new Placement(1, 0, 5, Material.COBBLESTONE));
+        out.add(new Placement(1, 5, 1, Material.COBBLESTONE));
+        out.add(new Placement(1, 5, 5, Material.COBBLESTONE));
+        out.add(new Placement(5, 5, 1, Material.COBBLESTONE));
+        out.add(new Placement(5, 5, 5, Material.COBBLESTONE));
+        out.add(new Placement(1, 10, 1, Material.COBBLESTONE));
+        out.add(new Placement(1, 10, 5, Material.COBBLESTONE));
+        out.add(new Placement(5, 10, 1, Material.COBBLESTONE));
+        out.add(new Placement(5, 10, 5, Material.COBBLESTONE));
         // The six windows.
         out.add(new Placement(3, 7, 1, Material.GLASS_PANE));
         out.add(new Placement(3, 8, 1, Material.GLASS_PANE));

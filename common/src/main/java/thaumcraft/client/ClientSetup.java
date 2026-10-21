@@ -77,6 +77,9 @@ public final class ClientSetup {
         EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE_SMALL,
                 context -> new thaumcraft.client.renderers.entity.RenderTaintacle(context, .2F, 6));
         thaumcraft.common.entities.monster.EntityTaintacle.setClientEffects(thaumcraft.client.fx.particles.TaintacleAriseParticle::arise);
+        // Original ClientProxy.slimeJumpFX: the thaumic slime launch and landing bursts.
+        thaumcraft.common.entities.monster.EntityThaumicSlime.setClientEffects(
+                (slime, count, size) -> thaumcraft.client.fx.particles.SlimeJumpParticle.emit(slime, count, size));
         // Original ClientProxy.smokeSpiral: the smoke of the Sword of the Zephyr and of the
         // spawning eldritch warden (oracle ItemElementalSword.onUsingTick:128-141 and
         // EntityEldritchWarden.onUpdate:186-194).

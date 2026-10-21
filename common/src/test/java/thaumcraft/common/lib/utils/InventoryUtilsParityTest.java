@@ -61,7 +61,9 @@ class InventoryUtilsParityTest {
     // ------------------------------------------------------------- the stack equality
 
     /**
-     * Original {@code InventoryUtils.areItemStacksEqual} (oracle {@code InventoryUtils.java:343-377}):
+     * Original {@code InventoryUtils.areItemStacksEqual} (oracle
+     * {@code InventoryUtils.java:333-339}, the same rule in
+     * {@code areItemStacksEqualForCrafting} at oracle {@code InventoryUtils.java:303-309}):
      * the damage of 32767 is the original's "any metadata" wildcard, so two stacks whose damage
      * values differ only by that wildcard are equal when the caller ignores the damage.
      */
@@ -78,13 +80,20 @@ class InventoryUtilsParityTest {
         assertTrue(InventoryUtils.damageMatches(0, 5, true, true, true));
         // The wildcard does not rescue a damageable pair that the ignore rule already equalised.
         assertTrue(InventoryUtils.damageMatches(0, 32767, true, true, true));
-        // A damageable stack and an ordinary one are never equalised by the wildcard alone.
-        assertFalse(InventoryUtils.damageMatches(0, 32767, true, true, false));
+        // The wildcard rule of the original does NOT ask for two damageable stacks: oracle
+        // InventoryUtils.java:337-339 reads
+        //   if (t2 && ignoreDamage && (stack0.getItemDamage() == 32767 || stack1.getItemDamage() == 32767)) t2 = false;
+        // so the wildcard equalises the pair as soon as the caller ignores the damage and one of
+        // the two damage values is the wildcard, even when only one of the two stacks is
+        // damageable. The port keeps that rule in InventoryUtils.damageMatches:407.
+        assertTrue(InventoryUtils.damageMatches(0, 32767, true, true, false),
+                "the wildcard equalises the pair even when only one stack is damageable");
+        assertTrue(InventoryUtils.damageMatches(0, 32767, true, false, false));
     }
 
     /**
      * Original {@code InventoryUtils.areItemStacksEqualForCrafting} (oracle
-     * {@code InventoryUtils.java:307-341}): the answer also needs
+     * {@code InventoryUtils.java:285-311}): the answer also needs
      * {@code stack0.stackSize <= stack0.getMaxStackSize()}.
      */
     @Test void theCraftingComparisonRefusesAnOverfullSlot() {
@@ -95,7 +104,8 @@ class InventoryUtilsParityTest {
 
     /**
      * Original {@code ThaumcraftApiHelper.areItemStackTagsEqualForCrafting} (oracle
-     * {@code InventoryUtils.java:327}): a recipe tag that the slot does not carry is a mismatch,
+     * {@code thaumcraft/api/ThaumcraftApiHelper.java:128-146}, called from oracle
+     * {@code InventoryUtils.java:301}): a recipe tag that the slot does not carry is a mismatch,
      * but a slot with more tags than the recipe still matches.
      */
     @Test void theCraftingTagRuleIsTheOriginalOne() {

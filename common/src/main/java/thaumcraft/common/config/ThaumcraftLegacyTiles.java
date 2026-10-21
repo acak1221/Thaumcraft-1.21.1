@@ -82,7 +82,10 @@ public final class ThaumcraftLegacyTiles {
     /** The block properties of the legacy blocks, with the original hardness, resistance and sound. */
     private static BlockBehaviour.Properties fluid() {
         return BlockBehaviour.Properties.of().mapColor(MapColor.WATER)
-                .strength(100.0F).noCollission().noOcclusion().dynamicShape().replaceable();
+                .strength(100.0F).noCollission().noOcclusion().dynamicShape().replaceable()
+                // The original death fluid draws its slimy bubble in the random display tick
+                // (oracle BlockFluidDeath:65-80), so the cell has to tick on the client.
+                .randomTicks();
     }
 
     private static BlockBehaviour.Properties arcaneFurnace() {

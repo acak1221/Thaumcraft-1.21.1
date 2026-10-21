@@ -6,8 +6,13 @@ import org.junit.jupiter.api.Test;
 import thaumcraft.client.fx.bolt.WispLightningShape;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * The structural contract of the native bolt shape. The numbers of the original
+ * {@code thaumcraft/client/fx/bolt/FXLightningBoltCommon.java} are asserted in
+ * {@code thaumcraft/client/fx/BoltShapeParityTest.java}.
+ */
 class WispLightningShapeTest {
-    @Test void sevenFractalsRetainEndpointsBranchesAndFiniteJoinedWidths() {
+    @Test void sevenFractalsRetainEndpointsBranchesAndJoinedWidths() {
         Vec3 from=new Vec3(1,2,3),to=new Vec3(7,5,8);
         for(int seed=0;seed<64;seed++) {
             var shape=new WispLightningShape(from,to,seed);
@@ -19,8 +24,16 @@ class WispLightningShapeTest {
             for(var segment:shape.segments) {
                 for(Vec3 vector:List.of(segment.start(),segment.end(),segment.previousDirection(),segment.nextDirection()))
                     assertTrue(Double.isFinite(vector.x)&&Double.isFinite(vector.y)&&Double.isFinite(vector.z));
-                assertTrue(segment.sinPrevious()>0 && Float.isFinite(segment.sinPrevious()));
-                assertTrue(segment.sinNext()>0 && Float.isFinite(segment.sinNext()));
+                // The original divides the ribbon width by the joint sine. A normalised dot product that leaves
+                // the unit interval makes the original sine not a number and the original rasteriser drops the
+                // quad; the port reports the same segment as not renderable instead of clamping the sine.
+                if(segment.renderable()) {
+                    assertTrue(segment.sinPrevious()>0 && Float.isFinite(segment.sinPrevious()));
+                    assertTrue(segment.sinNext()>0 && Float.isFinite(segment.sinNext()));
+                } else {
+                    assertTrue(!Float.isFinite(segment.sinPrevious())||segment.sinPrevious()==0
+                            ||!Float.isFinite(segment.sinNext())||segment.sinNext()==0);
+                }
                 assertTrue(segment.number>=0 && segment.number<128 && segment.light>0 && segment.light<=1);
             }
             assertTrue(shape.maxAge>=2 && shape.maxAge<=4);

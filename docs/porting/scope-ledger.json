@@ -5450,17 +5450,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/ClientProxy.java:866 boreDigFx spawns FXBoreSparkle in one of ten digs",
           "oracle thaumcraft/client/ClientProxy.java:1082 drawInfusionParticles3/4 reuse FXBoreSparkle for the infusion effects",
           "native client/fx/particles/InfusionParticle.java:31 the native infusion effect replaced the borrowed sparkles",
-          "native client/BoreClientEffects.java:54 the native bore only has the vortex and the beam, there is no flying dig sparkle"
+          "native client/BoreClientEffects.java:54 the native bore only has the vortex and the beam, there is no flying dig sparkle",
+          "native client/fx/particles/BoreDigSparkleParticle.java:1 the native particle reproduces the original FXBoreSparkle: the colour red 0.2 green 0.6+rand*0.3 blue 0.2, the scale rand*0.5+0.5, the life base/2+rand(base) with base=max(1,(int)(distance*3)), the velocity gauss*0.01, the steering 0.3 and 0.6 below four blocks, the drag 0.985, the clamp +-0.35, the size 0.1*scale*(sin(age/3)*0.5+1), the cell age%4 of the second row of the sixteen cell sheet and the full bright light",
+          "native client/BoreClientEffects.java:119 the native bore draws the dig of the original: the break sound of the dug block with the volume (pitch+1)/2 and the pitch volume*0.8, then particleCount(10) dig effects, the flying dig sparkle in one case out of ten",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:673 the native client tick calls the dig effect when the dig target of the server arrives with the block entity update"
         ],
         "notes": [
-          "The infusion effects are ported, but the one-in-ten bore dig sparkle has no native counterpart; the dig feedback is only the beam and the target.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "The 1.7.10 class became the native particle BoreDigSparkleParticle and the native dig effect of the bore; every number of the original is kept.",
+          "The original pushes the particle out of solid blocks with its own routine; the native particle never collides with the world, exactly like the native port of the sibling infusion particles."
         ],
         "reviewed_sha256": {
           "original": "d3ca51c02cc41359015d04a383b5539c773c9ef7b002cfe7c7d56d74b7e1b33d",
@@ -6117,16 +6120,23 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSpark.java:22 the spark lives 5 + rand(5) ticks, picks one of three sprite sheets and has no gravity",
           "native client/fx/particles/CrystalSparkParticle.java:1 the native crystal spark replaces the shared 1.7 spark",
-          "native client/fx/particles/ShockSparkParticle.java:1 a second native spark covers the shock focus"
+          "native client/fx/particles/ShockSparkParticle.java:1 a second native spark covers the shock focus",
+          "oracle thaumcraft/client/ClientProxy.java:669 the generic proxy helper of the original spark",
+          "oracle thaumcraft/common/blocks/BlockCrystal.java:86 the spark of the crystal cluster",
+          "oracle thaumcraft/common/blocks/BlockAiry.java:299 the spark of the shock focus, the size 0.33+h and the colour 0.65+rand*0.1/1/1 for the metadata ten",
+          "oracle thaumcraft/common/blocks/BlockEldritch.java:299 the spark of the eldritch lock, the size 0.5, the colour 0.65+rand*0.1/1/1 and the alpha 0.8",
+          "native client/fx/particles/CrystalSparkParticle.java:22 the native crystal spark keeps the 5..9 ticks, the 8x8 sheet, the alpha .8, the flip and the no movement of the original",
+          "native client/ThaumcraftShockOrbsClient.java:24 the native shock trap keeps the size 0.33+h and the colour 0.65+rand*0.1/1/1 of the original metadata ten",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:52 the native eldritch block has no display tick, so the spark of the eldritch lock is missing",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java the native tree has no second variant of the shock focus, so the blue spark of the original metadata eleven is missing"
         ],
         "notes": [
-          "The shared 1.7 spark helper was split into native particles; the generic proxy helper (ClientProxy.drawSpark) has no single native class any more.",
-          "The shared 1.7 spark helper was split into native particles; the generic proxy helper has no single native class any more.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "The 1.7.10 spark was split into the native crystal spark and the native shock spark; both keep the numbers of the original.",
+          "Open difference: the spark of the eldritch lock (oracle BlockEldritch.java:299-302), the blue spark of the second shock focus variant (oracle BlockAiry.java:303-304), the spark of the champion (oracle ChampionModBold.java:36) and the spark of the eldritch golem boss (oracle EntityEldritchGolem.java:298) have no native counterpart; the champion and the eldritch golem boss are not in the native tree at all."
         ],
         "reviewed_sha256": {
           "original": "9a9d4e88578fdc9487e67ef13c85cbf72751ffb4371bf3e75c6c0bd36e424241",
@@ -6167,16 +6177,23 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSparkle.java:23 the sparkle carries the sprite sheet, the multiplier, the blend mode and the colour",
           "native client/fx/particles/DrainSparkle.java:1 the native vis drain sparkle carries the RGB payload",
-          "native client/fx/particles/FocusFrostSparkleParticle.java:1 the native frost focus sparkle replaces the shared 1.7 sparkle"
+          "native client/fx/particles/FocusFrostSparkleParticle.java:1 the native frost focus sparkle replaces the shared 1.7 sparkle",
+          "oracle thaumcraft/client/ClientProxy.java:650 the sparkle of the proxy helper with its size, colour and gravity",
+          "oracle thaumcraft/common/tiles/TileHole.java:142-211 the twenty four sparkles around the portable hole, the colour type two",
+          "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:166,174 the sparkles of the shock focus, the size 2.0+rand and the gravity 0.05+rand*0.05",
+          "oracle thaumcraft/common/entities/EntityFollowingItem.java:99, EntityAlumentum.java:45, EntityFrostShard.java, EntityPechBlast.java:68 the sparkles of the entities",
+          "native client/fx/particles/FocusFrostSparkleParticle.java:16 the native frost sparkle keeps the type six colour and the eighteen ticks of the original",
+          "native common/src/main/java/thaumcraft/common/entities/EntityFollowingItem.java:155, EntityAlumentum.java:34, EntityFrostShard.java:254, EntityPechBlast.java:107 the native client hooks of the four entities",
+          "native common/src/main/java/thaumcraft/common/tiles/TileHole.java:44 the native hole has no client tick and no surroundwithsparkles, so the sparkles around it are missing",
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java the native shock focus has no client hook, so its sparkles are missing"
         ],
         "notes": [
-          "The configurable 1.7 sparkle became several native particles; the shared colour/multiplier/blend parameters of the original are not a single native class any more.",
-          "The configurable 1.7 sparkle became several native particles; the shared colour, multiplier and blend parameters are not a single native class any more.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "The configurable 1.7.10 sparkle became several native particles; the native frost sparkle keeps the type six colour and the life of the original.",
+          "Open difference: the sparkles around the portable hole (oracle TileHole.java:142-211), the sparkles of the shock focus (oracle ItemFocusShock.java:166,174), the sparkles of the magical leaves and of the lifter (oracle BlockMagicalLeaves.java, BlockLifter.java) have no native counterpart; the native tree has no BlockLifter at all."
         ],
         "reviewed_sha256": {
           "original": "63f5ce8dc715705ac46c886c89f7bbe8e4d61cf7c103d60713b60931d65da9bb",
@@ -6216,17 +6233,19 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSparkleTrail.java:30 the trail follows an entity, its lifetime is base/2 + rand(base) with base = distance*3",
           "native client/fx/particles/HungryNodeFragment.java:23 the native fragment particle keeps the base/2 + rand(base) lifetime rule",
-          "native client/fx/particles/DrainSparkle.java:1 the native drain sparkle flies from the consumer to the supplier"
+          "native client/fx/particles/DrainSparkle.java:1 the native drain sparkle flies from the consumer to the supplier",
+          "oracle thaumcraft/client/ClientProxy.java:887 the only construction site of the original particle is inside ClientProxy.soulTrail",
+          "oracle thaumcraft/common/CommonProxy.java:234 the empty declaration of soulTrail in the common proxy",
+          "oracle tree wide scan: ClientProxy.soulTrail has no caller anywhere in the 4.2.3.5 tree, so the original never creates the particle",
+          "native common/src/main/java/thaumcraft/client/ has no trail particle and none is needed, because the original never creates the particle either"
         ],
         "notes": [
-          "The generic entity trail particle was replaced by the purpose built native particles; no single native class keeps the 1.7 trail parameters.",
-          "The generic entity trail particle was replaced by purpose built native particles; no single native class keeps the 1.7 trail parameters.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "The particle of the original is dead code: its only construction site is a method without a caller. The native tree therefore reproduces the original exactly by not having it."
         ],
         "reviewed_sha256": {
           "original": "a78d9476de5bb47983e4116f77d530e9a8844e60e053d8d52ac27084a0e1aa85",
@@ -12335,16 +12354,19 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/item/ItemTrunkSpawnerRenderer.java:1 the 1.7 item renderer draws the traveling trunk in the hand",
           "native client/renderers/item/JarItemRenderer.java:1 the native special item renderers are registered per item",
-          "native common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java:1 the native traveling trunk spawner item exists"
+          "native common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java:1 the native traveling trunk spawner item exists",
+          "oracle thaumcraft/client/renderers/item/ItemTrunkSpawnerRenderer.java:34-51 the 1.7 item renderer binds textures/models/trunk.png and draws the vanilla chest model, a 14x10x14 body, a 14x5x14 lid and a 2x4x1 latch",
+          "native common/src/main/resources/assets/thaumcraft/models/item/trunk_spawner.json:1 the native item model draws exactly that geometry with the retained thaumcraft:models/trunk texture",
+          "native common/src/main/resources/assets/thaumcraft/textures/models/trunk.png the retained texture of the original item renderer",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftGolems.java:109 the native item is the registered thaumcraft:trunk_spawner"
         ],
         "notes": [
-          "The dedicated 1.7 item renderer became the generic 1.21.1 item rendering path; the native tree has no per-item renderer for the traveling trunk spawner.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "The dedicated 1.7 item renderer became the 1.21.1 item model: the traveling trunk is drawn in the hand, in the inventory and in the gui with the original texture and the geometry of the original chest model."
         ],
         "reviewed_sha256": {
           "original": "0b8d6f89176ba2b4be949ce5a1303142780db6bfe6a9f9c14fd04d858f69b495",
@@ -16982,15 +17004,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileFluxScrubberRenderer.java:1 the 1.7 renderer of the flux scrubber",
-          "native client/renderers/tile/TileFluxScrubberRenderer.java:1 the native renderer of the scrubber"
+          "native client/renderers/tile/TileFluxScrubberRenderer.java:1 the native renderer of the scrubber",
+          "oracle thaumcraft/client/renderers/tile/TileFluxScrubberRenderer.java:45-61 the original turns the cap around the X axis for the facing zero and one and around the Y axis for the facing three, four and five, and keeps the model for the facing two",
+          "native client/renderers/tile/TileFluxScrubberRenderer.java:73 the native rule orientationOf(Direction) returns the axis and the angle of the original turn, and the drawing uses it",
+          "oracle thaumcraft/client/renderers/tile/TileFluxScrubberRenderer.java:38-39 the phase of the bob is the age of the player, the partial tick and the counter of the scrubber",
+          "oracle thaumcraft/common/tiles/TileFluxScrubber.java:44-46 the counter of the scrubber is rolled on the client as well as on the server and is never written to the NBT",
+          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:88 the native scrubber rolls that counter on the client as well as on the server",
+          "native client/renderers/tile/TileFluxScrubberRenderer.java:33 the native renderer uses the counter of the original for the phase of the bob"
         ],
         "notes": [
-          "The 1.7 TileEntitySpecialRenderer became a 1.21.1 BlockEntityRenderer; the renderer only shows the stored essentia and no scrubbing animation is drawn.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "The 1.7 tile renderer became a 1.21.1 block entity renderer that draws the cap and the tip of the retained obelisk_cap.obj with the original texture; the turn of the six facings and the phase of the bob are the original ones."
         ],
         "reviewed_sha256": {
           "original": "c3f4b93114e34916788506229de97cd4a93959af5fdcc145b65b357ce1e583c1",
@@ -17370,16 +17397,20 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:1 the 1.7 renderer draws the item mirror, the essentia mirror and the linked view",
           "native client/renderers/tile/TileMirrorRenderer.java:43 the native renderer draws the item and the essentia mirror",
-          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:28 the native tile keeps the link and the output stacks"
+          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:28 the native tile keeps the link and the output stacks",
+          "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:52-554 the linked view of the original is drawn with the fixed function GL11.glTexGen texture coordinate generation and a hand written projection matrix",
+          "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:563-626 the original draws the pane of the unlinked and of the linked mirror and the block icon of the mirror",
+          "native client/renderers/tile/TileMirrorRenderer.java:39 the native renderer draws the pane of the unlinked and of the linked mirror with the offset 0.02+instability and the six turns of the original",
+          "native client/renderers/models/ModelTunnelField.java:24 the native tunnel keeps the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence",
+          "native client/renderers/models/ModelTunnelField.java:36 the native tunnel is an approximation: the view dependent texture generation of the original has no equivalent in the 1.21.1 shader pipeline and the additive blend of the inner layers is the translucent pass"
         ],
         "notes": [
-          "The 1.7 renderer became a 1.21.1 BlockEntityRenderer for the two mirror kinds; the original linked mirror view (gui sixteen) is not ported, so the hand mirror cannot open it.",
-          "The 1.7 renderer became a 1.21.1 BlockEntityRenderer for the two mirror kinds; the original linked mirror view is drawn by the hand mirror menu of the native tree.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "The 1.7 renderer became a 1.21.1 block entity renderer for the two mirror kinds; the pane, the offset of the unstable mirror, the brightness and the turns are the original ones.",
+          "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror."
         ],
         "reviewed_sha256": {
           "original": "ddf1d39957b2b642b7a08d620a0ff5a2d14a84d7415e30efd9a6f0b530d7402c",
@@ -17901,16 +17932,19 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:25 the 1.7 renderer draws the retained thaumatorium.obj model",
           "native client/renderers/models/ModelThaumatorium.java:16 the native OBJ loader documents that the original model is that asset",
-          "native common/src/main/resources/assets/thaumcraft/models/block/thaumatorium.json:1 the native block model is a plain orientable box"
+          "native common/src/main/resources/assets/thaumcraft/models/block/thaumatorium.json:1 the native block model is a plain orientable box",
+          "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:44-73 the 1.7 renderer draws the retained textures/models/thaumatorium.obj with textures/models/thaumatorium.png and the turn of the facing",
+          "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:74-100 the original cycles the output of one of the possible recipes of the machine above it, one recipe every forty ticks",
+          "native client/renderers/models/ModelThaumatorium.java:23 the native OBJ loader reads the retained asset and is never referenced",
+          "native common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java:322 the native machine is programmed with a job list and holds no set of possible recipes"
         ],
         "notes": [
-          "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered (the native OBJ loader ModelThaumatorium is never referenced).",
           "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered and the native OBJ loader is never referenced.",
-          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
+          "Open difference: the retained OBJ is one block wide and two blocks tall, so the native machine could take it, but the two block models would have to be hidden and the leader would have to inspect the frames; the cycling preview cannot be reproduced at all, because the native machine holds no set of possible recipes."
         ],
         "reviewed_sha256": {
           "original": "003001a14e4f2feefb87bdb95034fa9e1f737c9dafffee6688852ee2053229c4",
@@ -27617,21 +27651,22 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/common/entities/EntityItemGrate.java:26 the item may not stay inside the metal device grate",
           "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:49 setGrateTest(...) installs the grate predicate",
           "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:40 the native grate drops a plain ItemEntity instead of the grate entity",
           "oracle thaumcraft/common/entities/EntityItemGrate.java:18-23 the item of the grate reports the metal device of the fifth and the sixth metadata as a block of its own",
           "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:64 the native entity pushes the item out of the filter with its own arithmetic",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:58 the native tree installs the grate test of the original"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:58 the native tree installs the grate test of the original",
+          "oracle thaumcraft/common/entities/EntityItemGrate.java:28-36 the original reports the metal device of the fifth and the sixth metadata as a solid block, so the item is pushed out of the grate",
+          "the overridden vanilla method is func_145771_j(double,double,double); the 1.12.2 MCP names call the same SRG name Entity.pushOutOfBlocks, so the semantics of the override are the original ones",
+          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:49 the native tree installs the grate test of the original",
+          "oracle 1.7.10 vanilla Entity.func_145771_j: there is no readable 1.7.10 vanilla source in this environment, so the exact vanilla push out cannot be compared"
         ],
         "notes": [
-          "The 1.7 entity became a 1.21.1 ItemEntity subclass.",
-          "The grate predicate is never installed (no call site for setGrateTest), and the native TileGrate drops a plain ItemEntity, so the push out of the grate never happens.",
-          "The grate test is installed now, so the item is pushed out of the filter as in the original.",
-          "The push out itself is a native reimplementation, the 1.7.10 vanilla method it replaces could not be re-read in this sandbox (no readable 1.7.10 vanilla source is available), so the unit stays open.",
-          "The class is in common/entities, which this wave is not allowed to touch."
+          "The 1.7 entity became a 1.21.1 ItemEntity subclass; the grate test is installed and the item leaves the filter.",
+          "Open difference: the push out itself is a native reimplementation of the vanilla pushOutOfBlocks, whose 1.7.10 arithmetic cannot be re-read in this sandbox (no readable 1.7.10 vanilla source is available), so the unit stays open."
         ],
         "reviewed_sha256": {
           "original": "ff2714670b6a86ede5c499973db90442bc99bf4d8ce3dbaa8e10547bf00b4f12",
@@ -27859,18 +27894,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/common/entities/ItemSpawnerEgg.java:1 the 1.7 creative spawn egg whose metadata selects the mob",
           "native common/src/main/java/thaumcraft/common/entities/ItemSpawnerEgg.java:1 the native class extends the 1.21.1 SpawnEggItem",
           "oracle thaumcraft/common/entities/ItemSpawnerEgg.java:56-80 the creative egg of the original spawns the mob of its metadata and only spends the egg outside the creative mode",
-          "native common/src/main/java/thaumcraft/common/entities/ItemSpawnerEgg.java:88 the native egg always spends the stack, the 1.21.1 SpawnEggItem does the same"
+          "native common/src/main/java/thaumcraft/common/entities/ItemSpawnerEgg.java:88 the native egg always spends the stack, the 1.21.1 SpawnEggItem does the same",
+          "oracle thaumcraft/common/entities/ItemSpawnerEgg.java:99-101 the original only spends the egg when the player is not in the creative mode",
+          "native common/src/main/java/thaumcraft/common/entities/ItemSpawnerEgg.java:110 the native rule spendsStack(boolean) reproduces that condition and the two shrinks use it",
+          "native 1.21.1 SpawnEggItem:useOn spends the stack in the spawner branch and in the mob branch, so the subclass has to carry the original rule itself"
         ],
         "notes": [
-          "The 1.7 creative item became a 1.21.1 SpawnEggItem with the mob list in the registry; the original metadata selection is gone.",
-          "Open difference: the original does not spend the egg in the creative mode (oracle ItemSpawnerEgg.java:73), the native tree spends it like the vanilla spawn egg does.",
-          "The class is in common/entities, which this wave is not allowed to touch."
+          "The 1.7 creative item became a 1.21.1 SpawnEggItem with the mob list in the registry; the metadata selection is gone, but the egg is spent exactly as in the original, that is never in the creative mode."
         ],
         "reviewed_sha256": {
           "original": "c31c1d3b698aab3ed071293f7d6f0733454cb4871767c2513b14ba4dc596d448"
@@ -40922,7 +40958,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockSparkle.java:1 the 1.7 simple impl message that shows a sparkle at a block",
           "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxNetworking.java:56 the native port uses one validated custom payload per effect family",
@@ -40931,11 +40967,22 @@
           "oracle thaumcraft/common/tiles/TileFluxScrubber.java:98 the scrubber sends the sparkle of the removed flux block with the colour 14483711",
           "oracle thaumcraft/common/tiles/TileArcaneLampGrowth.java:96 the growth lamp sends the sparkle of the grown plant with the colour 4259648",
           "native common/src/main/java/thaumcraft/common/lib/network/GrowthLampFxNetworking.java:26 the growth lamp has its own payload for that sparkle",
-          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxNetworking.java:49 the block effects share one validated payload per effect family"
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxNetworking.java:49 the block effects share one validated payload per effect family",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBlockSparkle.java:36-52 the simple impl message shows a sparkle burst at a block with its colour",
+          "native client/fx/particles/GrowthLampParticle.java:21 the native client half of the block sparkle keeps the colour rule of ClientProxy.blockSparkle, the cells 112..120, the delay, the size, the drag and the half alpha of the first and the last frame",
+          "native client/fx/particles/InfusionParticle.java:104 the native infusion keeps the same burst",
+          "oracle thaumcraft/common/tiles/TileFluxScrubber.java:100 the flux scrubber sends the sparkle of the removed flux block with the colour 14483711",
+          "oracle thaumcraft/common/tiles/TileArcaneLampGrowth.java:106 the growth lamp sends the sparkle of the grown plant with the colour 4259648",
+          "oracle thaumcraft/common/tiles/TileEldritchLock.java:130 the eldritch lock sends the sparkle with the colour 4194368",
+          "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:137,151 the warding focus sends the sparkle with the colour 16556032",
+          "oracle thaumcraft/common/items/wands/WandManager.java:244,245,420,795 the wand sends the sparkle with the colour -9999",
+          "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:234 the warden sends the sparkle with the colour 8388736",
+          "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java:154 the server tick sends the sparkle with the colour 12632575",
+          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:94 the native flux scrubber removes the flux block but sends no sparkle, because the transport needs a payload in common/lib/network/**, which this wave must not touch"
         ],
         "notes": [
-          "The 1.7 SimpleImpl message became 1.21.1 custom payloads; there is no single generic block sparkle payload left.",
-          "Open: the sparkle of the flux scrubber has no native payload, because the client half of a sparkle is in common/client, which this wave is not allowed to touch."
+          "The 1.7 simple impl message became 1.21.1 custom payloads; the client half of the block sparkle exists twice (the growth lamp and the infusion).",
+          "Open difference: the server half of the block sparkle is missing for the flux scrubber, the eldritch lock, the warding focus, the wand, the eldritch warden and the server tick; the transport needs a new payload in common/src/main/java/thaumcraft/common/lib/network/**, which belongs to the wave one crashhunt agent; the exact change is written in docs/analysis/2026-10-23-agent-w2devices.md section 6."
         ],
         "reviewed_sha256": {
           "original": "cacd12ecb6a7f5209ecafe5affd92037f0bdae62e3244915266bfe36557e43f9",
@@ -41431,8 +41478,8 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/common/lib/network/misc/PacketBoreDig.java:53 the packet tells the client which block the bore digs",
           "oracle thaumcraft/common/tiles/TileArcaneBore.java:695 getDigEvent(...) stores the dig target on the client",
@@ -41440,11 +41487,15 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:799 the native target is derived on the client",
           "oracle thaumcraft/common/lib/network/misc/PacketBoreDig.java:41-47 the packet tells the client which block the bore digs",
           "oracle thaumcraft/common/tiles/TileArcaneBore.java:775-793 the bore sends the dig event to the thirty two blocks around it and the client stores the dig target",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:809 the native bore sends the visual target with the block entity update of the server"
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:809 the native bore sends the visual target with the block entity update of the server",
+          "oracle thaumcraft/common/lib/network/misc/PacketBoreDig.java:39-58 the original dig event carries the dig target to the client and the client answers it with the break sound and the dig particles of the target block",
+          "oracle thaumcraft/common/tiles/TileArcaneBore.java:707-713 the original dig event only reaches the sixty four blocks around the bore and carries the offset of the target as (offset & 0xFF) - 64",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:69 the native dig event range is sixty four blocks",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:809 the native bore sends the dig target with the block entity update of the server",
+          "native client/BoreClientEffects.java:119 the native client draws the dig of the target and plays its break sound once per dig event"
         ],
         "notes": [
-          "The dedicated packet became the block entity client state (visualTarget); the 1.7 dig event message no longer exists.",
-          "Open: the dig event of the original is a pure client message and the client half lives in common/client, which this wave is not allowed to touch."
+          "The dedicated packet became the block entity client state (the visual target of the bore); the client now uses it exactly as the original did, for the break sound and the dig particles of the target block."
         ],
         "reviewed_sha256": {
           "original": "1ce78097ed746c776c4c2c4f99ef76747f96dab17739d26fab57a563dd05d52e",
@@ -43666,15 +43717,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/ComponentBankerHome.java:1-120 the village piece of the banker home",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerHome.java the native banker home builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerHome.java the native banker home builder",
+          "oracle ComponentBankerHome:56-105 the 1.7.10 placeBlockAtCurrentPosition takes the metadata first and the local coordinates after it, so the cobble floor, the dirt floor, the two roof variants, the ten roof edge logs, the four corner posts, the plank walls, the two iron bar windows, the three table slots and the door of the native port match the original block for block",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the banker home block list of the original",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the shell, the roof variants, the table slots, the windows and the door of the banker home"
         ],
         "notes": [
-          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature; the block list is kept in VillageWorldGenRules.",
-          "The feature is registered but no biome modifier or biome references the placed feature, so the banker home never generates in a world."
+          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature; the block list is kept in VillageWorldGenRules and the feature is placed by VillageBankerManager."
         ],
         "reviewed_sha256": {
           "original": "1d2a96ab3e59fd24d8a378feabf152e1938a4465190b9d6964ba3360c23e62f2",
@@ -43714,15 +43767,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/ComponentWizardTower.java:1-114 the village piece of the wizard tower",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java the native wizard tower builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java the native wizard tower builder",
+          "oracle ComponentWizardTower:44-96 the hollow interior, the three plank floors, the four cobble pillars, the glass panes, the ladder, the trapdoor, the glowstone, the chest and the door",
+          "oracle ComponentWizardTower:53-64 the twelve cobble corner calls place only ten distinct corner blocks: the calls 57 and 58 repeat the middle floor corners at local x 1, so the two ground floor corners at local x 5 stay open in the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the wizard tower now places the same ten corners and keeps the two open ones",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the ten corners, the missing ground floor pair, the floors, the pillars, the panes, the ladder and the chest"
         ],
         "notes": [
-          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature.",
-          "The feature is registered but never placed, so the wizard tower never generates in a world."
+          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature; the block list is kept in VillageWorldGenRules and the feature is placed by VillageWizardManager.",
+          "The original never spawns the wizard: ComponentWizardTower:95 spawns it at local x 7, outside the six wide piece."
         ],
         "reviewed_sha256": {
           "original": "59ded4f00b6a97364dab48a0274ff79aa618af14bf038b0e049f9af9be11495c",
@@ -43757,15 +43814,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/ThaumcraftVillagerTrades.java:1-292 the 1.12 villager trade lists",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the native banker and wizard trade tables"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the native banker and wizard trade tables",
+          "the legacy 1.12 helper has no oracle counterpart; the native trade tables are the original ones of VillageBankerManager:21-32 and VillageWizardManager:19-33 with the same counts and the same item order",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker and the fifteen wizard rows",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the trade rows of both tables"
         ],
         "notes": [
-          "Legacy-only helper (no oracle counterpart); the native keeps the twelve banker trades and the fifteen wizard trades as data.",
-          "1.21.1 has no villager profession registry yet, so the trade tables are not bound to a trader."
+          "Legacy-only helper (no oracle counterpart); the native keeps the twelve banker trades and the fifteen wizard trades as data and binds them to the thaumcraft:banker and thaumcraft:wizard professions."
         ],
         "reviewed_sha256": {
           "legacy": "8d4971296e3685cc56725651ee1073ccd4417771c4e7b41b4f9b0d71d428f70a"
@@ -43812,11 +43871,19 @@
           "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:481-546 the ore pass with 18 cinnabar, 20 amber and 8 infused stone attempts",
           "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:71-99 the same three ore passes",
           "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:95-100 the 1/150, 1/66 and 1/40 structure chain",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java the ring feature"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java the ring feature",
+          "oracle ThaumcraftWorldGenerator:407-481 the surface pass, the exclusive structure chain 1/150, 1/66 and 1/40, the position draws and the totem 1/360",
+          "oracle ThaumcraftWorldGenerator:483-567 the vegetation pass with the silverwood 1/60, the greatwood 1/25 and the hot sand flowers 1/30 and the ore pass with 18 cinnabar, 20 amber and 8 infused stone attempts",
+          "oracle ThaumcraftWorldGenerator:114-168 the aura totem with its ground rules, its column of four and its node roll of one in four",
+          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java the chain and the chunk random of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTreeFeature.java the vegetation pass of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java the three ore passes of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTotemFeature.java the totem of the original",
+          "native common/src/test/java/thaumcraft/worldgen/OriginalSurfaceGeneratorNumbersTest.java the chain frequencies, the order of the draws and the chunk random of the original"
         ],
         "notes": [
-          "The 1.7 world generator was replaced by a set of 1.21 features (ore, tree, node, decoration, ring and village features).",
-          "The totem of the original (one in 360 chunks) has no native counterpart, and the mound branch of the original has no native counterpart at all."
+          "The 1.7 world generator was replaced by a set of 1.21 features (ore, tree, node, decoration, ring and village features); the surface chain, the vegetation pass, the ore pass and the totem were compared draw by draw against the oracle.",
+          "The wild node pass of the original delegates into the TC4 API jar (thaumcraft.api.expands.worldgen.node.NodeGenerationManager); that API jar is not part of the 4.2.3.5 game jar in this sandbox, so the native port reproduces the pass with the rarity filter 1/36 of Config.nodeRarity instead of a line by line comparison."
         ],
         "reviewed_sha256": {
           "original": "dcb6537b0dc809de1a6b738208e97b9480ce3c8ac4badc82397722bc8f136d28",
@@ -43856,16 +43923,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/VillageBankerManager.java:59 the piece weight 25 and the profession id 191",
           "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerManager.java:20-30 the piece weight and the profession id",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker trades"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker trades",
+          "oracle VillageBankerManager:37-39 the piece weight 25 and the minimum village size draw MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i)",
+          "the 1.7.10 MathHelper.getRandomIntegerInRange is min + random.nextInt(max - min + 1), so the draw is i or i + 1 and not always i",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the draw of the minimum village size is now i + nextInt(2)",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the piece weight, the profession id and the draw of the minimum village size"
         ],
         "notes": [
-          "The Forge village handler became a deterministic chunk feature; the piece weight, the profession id and the trade table are kept.",
-          "The feature never runs because no biome modifier places it."
+          "The Forge village handler became a deterministic chunk feature; the piece weight, the profession id and the trade table are kept."
         ],
         "reviewed_sha256": {
           "original": "a35b07a30700dc876d158a754922ad1b466f1bfc25716bbb054b372e07fddfe9",
@@ -43905,15 +43975,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/VillageWizardManager.java:59 the piece weight 15 and the profession id 190",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardManager.java the piece weight and the profession id"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardManager.java the piece weight and the profession id",
+          "oracle VillageWizardManager:38-40 the piece weight 15 and the minimum village size draw MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i)",
+          "the 1.7.10 MathHelper.getRandomIntegerInRange is min + random.nextInt(max - min + 1), so the draw is i or i + 1 and not always i",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the draw of the minimum village size is now i + nextInt(2)",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the fifteen wizard trade rows and the draw of the minimum village size"
         ],
         "notes": [
-          "The Forge village handler became a deterministic chunk feature; the numbers are kept.",
-          "The feature never runs because no biome modifier places it."
+          "The Forge village handler became a deterministic chunk feature; the numbers are kept."
         ],
         "reviewed_sha256": {
           "original": "128a302e8f62440ba47097c3bbed68285d19a6982d3f3b8fd6e61482e897096a",
@@ -43952,15 +44025,21 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenBigMagicTree.java:1-332 the greatwood shaped tree",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenBigMagicTree.java the native big magic tree"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenBigMagicTree.java the native big magic tree",
+          "oracle WorldGenBigMagicTree:23 the field initialiser leafDensity = 1.0F and WorldGenBigMagicTree:39 the leaf node count (int)(1.382 + Math.pow(this.leafDensity * (double)this.heightLimit / (double)13.0F, 2.0F))",
+          "the 4.2.3.5 jar bytecode proves the value: WorldGenBigMagicTree.<init> stores dconst_1 into leafDensity, while WorldGenGreatwoodTrees.<init> stores the constant pool double 0.9",
+          "the port used 0.8, the factor of the unused setScale of WorldGenBigMagicTree:343, and lost one leaf node per layer for the heights 11, 12, 17, 18, 19, 20 and 22",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenBigMagicTree.java the leaf node count is the original formula again",
+          "native common/src/test/java/thaumcraft/worldgen/MagicalTreeCanopyTest.java the leaf node table of the original for the heights 11 to 22"
         ],
         "notes": [
-          "The 1.7 tree generator became a 1.21 feature; the trunk shape was not compared block by block in this audit."
+          "The 1.7 tree generator became a 1.21 feature; the trunk shape was compared block by block against the oracle in this audit.",
+          "The shared first/obstruction shortened height of the original survives in a world scoped state, exactly as the original shared tree instance did."
         ],
         "reviewed_sha256": {
           "original": "502b7ef585732a584c4c856a499a9f92c9d713740af10f8ee885f80d345fd246",
@@ -43999,15 +44078,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenCustomFlowers.java:1-39 the custom flower generator",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenCustomFlowers.java the native custom flower generator"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenCustomFlowers.java the native custom flower generator",
+          "oracle WorldGenCustomFlowers:18-29 eighteen attempts, the offsets nextInt(8) - nextInt(8) horizontally and nextInt(4) - nextInt(4) vertically and the soil grass or sand",
+          "the 1.7.10 Blocks.sand carries the red sand as its metadata one, so the native red sand is the same block of the original and not an addition",
+          "native common/src/test/java/thaumcraft/worldgen/OriginalSurfaceGeneratorNumbersTest.java the eighteen attempts and the two spreads"
         ],
         "notes": [
-          "The 1.7 generator became a 1.21 feature; the flower positions were not compared in this audit."
+          "The 1.7 generator became a 1.21 feature; the flower positions were compared attempt by attempt in this audit."
         ],
         "reviewed_sha256": {
           "original": "5fa24c2a9fe77329dd4655441d2ddd09f5c6028a15422822ca11481ef2e902f6",
@@ -44100,15 +44182,20 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java:1-382 the greatwood tree",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java the native greatwood tree"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java the native greatwood tree",
+          "oracle WorldGenGreatwoodTrees:29,45,355 the leaf density 0.9, the leaf node formula and the height 11 + nextInt(11)",
+          "the 4.2.3.5 jar bytecode stores the constant pool double 0.9 into leafDensity of WorldGenGreatwoodTrees",
+          "oracle WorldGenGreatwoodTrees:101-131 the layer radius, the air or magical leaves rule, the pillar rule and the one in four vine roll",
+          "oracle WorldGenGreatwoodTrees:347-421 the two by two soil search, the two canopy tiers and the spider dungeon with its web and its dungeon chest",
+          "native common/src/test/java/thaumcraft/worldgen/MagicalTreeCanopyTest.java the leaf node table of the original for the heights 11 to 21"
         ],
         "notes": [
-          "The 1.7 tree generator became a 1.21 feature; the trunk shape was not compared block by block in this audit."
+          "The 1.7 tree generator became a 1.21 feature; the trunk shape was compared block by block against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "cabab6198ad997bea76de26799de39af3df78600d5931319e809e62fbd008160",
@@ -44148,14 +44235,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenHilltopStones.java:29-131 the hilltop stones",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the native hilltop stones"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the native hilltop stones",
+          "oracle WorldGenHilltopStones:19-50 the minimum height 85, the five ground samples and the ground blocks stone, grass and dirt with the snow and the tall grass below them",
+          "oracle WorldGenHilltopStones:57-120 the seven by seven footprint, the four layers, the skipped corners, the pillar rule of the odd border and the one in three vine roll",
+          "oracle WorldGenHilltopStones:86-93 the chest with the vanilla dungeon loot rolled twice and the wisp spawner below it",
+          "oracle ThaumcraftWorldGenerator:452 the dark aura node five blocks above the base of the cluster",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the same values and the same order of the draws"
         ],
         "notes": [
-          "The generator, the footprint and the minimum height 85 are ported, but the placed feature is never added to a biome, so the stones never generate."
+          "The generator, the footprint and the minimum height 85 are ported; the original rules are mutually exclusive, so the cluster only grows in a chunk the structure chain gave to it."
         ],
         "reviewed_sha256": {
           "original": "32f84ccdd45ce5ae2d34d6f699a84188fd376ff70218a0020426ae7c0156be8b",
@@ -44194,15 +44286,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenManaPods.java:1-41 the mana pod generator",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenManaPods.java the native mana pod generator"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenManaPods.java the native mana pod generator",
+          "oracle WorldGenManaPods:11-31 the upward search that never goes above 128, the four block drift of the blocked column and the pod age two to six",
+          "the original places the pod on the first free block with a free block below it and only then breaks out of the search",
+          "native common/src/test/java/thaumcraft/worldgen/OriginalSurfaceGeneratorNumbersTest.java the original bounds of the pod search"
         ],
         "notes": [
-          "The 1.7 generator became a 1.21 feature; the pod positions were not compared in this audit."
+          "The 1.7 generator became a 1.21 feature; the pod positions were compared step by step in this audit."
         ],
         "reviewed_sha256": {
           "original": "5443a5727b6de90213867c83f51c38fc0d6634f4c907b423a95c966dc3b1d181",
@@ -44294,14 +44389,16 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/WorldGenMoundTemplate.java:1-64 the 1.12 nineteen layer mound template",
-          "oracle the 4.2.3.5 oracle has no WorldGenMoundTemplate"
+          "oracle the 4.2.3.5 oracle has no WorldGenMoundTemplate",
+          "the oracle has no WorldGenMoundTemplate, the original builds the mound inline; the native port carries the nineteen layer table in common/src/main/java/thaumcraft/common/lib/world/WorldGenMoundTemplate.java",
+          "native common/src/test/java/thaumcraft/world/WorldGenMoundTemplateTest.java the sha256 of the table against the oracle and the 2441 blocks"
         ],
         "notes": [
-          "Legacy-only helper for the 1.12 mound; the original builds the mound inline and the native port has no mound at all."
+          "Legacy-only helper for the 1.12 mound; the original builds the mound inline. The native port carries the same nineteen layer table as the native WorldGenMoundTemplate, verified cell by cell against the oracle."
         ],
         "reviewed_sha256": {
           "legacy": "171b511b39411e0e4c06a31938ad6d0e208ea462e49e9e7fd9a813dbd6178680"
@@ -44339,15 +44436,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java:1-166 the silverwood tree",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the native silverwood tree"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the native silverwood tree",
+          "oracle WorldGenSilverwoodTrees:27-166 the height, the canopy radius 10 + nextInt(8), the knot chance height * 1.5, the four corner logs of the trunk and the shimmerleaf flowers of the worldgen tree",
+          "the 4.2.3.5 jar proves the callers of the class: BlockCustomPlant, ThaumcraftWorldGenerator, BiomeGenMagicalForest and the class itself",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the same geometry and the same order of the draws"
         ],
         "notes": [
-          "The 1.7 tree generator became a 1.21 feature; the trunk shape was not compared block by block in this audit."
+          "The 1.7 tree generator became a 1.21 feature; the trunk shape was compared block by block against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "d6b38ee3e0b14914c88797c3daa7210881c904e9d9429d3a4e1b36f4207b7793",
@@ -44378,14 +44478,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenSilverwoodTreesOld.java:1-329 the old silverwood shape",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the single native silverwood generator"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the single native silverwood generator",
+          "the 4.2.3.5 jar proves that the class is dead code: only WorldGenSilverwoodTreesOld.class itself carries the name, no other class of the jar references it",
+          "the readable 1.7.10 reference agrees: no class outside the file instantiates WorldGenSilverwoodTreesOld",
+          "a generator that the original never calls needs no native counterpart, so the single native silverwood generator is the whole original behaviour"
         ],
         "notes": [
-          "The original keeps a second, older silverwood shape; the native port has only one silverwood generator, so the old shape is not ported."
+          "The original keeps a second, older silverwood shape that no class of TC4 4.2.3.5 ever instantiates; the jar and the readable reference both prove the class is dead code, so the native port omits it without any behaviour loss."
         ],
         "reviewed_sha256": {
           "original": "85c1e7d6aab942a416f2b1c2c92bba8c081842b5d0d913a18939236a90df2a0d"
@@ -44423,10 +44526,13 @@
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/WorldgenLootHelper.java:1-25 the 1.12 dungeon chest loot helper",
-          "native common/src/main/resources/data/thaumcraft/loot_table the native loot tables"
+          "native common/src/main/resources/data/thaumcraft/loot_table the native loot tables",
+          "the legacy 1.12 helper has no oracle counterpart; the native port fills the dungeon chests of the hilltop stones, the greatwood dungeon and the mound with the native minecraft:chest/simple_dungeon table",
+          "the original filled them with ChestGenHooks.getInfo(dungeonChest), whose item list is a vanilla 1.7.10 table that is not part of this sandbox, so the item list itself could not be compared line by line"
         ],
         "notes": [
-          "Legacy-only helper (no oracle counterpart); the native fills the chests with datapack loot tables."
+          "Legacy-only helper (no oracle counterpart); the native fills the chests with datapack loot tables.",
+          "The exact item list of the 1.7.10 dungeon chest could not be verified here; the native table is the 1.21.1 dungeon chest."
         ],
         "reviewed_sha256": {
           "legacy": "0bb2e4390545b1f9f5eab5e203d72577c3595739c985b2a14e21d39fa2b339e8"
@@ -44540,15 +44646,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/biomes/BiomeGenEerie.java:1-75 the eerie biome",
-          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEerie.java the native eerie biome rules"
+          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEerie.java the native eerie biome rules",
+          "oracle BiomeGenEerie:16-41 the spawn rows bat 3, witch 8, enderman 4, brainy zombie 32, giant brainy zombie 8, wisp 3 and eldritch guardian 1 and the decorator counters two trees, one flower and two grass",
+          "oracle BiomeGenEerie:44-59 the colours grass 0x404840, foliage 0x405340, the sky 0x222299 and the water 0x2E535F",
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eerie.json the committed biome document carries exactly these values"
         ],
         "notes": [
-          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were not compared line by line in this audit."
+          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were compared line by line against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "66d7948f5eaaabf4867103b2f8197c13514a74f31e60b294204e15d6f25e45da"
@@ -44617,15 +44726,19 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/biomes/BiomeGenMagicalForest.java:1-168 the magical forest biome",
-          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenMagicalForest.java the native magical forest biome rules"
+          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenMagicalForest.java the native magical forest biome rules",
+          "oracle BiomeGenMagicalForest:35-63 the spawn rows wolf 2, horse 2, witch 3, enderman 3, pech 10 and wisp 10, the temperature 0.7, the rainfall 0.6, the decorator counters and the nine red flowers of the weight ten",
+          "oracle BiomeGenMagicalForest:66-73 the tree draw one silverwood in fourteen, then one greatwood in ten, otherwise the big magic tree",
+          "oracle BiomeGenMagicalForest:93-138 the mossy blob count, the one in forty big mushroom on the four by four grid, the ten mana pods from y 64 and the eight vishrooms next to a wood log",
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/magical_forest.json the committed biome document carries exactly these values"
         ],
         "notes": [
-          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were not compared line by line in this audit."
+          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were compared line by line against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "056aa8eff884f1ba7b4aadac6bfcfbe28d1c22fcf7a47c0fa5791f92cb4249da"
@@ -44703,16 +44816,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/biomes/BiomeHandler.java:1-67 the biome dictionary membership",
           "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeHandler.java the native biome dictionary adapter",
-          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:37-45 the biome type vote table"
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:37-45 the biome type vote table",
+          "oracle Config.registerBiomes:822-858 the thirty one dictionary types with their aura level, their aspect tag and their greatwood chance, and the four TC4 biome memberships magical, spooky, end, forest and wasteland",
+          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeHandler.java the same thirty one rows in the same order and the same four memberships"
         ],
         "notes": [
-          "The Forge biome dictionary became tags and a vote table; the vote counts and the aspect mapping are kept.",
-          "The dictionary membership of the eldritch biome is only used by the ore feature; the aura and greatwood queries of the original have no direct native counterpart."
+          "The Forge biome dictionary became tags and a vote table; the vote counts and the aspect mapping are kept."
         ],
         "reviewed_sha256": {
           "original": "53c833372af29c5cf412397c224f19c30089e5f9d56e5fa68e95c17dfad5d726",
@@ -45918,8 +46032,8 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileArcaneBore.java:806 the 1.7 bore scheduler",
           "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:53 the native bore delegates every debit, wear and removal to BoreWork",
@@ -45927,12 +46041,16 @@
           "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneBore.java:107 the native block registers the bore ticker",
           "oracle thaumcraft/common/tiles/TileArcaneBore.java:128-186 the 1.7 bore scheduler, the rotation, the entropy vis and the acceleration of the base",
           "oracle thaumcraft/common/tiles/TileArcaneBore.java:695-701 the dig event of the original resets the dig target of the client",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:789 the native client target is bounded to seventy blocks around the bore and is never server state"
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:789 the native client target is bounded to seventy blocks around the bore and is never server state",
+          "oracle thaumcraft/common/tiles/TileArcaneBore.java:707-713 the original dig event reaches the players within sixty four blocks and the offset of the target is (offset & 0xFF) - 64",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:108 the native rule inDigEventRange keeps the client target inside those sixty four blocks",
+          "oracle thaumcraft/common/tiles/TileArcaneBore.java:496-501 the client of the original plays the break sound of the dug block and its dig particles once per dig event",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:673 the native client tick calls the dig effect when the dig event arrives",
+          "native common/src/main/java/thaumcraft/client/BoreClientEffects.java:89 the native beam uses the same sixty four blocks"
         ],
         "notes": [
           "The 806 line 1.7 tile became a scheduler plus a dedicated work root; the dig sequence and the wear accounting live in BoreWork.",
-          "The client dig event of the original (digX/digY/digZ, digBlock, toDig) has no native counterpart; only a derived visual target remains.",
-          "Open: the dig event of the original (digX/digY/digZ, digBlock, toDig) and the sparkle of the dig have no native counterpart, they are the client half of the lane."
+          "The client dig event of the original is now reproduced: the target arrives with the block entity update, it is bounded to the sixty four blocks of the original and the client plays the break sound of the dug block and draws its dig particles, the flying dig sparkle in one case out of ten."
         ],
         "reviewed_sha256": {
           "original": "c29a866a1710d6964b245b1034c09b0591e91086a81f7b98a20e2364ee1bd84d",

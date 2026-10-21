@@ -514,6 +514,80 @@ public final class VisNetHandler {
         return result;
     }
     public static int drainVis(Level level, int x, int y, int z, Aspect aspect, int amount) { return drainVis(level, new BlockPos(x, y, z), aspect, amount); }
+
+    /**
+     * The aspect-less drain of the legacy 1.12 add-on surface.
+     *
+     * <p>The retained 1.12 reference drained the VIS NETWORK at the position and not the essence of a
+     * single node: {@code src/main/java/thaumcraft/common/world/aura/AuraHandler.java:27-33} delegates
+     * to {@code VisNetHandler.drainVis(world, x, y, z, requested, simulate)}, and that method walks the
+     * primal aspects of every root source that is in range of the position
+     * ({@code src/main/java/thaumcraft/api/visnet/VisNetHandler.java:92-139}). The native network has
+     * one aspect per call, so the aspect-less form is the loop over the primal aspects, in the original
+     * order of {@code Aspect.getPrimalAspects()}.</p>
+     *
+     * <p>Forced 1.21.1 change: the amount is an integer, the original surface used a float.</p>
+     */
+    public static int drainVis(Level level, BlockPos pos, int amount, boolean simulate) {
+        if (level == null || pos == null || amount <= 0) return 0;
+        if (!isNativeServerLevel(level)) return 0;
+        ServerLevel server = (ServerLevel) level;
+        if (simulate) {
+            return planPrimalDrain(amount, aspect -> availableVis(server, pos, aspect));
+        }
+        int remaining = amount, drained = 0;
+        for (Aspect aspect : Aspect.getPrimalAspects()) {
+            if (remaining <= 0) break;
+            int taken = drainVis(level, pos, aspect, remaining);
+            drained += taken;
+            remaining -= taken;
+        }
+        return drained;
+    }
+
+    /**
+     * The original aspect-less drain plan.
+     *
+     * <p>Retained 1.12 reference {@code src/main/java/thaumcraft/api/visnet/VisNetHandler.java:92-139}:
+     * every primal aspect is taken in the order of {@code Aspect.getPrimalAspects()}, each of them
+     * bounded by what is still requested.</p>
+     */
+    public static int planPrimalDrain(int amount, java.util.function.IntUnaryOperator available) {
+        if (amount <= 0 || available == null) return 0;
+        int remaining = amount, total = 0;
+        for (Aspect aspect : Aspect.getPrimalAspects()) {
+            if (remaining <= 0) break;
+            int take = Math.min(remaining, Math.max(0, available.applyAsInt(aspect)));
+            total += take;
+            remaining -= take;
+        }
+        return total;
+    }
+
+    /** The read-only twin of the network drain: the amount the roots in range would give. */
+    private static int availableVis(ServerLevel server, BlockPos pos, Aspect aspect) {
+        if (!isValidAspect(aspect)) return 0;
+        Network net = network(server, false);
+        if (net == null || net.closed || net.consuming || net.changing) return 0;
+        BlockPos at = pos.immutable();
+        if (!server.isInWorldBounds(at) || !server.hasChunkAt(at)) return 0;
+        Consumer consumer = new Consumer(at, server.getBlockState(at), server.getBlockEntity(at));
+        if (!consumer.current(server)) return 0;
+        sweep(net);
+        int available = 0;
+        Set<TileVisNode> spentRoots = identities();
+        for (Choice choice : choices(net, at)) {
+            TileVisNode root = choice.root.get(), node = choice.node.get();
+            if (root == null || node == null || !spentRoots.add(root)) continue;
+            Path route = path(net, node);
+            if (route == null || route.root != root || !unchanged(net, route)) continue;
+            if (inRange(server, new WorldCoordinates(server.dimension(), consumer.pos), node.getLocation(),
+                    route.steps.getFirst().metadata.range) <= 0) continue;
+            available += root.availableFromSource(aspect);
+        }
+        return available;
+    }
+
     public static int drainVis(Level level, BlockPos pos, Aspect aspect, int amount) {
         if (amount <= 0 || pos == null || !isNativeServerLevel(level)) return 0;
         ServerLevel server = (ServerLevel) level; Network net = network(level, true);

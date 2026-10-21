@@ -39,7 +39,11 @@ public final class CropUtils {
 
     /** The list key of a block stage: {@code <registry name>#<stage>}. */
     public static String key(Block block, int stage) {
-        return BuiltInRegistries.BLOCK.getKey(block).toString() + "#" + stage;
+        if (block == null) return "#" + stage;
+        var id = BuiltInRegistries.BLOCK.getKey(block);
+        // A block that the registry does not know has no registry name; it also
+        // never matches a registered crop, but it must not crash the crop rules.
+        return (id == null ? "unregistered:" + block.getClass().getName() : id.toString()) + "#" + stage;
     }
 
     /** The list key of a block state: {@code <registry name>#<stage>} of the state's growth stage. */

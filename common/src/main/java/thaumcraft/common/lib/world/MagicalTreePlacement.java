@@ -15,6 +15,7 @@ import thaumcraft.common.blocks.BlockMagicalLog;
 
 /** Private tree transaction/canopy adapter: no remote chunk reads or partial failed trees. */
 final class MagicalTreePlacement {
+    private static final java.util.concurrent.atomic.AtomicLong knotsWithoutEntity = new java.util.concurrent.atomic.AtomicLong();
     final WorldGenLevel level;
     private final Map<BlockPos, BlockState> blocks = new LinkedHashMap<>();
     private boolean writable = true;
@@ -91,12 +92,22 @@ final class MagicalTreePlacement {
             }
         }
         // Real knot blocks and their shared TileNode exist before initializing the prepared original generation plan.
+        // A missing knot entity must never abort the world generation: an exception here would fail the whole
+        // chunk generation and kill the server. The tree is already committed, so the knot simply stays empty
+        // and the counter records it for the diagnostics.
         for (var entry : nodes.entrySet()) {
             if (!level.getBlockState(entry.getKey()).is(thaumcraft.common.config.ThaumcraftContent.SILVERWOOD_KNOT.get())
-                    || !(level.getBlockEntity(entry.getKey()) instanceof thaumcraft.common.tiles.TileNode node))
-                throw new IllegalStateException("Committed Silverwood knot has no actual native TileNode at " + entry.getKey());
+                    || !(level.getBlockEntity(entry.getKey()) instanceof thaumcraft.common.tiles.TileNode node)) {
+                knotsWithoutEntity.incrementAndGet();
+                continue;
+            }
             var plan = entry.getValue(); node.initializeGenerated(plan.aspects(), plan.type(), plan.modifier(), level);
         }
         return true;
+    }
+
+    /** Silverwood knots whose committed block carried no node entity. */
+    public static long knotsWithoutEntity() {
+        return knotsWithoutEntity.get();
     }
 }

@@ -30,8 +30,10 @@ public final class TileFluxScrubberRenderer implements BlockEntityRenderer<TileF
 
     @Override public void render(TileFluxScrubber tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         var player = Minecraft.getInstance().player;
-        float time = (player == null ? 0.0F : player.tickCount + partialTick) + tile.getCharges();
-        float bob = Mth.sin(time / 8.0F) * .075F + .075F;
+        // Original TileFluxScrubberRenderer:38-39 - the phase of the bob is the
+        // age of the player, the partial tick and the counter of the scrubber.
+        float time = (player == null ? 0.0F : player.tickCount + partialTick) + tile.getCount();
+        float bob = bobFor(time);
         var out = buffers.getBuffer(RenderType.entityCutoutNoCull(SCRUBBER));
         pose.pushPose();
         try {
@@ -49,14 +51,57 @@ public final class TileFluxScrubberRenderer implements BlockEntityRenderer<TileF
 
     /** The original translateFromOrientation of the flux scrubber. */
     private static void orientation(PoseStack pose, net.minecraft.core.Direction facing) {
-        switch (facing) {
-            case DOWN -> pose.mulPose(Axis.XP.rotationDegrees(-90.0F));
-            case UP -> pose.mulPose(Axis.XP.rotationDegrees(90.0F));
-            case NORTH -> {
-            }
-            case SOUTH -> pose.mulPose(Axis.YP.rotationDegrees(180.0F));
-            case WEST -> pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
-            default -> pose.mulPose(Axis.ZP.rotationDegrees(-90.0F));
+        Orientation rotation = orientationOf(facing);
+        switch (rotation.axis()) {
+            case X -> pose.mulPose(Axis.XP.rotationDegrees(rotation.degrees()));
+            case Y -> pose.mulPose(Axis.YP.rotationDegrees(rotation.degrees()));
+            case NONE -> { }
         }
+    }
+
+    /** The axis the original turns the cap of the scrubber around. */
+    public enum RotationAxis { X, Y, NONE }
+
+    /**
+     * The bob of the tip of the cap of the original
+     * (oracle {@code thaumcraft/client/renderers/tile/TileFluxScrubberRenderer.java:38-40}):
+     * {@code sin(phase/8)*0.075 + 0.075}, so the tip never sinks into the cap
+     * and never rises more than a tenth and a half of a block above it.
+     *
+     * @param phase the age of the player, the partial tick and the counter of
+     *              the scrubber
+     * @return the distance of the tip in front of the cap
+     */
+    public static float bobFor(float phase) {
+        return Mth.sin(phase / 8.0F) * .075F + .075F;
+    }
+
+    /**
+     * The turn of the original {@code translateFromOrientation} (oracle
+     * {@code thaumcraft/client/renderers/tile/TileFluxScrubberRenderer.java:45-61}).
+     *
+     * <p>The original turns the facing zero (down) and one (up) around the X
+     * axis by minus and plus ninety degrees and the facing three (south), four
+     * (west) and five (east) around the Y axis by one hundred and eighty, plus
+     * and minus ninety degrees. The facing two (north) keeps the model as it
+     * is.
+     */
+    public record Orientation(RotationAxis axis, float degrees) {}
+
+    /**
+     * The turn of the cap of the scrubber for that facing.
+     *
+     * @param facing the facing of the scrubber
+     * @return the axis and the angle of the original turn
+     */
+    public static Orientation orientationOf(net.minecraft.core.Direction facing) {
+        return switch (facing) {
+            case DOWN -> new Orientation(RotationAxis.X, -90.0F);
+            case UP -> new Orientation(RotationAxis.X, 90.0F);
+            case NORTH -> new Orientation(RotationAxis.NONE, 0.0F);
+            case SOUTH -> new Orientation(RotationAxis.Y, 180.0F);
+            case WEST -> new Orientation(RotationAxis.Y, 90.0F);
+            default -> new Orientation(RotationAxis.Y, -90.0F);
+        };
     }
 }

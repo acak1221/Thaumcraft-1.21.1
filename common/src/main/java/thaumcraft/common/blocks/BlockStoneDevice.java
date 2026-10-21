@@ -72,7 +72,14 @@ public final class BlockStoneDevice extends BaseEntityBlock implements StateDepe
     }
 
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide) return null;
+        if (level.isClientSide) {
+            // Original TileFluxScrubber:44-46 - the counter of the scrubber is
+            // rolled on the client too, and it is the phase of the bob of the
+            // tip of its cap.
+            return (lvl, pos, st, tile) -> {
+                    if (tile instanceof TileFluxScrubber scrubber) scrubber.rollCount(lvl);
+                };
+        }
         return (lvl, pos, st, tile) -> {
                     if (tile instanceof TileFluxScrubber scrubber) TileFluxScrubber.tick(lvl, pos, st, scrubber);
                     else if (tile instanceof TileWandPedestal pedestal) TileWandPedestal.tick(lvl, pos, st, pedestal);

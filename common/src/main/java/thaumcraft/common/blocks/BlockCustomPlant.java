@@ -33,11 +33,72 @@ public final class BlockCustomPlant extends BushBlock {
     public boolean isCinderpearl() { return cinderpearl; }
     @Override protected MapCodec<BlockCustomPlant> codec() { return CODEC; }
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
+    /**
+     * Original BlockCustomPlant:62-68 - the soil that carries the plant type.
+     *
+     * <p>Forge 1.7 accepts the inherited {@code BlockBush} soils first, then the Desert plant
+     * type adds sand (both old metadata variants). The rule is a pure function of the plant
+     * type and the soil, so it can be asserted without a world and without constructing a
+     * block (a constructed block would leave an unregistered intrusive holder behind and
+     * break the registry freeze of the whole test suite).</p>
+     *
+     * @param cinderpearl the Desert plant type of the original metadata three
+     * @param soil        the block the plant would stand on
+     */
+    public static boolean soilSupports(boolean cinderpearl, BlockState soil) {
+        return soilSupports(cinderpearl ? PlantType.DESERT : PlantType.PLAINS, soil);
+    }
+
+    /**
+     * The plant types of the original Forge {@code EnumPlantType}. Minecraft 1.21.1 has no
+     * {@code IPlantable} and no {@code EnumPlantType}, so the plant type of the original is
+     * answered by the block itself and the soil rule is a pure function of the type and the soil.
+     */
+    public enum PlantType { PLAINS, DESERT, CAVE }
+
+    /**
+     * Original BlockCustomPlantItem:85-101 - the plant type the original <em>item</em> of the
+     * metadata asks the soil for: the metadata three is Desert, the metadata four and five are
+     * Cave and every other metadata is Plains.
+     *
+     * <p>The original block answers a different table (BlockCustomPlant:119-128, see
+     * {@link #blockPlantType(int)}): only the metadata five differs, the item wants a Cave soil
+     * for the manashroom while the block itself is a Plains plant.</p>
+     */
+    public static PlantType itemPlantType(int metadata) {
+        if (metadata == 3) return PlantType.DESERT;
+        if (metadata == 4 || metadata == 5) return PlantType.CAVE;
+        return PlantType.PLAINS;
+    }
+
+    /**
+     * Original BlockCustomPlant:119-128 - the plant type the original <em>block</em> of the
+     * metadata answers: the metadata three is Desert, the metadata four is Cave and every other
+     * metadata, the manashroom included, is Plains.
+     */
+    public static PlantType blockPlantType(int metadata) {
+        if (metadata == 3) return PlantType.DESERT;
+        if (metadata == 4) return PlantType.CAVE;
+        return PlantType.PLAINS;
+    }
+
+    /**
+     * The soil rule of the plant type.
+     *
+     * <p>The Plains type is the soil of the inherited {@code BlockBush} (grass, dirt and the
+     * farmland), the Desert type adds the sand. The Cave type has no counterpart that the oracle
+     * can prove: the Forge 1.7.10 table of the Cave soils is not part of the decompiled original,
+     * so the port keeps the Plains soil of the original's own block rule for the two Cave plants,
+     * which is the soil the original's world generator puts them on
+     * (oracle BiomeGenMagicalForest:147).</p>
+     */
+    public static boolean soilSupports(PlantType type, BlockState soil) {
+        if (type == PlantType.DESERT) return soil.is(Blocks.SAND) || soil.is(Blocks.RED_SAND);
+        return soil.is(Blocks.GRASS_BLOCK) || soil.is(Blocks.DIRT) || soil.is(Blocks.COARSE_DIRT) || soil.is(Blocks.PODZOL) || soil.is(Blocks.FARMLAND);
+    }
+
     @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {
-        // Forge1.7 first accepts the inherited BlockBush soils, then the
-        // Desert plant type adds sand (both old metadata variants).
-        return soil.is(Blocks.GRASS_BLOCK) || soil.is(Blocks.DIRT) || soil.is(Blocks.COARSE_DIRT) || soil.is(Blocks.PODZOL) || soil.is(Blocks.FARMLAND)
-                || cinderpearl && (soil.is(Blocks.SAND) || soil.is(Blocks.RED_SAND));
+        return soilSupports(cinderpearl, soil);
     }
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below());

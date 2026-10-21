@@ -10,6 +10,8 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.common.container.ContainerGolem;
 import thaumcraft.common.items.golems.GolemGuardTargets;
 import thaumcraft.common.items.golems.GolemItemMatch;
+import thaumcraft.common.items.golems.GolemUpgrade;
+import thaumcraft.common.lib.utils.Utils;
 
 /** Ordinary core settings, one fluid ghost or six item ghosts; none for Sorting/Guard. An Order Guard shows its four target
  * switches (original GuiGolem:167-189) at the original positions. No client-side filter mutation, upgrade controls or
@@ -34,12 +36,17 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
             graphics.blit(BACKGROUND, leftPos + 96 + i / 2 * 28, topPos + 12 + i % 2 * 31, 184, materialFrame, 24, 24, 256, 256);
         }
         if (menu.canColorSlots()) {
-            // Order: a small colour chip under each ghost (grey = any marker, otherwise the dye colour).
+            // Order: the original draws a 24x12 bar above every ghost slot and a 6x6 colour square in its middle,
+            // tinted with the original palette (GuiGolem:134-145). The bar itself is transparent in the texture,
+            // the square is a grey bevel that the tint turns into the marker colour.
             for (int i = 0; i < menu.ghostSlotCount(); i++) {
+                graphics.blit(BACKGROUND, leftPos + 96 + i / 2 * 28, topPos + 4 + i % 2 * 31, 72, 168, 24, 12, 256, 256);
                 int color = menu.slotColor(i);
-                int x = leftPos + 100 + i / 2 * 28 + 4, y = topPos + 16 + i % 2 * 31 + 18;
-                graphics.fill(x - 1, y - 1, x + 9, y + 6, 0xff373737);
-                graphics.fill(x, y, x + 8, y + 5, color < 0 ? 0xff8b8b8b : 0xff000000 | net.minecraft.world.item.DyeColor.byId(color).getTextureDiffuseColor());
+                if (color < 0) continue;
+                int rgb = Utils.colors[color];
+                graphics.setColor(((rgb >> 16) & 0xFF) / 255F, ((rgb >> 8) & 0xFF) / 255F, (rgb & 0xFF) / 255F, 1F);
+                graphics.blit(BACKGROUND, leftPos + 105 + i / 2 * 28, topPos + 7 + i % 2 * 31, 0, 176, 6, 6, 256, 256);
+                graphics.setColor(1, 1, 1, 1);
             }
         }
         if (menu.canSwitchGuardTargets()) {
@@ -53,6 +60,12 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
             // Original190–202: checked means precise (any-amount is false).
             if (!menu.isFillAnyAmount()) graphics.blit(BACKGROUND, leftPos + 62, topPos + 54, 8, 176, 8, 8, 256, 256);
         }
+        if (menu.pageCount() > 1) {
+            // Original GuiGolem:154-165: the page arrows are texture arrows, the dimmed one is the disabled end.
+            boolean first = menu.page() == 0, last = menu.page() >= menu.pageCount() - 1;
+            graphics.blit(BACKGROUND, leftPos + 111, topPos + 68, 0, first ? 200 : 208, 24, 8, 256, 256);
+            graphics.blit(BACKGROUND, leftPos + 135, topPos + 68, 24, last ? 200 : 208, 24, 8, 256, 256);
+        }
         if (menu.canSwitchItemMatch()) {
             // Original GuiGolem:376-389: three boxes at the Sorting corner or beside the panel; a lit box is a switch that is on.
             for (int i = 0; i < GolemItemMatch.BUTTON_COUNT; i++) {
@@ -64,20 +77,36 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
         if (golem != null && golem.isAlive()) {
             // Native helper saves/restores body/head rotations and render state.
             // It renders this real entity; there is no tick/AI or NoAI change.
+            // Original GuiGolem:267-317 draws the golem in the 320x240 viewport of the screen centre, which is the
+            // centre of the panel: the preview belongs there, not in the top left corner.
             InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
-                    leftPos + 4, topPos + 14, leftPos + 40, topPos + 76, 42, 0, mouseX, mouseY, golem);
+                    leftPos + 63, topPos + 52, leftPos + 113, topPos + 114, 42, 0, mouseX, mouseY, golem);
         }
     }
 
     @Override protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         int core = menu.core();
         if (menu.pageCount() > 1) {
-            // Each Fire upgrade of a Fill/Empty/Gather/Use golem adds a page of six ghosts.
-            boolean first = menu.page() == 0, last = menu.page() >= menu.pageCount() - 1;
-            graphics.drawString(font, Component.literal("<"), 104, PAGER_Y + 1, first ? 0xff777777 : 0xfffdfdfd, false);
-            graphics.drawString(font, Component.literal(">"), 162, PAGER_Y + 1, last ? 0xff777777 : 0xfffdfdfd, false);
-            Component label = Component.literal((menu.page() + 1) + "/" + menu.pageCount());
-            graphics.drawString(font, label, 141 - font.width(label) / 2, PAGER_Y + 1, 0xfffdfdfd, false);
+            // Original GuiGolem:88-91: the page counter is half-size text on the right of the panel.
+            graphics.pose().pushPose();
+            try {
+                graphics.pose().scale(.5F, .5F, 1);
+                Component label = Component.literal((menu.page() + 1) + "/" + menu.pageCount());
+                graphics.drawString(font, label, 323, 140, 0xfffdfdfd, false);
+            } finally { graphics.pose().popPose(); }
+        }
+        if (menu.canColorSlots() && showColorNames()) {
+            // Original GuiGolem:102-114: the colour name of the hovered colour bar, above the panel.
+            for (int i = 0; i < menu.ghostSlotCount(); i++) {
+                int overX = mouseX - (leftPos + 96 + i / 2 * 28);
+                int overY = mouseY - (topPos + 4 + i % 2 * 31);
+                if (overX < 0 || overY < 0 || overX >= 24 || overY >= 12) continue;
+                int color = menu.slotColor(i);
+                Component name = color < 0 ? Component.translatable("tc.port.golem.color.any")
+                        : Component.translatable("tc.port.golem.color." + color);
+                graphics.drawString(font, name, leftPos + 133 - font.width(name) / 2, topPos - 6, 0xfffdfdfd, false);
+                break;
+            }
         }
         if (core >= 0 && core <= 2 || core == 4 || core == 5 || core == 8 || core == 10) {
             // Original80–91: choose the caption from current synced core data.
@@ -146,10 +175,18 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
         }
     }
 
-    private static final int PAGER_Y = 72;
     // Original GuiGolem:376-379: Sorting keeps them inside the panel, the others float beside it.
     private int matchX() { return menu.core() == 10 ? 66 : 180; }
     private int matchY(int index) { return 24 + 10 * index + (menu.core() == 10 ? 12 : 0); }
+
+    /**
+     * Original GuiGolem:102 — the colour name above the panel is only shown when the golem carries the Entropy
+     * upgrade (the original's {@code getUpgradeAmount(5)}), whatever the Order colour chip does.
+     */
+    private boolean showColorNames() {
+        var golem = menu.golem();
+        return golem != null && golem.getUpgradeAmount(GolemUpgrade.ENTROPY) > 0;
+    }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && menu.canSwitchGuardTargets() && minecraft != null && minecraft.gameMode != null) {
@@ -172,20 +209,28 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
         }
         if (button == 0 && menu.canColorSlots() && minecraft != null && minecraft.gameMode != null) {
             // The colour is server state; wait for the synced menu data, never recolour locally.
+            // Original GuiGolem:328-342: the left third of the colour bar lowers the colour of that slot, the right
+            // third raises it; the button ids are the golem's own slot ids (below the slot count) and the slot count
+            // plus the slot id (above it), exactly as the original menu expects them.
+            int slotBase = menu.page() * ContainerGolem.GHOSTS;
             for (int i = 0; i < menu.ghostSlotCount(); i++) {
-                if (isHovering(100 + i / 2 * 28 + 4, 16 + i % 2 * 31 + 18, 8, 5, mouseX, mouseY)) {
-                    minecraft.gameMode.handleInventoryButtonClick(menu.containerId, ContainerGolem.COLOR_BUTTON + i);
+                if (isHovering(96 + i / 2 * 28, 4 + i % 2 * 31, 8, 12, mouseX, mouseY)) {
+                    minecraft.gameMode.handleInventoryButtonClick(menu.containerId, slotBase + i);
+                    return true;
+                }
+                if (isHovering(96 + 16 + i / 2 * 28, 4 + i % 2 * 31, 8, 12, mouseX, mouseY)) {
+                    minecraft.gameMode.handleInventoryButtonClick(menu.containerId, menu.slotCount() + slotBase + i);
                     return true;
                 }
             }
         }
         if (button == 0 && menu.pageCount() > 1 && minecraft != null && minecraft.gameMode != null) {
             // The page is server state; wait for the synced menu data, never flip it locally.
-            if (isHovering(100, PAGER_Y, 12, 10, mouseX, mouseY) && menu.page() > 0) {
+            if (isHovering(111, 68, 24, 8, mouseX, mouseY) && menu.page() > 0) {
                 minecraft.gameMode.handleInventoryButtonClick(menu.containerId, ContainerGolem.PREVIOUS_PAGE);
                 return true;
             }
-            if (isHovering(158, PAGER_Y, 12, 10, mouseX, mouseY) && menu.page() < menu.pageCount() - 1) {
+            if (isHovering(135, 68, 24, 8, mouseX, mouseY) && menu.page() < menu.pageCount() - 1) {
                 minecraft.gameMode.handleInventoryButtonClick(menu.containerId, ContainerGolem.NEXT_PAGE);
                 return true;
             }

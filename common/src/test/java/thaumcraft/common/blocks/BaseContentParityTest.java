@@ -9,14 +9,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -88,19 +88,25 @@ class BaseContentParityTest {
      * face of a block whose soil supports its plant type, so the item of the port has to refuse
      * the placement that the original refuses instead of losing the item to a later tick.
      */
-    @Test void thePlantItemRefusesThePlacementTheOriginalRefuses() {
-        var plant = new BlockCustomPlant(false, BlockBehaviour.Properties.of());
-        var item = new BlockCustomPlant.PlantItem(plant, new Item.Properties());
-        assertTrue(item.mustSurvive(), "the original item refuses a plant without a supporting soil");
+    @Test void thePlantItemRefusesThePlacementTheOriginalRefuses() throws Exception {
+        // BlockCustomPlantItem:50-65 - the item only places the plant on the top face of a
+        // block whose soil supports its plant type. The rule itself is the pure soil function
+        // of the block, so no block is constructed here: a constructed block would leave an
+        // unregistered intrusive holder behind and break the registry freeze of the suite.
+        Method mustSurvive = BlockCustomPlant.PlantItem.class.getDeclaredMethod("mustSurvive");
+        assertEquals(BlockCustomPlant.PlantItem.class, mustSurvive.getDeclaringClass(),
+                "the original item refuses a plant without a supporting soil (BlockCustomPlantItem:54)");
+        Method placement = BlockCustomPlant.PlantItem.class.getDeclaredMethod("getPlacementState", BlockPlaceContext.class);
+        assertEquals(BlockCustomPlant.PlantItem.class, placement.getDeclaringClass(),
+                "the original item only places the plant on the top face (BlockCustomPlantItem:51)");
         // BlockCustomPlantItem:54 - the soil has to carry the plant type of the metadata.
-        assertTrue(plant.mayPlaceOn(Blocks.GRASS_BLOCK.defaultBlockState(), null, BlockPos.ZERO));
-        assertTrue(plant.mayPlaceOn(Blocks.DIRT.defaultBlockState(), null, BlockPos.ZERO));
-        assertTrue(plant.mayPlaceOn(Blocks.FARMLAND.defaultBlockState(), null, BlockPos.ZERO));
-        assertFalse(plant.mayPlaceOn(Blocks.SAND.defaultBlockState(), null, BlockPos.ZERO),
+        assertTrue(BlockCustomPlant.soilSupports(false, Blocks.GRASS_BLOCK.defaultBlockState()));
+        assertTrue(BlockCustomPlant.soilSupports(false, Blocks.DIRT.defaultBlockState()));
+        assertTrue(BlockCustomPlant.soilSupports(false, Blocks.FARMLAND.defaultBlockState()));
+        assertFalse(BlockCustomPlant.soilSupports(false, Blocks.SAND.defaultBlockState()),
                 "the sand carries the Desert plant type only");
-        assertFalse(plant.mayPlaceOn(Blocks.STONE.defaultBlockState(), null, BlockPos.ZERO));
-        var cinderpearl = new BlockCustomPlant(true, BlockBehaviour.Properties.of());
-        assertTrue(cinderpearl.mayPlaceOn(Blocks.SAND.defaultBlockState(), null, BlockPos.ZERO),
+        assertFalse(BlockCustomPlant.soilSupports(false, Blocks.STONE.defaultBlockState()));
+        assertTrue(BlockCustomPlant.soilSupports(true, Blocks.SAND.defaultBlockState()),
                 "the cinderpearl is the Desert plant type of the original metadata three");
     }
 
@@ -174,10 +180,13 @@ class BaseContentParityTest {
      * opacity zero, so a dry stair lets the light through.
      */
     @Test void theCosmeticStairsKeepTheOriginalLightOpacity() {
-        BlockState parent = Blocks.STONE.defaultBlockState();
-        var stairs = new BlockCosmeticStairs(parent, BlockBehaviour.Properties.of());
-        BlockState state = stairs.defaultBlockState();
-        assertEquals(0, stairs.getLightBlock(state, null, BlockPos.ZERO));
+        // BlockCosmeticStairs:32 - the original stairs of the cosmetic family have the light
+        // opacity zero, so a dry stair lets the light through. The vanilla stair of a solid
+        // block would have the opacity fifteen, so the override is a real difference.
+        assertEquals(0, BlockCosmeticStairs.lightOpacity(false, 15),
+                "a dry cosmetic stair lets the light through");
+        assertEquals(15, BlockCosmeticStairs.lightOpacity(true, 15),
+                "a waterlogged cosmetic stair keeps the vanilla opacity");
     }
 
     // ------------------------------------------------------------ the helpers

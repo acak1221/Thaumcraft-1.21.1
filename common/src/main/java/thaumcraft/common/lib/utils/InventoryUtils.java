@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -21,7 +20,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
@@ -40,7 +38,8 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
  * native {@link Direction} ordinals.
  *
  * <p>The item metadata of 1.7.10 is the damage value of 1.21.1. The wildcard metadata of the original
- * ({@code Short.MAX_VALUE}) has no native form, so the comparisons that used it are documented where they occur.
+ * ({@code Short.MAX_VALUE} = 32767) has no native form, but the damage value of a stack can still be
+ * 32767, so the wildcard rule of the original is kept in {@link #damageMatches}.
  */
 public final class InventoryUtils {
     /** The native replacement of the Forge ore dictionary: the original ore names mapped to native item tags. */
@@ -396,9 +395,10 @@ public final class InventoryUtils {
      * The original damage comparison of the two stack equalities.
      *
      * <p>Original {@code InventoryUtils.areItemStacksEqual} and {@code areItemStacksEqualForCrafting}
-     * (oracle {@code InventoryUtils.java:330-337} and {@code :366-373}) compared the metadata of the two
+     * (oracle {@code InventoryUtils.java:333-339} and {@code :303-309}) compared the metadata of the two
      * stacks, ignored the difference when the caller asked to ignore the damage and both stacks were
-     * damageable, and treated the metadata 32767 as "any value" in the same case. The metadata of 1.21.1
+     * damageable, and treated the metadata 32767 as "any value" whenever the caller ignored the damage
+     * and one of the two metadata values was the wildcard. The metadata of 1.21.1
      * is the damage value, so the rule is kept with the damage value.</p>
      */
     static boolean damageMatches(int damage0, int damage1, boolean ignoreDamage, boolean damageable0, boolean damageable1) {
@@ -410,7 +410,7 @@ public final class InventoryUtils {
 
     /**
      * The original stack-size condition of the crafting comparison
-     * ({@code stack0.stackSize <= stack0.getMaxStackSize()}, oracle {@code InventoryUtils.java:339}).
+     * ({@code stack0.stackSize <= stack0.getMaxStackSize()}, oracle {@code InventoryUtils.java:310}).
      */
     static boolean withinStackLimit(int count, int maxStackSize) {
         return count <= maxStackSize;
@@ -579,9 +579,12 @@ public final class InventoryUtils {
         if (stack == null || stack.isEmpty() || level == null) return 0;
         var enchantments = stack.get(DataComponents.ENCHANTMENTS);
         if (enchantments == null) return 0;
-        var registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-        Holder<Enchantment> unbreaking = registry.getOrThrow(Enchantments.UNBREAKING);
-        return enchantments.getLevel(unbreaking);
+        // A registry or an entry that the runtime does not know means "no
+        // unbreaking", never a crash in the durability path.
+        return level.registryAccess().lookup(Registries.ENCHANTMENT)
+                .flatMap(lookup -> lookup.get(Enchantments.UNBREAKING))
+                .map(unbreaking -> enchantments.getLevel(unbreaking))
+                .orElse(0);
     }
 
     // --------------------------------------------------------------------- chests

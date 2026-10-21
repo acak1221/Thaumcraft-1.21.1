@@ -270,8 +270,24 @@ public final class TileParityRules {
      * block of flux gas.</p>
      */
     public static boolean fluxScrubberRemoves(net.minecraft.world.level.block.state.BlockState state) {
-        return state.getBlock() instanceof FluxFiniteBlock;
+        return state != null && fluxScrubberRemovesBlock(state.getBlock().getClass());
     }
+
+    /**
+     * The flux rule of the original scrubber, asked for the class of a block.
+     *
+     * <p>The rule is asked for the class and not for an instance, so that it can be asserted
+     * without constructing a block: a constructed block keeps an intrusive holder in the block
+     * registry and the freeze of the registry then refuses the whole test suite
+     * (Minecraft 1.21.1 {@code net/minecraft/core/MappedRegistry}:342-347).</p>
+     *
+     * @param block the class of the block the scrubber looks at
+     * @return true when the original scrubber removes that block
+     */
+    public static boolean fluxScrubberRemovesBlock(Class<?> block) {
+        return block != null && FluxFiniteBlock.class.isAssignableFrom(block);
+    }
+
     // ---------------------------------------------------------------------------------------------
     // Node jar (oracle thaumcraft/common/tiles/TileJarNode.java)
     // ---------------------------------------------------------------------------------------------

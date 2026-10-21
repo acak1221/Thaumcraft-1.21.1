@@ -30,10 +30,13 @@ class VillageWorldGenRulesTest {
         assertEquals(190, VillageWorldGenRules.WIZARD_PROFESSION_ID);
     }
 
-    @Test void pieceWeightMinimumIsAlwaysTheVillageSize() {
-        // MathHelper.getIntWithMinMax(random, 0 + i, 1 + i) is i + nextInt(1).
+    @Test void pieceWeightMinimumIsTheVillageSizeOrOneMore() {
+        // MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i) is i + nextInt(2),
+        // so the original draws the village size or the village size plus one.
         for (int size = 1; size <= 12; size++) {
             assertEquals(size, VillageWorldGenRules.pieceWeightMinSize(size));
+            assertEquals(size, VillageWorldGenRules.pieceWeightMinSize(size, 0));
+            assertEquals(size + 1, VillageWorldGenRules.pieceWeightMinSize(size, 1));
         }
     }
 

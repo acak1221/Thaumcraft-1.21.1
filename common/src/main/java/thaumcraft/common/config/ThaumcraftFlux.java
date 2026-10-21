@@ -13,6 +13,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
@@ -23,6 +24,7 @@ import thaumcraft.common.blocks.BlockFluxGasItem;
 import thaumcraft.common.blocks.BlockFluxGoo;
 import thaumcraft.common.blocks.BlockFluxGooItem;
 import thaumcraft.common.blocks.FluxFiniteBlock;
+import thaumcraft.common.lib.CustomSoundType;
 import thaumcraft.common.lib.potions.PotionInfectiousVisExhaust;
 import thaumcraft.common.lib.potions.PotionVisExhaust;
 
@@ -32,8 +34,13 @@ public final class ThaumcraftFlux {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(Thaumcraft.MODID, Registries.MOB_EFFECT);
 
-    public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties()));
-    public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties()));
+    public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties(false)));
+    public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties(true)));
+    /**
+     * Original BlockFluxGoo:50 - the custom sound type of the flux goo: the sound
+     * {@code thaumcraft:gore} with the volume 1.0 and the pitch 1.0.
+     */
+    public static final SoundType FLUX_GOO_SOUND = new CustomSoundType("gore", 1.0F, 1.0F);
     /**
      * The original items of the two finite fluids.
      *
@@ -50,12 +57,22 @@ public final class ThaumcraftFlux {
 
     private ThaumcraftFlux() {}
 
-    private static BlockBehaviour.Properties properties() {
-        return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).noCollission().noOcclusion()
-                .randomTicks().noLootTable().pushReaction(PushReaction.DESTROY)
+    private static BlockBehaviour.Properties properties(boolean goo) {
+        // Original MaterialTaint:func_76219_n() sets the mobility flag of the taint material to one
+        // and Config:917 hands that material to the flux gas and the flux goo. The mobility flag one
+        // is "the piston is stopped and the block survives"; the 1.21.1 push reaction BLOCK is the
+        // counterpart. DESTROY would break the original block instead.
+        BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).noCollission().noOcclusion()
+                .randomTicks().noLootTable().pushReaction(PushReaction.BLOCK)
                 .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)
                 // BlockFluidBase scales luminosity by metadata, NOT metadata+1.
                 .lightLevel(state -> state.getValue(FluxFiniteBlock.LEVEL) * 7 / 8);
+        // Original BlockFluxGoo:50 - the flux goo plays the custom sound "thaumcraft:gore"
+        // with the volume 1.0 and the pitch 1.0 (CustomSoundType). The flux gas of the
+        // original (BlockFluxGas:46) has no custom sound of its own and keeps the sound
+        // of its material, so nothing is set here.
+        if (goo) properties = properties.sound(FLUX_GOO_SOUND);
+        return properties;
     }
 
     public static void register() {

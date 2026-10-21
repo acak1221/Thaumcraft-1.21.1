@@ -35,6 +35,11 @@ import thaumcraft.common.lib.world.EldritchMobRules;
  * merge with other slimes and its leap of faith at nearby players.
  */
 public class EntityThaumicSlime extends Monster implements ITaintedMob {
+    /** The client side jump burst of the original {@code slimeJumpFX}. */
+    public interface ClientEffects { void jump(Entity slime, int count, int size); }
+    private static ClientEffects clientEffects;
+    /** The client half of the original {@code Thaumcraft.proxy.slimeJumpFX}. */
+    public static void setClientEffects(ClientEffects effects) { clientEffects=effects; }
     private static final EntityDataAccessor<Integer> SIZE=SynchedEntityData.defineId(EntityThaumicSlime.class,EntityDataSerializers.INT);
     private int slimeJumpDelay;
     private int launched=EldritchMobRules.SLIME_LAUNCHED;
@@ -111,9 +116,17 @@ public class EntityThaumicSlime extends Monster implements ITaintedMob {
         squish+=(targetSquish-squish)*.2F;
         if(targetSquish>0F)targetSquish-=.05F;
         super.tick();
-        if(launched>0)--launched;
-        if(onGround()&&!wasOnGround&&makesSoundOnLand())
-            playSound(jumpSound(),getSoundVolume(),((getRandom().nextFloat()-getRandom().nextFloat())*.2F+1F)*.8F);
+        // Original EntityThaumicSlime:143-160: the launch burst and the landing burst.
+        int size=(int)Math.sqrt(getSlimeSize());
+        if(launched>0) {
+            --launched;
+            if(level().isClientSide&&clientEffects!=null)clientEffects.jump(this,size*(launched+1),size);
+        }
+        if(onGround()&&!wasOnGround) {
+            if(level().isClientSide&&clientEffects!=null)clientEffects.jump(this,size*8,size);
+            if(makesSoundOnLand())
+                playSound(jumpSound(),getSoundVolume(),((getRandom().nextFloat()-getRandom().nextFloat())*.2F+1F)*.8F);
+        }
     }
 
     /** Original slime behaviour: spit at players, merge with other slimes and jump. */

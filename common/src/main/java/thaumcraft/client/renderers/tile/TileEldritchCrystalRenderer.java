@@ -2,6 +2,7 @@ package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -18,10 +19,11 @@ import thaumcraft.common.tiles.TileEldritchCrystal;
  * texture. The native tree already carries the converted wavefront model in
  * {@link ModelEldritchCrystal}, so the geometry is reused as it is.
  *
- * <p>Deviation: the original overwrites the global light texture with a value
- * of {@code 210 * shade} to make the crystal pulse. Minecraft 1.21.1 has no
- * global light texture override in the block entity pass, so the crystal keeps
- * the light of the block.
+ * <p>Oracle {@code TileEldritchCrystalRenderer.java:44-50}: the original
+ * overwrites the coordinates of the light map before it draws the crystal, so
+ * the crystal keeps its own brightness and does not follow the light of its
+ * block. The native port draws the crystal with the full light for the same
+ * reason.
  */
 public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<TileEldritchCrystal> {
     /** The original texture of the base of the crystal. */
@@ -44,10 +46,26 @@ public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<Ti
             // The original turns the crystal by a quarter turn per position.
             pose.mulPose(Axis.ZP.rotationDegrees(90.0F * (Math.abs(tile.getBlockPos().hashCode()) % 4)));
             model.renderBase(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(CRUST)), light, overlay, 0xffffffff);
-            model.renderCrystal(pose, buffers.getBuffer(RenderType.entityTranslucent(CRYSTAL)), light, overlay, CRYSTAL_COLOR);
+            model.renderCrystal(pose, buffers.getBuffer(RenderType.entityTranslucent(CRYSTAL)), crystalLight(), overlay, CRYSTAL_COLOR);
         } finally {
             pose.popPose();
         }
+    }
+
+    /**
+     * The light of the crystal of the original.
+     *
+     * <p>Oracle {@code TileEldritchCrystalRenderer.java:45-49}: the original
+     * overwrites the coordinates of the light map with
+     * {@code (OpenGlHelper.field_77476_b, (int) (210 * shade))}, that is with
+     * {@code (5898, 178)} up to {@code (5898, 210)}, and the light map clamps the
+     * coordinates it is given to the range of the texture, so the crystal is
+     * always drawn with the brightest texel of the light map and the pulse of
+     * the original never reaches the screen. The native port therefore draws the
+     * crystal with the full light and not with the light of its block.
+     */
+    public static int crystalLight() {
+        return LightTexture.FULL_BRIGHT;
     }
 
     /** The original translateFromOrientation of the crystal and the crab vent. */

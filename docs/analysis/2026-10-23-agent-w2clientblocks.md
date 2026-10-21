@@ -4,9 +4,11 @@
 eldritch models, the eldritch block models and block states, the eldritch tiles and the ten
 Outer Lands units of the world package.
 
-**Result.** 33 units moved `partial -> parity_verified`, 4 stay `partial` with a precise
-blocker. Six defects were found and fixed. The client was **not** run (no Gradle in this
-wave): the acceptance criteria for the frames are in §7.
+**Result.** 35 units moved `partial -> parity_verified`, 2 stay `partial` with a precise
+blocker. Twelve defects were found and fixed (six in the first part of this session, six in
+the second one, the second part closes the two open items of the cultist portal and of the
+crystal). The client was **not** run (no Gradle in this wave): the acceptance criteria for
+the frames are in §7.
 
 ---
 
@@ -17,7 +19,7 @@ wave): the acceptance criteria for the frames are in §7.
 | `thaumcraft/client/renderers/block/BlockEldritchRenderer.java` | partial | **parity_verified** |
 | `thaumcraft/client/renderers/block/EldritchCrustBakedModel.java` | partial | partial (§6.1) |
 | `thaumcraft/client/renderers/entity/RenderCultist.java` | partial | **parity_verified** |
-| `thaumcraft/client/renderers/entity/RenderCultistPortal.java` | partial | partial (§6.2) |
+| `thaumcraft/client/renderers/entity/RenderCultistPortal.java` | partial | **parity_verified** (§3.7, §3.8) |
 | `thaumcraft/client/renderers/entity/RenderEldritchCrab.java` | partial | **parity_verified** |
 | `thaumcraft/client/renderers/entity/RenderEldritchGolem.java` | partial | **parity_verified** |
 | `thaumcraft/client/renderers/entity/RenderEldritchGuardian.java` | partial | **parity_verified** |
@@ -29,7 +31,7 @@ wave): the acceptance criteria for the frames are in §7.
 | `thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java` | partial | **parity_verified** |
 | `thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java` | partial | **parity_verified** |
 | `thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java` | partial | **parity_verified** |
-| `thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java` | partial | partial (§6.3) |
+| `thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java` | partial | **parity_verified** (§3.9, §3.10) |
 | `thaumcraft/client/renderers/tile/TileEldritchLockRenderer.java` | partial | **parity_verified** |
 | `thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java` | partial | **parity_verified** |
 | `thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java` | partial | **parity_verified** |
@@ -193,6 +195,76 @@ What the family was still missing was the **geometry** of the stones: see §3.1.
 
 ---
 
+### 3.7 The eldritch void drew its tunnel on the wrong faces
+
+* **Original.** `TileEldritchNothingRenderer.java:39-59` draws the tunnel on the face whose
+  neighbour is **not an opaque cube**:
+  `if (!te.getWorld().getBlock(x, y + 1, z).isOpaqueCube()) { this.drawPlaneYNeg(x, y, z, f); }`
+  The tunnel is therefore visible on the border between the filler and the **air** of the
+  room, and the filler itself stays invisible where it touches stone. The original
+  `BlockEldritchNothing.java:52-60` is an opaque cube, so two fillers do not show the
+  tunnel between them.
+* **Port.** `TileEldritchNothingRenderer.java:36-47` skipped the faces whose neighbour is
+  **air** and drew the tunnel on the faces that touch the stone: the exact opposite.
+* **Fix.** `TileEldritchNothingRenderer.java:44-58` asks the neighbour for its opaque cube
+  and `TileEldritchNothingRenderer.java:70-88` reproduces the 1.7.10 `isOpaqueCube` for the
+  three blocks of the family that do not agree with the 1.21.1 `isSolidRender`: the
+  eldritch filler is opaque, the cosmetic solid is opaque, the eldritch stone is not
+  (`BlockEldritch.java:171-173`).
+
+### 3.8 The two portal quads did not use the camera basis of the original
+
+* **Original.** the basis is the one of the 1.7.10 `ActiveRenderInfo.updateRenderInfo`:
+  the left vector is `(cos(yaw), 0, sin(yaw))` and the up vector is
+  `(-sin(yaw) sin(pitch), cos(pitch), cos(yaw) sin(pitch))`; both are built from the look
+  angles of the **player** and not from the camera, and their horizontal part is negated in
+  the third person view (the `1 - 2i` of the original, `i` is one in the third person).
+  `RenderCultistPortal.java:62-70` and `:92-108` and `TileEldritchPortalRenderer.java:44-52`
+  and `:74-81` build the four corners of the quad from that basis and multiply the
+  horizontal part of a corner with the scale and the vertical part with the scaley.
+* **Port.** both renderers used the camera orientation, so the quad of the original was
+  mirrored in the third person view and it always faced the camera. The four texture
+  coordinates of the cultist portal were twisted as well: the two opposite corners carried
+  the same coordinate, so the sheet of the sixteen frames was mirrored along the diagonal.
+  The gate was drawn at **half** the size of the original (the port used half of the scale
+  and of the scaley as the half extents) and at **twice the position** of its block (the
+  1.21.1 block entity renderer is placed on the corner of the block,
+  `LevelRenderer:1232-1275`, and the port added the absolute centre of the block on top of
+  it).
+* **Fix.** the new `common/src/main/java/thaumcraft/client/renderers/CameraBasis.java` with
+  the pure helpers `leftFor(yaw, thirdPerson)` and `upFor(yaw, pitch, thirdPerson)`;
+  `RenderCultistPortal.java:74-92` and `:99-111` and
+  `TileEldritchPortalRenderer.java:78-92` and `:130-142` use them. A fully opened gate is
+  two blocks wide and two blocks high again, and the frame of the sheet of the gate is
+  turned by ninety degrees like the original.
+* **Evidence.** `EldritchPortalParityTest` checks the basis, its mirror, the half extents of
+  the gate and the four texture coordinates of the two sheets.
+
+### 3.9 The crystal of the Outer Lands was drawn upside down
+
+* **Original.** `TileEldritchCrystalRenderer.java:31` loads `vcrystal.obj` with
+  `AdvancedModelLoader`. The file and `obelisk_cap.obj` come from the same exporter
+  ("3ds Max Wavefront OBJ Exporter v0.97b") and the original loads both with the same
+  loader, so both use the same convention: the `v` of the wavefront file runs from the
+  **bottom** of the image and the `v` of the model is its complement.
+* **Port.** `ModelEldritchCrystal.java:557` used the `v` of the file unchanged, while
+  `ModelEldritchCap.java:144` (the cap of the obelisk) already flipped it. One of the two
+  was wrong: the cap was right, so the crystal was drawn upside down.
+
+### 3.10 The crystal followed the light of its block
+
+* **Original.** `TileEldritchCrystalRenderer.java:45-49` overwrites the coordinates of the
+  light map with `(OpenGlHelper.field_77476_b, (int) (210 * shade))`, that is with
+  `(5898, 178)` up to `(5898, 210)`. The light map clamps the coordinates it is given to the
+  range of the texture, so the crystal of the original is **always** drawn with the
+  brightest texel of the light map and the pulse of the original never reaches the screen.
+* **Port.** the crystal was drawn with the light of its block, so it was black in an unlit
+  room. The earlier draft of this report called the pulse an unfixable blocker ("the light
+  map of 1.21.1 holds sixteen steps"); the clamp of the light map is the real reason and it
+  makes the pulse irrelevant.
+* **Fix.** `TileEldritchCrystalRenderer.java:67-78` draws the crystal with
+  `LightTexture.FULL_BRIGHT`.
+
 ## 4. What was verified and found correct
 
 * the icon of every metadata of the eldritch stone (`BlockEldritch:92-94`): `es_i_1`,
@@ -246,14 +318,17 @@ What the family was still missing was the **geometry** of the stones: see §3.1.
 * `common/src/main/java/thaumcraft/client/renderers/models/entities/ModelEldritchGolem.java`
 * `common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchObeliskRenderer.java`
 * `common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java`
+* `common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java`
 * `common/src/main/resources/assets/thaumcraft/models/block/eldritch.json`,
   `eldritch_1.json`, `eldritch_2.json`, `eldritch_3.json`
 * `common/src/main/resources/assets/thaumcraft/models/item/eldritch.json`
 
-**Added**
-
-* `common/src/test/java/thaumcraft/eldritch/EldritchClientModelParityTest.java`
-* `common/src/test/java/thaumcraft/eldritch/EldritchBlockAssetParityTest.java`
+* `common/src/main/java/thaumcraft/client/renderers/CameraBasis.java` (the basis of the
+  1.7.10 `ActiveRenderInfo`)
+* `common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java`
+* `common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java`
+* `common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java`
+* `common/src/test/java/thaumcraft/eldritch/EldritchPortalParityTest.java`
 
 **Not touched** (the rules of the wave): `common/src/main/java/thaumcraft/common/lib/world/**`
 and `common/src/main/java/thaumcraft/common/lib/{utils,network,enchantment}/**`. The four
@@ -273,21 +348,18 @@ unit tested. **Blocker: a static model cannot express the neighbour dependent bo
 The leader can close it with a custom `BakedModel` that is re-baked per chunk, or accept the
 isolated cube.
 
-### 6.2 `RenderCultistPortal` — the size of the quad of the portal
+### 6.2 `RenderCultistPortal` — **closed** (§3.8)
 
-The original builds the quad from the camera vectors of the 1.7.10 `ActiveRenderInfo`
-(`RenderCultistPortal.java:97-110`, the fields `rotationX`, `rotationZ`, `rotationXY`,
-`rotationXZ` and `rotationYZ`), so its size depends on the camera. Those vectors have no
-1.21.1 equivalent: the port draws a quad of one block that always faces the camera. The
-frame, the scale of the age, the wobble of the damage and the fade with the health are
-reproduced. **Blocker: the 1.7.10 camera vectors.**
+The basis of the 1.7.10 `ActiveRenderInfo` is reproducible in 1.21.1: it is built from the
+look angles of the player, and the third person view is read from the type of the camera of
+the options. The quad of the original is now drawn with the four corners and the four
+texture coordinates of the oracle.
 
-### 6.3 `TileEldritchCrystalRenderer` — the pulse of the crystal
+### 6.3 `TileEldritchCrystalRenderer` — **closed** (§3.9, §3.10)
 
-The original overwrites the global light map with the value `210 * shade`
-(`TileEldritchCrystalRenderer.java:48-52`) so that the crystal pulses. The light map of
-1.21.1 holds sixteen steps, so the pulse cannot be reproduced; the crystal keeps the light
-of its block. **Blocker: the 1.21.1 light map has sixteen steps.**
+The wavefront file of the crystal is loaded with the same convention as the cap of the
+obelisk, and the crystal is drawn with the full light like the original, whose light map
+coordinate is clamped to the brightest texel.
 
 ### 6.4 `GenKeyRoom` — the guardian of the key room has no AI home
 
@@ -301,6 +373,34 @@ sixteen in `DungeonRooms.generateKeyRoom` (`:826-832`) and call
 `restrictTo(home, 16)` on the guardian in `ThaumcraftOuterLands.spawnRoomEntities`
 (`:349-360`) — the guardian already has the restriction of the original
 (`EntityEldritchGuardian.java:141` and `:145`).
+
+---
+
+### 6.5 A risk for the three eldritch entity models (not a defect that is proved, but a check)
+
+While the convention of the wavefront file was proved (§3.9) the layout of the model boxes
+was compared as well, and a difference was found that touches three units of this list
+(`ModelEldritchCrab`, `ModelEldritchGolem` and `ModelEldritchGuardian`, all
+`parity_verified` after the first part of this wave):
+
+* the 1.7.10 `ModelBox` (the readable vanilla source) gives the box the regions north
+  `(u, v+d)`, south `(u+d, v+d)`, east `(u+d+w, v+d)`, west `(u+d+w+d, v+d)`, top
+  `(u+d+w, v)`, bottom `(u+d, v)`, and its local `v` grows upwards, so the `v` of the model
+  space of 1.7.10 runs from the **bottom** of the image;
+* the 1.21.1 `ModelPart$Cube` (the bytecode of the merged jar) gives the same box the
+  regions north `(u+d, v+d)`, west `(u, v+d)`, east `(u+d+w, v)`, up `(u+d+w+d, v)`, down
+  `(u+d, v)`, south `(u+d+w+d, v+d)`, so the `v` of the model space of 1.21.1 runs from the
+  **top** of the image;
+* the port copies the 1.7.10 offsets verbatim (for example `texOffs(40, 12)` for the hood
+  of the guardian against the original `new ModelRenderer(this, 40, 12)`), so the texture of
+  every face of the three models may be mirrored vertically and the region of the east and
+  of the top faces is exchanged.
+
+**The leader should look at the guardian, the crab and the golem on a frame** (item 12 of
+§7). If the models are upside down, the conversion of the three models has to flip the `v`
+of every box (`texOffs(u, textureHeight - v - depth - height)`) and to exchange the east and
+the top faces. That is a change of the three model files and not of the renderers, and it is
+not part of the units that are still open.
 
 ---
 
@@ -331,11 +431,45 @@ in this wave (no Gradle, no client).
    back.
 7. **The warden shows its glowing eye.** The hood of the warden shows a bright eye that the
    guardian does not have.
-8. **The link of the ritualist cleric is a ribbon.** A ritualist cleric that channels shows a
-   dark purple ribbon of the `wispy.png` sheet between its eyes and the ritual target, and
-   the ribbon keeps a constant width on the screen while the cleric and the target move.
+8. **The eldritch void is only on the border with the air.** In the Outer Lands, look at a
+   wall of the eldritch filler from inside a room: the tunnel effect must swirl on the
+   border between the wall and the air of the room and must **not** appear between the
+   filler and the stone of the floor. (Before the fix of §3.7 it was the other way round.)
+9. **The eldritch gate is in its own block and it is two blocks wide.** Walk into a gate of
+   the Outer Lands: the magenta sheet must be in the middle of the block of the gate (it
+   was drawn at twice the position of the block) and it must open to two blocks wide and
+   two blocks high (it was one by one). The animation of the sheet runs **vertically**,
+   because the frame of the original is turned by ninety degrees.
+10. **The sheet of the cultist portal is upright.** The boss portal of the Inner Sanctum
+    must show the sixteen frames of the sheet upright and not twisted along a diagonal
+    (§3.8), and it must be mirrored in the third person view like the original.
+11. **The eldritch crystal stands upright and glows.** The crystal of the Outer Lands must
+    stand with its tip at the top (§3.9) and it must keep its own light in an unlit room
+    (§3.10).
+
+12. **The guardian, the crab and the golem are not upside down.** The texture of the faces
+    of the three eldritch entity models must not be mirrored vertically and the plates of
+    the guardian must be on the right side (see §6.5).
+13. **The link of the ritualist cleric is a ribbon.** A ritualist cleric that channels shows
+    a dark purple ribbon of the `wispy.png` sheet between its eyes and the ritual target,
+    and the ribbon keeps a constant width on the screen while the cleric and the target
+    move.
 
 ---
+
+## 7.1 The tests
+
+| file | what it locks |
+|---|---|
+| `common/src/test/java/thaumcraft/eldritch/EldritchPortalParityTest.java` | **new in the second part** — the basis of `ActiveRenderInfo` and its mirror of the third person view, the half extents of the eldritch gate, the four texture coordinates of the two sheets, the light of the crystal |
+| `common/src/test/java/thaumcraft/eldritch/EldritchClientModelParityTest.java` | the parts, the rotation points and the cosine of the crab, of the golem and of the guardian |
+| `common/src/test/java/thaumcraft/eldritch/EldritchBlockAssetParityTest.java` | the models and the block states of the eldritch stones |
+
+**All of them are authored but NOT executed**: this wave has no Gradle, the leader runs every
+build and every test suite sequentially with the shared Loom cache.
+
+The branch also carries the merge of the current `work` (the `w2golems` and the `piston`
+waves), so the leader does not have to merge it again before the build.
 
 ## 8. The checks that were run
 
@@ -343,6 +477,6 @@ in this wave (no Gradle, no client).
 |---|---|
 | `python3 scripts/porting/convert_assets.py --verify` | `missing_references: 0` (3877 texture references, 2904 model references) |
 | `python3 scripts/porting/update_scope_ledger.py --check --original-root /home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle` | `stale_review_fingerprints: 0` |
-| `javac` of the nine changed sources and of the two new tests against the real `minecraft-merged-1.21.1` of the Loom cache | **no error in a changed file**; the only errors of the run are the known ones of the plain jar (the three members of `thaumcraft.accesswidener` and the private `BlockEntityType.BlockEntitySupplier`), all of them in files this wave did not touch |
+| `javac` of the whole `common` tree (1350 sources) and of the three tests against the real `minecraft-merged-1.21.1` of the Loom cache | **no error in a changed file and in the three tests**; the only errors of the run are the known ones of the plain jar (the 65 `BlockEntitySupplier` accesses, the four `Projectile` constructors, the four `lastHurtByPlayerTime` and the one `pickupDelay`, that is the access widener `thaumcraft.accesswidener` and nothing else), all of them in files this wave did not touch |
 | the JUnit suites of this wave | **authored, NOT executed** — the leader has to run them with Gradle |
 | the client | **not run** — the acceptance criteria of §7 are open |

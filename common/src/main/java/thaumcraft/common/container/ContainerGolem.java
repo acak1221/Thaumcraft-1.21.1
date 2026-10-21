@@ -4,6 +4,8 @@ import dev.architectury.registry.menu.MenuRegistry;
 import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -199,6 +201,16 @@ public final class ContainerGolem extends AbstractContainerMenu {
     @Override public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) { return slot.index >= ghostSlots; }
     @Override public boolean clickMenuButton(Player player, int button) {
         if (!active(player)) return false;
+        boolean handled = applyButton(button);
+        // Original ContainerGolem.func_75140_a:110 — EVERY menu button plays the click at the
+        // golem, also the ones that change nothing (the page arrow at the first or the last page).
+        serverGolem.level().playSound(null, serverGolem.blockPosition(),
+                SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER, 0.2F, 0.8F);
+        return handled;
+    }
+
+    /** The original's button handling, {@code ContainerGolem.func_75140_a}:82-109. */
+    private boolean applyButton(int button) {
         if (button == PREVIOUS_PAGE || button == NEXT_PAGE) {
             int pages = Math.max(1, (serverGolem.getSlotCount() + GHOSTS - 1) / GHOSTS);
             int next = serverPage[0] + (button == NEXT_PAGE ? 1 : -1);

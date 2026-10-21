@@ -18,11 +18,29 @@ import thaumcraft.common.lib.utils.Utils;
  * fabricated preview entity: every switch is server state, shown from synced menu data. */
 public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/guigolem.png");
+    /** Original GuiGolem:74-77 — an advanced golem shows a random threat line in one case of four. */
+    private int threat = -1;
+    private boolean threatDecided;
 
     public GuiGolem(ContainerGolem menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = ContainerGolem.IMAGE_WIDTH;
         imageHeight = ContainerGolem.IMAGE_HEIGHT;
+    }
+
+    /**
+     * Original GuiGolem:74-77 — the threat line of an advanced golem is drawn once, when the menu
+     * opens: one case of four the golem says something else instead of its core's blurb.
+     */
+    private int threat() {
+        if (!threatDecided) {
+            threatDecided = true;
+            var golem = menu.golem();
+            if (golem != null && golem.isAdvanced() && golem.level().getRandom().nextInt(4) == 0) {
+                threat = golem.level().getRandom().nextInt(9);
+            }
+        }
+        return threat;
     }
 
     @Override protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
@@ -79,8 +97,28 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
             // It renders this real entity; there is no tick/AI or NoAI change.
             // Original GuiGolem:267-317 draws the golem in the 320x240 viewport of the screen centre, which is the
             // centre of the panel: the preview belongs there, not in the top left corner.
-            InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
-                    leftPos + 63, topPos + 52, leftPos + 113, topPos + 114, 42, 0, mouseX, mouseY, golem);
+            // Original GuiGolem:289-303 — the preview is drawn with the body yaw of -20 and the head pitch of -5
+            // and it does NOT follow the mouse; the rotations are set for the frame and restored afterwards.
+            float body = golem.yBodyRot, bodyOld = golem.yBodyRotO;
+            float head = golem.yHeadRot, headOld = golem.yHeadRotO;
+            float yaw = golem.getYRot();
+            golem.yBodyRot = -20F;
+            golem.yBodyRotO = -5F;
+            golem.yHeadRot = 0F;
+            golem.yHeadRotO = -5F;
+            golem.setYRot(0F);
+            try {
+                // The mouse is pinned to the centre of the box, so the preview keeps the original's fixed pose.
+                InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
+                        leftPos + 63, topPos + 52, leftPos + 113, topPos + 114, 42,
+                        0F, (leftPos + 63 + leftPos + 113) / 2.0F, (topPos + 52 + topPos + 114) / 2.0F, golem);
+            } finally {
+                golem.yBodyRot = body;
+                golem.yBodyRotO = bodyOld;
+                golem.yHeadRot = head;
+                golem.yHeadRotO = headOld;
+                golem.setYRot(yaw);
+            }
         }
     }
 
@@ -108,12 +146,15 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
                 break;
             }
         }
-        if (core >= 0 && core <= 2 || core == 4 || core == 5 || core == 8 || core == 10) {
-            // Original80–91: choose the caption from current synced core data.
+        if (core >= 0) {
+            // Original80–91: the core's blurb, or the threat line of an advanced golem.
             graphics.pose().pushPose();
             try {
                 graphics.pose().scale(.5F, .5F, 1);
-                graphics.drawWordWrap(font, Component.translatable("golemblurb." + core + ".text"), 80, 22, 110, 0xffdddddd);
+                int line = threat();
+                Component blurb = line >= 0 ? Component.translatable("golemthreat." + line + ".text")
+                        : Component.translatable("golemblurb." + core + ".text");
+                graphics.drawWordWrap(font, blurb, 80, 22, 110, 0xffdddddd);
             } finally { graphics.pose().popPose(); }
         }
         if (core == 0) {

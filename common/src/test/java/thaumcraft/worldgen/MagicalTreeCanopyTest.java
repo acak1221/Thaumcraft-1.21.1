@@ -70,17 +70,15 @@ class MagicalTreeCanopyTest {
     @Test void theTwoTreesDoNotShareTheirLeafDensity() {
         // The greatwood really uses 0.9 (WorldGenGreatwoodTrees:29), the big magic tree 1.0
         // (WorldGenBigMagicTree:23). A shared factor would change one of the two canopies.
-        for (int height = 11; height <= 22; height++) {
-            if (height <= 21) {
-                boolean same = WorldGenBigMagicTree.leafNodeCount(height)
-                        == WorldGenGreatwoodTrees.leafNodeCount(height);
-                // The two densities agree for some heights; they must not be derived from
-                // one shared constant. The heights below are the ones where they differ.
-                if (height == 11 || height == 12 || height == 17 || height == 18
-                        || height == 19 || height == 20 || height == 22) {
-                    assertTrue(!same, "the two leaf densities must differ at height " + height);
-                }
-            }
+        // The two formulas agree on some heights; they must not be derived from one constant.
+        int[] different = {11, 17, 18, 22};
+        for (int height : different) {
+            assertTrue(WorldGenBigMagicTree.leafNodeCount(height)
+                            != WorldGenGreatwoodTrees.leafNodeCount(height),
+                    "the two leaf densities must differ at height " + height);
         }
+        // The big magic tree reaches one more leaf node at the top of its height range.
+        assertEquals(4, WorldGenBigMagicTree.leafNodeCount(22));
+        assertEquals(3, WorldGenGreatwoodTrees.leafNodeCount(22));
     }
 }

@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * net.minecraft.world.level.block.piston.PistonBaseBlock#isPushable} ends with
  * {@code return !blockState.hasBlockEntity();}, and {@code BlockState#hasBlockEntity} is
  * {@code block instanceof EntityBlock} (Minecraft 1.21.1
- * {@code net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase}:552-554). The two
+ * {@code net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase}:552-554, the decompilation of CFR 0.152). The two
  * rules agree for the vanilla blocks, and they do not agree for the blocks of Thaumcraft, because
  * the port carries the tile of a family in a block entity class where the original carried it in
  * a plain block.

@@ -5,10 +5,14 @@ Input: the open item of the report of the `blockvis` agent
 by the piston, and 1.7.10 pushed it"* — the two missing pieces were a mixin on `PistonBaseBlock#isPushable` and the
 carrying of the block entity through `PistonMovingBlockEntity`.
 
-Result in one line: **the gap is closed, but the premise of the task is corrected by the vanilla 1.7.10 source — the
+Result in one line: **the gap is closed, but the premise of the task is corrected by the vanilla 1.7.10 bytecode — the
 1.7.10 piston decided per class and not per metadata, so the port now reproduces the original exactly: the families
-whose 1.7.10 class was a plain `Block` are moved (the tile of the metadata that carried one is destroyed, as in
-1.7.10), and the families whose 1.7.10 class was a `BlockContainer` are refused, for every metadata.**
+whose 1.7.10 class was a plain `Block` are moved (the content of the tile of the metadata that carried one is
+destroyed, as in 1.7.10), and the families whose 1.7.10 class was a `BlockContainer` are refused, for every
+metadata.** The second half of the recipe of the `blockvis` report — carrying the NBT of the tile through
+`PistonMovingBlockEntity` — is **not** done, on purpose: the 1.7.10 `TileEntityPiston` carried the block and the
+metadata only, so the original lost the content of the tile as well; carrying it would be a deviation from the
+original and not a parity (§1.1 and §3.3).
 
 ---
 
@@ -16,32 +20,58 @@ whose 1.7.10 class was a plain `Block` are moved (the tile of the metadata that 
 
 ### 1.1 The rule of the vanilla piston
 
-The piston of 1.7.10 asks **one** question about a block, and the metadata is not part of it. Vanilla 1.7.10
-`net.minecraft.block.BlockPistonBase#canPushBlock` (MCP-decompiled vanilla 1.7.10, `MCP-Decompiled/1.7.10-12`,
-`src/minecraft/net/minecraft/block/BlockPistonBase.java:358`) ends with:
+The piston of 1.7.10 asks **one** question about a block, and the metadata is not part of it. The rule was read out
+of the **bytecode of the official 1.7.10 client jar of Mojang** and of the **official srg of MCP 1.7.10**, never
+out of a memory:
 
-```java
-return !(p_150080_0_ instanceof ITileEntityProvider);
+```
+$ curl -sSfL -o client.jar https://launcher.mojang.com/v1/objects/e80d9b3bf5085002218d4be59e668bac718abbc6/client.jar
+$ curl -sSfL -o mcp.zip https://maven.minecraftforge.net/de/oceanlabs/mcp/mcp/1.7.10/mcp-1.7.10-srg.zip
+$ grep -E "BlockPistonBase|ITileEntityProvider" joined.srg
+289:CL: akw net/minecraft/block/ITileEntityProvider
+415:CL: app net/minecraft/block/BlockPistonBase
+11891:MD: app/a (Laji;Lahb;IIIZ)Z net/minecraft/block/BlockPistonBase/func_150080_a (Lnet/minecraft/block/Block;Lnet/minecraft/world/World;IIIZ)Z
 ```
 
-`net.minecraft.block.ITileEntityProvider` is the interface of the vanilla 1.7.10
-(`src/minecraft/net/minecraft/block/ITileEntityProvider.java`, package `net.minecraft.block`), and every
-`BlockContainer` of the original implements it
-(`src/minecraft/net/minecraft/block/BlockContainer.java:11` — `public abstract class BlockContainer extends Block
-implements ITileEntityProvider`).
+`app` is `net.minecraft.block.BlockPistonBase`, `akw` is `net.minecraft.block.ITileEntityProvider`, and
+`func_150080_a` is the method that MCP names `canPushBlock` (`methods.csv:1530` — *"returns true if the piston can
+push the specified block"*). The body of the method, out of the client jar (`javap -p -c app`):
+
+```
+  private static boolean a(aji, ahb, int, int, int, boolean);   // canPushBlock(Block, World, int, int, int, boolean)
+      ...
+      83: aload_0
+      84: instanceof    #23   // class akw        <- net.minecraft.block.ITileEntityProvider
+      87: ifeq          92
+      90: iconst_0
+      91: ireturn                                 <- false when the block is a tile entity provider
+      92: iconst_1
+      93: ireturn                                 <- true otherwise
+```
 
 So the rule of the original is:
 
 > **a block is moved by the piston iff the class of the block did not implement `ITileEntityProvider`** — a
 > `BlockContainer` is never moved, for any of its metadata; a plain `Block` is moved for every metadata.
 
-The move **destroys the tile** of the metadata that carried one: the 1.7.10
-`net.minecraft.tileentity.TileEntityPiston` carries the block and the metadata only
-(`TileEntityPiston.java`: the fields `storedBlock` and `storedMetadata`, the methods `getStoredBlockID()` and
-`getBlockMetadata()`), and the block that arrives is put back with
-`this.worldObj.setBlock(x, y, z, this.storedBlock, this.storedMetadata, 3)` (`TileEntityPiston#updateEntity` and
-`TileEntityPiston#clearPistonTileEntity`). The 1.7.10 `World#setBlock` does not create a tile entity
-(`World.java:350-402`), so the moved block arrives with **no** tile at all.
+The metadata is never asked: the last line of the method is the `instanceof`, and the metadata is read only by the
+two checks before it (the piston itself and the height of the block). Every `BlockContainer` of the original
+implements `ITileEntityProvider` (`net.minecraft.block.BlockContainer` — obf `ajc` — is
+`public abstract class ajc extends aji implements akw`).
+
+The move **destroys the content of the tile** of the metadata that carried one: the 1.7.10
+`net.minecraft.tileentity.TileEntityPiston` (obf `aps`) carries the block and the metadata only — its fields are the
+block (`aji a`), the metadata (`int i`), the direction, the two flags, the two progresses and the list of the moved
+entities; there is **no field and no NBT of the tile of the moved block**, and `readFromNBT`/`writeToNBT`
+(`func_145839_a`/`func_145841_b`) read and write nothing else. The block that arrives is put back with
+`world.setBlock(x, y, z, this.storedBlock, this.storedMetadata, 3)` (`TileEntityPiston#updateEntity`, obf `aps.f()V`,
+offset 91-99: `invokevirtual ahb.d:(IIILaji;II)Z`, that is `World#setBlock`), and the tile of the destination is
+created **new and empty** by the chunk on demand: `net.minecraft.world.Chunk#getTileEntity` (obf `apx.e(III)Laor`)
+asks `block.hasTileEntity()` (offset 44; the flag that the constructor of `BlockContainer` sets, `ajc.<init>` offset
+5-7: `iconst_1; putfield A:Z`) and then calls `((ITileEntityProvider) block).createTileEntity(world, metadata)`
+(offset 54-68) — a **new** tile.
+
+⇒ **the content of the tile is lost by a move in 1.7.10**, exactly as in 1.21.1 (§3.3).
 
 ### 1.2 The families of Thaumcraft (the oracle)
 
@@ -57,7 +87,7 @@ The oracle is the 1.7.10 jar of the mod itself; the class of every family is in 
 | `BlockCustomPlant` | `thaumcraft/common/blocks/BlockCustomPlant.java:55-56` | `BlockBush` | `:97-102` — md 4 (the ethereal bloom) | **moved**, every md |
 | `BlockCosmeticOpaque` | `thaumcraft/common/blocks/BlockCosmeticOpaque.java:58-59` | `BlockContainer` | inherited — always (the tile is created for md 2 only, `:214-218`) | **never moved** |
 | `BlockEldritch` | `thaumcraft/common/blocks/BlockEldritch.java:60-61` | `BlockContainer` | `:151-153` — md 0, 1, 3, 8, 9, 10 | **never moved** |
-| `BlockAiry` | `thaumcraft/common/blocks/BlockAiry.java:77-78` | `BlockContainer` | inherited — always (the tile is created for md 0, 1, 5, `:313-326`) | **never moved** |
+| `BlockAiry` | `thaumcraft/common/blocks/BlockAiry.java:77-78` | `BlockContainer` | inherited — always (the tile is created for md 0, 1, 4 and 5, `:313-326`) | **never moved** |
 
 Every other family of Thaumcraft that carries a tile is a `BlockContainer` in 1.7.10
 (`BlockAlchemyFurnace`, `BlockArcaneDoor`, `BlockArcaneFurnace`, `BlockChestHungry`, `BlockCrystal`,
@@ -109,8 +139,10 @@ decompiled with **CFR 0.152**:
   and nothing else; `:324-341` — `loadAdditional`/`saveAdditional` carry the state, the direction, the progress, the
   two flags; `:277-288` (`finalTick`) and `:290-322` (`tick`) put the moved state back with
   `level.setBlock(this.worldPosition, blockState, 3)`;
-* `net/minecraft/world/level/chunk/LevelChunk.java:301-316` — the block entity of the block that arrives is created
-  **empty** (`((EntityBlock) block).newBlockEntity(blockPos, blockState)`), the old one was removed at `:343-352`.
+* `net/minecraft/world/level/chunk/LevelChunk.java:289-304` — the block entity of the block that arrives is created
+  **empty** (`:296` — `((EntityBlock) block).newBlockEntity(blockPos, blockState)`), the old one is removed at
+  `:277-282` and by `net/minecraft/world/level/block/state/BlockBehaviour.java:248-252`
+  (`if (blockState.hasBlockEntity() && !blockState.is(blockState2.getBlock())) level.removeBlockEntity(blockPos);`).
 
 ⇒ In 1.21.1 the piston refuses every block that is an `EntityBlock`, and a block that carries a tile in the port is
 an `EntityBlock`, so it is refused. That is the gap.
@@ -152,14 +184,15 @@ an `EntityBlock`, so it is refused. That is the gap.
 ### 3.3 The block entity of a moved block
 
 The NBT of the block entity is **not** carried through `PistonMovingBlockEntity`, and that is the answer of the
-original, not an omission: the 1.7.10 `TileEntityPiston` carried the block and the metadata only, so the move
-destroyed the tile. The port reproduces it: the tile of the source is removed when the moving piston is put there
-(`LevelChunk.java:343-352`) and a **fresh, empty** tile is created at the destination
-(`LevelChunk.java:301-316`). The one difference to 1.7.10 is that 1.7.10 left the moved block with **no** tile and
-1.21.1 leaves it with an **empty** one — the content is lost in both.
+original, not an omission: the 1.7.10 `TileEntityPiston` carried the block and the metadata only (§1.1), so the move
+destroyed the content of the tile. The port reproduces it: the tile of the source is removed when the moving piston is
+put there (`BlockBehaviour.onRemove:248-252` → `level.removeBlockEntity(pos)`) and a **fresh, empty** tile is created
+at the destination (`LevelChunk.setBlockState:289-304`).
 
-⇒ the second half of the recipe of the `blockvis` report (a mixin on `PistonMovingBlockEntity` that carries the NBT
-of the tile) would have been a **deviation** from the original. It is not done, and the report says why.
+⇒ 1.7.10 and 1.21.1 lose the content of the tile of a moved block in the same way, and both give the moved block a
+**new, empty** tile. The parity of this half of the recipe of the `blockvis` report is therefore already there: the
+second half of that recipe (a mixin on `PistonMovingBlockEntity` that carries the NBT of the tile) would have been a
+**deviation** from the original. It is not done, and the report says why.
 
 ## 4. The verification of the target of the mixin
 
@@ -197,6 +230,27 @@ The redirect handler is `private static` because `isPushable` is static, and it 
 call (the `BlockState`) as its first argument, which is the rule of Mixin for an instance call
 (`RedirectInjector$RedirectedInvokeData#handlerArgs`).
 
+**Both loaders were checked.** The mixin is common (`thaumcraft-common.mixins.json` is read by `fabric.mod.json` and
+by `neoforge.mods.toml`), so the target has to exist in the jar of Fabric *and* in the jar of NeoForge:
+
+```
+$ MC=~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged/1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2/minecraft-merged-1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2.jar
+$ NF=~/.gradle-leader/caches/fabric-loom/minecraftMaven/net/minecraft/neoforge-21.1.259-minecraft-merged/1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2-neoforge-21.1.259/neoforge-21.1.259-minecraft-merged-1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2-neoforge-21.1.259.jar
+$ for J in $MC $NF; do unzip -p $J net/minecraft/world/level/block/piston/PistonBaseBlock.class > /tmp/P.class; \
+    javap -p -c /tmp/P.class | grep -E "isPushable|hasBlockEntity"; done
+  public static boolean isPushable(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.Direction, boolean, net.minecraft.core.Direction);
+     238: invokevirtual #505   // Method net/minecraft/world/level/block/state/BlockState.hasBlockEntity:()Z      (fabric)
+     232: invokevirtual #505   // Method net/minecraft/world/level/block/state/BlockState.hasBlockEntity:()Z      (the second call, in moveBlocks)
+  public static boolean isPushable(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.Direction, boolean, net.minecraft.core.Direction);
+     243: invokevirtual #509   // Method net/minecraft/world/level/block/state/BlockState.hasBlockEntity:()Z      (neoforge)
+     232: invokevirtual #509   // Method net/minecraft/world/level/block/state/BlockState.hasBlockEntity:()Z      (the second call, in moveBlocks)
+```
+
+The method, the single call inside it and the owner of the call in the constant pool
+(`#505 = Methodref #95.#504 // net/minecraft/world/level/block/state/BlockState.hasBlockEntity:()Z`) are the same in
+both jars; the second call of the class is in `moveBlocks` and is **not** touched by the redirect, because the
+redirect names the method `isPushable`.
+
 **The risk of the mixin** is the ordinary one of a `@Redirect`: if the instruction were not where the target says, the
 mixin would not apply and the game would stop at the start. It is limited here by `require = 1` (the mixin fails
 loudly instead of silently) and by the three checks above. The mixin touches **nothing** but the question of the
@@ -223,8 +277,20 @@ unregistered intrusive holder in the registry and breaks the registry freeze of 
   block entity answers the contract of the piston as well;
 * `theMixinThatAsksTheContractIsRegistered` — the common mixin configuration names the new mixin.
 
-**The run** (Gradle is not allowed in this wave, so the classes were built with `javac` against the real
-`minecraft-merged-1.21.1` jar of the cache of Loom and the suite was started with the `junit-platform-launcher`):
+**The run.** Gradle is not allowed in this wave, so the classes were built with `javac` against the real
+`minecraft-merged-1.21.1` jar of the cache of Loom and the suite was started with the `junit-platform-launcher`
+(the command is in the log of the session, the class path is the jar of the cache of Loom, the classes of the port
+and the jars of the dependencies of the cache of Gradle):
+
+```
+$ javac -nowarn -proc:none -d /tmp/pistonout -cp "$MC:$LIBS" \
+      common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java \
+      common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java \
+      common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java \
+      common/src/main/java/thaumcraft/common/blocks/{BlockAiry,BlockCosmeticOpaque,BlockCosmeticSolid,BlockCustomPlant,BlockEldritch,BlockEldritchNothing,BlockEldritchPortal,BlockManaPod,BlockSilverwoodNode}.java
+$ echo $?
+0                                     <- the twelve files of the change compile against the real 1.21.1 jar
+```
 
 ```
 [        11 tests found           ]
@@ -235,13 +301,17 @@ unregistered intrusive holder in the registry and breaks the registry freeze of 
 [         0 tests failed          ]
 ```
 
+The suite of the wave 1 was run the same way in this session: **13 tests found, 13 successful, 0 failed**.
+
 `common/src/test/java/thaumcraft/blocks/BlockVisibilityAndPistonTest.java` (the suite of the wave 1) was **corrected**:
 its test `theStatesWithoutATileAreTheOnesThePistonMoves` asserted the wave 1 claim, that the states without a tile
 are the states that the piston moves. The **assertions** (fourteen cosmetic stones and five eldritch stones without a
 tile) are about the block entity and they did not change; the test was renamed
 (`theStatesWithoutATileAreTheOnesTheBlockEntityContractLeavesEmpty`) and its comment says that the question of the
-piston is a question of its own. **That suite was not executed in this session** (it builds the blocks of the port and
-needs the whole bootstrap of the loader), so the leader has to run it.
+piston is a question of its own. The suite was run in this session outside Gradle, against the real 1.21.1 classes
+and with the same listeners (`common/src/test/resources/META-INF/services/org.junit.platform.launcher.LauncherSessionListener`):
+**13 tests found, 13 successful, 0 failed**. The leader still has to run the whole suite with Gradle, because the
+suites share one JVM and one registry freeze.
 
 ## 6. The units of the ledger
 
@@ -263,6 +333,31 @@ Nine units carry the new evidence; the `counts` were not touched and the shape o
 No unit was moved to another coverage: the units were `parity_verified` and the piston was only one of their
 aspects; the change corrects that aspect.
 
+**The citations of the evidence of the wave 1 were corrected at the same time.** Twelve of them carry the line numbers
+of the readable 1.7.10 reference (`OpenTC4`) and were labelled `oracle`; the oracle is the decompilation of the jar of
+the mod, and its lines are different. Every one of the twelve was checked against the oracle and the line numbers were
+corrected (the claims themselves are right):
+
+| unit | the citation of the wave 1 | the line of the oracle |
+|---|---|---|
+| `BlockAiry` | `:115-140` the hardness, the explosion resistance and the light | `:115-155` |
+| `BlockAiry` | `:206-230` the replaceable and leaves metadata sets | `:167-187` |
+| `BlockAiry` | `:196-197` the render type is minus one | `:237-239` |
+| `BlockAiry` | `:275-289` a tile for the metadata 0, 1 and 5 | `:313-326` — a tile for the metadata 0, 1, **4** and 5 |
+| `BlockCosmeticOpaque` | `:190-192` and `:221-223` the owned tile of the metadata two | `:214-219` |
+| `BlockCosmeticSolid` | `:52` the class extends `Block` | `:60-61` |
+| `BlockCosmeticSolid` | `:259-265` `hasTileEntity(int)` | `:278-285` |
+| `BlockEldritch` | `:140-141` the render id of the family | `:70` |
+| `BlockEldritch` | `:120-122` `hasTileEntity(int)` | `:151-153` |
+| `BlockEldritchNothing` | `:57-58` the render type is minus one | `:77-79` |
+| `BlockEldritchNothing` | `:61-63` `hasTileEntity(int)` | `:81-83` |
+| `BlockEldritchPortal` | `:78-79` the render type is minus one | `:95-97` |
+| `BlockEldritchPortal` | `:115-128` the gate survives between two eldritch blocks | `:123-128` |
+
+Three native citations had drifted because the change of this wave added lines to the files: the ticker of the gate
+(`BlockEldritchPortal.java:63-68`), the neighbour rule of the gate (`BlockEldritchPortal.java:79-86`) and the strength
+of the logs (`ThaumcraftNaturals.java:65-67`).
+
 `python3 scripts/porting/update_scope_ledger.py --check --original-root
 /home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle` → **`stale_review_fingerprints: 0`**.
 
@@ -282,7 +377,8 @@ aspects; the change corrects that aspect.
    the acceptance criterion of the leader: put a warding stone (the md 3 of the cosmetic solid), a silverwood node, a
    mana pod or an eldritch gate on a piston and power it — the block has to move, and the tile of the block that
    arrives has to be empty. Put an eldritch stone, an amber block or an airy block on a piston: it has to stay.
-4. **The suite of the wave 1 was not executed here** (§5).
+4. **The whole suite of the port was not executed here** (Gradle is not allowed in this wave): the two suites of §5
+   were run outside Gradle against the real 1.21.1 classes, the leader has to run the whole suite with Gradle.
 
 ## 8. The files
 

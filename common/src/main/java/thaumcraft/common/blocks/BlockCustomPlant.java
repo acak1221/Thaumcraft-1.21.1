@@ -118,6 +118,7 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
     @Override public boolean isPushableInOriginal(BlockState state) {
         return OriginalPistonRule.Family.CUSTOM_PLANT.isPushableInOriginal(0);
     }
+
     @Override protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!state.canSurvive(level, pos)) level.destroyBlock(pos, true);
     }

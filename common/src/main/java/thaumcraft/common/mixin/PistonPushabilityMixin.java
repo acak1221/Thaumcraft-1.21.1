@@ -13,7 +13,7 @@ import thaumcraft.common.blocks.OriginalPistonPushable;
  * <p>The vanilla piston of 1.21.1 refuses every block that carries a block entity: the last line
  * of {@code PistonBaseBlock#isPushable} is {@code return !blockState.hasBlockEntity();} and
  * {@code BlockState#hasBlockEntity} is {@code block instanceof EntityBlock} (Minecraft 1.21.1
- * {@code net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase}:552-554). The
+ * {@code net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase}:552-554, the decompilation of CFR 0.152). The
  * question is therefore asked per block, not per state, and every block entity block of the port
  * is refused, the blocks of Thaumcraft included.
  *

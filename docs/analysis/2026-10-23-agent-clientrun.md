@@ -274,7 +274,17 @@ come from another machine and never exercised the `full` sequence):
    label of a research *category*; the browser draws the categories as icons and picks them
    with its own hit test, so the button can never exist. Fixed by using the real tab hit
    test (`BookClientSmoke.clickCategoryTab`).
-2. The focus sequence then timed out in `CANCEL_PRESS` (1800 ticks). The sandbox itself
+2. The focus sequence then timed out in `CANCEL_PRESS` (1800 ticks). The step only waits
+   for `isGreatwoodGold(client.player.getMainHandItem())`; the server side of the same wand
+   is proved greatwood/gold by the setup of the sequence
+   (`FocusClientSequence.java:718-721`, which also writes the supplied vis into the
+   `thaumcraft:wand_data` component and calls `broadcastChanges()`), so the only open
+   question is whether the **client side copy of hotbar slot 7 still carries the
+   `thaumcraft:wand_data` component** after the arcane workbench paid the crafting. The
+   timeout message now prints the components of the held wand, of slot 7 and of the server
+   side hand, so the next run answers it in one line. If the client side copy lost the
+   component, that is a **port defect** (the custom data component of the wand is not
+   carried by the inventory sync) and not a harness defect. The sandbox itself
    makes that stage fragile: three Minecraft clients were open at the same time (this
    agent, the leader and the `multiplayer` agent) and two `xfocus.py` loops
    (`while true; do python3 .tmp/xfocus.py :0 Minecraft; sleep 3; done`) fight over the
@@ -359,3 +369,9 @@ runs of this session were deleted together with the run directory when that run 
 3. **Multiplayer, survival progression, the NeoForge client and the audio** are not
    verified by this agent.
 4. The `docs/porting/*-client.json` accepted evidence was not modified by this agent.
+5. **The sandbox itself was the limiting factor of the last hour**: three Minecraft
+   clients (this agent, the leader and the `multiplayer` agent), Gradle daemons and two
+   `xfocus.py` loops shared 15 GB of RAM and one X display, so runs were killed with exit
+   137 and the focus dependent stages of one client starved the other. No further client
+   run of this agent was possible after 04:30 (1.1 GB of RAM available for a client that
+   needs about 2 GB).

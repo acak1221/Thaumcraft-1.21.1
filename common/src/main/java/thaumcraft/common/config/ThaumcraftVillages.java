@@ -30,6 +30,7 @@ import thaumcraft.common.lib.world.VillageBankerManager;
 import thaumcraft.common.lib.world.VillageWizardManager;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
 import thaumcraft.common.lib.world.WorldGenHilltopStones;
+import thaumcraft.common.lib.world.WorldGenMound;
 
 /**
  * Registration of the TC4 village components and of the two remaining surface
@@ -56,6 +57,12 @@ public final class ThaumcraftVillages {
     public static final RegistrySupplier<WorldGenHilltopStones> HILLTOP_STONES =
             FEATURES.register("hilltop_stones", WorldGenHilltopStones::new);
     /**
+     * The TC4 mound, the first structure of the exclusive chain of the overworld
+     * (oracle WorldGenMound, one chunk in 150).
+     */
+    public static final RegistrySupplier<WorldGenMound> MOUND =
+            FEATURES.register("tc4_mound", WorldGenMound::new);
+    /**
      * The eldritch ring is the single port of the original WorldGenEldritchRing and it belongs
      * to the Outer Lands, because the ring seeds the labyrinth of the Outer Lands. It is
      * registered by {@link ThaumcraftOuterLands} as {@code thaumcraft:tc4_eldritch_ring}.
@@ -64,6 +71,7 @@ public final class ThaumcraftVillages {
     public static final ResourceKey<PlacedFeature> BANKER_HOMES_KEY = placed("village_banker_homes");
     public static final ResourceKey<PlacedFeature> WIZARD_TOWERS_KEY = placed("village_wizard_towers");
     public static final ResourceKey<PlacedFeature> HILLTOP_STONES_KEY = placed("hilltop_stones");
+    public static final ResourceKey<PlacedFeature> MOUND_KEY = placed("tc4_mound");
 
     /**
      * The biomes that may carry the TC4 surface structures.

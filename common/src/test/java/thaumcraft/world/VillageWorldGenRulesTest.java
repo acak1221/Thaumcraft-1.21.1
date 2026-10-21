@@ -398,11 +398,11 @@ class VillageWorldGenRulesTest {
         assertEquals(20, first.payMin());
         assertEquals(22, first.payMax());
         assertEquals("minecraft:emerald", first.receiveItems().get(0));
-        // Oracle VillageBankerManager:47 - seven plus nextInt two, so seven to eight.
+        // Oracle VillageBankerManager:47 - seven plus nextInt three, so seven to nine.
         VillageWorldGenRules.TradeSpec book = trades.get(4);
         assertEquals("thaumcraft:gold_coin", book.payItem());
         assertEquals(7, book.payMin());
-        assertEquals(8, book.payMax());
+        assertEquals(9, book.payMax());
         assertEquals("minecraft:book", book.receiveItems().get(0));
     }
 
@@ -426,6 +426,17 @@ class VillageWorldGenRulesTest {
         assertEquals(4, amber.payMin());
         assertEquals(6, amber.payMax());
         assertEquals("minecraft:emerald", amber.receiveItems().get(0));
+        // Oracle VillageWizardManager:43 and :45 - the two edible nuggets of the original.
+        VillageWorldGenRules.TradeSpec chicken = trades.get(6);
+        assertEquals("thaumcraft:nugget_chicken", chicken.payItem());
+        assertEquals(24, chicken.payMin());
+        assertEquals(31, chicken.payMax());
+        assertEquals("minecraft:emerald", chicken.receiveItems().get(0));
+        VillageWorldGenRules.TradeSpec beef = trades.get(8);
+        assertEquals("thaumcraft:nugget_beef", beef.payItem());
+        assertEquals(24, beef.payMin());
+        assertEquals(31, beef.payMax());
+        assertEquals("minecraft:emerald", beef.receiveItems().get(0));
     }
 
     // ------------------------------------------------------------------ chunk locator

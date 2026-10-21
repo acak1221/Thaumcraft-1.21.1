@@ -89,6 +89,8 @@
   "entity.thaumcraft.pech.2.name": "Гном-искатель",
   "entity.Villager.wizard": "Волшебник",
   "entity.Villager.banker": "Банкир",
+  "entity.villager.wizard": "Волшебник",
+  "entity.villager.banker": "Банкир",
   "entity.thaumcraft.specialitem.name": "Магический предмет",
   "entity.thaumcraft.permanentitem.name": "Постоянный предмет",
   "entity.thaumcraft.followitem.name": "Сопровождающий предмет",

@@ -70,6 +70,7 @@ import thaumcraft.common.testing.NodeStabilizerRuntimeChecks;
 import thaumcraft.common.testing.NodeStabilizerLifecycleChecks;
 import thaumcraft.common.testing.SurfaceStructurePlacementRuntimeChecks;
 import thaumcraft.common.testing.VillageComponentPlacementRuntimeChecks;
+import thaumcraft.common.testing.VillageTradeRuntimeChecks;
 import thaumcraft.common.testing.FluxOverfullRuntimeChecks;
 import thaumcraft.common.testing.VisPowerRecipeRuntimeChecks;
 import thaumcraft.common.testing.NodeTransductionRuntimeChecks;
@@ -633,6 +634,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
     public void villageComponentsReachTheOverworld(GameTestHelper test) {
         VillageComponentPlacementRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void villageTradesReachTheVillagers(GameTestHelper test) {
+        VillageTradeRuntimeChecks.run(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

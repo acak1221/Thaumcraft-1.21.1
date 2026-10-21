@@ -67,7 +67,8 @@
     "ChampionMobMixin",
     "ChampionTickMixin",
     "ChampionHurtMixin",
-    "ChampionDeathLootMixin"
+    "ChampionDeathLootMixin",
+    "VillagerVillageTradesMixin"
   ],
   "client": [
     "client.OuterLandsDimensionEffectsMixin",

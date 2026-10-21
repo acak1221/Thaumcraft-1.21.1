@@ -45,8 +45,11 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
         if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
-        // Oracle ThaumcraftWorldGenerator:149 - the totem only grows in the overworld.
-        if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
+        // Oracle ThaumcraftWorldGenerator:149 - the totem only grows in the overworld of
+        // the original, the dimension zero. The native adapter also accepts a dimension
+        // of the overworld type, the way the 1.7.10 world generation mod changed the
+        // overworld of a world without changing its dimension id.
+        if (!isOverworld(level.getLevel())) return false;
         int chunkX = context.origin().getX() >> 4;
         int chunkZ = context.origin().getZ() >> 4;
         RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
@@ -95,15 +98,21 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         // Oracle ThaumcraftWorldGenerator:171-186 - the column and its node.
         while (isFree(level, x, topy + count, z) && count < COLUMN_HEIGHT + 1) {
             if (count > 1 && random.nextInt(NODE_CHANCE) == 0) {
-                // Oracle ThaumcraftWorldGenerator:173-177 - the node of the totem replaces
-                // the block of the column it grows on.
+                // Oracle ThaumcraftWorldGenerator:173-177 - the original replaces the block
+                // of the column with the cosmetic solid metadata eight and then asks for a
+                // dark node there. The block of the original is not a block container, so it
+                // holds no node tile and the request of the original creates no node; the
+                // native keeps that, the block of the column and the rolls of the original.
+                if (!set(level, x, topy + count, z, VillageWorldGenRules.Material.COSMETIC_SOLID_NODE)) return false;
                 NodeGeneration.createRandomNodeAt(level, new BlockPos(x, topy + count, z), random, false, true, false);
                 return true;
             }
             if (!set(level, x, topy + count, z, VillageWorldGenRules.Material.COSMETIC_SOLID_0)) return false;
             ++count;
             if (count >= COLUMN_HEIGHT + 1) {
-                // Oracle ThaumcraftWorldGenerator:179-182 - the node sits above the column.
+                // Oracle ThaumcraftWorldGenerator:179-182 - the node sits above the column,
+                // in the cosmetic solid metadata eight of the original.
+                if (!set(level, x, topy + NODE_HEIGHT, z, VillageWorldGenRules.Material.COSMETIC_SOLID_NODE)) return false;
                 NodeGeneration.createRandomNodeAt(level, new BlockPos(x, topy + NODE_HEIGHT, z), random, false, true, false);
             }
         }
@@ -116,6 +125,26 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         BlockState state = level.getBlockState(new BlockPos(x, y, z));
         return state.isAir() || state.is(Blocks.SNOW) || state.is(Blocks.SHORT_GRASS);
     }
+
+    /**
+     * Oracle ThaumcraftWorldGenerator:149 - the totem grows in the overworld of the
+     * original, the dimension zero, and in no other dimension.
+     *
+     * <p>The native form accepts the overworld and every dimension of the overworld type:
+     * a world generation mod of the 1.7.10 world changed the overworld without changing
+     * the id of its dimension, and the totem of the original grew there.
+     */
+    public static boolean isOverworld(net.minecraft.server.level.ServerLevel level) {
+        if (level.dimension().equals(Level.OVERWORLD)) return true;
+        var registry = level.getServer().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DIMENSION_TYPE);
+        var overworld = registry.get(OVERWORLD_TYPE);
+        return overworld != null && overworld.equals(level.dimensionType());
+    }
+
+    /** The dimension type of the overworld of the original. */
+    private static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.dimension.DimensionType> OVERWORLD_TYPE =
+            net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION_TYPE,
+                    net.minecraft.resources.ResourceLocation.withDefaultNamespace("overworld"));
 
     private static boolean set(WorldGenLevel level, int x, int y, int z, VillageWorldGenRules.Material material) {
         BlockState state = ThaumcraftVillages.state(material, 0);

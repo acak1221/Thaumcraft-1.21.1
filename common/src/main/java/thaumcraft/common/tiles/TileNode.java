@@ -210,7 +210,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
             if (isRemoved() || !owner.hasChunkAt(worldPosition)
                     || !owner.ensureCanWrite(worldPosition) || owner.getBlockEntity(worldPosition) != this
                     || owner.getBlockState(worldPosition) != getBlockState()
-                    || !getBlockState().is(ThaumcraftContent.AURA_NODE.get()) && !getBlockState().is(ThaumcraftContent.SILVERWOOD_KNOT.get()))
+                    || !isNodeHost(getBlockState()))
                 return false;
             initializeGeneratedFields(values, type, modifier);
             owner.getChunk(worldPosition).setUnsaved(true);
@@ -528,10 +528,26 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     private boolean current() {
         Level world = level;
         BlockState state = getBlockState();
-        return world != null && (!ticking || world == tickingLevel && state == tickingState) && !isRemoved() && (state.is(ThaumcraftContent.AURA_NODE.get()) || state.is(ThaumcraftContent.SILVERWOOD_KNOT.get()))
+        return world != null && (!ticking || world == tickingLevel && state == tickingState) && !isRemoved() && isNodeHost(state)
                 && !world.isOutsideBuildHeight(worldPosition) && world.hasChunkAt(worldPosition)
                 && world.getBlockEntity(worldPosition) == this && world.getBlockState(worldPosition) == state
                 && !isRemoved() && level == world && getBlockState() == state;
+    }
+
+    /**
+     * The blocks that host a node of the original.
+     *
+     * <p>The original hosts a node in the invisible block {@code blockAiry} of the metadata
+     * zero, in the silverwood knot and in the cosmetic solid of the metadata eight. The
+     * native tree has its own node block for the first and keeps the other two.
+     */
+    public static boolean isNodeHost(BlockState state) {
+        if (state.is(ThaumcraftContent.AURA_NODE.get()) || state.is(ThaumcraftContent.SILVERWOOD_KNOT.get())) return true;
+        // Oracle BlockCosmeticSolid:288-296 - the metadata eight of the cosmetic solid is
+        // the host of the node of the totem of the original.
+        return state.is(thaumcraft.common.config.ThaumcraftEldritchBlocks.COSMETIC_SOLID_TOUGH.get())
+                && state.getValue(thaumcraft.common.blocks.BlockCosmeticSolid.VARIANT)
+                        == thaumcraft.common.lib.world.EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED;
     }
 
     /** A stronger nearby normal node can bully a weaker one, as in TC4. */

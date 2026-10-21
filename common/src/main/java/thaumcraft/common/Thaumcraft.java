@@ -110,6 +110,7 @@ public final class Thaumcraft {
         ThaumcraftOres.register();
         ThaumcraftWorldgen.register();
         thaumcraft.common.config.ThaumcraftVillages.register();
+        thaumcraft.common.config.ThaumcraftVillageProfessions.register();
         thaumcraft.common.config.ThaumcraftOuterLands.register();
         ThaumcraftNodes.register();
         ThaumcraftNodeDevices.register();

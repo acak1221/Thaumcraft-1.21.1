@@ -56,7 +56,7 @@ public final class NodeHarvest {
     public static void prepare(Level level, BlockPos pos, BlockState state, Player player, TileNode node) {
         if (!(level instanceof ServerLevel server) || player.level() != level || player.isSpectator()
                 || node == null || node.isRemoved() || node.getLevel() != level
-                || !state.is(ThaumcraftContent.AURA_NODE.get()) && !state.is(ThaumcraftContent.SILVERWOOD_KNOT.get())
+                || !TileNode.isNodeHost(state)
                 || !server.hasChunkAt(pos)
                 || server.getBlockEntity(pos) != node || server.getBlockState(pos) != state
                 || !player.canInteractWithBlock(pos, 0) || !server.mayInteract(player, pos)) return;

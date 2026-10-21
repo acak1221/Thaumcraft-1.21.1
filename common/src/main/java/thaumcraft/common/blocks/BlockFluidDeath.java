@@ -163,6 +163,35 @@ public final class BlockFluidDeath extends LiquidBlock {
     }
 
     /**
+     * The original random display tick of the death fluid: a slimy bubble over the cell and, in one
+     * of fifty, the pop of the lava (oracle BlockFluidDeath:65-80).
+     */
+    @FunctionalInterface public interface ClientEffects { void slimyBubble(Level level, double x, double y, double z, float size, float alpha); }
+    private static ClientEffects clientEffects = (level, x, y, z, size, alpha) -> {};
+
+    /** The client effect of the slimy bubble of the death fluid. */
+    public static void setClientEffects(ClientEffects effects) { clientEffects = java.util.Objects.requireNonNull(effects); }
+
+    /**
+     * Oracle BlockFluidDeath:65-80 - the random display tick of a cell of the death fluid draws the
+     * slimy bubble at the height of the cell and plays the lava pop in one of fifty rolls.
+     */
+    @Override public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        int meta = state.hasProperty(LEVEL) ? state.getValue(LEVEL) : 0;
+        float h = random.nextFloat() * 0.075F;
+        clientEffects.slimyBubble(level, pos.getX() + random.nextFloat(), pos.getY() + 0.1F + 0.225F * meta,
+                pos.getZ() + random.nextFloat(), 0.075F + h, 0.8F);
+        if (random.nextInt(50) == 0) {
+            double x = pos.getX() + random.nextFloat();
+            double y = pos.getY() + 1.0D;
+            double z = pos.getZ() + random.nextFloat();
+            level.playLocalSound(x, y, z, net.minecraft.sounds.SoundEvents.LAVA_POP,
+                    net.minecraft.sounds.SoundSource.BLOCKS, 0.1F + random.nextFloat() * 0.1F,
+                    0.9F + random.nextFloat() * 0.15F, false);
+        }
+    }
+
+    /**
      * The classic quanta flow of the death fluid: the source spreads downwards first and then sideways, and
      * every flowing cell without a stronger neighbour dries up again.
      */

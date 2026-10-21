@@ -24,7 +24,9 @@ public final class AccessoryNetworking {
     }
     public static void initClient(){
         if(client)return;client=true;
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C,AccessoryContentsPayload.TYPE,AccessoryContentsPayload.STREAM_CODEC,(payload,context)->context.queue(()->PlayerAccessories.get(context.getPlayer()).receive(payload.stacks())));
+        // The client context carries no player while the local player is being torn
+        // down, so the snapshot is dropped instead of dereferencing a null player.
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C,AccessoryContentsPayload.TYPE,AccessoryContentsPayload.STREAM_CODEC,(payload,context)->context.queue(()->{var player=context.getPlayer();if(player!=null)PlayerAccessories.get(player).receive(payload.stacks());}));
     }
     public static void requestOpen(){NetworkManager.sendToServer(new AccessoryOpenPayload());}
     public static boolean open(ServerPlayer player){

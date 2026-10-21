@@ -422,9 +422,14 @@ public final class DungeonRooms {
                     place(out, view, worldRandom, x + 4 + w, y + 2, z + 4 + h, 7, -1, cell);
                     place(out, view, worldRandom, x + 4 + w, y + 8, z + 4 + h, 7, -1, cell);
                 } else {
-                    int block = cell.feature == OuterLandsRules.FEATURE_TRAPPED_PASSAGE && random.nextInt(3) == 0 ? 20 : 2;
-                    place(out, view, worldRandom, x + 4 + w, y + 2, z + 4 + h, block, -1, cell);
-                    place(out, view, worldRandom, x + 4 + w, y + 8, z + 4 + h, block, -1, cell);
+                    // Oracle GenPassage:54-55 - the floor and the ceiling draw the buried stone
+                    // of a trapped passage separately, so the floor and the ceiling of the same
+                    // column may differ and the random stream of the passage advances by two
+                    // rolls of three for every column.
+                    place(out, view, worldRandom, x + 4 + w, y + 2, z + 4 + h,
+                            cell.feature == OuterLandsRules.FEATURE_TRAPPED_PASSAGE && random.nextInt(3) == 0 ? 20 : 2, -1, cell);
+                    place(out, view, worldRandom, x + 4 + w, y + 8, z + 4 + h,
+                            cell.feature == OuterLandsRules.FEATURE_TRAPPED_PASSAGE && random.nextInt(3) == 0 ? 20 : 2, -1, cell);
                 }
                 place(out, view, worldRandom, x + 4 + w, y, z + 4 + h, 1, -1, cell);
                 place(out, view, worldRandom, x + 4 + w, y + 10, z + 4 + h, 1, -1, cell);
@@ -914,7 +919,8 @@ public final class DungeonRooms {
             for (int b = -5; b <= 5; ++b) {
                 if (!(random.nextFloat() < OuterLandsRules.NEST_LOOT_DENSITY)) continue;
                 if (!view.isAir(x + 8 + a, y + 2, z + 8 + b)) continue;
-                int meta = OuterLandsRules.lootUrnMeta(random.nextFloat());
+                // Oracle GenNestRoom:117 - the nest room rolls its own rarity table.
+                int meta = OuterLandsRules.nestLootUrnMeta(random.nextFloat());
                 Kind kind = OuterLandsRules.nestLootIsCrate(random.nextFloat()) ? Kind.LOOT_CRATE : Kind.LOOT_URN;
                 out.placements.add(new Placement(x + 8 + a, y + 2, z + 8 + b, kind, meta, -1));
             }
@@ -1040,7 +1046,9 @@ public final class DungeonRooms {
             for (int b = 0; b < 7; ++b) {
                 int xx = 0;
                 int zz = 0;
-                int facing = -1;
+                // Oracle GenBossRoom:48 - the doorway starts with the unknown direction and the
+                // last side of the cell that has an exit wins, exactly like the original.
+                int facing = OuterLandsRules.DIRECTION_UNKNOWN;
                 if (cell.north) {
                     xx = x + 5 + a;
                     zz = z + 3;
@@ -1062,9 +1070,11 @@ public final class DungeonRooms {
                     facing = 4;
                 }
                 switch (PAT_DOORWAY[a][b]) {
+                    // The lock takes the direction of the side of the room it stands on
+                    // (oracle GenBossRoom:72-75), the door and the invisible door do not.
                     case 1 -> place(out, view, worldRandom, xx, y + 2 + b, zz, 16, facing, cell);
-                    case 2 -> place(out, view, worldRandom, xx, y + 2 + b, zz, 15, facing, cell);
-                    case 9 -> place(out, view, worldRandom, xx, y + 2 + b, zz, 17, facing, cell);
+                    case 2 -> place(out, view, worldRandom, xx, y + 2 + b, zz, 15, OuterLandsRules.DIRECTION_UNKNOWN, cell);
+                    case 9 -> place(out, view, worldRandom, xx, y + 2 + b, zz, 17, OuterLandsRules.DIRECTION_UNKNOWN, cell);
                     default -> {
                     }
                 }

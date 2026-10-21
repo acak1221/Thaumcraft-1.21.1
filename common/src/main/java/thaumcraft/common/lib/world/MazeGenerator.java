@@ -328,10 +328,14 @@ public final class MazeGenerator {
         for (int aa = 0; aa < this.height; ++aa) {
             for (int bb = 0; bb < this.width; ++bb) {
                 c = new Cell((short) this.grid[aa][bb]);
+                // Oracle MazeGenerator:332 - the skip condition is one single expression:
+                // "the cell already carries a feature, or the cell has no exit at all, or the
+                // roll of twenty five does not hit zero". The short circuit evaluation of the
+                // original means that a cell without a single exit is skipped without drawing
+                // a random number, while a cell with an exit always draws the twenty five.
                 if (c.feature != 0) continue;
-                if (c.north || c.south || c.west || c.east) {
-                    if (this.rand.nextInt(25) != 0) continue;
-                }
+                if (!c.north && !c.south && !c.west && !c.east) continue;
+                if (this.rand.nextInt(25) != 0) continue;
                 switch (this.rand.nextInt(8)) {
                     case 0 -> c.feature = (byte) 8;
                     case 1 -> c.feature = (byte) 10;

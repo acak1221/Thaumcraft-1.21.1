@@ -16,17 +16,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.lib.world.DungeonRooms;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.lib.world.OuterLandsProvider;
+import thaumcraft.common.lib.world.OuterLandsWiringRules;
 
 /**
  * Registration of the TC4 Outer Lands and of the blocks it needs from the eldritch content.
@@ -185,11 +188,12 @@ public final class ThaumcraftOuterLands {
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case COSMETIC_SLAB_STONE -> {
-                // The contract id is cosmetic_slab_stone; the native registration splits the original
-                // slab into its two kinds, the arcane one and the eldritch one.
-                Block block = block("cosmetic_slab_stone");
+                // The contract id is cosmetic_slab_stone; the native registration splits the
+                // original slab into its two kinds, the arcane one and the eldritch one.
+                Block block = blockById(OuterLandsWiringRules.stoneSlabBlock(variant));
+                if (block == null) block = block("cosmetic_slab_stone");
                 if (block == null) block = block("cosmetic_stone_slab_eldritch");
-                return block == null ? null : withVariant(block.defaultBlockState(), variant);
+                return block == null ? null : slabState(block, variant);
             }
             case COSMETIC_SOLID -> {
                 Block block = cosmeticSolid(variant);
@@ -222,6 +226,30 @@ public final class ThaumcraftOuterLands {
             return state.setValue(intProperty, Math.min(Math.max(variant, min), max));
         }
         return state;
+    }
+
+    /**
+     * The native state of an original slab metadata.
+     *
+     * <p>Oracle {@code GenLibraryRoom:78,86,95,98}: the desk of the library room is the
+     * stone slab with the metadata one below the eldritch block and the stone slab with the
+     * metadata nine above it. The metadata nine is the metadata one as the upper half of the
+     * slab. The 1.21.1 slab carries its half in the "type" property and not in a "variant"
+     * property, so the original metadata has to be decoded into that property.
+     *
+     * @param block the slab block that hosts the original metadata
+     * @param metadata the original 1.7 metadata of the slab
+     */
+    public static BlockState slabState(Block block, int metadata) {
+        BlockState state = block.defaultBlockState();
+        if (!state.hasProperty(SlabBlock.TYPE)) return state;
+        return state.setValue(SlabBlock.TYPE,
+                OuterLandsWiringRules.slabUpper(metadata) ? SlabType.TOP : SlabType.BOTTOM);
+    }
+
+    /** The block of a full registry id, or null when the block does not exist. */
+    private static Block blockById(String registryId) {
+        return BuiltInRegistries.BLOCK.get(ResourceLocation.parse(registryId));
     }
 
     /** Applies the original 1.7 stair metadata (0 east, 1 west, 2 south, 3 north, 4..7 upside down). */
@@ -313,7 +341,8 @@ public final class ThaumcraftOuterLands {
 
     /** Oracle GenKeyRoom:97-101 - the permanent eldritch object of the key room. */
     private static void spawnPermanentItem(WorldGenLevel level, BlockPos pos, int variant) {
-        Item item = BuiltInRegistries.ITEM.get(id("eldritch_object"));
+        // The original item carried the metadata two, the runed tablet.
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(OuterLandsWiringRules.eldritchObjectItem(variant)));
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id("inventory_item"));
         if (item == null || type == null) return;
         Entity entity = type.create(level.getLevel());

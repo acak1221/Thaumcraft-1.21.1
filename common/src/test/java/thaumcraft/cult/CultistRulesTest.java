@@ -258,7 +258,7 @@ class CultistRulesTest {
         // Original EntityAIRestrictOpenDoor:37 - the nearest village within sixteen blocks.
         assertEquals(16, CultistRules.RESTRICT_DOOR_VILLAGE_RADIUS);
         // Original EntityAIRestrictOpenDoor:41 - the mob stands within 2.25 blocks of the door.
-        assertEquals(2.25D, CultistRules.RESTRICT_DOOR_DISTANCE_SQ, 1E-9D);
+        assertEquals(1.5 * 1.5, CultistRules.RESTRICT_DOOR_DISTANCE_SQ);
     }
 
     @Test void aTargetHasToStandInsideTheHomeAreaOfTheCultist() {

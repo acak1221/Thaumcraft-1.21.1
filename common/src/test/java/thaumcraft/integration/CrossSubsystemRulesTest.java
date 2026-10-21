@@ -99,8 +99,8 @@ class CrossSubsystemRulesTest {
 
     @Test void theTaintCreeperSwellKeepsTheOriginalRanges() {
         // Original AICreeperSwell: the swell starts below nine blocks and is given up beyond forty nine.
-        assertEquals(9.0D, TaintCreeperSwell.SWELL_RANGE, 1E-9D);
-        assertEquals(49.0D, TaintCreeperSwell.SWELL_CANCEL_RANGE, 1E-9D);
+        assertEquals(3.0 * 3.0, TaintCreeperSwell.SWELL_RANGE);
+        assertEquals(7.0 * 7.0, TaintCreeperSwell.SWELL_CANCEL_RANGE);
     }
 
     // ------------------------------------------------------------------ the ore dictionary replacement

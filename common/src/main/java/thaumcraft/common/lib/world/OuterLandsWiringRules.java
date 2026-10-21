@@ -207,6 +207,26 @@ public final class OuterLandsWiringRules {
     /** The rarity of a loot container, clamped into the native zero to two range. */
     public static int lootRarity(int metadata) { return Math.max(0, Math.min(2, metadata)); }
 
+    /**
+     * The native item of an original {@code ItemEldritchObject} metadata.
+     *
+     * <p>Oracle {@code ItemEldritchObject:31-48} carried the five metadata values zero to four
+     * on one item, the eldritch eye, the crimson rites, the runed tablet, the primordial pearl
+     * and the obelisk placer. The 1.21.1 port flattens the metadata into an item of its own,
+     * so the permanent item of the key room (oracle {@code GenKeyRoom:97}, the metadata two)
+     * is the runed tablet.
+     */
+    public static String eldritchObjectItem(int metadata) {
+        return switch (metadata) {
+            case 0 -> "thaumcraft:eldritch_eye";
+            case 1 -> "thaumcraft:crimson_rites";
+            case 2 -> "thaumcraft:eldritch_tablet";
+            case 3 -> "thaumcraft:primordial_pearl";
+            case 4 -> "thaumcraft:eldritch_placer";
+            default -> "thaumcraft:eldritch_object";
+        };
+    }
+
     /* ------------------------------------------------------------------ */
     /* The eldritch gate                                                    */
     /* ------------------------------------------------------------------ */

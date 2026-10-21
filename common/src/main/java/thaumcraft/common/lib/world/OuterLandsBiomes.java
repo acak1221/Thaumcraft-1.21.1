@@ -39,9 +39,13 @@ public final class OuterLandsBiomes {
     }
 
     /**
-     * The 1.21 fog colour of the biome. The original dimension fog is 0xA080A0 scaled by 0.15
-     * (oracle WorldProviderOuter.func_76562_b:84-97) and 1.21 has no dimension wide fog
-     * resource any more, so the dimension fog is carried by the only biome of the dimension.
+     * The fog colour of the dimension of the Outer Lands.
+     *
+     * <p>The original dimension fog is 0xA080A0 scaled by 0.15 (oracle
+     * {@code WorldProviderOuter.func_76562_b:84-97}). The fog colour of the biome itself is
+     * the black of the original sky and lives in the native biome document
+     * {@code data/thaumcraft/worldgen/biome/eldritch_lands.json} and in
+     * {@link OuterLandsRules#BIOME_FOG_COLOR}.
      */
     public static int fogColor() {
         return OuterLandsRules.packedFogColor();

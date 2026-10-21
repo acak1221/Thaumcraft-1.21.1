@@ -194,6 +194,12 @@ public final class OuterLandsProvider {
                 };
                 BlockPos pos = new BlockPos(placement.x(), placement.y(), placement.z());
                 level.setBlock(pos, state, flags);
+                // Oracle GenBossRoom:72-75 - the eldritch lock of a boss room takes the
+                // direction of the side of the room it stands on.
+                if (placement.kind() == DungeonRooms.Kind.ELDRITCH
+                        && placement.variant() == EldritchBlockRules.ELDRITCH_LOCK) {
+                    ThaumcraftOuterLands.configureFacing(level.getBlockEntity(pos), (byte) placement.facing());
+                }
                 if (placement.kind() != DungeonRooms.Kind.CRYSTAL) continue;
                 // Oracle GenCommon:296-299 - the crystal points into the free neighbour.
                 if (level.getBlockEntity(pos) instanceof thaumcraft.common.tiles.TileCrystal crystal)

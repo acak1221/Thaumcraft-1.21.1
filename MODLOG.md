@@ -1,3 +1,32 @@
+## 2026-10-21 — Outer Lands labyrinth fidelity: the maze generator and the eldritch rooms
+
+The critical defect of the a5 eldritch audit is closed. The native labyrinth generator skipped a
+cell without a single exit only when the cell *had* an exit, so it gave such a cell a random
+room feature and drew one extra `nextInt(8)`: the random stream of the whole labyrinth diverged
+and the key, nest and library rooms and every passage of every seed were different. The oracle
+condition of `MazeGenerator:332` is restored. A new JUnit test compares the native generator
+with a transcription of the oracle generator over the eight original labyrinth sizes and forty
+seeds: 159 821 cells, 0 differences in the walls and 0 in the feature bytes. The same comparison
+against the compiled oracle class measures 45 429 differing cells before the fix, all of them in
+the feature byte.
+
+Five more deviations of the audit are closed against the oracle: the trapped passage draws the
+buried stone of the floor and of the ceiling separately (`GenPassage:54-55`), the nest room rolls
+its own loot rarity of 15 % / 25 % / 60 % instead of the rarity of the common decoration
+(`GenNestRoom:117`), the lock of a boss room takes the direction of the side it stands on
+(`GenBossRoom:72-75`), the library desk slab keeps the upper half of the original metadata nine
+(`GenLibraryRoom:86,96`), and the permanent item of the key room keeps its metadata two, the runed
+tablet (`GenKeyRoom:97`). The fog, grass and foliage colours of `OuterLandsRules` now agree with
+the native biome document `eldritch_lands.json`.
+
+The key room guardian offset was checked against the oracle and was already correct: the 1.7
+helper `MathHelper.getRandomIntegerInRange` is inclusive on both ends, so the sign factor is
+minus one to one and not minus one to zero as the audit read it; a new test proves the offsets
+against the recorded draws of the world random.
+
+Local: `:common:compileJava` and `:common:test` pass, 1512 JUnit tests in 218 suites, 0 failures.
+No runtime, client visual, multiplayer or NeoForge acceptance is claimed.
+
 ## 2026-10-21 — Parallel port wave: 33 sub-agents over three waves
 
 The second (parallel) port line was stopped by the user and its whole scope taken over here. Three

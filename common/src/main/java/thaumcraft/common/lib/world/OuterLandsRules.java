@@ -49,14 +49,28 @@ public final class OuterLandsRules {
     public static final float FOG_BRIGHTNESS = 0.15F;
     /** BiomeGenEldritch.func_76731_a - the Outer Lands sky is black. */
     public static final int SKY_COLOR = 0x000000;
-    /** BiomeGenEldritch.func_150558_b/func_150571_c keep the vanilla 1.7 defaults. */
-    public static final int GRASS_COLOR = 0xC6D3FF;
-    public static final int FOLIAGE_COLOR = 0xC6D3FF;
+    /**
+     * The 1.21 grass colour of the Eldritch biome.
+     *
+     * <p>Oracle {@code BiomeGenEldritch:38-42} only overrides the sky colour and makes it
+     * black, so the grass colour stays the default biome colour of {@code BiomeGenBase}.
+     */
+    public static final int GRASS_COLOR = 0x000000;
+    /** The 1.21 foliage colour of the Eldritch biome, the default biome colour as well. */
+    public static final int FOLIAGE_COLOR = 0x000000;
     /** BiomeGenBase default water colour and water fog colour. */
     public static final int WATER_COLOR = 0x3F76E4;
     public static final int WATER_FOG_COLOR = 329011;
-    /** BiomeGenBase default fog colour (1.7 default, not the dimension fog). */
-    public static final int BIOME_FOG_COLOR = 0xC0C0FF;
+    /**
+     * The 1.21 biome fog colour of the Eldritch biome.
+     *
+     * <p>Oracle {@code BiomeGenEldritch:38-42} only overrides the sky colour and makes it
+     * black; the 1.7 client used that single colour for the fog as well. The value is the
+     * one of the native biome document
+     * {@code data/thaumcraft/worldgen/biome/eldritch_lands.json} and of
+     * {@link thaumcraft.common.lib.world.biomes.BiomeSurfaceRules#fogColour}.
+     */
+    public static final int BIOME_FOG_COLOR = 0x000000;
 
     public static final float BIOME_TEMPERATURE = 0.5F;
     public static final float BIOME_DOWNFALL = 0.5F;
@@ -120,6 +134,15 @@ public final class OuterLandsRules {
         LIBRARY_ROOM,
         PASSAGE
     }
+
+    /**
+     * The 1.7 {@code ForgeDirection.UNKNOWN} ordinal.
+     *
+     * <p>Oracle {@code GenBossRoom:48} starts the doorway of a boss room with the unknown
+     * direction and only replaces it when the cell has an exit on that side, so the lock of
+     * a boss room quadrant without any exit keeps the unknown direction.
+     */
+    public static final int DIRECTION_UNKNOWN = 6;
 
     /**
      * Oracle MazeHandler.generateEldritch:152-186. Feature 1 is the portal, 2..5 the boss
@@ -199,6 +222,19 @@ public final class OuterLandsRules {
     public static int lootUrnMeta(float roll) {
         if (roll < 0.025F) return 2;
         if (roll < 0.1F) return 1;
+        return 0;
+    }
+
+    /**
+     * The nest room rolls its own rarity: 15% rich, 25% common, 60% plain.
+     *
+     * <p>Oracle {@code GenNestRoom:116-118}: the nest room draws its own rarity table and
+     * not the rarity of the common decoration of {@code GenCommon:284-285}, so the nest is
+     * much richer than the rest of the labyrinth.
+     */
+    public static int nestLootUrnMeta(float roll) {
+        if (roll < 0.15F) return 2;
+        if (roll < 0.4F) return 1;
         return 0;
     }
 

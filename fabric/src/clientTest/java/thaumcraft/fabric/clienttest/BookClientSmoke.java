@@ -89,6 +89,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class BookClientSmoke implements ClientModInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger("thaumcraft-client-smoke");
     private static final long CAPTURE_TIMEOUT_NANOS = 10_000_000_000L;
+    /** How long a stage may wait for a vanilla screen button that is not built yet. */
+    private static final int SCREEN_RETRY_TICKS = 200;
     private enum Stage {
         WAIT_WORLD, WAIT_RESTART_PROBE, ENGLISH_RELOAD, WAIT_ITEM, BROWSER, OPEN_BOOK, BOOK, BACK_TO_BROWSER, OPEN_RESEARCH,
         RESEARCH, NEXT_RESEARCH, ILLUSTRATED, PREVIOUS_RESEARCH, PREVIOUS_CAPTURE,
@@ -1552,6 +1554,15 @@ public final class BookClientSmoke implements ClientModInitializer {
                     client.stop();
                 }
             }
+        } catch (ScreenNotReadyException notReady) {
+            // A vanilla screen that has not built its button yet is not a defect of
+            // the port: the stage waits for the real widget and only reports when
+            // the screen never offers it.
+            if (stageTicks > SCREEN_RETRY_TICKS) {
+                fail(client, notReady);
+                return;
+            }
+            LOGGER.info("Client smoke: {} waits for its screen button ({})", stage, notReady.getMessage());
         } catch (Throwable error) {
             fail(client, error);
         }
@@ -1946,14 +1957,29 @@ public final class BookClientSmoke implements ClientModInitializer {
 
     private void clickButton(Minecraft client, String label) {
         Screen screen = client.screen;
-        Button button = client.screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast)
-                .filter(widget -> widget.getMessage().getString().equals(label)).findFirst().orElseThrow();
+        var buttons = screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast).toList();
+        Button button = buttons.stream().filter(widget -> widget.getMessage().getString().equals(label)).findFirst().orElse(null);
+        if (button == null) {
+            // The vanilla button of the screen is built while the screen initialises
+            // and the language of the label can change between two ticks, so a
+            // missing button is a "not ready yet" answer, not a defect of the port.
+            // The stage retries until SCREEN_RETRY_TICKS and only then reports.
+            throw new ScreenNotReadyException("Screen button is not present yet: " + label
+                    + "; available=" + buttons.stream().map(widget -> widget.getMessage().getString()).toList());
+        }
         if (!button.active || !button.visible
                 || !client.screen.mouseClicked(button.getX() + button.getWidth() / 2.0,
                         button.getY() + button.getHeight() / 2.0, 0)) {
             throw new IllegalStateException("Screen button is unavailable: " + label);
         }
         screen.mouseReleased(button.getX() + 1, button.getY() + 1, 0);
+    }
+
+    /** The screen has not built the wanted button yet; the stage may retry. */
+    private static final class ScreenNotReadyException extends RuntimeException {
+        ScreenNotReadyException(String message) {
+            super(message, null, false, false);
+        }
     }
 
     /**

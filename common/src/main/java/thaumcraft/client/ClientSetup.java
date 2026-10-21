@@ -24,6 +24,7 @@ import thaumcraft.common.tiles.TileNodeConverter;
 import thaumcraft.common.lib.network.OpenThaumonomiconPayload;
 import net.minecraft.client.renderer.RenderType;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.config.ThaumcraftProjectiles;
 import thaumcraft.common.config.ThaumcraftOres;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.lib.network.KnowledgeEvents;
@@ -164,6 +165,15 @@ public final class ClientSetup {
         });
         EntityRendererRegistry.register(ThaumcraftContent.SPECIAL_ITEM, thaumcraft.client.renderers.entity.RenderSpecialItem::new);
         EntityRendererRegistry.register(ThaumcraftContent.INVENTORY_ITEM, ItemEntityRenderer::new);
+        // Original TC4 shares RenderSpecialItem between EntitySpecialItem and
+        // EntityPermanentItem (oracle thaumcraft/client/renderers/entity/RenderSpecialItem.java:1-119)
+        // and renders EntityFollowingItem with RenderFollowingItem.
+        // Every item entity needs its own registration: 1.21.1 looks the renderer up by
+        // entity type and has no fallback, so an unregistered type crashes the client
+        // with a NullPointerException as soon as the entity is drawn.
+        EntityRendererRegistry.register(ThaumcraftProjectiles.PERMANENT_ITEM, thaumcraft.client.renderers.entity.RenderSpecialItem::new);
+        EntityRendererRegistry.register(ThaumcraftProjectiles.FOLLOW_ITEM, thaumcraft.client.renderers.entity.RenderFollowingItem::new);
+        EntityRendererRegistry.register(ThaumcraftProjectiles.ITEM_GRATE, ItemEntityRenderer::new);
         thaumcraft.client.ThaumcraftEldritchClient.init();
         thaumcraft.client.ThaumcraftDeviceGuiClient.init();
         thaumcraft.client.ThaumcraftGearModelsClient.init();

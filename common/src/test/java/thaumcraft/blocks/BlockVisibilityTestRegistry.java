@@ -1,6 +1,10 @@
 package thaumcraft.blocks;
 
 import java.lang.reflect.Field;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.LauncherSessionListener;
@@ -17,6 +21,7 @@ import thaumcraft.common.blocks.BlockMetalDevice;
 import thaumcraft.common.blocks.BlockMirror;
 import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWoodenDevice;
+import thaumcraft.world.EldritchTestRegistry;
 
 /**
  * The blocks of the port for the render shape and the block entity test.
@@ -24,9 +29,14 @@ import thaumcraft.common.blocks.BlockWoodenDevice;
  * <p>Minecraft 1.21.1 asks the block registry for the intrusive holder of a block in the
  * constructor of the block (Minecraft 1.21.1 {@code net/minecraft/world/level/block/Block}:81) and
  * the frozen registry refuses it, so a block of the port can only be built before the vanilla
- * bootstrap freezes the registries. The test platform opens its session before it runs a single
- * test, so the blocks are built here, the same way the eldritch family builds its blocks
- * ({@code thaumcraft.world.EldritchTestRegistry}).
+ * bootstrap freezes the registries. A block that is built and never registered leaves an
+ * intrusive holder behind, and the frozen registry then refuses to start
+ * ({@code MappedRegistry}: "Some intrusive holders were not registered"), so the blocks are
+ * registered under the ids of the production registration.
+ *
+ * <p>The test platform opens its session before it runs a single test, so the blocks are built
+ * here, the same way the eldritch family builds its blocks
+ * ({@link EldritchTestRegistry}).
  */
 public final class BlockVisibilityTestRegistry implements LauncherSessionListener {
     /** The three groups of the cosmetic solid family. */
@@ -95,25 +105,29 @@ public final class BlockVisibilityTestRegistry implements LauncherSessionListene
     private static void build() {
         boolean raised = raiseBootstrapFlag();
         try {
-            cosmetic = new BlockCosmeticSolid[] {BlockCosmeticSolid.group(0, properties()),
-                    BlockCosmeticSolid.group(1, properties()), BlockCosmeticSolid.group(2, properties())};
-            eldritch = new BlockEldritch[] {BlockEldritch.group(0, properties()),
-                    BlockEldritch.group(1, properties()), BlockEldritch.group(2, properties()),
-                    BlockEldritch.group(3, properties()), BlockEldritch.group(4, properties()),
-                    BlockEldritch.group(5, properties())};
-            airy = new BlockAiry[] {BlockAiry.group(0, properties()), BlockAiry.group(1, properties()),
-                    BlockAiry.group(2, properties()), BlockAiry.group(3, properties())};
-            amber = new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_AMBER, properties());
-            warded = new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_WARDED, properties());
-            nothing = new BlockEldritchNothing(properties());
-            portal = new BlockEldritchPortal(properties());
-            mirror = new BlockMirror(properties());
-            metalDevice = new BlockMetalDevice(properties());
-            stoneDevice = new BlockStoneDevice(properties());
-            woodenDevice = new BlockWoodenDevice(properties());
-            magicBox = new BlockMagicBox(properties());
-            arcaneDoor = new BlockArcaneDoor(properties());
-            plate = new BlockArcanePressurePlate(properties());
+            cosmetic = new BlockCosmeticSolid[] {
+                    register("cosmetic_solid", BlockCosmeticSolid.group(0, properties())),
+                    register("cosmetic_solid_tough", BlockCosmeticSolid.group(1, properties())),
+                    register("cosmetic_solid_thaumium", BlockCosmeticSolid.group(2, properties()))};
+            eldritch = eldritchFamily();
+            airy = new BlockAiry[] {
+                    register("airy", BlockAiry.group(0, properties())),
+                    register("airy_node", BlockAiry.group(1, properties())),
+                    register("airy_hole", BlockAiry.group(2, properties())),
+                    register("airy_unbreakable", BlockAiry.group(3, properties()))};
+            amber = register("cosmetic_opaque",
+                    new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_AMBER, properties()));
+            warded = register("cosmetic_opaque_warded",
+                    new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_WARDED, properties()));
+            nothing = register("eldritch_nothing", new BlockEldritchNothing(properties()));
+            portal = register("eldritch_portal", new BlockEldritchPortal(properties()));
+            mirror = register("mirror", new BlockMirror(properties()));
+            metalDevice = register("metal_device", new BlockMetalDevice(properties()));
+            stoneDevice = register("stone_device", new BlockStoneDevice(properties()));
+            woodenDevice = register("wooden_device", new BlockWoodenDevice(properties()));
+            magicBox = register("magic_box", new BlockMagicBox(properties()));
+            arcaneDoor = register("arcane_door", new BlockArcaneDoor(properties()));
+            plate = register("arcane_pressure_plate", new BlockArcanePressurePlate(properties()));
         } catch (RuntimeException | LinkageError failure) {
             // The registry cannot be written any more, the resolver cannot be checked.
             cosmetic = null;
@@ -133,6 +147,40 @@ public final class BlockVisibilityTestRegistry implements LauncherSessionListene
         } finally {
             lowerBootstrapFlag(raised);
         }
+    }
+
+    /**
+     * The six blocks of the eldritch family, the ones of the test registry of the family when it
+     * has built them, the blocks of this registry otherwise.
+     */
+    private static BlockEldritch[] eldritchFamily() {
+        java.util.List<Block> family = EldritchTestRegistry.family();
+        if (family.size() == 6) {
+            BlockEldritch[] blocks = new BlockEldritch[family.size()];
+            for (int index = 0; index < blocks.length; ++index) {
+                blocks[index] = (BlockEldritch) family.get(index);
+            }
+            return blocks;
+        }
+        return new BlockEldritch[] {
+                register("eldritch", BlockEldritch.group(0, properties())),
+                register("eldritch_crust", BlockEldritch.group(1, properties())),
+                register("eldritch_deco", BlockEldritch.group(2, properties())),
+                register("eldritch_doorway", BlockEldritch.group(3, properties())),
+                register("eldritch_spawner", BlockEldritch.group(4, properties())),
+                register("eldritch_crystal", BlockEldritch.group(5, properties()))};
+    }
+
+    /**
+     * Registers the block under the id of the production registration, so that the intrusive
+     * holder of the block is bound and the frozen registry accepts it.
+     */
+    private static <T extends Block> T register(String id, T block) {
+        ResourceLocation key = ResourceLocation.fromNamespaceAndPath("thaumcraft", id);
+        if (!BuiltInRegistries.BLOCK.containsKey(key)) {
+            Registry.register(BuiltInRegistries.BLOCK, key, block);
+        }
+        return block;
     }
 
     /** The properties of a block of the port. */

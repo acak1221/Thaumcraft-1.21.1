@@ -2,7 +2,6 @@ package thaumcraft.common.entities.golems;
 
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
@@ -26,13 +25,39 @@ final class GatherGolemGoals {
 
     GatherGolemGoals(EntityGolemBase golem) { this.golem = golem; }
 
-    void install() {
+    /**
+     * The creeper flight of the original, registered FIRST (oracle EntityGolemBase:267-268).
+     *
+     * <p>The original registered it with the number zero, and the 1.7 goal selector walks its list in the order of the
+     * registration, so the golem flees a swelling creeper before every other goal of the golem.</p>
+     */
+    void installCreeperFlight() {
         golem.addWorkGoal(GoalPriority.CREEPER_FLIGHT, new AvoidSwell());
-        golem.addWorkGoal(GoalPriority.SWIM, new FloatGoal(golem) {
-            @Override public boolean canUse() { return golem.canWork() && super.canUse(); }
-            @Override public boolean canContinueToUse() { return golem.canWork() && super.canContinueToUse(); }
-        });
+    }
+
+    /**
+     * The pickup goal of the Gather golem (oracle EntityGolemBase:289-290, the number two).
+     *
+     * <p>It belongs to the goals of the core, so it is registered with them and before the shared goals.</p>
+     */
+    void installGather() {
         if (golem.getGolemCore() == GolemData.GATHER) golem.addWorkGoal(GoalPriority.ITEM_PICKUP, new Pickup());
+    }
+
+    /**
+     * The shared goals of every core, registered AFTER the goals of the core (oracle EntityGolemBase:346-351).
+     *
+     * <p>The 1.21 selector walks its goals in the order of the registration, so the shared goals come last, exactly like
+     * the original, where the goals of the core were registered first and the door, the return home, the watch and the
+     * idle look after them.</p>
+     *
+     * <p>There is NO swimming goal: the original cleared its whole goal list ({@code tasks.taskEntries.clear()}, oracle
+     * EntityGolemBase:265) and registered only its own goals, and 1.7.10 registered the swimming goal in the individual
+     * mobs (the wolf, the horse, the ocelot, the sheep), never in the base classes of a living entity. A native floating
+     * goal would take the MOVE flag of the number one goals of the Decanting and the Alchemy golem, so the port has
+     * none.</p>
+     */
+    void installShared() {
         golem.addWorkGoal(GoalPriority.OPEN_DOOR, new OpenDoorGoal(golem, true) {
             @Override public boolean canUse() { return golem.canWork() && super.canUse(); }
             @Override public boolean canContinueToUse() { return golem.canWork() && super.canContinueToUse(); }

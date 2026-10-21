@@ -313,6 +313,16 @@ public class EntityGolemBase extends AbstractGolem {
         EnumGolemType type = EnumGolemType.getType(getGolemMaterial());
         return type != null && type.fireResist;
     }
+    /**
+     * Original EntityGolemBase:380-382 - the heavy golems (the stone, the iron and the thaumium golem) move twice as fast
+     * in water. The original doubled its own speed value; the native 1.21.1 water movement does not use the movement speed
+     * attribute at all (the water branch of {@code LivingEntity.travel} moves with the constant 0.02), so the port doubles
+     * the movement input of that branch instead - the same doubling of the same movement.
+     */
+    @Override public void travel(Vec3 input) {
+        EnumGolemType type = EnumGolemType.getType(getGolemMaterial());
+        super.travel(type != null && type.heavyWater() && isInWater() ? input.scale(2.0) : input);
+    }
     public int getGolemCore() { return level().isClientSide ? entityData.get(CORE) : core; }
     private static boolean inventoryCore(int value) {
         return value == GolemData.FILL || value == GolemData.EMPTY_CORE || value == GolemData.GATHER || value == GolemData.SORTING;
@@ -791,7 +801,14 @@ public class EntityGolemBase extends AbstractGolem {
     public static final class GoalPriority {
         /** Original {@code AIAvoidCreeperSwell}: the creeper flight outranks every other golem goal. */
         public static final int CREEPER_FLIGHT = 0;
-        /** Original {@code EntityAISwimming}: the native float goal of the golem. */
+        /**
+         * The number the 1.7.10 {@code EntityAISwimming} would have carried. The original golem never had it:
+         * 1.7.10 registered the swimming goal in the individual mobs (the wolf, the horse, the ocelot, the sheep),
+         * never in the base classes of a living entity, and the original golem cleared its whole goal list
+         * ({@code tasks.taskEntries.clear()}, oracle EntityGolemBase:265) before it registered its own goals. The port
+         * has no swimming goal either: a native floating goal would take the MOVE flag away from the goals of the
+         * number one, the emptying of the Decanting and the Alchemy golem.
+         */
         public static final int SWIM = 1;
         /** Original {@code AIItemPickup}: the Gather pickup. */
         public static final int ITEM_PICKUP = 2;
@@ -861,6 +878,12 @@ public class EntityGolemBase extends AbstractGolem {
      * <p>The native goals of this golem already carry the original numbers, which {@link GoalPriority} publishes
      * once: the creeper flight 0, the dart 2, the melee 3, the fill route 4, the door 5, the return home 6, the
      * watch 7 and the idle look 8.</p>
+     *
+     * <p>The ORDER of the registration is the second half of the ladder: the 1.7 selector walked its goal list in the
+     * order of the registration (1.7.10 {@code EntityAITasks.onUpdateTasks}), and the native 1.21.1 selector walks its
+     * goals in the order of the registration as well ({@code GoalSelector.tick} iterates {@code availableGoals}). The
+     * original registered the creeper flight first, then the goals of the core and only then the door, the return home,
+     * the watch and the idle look, and the port installs them in the same order.</p>
      */
     public static int nativeGoalPriority(int originalPriority) { return originalPriority; }
 
@@ -893,7 +916,9 @@ public class EntityGolemBase extends AbstractGolem {
      * with the same transfers.</li>
      * <li>Fishing (11): Fish2 -> the fishing goal at 2.</li>
      * <li>Every core: AvoidCreeperSwell0, OpenDoor5, ReturnHome6, WatchClosest7 and LookIdle8 -> the creeper
-     * flight, the door, the return home, the watch and the idle look.</li>
+     * flight, the door, the return home, the watch and the idle look. There is no swimming goal: the original
+     * cleared its goal list and registered only its own goals, and 1.7.10 registered the swimming goal in the
+     * individual mobs, never in the base class of a living entity.</li>
      * </ul>
      *
      * <p>The ported TC4 goal set ({@code thaumcraft.common.entities.ai}) was therefore superseded and is NOT
@@ -919,7 +944,10 @@ public class EntityGolemBase extends AbstractGolem {
         boolean enabled = EnumGolemType.isSupported(material) && !unsupported && hasSupportedCore();
         if (getNavigation() instanceof GroundPathNavigation ground) ground.setCanOpenDoors(enabled);
         if (enabled) {
-            work.install();
+            // The original registers the creeper flight first (the number zero, oracle EntityGolemBase:267-268), then the
+            // goals of the core, and only then the shared goals (oracle EntityGolemBase:346-351). The 1.21 selector walks
+            // its goals in the order of the registration, so the order of the installation IS the ladder.
+            work.installCreeperFlight();
             if (core == GolemData.HARVEST) harvest.install();
             else if (core == GolemData.LUMBER) lumber.install();
             else if (core == GolemData.GUARD || core == GolemData.BUTCHER) guard.install();
@@ -927,7 +955,9 @@ public class EntityGolemBase extends AbstractGolem {
             else if (core == GolemData.LIQUID) liquid.install();
             else if (core == GolemData.ALCHEMY) alchemy.install();
             else if (core == GolemData.USE) use.install();
-            else if (inventoryCore(core) && core != GolemData.GATHER) inventories.install();
+            else if (core == GolemData.GATHER) work.installGather();
+            else if (inventoryCore(core)) inventories.install();
+            work.installShared();
         }
     }
     boolean hasInventoryRoute() {
@@ -2389,17 +2419,33 @@ public class EntityGolemBase extends AbstractGolem {
             if (!level().isClientSide) recall(player, player.isShiftKeyDown());
             return false; // Bell failure is NOT permission to apply ordinary damage.
         }
-        // Original EntityGolemBase:1131-1138. The golem and the traveling trunk share one immunity: the original's
-        // DamageSource.field_76367_g, the "inWall" source of 1.7.10 (the same source the 1.12.2 line of this mod names
-        // DamageSource.IN_WALL), so the golem never suffocates in the wall it is teleported into.
-        if (source.is(DamageTypes.CACTUS)) return false;
+        // Original EntityGolemBase:1131-1134. The golem and the traveling trunk share one immunity: the original's
+        // DamageSource.field_76367_g, the 1.7.10 "cactus" source (1.7.10 DamageSource.cactus), NOT the in-wall one.
+        if (GolemDamageRules.isImmuneSource(source)) return false;
         // Original EntityGolemBase:1136-1138: a thaumium golem takes half of the magic damage. The original's
-        // DamageSource.field_76376_m is the 1.7.10 "magic" source, the one 1.21.1 keeps as
-        // DamageTypes.MAGIC.
+        // DamageSource.field_76376_m is the 1.7.10 "magic" source (1.7.10 DamageSource.magic), NOT the indirect one.
         amount = GolemDamageRules.amount(EnumGolemType.getType(getGolemMaterial()) == EnumGolemType.THAUMIUM,
-                source.is(DamageTypes.MAGIC), amount);
+                GolemDamageRules.isMagicSource(source), amount);
+        // Original EntityGolemBase:740-742: the in-wall and the out-of-world damage set the golem back onto its home
+        // before the damage lands. The original reads DamageSource.field_76368_d (inWall) and field_76380_i (outOfWorld).
+        if (level() instanceof ServerLevel server && (source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.FELL_OUT_OF_WORLD))) {
+            returnHomeFromDamage(server);
+        }
         reflectThorns(source);
         return super.hurt(source, amount);
+    }
+    /**
+     * Original EntityGolemBase:740-742 - the golem that takes the in-wall or the out-of-world damage is set back onto its
+     * home block before the damage lands. The original writes the position of the home block itself and resets the
+     * rotation to zero; the port keeps the home block of the golem and its own rotation, and refuses a home that is not
+     * loaded, so the golem never lands inside an unloaded chunk.
+     */
+    private void returnHomeFromDamage(ServerLevel server) {
+        BlockPos home = getHomePosition();
+        if (!hasHome || !server.hasChunkAt(home) || server.isOutsideBuildHeight(home)) return;
+        moveTo(home.getX() + .5, home.getY() + .5, home.getZ() + .5, getYRot(), getXRot());
+        fallDistance = 0;
+        getNavigation().stop();
     }
     /**
      * Entropy thorns (original E:1139-1142): before the ordinary damage, whatever DIRECTLY damaged the golem

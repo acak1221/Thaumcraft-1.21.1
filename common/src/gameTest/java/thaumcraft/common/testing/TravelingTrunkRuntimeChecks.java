@@ -319,14 +319,13 @@ public final class TravelingTrunkRuntimeChecks {
 
         private void damageRules() {
             var trunk = trunk(base.offset(4, 0, 0), TrunkRules.NO_UPGRADE, owner);
-            // Oracle EntityTravelingTrunk:106-114 - the original ignores exactly one damage source,
-            // DamageSource.field_76367_g, which the 1.7.10 MCP mapping resolves to the "cactus"
-            // source. The 1.12.2 line of this mod names a different field IN_WALL, which is why the
-            // legacy reference reads as IN_WALL. So a cactus does nothing and being in a wall hurts.
+            // The original ignores the 1.7.10 "cactus" source (DamageSource.field_76367_g, the
+            // 1.7.10 DamageSource.cactus) and nothing else, so a cactus does not hurt the
+            // trunk and being in a wall does.
             test.assertTrue(!trunk.hurt(level.damageSources().cactus(), 5F) && trunk.getHealth() == 75F,
-                    "a cactus does nothing: " + trunk.getHealth());
+                    "the cactus source does nothing: " + trunk.getHealth());
             test.assertTrue(trunk.hurt(new net.minecraft.world.damagesource.DamageSource(level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getOrThrow(net.minecraft.world.damagesource.DamageTypes.IN_WALL)), 5F) && trunk.getHealth() == 70F,
-                    "being in a wall hurts: " + trunk.getHealth());
+                    "being in a wall hurts the trunk: " + trunk.getHealth());
             test.assertTrue(trunk.fireImmune() && trunk.getType().fireImmune(), "fire does not harm it");
             owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
             // The original arms the entity against a second hit in the same tick

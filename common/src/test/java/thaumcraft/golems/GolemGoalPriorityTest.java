@@ -46,11 +46,21 @@ class GolemGoalPriorityTest {
 
     @Test void theSharedGoalsKeepTheirOriginalNumbers() {
         assertEquals(0, GoalPriority.CREEPER_FLIGHT, "AIAvoidCreeperSwell, the highest 1.7 precedence");
-        assertEquals(1, GoalPriority.SWIM, "EntityAISwimming");
         assertEquals(5, GoalPriority.OPEN_DOOR, "AIOpenDoor");
         assertEquals(6, GoalPriority.RETURN_HOME, "AIReturnHome");
         assertEquals(7, GoalPriority.WATCH_CLOSEST, "EntityAIWatchClosest");
         assertEquals(8, GoalPriority.LOOK_IDLE, "EntityAILookIdle");
+    }
+
+    @Test void theOriginalGolemHadNoSwimmingGoal() {
+        // 1.7.10 registered EntityAISwimming in the individual mobs (the wolf, the horse, the ocelot, the sheep),
+        // never in EntityLiving/EntityLivingBase/EntityCreature/EntityGolem, and the original golem cleared its
+        // whole goal list (tasks.taskEntries.clear(), oracle EntityGolemBase:265) before it registered its own goals.
+        // The number the swimming goal would have carried is published, but no goal of the golem carries it: the
+        // number one belongs to the emptying of the Decanting and of the Alchemy golem.
+        assertEquals(1, GoalPriority.SWIM);
+        assertEquals(1, GoalPriority.LIQUID_EMPTY);
+        assertEquals(1, GoalPriority.ESSENTIA_EMPTY);
     }
 
     // ---- the combat goals ------------------------------------------------------------------------------------------

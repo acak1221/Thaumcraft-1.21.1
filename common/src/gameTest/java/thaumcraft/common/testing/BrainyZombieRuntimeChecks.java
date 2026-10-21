@@ -202,7 +202,24 @@ public final class BrainyZombieRuntimeChecks {
             long oldTime = level.getDayTime();
             try {
                 level.setDayTime(6000); level.updateSkyBrightness();
-                test.assertTrue(!SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), level, MobSpawnType.NATURAL, origin, RandomSource.create(7)), "registered native placement rejects bright daytime");
+                // The original EntityMob.isValidLightLevel is a ROLL, not a daylight switch: the
+                // saved sky light of the cell against nextInt(32) and the block light against
+                // nextInt(8). A bright cell is therefore refused by some seeds and admitted by
+                // the others, exactly as the original does.
+                System.out.println("LIGHTDIAG sky=" + level.getBrightness(net.minecraft.world.level.LightLayer.SKY, origin)
+                        + " block=" + level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, origin)
+                        + " roll7=" + RandomSource.create(7).nextInt(32));
+                for (long seed = 0; seed < 4; ++seed) {
+                    var probe = RandomSource.create(seed);
+                    System.out.println("LIGHTDIAG seed=" + seed + " roll=" + probe.nextInt(32)
+                            + " placement=" + SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), level, MobSpawnType.NATURAL, origin, RandomSource.create(seed))
+                            + " direct=" + thaumcraft.common.entities.monster.EntityBrainyZombie.checkBrainySpawnRules(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), level, MobSpawnType.NATURAL, origin, RandomSource.create(seed)));
+                }
+                int daytimeRefused = 0;
+                for (long seed = 0; seed < 64; ++seed) {
+                    if (!SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), level, MobSpawnType.NATURAL, origin, RandomSource.create(seed))) daytimeRefused++;
+                }
+                test.assertTrue(daytimeRefused > 0 && daytimeRefused < 64, "the bright daytime cell follows the original32 sky roll, not a daylight switch: " + daytimeRefused + " of 64 refused");
                 level.setDayTime(18000); level.updateSkyBrightness(); boolean allowed = false;
                 for (long seed = 0; seed < 500 && !allowed; seed++) allowed = SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), level, MobSpawnType.NATURAL, origin, RandomSource.create(seed));
                 test.assertTrue(allowed, "registered native placement admits a supported dark night cell through the original32/8 light rolls");

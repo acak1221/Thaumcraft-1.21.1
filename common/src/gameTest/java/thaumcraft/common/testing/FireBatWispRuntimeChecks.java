@@ -178,7 +178,14 @@ public final class FireBatWispRuntimeChecks {
             }
             long time=level.getDayTime();
             try {
-                level.setDayTime(6000);level.updateSkyBrightness();test.assertTrue(!SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.FIREBAT.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(2)) && !SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.WISP.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(2)),"both registered placement predicates reject bright day");
+                // The original light rule is a ROLL: the saved sky light of the cell against
+                // nextInt(32) and the block light against nextInt(8). A bright cell is refused
+                // by some seeds and admitted by the others, exactly as the original does.
+                level.setDayTime(6000);level.updateSkyBrightness();
+                int refused=0;for(long seed=0;seed<64;++seed){
+                    if(!SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.FIREBAT.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed))
+                            ||!SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.WISP.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed)))refused++;}
+                test.assertTrue(refused>0&&refused<64,"both registered placement predicates follow the original32 sky roll, not a daylight switch: "+refused+" of 64 refused");
                 level.setDayTime(18000);level.updateSkyBrightness();boolean batAllowed=false,wispAllowed=false;
                 for(int seed=0;seed<1000;seed++) {batAllowed|=SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.FIREBAT.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed));wispAllowed|=SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.WISP.get(),level,MobSpawnType.NATURAL,origin,RandomSource.create(seed));}
                 test.assertTrue(batAllowed && wispAllowed,"both native placement predicates admit dark air without invented ground requirement");

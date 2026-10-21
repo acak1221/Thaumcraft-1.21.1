@@ -32,6 +32,12 @@ public enum EnumGolemType {
         };
     }
 
+    /**
+     * Original EntityGolemBase:380-382 - the stone, the iron and the thaumium golem move twice as fast in water.
+     * The 1.12 legacy line of this mod calls the same three materials its "heavy water golem".
+     */
+    public boolean heavyWater() { return this == STONE || this == IRON || this == THAUMIUM; }
+
     private EnumGolemType(int health, int armor, float speed, boolean fireResist,
                           int upgrades, int carry, int regenDelay, int strength) {
         this.health = health;

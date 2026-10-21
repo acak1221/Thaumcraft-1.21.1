@@ -1,3 +1,71 @@
+## 2026-10-21 — The golems of the 1.7.10 oracle: the damage sources, the goal ladder and the heavy water golem
+
+The readable 1.7.10 vanilla sources (`/home/Acak/work/mc1710-src`) settled three questions the
+previous audit of the golems had left open, and every change below follows the oracle
+(`/home/Acak/work/thaumcraft-4.2.3.5-oracle`) and that vanilla tree, never the 1.12 legacy line
+of this repository, whose SRG-to-MCP mapping resolves the same fields to other names.
+
+**The two damage sources of the golem and of the traveling trunk were the wrong ones.** Oracle
+`thaumcraft/common/entities/golems/EntityGolemBase.java`:1131-1134 refuses
+`DamageSource.field_76367_g` and `:1136-1138` halves `DamageSource.field_76376_m` for a thaumium
+golem; oracle `thaumcraft/common/entities/golems/EntityTravelingTrunk.java`:106-109 refuses the
+same first source. In 1.7.10 those fields are `DamageSource.cactus` ("cactus") and
+`DamageSource.magic` ("magic") — 1.7.10 `net/minecraft/util/DamageSource.java`:25 and `:29` — and
+`scripts/porting/resolve_srg.py` resolves them the same way. The port tested
+`DamageTypes.IN_WALL` and `DamageTypes.INDIRECT_MAGIC`, the names the 1.12 mapping gives to
+those SRG fields, so a golem never suffocated and a thaumium golem lost half of the *indirect*
+magic damage instead of half of the magic damage. The new pure rules
+`thaumcraft.common.items.golems.GolemDamageRules` (`IMMUNE_SOURCE = DamageTypes.CACTUS`,
+`MAGIC_SOURCE = DamageTypes.MAGIC`) carry the two sources and are used by the golem
+(`EntityGolemBase.hurt`) and by the trunk (`EntityTravelingTrunk.hurt`).
+
+**The golem had a swimming goal the original never had.** Oracle `EntityGolemBase.java`:265
+clears the whole goal list (`tasks.taskEntries.clear()`) and registers only its own goals, and
+1.7.10 registered `EntityAISwimming` in the individual mobs (the wolf, the horse, the ocelot, the
+sheep), never in `EntityLiving`, `EntityLivingBase`, `EntityCreature` or `EntityGolem`. The port
+installed a native `FloatGoal` with the number one, and the native selector hands the `MOVE`
+flag to the first registered goal of a number, so the float goal took the flag away from the
+emptying goals of the number one (the Decanting and the Alchemy golem) and could not be
+preempted by the goals of the numbers two and three. The float goal is gone.
+
+**The order of the registration is the second half of the ladder.** The 1.7 selector walks its
+goal list in the order of the registration (1.7.10 `EntityAITasks.onUpdateTasks`:49-85) and the
+native `GoalSelector.tick()` walks `availableGoals` in the order of the registration as well.
+The original registered the creeper flight (the number zero), then the goals of the core and only
+then the door, the return home, the watch and the idle look; the port installed the shared goals
+first, so they took the `MOVE` and the `LOOK` flags before the goals of the core could use them.
+The installation now follows the original order.
+
+**The golem did not come home when it suffocated or fell out of the world.** Oracle
+`EntityGolemBase.java`:740-742 sets the golem back onto its home block when the damage source is
+`DamageSource.field_76368_d` (the 1.7.10 "inWall") or `DamageSource.field_76380_i` (the 1.7.10
+"outOfWorld"). The port had no such rule. It has one now, with the documented difference that the
+port keeps the rotation of the golem and refuses a home that is not loaded.
+
+**The heavy golems move twice as fast in water.** Oracle `EntityGolemBase.java`:380-382 doubles
+the speed of the stone, the iron and the thaumium golem while it is in water. The native water
+branch of `LivingEntity.travel` moves with the constant 0.02 and does not use the movement speed
+attribute at all, so the port doubles the movement input of that branch — the same doubling of
+the same movement.
+
+The champion system was checked against the oracle as well and needed no change: the thirteen
+modifiers (the grim one withers with `Potion.field_82731_v`, the sickly one starves with
+`Potion.field_76438_s`), the warded champion with half of its *total* maximum health
+(`EntityUtils.makeChampion`:271-274), the class whitelist of `ConfigEntities`:195-208 resolved by
+id **and** class (the cave spider, the cultist knight and cleric, the mind spider and the taintacle
+giant), the spawn roll of `EventHandlerEntity.entitySpawns`:389-421, the three dozen exact numbers
+of the golem (materials, accessories, upgrades, ranges, capacities) and the recipes of the cores
+and of the placers were all verified and are exact. The mighty champion deals six times the base
+damage in the original, because the 1.7 attribute multiplies the running total twice; the native
+`ADD_MULTIPLIED_TOTAL` was measured on a real `AttributeInstance` and multiplies the same way,
+so the port needed no change either.
+
+New JUnit tests pin the corrected damage sources and the missing swimming goal; the damage rules
+of the traveling trunk in the GameTest source set follow the corrected source. Local:
+`:common:compileJava`, `:common:compileTestJava`, `:common:compileGameTestJava` and
+`:common:test` pass — 1669 JUnit tests in 241 suites, 0 failures. No client visual, multiplayer
+or NeoForge acceptance is claimed; the GameTest set was compiled but not run.
+
 ## 2026-10-21 — Outer Lands eldritch variants: the metadata table, the lock key and the boss lock
 
 Every eldritch block of the Outer Lands was placed through one native block, `thaumcraft:eldritch`,

@@ -159,9 +159,19 @@ public final class BellowsRuntimeChecks {
                 test.assertTrue(((TileBellows) level.getBlockEntity(adjacent)).isPowered(), "crucible fixture bellows is actually powered: " + side);
             }
             test.assertTrue(TileBellows.getBellows(level, pos, Direction.Plane.HORIZONTAL) == 0, "powered, outward nozzles supply no directional machine boost");
+            // Original TileCrucible:69 and :98-100 - the bellows are counted ONCE, on the first
+            // tick, and the count is never invalidated, so a bellows that is placed later is not
+            // seen by the crucible any more.
             TileCrucible.tick(level, pos, level.getBlockState(pos), crucible);
-            test.assertTrue(crucible.getHeat() == 10 && crucible.getWaterAmount() == 1000 && crucible.tagAmount() == 0,
-                    "all four actual adjacent bellows still add two crucible heat each, regardless of power or direction");
+            test.assertTrue(crucible.getHeat() == 2 && crucible.getWaterAmount() == 1000 && crucible.tagAmount() == 0,
+                    "the cached bellows count of the original does not see a bellows placed after the first tick");
+            // A fresh crucible tile counts the four bellows again and heats by one plus two each.
+            set(level, pos, ThaumcraftAlchemy.CRUCIBLE.get().defaultBlockState());
+            var counted = (TileCrucible) level.getBlockEntity(pos);
+            counted.fillWater(1000, true);
+            TileCrucible.tick(level, pos, level.getBlockState(pos), counted);
+            test.assertTrue(counted.getHeat() == 9 && counted.getWaterAmount() == 1000 && counted.tagAmount() == 0,
+                    "all four actual adjacent bellows add two crucible heat each, regardless of power or direction");
         } finally {
             try {
                 for (BlockPos saved : states.keySet()) level.removeBlockEntity(saved);

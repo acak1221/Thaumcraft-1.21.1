@@ -109,8 +109,11 @@ public final class TaintacleRuntimeChecks {
             var saved=new CompoundTag();child.saveWithoutId(saved);var reloaded=new EntityTaintacleSmall(a.level);reloaded.load(saved);reloaded.setUUID(java.util.UUID.randomUUID());reloaded.setNoGravity(true);reloaded.setNoAi(true);terrain.owned.add(reloaded);
             a.require(a.level.addFreshEntity(reloaded),"actual native save/reload produces an independent lifetime owner");
             tick(a,reloaded,1);a.require(reloaded.isAlive()&&reloaded.getHealth()==8,"original transient lifetime reloads fresh rather than serializing exhausted200 ticks");
-            tick(a,child,1);a.require(child.isDeadOrDying()&&child.getHealth()==0&&child.getCombatTracker().getDeathMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents message&&message.getKey().equals("death.attack.drown"),
-                    "post-decrement lifetime applies protected drown10 on real update201");
+            // Oracle EntityTaintacleSmall:38-42 - the lifetime ends with the damage source
+            // DamageSource.field_76376_m, which the 1.7.10 MCP mapping resolves to the "magic"
+            // source, and ten points of damage.
+            tick(a,child,1);a.require(child.isDeadOrDying()&&child.getHealth()==0&&child.getCombatTracker().getDeathMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents message&&message.getKey().equals("death.attack.magic"),
+                    "post-decrement lifetime applies the original magic10 on real update201");
             var drops=a.level.getEntitiesOfClass(ItemEntity.class,child.getBoundingBox().inflate(2));
             a.require(drops.isEmpty(),"ordinary Small death produces no custom tendril/goo loot");
             reloaded.discard();

@@ -73,7 +73,7 @@ public final class MonsterSpriteParticle extends SingleQuadParticle {
         if(kind!=Kind.BURST) {
             yd-=.04*gravity;
             // The original FXWisp:194-196 pushes the mote out of the solid blocks it ends up inside.
-            var motion=ParticleDeflection.pushOutOfBlocks(level,random,x,y,z,xd,yd,zd);
+            var motion=ParticleDeflection.pushOutOfBlocks(level,random,getBoundingBox(),x,y,z);
             if(motion!=null){xd=motion.x();yd=motion.y();zd=motion.z();}
             move(xd,yd,zd);xd*=.98F;yd*=.98F;zd*=.98F;if(onGround){xd*=.7F;zd*=.7F;}
         }

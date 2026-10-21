@@ -194,7 +194,7 @@ public final class InfusionParticle extends SingleQuadParticle {
         if (kind == Kind.ESSENTIA) yd += .002;
         // The original FXEssentiaTrail:115 pushes the mote out of the solid blocks it ends up inside.
         if (kind == Kind.ESSENTIA) {
-            var motion = ParticleDeflection.pushOutOfBlocks(level, random, x, y, z, xd, yd, zd);
+            var motion = ParticleDeflection.pushOutOfBlocks(level, random, getBoundingBox(), x, y, z);
             if (motion != null) { xd = motion.x(); yd = motion.y(); zd = motion.z(); }
         }
         moveLoaded();

@@ -139,6 +139,10 @@ final class FocusClientSequence {
         if (ticks > 1800) throw new IllegalStateException("Focus client step timed out: " + step
                 + "; screen=" + (client.screen == null ? "none" : client.screen.getClass().getName())
                 + "; selected=" + client.player.getInventory().selected + "; hand=" + client.player.getMainHandItem()
+                + "; hand_components=" + client.player.getMainHandItem().getComponents()
+                + "; slot7=" + client.player.getInventory().getItem(7).getComponents()
+                + "; server_hand=" + (client.getSingleplayerServer() == null ? "none"
+                        : client.getSingleplayerServer().getPlayerList().getPlayer(client.player.getUUID()).getMainHandItem().getComponents())
                 + "; using=" + client.player.isUsingItem() + "; selections=" + selectionPackets + "; swaps=" + offhandSwapPackets.get());
         if (castProbe != null && castProbe.failure != null) throw new IllegalStateException("Native cast observation failed", castProbe.failure);
         if (wireObservationFailure != null) throw new IllegalStateException("Native packet observation failed", wireObservationFailure);

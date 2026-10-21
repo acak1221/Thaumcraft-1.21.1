@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "mixins": [
-    "GameTestHelperMockConnectionMixin"
+    "GameTestHelperMockConnectionMixin",
+    "BoreNativeGameEventMixin",
+    "GameTestSelectionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

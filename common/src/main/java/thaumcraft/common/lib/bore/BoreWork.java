@@ -1,6 +1,5 @@
 package thaumcraft.common.lib.bore;
 
-import dev.architectury.event.events.common.BlockEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
@@ -422,7 +421,7 @@ public final class BoreWork {
         ServerPlayer actor = platform.actor(f.level);
         ActorLease lease = new ActorLease(f.level, actor, platform);
         if (!harvestable(f) || !lease.valid() || !f.level.mayInteract(actor, f.before.targetPos())) { f.refuse(); return; }
-        if (BlockEvent.BREAK.invoker().breakBlock(f.level, f.before.targetPos(), f.before.targetState(), actor, null).isFalse()) { f.refuse(); return; }
+        if (!platform.sharedBreak(f.level, actor, f.before.targetPos(), f.before.targetState())) { f.refuse(); return; }
         if (!harvestable(f) || !lease.valid()) { f.refuse(); return; }
         boolean allowed = platform.before(f.level, actor, f.before.targetPos(), f.before.targetState());
         if (!allowed) {

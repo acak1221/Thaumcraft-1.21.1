@@ -50,6 +50,19 @@ public final class GolemHarvestPlatform {
     public interface Bridge {
         ServerPlayer actor(ServerLevel level);
         boolean isNativeActor(ServerPlayer actor);
+        /**
+         * The shared break protection notification of the machine actor.
+         *
+         * <p>The shared {@code BlockEvent.BREAK} of Architectury is the notification every loader
+         * owes to the other mods, and it must be delivered EXACTLY once for one break: the
+         * Fabric loader has no native counterpart of it, so the loader delivers it here; the
+         * NeoForge loader's native cancellable break event already delivers it, so its
+         * implementation answers without a second notification. Two notifications would let a
+         * listener of the shared event observe two breaks for one removal.</p>
+         *
+         * @return whether the break may continue.
+         */
+        boolean sharedBreak(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state);
         boolean before(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state);
         void canceled(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state);
         void after(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state);
@@ -114,7 +127,7 @@ public final class GolemHarvestPlatform {
             actor.setYRot(golem.getYRot());
             actor.setXRot(golem.getXRot());
             if (!waterEligible(level, golem, chunk, pos, expected) || !level.mayInteract(actor, pos)) return false;
-            if (BlockEvent.BREAK.invoker().breakBlock(level, pos, expected, actor, null).isFalse()) {
+            if (!platform.sharedBreak(level, actor, pos, expected)) {
                 platform.canceled(level, actor, pos, expected);
                 return false;
             }
@@ -268,7 +281,7 @@ public final class GolemHarvestPlatform {
             actor.setYRot(golem.getYRot());
             actor.setXRot(golem.getXRot());
             if (!eligible.test(level, golem, pos, expected) || !level.mayInteract(actor, pos)) return false;
-            if (BlockEvent.BREAK.invoker().breakBlock(level, pos, expected, actor, null).isFalse()) {
+            if (!platform.sharedBreak(level, actor, pos, expected)) {
                 platform.canceled(level, actor, pos, expected);
                 return false;
             }

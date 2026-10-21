@@ -48,6 +48,8 @@ cfr.jar
 # Track modern Windows wrapper.
 
 .gradle21/
+# Isolated Gradle home of the NeoForge module (its own Loom cache).
+.gradle-neoforge/
 common/build/
 fabric/build/
 neoforge/build/

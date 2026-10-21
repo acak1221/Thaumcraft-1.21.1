@@ -1,13 +1,17 @@
 package thaumcraft.client.renderers.tile;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
@@ -21,16 +25,24 @@ import thaumcraft.common.tiles.TileEtherealBloom;
  * leaf quads, four petal quads, four stalk quads, the crystal capacitor cube
  * in the middle and the light strip that shines out of the plant.
  *
- * <p>Deviation: the original light strip is a 1.7 fixed function helper that
- * scrolls a texture along the plant. The native port draws the same strip with
- * the same {@code nodes.png} texture as an additive quad, which keeps the
- * original texture and colour but not the original scrolling.
+ * <p>The light strip of the original (oracle
+ * {@code thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:74-79}) is the 1.7 fixed
+ * function helper {@code UtilsFX.renderFacingStrip(x + 0.5, y + scale1, z + 0.5, 0, scale1, 1.0, 32, 6,
+ * counter % 32, partialTick, 0xAADDFF)}: a camera facing square of the half size {@code scale1} that
+ * shows the cell {@code (counter % 32, 6)} of the thirty two by thirty two grid of the
+ * {@code nodes.png} texture and that is drawn with the additive blend {@code (770, 1)}.
  */
 public final class TileEtherealBloomRenderer implements BlockEntityRenderer<TileEtherealBloom> {
     /** The original texture of the crystal capacitor in the middle of the bloom. */
     public static final ResourceLocation CAPACITOR = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/crystalcapacitor.png");
     /** The original texture of the light strip. */
     public static final ResourceLocation NODES = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/nodes.png");
+    /** The original number of cells of the nodes texture. */
+    public static final int STRIP_CELLS = 32;
+    /** The original row of the nodes texture the light strip shows. */
+    public static final int STRIP_ROW = 6;
+
+    private static final RenderType STRIP = new StripRenderType();
 
     private final ModelCube cube = new ModelCube(0);
 
@@ -46,12 +58,24 @@ public final class TileEtherealBloomRenderer implements BlockEntityRenderer<Tile
         float scaleLeaves = leaves / 60.0F + .1666666F;
         float scaleStem = stem / 33.0F;
         float scaleCore = core / 33.0F * .7F;
-        // The light strip of the original.
+        // The light strip of the original: the camera facing square of the half size scale1 that shows
+        // the cell (counter % 32, 6) of the nodes texture, drawn with the additive blend (770, 1).
         pose.pushPose();
         try {
             pose.translate(.5F, scalePetals, .5F);
-            var strip = buffers.getBuffer(RenderType.entityTranslucent(NODES));
-            quad(pose, strip, .5F, .5F, 0xAADDFF, light, overlay);
+            pose.mulPose(Minecraft.getInstance().gameRenderer.getMainCamera().rotation());
+            int frame = tile.counter % STRIP_CELLS;
+            float u0 = frame / (float) STRIP_CELLS;
+            float u1 = (frame + 1F) / STRIP_CELLS;
+            float v0 = STRIP_ROW / (float) STRIP_CELLS;
+            float v1 = (STRIP_ROW + 1F) / STRIP_CELLS;
+            var strip = buffers.getBuffer(STRIP);
+            // The original vertex order of UtilsFX.renderFacingStrip: the bottom left corner of the
+            // camera square carries the right edge of the cell, the top right one its left edge.
+            vertex(strip, pose, -scalePetals, -scalePetals, u1, v1);
+            vertex(strip, pose, -scalePetals, scalePetals, u1, v0);
+            vertex(strip, pose, scalePetals, scalePetals, u0, v0);
+            vertex(strip, pose, scalePetals, -scalePetals, u0, v1);
         } finally {
             pose.popPose();
         }
@@ -139,15 +163,46 @@ public final class TileEtherealBloomRenderer implements BlockEntityRenderer<Tile
         }
     }
 
-    /** The light strip of the original, a quad of half a block. */
-    private static void quad(PoseStack pose, VertexConsumer out, float half, float height, int color, int light, int overlay) {
-        float[][] corners = {{-half, height}, {half, height}, {half, 0.0F}, {-half, 0.0F}};
-        float[][] uv = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
-        for (int index = 0; index < 4; index++) {
-            out.addVertex(pose.last(), corners[index][0], corners[index][1], 0.0F)
-                    .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, 255)
-                    .setUv(uv[index][0], uv[index][1]).setOverlay(overlay).setLight(light)
-                    .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
+    /**
+     * A vertex of the light strip of the original: the colour is the original {@code 0xAADDFF} with the
+     * original alpha of one, and the texture cell is the one the original scroll frame asks for.
+     */
+    private static void vertex(VertexConsumer out, PoseStack pose, float x, float y, float u, float v) {
+        out.addVertex(pose.last(), x, y, 0.0F)
+                .setColor(0xAA, 0xDD, 0xFF, 255)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightTexture.FULL_BRIGHT)
+                .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
+    }
+
+    /**
+     * The light strip of the original: the additive blend {@code (770, 1)}, no culling, no depth write.
+     */
+    private static final class StripRenderType extends RenderType {
+        private static final TextureStateShard NODES_TEXTURE = new TextureStateShard(NODES, false, false);
+
+        private StripRenderType() {
+            super("thaumcraft_bloom_strip", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS,
+                    4096, false, true, StripRenderType::begin, StripRenderType::end);
+        }
+
+        private static void begin() {
+            RENDERTYPE_EYES_SHADER.setupRenderState();
+            NODES_TEXTURE.setupRenderState();
+            LIGHTNING_TRANSPARENCY.setupRenderState(); // SRC_ALPHA / ONE, the original blend (770, 1).
+            NO_CULL.setupRenderState();
+            LEQUAL_DEPTH_TEST.setupRenderState();
+            COLOR_WRITE.setupRenderState();
+        }
+
+        private static void end() {
+            COLOR_WRITE.clearRenderState();
+            LEQUAL_DEPTH_TEST.clearRenderState();
+            NO_CULL.clearRenderState();
+            LIGHTNING_TRANSPARENCY.clearRenderState();
+            NODES_TEXTURE.clearRenderState();
+            RENDERTYPE_EYES_SHADER.clearRenderState();
         }
     }
 }

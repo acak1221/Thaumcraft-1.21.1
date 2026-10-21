@@ -10,6 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.client.fx.RuneEffects;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -239,6 +241,20 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
             case EldritchBlockRules.ELDRITCH_CRYSTAL -> new TileEldritchCrystal(pos, state);
             default -> null;
         };
+    }
+
+    /**
+     * The original random update of the runed eldritch block (oracle
+     * {@code thaumcraft/common/blocks/BlockEldritch.java:302-304}): the rune floats in one of the
+     * neighbouring air blocks. The 1.21.1 client equivalent of the random update is the client tick
+     * of the block, with the same average rate of the original.
+     */
+    @Override public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        super.animateTick(state, level, pos, random);
+        if (variant(state) != EldritchBlockRules.ELDRITCH_RUNED) return;
+        if (!(level instanceof net.minecraft.client.multiplayer.ClientLevel client)) return;
+        if (!RuneEffects.randomUpdate(random)) return;
+        RuneEffects.eldritchRune(client, pos);
     }
 
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

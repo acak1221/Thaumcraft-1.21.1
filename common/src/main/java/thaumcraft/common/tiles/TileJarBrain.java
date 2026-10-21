@@ -116,7 +116,10 @@ public final class TileJarBrain extends BlockEntity {
         ExperienceOrb orb = jar.xp < jar.xpMax ? closestOrb(level, pos) : null;
         net.minecraft.world.entity.Entity look = orb;
         if (look == null) {
-            Player player = level.getNearestPlayer(pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, 6.0D, false);
+            // The original TileJarBrain:69 uses the 1.7.10 world.getClosestPlayer(x, y, z, 6.0), the closest
+            // player that is neither in creative mode nor a spectator. The 1.21.1 signature of the same
+            // search is getNearestPlayer(x, y, z, distance, excludeCreativePlayers).
+            Player player = level.getNearestPlayer(pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, 6.0D, true);
             if (player != null && jar.lastSigh < System.currentTimeMillis()) {
                 level.playSound(null, pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, BRAIN,
                         SoundSource.BLOCKS, .15F, .8F + level.random.nextFloat() * .4F);

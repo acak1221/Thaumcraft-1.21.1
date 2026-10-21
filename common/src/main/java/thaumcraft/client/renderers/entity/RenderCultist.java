@@ -1,7 +1,6 @@
 package thaumcraft.client.renderers.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -12,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
+import thaumcraft.client.fx.FloatyLine;
 import thaumcraft.common.entities.monster.EntityCultistCleric;
 import thaumcraft.common.entities.monster.EntityCultistLeader;
 
@@ -68,110 +68,31 @@ public final class RenderCultist<T extends Mob> extends MobRenderer<T, HumanoidM
     }
 
     /**
-     * Original RenderCultist:83-163 - the two ribbons of the link line of the ritualist
-     * cleric. The line starts at the eyes of the cleric and ends one and a half blocks
-     * above the ritual target; it waves with the world lattice and it scrolls with the
-     * original speed.
+     * The original link line of the ritualist cleric.
+     *
+     * <p>Original RenderCultist.java:83-163 is its own copy of the floaty line helper: the two
+     * crossed ribbons with the ordinary alpha blend, the depth write and the constant alpha
+     * {@code 0.8f}. The native port draws the same two ribbons through the shared helper
+     * {@code thaumcraft.client.fx.FloatyLine}.</p>
      */
     private static void drawLink(EntityCultistCleric cleric, float bob, int light, PoseStack pose, MultiBufferSource buffers) {
         BlockPos home = cleric.getRitualTarget();
         if (home == null) return;
-        // The original start point: the position of the cleric and one and a fifth of its
-        // eye height above it. The original end point: the middle of the ritual target and
-        // one and a half blocks above it, less the bob that the matrix already adds.
-        double startX = cleric.getX();
-        double startY = cleric.getY() + cleric.getEyeHeight() * 1.2F;
-        double startZ = cleric.getZ();
-        double endX = home.getX() + .5D;
-        double endY = home.getY() + 1.5D - bob;
-        double endZ = home.getZ() + .5D;
-        // The ribbon is drawn in the space of the entity, so the end point is relative to it.
-        double localEndX = endX - startX;
-        double localEndY = endY - startY;
-        double localEndZ = endZ - startZ;
-        double deltaX = startX - endX;
-        double deltaY = startY - endY;
-        double deltaZ = startZ - endZ;
-        double distanceWorld = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-        float blocks = Math.round((float) distanceWorld);
-        float length = blocks * (GOLEM_LINK_QUALITY / 2.0F);
-        if (length <= 0.0F) return;
+        // The original start point: the position of the cleric and one and a fifth of its eye
+        // height above it. The original end point: the middle of the ritual target and one and a
+        // half blocks above it, less the bob that the matrix already adds. The ribbon is drawn in
+        // the space of the entity, so the end point is relative to it.
+        double fromX = 0.0D;
+        double fromY = cleric.getEyeHeight() * 1.2D;
+        double fromZ = 0.0D;
+        double toX = home.getX() + .5D - cleric.getX();
+        double toY = home.getY() + 1.5D - bob - cleric.getY();
+        double toZ = home.getZ() + .5D - cleric.getZ();
         // The original distance: the share of the ten ticks the ritual needs.
         float distance = Math.min(cleric.tickCount, 10) / 10.0F;
-        double time = System.nanoTime() / 30000000L;
-        int red = LINK_COLOR >> 16 & 255;
-        int green = LINK_COLOR >> 8 & 255;
-        int blue = LINK_COLOR & 255;
-        VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(WISPY));
-        int segments = (int) (length * distance);
-        // The original first ribbon is widened in y, the second one in x.
-        for (int pass = 0; pass < 2; pass++) {
-            double previousLowX = 0.0D, previousLowY = 0.0D, previousLowZ = 0.0D;
-            double previousHighX = 0.0D, previousHighY = 0.0D, previousHighZ = 0.0D;
-            float previousU = 0.0F;
-            boolean first = true;
-            for (int index = 0; index <= segments; index++) {
-                float beam = index / length;
-                float centre = 1.0F - Math.abs(index - length / 2.0F) / (length / 2.0F);
-                double waveX = Mth.sin((float) ((startZ % 16.0D
-                        + distanceWorld * (1.0F - beam) * GOLEM_LINK_QUALITY / 2.0F
-                        - (time % 32767.0D / 5.0D)) / 4.0D)) * .5D * centre;
-                double waveY = Mth.sin((float) ((startX % 16.0D
-                        + distanceWorld * (1.0F - beam) * GOLEM_LINK_QUALITY / 2.0F
-                        - (time % 32767.0D / 5.0D)) / 3.0D)) * .5D * centre;
-                double waveZ = Mth.sin((float) ((startY % 16.0D
-                        + distanceWorld * (1.0F - beam) * GOLEM_LINK_QUALITY / 2.0F
-                        - (time % 32767.0D / 5.0D)) / 2.0D)) * .5D * centre;
-                double x = localEndX + (deltaX + waveX) * beam;
-                double y = localEndY + (deltaY + waveY) * beam;
-                double z = localEndZ + (deltaZ + waveZ) * beam;
-                float u = (1.0F - beam) * (float) distanceWorld - (float) (time * LINK_SPEED);
-                // The normal of the ribbon is perpendicular to the line and to the width.
-                double lineX = deltaX + waveX;
-                double lineY = deltaY + waveY;
-                double lineZ = deltaZ + waveZ;
-                double normalX, normalY, normalZ;
-                if (pass == 0) {
-                    normalX = lineY; normalY = -lineX; normalZ = 0.0D;
-                } else {
-                    normalX = lineZ; normalY = 0.0D; normalZ = -lineX;
-                }
-                double normalLength = Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ);
-                if (normalLength < 1.0E-6D) { normalX = 0.0D; normalY = 1.0D; normalZ = 0.0D; normalLength = 1.0D; }
-                normalX /= normalLength; normalY /= normalLength; normalZ /= normalLength;
-                double lowX, lowY, lowZ, highX, highY, highZ;
-                if (pass == 0) {
-                    lowX = x; lowY = y - LINK_WIDTH; lowZ = z;
-                    highX = x; highY = y + LINK_WIDTH; highZ = z;
-                } else {
-                    lowX = x - LINK_WIDTH; lowY = y; lowZ = z;
-                    highX = x + LINK_WIDTH; highY = y; highZ = z;
-                }
-                if (!first) {
-                    // The original quad of the ribbon: the low and the high edge of two segments.
-                    vertex(out, pose, previousLowX, previousLowY, previousLowZ, previousU, 1.0F, normalX, normalY, normalZ, red, green, blue, light);
-                    vertex(out, pose, previousHighX, previousHighY, previousHighZ, previousU, 0.0F, normalX, normalY, normalZ, red, green, blue, light);
-                    vertex(out, pose, lowX, lowY, lowZ, u, 1.0F, normalX, normalY, normalZ, red, green, blue, light);
-                    vertex(out, pose, previousHighX, previousHighY, previousHighZ, previousU, 0.0F, normalX, normalY, normalZ, red, green, blue, light);
-                    vertex(out, pose, highX, highY, highZ, u, 0.0F, normalX, normalY, normalZ, red, green, blue, light);
-                    vertex(out, pose, lowX, lowY, lowZ, u, 1.0F, normalX, normalY, normalZ, red, green, blue, light);
-                }
-                previousLowX = lowX; previousLowY = lowY; previousLowZ = lowZ;
-                previousHighX = highX; previousHighY = highY; previousHighZ = highZ;
-                previousU = u;
-                first = false;
-            }
-        }
+        FloatyLine.draw(pose, buffers, fromX, fromY, fromZ, toX, toY, toZ,
+                cleric.getX() + fromX, cleric.getY() + fromY, cleric.getZ() + fromZ,
+                LINK_COLOR, WISPY, LINK_SPEED, distance, LINK_WIDTH, FloatyLine.Flavour.CULTIST);
     }
 
-    private static void vertex(VertexConsumer out, PoseStack pose, double x, double y, double z,
-                               float u, float v, double normalX, double normalY, double normalZ,
-                               int red, int green, int blue, int light) {
-        out.addVertex(pose.last(), (float) x, (float) y, (float) z)
-                .setColor(red, green, blue, (int) (LINK_ALPHA * 255.0F))
-                .setUv(u, v)
-                .setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
-                .setLight(light)
-                .setNormal(pose.last(), (float) normalX, (float) normalY, (float) normalZ);
-    }
 }

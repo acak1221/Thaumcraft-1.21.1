@@ -48,7 +48,7 @@ public final class WarpGuardianParticle extends SingleQuadParticle {
         xo = x; yo = y; zo = z;
         if (!onGround) { x += target.getDeltaMovement().x; z += target.getDeltaMovement().z; }
         // The original FXWispEG:97 pushes the mote out of the solid blocks it ends up inside.
-        var motion=ParticleDeflection.pushOutOfBlocks(level,random,x,y,z,xd,yd,zd);
+        var motion=ParticleDeflection.pushOutOfBlocks(level,random,getBoundingBox(),x,y,z);
         if(motion!=null){xd=motion.x();yd=motion.y();zd=motion.z();}
         move(xd, yd, zd); xd *= .98F; yd *= .98F; zd *= .98F;
         if (onGround) { xd *= .8500000190734863; zd *= .8500000190734863; }

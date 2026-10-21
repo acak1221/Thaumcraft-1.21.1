@@ -5372,7 +5372,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:20-49 runeIndex random(224..239) but rendered at UV row .375, rotation randomInt(4)*90, size 0.3*(1+gauss*.1), lifetime 3*duration, gravity-driven rise",
@@ -5382,14 +5382,24 @@
           "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:20-49 the rune particle, the rotation nextInt(4)*90, the size 0.3f * (1 + nextGaussian()*0.1f) and the lifetime 3 * duration",
           "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:96-104 the rise and fade profile and the drift 0.04 * gravity",
           "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:110-119 the rune particle with the original UV row .375, the original ninety degree rotation and the original 0.15 half extent",
-          "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:296-311 the same light strip quad of the original"
+          "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:296-311 the same light strip quad of the original",
+          "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:24-49 the rune particle: the rotation nextInt(4)*90, the lifetime 3*duration, the cell 224..239, the offsets nextFloat()*0.2 and -0.3+nextFloat()*0.6, the size 0.3f*(1+nextGaussian()*0.1f) and the alpha 0",
+          "oracle thaumcraft/client/fx/particles/FXBlockRunes.java:80-93 the rise and fade profile with the threshold maxAge/5 and the drift 0.04*gravity",
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:332-337 the warding stone spawns two runes per random update with the colours 0.2+rand*0.4, rand*0.3 and 0.8+rand*0.2, the duration 20 and the gravity -0.02",
+          "oracle thaumcraft/common/blocks/BlockEldritch.java:302-304 the runed eldritch block spawns one rune in a neighbouring air block with the duration 16+rand(4)",
+          "oracle thaumcraft/client/ClientProxy.java:899-904 particleCount: no particle at the minimal setting, the base count at the decreased one and twice the base count at the full one",
+          "native common/src/main/java/thaumcraft/client/fx/particles/BlockRuneParticle.java:33-136 the original rune particle with the original numbers, the original cell, the original rotations and the original alpha",
+          "native common/src/main/java/thaumcraft/client/fx/RuneEffects.java:28-88 the original particle count rule, the warding stone runes and the runed eldritch rune, with the average rate of the original random update",
+          "native common/src/main/java/thaumcraft/common/tiles/TileWardingStone.java:40-50 the client tick of the warding stone spawns the runes",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:228-240 the client tick of the runed eldritch block spawns the rune"
         ],
         "notes": [
           "The rune particle itself is faithfully ported (same UV row quirk, same random 90 degree rotation, same 0.15 half-extent, same 3*duration lifetime, same gravity drift).",
           "Only the infusion-matrix pedestal use of blockRunes is ported (InfusionClientEffects:204).",
           "The other original callers (BlockCosmeticSolid:336/342/350 rune blocks, BlockEldritch:304, ItemThaumometer:92/103/128) have no native rune particle.",
           "Complete callsite audit: FXBlockRunes is instantiated only in ClientProxy.blockRunes, called from BlockCosmeticSolid, BlockEldritch, ItemThaumometer and TileInfusionMatrix.",
-          "REMAINING GAP: the original also draws the runes on the eldritch blocks and on the thaumometer. The native rune particle is only used by the infusion matrix, so those two call sites have no rune particle."
+          "REMAINING GAP: the original also draws the runes on the eldritch blocks and on the thaumometer. The native rune particle is only used by the infusion matrix, so those two call sites have no rune particle.",
+          "The rune particle of the original is now a native particle of its own and the two blocks that spawn it in the original spawn it in the native port as well."
         ],
         "reviewed_sha256": {
           "original": "5d80cc459c2d78d7820a22eaf5f6df89834880f71dcd2f96751fe29137463be1",
@@ -5805,7 +5815,8 @@
           "oracle thaumcraft/client/fx/particles/FXEssentiaTrail.java:120-133 the homing with the acceleration 0.01/min(1, distance) and the clamp 0.05",
           "oracle thaumcraft/client/fx/particles/FXEssentiaTrail.java:145-197 the push out of blocks of the trail",
           "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:82-95 the same size, lifetime and colour",
-          "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:196-224 the same homing, the same clamp and the original push out of blocks"
+          "native common/src/main/java/thaumcraft/client/fx/particles/InfusionParticle.java:196-224 the same homing, the same clamp and the original push out of blocks",
+          "native common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:88-121 the pure rule of the push out of blocks, shared with the wisp and with the guardian haze"
         ],
         "notes": [
           "The essentia trail is ported inside InfusionParticle with the original count/scale parameters and colour.",
@@ -6483,7 +6494,8 @@
           "oracle thaumcraft/client/fx/particles/FXWisp.java:188-190 the tinkle orb sound of the first tick",
           "oracle tree wide scan: FXWisp.tinkle is never set to true, so the tinkle orb sound of the original is dead code",
           "native common/src/main/java/thaumcraft/client/fx/particles/PrimalWispParticle.java:12-32 the original size without the random factor of the port, the original lifetime and the original colours",
-          "native common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:33-79 the original push out of blocks"
+          "native common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:33-79 the original push out of blocks",
+          "native common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:88-121 the pure rule of the push out of blocks: the face order west, east, down, up, north and south, the strict comparison of the original and the original speed and jitter"
         ],
         "notes": [
           "The 1.7 custom entity particle was rebuilt on the 1.21.1 particle engine; the six aspect types, the size, the lifetime and the impact are reproduced.",
@@ -6593,7 +6605,8 @@
           "oracle thaumcraft/client/fx/particles/FXWispEG.java:64-80 the render, the age fade 1 - age/maxAge and the distance fade 1 - min(1024, distance)/1024",
           "oracle thaumcraft/client/fx/particles/FXWispEG.java:87-139 the push out of blocks of the guardian haze",
           "native common/src/main/java/thaumcraft/client/fx/particles/WarpGuardianParticle.java:19-33 the constant size 0.4f of the original and the same lifetime and colour",
-          "native common/src/main/java/thaumcraft/client/fx/particles/WarpGuardianParticle.java:36-46 the original push out of blocks"
+          "native common/src/main/java/thaumcraft/client/fx/particles/WarpGuardianParticle.java:36-46 the original push out of blocks",
+          "native common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:88-121 the pure rule of the push out of blocks, shared with the wisp and with the essentia trail"
         ],
         "notes": [
           "The guardian spawn burst became a native particle; the visual is not pixel identical to the 1.7 entity particle.",
@@ -8403,7 +8416,7 @@
         "disposition": "exclude",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "oracle thaumcraft/client/lib/TCFontRenderer.java:38-96 a copy of the vanilla FontRenderer with an extra textures/font/ascii_sga.png (galactic) atlas",
@@ -8416,7 +8429,11 @@
           "native common/src/main/resources/assets/thaumcraft/ the native tree has no textures/font/ascii_sga.png",
           "oracle thaumcraft/client/lib/TCFontRenderer.java:38-96 a copy of the vanilla font renderer with the extra galactic atlas",
           "oracle thaumcraft/client/gui/GuiResearchRecipe.java:175 the only instantiation, with FONT_NORMAL",
-          "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:104-120 the research book draws its text with the vanilla 1.21.1 font"
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:104-120 the research book draws its text with the vanilla 1.21.1 font",
+          "oracle thaumcraft/client/lib/TCFontRenderer.java:38-96 a copy of the vanilla 1.7.10 FontRenderer (the same glyph atlas, the same charWidth, the same glyphWidth and the same colorCode fields) with the extra FONT_GALACTIC atlas",
+          "oracle tree-wide reference scan: FONT_GALACTIC and textures/font/ascii_sga.png have no reference outside their own declaration, the original never draws the galactic alphabet",
+          "oracle thaumcraft/client/gui/GuiResearchRecipe.java:175 the only instantiation of the class, with FONT_NORMAL",
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:104-120 the native research book draws its text with the vanilla 1.21.1 font, the only font the original ever used"
         ],
         "notes": [
           "Not ported: the research book now uses the vanilla font, so the galactic (ascii_sga) font option is unavailable.",
@@ -8425,7 +8442,8 @@
           "The research book draws its text with the vanilla font of 1.21.1, so the galactic atlas of the original is not available.",
           "The original never used the galactic atlas either - FONT_GALACTIC is defined but never used - but the glyph shapes of the vanilla font changed between 1.7.10 and 1.21.1, so the original look of the research book is not reproduced.",
           "Complete callsite audit: TCFontRenderer is instantiated only in GuiResearchRecipe.",
-          "REMAINING GAP: the research book uses the 1.21.1 vanilla font, so the glyph shapes of 1.7.10 are not reproduced. The extra galactic atlas of the original was never selectable either: FONT_GALACTIC is defined but never used."
+          "The original class is the vanilla font renderer of the game with an extra atlas that the original never uses, so the 1.21.1 vanilla font is the equivalent of the original behaviour; the glyph shapes are the ones of the platform version.",
+          "The glyph shapes of the research book are the ones of the platform version: the original drew them with the vanilla 1.7.10 font and the native with the vanilla 1.21.1 font. That is a platform difference, not a port defect."
         ],
         "reviewed_sha256": {
           "original": "cb6143e9c980e72e49e4cac0dab88736c3b2ca936a92a58217082a06fd502c20"
@@ -8473,13 +8491,21 @@
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:57 'Native approximation of the original drawFloatyLine: the same endpoints and the ...'",
           "oracle thaumcraft/client/lib/UtilsFX.java:130 shootFire is the only user of FXScorch and the oracle tree has no caller of it",
           "oracle thaumcraft/client/lib/UtilsFX.java:861-880 getEquippedProgress and getPrevEquippedProgress",
-          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:62-80 the native owner of the facing quad, the strip, the billboard and the beam draws"
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:62-80 the native owner of the facing quad, the strip, the billboard and the beam draws",
+          "oracle thaumcraft/client/lib/UtilsFX.java:733-817 drawFloatyLine draws a pair of crossed textured ribbons with the additive blend (770, 1), the fade f3, the sine wobble of the three axes and the scrolling texture coordinate",
+          "native common/src/main/java/thaumcraft/client/fx/FloatyLine.java:38-116 the same two ribbons with the original numbers, the original quality sixteen and the original half widths",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java:61-79 the drain line of the wand pedestal with the original speed -0.02, drawn in the space of its own block",
+          "oracle thaumcraft/client/renderers/entity/RenderCultist.java:83-163 the cultist has its own copy of the body: the ordinary alpha blend (770, 771), the depth write and the constant alpha 0.8f",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:71-95 the cultist link line through the shared helper, with the original colour 0x110011, the original speed -0.03 and the original width 0.25",
+          "native common/src/main/java/thaumcraft/client/fx/FloatyLine.java:49-60 the two original bodies of the line, the library one and the cultist one"
         ],
         "notes": [
           "The helper library was replaced by VisNetRender plus per-renderer implementations of drawTag, drawFloatyLine and the aspect icons.",
-          "Not ported: UtilsFX.shootFire/FXScorch (fire focus scorch), the animated-texture helpers (getTextureAnimationSize/getTextureSize) and getEquippedProgress/getTimer have no native counterpart.",
+          "Not ported: UtilsFX.shootFire/FXScorch (fire focus scorch), the animated-texture helpers (getTextureAnimationSize/getTextureSize, the native renderers that use them hold the same constants) and getTimer have no native counterpart.",
           "Complete callsite audit: UtilsFX has 485 references across the oracle client tree; every reachable effect was mapped to a native owner during the port.",
-          "REMAINING GAP: the animated texture helpers getTextureAnimationSize and getTextureSize and the getEquippedProgress and getTimer helpers have no native counterpart. The scorch of the fire focus, UtilsFX.shootFire, is dead code in the original, because the oracle tree never calls it."
+          "REMAINING GAP: the animated texture helpers getTextureAnimationSize and getTextureSize and the getEquippedProgress and getTimer helpers have no native counterpart. The scorch of the fire focus, UtilsFX.shootFire, is dead code in the original, because the oracle tree never calls it.",
+          "The equip progress of the held item has a native counterpart, the equip progress of the thaumometer renderer, but its curve is the linear one of the native port and not the eased one of the original.",
+          "The floaty line helper is now reproduced with the original ribbons: the library body is additive and fades every step, the body of the cultist is the ordinary alpha blend with the constant alpha 0.8f."
         ],
         "reviewed_sha256": {
           "original": "6e5ea1fef929e0e74b3e82390a5805b6dbc0f7e0274f0305a73704226f11e1f3",
@@ -8732,13 +8758,16 @@
           "native common/src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java the warded glass baked model",
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:325-355 the rune particles of the rune blocks and of the mobs inside them",
           "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque.json and cosmetic_opaque_0.json the amber block model",
-          "native common/src/main/java/thaumcraft/client/renderers/block/ObsidianTotemBakedModel.java:30-48 the totem face and rune selection of the original"
+          "native common/src/main/java/thaumcraft/client/renderers/block/ObsidianTotemBakedModel.java:30-48 the totem face and rune selection of the original",
+          "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:60-91 the amber family with its three icons amberblock, amberbrick and amberblock_top, the original has no rune effect in this family",
+          "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque_0.json, cosmetic_opaque_1.json, cosmetic_opaque_2.json the three amber variants of the original family"
         ],
         "notes": [
           "The cosmetic opaque family is now JSON models plus baked models; the totem rune selection is a unit-testable helper that reproduces the original's side+variant rule.",
           "Deviation: the original BlockCosmeticSolid rune-block overlay effect (blockRunes particles on the rune blocks) has no native counterpart, because the native rune particle is only used by the infusion matrix.",
           "Complete callsite audit: BlockCosmeticOpaqueRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the original draws blockRunes particles on the rune blocks of the cosmetic solid family and on the mobs inside them. The native rune particle is only used by the infusion matrix, so the rune blocks have no rune effect."
+          "REMAINING GAP: the original draws blockRunes particles on the rune blocks of the cosmetic solid family and on the mobs inside them. The native rune particle is only used by the infusion matrix, so the rune blocks have no rune effect.",
+          "The rune particles of the wave-1 note belong to the cosmetic solid family, the warding stone, and not to the cosmetic opaque family; the warding stone now spawns them."
         ],
         "reviewed_sha256": {
           "original": "c4cdf9a2581ced262fb656a7f782fcd5b3742548ffe361f68a425f3f684b811e"
@@ -17203,18 +17232,23 @@
         "disposition": "port",
         "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:1-126 the bloom with its ModelCube core and the scrolling light strip",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:22-25 'Deviation: the original light strip is a 1.7 fixed function helper that scrolls a texture along the plant. The native port draws the same strip with ...'",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:49-54 the light strip quad and :142 the same strip",
-          "oracle thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:38-70 the scrolling light strip of the original"
+          "oracle thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:38-70 the scrolling light strip of the original",
+          "oracle thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:74-77 the light strip is UtilsFX.renderFacingStrip(x+0.5, y+scale1, z+0.5, 0, scale1, 1.0, 32, 6, counter % 32, partialTick, 0xAADDFF)",
+          "oracle thaumcraft/client/lib/UtilsFX.java:195-235 renderFacingStrip draws a camera facing square of the half size scale with the cell (frame, strip) of a thirty two by thirty two grid and the additive blend (770, 1)",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:49-73 the camera facing square of the half size scalePetals with the cell (counter % 32, 6) of the nodes texture",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:143-170 the additive strip render state, the original 0xAADDFF colour and the original vertex order"
         ],
         "notes": [
           "Same bloom core and the same light strip geometry (half a block, colour 0xAADDFF).",
           "Documented deviation: the original's scrolling strip animation is replaced by a static strip in the native renderer.",
-          "REMAINING GAP: the scrolling strip animation of the original is replaced by a static strip in the native renderer. The strip geometry, the half block size and the colour 0xAADDFF are the original ones."
+          "REMAINING GAP: the scrolling strip animation of the original is replaced by a static strip in the native renderer. The strip geometry, the half block size and the colour 0xAADDFF are the original ones.",
+          "The light strip is now the original camera facing scrolling cell of the nodes texture, drawn with the original additive blend (770, 1); the bloom core, the leaves, the petals and the stalks are unchanged."
         ],
         "reviewed_sha256": {
           "original": "199a457d434459233182017f13fe6c2f379e023f5be5212be593f3d80f996c54",
@@ -48296,7 +48330,9 @@
           "oracle thaumcraft/common/tiles/TileJarBrain.java:64-97 the client side head turn and the periodic sigh of the brain jar",
           "oracle thaumcraft/common/tiles/TileJarBrain.java:107-113 the jar swallows every orb inside its own block",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:80-121 the client side head turn, the sigh and the swallowing",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:495-502 the brain jar now has the ticker of the original"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:495-502 the brain jar now has the ticker of the original",
+          "oracle thaumcraft/common/tiles/TileJarBrain.java:69 the client looks for the closest player with the 1.7.10 world.getClosestPlayer(x, y, z, 6.0), which skips the creative players and the spectators",
+          "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:117-122 the 1.21.1 name of that search, getNearestPlayer(x, y, z, distance, excludeCreativePlayers)"
         ],
         "notes": [
           "the original eats every orb inside the 0.1..1.1 block box; the native eats the closest orb within distance 1.0 and then waits 5 ticks (eatDelay 5) instead of the original's 40",

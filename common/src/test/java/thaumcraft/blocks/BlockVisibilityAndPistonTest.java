@@ -10,6 +10,7 @@ import com.google.gson.JsonParser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.Shapes;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.blocks.BlockAiry;
 import thaumcraft.common.blocks.BlockArcaneDoor;
@@ -74,53 +77,83 @@ class BlockVisibilityAndPistonTest {
     /** The four groups of the airy family. */
     private static final int[] AIRY_GROUPS = {0, 1, 2, 3};
 
+    /**
+     * The blocks of the port, built before the vanilla bootstrap freezes the block registry:
+     * the constructor of a block asks the registry for its intrusive holder
+     * (Minecraft 1.21.1 Block:81) and the frozen registry refuses it.
+     *
+     * @see BlockVisibilityTestRegistry
+     */
+    private static final BlockCosmeticSolid[] COSMETIC = BlockVisibilityTestRegistry.cosmetic();
+    private static final BlockEldritch[] ELDRITCH = BlockVisibilityTestRegistry.eldritch();
+    private static final BlockAiry[] AIRY = BlockVisibilityTestRegistry.airy();
+    private static final BlockCosmeticOpaque AMBER = BlockVisibilityTestRegistry.amber();
+    private static final BlockCosmeticOpaque WARDED = BlockVisibilityTestRegistry.warded();
+    private static final BlockEldritchNothing NOTHING = BlockVisibilityTestRegistry.nothing();
+    private static final BlockEldritchPortal PORTAL = BlockVisibilityTestRegistry.portal();
+    private static final BlockMirror MIRROR = BlockVisibilityTestRegistry.mirror();
+    private static final BlockMetalDevice METAL_DEVICE = BlockVisibilityTestRegistry.metalDevice();
+    private static final BlockStoneDevice STONE_DEVICE = BlockVisibilityTestRegistry.stoneDevice();
+    private static final BlockWoodenDevice WOODEN_DEVICE = BlockVisibilityTestRegistry.woodenDevice();
+    private static final BlockMagicBox MAGIC_BOX = BlockVisibilityTestRegistry.magicBox();
+    private static final BlockArcaneDoor ARCANE_DOOR = BlockVisibilityTestRegistry.arcaneDoor();
+    private static final BlockArcanePressurePlate PLATE = BlockVisibilityTestRegistry.plate();
+
+    /**
+     * The blocks of the port have to exist, the registry has to be writable before the vanilla
+     * bootstrap freezes it.
+     */
+    @BeforeAll static void blocksExist() {
+        assertNotNull(COSMETIC, "the blocks of the port could not be built");
+        assertNotNull(ELDRITCH, "the blocks of the port could not be built");
+        assertNotNull(AIRY, "the blocks of the port could not be built");
+        assertNotNull(NOTHING, "the blocks of the port could not be built");
+    }
+
     // ------------------------------------------------------------------ render shape
 
     @Test void theCosmeticStonesAreDrawnAsTheirModel() {
-        for (int group : COSMETIC_GROUPS) {
-            BlockCosmeticSolid block = BlockCosmeticSolid.group(group, properties());
+        for (BlockCosmeticSolid block : COSMETIC) {
             assertEquals(RenderShape.MODEL, block.defaultBlockState().getRenderShape(),
-                    "the cosmetic solid of the group " + group + " is drawn as its model");
+                    "the cosmetic solid of the group " + block.group() + " is drawn as its model");
         }
     }
 
     @Test void theEldritchStonesAreDrawnAsTheirModel() {
-        for (int group : ELDRITCH_GROUPS) {
-            BlockEldritch block = BlockEldritch.group(group, properties());
+        for (BlockEldritch block : ELDRITCH) {
             assertEquals(RenderShape.MODEL, block.defaultBlockState().getRenderShape(),
-                    "the eldritch stone of the group " + group + " is drawn as its model");
+                    "the eldritch stone of the group " + block.group() + " is drawn as its model");
         }
     }
 
     @Test void theDeviceFamiliesAndTheMagicBoxAreDrawnAsTheirModel() {
-        assertEquals(RenderShape.MODEL, new BlockMetalDevice(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.MODEL, METAL_DEVICE.defaultBlockState().getRenderShape(),
                 "the metal device is drawn as its model");
-        assertEquals(RenderShape.MODEL, new BlockStoneDevice(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.MODEL, STONE_DEVICE.defaultBlockState().getRenderShape(),
                 "the stone device is drawn as its model");
-        assertEquals(RenderShape.MODEL, new BlockWoodenDevice(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.MODEL, WOODEN_DEVICE.defaultBlockState().getRenderShape(),
                 "the wooden device is drawn as its model");
-        assertEquals(RenderShape.MODEL, new BlockMagicBox(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.MODEL, MAGIC_BOX.defaultBlockState().getRenderShape(),
                 "the magic box is drawn as its model");
-        assertEquals(RenderShape.MODEL, new BlockArcaneDoor(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.MODEL, ARCANE_DOOR.defaultBlockState().getRenderShape(),
                 "the arcane door is drawn as its model");
-        assertEquals(RenderShape.MODEL, new BlockArcanePressurePlate(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.MODEL, PLATE.defaultBlockState().getRenderShape(),
                 "the arcane pressure plate is drawn as its model");
-        assertEquals(RenderShape.MODEL, new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_AMBER, properties())
-                        .defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.MODEL, AMBER.defaultBlockState().getRenderShape(),
                 "the cosmetic opaque is drawn as its model");
     }
 
     @Test void theBlocksTheOriginalDidNotDrawStayInvisible() {
         // The render type minus one of the original is "not drawn at all".
-        assertEquals(RenderShape.INVISIBLE, new BlockEldritchNothing(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.INVISIBLE, NOTHING.defaultBlockState().getRenderShape(),
                 "the eldritch nothing is not drawn, the tile renderer draws the void");
-        assertEquals(RenderShape.INVISIBLE, new BlockEldritchPortal(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.INVISIBLE, PORTAL.defaultBlockState().getRenderShape(),
                 "the eldritch gate is not drawn, the tile renderer draws the gate");
-        assertEquals(RenderShape.INVISIBLE, new BlockMirror(properties()).defaultBlockState().getRenderShape(),
+        assertEquals(RenderShape.INVISIBLE, MIRROR.defaultBlockState().getRenderShape(),
                 "the mirror is not drawn, the tile renderer draws the pane");
-        for (int group : AIRY_GROUPS) {
-            assertEquals(RenderShape.INVISIBLE, BlockAiry.group(group, properties()).defaultBlockState().getRenderShape(),
-                    "the airy block of the group " + group + " is not drawn");
+        for (BlockAiry block : AIRY) {
+            assertEquals(RenderShape.INVISIBLE, block.defaultBlockState().getRenderShape(),
+                    "the airy block of the group " + block.group() + " is not drawn");
         }
     }
 
@@ -129,9 +162,8 @@ class BlockVisibilityAndPistonTest {
     @Test void theCosmeticSolidCarriesTheTileOfTheWardingStoneAndOfTheNodeOnly() {
         // OpenTC4 BlockCosmeticSolid:259-265 - the original created the tile for the metadata
         // three and for the metadata eight only.
-        for (int group : COSMETIC_GROUPS) {
-            BlockCosmeticSolid block = BlockCosmeticSolid.group(group, properties());
-            for (int variant : EldritchBlockRules.cosmeticGroupVariants(group)) {
+        for (BlockCosmeticSolid block : COSMETIC) {
+            for (int variant : EldritchBlockRules.cosmeticGroupVariants(block.group())) {
                 boolean expected = variant == EldritchBlockRules.COSMETIC_WARDING_STONE
                         || variant == EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED;
                 assertEquals(expected, hasTile(block, variant),
@@ -143,20 +175,17 @@ class BlockVisibilityAndPistonTest {
     @Test void theCosmeticOpaqueCarriesTheTileOfTheWardedGlassOnly() {
         // OpenTC4 BlockCosmeticOpaque:190-192 and :221-223 - the original created the owned
         // tile for the metadata two only.
-        BlockCosmeticOpaque amber = new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_AMBER, properties());
-        assertFalse(hasTile(amber, 0), "the amber block has no tile");
-        assertFalse(hasTile(amber, 1), "the amber brick has no tile");
-        BlockCosmeticOpaque warded = new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_WARDED, properties());
-        assertTrue(hasTile(warded, EldritchBlockRules.COSMETIC_OPAQUE_OWNED), "the warded glass has its tile");
+        assertFalse(hasTile(AMBER, 0), "the amber block has no tile");
+        assertFalse(hasTile(AMBER, 1), "the amber brick has no tile");
+        assertTrue(hasTile(WARDED, EldritchBlockRules.COSMETIC_OPAQUE_OWNED), "the warded glass has its tile");
     }
 
     @Test void theEldritchStoneCarriesTheTileOfTheOriginalMetadataOnly() {
         // OpenTC4 BlockEldritch:120-122 - the original created the tile for the metadata zero,
         // one, three, eight, nine and ten only. The metadata eleven is the eldritch crystal of
         // the port, a block of its own in the original, and it carries its tile.
-        for (int group : ELDRITCH_GROUPS) {
-            BlockEldritch block = BlockEldritch.group(group, properties());
-            for (int variant : EldritchBlockRules.eldritchGroupVariants(group)) {
+        for (BlockEldritch block : ELDRITCH) {
+            for (int variant : EldritchBlockRules.eldritchGroupVariants(block.group())) {
                 boolean expected = variant == EldritchBlockRules.ELDRITCH_ALTAR
                         || variant == EldritchBlockRules.ELDRITCH_OBELISK
                         || variant == EldritchBlockRules.ELDRITCH_CAPSTONE
@@ -173,18 +202,18 @@ class BlockVisibilityAndPistonTest {
     @Test void theEldritchNothingCarriesTheTileOfTheExposedFillerOnly() {
         // OpenTC4 BlockEldritchNothing:61-63 - the original created the tile for the metadata
         // one only, the exposed filler.
-        BlockEldritchNothing block = new BlockEldritchNothing(properties());
-        assertFalse(hasTileState(block, exposed(block, 0)), "the covered filler has no tile");
-        assertTrue(hasTileState(block, exposed(block, 1)), "the exposed filler has its tile");
+        assertFalse(hasTileState(NOTHING, NOTHING.defaultBlockState().setValue(BlockEldritchNothing.EXPOSED, 0)),
+                "the covered filler has no tile");
+        assertTrue(hasTileState(NOTHING, NOTHING.defaultBlockState().setValue(BlockEldritchNothing.EXPOSED, 1)),
+                "the exposed filler has its tile");
     }
 
     @Test void theAiryFamilyCarriesTheTileOfTheWardingFenceOnly() {
         // OpenTC4 BlockAiry:275-289 - the original created a tile for the metadata zero, one
         // and five; the port owns the warding fence only, the node, the nitor and the energised
         // node are native blocks of their own.
-        for (int group : AIRY_GROUPS) {
-            BlockAiry block = BlockAiry.group(group, properties());
-            for (int variant : EldritchBlockRules.airyGroupVariants(group)) {
+        for (BlockAiry block : AIRY) {
+            for (int variant : EldritchBlockRules.airyGroupVariants(block.group())) {
                 assertEquals(variant == EldritchBlockRules.AIRY_WARDING_FENCE, hasTile(block, variant),
                         "the airy block of the metadata " + variant + " and its block entity");
             }
@@ -198,9 +227,8 @@ class BlockVisibilityAndPistonTest {
         // The original family of the cosmetic stones has sixteen metadata values and two of them
         // carry a tile, so fourteen of them are moved.
         int cosmeticMoved = 0;
-        for (int group : COSMETIC_GROUPS) {
-            BlockCosmeticSolid block = BlockCosmeticSolid.group(group, properties());
-            for (int variant : EldritchBlockRules.cosmeticGroupVariants(group)) {
+        for (BlockCosmeticSolid block : COSMETIC) {
+            for (int variant : EldritchBlockRules.cosmeticGroupVariants(block.group())) {
                 if (!hasTile(block, variant)) ++cosmeticMoved;
             }
         }
@@ -210,9 +238,8 @@ class BlockVisibilityAndPistonTest {
         // carry a tile, so five of them are moved. The metadata eleven is the crystal of the
         // port and it carries its tile.
         int eldritchMoved = 0;
-        for (int group : ELDRITCH_GROUPS) {
-            BlockEldritch block = BlockEldritch.group(group, properties());
-            for (int variant : EldritchBlockRules.eldritchGroupVariants(group)) {
+        for (BlockEldritch block : ELDRITCH) {
+            for (int variant : EldritchBlockRules.eldritchGroupVariants(block.group())) {
                 if (!hasTile(block, variant)) ++eldritchMoved;
             }
         }
@@ -220,9 +247,10 @@ class BlockVisibilityAndPistonTest {
 
         // The eldritch nothing is moved while it is covered and it stands still while it is
         // exposed, because the exposed filler is the one that holds the tile of the void.
-        BlockEldritchNothing nothing = new BlockEldritchNothing(properties());
-        assertTrue(hasTileState(nothing, exposed(nothing, 1)), "the exposed filler holds the tile of the void");
-        assertFalse(hasTileState(nothing, exposed(nothing, 0)), "the covered filler holds no tile");
+        assertTrue(hasTileState(NOTHING, NOTHING.defaultBlockState().setValue(BlockEldritchNothing.EXPOSED, 1)),
+                "the exposed filler holds the tile of the void");
+        assertFalse(hasTileState(NOTHING, NOTHING.defaultBlockState().setValue(BlockEldritchNothing.EXPOSED, 0)),
+                "the covered filler holds no tile");
     }
 
     @Test void theMixinThatReadsTheContractIsRegistered() {
@@ -238,16 +266,14 @@ class BlockVisibilityAndPistonTest {
     @Test void theStonesAreSelectedAsTheFullCubeOfTheOriginal() {
         // OpenTC4 BlockCosmeticSolid:165-167 - the original sets the bounds of the stone to the
         // full block, and so does the eldritch stone (OpenTC4 BlockEldritch:110-113).
-        for (int group : COSMETIC_GROUPS) {
-            BlockCosmeticSolid block = BlockCosmeticSolid.group(group, properties());
-            for (int variant : EldritchBlockRules.cosmeticGroupVariants(group)) {
+        for (BlockCosmeticSolid block : COSMETIC) {
+            for (int variant : EldritchBlockRules.cosmeticGroupVariants(block.group())) {
                 assertEquals(Shapes.block(), stateOf(block, variant).getShape(null, BlockPos.ZERO),
                         "the selection box of the cosmetic solid of the metadata " + variant);
             }
         }
-        for (int group : ELDRITCH_GROUPS) {
-            BlockEldritch block = BlockEldritch.group(group, properties());
-            for (int variant : EldritchBlockRules.eldritchGroupVariants(group)) {
+        for (BlockEldritch block : ELDRITCH) {
+            for (int variant : EldritchBlockRules.eldritchGroupVariants(block.group())) {
                 assertEquals(Shapes.block(), stateOf(block, variant).getShape(null, BlockPos.ZERO),
                         "the selection box of the eldritch stone of the metadata " + variant);
             }
@@ -257,9 +283,9 @@ class BlockVisibilityAndPistonTest {
     @Test void theFillerWithoutASelectionBoxHasNone() {
         // OpenTC4 BlockEldritchNothing:69-71 and BlockEldritchPortal:80-89 - the original gives
         // the eldritch nothing and the eldritch gate no selection box at all.
-        assertEquals(Shapes.empty(), new BlockEldritchNothing(properties()).defaultBlockState().getShape(null, BlockPos.ZERO),
+        assertEquals(Shapes.empty(), NOTHING.defaultBlockState().getShape(null, BlockPos.ZERO),
                 "the eldritch nothing has no selection box");
-        assertEquals(Shapes.empty(), new BlockEldritchPortal(properties()).defaultBlockState().getShape(null, BlockPos.ZERO),
+        assertEquals(Shapes.empty(), PORTAL.defaultBlockState().getShape(null, BlockPos.ZERO),
                 "the eldritch gate has no selection box");
     }
 
@@ -282,11 +308,6 @@ class BlockVisibilityAndPistonTest {
         return ((PerStateBlockEntity) block).hasBlockEntityForState(state);
     }
 
-    /** The state of the eldritch nothing with the given exposure. */
-    private static BlockState exposed(BlockEldritchNothing block, int exposed) {
-        return block.defaultBlockState().setValue(BlockEldritchNothing.EXPOSED, exposed);
-    }
-
     /** The state of the given original metadata of the given block. */
     private static BlockState stateOf(Block block, int variant) {
         BlockState state = block.defaultBlockState();
@@ -306,4 +327,5 @@ class BlockVisibilityAndPistonTest {
             throw new AssertionError("the common mixin configuration cannot be read", failure);
         }
     }
+
 }

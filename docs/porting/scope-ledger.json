@@ -106,23 +106,25 @@
       },
       "review": {
         "disposition": "exclude",
-        "source_semantics": "not_applicable",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "native_coverage": "partial",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/api/BlockCoordinates.java:13 class BlockCoordinates implements Comparable",
-          "oracle thaumcraft/api/IArchitect.java:18 ArrayList<BlockCoordinates> getArchitectBlocks(...)",
-          "oracle thaumcraft/client/lib/REHWandHandler.java:79 ArrayList<BlockCoordinates> architectBlocks",
-          "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:196 getArchitectBlocks(...) returns ArrayList<BlockCoordinates>",
-          "native common/src/main/java/thaumcraft/api/IArchitect.java:7 int getMaxAreaSize(ItemStack focus) (no block list)",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:28 public record Area(int x, int y, int z, int axis)",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:82 public static List<BlockPos> planarBlocks(...)"
+          "oracle thaumcraft/api/BlockCoordinates.java:13 the mutable x/y/z holder with equals, hashCode and compareWorldCoordinate",
+          "oracle thaumcraft/api/BlockCoordinates.java:77,83 readNBT/writeNBT with the b_x/b_y/b_z keys",
+          "oracle thaumcraft/api/IArchitect.java:18 the only published consumer: ArrayList<BlockCoordinates> getArchitectBlocks(...)",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:79,311,319,371 the client architect preview list",
+          "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:60,121,143,196 and oracle thaumcraft/common/items/equipment/ItemElementalShovel.java:228-281 the warding and shovel architect areas",
+          "oracle grep b_x: no class of the 4.2.3.5 tree calls BlockCoordinates.readNBT or writeNBT, so the NBT helpers are dead code in the original",
+          "native common/src/main/java/thaumcraft/api/IArchitect.java:7,9 the native focus surface (max area size and axis modes) instead of a block list",
+          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:28,63 the bounded Area record (x, y, z, axis) and its selection",
+          "native common/src/main/java/thaumcraft/common/lib/world/WardingCasts.java:37 the native warding cast works on net.minecraft.core.BlockPos"
         ],
         "notes": [
-          "The native Architect/warding surface is server side and works on BlockPos plus a bounded Area record, so the original mutable int triple has no consumer left.",
-          "Every oracle call site of BlockCoordinates (IArchitect, REHWandHandler, ItemFocusWarding, ItemElementalShovel) is an Architect-area consumer and all of them were re-architected.",
-          "The class is therefore deliberately not carried over; the coordinates it held live in net.minecraft.core.BlockPos."
+          "Every live consumer of the original class is an Architect-area consumer, and all of them were re-architected onto net.minecraft.core.BlockPos plus the bounded WandArchitect.Area record, so the original mutable triple has no consumer left.",
+          "The readNBT/writeNBT helpers of the class were never called in the 4.2.3.5 tree, so dropping the class loses no behaviour.",
+          "Partial, not verified: the published add-on type is gone, so an add-on written against thaumcraft.api.BlockCoordinates does not compile against the native. This is the same public-API regression that the thaumcraft.api.IArchitect row records."
         ],
         "reviewed_sha256": {
           "original": "1fcce3b8ff02d03d9c70487ad21a9dd277be15ca6f874462c6daa9349d4f0e57",
@@ -1956,17 +1958,21 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/api/entities/GolemIds.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/items/golems/GolemData.java:40-52 core ids 0..11 (FILL..FISHING) and NO_CORE=-1",
-          "native common/src/main/java/thaumcraft/items/golems/GolemUpgrade.java:10-15 upgrade ids 0..5 (AIR..ENTROPY)",
-          "native common/src/main/java/thaumcraft/entities/golems/EnumGolemType.java:5-12 material ordinals 0..7"
+          "oracle thaumcraft/api/entities/GolemIds.java: absent from the TC4 4.2.3.5 oracle (the helper is a 1.12 add-on surface)",
+          "oracle thaumcraft/common/entities/golems/ItemGolemCore.java:45-56 the original core metadata 0..11 (fill, empty, gather, harvest, guard, liquid, essentia, lumber, use, butcher, sorting, fish)",
+          "oracle thaumcraft/common/entities/golems/ItemGolemUpgrade.java:46-51 the original upgrade metadata 0..5 (air, earth, fire, water, order, entropy)",
+          "oracle thaumcraft/common/entities/golems/EnumGolemType.java:10-17 the original material ordinals 0..7 (straw..thaumium)",
+          "legacy src/main/java/thaumcraft/api/entities/GolemIds.java:5-33 the 1.12 restatement of those three id sets",
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemData.java:40-52 the same core ids (NO_CORE=-1, FILL=0 .. FISHING=11)",
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemUpgrade.java:10-15 the same upgrade ids (AIR=0 .. ENTROPY=5)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EnumGolemType.java:5-12 the same material ordinals and the same property values"
         ],
         "notes": [
-          "Legacy-only (1.12) helper: the class does not exist in the TC4 4.2.3.5 jar, so there is nothing to port.",
-          "The same numeric ids live in the native GolemData/GolemUpgrade/EnumGolemType, so no information is lost."
+          "The 1.12 helper only restates the original metadata ids; the native carries the identical numbers in GolemData, GolemUpgrade and EnumGolemType, so not one id is lost.",
+          "The helper class itself is not part of the TC4 specification and is deliberately not carried over."
         ],
         "reviewed_sha256": {
           "legacy": "375c5f2b57a23a97c65fd5441f28ea7a9bb1b72cc385393e81e3b82ced058c4c"
@@ -2048,16 +2054,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "partial",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/api/entities/IGolemInfo.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/entities/golems/EntityGolemBase.java:386 getOwnerName, :364 getAttackSpeed, :377-378 getRange",
-          "native common/src/main/java/thaumcraft/items/golems/GolemUpgrade.java:32-34 byId/isSupported"
+          "oracle thaumcraft/api/entities/IGolemInfo.java: absent from the TC4 4.2.3.5 oracle",
+          "legacy src/main/java/thaumcraft/api/entities/IGolemInfo.java:12-21 the 1.12 read-only golem surface (core id, material id, advanced flag, upgrade count)",
+          "legacy src/main/java/thaumcraft/common/integration/waila/GolemWailaPlugin.java:23,28 the only consumer of the interface is the 1.12 WAILA provider",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:281,326,357,373 getGolemMaterial(), getGolemCore(), isAdvanced() and getUpgradeAmount(GolemUpgrade) expose the same data",
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemUpgrade.java:34 byId(int) maps the stable legacy upgrade id onto the native enum"
         ],
         "notes": [
-          "Legacy-only (1.12) read-only golem API used by the 1.12 WAILA integration; absent from the TC4 jar.",
-          "The native golem exposes the same data through getGolemCore()/getGolemMaterial()/isAdvanced()/getUpgradeAmount()."
+          "The data of the 1.12 read-only golem API is exposed by the native golem entity, so nothing of the original golem information is lost.",
+          "Partial: the interface type itself is not published, so an add-on that links against thaumcraft.api.entities.IGolemInfo does not compile against the native. Publishing it would mean changing the golem entity, which belongs to the golems lane."
         ],
         "reviewed_sha256": {
           "legacy": "841b967303408ca2fd986eea2496786108bcb1d37ac49c71a8ba2b0d8eeeabbf"
@@ -2138,16 +2146,19 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "legacy src/main/java/thaumcraft/api/internal/CommonInternals.java: TC6 compatibility surface (scanEntities alias, generateUniqueItemstackId, ProjectedObjectTagMap)",
-          "native common/src/main/java/thaumcraft/api/internal/ThaumcraftInternalMethods.java (the real handler installed as ThaumcraftApi.internalMethods)",
-          "native common/src/main/java/thaumcraft/api/internal/IInternalMethodHandler.java:21 the plug point interface"
+          "oracle thaumcraft/api/internal/CommonInternals.java: absent from the TC4 4.2.3.5 oracle (a 1.12 add-on shim)",
+          "legacy src/main/java/thaumcraft/api/internal/CommonInternals.java:14,16,18 the three services: the scanEntities alias, the object-tag map and the unique item-stack id",
+          "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:74,75 the native scanEntities list and objectTags map",
+          "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:367,371,374,378,383,388 registerObjectTag for the stack, item, id, tag and name forms",
+          "native common/src/main/java/thaumcraft/api/internal/IInternalMethodHandler.java:21 the live plug point of the original internal methods",
+          "native common/src/main/java/thaumcraft/common/lib/research/ObjectAspectRegistry.java:45,49 the native object tag registry keeps the original (item, metadata) key, so no integer id is needed"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 addon compatibility surface for the TC6 internal API.",
-          "The native keeps the real plug point (IInternalMethodHandler) and the live handler, but not the TC6 CommonInternals alias class, so a 1.12 addon that links against it would not resolve."
+          "Every service of the 1.12 shim exists natively; the integer id indirection of generateUniqueItemstackId is not needed because the native registry is keyed by the item identity itself.",
+          "The class is not part of the TC4 specification and is deliberately not carried over."
         ],
         "reviewed_sha256": {
           "legacy": "79e2aad246fe37a1a42d6b3a46ea80c881a0dced75220c787d55c458927f2265"
@@ -23845,14 +23856,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockEssentiaReservoirItem.java: the 1.12 item in the ItemBlocks package",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:70 the native reservoir item"
+          "oracle thaumcraft/common/blocks/ItemBlocks/BlockEssentiaReservoirItem.java: absent; the original item class is oracle thaumcraft/common/blocks/BlockEssentiaReservoirItem.java and is audited in its own row",
+          "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockEssentiaReservoirItem.java:27-36 places the block and sets the tile facing to the opposite of the clicked side",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:70-80 the native reservoir item sets the same facing after the placement",
+          "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:56 placedFacing(clicked) returns clicked.getOpposite()"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 package reorganisation. The native has no ItemBlocks package; the reservoir item is a normal registry item."
+          "The 1.12 ItemBlocks package is a reorganisation of the 1.12 tree; the original 1.7 item class lives in thaumcraft/common/blocks and keeps its own ledger row.",
+          "The native reproduces the placement facing exactly; the 1.12 damage-value subtype flags have no 1.21.1 analogue and are not needed."
         ],
         "reviewed_sha256": {
           "legacy": "80a236877df6bbc48340074e706bf584bf1c2dc938cc3d4149395d14f085acba"
@@ -24253,14 +24267,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockTubeItem.java: the 1.12 item in the ItemBlocks package",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java (the native tube items)"
+          "oracle thaumcraft/common/blocks/ItemBlocks/BlockTubeItem.java: absent; the original item class is oracle thaumcraft/common/blocks/BlockTubeItem.java and is audited in its own row",
+          "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockTubeItem.java:20-35 the tube takes the clicked side and the crystallizer the opposite side",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:116-127 the native tube item sets the facing to the clicked face",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEssentiaCrystalizer.java:32 getStateForPlacement uses context.getClickedFace().getOpposite()",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftTubes.java:81-84 the native centrifuge item keeps the original default facing, because the original item assigned none"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 package reorganisation, deliberately not carried over."
+          "Both facings of the 1.12 item class are reproduced natively, the tube by its item and the crystallizer by its block state.",
+          "The 1.12 metadata subtype flags have no 1.21.1 analogue and are not needed."
         ],
         "reviewed_sha256": {
           "legacy": "e3f6c473d45034d89425ace6c637cc165c472f281fb28a0e1bff05a29cb5b4bb"
@@ -24533,16 +24551,19 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/compat/ThaumcraftSixCompatibility.java: initBlockAliases() and the other TC6 alias initialisers",
-          "native common/src/main/java/thaumcraft/api/blocks/BlocksTC.java and thaumcraft/api/items/ItemsTC.java present",
-          "native common/src/main/java/thaumcraft/api/aspects/AspectEventProxy.java, AspectHelper.java, AspectRegistryEvent.java present"
+          "oracle thaumcraft/common/compat/ThaumcraftSixCompatibility.java: absent from the TC4 4.2.3.5 oracle (the TC6 binary-compatibility bootstrap of the 1.12 tree)",
+          "legacy src/main/java/thaumcraft/common/compat/ThaumcraftSixCompatibility.java:22,26,31 the three services: initBlockAliases, initItemAliases and postAspectRegistryEvent",
+          "native common/src/main/java/thaumcraft/api/blocks/BlocksTC.java:29 and common/src/main/java/thaumcraft/api/items/ItemsTC.java:29 the native alias classes answer from the 1.21.1 registry on demand, so there is no init pass to run",
+          "native common/src/main/java/thaumcraft/api/aspects/AspectRegistryEvent.java:22,35-42 the native listener registry and its post()",
+          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:235 the native mod initializer raises the aspect registry event after the core aspect tags exist"
         ],
         "notes": [
-          "Not an original TC4 class: the TC6 binary-compatibility bootstrap of the legacy 1.12 tree.",
-          "The native port carries the individual TC6 alias classes but not the central initialiser that used to wire them, so the alias fields are not populated by a compat init pass."
+          "The native needs no central TC6 initialiser because the alias classes have no static fields to fill: BlocksTC and ItemsTC resolve the registry when they are called, and the aspect registry event is raised by the common initializer.",
+          "The class is not part of the TC4 specification and is deliberately not carried over; the mod loads without any TC6 addon.",
+          "This corrects the earlier wording of this row, which said the alias fields were left unpopulated: the native alias classes never had fields to populate."
         ],
         "reviewed_sha256": {
           "legacy": "a6c779ed0aaab1e5cd32bc3114d0dc464b8019a082047baf0325c866f0bee516"
@@ -24918,17 +24939,22 @@
       },
       "review": {
         "disposition": "exclude",
-        "source_semantics": "not_applicable",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "partial",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/config/MaterialAiry.java:1-52 a 1.7 Block.Material subclass with a custom mobility flag",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticSolid.java the native equivalent solid block"
+          "oracle thaumcraft/common/config/MaterialAiry.java:13 a 1.7 Block.Material subclass: not solid, not replaceable, does not block light, blocks movement and carries the no-push mobility flag 1",
+          "oracle thaumcraft/common/config/MaterialAiry.java:19,20 the constructor asks for setNoPushMobility and setRequiresTool",
+          "oracle thaumcraft/common/config/Config.java:916 the airy material is created once and shared",
+          "oracle thaumcraft/common/blocks/BlockAiry.java:82 and oracle thaumcraft/common/blocks/BlockEldritchPortal.java:43 the two consumers of the material",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:298-303 the native airy properties (noOcclusion, noCollission, the original hardness and blast resistance)",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:76-88 the native per-metadata shape of the airy family",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:47-55 the native portal has neither a selection nor a collision box"
         ],
         "notes": [
-          "The 1.7 Block.Material class (and its mobility flag) does not exist in 1.21.1; the block properties are expressed with the modern block API instead.",
-          "The original was used by the cosmetic solid block, which the native ports with the modern properties."
+          "1.21.1 has no Block.Material class, so the material flags became modern block properties and the class itself has no counterpart.",
+          "Partial: the light, collision and replaceable rules of the two consumers are reproduced, but the requires-a-tool flag of the original material has no native counterpart - the airy blocks declare no requiresCorrectToolForDrops."
         ],
         "reviewed_sha256": {
           "original": "518a291876c3533c4d497dad5cd8924798c4de3e5532f24b59e7a618d42a628a",
@@ -33461,15 +33487,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "not_assessed",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/integration/waila/GolemWailaPlugin.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:274-276 getTypeName from the material placer"
+          "oracle thaumcraft/common/integration/waila/GolemWailaPlugin.java: absent from the TC4 4.2.3.5 oracle (WAILA did not exist for 1.7.10)",
+          "legacy src/main/java/thaumcraft/common/integration/waila/GolemWailaPlugin.java:17,23,28 the 1.12 WAILA provider that writes the golem material, core and upgrades into the hover tooltip",
+          "native grep waila/huduma/journeymap in common/src, fabric/src and neoforge/src: no reference at all, so the mod has neither a soft nor a hard dependency and loads without WAILA",
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:32 the native golem screen draws the material frame and the core blurb"
         ],
         "notes": [
-          "Legacy-only (1.12) WAILA integration; the TC4 4.2.3.5 jar has no WAILA plugin and WAILA does not exist for 1.21.1.",
-          "The native provides the same information through the entity name and its own tooltip."
+          "Documented gap: WAILA has no 1.21.1 version, so the hover lines cannot be ported as an integration. The native carries no WAILA code and no WAILA reference, so the mod loads unchanged without it.",
+          "The information the plugin showed is only partly reproduced: the golem screen shows the material and the core, while the list of installed upgrades is shown nowhere in the native.",
+          "not_assessed: the integration target does not exist in 1.21.1, so there is no native counterpart to assess."
         ],
         "reviewed_sha256": {
           "legacy": "a24009669787a5a831822a6fa3b1248c8702d327cb5941ebc3e72fa642ab3543"
@@ -38053,15 +38082,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/lib/CommandThaumcraft.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/common/lib/events/ThaumcraftCommands.java the native command implementation"
+          "oracle thaumcraft/common/lib/CommandThaumcraft.java: absent from the TC4 4.2.3.5 oracle; the original command is oracle thaumcraft/common/lib/events/CommandThaumcraft.java and is audited in its own row",
+          "legacy src/main/java/thaumcraft/common/lib/CommandThaumcraft.java:6 the 1.12 duplicate is an empty abstract CommandBase",
+          "native common/src/main/java/thaumcraft/common/lib/events/ThaumcraftCommands.java:31-35 the native registers /thaumcraft with the aliases /thaum and /tc",
+          "native common/src/main/java/thaumcraft/common/lib/events/ThaumcraftCommands.java:50-82 the native reproduces the help, research, aspect and warp actions at permission level 2",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchAdministration.java:13,33,41,48 the original grant recursion over parents and siblings, the reset that re-completes the auto-unlock research, the positive aspect amount and the warp ranges"
         ],
         "notes": [
-          "Legacy-only (1.12) duplicate of the 1.12 lib/events/CommandThaumcraft; the TC4 jar has only the lib/events one.",
-          "The native implements the command once, in ThaumcraftCommands."
+          "The 1.12 class is an empty duplicate of the 1.12 lib/events command; the native implements the command once, in ThaumcraftCommands.",
+          "The numbers of the original were checked against the native: the aspect amount starts at 1, the warp set amount starts at 0 and the warp add amount is limited to -100..100, exactly as the original parses them."
         ],
         "reviewed_sha256": {
           "legacy": "0b13d072c12af6aa4d33a044383bc8c9f5e59ea953ddcaa1ff54b30e40a7249a"
@@ -38340,15 +38372,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/lib/SoundsTC.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:69 UPGRADE sound events"
+          "oracle thaumcraft/common/lib/SoundsTC.java: absent from the TC4 4.2.3.5 oracle",
+          "legacy src/main/java/thaumcraft/common/lib/SoundsTC.java:10 the 1.12 alias of the TC6 sound table",
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:35 and common/src/main/java/thaumcraft/common/entities/monster/EntityCultistPortal.java:136 the native plays the same sound ids through SoundEvent.createVariableRangeEvent",
+          "native common/src/main/resources/assets/thaumcraft/sounds.json the native sound event table"
         ],
         "notes": [
-          "Legacy-only (1.12) sound event holder; the TC4 jar has no such class.",
-          "The native uses the vanilla sound events and the thaumcraft sound registry directly."
+          "1.21.1 has no SoundEvent registry, so a sound is a resource location: the alias holder has no counterpart and the same sound id is used directly.",
+          "The sound id set itself is complete; see the thaumcraft/common/lib/TCSounds.java row."
         ],
         "reviewed_sha256": {
           "legacy": "a820bde4052c2ac9c675a81e5c7f2ce84aeab432f40788f20cc3ca28212611c0"
@@ -38382,14 +38416,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/lib/TCSounds.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/common/src/main/resources/assets/thaumcraft/sounds the native sound assets"
+          "oracle thaumcraft/common/lib/TCSounds.java: absent from the TC4 4.2.3.5 oracle; the original ships its sound events in assets/thaumcraft/sounds.json",
+          "legacy src/main/java/thaumcraft/common/lib/TCSounds.java:16-93 the 1.12 list of 66 sound events registered through the Forge registry",
+          "original jar assets/thaumcraft/sounds.json 66 sound events; native common/src/main/resources/assets/thaumcraft/sounds.json the same 66 ids",
+          "the only difference is the two runic shield ids, lower cased (runicShieldEffect/runicShieldCharge become runicshieldeffect/runicshieldcharge) because a 1.21.1 resource location path must be lower case",
+          "native common/src/main/java/thaumcraft/common/lib/runic/RunicShield.java:115,120 the native plays the lower cased ids"
         ],
         "notes": [
-          "Legacy-only (1.12) sound event holder; the TC4 jar has no such class."
+          "Every sound event of the original jar is present in the native table and the ogg files of the 66 events are in common/src/main/resources/assets/thaumcraft/sounds.",
+          "The class itself is a 1.12 Forge registry holder and has no 1.21.1 counterpart; the sound ids live in the asset table instead."
         ],
         "reviewed_sha256": {
           "legacy": "be6324f1b4fbe8838f878e6e7ceca7f517e751fba32e529d2d5c0d9693e6bc82"
@@ -39521,15 +39559,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/lib/events/LootHandler.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/common/lib/loot/OriginalMobLoot.java, ZombieBrainDrops.java the native loot rules"
+          "oracle thaumcraft/common/lib/events/LootHandler.java: absent from the TC4 4.2.3.5 oracle; the original injects its chest loot with the Forge 1.7 ChestGenHooks (oracle thaumcraft/common/config/Config.java:574-597)",
+          "legacy src/main/java/thaumcraft/common/lib/events/LootHandler.java:26,32 the 1.12 chest loot injection through the LootTableLoadEvent",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftLoot.java:97-133 chestAdditions(category) with the original counts and weights: the common loot 1..3 at weight 5 (dungeon, jungle and desert pyramid) or 4 (mineshaft, stronghold corridor, crossing and library), the uncommon loot 1..2 at weight 4 or 3, the rare loot 1..1 at weight 1, the stronghold library knowledge fragment 3..6 at weight 20 and the village blacksmith thaumium ingot 1..3 at weight 10",
+          "native fabric/src/main/java/thaumcraft/fabric/loot/FabricThaumcraftLoot.java:16-26,30-49 the native maps the eight original categories onto the 1.21.1 chest tables and appends the entries to the primary weighted pool",
+          "oracle thaumcraft/common/config/Config.java:571-597 the original items: loot bag 0/1/2, resource 2 thaumium ingot, resource 6 amber, bauble blanks 0/1/2 (the mundane amulet, ring and belt), resource 9 knowledge fragment, the vis amulet and the six primal discount rings"
         ],
         "notes": [
-          "Legacy-only (1.12) loot event handler; the TC4 jar has no such class.",
-          "The behaviour it had in 1.12 is implemented natively by the loot rules classes."
+          "The 1.12 LootHandler is the Forge 1.12 shape of the original chest loot; the native reproduces the same items, counts and weights on the 1.21.1 chest tables.",
+          "The NeoForge module is still a bootstrap stub, so the chest injection currently exists on Fabric only."
         ],
         "reviewed_sha256": {
           "legacy": "b81fcdc797893bc016bc48be363f7b63b5b9bac3aceac736dc0be65c49a58787"
@@ -39663,14 +39704,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/lib/network/PacketBase.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/common/lib/network/ (the native payload classes)"
+          "oracle thaumcraft/common/lib/network/PacketBase.java: absent from the TC4 4.2.3.5 oracle; the original uses the Forge simpleimpl messages",
+          "legacy src/main/java/thaumcraft/common/lib/network/PacketBase.java:15,34,42 the 1.12 base class: the empty toBytes/fromBytes, the onMessage hook and the scheduleServer helper",
+          "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxNetworking.java:22-40 the native shape: a payload record with a TYPE and a StreamCodec plus a Networking class that registers the payload and queues the handler on the game thread",
+          "native common/src/main/java/thaumcraft/common/lib/network/ the payload set of the port"
         ],
         "notes": [
-          "Legacy-only (1.12) network base class; the TC4 jar has no such class."
+          "1.21.1 has no IMessage base class: the serialization moved into the StreamCodec of every payload and the handling into the matching Networking class, which is the same split of duties as the 1.12 base class.",
+          "The base class itself is not part of the TC4 specification and is deliberately not carried over."
         ],
         "reviewed_sha256": {
           "legacy": "6a71ab9a2522346ef07f1ab3dc9079df3d6cd658c4ece88460c118a30cfc1ed4"
@@ -39802,17 +39846,23 @@
       },
       "review": {
         "disposition": "replace",
-        "source_semantics": "different",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:61-80 sends the boss and the target ids and spawns the beam particle",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:198-211 the beam is now a spawned EntityGolemOrb"
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:36-88 the message carries two entity ids and draws the two client beams (0.07/0.376/0.325 and 1.0/0.5/0.5, age 20, blendmode 1)",
+          "oracle thaumcraft/common/lib/network/PacketHandler.java:96 the message is registered for the client side",
+          "oracle grep PacketFXBeamPulseGolemBoss: the 4.2.3.5 tree only declares and registers the message, no class of the original ever sends it",
+          "oracle /home/Acak/work/opentc4/src/main/java/thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:16-57 the readable 1.7.10 source has the same class and the same registration and no sender",
+          "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:227-241 the original shot: beamCharge -= 15 + rand.nextInt(5), the EntityGolemOrb with the speed 0.66 and the inaccuracy 5.0 and the sound thaumcraft:egattack",
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:247-260 the native shot with the same numbers and the same order",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java:142-146 the native GOLEM_BEAM_MAX_CHARGE=150, the drain 15+0..4, the speed 0.66 and the inaccuracy 5.0"
         ],
         "notes": [
-          "The packet is gone: the headless golem beam no longer needs a client packet because it is an entity projectile.",
-          "The visible beam effect of the original is therefore missing."
+          "CORRECTION of the earlier review: the message is dead code in the original. The 4.2.3.5 tree registers it and never sends it, in the oracle and in the readable 1.7.10 source alike, so the visible attack of the headless golem in TC4 is the EntityGolemOrb projectile, which the native ports with the same charge, drain, speed, inaccuracy and sound.",
+          "The earlier note that the visible beam of the original is missing was wrong: the original never draws that beam, so no native counterpart is owed.",
+          "The client class thaumcraft/client/fx/beams/FXBeamGolemBoss.java was closed by the client fx lane with the same correction; it is not a unit of this lane."
         ],
         "reviewed_sha256": {
           "original": "b78c0ada83838d3855e0d083528846e358ffecfd840a5b8346ceff902f93b05e",
@@ -42165,15 +42215,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "native_coverage": "parity_verified",
+        "owner": "port/commonleft",
         "evidence": [
-          "oracle thaumcraft/common/lib/utils/ConnectedTextureUtils.java: (file absent from the TC4 4.2.3.5 oracle)",
-          "native common/src/main/java/thaumcraft/common/src/main/resources/assets/thaumcraft/textures the native textures"
+          "oracle thaumcraft/common/lib/utils/ConnectedTextureUtils.java: absent from the TC4 4.2.3.5 oracle; the original keeps the lookup table in oracle thaumcraft/client/lib/UtilsFX.java:75 and the neighbour mask in oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:111-160",
+          "legacy src/main/java/thaumcraft/common/lib/utils/ConnectedTextureUtils.java:6,21,65 the 1.12 helper: the neighbour mask, the mask-to-texture lookup and the 256 entry table",
+          "native common/src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java:25-41 the native 256 entry table, entry for entry the same as oracle UtilsFX.connectedTextureRefByID and as the 1.12 table",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileWardedGlassRenderer.java:58-93 the native computes the same eight neighbour flags per face as the original"
         ],
         "notes": [
-          "Legacy-only (1.12) connected texture helper; the TC4 jar has no such class.",
-          "1.21.1 has no connected texture model support, so the helper has no counterpart."
+          "The connected texture of the warded glass is an original TC4 feature and it is ported: the lookup table and the neighbour masks are identical, so the rune face of a warded glass is chosen exactly as in 4.2.3.5.",
+          "The 1.12 helper class is a refactoring of the original and is deliberately not carried over."
         ],
         "reviewed_sha256": {
           "legacy": "200fefa94e487414dafa617c235c9b2079999bb4c8c1a38d4e8dfb494af4096b"
@@ -48515,14 +48567,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "native_coverage": "partial",
+        "owner": "port/commonleft",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/world/aura/AuraChunk.java: the TC6 per-chunk aura storage",
-          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java the native aura is the node's own stored essence"
+          "oracle thaumcraft/common/world/aura/AuraChunk.java: absent from the TC4 4.2.3.5 oracle; TC4 has no per-chunk aura, the aura is the aura node (oracle thaumcraft/common/tiles/TileNodeEnergized.java:27,165)",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraChunk.java:6 the 1.12 chunk state holder (base, vis, flux)",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:15,19,23 the 1.12 handler itself refuses the chunk state with UnsupportedOperationException",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:20,26,48 the native projection of the add-on surface onto the TC4 aura node"
         ],
         "notes": [
-          "Not an original TC4 class: TC4 has no per-chunk aura. The native keeps the aura in the node block entity, so the class is deliberately not carried over."
+          "TC4 has no per-chunk aura: the native keeps the essence in the aura node and projects the add-on accessors onto it, so the vis of the legacy chunk state is reachable.",
+          "Partial: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well."
         ],
         "reviewed_sha256": {
           "legacy": "63c22abddf12b0f553991b5b91a25bc1fb9c98cb635c74102c2c32f9ce65c415"
@@ -48556,14 +48611,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "native_coverage": "partial",
+        "owner": "port/commonleft",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java: the TC6 per-chunk aura service",
-          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java the native projection of the aura onto the node"
+          "oracle thaumcraft/common/world/aura/AuraHandler.java: absent from the TC4 4.2.3.5 oracle",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:27-33 drainVis floors the amount and delegates to the VisNet handler",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 the native drainVis(level, pos, amount, simulate) over the essence of the node",
+          "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:516,517 the native VisNet drain with an aspect"
         ],
         "notes": [
-          "Not an original TC4 class: TC4 has no per-chunk aura service, so the class is deliberately not carried over; the native exposes the node through AuraHelper instead."
+          "The vis drain of the 1.12 handler is projected onto the native aura node; the chunk state and the flux have no TC4 counterpart.",
+          "Partial for the same reason as the AuraChunk row."
         ],
         "reviewed_sha256": {
           "legacy": "11f597a010debe4d5ace27d99fdb588558f79a59b75591b2f89232a25e9c3db4"

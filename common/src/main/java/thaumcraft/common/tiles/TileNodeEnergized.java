@@ -170,6 +170,13 @@ public final class TileNodeEnergized extends TileVisNode implements IAspectConta
         if (drained > 0) vis.reduce(aspect, drained);
         return drained;
     }
+    /** Read-only availability of the same stock the debit would take. */
+    @Override protected int availableFromSource(Aspect aspect) {
+        if (aspect == null || !EnergizedNodeReducer.canonical(aspect) || !aspect.isPrimal()
+                || !initialized || isQuarantined() || ticking || notifying || lifecycle || VisNodeFailures.isMutationActive()) return 0;
+        if (!current() || !VisNodeFailures.isTowerCoherent(this) || !current()) return 0;
+        return vis.getAmount(aspect);
+    }
     /** Only VisNodeFailures can mint this identity-bound, active permission. */
     public boolean retireForFailure(VisNodeFailures.Failure operation) {
         if (operation == null || !operation.authorizes(this) || failed || rejected != null) return false;

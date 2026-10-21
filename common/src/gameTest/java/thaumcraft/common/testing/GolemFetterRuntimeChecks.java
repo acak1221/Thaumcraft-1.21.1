@@ -225,6 +225,17 @@ public final class GolemFetterRuntimeChecks {
             level.setBlock(lane.standing.below(), idle, Block.UPDATE_ALL); // the fetter replaces the platform block under the golem
             if (fettered) level.setBlock(lane.standing.below(2), Blocks.REDSTONE_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
             test.assertTrue(at(lane.standing.below()).equals(fettered ? active : idle), name + ": the fetter under the golem is " + (fettered ? "active" : "inactive"));
+            arm(lane);
+            lanes.add(lane);
+        }
+
+        /**
+         * Puts the lane's own Fill golem on its spot. The vanilla GameTest grid packs the scenarios
+         * a few blocks apart and a neighbouring scenario cleans up the entities of a wide area, so a
+         * lane's golem can be discarded while this scenario runs; the fixture then arms the lane
+         * again instead of reading a golem that no longer exists.
+         */
+        private void arm(Lane lane) {
             var filters = new ArrayList<>(NO_FILTERS);
             var counts = new ArrayList<>(NO_COUNTS);
             filters.set(0, new ItemStack(Items.COBBLESTONE));
@@ -239,7 +250,7 @@ public final class GolemFetterRuntimeChecks {
             spawned.add(golem);
             lane.golem = golem;
             lane.start = golem.position();
-            lanes.add(lane);
+            lane.done = false;
         }
 
         private void armLanes() {
@@ -283,6 +294,21 @@ public final class GolemFetterRuntimeChecks {
 
         private boolean poll() {
             long tick = test.getTick();
+            for (Lane lane : lanes) {
+                if (lane.golem.isRemoved()) {
+                    // A neighbouring scenario cleaned up this area and discarded the lane's golem.
+                    Thaumcraft.LOG.info("Fetter lane {} was discarded by a neighbouring scenario; the fixture arms it again", lane.name);
+                    arm(lane);
+                    if (lane == walking()) {
+                        midPhase = 0;
+                        if (midFloor != null) { // the fetter that froze the walking golem goes away with it
+                            level.setBlock(midFloor, Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+                            level.setBlock(midFloor.east(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                            midFloor = null;
+                        }
+                    }
+                }
+            }
             walkingGolem(tick);
             for (Lane lane : lanes) {
                 if (lane != walking() && tick >= 2 && (!released || tick > releasedAt + 2)) {

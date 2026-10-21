@@ -90,7 +90,7 @@ it as an entity of the generated chunk: the entity is written into the
 `ProtoChunk` of the chunk and the world adds it when the chunk reaches the full
 status (`ChunkStatusTasks.postLoadProtoChunk`).
 
-The check failed once in nine runs while the isolated run of the same case
+The check failed once in seven runs while the isolated run of the same case
 passed. The reason is the life of the entities of a chunk in 1.21.1:
 
 - The entities of a chunk are only tracked after the chunk status of the world

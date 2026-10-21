@@ -80,8 +80,9 @@ Every fix below is committed in `port/octiles` with the oracle file and line in 
   `DOWN` minus `facing`). With the machine facing down that is ten cells, so the machine can hold
   **1 + 2 × 10 = 21** formulas.
 * **Port (before)** `TileThaumatorium.java`: `Math.clamp(tag.getInt("MaxRecipes"), 1, 19)` and
-  `list.size() > 19` → a machine with 20 or 21 slots lost one or two formulas on every reload
-  (`refreshUpgrades()` then trimmed the job list to the clamped capacity).
+  `list.size() > 19` → a machine with 20 or 21 formulas was rejected as a malformed payload on
+  every load; `loadAdditional` catches the exception and quarantines the **whole** machine state, so
+  the thaumatorium stopped working entirely until the block was replaced.
 * **Fix** `ThaumatoriumRules.MAX_RECIPES = 21` (`BASE_RECIPES = 1`, `RECIPES_PER_MATRIX = 2`,
   `MAX_MATRIX_SLOTS = 10`) used by the NBT clamp, by the recipe-list bound and by `refreshUpgrades()`
   through the new `recipeCapacity(matrices)`.
@@ -165,7 +166,7 @@ Every fix below is committed in `port/octiles` with the oracle file and line in 
 | | `:264` | smelt spends 50 mB | `CRUCIBLE_SMELT_WATER` |
 | | `:315-325` | fluid height 0.3 + 0.5·water/cap + tags/100·(1−base), clamped to 1.001/0.9999 | `crucibleFluidHeight` |
 | | `:250-285` | ceil(stack/2) items per collision | port comment + loop shape |
-| | `:132-145` | the primal aspect is redrawn **once**, not searched | port comment + code |
+| | `:130-145` | the primal aspect is redrawn **once**, not searched | port comment + code |
 | Essentia reservoir | `TileEssentiaReservoir.java:35` | 256 units in total | `ReservoirRules.CAPACITY` |
 | | `:164` | minimum suction 24 | `ReservoirRules.SUCTION` |
 | | `:201` | one unit every 5th tick | `ReservoirRules.PULL_INTERVAL` |

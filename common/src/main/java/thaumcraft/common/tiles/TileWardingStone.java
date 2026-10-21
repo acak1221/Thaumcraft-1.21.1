@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.client.fx.RuneEffects;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
@@ -38,7 +39,16 @@ public final class TileWardingStone extends BlockEntity {
 
     /** Original TileWardingStone:28-44 - the ward pushes the entities away. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileWardingStone stone) {
-        if (level.isClientSide) return;
+        if (level.isClientSide) {
+            // The original spawns the runes of the warding stone from the random update of the block
+            // (oracle BlockCosmeticSolid:332-337); the 1.21.1 client equivalent is the client tick of
+            // the tile, with the same average rate of the original random update.
+            if (level instanceof net.minecraft.client.multiplayer.ClientLevel client
+                    && RuneEffects.randomUpdate(client.getRandom())) {
+                RuneEffects.wardingStone(client, pos);
+            }
+            return;
+        }
         stone.count++;
         if (!stone.gettingPower(level) && stone.count % EldritchBlockRules.WARDING_STONE_PUSH_PERIOD == 0) {
             net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(pos.getX(), pos.getY(), pos.getZ(),

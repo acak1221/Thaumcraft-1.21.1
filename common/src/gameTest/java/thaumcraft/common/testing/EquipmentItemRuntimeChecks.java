@@ -12,6 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import thaumcraft.common.config.ThaumcraftInfusion;
 import thaumcraft.common.config.ThaumcraftLegacyItems;
+import thaumcraft.common.entities.projectile.EntityBottleTaint;
 import thaumcraft.common.items.ItemBottleTaint;
 import thaumcraft.common.items.relics.ItemSanityChecker;
 import thaumcraft.common.lib.items.EquipmentRules;
@@ -129,7 +130,7 @@ public final class EquipmentItemRuntimeChecks {
             victim.setNoAi(true);
             level.addFreshEntity(victim);
             var bottle = new ItemStack(ThaumcraftLegacyItems.BOTTLE_TAINT.get());
-            ItemBottleTaint.burst(level, lane.origin, player);
+            thaumcraft.common.entities.projectile.EntityBottleTaint.burst(level, lane.origin, player);
             test.assertTrue(victim.hasEffect(fluxTaint),
                     "the bottle of taint poisons every living thing around it: " + victim.getEffect(fluxTaint));
             int fibres = 0;

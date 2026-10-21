@@ -200,6 +200,21 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         return taken;
     }
 
+    /**
+     * Original {@code TileNode:265-271}: the base of the node becomes the given amount and the
+     * current essence of the node does NOT change.
+     *
+     * <p>The original writes only the base:
+     * {@code if (this.aspectsBase.getAmount(aspect) < nodeVisBase) this.aspectsBase.merge(aspect, nodeVisBase);
+     * else this.aspectsBase.reduce(aspect, this.aspectsBase.getAmount(aspect) - nodeVisBase);}</p>
+     */
+    public void setNodeVisBase(Aspect aspect, int amount) {
+        if (aspect == null) return;
+        if (aspectsBase.getAmount(aspect) < amount) aspectsBase.merge(aspect, amount);
+        else aspectsBase.reduce(aspect, aspectsBase.getAmount(aspect) - amount);
+        changed();
+    }
+
     // Original TileNode:463-484 deliberately does NOT implement useful contains
     // queries or bulk extraction, despite accepting every aspect for refilling.
     @Override public boolean doesContainerAccept(Aspect aspect) { return true; }

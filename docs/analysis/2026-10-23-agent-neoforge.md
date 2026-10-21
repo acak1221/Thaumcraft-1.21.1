@@ -86,6 +86,7 @@ harness of `neoforge/src/gameTest` in a real dedicated server.
 |---|---|---|---|---|
 | baseline of the wave (before the fixes of this wave) | 300 | 276 | **24** | `neoforge/build/gametest-results.xml` |
 | after the probe registration and the break notification fix | 300 | 283 | **17** | same file, overwritten by the last run |
+| after the chest row fix and the damage container fix | 300 | 286 | **14** | same file, the last run of this wave |
 
 The 24 → 17 movement is the sum of two fixes, both committed in this wave.
 
@@ -165,39 +166,95 @@ The fix (`8f041ed2`, `b870abd2`) moves the shared notification into the loader b
 The Fabric behaviour is unchanged byte for byte: the shared event is still fired once, by the
 loader, at the same point of the sequence.
 
+### 2.3 The chest rows never reached the vanilla chest tables (a real NeoForge difference)
+
+`lootbagspreserveoriginalpoolsandpaidnativedropcustody` failed with
+
+```
+actual native dungeon table, loaded through the Fabric weighted-pool hook, naturally reaches a bag
+```
+
+The NeoForge adapter rebuilt the loot table from its **encoded** form, and that cannot work. The
+diagnosis (from the server log of a focused run of the scenario):
+
+```
+DIAG loot table minecraft:chests/simple_dungeon category=dungeonChest additions=22 encoded=null
+  error=DataResult.Error['HolderSet NamedSet(TagKey[minecraft:enchantment / minecraft:on_random_loot])[[]]
+  is not valid in current registry set']
+DIAG loot table minecraft:chests/village/village_toolsmith ... rebuilt=false
+  error=DataResult.Error['Input does not contain a key [type]: MapLike[{"functions":[...],
+  "name":"thaumcraft:thaumium_ingot","weight":10}]']
+```
+
+Two independent reasons, both in the 1.21.1 loot codec:
+
+1. **The encode of the vanilla chest tables fails.** The first pool of
+   `minecraft:chests/simple_dungeon` carries the `minecraft:enchant_randomly` function with the
+   holder set of the tag `minecraft:on_random_loot`. The loot data is loaded **before** the tags of
+   the dynamic registries are bound, so the holder set of that tag is empty and the tag is not in
+   the registry set of the loot loader: the table cannot be encoded again. Every vanilla chest
+   table with that function (the dungeon, both pyramids, the mineshaft, the three strongholds)
+   failed to encode. The three village tables encoded, but see reason two.
+2. **The rows of a pool are decoded with the dispatch codec of the entry type.** The plain map
+   codec of the loot item (`LootItem.CODEC.codec()`) does not write the `type` field of the row,
+   so the table that was built again could not be decoded.
+
+**The fix** (`a8c1f8fc`) does not encode the table at all. The rows are appended to the rows of
+the first pool of the loaded table itself:
+
+* `neoforge/src/main/java/thaumcraft/neoforge/NeoForgeLootTables.java:57` — the handler of the
+  `LootTableLoadEvent`;
+* `neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeLootPoolMixin.java` — the rows of the
+  pool (`@Mutable @Shadow @Final`), so the original rows keep their identity, their order and
+  their weight and the appended rows are the very objects the Fabric builder produces;
+* `neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeLootTableMixin.java` — the pools of
+  the table, the NeoForge patch copies them into a mutable list;
+* `neoforge/src/main/java/thaumcraft/neoforge/NeoForgeLootPoolAccess.java` and
+  `.../NeoForgeLootTableAccess.java` — the two interfaces the mixins implement, because Mixin
+  refuses a public static helper in a mixin.
+
+The weighted list of the chest is therefore the same list on both loaders, and the draw order is
+the same as well. The scenario passes.
+
+**A note for the leader:** the interfaces of the mixins must not live in the mixin package
+`thaumcraft.neoforge.mixin.*`: Mixin refuses to load a class of a defined mixin package that is
+referenced directly ("`IllegalClassLoadError`"), and a stale class file of an earlier build
+triggers the same error at the start of the server.
+
 ---
 
 ## 3. The remaining failures and their verdict
 
-The last full run of this wave left **17** failures. The verdict of every one of them:
+The last full run of this wave left **14** failures. The verdict of every one of them:
 
 | # | Scenario | Verdict | Why |
 |---|---|---|---|
 | 1 | `excavationextraremovalfailureaccounting` | **harness gap** | the probe loads `net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents` by reflection (`common/src/gameTest/java/thaumcraft/common/testing/ExcavationRemovalFailureRuntimeChecks.java:221`); that class does not exist on NeoForge |
 | 2 | `excavationharvestpreservesprotectionlootandcontainers` | **harness gap** | the same reflection (`ExcavationHarvestRuntimeChecks.java:397`) |
 | 3 | `excavationupgradetreasureandenlarge` | **harness gap** | the same reflection (`ExcavationUpgradeRuntimeChecks.java:199`) |
-| 4 | `taintacleskeeporiginalcombatandrootedai` | **shared behaviour, still open** | an exception without a message inside the check; the taintacle AI is shared code, so the failure is a shared defect, not a loader difference |
-| 5 | `taintacleskeeporiginalretaliationlifetimeandloot` | **shared behaviour, still open** | the same |
+| 4 | `tablebreakevacuateseachhalfonce` | **fixture depends on a Fabric-only event** | the scenario waits for the `server-level-post` tick of the Fabric harness (`ResearchTableRuntimeChecks.java:309`); the NeoForge loader has no such tick, so the scenario never reaches its own assertion |
+| 5 | `champion_promotion_uses_the_original_bonuses` | **shared behaviour, still open** | the champion promotion bonuses; the champion code is shared |
 | 6 | `fluxoriginalexposureandgootail` | **shared behaviour, still open** | `original lower25 MISS falls through30 HIT then boolean; exact observed calls=[nextInt(25)]` — the observed RNG bound is the original one, the scenario wants the 30 roll as well |
 | 7 | `fluxmovesandexhaustswithoriginalrules` | **shared behaviour, still open** | `pending real Thaumic Slime branch does not silently consume goo (M11 not complete)` — the scenario itself names the missing unit |
 | 8 | `fullinventoryreusesfreedpaperslotordrops` | **shared behaviour, still open** | `creative overflow spends one paper and the ink, and creates no note entity` |
 | 9 | `magicalbiomesgeneratenaturallyandspawnactualpech` | **shared behaviour, still open** | `region generation admits actual typed BE with original generation-plus-growth age3..7` — the world generation is shared code |
 | 10 | `purifyingfluidpreservesoriginalclassicflowwardandsaltexpiry` | **shared behaviour, still open** | `actual native entity tick sees eyes just inside original Forge filledPercentage: 0` |
-| 11 | `tablebreakevacuateseachhalfonce` | **fixture depends on a Fabric-only event** | the scenario waits for the `server-level-post` tick of the Fabric harness (`ResearchTableRuntimeChecks.java:309`); the NeoForge loader has no such tick, so the scenario never reaches its own assertion |
-| 12 | `entropyqueuesthefarthestconnectedwaterforliquidgolems` | **shared behaviour, still open** | the drained buckets are not conjured; the golem cargo logic is shared code |
-| 13 | `entropyswitcheschangewhatrealgolemsfetchemptyandsort` | **shared behaviour, still open** | the item-match lanes do not finish in 1800 ticks |
-| 14 | `travelingtrunkfollowsteleportsdefendsandpullsitems` | **shared behaviour, still open** | the trunk phases do not finish in 1500 ticks |
-| 15 | `voidmetalgearmendswithersandwarps` | **shared behaviour, still open** | the void sword does not wither the mob for 60 ticks |
-| 16 | `advancedfurnacepreservescustodyacrossrealchunkunload` | **shared behaviour, still open** | the partial disassembly does not force-load the remote shell terrain |
-| 17 | `lootbagspreserveoriginalpoolsandpaidnativedropcustody` | **loader difference, still open** | the native dungeon table of NeoForge is built by the encoded-table rewrite of `NeoForgeLootTables`, not by the Fabric weighted-pool hook; the scenario draws 2000 seeds from `minecraft:chests/simple_dungeon` and expects a loot bag, and the NeoForge table does not reach one in that many seeds (`LootBagRuntimeChecks.java:157`) |
+| 11 | `entropyqueuesthefarthestconnectedwaterforliquidgolems` | **shared behaviour, still open** | the drained buckets are not conjured; the golem cargo logic is shared code |
+| 12 | `entropyswitcheschangewhatrealgolemsfetchemptyandsort` | **shared behaviour, still open** | the item-match lanes do not finish in 1800 ticks |
+| 13 | `travelingtrunkfollowsteleportsdefendsandpullsitems` | **shared behaviour, still open** | the trunk phases do not finish in 1500 ticks |
+| 14 | `voidmetalgearmendswithersandwarps` | **shared behaviour, still open** | the void sword does not wither the mob for 60 ticks |
+| 15 | `advancedfurnacepreservescustodyacrossrealchunkunload` | **shared behaviour, still open** | the partial disassembly does not force-load the remote shell terrain |
 
-**The important conclusion for the NeoForge parity:** of the 17 remaining failures, **three are
+(The table lists fifteen rows for fourteen failures: the last run of the suite and the focused runs
+of the same tree disagree about the two champion scenarios, which are unstable. The stable set of
+the fourteen is the one of the report above; the champion scenario is in flight in the shared
+harness.)
+
+**The important conclusion for the NeoForge parity:** of the remaining failures, **three are
 harness gaps** (the reflection into a Fabric-API class), **one depends on a Fabric-only tick**
-of the harness, and **thirteen are shared-code behaviour** that is identical on both loaders.
-There is **no remaining failure that is a NeoForge-only behavioural difference**, apart from
-the loot table of #17, whose *content* is the same (the same ten tables, the same 22 TC4 rows
-in the same weighted pool) but whose *draw order* differs because the NeoForge path rebuilds
-the encoded table instead of mutating a mutable builder.
+of the harness, and the rest are **shared-code behaviour** that is identical on both loaders.
+**There is no remaining failure that is a NeoForge-only behavioural difference**: the last one,
+the chest rows, is closed by the fix of section 2.3.
 
 ---
 
@@ -419,20 +476,16 @@ the three is implemented yet** — the reason is at the end of this section.
    model and the armour renderer. The NeoForge-native mechanism is known for each of them
    (section 6), the acceptance criteria are written down, and the hover harness back pack has
    no NeoForge-native expression.
-2. **The thirteen shared behaviour failures** of section 3. They are shared code and therefore
-   a Fabric defect as much as a NeoForge one; they belong to the domains of the shared code
-   (taintacles, flux, research table, golems, void gear, advanced furnace) and are not closed
-   by this wave.
-3. **The loot table of #17**: the NeoForge path rebuilds the encoded table, and the draw order
-   of the first pool differs from the Fabric path. The content is the same, the draw is not.
-   The fix belongs into `NeoForgeLootTables` (the rows have to be appended with the same
-   relative order and the same weights as the Fabric mutable builder produces).
-4. **The three harness probes** of section 3 that reflect into
+2. **The shared behaviour failures** of section 3: the taintacle AI, the flux rules, the research
+   table, the golems, the void gear, the advanced furnace, the magical biomes and the champion
+   promotion. They are shared code and therefore a Fabric defect as much as a NeoForge one; they
+   belong to the domains of the shared code and are not closed by this wave.
+3. **The three harness probes** of section 3 that reflect into
    `net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents`: the NeoForge harness would
    need its own `BEFORE`/`CANCELED`/`AFTER` observer of the native `BlockEvent.BreakEvent`.
-5. **The `server-level-post` tick** of the research table scenario: the NeoForge harness would
+4. **The `server-level-post` tick** of the research table scenario: the NeoForge harness would
    need the same tick, or the scenario would have to be written loader neutral.
-6. **The client was never started** in this wave: no NeoForge client run, no production
+5. **The client was never started** in this wave: no NeoForge client run, no production
    (remapped) JAR run, no multiplayer run.
 
 ---
@@ -446,3 +499,7 @@ the three is implemented yet** — the reason is at the end of this section.
 | `b870abd2` | `fix(neoforge)`: the same break notification fix, plus the native `BLOCK_DESTROY` observation, the failure stack trace in the log and the focused `-PgameTestFilter` diagnostics |
 | `f0e13f62` | `test(neoforge)`: the loader parity test, and the two missing item renderers it found |
 | `3bef8dc5` | `docs(neoforge)`: the baseline of the wave |
+| `f65069ab`, `9ff2dcb1` | `fix(crashhunt)`: the chest row guard of the NeoForge adapter and the shared pool helper, cherry picked from the crashhunt branch (they are already in `work`) |
+| `08ea0ec6` | `fix(neoforge)`: the damage container of NeoForge and the water type of the purifying fluid |
+| `a8c1f8fc` | `fix(neoforge)`: the original chest rows reach the vanilla chest tables again (section 2.3) |
+| `421b1398` | `docs(neoforge)`: this report |

@@ -8,16 +8,17 @@ Unit list: `/home/cyberfox-kali/units/w2clientfx.txt` (37 units: 25 `client_rend
 **The tests written here are authored but NOT executed** — this agent may not run Gradle.
 (The resumed session of section 8 runs them with a plain JUnit launcher instead; that is not Gradle.)
 
-Thirteen units moved `partial -> parity_verified`:
+Fourteen units moved `partial -> parity_verified`:
 `thaumcraft/client/fx/WRMat4.java`, `thaumcraft/client/fx/WRVector3.java`,
 `thaumcraft/client/fx/bolt/FXLightningBolt.java`, `thaumcraft/client/fx/bolt/FXLightningBoltCommon.java`,
-`thaumcraft/client/fx/particles/FXBreaking.java`, `thaumcraft/client/fx/particles/FXEssentiaTrail.java`,
+`thaumcraft/client/fx/particles/FXBreaking.java`, `thaumcraft/client/fx/particles/FXBlockRunes.java`,
+`thaumcraft/client/fx/particles/FXEssentiaTrail.java`,
 `thaumcraft/client/fx/particles/FXWisp.java`, `thaumcraft/client/fx/particles/FXWispArcing.java`,
 `thaumcraft/client/fx/particles/FXWispEG.java`, `thaumcraft/client/gui/MappingThread.java`,
 `thaumcraft/common/config/MaterialTaint.java`, `thaumcraft/client/lib/TCFontRenderer.java`,
 `thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java`.
 
-The other twenty-four stay `partial`; each one carries the exact remaining difference in the ledger.
+The other twenty-three stay `partial`; each one carries the exact remaining difference in the ledger.
 
 ---
 
@@ -567,3 +568,54 @@ suite for the whole repository.
   `w2devices` agent, not to this unit list. Its agent already added
   `client/fx/particles/BoreDigSparkleParticle.java` and the dig event of the original; this agent
   only read it as a cross check and did not touch it.
+
+## 8.9 The rune particles of the warding stone and of the runed eldritch block
+
+* original `thaumcraft/client/fx/particles/FXBlockRunes.java:24-49` — the rune particle: the rotation
+  `rand.nextInt(4) * 90`, the lifetime `3 * duration`, the cell `224..239`, the offsets
+  `rand.nextFloat() * 0.2` and `-0.3 + rand.nextFloat() * 0.6`, the size `0.3f * (1 + rand.nextGaussian()
+  * 0.1f)` and the alpha zero;
+* original `FXBlockRunes.java:51-78` — the draw: the cell of the row `.375`, the two rotations and the
+  two offsets, the half size `0.5 * 0.3f * (1 + gauss * 0.1f)`;
+* original `FXBlockRunes.java:80-93` — the rise and fade profile with the threshold `maxAge / 5` and the
+  drift `0.04 * gravity`;
+* original `thaumcraft/common/blocks/BlockCosmeticSolid.java:332-337` — the warding stone spawns two
+  runes per random update with the colours `0.2 + rand * 0.4`, `rand * 0.3` and `0.8 + rand * 0.2`, the
+  duration twenty and the gravity `-0.02`;
+* original `thaumcraft/common/blocks/BlockEldritch.java:302-304` — the runed eldritch block spawns one
+  rune in a neighbouring air block with the colours `0.5 + rand * 0.5`, `rand * 0.3` and
+  `0.9 + rand * 0.1` and the duration `16 + rand(4)`;
+* original `thaumcraft/client/ClientProxy.java:899-904` — `particleCount`: no particle at the minimal
+  setting, the base count at the decreased one and twice the base count at the full one.
+
+The port before this session had the rune particle (inside the particle of the infusion matrix) but
+**only the infusion matrix used it**: the warding stone and the runed eldritch block showed no rune at
+all. The native port now has the particle of its own
+(`common/src/main/java/thaumcraft/client/fx/particles/BlockRuneParticle.java`), the original spawn
+helper (`common/src/main/java/thaumcraft/client/fx/RuneEffects.java`) and the two spawn sites: the
+client tick of the warding stone (`common/tiles/TileWardingStone.java:40-50`) and the client tick of
+the runed eldritch block (`common/blocks/BlockEldritch.java:228-240`).
+
+The 1.7.10 random update runs three times per chunk and per tick, so a block is updated once every
+4096 / 3 ticks on average; the native port uses the same probability
+(`RuneEffects.randomUpdate`). The 1.21.1 random update of a block is a **server** tick, and the
+original effect is a client side particle, so the native port uses the client tick of the two blocks
+instead.
+
+**Acceptance criterion for the leader**: a warding stone that is powered must show **two small purple
+rune glyphs floating just above it**, and a runed eldritch block must show a **single rune glyph
+drifting in one of the air blocks next to it**. With the particle setting on *minimal* no rune may
+appear at all, with *decreased* two runes must appear for the warding stone and one for the eldritch
+block, and with *all* four and two.
+
+## 8.10 The tests of this session
+
+| test | what it pins | state |
+|---|---|---|
+| `common/src/test/java/thaumcraft/client/fx/ParticleDeflectionTest.java` | the six faces of the push out of blocks, the nearest face, the order of the faces in a tie, the speed and the jitter against the values of the real 1.21.1 random and the two random draws of a walled in mote | **executed** with a plain JUnit launcher: 5 of 5 |
+| `common/src/test/java/thaumcraft/client/fx/FloatyLineParityTest.java` | the link quality sixteen, the eight steps per block, the fade, the scroll and the phase of the original floaty line | **executed**: 5 of 5 |
+| `common/src/test/java/thaumcraft/client/fx/ParticleScaleParityTest.java` | the half sizes of the original particles, the heat source of the crucible and the unpushable taint; the bootstrap of the 1.21.1 registries was added, without it the test fails when it runs first | **executed**: 5 of 5 |
+| `common/src/test/java/thaumcraft/client/fx/BoltShapeParityTest.java` and `common/src/test/java/thaumcraft/warp/WispLightningShapeTest.java` | the segment counts, the ages, the multipliers and the dropped segments of the original bolt | **executed**: 12 of 12 |
+
+All twenty two of the client fx tests of this branch pass with the plain JUnit platform launcher. The
+leader still has to run the Gradle suite of the whole repository; this agent may not start a daemon.

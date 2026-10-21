@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -58,10 +57,11 @@ final class GatherGolemGoals {
      * none.</p>
      */
     void installShared() {
-        golem.addWorkGoal(GoalPriority.OPEN_DOOR, new OpenDoorGoal(golem, true) {
-            @Override public boolean canUse() { return golem.canWork() && super.canUse(); }
-            @Override public boolean canContinueToUse() { return golem.canWork() && super.canContinueToUse(); }
-        });
+        // Original AIOpenDoor (oracle …/ai/misc/AIOpenDoor.java:117-171): the golem opens the
+        // wooden door or the fence gate it is blocked by, for twenty ticks. The vanilla
+        // OpenDoorGoal knows only the door in front of the golem, opens it whenever the golem
+        // walks and never closes a fence gate, so the original's own goal is used.
+        golem.addWorkGoal(GoalPriority.OPEN_DOOR, new GolemDoorGoal(golem));
         golem.addWorkGoal(GoalPriority.RETURN_HOME, new ReturnHome());
         golem.addWorkGoal(GoalPriority.WATCH_CLOSEST, new LookAtPlayerGoal(golem, Player.class, 6) {
             @Override public boolean canUse() { return golem.canWork() && super.canUse(); }

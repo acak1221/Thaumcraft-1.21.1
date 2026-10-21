@@ -54,6 +54,8 @@ public class EntityCultistCleric extends EntityCultist implements RangedAttackMo
         goalSelector.addGoal(1, new CultistAltarFocusGoal(this));
         goalSelector.addGoal(2, new CultistLongRangeGoal(this, 2.0, 1.0, 20, 40, 24.0F));
         goalSelector.addGoal(3, new CultistMeleeGoal(this, 1.0, false));
+        // Original EntityCultistCleric:57 - the door restriction of priority four.
+        goalSelector.addGoal(4, new CultistRestrictOpenDoorGoal(this));
         goalSelector.addGoal(5, new OpenDoorGoal(this, true));
         goalSelector.addGoal(6, new MoveTowardsRestrictionGoal(this, 0.8));
         goalSelector.addGoal(7, new RandomStrollGoal(this, 0.8));
@@ -62,7 +64,9 @@ public class EntityCultistCleric extends EntityCultist implements RangedAttackMo
         targetSelector.addGoal(1, new CultistHurtByTargetGoal(this, true));
         // Original EntityAINearestAttackableTarget:52-58 - a target chance of zero scans
         // every tick. The native goal scans every fifth tick unless the interval is one.
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 1, true, false, null));
+        // The selector keeps the original home rule of EntityAITarget.isSuitableTarget.
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 1, true, false,
+                target -> EntityCultist.withinHome(this, target)));
     }
 
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {

@@ -16,15 +16,20 @@ import thaumcraft.api.wands.IWandable;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.aspects.IAspectContainer;
 import thaumcraft.common.items.wands.ItemWandCasting;
+import thaumcraft.common.lib.tiles.TileParityRules;
 import thaumcraft.common.tiles.TileNode.NodeModifier;
 import thaumcraft.common.tiles.TileNode.NodeType;
 
 /**
  * Original TileJarNode: the node jar. It keeps the aspects and the identity
  * of a node until the player turns it back into a node with a wand.
+ *
+ * <p>Original TileJarNode extends TileJar and implements {@code IAspectContainer}: the stored
+ * aspects may never grow past the stored base of the node.
  */
-public final class TileJarNode extends BlockEntity implements IWandable {
+public final class TileJarNode extends BlockEntity implements IWandable, IAspectContainer {
     private final AspectList aspects = new AspectList();
     private final AspectList aspectsBase = new AspectList();
     private NodeType nodeType = NodeType.NORMAL;
@@ -37,8 +42,6 @@ public final class TileJarNode extends BlockEntity implements IWandable {
         super(ThaumcraftEldritchBlocks.JAR_NODE_TILE.get(), pos, state);
     }
 
-    public AspectList getAspects() { return aspects.copy(); }
-    public AspectList getAspectsBase() { return aspectsBase.copy(); }
     public NodeType getNodeType() { return nodeType; }
     public NodeModifier getNodeModifier() { return nodeModifier; }
     public String getId() { return id; }
@@ -55,6 +58,65 @@ public final class TileJarNode extends BlockEntity implements IWandable {
                 aspects.add(aspect, values.getAmount(aspect));
                 aspectsBase.add(aspect, values.getAmount(aspect));
             }
+        }
+    }
+    // ---------------------------------------------------------------- aspect container
+    /** Original TileJarNode:110-131 - the jar is an aspect container whose stored aspects
+     * never grow past the stored base of the node. */
+    @Override public AspectList getAspects() { return aspects.copy(); }
+
+    /** Original TileJarNode:getAspectsBase - the base of the stored node. */
+    public AspectList getAspectsBase() { return aspectsBase.copy(); }
+
+    /** Original TileJarNode:255-257 - the jar accepts every aspect. */
+    @Override public boolean doesContainerAccept(Aspect aspect) { return true; }
+
+    /**
+     * Original TileJarNode:118-127 - the jar takes only what fits above the base of the
+     * node and returns the rest.
+     */
+    @Override public int addToContainer(Aspect aspect, int amount) {
+        if (aspect == null || amount <= 0) return amount;
+        int accepted = TileParityRules.jarNodeAccepted(aspects.getAmount(aspect), aspectsBase.getAmount(aspect), amount);
+        if (accepted <= 0) return amount;
+        aspects.add(aspect, accepted);
+        changed();
+        return amount - accepted;
+    }
+
+    /** Original TileJarNode:129-138 - the jar gives an aspect back when it holds enough. */
+    @Override public boolean takeFromContainer(Aspect aspect, int amount) {
+        if (aspect == null || !TileParityRules.jarNodeGives(aspects.getAmount(aspect), amount)) return false;
+        aspects.remove(aspect, amount);
+        changed();
+        return true;
+    }
+
+    /** Original TileJarNode:140-142 - the jar never takes a list of aspects. */
+    @Override @Deprecated public boolean takeFromContainer(AspectList values) { return false; }
+
+    /** Original TileJarNode:142-144 - the jar holds as much of the aspect as it was given. */
+    @Override public boolean doesContainerContainAmount(Aspect aspect, int amount) {
+        return aspects.getAmount(aspect) >= amount;
+    }
+
+    /** Original TileJarNode:146-153 - the jar holds every aspect of the list. */
+    @Override @Deprecated public boolean doesContainerContain(AspectList values) {
+        if (values == null) return false;
+        for (Aspect aspect : values.getAspects()) {
+            if (aspects.getAmount(aspect) >= values.getAmount(aspect)) continue;
+            return false;
+        }
+        return true;
+    }
+
+    /** Original TileJarNode:155-157 - the stored amount of an aspect. */
+    @Override public int containerContains(Aspect aspect) { return aspects.getAmount(aspect); }
+
+    private void changed() {
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
 

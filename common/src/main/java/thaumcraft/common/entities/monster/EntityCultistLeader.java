@@ -105,7 +105,9 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
         targetSelector.addGoal(1, new EntityCultist.CultistHurtByTargetGoal(this, true));
         // Original EntityAINearestAttackableTarget:52-58 - a target chance of zero scans
         // every tick. The native goal scans every fifth tick unless the interval is one.
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 1, true, false, null));
+        // The selector keeps the original home rule of EntityAITarget.isSuitableTarget.
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 1, true, false,
+                target -> EntityCultist.withinHome(this, target)));
     }
 
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {

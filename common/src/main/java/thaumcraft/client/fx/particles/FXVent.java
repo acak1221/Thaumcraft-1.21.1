@@ -54,6 +54,18 @@ public final class FXVent extends SingleQuadParticle {
                 fx/5, fy/5, fx/5, colour));
     }
 
+    /**
+     * Original TileThaumatorium:221-230 - the vent of the machine, with the position and the
+     * direction of the original call. FXVent:33-46 keeps the original distance cull.
+     */
+    public static void emit(Level world, double x, double y, double z, double dx, double dy, double dz, int colour) {
+        if (!(world instanceof ClientLevel level)) return;
+        var camera = Minecraft.getInstance().getCameraEntity();
+        int range = Minecraft.useFancyGraphics() ? 50 : 25;
+        if (camera == null || camera.distanceToSqr(x, y, z) > range * range) return;
+        Minecraft.getInstance().particleEngine.add(new FXVent(level, x, y, z, dx, dy, dz, colour));
+    }
+
     @Override public void tick() {
         xo = x; yo = y; zo = z;
         age++;

@@ -121,6 +121,31 @@ public final class CultistRules {
     /** Original AIAltarFocus compares a squared block distance against sixteen. */
     public static final double RITUALIST_MAX_HOME_DISTANCE_SQ = 16.0;
 
+    /**
+     * Original EntityAIRestrictOpenDoor:37 - the goal of priority four looks for the nearest
+     * village within sixteen blocks before it looks for the door of that village.
+     */
+    public static final int RESTRICT_DOOR_VILLAGE_RADIUS = 16;
+
+    /**
+     * Original EntityAIRestrictOpenDoor:41 - the mob has to stand within 2.25 blocks of the
+     * inside of the village door (a squared distance of one and a half blocks).
+     */
+    public static final double RESTRICT_DOOR_DISTANCE_SQ = 2.25;
+
+    /**
+     * Original EntityAITarget.isSuitableTarget: a target has to stand inside the home area of
+     * the mob. The 1.7.10 home is a box around the anchor, the native restriction is a sphere
+     * of the same radius.
+     *
+     * @param hasHome     whether the mob has a home area at all
+     * @param distanceSq  the squared distance of the target to the anchor of the home
+     * @param radius      the radius of the home area
+     */
+    public static boolean withinHomeArea(boolean hasHome, double distanceSq, double radius) {
+        return !hasHome || distanceSq < radius * radius;
+    }
+
     /** Original TileEldritchAltar:180 - the ritualist cleric anchors its home at the altar. */
     public static final int ALTAR_CLERIC_HOME_RADIUS = 8;
 

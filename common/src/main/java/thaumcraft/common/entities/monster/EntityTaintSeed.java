@@ -37,8 +37,15 @@ import thaumcraft.common.lib.loot.OriginalTaintExperience;
 import thaumcraft.common.lib.taint.TaintAnimalRules;
 import thaumcraft.common.lib.world.BiomeColumns;
 
-/** Original tainted seed:75HP/4damage, the original fibre spread, the original
- * flux taint aura and the original small tentacle growth. */
+/**
+ * The tainted seed of the 1.12.2 backport: 75HP/4damage, the fibre spread, the flux taint
+ * aura and the small tentacle growth.
+ *
+ * <p>TC4 4.2.3.5 has no tainted seed: the entity comes from
+ * {@code Thaumcraft-1.12.2-6.1.BETA26.jar}
+ * ({@code thaumcraft/common/entities/monster/tainted/EntityTaintSeed.java}). The values above
+ * are the ones of that 1.12.2 original, not of the 4.2.3.5 oracle.
+ */
 public class EntityTaintSeed extends net.minecraft.world.entity.monster.Monster implements ITaintedMob {
     public int boost;
     private boolean firstRun;

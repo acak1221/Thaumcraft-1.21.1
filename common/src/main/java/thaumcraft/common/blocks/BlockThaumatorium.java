@@ -39,10 +39,13 @@ public final class BlockThaumatorium extends BaseEntityBlock {
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return top ? new TileThaumatoriumTop(pos, state) : new TileThaumatorium(pos, state); }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide) return null;
         // The upper half watches its lower half, exactly as the original did.
-        return top ? createTickerHelper(type, ThaumcraftThaumatorium.TOP_TILE.get(), TileThaumatoriumTop::tick)
-                : createTickerHelper(type, ThaumcraftThaumatorium.TILE.get(), TileThaumatorium::tick);
+        if (top) {
+            return level.isClientSide ? null
+                    : createTickerHelper(type, ThaumcraftThaumatorium.TOP_TILE.get(), TileThaumatoriumTop::tick);
+        }
+        // Original TileThaumatorium:221-230 - the client of the machine draws the vent.
+        return createTickerHelper(type, ThaumcraftThaumatorium.TILE.get(), TileThaumatorium::tick);
     }
     private TileThaumatorium machine(Level level, BlockPos pos) {
         BlockEntity tile = level.getBlockEntity(top ? pos.below() : pos);

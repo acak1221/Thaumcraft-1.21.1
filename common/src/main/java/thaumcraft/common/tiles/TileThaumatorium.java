@@ -51,6 +51,17 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /** Original baseline Thaumatorium: one learned recipe, one catalyst, exact essentia, five-tick work and 128 suction. */
 public final class TileThaumatorium extends BlockEntity implements WorldlyContainer, MenuProvider, IAspectContainer, EssentiaAtomicEndpoint {
+    /**
+     * Original TileThaumatorium:323-331 - the block event of the machine starts the vent of
+     * the client; the counter itself is runtime state and is never saved.
+     */
+    public interface ClientEffects {
+        /** Original TileThaumatorium:221-230 - the vent particles in front of the machine. */
+        void vent(Level level, BlockPos pos, Direction facing);
+    }
+    private static ClientEffects clientEffects;
+    public static void setClientEffects(ClientEffects effects) { clientEffects = effects; }
+
     private ItemStack input = ItemStack.EMPTY, physicalOutput = ItemStack.EMPTY;
     private Map<Aspect, Integer> stock = Map.of();
     private ResourceLocation selected;
@@ -66,6 +77,8 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
     private Direction faceIntent;
     private CrucibleRecipe recipeIntent;
     private CompoundTag rejected;
+    /** Original TileThaumatorium:75 - the vent counter of the client. */
+    private int venting;
 
     public TileThaumatorium(BlockPos pos, BlockState state) { super(ThaumcraftThaumatorium.TILE.get(), pos, state); }
     public Direction facing() { return getBlockState().getValue(BlockThaumatorium.FACING); }
@@ -105,10 +118,36 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
             || level.getBlockState(pos).is(Blocks.LAVA) || level.getBlockEntity(pos) instanceof TileNitor); }
 
     public static void tick(Level level, BlockPos pos, BlockState state, TileThaumatorium tile) {
+        if (level.isClientSide) {
+            tile.clientTick();
+            return;
+        }
         if (!(level instanceof ServerLevel) || !tile.current() || tile.ticking || tile.isQuarantined() || EssentiaTransfers.isMutationActive()) return;
         tile.ticking = true;
         try { tile.serverTick(); } catch (RuntimeException failure) { Thaumcraft.LOG.warn("Thaumatorium work failed at {}; paid stock remains with its actual owner", pos, failure); }
         finally { tile.ticking = tile.finishing = false; tile.outputIntent = null; tile.inputIntent = null; tile.stockIntent = null; }
+    }
+
+    /**
+     * Original TileThaumatorium:221-230 - the client draws the vent particles while the vent
+     * counter of the machine runs.
+     */
+    private void clientTick() {
+        if (venting <= 0) return;
+        --venting;
+        if (clientEffects != null && level != null) clientEffects.vent(level, worldPosition, facing());
+    }
+
+    /**
+     * Original TileThaumatorium:323-331 - the block event of the machine starts the vent of
+     * the client.
+     */
+    @Override public boolean triggerEvent(int id, int data) {
+        if (id >= 0) {
+            if (level != null && level.isClientSide) venting = 7;
+            return true;
+        }
+        return super.triggerEvent(id, data);
     }
     private void serverTick() {
         flushOutput();
@@ -179,6 +218,8 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
                 new Vec3(worldPosition.getX() + .5 + out.getStepX() * .66, worldPosition.getY() + .33 - out.getStepY(), worldPosition.getZ() + .5 + out.getStepZ() * .66),
                 new Vec3(out.getStepX() * .075F, .025F, out.getStepZ() * .075F), physicalOutput);
         physicalOutput = ItemStack.EMPTY; setChanged();
+        // Original TileThaumatorium:252 - the machine vents when its output leaves it.
+        server.blockEvent(worldPosition, getBlockState().getBlock(), 0, 0);
     }
 
     @Override public AspectList getAspects() { var copy = new AspectList(); stock.forEach(copy::add); return copy; }

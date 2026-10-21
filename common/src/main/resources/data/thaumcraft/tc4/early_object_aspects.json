@@ -2989,6 +2989,149 @@
       }
     },
     {
+      "original_source_line": 437,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemChestCultistPlate",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects437 registers the crimson cultist chest plate with metallum5 and alienis1; ThaumcraftRunicBaubles registers the flattened cultist_plate item",
+      "modern_ids": [
+        "thaumcraft:cultist_plate"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      }
+    },
+    {
+      "original_source_line": 438,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemChestCultistRobe",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects438 registers the crimson cultist robe chest with metallum3, pannus2 and alienis1; ThaumcraftRunicBaubles registers the flattened cultist_robe item",
+      "modern_ids": [
+        "thaumcraft:cultist_robe"
+      ],
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      }
+    },
+    {
+      "original_source_line": 439,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemChestCultistLeaderPlate",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects439 registers the praetor chest plate with metallum5 and alienis2; ThaumcraftRunicBaubles registers the flattened cultist_leader item",
+      "modern_ids": [
+        "thaumcraft:cultist_leader"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      }
+    },
+    {
+      "original_source_line": 440,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemLegsCultistPlate",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects440 registers the crimson cultist legs with metallum5 and alienis1; ThaumcraftRunicBaubles registers the flattened cultist_plate_legs item",
+      "modern_ids": [
+        "thaumcraft:cultist_plate_legs"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      }
+    },
+    {
+      "original_source_line": 441,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemLegsCultistLeaderPlate",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects441 registers the praetor legs with metallum5 and alienis2; ThaumcraftRunicBaubles registers the flattened cultist_leader_legs item",
+      "modern_ids": [
+        "thaumcraft:cultist_leader_legs"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      }
+    },
+    {
+      "original_source_line": 442,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemLegsCultistRobe",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects442 registers the crimson cultist robe legs with metallum3, pannus2 and alienis1; ThaumcraftRunicBaubles registers the flattened cultist_robe_legs item",
+      "modern_ids": [
+        "thaumcraft:cultist_robe_legs"
+      ],
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      }
+    },
+    {
+      "original_source_line": 443,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemHelmetCultistPlate",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects443 registers the crimson cultist helm with metallum5 and alienis1; ThaumcraftRunicBaubles registers the flattened cultist_plate_helm item",
+      "modern_ids": [
+        "thaumcraft:cultist_plate_helm"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      }
+    },
+    {
+      "original_source_line": 444,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemHelmetCultistLeaderPlate",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects444 registers the praetor helm with metallum5 and alienis2; ThaumcraftRunicBaubles registers the flattened cultist_leader_helm item",
+      "modern_ids": [
+        "thaumcraft:cultist_leader_helm"
+      ],
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      }
+    },
+    {
+      "original_source_line": 445,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemHelmetCultistRobe",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects445 registers the crimson cultist robe hood with metallum3, pannus2 and alienis1; ThaumcraftRunicBaubles registers the flattened cultist_robe_hood item",
+      "modern_ids": [
+        "thaumcraft:cultist_robe_hood"
+      ],
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      }
+    },
+    {
+      "original_source_line": 446,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemBootsCultist",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original ConfigAspects446 registers the crimson cultist boots with metallum4 and alienis1; ThaumcraftRunicBaubles registers the flattened cultist_boots item",
+      "modern_ids": [
+        "thaumcraft:cultist_boots"
+      ],
+      "aspects": {
+        "metallum": 4,
+        "alienis": 1
+      }
+    },
+    {
       "original_source_line": 448,
       "registration": "direct",
       "original_target": "ConfigItems.itemEldritchObject",

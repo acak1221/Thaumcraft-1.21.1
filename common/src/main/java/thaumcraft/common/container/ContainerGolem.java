@@ -20,14 +20,14 @@ import thaumcraft.common.entities.golems.EntityGolemBase;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemGuardTargets;
 import thaumcraft.common.items.golems.GolemItemMatch;
+import thaumcraft.common.items.golems.GolemMarker;
 
 /** Item cores show six ghosts per page (every Fire upgrade adds a page), Decanting one, Sorting/Guard none. Ghosts own no stock.
- * Paging is a server menu button (60 previous, 61 next); the page and slot count reach the client as menu data. */
+ * Paging is a server menu button (66 previous, 67 next); the page and slot count reach the client as menu data. */
 public final class ContainerGolem extends AbstractContainerMenu {
     public static final int IMAGE_WIDTH = 176, IMAGE_HEIGHT = 166, GHOSTS = 6, DATA = 21;
-    public static final int PREVIOUS_PAGE = 60, NEXT_PAGE = 61;
-    /** Menu button 100 + i cycles the Order colour of the i-th ghost on the current page: any, 0 .. 15, any. */
-    public static final int COLOR_BUTTON = 100;
+    /** Original ContainerGolem:84-90: the page arrows are the menu buttons 66 (previous) and 67 (next). */
+    public static final int PREVIOUS_PAGE = 66, NEXT_PAGE = 67;
     /** Order Guard target switches keep the original ids 51 (Monsters), 52 (Animals), 53 (Players), 54 (Creepers); see GolemGuardTargets. */
     public static final int GUARD_BUTTON = GolemGuardTargets.FIRST_BUTTON;
     /** Entropy's item-comparison switches keep the original ids 55 (tags), 56 (damage), 57 (components); see GolemItemMatch. */
@@ -93,6 +93,8 @@ public final class ContainerGolem extends AbstractContainerMenu {
     public int getWantedCount(int slot) { return slot >= 0 && slot < GHOSTS ? configuration.get(slot) : 0; }
     /** Zero-based page shown, and the number of pages the golem's slot count provides. */
     public int page() { return configuration.get(8); }
+    /** The golem's own slot count (the original's {@code mobInv.slotCount}); the Order colour button ids use it. */
+    public int slotCount() { return configuration.get(9); }
     /** Order colour (-1 any, 0..15) of the {@code slot}-th ghost on the current page, and whether colours can be edited at all. */
     public int slotColor(int slot) { return slot >= 0 && slot < GHOSTS ? configuration.get(10 + slot) : -1; }
     public boolean canColorSlots() { return ghostSlots != 0 && openingCore != GolemData.LIQUID && configuration.get(16) != 0; }
@@ -206,14 +208,7 @@ public final class ContainerGolem extends AbstractContainerMenu {
             broadcastChanges();
             return true;
         }
-        if (button >= COLOR_BUTTON && button < COLOR_BUTTON + GHOSTS) {
-            int slot = base() + button - COLOR_BUTTON;
-            if (button - COLOR_BUTTON >= ghostSlots || !serverGolem.canColorSlots()) return false;
-            int next = serverGolem.getSlotColor(slot) + 1;
-            if (!serverGolem.setSlotColor(slot, next > 15 ? -1 : next)) return false;
-            broadcastChanges();
-            return true;
-        }
+        if (adjustColor(button)) return true;
         int category = GolemGuardTargets.categoryOfButton(button);
         if (category != 0) {
             // Server-side gate: only a Guard that carries Order has switches, whatever a client sends.
@@ -230,6 +225,31 @@ public final class ContainerGolem extends AbstractContainerMenu {
         }
         if (button != 50 || serverGolem.getGolemCore() != GolemData.FILL) return false;
         serverGolem.setFillAnyAmount(!serverGolem.isFillAnyAmount());
+        broadcastChanges();
+        return true;
+    }
+
+    /**
+     * The Order colour buttons of the original menu.
+     *
+     * <p>Original {@code ContainerGolem.onButtonClick}:96-109 — a button id <em>below</em> the golem's slot count lowers the
+     * colour of that very slot, and an id from the slot count up to twice the slot count raises it. The colour wraps the
+     * original way: lowering turns {@code -1} (any) into {@code 15} and raises {@code 15} into {@code -1}.</p>
+     *
+     * @return whether the button was an Order colour button of this golem
+     */
+    private boolean adjustColor(int button) {
+        int slots = serverGolem.getSlotCount();
+        if (slots <= 0 || !serverGolem.canColorSlots()) return false;
+        int slot, step;
+        if (button >= 0 && button < slots) { slot = button; step = -1; }
+        else if (button >= slots && button < slots * 2) { slot = button - slots; step = 1; }
+        else return false;
+        int current = serverGolem.getSlotColor(slot);
+        int next = current + step;
+        if (step < 0 && next < GolemMarker.ANY) next = GolemMarker.LAST_COLOR;
+        if (step > 0 && next > GolemMarker.LAST_COLOR) next = GolemMarker.ANY;
+        if (!serverGolem.setSlotColor(slot, next)) return false;
         broadcastChanges();
         return true;
     }

@@ -1,3 +1,35 @@
+## 2026-10-21 — The warp post chains load again, and the client effects of the wave are closed
+
+The previous wave closed the four warp post effects as an impossible gap ("vanilla 1.21.1 ships no
+post program at all"). Both halves of that claim were wrong. Vanilla 1.21.1 does ship post programs
+(`blit`, `box_blur`, `color_convolve`, ... in `assets/minecraft/shaders/program/`), and the real
+reason the chains never loaded was the resolution rule of
+`net.minecraft.client.renderer.EffectInstance`: a post program only exists in the DEFAULT
+namespace, so a pass named `minecraft:box_blur` or `thaumcraft:bloom2` is looked up as
+`minecraft:shaders/program/minecraft:box_blur.json` and can never be found. The four native chains
+now name their programs plainly, and the three original TC4 programs (`bloomColor`, `bloom2`,
+`color_convolve2`) are ported to GLSL 150 into `assets/minecraft/shaders/program/` with the
+original pass order, uniforms and numbers. The original switch `Config.shaders` came back as a
+local setting, and `WarpPostChainTest` fails when a pass names a program that neither the port nor
+1.21.1 can resolve.
+
+The wave also ported the smoke spiral of the Sword of the Zephyr and of the spawning eldritch
+warden (`FXSmokeSpiral`, with the original 720 degree turn and the first five cells of the particle
+sheet), added the missing additive flare of the visnet relay beam, and replaced the Forge
+configuration screen of the original with a native screen that keeps its five categories and its
+keys over the same properties file.
+
+The ledger verdicts of nineteen client rows were corrected against the oracle. Two of them were
+false "missing" verdicts of the audit wave: `FXBeam` and `FXBeamGolemBoss` are dead code in the
+original, because the packets that would show them are registered in the original packet handler
+but never sent by any class of TC4 4.2.3.5. The JEI plugin stays excluded: the original has no JEI
+integration at all and the 1.21.1 JEI is an external mod with its own API artifact.
+
+Verified in the integrated tree: 1781 JUnit tests with no failure, `:fabric:compileClientJava`
+successful, the ledger and the class inventory consistent. No client run: none of the ported
+effects was inspected in the game, so every visual verdict stays partial.
+The report is `docs/analysis/2026-10-21-close-clientfx.md`.
+
 ## 2026-10-21 — The OpenTC4 comparison wave: nine agents, sixty-two defects
 
 The readable 1.7.10 sources settled what the SRG names of the oracle could not: the mapping of

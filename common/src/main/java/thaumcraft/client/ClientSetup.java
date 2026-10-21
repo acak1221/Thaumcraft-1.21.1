@@ -114,6 +114,7 @@ public final class ClientSetup {
         ThaumcraftBellowsClient.init();
         ThaumcraftFocusClient.init();
         ThaumcraftMiscKeyClient.init();
+        ThaumcraftConfigClient.init();
         ThaumcraftFocalClient.init();
         ThaumcraftBoreClient.init();
         ThaumcraftHungryChestClient.init();

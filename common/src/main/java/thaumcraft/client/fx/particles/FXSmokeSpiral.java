@@ -91,16 +91,28 @@ public final class FXSmokeSpiral extends Particle {
     /** Original FXSmokeSpiral:45-53: the spiral of the cell and of the position. */
     private void spiral(float partialTick, Vec3 eye, PoseStack pose) {
         float t = (age + partialTick) / (float) lifetime;
+        Vec3 offset = spiralOffset(radius, start, t);
+        double px = x + offset.x;
+        // Original FXSmokeSpiral:60: the spiral never sinks below the floor of its owner.
+        double py = Math.max(y + offset.y, miny + .1);
+        double pz = z + offset.z;
+        pose.translate(px - eye.x, py - eye.y, pz - eye.z);
+    }
+
+    /**
+     * The spiral of the original (oracle {@code thaumcraft/client/fx/particles/FXSmokeSpiral.java:46-53}):
+     * the turn is {@code start + 720 * t} degrees, the polar angle is {@code 90 - 180 * t} degrees and
+     * the circle of the radius follows it.
+     *
+     * @param t the share of the life of the spiral, from 0 to 1
+     */
+    public static Vec3 spiralOffset(float radius, int start, float t) {
         float r1 = start + 720F * t;
         float r2 = 90F - 180F * t;
         float mx = -Mth.sin(r1 * (float) Math.PI / 180F) * Mth.cos(r2 * (float) Math.PI / 180F);
         float mz = Mth.cos(r1 * (float) Math.PI / 180F) * Mth.cos(r2 * (float) Math.PI / 180F);
         float my = -Mth.sin(r2 * (float) Math.PI / 180F);
-        double px = x + mx * radius;
-        // Original FXSmokeSpiral:60: the spiral never sinks below the floor of its owner.
-        double py = Math.max(y + my * radius, miny + .1);
-        double pz = z + mz * radius;
-        pose.translate(px - eye.x, py - eye.y, pz - eye.z);
+        return new Vec3(mx * radius, my * radius, mz * radius);
     }
 
     @Override public void render(VertexConsumer unused, Camera camera, float partialTick) {

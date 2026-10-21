@@ -2040,6 +2040,7 @@
   "block.thaumcraft.cinderpearl": "Cinderpearl",
   "item.thaumcraft.focus_fire": "Wand Focus: Fire",
   "entity.thaumcraft.ember": "Ember",
+  "key.thaumcraft.config": "Thaumcraft Configuration",
   "key.thaumcraft.change_focus": "Change Wand Focus",
   "tc.port.focus.previous": "Previous",
   "tc.port.focus.next": "Next",

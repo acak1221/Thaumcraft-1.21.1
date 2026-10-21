@@ -82,6 +82,20 @@ public final class VisNetRender {
         Vec3 delta=end.subtract(start);double length=delta.length();if(length<1.0e-6 || length>8.2)return;Vec3 direction=delta.scale(1/length);Vec3 side=direction.cross(Math.abs(direction.y)>.99?new Vec3(1,0,0):new Vec3(0,1,0)).normalize().scale(.105),other=direction.cross(side).normalize().scale(.105);float slide=-age*.2F-Mth.floor(-age*.1F);
         draw(BEAM,GL11.GL_ONE,false,out->{for(int i=0;i<2;i++){Vec3 across=i==0?side:other;float v=-1+slide+i/3F;vertex(out,pose,end.subtract(across),1,v+(float)length,colour,opacity);vertex(out,pose,start.subtract(across),1,v,colour,opacity);vertex(out,pose,start.add(across),0,v,colour,opacity);vertex(out,pose,end.add(across),0,v+(float)length,colour,opacity);}});
     }
+    /** Original FXBeamPower.renderFlare:186-218, the additive sprite of the particle sheet at the
+     * target of the relay beam: the cell walks with the age, the half size is 0.66 of the beam
+     * opacity and the alpha is the beam opacity of the caller. */
+    public static void flare(PoseStack pose,Vec3 target,float age,float scale,float alpha,int colour,int light){
+        int part=(int)Math.floorMod((int)age,16);float u0=part/16F,u1=u0+.0624375F,v0=.3125F,v1=v0+.0624375F;
+        pose.pushPose();try{pose.translate(target.x,target.y,target.z);pose.mulPose(Minecraft.getInstance().gameRenderer.getMainCamera().rotation());
+            drawParticle(PARTICLES,GL11.GL_ONE,Objects.requireNonNull(shader,"Native effect shader must be registered before drawing"),out->{
+                sprite(out,pose,-scale,-scale,u1,v1,colour,alpha,light);sprite(out,pose,-scale,scale,u1,v0,colour,alpha,light);
+                sprite(out,pose,scale,scale,u0,v0,colour,alpha,light);sprite(out,pose,scale,-scale,u0,v1,colour,alpha,light);});
+        }finally{pose.popPose();}
+    }
+    private static void sprite(VertexConsumer out,PoseStack pose,float x,float y,float u,float v,int colour,float alpha,int light){
+        out.addVertex(pose.last(),x,y,0).setUv(u,v).setColor(colour>>16&255,colour>>8&255,colour&255,Mth.clamp((int)(alpha*255F),0,255)).setLight(light);
+    }
     /** State is captured at DRAW time, never while merely queuing vertices. */
     private static final class NativeState implements AutoCloseable {
         final ShaderInstance shader=RenderSystem.getShader();final int[] textures={RenderSystem.getShaderTexture(0),RenderSystem.getShaderTexture(1),RenderSystem.getShaderTexture(2)};final float[] colour=RenderSystem.getShaderColor().clone();

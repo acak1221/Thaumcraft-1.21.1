@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "a910fc0f7ff2522f6d1d169ee3e1224d38443e6c2575686f4c7dbb1fb80a8131",
+    "canonical_json_sha256": "87c4be99a6744f06860009138a01f2e2d9a1536e37cc6908576072c5ada8c83f",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {
@@ -48,14 +48,14 @@
     "shared_path": 749,
     "original_only": 110,
     "legacy_only": 185,
-    "native_linked_rows": 34,
-    "unique_native_counterparts": 53,
+    "native_linked_rows": 37,
+    "unique_native_counterparts": 57,
     "dispositions": {
-      "adapt": 263,
-      "exclude": 165,
+      "adapt": 267,
+      "exclude": 161,
       "needs_review": 1,
-      "port": 288,
-      "replace": 327
+      "port": 289,
+      "replace": 326
     },
     "milestone_queue": {
       "M00": 75,
@@ -4398,20 +4398,21 @@
       "native_counterparts": [],
       "class_inventory_mapping": null,
       "review": {
-        "disposition": "exclude",
-        "source_semantics": "different",
+        "disposition": "adapt",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "partial",
+        "owner": "port/clientfx",
         "evidence": [
           "oracle thaumcraft/client/ThaumcraftGuiFactory.java:19-35 the FML IModGuiFactory that exposes ThaumcraftGuiConfig",
           "oracle thaumcraft/common/Thaumcraft.java the only reference to ThaumcraftGuiFactory",
-          "native common/src/main/java/thaumcraft/client/ has no gui factory and the build has no FML dependency"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java the native entry point of the configuration screen",
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java the screen the entry point opens"
         ],
         "notes": [
-          "Not ported: 1.21.1/Architectury has no FML mod-gui factory entry point, so the class has no counterpart.",
-          "The configuration it exposed is still readable/editable through the native properties file (ThaumcraftSettings), but there is no in-game configuration screen.",
-          "Complete callsite audit: ThaumcraftGuiFactory is referenced only from Thaumcraft.java."
+          "1.21.1 has no mod list and no FML mod gui factory, so the port opens its own configuration screen with a key binding that has no default key.",
+          "The configuration the original screen exposed is still the properties file of the port, and the native screen edits exactly that file.",
+          "The key binding was not exercised in a game, so the verdict stays partial."
         ],
         "reviewed_sha256": {
           "original": "bd443056b87214d817f907cf654ceefd64bb000226efee4e48bf02349e40b157"
@@ -4638,30 +4639,32 @@
         "planned_milestone": "M14",
         "basis": "path_name_heuristic_unreviewed"
       },
-      "native_counterparts": [],
+      "native_counterparts": [
+        "common/src/main/java/thaumcraft/client/fx/particles/FXArc.java"
+      ],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "The native 1.21.1 particle in the fx/particles package is the port of the original beam ribbon: the same arc points (gravity 0.115, noise 0.25, fifty steps), the same crossed strips of textures/misc/beamh.png, the same half width 0.25, the same alpha 0.8 and the same UV of the point index over the arc length. The package differs because 1.21.1 has no EntityFX. The client visual was not inspected in a game."
       },
       "review": {
-        "disposition": "exclude",
-        "source_semantics": "different",
+        "disposition": "adapt",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "partial",
+        "owner": "port/clientfx",
         "evidence": [
-          "oracle thaumcraft/client/fx/beams/FXArc.java:24-60 builds a gravity-bent arc (gravity 0.115, noise 0.25, max 50 segments) drawn with textures/misc/beamh.png",
-          "oracle thaumcraft/client/ClientProxy.java:1152-1159 arcLightning() creates the FXArc and adds it to the effect list",
-          "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302 calls Thaumcraft.proxy.arcLightning(...) during the arcing phase",
-          "oracle thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:64 calls Thaumcraft.proxy.arcLightning(...)",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:231-234 stores arcX/arcY/arcZ but no native code ever reads them"
+          "oracle thaumcraft/client/fx/beams/FXArc.java:37-73 the arc points: the launch velocity of Utils.calculateVelocity with the gravity 0.115 and the requested height gain, at most fifty steps, every emitted point displaced by the noise 0.25",
+          "oracle thaumcraft/client/fx/beams/FXArc.java:90-144 the ribbon: textures/misc/beamh.png, the half width 0.25, the alpha 0.8, the additive blend 770,1 and the UV of the point index over the arc length",
+          "oracle thaumcraft/client/ClientProxy.java:1152-1159 arcLightning() creates the arc and the target sparkle",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:37-122 the 1.21.1 port of the ribbon",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java the arc point generator the native particle uses"
         ],
         "notes": [
-          "Deliberately not ported: there is no native equivalent of the 1.7 FXArc ribbon.",
-          "The only native arc (InfusionArcParticle) serves a different original call site (nodeBolt type 0), not arcLightning.",
-          "Consequence: the eldritch golem's arcing lightning and PacketFXBlockArc show no arc in 1.21.1; the golem's arcX/arcY/arcZ fields are written but never consumed.",
-          "Complete callsite audit: FXArc is instantiated only in ClientProxy.arcLightning, which has exactly two callers (EntityEldritchGolem:302 and PacketFXBlockArc:64)."
+          "The 1.21.1 particle in the fx/particles package is the port of the original beam ribbon; the package differs because 1.21.1 has no EntityFX and every effect is a Particle.",
+          "The original numbers are kept: the gravity 0.115, the noise 0.25, the fifty step limit, the half width 0.25, the alpha 0.8, the crossed vertical and horizontal strips and the UV of the point index over the arc length.",
+          "The native skips a strip whose points are NaN; the original submits those vertices, so the native shows no arc where the original shows a broken one.",
+          "The client visual was not inspected in a game, so the verdict stays partial."
         ],
         "reviewed_sha256": {
           "original": "e6398f62f30767166f6f2d80c5347bc2677a3af8e4950a58431f53831e4bd855",
@@ -4693,26 +4696,26 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the packet that would show the beam is registered in the original packet handler but no class of the original ever sends it."
       },
       "review": {
         "disposition": "exclude",
-        "source_semantics": "different",
+        "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "owner": "port/clientfx",
         "evidence": [
-          "oracle thaumcraft/client/fx/beams/FXBeam.java:130-143 three 60-degree rotated quads using textures/misc/beam.png, beam1.png, beam2.png, beam3.png, half width 0.15*size, pulse and rotationspeed 5",
-          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulse.java:71 the only instantiation: type 1, reverse, pulse, field_70130_N=2.5, blendmode 771, age 20",
-          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:77-80 beam() draws two crossed planes of textures/misc/beam1.png at half width .105 for the visnet relay only"
+          "oracle thaumcraft/client/fx/beams/FXBeam.java:130-143 three 60 degree rotated quads using textures/misc/beam.png, beam1.png, beam2.png and beam3.png, the half width 0.15 of the size, the pulse and the rotation speed 5",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulse.java:64-75 the only instantiation of the beam",
+          "oracle thaumcraft/common/lib/network/PacketHandler.java:95 registers the packet on the client side",
+          "oracle grep: no class of the TC4 4.2.3.5 decompilation ever constructs a PacketFXBeamPulse, so the registered message is never sent"
         ],
         "notes": [
-          "The original entity-to-entity beam (golem boss / PacketFXBeamPulse) has no native counterpart: the native payload list has no beam-pulse message.",
-          "VisNetRender.beam is a different original effect (the visnet relay beam, 2 planes, .105 half width) and must not be counted as the FXBeam port.",
-          "The eldritch golem beam gameplay (charge, drain, damage) is ported, but its beam visual is not.",
-          "Complete callsite audit: FXBeam is constructed only in ClientProxy.beam and PacketFXBeamPulse.onMessage."
+          "Dead code in the original: the packet that would show the beam is registered in the original packet handler but no class of the original ever sends it, so TC4 4.2.3.5 never showed this beam.",
+          "The native port therefore needs no counterpart; the two crossed planes of native VisNetRender.beam are the visnet relay beam (FXBeamPower) and must not be counted as this unit.",
+          "Complete callsite audit: FXBeam is constructed only in the client handler of PacketFXBeamPulse, and the message has zero senders in the oracle."
         ],
         "reviewed_sha256": {
           "original": "9dbfc601a4709b967858be7ed48f18d79ecf043dbed29bee6e01715830fbc480",
@@ -4793,26 +4796,28 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the packet that would show the boss beam is registered in the original packet handler but no class of the original ever sends it; the headless golem shoots an EntityGolemOrb in the original as well."
       },
       "review": {
-        "disposition": "replace",
-        "source_semantics": "different",
+        "disposition": "exclude",
+        "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a7-golems",
+        "owner": "port/clientfx",
         "evidence": [
-          "oracle thaumcraft/client/fx/beams/FXBeamGolemBoss.java:59-88 client-side beam particle from the boss head to the target",
-          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:61-80 spawns FXBeamGolemBoss on the client",
-          "native common/src/main/java/thaumcraft/entities/monster/EntityEldritchGolem.java:198-211 headless beam is now a spawned EntityGolemOrb projectile",
-          "native common/src/main/java/thaumcraft/entities/projectile/EntityGolemOrb.java (native orb projectile)"
+          "oracle thaumcraft/client/fx/beams/FXBeamGolemBoss.java:59-100 the client side beam from the head of the boss to the target",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:61-80 the only instantiation of the beam",
+          "oracle thaumcraft/common/lib/network/PacketHandler.java:96 registers the packet on the client side",
+          "oracle grep: no class of the TC4 4.2.3.5 decompilation ever constructs a PacketFXBeamPulseGolemBoss, so the registered message is never sent",
+          "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:226-243 the ranged attack of the headless golem is an EntityGolemOrb, exactly as the native port does"
         ],
         "notes": [
-          "The headless eldritch golem beam was replaced by an EntityGolemOrb projectile; the client beam particle and its network packet were not ported.",
-          "The visible beam of the original (a pulsing head-to-target beam) is therefore missing: the port shows a travelling orb instead.",
-          "The beam damage, charge drain and cooldown live in EldritchMobRules and were ported."
+          "Dead code in the original: the packet that would show the boss beam is registered in the original packet handler but no class of the original ever sends it, so TC4 4.2.3.5 never showed this beam.",
+          "This corrects the earlier verdict of the audit wave, which took the missing beam for a missing original feature: the original itself never showed it.",
+          "The gameplay of the headless golem is unchanged: the original shoots an EntityGolemOrb (oracle EntityEldritchGolem:226-243) and the native port shoots the same orb.",
+          "Complete callsite audit: FXBeamGolemBoss is constructed only in the client handler of PacketFXBeamPulseGolemBoss, and the message has zero senders in the oracle."
         ],
         "reviewed_sha256": {
           "original": "4c4c450c1ad34bbfbef4844ba5e98aee992b62973f3f37868389c1035f540fe9",
@@ -4842,28 +4847,36 @@
         "planned_milestone": "M14",
         "basis": "path_name_heuristic_unreviewed"
       },
-      "native_counterparts": [],
+      "native_counterparts": [
+        "common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java",
+        "common/src/main/java/thaumcraft/client/renderers/VisNetRender.java"
+      ],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "The native relay beam reproduces the original numbers: the half width 0.105 (0.15 of the size 0.7), the scrolling of the texture, the opacity floor 0.3, the decay of 0.025 per tick, the pulse of 0.8, the ten times brighter beam of a viewer with a revealer and the additive flare of the particle sheet at the target with the half size 0.66 of the opacity. The original shows the beam as a particle that dies when the relay unlinks; the native keeps a per relay opacity instead. The client visual was not inspected in a game."
       },
       "review": {
-        "disposition": "exclude",
-        "source_semantics": "different",
+        "disposition": "adapt",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "owner": "port/clientfx",
         "evidence": [
-          "oracle thaumcraft/client/fx/beams/FXBeamPower.java:96-118 two quads of textures/misc/beam1.png, size 0.7, opacity clamped to 0.3..0.8, plus a particle-texture flare quad at the target",
-          "oracle thaumcraft/common/tiles/TileVisRelay.java:124 the only caller: Thaumcraft.proxy.beamPower(..., this.pRed, this.pGreen, this.pBlue, this.pulse > 0, this.beam1)",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39 VisNetRender.beam(pose,start,own,...,opacity,colour) draws the relay beam",
-          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:78 half width .105, textures/misc/beam1.png, scrolling slide -age*.2-Mth.floor(-age*.1)"
+          "oracle thaumcraft/client/fx/beams/FXBeamPower.java:129-184 the two crossed quads of textures/misc/beam1.png, the half width 0.15 of the size 0.7 and the scrolling of the texture",
+          "oracle thaumcraft/client/fx/beams/FXBeamPower.java:105-110 the opacity ramp: the floor 0.3 and the decay of 0.025 per tick",
+          "oracle thaumcraft/client/fx/beams/FXBeamPower.java:122-127 the pulse lifts the opacity to 0.8",
+          "oracle thaumcraft/client/fx/beams/FXBeamPower.java:154-158 and :187-191 the revealer in the head slot multiplies the beam by ten and the flare by five",
+          "oracle thaumcraft/client/fx/beams/FXBeamPower.java:186-218 the additive flare of the particle sheet at the target, the half size 0.66 of the opacity and the cell of the age",
+          "oracle thaumcraft/common/tiles/TileVisRelay.java:124 the only caller, the relay beam",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:32-40 the native relay beam with the opacity ramp, the pulse and the revealer factor",
+          "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:81-97 the two crossed planes and the additive flare of the particle sheet"
         ],
         "notes": [
-          "The visnet relay beam is ported, but with a different construction: two crossed planes at half width .105 instead of the original's two quads at half width 0.15*0.7=0.105 plus the original's separate additive flare quad on textures/misc/particles.png.",
-          "The original opacity ramp (0.3 floor, 0.8 on pulse, -0.025/tick decay) and the IRevealer x10 opacity boost are not reproduced by VisNetRender.beam.",
-          "Complete callsite audit: FXBeamPower is constructed only in ClientProxy.beamPower, whose only caller is TileVisRelay:124."
+          "The native relay beam reproduces the original numbers: the half width 0.105 (0.15 of the size 0.7), the scrolling of the texture, the opacity floor 0.3, the decay of 0.025 per tick, the pulse of 0.8 and the ten times brighter beam of a viewer that wears a revealer.",
+          "The additive flare of the particle sheet at the target of the original (renderFlare) is now drawn as well, with the half size 0.66 of the opacity and the cell of the age.",
+          "The original shows the beam as a particle that dies when the relay unlinks; the native renderer keeps a per relay opacity instead.",
+          "The client visual was not inspected in a game, so the verdict stays partial."
         ],
         "reviewed_sha256": {
           "original": "147df0fe10e2769bcb83b56a7c5100dd6da9ba6026483104a8f39327cb8958e4",
@@ -5492,9 +5505,9 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the class is never instantiated anywhere in the TC4 4.2.3.5 decompilation."
       },
       "review": {
         "disposition": "exclude",
@@ -5508,8 +5521,8 @@
         ],
         "notes": [
           "Dead code in the original: the class is never instantiated anywhere in the TC4 4.2.3.5 decompilation.",
-          "Nothing to port; the native port correctly omits it.",
-          "Complete callsite audit: zero external references in the oracle tree (859 classes)."
+          "The 1.21.1 port therefore needs no counterpart.",
+          "Complete callsite audit: the class has zero construction sites in the oracle."
         ],
         "reviewed_sha256": {
           "original": "466c527fe10eed076bb829ffb7251317260c0b8936820f0061258ad130fd84d1",
@@ -5742,13 +5755,13 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the only instantiation is in UtilsFX.shootFire and that method has zero callers in the TC4 4.2.3.5 decompilation."
       },
       "review": {
         "disposition": "exclude",
-        "source_semantics": "different",
+        "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
         "owner": "audit-a1-client",
@@ -5759,8 +5772,8 @@
           "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java the native fire focus, with no scorch particle"
         ],
         "notes": [
-          "Not ported: the fire focus has no native scorch trail particle.",
-          "The original's only caller chain is ClientProxy -> UtilsFX.shootFire, and shootFire itself is never called from the TC4 tree, so the effect was already unreachable in the original.",
+          "Dead code in the original: the only instantiation is in UtilsFX.shootFire and that method has zero callers in the TC4 4.2.3.5 decompilation, so the scorch trail was already unreachable.",
+          "The 1.21.1 fire focus therefore needs no counterpart, and the port's fire focus has no scorch particle.",
           "Complete callsite audit: FXScorch is instantiated only in UtilsFX.shootFire; shootFire has zero callers in the oracle."
         ],
         "reviewed_sha256": {
@@ -5882,27 +5895,35 @@
         "planned_milestone": "M14",
         "basis": "path_name_heuristic_unreviewed"
       },
-      "native_counterparts": [],
+      "native_counterparts": [
+        "common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java"
+      ],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "The native 1.21.1 particle is the port of the original smoke spiral: the same 720 degree turn, the same 90..-90 polar angle, the same radius, the same 0.15 scale quad, the same 0.66 alpha, the same first five cells of the particle sheet and the same mirrored cell order. The client visual was not inspected in a game."
       },
       "review": {
-        "disposition": "exclude",
-        "source_semantics": "different",
+        "disposition": "port",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "partial",
+        "owner": "port/clientfx",
         "evidence": [
-          "oracle thaumcraft/client/fx/particles/FXSmokeSpiral.java:1-153 the rising smoke spiral",
-          "oracle thaumcraft/client/ClientProxy.java:677-682 smokeSpiral() is the only instantiation",
-          "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:191 and thaumcraft/common/items/equipment/ItemElementalSword.java:133 are the only callers",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java and common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java contain no smoke spiral effect"
+          "oracle thaumcraft/client/fx/particles/FXSmokeSpiral.java:25-41 the particle: the life 20 + rand(10), the size 0.01 and the particle scale of the EntityFX default",
+          "oracle thaumcraft/client/fx/particles/FXSmokeSpiral.java:43-69 the render: the cell 1 + age / maxAge * 4, the turn of 720 degrees, the polar angle 90..-90 degrees, the radius, the half size 0.15 of the particle scale, the alpha 0.66 of the fade and the floor of the owner",
+          "oracle thaumcraft/client/fx/particles/FXSmokeSpiral.java:75-80 the fade of the alpha and the death of the particle",
+          "oracle thaumcraft/client/ClientProxy.java:677-683 the only instantiation, the colour of the caller",
+          "oracle thaumcraft/common/items/equipment/ItemElementalSword.java:128-141 and thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:186-194 the only callers",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java the 1.21.1 port",
+          "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java:78-92 the client branch of the hold of the sword",
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java the client branch of the spawn animation"
         ],
         "notes": [
-          "Not ported: neither the eldritch warden smoke spiral nor the elemental sword smoke spiral exists in the native port.",
-          "Complete callsite audit: FXSmokeSpiral is instantiated only in ClientProxy.smokeSpiral, whose only callers are EntityEldritchWarden:191 and ItemElementalSword:133."
+          "Ported: the native particle keeps the original 720 degree turn, the 90..-90 polar angle, the radius, the 0.15 scale quad, the 0.66 alpha, the first five cells of the particle sheet and the mirrored cell order of the original.",
+          "The original's cell mirror and its floor of the owner are kept; the original's own quirk of the grey pixels belongs to the bloomColor program and is not repeated here.",
+          "The original spawned the spirals from the client side only; the port keeps that split with a client effects hook of the sword and of the warden.",
+          "The client visual was not inspected in a game, so the verdict stays partial."
         ],
         "reviewed_sha256": {
           "original": "f98805291ae66952651887e28c6e97f3ef640edfaa28d9e271d3f62c33340069",
@@ -5934,13 +5955,13 @@
       },
       "native_counterparts": [],
       "class_inventory_mapping": {
-        "legacy_status": "pending",
+        "legacy_status": "partial",
         "legacy_parity_verified": false,
-        "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
+        "basis": "Dead code in the original: the only instantiation is in ClientProxy.soulTrail and that method has zero callers in the TC4 4.2.3.5 decompilation."
       },
       "review": {
         "disposition": "exclude",
-        "source_semantics": "different",
+        "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
         "owner": "audit-a1-client",
@@ -5951,7 +5972,8 @@
           "native common/src/main/java/thaumcraft/client/ contains no smoke-trail particle"
         ],
         "notes": [
-          "Not ported; the original path was already unreachable because ClientProxy.soulTrail has zero callers in the TC4 tree.",
+          "Dead code in the original: the only instantiation is in ClientProxy.soulTrail and that method has zero callers in the TC4 4.2.3.5 decompilation, so the smoke trail was already unreachable.",
+          "The 1.21.1 port therefore needs no counterpart.",
           "Complete callsite audit: FXSmokeTrail is instantiated only in ClientProxy.soulTrail; soulTrail has zero callers in the oracle."
         ],
         "reviewed_sha256": {
@@ -7399,21 +7421,22 @@
       "native_counterparts": [],
       "class_inventory_mapping": null,
       "review": {
-        "disposition": "exclude",
-        "source_semantics": "different",
+        "disposition": "adapt",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "native_coverage": "partial",
+        "owner": "port/clientfx",
         "evidence": [
-          "oracle thaumcraft/client/gui/ThaumcraftGuiConfig.java:10-34 the FML config screen exposing the general, Monster_Spawning, World_Generation, World_Regeneration and Research categories",
-          "oracle thaumcraft/client/ThaumcraftGuiFactory.java:24-25 the only reference to ThaumcraftGuiConfig",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:37 the native port reads the same configuration from a properties file at startup",
-          "native common/src/main/java/thaumcraft/client/ has no config screen"
+          "oracle thaumcraft/client/gui/ThaumcraftGuiConfig.java:10-34 the FML config screen with the five categories general, Monster_Spawning, World_Generation, World_Regeneration and Research",
+          "oracle thaumcraft/common/config/Config.java:104-111 the five original category names and their keys",
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java the native screen with the five original categories",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java the catalogue of the settings of the port in the original categories"
         ],
         "notes": [
-          "Not ported: 1.21.1/Architectury has no FML mod-config GUI hook, so the in-game configuration screen does not exist.",
-          "The configuration values themselves are still settable, but only by editing the properties file, not from the options menu.",
-          "Complete callsite audit: ThaumcraftGuiConfig is referenced only by ThaumcraftGuiFactory, which is itself only referenced from Thaumcraft.java."
+          "1.21.1 has no Forge configuration screen, so the port has its own screen: the five original categories, the original keys and the original defaults, edited in the properties file of the port.",
+          "The original category World_Regeneration is empty in the port: the port does not regenerate chunks at all, and the original switches of that category have no counterpart.",
+          "The original options that the port never carried (the golem delay and link quality, the champion mobs, the runic shield values, the node rarity, the notification limits, the colour blind and crooked options) are not in the screen.",
+          "The screen was not inspected in a game, so the verdict stays partial."
         ],
         "reviewed_sha256": {
           "original": "14aaff21866a9023f4de910ba252ba6b292696165696f45cc04020386d5e4430"
@@ -7448,13 +7471,18 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "owner": "port/clientfx",
         "evidence": [
-          "legacy src/main/java/thaumcraft/client/integration/jei/JeiRecipeData.java: the 1.12 JEI integration data holder",
-          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display"
+          "legacy src/main/java/thaumcraft/client/integration/jei/: a 1.12 JEI plugin registering the TC4 aspect and infusion recipes",
+          "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI class at all; the only related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "oracle thaumcraft/common/Thaumcraft.java:133 Thaumcraft.aspectShift, the GUI offset that the NotEnoughItems detection sets",
+          "native common/src/main/resources/fabric.mod.json: the port declares no JEI dependency and no jei entry point, and the build has no JEI artifact"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over."
+          "Not portable as written: the 1.21.1 JEI is an external mod with its own API artifact (maven.blamejared.com) and its own entry point, so the plugin cannot be compiled or loaded without declaring that dependency.",
+          "The plugin is a 1.12 FOREVA addition and not a TC4 4.2.3.5 feature: the original JAR has no JEI class, so no original gameplay depends on it.",
+          "The only original behaviour that touches a recipe viewer is the NotEnoughItems detection of ClientProxy:444, which sets Thaumcraft.aspectShift to shift the aspect icons of the GUI; 1.21.1 has neither NotEnoughItems nor OptiFine by default and the port draws its aspect icons without that offset.",
+          "Decision: the unit stays excluded and is documented as requiring the external JEI mod; a JEI integration of the port would be a new feature, not a port of the original."
         ],
         "reviewed_sha256": {
           "legacy": "cdb2816098136e6c210fedb3d413e9382e0d43c7aab8967a0093f8cf85c5348c"
@@ -7489,16 +7517,18 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a8-research",
+        "owner": "port/clientfx",
         "evidence": [
-          "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibility.java:11-91 the JEI hidden-recipe state machine",
-          "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibilityTicker.java:25-31 its only caller",
-          "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java registers the ticker",
-          "native common/src/main/java/thaumcraft contains no client/integration package and no JEI/EMI dependency (no 'jei' reference in common/src/main/java)"
+          "legacy src/main/java/thaumcraft/client/integration/jei/: a 1.12 JEI plugin registering the TC4 aspect and infusion recipes",
+          "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI class at all; the only related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "oracle thaumcraft/common/Thaumcraft.java:133 Thaumcraft.aspectShift, the GUI offset that the NotEnoughItems detection sets",
+          "native common/src/main/resources/fabric.mod.json: the port declares no JEI dependency and no jei entry point, and the build has no JEI artifact"
         ],
         "notes": [
-          "Excluded: the class only exists to drive the 1.12 JEI plugin (net.minecraftforge JEI API), which has no counterpart in the 1.21.1 port; the port ships no recipe-viewer integration at all.",
-          "The research visibility rules it enforced are still honoured inside the mod by ResearchBrowserData.isVisible and the server-side admission in ResearchPurchase/ResearchNoteIssuance."
+          "Not portable as written: the 1.21.1 JEI is an external mod with its own API artifact (maven.blamejared.com) and its own entry point, so the plugin cannot be compiled or loaded without declaring that dependency.",
+          "The plugin is a 1.12 FOREVA addition and not a TC4 4.2.3.5 feature: the original JAR has no JEI class, so no original gameplay depends on it.",
+          "The only original behaviour that touches a recipe viewer is the NotEnoughItems detection of ClientProxy:444, which sets Thaumcraft.aspectShift to shift the aspect icons of the GUI; 1.21.1 has neither NotEnoughItems nor OptiFine by default and the port draws its aspect icons without that offset.",
+          "Decision: the unit stays excluded and is documented as requiring the external JEI mod; a JEI integration of the port would be a new feature, not a port of the original."
         ],
         "reviewed_sha256": {
           "legacy": "a0b48d4f954926390ef497c1983bebc0cad68d359fa29a607d885077705069fe"
@@ -7533,15 +7563,18 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a8-research",
+        "owner": "port/clientfx",
         "evidence": [
-          "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibilityTicker.java:18-32 the client-tick subscriber",
-          "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java the JEI plugin that owns it",
-          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:51-57 the native snapshot sync replaces the tick poll"
+          "legacy src/main/java/thaumcraft/client/integration/jei/: a 1.12 JEI plugin registering the TC4 aspect and infusion recipes",
+          "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI class at all; the only related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "oracle thaumcraft/common/Thaumcraft.java:133 Thaumcraft.aspectShift, the GUI offset that the NotEnoughItems detection sets",
+          "native common/src/main/resources/fabric.mod.json: the port declares no JEI dependency and no jei entry point, and the build has no JEI artifact"
         ],
         "notes": [
-          "Excluded with ResearchVisibility: there is no JEI plugin in the 1.21.1 port, so the ticker has no event source.",
-          "The knowledge refresh the ticker polled for is now an explicit server snapshot (KnowledgeEvents.sync)."
+          "Not portable as written: the 1.21.1 JEI is an external mod with its own API artifact (maven.blamejared.com) and its own entry point, so the plugin cannot be compiled or loaded without declaring that dependency.",
+          "The plugin is a 1.12 FOREVA addition and not a TC4 4.2.3.5 feature: the original JAR has no JEI class, so no original gameplay depends on it.",
+          "The only original behaviour that touches a recipe viewer is the NotEnoughItems detection of ClientProxy:444, which sets Thaumcraft.aspectShift to shift the aspect icons of the GUI; 1.21.1 has neither NotEnoughItems nor OptiFine by default and the port draws its aspect icons without that offset.",
+          "Decision: the unit stays excluded and is documented as requiring the external JEI mod; a JEI integration of the port would be a new feature, not a port of the original."
         ],
         "reviewed_sha256": {
           "legacy": "93c3017d8ce234afac08cb5e2afe871bbc477f2ac8cb3de9128502c59d3c55b6"
@@ -7576,16 +7609,18 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "owner": "port/clientfx",
         "evidence": [
-          "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java:1-105 a 1.12 JEI plugin registering TC4 aspect/infusion recipes",
-          "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI plugin; the only JEI-related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
-          "native common/src/ and fabric/src/ contain no JEI dependency or plugin class"
+          "legacy src/main/java/thaumcraft/client/integration/jei/: a 1.12 JEI plugin registering the TC4 aspect and infusion recipes",
+          "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI class at all; the only related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "oracle thaumcraft/common/Thaumcraft.java:133 Thaumcraft.aspectShift, the GUI offset that the NotEnoughItems detection sets",
+          "native common/src/main/resources/fabric.mod.json: the port declares no JEI dependency and no jei entry point, and the build has no JEI artifact"
         ],
         "notes": [
-          "Legacy-only 1.12 integration with no TC4 original counterpart and no JEI dependency in the 1.21.1 build.",
-          "Consequence: the original's NotEnoughItems detection (which set Thaumcraft.aspectShift and shifted the aspect icons) has no 1.21.1 equivalent; the native draws its aspect icons without that offset.",
-          "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code."
+          "Not portable as written: the 1.21.1 JEI is an external mod with its own API artifact (maven.blamejared.com) and its own entry point, so the plugin cannot be compiled or loaded without declaring that dependency.",
+          "The plugin is a 1.12 FOREVA addition and not a TC4 4.2.3.5 feature: the original JAR has no JEI class, so no original gameplay depends on it.",
+          "The only original behaviour that touches a recipe viewer is the NotEnoughItems detection of ClientProxy:444, which sets Thaumcraft.aspectShift to shift the aspect icons of the GUI; 1.21.1 has neither NotEnoughItems nor OptiFine by default and the port draws its aspect icons without that offset.",
+          "Decision: the unit stays excluded and is documented as requiring the external JEI mod; a JEI integration of the port would be a new feature, not a port of the original."
         ],
         "reviewed_sha256": {
           "legacy": "0e43c54200f1a42afdc48c023198dd8edb44222df0eb8a855c4e73d24550fbd8"
@@ -7620,13 +7655,18 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "owner": "port/clientfx",
         "evidence": [
-          "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeCategory.java: the 1.12 JEI recipe category",
-          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java"
+          "legacy src/main/java/thaumcraft/client/integration/jei/: a 1.12 JEI plugin registering the TC4 aspect and infusion recipes",
+          "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI class at all; the only related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "oracle thaumcraft/common/Thaumcraft.java:133 Thaumcraft.aspectShift, the GUI offset that the NotEnoughItems detection sets",
+          "native common/src/main/resources/fabric.mod.json: the port declares no JEI dependency and no jei entry point, and the build has no JEI artifact"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration, not carried over."
+          "Not portable as written: the 1.21.1 JEI is an external mod with its own API artifact (maven.blamejared.com) and its own entry point, so the plugin cannot be compiled or loaded without declaring that dependency.",
+          "The plugin is a 1.12 FOREVA addition and not a TC4 4.2.3.5 feature: the original JAR has no JEI class, so no original gameplay depends on it.",
+          "The only original behaviour that touches a recipe viewer is the NotEnoughItems detection of ClientProxy:444, which sets Thaumcraft.aspectShift to shift the aspect icons of the GUI; 1.21.1 has neither NotEnoughItems nor OptiFine by default and the port draws its aspect icons without that offset.",
+          "Decision: the unit stays excluded and is documented as requiring the external JEI mod; a JEI integration of the port would be a new feature, not a port of the original."
         ],
         "reviewed_sha256": {
           "legacy": "340f5098de257eebb9c9a49d6fad95b391fbbe3a895cd6ae8a2a434b66361ce6"
@@ -7661,13 +7701,18 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a9-core",
+        "owner": "port/clientfx",
         "evidence": [
-          "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeWrapper.java: the 1.12 JEI recipe wrapper",
-          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java"
+          "legacy src/main/java/thaumcraft/client/integration/jei/: a 1.12 JEI plugin registering the TC4 aspect and infusion recipes",
+          "oracle tree: the TC4 4.2.3.5 decompilation contains no JEI class at all; the only related line is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "oracle thaumcraft/common/Thaumcraft.java:133 Thaumcraft.aspectShift, the GUI offset that the NotEnoughItems detection sets",
+          "native common/src/main/resources/fabric.mod.json: the port declares no JEI dependency and no jei entry point, and the build has no JEI artifact"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration, not carried over."
+          "Not portable as written: the 1.21.1 JEI is an external mod with its own API artifact (maven.blamejared.com) and its own entry point, so the plugin cannot be compiled or loaded without declaring that dependency.",
+          "The plugin is a 1.12 FOREVA addition and not a TC4 4.2.3.5 feature: the original JAR has no JEI class, so no original gameplay depends on it.",
+          "The only original behaviour that touches a recipe viewer is the NotEnoughItems detection of ClientProxy:444, which sets Thaumcraft.aspectShift to shift the aspect icons of the GUI; 1.21.1 has neither NotEnoughItems nor OptiFine by default and the port draws its aspect icons without that offset.",
+          "Decision: the unit stays excluded and is documented as requiring the external JEI mod; a JEI integration of the port would be a new feature, not a port of the original."
         ],
         "reviewed_sha256": {
           "legacy": "c33dd092674d012c5b65b6edce41cdff745f2cedcf67f674794005e0ecc09e79"
@@ -7795,15 +7840,18 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a1-client",
+        "owner": "port/clientfx",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/lib/ItemAspectTooltipHandler.java:1-183 a 1.12-only tooltip handler that appends aspect icons below an item tooltip while Shift is held",
           "oracle tree: no file named ItemAspectTooltipHandler exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/java/thaumcraft/client/lib/ has no ItemAspectTooltipHandler"
+          "oracle thaumcraft/client/lib/ClientTickEventsFML.java:660-724 the original counterpart renderAspectsInGui: the aspect row of a scanned item over the hovered slot of an open container",
+          "oracle thaumcraft/common/lib/research/ScanManager.java:290-336 the original row needs the scanned objects registry, Thaumcraft.proxy.getScannedObjects()",
+          "native common/src/main/java/thaumcraft/common/lib/research/ the port has no scanned objects registry, so the original row has no data to draw"
         ],
         "notes": [
           "Legacy-only 1.12 feature with no TC4 original counterpart, deliberately not ported.",
-          "The original's own equivalent (ClientTickEventsFML.renderAspectsInGui) is also not ported, so no aspect tooltip row exists in 1.21.1.",
+          "The original's own equivalent needs the scanned objects registry of the original, which the 1.21.1 port does not carry; the aspect row of a scanned item therefore has no native counterpart either.",
+          "The aspect icons the port does draw are its own research screens, not this row.",
           "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code."
         ],
         "reviewed_sha256": {

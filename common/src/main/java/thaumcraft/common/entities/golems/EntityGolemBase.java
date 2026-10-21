@@ -2103,13 +2103,12 @@ public class EntityGolemBase extends AbstractGolem {
     public GolemHomeInventory.Destination markedInventory(GolemMarker marker) {
         if (!(level() instanceof ServerLevel server) || marker == null || !markers.contains(marker)
                 || !marker.dimension().equals(level().dimension().location()) || marker.pos().equals(homeInventoryPosition())) return null;
-        BlockPos home = getHomePosition();
-        double dx = (double) marker.pos().getX() - home.getX();
-        double dy = (double) marker.pos().getY() - home.getY();
-        double dz = (double) marker.pos().getZ() - home.getZ();
         double range = rangeSqr();
-        if (dx * dx + dy * dy + dz * dz >= range || distanceToSqr(marker.pos().getX() + .5,
-                marker.pos().getY() + .5, marker.pos().getZ() + .5) > range) return null;
+        // Original GolemHelper.getMarkedContainers:54-64 has NO range at all; the range of the
+        // original is the golem's own (AIFillGoto:100-104, AIEmptyGoto:56; the adjacent goals
+        // are bound by the squared distance of four instead). The distance of the HOME is not a
+        // bound of the original, so it is not one here.
+        if (distanceToSqr(marker.pos().getX() + .5, marker.pos().getY() + .5, marker.pos().getZ() + .5) > range) return null;
         GolemHomeInventory.Destination result = GolemHomeInventory.find(server, marker.pos());
         // A native double chest is one storage owner, not a remote source just
         // because the marker happens to name its other physical half.
@@ -2119,8 +2118,8 @@ public class EntityGolemBase extends AbstractGolem {
         if (core != GolemData.SORTING || !(level() instanceof ServerLevel server) || marker == null || !markers.contains(marker)
                 || !marker.dimension().equals(server.dimension().location()) || marker.pos().equals(homeInventoryPosition())
                 || distanceToMarkerSqr(marker) > rangeSqr()) return null;
-        // Sorting's original bound is relative to the GOLEM, not its home. Do
-        // not widen Fill/Empty's existing stricter lookup to implement this.
+        // Sorting's original bound is relative to the GOLEM (AISortingGoto:58-59), like Fill's
+        // and Empty's now.
         GolemHomeInventory.Destination result = GolemHomeInventory.find(server, marker.pos());
         return result == null || result.sharesStorage(homeInventory()) ? null : result;
     }
@@ -2130,6 +2129,8 @@ public class EntityGolemBase extends AbstractGolem {
 
     private GolemMarker firstAdjacentWorldThrowMarker() {
         for (GolemMarker marker : markers) {
+            // Original AIEmptyDrop:49 — the golem's own home is never a drop target.
+            if (marker.pos().equals(getHomePosition())) continue;
             if (distanceToMarkerSqr(marker) < 4 && markedWorldThrowTarget(marker)) return marker;
         }
         return null;

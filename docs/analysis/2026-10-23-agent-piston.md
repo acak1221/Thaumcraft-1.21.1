@@ -5,10 +5,14 @@ Input: the open item of the report of the `blockvis` agent
 by the piston, and 1.7.10 pushed it"* — the two missing pieces were a mixin on `PistonBaseBlock#isPushable` and the
 carrying of the block entity through `PistonMovingBlockEntity`.
 
-Result in one line: **the gap is closed, but the premise of the task is corrected by the vanilla 1.7.10 source — the
+Result in one line: **the gap is closed, but the premise of the task is corrected by the vanilla 1.7.10 bytecode — the
 1.7.10 piston decided per class and not per metadata, so the port now reproduces the original exactly: the families
-whose 1.7.10 class was a plain `Block` are moved (the tile of the metadata that carried one is destroyed, as in
-1.7.10), and the families whose 1.7.10 class was a `BlockContainer` are refused, for every metadata.**
+whose 1.7.10 class was a plain `Block` are moved (the content of the tile of the metadata that carried one is
+destroyed, as in 1.7.10), and the families whose 1.7.10 class was a `BlockContainer` are refused, for every
+metadata.** The second half of the recipe of the `blockvis` report — carrying the NBT of the tile through
+`PistonMovingBlockEntity` — is **not** done, on purpose: the 1.7.10 `TileEntityPiston` carried the block and the
+metadata only, so the original lost the content of the tile as well; carrying it would be a deviation from the
+original and not a parity (§1.1 and §3.3).
 
 ---
 

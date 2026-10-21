@@ -903,6 +903,40 @@ public final class EldritchBlockRules {
         return colour >= 0 || hasAspect;
     }
 
+    /**
+     * The original facing byte of the banner block entity.
+     *
+     * <p>Original BlockWoodenDevice:266-283 draws the wall banner of the facing
+     * byte zero on the north side, eight on the south side, twelve on the west
+     * side and four on the east side; original EntityCultistPortal:143-157 and
+     * WorldGenEldritchRing:101-125 set the same four bytes. The native keeps the
+     * direction and converts it back to that byte here, so the original
+     * {@code facing * 360 / 16} rotation of the banner renderer is reproduced.
+     */
+    public static int bannerOriginalFacing(net.minecraft.core.Direction facing) {
+        return switch (facing) {
+            case NORTH -> 0;
+            case SOUTH -> 8;
+            case WEST -> 12;
+            case EAST -> 4;
+            default -> 0;
+        };
+    }
+
+    /**
+     * The original colour table of the banner.
+     *
+     * <p>Original {@code thaumcraft/common/lib/utils/Utils.java:80} keeps its own
+     * sixteen dye colours, which are NOT the vanilla dye colours of 1.7.10: the
+     * white is {@code 0xF0F0F0} and the black is {@code 0x1E1B1B}. Original
+     * TileBannerRenderer:55-58 tints the tabs and the cloth with this table.
+     */
+    public static int bannerColour(int colour) {
+        int[] colours = {0xF0F0F0, 15435844, 12801229, 6719955, 14602026, 4312372, 14188952, 0x434343,
+                0xA0A0A0, 2651799, 8073150, 2437522, 5320730, 3887386, 11743532, 0x1E1B1B};
+        return colour < 0 || colour >= colours.length ? 0xFFFFFF : colours[colour];
+    }
+
     // --------------------------------------------------------- arcane pressure plate
 
     /** BlockWoodenDevice:371-387 - the plate cycles through three sensitivity modes. */

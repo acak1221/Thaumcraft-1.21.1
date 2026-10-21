@@ -81,4 +81,15 @@ public final class ModelBanner {
     public void renderBanner(PoseStack pose, VertexConsumer vertices, int light, int overlay) {
         banner.render(pose, vertices, light, overlay, -1);
     }
+
+    /**
+     * Original renderBanner67-69 with the original's global colour still active.
+     *
+     * <p>Original TileBannerRenderer:55-62 sets the dye colour before the tabs
+     * and only resets it after the cloth, so the cloth of a coloured banner
+     * carries the dye tint as well.
+     */
+    public void renderBanner(PoseStack pose, VertexConsumer vertices, int light, int overlay, int colour) {
+        banner.render(pose, vertices, light, overlay, colour);
+    }
 }

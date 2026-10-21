@@ -27,6 +27,7 @@
     "BoreNativeInventoryMixin",
     "ZombieBrainDropsMixin",
     "GolemUseServerPlayerGameModeMixin",
+    "TradeFocusServerPlayerGameModeMixin",
     "StreamAxeItemMixin",
     "SpecialMiningBlockMixin",
     "ServerGamePacketListenerFloatAccess",

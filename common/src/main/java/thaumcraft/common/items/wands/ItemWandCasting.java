@@ -196,7 +196,10 @@ public final class ItemWandCasting extends Item {
         if (crucible != InteractionResult.PASS) return crucible;
         InteractionResult arcane = thaumcraft.common.blocks.BlockArcaneWorkbench.tryCreate(context);
         if (arcane != InteractionResult.PASS) return arcane;
-        if (!WandManager.canCreateThaumonomicon(context)) return InteractionResult.PASS;
+        if (!WandManager.canCreateThaumonomicon(context)) {
+            // Original ItemWandCasting:390-415 - the wand takes the warded stone blocks back.
+            return WandWardedStone.tryRemove(context);
+        }
         if (context.getLevel().isClientSide) return InteractionResult.SUCCESS;
         return WandManager.createThaumonomicon(context) ? InteractionResult.CONSUME : InteractionResult.FAIL;
     }

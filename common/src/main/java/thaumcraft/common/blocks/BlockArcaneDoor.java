@@ -99,6 +99,10 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
 
     /** BlockArcaneDoor:256-274 - the owner decides whether the door opens. */
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        // The original door has no onBlockActivated at all, so it never swallowed
+        // the click: a wand click reached ItemWandCasting:400-415, which takes the
+        // door back. The native door must leave that click to the wand as well.
+        if (holdsWand(player)) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TileOwned door)) return InteractionResult.PASS;
         if (!EldritchBlockRules.doorAllows(door.getOwner(), door.getAccessList(), player.getGameProfile().getName())) {
@@ -108,6 +112,14 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
         }
         toggleDoor(level, pos, !state.getValue(OPEN));
         return InteractionResult.CONSUME;
+    }
+
+    /** A wand in the main hand takes the door back instead of opening it. */
+    private static boolean holdsWand(Player player) {
+        // The original 1.7.10 wand only ever acted from the main hand
+        // (EntityPlayer.getCurrentEquippedItem), and the original door had no
+        // onBlockActivated at all, so it never swallowed that click.
+        return player != null && player.getMainHandItem().getItem() instanceof thaumcraft.common.items.wands.ItemWandCasting;
     }
 
     /** BlockArcaneDoor:288-305 - the open bit is flipped on the lower half. */

@@ -53,9 +53,10 @@ public final class ItemFocusTrade extends ItemFocusBasic implements IArchitect {
         return wand;
     }
     public static boolean leftClick(ServerPlayer player, ItemStack wand, net.minecraft.core.BlockPos pos) {
+        // Original ItemFocusTrade:168-181 - the swing of the wand swaps the targeted block only.
+        if (!TradeSwaps.actor(player, wand)) return false;
         HitResult ray = player.pick(5, 1, false);
-        return TradeSwaps.actor(player, wand) && ray instanceof BlockHitResult hit
-                && ray.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(pos)
+        return ray instanceof BlockHitResult hit && ray.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(pos)
                 && TradeSwaps.enqueue(player, wand, pos, 0);
     }
 }

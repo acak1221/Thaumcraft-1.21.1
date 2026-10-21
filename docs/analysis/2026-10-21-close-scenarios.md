@@ -191,6 +191,13 @@ fixed here as well:
 * `tableFirstNativeTickRepairsReloadedOrphans` and `tableBreakEvacuatesEachHalfOnce` — the drops of
   the broken table are posted into the world and were taken by the cleanup of a neighbouring
   scenario; both scenarios now run in a batch of their own, like the scenarios of this task.
+* `advancedFurnacePreservesCustodyAcrossRealChunkUnload` — the scenario waits for the native
+  **asynchronous** reload of the saved shell terrain (the radius zero ticket of the original) and
+  gave that reload two hundred ticks; on a loaded server the reload needs more, so the poll limit
+  is now a thousand ticks, well inside the timeout of the scenario.
+* `mixedCrystalOrientationSurvivesActualChunkUnload` — the same race with the reload of the crystal
+  chunk and the return of its entity section: the scenario waited five hundred and forty ticks and
+  the timeout of the scenario was six hundred; both are raised now.
 
 ---
 
@@ -209,10 +216,13 @@ fixed here as well:
 | `common/src/gameTest/java/thaumcraft/common/testing/EldritchBestiaryRuntimeChecks.java`, `ProjectileRuntimeChecks.java`, `TravelingTrunkRuntimeChecks.java`, `TaintBlockRuntimeChecks.java`, `FortressRuntimeChecks.java`, `GolemFireOrderRuntimeChecks.java`, `GolemDartRuntimeChecks.java`, `GolemUpgradeRuntimeChecks.java`, `GolemAdvancedRuntimeChecks.java` | every hostile mob that joins the world declares the original champion join roll |
 | `common/src/gameTest/java/thaumcraft/common/testing/ElementalSwordRuntimeChecks.java` | the scenario loads the chunks of its sweep room |
 | `common/src/gameTest/java/thaumcraft/common/testing/UnknownKnowledgeRuntimeChecks.java` | the two fragments of the scenario land apart, so they cannot merge into one stack |
+| `common/src/gameTest/java/thaumcraft/common/testing/AdvancedFurnaceUnloadRuntimeChecks.java` | the asynchronous reload of the saved shell gets the time of the original |
+| `common/src/gameTest/java/thaumcraft/common/testing/CrystalClustersRuntimeChecks.java` | the asynchronous reload of the crystal chunk gets the time of the original |
 | `fabric/src/gameTest/java/thaumcraft/fabric/testing/ThaumcraftGameTests.java` | the scenarios with a room of their own run in a batch of their own, so no other scenario runs beside them |
 | `neoforge/src/gameTest/java/thaumcraft/neoforge/testing/ThaumcraftGameTests.java` | the same batch for the one scenario of that registry |
 
-The neoforge registry has no entry for these scenarios, so it was not touched.
+The neoforge registry knows only the bookshelf scenario of the five, so only that entry got the
+batch; the neoforge module itself was not built or run (the port works on Fabric first).
 
 ---
 
@@ -221,16 +231,30 @@ The neoforge registry has no entry for these scenarios, so it was not touched.
 `./gradlew --no-daemon --console=plain :common:test` — BUILD SUCCESSFUL, 0 failures.
 
 `./gradlew --no-daemon --console=plain :fabric:runGameTest` with
-`rm -rf fabric/run-gametest/world` before every run:
+`rm -rf fabric/run-gametest/world` before every run (312 scenarios, the world of the run is
+created from scratch every time):
 
 | run | result |
 | --- | --- |
-| 1 (before the fixes, the state of `work`) | 312 tests, 5 failed: construct, bookshelf, fetter, decorations, sword of the zephyr |
-| 2 (after the fixes) | 312 tests, **0 failed** |
-| 3 (after the fixes) | 312 tests, **0 failed** |
-| 4 (after the fixes) | 312 tests, **0 failed** |
+| 1 (the state of `work`, before the fixes) | 312 tests, **5 failed**: construct, bookshelf, fetter, decorations, sword of the zephyr |
+| 2 (after the first fixes) | 312 tests, 0 failed |
+| 3 (after the first fixes) | 312 tests, 1 failed: unknown knowledge |
+| 4 (after the first fixes) | 312 tests, 3 failed: unknown knowledge, sword of the zephyr, table orphan repair |
+| 5 (after the champion declarations) | 312 tests, 1 failed: eldritch bestiary (a promoted watcher) |
+| 6 (after the champion declarations) | 312 tests, 0 failed |
+| 7 (after the champion declarations) | 312 tests, 1 failed: travelling trunk |
+| 8 (after the trunk isolation) | 312 tests, 1 failed: advanced furnace (a real chunk unload) |
+| 9 (after the trunk isolation) | 312 tests, 0 failed |
+| 10 (after the trunk isolation) | 312 tests, 1 failed: crystal cluster (a real chunk unload) |
+| 11 (after the chunk waits) | 312 tests, **0 failed** |
+| 12 (after the chunk waits) | 312 tests, **0 failed** |
+| 13 (after the chunk waits) | 312 tests, **0 failed** |
 
-The exact output of every run is quoted in the section below.
+The three runs 11, 12 and 13 are the runs of the final state of the branch: they are consecutive and
+green (`========= 312 GAME TESTS COMPLETE IN ...` with no `required tests failed` line and the exit
+code of the task `0`). The runs before them show every failure of the way and what removed it.
+
+The unit suite of the common module (`./gradlew :common:test`) is green as well.
 
 ---
 

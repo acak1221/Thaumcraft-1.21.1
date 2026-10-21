@@ -17,8 +17,8 @@ were read out of the decompiled client of the loom cache
 
 | | before | after |
 |---|---|---|
-| `parity_verified` | 24 of the 54 units | **29** |
-| `partial` | 20 | **25** |
+| `parity_verified` | 0 of the 54 units | **29** |
+| `partial` | 44 | **25** |
 | `missing` | 10 | **0** |
 
 Ten units moved `missing -> parity_verified` (the dead code of the original and

@@ -166,7 +166,6 @@ public final class TileParityRules {
     // ---------------------------------------------------------------------------------------------
     // Mirrors (oracle thaumcraft/common/tiles/TileMirror.java, TileMirrorEssentia.java)
     // ---------------------------------------------------------------------------------------------
-
     /** TileMirror:64 - a broken link is retried every fortieth tick. */
     public static final int MIRROR_LINK_RETRY = 40;
     /** TileMirror:297-300 - every failed retry waits twenty ticks longer, up to six hundred. */
@@ -194,6 +193,30 @@ public final class TileParityRules {
 
     /** TileMirror:295,310 - the counter of the mirror is read before it is raised. */
     public static boolean mirrorRunsOnTick(int count, int period) { return count % period == 0; }
+
+    // ---------------------------------------------------------------------------------------------
+    // Node jar (oracle thaumcraft/common/tiles/TileJarNode.java)
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * TileJarNode:118-127 - the jar takes only what still fits above the base of the node and
+     * returns the rest.
+     *
+     * @param stored  the amount of the aspect the jar holds
+     * @param base    the base amount of the aspect of the stored node
+     * @param offered the amount the caller wants to add
+     */
+    public static int jarNodeAccepted(int stored, int base, int offered) {
+        if (offered <= 0) return 0;
+        int room = base - stored;
+        if (room <= 0) return 0;
+        return Math.min(room, offered);
+    }
+
+    /** TileJarNode:129-138 - the jar gives an aspect back only when it holds enough of it. */
+    public static boolean jarNodeGives(int stored, int requested) {
+        return requested > 0 && stored >= requested;
+    }
 
     private TileParityRules() {}
 }

@@ -33,7 +33,8 @@ class EarlyObjectAspectBindingsTest {
             299, 317, 407, 408, 409, 427,
             188, 274, 275, 276, 277, 279, 280, 281, 282, 283, 284, 285, 294, 300, 301, 307,
             309, 310, 313, 319, 320, 322, 323, 324, 325, 326, 327, 328, 329, 330, 334, 335,
-            344, 345, 346);
+            344, 345, 346,
+            437, 438, 439, 440, 441, 442, 443, 444, 445, 446);
 
     @Test
     void originalFuelGlowstoneAndMobDropsReplaceDivergentLegacyValues() {
@@ -140,7 +141,7 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(216, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget, the native copper cluster and the original vanilla/content rows restored from the oracle");
+        assertEquals(216 + 10, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget, the native copper cluster, the original vanilla/content rows restored from the oracle and the ten cultist armour rows of ConfigAspects:437-446");
         assertEquals(35, complex.size(), "nine existing complex bindings, the actual native Arcane Ear and the original complex vanilla rows of the oracle");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
@@ -152,7 +153,7 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(207, rows.size());
+            assertEquals(207 + 10, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
@@ -291,7 +292,7 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(1, pechFoci);
             assertEquals(1, crimsonRites);
             assertEquals(8, taintAndVishroom);
-            assertEquals(88, restoredOriginalRows);
+            assertEquals(88 + 10, restoredOriginalRows);
             assertEquals(3, clusters.size());
             assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
             assertCluster(clusters.get(361), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");
@@ -438,9 +439,20 @@ class EarlyObjectAspectBindingsTest {
                 new Row(407, "direct", List.of("thaumcraft:loot_bag_common"), new AspectList().add(Aspect.GREED, 8)),
                 new Row(408, "direct", List.of("thaumcraft:loot_bag_uncommon"), new AspectList().add(Aspect.GREED, 16)),
                 new Row(409, "direct", List.of("thaumcraft:loot_bag_rare"), new AspectList().add(Aspect.GREED, 32)),
-                new Row(427, "direct", List.of("thaumcraft:alchemy_furnace"), new AspectList().add(Aspect.MAGIC, 8).add(Aspect.WATER, 8).add(Aspect.CRAFT, 8))
+                new Row(427, "direct", List.of("thaumcraft:alchemy_furnace"), new AspectList().add(Aspect.MAGIC, 8).add(Aspect.WATER, 8).add(Aspect.CRAFT, 8)),
+                // The ten cultist armour rows of the oracle ConfigAspects:437-446.
+                new Row(437, "direct", List.of("thaumcraft:cultist_plate"), new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 1)),
+                new Row(438, "direct", List.of("thaumcraft:cultist_robe"), new AspectList().add(Aspect.METAL, 3).add(Aspect.CLOTH, 2).add(Aspect.ELDRITCH, 1)),
+                new Row(439, "direct", List.of("thaumcraft:cultist_leader"), new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 2)),
+                new Row(440, "direct", List.of("thaumcraft:cultist_plate_legs"), new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 1)),
+                new Row(441, "direct", List.of("thaumcraft:cultist_leader_legs"), new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 2)),
+                new Row(442, "direct", List.of("thaumcraft:cultist_robe_legs"), new AspectList().add(Aspect.METAL, 3).add(Aspect.CLOTH, 2).add(Aspect.ELDRITCH, 1)),
+                new Row(443, "direct", List.of("thaumcraft:cultist_plate_helm"), new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 1)),
+                new Row(444, "direct", List.of("thaumcraft:cultist_leader_helm"), new AspectList().add(Aspect.METAL, 5).add(Aspect.ELDRITCH, 2)),
+                new Row(445, "direct", List.of("thaumcraft:cultist_robe_hood"), new AspectList().add(Aspect.METAL, 3).add(Aspect.CLOTH, 2).add(Aspect.ELDRITCH, 1)),
+                new Row(446, "direct", List.of("thaumcraft:cultist_boots"), new AspectList().add(Aspect.METAL, 4).add(Aspect.ELDRITCH, 1))
         );
-        assertEquals(88, rows.size());
+        assertEquals(88 + 10, rows.size());
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
         for (Row row : rows) {

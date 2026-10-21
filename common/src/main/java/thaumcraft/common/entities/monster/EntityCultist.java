@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -16,6 +17,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
@@ -23,6 +26,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -47,6 +52,31 @@ public class EntityCultist extends Monster {
     public EntityCultist(EntityType<? extends EntityCultist> type, Level level) {
         super(type, level);
         xpReward = CultistRules.CULTIST_EXPERIENCE;
+        applyOriginalNavigator();
+    }
+
+    /**
+     * Original EntityCultist:37-38 - the navigator of the cultist may pass a closed wooden
+     * door and the pathfinder refuses the water.
+     *
+     * <p>The 1.7.10 navigator had two flags for the doors:
+     * {@code setBreakDoors(true)} let the path run through a <em>closed</em> wooden door and
+     * {@code setEnterDoors(true)} (the 1.7.10 default) let it run through an open one. The
+     * 1.21.1 navigator splits the same two rules: {@code setCanOpenDoors} decides whether a
+     * closed wooden door is walkable ({@code PathType.DOOR_WOOD_CLOSED} becomes
+     * {@code WALKABLE_DOOR}) and {@code setCanPassDoors} decides whether a door opening is
+     * walkable at all.
+     *
+     * <p>The 1.7.10 {@code setAvoidsWater(true)} made the pathfinder refuse every water cell
+     * ({@code PathFinder.canEntityStandAt} returned {@code -1}); the 1.21.1 equivalent is a
+     * water path type that the mob may not walk on.
+     */
+    public void applyOriginalNavigator() {
+        if (getNavigation() instanceof GroundPathNavigation ground) {
+            ground.setCanOpenDoors(true);
+            ground.setCanPassDoors(true);
+        }
+        setPathfindingMalus(PathType.WATER, -1.0F);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -403,6 +433,94 @@ public class EntityCultist extends Monster {
                 mob.setDeltaMovement(mob.getDeltaMovement().add(0.0, (surface - eye) * 0.2, 0.0));
             }
         }
+    }
+
+    /**
+     * Original EntityAIRestrictOpenDoor: the goal of priority four of the cleric and of the
+     * knight. At night, next to a door of a village, the mob stops breaking and entering
+     * doors, and the restriction counter of that door rises.
+     *
+     * <p>The 1.7.10 goal looked for the nearest village within sixteen blocks and for the
+     * nearest door of that village, and it required the mob to stand within 1.5 blocks of the
+     * inside of that door. The 1.21.1 world has no {@code VillageDoorInfo} and no village
+     * object; the village is the point-of-interest set of the world and the door is the
+     * wooden door next to the mob. The restriction counter of the 1.7.10 door has no 1.21.1
+     * counterpart: it only made the villagers of that village close their door.
+     */
+    public static class CultistRestrictOpenDoorGoal extends Goal {
+        private final Mob mob;
+        private BlockPos door;
+
+        public CultistRestrictOpenDoorGoal(Mob mob) {
+            this.mob = mob;
+        }
+
+        @Override public boolean canUse() {
+            if (mob.level().isDay()) return false;
+            if (!(mob.level() instanceof ServerLevel server)) return false;
+            // Original EntityAIRestrictOpenDoor:37 - the nearest village within sixteen blocks.
+            if (server.getPoiManager().findClosest(holder -> holder.is(PoiTypeTags.VILLAGE),
+                    mob.blockPosition(), CultistRules.RESTRICT_DOOR_VILLAGE_RADIUS, PoiManager.Occupancy.ANY).isEmpty()) {
+                return false;
+            }
+            door = findDoor(mob);
+            return door != null;
+        }
+
+        @Override public boolean canContinueToUse() {
+            if (mob.level().isDay()) return false;
+            return door != null && mob.distanceToSqr(Vec3.atCenterOf(door)) <= CultistRules.RESTRICT_DOOR_DISTANCE_SQ;
+        }
+
+        @Override public void start() {
+            // Original EntityAIRestrictOpenDoor:47-48 - the navigator stops breaking and entering doors.
+            setDoors(false, false);
+        }
+
+        @Override public void stop() {
+            // Original EntityAIRestrictOpenDoor:53-54 - the doors of the navigator come back.
+            setDoors(true, true);
+            door = null;
+        }
+
+        @Override public void tick() {
+            // Original EntityAIRestrictOpenDoor:58 - the restriction counter of the door rises.
+            // The 1.21.1 door has no such counter; the flag of the navigator is the behaviour.
+        }
+
+        private void setDoors(boolean canOpen, boolean canPass) {
+            if (mob.getNavigation() instanceof GroundPathNavigation ground) {
+                ground.setCanOpenDoors(canOpen);
+                ground.setCanPassDoors(canPass);
+            }
+        }
+
+        /** The wooden door the mob stands at; the original used the inside of the village door. */
+        private static BlockPos findDoor(Mob mob) {
+            BlockPos origin = mob.blockPosition();
+            BlockPos found = null;
+            double best = CultistRules.RESTRICT_DOOR_DISTANCE_SQ;
+            for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-1, -1, -1), origin.offset(1, 1, 1))) {
+                if (!DoorBlock.isWoodenDoor(mob.level(), pos)) continue;
+                double distance = mob.distanceToSqr(Vec3.atCenterOf(pos));
+                if (distance > best) continue;
+                best = distance;
+                found = pos.immutable();
+            }
+            return found;
+        }
+    }
+
+    /**
+     * Original EntityAITarget.isSuitableTarget: a target has to stand inside the home area of
+     * the mob. The native {@code NearestAttackableTargetGoal} scans the whole follow range
+     * and never asks for the restriction, so the cultist selector keeps the original rule.
+     */
+    public static boolean withinHome(Mob mob, LivingEntity target) {
+        if (!mob.hasRestriction()) return true;
+        BlockPos home = mob.getRestrictCenter();
+        if (home == null) return true;
+        return CultistRules.withinHomeArea(true, home.distSqr(target.blockPosition()), mob.getRestrictRadius());
     }
 
     // ---------------------------------------------------------------- energy orb

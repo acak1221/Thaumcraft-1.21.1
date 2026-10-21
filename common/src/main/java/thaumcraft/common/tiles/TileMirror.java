@@ -8,12 +8,15 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -21,13 +24,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.visnet.VisNetHandler;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.tiles.TileParityRules;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 
 /**
  * Original TileMirror: the item mirror. Two mirrors that see each other pass
  * the items that enter them back and forth.
+ *
+ * <p>Original TileMirror implements {@code IInventory} with a single slot that always reads
+ * empty; an item that a hopper pushes into the slot is handed to the linked mirror, and the
+ * mirror without a twin ejects it.
  */
-public final class TileMirror extends BlockEntity {
+public final class TileMirror extends BlockEntity implements WorldlyContainer {
+    /** The single slot of the original mirror. */
+    private static final int[] SLOTS = {0};
     public boolean linked = false;
     public int linkX;
     public int linkY;
@@ -226,8 +236,7 @@ public final class TileMirror extends BlockEntity {
     }
 
     /** The world of the linked mirror. */
-    private ServerLevel targetWorld() {
-        if (level == null || level.getServer() == null) return null;
+    private ServerLevel targetWorld() {        if (level == null || level.getServer() == null) return null;
         MinecraftServer server = level.getServer();
         ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
                 ResourceLocation.tryParse(linkDim));
@@ -285,6 +294,74 @@ public final class TileMirror extends BlockEntity {
         }
         tag.put("Items", items);
     }
+
+    // ---------------------------------------------------------------- inventory surface
+    /**
+     * Original TileMirror:346-348 - the mirror has one inventory slot, and its stack limit
+     * is sixty four (original TileMirror:387-389).
+     */
+    @Override public int getContainerSize() { return TileParityRules.MIRROR_INVENTORY_SLOTS; }
+
+    /** The original slot never holds anything: the item is handed to the twin at once. */
+    @Override public boolean isEmpty() { return true; }
+
+    /** Original TileMirror:352 - the single slot always reads empty. */
+    @Override public ItemStack getItem(int slot) { return ItemStack.EMPTY; }
+
+    /** Original TileMirror:357 - the single slot never gives anything back. */
+    @Override public ItemStack removeItem(int slot, int amount) { return ItemStack.EMPTY; }
+
+    /** Original TileMirror:362 - the single slot never gives anything back. */
+    @Override public ItemStack removeItemNoUpdate(int slot) { return ItemStack.EMPTY; }
+
+    /**
+     * Original TileMirror:371-383 - an item that enters the slot is handed to the linked
+     * mirror, which keeps it until it ejects it; a mirror without a twin ejects the item
+     * in front of itself. The slot itself stays empty.
+     */
+    @Override public void setItem(int slot, ItemStack stack) {
+        if (slot != 0 || stack == null || stack.isEmpty() || level == null || level.isClientSide) return;
+        ServerLevel target = targetWorld();
+        TileMirror twin = target == null ? null
+                : target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror ? mirror : null;
+        if (twin != null) {
+            twin.addStack(stack.copy());
+            addInstability(null, stack.getCount());
+            setChanged();
+        } else {
+            spawnItem(stack.copy());
+        }
+    }
+
+    /** Original TileMirror:365 - the slot holds nothing, so there is nothing to clear. */
+    @Override public void clearContent() {}
+
+    /** Original TileMirror:387-389 - a slot of the mirror holds sixty four items. */
+    @Override public int getMaxStackSize() { return TileParityRules.MIRROR_STACK_LIMIT; }
+
+    /** Original TileMirror:381 - the item is only accepted when the twin mirror exists. */
+    @Override public boolean canPlaceItem(int slot, ItemStack stack) { return slot == 0 && isItemValidForSlot(slot, stack); }
+
+    /** Original TileMirror:406-411 - the twin mirror has to exist. */
+    public boolean isItemValidForSlot(int slot, ItemStack stack) {
+        if (slot != 0 || stack == null || stack.isEmpty()) return false;
+        ServerLevel target = targetWorld();
+        return target != null && target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror;
+    }
+
+    /** The mirror takes the item from every side, as the original IInventory did. */
+    @Override public int[] getSlotsForFace(Direction side) { return SLOTS; }
+
+    @Override public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) { return canPlaceItem(slot, stack); }
+
+    /** Original TileMirror:378 - the mirror never gives an item back. */
+    @Override public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) { return false; }
+
+    /** Original TileMirror:400 - no player may open the mirror. */
+    @Override public boolean stillValid(Player player) { return false; }
+
+    /** Original TileMirror:385 - the name of the container of the mirror. */
+    public Component mirrorContainerName() { return Component.translatable("container.mirror"); }
 
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveWithoutMetadata(registries); }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }

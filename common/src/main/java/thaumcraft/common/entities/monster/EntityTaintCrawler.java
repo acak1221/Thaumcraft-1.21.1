@@ -34,9 +34,16 @@ import thaumcraft.common.lib.loot.OriginalMobLoot;
 import thaumcraft.common.lib.loot.OriginalTaintExperience;
 import thaumcraft.common.lib.taint.TaintAnimalRules;
 
-/** Original tainted crawler:8HP/2damage/0.275speed, the original silverfish
- * sounds, the original crouching fibre growth and the original flux taint
- * poison on a successful hit. */
+/**
+ * The tainted crawler of the 1.12.2 backport: 8HP/2damage/0.275speed, the original silverfish
+ * sounds, the original crouching fibre growth and the original flux taint poison on a
+ * successful hit.
+ *
+ * <p>TC4 4.2.3.5 has no tainted crawler: the entity comes from
+ * {@code Thaumcraft-1.12.2-6.1.BETA26.jar}
+ * ({@code thaumcraft/common/entities/monster/tainted/EntityTaintCrawler.java}). The values
+ * above are the ones of that 1.12.2 original, not of the 4.2.3.5 oracle.
+ */
 public final class EntityTaintCrawler extends net.minecraft.world.entity.monster.Monster implements ITaintedMob {
     private BlockPos lastPos=new BlockPos(0,0,0);
     public EntityTaintCrawler(EntityType<? extends EntityTaintCrawler> type,Level level) {

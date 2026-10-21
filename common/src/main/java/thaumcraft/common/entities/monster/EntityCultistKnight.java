@@ -38,6 +38,8 @@ public class EntityCultistKnight extends EntityCultist {
     @Override protected void registerGoals() {
         goalSelector.addGoal(0, new CultistSwimGoal(this));
         goalSelector.addGoal(3, new CultistMeleeGoal(this, 1.0, false));
+        // Original EntityCultistKnight:57 - the door restriction of priority four.
+        goalSelector.addGoal(4, new CultistRestrictOpenDoorGoal(this));
         goalSelector.addGoal(5, new OpenDoorGoal(this, true));
         goalSelector.addGoal(6, new MoveTowardsRestrictionGoal(this, 0.8));
         goalSelector.addGoal(7, new RandomStrollGoal(this, 0.8));
@@ -46,7 +48,9 @@ public class EntityCultistKnight extends EntityCultist {
         targetSelector.addGoal(1, new CultistHurtByTargetGoal(this, true));
         // Original EntityAINearestAttackableTarget:52-58 - a target chance of zero scans
         // every tick. The native goal scans every fifth tick unless the interval is one.
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 1, true, false, null));
+        // The selector keeps the original home rule of EntityAITarget.isSuitableTarget.
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 1, true, false,
+                target -> EntityCultist.withinHome(this, target)));
     }
 
     @Override public Component getName() {

@@ -250,9 +250,29 @@ class CultistRulesTest {
         assertEquals(30, CultistRules.PORTAL_EXPERIENCE);
     }
 
+    // ---------------------------------------------------------------- the door restriction
+    @Test void theDoorRestrictionLooksForAVillageWithinSixteenBlocks() {
+        // Original EntityAIRestrictOpenDoor:37 - the nearest village within sixteen blocks.
+        assertEquals(16, CultistRules.RESTRICT_DOOR_VILLAGE_RADIUS);
+        // Original EntityAIRestrictOpenDoor:41 - the mob stands within 2.25 blocks of the door.
+        assertEquals(2.25D, CultistRules.RESTRICT_DOOR_DISTANCE_SQ, 1E-9D);
+    }
+
+    @Test void aTargetHasToStandInsideTheHomeAreaOfTheCultist() {
+        // Original EntityAITarget.isSuitableTarget - the target has to be within the home
+        // area of the mob; a mob without a home may target anybody.
+        assertTrue(CultistRules.withinHomeArea(false, 4096.0D, 8.0D));
+        assertTrue(CultistRules.withinHomeArea(true, 0.0D, 8.0D));
+        assertTrue(CultistRules.withinHomeArea(true, 63.0D, 8.0D));
+        assertFalse(CultistRules.withinHomeArea(true, 64.0D, 8.0D));
+        assertFalse(CultistRules.withinHomeArea(true, 100.0D, 8.0D));
+        // The praetor keeps a home of twenty four blocks, the ritualist cleric one of eight.
+        assertTrue(CultistRules.withinHomeArea(true, 23.0D * 23.0D, CultistRules.BOSS_HOME_RADIUS));
+        assertFalse(CultistRules.withinHomeArea(true, 25.0D * 25.0D, CultistRules.BOSS_HOME_RADIUS));
+    }
+
     // ---------------------------------------------------------------- native ids
-    @Test void theNativeGearIdsAreTheOnesTheLanguageFileReserves() throws Exception {
-        String lang = readLang();
+    @Test void theNativeGearIdsAreTheOnesTheLanguageFileReserves() throws Exception {        String lang = readLang();
         for (String id : List.of(CultistRules.ITEM_ROBE_HOOD, CultistRules.ITEM_ROBE_CHESTPLATE, CultistRules.ITEM_ROBE_LEGGINGS,
                 CultistRules.ITEM_PLATE_HELM, CultistRules.ITEM_PLATE_CHESTPLATE, CultistRules.ITEM_PLATE_LEGGINGS,
                 CultistRules.ITEM_LEADER_HELM, CultistRules.ITEM_LEADER_CHESTPLATE, CultistRules.ITEM_LEADER_LEGGINGS,

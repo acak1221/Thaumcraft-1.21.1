@@ -179,16 +179,18 @@ public final class TileEldritchPortal extends BlockEntity {
         NetworkManager.sendToPlayer(player, new ResearchNoticePayload(OUTER_LANDS_RESEARCH));
     }
 
+    /**
+     * Original TileEldritchPortal stores nothing: the open counter and the tick counter are
+     * runtime state of the client and of the server, they never reach the saved data.
+     */
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        opencount = tag.contains("opencount") ? tag.getInt("opencount") : -1;
-        count = tag.getInt("count");
+        opencount = -1;
+        count = 0;
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.putInt("opencount", opencount);
-        tag.putInt("count", count);
     }
 
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveWithoutMetadata(registries); }

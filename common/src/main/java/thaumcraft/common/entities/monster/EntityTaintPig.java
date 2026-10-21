@@ -73,6 +73,8 @@ public final class EntityTaintPig extends Pig implements ITaintedMob {
     @Override protected SoundEvent getHurtSound(DamageSource source) { return SoundEvents.PIG_AMBIENT; }
     @Override protected SoundEvent getDeathSound() { return SoundEvents.PIG_DEATH; }
     @Override public float getVoicePitch() { return TaintAnimalRules.voicePitch(); }
+    /** Original EntityTaintPig:66-68 - the total armour of the tainted pig is a constant two. */
+    @Override public int getArmorValue() { return TaintAnimalRules.armor(TaintedAnimal.PIG); }
     @Override public boolean isFood(ItemStack stack) { return false; }
     @Override public boolean canFallInLove() { return false; }
     @Override public InteractionResult mobInteract(Player player,InteractionHand hand) { return InteractionResult.PASS; }

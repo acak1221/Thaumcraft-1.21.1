@@ -83,6 +83,20 @@ public final class TaintAnimalRules {
     public static boolean despawnsInPeaceful(TaintedAnimal animal) { return animal==TaintedAnimal.COW; }
     /** Original getVoicePitch of every tainted animal. */
     public static float voicePitch() { return 0.7F; }
+    /**
+     * Original getTotalArmorValue of the tainted animals.
+     *
+     * <p>Oracle {@code EntityTaintChicken:64-66} and {@code EntityTaintPig:66-68} return a
+     * constant two and {@code EntityTaintSheep:63-65} a constant one; the cow and the villager
+     * keep the inherited armour of their equipment.</p>
+     */
+    public static int armor(TaintedAnimal animal) {
+        return switch(animal) {
+            case CHICKEN, PIG -> 2;
+            case SHEEP -> 1;
+            case COW, VILLAGER -> 0;
+        };
+    }
     /** Original getSoundVolume: only the cow lowers it. */
     public static float soundVolume(TaintedAnimal animal) { return animal==TaintedAnimal.COW ? 0.4F : 1.0F; }
 

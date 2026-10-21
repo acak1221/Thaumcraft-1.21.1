@@ -82,11 +82,17 @@ public final class SpecialMining {
     /**
      * Original {@code findSpecialMiningResult}: one roll per drop (taken even when nothing is listed, as the original does), and on success
      * the listed cluster with the dropped count.
+     *
+     * <p>The original table is filled with the registered clusters at start up, so the original never
+     * meets a missing cluster. The 1.21.1 item registry is defaulted, so a lookup of an unknown id
+     * answers the air item instead of {@code null}: a cluster the runtime does not know keeps the
+     * original drop, otherwise the drop of the block would be replaced by an empty stack.
      */
     public static ItemStack find(ItemStack dropped, float chance, RandomSource random) {
         float roll = random.nextFloat();
         Result result = result(dropped);
         if (result == null || !succeeds(roll, chance, result.factor())) return dropped.copy();
+        if (!BuiltInRegistries.ITEM.containsKey(result.output())) return dropped.copy();
         Item output = BuiltInRegistries.ITEM.get(result.output());
         // A cluster that the registry does not know keeps the original drop.
         if (output == null) return dropped.copy();

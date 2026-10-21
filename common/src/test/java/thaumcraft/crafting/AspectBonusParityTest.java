@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.effect.MobEffect;
@@ -111,11 +109,19 @@ class AspectBonusParityTest {
         assertEquals(6, bonus(new ItemStack(Items.IRON_CHESTPLATE)).getAmount(Aspect.ARMOR));
     }
 
+    /**
+     * Puts one enchantment on a stack.
+     *
+     * <p>The enchantments are a <b>dynamic</b> registry in 1.21.1, so a unit test cannot read
+     * them from a registry access: {@code Registries.ENCHANTMENT} is not a member of the static
+     * registry of the vanilla bootstrap and the lookup of the lookup throws
+     * {@code Registry minecraft:enchantment not found}. The production code asks the holder of
+     * the enchantment for its key ({@code ObjectAspectResolver}:163), so the test builds a stand
+     * alone holder that carries the key of the original enchantment
+     * (Minecraft 1.21.1 {@code net/minecraft/core/Holder$Reference}:{@code createStandAlone}).</p>
+     */
     private static ItemStack withEnchantment(ItemStack stack, ResourceKey<Enchantment> key, int level) {
-        // The 1.21.1 BuiltInRegistries has no ENCHANTMENT registry, the enchantments live in the
-        // dynamic registry of the Registries.ENCHANTMENT key.
-        Holder<Enchantment> holder = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)
-                .lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key);
+        Holder<Enchantment> holder = Holder.Reference.createStandAlone(new HolderOwner<Enchantment>() {}, key);
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
         mutable.set(holder, level);
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());

@@ -264,6 +264,11 @@ loom.runs {
 }
 tasks.named('runGameTest') {
  dependsOn tasks.named('gameTestClasses'), project(':common').tasks.named('gameTestClasses')
+ // Diagnostic selection only: -PgameTestFilter=<test name> runs a single case.
+ // The default run still requires every authored case.
+ if (project.hasProperty('gameTestFilter')) {
+  systemProperty 'thaumcraft.gameTestFilter', project.property('gameTestFilter')
+ }
 }
 // Bore checks immutable parent/prelaunch evidence, never equality after play.
 def clientSmokeTargetWorld = file('run-clienttest/saves/' + clientSmokeWorld).toPath().toAbsolutePath().normalize()

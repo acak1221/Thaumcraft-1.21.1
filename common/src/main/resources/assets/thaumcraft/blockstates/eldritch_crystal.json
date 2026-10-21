@@ -1,6 +1,6 @@
 {
   "variants": {
-    "variant=11": {
+    "": {
       "model": "thaumcraft:block/eldritch_crystal"
     }
   }

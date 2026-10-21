@@ -1,6 +1,7 @@
 package thaumcraft.common.testing;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -8,8 +9,10 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftVillageProfessions;
@@ -36,7 +39,14 @@ public final class VillageTradeRuntimeChecks {
     /** The chunk coordinates the scan of the village cells covers. */
     private static final int SCAN_RADIUS = 96;
     /** The number of component chunks that are generated at most. */
-    private static final int MAX_GENERATED = 12;
+    private static final int MAX_GENERATED = 24;
+    /**
+     * A ticket that keeps a generated chunk loaded while the check reads its entities.
+     * The ticket of the original types ({@code TicketType.POST_TELEPORT}) expires after
+     * five ticks, so the check needs a ticket of its own.
+     */
+    private static final TicketType<ChunkPos> HELD =
+            TicketType.create("thaumcraft_gametest_hold", Comparator.comparingLong(ChunkPos::toLong));
 
     private VillageTradeRuntimeChecks() {}
 
@@ -76,28 +86,48 @@ public final class VillageTradeRuntimeChecks {
         // The chunks the village plan gives a banker home to are generated.
         List<int[]> bankers = componentChunks(seed, VillageWorldGenRules.HouseType.BANKER_HOME);
         test.assertTrue(!bankers.isEmpty(), "the village plan gives chunks to the banker home");
+        // The chunk system unloads a chunk that no ticket holds, and the entities of a
+        // chunk leave the world with the chunk. The check holds a ticket on every chunk
+        // it generates, so the villager of the piece stays in the world while it is read.
+        List<ChunkPos> held = new ArrayList<>();
         int generated = 0;
         for (int[] chunk : bankers) {
             if (generated >= MAX_GENERATED) break;
             ++generated;
+            ChunkPos pos = new ChunkPos(chunk[0], chunk[1]);
+            level.getChunkSource().addRegionTicket(HELD, pos, 1, pos);
+            held.add(pos);
             level.getChunk(chunk[0], chunk[1]);
         }
-
-        // The banker of the house carries the table of the original.
-        Villager banker = null;
-        for (Villager villager : bankers(level)) {
-            if (villager.getVillagerData().getProfession() == ThaumcraftVillageProfessions.BANKER.get()) {
-                banker = villager;
-                break;
+        final int generatedChunks = generated;
+        // The entities of a generated chunk become visible one task after the generation:
+        // the chunk status of the world changes when the chunk reaches the full status,
+        // and only then the entity manager starts to track the entities of the chunk.
+        // The check therefore reads the villagers in a later tick.
+        test.runAfterDelay(5, () -> {
+            Villager banker = null;
+            List<Villager> found = villagers(level);
+            for (Villager villager : found) {
+                if (villager.getVillagerData().getProfession() == ThaumcraftVillageProfessions.BANKER.get()) {
+                    banker = villager;
+                    break;
+                }
             }
-        }
-        test.assertTrue(banker != null, "the house of the banker carries a villager of the banker profession, "
-                + generated + " chunks were generated");
-        var offers = banker.getOffers();
-        test.assertTrue(offers.size() == VillageBankerManager.trades().size(),
-                "the banker carries the twelve trades of the original, found " + offers.size());
-        test.assertTrue(hasBookTrade(offers), "the banker buys the book for seven to nine gold coins");
-        test.succeed();
+            try {
+                test.assertTrue(banker != null, "the house of the banker carries a villager of the banker profession, "
+                        + generatedChunks + " chunks were generated, " + found.size() + " villagers of the world found: "
+                        + professions(found));
+                var offers = banker.getOffers();
+                test.assertTrue(offers.size() == VillageBankerManager.trades().size(),
+                        "the banker carries the twelve trades of the original, found " + offers.size());
+                test.assertTrue(hasBookTrade(offers), "the banker buys the book for seven to nine gold coins");
+                test.succeed();
+            } finally {
+                for (ChunkPos pos : held) {
+                    level.getChunkSource().removeRegionTicket(HELD, pos, 1, pos);
+                }
+            }
+        });
     }
 
     /**
@@ -119,10 +149,19 @@ public final class VillageTradeRuntimeChecks {
     }
 
     /** The villagers of the loaded part of the world. */
-    private static List<Villager> bankers(ServerLevel level) {
+    private static List<Villager> villagers(ServerLevel level) {
         var box = new AABB(-4096, level.getMinBuildHeight(), -4096,
                 4096, level.getMaxBuildHeight(), 4096);
         return new ArrayList<>(level.getEntitiesOfClass(Villager.class, box));
+    }
+
+    /** The professions of the villagers, for the failure message of the check. */
+    private static String professions(List<Villager> villagers) {
+        var names = new ArrayList<String>();
+        for (Villager villager : villagers) {
+            names.add(String.valueOf(villager.getVillagerData().getProfession()));
+        }
+        return names.toString();
     }
 
     /** The trade of the book, oracle VillageBankerManager:47. */

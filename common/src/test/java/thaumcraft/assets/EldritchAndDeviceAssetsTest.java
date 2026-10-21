@@ -220,10 +220,10 @@ class EldritchAndDeviceAssetsTest {
         List<List<String>> expected = List.of(
                 List.of("variant=0", "variant=1", "variant=2", "variant=3"),
                 List.of("variant=4", "variant=5"),
-                List.of("variant=6"),
+                List.of(""),
                 List.of("variant=7", "variant=8"),
                 List.of("variant=9", "variant=10"),
-                List.of("variant=11"));
+                List.of(""));
         for (int index = 0; index < ELDRITCH_GROUPS.size(); index++) {
             String id = ELDRITCH_GROUPS.get(index);
             JsonObject variants = ResourceTree.object(ASSETS + "blockstates/" + id + ".json").getAsJsonObject("variants");

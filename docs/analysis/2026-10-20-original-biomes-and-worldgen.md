@@ -155,8 +155,12 @@ Root hooks needed on coherent activation:
 2. Original biome keys/feature/plant registration ThaumcraftBiomes.register().
 3. Common mixin JSON add Tc4BiomeParameterListMixin, Tc4ClimateSamplerMixin,
    Tc4RandomStateMixin, Tc4MultiNoiseBiomeSourceMixin; client entry
-   client.Tc4BiomeColorsMixin. The source guard requires canonical keyed
+   client.Tc4BiomeColorMixin. The source guard requires canonical keyed
    minecraft:overworld parameter-list holder, not merely a compatible preset.
+   The client entry mixes the colour of the biome itself
+   (Biome.getGrassColor/getFoliageColor) and not a colour resolver of its own:
+   1.21.1 only knows the registered resolvers and the renderer refuses every
+   other one with "ClientWorld.getColor called with unregistered ColorResolver".
 4. ClientSetup calls ThaumcraftBiomeClient.init() after ResourceParticle setup.
 5. Exact tag data joins for actual3 biomes; no vanilla magic tagging.
 

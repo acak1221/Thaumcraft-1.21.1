@@ -669,6 +669,14 @@ def validate_resources() -> dict[str, int]:
             relative = parent.split(":", 1)[1]
             if not (ASSETS / "models" / f"{relative}.json").is_file():
                 missing.append(f"{path.relative_to(ROOT)} parent {parent}")
+        for override in data.get("overrides", []):
+            model = override.get("model")
+            if not isinstance(model, str) or not model.startswith("thaumcraft:"):
+                continue
+            model_refs += 1
+            relative = model.split(":", 1)[1]
+            if not (ASSETS / "models" / f"{relative}.json").is_file():
+                missing.append(f"{path.relative_to(ROOT)} override {model}")
         for texture in data.get("textures", {}).values():
             if texture.startswith("#"):
                 continue

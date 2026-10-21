@@ -53,6 +53,9 @@ import thaumcraft.common.lib.world.OuterLandsWiringRules;
  * authority of that grouping and are read by this test as well.
  */
 class OuterLandsEldritchVariantTest {
+    /** The blocks of a family that host a single original metadata value. */
+    private static final java.util.Set<String> SINGLE_METADATA_BLOCKS = java.util.Set.of(
+            "thaumcraft:eldritch_deco", "thaumcraft:eldritch_crystal");
     /** The floor of the labyrinth, the oracle generates the rooms at Y fifty. */
     private static final int BASE = OuterLandsRules.MAZE_FLOOR_Y;
     private static final String ASSETS = "assets/thaumcraft/";
@@ -150,8 +153,11 @@ class OuterLandsEldritchVariantTest {
         for (Row row : ROWS) {
             String path = ASSETS + "blockstates/" + path(row.blockId()) + ".json";
             JsonObject variants = object(path).getAsJsonObject("variants");
-            JsonElement entry = variants.get("variant=" + row.metadata());
-            assertNotNull(entry, path + " misses the variant=" + row.metadata());
+            // A group with a single metadata value has one state and no variant property, so its
+            // blockstate names the default state.
+            String key = SINGLE_METADATA_BLOCKS.contains(row.blockId()) ? "" : "variant=" + row.metadata();
+            JsonElement entry = variants.get(key);
+            assertNotNull(entry, path + " misses the state " + key);
             List<String> models = new ArrayList<>();
             collect(entry, models);
             assertEquals(row.models(), models, "the models of the metadata " + row.metadata());

@@ -144,8 +144,8 @@ class CosmeticFamilyAssetsTest {
         // BlockCosmeticOpaque:88-89,214-218 - the metadata two is the warded glass with the owned tile.
         // Minecraft 1.21.1 binds the blast resistance to the block, so the warded glass
         // (resistance 999, unbreakable with the warded stone option) is a block of its own.
-        assertEquals("thaumcraft:block/cosmetic_opaque_warded", model("cosmetic_opaque_warded", "variant=2"));
-        assertEquals("thaumcraft:blocks/wardedglass", face(modelTextures(model("cosmetic_opaque_warded", "variant=2")), "all"));
+        assertEquals("thaumcraft:block/cosmetic_opaque_warded", model("cosmetic_opaque_warded", ""));
+        assertEquals("thaumcraft:blocks/wardedglass", face(modelTextures(model("cosmetic_opaque_warded", "")), "all"));
         assertEquals("thaumcraft:block/amber_block", model("cosmetic_opaque", "variant=0"));
         assertEquals("thaumcraft:block/amber_bricks", model("cosmetic_opaque", "variant=1"));
         assertEquals(2, variants("cosmetic_opaque").size(), "the cosmetic opaque keeps the amber block and the amber brick");

@@ -153,7 +153,11 @@ public final class TileCrucible extends BlockEntity {
     }
 
     private static boolean isHeatSource(BlockState state) {
-        return state.is(BlockTags.FIRE) || state.getFluidState().is(FluidTags.LAVA)
+        // Original TileCrucible:99-101 - the heat sources are the blocks with the material fire, the blocks
+        // with the material lava and the nitor. The 1.7.10 fire MATERIAL is the fire block alone, so the
+        // vanilla fire block tag must not be used: a campfire or a soul campfire did not heat the crucible.
+        return state.is(net.minecraft.world.level.block.Blocks.FIRE)
+                || state.getFluidState().is(FluidTags.LAVA)
                 || BuiltInRegistries.BLOCK.getKey(state.getBlock()).equals(NITOR);
     }
 

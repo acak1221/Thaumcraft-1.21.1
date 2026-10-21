@@ -240,7 +240,7 @@
 
 | Файл | Что закрепляет |
 |---|---|
-| `common/src/test/java/thaumcraft/crafting/AspectBonusParityTest.java` | 6 тестов: константный бонус меча (5) для шести мечей 1.21.1; `instrumentum` мотыка и отсутствие `meto`; `meto` ножниц (3) и отсутствие `instrumentum`; бонус лука/кирки/брони оригинала; таблица зачарований (`thorns` → WEAPON, `smite` → ENTROPY) и остальные; таблица зелий (`confusion` → ELDRITCH, `weakness` → DEATH, `invisibility` → SENSES, splash → ENTRPY 2) |
+| `common/src/test/java/thaumcraft/crafting/AspectBonusParityTest.java` | 7 тестов: константный бонус меча (5) для шести мечей 1.21.1; `instrumentum` мотыка и отсутствие `meto`; `meto` ножниц (3) и отсутствие `instrumentum`; бонус лука/кирки/брони оригинала; таблица зачарований (`thorns` → WEAPON, `smite` → ENTROPY) и остальные; таблица зелий (`confusion` → ELDRITCH, `weakness` → DEATH, `invisibility` → SENSES, splash → ENTRPY 2) |
 | `common/src/test/java/thaumcraft/taint/TaintBlockTagTest.java` | тег `thaumcraft:taint` существует и несёт ровно семью заражения оригинала |
 | `common/src/test/java/thaumcraft/essentia/JarSoundTypeTest.java` | оригинальный звук `thaumcraft:jar` для всех пяти звуков типа, громкость 1.0 и тон 1.0 |
 

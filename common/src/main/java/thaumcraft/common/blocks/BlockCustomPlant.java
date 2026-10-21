@@ -4,10 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -46,9 +50,35 @@ public final class BlockCustomPlant extends BushBlock {
     }
     public interface ClientEffects { void tick(Level level, BlockPos pos, boolean cinderpearl, RandomSource random); }
     public static void setClientEffects(ClientEffects effects) { clientEffects = effects; }
-    /** Placement itself was permissive; ordinary stay/random ticks still enforce soil. */
+    /**
+     * The item of a custom plant.
+     *
+     * <p>Original {@code BlockCustomPlantItem:50-65}: the item places the plant only on the top
+     * face of a block whose soil supports its plant type, it plays the step sound of the plant
+     * block and it consumes one item. 1.21.1 has no {@code IPlantable}, so the plant type of the
+     * original metadata is answered by the block itself and the soil of the port is the
+     * canonical one; the placement of the 1.12 reference, which let the plant die on the next
+     * tick instead of refusing the placement, is not the behaviour of the 1.7.10 original.</p>
+     *
+     * <p>Oracle: {@code thaumcraft/common/blocks/BlockCustomPlantItem.java}, lines 50-65.</p>
+     */
     public static final class PlantItem extends BlockItem {
         public PlantItem(Block block, Item.Properties properties) { super(block, properties); }
-        @Override protected boolean mustSurvive() { return false; }
+
+        /** Original BlockCustomPlantItem:51 - only the top face of a block carries a plant. */
+        @Override protected BlockState getPlacementState(BlockPlaceContext context) {
+            if (context.getClickedFace() != Direction.UP) return null;
+            return super.getPlacementState(context);
+        }
+
+        /** Original BlockCustomPlantItem:54 - the soil below has to support the plant. */
+        @Override protected boolean mustSurvive() { return true; }
+
+        /**
+         * Original BlockCustomPlantItem:56 - the plant announces itself with the step sound of
+         * its own block. The pitch of the original (0.8) is a property of the 1.7.10 sound
+         * type, 1.21.1 has no per block sound pitch.
+         */
+        @Override protected SoundEvent getPlaceSound(BlockState state) { return SoundEvents.GRASS_STEP; }
     }
 }

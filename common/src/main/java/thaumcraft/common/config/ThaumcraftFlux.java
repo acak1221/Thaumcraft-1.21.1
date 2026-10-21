@@ -1,5 +1,6 @@
 package thaumcraft.common.config;
 
+import dev.architectury.registry.registries.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.BlockPos;
@@ -10,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,7 +19,9 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockFluxGas;
+import thaumcraft.common.blocks.BlockFluxGasItem;
 import thaumcraft.common.blocks.BlockFluxGoo;
+import thaumcraft.common.blocks.BlockFluxGooItem;
 import thaumcraft.common.blocks.FluxFiniteBlock;
 import thaumcraft.common.lib.potions.PotionInfectiousVisExhaust;
 import thaumcraft.common.lib.potions.PotionVisExhaust;
@@ -25,10 +29,22 @@ import thaumcraft.common.lib.potions.PotionVisExhaust;
 /** TC4 ConfigBlocks:163-164; these are finite blocks, not vanilla source fluids. */
 public final class ThaumcraftFlux {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEMS);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(Thaumcraft.MODID, Registries.MOB_EFFECT);
 
     public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties()));
     public static final RegistrySupplier<BlockFluxGoo> FLUX_GOO = BLOCKS.register("flux_goo", () -> new BlockFluxGoo(properties()));
+    /**
+     * The original items of the two finite fluids.
+     *
+     * <p>Original {@code ConfigBlocks:295-296} registers both blocks with their own item class
+     * ({@code BlockFluxGooItem} and {@code BlockFluxGasItem}), and both items place the block
+     * with the original metadata eight.</p>
+     */
+    public static final RegistrySupplier<Item> FLUX_GAS_ITEM = ITEMS.register("flux_gas",
+            () -> new BlockFluxGasItem(FLUX_GAS.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> FLUX_GOO_ITEM = ITEMS.register("flux_goo",
+            () -> new BlockFluxGooItem(FLUX_GOO.get(), new Item.Properties()));
     private static final RegistrySupplier<MobEffect> VIS_EXHAUST = EFFECTS.register("vis_exhaust", PotionVisExhaust::new);
     private static final RegistrySupplier<MobEffect> INFECTIOUS_VIS_EXHAUST = EFFECTS.register("infectious_vis_exhaust", PotionInfectiousVisExhaust::new);
 
@@ -44,7 +60,10 @@ public final class ThaumcraftFlux {
 
     public static void register() {
         BLOCKS.register();
+        ITEMS.register();
         EFFECTS.register();
+        // Original BlockFluxGas:29 and BlockFluxGoo:34 put both blocks in the tab of the mod.
+        CreativeTabRegistry.append(ThaumcraftContent.TAB, FLUX_GAS_ITEM, FLUX_GOO_ITEM);
     }
 
     // Architectury's RegistrySupplier implements Holder, but is NOT the actual

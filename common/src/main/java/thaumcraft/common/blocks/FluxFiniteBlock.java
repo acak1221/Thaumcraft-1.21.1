@@ -40,6 +40,15 @@ public abstract class FluxFiniteBlock extends Block {
     public static final int QUANTA = 8;
     // Original exceptional births use metadata8 (NINE units), not a capacity9.
     public static final IntegerProperty LEVEL = IntegerProperty.create("level", 0, 8);
+    /**
+     * The original metadata of a placed finite fluid source.
+     *
+     * <p>Original {@code BlockFluxGasItem:17-19} and {@code BlockFluxGooItem:17-19} always place
+     * the block with the metadata eight, and the Forge {@code BlockFluidBase} does the same in
+     * its own placement hook. The metadata eight is the exceptional birth of nine units, one
+     * unit more than the eight units a cell holds.</p>
+     */
+    public static final int PLACED_METADATA = 8;
     /** Geometry only; neither full height nor an overfull birth changes capacity8. */
     public static final BooleanProperty FULL_HEIGHT = BooleanProperty.create("full_height");
     public static final TagKey<Block> DISPLACEMENT_BLOCKED = TagKey.create(Registries.BLOCK,
@@ -105,6 +114,22 @@ public abstract class FluxFiniteBlock extends Block {
 
     @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return withGeometry(state, level, pos);
+    }
+
+    /**
+     * The state a placed finite fluid carries.
+     *
+     * <p>Original {@code BlockFluxGasItem:17-19} and {@code BlockFluxGooItem:17-19} always place
+     * the block with the metadata eight, the exceptional nine unit birth of a Forge
+     * {@code BlockFluidFinite}; a cell itself holds eight units.</p>
+     *
+     * @param context the placement of the item
+     * @return the state to place, or null when the block is not a finite flux block
+     */
+    public static BlockState placedState(Block block, BlockPlaceContext context) {
+        if (!(block instanceof FluxFiniteBlock flux)) return null;
+        BlockState state = flux.defaultBlockState().setValue(LEVEL, PLACED_METADATA);
+        return flux.withGeometry(state, context.getLevel(), context.getClickedPos());
     }
 
     @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moved) {

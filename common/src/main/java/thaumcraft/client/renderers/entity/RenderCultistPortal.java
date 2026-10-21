@@ -72,8 +72,7 @@ public final class RenderCultistPortal<T extends EntityCultistPortal> extends En
             // height of the portal.
             pose.translate(0.0D, portal.getBbHeight() / 2.0D, 0.0D);
             int frame = 15 - (int) (time % FRAMES);
-            float u0 = frame / (float) FRAMES;
-            float u1 = u0 + .0625F;
+            float[] uv = frameUv(frame);
             VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(PORTAL));
             // Oracle RenderCultistPortal.java:93-108 - the four corners of the quad
             // are the bottom right, the top right, the top left and the bottom left
@@ -87,11 +86,26 @@ public final class RenderCultistPortal<T extends EntityCultistPortal> extends En
             Vector3f topRight = new Vector3f(left).negate().add(up);
             Vector3f topLeft = new Vector3f(left).add(up);
             Vector3f bottomLeft = new Vector3f(left).sub(up);
-            vertex(out, pose, bottomRight, scale, scaley, u1, 0.0F, alpha);
-            vertex(out, pose, topRight, scale, scaley, u1, 1.0F, alpha);
-            vertex(out, pose, topLeft, scale, scaley, u0, 1.0F, alpha);
-            vertex(out, pose, bottomLeft, scale, scaley, u0, 0.0F, alpha);
+            vertex(out, pose, bottomRight, scale, scaley, uv[0], uv[1], alpha);
+            vertex(out, pose, topRight, scale, scaley, uv[2], uv[3], alpha);
+            vertex(out, pose, topLeft, scale, scaley, uv[4], uv[5], alpha);
+            vertex(out, pose, bottomLeft, scale, scaley, uv[6], uv[7], alpha);
         } finally { pose.popPose(); }
+    }
+
+    /**
+     * The four texture coordinates of the portal of the original.
+     *
+     * <p>Oracle {@code RenderCultistPortal.java:95-108}: the frame of the sheet is
+     * counted backwards, {@code frame = 15 - time % 16}, and the four corners are
+     * the bottom right, the top right, the top left and the bottom left of the
+     * basis with the texture coordinates {@code (uMax, 0)}, {@code (uMax, 1)},
+     * {@code (u, 1)} and {@code (u, 0)}.
+     */
+    public static float[] frameUv(int frame) {
+        float u = frame / (float) FRAMES;
+        float uMax = u + .0625F;
+        return new float[]{uMax, 0.0F, uMax, 1.0F, u, 1.0F, u, 0.0F};
     }
 
     /**

@@ -47,13 +47,12 @@ public final class TileEldritchPortalRenderer implements BlockEntityRenderer<Til
         if (tile.getLevel() == null) return;
         int open = tile.getOpenCount();
         // The original clamps the opening counter to five and to thirty.
-        float height = Mth.clamp(open + partialTick, 0.0F, HEIGHT_LIMIT) / HEIGHT_LIMIT;
-        float width = Mth.clamp(open + partialTick, 0.0F, WIDTH_LIMIT) / WIDTH_LIMIT;
+        float height = halfHeight(open, partialTick);
+        float width = halfWidth(open, partialTick);
         if (width <= 0.0F || height <= 0.0F) return;
         long time = System.nanoTime() / 50000000L;
         int frame = (int) (time % FRAMES);
-        float u = frame / (float) FRAMES;
-        float uMax = u + 1.0F / FRAMES;
+        float[] uv = frameUv(frame);
         Vector3f left = CameraBasis.left();
         Vector3f up = CameraBasis.up();
         // Oracle TileEldritchPortalRenderer:44-52 - the scale and the scaley of the
@@ -75,11 +74,48 @@ public final class TileEldritchPortalRenderer implements BlockEntityRenderer<Til
             // Oracle TileEldritchPortalRenderer:76-81 - the frame of the original is
             // turned by ninety degrees, the u of the frame is the vertical axis of
             // the gate and its v the horizontal one.
-            vertex(out, pose, bottomRight, width, height, u, 1.0F, red, green, blue, light, overlay);
-            vertex(out, pose, topRight, width, height, uMax, 1.0F, red, green, blue, light, overlay);
-            vertex(out, pose, topLeft, width, height, uMax, 0.0F, red, green, blue, light, overlay);
-            vertex(out, pose, bottomLeft, width, height, u, 0.0F, red, green, blue, light, overlay);
+            vertex(out, pose, bottomRight, width, height, uv[0], uv[1], red, green, blue, light, overlay);
+            vertex(out, pose, topRight, width, height, uv[2], uv[3], red, green, blue, light, overlay);
+            vertex(out, pose, topLeft, width, height, uv[4], uv[5], red, green, blue, light, overlay);
+            vertex(out, pose, bottomLeft, width, height, uv[6], uv[7], red, green, blue, light, overlay);
         } finally { pose.popPose(); }
+    }
+
+    /**
+     * The half width of the gate of the original.
+     *
+     * <p>Oracle {@code TileEldritchPortalRenderer.java:41,44}: the scale is the
+     * opening counter clamped to five and divided by five, and it is the half
+     * width of the quad.
+     */
+    public static float halfWidth(int openCount, float partialTick) {
+        return Mth.clamp(openCount + partialTick, 0.0F, WIDTH_LIMIT) / WIDTH_LIMIT;
+    }
+
+    /**
+     * The half height of the gate of the original.
+     *
+     * <p>Oracle {@code TileEldritchPortalRenderer.java:40,45}: the scaley is the
+     * opening counter clamped to thirty and divided by thirty, and it is the half
+     * height of the quad.
+     */
+    public static float halfHeight(int openCount, float partialTick) {
+        return Mth.clamp(openCount + partialTick, 0.0F, HEIGHT_LIMIT) / HEIGHT_LIMIT;
+    }
+
+    /**
+     * The four texture coordinates of the gate of the original.
+     *
+     * <p>Oracle {@code TileEldritchPortalRenderer.java:74-81}: the frame of the
+     * sheet is turned by ninety degrees, the u of the frame is the vertical axis
+     * of the gate and its v the horizontal one. The corners are the ones of the
+     * original in its order: the bottom right, the top right, the top left and
+     * the bottom left.
+     */
+    public static float[] frameUv(int frame) {
+        float u = frame / (float) FRAMES;
+        float uMax = u + 1.0F / FRAMES;
+        return new float[]{u, 1.0F, uMax, 1.0F, uMax, 0.0F, u, 0.0F};
     }
 
     private static void vertex(VertexConsumer out, PoseStack pose, Vector3f corner, float scale, float scaley,

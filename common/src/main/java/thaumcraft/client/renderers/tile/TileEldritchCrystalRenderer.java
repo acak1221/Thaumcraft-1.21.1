@@ -2,14 +2,12 @@ package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import thaumcraft.client.renderers.models.ModelEldritchCrystal;
 import thaumcraft.common.tiles.TileEldritchCrystal;
 
@@ -22,13 +20,10 @@ import thaumcraft.common.tiles.TileEldritchCrystal;
  * {@link ModelEldritchCrystal}, so the geometry is reused as it is.
  *
  * <p>Oracle {@code TileEldritchCrystalRenderer.java:44-50}: the original
- * overwrites the light map of the crystal with a fixed texel that pulses with
- * the tick counter of the player, so the crystal keeps its own brightness and
- * does not follow the light of the block. The native port reproduces the pulse
- * with a packed light of its own: the light level of the block light of the
- * original texel is {@code (int) (210 * shade) / 16}, that is eleven, twelve or
- * thirteen, and the crystal is drawn with that light instead of the light of the
- * block.
+ * overwrites the coordinates of the light map before it draws the crystal, so
+ * the crystal keeps its own brightness and does not follow the light of its
+ * block. The native port draws the crystal with the full light for the same
+ * reason.
  */
 public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<TileEldritchCrystal> {
     /** The original texture of the base of the crystal. */
@@ -37,14 +32,6 @@ public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<Ti
     public static final ResourceLocation CRYSTAL = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/vcrystal.png");
     /** The original alpha of the crystal. */
     private static final int CRYSTAL_COLOR = 0xb2ffffff;
-    /** The original divisor of the tick counter of the pulse, oracle :45. */
-    private static final float PULSE_PERIOD = 6.0F;
-    /** The original amplitude of the pulse, oracle :45. */
-    private static final float PULSE_AMPLITUDE = 0.075F;
-    /** The original offset of the pulse, oracle :45. */
-    private static final float PULSE_OFFSET = 0.925F;
-    /** The original brightness of the crystal, oracle :46. */
-    private static final float PULSE_BRIGHTNESS = 210.0F;
 
     private final ModelEldritchCrystal model = new ModelEldritchCrystal();
 
@@ -66,19 +53,19 @@ public final class TileEldritchCrystalRenderer implements BlockEntityRenderer<Ti
     }
 
     /**
-     * The light of the crystal of the original: the pulse of the light map.
+     * The light of the crystal of the original.
      *
-     * <p>Oracle {@code TileEldritchCrystalRenderer.java:45-49}: the shade is
-     * {@code sin(ticks / 6) * 0.075 + 0.925} and the light map is set to the texel
-     * {@code (int) (210 * shade)}, whose light level of the block light is the
-     * texel divided by sixteen.
+     * <p>Oracle {@code TileEldritchCrystalRenderer.java:45-49}: the original
+     * overwrites the coordinates of the light map with
+     * {@code (OpenGlHelper.field_77476_b, (int) (210 * shade))}, that is with
+     * {@code (5898, 178)} up to {@code (5898, 210)}, and the light map clamps the
+     * coordinates it is given to the range of the texture, so the crystal is
+     * always drawn with the brightest texel of the light map and the pulse of
+     * the original never reaches the screen. The native port therefore draws the
+     * crystal with the full light and not with the light of its block.
      */
     public static int crystalLight() {
-        var player = Minecraft.getInstance().player;
-        float ticks = player == null ? 0.0F : player.tickCount;
-        float shade = Mth.sin(ticks / PULSE_PERIOD) * PULSE_AMPLITUDE + PULSE_OFFSET;
-        int level = (int) (PULSE_BRIGHTNESS * shade) / 16;
-        return LightTexture.pack(level, 0);
+        return LightTexture.FULL_BRIGHT;
     }
 
     /** The original translateFromOrientation of the crystal and the crab vent. */

@@ -720,6 +720,54 @@
       "aspects": {"lucrum": 1}
     },
     {
+      "original_source_line": 407, "registration": "direct", "original_target": "ConfigItems.itemLootbag", "original_metadata": 0,
+      "identifier_evidence": "Oracle ConfigAspects407 registers the common loot bag metadata0 with lucrum8; ThaumcraftLoot registers the flattened loot_bag_common item",
+      "modern_ids": ["thaumcraft:loot_bag_common"],
+      "aspects": {"lucrum": 8}
+    },
+    {
+      "original_source_line": 408, "registration": "direct", "original_target": "ConfigItems.itemLootbag", "original_metadata": 1,
+      "identifier_evidence": "Oracle ConfigAspects408 registers the uncommon loot bag metadata1 with lucrum16; ThaumcraftLoot registers the flattened loot_bag_uncommon item",
+      "modern_ids": ["thaumcraft:loot_bag_uncommon"],
+      "aspects": {"lucrum": 16}
+    },
+    {
+      "original_source_line": 409, "registration": "direct", "original_target": "ConfigItems.itemLootbag", "original_metadata": 2,
+      "identifier_evidence": "Oracle ConfigAspects409 registers the rare loot bag metadata2 with lucrum32; ThaumcraftLoot registers the flattened loot_bag_rare item",
+      "modern_ids": ["thaumcraft:loot_bag_rare"],
+      "aspects": {"lucrum": 32}
+    },
+    {
+      "original_source_line": 410, "registration": "direct", "original_target": "ConfigItems.itemNuggetBeef", "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Oracle ConfigAspects410 registers the beef nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_beef item",
+      "modern_ids": ["thaumcraft:nugget_beef"],
+      "aspects": {"fames": 1}
+    },
+    {
+      "original_source_line": 411, "registration": "direct", "original_target": "ConfigItems.itemNuggetChicken", "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Oracle ConfigAspects411 registers the chicken nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_chicken item",
+      "modern_ids": ["thaumcraft:nugget_chicken"],
+      "aspects": {"fames": 1}
+    },
+    {
+      "original_source_line": 412, "registration": "direct", "original_target": "ConfigItems.itemNuggetPork", "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Oracle ConfigAspects412 registers the pork nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_pork item",
+      "modern_ids": ["thaumcraft:nugget_pork"],
+      "aspects": {"fames": 1}
+    },
+    {
+      "original_source_line": 413, "registration": "direct", "original_target": "ConfigItems.itemNuggetFish", "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Oracle ConfigAspects413 registers the fish nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_fish item",
+      "modern_ids": ["thaumcraft:nugget_fish"],
+      "aspects": {"fames": 1}
+    },
+    {
+      "original_source_line": 414, "registration": "complex", "original_target": "ConfigItems.itemTripleMeatTreat", "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Oracle ConfigAspects414 registers the triple meat treat with a wildcard metadata; the supplied sano1 is ADDED to the recipe-derived base, the original remove(fames1) applies to the supplied list only",
+      "modern_ids": ["thaumcraft:triple_meat_treat"],
+      "aspects": {"sano": 1}
+    },
+    {
       "original_source_line": 415, "registration": "direct", "original_target": "ConfigItems.itemShard", "original_metadata": 0,
       "identifier_evidence": "Explicit original primal shard metadata0; existing air_shard identifier",
       "modern_ids": ["thaumcraft:air_shard"],
@@ -780,6 +828,12 @@
       "aspects": {"auram": 2}
     },
     {
+      "original_source_line": 432, "registration": "complex", "original_target": "ConfigItems.itemPrimalArrow", "original_metadata": 0,
+      "identifier_evidence": "Oracle ConfigAspects432 registers the complex object tag of new ItemStack(itemPrimalArrow), that is metadata0 only, with telum1; only the flattened air arrow carries it",
+      "modern_ids": ["thaumcraft:primal_arrow_air"],
+      "aspects": {"telum": 1}
+    },
+    {
       "original_source_line": 433, "registration": "complex", "original_target": "ConfigItems.itemGoggles", "original_metadata": "wildcard:32767",
       "identifier_evidence": "Original Goggles of Revealing now has a real native recipe/material; add sensus4 to recipe-derived tags, never replace the entire item base with the supplied bonus",
       "modern_ids": ["thaumcraft:goggles_revealing"],
@@ -798,10 +852,22 @@
       "aspects": {"praecantatio": 5, "venenum": 5, "perditio": 5, "alienis": 5, "telum": 5}
     },
     {
+      "original_source_line": 448, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 0,
+      "identifier_evidence": "Oracle ConfigAspects448 registers the eldritch eye metadata0; ThaumcraftWarp registers the flattened eldritch_eye item",
+      "modern_ids": ["thaumcraft:eldritch_eye"],
+      "aspects": {"alienis": 5, "auram": 3, "praecantatio": 3, "sensus": 3, "spiritus": 3}
+    },
+    {
       "original_source_line": 449, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 1,
       "identifier_evidence": "ConfigAspects449 direct Crimson Rites row; actual native reusable ItemCrimsonRites now registered as crimson_rites",
       "modern_ids": ["thaumcraft:crimson_rites"],
       "aspects": {"cognitio": 5, "praecantatio": 3, "alienis": 3, "spiritus": 3}
+    },
+    {
+      "original_source_line": 450, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 2,
+      "identifier_evidence": "Oracle ConfigAspects450 registers the runed tablet metadata2; ThaumcraftLegacyItems registers the flattened eldritch_tablet item",
+      "modern_ids": ["thaumcraft:eldritch_tablet"],
+      "aspects": {"vinculum": 4, "cognitio": 4, "machina": 4}
     },
     {
       "original_source_line": 454, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 3,

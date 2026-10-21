@@ -31,7 +31,9 @@ public final class ItemEldritchObject extends Item {
     private final int type;
 
     public ItemEldritchObject(Properties properties, int type) {
-        super(properties.stacksTo(type == EquipmentRules.ELDRITCH_OBELISK_PLACER ? 1 : 64).rarity(rarityOf(type)));
+        // Oracle ItemEldritchObject:56 sets the stack size of ONE for every metadata of the
+        // original item, so the runed tablet does not stack either.
+        super(properties.stacksTo(1).rarity(rarityOf(type)));
         this.type = type;
     }
 

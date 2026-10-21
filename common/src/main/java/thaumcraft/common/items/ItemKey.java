@@ -53,6 +53,12 @@ public final class ItemKey extends Item {
     /** The kind of key: zero the iron key, one the gold key. */
     public int keyType() { return keyType; }
 
+    /**
+     * Oracle ItemKey:90-92 glints a key that carries its link data. The original used the
+     * presence of the NBT compound; the native equivalent is the presence of the link component.
+     */
+    @Override public boolean isFoil(ItemStack stack) { return stack.has(ThaumcraftLegacyItems.KEY_LINK.get()); }
+
     /** The link of the stack, or null when the key was never linked. */
     public static KeyLink link(ItemStack stack) { return stack.get(ThaumcraftLegacyItems.KEY_LINK.get()); }
 

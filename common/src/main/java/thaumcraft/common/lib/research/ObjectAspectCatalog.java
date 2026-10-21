@@ -39,6 +39,11 @@ public final class ObjectAspectCatalog {
     private static final List<String> ORE_IDS = List.of(
             "cinnabar_ore", "air_infused_stone", "fire_infused_stone", "water_infused_stone",
             "earth_infused_stone", "order_infused_stone", "entropy_infused_stone", "amber_ore");
+    /**
+     * The retained 1.12 fallback corpus rows that the 1.7.10 original never registered. They must
+     * not become direct object tags here: the original resolves those items from their recipes.
+     */
+    private static final Set<String> LEGACY_ONLY_FALLBACK_IDS = Set.of("thaumcraft:balance_shard");
     private static volatile Map<ResourceLocation, AspectList> bindings = Map.of();
     private static Map<ResourceLocation, AspectList> candidateBindings = Map.of();
     private static Set<ResourceLocation> blockCandidateIds = Set.of();
@@ -86,9 +91,18 @@ public final class ObjectAspectCatalog {
                             : "ConfigBlocks.blockCustomOre".equals(target) ? ORE_IDS : List.of();
                     if (metadata >= 0 && metadata < flattened.size()) {
                         ResourceLocation candidate = ResourceLocation.fromNamespaceAndPath("thaumcraft", flattened.get(metadata));
-                        putConsistent(loaded, conflicts, candidate, aspects);
-                        ownContent.add(candidate);
-                        if ("ConfigBlocks.blockCustomOre".equals(target)) blocks.add(candidate);
+                        // The 1.12 backport registered a literal object tag for the balanced shard
+                        // (src/main/java/thaumcraft/common/config/ConfigAspects.java:340-341) that the
+                        // 1.7.10 original never had: the oracle ConfigAspects:415-420 registers only
+                        // the six primal shards, and OpenTC4 1.7.10 ConfigAspects:410-415 stops at
+                        // shard five. Without a direct registration the original derives the balanced
+                        // shard from its crucible recipe (ThaumcraftCraftingManager:513-540), which is
+                        // also the base the original salis mundus expression (ConfigAspects:421) uses.
+                        if (!LEGACY_ONLY_FALLBACK_IDS.contains(candidate.toString())) {
+                            putConsistent(loaded, conflicts, candidate, aspects);
+                            ownContent.add(candidate);
+                            if ("ConfigBlocks.blockCustomOre".equals(target)) blocks.add(candidate);
+                        }
                     }
                 }
             }

@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.common.lib.research.EarlyObjectAspectBindings;
 import thaumcraft.common.lib.research.ObjectAspectCatalog;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,5 +47,38 @@ class ObjectAspectCatalogTest {
         var copy = ObjectAspectCatalog.get(ResourceLocation.parse("minecraft:stone"));
         copy.add(Aspect.EARTH, 500);
         assertEquals(2, ObjectAspectCatalog.get(ResourceLocation.parse("minecraft:stone")).getAmount(Aspect.EARTH));
+    }
+
+    /**
+     * Oracle ConfigAspects:407-414, 432, 448 and 450 register the object tags of the loot bags,
+     * the edible nuggets, the triple meat treat, the primal arrow and the two eldritch objects that
+     * the flattened native items carry. The 1.12 backport added a literal balanced shard tag
+     * (src/main/java/thaumcraft/common/config/ConfigAspects.java:340-341) that the 1.7.10 original
+     * never had, so the balanced shard must stay recipe-derived.
+     */
+    @Test
+    void originalItemObjectTagsArePresentAndTheLegacyOnlyBalancedShardStaysRecipeDerived() {
+        var eye = ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:eldritch_eye"));
+        assertEquals(5, eye.getAmount(Aspect.ELDRITCH));
+        assertEquals(3, eye.getAmount(Aspect.AURA));
+        assertEquals(3, eye.getAmount(Aspect.MAGIC));
+        assertEquals(3, eye.getAmount(Aspect.SENSES));
+        assertEquals(3, eye.getAmount(Aspect.SOUL));
+        var tablet = ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:eldritch_tablet"));
+        assertEquals(4, tablet.getAmount(Aspect.TRAP));
+        assertEquals(4, tablet.getAmount(Aspect.MIND));
+        assertEquals(4, tablet.getAmount(Aspect.MECHANISM));
+        assertEquals(8, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:loot_bag_common")).getAmount(Aspect.GREED));
+        assertEquals(16, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:loot_bag_uncommon")).getAmount(Aspect.GREED));
+        assertEquals(32, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:loot_bag_rare")).getAmount(Aspect.GREED));
+        for (String nugget : new String[]{"nugget_chicken", "nugget_beef", "nugget_pork", "nugget_fish"}) {
+            assertEquals(1, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:" + nugget)).getAmount(Aspect.HUNGER), nugget);
+        }
+        assertEquals(0, ObjectAspectCatalog.get(ResourceLocation.parse("thaumcraft:balance_shard")).size());
+        assertFalse(ObjectAspectCatalog.registeredIds().contains(ResourceLocation.parse("thaumcraft:balance_shard")));
+        var complex = EarlyObjectAspectBindings.complex();
+        assertEquals(1, complex.get(ResourceLocation.parse("thaumcraft:primal_arrow_air")).getAmount(Aspect.WEAPON));
+        assertEquals(1, complex.get(ResourceLocation.parse("thaumcraft:triple_meat_treat")).getAmount(Aspect.HEAL));
+        assertFalse(complex.containsKey(ResourceLocation.parse("thaumcraft:primal_arrow_fire")));
     }
 }

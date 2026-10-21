@@ -29,6 +29,7 @@
 | Синхронизация (компоненты `wand_data`/`wand_focus`/`focus_upgrades`) | совпадает |
 | **Дефект 1:** палочка не забирает обратно «вардовый камень» (плиту, стекло, дверь) | **исправлен** |
 | **Дефект 2:** у фокуса Trade нет левого клика (обмен блока) | **исправлен** |
+| **Дефект 3:** компонент цены сборки не вмещает самый дорогой скиптр (432) | **исправлен** |
 | Пробел: подсказка палочки не показывает расход по аспектам и средний | остаётся (клиент) |
 
 ---
@@ -162,7 +163,6 @@ frugal), `common/.../crafting/ArcaneVis.java:42` (`(int)(amount * 100 * modifier
 ## 3. Дефекты
 
 ### D1. Палочка не забирает обратно «вардовый камень» (плита, стекло, арканная дверь)
-
 * **Оригинал:** `oracle thaumcraft/common/items/wands/ItemWandCasting.java:390-415`
   (`onItemUseFirst`): клик палочкой по деревянному устройству md 2 (арканная нажимная плита) или
   непрозрачному косметическому блоку md 2 (вардовое стекло) **и** по арканной двери снимает блок и
@@ -214,6 +214,24 @@ frugal), `common/.../crafting/ArcaneVis.java:42` (`(int)(amount * 100 * modifier
   (`TradeSwaps.actor`), и только потом трассирует луч: раньше трассировка шла при каждом
   `START_DESTROY_BLOCK` в мире.
 
+### D3. Компонент цены сборки не вмещает самый дорогой скиптр
+
+* **Оригинал:** `oracle common/lib/crafting/ArcaneSceptreRecipe.java:64` — цена скиптра
+  `(int)((float)(cc * cr) * 1.5f)`, где `cc` — цена колпачка (максимум 9, пустотный), `cr` — цена
+  стержня (максимум 32, ядро Primal). Самая дорогая палочка стоит `9 × 32 = 288`, самый дорогой
+  **скиптр** — `(int)(288 × 1.5f) = 432`. Оригинал писал это в метаданные предмета (без ограничения
+  диапазона, кроме short).
+* **Порт:** `common/.../config/ThaumcraftWands.java:24` объявлял
+  `CRAFT_COST_CODEC = Codec.intRange(0, 32 * 9)` — то есть до 288. Скиптр из пустотного колпачка и
+  ядра Primal получал компонент со значением 432, которое **не входит в диапазон кодека**: при
+  сохранении предмета или синхронизации с клиентом `DataResult` кодека компонента превращается в
+  исключение (`getOrThrow`), то есть предмет нельзя ни сохранить, ни переслать.
+* **Исправление:** `common/.../lib/enchantment/WandEnchantmentRules.java` — добавлена константа
+  `MAX_CRAFT_COST = 32 * 9 * 3 / 2` (432) с пояснением; `ThaumcraftWands` использует её как верхнюю
+  границу кодека и отдаёт кодек через `ThaumcraftWands.craftCostCodec()`.
+* **Проверка:** `common/src/test/java/thaumcraft/wands/WandCraftCostTest.java` — самая дорогая палочка
+  288, самый дорогой скиптр 432, кодек принимает 432 и отвергает 433.
+
 ---
 
 ## 4. Пробелы (не исправлено в этой ветке)
@@ -255,19 +273,19 @@ export GRADLE_USER_HOME=/home/Acak/gradle-homes/ocwands
 ```
 > Task :common:compileJava
 > Task :common:processResources UP-TO-DATE
-> Task :common:classes UP-TO-DATE
+> Task :common:classes
 > Task :common:compileTestJava UP-TO-DATE
 > Task :common:processTestResources UP-TO-DATE
 > Task :common:testClasses UP-TO-DATE
 > Task :common:test
 
-BUILD SUCCESSFUL in 25s
-5 actionable tasks: 1 executed, 4 up-to-date
+BUILD SUCCESSFUL in 30s
+5 actionable tasks: 3 executed, 2 up-to-date
 ```
 
 Разбор XML-отчёта `common/build/test-results/test/*.xml`:
-**1670 тестов, 0 failures, 0 errors, 0 skipped** (до правок было 1665; добавлено 5 в
-`thaumcraft.wands.WandWardedStoneTest`).
+**1672 теста, 0 failures, 0 errors, 0 skipped** (до правок было 1665; добавлено 7 в
+`thaumcraft.wands.WandWardedStoneTest` — 5 и `thaumcraft.wands.WandCraftCostTest` — 2).
 
 Новый тест `common/src/test/java/thaumcraft/wands/WandWardedStoneTest.java` (5 тестов):
 
@@ -278,6 +296,12 @@ BUILD SUCCESSFUL in 25s
   `thaumcraft-common.mixins.json` (без регистрации он был бы мёртвым);
 * `theCopperCapPaysItsOwnPriceForOrderAndEntropy` — модификатор колпачка по аспекту и цена
   (10000 centivis за order, 11000 за air, 9000 с frugal 1).
+
+Новый тест `common/src/test/java/thaumcraft/wands/WandCraftCostTest.java` (2 теста):
+
+* `theDearestSceptreCostsHalfAsMuchAgainAsTheDearestWand` — 288 и 432;
+* `theCraftCostComponentHoldsEveryOriginalCraftCost` — кодек компонента принимает самую дорогую
+  палочку и самую дорогой скиптр и отвергает всё, что выше.
 
 **Не выполнялось:** клиентский приём, GameTest-прогон, мультиплеер. Новый миксин
 (`TradeFocusServerPlayerGameModeMixin`) проверен только компиляцией и чтением сигнатуры

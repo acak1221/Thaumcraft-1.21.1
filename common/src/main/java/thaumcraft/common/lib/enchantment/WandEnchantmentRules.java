@@ -108,4 +108,13 @@ public final class WandEnchantmentRules {
         if (capCraftCost < 0 || rodCraftCost < 0) throw new IllegalArgumentException("Negative wand craft cost");
         return (int) ((float) (capCraftCost * rodCraftCost) * 1.5F);
     }
+
+    /**
+     * The dearest craft cost of the original: the primal staff (32) in a void cap (9) sceptre.
+     *
+     * <p>The plain wand of the same materials costs {@code 32 * 9 = 288} and the sceptre
+     * {@code (int) (288 * 1.5F) = 432}. The native craft cost component has to hold the sceptre too,
+     * otherwise the dearest sceptre could not be saved or sent to a client.</p>
+     */
+    public static final int MAX_CRAFT_COST = 32 * 9 * 3 / 2;
 }

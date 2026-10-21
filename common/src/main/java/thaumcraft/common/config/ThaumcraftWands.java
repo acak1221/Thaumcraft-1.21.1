@@ -14,6 +14,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.crafting.ArcaneWandRecipe;
 import thaumcraft.common.items.wands.WandMaterials;
+import thaumcraft.common.lib.enchantment.WandEnchantmentRules;
 
 /** Register after ThaumcraftContent/ThaumcraftArcane; the basic iron cap and wooden rod already exist. */
 public final class ThaumcraftWands {
@@ -21,7 +22,8 @@ public final class ThaumcraftWands {
     private static final DeferredRegister<DataComponentType<?>> COMPONENTS = DeferredRegister.create(Thaumcraft.MODID, Registries.DATA_COMPONENT_TYPE);
     private static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(Thaumcraft.MODID, Registries.RECIPE_SERIALIZER);
     // cap x rod price: the dearest rod is the primal staff (32), the dearest cap the void one (9).
-    private static final Codec<Integer> CRAFT_COST_CODEC = Codec.intRange(0, 32 * 9);
+    // A sceptre of the same materials costs half as much again (432), and it carries this metadata too.
+    private static final Codec<Integer> CRAFT_COST_CODEC = Codec.intRange(0, WandEnchantmentRules.MAX_CRAFT_COST);
 
     public static final RegistrySupplier<Item> GREATWOOD_WAND_ROD = ITEMS.register("wand_rod_greatwood", () -> new Item(new Item.Properties()));
     public static final RegistrySupplier<Item> SILVERWOOD_WAND_ROD = ITEMS.register("wand_rod_silverwood", () -> new Item(new Item.Properties()));
@@ -70,6 +72,9 @@ public final class ThaumcraftWands {
                 QUARTZ_STAFF_ROD, BONE_STAFF_ROD, REED_STAFF_ROD, SILVERWOOD_STAFF_ROD, PRIMAL_STAFF_ROD, GOLD_WAND_CAP, COPPER_WAND_CAP,
                 THAUMIUM_NUGGET, THAUMIUM_WAND_CAP_INERT, THAUMIUM_WAND_CAP, VOID_NUGGET, VOID_WAND_CAP_INERT, VOID_WAND_CAP);
     }
+
+    /** The codec of the original wand craft cost metadata: the item metadata of the assembled wand. */
+    public static Codec<Integer> craftCostCodec() { return CRAFT_COST_CODEC; }
 
     /** Fresh canonical material stacks; no singleton ItemStack is exposed for mutation. */
     public static ItemStack rodItem(String tag) {

@@ -2,6 +2,7 @@ package thaumcraft.common.config;
 
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.registry.CreativeTabRegistry;
+import dev.architectury.registry.fuel.FuelRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import java.util.List;
@@ -36,7 +37,9 @@ public final class ThaumcraftNaturals {
     private static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTIONS = DeferredRegister.create(
             Thaumcraft.MODID, Registries.LOOT_FUNCTION_TYPE);
 
-    public static final RegistrySupplier<BlockMagicalLog> GREATWOOD_LOG = log("greatwood_log", MapColor.COLOR_BROWN);
+    public static final RegistrySupplier<BlockMagicalLog> GREATWOOD_LOG = BLOCKS.register("greatwood_log", () -> new BlockMagicalLog(logProperties(MapColor.COLOR_BROWN)));
+    /** The greatwood log item: the original's {@code blockMagicalLog} metadata 0, the only magical log that is fuel. */
+    public static final RegistrySupplier<Item> GREATWOOD_LOG_ITEM = ITEMS.register("greatwood_log", () -> new BlockItem(GREATWOOD_LOG.get(), new Item.Properties()));
     public static final RegistrySupplier<BlockMagicalLog> SILVERWOOD_LOG = log("silverwood_log", MapColor.QUARTZ);
     public static final RegistrySupplier<Block> GREATWOOD_PLANKS = planks("greatwood_planks", MapColor.COLOR_BROWN);
     public static final RegistrySupplier<Block> SILVERWOOD_PLANKS = planks("silverwood_planks", MapColor.QUARTZ);
@@ -54,10 +57,13 @@ public final class ThaumcraftNaturals {
     private ThaumcraftNaturals() {}
 
     private static RegistrySupplier<BlockMagicalLog> log(String id, MapColor color) {
-        var block = BLOCKS.register(id, () -> new BlockMagicalLog(BlockBehaviour.Properties.of()
-                .mapColor(color).strength(2.5F).sound(SoundType.WOOD)));
+        var block = BLOCKS.register(id, () -> new BlockMagicalLog(logProperties(color)));
         ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
         return block;
+    }
+
+    private static BlockBehaviour.Properties logProperties(MapColor color) {
+        return BlockBehaviour.Properties.of().mapColor(color).strength(2.5F).sound(SoundType.WOOD);
     }
 
     private static RegistrySupplier<Block> planks(String id, MapColor color) {
@@ -92,6 +98,8 @@ public final class ThaumcraftNaturals {
         for (var block : all) CreativeTabRegistry.appendStack(ThaumcraftContent.TAB, () -> new ItemStack(block.get()));
         LifecycleEvent.SETUP.register(() -> {
             FireBlock fire = (FireBlock) Blocks.FIRE;
+            // Original EventHandlerWorld.getBurnTime:143-145 - the magical log burns 400 ticks.
+            FuelRegistry.register(ThaumcraftResources.MAGICAL_LOG_BURN_TIME, GREATWOOD_LOG_ITEM.get());
             // FireBlock takes spread/encouragement first, flammability second.
             fire.setFlammable(GREATWOOD_LOG.get(), 5, 5);
             fire.setFlammable(SILVERWOOD_LOG.get(), 5, 5);

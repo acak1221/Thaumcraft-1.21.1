@@ -249,7 +249,7 @@ public final class ItemGolemPlacer extends Item {
                 tooltip.add(line);
             }
             if (data.core() == GolemData.GUARD && !GolemGuardTargets.isDefault(data.guardTargets())) {
-                // The owner's Order switches (hostile monsters only is the unmarked default).
+                // The owner's Order switches: the categories the golem still attacks (a switched-off category is not listed).
                 MutableComponent kinds = Component.empty();
                 String[] names = {"monsters", "animals", "players", "creepers"};
                 boolean first = true;

@@ -244,7 +244,7 @@ public final class GolemGuardTargetsRuntimeChecks {
             test.assertTrue(golem.interact(owner.player, InteractionHand.MAIN_HAND) == InteractionResult.CONSUME && owner.player.getMainHandItem().isEmpty()
                             && golem.getUpgradeAmount(GolemUpgrade.ORDER) == 1, "a real player installs Order into the first free slot and pays the item");
             test.assertTrue(golem.canSwitchGuardTargets() && golem.getGuardTargets() == GolemGuardTargets.DEFAULT,
-                    "the switches now exist, and installing Order does not enable anything by itself");
+                    "the switches now exist, and installing Order does not change the original's default mask");
             clearEntities();
         }
 
@@ -256,16 +256,16 @@ public final class GolemGuardTargetsRuntimeChecks {
             var menu = new ContainerGolem(901, owner.player.getInventory(), ordered);
             owner.player.containerMenu = menu;
             try {
-                test.assertTrue(menu.canSwitchGuardTargets() && menu.guardTargets() == M, "the menu offers four switches, only Monsters on");
-                test.assertTrue(ContainerGolem.GUARD_BUTTON == 51 && menu.clickMenuButton(owner.player, 52) && ordered.getGuardTargets() == (M | A)
-                                && menu.guardTargets() == (M | A), "button 52 is Animals: the golem and the synced menu data both change");
-                test.assertTrue(menu.clickMenuButton(owner.player, 53) && menu.clickMenuButton(owner.player, 54) && ordered.getGuardTargets() == GolemGuardTargets.ALL
-                                && menu.guardTargets() == GolemGuardTargets.ALL, "53 is Players and 54 is Creepers");
-                test.assertTrue(menu.clickMenuButton(owner.player, 51) && ordered.getGuardTargets() == (A | P | C), "51 is Monsters and may be switched off");
+                test.assertTrue(menu.canSwitchGuardTargets() && menu.guardTargets() == 0, "the menu offers four switches, none of them forbidding a category");
+                test.assertTrue(ContainerGolem.GUARD_BUTTON == 51 && menu.clickMenuButton(owner.player, 52) && ordered.getGuardTargets() == A
+                                && menu.guardTargets() == A, "button 52 is Animals: the golem and the synced menu data both forbid it");
+                test.assertTrue(menu.clickMenuButton(owner.player, 53) && menu.clickMenuButton(owner.player, 54) && ordered.getGuardTargets() == (A | P | C)
+                                && menu.guardTargets() == (A | P | C), "53 is Players and 54 is Creepers");
+                test.assertTrue(menu.clickMenuButton(owner.player, 51) && ordered.getGuardTargets() == GolemGuardTargets.ALL, "51 is Monsters and may be switched off too");
                 for (int click = 0; click < 2; click++) test.assertTrue(menu.clickMenuButton(owner.player, 52), "a switch flips back and forth");
-                test.assertTrue(ordered.getGuardTargets() == (A | P | C), "two clicks restore it");
+                test.assertTrue(ordered.getGuardTargets() == GolemGuardTargets.ALL, "two clicks restore it");
                 for (int button : new int[] {50, 55, 56, 57, 60, 61, 99, 100, 105, 0, -1}) {
-                    test.assertTrue(!menu.clickMenuButton(owner.player, button) && ordered.getGuardTargets() == (A | P | C),
+                    test.assertTrue(!menu.clickMenuButton(owner.player, button) && ordered.getGuardTargets() == GolemGuardTargets.ALL,
                             "button " + button + " is not a Guard switch and changes nothing");
                 }
             } finally { menu.removed(owner.player); owner.player.containerMenu = owner.player.inventoryMenu; }
@@ -344,8 +344,8 @@ public final class GolemGuardTargetsRuntimeChecks {
                         "Guard without Order, " + target.name() + ": monsters only");
             }
 
-            // Everything switched on, then the player rules: never creative/spectating, never when the server forbids PvP.
-            withOrder.setGuardTargets(GolemGuardTargets.ALL);
+            // Monsters and players left, then the player rules: never creative/spectating, never when the server forbids PvP.
+            withOrder.setGuardTargets(A | C);
             test.assertTrue(withOrder.isGuardTarget(bystander.player), "a survival non-owner is a target with Players on");
             bystander.player.setGameMode(GameType.CREATIVE);
             test.assertTrue(!withOrder.isGuardTarget(bystander.player), "a creative player cannot be hurt, so is never chased");
@@ -389,7 +389,7 @@ public final class GolemGuardTargetsRuntimeChecks {
             test.assertTrue(golem.getGuardTargets() == (A | C) && golem.configuredData().guardTargets() == (A | C), "the configuration reaches the golem and comes back");
             var tag = save(golem);
             test.assertTrue(tag.contains("GuardTargets", Tag.TAG_BYTE) && tag.getByte("GuardTargets") == (A | C) && !tag.contains("toggles"),
-                    "saved under its own key as a positive byte; the original inverted `toggles` byte is not reused");
+                    "saved under its own key as the original's negative byte; the original's shared `toggles` byte is not reused");
             var reloaded = load(tag);
             test.assertTrue(reloaded.getGuardTargets() == (A | C) && !unsupported(reloaded) && reloaded.configuredData().guardTargets() == (A | C)
                             && reloaded.canSwitchGuardTargets(), "reloading restores the mask");
@@ -401,9 +401,9 @@ public final class GolemGuardTargetsRuntimeChecks {
             var plainReloaded = load(plainTag);
             test.assertTrue(plainReloaded.getGuardTargets() == GolemGuardTargets.DEFAULT && !unsupported(plainReloaded), "and reads back as the default");
             plainReloaded.discard();
-            var none = guard(IRON, List.of(ORDER), 0, base.offset(0, 0, 8));
+            var none = guard(IRON, List.of(ORDER), M, base.offset(0, 0, 8));
             var noneReloaded = load(save(none));
-            test.assertTrue(noneReloaded.getGuardTargets() == 0 && !unsupported(noneReloaded), "even 'attack nothing' (Monsters off) survives");
+            test.assertTrue(noneReloaded.getGuardTargets() == M && !unsupported(noneReloaded), "even a switched-off category (Monsters off) survives");
             noneReloaded.discard();
 
             // Data this port cannot honour is kept and flagged, never flattened into a plain Guard.
@@ -472,10 +472,10 @@ public final class GolemGuardTargetsRuntimeChecks {
         private void armLanes() {
             int z = 40;
             for (BlockPos pos : List.of(base.offset(0, 0, z), base.offset(0, 0, 2 * z), base.offset(0, 0, 3 * z), base.offset(0, 0, 4 * z))) forceChunks(pos, 3);
-            lanes.add(new Lane("DEFAULT", base.offset(0, 0, z), GolemGuardTargets.DEFAULT, Kind.SPIDER));
-            lanes.add(new Lane("ANIMALS", base.offset(0, 0, 2 * z), A, Kind.COW));
-            lanes.add(new Lane("CREEPERS", base.offset(0, 0, 3 * z), C, Kind.CREEPER));
-            lanes.add(new Lane("PLAYERS", base.offset(0, 0, 4 * z), P, Kind.PLAYER));
+            lanes.add(new Lane("MONSTERS", base.offset(0, 0, z), A | P | C, Kind.SPIDER));
+            lanes.add(new Lane("ANIMALS", base.offset(0, 0, 2 * z), M | P | C, Kind.COW));
+            lanes.add(new Lane("CREEPERS", base.offset(0, 0, 3 * z), M | A | P, Kind.CREEPER));
+            lanes.add(new Lane("PLAYERS", base.offset(0, 0, 4 * z), M | A | C, Kind.PLAYER));
             for (Lane lane : lanes) lane.setup();
         }
 
@@ -483,9 +483,10 @@ public final class GolemGuardTargetsRuntimeChecks {
 
         /**
          * One Guard with a spider (east), a cow (west), a creeper (north) and a player (south), all within four blocks. The Guard's
-         * mask makes exactly one of them its target: that one must be hurt (and, if mortal, killed so the Guard looks around again),
-         * and every other one must never lose a point of health at any tick. The default lane keeps a real, non-owner player and
-         * a real creeper and cow at its side the whole time, which is the original's unsafe default this port refuses.
+         * mask switches off the three categories it may not attack, so exactly one of them is its target: that one must be hurt (and,
+         * if mortal, killed so the Guard looks around again), and every other one must never lose a point of health at any tick. Every
+         * lane keeps a real, non-owner player and a real creeper and cow at its side the whole time; the original's default forbids
+         * nothing, so a lane only ever switches a category off explicitly.
          */
         private final class Lane {
             final String name;

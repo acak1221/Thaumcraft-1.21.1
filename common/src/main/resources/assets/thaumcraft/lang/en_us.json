@@ -889,6 +889,7 @@
   "tc.pressureplate.except_owner": "It will now trigger on everything except you.",
   "tc.pressureplate.owner_only": "It will now trigger on just you.",
   "tc.golem.notowner": "You are not my Master!",
+  "tc.warded.enderpearl": "The magic of a nearby warded object destroys the ender pearl.",
   "tc.researcherror": "You lack the required knowledge to understand this.",
   "tc.researchmissing": "Missing required research!",
   "tc.research.purchase": "Click to purchase this research",

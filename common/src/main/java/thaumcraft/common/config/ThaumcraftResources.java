@@ -23,6 +23,12 @@ import thaumcraft.common.tiles.TileNitor;
 public final class ThaumcraftResources {
     // TC4 EventHandlerWorld.getBurnTime:139-146, not the later-version value.
     public static final int ALUMENTUM_BURN_TIME = 6400;
+    /**
+     * TC4 EventHandlerWorld.getBurnTime:143-145 - the magical log (the greatwood log, the original's
+     * {@code ConfigBlocks.blockMagicalLog} metadata 0) burns 400 ticks. The silverwood log is ordinary wood and keeps the
+     * vanilla burn time.
+     */
+    public static final int MAGICAL_LOG_BURN_TIME = 400;
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK_ENTITY_TYPE);
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Thaumcraft.MODID, Registries.ENTITY_TYPE);

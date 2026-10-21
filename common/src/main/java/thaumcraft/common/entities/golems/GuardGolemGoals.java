@@ -6,7 +6,6 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
@@ -248,7 +247,9 @@ final class GuardGolemGoals {
             return chosen != null;
         }
         @Override public boolean canContinueToUse() {
-            double follow = golem.getAttributeValue(Attributes.FOLLOW_RANGE);
+            // Original AITarget.func_75253_b:31-42 and AINearestAttackableTarget:41 - the keep distance is the GOLEM's
+            // own range, not the vanilla FOLLOW_RANGE attribute.
+            double follow = golem.getRange();
             return golem.getTarget() == chosen && golem.isGuardTarget(chosen)
                     && golem.distanceToSqr(chosen) <= follow * follow && unseen <= 60;
         }

@@ -78,6 +78,7 @@ import thaumcraft.common.container.ContainerGolem;
 import thaumcraft.common.entities.projectile.EntityDart;
 import thaumcraft.common.items.golems.GolemDartRules;
 import thaumcraft.common.items.golems.GolemData;
+import thaumcraft.common.items.golems.GolemDamageRules;
 import thaumcraft.common.items.golems.GolemDecorations;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemGuardTargets;
@@ -85,6 +86,7 @@ import thaumcraft.common.blocks.BlockGolemFetter;
 import thaumcraft.common.items.golems.GolemItemMatch;
 import thaumcraft.common.items.golems.GolemLiquidQueue;
 import thaumcraft.common.items.golems.GolemMarker;
+import thaumcraft.common.items.golems.GolemOwnership;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUpgrades;
 import thaumcraft.common.items.golems.GolemUseOptions;
@@ -178,7 +180,7 @@ public class EntityGolemBase extends AbstractGolem {
     // One entry per material slot, -1 empty. Server-owned; the client reads the packed copy.
     private int[] upgradeSlots = new int[0];
     private boolean reflectingThorns;
-    // Order Guard target switches (GolemGuardTargets); server-only, the menu mirrors them. Default: hostile monsters only.
+    // Order Guard target switches (GolemGuardTargets); server-only, the menu mirrors them. A set bit forbids the category.
     private int guardTargets = GolemGuardTargets.DEFAULT;
     private boolean advanced;
     // Standing on an active Golem Fetter (original `inactive`): recomputed from the world on both sides every tick, never saved or synced.
@@ -471,7 +473,7 @@ public class EntityGolemBase extends AbstractGolem {
     public int getSlotCount() { return GolemData.slotCount(getGolemCore(), getUpgradeAmount(GolemUpgrade.FIRE)); }
     /** Guard target switches exist on a Guard core that carries an Order upgrade (original GuiGolem:167). */
     public boolean canSwitchGuardTargets() { return GolemGuardTargets.configurable(getGolemCore(), getUpgradeAmount(GolemUpgrade.ORDER)); }
-    /** The server's authoritative mask; without Order it is always the default (hostile monsters only). */
+    /** The server's authoritative mask; without Order it is always the default (no category switched off). */
     public int getGuardTargets() { return guardTargets; }
     /** Entropy's switches exist on Fill, Empty, Gather, Use and Sorting golems that carry an Entropy upgrade (original GuiGolem:214). */
     public boolean canSwitchItemMatch() { return GolemItemMatch.configurable(getGolemCore(), getUpgradeAmount(GolemUpgrade.ENTROPY)); }
@@ -737,7 +739,9 @@ public class EntityGolemBase extends AbstractGolem {
         return !isRemoved() && level().hasChunkAt(blockPosition()) && level().getEntity(getId()) == this;
     }
     public boolean canConfigure(Player player) {
-        return canEditLinks(player) && distanceToSqr(player) <= 64;
+        // Original EventHandlerEntity.playerInteract:348-356 - only the owner configures the golem.
+        return canEditLinks(player) && GolemOwnership.allows(getOwnerName(), player.getGameProfile().getName())
+                && distanceToSqr(player) <= 64;
     }
     /** A previously selected loaded worker can receive bell links remotely;
      * invalid/retiring state is still refused, without imposing a second entity ray. */
@@ -1132,7 +1136,7 @@ public class EntityGolemBase extends AbstractGolem {
     /**
      * Policy shared by nearest, self-retaliation, chase and every strike (original isValidTarget, E:1150-1180). Hostile
      * monsters other than creepers are always eligible; creepers, animals and players need an Order upgrade AND their
-     * switch ({@link GolemGuardTargets}), and every switch but Monsters starts off.
+     * switch ({@link GolemGuardTargets}). Every switch starts clear, so a fresh Order Guard attacks all four categories.
      */
     public boolean isGuardTarget(LivingEntity target) {
         if (core != GolemData.GUARD || !(level() instanceof ServerLevel server) || !server.getServer().isSameThread()
@@ -2260,6 +2264,12 @@ public class EntityGolemBase extends AbstractGolem {
 
     @Override protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
+        if (GolemOwnership.denies(getOwnerName(), player.getGameProfile().getName())) {
+            // Original EventHandlerEntity.playerInteract:348-356: EVERY interaction with somebody else's golem is
+            // cancelled, and the stranger is told that the golem has another master.
+            if (!level().isClientSide) player.displayClientMessage(Component.translatable(GolemOwnership.NOT_OWNER_KEY), false);
+            return InteractionResult.FAIL;
+        }
         if (player.isShiftKeyDown() || held.getItem() instanceof ItemWandCasting) return InteractionResult.PASS;
         if (busy || retiring || !EnumGolemType.isSupported(getGolemMaterial()) || unsupported || !canInteract(player, held)) return InteractionResult.PASS;
         if (held.is(ThaumcraftGolems.GOLEM_BELL.get())) return ItemGolemBell.select(held, player, this);
@@ -2379,6 +2389,14 @@ public class EntityGolemBase extends AbstractGolem {
             if (!level().isClientSide) recall(player, player.isShiftKeyDown());
             return false; // Bell failure is NOT permission to apply ordinary damage.
         }
+        // Original EntityGolemBase:1131-1138. The golem and the traveling trunk share one immunity: the original's
+        // DamageSource.field_76367_g, the "inWall" source of 1.7.10 (the same source the 1.12.2 line of this mod names
+        // DamageSource.IN_WALL), so the golem never suffocates in the wall it is teleported into.
+        if (source.is(DamageTypes.IN_WALL)) return false;
+        // Original EntityGolemBase:1136-1138: a thaumium golem takes half of the magic damage. The original's
+        // DamageSource.field_76376_m is the "indirectMagic" source, the one 1.21.1 keeps as DamageTypes.INDIRECT_MAGIC.
+        amount = GolemDamageRules.amount(EnumGolemType.getType(getGolemMaterial()) == EnumGolemType.THAUMIUM,
+                source.is(DamageTypes.INDIRECT_MAGIC), amount);
         reflectThorns(source);
         return super.hurt(source, amount);
     }

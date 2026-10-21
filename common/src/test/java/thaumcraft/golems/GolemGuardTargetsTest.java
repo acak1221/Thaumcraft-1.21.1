@@ -45,15 +45,15 @@ class GolemGuardTargetsTest {
 
     // ---- the pure rules ---------------------------------------------------------------------------------------------
 
-    @Test void theDefaultAllowsHostileMonstersOnlyWhileTheOriginalDefaultAllowedEverything() {
-        assertEquals(M, GolemGuardTargets.DEFAULT);
-        assertTrue(GolemGuardTargets.isDefault(M) && !GolemGuardTargets.isDefault(GolemGuardTargets.ALL) && !GolemGuardTargets.isDefault(0));
-        // A fresh original Guard has an all-clear toggles byte, i.e. every category allowed: the unsafe default this port does not copy.
-        assertEquals(GolemGuardTargets.ALL, GolemGuardTargets.fromOriginalToggles((byte) 0));
-        // The port's default, written in the original's inverted bits, forbids animals (2), players (3) and creepers (4).
-        assertEquals((byte) 0b11100, GolemGuardTargets.toOriginalToggles(GolemGuardTargets.DEFAULT));
-        assertEquals((byte) 0, GolemGuardTargets.toOriginalToggles(GolemGuardTargets.ALL));
-        assertEquals((byte) 0b11110, GolemGuardTargets.toOriginalToggles(0));
+    @Test void theDefaultForbidsNothingLikeTheOriginalsFreshGuard() {
+        assertEquals(0, GolemGuardTargets.DEFAULT);
+        assertTrue(GolemGuardTargets.isDefault(0) && !GolemGuardTargets.isDefault(M) && !GolemGuardTargets.isDefault(GolemGuardTargets.ALL));
+        // A fresh original Guard has an all-clear toggles byte, i.e. every category is allowed.
+        assertEquals(0, GolemGuardTargets.fromOriginalToggles((byte) 0));
+        // The port's mask holds the original's forbidden bits: monsters are toggles[1], animals toggles[2] and so on.
+        assertEquals((byte) 0b00010, GolemGuardTargets.toOriginalToggles(M));
+        assertEquals((byte) 0, GolemGuardTargets.toOriginalToggles(GolemGuardTargets.DEFAULT));
+        assertEquals((byte) 0b11110, GolemGuardTargets.toOriginalToggles(GolemGuardTargets.ALL));
     }
 
     @Test void theOriginalTogglesByteMapsBothWaysAndIgnoresTheBitsOfOtherCores() {
@@ -61,8 +61,8 @@ class GolemGuardTargetsTest {
             assertEquals(mask, GolemGuardTargets.fromOriginalToggles(GolemGuardTargets.toOriginalToggles(mask)), "mask " + mask);
         }
         // Bit 0 (Fill precise amount) and bits 5..7 (Entropy fuzzy matching, Use modes) are not Guard state.
-        assertEquals(GolemGuardTargets.ALL, GolemGuardTargets.fromOriginalToggles((byte) 0b11100001));
-        assertEquals(0, GolemGuardTargets.fromOriginalToggles((byte) 0b00011110));
+        assertEquals(0, GolemGuardTargets.fromOriginalToggles((byte) 0b11100001));
+        assertEquals(GolemGuardTargets.ALL, GolemGuardTargets.fromOriginalToggles((byte) 0b00011110));
     }
 
     @Test void validMasksAreTheFourLowBitsAndToggleFlipsExactlyOneCategory() {
@@ -73,11 +73,14 @@ class GolemGuardTargetsTest {
                 int flipped = GolemGuardTargets.toggle(mask, category);
                 assertEquals(mask ^ category, flipped);
                 assertEquals(mask, GolemGuardTargets.toggle(flipped, category));
-                assertEquals((mask & category) != 0, GolemGuardTargets.allows(mask, category));
+                // A set bit forbids the category, a clear bit allows it (the original's canAttackX()).
+                assertEquals((mask & category) == 0, GolemGuardTargets.allows(mask, category));
+                assertEquals((mask & category) != 0, GolemGuardTargets.forbids(mask, category));
             }
             for (int notACategory : new int[] {0, 3, 5, 6, 7, 15, 16, 32, -1}) {
                 assertEquals(mask, GolemGuardTargets.toggle(mask, notACategory), "toggle(" + mask + ", " + notACategory + ")");
                 assertFalse(GolemGuardTargets.allows(mask, notACategory), "allows(" + mask + ", " + notACategory + ")");
+                assertFalse(GolemGuardTargets.forbids(mask, notACategory), "forbids(" + mask + ", " + notACategory + ")");
             }
         }
     }
@@ -107,7 +110,7 @@ class GolemGuardTargetsTest {
         assertTrue(GolemGuardTargets.acceptable(0, GolemData.GUARD, 1));
         assertTrue(GolemGuardTargets.acceptable(GolemGuardTargets.ALL, GolemData.GUARD, 1));
         assertFalse(GolemGuardTargets.acceptable(GolemGuardTargets.ALL, GolemData.GUARD, 0));
-        assertFalse(GolemGuardTargets.acceptable(0, GolemData.GUARD, 0), "even switching Monsters off needs Order");
+        assertFalse(GolemGuardTargets.acceptable(M, GolemData.GUARD, 0), "even switching Monsters off needs Order");
         assertFalse(GolemGuardTargets.acceptable(16, GolemData.GUARD, 1));
         assertFalse(GolemGuardTargets.acceptable(-1, GolemData.GUARD, 1));
     }
@@ -148,7 +151,7 @@ class GolemGuardTargetsTest {
     @Test void aMaskNeedsAGuardCoreAndAnOrderUpgrade() {
         assertThrows(IllegalArgumentException.class, () -> guard(List.of(), A), "no Order");
         assertThrows(IllegalArgumentException.class, () -> guard(List.of(FIRE), A), "Fire is not Order");
-        assertThrows(IllegalArgumentException.class, () -> guard(List.of(), 0), "switching Monsters off also needs Order");
+        assertThrows(IllegalArgumentException.class, () -> guard(List.of(), M), "switching Monsters off also needs Order");
         for (int core : new int[] {GolemData.HARVEST, GolemData.BUTCHER, GolemData.SORTING, GolemData.FISHING, GolemData.LIQUID, GolemData.ALCHEMY, GolemData.LUMBER}) {
             assertThrows(IllegalArgumentException.class, () -> data(core, List.of(ORDER), A), "core " + core + " has no target switches");
             assertDoesNotThrow(() -> data(core, List.of(ORDER), GolemGuardTargets.DEFAULT));

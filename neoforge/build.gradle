@@ -1,5 +1,8 @@
 plugins { id 'com.github.johnrengelman.shadow' }
 architectury { platformSetupLoomIde(); neoForge() }
+// Diagnostic selection only: -PgameTestFilter=<scenario>[,<scenario>...] runs the
+// named scenarios alone. The default run still requires every authored case.
+def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
 configurations {
  common { canBeResolved = true; canBeConsumed = false }
  compileClasspath.extendsFrom common
@@ -46,7 +49,11 @@ loom.runs {
   vmArg '-Dneoforge.enableGameTest=true'
   vmArg '-Dneoforge.gameTestServer=true'
   vmArg '-Dneoforge.enabledGameTestNamespaces=thaumcraft'
-  vmArg "-Dthaumcraft.gametest.report-file=${layout.buildDirectory.file('gametest-results.xml').get().asFile.absolutePath}"
+  vmArg "-Dthaumcraft.gametest.report-file=${layout.buildDirectory.file(gameTestFilter.isBlank() ? 'gametest-results.xml' : 'gametest-focused-results.xml').get().asFile.absolutePath}"
+  // Focused diagnostics, the same convention as the Fabric harness:
+  // -PgameTestFilter=<scenario>[,<scenario>...] runs only the named scenarios.
+  // The default run still requires every authored case.
+  if (!gameTestFilter.isBlank()) vmArg "-Dthaumcraft.gameTestFilter=${gameTestFilter}"
   runDir 'run-gametest'
  }
 }

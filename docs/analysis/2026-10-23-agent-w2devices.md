@@ -203,13 +203,28 @@ The original draws `textures/models/thaumatorium.obj` with `textures/models/thau
 above the machine (`:74-100`). The native tree draws a plain orientable block model
 (`common/src/main/resources/assets/thaumcraft/models/block/thaumatorium.json:1`) and its OBJ
 loader `common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:23-61`
-is never referenced. The OBJ is one block wide and two blocks tall (`z` from 0 to 2), so the
-native machine (a lower and an upper block, `common/src/main/java/thaumcraft/common/blocks/BlockThaumatorium.java`)
-could take it, but the two block models would have to be hidden and the leader would have to
-inspect the frames. The cycling preview cannot be reproduced at all: the original shows the
-output of one of the *possible* recipes of the machine (`tile.recipeHash`) and the native
-machine is programmed with a job list (`TileThaumatorium.java:322-324`) that holds no such
-set.
+is never referenced. The OBJ is one block wide and two blocks tall (`x` and `y` from -0.5 to
+0.5, `z` from 0 to 2), so the native machine (a lower and an upper block,
+`common/src/main/java/thaumcraft/common/blocks/BlockThaumatorium.java`) could take it. The
+exact pose of the original is:
+
+```java
+pose.translate(.5F, 0.0F, .5F);                    // the original glTranslatef(x+0.5, y, z+0.5)
+pose.mulPose(Axis.XP.rotationDegrees(-90.0F));     // the original glRotatef(90, -1, 0, 0)
+// the original glRotatef of the facing, in the same frame:
+//   NORTH 270, SOUTH 90, EAST 180, WEST/DOWN/UP 0 degrees around the Z axis
+pose.mulPose(Axis.ZP.rotationDegrees(facingAngle));
+```
+
+and the two block models of the machine would have to become `RenderShape.INVISIBLE`, because
+the OBJ already covers both blocks. **This was not done in this wave on purpose:** the pose
+above was derived by hand, the client cannot be run here, and a machine that is drawn with the
+wrong pose is worse than the box that is drawn today. The leader has to check the frames
+before the change is accepted.
+
+The cycling preview cannot be reproduced at all: the original shows the output of one of the
+*possible* recipes of the machine (`tile.recipeHash`) and the native machine is programmed
+with a job list (`TileThaumatorium.java:322-324`) that holds no such set.
 
 ### 4.5 `EntityItemGrate` — the 1.7.10 vanilla push out is not readable here
 

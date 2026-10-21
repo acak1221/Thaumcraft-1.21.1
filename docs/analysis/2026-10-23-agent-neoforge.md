@@ -75,6 +75,26 @@ BUILD SUCCESSFUL in 34s
 `:neoforge:test` (the new loader parity test, section 4) is part of `:neoforge:build` and is
 green: **9 tests, 0 failures**.
 
+### 1.1 The shared test suite (`:common:test`)
+
+`:common:test` runs **2020 tests, 12 failed** in this worktree. None of the twelve is in the
+NeoForge domain, and none of them is caused by a change of this wave — the wave-1 and wave-2
+shared changes are the cause. They are listed here because the leader runs the shared suite and
+needs to know that they are already red:
+
+| Test | Failure |
+|---|---|
+| `ApiSurfaceTest.initializationError` | `Some intrusive holders were not registered` |
+| `AspectBonusParityTest` (three) | `Registry minecraft:enchantment not found` and `Trying to access unbound value 'minecraft:armor_material / minecraft:iron'` — the enchantment keys that `thaumcraft.api.ThaumcraftApi` gained in wave 1 |
+| `BoreInventoryPlanTest` (five) | `Cannot freeze complete stack components` |
+| `ChampionRulesTest` | `Trying to access unbound value 'minecraft:attribute / minecraft:generic.max_health'` |
+| `AdvancedDeviceParityTest` | `Registry is already frozen` |
+| `InventoryUtilsParityTest` | `theDamageWildcardOfTheOriginalIsKept` — expected false, was true |
+
+The shared changes of this wave are the `sharedBreak` entry of the two loader bridges and the new
+`common/src/main/java/thaumcraft/common/lib/utils/ChestLootPoolRules.java`; neither is named in
+the twelve.
+
 ---
 
 ## 2. The GameTest suite

@@ -39363,7 +39363,8 @@
           "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:358-379 the ender pearl that a warded object destroys",
           "native common/src/main/java/thaumcraft/common/items/golems/GolemOwnership.java the owner rule",
           "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2297 the refused interaction of a golem",
-          "native common/src/main/java/thaumcraft/common/lib/ward/WardedPearl.java the warded pearl rule"
+          "native common/src/main/java/thaumcraft/common/lib/ward/WardedPearl.java the warded pearl rule",
+          "native common/src/main/java/thaumcraft/common/lib/enchantment/EquipmentEnchantments.java:18-27 the enchantment level answers zero for a missing stack, a detached world or an unknown registry entry instead of throwing in the living tick"
         ],
         "notes": [
           "The 1.7 Forge event handler became a mixin and platform-event architecture; most of its behaviours are present (the research save and load, the repair enchantment, the warp and death gaze checks, the champion spawn roll and drops, the zombie brain, the villager resource, the crystal essence on dissolve, the taint conversion on death, the aspect orbs, the primal arrow, the unnatural hunger, the bath salts, the special mining drops, the pure bucket, the note block and the travel gear).",
@@ -42149,7 +42150,8 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/utils/BlockUtils.java the helpers of the original",
-          "native common/src/main/java/thaumcraft/common/lib/utils/BlockUtils.java the native helpers"
+          "native common/src/main/java/thaumcraft/common/lib/utils/BlockUtils.java the native helpers",
+          "native common/src/main/java/thaumcraft/common/lib/utils/BlockUtils.java:121-133 the following drop spawner receives the server level through an instanceof check instead of an unchecked cast"
         ],
         "notes": [
           "The helper set is reproduced (every original method name is still present) and the new helpers (canHarvest, drops, markForRenderUpdate, matches) are native additions.",
@@ -42241,7 +42243,8 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/utils/CropUtils.java the crop helpers of the original",
-          "native common/src/main/java/thaumcraft/common/lib/utils/CropUtils.java the native helpers"
+          "native common/src/main/java/thaumcraft/common/lib/utils/CropUtils.java the native helpers",
+          "native common/src/main/java/thaumcraft/common/lib/utils/CropUtils.java:41-49 the crop list key no longer dereferences a missing registry name, so every crop predicate of the growth lamp, the harvesting focus and the golem replanter stays answerable"
         ],
         "notes": [
           "Every original method name is present in the native class; the 1.7 Block crop check became the 1.21.1 BlockState check."
@@ -42391,7 +42394,8 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/utils/InventoryUtils.java the inventory helpers of the original",
-          "native common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java the native helpers"
+          "native common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java the native helpers",
+          "native common/src/main/java/thaumcraft/common/lib/utils/InventoryUtils.java:520-534 the unbreaking level reads the enchantment registry through lookup instead of lookupOrThrow, so an absent registry or entry answers zero instead of throwing in the durability path"
         ],
         "notes": [
           "Every original method name is present in the native class and the native adds the ore tag helpers (matchesOre, oresOf, registerOreTag) that replace the 1.7 ore dictionary.",
@@ -42550,7 +42554,8 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/utils/Utils.java the helpers of the original",
-          "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java the native helpers"
+          "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java the native helpers",
+          "native common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java:67-95 the special mining table now answers no result for a missing stack and keeps the original drop when the cluster item is not in the registry; the immutable Map.of table rejects a null key with a NullPointerException and the block break path of every Core pickaxe mining hit it"
         ],
         "notes": [
           "The native class keeps every original helper except the three that were moved into their own classes, and it says so in its own header (SpecialMining, LootTables, BiomeColumns).",

@@ -227,12 +227,15 @@ public final class TileParityRules {
      * locks the node with one, the device of the tenth metadata is the advanced stabiliser
      * and locks the node with two. A node without a stabiliser below it is not locked.
      *
+     * <p>The rule itself lives in {@link thaumcraft.common.lib.world.NodeStabilizerRules}, the
+     * single home of the node lock and everything it changes; this method only forwards to it
+     * so that both call sites answer identically.</p>
+     *
      * @param basic   the block below the node is the basic stabiliser
      * @param advanced the block below the node is the advanced stabiliser
      */
     public static int nodeStabilizerLock(boolean basic, boolean advanced) {
-        if (advanced) return NODE_STABILIZER_LOCK_ADVANCED;
-        return basic ? NODE_STABILIZER_LOCK_BASIC : NODE_STABILIZER_LOCK_NONE;
+        return thaumcraft.common.lib.world.NodeStabilizerRules.lock(basic, advanced);
     }
 
     /**
@@ -240,9 +243,7 @@ public final class TileParityRules {
      * that is locked with two regenerates twenty times as fast.
      */
     public static int nodeRegenerationInterval(int interval, int lock) {
-        if (lock == NODE_STABILIZER_LOCK_BASIC) return interval * NODE_REGENERATION_FACTOR_BASIC;
-        if (lock == NODE_STABILIZER_LOCK_ADVANCED) return interval * NODE_REGENERATION_FACTOR_ADVANCED;
-        return interval;
+        return thaumcraft.common.lib.world.NodeStabilizerRules.regenerationInterval(interval, lock);
     }
 
     /**
@@ -250,7 +251,7 @@ public final class TileParityRules {
      * by the lock, so the advanced stabiliser repairs its node twice as often.
      */
     public static int nodeFadingRepairBound(int lock) {
-        return lock <= 0 ? 0 : NODE_FADING_REPAIR_BOUND / lock;
+        return thaumcraft.common.lib.world.NodeStabilizerRules.fadingRepairBound(lock);
     }
 
     // ---------------------------------------------------------------------------------------------

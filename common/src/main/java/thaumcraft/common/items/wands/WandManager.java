@@ -23,11 +23,19 @@ import thaumcraft.common.entities.EntitySpecialItem;
 public final class WandManager {
     private WandManager() {}
 
+    /**
+     * Original {@code WandManager:459-478} - the Thaumonomicon of the original is made from a
+     * bookshelf by a wand WITHOUT an installed focus: {@code if (wand.getFocus(itemstack) != null)
+     * return false;}. A wand with a focus leaves the bookshelf untouched.
+     */
+    public static boolean mayCreateThaumonomicon(boolean hasFocus) { return !hasFocus; }
+
     public static boolean canCreateThaumonomicon(UseOnContext context) {
         Player player = context.getPlayer();
         BlockPos pos = context.getClickedPos();
         return player != null && !player.isSpectator()
                 && context.getItemInHand().is(ThaumcraftContent.WAND.get())
+                && mayCreateThaumonomicon(!thaumcraft.common.items.wands.foci.FocusData.get(context.getItemInHand()).isEmpty())
                 && context.getLevel().getBlockState(pos).is(Blocks.BOOKSHELF)
                 && context.getLevel().mayInteract(player, pos)
                 && player.mayUseItemAt(pos, context.getClickedFace(), context.getItemInHand());

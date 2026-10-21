@@ -3,6 +3,7 @@ package thaumcraft.common.items.wands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -20,6 +21,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import thaumcraft.common.config.ThaumcraftContent;
@@ -35,6 +37,7 @@ import java.math.BigDecimal;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.wands.FocusUpgradeType;
 import thaumcraft.api.wands.IWandable;
+import thaumcraft.api.wands.WandTriggerRegistry;
 import thaumcraft.common.items.wands.foci.FocusData;
 import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 import thaumcraft.common.items.wands.foci.WandFocusActions;
@@ -165,11 +168,40 @@ public final class ItemWandCasting extends Item {
         return InteractionResult.PASS;
     }
 
+    /**
+     * Original {@code ItemWandCasting:389} - the public trigger registry of the original answers
+     * the wand click, right after the {@link IWandable} contract and before the warded stone
+     * branch; the first successful trigger wins.
+     *
+     * <p>The native registry is keyed by a block or by one exact block state, because 1.21.1 has
+     * no block metadata, so a click answers to both forms.</p>
+     */
+    public static boolean hasBlockTrigger(BlockState state) {
+        if (state == null) return false;
+        return WandTriggerRegistry.hasTrigger(state) || WandTriggerRegistry.hasTrigger(state.getBlock());
+    }
+
+    private static InteractionResult dispatchBlockTrigger(UseOnContext context) {
+        Level level = context.getLevel();
+        Player player = context.getPlayer();
+        if (player == null) return InteractionResult.PASS;
+        BlockPos pos = context.getClickedPos();
+        if (!level.hasChunkAt(pos)) return InteractionResult.PASS;
+        BlockState state = level.getBlockState(pos);
+        if (!hasBlockTrigger(state)) return InteractionResult.PASS;
+        boolean handled = WandTriggerRegistry.performTrigger(level, context.getItemInHand(), player,
+                pos.getX(), pos.getY(), pos.getZ(), context.getClickedFace().get3DDataValue(), state);
+        return handled ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+    }
+
     @Override public InteractionResult useOn(UseOnContext context) {
         // Original ItemWandCasting:onItemUseFirst - the IWandable contract of the
         // clicked block and of its block entity answers the wand click first.
         InteractionResult wandable = dispatchWandable(context);
         if (wandable != InteractionResult.PASS) return wandable;
+        // Original ItemWandCasting:389-390 - the registered block triggers come next.
+        InteractionResult trigger = dispatchBlockTrigger(context);
+        if (trigger != InteractionResult.PASS) return trigger;
         InteractionResult charger = thaumcraft.common.blocks.BlockMagicWorkbenchCharger.tryWandInteraction(context);
         if (charger != InteractionResult.PASS) return charger;
         InteractionResult thaumatorium = thaumcraft.common.lib.ThaumatoriumFormation.tryForm(context);
@@ -283,18 +315,45 @@ public final class ItemWandCasting extends Item {
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
         WandData state = data(stack);
         int capacity = getMaxVis(stack);
-        tooltip.add(Component.translatable("item.capacity.text").append(" " + capacity / 100));
-        tooltip.add(Component.translatable("tc.port.wand.base_cost", new BigDecimal(Float.toString(WandMaterials.capModifier(state.cap())))
-                .movePointRight(2).stripTrailingZeros().toPlainString()));
-        for (String tag : WandData.PRIMALS) if (state.vis().containsKey(tag)) {
-            tooltip.add(Component.literal(Aspect.getAspect(tag).getName() + ": "
-                    + BigDecimal.valueOf(state.amount(tag), 2).stripTrailingZeros().toPlainString() + "/" + capacity / 100));
-        }
+        // Original ItemWandCasting:132-183 - the consumption modifier of every stored aspect and
+        // their average. The 1.21.1 tooltip has no player, so the equipment discount of the
+        // original (ItemWandCasting:244-245) cannot be shown; the cap, the focus and the sceptre
+        // discounts are the ones of the original. The cap modifier is the ASPECT dependent one
+        // (ItemWandCasting:236-241), so the copper cap really costs one for order and entropy.
+        boolean sceptre = isSceptre(stack);
         ItemStack focus = FocusData.get(stack);
+        int frugal = FocusUpgradeData.read(focus).level(FocusUpgradeType.frugal);
+        List<String> stored = new java.util.ArrayList<>();
+        int total = 0;
+        for (String tag : WandData.PRIMALS) {
+            if (!state.vis().containsKey(tag)) continue;
+            stored.add(tag);
+            total += (int) (WandVisDiscount.focusModifier(WandMaterials.cap(state.cap()).modifierFor(tag), 0, frugal, sceptre) * 100F);
+        }
+        MutableComponent capacityLine = Component.translatable("item.capacity.text")
+                .withStyle(ChatFormatting.GOLD).append(" " + capacity / 100);
+        if (!stored.isEmpty()) {
+            // Original ItemWandCasting:168-172 - the average of the per aspect consumption.
+            int average = total / stored.size();
+            capacityLine = capacityLine.append(" (" + average + "% ").append(Component.translatable("tc.vis.costavg")).append(")");
+        }
+        tooltip.add(capacityLine);
+        for (String tag : stored) {
+            float modifier = WandVisDiscount.focusModifier(WandMaterials.cap(state.cap()).modifierFor(tag), 0, frugal, sceptre);
+            tooltip.add(Component.literal(Aspect.getAspect(tag).getName() + ": "
+                    + BigDecimal.valueOf(state.amount(tag), 2).stripTrailingZeros().toPlainString() + "/" + capacity / 100
+                    + " (").append(Component.literal(percent(modifier * 100F) + "% "))
+                    .append(Component.translatable("tc.vis.cost")).append(")"));
+        }
         if (!focus.isEmpty()) {
             tooltip.add(focus.getHoverName().copy().withStyle(ChatFormatting.BOLD, ChatFormatting.ITALIC, ChatFormatting.GREEN));
             focusUpgradeTooltip.accept(focus, tooltip);
         }
+    }
+    /** The original formats the percentages with a DecimalFormat of at most two decimals. */
+    private static String percent(float value) {
+        return new BigDecimal(Float.toString(value)).setScale(2, java.math.RoundingMode.HALF_EVEN)
+                .stripTrailingZeros().toPlainString();
     }
     @Override public Component getName(ItemStack stack) {
         WandData state = data(stack);

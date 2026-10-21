@@ -34,6 +34,42 @@ public class ItemFocusBasic extends Item {
     public int getActivationCooldown(ItemStack focusstack) { return 0; }
     public WandFocusAnimation getAnimation(ItemStack focusstack) { return WandFocusAnimation.WAVE; }
 
+    /**
+     * The original ornament of the focus.
+     *
+     * <p>Original {@code thaumcraft/api/wands/ItemFocusBasic.java}: {@code getOrnament(ItemStack)} returns
+     * the icon of the ornament and answers {@code null} for a focus without one.</p>
+     *
+     * <p>Forced 1.21.1 change: the removed {@code IIcon} became a {@link net.minecraft.resources.ResourceLocation}.</p>
+     */
+    public net.minecraft.resources.ResourceLocation getOrnament(ItemStack focusstack) { return null; }
+
+    /**
+     * The original depth layer of the focus.
+     *
+     * <p>Original {@code thaumcraft/api/wands/ItemFocusBasic.java}: {@code getFocusDepthLayerIcon(ItemStack)}
+     * returns the icon of the depth layer and answers {@code null} for a focus without one.</p>
+     *
+     * <p>Forced 1.21.1 change: the removed {@code IIcon} became a {@link net.minecraft.resources.ResourceLocation}.</p>
+     */
+    public net.minecraft.resources.ResourceLocation getFocusDepthLayerIcon(ItemStack focusstack) { return null; }
+
+    /**
+     * The original size of the architect area of the focus.
+     *
+     * <p>Original {@code thaumcraft/api/wands/ItemFocusBasic.java}: {@code getMaxAreaSize(ItemStack)} answers
+     * one for a focus without an architect upgrade.</p>
+     */
+    public int getMaxAreaSize(ItemStack focusstack) { return 1; }
+
+    /**
+     * The original hook of a focus that breaks a block.
+     *
+     * <p>Original {@code thaumcraft/api/wands/ItemFocusBasic.java}: {@code onFocusBlockStartBreak} answers
+     * false for a focus that does not handle the break itself.</p>
+     */
+    public boolean onFocusBlockStartBreak(ItemStack focusstack, int x, int y, int z, Player player) { return false; }
+
     public ItemStack onFocusRightClick(ItemStack wandstack, Level level, Player player, InteractionHand hand) { return null; }
     public void onUsingFocusTick(ItemStack wandstack, Player player, int count) {}
     public void onPlayerStoppedUsingFocus(ItemStack wandstack, Level level, Player player, int count) {}

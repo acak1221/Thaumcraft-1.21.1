@@ -159,4 +159,27 @@ class PublicApiContractTest {
         assertSame(Aspect.AIR, Aspect.getAspect("aer"));
         assertNull(Aspect.getAspect("not_an_aspect"));
     }
+
+    /**
+     * Oracle {@code thaumcraft/api/BlockCoordinates.java}: the published value type of the original, with
+     * its comparison, its hash and the NBT keys {@code b_x}, {@code b_y} and {@code b_z}.
+     */
+    @Test void thePublishedBlockCoordinateKeepsTheOriginalSemantics() {
+        BlockCoordinates at = new BlockCoordinates(3, 4, 5);
+        assertEquals(3, at.x);
+        assertEquals(4, at.y);
+        assertEquals(5, at.z);
+        assertEquals(at, new BlockCoordinates(3, 4, 5));
+        assertEquals(at.hashCode(), new BlockCoordinates(3, 4, 5).hashCode());
+        assertEquals(0, at.compareWorldCoordinate(new BlockCoordinates(3, 4, 5)));
+        assertTrue(at.compareWorldCoordinate(new BlockCoordinates(9, 4, 5)) < 0, "the x coordinate is the last one");
+        assertTrue(at.compareWorldCoordinate(new BlockCoordinates(3, 9, 5)) < 0, "the y coordinate is the first one");
+        assertEquals(50.0F, at.getDistanceSquared(0, 0, 0), 0.0001F);
+        assertEquals(50.0F, at.getDistanceSquaredToWorldCoordinates(new BlockCoordinates(0, 0, 0)), 0.0001F);
+        CompoundTag tag = new CompoundTag();
+        at.writeNBT(tag);
+        BlockCoordinates read = new BlockCoordinates();
+        read.readNBT(tag);
+        assertEquals(at, read);
+    }
 }

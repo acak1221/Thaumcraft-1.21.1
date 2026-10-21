@@ -28,6 +28,7 @@ class ApiSurfaceTest {
             "thaumcraft.api.ThaumcraftApiHelper",
             "thaumcraft.api.ItemApi",
             "thaumcraft.api.ItemRunic",
+            "thaumcraft.api.BlockCoordinates",
             "thaumcraft.api.TileThaumcraft",
             "thaumcraft.api.ThaumcraftMaterials",
             "thaumcraft.api.aspects.Aspect",

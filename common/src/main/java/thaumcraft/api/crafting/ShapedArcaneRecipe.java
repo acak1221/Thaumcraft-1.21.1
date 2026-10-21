@@ -141,6 +141,24 @@ public class ShapedArcaneRecipe implements IArcaneRecipe {
         return this;
     }
 
+    /**
+     * The original comparison of two ingredient stacks.
+     *
+     * <p>Original {@code thaumcraft/api/crafting/ShapedArcaneRecipe.java}: two stacks are the same when
+     * they are the same item, when their tags are equal and when their damage values are equal; the
+     * wildcard damage of the recipe accepts every damage of the item.</p>
+     *
+     * <p>Forced 1.21.1 change: the Forge ore dictionary of the original has no 1.21.1 counterpart, so the
+     * shortcut of the original is gone; the tags are compared with the native data components.</p>
+     */
+    protected boolean checkItemEquals(ItemStack stack0, ItemStack stack1) {
+        if (stack0 == null || stack1 == null) return stack0 == null && stack1 == null;
+        if (stack0.getItem() != stack1.getItem()) return false;
+        if (!stack0.getComponents().isEmpty() && !ThaumcraftApiHelper.areItemStackTagsEqualForCrafting(stack0, stack1)) return false;
+        if (stack0.getDamageValue() == Short.MAX_VALUE) return true;
+        return stack0.getDamageValue() == stack1.getDamageValue();
+    }
+
     /** The original ingredient cells of the pattern; a blank cell is null. */
     public Object[] getInput() { return this.input; }
 

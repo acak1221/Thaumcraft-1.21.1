@@ -60,6 +60,23 @@ public final class FocusUpgradeType {
     }
 
     public AspectList getAspects() { return aspects.copy(); }
+
+    /**
+     * The translated name of the upgrade.
+     *
+     * <p>Original {@code thaumcraft/api/wands/FocusUpgradeType.java}: {@code getLocalizedName()} returns the
+     * translation of the {@code name} key of the upgrade.</p>
+     */
+    public String getLocalizedName() { return net.minecraft.network.chat.Component.translatable(this.name).getString(); }
+
+    /**
+     * The translated description of the upgrade.
+     *
+     * <p>Original {@code thaumcraft/api/wands/FocusUpgradeType.java}: {@code getLocalizedText()} returns the
+     * translation of the {@code text} key of the upgrade.</p>
+     */
+    public String getLocalizedText() { return net.minecraft.network.chat.Component.translatable(this.text).getString(); }
+
     public static FocusUpgradeType get(short id) { return TYPES.get(id); }
     public static FocusUpgradeType get(int id) { return id < 0 || id > Short.MAX_VALUE ? null : get((short) id); }
     @Override public boolean equals(Object other) { return this == other || other instanceof FocusUpgradeType type && id == type.id; }

@@ -1,5 +1,6 @@
 package thaumcraft.client.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -55,7 +56,18 @@ public final class GuiHandMirror extends AbstractContainerScreen<ContainerHandMi
     }
 
     @Override protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, 256, 256);
+        // Original GuiHandMirror draws the sheet with the ordinary alpha blend
+        // of the 1.7.10 GUI. The plain 1.21.1 texture blit neither enables nor
+        // disables blending, and the sheet of the mirror has a translucent
+        // frame (11133 of 29216 pixels of the drawn region), so without the
+        // blend the frame is drawn as solid black.
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        try {
+            graphics.blit(TEXTURE, leftPos, topPos, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, 256, 256);
+        } finally {
+            RenderSystem.disableBlend();
+        }
     }
 
     @Override protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {

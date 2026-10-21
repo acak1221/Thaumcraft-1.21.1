@@ -1,5 +1,6 @@
 package thaumcraft.client.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -95,32 +96,44 @@ public final class GuiResearchRecipe extends Screen {
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         refreshPages(false); // Also removes unavailable recipes/gated pages while the book stays open.
         super.renderBackground(graphics, mouseX, mouseY, delta);
-        graphics.blit(BOOK, left, top, bookWidth, bookHeight, 0, 0, 512, 360, 512, 512);
-        ThaumcraftRecipeDisplay.Hover hover = null;
-        for (int side = 0; side < 2; side++) {
-            int x = left + bookWidth * (side == 0 ? 26 : 273) / 512;
-            int index = page + side;
-            if (index >= pages.size()) continue;
-            graphics.drawString(font, font.substrByWidth(title, textWidth).getString(), x, top + 14, 0xFF43301F, false);
-            BookPage current = pages.get(index);
-            if (current.recipe != null && minecraft.level != null) {
-                var recipeHover = current.recipe.render(graphics, font, minecraft.level, minecraft.player,
-                        x, top + 32, textWidth, textHeight, mouseX, mouseY, net.minecraft.Util.getMillis() / 1000L);
-                if (recipeHover != null) hover = recipeHover;
+        // Original GuiResearchRecipe draws the book sheet and the page icons
+        // with the ordinary alpha blend of the 1.7.10 GUI. The plain 1.21.1
+        // texture blit neither enables nor disables blending, and the book
+        // sheet has a translucent edge (11419 of 184320 pixels of the drawn
+        // region) while the page icons are the translucent aspect glyphs, so
+        // without the blend both are drawn as solid black.
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        try {
+            graphics.blit(BOOK, left, top, bookWidth, bookHeight, 0, 0, 512, 360, 512, 512);
+            ThaumcraftRecipeDisplay.Hover hover = null;
+            for (int side = 0; side < 2; side++) {
+                int x = left + bookWidth * (side == 0 ? 26 : 273) / 512;
+                int index = page + side;
+                if (index >= pages.size()) continue;
+                graphics.drawString(font, font.substrByWidth(title, textWidth).getString(), x, top + 14, 0xFF43301F, false);
+                BookPage current = pages.get(index);
+                if (current.recipe != null && minecraft.level != null) {
+                    var recipeHover = current.recipe.render(graphics, font, minecraft.level, minecraft.player,
+                            x, top + 32, textWidth, textHeight, mouseX, mouseY, net.minecraft.Util.getMillis() / 1000L);
+                    if (recipeHover != null) hover = recipeHover;
+                }
+                for (Draw draw : current.text) {
+                    int y = top + 32 + draw.y;
+                    if (draw.text != null) graphics.drawString(font, draw.text, x, y, 0xFF30251B, false);
+                    else if (draw.image != null) {
+                        var image = draw.image;
+                        graphics.blit(ResourceLocation.parse(image.texture()), x + (textWidth - draw.width) / 2, y,
+                                draw.width, draw.height, image.u(), image.v(), image.width(), image.height(), 256, 256);
+                    } else graphics.hLine(x + 6, x + textWidth - 6, y, 0xFF927A54);
+                }
+                graphics.drawCenteredString(font, Component.literal((index + 1) + " / " + pages.size()), x + textWidth / 2, top + bookHeight - 15, 0xFF635034);
             }
-            for (Draw draw : current.text) {
-                int y = top + 32 + draw.y;
-                if (draw.text != null) graphics.drawString(font, draw.text, x, y, 0xFF30251B, false);
-                else if (draw.image != null) {
-                    var image = draw.image;
-                    graphics.blit(ResourceLocation.parse(image.texture()), x + (textWidth - draw.width) / 2, y,
-                            draw.width, draw.height, image.u(), image.v(), image.width(), image.height(), 256, 256);
-                } else graphics.hLine(x + 6, x + textWidth - 6, y, 0xFF927A54);
-            }
-            graphics.drawCenteredString(font, Component.literal((index + 1) + " / " + pages.size()), x + textWidth / 2, top + bookHeight - 15, 0xFF635034);
+            super.render(graphics, mouseX, mouseY, delta);
+            if (hover != null) hover.render(graphics, font, mouseX, mouseY);
+        } finally {
+            RenderSystem.disableBlend();
         }
-        super.render(graphics, mouseX, mouseY, delta);
-        if (hover != null) hover.render(graphics, font, mouseX, mouseY);
     }
     // Screen.render draws widgets after calling this. Do not blur the pages a
     // second time: their explicit background pass is at the start of render.

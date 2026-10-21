@@ -21,6 +21,20 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EarlyObjectAspectBindingsTest {
+    /**
+     * Original rows restored from the oracle after the ALL90 snapshot: the vanilla
+     * object tags ConfigAspects176-299 and the milk bucket, the three loot bags and
+     * the alchemy furnace. Each of them is checked on its own below.
+     */
+    private static final java.util.Set<Integer> RESTORED_ORIGINAL_ROWS = java.util.Set.of(
+            176, 179, 182, 183, 187, 189, 190, 193, 196, 198, 199, 200, 201, 202, 204, 205,
+            211, 212, 213, 223, 226, 227, 228, 229, 232, 233, 234, 235, 240, 241, 242, 245,
+            253, 257, 259, 261, 263, 266, 269, 270, 271, 272, 273, 287, 288, 289, 290,
+            299, 317, 407, 408, 409, 427,
+            188, 274, 275, 276, 277, 279, 280, 281, 282, 283, 284, 285, 294, 300, 301, 307,
+            309, 310, 313, 319, 320, 322, 323, 324, 325, 326, 327, 328, 329, 330, 334, 335,
+            344, 345, 346);
+
     @Test
     void originalFuelGlowstoneAndMobDropsReplaceDivergentLegacyValues() {
         var direct = EarlyObjectAspectBindings.direct();
@@ -126,8 +140,8 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(139, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget and the native copper cluster, the three loot bags, the four edible nuggets, the eldritch eye, the runed tablet and the air discount ring");
-        assertEquals(12, complex.size(), "nine existing complex bindings plus the actual native Arcane Ear, the triple meat treat and the primal arrow");
+        assertEquals(209, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget, the native copper cluster and the original vanilla/content rows restored from the oracle");
+        assertEquals(33, complex.size(), "nine existing complex bindings, the actual native Arcane Ear and the original complex vanilla rows of the oracle");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
         assertEquals(0, EarlyObjectAspectBindings.metadata(id("thaumcraft:focus_pech")), "original one-argument ItemStack(Item) selects exact metadata0, not wildcard");
@@ -138,7 +152,7 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(122, rows.size());
+            assertEquals(198, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
@@ -146,8 +160,8 @@ class EarlyObjectAspectBindingsTest {
             int ears = 0;
             int pechFoci = 0;
             int crimsonRites = 0;
-            int itemRows = 0;
             int taintAndVishroom = 0;
+            int restoredOriginalRows = 0;
             Map<Integer, JsonObject> clusters = new java.util.TreeMap<>();
             Map<Integer, JsonObject> copper = new java.util.TreeMap<>();
             for (int index = 0; index < rows.size(); index++) {
@@ -211,49 +225,6 @@ class EarlyObjectAspectBindingsTest {
                             .add(Aspect.MAGIC, 3).add(Aspect.ELDRITCH, 3).add(Aspect.SOUL, 3));
                     continue;
                 }
-                if (sourceLine >= 407 && sourceLine <= 414 || sourceLine == 432
-                        || sourceLine == 435 || sourceLine == 448 || sourceLine == 450) {
-                    // The item rows added after the ALL90 snapshot: the three loot bags, the four
-                    // edible nuggets, the triple meat treat, the primal arrow and the two eldritch
-                    // objects. They are checked on their own and do not enter the ALL90 digest.
-                    ++itemRows;
-                    boolean complexRow = sourceLine == 414 || sourceLine == 432;
-                    assertEquals(complexRow ? "complex" : "direct", row.get("registration").getAsString());
-                    String nativeId = switch (sourceLine) {
-                        case 407 -> "thaumcraft:loot_bag_common";
-                        case 408 -> "thaumcraft:loot_bag_uncommon";
-                        case 409 -> "thaumcraft:loot_bag_rare";
-                        case 410 -> "thaumcraft:nugget_beef";
-                        case 411 -> "thaumcraft:nugget_chicken";
-                        case 412 -> "thaumcraft:nugget_pork";
-                        case 413 -> "thaumcraft:nugget_fish";
-                        case 414 -> "thaumcraft:triple_meat_treat";
-                        case 432 -> "thaumcraft:primal_arrow_air";
-                        case 435 -> "thaumcraft:discount_ring_aer";
-                        case 448 -> "thaumcraft:eldritch_eye";
-                        default -> "thaumcraft:eldritch_tablet";
-                    };
-                    assertEquals(JsonParser.parseString("[\"" + nativeId + "\"]"), row.get("modern_ids"));
-                    if (sourceLine >= 410 && sourceLine <= 414) {
-                        assertEquals("wildcard:32767", row.get("original_metadata").getAsString());
-                    }
-                    AspectList expected = switch (sourceLine) {
-                        case 407 -> new AspectList().add(Aspect.GREED, 8);
-                        case 408 -> new AspectList().add(Aspect.GREED, 16);
-                        case 409 -> new AspectList().add(Aspect.GREED, 32);
-                        case 410, 411, 412, 413 -> new AspectList().add(Aspect.HUNGER, 1);
-                        case 414 -> new AspectList().add(Aspect.HEAL, 1);
-                        case 432 -> new AspectList().add(Aspect.WEAPON, 1);
-                        case 435 -> new AspectList().add(Aspect.MAGIC, 5);
-                        case 448 -> new AspectList().add(Aspect.ELDRITCH, 5).add(Aspect.AURA, 3)
-                                .add(Aspect.MAGIC, 3).add(Aspect.SENSES, 3).add(Aspect.SOUL, 3);
-                        default -> new AspectList().add(Aspect.TRAP, 4).add(Aspect.MIND, 4).add(Aspect.MECHANISM, 4);
-                    };
-                    AspectList actual = complexRow ? complex.get(id(nativeId)) : direct.get(id(nativeId));
-                    assertNotNull(actual, nativeId);
-                    assertEquals(expected.aspects, actual.aspects, nativeId);
-                    continue;
-                }
                 if (sourceLine == 454) {
                     assertEquals("ConfigItems.itemEldritchObject", row.get("original_target").getAsString());
                     assertEquals(3, row.get("original_metadata").getAsInt());
@@ -271,6 +242,17 @@ class EarlyObjectAspectBindingsTest {
                     // The copper nugget and the native copper cluster (ConfigAspects:149 and :153); copper is vanilla in
                     // 1.21.1, so the original conditional branch is carried. Checked on their own, outside the ALL90 digest.
                     copper.put(sourceLine, row);
+                    continue;
+                }
+                if (RESTORED_ORIGINAL_ROWS.contains(sourceLine)) {
+                    // These restored original rows do not enter the unchanged ALL90 digest.
+                    ++restoredOriginalRows;
+                    assertTrue(List.of("direct", "complex").contains(row.get("registration").getAsString()),
+                            "original line " + sourceLine);
+                    assertTrue(row.getAsJsonArray("modern_ids").size() >= 1, "original line " + sourceLine);
+                    assertTrue(row.get("identifier_evidence").getAsString().toLowerCase(java.util.Locale.ROOT).contains("original")
+                            || row.get("identifier_evidence").getAsString().contains("1.21.1"),
+                            "original line " + sourceLine);
                     continue;
                 }
                 if (row.get("original_source_line").getAsInt() == 224) {
@@ -293,8 +275,8 @@ class EarlyObjectAspectBindingsTest {
                 }
                 if (row.get("original_source_line").getAsInt() != 332) { previous.add(row); continue; }
                 ++added;
-                assertEquals(312, rows.get(index - 1).getAsJsonObject().get("original_source_line").getAsInt());
-                assertEquals(336, rows.get(index + 1).getAsJsonObject().get("original_source_line").getAsInt());
+                assertEquals(330, rows.get(index - 1).getAsJsonObject().get("original_source_line").getAsInt());
+                assertEquals(334, rows.get(index + 1).getAsJsonObject().get("original_source_line").getAsInt());
                 assertEquals("complex", row.get("registration").getAsString());
                 assertEquals("Blocks.field_150331_J", row.get("original_target").getAsString());
                 assertEquals("wildcard:32767", row.get("original_metadata").getAsString());
@@ -308,8 +290,8 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(1, ears);
             assertEquals(1, pechFoci);
             assertEquals(1, crimsonRites);
-            assertEquals(12, itemRows);
             assertEquals(8, taintAndVishroom);
+            assertEquals(88, restoredOriginalRows);
             assertEquals(3, clusters.size());
             assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
             assertCluster(clusters.get(361), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");
@@ -334,6 +316,145 @@ class EarlyObjectAspectBindingsTest {
         }
     }
 
+    /**
+     * Every vanilla identifier of the corpus must exist in the 1.21.1 item registry.
+     * A renamed or missing identifier would silently drop the original object tag.
+     */
+    @Test
+    void everyVanillaCorpusIdentifierExistsInTheTargetRegistry() throws Exception {
+        net.minecraft.SharedConstants.tryDetectVersion();
+        net.minecraft.server.Bootstrap.bootStrap();
+        var stream = getClass().getClassLoader().getResourceAsStream("data/thaumcraft/tc4/early_object_aspects.json");
+        assertNotNull(stream);
+        var ids = new java.util.LinkedHashSet<String>();
+        try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
+            for (var element : rows) {
+                for (var id : element.getAsJsonObject().getAsJsonArray("modern_ids")) {
+                    if (id.getAsString().startsWith("minecraft:")) ids.add(id.getAsString());
+                }
+            }
+        }
+        assertTrue(ids.size() > 80, "the corpus carries the original vanilla object tags");
+        for (String name : ids) {
+            assertTrue(net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(name)), name);
+        }
+    }
+
+    /**
+     * The original rows restored from the oracle after the ALL90 snapshot keep the
+     * literal tag of their original ConfigAspects line.
+     */
+    @Test
+    void restoredOriginalRowsCarryTheOriginalLiteralTags() {
+        record Row(int line, String kind, List<String> ids, AspectList aspects) {}
+        List<Row> rows = List.of(
+                new Row(176, "direct", List.of("minecraft:bedrock"), new AspectList().add(Aspect.VOID, 16).add(Aspect.ENTROPY, 16).add(Aspect.EARTH, 16).add(Aspect.DARKNESS, 16)),
+                new Row(179, "direct", List.of("minecraft:farmland"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.HARVEST, 2)),
+                new Row(182, "direct", List.of("minecraft:clay_ball"), new AspectList().add(Aspect.WATER, 1).add(Aspect.EARTH, 1)),
+                new Row(183, "direct", List.of("minecraft:end_stone"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.DARKNESS, 1)),
+                new Row(187, "direct", List.of("minecraft:terracotta"), new AspectList().add(Aspect.EARTH, 4).add(Aspect.FIRE, 1)),
+                new Row(188, "direct", List.of("minecraft:white_terracotta", "minecraft:orange_terracotta", "minecraft:magenta_terracotta", "minecraft:light_blue_terracotta", "minecraft:yellow_terracotta", "minecraft:lime_terracotta", "minecraft:pink_terracotta", "minecraft:gray_terracotta", "minecraft:light_gray_terracotta", "minecraft:cyan_terracotta", "minecraft:purple_terracotta", "minecraft:blue_terracotta", "minecraft:brown_terracotta", "minecraft:green_terracotta", "minecraft:red_terracotta", "minecraft:black_terracotta"), new AspectList().add(Aspect.EARTH, 3).add(Aspect.FIRE, 1).add(Aspect.SENSES, 1)),
+                new Row(189, "direct", List.of("minecraft:brick"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.FIRE, 1)),
+                new Row(190, "direct", List.of("minecraft:nether_brick"), new AspectList().add(Aspect.FIRE, 1)),
+                new Row(193, "direct", List.of("minecraft:nether_bricks"), new AspectList().add(Aspect.EARTH, 2).add(Aspect.FIRE, 1)),
+                new Row(196, "direct", List.of("minecraft:mossy_cobblestone"), new AspectList().add(Aspect.EARTH, 1).add(Aspect.PLANT, 1).add(Aspect.MAGIC, 1)),
+                new Row(198, "direct", List.of("minecraft:infested_stone"), new AspectList().add(Aspect.EARTH, 2).add(Aspect.BEAST, 1).add(Aspect.TRAP, 1)),
+                new Row(199, "direct", List.of("minecraft:stone_bricks"), new AspectList().add(Aspect.EARTH, 2)),
+                new Row(200, "direct", List.of("minecraft:mossy_stone_bricks"), new AspectList().add(Aspect.PLANT, 1)),
+                new Row(201, "direct", List.of("minecraft:cracked_stone_bricks"), new AspectList().add(Aspect.ENTROPY, 1)),
+                new Row(202, "direct", List.of("minecraft:chiseled_stone_bricks"), new AspectList().add(Aspect.ORDER, 1)),
+                new Row(204, "direct", List.of("minecraft:chiseled_sandstone"), new AspectList().add(Aspect.MAGIC, 1)),
+                new Row(205, "direct", List.of("minecraft:smooth_sandstone"), new AspectList().add(Aspect.ORDER, 1)),
+                new Row(211, "direct", List.of("minecraft:wheat_seeds"), new AspectList().add(Aspect.PLANT, 1)),
+                new Row(212, "direct", List.of("minecraft:melon_seeds"), new AspectList().add(Aspect.PLANT, 1)),
+                new Row(213, "direct", List.of("minecraft:pumpkin_seeds"), new AspectList().add(Aspect.PLANT, 1)),
+                new Row(223, "direct", List.of("minecraft:sugar_cane"), new AspectList().add(Aspect.PLANT, 1).add(Aspect.WATER, 1).add(Aspect.AIR, 1)),
+                new Row(226, "direct", List.of("minecraft:carrot"), new AspectList().add(Aspect.CROP, 1).add(Aspect.HUNGER, 1).add(Aspect.SENSES, 1)),
+                new Row(227, "direct", List.of("minecraft:potato"), new AspectList().add(Aspect.CROP, 1).add(Aspect.HUNGER, 1).add(Aspect.EARTH, 1)),
+                new Row(228, "direct", List.of("minecraft:baked_potato"), new AspectList().add(Aspect.CROP, 1).add(Aspect.HUNGER, 2)),
+                new Row(229, "direct", List.of("minecraft:poisonous_potato"), new AspectList().add(Aspect.CROP, 1).add(Aspect.POISON, 2)),
+                new Row(232, "direct", List.of("minecraft:name_tag"), new AspectList().add(Aspect.MIND, 2).add(Aspect.BEAST, 2)),
+                new Row(233, "direct", List.of("minecraft:iron_horse_armor"), new AspectList().add(Aspect.ARMOR, 2).add(Aspect.BEAST, 2)),
+                new Row(234, "direct", List.of("minecraft:golden_horse_armor"), new AspectList().add(Aspect.ARMOR, 4).add(Aspect.BEAST, 2)),
+                new Row(235, "direct", List.of("minecraft:diamond_horse_armor"), new AspectList().add(Aspect.ARMOR, 6).add(Aspect.BEAST, 2)),
+                new Row(240, "direct", List.of("minecraft:packed_ice"), new AspectList().add(Aspect.COLD, 3).add(Aspect.EARTH, 1)),
+                new Row(241, "direct", List.of("minecraft:snowball"), new AspectList().add(Aspect.COLD, 1)),
+                new Row(242, "direct", List.of("minecraft:cookie"), new AspectList().add(Aspect.HUNGER, 1)),
+                new Row(245, "direct", List.of("minecraft:cobweb"), new AspectList().add(Aspect.TRAP, 2).add(Aspect.CLOTH, 1)),
+                new Row(253, "direct", List.of("minecraft:egg"), new AspectList().add(Aspect.SLIME, 1).add(Aspect.LIFE, 1).add(Aspect.BEAST, 1)),
+                new Row(257, "direct", List.of("minecraft:cod"), new AspectList().add(Aspect.FLESH, 3).add(Aspect.LIFE, 1).add(Aspect.WATER, 1)),
+                new Row(259, "direct", List.of("minecraft:chicken"), new AspectList().add(Aspect.FLESH, 3).add(Aspect.LIFE, 2).add(Aspect.BEAST, 1)),
+                new Row(261, "direct", List.of("minecraft:porkchop"), new AspectList().add(Aspect.FLESH, 3).add(Aspect.LIFE, 1).add(Aspect.BEAST, 1)),
+                new Row(263, "direct", List.of("minecraft:beef"), new AspectList().add(Aspect.FLESH, 4).add(Aspect.LIFE, 2).add(Aspect.BEAST, 1)),
+                new Row(266, "direct", List.of("minecraft:saddle"), new AspectList().add(Aspect.BEAST, 2).add(Aspect.CLOTH, 3).add(Aspect.TRAVEL, 3)),
+                new Row(269, "direct", List.of("minecraft:skeleton_skull"), new AspectList().add(Aspect.DEATH, 4).add(Aspect.SOUL, 4).add(Aspect.UNDEAD, 4)),
+                new Row(270, "direct", List.of("minecraft:wither_skeleton_skull"), new AspectList().add(Aspect.DEATH, 4).add(Aspect.SOUL, 4).add(Aspect.UNDEAD, 4).add(Aspect.POISON, 4)),
+                new Row(271, "direct", List.of("minecraft:zombie_head"), new AspectList().add(Aspect.DEATH, 4).add(Aspect.SOUL, 4).add(Aspect.FLESH, 4)),
+                new Row(272, "direct", List.of("minecraft:player_head"), new AspectList().add(Aspect.DEATH, 4).add(Aspect.SOUL, 4).add(Aspect.MAN, 4)),
+                new Row(273, "direct", List.of("minecraft:creeper_head"), new AspectList().add(Aspect.DEATH, 4).add(Aspect.SOUL, 4).add(Aspect.ENTROPY, 2).add(Aspect.FIRE, 2)),
+                new Row(274, "direct", List.of("minecraft:music_disc_11"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.GREED, 4)),
+                new Row(275, "direct", List.of("minecraft:music_disc_13"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.WATER, 4).add(Aspect.GREED, 4)),
+                new Row(276, "direct", List.of("minecraft:music_disc_cat"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.BEAST, 4).add(Aspect.GREED, 4)),
+                new Row(277, "direct", List.of("minecraft:music_disc_chirp"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.EARTH, 4).add(Aspect.GREED, 4)),
+                new Row(279, "direct", List.of("minecraft:music_disc_mall"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.MAN, 4).add(Aspect.GREED, 4)),
+                new Row(280, "direct", List.of("minecraft:music_disc_mellohi"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.CRAFT, 4).add(Aspect.GREED, 4)),
+                new Row(281, "direct", List.of("minecraft:music_disc_stal"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.DARKNESS, 4).add(Aspect.GREED, 4)),
+                new Row(282, "direct", List.of("minecraft:music_disc_strad"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.MECHANISM, 4).add(Aspect.GREED, 4)),
+                new Row(283, "direct", List.of("minecraft:music_disc_ward"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.MAGIC, 4).add(Aspect.GREED, 4)),
+                new Row(284, "direct", List.of("minecraft:music_disc_blocks"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.TOOL, 4).add(Aspect.GREED, 4)),
+                new Row(285, "direct", List.of("minecraft:music_disc_wait"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.AIR, 4).add(Aspect.TRAP, 4).add(Aspect.GREED, 4)),
+                new Row(287, "direct", List.of("minecraft:chainmail_helmet"), new AspectList().add(Aspect.METAL, 8)),
+                new Row(288, "direct", List.of("minecraft:chainmail_chestplate"), new AspectList().add(Aspect.METAL, 12)),
+                new Row(289, "direct", List.of("minecraft:chainmail_leggings"), new AspectList().add(Aspect.METAL, 11)),
+                new Row(290, "direct", List.of("minecraft:chainmail_boots"), new AspectList().add(Aspect.METAL, 7)),
+                new Row(294, "complex", List.of("minecraft:bookshelf"), new AspectList().add(Aspect.MIND, 8)),
+                new Row(299, "direct", List.of("minecraft:spawner"), new AspectList().add(Aspect.BEAST, 4).add(Aspect.TRAVEL, 4).add(Aspect.UNDEAD, 4).add(Aspect.MAGIC, 4)),
+                new Row(300, "complex", List.of("minecraft:ender_eye"), new AspectList().add(Aspect.SENSES, 4)),
+                new Row(301, "complex", List.of("minecraft:arrow"), new AspectList().add(Aspect.WEAPON, 1)),
+                new Row(307, "complex", List.of("minecraft:mushroom_stew"), new AspectList().add(Aspect.HUNGER, 4)),
+                new Row(309, "complex", List.of("minecraft:iron_door"), new AspectList().add(Aspect.MECHANISM, 2).add(Aspect.MOTION, 1)),
+                new Row(310, "complex", List.of("minecraft:oak_door"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.MOTION, 1)),
+                new Row(313, "complex", List.of("minecraft:fishing_rod"), new AspectList().add(Aspect.WATER, 1).add(Aspect.TOOL, 1)),
+                new Row(317, "direct", List.of("minecraft:milk_bucket"), new AspectList().add(Aspect.METAL, 8).add(Aspect.VOID, 1).add(Aspect.HUNGER, 2).add(Aspect.HEAL, 2).add(Aspect.WATER, 2)),
+                new Row(319, "complex", List.of("minecraft:brewing_stand"), new AspectList().add(Aspect.CRAFT, 2).add(Aspect.WATER, 2)),
+                new Row(320, "complex", List.of("minecraft:stone_button"), new AspectList().add(Aspect.MECHANISM, 1)),
+                new Row(322, "complex", List.of("minecraft:detector_rail"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.SENSES, 1)),
+                new Row(323, "complex", List.of("minecraft:powered_rail"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.ENERGY, 1)),
+                new Row(324, "complex", List.of("minecraft:activator_rail"), new AspectList().add(Aspect.MECHANISM, 2)),
+                new Row(325, "complex", List.of("minecraft:oak_fence_gate"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.TRAVEL, 1)),
+                new Row(326, "complex", List.of("minecraft:oak_pressure_plate"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.SENSES, 1)),
+                new Row(327, "complex", List.of("minecraft:stone_pressure_plate"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.SENSES, 1)),
+                new Row(328, "complex", List.of("minecraft:light_weighted_pressure_plate"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.SENSES, 1)),
+                new Row(329, "complex", List.of("minecraft:heavy_weighted_pressure_plate"), new AspectList().add(Aspect.MECHANISM, 1).add(Aspect.SENSES, 1)),
+                new Row(330, "complex", List.of("minecraft:lever"), new AspectList().add(Aspect.MECHANISM, 1)),
+                new Row(334, "complex", List.of("minecraft:jukebox"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.MECHANISM, 2).add(Aspect.AIR, 4)),
+                new Row(335, "complex", List.of("minecraft:note_block"), new AspectList().add(Aspect.SENSES, 4).add(Aspect.MECHANISM, 1).add(Aspect.AIR, 4)),
+                new Row(344, "complex", List.of("minecraft:oak_button"), new AspectList().add(Aspect.MECHANISM, 1)),
+                new Row(345, "complex", List.of("minecraft:carrot_on_a_stick"), new AspectList().add(Aspect.TRAVEL, 4)),
+                new Row(346, "complex", List.of("minecraft:flower_pot"), new AspectList().add(Aspect.VOID, 1).add(Aspect.PLANT, 1)),
+                new Row(407, "direct", List.of("thaumcraft:loot_bag_common"), new AspectList().add(Aspect.GREED, 8)),
+                new Row(408, "direct", List.of("thaumcraft:loot_bag_uncommon"), new AspectList().add(Aspect.GREED, 16)),
+                new Row(409, "direct", List.of("thaumcraft:loot_bag_rare"), new AspectList().add(Aspect.GREED, 32)),
+                new Row(427, "direct", List.of("thaumcraft:alchemy_furnace"), new AspectList().add(Aspect.MAGIC, 8).add(Aspect.WATER, 8).add(Aspect.CRAFT, 8))
+        );
+        assertEquals(88, rows.size());
+        var direct = EarlyObjectAspectBindings.direct();
+        var complex = EarlyObjectAspectBindings.complex();
+        for (Row row : rows) {
+            Map<ResourceLocation, AspectList> table = "complex".equals(row.kind()) ? complex : direct;
+            for (String name : row.ids()) {
+                assertAspects(table, name, row.aspects(), "original ConfigAspects:" + row.line());
+                assertTrue(EarlyObjectAspectBindings.metadata(id(name)) >= 0, name);
+            }
+            if ("direct".equals(row.kind())) {
+                for (String name : row.ids()) {
+                    assertFalse(complex.containsKey(id(name)), name);
+                }
+            }
+        }
+    }
+
     private static void assertCluster(JsonObject row, int metadata, String modernId, String aspects) {
         assertNotNull(row, modernId);
         assertEquals("direct", row.get("registration").getAsString());
@@ -344,9 +465,13 @@ class EarlyObjectAspectBindingsTest {
     }
 
     private static void assertAspects(Map<ResourceLocation, AspectList> bindings, String name, AspectList expected) {
+        assertAspects(bindings, name, expected, name);
+    }
+
+    private static void assertAspects(Map<ResourceLocation, AspectList> bindings, String name, AspectList expected, String label) {
         AspectList actual = bindings.get(id(name));
-        assertNotNull(actual, name);
-        assertEquals(expected.aspects, actual.aspects, name);
+        assertNotNull(actual, label);
+        assertEquals(expected.aspects, actual.aspects, label);
     }
 
     private static ResourceLocation id(String value) { return ResourceLocation.parse(value); }

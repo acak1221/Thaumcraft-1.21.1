@@ -58,7 +58,7 @@
     "hungry_chest_trapdoor": "ConfigAspects336: original wildcard wooden trapdoor contributes raw complex motus1, flattened only to minecraft:oak_trapdoor. Hungry Chest has no original direct registration; its scan tags remain recipe-derived."
   },
   "policy": {
-    "coverage": "A selected early vanilla resource family, six primal shards, literal native material variants including quicksilver drops, eight original native ores, magical wood/leaves/saplings/plants, arcane stone/bricks and two phial bases; extended by original piston complex row332 and wooden trapdoor row336 for native content prerequisites. Not a complete ConfigAspects port or gameplay-completion claim.",
+    "coverage": "A selected early vanilla resource family, six primal shards, literal native material variants including quicksilver drops, eight original native ores, magical wood/leaves/saplings/plants, arcane stone/bricks and two phial bases; extended by original piston complex row332 and wooden trapdoor row336 for native content prerequisites, and by the original vanilla object tags of ConfigAspects176-346 (the plain blocks and items, the stone brick and sandstone metadata families, the five skull variants, the chainmail set, the horse armours, the food, seed and music disc items, and the complex additions of the rails, buttons, pressure plates, lever, doors, arrow, ender eye, jukebox, note block, bookshelf, brewing stand, fishing rod, flower pot, carrot on a stick and mushroom stew), the milk bucket row317, the three loot bags rows407-409 and the alchemy furnace row427. Not a complete ConfigAspects port or gameplay-completion claim.",
     "direct": "Authoritative original values override divergent legacy 1.12 fallback values with put/putAll; do not treat the override as a conflict. Preserve explicitly empty direct lists.",
     "complex": "Only raw supplied additions for the no-existing-original-tag branch. The caller supplies the 0.75-scaled recipe base. Never add these to an existing original direct tag: API269-273 max-merges the old amount with itself, not the supplied amount.",
     "identifiers": "All modern_ids are explicit existing item identifiers. No wildcard/path-pattern expansion and no inferred future Thaumcraft registrations. The caller validates against completed target registries.",
@@ -66,7 +66,8 @@
     "copper_nugget_adaptation": "thaumcraft:copper_nugget replaces the original modded nuggetCopper / ConfigItems.itemNugget metadata 1 and thaumcraft:cluster_copper the original native copper cluster of metadata 17. The original registered both only when Config.foundCopperIngot, and copper is vanilla in 1.21.1.",
     "torch_and_workbench": "Original line244 torch is direct lux1, not complex recipe energy; line340 crafting_table is direct fabrico4. The retained legacy torch registration is not the specification.",
     "phials": "phial_empty is direct vacuos1; phial_filled has an explicitly empty direct base. PhialData's 8 contained aspects are the caller's stack bonus, never a static binding here.",
-    "piston_mechanical_prerequisite": "Only minecraft:piston receives the ORIGINAL raw complex machina2/motus4 addition, never a replacement direct list or a precomputed final yield. Recipe derivation, cap/bonus/cull and legacy-fallback suppression reuse the existing complex path. Wooden trapdoor336 is separately included for Hungry Chest; sticky piston333 and other unselected mechanical rows remain outside these bounded additions."
+    "piston_mechanical_prerequisite": "Only minecraft:piston receives the ORIGINAL raw complex machina2/motus4 addition, never a replacement direct list or a precomputed final yield. Recipe derivation, cap/bonus/cull and legacy-fallback suppression reuse the existing complex path. Wooden trapdoor336 is separately included for Hungry Chest; sticky piston333 and other unselected mechanical rows remain outside these bounded additions.",
+    "restored_original_vanilla_rows": "Rows restored from the oracle keep the original literal amounts of their ConfigAspects line; only the 1.21.1 identifier is an explicit adaptation (hardened clay is terracotta, monster egg is infested_stone, the four stone brick and three sandstone metadata variants are their own blocks, the five skull variants are the five head items, reeds is sugar_cane, fish is cod, web is cobweb, mob_spawner is spawner, the wooden button, pressure plate, fence gate and door are their oak forms, golden_rail is powered_rail, the record_X discs are the music_disc_X items). Every vanilla identifier of this resource is checked against the 1.21.1 item registry by EarlyObjectAspectBindingsTest."
   },
   "unsupported_branches": [
     "No invented direct tags for raw_iron, raw_gold, raw_copper, raw metal blocks, copper, netherite, deepslate ores, nether gold ore, or post-1.7 wood families.",
@@ -75,432 +76,2230 @@
     "Original lit_redstone_ore line130 and lit_furnace line337 are distinct legacy blocks, not extra overrides for the modern unlit item. The modern item uses original oreRedstone line129 and furnace line338 respectively.",
     "No general tool/boot/enchantment bonuses: those depend on runtime item/material state and max-merge semantics outside this data unit.",
     "No balance_shard, salis_mundus expression, crystal blocks, dynamic resource expressions, arbitrary ore-dictionary members, or unregistered native nugget/cluster/block variants.",
-    "The original API existing-tag complex branch is not modeled as additive; all selected complex rows have no earlier original direct binding. The resource does not claim the remaining registrations are ported."
+    "The original API existing-tag complex branch is not modeled as additive; all selected complex rows have no earlier original direct binding. The resource does not claim the remaining registrations are ported.",
+    "The remaining original vanilla rows stay outside this resource: the melon item row214 (1.21.1 shares one minecraft:melon identifier with the melon block of the retained legacy row, so the two original tags cannot both exist), the potion item rows243 and 363 (the native potion tag is computed from the potion contents), the end portal block row297 (1.21.1 has no end portal item), the golden apple rows304 and 305 (the enchanted golden apple has no recipe base), the plain sandstone row203 and the enchanted book row293 (empty complex additions only), and the cultist armour rows437-446, which the port does not contain."
   ],
   "registered_materials_without_literal_binding_in_this_unit": [
-    "alumentum", "nitor", "thaumium_ingot", "magic_tallow", "enchanted_fabric", "vis_filter",
-    "mirrored_glass", "jar_label", "salis_mundus", "primal_charm", "void_ingot", "void_seed"
+    "alumentum",
+    "nitor",
+    "thaumium_ingot",
+    "magic_tallow",
+    "enchanted_fabric",
+    "vis_filter",
+    "mirrored_glass",
+    "jar_label",
+    "salis_mundus",
+    "primal_charm",
+    "void_ingot",
+    "void_seed"
   ],
   "bindings": [
     {
-      "original_source_line": 114, "registration": "direct", "original_target": "ore_dictionary:stone",
+      "original_source_line": 114,
+      "registration": "direct",
+      "original_target": "ore_dictionary:stone",
       "identifier_evidence": "Blocks.field_150348_b / ajn/b / stone; original default metadata",
-      "modern_ids": ["minecraft:stone"],
-      "aspects": {"terra": 2}
+      "modern_ids": [
+        "minecraft:stone"
+      ],
+      "aspects": {
+        "terra": 2
+      }
     },
     {
-      "original_source_line": 115, "registration": "direct", "original_target": "ore_dictionary:cobblestone",
+      "original_source_line": 115,
+      "registration": "direct",
+      "original_target": "ore_dictionary:cobblestone",
       "identifier_evidence": "Blocks.field_150347_e / ajn/e / cobblestone",
-      "modern_ids": ["minecraft:cobblestone"],
-      "aspects": {"terra": 1, "perditio": 1}
+      "modern_ids": [
+        "minecraft:cobblestone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "perditio": 1
+      }
     },
     {
-      "original_source_line": 116, "registration": "direct", "original_target": "ore_dictionary:logWood",
+      "original_source_line": 116,
+      "registration": "direct",
+      "original_target": "ore_dictionary:logWood",
       "identifier_evidence": "Blocks.field_150364_r / ajn/r / log metadata0-3 and Blocks.field_150363_s / ajn/s / log2 metadata0-1; only the six original species",
-      "modern_ids": ["minecraft:oak_log", "minecraft:spruce_log", "minecraft:birch_log", "minecraft:jungle_log", "minecraft:acacia_log", "minecraft:dark_oak_log"],
-      "aspects": {"arbor": 4}
+      "modern_ids": [
+        "minecraft:oak_log",
+        "minecraft:spruce_log",
+        "minecraft:birch_log",
+        "minecraft:jungle_log",
+        "minecraft:acacia_log",
+        "minecraft:dark_oak_log"
+      ],
+      "aspects": {
+        "arbor": 4
+      }
     },
     {
-      "original_source_line": 117, "registration": "direct", "original_target": "ore_dictionary:plankWood",
+      "original_source_line": 117,
+      "registration": "direct",
+      "original_target": "ore_dictionary:plankWood",
       "identifier_evidence": "Blocks.field_150344_f / ajn/f / planks metadata0-5; ConfigItems296-297 also registers original woodenDevice6/7 as plankWood. Only original species and those two native counterparts.",
-      "modern_ids": ["minecraft:oak_planks", "minecraft:spruce_planks", "minecraft:birch_planks", "minecraft:jungle_planks", "minecraft:acacia_planks", "minecraft:dark_oak_planks", "thaumcraft:greatwood_planks", "thaumcraft:silverwood_planks"],
-      "aspects": {"arbor": 1}
+      "modern_ids": [
+        "minecraft:oak_planks",
+        "minecraft:spruce_planks",
+        "minecraft:birch_planks",
+        "minecraft:jungle_planks",
+        "minecraft:acacia_planks",
+        "minecraft:dark_oak_planks",
+        "thaumcraft:greatwood_planks",
+        "thaumcraft:silverwood_planks"
+      ],
+      "aspects": {
+        "arbor": 1
+      }
     },
     {
-      "original_source_line": 120, "registration": "direct", "original_target": "ore_dictionary:stickWood",
+      "original_source_line": 120,
+      "registration": "direct",
+      "original_target": "ore_dictionary:stickWood",
       "identifier_evidence": "Items.field_151055_y / ade/y / stick",
-      "modern_ids": ["minecraft:stick"],
-      "aspects": {"arbor": 1}
+      "modern_ids": [
+        "minecraft:stick"
+      ],
+      "aspects": {
+        "arbor": 1
+      }
     },
     {
-      "original_source_line": 124, "registration": "direct", "original_target": "ore_dictionary:dyeBlue",
+      "original_source_line": 124,
+      "registration": "direct",
+      "original_target": "ore_dictionary:dyeBlue",
       "identifier_evidence": "Items.field_151100_aR / ade/aR / dye metadata4; dyes[4] is dyeBlue, not a modern blue_dye binding",
-      "modern_ids": ["minecraft:lapis_lazuli"],
-      "aspects": {"sensus": 1}
+      "modern_ids": [
+        "minecraft:lapis_lazuli"
+      ],
+      "aspects": {
+        "sensus": 1
+      }
     },
     {
-      "original_source_line": 126, "registration": "direct", "original_target": "ore_dictionary:oreLapis",
+      "original_source_line": 126,
+      "registration": "direct",
+      "original_target": "ore_dictionary:oreLapis",
       "identifier_evidence": "Blocks.field_150369_x / ajn/x / lapis_ore",
-      "modern_ids": ["minecraft:lapis_ore"],
-      "aspects": {"terra": 1, "sensus": 3}
+      "modern_ids": [
+        "minecraft:lapis_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "sensus": 3
+      }
     },
     {
-      "original_source_line": 127, "registration": "direct", "original_target": "ore_dictionary:oreDiamond",
+      "original_source_line": 127,
+      "registration": "direct",
+      "original_target": "ore_dictionary:oreDiamond",
       "identifier_evidence": "Blocks.field_150482_ag / ajn/ag / diamond_ore",
-      "modern_ids": ["minecraft:diamond_ore"],
-      "aspects": {"terra": 1, "lucrum": 3, "vitreus": 3}
+      "modern_ids": [
+        "minecraft:diamond_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "lucrum": 3,
+        "vitreus": 3
+      }
     },
     {
-      "original_source_line": 128, "registration": "direct", "original_target": "ore_dictionary:gemDiamond",
+      "original_source_line": 128,
+      "registration": "direct",
+      "original_target": "ore_dictionary:gemDiamond",
       "identifier_evidence": "Items.field_151045_i / ade/i / diamond",
-      "modern_ids": ["minecraft:diamond"],
-      "aspects": {"vitreus": 4, "lucrum": 4}
+      "modern_ids": [
+        "minecraft:diamond"
+      ],
+      "aspects": {
+        "vitreus": 4,
+        "lucrum": 4
+      }
     },
     {
-      "original_source_line": 129, "registration": "direct", "original_target": "ore_dictionary:oreRedstone",
+      "original_source_line": 129,
+      "registration": "direct",
+      "original_target": "ore_dictionary:oreRedstone",
       "identifier_evidence": "Blocks.field_150450_ax / ajn/ax / redstone_ore; not the lit block at original line130",
-      "modern_ids": ["minecraft:redstone_ore"],
-      "aspects": {"terra": 1, "potentia": 2, "machina": 2}
+      "modern_ids": [
+        "minecraft:redstone_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "potentia": 2,
+        "machina": 2
+      }
     },
     {
-      "original_source_line": 131, "registration": "direct", "original_target": "ore_dictionary:oreEmerald",
+      "original_source_line": 131,
+      "registration": "direct",
+      "original_target": "ore_dictionary:oreEmerald",
       "identifier_evidence": "Blocks.field_150412_bA / ajn/bA / emerald_ore",
-      "modern_ids": ["minecraft:emerald_ore"],
-      "aspects": {"terra": 1, "lucrum": 4, "vitreus": 3}
+      "modern_ids": [
+        "minecraft:emerald_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "lucrum": 4,
+        "vitreus": 3
+      }
     },
     {
-      "original_source_line": 132, "registration": "direct", "original_target": "ore_dictionary:gemEmerald",
+      "original_source_line": 132,
+      "registration": "direct",
+      "original_target": "ore_dictionary:gemEmerald",
       "identifier_evidence": "Items.field_151166_bC / ade/bC / emerald",
-      "modern_ids": ["minecraft:emerald"],
-      "aspects": {"vitreus": 4, "lucrum": 5}
+      "modern_ids": [
+        "minecraft:emerald"
+      ],
+      "aspects": {
+        "vitreus": 4,
+        "lucrum": 5
+      }
     },
     {
-      "original_source_line": 133, "registration": "direct", "original_target": "ore_dictionary:oreQuartz",
+      "original_source_line": 133,
+      "registration": "direct",
+      "original_target": "ore_dictionary:oreQuartz",
       "identifier_evidence": "Blocks.field_150449_bY / ajn/bY / quartz_ore; modern registry name nether_quartz_ore",
-      "modern_ids": ["minecraft:nether_quartz_ore"],
-      "aspects": {"terra": 1, "vitreus": 3}
+      "modern_ids": [
+        "minecraft:nether_quartz_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "vitreus": 3
+      }
     },
     {
-      "original_source_line": 134, "registration": "direct", "original_target": "Items.field_151128_bU", "original_metadata": 0,
+      "original_source_line": 134,
+      "registration": "direct",
+      "original_target": "Items.field_151128_bU",
+      "original_metadata": 0,
       "identifier_evidence": "ade/bU / quartz",
-      "modern_ids": ["minecraft:quartz"],
-      "aspects": {"vitreus": 1, "potentia": 1}
+      "modern_ids": [
+        "minecraft:quartz"
+      ],
+      "aspects": {
+        "vitreus": 1,
+        "potentia": 1
+      }
     },
     {
-      "original_source_line": 135, "registration": "direct", "original_target": "Items.field_151074_bl", "original_metadata": 0,
+      "original_source_line": 135,
+      "registration": "direct",
+      "original_target": "Items.field_151074_bl",
+      "original_metadata": 0,
       "identifier_evidence": "ade/bl / gold_nugget; no lucrum addition in the original binding",
-      "modern_ids": ["minecraft:gold_nugget"],
-      "aspects": {"metallum": 1}
+      "modern_ids": [
+        "minecraft:gold_nugget"
+      ],
+      "aspects": {
+        "metallum": 1
+      }
     },
     {
-      "original_source_line": 136, "registration": "direct", "original_target": "ore_dictionary:nuggetIron",
+      "original_source_line": 136,
+      "registration": "direct",
+      "original_target": "ore_dictionary:nuggetIron",
       "identifier_evidence": "Explicit modern identifier adaptation from ConfigItems.itemNugget metadata0: config_items:276 and item_nugget:39",
-      "modern_ids": ["minecraft:iron_nugget"],
-      "aspects": {"metallum": 1}
+      "modern_ids": [
+        "minecraft:iron_nugget"
+      ],
+      "aspects": {
+        "metallum": 1
+      }
     },
     {
-      "original_source_line": 137, "registration": "direct", "original_target": "ore_dictionary:oreIron",
+      "original_source_line": 137,
+      "registration": "direct",
+      "original_target": "ore_dictionary:oreIron",
       "identifier_evidence": "Blocks.field_150366_p / ajn/p / iron_ore; not raw_iron or deepslate_iron_ore",
-      "modern_ids": ["minecraft:iron_ore"],
-      "aspects": {"terra": 1, "metallum": 3}
+      "modern_ids": [
+        "minecraft:iron_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "metallum": 3
+      }
     },
     {
-      "original_source_line": 139, "registration": "direct", "original_target": "Items.field_151042_j", "original_metadata": 0,
+      "original_source_line": 139,
+      "registration": "direct",
+      "original_target": "Items.field_151042_j",
+      "original_metadata": 0,
       "identifier_evidence": "ade/j / iron_ingot",
-      "modern_ids": ["minecraft:iron_ingot"],
-      "aspects": {"metallum": 4}
+      "modern_ids": [
+        "minecraft:iron_ingot"
+      ],
+      "aspects": {
+        "metallum": 4
+      }
     },
     {
-      "original_source_line": 140, "registration": "direct", "original_target": "ore_dictionary:oreGold",
+      "original_source_line": 140,
+      "registration": "direct",
+      "original_target": "ore_dictionary:oreGold",
       "identifier_evidence": "Blocks.field_150352_o / ajn/o / gold_ore; not raw_gold, nether_gold_ore or deepslate_gold_ore",
-      "modern_ids": ["minecraft:gold_ore"],
-      "aspects": {"terra": 1, "metallum": 2, "lucrum": 1}
+      "modern_ids": [
+        "minecraft:gold_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "lucrum": 1
+      }
     },
     {
-      "original_source_line": 142, "registration": "direct", "original_target": "Items.field_151043_k", "original_metadata": 0,
+      "original_source_line": 142,
+      "registration": "direct",
+      "original_target": "Items.field_151043_k",
+      "original_metadata": 0,
       "identifier_evidence": "ade/k / gold_ingot",
-      "modern_ids": ["minecraft:gold_ingot"],
-      "aspects": {"metallum": 3, "lucrum": 2}
+      "modern_ids": [
+        "minecraft:gold_ingot"
+      ],
+      "aspects": {
+        "metallum": 3,
+        "lucrum": 2
+      }
     },
     {
-      "original_source_line": 143, "registration": "direct", "original_target": "Blocks.field_150365_q", "original_metadata": 0,
+      "original_source_line": 143,
+      "registration": "direct",
+      "original_target": "Blocks.field_150365_q",
+      "original_metadata": 0,
       "identifier_evidence": "ajn/q / coal_ore",
-      "modern_ids": ["minecraft:coal_ore"],
-      "aspects": {"terra": 1, "potentia": 2, "ignis": 1}
+      "modern_ids": [
+        "minecraft:coal_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "potentia": 2,
+        "ignis": 1
+      }
     },
     {
-      "original_source_line": 144, "registration": "direct", "original_target": "Items.field_151044_h", "original_metadata": "wildcard:32767",
+      "original_source_line": 144,
+      "registration": "direct",
+      "original_target": "Items.field_151044_h",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/h / coal; original metadata0 coal and metadata1 charcoal both inherit the wildcard binding",
-      "modern_ids": ["minecraft:coal", "minecraft:charcoal"],
-      "aspects": {"potentia": 2, "ignis": 2}
+      "modern_ids": [
+        "minecraft:coal",
+        "minecraft:charcoal"
+      ],
+      "aspects": {
+        "potentia": 2,
+        "ignis": 2
+      }
     },
     {
-      "original_source_line": 145, "registration": "direct", "original_target": "ore_dictionary:dustRedstone",
+      "original_source_line": 145,
+      "registration": "direct",
+      "original_target": "ore_dictionary:dustRedstone",
       "identifier_evidence": "Items.field_151137_ax / ade/ax / redstone",
-      "modern_ids": ["minecraft:redstone"],
-      "aspects": {"potentia": 2, "machina": 1}
+      "modern_ids": [
+        "minecraft:redstone"
+      ],
+      "aspects": {
+        "potentia": 2,
+        "machina": 1
+      }
     },
     {
-      "original_source_line": 146, "registration": "direct", "original_target": "ore_dictionary:dustGlowstone",
+      "original_source_line": 146,
+      "registration": "direct",
+      "original_target": "ore_dictionary:dustGlowstone",
       "identifier_evidence": "Items.field_151114_aO / ade/aO / glowstone_dust",
-      "modern_ids": ["minecraft:glowstone_dust"],
-      "aspects": {"sensus": 1, "lux": 2}
+      "modern_ids": [
+        "minecraft:glowstone_dust"
+      ],
+      "aspects": {
+        "sensus": 1,
+        "lux": 2
+      }
     },
     {
-      "original_source_line": 147, "registration": "direct", "original_target": "ore_dictionary:glowstone",
+      "original_source_line": 147,
+      "registration": "direct",
+      "original_target": "ore_dictionary:glowstone",
       "identifier_evidence": "Blocks.field_150426_aN / ajn/aN / glowstone",
-      "modern_ids": ["minecraft:glowstone"],
-      "aspects": {"sensus": 3, "lux": 10}
+      "modern_ids": [
+        "minecraft:glowstone"
+      ],
+      "aspects": {
+        "sensus": 3,
+        "lux": 10
+      }
     },
     {
-      "original_source_line": 149, "registration": "direct", "original_target": "ore_dictionary:nuggetCopper",
+      "original_source_line": 149,
+      "registration": "direct",
+      "original_target": "ore_dictionary:nuggetCopper",
       "identifier_evidence": "Explicit modern identifier adaptation from ConfigItems.itemNugget metadata1: config_items:277 and item_nugget:40; the original registers the branch only when Config.foundCopperIngot, and copper is vanilla in 1.21.1",
-      "modern_ids": ["thaumcraft:copper_nugget"],
-      "aspects": {"metallum": 1}
+      "modern_ids": [
+        "thaumcraft:copper_nugget"
+      ],
+      "aspects": {
+        "metallum": 1
+      }
     },
     {
-      "original_source_line": 153, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 17,
+      "original_source_line": 153,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget",
+      "original_metadata": 17,
       "identifier_evidence": "Native Copper Cluster, ItemNugget metadata 17; flattened to the native cluster item; the original registers the branch only when Config.foundCopperIngot, and copper is vanilla in 1.21.1",
-      "modern_ids": ["thaumcraft:cluster_copper"],
-      "aspects": {"ordo": 1, "metallum": 5, "terra": 1, "permutatio": 2}
+      "modern_ids": [
+        "thaumcraft:cluster_copper"
+      ],
+      "aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "permutatio": 2
+      }
     },
     {
-      "original_source_line": 180, "registration": "direct", "original_target": "Blocks.field_150354_m", "original_metadata": "wildcard:32767",
+      "original_source_line": 176,
+      "registration": "direct",
+      "original_target": "Blocks.field_150357_h",
+      "original_metadata": 0,
+      "identifier_evidence": "Blocks.field_150357_h / Blocks.bedrock metadata0; the original block keeps its literal tag",
+      "modern_ids": [
+        "minecraft:bedrock"
+      ],
+      "aspects": {
+        "vacuos": 16,
+        "perditio": 16,
+        "terra": 16,
+        "tenebrae": 16
+      }
+    },
+    {
+      "original_source_line": 179,
+      "registration": "direct",
+      "original_target": "Blocks.field_150458_ak",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150458_ak / Blocks.farmland wildcard metadata; the original block keeps its literal tag",
+      "modern_ids": [
+        "minecraft:farmland"
+      ],
+      "aspects": {
+        "terra": 1,
+        "meto": 2
+      }
+    },
+    {
+      "original_source_line": 180,
+      "registration": "direct",
+      "original_target": "Blocks.field_150354_m",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/m / sand metadata0 sand and metadata1 red_sand",
-      "modern_ids": ["minecraft:sand", "minecraft:red_sand"],
-      "aspects": {"terra": 1, "perditio": 1}
+      "modern_ids": [
+        "minecraft:sand",
+        "minecraft:red_sand"
+      ],
+      "aspects": {
+        "terra": 1,
+        "perditio": 1
+      }
     },
     {
-      "original_source_line": 184, "registration": "direct", "original_target": "Blocks.field_150351_n", "original_metadata": 0,
+      "original_source_line": 182,
+      "registration": "direct",
+      "original_target": "Items.field_151119_aD",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151119_aD / Items.clay_ball wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:clay_ball"
+      ],
+      "aspects": {
+        "aqua": 1,
+        "terra": 1
+      }
+    },
+    {
+      "original_source_line": 183,
+      "registration": "direct",
+      "original_target": "Blocks.field_150377_bs",
+      "original_metadata": 0,
+      "identifier_evidence": "Blocks.field_150377_bs / Blocks.end_stone metadata0; the original block keeps its literal tag",
+      "modern_ids": [
+        "minecraft:end_stone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "tenebrae": 1
+      }
+    },
+    {
+      "original_source_line": 184,
+      "registration": "direct",
+      "original_target": "Blocks.field_150351_n",
+      "original_metadata": 0,
       "identifier_evidence": "ajn/n / gravel; the two EARTH additions in the original sum to terra2",
-      "modern_ids": ["minecraft:gravel"],
-      "aspects": {"terra": 2}
+      "modern_ids": [
+        "minecraft:gravel"
+      ],
+      "aspects": {
+        "terra": 2
+      }
     },
     {
-      "original_source_line": 191, "registration": "direct", "original_target": "Blocks.field_150425_aM", "original_metadata": "wildcard:32767",
+      "original_source_line": 187,
+      "registration": "direct",
+      "original_target": "Blocks.field_150405_ch",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150405_ch / Blocks.hardened_clay wildcard metadata; 1.7.10 hardened clay is the 1.21.1 terracotta block",
+      "modern_ids": [
+        "minecraft:terracotta"
+      ],
+      "aspects": {
+        "terra": 4,
+        "ignis": 1
+      }
+    },
+    {
+      "original_source_line": 188,
+      "registration": "direct",
+      "original_target": "Blocks.field_150406_ce",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150406_ce / Blocks.stained_hardened_clay wildcard metadata; 1.7.10 stained hardened clay is one wildcard family; 1.21.1 splits it into sixteen stained terracotta blocks",
+      "modern_ids": [
+        "minecraft:white_terracotta",
+        "minecraft:orange_terracotta",
+        "minecraft:magenta_terracotta",
+        "minecraft:light_blue_terracotta",
+        "minecraft:yellow_terracotta",
+        "minecraft:lime_terracotta",
+        "minecraft:pink_terracotta",
+        "minecraft:gray_terracotta",
+        "minecraft:light_gray_terracotta",
+        "minecraft:cyan_terracotta",
+        "minecraft:purple_terracotta",
+        "minecraft:blue_terracotta",
+        "minecraft:brown_terracotta",
+        "minecraft:green_terracotta",
+        "minecraft:red_terracotta",
+        "minecraft:black_terracotta"
+      ],
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_source_line": 189,
+      "registration": "direct",
+      "original_target": "Items.field_151118_aC",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151118_aC / Items.brick wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:brick"
+      ],
+      "aspects": {
+        "terra": 1,
+        "ignis": 1
+      }
+    },
+    {
+      "original_source_line": 190,
+      "registration": "direct",
+      "original_target": "Items.field_151130_bT",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151130_bT / Items.netherbrick wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:nether_brick"
+      ],
+      "aspects": {
+        "ignis": 1
+      }
+    },
+    {
+      "original_source_line": 191,
+      "registration": "direct",
+      "original_target": "Blocks.field_150425_aM",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/aM / soul_sand",
-      "modern_ids": ["minecraft:soul_sand"],
-      "aspects": {"terra": 1, "vinculum": 1, "spiritus": 1}
+      "modern_ids": [
+        "minecraft:soul_sand"
+      ],
+      "aspects": {
+        "terra": 1,
+        "vinculum": 1,
+        "spiritus": 1
+      }
     },
     {
-      "original_source_line": 192, "registration": "direct", "original_target": "Blocks.field_150424_aL", "original_metadata": "wildcard:32767",
+      "original_source_line": 192,
+      "registration": "direct",
+      "original_target": "Blocks.field_150424_aL",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/aL / netherrack; repeated EARTH additions sum to terra2",
-      "modern_ids": ["minecraft:netherrack"],
-      "aspects": {"terra": 2, "ignis": 1}
+      "modern_ids": [
+        "minecraft:netherrack"
+      ],
+      "aspects": {
+        "terra": 2,
+        "ignis": 1
+      }
     },
     {
-      "original_source_line": 194, "registration": "direct", "original_target": "Blocks.field_150359_w", "original_metadata": "wildcard:32767",
+      "original_source_line": 193,
+      "registration": "direct",
+      "original_target": "Blocks.field_150385_bj",
+      "original_metadata": 0,
+      "identifier_evidence": "Blocks.field_150385_bj / Blocks.nether_brick metadata0; the original nether brick block is the 1.21.1 nether_bricks block",
+      "modern_ids": [
+        "minecraft:nether_bricks"
+      ],
+      "aspects": {
+        "terra": 2,
+        "ignis": 1
+      }
+    },
+    {
+      "original_source_line": 194,
+      "registration": "direct",
+      "original_target": "Blocks.field_150359_w",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/w / glass; stained glass and panes are not generalized from this row",
-      "modern_ids": ["minecraft:glass"],
-      "aspects": {"vitreus": 1}
+      "modern_ids": [
+        "minecraft:glass"
+      ],
+      "aspects": {
+        "vitreus": 1
+      }
     },
     {
-      "original_source_line": 215, "registration": "direct", "original_target": "Items.field_151075_bm", "original_metadata": 0,
+      "original_source_line": 196,
+      "registration": "direct",
+      "original_target": "Blocks.field_150341_Y",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150341_Y / Blocks.mossy_cobblestone wildcard metadata; the original block keeps its literal tag",
+      "modern_ids": [
+        "minecraft:mossy_cobblestone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "herba": 1,
+        "praecantatio": 1
+      }
+    },
+    {
+      "original_source_line": 198,
+      "registration": "direct",
+      "original_target": "Blocks.field_150418_aU",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150418_aU / Blocks.monster_egg wildcard metadata; 1.21.1 renamed monster_egg to infested_stone",
+      "modern_ids": [
+        "minecraft:infested_stone"
+      ],
+      "aspects": {
+        "terra": 2,
+        "bestia": 1,
+        "vinculum": 1
+      }
+    },
+    {
+      "original_source_line": 199,
+      "registration": "direct",
+      "original_target": "Blocks.field_150417_aV",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick wildcard metadata; 1.21.1 splits the four original stonebrick metadata variants into four blocks",
+      "modern_ids": [
+        "minecraft:stone_bricks"
+      ],
+      "aspects": {
+        "terra": 2
+      }
+    },
+    {
+      "original_source_line": 200,
+      "registration": "direct",
+      "original_target": "Blocks.field_150417_aV",
+      "original_metadata": 1,
+      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata0; 1.21.1 splits the four original stonebrick metadata variants into four blocks",
+      "modern_ids": [
+        "minecraft:mossy_stone_bricks"
+      ],
+      "aspects": {
+        "herba": 1
+      }
+    },
+    {
+      "original_source_line": 201,
+      "registration": "direct",
+      "original_target": "Blocks.field_150417_aV",
+      "original_metadata": 2,
+      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata0; 1.21.1 splits the four original stonebrick metadata variants into four blocks",
+      "modern_ids": [
+        "minecraft:cracked_stone_bricks"
+      ],
+      "aspects": {
+        "perditio": 1
+      }
+    },
+    {
+      "original_source_line": 202,
+      "registration": "direct",
+      "original_target": "Blocks.field_150417_aV",
+      "original_metadata": 3,
+      "identifier_evidence": "Blocks.field_150417_aV / Blocks.stonebrick metadata0; 1.21.1 splits the four original stonebrick metadata variants into four blocks",
+      "modern_ids": [
+        "minecraft:chiseled_stone_bricks"
+      ],
+      "aspects": {
+        "ordo": 1
+      }
+    },
+    {
+      "original_source_line": 204,
+      "registration": "direct",
+      "original_target": "Blocks.field_150322_A",
+      "original_metadata": 1,
+      "identifier_evidence": "Blocks.field_150322_A / Blocks.sandstone metadata0; 1.21.1 splits the original sandstone metadata variants into three blocks",
+      "modern_ids": [
+        "minecraft:chiseled_sandstone"
+      ],
+      "aspects": {
+        "praecantatio": 1
+      }
+    },
+    {
+      "original_source_line": 205,
+      "registration": "direct",
+      "original_target": "Blocks.field_150322_A",
+      "original_metadata": 2,
+      "identifier_evidence": "Blocks.field_150322_A / Blocks.sandstone metadata0; 1.21.1 splits the original sandstone metadata variants into three blocks",
+      "modern_ids": [
+        "minecraft:smooth_sandstone"
+      ],
+      "aspects": {
+        "ordo": 1
+      }
+    },
+    {
+      "original_source_line": 211,
+      "registration": "direct",
+      "original_target": "Items.field_151014_N",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151014_N / Items.wheat_seeds wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:wheat_seeds"
+      ],
+      "aspects": {
+        "herba": 1
+      }
+    },
+    {
+      "original_source_line": 212,
+      "registration": "direct",
+      "original_target": "Items.field_151081_bc",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151081_bc / Items.melon_seeds wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:melon_seeds"
+      ],
+      "aspects": {
+        "herba": 1
+      }
+    },
+    {
+      "original_source_line": 213,
+      "registration": "direct",
+      "original_target": "Items.field_151080_bb",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151080_bb / Items.pumpkin_seeds wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:pumpkin_seeds"
+      ],
+      "aspects": {
+        "herba": 1
+      }
+    },
+    {
+      "original_source_line": 215,
+      "registration": "direct",
+      "original_target": "Items.field_151075_bm",
+      "original_metadata": 0,
       "identifier_evidence": "ade/bm / nether_wart",
-      "modern_ids": ["minecraft:nether_wart"],
-      "aspects": {"herba": 1, "praecantatio": 1}
+      "modern_ids": [
+        "minecraft:nether_wart"
+      ],
+      "aspects": {
+        "herba": 1,
+        "praecantatio": 1
+      }
     },
     {
-      "original_source_line": 224, "registration": "direct", "original_target": "Items.field_151015_O", "original_metadata": 0,
+      "original_source_line": 223,
+      "registration": "direct",
+      "original_target": "Items.field_151120_aE",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151120_aE / Items.reeds metadata0; the original reeds item is the 1.21.1 sugar_cane item",
+      "modern_ids": [
+        "minecraft:sugar_cane"
+      ],
+      "aspects": {
+        "herba": 1,
+        "aqua": 1,
+        "aer": 1
+      }
+    },
+    {
+      "original_source_line": 224,
+      "registration": "direct",
+      "original_target": "Items.field_151015_O",
+      "original_metadata": 0,
       "identifier_evidence": "Original ConfigAspects224; MCP field_151015_O = wheat. Genuine Messis source for ordinary Harvest core, not a precomputed golem aspect list.",
-      "modern_ids": ["minecraft:wheat"],
-      "aspects": {"messis": 2, "fames": 1}
+      "modern_ids": [
+        "minecraft:wheat"
+      ],
+      "aspects": {
+        "messis": 2,
+        "fames": 1
+      }
     },
     {
-      "original_source_line": 244, "registration": "direct", "original_target": "Blocks.field_150478_aa", "original_metadata": "wildcard:32767",
+      "original_source_line": 226,
+      "registration": "direct",
+      "original_target": "Items.field_151172_bF",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151172_bF / Items.carrot metadata0; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:carrot"
+      ],
+      "aspects": {
+        "messis": 1,
+        "fames": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_source_line": 227,
+      "registration": "direct",
+      "original_target": "Items.field_151174_bG",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151174_bG / Items.potato metadata0; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:potato"
+      ],
+      "aspects": {
+        "messis": 1,
+        "fames": 1,
+        "terra": 1
+      }
+    },
+    {
+      "original_source_line": 228,
+      "registration": "direct",
+      "original_target": "Items.field_151168_bH",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151168_bH / Items.baked_potato metadata0; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:baked_potato"
+      ],
+      "aspects": {
+        "messis": 1,
+        "fames": 2
+      }
+    },
+    {
+      "original_source_line": 229,
+      "registration": "direct",
+      "original_target": "Items.field_151170_bI",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151170_bI / Items.poisonous_potato metadata0; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:poisonous_potato"
+      ],
+      "aspects": {
+        "messis": 1,
+        "venenum": 2
+      }
+    },
+    {
+      "original_source_line": 232,
+      "registration": "direct",
+      "original_target": "Items.field_151057_cb",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151057_cb / Items.name_tag wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:name_tag"
+      ],
+      "aspects": {
+        "cognitio": 2,
+        "bestia": 2
+      }
+    },
+    {
+      "original_source_line": 233,
+      "registration": "direct",
+      "original_target": "Items.field_151138_bX",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151138_bX / Items.iron_horse_armor wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:iron_horse_armor"
+      ],
+      "aspects": {
+        "tutamen": 2,
+        "bestia": 2
+      }
+    },
+    {
+      "original_source_line": 234,
+      "registration": "direct",
+      "original_target": "Items.field_151136_bY",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151136_bY / Items.golden_horse_armor wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:golden_horse_armor"
+      ],
+      "aspects": {
+        "tutamen": 4,
+        "bestia": 2
+      }
+    },
+    {
+      "original_source_line": 235,
+      "registration": "direct",
+      "original_target": "Items.field_151125_bZ",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151125_bZ / Items.diamond_horse_armor wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:diamond_horse_armor"
+      ],
+      "aspects": {
+        "tutamen": 6,
+        "bestia": 2
+      }
+    },
+    {
+      "original_source_line": 240,
+      "registration": "direct",
+      "original_target": "Blocks.field_150403_cj",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150403_cj / Blocks.packed_ice wildcard metadata; the original block keeps its literal tag",
+      "modern_ids": [
+        "minecraft:packed_ice"
+      ],
+      "aspects": {
+        "gelum": 3,
+        "terra": 1
+      }
+    },
+    {
+      "original_source_line": 241,
+      "registration": "direct",
+      "original_target": "Items.field_151126_ay",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151126_ay / Items.snowball wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:snowball"
+      ],
+      "aspects": {
+        "gelum": 1
+      }
+    },
+    {
+      "original_source_line": 242,
+      "registration": "direct",
+      "original_target": "Items.field_151106_aX",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151106_aX / Items.cookie wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:cookie"
+      ],
+      "aspects": {
+        "fames": 1
+      }
+    },
+    {
+      "original_source_line": 244,
+      "registration": "direct",
+      "original_target": "Blocks.field_150478_aa",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/aa / torch; original registration is direct, not complex",
-      "modern_ids": ["minecraft:torch"],
-      "aspects": {"lux": 1}
+      "modern_ids": [
+        "minecraft:torch"
+      ],
+      "aspects": {
+        "lux": 1
+      }
     },
     {
-      "original_source_line": 246, "registration": "direct", "original_target": "Items.field_151145_ak", "original_metadata": "wildcard:32767",
+      "original_source_line": 245,
+      "registration": "direct",
+      "original_target": "Blocks.field_150321_G",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150321_G / Blocks.web wildcard metadata; the original web block is the 1.21.1 cobweb block",
+      "modern_ids": [
+        "minecraft:cobweb"
+      ],
+      "aspects": {
+        "vinculum": 2,
+        "pannus": 1
+      }
+    },
+    {
+      "original_source_line": 246,
+      "registration": "direct",
+      "original_target": "Items.field_151145_ak",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/ak / flint",
-      "modern_ids": ["minecraft:flint"],
-      "aspects": {"terra": 1, "instrumentum": 1}
+      "modern_ids": [
+        "minecraft:flint"
+      ],
+      "aspects": {
+        "terra": 1,
+        "instrumentum": 1
+      }
     },
     {
-      "original_source_line": 247, "registration": "direct", "original_target": "Items.field_151007_F", "original_metadata": "wildcard:32767",
+      "original_source_line": 247,
+      "registration": "direct",
+      "original_target": "Items.field_151007_F",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/F / string",
-      "modern_ids": ["minecraft:string"],
-      "aspects": {"bestia": 1, "pannus": 1}
+      "modern_ids": [
+        "minecraft:string"
+      ],
+      "aspects": {
+        "bestia": 1,
+        "pannus": 1
+      }
     },
     {
-      "original_source_line": 248, "registration": "direct", "original_target": "Items.field_151123_aH", "original_metadata": 0,
+      "original_source_line": 248,
+      "registration": "direct",
+      "original_target": "Items.field_151123_aH",
+      "original_metadata": 0,
       "identifier_evidence": "ade/aH / slime_ball",
-      "modern_ids": ["minecraft:slime_ball"],
-      "aspects": {"limus": 2}
+      "modern_ids": [
+        "minecraft:slime_ball"
+      ],
+      "aspects": {
+        "limus": 2
+      }
     },
     {
-      "original_source_line": 249, "registration": "direct", "original_target": "Items.field_151116_aA", "original_metadata": "wildcard:32767",
+      "original_source_line": 249,
+      "registration": "direct",
+      "original_target": "Items.field_151116_aA",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/aA / leather",
-      "modern_ids": ["minecraft:leather"],
-      "aspects": {"pannus": 2, "bestia": 1, "tutamen": 1}
+      "modern_ids": [
+        "minecraft:leather"
+      ],
+      "aspects": {
+        "pannus": 2,
+        "bestia": 1,
+        "tutamen": 1
+      }
     },
     {
-      "original_source_line": 250, "registration": "direct", "original_target": "Items.field_151078_bh", "original_metadata": "wildcard:32767",
+      "original_source_line": 250,
+      "registration": "direct",
+      "original_target": "Items.field_151078_bh",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/bh / rotten_flesh",
-      "modern_ids": ["minecraft:rotten_flesh"],
-      "aspects": {"humanus": 1, "corpus": 2}
+      "modern_ids": [
+        "minecraft:rotten_flesh"
+      ],
+      "aspects": {
+        "humanus": 1,
+        "corpus": 2
+      }
     },
     {
-      "original_source_line": 251, "registration": "direct", "original_target": "Items.field_151008_G", "original_metadata": "wildcard:32767",
+      "original_source_line": 251,
+      "registration": "direct",
+      "original_target": "Items.field_151008_G",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/G / feather",
-      "modern_ids": ["minecraft:feather"],
-      "aspects": {"volatus": 2, "aer": 1}
+      "modern_ids": [
+        "minecraft:feather"
+      ],
+      "aspects": {
+        "volatus": 2,
+        "aer": 1
+      }
     },
     {
-      "original_source_line": 252, "registration": "direct", "original_target": "Items.field_151103_aS", "original_metadata": "wildcard:32767",
+      "original_source_line": 252,
+      "registration": "direct",
+      "original_target": "Items.field_151103_aS",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/aS / bone",
-      "modern_ids": ["minecraft:bone"],
-      "aspects": {"mortuus": 2, "corpus": 1}
+      "modern_ids": [
+        "minecraft:bone"
+      ],
+      "aspects": {
+        "mortuus": 2,
+        "corpus": 1
+      }
     },
     {
-      "original_source_line": 254, "registration": "direct", "original_target": "Items.field_151070_bp", "original_metadata": "wildcard:32767",
+      "original_source_line": 253,
+      "registration": "direct",
+      "original_target": "Items.field_151110_aK",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151110_aK / Items.egg wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:egg"
+      ],
+      "aspects": {
+        "limus": 1,
+        "victus": 1,
+        "bestia": 1
+      }
+    },
+    {
+      "original_source_line": 254,
+      "registration": "direct",
+      "original_target": "Items.field_151070_bp",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/bp / spider_eye",
-      "modern_ids": ["minecraft:spider_eye"],
-      "aspects": {"sensus": 2, "bestia": 2, "venenum": 2}
+      "modern_ids": [
+        "minecraft:spider_eye"
+      ],
+      "aspects": {
+        "sensus": 2,
+        "bestia": 2,
+        "venenum": 2
+      }
     },
     {
-      "original_source_line": 255, "registration": "direct", "original_target": "Items.field_151016_H", "original_metadata": "wildcard:32767",
+      "original_source_line": 255,
+      "registration": "direct",
+      "original_target": "Items.field_151016_H",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/H / gunpowder",
-      "modern_ids": ["minecraft:gunpowder"],
-      "aspects": {"ignis": 4, "perditio": 4}
+      "modern_ids": [
+        "minecraft:gunpowder"
+      ],
+      "aspects": {
+        "ignis": 4,
+        "perditio": 4
+      }
     },
     {
-      "original_source_line": 256, "registration": "direct", "original_target": "Blocks.field_150325_L", "original_metadata": "wildcard:32767",
+      "original_source_line": 256,
+      "registration": "direct",
+      "original_target": "Blocks.field_150325_L",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/L / wool metadata0-15 flattened to the original sixteen colors",
-      "modern_ids": ["minecraft:white_wool", "minecraft:orange_wool", "minecraft:magenta_wool", "minecraft:light_blue_wool", "minecraft:yellow_wool", "minecraft:lime_wool", "minecraft:pink_wool", "minecraft:gray_wool", "minecraft:light_gray_wool", "minecraft:cyan_wool", "minecraft:purple_wool", "minecraft:blue_wool", "minecraft:brown_wool", "minecraft:green_wool", "minecraft:red_wool", "minecraft:black_wool"],
-      "aspects": {"pannus": 4, "fabrico": 1}
+      "modern_ids": [
+        "minecraft:white_wool",
+        "minecraft:orange_wool",
+        "minecraft:magenta_wool",
+        "minecraft:light_blue_wool",
+        "minecraft:yellow_wool",
+        "minecraft:lime_wool",
+        "minecraft:pink_wool",
+        "minecraft:gray_wool",
+        "minecraft:light_gray_wool",
+        "minecraft:cyan_wool",
+        "minecraft:purple_wool",
+        "minecraft:blue_wool",
+        "minecraft:brown_wool",
+        "minecraft:green_wool",
+        "minecraft:red_wool",
+        "minecraft:black_wool"
+      ],
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      }
     },
     {
-      "original_source_line": 265, "registration": "direct", "original_target": "Items.field_151072_bj", "original_metadata": "wildcard:32767",
+      "original_source_line": 257,
+      "registration": "direct",
+      "original_target": "Items.field_151115_aP",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151115_aP / Items.fish wildcard metadata; the original fish item is the 1.21.1 cod item",
+      "modern_ids": [
+        "minecraft:cod"
+      ],
+      "aspects": {
+        "corpus": 3,
+        "victus": 1,
+        "aqua": 1
+      }
+    },
+    {
+      "original_source_line": 259,
+      "registration": "direct",
+      "original_target": "Items.field_151076_bf",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151076_bf / Items.chicken wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:chicken"
+      ],
+      "aspects": {
+        "corpus": 3,
+        "victus": 2,
+        "bestia": 1
+      }
+    },
+    {
+      "original_source_line": 261,
+      "registration": "direct",
+      "original_target": "Items.field_151147_al",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151147_al / Items.porkchop wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:porkchop"
+      ],
+      "aspects": {
+        "corpus": 3,
+        "victus": 1,
+        "bestia": 1
+      }
+    },
+    {
+      "original_source_line": 263,
+      "registration": "direct",
+      "original_target": "Items.field_151082_bd",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151082_bd / Items.beef wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:beef"
+      ],
+      "aspects": {
+        "corpus": 4,
+        "victus": 2,
+        "bestia": 1
+      }
+    },
+    {
+      "original_source_line": 265,
+      "registration": "direct",
+      "original_target": "Items.field_151072_bj",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/bj / blaze_rod; not a direct blaze_powder binding",
-      "modern_ids": ["minecraft:blaze_rod"],
-      "aspects": {"ignis": 4, "praecantatio": 2}
+      "modern_ids": [
+        "minecraft:blaze_rod"
+      ],
+      "aspects": {
+        "ignis": 4,
+        "praecantatio": 2
+      }
     },
     {
-      "original_source_line": 267, "registration": "direct", "original_target": "Items.field_151079_bi", "original_metadata": "wildcard:32767",
+      "original_source_line": 266,
+      "registration": "direct",
+      "original_target": "Items.field_151141_av",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151141_av / Items.saddle wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:saddle"
+      ],
+      "aspects": {
+        "bestia": 2,
+        "pannus": 3,
+        "iter": 3
+      }
+    },
+    {
+      "original_source_line": 267,
+      "registration": "direct",
+      "original_target": "Items.field_151079_bi",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/bi / ender_pearl",
-      "modern_ids": ["minecraft:ender_pearl"],
-      "aspects": {"alienis": 4, "praecantatio": 2, "iter": 4}
+      "modern_ids": [
+        "minecraft:ender_pearl"
+      ],
+      "aspects": {
+        "alienis": 4,
+        "praecantatio": 2,
+        "iter": 4
+      }
     },
     {
-      "original_source_line": 268, "registration": "direct", "original_target": "Items.field_151073_bk", "original_metadata": "wildcard:32767",
+      "original_source_line": 268,
+      "registration": "direct",
+      "original_target": "Items.field_151073_bk",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/bk / ghast_tear",
-      "modern_ids": ["minecraft:ghast_tear"],
-      "aspects": {"aqua": 1, "exanimis": 4, "spiritus": 4}
+      "modern_ids": [
+        "minecraft:ghast_tear"
+      ],
+      "aspects": {
+        "aqua": 1,
+        "exanimis": 4,
+        "spiritus": 4
+      }
     },
     {
-      "original_source_line": 291, "registration": "complex", "original_target": "Items.field_151121_aF", "original_metadata": 0,
+      "original_source_line": 269,
+      "registration": "direct",
+      "original_target": "Items.field_151144_bL",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151144_bL / Items.skull metadata0; 1.21.1 splits the original skull metadata variants into separate items",
+      "modern_ids": [
+        "minecraft:skeleton_skull"
+      ],
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "exanimis": 4
+      }
+    },
+    {
+      "original_source_line": 270,
+      "registration": "direct",
+      "original_target": "Items.field_151144_bL",
+      "original_metadata": 1,
+      "identifier_evidence": "Items.field_151144_bL / Items.skull metadata0; 1.21.1 splits the original skull metadata variants into separate items",
+      "modern_ids": [
+        "minecraft:wither_skeleton_skull"
+      ],
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "exanimis": 4,
+        "venenum": 4
+      }
+    },
+    {
+      "original_source_line": 271,
+      "registration": "direct",
+      "original_target": "Items.field_151144_bL",
+      "original_metadata": 2,
+      "identifier_evidence": "Items.field_151144_bL / Items.skull metadata0; 1.21.1 splits the original skull metadata variants into separate items",
+      "modern_ids": [
+        "minecraft:zombie_head"
+      ],
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "corpus": 4
+      }
+    },
+    {
+      "original_source_line": 272,
+      "registration": "direct",
+      "original_target": "Items.field_151144_bL",
+      "original_metadata": 3,
+      "identifier_evidence": "Items.field_151144_bL / Items.skull metadata0; 1.21.1 splits the original skull metadata variants into separate items",
+      "modern_ids": [
+        "minecraft:player_head"
+      ],
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "humanus": 4
+      }
+    },
+    {
+      "original_source_line": 273,
+      "registration": "direct",
+      "original_target": "Items.field_151144_bL",
+      "original_metadata": 4,
+      "identifier_evidence": "Items.field_151144_bL / Items.skull metadata0; 1.21.1 splits the original skull metadata variants into separate items",
+      "modern_ids": [
+        "minecraft:creeper_head"
+      ],
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "perditio": 2,
+        "ignis": 2
+      }
+    },
+    {
+      "original_source_line": 274,
+      "registration": "direct",
+      "original_target": "Items.field_151086_cn",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151086_cn / Items.record_11 metadata0; the original record_11 disc is the 1.21.1 music_disc_11 item",
+      "modern_ids": [
+        "minecraft:music_disc_11"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 275,
+      "registration": "direct",
+      "original_target": "Items.field_151096_cd",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151096_cd / Items.record_13 metadata0; the original record_13 disc is the 1.21.1 music_disc_13 item",
+      "modern_ids": [
+        "minecraft:music_disc_13"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "aqua": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 276,
+      "registration": "direct",
+      "original_target": "Items.field_151093_ce",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151093_ce / Items.record_cat metadata0; the original record_cat disc is the 1.21.1 music_disc_cat item",
+      "modern_ids": [
+        "minecraft:music_disc_cat"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "bestia": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 277,
+      "registration": "direct",
+      "original_target": "Items.field_151091_cg",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151091_cg / Items.record_chirp metadata0; the original record_chirp disc is the 1.21.1 music_disc_chirp item",
+      "modern_ids": [
+        "minecraft:music_disc_chirp"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "terra": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 279,
+      "registration": "direct",
+      "original_target": "Items.field_151089_ci",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151089_ci / Items.record_mall metadata0; the original record_mall disc is the 1.21.1 music_disc_mall item",
+      "modern_ids": [
+        "minecraft:music_disc_mall"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "humanus": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 280,
+      "registration": "direct",
+      "original_target": "Items.field_151090_cj",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151090_cj / Items.record_mellohi metadata0; the original record_mellohi disc is the 1.21.1 music_disc_mellohi item",
+      "modern_ids": [
+        "minecraft:music_disc_mellohi"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "fabrico": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 281,
+      "registration": "direct",
+      "original_target": "Items.field_151087_ck",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151087_ck / Items.record_stal metadata0; the original record_stal disc is the 1.21.1 music_disc_stal item",
+      "modern_ids": [
+        "minecraft:music_disc_stal"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "tenebrae": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 282,
+      "registration": "direct",
+      "original_target": "Items.field_151088_cl",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151088_cl / Items.record_strad metadata0; the original record_strad disc is the 1.21.1 music_disc_strad item",
+      "modern_ids": [
+        "minecraft:music_disc_strad"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "machina": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 283,
+      "registration": "direct",
+      "original_target": "Items.field_151085_cm",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151085_cm / Items.record_ward metadata0; the original record_ward disc is the 1.21.1 music_disc_ward item",
+      "modern_ids": [
+        "minecraft:music_disc_ward"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "praecantatio": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 284,
+      "registration": "direct",
+      "original_target": "Items.field_151094_cf",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151094_cf / Items.record_blocks metadata0; the original record_blocks disc is the 1.21.1 music_disc_blocks item",
+      "modern_ids": [
+        "minecraft:music_disc_blocks"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "instrumentum": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 285,
+      "registration": "direct",
+      "original_target": "Items.field_151084_co",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151084_co / Items.record_wait metadata0; the original record_wait disc is the 1.21.1 music_disc_wait item",
+      "modern_ids": [
+        "minecraft:music_disc_wait"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "vinculum": 4,
+        "lucrum": 4
+      }
+    },
+    {
+      "original_source_line": 287,
+      "registration": "direct",
+      "original_target": "Items.field_151020_U",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151020_U / Items.chainmail_helmet wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:chainmail_helmet"
+      ],
+      "aspects": {
+        "metallum": 8
+      }
+    },
+    {
+      "original_source_line": 288,
+      "registration": "direct",
+      "original_target": "Items.field_151023_V",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151023_V / Items.chainmail_chestplate wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:chainmail_chestplate"
+      ],
+      "aspects": {
+        "metallum": 12
+      }
+    },
+    {
+      "original_source_line": 289,
+      "registration": "direct",
+      "original_target": "Items.field_151022_W",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151022_W / Items.chainmail_leggings wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:chainmail_leggings"
+      ],
+      "aspects": {
+        "metallum": 11
+      }
+    },
+    {
+      "original_source_line": 290,
+      "registration": "direct",
+      "original_target": "Items.field_151029_X",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151029_X / Items.chainmail_boots wildcard metadata; the original item keeps its literal tag",
+      "modern_ids": [
+        "minecraft:chainmail_boots"
+      ],
+      "aspects": {
+        "metallum": 7
+      }
+    },
+    {
+      "original_source_line": 291,
+      "registration": "complex",
+      "original_target": "Items.field_151121_aF",
+      "original_metadata": 0,
       "identifier_evidence": "ade/aF / paper; no earlier original direct binding",
-      "modern_ids": ["minecraft:paper"],
-      "aspects": {"cognitio": 1}
+      "modern_ids": [
+        "minecraft:paper"
+      ],
+      "aspects": {
+        "cognitio": 1
+      }
     },
     {
-      "original_source_line": 292, "registration": "complex", "original_target": "Items.field_151122_aG", "original_metadata": 0,
+      "original_source_line": 292,
+      "registration": "complex",
+      "original_target": "Items.field_151122_aG",
+      "original_metadata": 0,
       "identifier_evidence": "ade/aG / book; no earlier original direct binding",
-      "modern_ids": ["minecraft:book"],
-      "aspects": {"cognitio": 3}
+      "modern_ids": [
+        "minecraft:book"
+      ],
+      "aspects": {
+        "cognitio": 3
+      }
     },
     {
-      "original_source_line": 302, "registration": "complex", "original_target": "Items.field_151069_bo", "original_metadata": 0,
+      "original_source_line": 294,
+      "registration": "complex",
+      "original_target": "Blocks.field_150342_X",
+      "original_metadata": 0,
+      "identifier_evidence": "Blocks.field_150342_X / Blocks.bookshelf metadata0; the original complex row adds cognitio8 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:bookshelf"
+      ],
+      "aspects": {
+        "cognitio": 8
+      }
+    },
+    {
+      "original_source_line": 299,
+      "registration": "direct",
+      "original_target": "Blocks.field_150474_ac",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150474_ac / Blocks.mob_spawner wildcard metadata; the original mob_spawner block is the 1.21.1 spawner block",
+      "modern_ids": [
+        "minecraft:spawner"
+      ],
+      "aspects": {
+        "bestia": 4,
+        "iter": 4,
+        "exanimis": 4,
+        "praecantatio": 4
+      }
+    },
+    {
+      "original_source_line": 300,
+      "registration": "complex",
+      "original_target": "Items.field_151061_bv",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151061_bv / Items.ender_eye metadata0; the original complex row adds sensus4 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:ender_eye"
+      ],
+      "aspects": {
+        "sensus": 4
+      }
+    },
+    {
+      "original_source_line": 301,
+      "registration": "complex",
+      "original_target": "Items.field_151032_g",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151032_g / Items.arrow metadata0; the original complex row adds telum1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:arrow"
+      ],
+      "aspects": {
+        "telum": 1
+      }
+    },
+    {
+      "original_source_line": 302,
+      "registration": "complex",
+      "original_target": "Items.field_151069_bo",
+      "original_metadata": 0,
       "identifier_evidence": "ade/bo / glass_bottle; no earlier original direct binding",
-      "modern_ids": ["minecraft:glass_bottle"],
-      "aspects": {"vacuos": 1}
+      "modern_ids": [
+        "minecraft:glass_bottle"
+      ],
+      "aspects": {
+        "vacuos": 1
+      }
     },
     {
-      "original_source_line": 306, "registration": "complex", "original_target": "Items.field_151054_z", "original_metadata": 0,
+      "original_source_line": 306,
+      "registration": "complex",
+      "original_target": "Items.field_151054_z",
+      "original_metadata": 0,
       "identifier_evidence": "ade/z / bowl; no earlier original direct binding",
-      "modern_ids": ["minecraft:bowl"],
-      "aspects": {"vacuos": 1}
+      "modern_ids": [
+        "minecraft:bowl"
+      ],
+      "aspects": {
+        "vacuos": 1
+      }
     },
     {
-      "original_source_line": 312, "registration": "complex", "original_target": "Items.field_151033_d", "original_metadata": "wildcard:32767",
+      "original_source_line": 307,
+      "registration": "complex",
+      "original_target": "Items.field_151009_A",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151009_A / Items.mushroom_stew metadata0; the original complex row adds fames4 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:mushroom_stew"
+      ],
+      "aspects": {
+        "fames": 4
+      }
+    },
+    {
+      "original_source_line": 309,
+      "registration": "complex",
+      "original_target": "Items.field_151139_aw",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151139_aw / Items.iron_door metadata0; the original complex row adds machina2 and motus1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:iron_door"
+      ],
+      "aspects": {
+        "machina": 2,
+        "motus": 1
+      }
+    },
+    {
+      "original_source_line": 310,
+      "registration": "complex",
+      "original_target": "Items.field_151135_aq",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151135_aq / Items.wooden_door metadata0; the original wooden door is the 1.21.1 oak door; the original complex row adds machina1 and motus1",
+      "modern_ids": [
+        "minecraft:oak_door"
+      ],
+      "aspects": {
+        "machina": 1,
+        "motus": 1
+      }
+    },
+    {
+      "original_source_line": 312,
+      "registration": "complex",
+      "original_target": "Items.field_151033_d",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ade/d / flint_and_steel; no earlier original direct binding",
-      "modern_ids": ["minecraft:flint_and_steel"],
-      "aspects": {"ignis": 4}
+      "modern_ids": [
+        "minecraft:flint_and_steel"
+      ],
+      "aspects": {
+        "ignis": 4
+      }
     },
     {
-      "original_source_line": 332, "registration": "complex", "original_target": "Blocks.field_150331_J", "original_metadata": "wildcard:32767",
+      "original_source_line": 313,
+      "registration": "complex",
+      "original_target": "Items.field_151112_aM",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151112_aM / Items.fishing_rod wildcard metadata; the original complex row adds aqua1 and instrumentum1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:fishing_rod"
+      ],
+      "aspects": {
+        "aqua": 1,
+        "instrumentum": 1
+      }
+    },
+    {
+      "original_source_line": 317,
+      "registration": "direct",
+      "original_target": "Items.field_151117_aB",
+      "original_metadata": 0,
+      "identifier_evidence": "aB / milk_bucket metadata0; the original seeds the list with the bucket registered at line314 (metallum8 + vacuos1) and adds fames2 + sano2 + aqua2",
+      "modern_ids": [
+        "minecraft:milk_bucket"
+      ],
+      "aspects": {
+        "metallum": 8,
+        "vacuos": 1,
+        "fames": 2,
+        "sano": 2,
+        "aqua": 2
+      }
+    },
+    {
+      "original_source_line": 319,
+      "registration": "complex",
+      "original_target": "Items.field_151067_bt",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151067_bt / Items.brewing_stand metadata0; the original complex row adds fabrico2 and aqua2 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:brewing_stand"
+      ],
+      "aspects": {
+        "fabrico": 2,
+        "aqua": 2
+      }
+    },
+    {
+      "original_source_line": 320,
+      "registration": "complex",
+      "original_target": "Blocks.field_150430_aB",
+      "original_metadata": 0,
+      "identifier_evidence": "Blocks.field_150430_aB / Blocks.stone_button metadata0; the original complex row adds machina1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:stone_button"
+      ],
+      "aspects": {
+        "machina": 1
+      }
+    },
+    {
+      "original_source_line": 322,
+      "registration": "complex",
+      "original_target": "Blocks.field_150319_E",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150319_E / Blocks.detector_rail wildcard metadata; the original complex row adds machina1 and sensus1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:detector_rail"
+      ],
+      "aspects": {
+        "machina": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_source_line": 323,
+      "registration": "complex",
+      "original_target": "Blocks.field_150318_D",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150318_D / Blocks.golden_rail wildcard metadata; the original complex row adds machina1 and potentia1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:powered_rail"
+      ],
+      "aspects": {
+        "machina": 1,
+        "potentia": 1
+      }
+    },
+    {
+      "original_source_line": 324,
+      "registration": "complex",
+      "original_target": "Blocks.field_150408_cc",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150408_cc / Blocks.activator_rail wildcard metadata; the original complex row adds machina2 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:activator_rail"
+      ],
+      "aspects": {
+        "machina": 2
+      }
+    },
+    {
+      "original_source_line": 325,
+      "registration": "complex",
+      "original_target": "Blocks.field_150396_be",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150396_be / Blocks.fence_gate wildcard metadata; the original wooden fence gate is the 1.21.1 oak fence gate; the original complex row adds machina1 and iter1",
+      "modern_ids": [
+        "minecraft:oak_fence_gate"
+      ],
+      "aspects": {
+        "machina": 1,
+        "iter": 1
+      }
+    },
+    {
+      "original_source_line": 326,
+      "registration": "complex",
+      "original_target": "Blocks.field_150452_aw",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150452_aw / Blocks.wooden_pressure_plate wildcard metadata; the original wooden pressure plate is the 1.21.1 oak pressure plate; the original complex row adds machina1 and sensus1",
+      "modern_ids": [
+        "minecraft:oak_pressure_plate"
+      ],
+      "aspects": {
+        "machina": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_source_line": 327,
+      "registration": "complex",
+      "original_target": "Blocks.field_150456_au",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150456_au / Blocks.stone_pressure_plate wildcard metadata; the original complex row adds machina1 and sensus1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:stone_pressure_plate"
+      ],
+      "aspects": {
+        "machina": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_source_line": 328,
+      "registration": "complex",
+      "original_target": "Blocks.field_150445_bS",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150445_bS / Blocks.light_weighted_pressure_plate wildcard metadata; the original complex row adds machina1 and sensus1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:light_weighted_pressure_plate"
+      ],
+      "aspects": {
+        "machina": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_source_line": 329,
+      "registration": "complex",
+      "original_target": "Blocks.field_150443_bT",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150443_bT / Blocks.heavy_weighted_pressure_plate wildcard metadata; the original complex row adds machina1 and sensus1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:heavy_weighted_pressure_plate"
+      ],
+      "aspects": {
+        "machina": 1,
+        "sensus": 1
+      }
+    },
+    {
+      "original_source_line": 330,
+      "registration": "complex",
+      "original_target": "Blocks.field_150442_at",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150442_at / Blocks.lever wildcard metadata; the original complex row adds machina1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:lever"
+      ],
+      "aspects": {
+        "machina": 1
+      }
+    },
+    {
+      "original_source_line": 332,
+      "registration": "complex",
+      "original_target": "Blocks.field_150331_J",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "Blocks.field_150331_J / ajn/J / piston; joined_srg FD mapping and pinned OpenTC4 fields.csv3775 identify piston, not sticky_piston field_150320_F at original line333. Original orientation metadata maps to native piston block state; no earlier original direct binding.",
-      "modern_ids": ["minecraft:piston"],
-      "aspects": {"machina": 2, "motus": 4}
+      "modern_ids": [
+        "minecraft:piston"
+      ],
+      "aspects": {
+        "machina": 2,
+        "motus": 4
+      }
     },
     {
-      "original_source_line": 336, "registration": "complex", "original_target": "Blocks.field_150415_aT", "original_metadata": "wildcard:32767",
+      "original_source_line": 334,
+      "registration": "complex",
+      "original_target": "Blocks.field_150421_aI",
+      "original_metadata": 0,
+      "identifier_evidence": "Blocks.field_150421_aI / Blocks.jukebox metadata0; the original complex row adds sensus4, machina2 and aer4 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:jukebox"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "machina": 2,
+        "aer": 4
+      }
+    },
+    {
+      "original_source_line": 335,
+      "registration": "complex",
+      "original_target": "Blocks.field_150323_B",
+      "original_metadata": 0,
+      "identifier_evidence": "Blocks.field_150323_B / Blocks.noteblock metadata0; the original complex row adds sensus4, machina1 and aer4 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:note_block"
+      ],
+      "aspects": {
+        "sensus": 4,
+        "machina": 1,
+        "aer": 4
+      }
+    },
+    {
+      "original_source_line": 336,
+      "registration": "complex",
+      "original_target": "Blocks.field_150415_aT",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/aT / trapdoor; original single wooden trapdoor flattened to minecraft:oak_trapdoor, not an any-species or iron-trapdoor tag; no earlier original direct binding",
-      "modern_ids": ["minecraft:oak_trapdoor"],
-      "aspects": {"motus": 1}
+      "modern_ids": [
+        "minecraft:oak_trapdoor"
+      ],
+      "aspects": {
+        "motus": 1
+      }
     },
     {
-      "original_source_line": 338, "registration": "complex", "original_target": "Blocks.field_150460_al", "original_metadata": "wildcard:32767",
+      "original_source_line": 338,
+      "registration": "complex",
+      "original_target": "Blocks.field_150460_al",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "ajn/al / furnace; not the distinct original lit_furnace at line337; no earlier original direct binding",
-      "modern_ids": ["minecraft:furnace"],
-      "aspects": {"ignis": 2}
+      "modern_ids": [
+        "minecraft:furnace"
+      ],
+      "aspects": {
+        "ignis": 2
+      }
     },
     {
-      "original_source_line": 340, "registration": "direct", "original_target": "Blocks.field_150462_ai", "original_metadata": 0,
+      "original_source_line": 340,
+      "registration": "direct",
+      "original_target": "Blocks.field_150462_ai",
+      "original_metadata": 0,
       "identifier_evidence": "ajn/ai / crafting_table; original registration is direct fabrico4",
-      "modern_ids": ["minecraft:crafting_table"],
-      "aspects": {"fabrico": 4}
+      "modern_ids": [
+        "minecraft:crafting_table"
+      ],
+      "aspects": {
+        "fabrico": 4
+      }
     },
     {
-      "original_source_line": 360, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 16,
+      "original_source_line": 344,
+      "registration": "complex",
+      "original_target": "Blocks.field_150471_bO",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Blocks.field_150471_bO / Blocks.wooden_button wildcard metadata; the original wooden button is the 1.21.1 oak button; the original complex row adds machina1",
+      "modern_ids": [
+        "minecraft:oak_button"
+      ],
+      "aspects": {
+        "machina": 1
+      }
+    },
+    {
+      "original_source_line": 345,
+      "registration": "complex",
+      "original_target": "Items.field_151146_bM",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Items.field_151146_bM / Items.carrot_on_a_stick wildcard metadata; the original complex row adds iter4 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:carrot_on_a_stick"
+      ],
+      "aspects": {
+        "iter": 4
+      }
+    },
+    {
+      "original_source_line": 346,
+      "registration": "complex",
+      "original_target": "Items.field_151162_bE",
+      "original_metadata": 0,
+      "identifier_evidence": "Items.field_151162_bE / Items.flower_pot metadata0; the original complex row adds vacuos1 and herba1 to the recipe derived base",
+      "modern_ids": [
+        "minecraft:flower_pot"
+      ],
+      "aspects": {
+        "vacuos": 1,
+        "herba": 1
+      }
+    },
+    {
+      "original_source_line": 360,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget",
+      "original_metadata": 16,
       "identifier_evidence": "Native Iron Cluster, ItemNugget metadata 16; flattened to the native cluster item",
-      "modern_ids": ["thaumcraft:cluster_iron"],
-      "aspects": {"ordo": 1, "metallum": 6, "terra": 1}
+      "modern_ids": [
+        "thaumcraft:cluster_iron"
+      ],
+      "aspects": {
+        "ordo": 1,
+        "metallum": 6,
+        "terra": 1
+      }
     },
     {
-      "original_source_line": 361, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 31,
+      "original_source_line": 361,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget",
+      "original_metadata": 31,
       "identifier_evidence": "Native Gold Cluster, ItemNugget metadata 31; flattened to the native cluster item",
-      "modern_ids": ["thaumcraft:cluster_gold"],
-      "aspects": {"ordo": 1, "metallum": 4, "terra": 1, "lucrum": 2}
+      "modern_ids": [
+        "thaumcraft:cluster_gold"
+      ],
+      "aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "lucrum": 2
+      }
     },
     {
-      "original_source_line": 362, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 21,
+      "original_source_line": 362,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget",
+      "original_metadata": 21,
       "identifier_evidence": "Native Cinnabar Cluster, ItemNugget metadata 21; flattened to the native cluster item",
-      "modern_ids": ["thaumcraft:cluster_cinnabar"],
-      "aspects": {"ordo": 1, "metallum": 4, "terra": 1, "permutatio": 4, "venenum": 2}
+      "modern_ids": [
+        "thaumcraft:cluster_cinnabar"
+      ],
+      "aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "permutatio": 4,
+        "venenum": 2
+      }
     },
     {
-      "original_source_line": 371, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 5,
+      "original_source_line": 371,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget",
+      "original_metadata": 5,
       "identifier_evidence": "ItemNugget:41 nuggetquicksilver, explicitly flattened to quicksilver_drop for the original Tube recipe; not a whole-resource quicksilver or iron nugget",
-      "modern_ids": ["thaumcraft:quicksilver_drop"],
-      "aspects": {"metallum": 1}
+      "modern_ids": [
+        "thaumcraft:quicksilver_drop"
+      ],
+      "aspects": {
+        "metallum": 1
+      }
     },
     {
-      "original_source_line": 372, "registration": "direct", "original_target": "ConfigItems.itemNugget", "original_metadata": 6,
+      "original_source_line": 372,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNugget",
+      "original_metadata": 6,
       "identifier_evidence": "Original nuggetThaumium, now a real native ordinary recipe/arcane ingredient",
-      "modern_ids": ["thaumcraft:thaumium_nugget"],
-      "aspects": {"metallum": 1}
+      "modern_ids": [
+        "thaumcraft:thaumium_nugget"
+      ],
+      "aspects": {
+        "metallum": 1
+      }
     },
     {
-      "original_source_line": 373, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 0,
+      "original_source_line": 373,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 0,
       "identifier_evidence": "Explicit original ore metadata0; existing ThaumcraftOres.CINNABAR identifier",
-      "modern_ids": ["thaumcraft:cinnabar_ore"],
-      "aspects": {"terra": 1, "metallum": 2, "permutatio": 2, "venenum": 1}
+      "modern_ids": [
+        "thaumcraft:cinnabar_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "permutatio": 2,
+        "venenum": 1
+      }
     },
     {
-      "original_source_line": 374, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 7,
+      "original_source_line": 374,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 7,
       "identifier_evidence": "Explicit original ore metadata7; existing ThaumcraftOres.AMBER identifier",
-      "modern_ids": ["thaumcraft:amber_ore"],
-      "aspects": {"terra": 1, "vinculum": 3, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:amber_ore"
+      ],
+      "aspects": {
+        "terra": 1,
+        "vinculum": 3,
+        "vitreus": 2
+      }
     },
     {
-      "original_source_line": 375, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 1,
+      "original_source_line": 375,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 1,
       "identifier_evidence": "Explicit original ore metadata1; existing air_infused_stone identifier",
-      "modern_ids": ["thaumcraft:air_infused_stone"],
-      "aspects": {"terra": 1, "aer": 3, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:air_infused_stone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "aer": 3,
+        "vitreus": 2
+      }
     },
     {
-      "original_source_line": 376, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 2,
+      "original_source_line": 376,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 2,
       "identifier_evidence": "Explicit original ore metadata2; existing fire_infused_stone identifier",
-      "modern_ids": ["thaumcraft:fire_infused_stone"],
-      "aspects": {"terra": 1, "ignis": 3, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:fire_infused_stone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "ignis": 3,
+        "vitreus": 2
+      }
     },
     {
-      "original_source_line": 377, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 3,
+      "original_source_line": 377,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 3,
       "identifier_evidence": "Explicit original ore metadata3; existing water_infused_stone identifier",
-      "modern_ids": ["thaumcraft:water_infused_stone"],
-      "aspects": {"terra": 1, "aqua": 3, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:water_infused_stone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "aqua": 3,
+        "vitreus": 2
+      }
     },
     {
-      "original_source_line": 378, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 4,
+      "original_source_line": 378,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 4,
       "identifier_evidence": "Explicit original ore metadata4; repeated EARTH additions sum to terra4",
-      "modern_ids": ["thaumcraft:earth_infused_stone"],
-      "aspects": {"terra": 4, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:earth_infused_stone"
+      ],
+      "aspects": {
+        "terra": 4,
+        "vitreus": 2
+      }
     },
     {
-      "original_source_line": 379, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 5,
+      "original_source_line": 379,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 5,
       "identifier_evidence": "Explicit original ore metadata5; existing order_infused_stone identifier",
-      "modern_ids": ["thaumcraft:order_infused_stone"],
-      "aspects": {"terra": 1, "ordo": 3, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:order_infused_stone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "ordo": 3,
+        "vitreus": 2
+      }
     },
     {
-      "original_source_line": 380, "registration": "direct", "original_target": "ConfigBlocks.blockCustomOre", "original_metadata": 6,
+      "original_source_line": 380,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomOre",
+      "original_metadata": 6,
       "identifier_evidence": "Explicit original ore metadata6; existing entropy_infused_stone identifier",
-      "modern_ids": ["thaumcraft:entropy_infused_stone"],
-      "aspects": {"terra": 1, "perditio": 3, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:entropy_infused_stone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "perditio": 3,
+        "vitreus": 2
+      }
     },
     {
       "original_source_line": 381,
@@ -603,52 +2402,119 @@
       }
     },
     {
-      "original_source_line": 389, "registration": "direct", "original_target": "ConfigBlocks.blockMagicalLog", "original_metadata": 0,
+      "original_source_line": 389,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockMagicalLog",
+      "original_metadata": 0,
       "identifier_evidence": "Original greatwood log variant, flattened to the native magical-tree block item; overrides earlier logWood arbor4",
-      "modern_ids": ["thaumcraft:greatwood_log"],
-      "aspects": {"arbor": 3, "praecantatio": 1}
+      "modern_ids": [
+        "thaumcraft:greatwood_log"
+      ],
+      "aspects": {
+        "arbor": 3,
+        "praecantatio": 1
+      }
     },
     {
-      "original_source_line": 390, "registration": "direct", "original_target": "ConfigBlocks.blockMagicalLog", "original_metadata": 1,
+      "original_source_line": 390,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockMagicalLog",
+      "original_metadata": 1,
       "identifier_evidence": "Original silverwood log variant, flattened to the native magical-tree block item; orientation is block state, not a new item",
-      "modern_ids": ["thaumcraft:silverwood_log"],
-      "aspects": {"arbor": 3, "praecantatio": 1, "ordo": 1}
+      "modern_ids": [
+        "thaumcraft:silverwood_log"
+      ],
+      "aspects": {
+        "arbor": 3,
+        "praecantatio": 1,
+        "ordo": 1
+      }
     },
     {
-      "original_source_line": 391, "registration": "direct", "original_target": "ConfigBlocks.blockMagicalLeaves", "original_metadata": 0,
+      "original_source_line": 391,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockMagicalLeaves",
+      "original_metadata": 0,
       "identifier_evidence": "Original greatwood leaves variant",
-      "modern_ids": ["thaumcraft:greatwood_leaves"],
-      "aspects": {"herba": 1}
+      "modern_ids": [
+        "thaumcraft:greatwood_leaves"
+      ],
+      "aspects": {
+        "herba": 1
+      }
     },
     {
-      "original_source_line": 392, "registration": "direct", "original_target": "ConfigBlocks.blockMagicalLeaves", "original_metadata": 1,
+      "original_source_line": 392,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockMagicalLeaves",
+      "original_metadata": 1,
       "identifier_evidence": "Original silverwood leaves variant",
-      "modern_ids": ["thaumcraft:silverwood_leaves"],
-      "aspects": {"herba": 1}
+      "modern_ids": [
+        "thaumcraft:silverwood_leaves"
+      ],
+      "aspects": {
+        "herba": 1
+      }
     },
     {
-      "original_source_line": 393, "registration": "direct", "original_target": "ConfigBlocks.blockCustomPlant", "original_metadata": 0,
+      "original_source_line": 393,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomPlant",
+      "original_metadata": 0,
       "identifier_evidence": "Original greatwood sapling variant",
-      "modern_ids": ["thaumcraft:greatwood_sapling"],
-      "aspects": {"herba": 2, "arbor": 1, "praecantatio": 1}
+      "modern_ids": [
+        "thaumcraft:greatwood_sapling"
+      ],
+      "aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      }
     },
     {
-      "original_source_line": 394, "registration": "direct", "original_target": "ConfigBlocks.blockCustomPlant", "original_metadata": 1,
+      "original_source_line": 394,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomPlant",
+      "original_metadata": 1,
       "identifier_evidence": "Original silverwood sapling variant",
-      "modern_ids": ["thaumcraft:silverwood_sapling"],
-      "aspects": {"herba": 2, "arbor": 1, "praecantatio": 1}
+      "modern_ids": [
+        "thaumcraft:silverwood_sapling"
+      ],
+      "aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      }
     },
     {
-      "original_source_line": 395, "registration": "direct", "original_target": "ConfigBlocks.blockCustomPlant", "original_metadata": 2,
+      "original_source_line": 395,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomPlant",
+      "original_metadata": 2,
       "identifier_evidence": "Original shimmerleaf, now an actual native plant and natural silverwood decoration",
-      "modern_ids": ["thaumcraft:shimmerleaf"],
-      "aspects": {"herba": 2, "permutatio": 2, "praecantatio": 2}
+      "modern_ids": [
+        "thaumcraft:shimmerleaf"
+      ],
+      "aspects": {
+        "herba": 2,
+        "permutatio": 2,
+        "praecantatio": 2
+      }
     },
     {
-      "original_source_line": 396, "registration": "direct", "original_target": "ConfigBlocks.blockCustomPlant", "original_metadata": 3,
+      "original_source_line": 396,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCustomPlant",
+      "original_metadata": 3,
       "identifier_evidence": "Original cinderpearl, now an actual native hot-desert plant",
-      "modern_ids": ["thaumcraft:cinderpearl"],
-      "aspects": {"herba": 2, "ignis": 2, "praecantatio": 2}
+      "modern_ids": [
+        "thaumcraft:cinderpearl"
+      ],
+      "aspects": {
+        "herba": 2,
+        "ignis": 2,
+        "praecantatio": 2
+      }
     },
     {
       "original_source_line": 397,
@@ -666,220 +2532,527 @@
       }
     },
     {
-      "original_source_line": 398, "registration": "direct", "original_target": "ConfigBlocks.blockCosmeticSolid", "original_metadata": 6,
+      "original_source_line": 398,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCosmeticSolid",
+      "original_metadata": 6,
       "identifier_evidence": "Original arcane stone variant, flattened to native masonry block/item",
-      "modern_ids": ["thaumcraft:arcane_stone"],
-      "aspects": {"terra": 1, "praecantatio": 1}
+      "modern_ids": [
+        "thaumcraft:arcane_stone"
+      ],
+      "aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      }
     },
     {
-      "original_source_line": 399, "registration": "direct", "original_target": "ConfigBlocks.blockCosmeticSolid", "original_metadata": 7,
+      "original_source_line": 399,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCosmeticSolid",
+      "original_metadata": 7,
       "identifier_evidence": "Original arcane stone bricks variant; stairs/slabs remain recipe-derived, not guessed direct bindings",
-      "modern_ids": ["thaumcraft:arcane_stone_bricks"],
-      "aspects": {"terra": 1, "praecantatio": 1}
+      "modern_ids": [
+        "thaumcraft:arcane_stone_bricks"
+      ],
+      "aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      }
     },
     {
-      "original_source_line": 400, "registration": "direct", "original_target": "ConfigItems.itemResource", "original_metadata": 3,
+      "original_source_line": 400,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemResource",
+      "original_metadata": 3,
       "identifier_evidence": "item_resource:84; explicit existing MATERIALS quick_silver identifier",
-      "modern_ids": ["thaumcraft:quick_silver"],
-      "aspects": {"metallum": 3, "venenum": 1, "permutatio": 2}
+      "modern_ids": [
+        "thaumcraft:quick_silver"
+      ],
+      "aspects": {
+        "metallum": 3,
+        "venenum": 1,
+        "permutatio": 2
+      }
     },
     {
-      "original_source_line": 401, "registration": "direct", "original_target": "ConfigItems.itemZombieBrain", "original_metadata": 0,
+      "original_source_line": 401,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemZombieBrain",
+      "original_metadata": 0,
       "identifier_evidence": "config_items:479-480; separate original itemZombieBrain, existing MATERIALS zombie_brain identifier",
-      "modern_ids": ["thaumcraft:zombie_brain"],
-      "aspects": {"corpus": 2, "cognitio": 4, "exanimis": 2}
+      "modern_ids": [
+        "thaumcraft:zombie_brain"
+      ],
+      "aspects": {
+        "corpus": 2,
+        "cognitio": 4,
+        "exanimis": 2
+      }
     },
     {
-      "original_source_line": 402, "registration": "direct", "original_target": "ConfigItems.itemResource", "original_metadata": 6,
+      "original_source_line": 402,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemResource",
+      "original_metadata": 6,
       "identifier_evidence": "item_resource:87; explicit existing MATERIALS amber_gem identifier",
-      "modern_ids": ["thaumcraft:amber_gem"],
-      "aspects": {"vinculum": 2, "vitreus": 2}
+      "modern_ids": [
+        "thaumcraft:amber_gem"
+      ],
+      "aspects": {
+        "vinculum": 2,
+        "vitreus": 2
+      }
     },
     {
-      "original_source_line": 403, "registration": "direct", "original_target": "ConfigItems.itemResource", "original_metadata": 9,
+      "original_source_line": 403,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemResource",
+      "original_metadata": 9,
       "identifier_evidence": "item_resource:90; explicit existing MATERIALS knowledge_fragment identifier",
-      "modern_ids": ["thaumcraft:knowledge_fragment"],
-      "aspects": {"cognitio": 8}
+      "modern_ids": [
+        "thaumcraft:knowledge_fragment"
+      ],
+      "aspects": {
+        "cognitio": 8
+      }
     },
     {
-      "original_source_line": 404, "registration": "direct", "original_target": "ConfigItems.itemResource", "original_metadata": 11,
+      "original_source_line": 404,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemResource",
+      "original_metadata": 11,
       "identifier_evidence": "item_resource:92; explicit existing MATERIALS tainted_goo identifier",
-      "modern_ids": ["thaumcraft:tainted_goo"],
-      "aspects": {"vitium": 3, "limus": 1}
+      "modern_ids": [
+        "thaumcraft:tainted_goo"
+      ],
+      "aspects": {
+        "vitium": 3,
+        "limus": 1
+      }
     },
     {
-      "original_source_line": 405, "registration": "direct", "original_target": "ConfigItems.itemResource", "original_metadata": 12,
+      "original_source_line": 405,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemResource",
+      "original_metadata": 12,
       "identifier_evidence": "item_resource:93; explicit existing MATERIALS taint_tendril identifier",
-      "modern_ids": ["thaumcraft:taint_tendril"],
-      "aspects": {"vitium": 2, "lucrum": 1, "fames": 1}
+      "modern_ids": [
+        "thaumcraft:taint_tendril"
+      ],
+      "aspects": {
+        "vitium": 2,
+        "lucrum": 1,
+        "fames": 1
+      }
     },
     {
-      "original_source_line": 406, "registration": "direct", "original_target": "ConfigItems.itemResource", "original_metadata": 18,
+      "original_source_line": 406,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemResource",
+      "original_metadata": 18,
       "identifier_evidence": "item_resource:100; explicit existing MATERIALS gold_coin identifier",
-      "modern_ids": ["thaumcraft:gold_coin"],
-      "aspects": {"lucrum": 1}
+      "modern_ids": [
+        "thaumcraft:gold_coin"
+      ],
+      "aspects": {
+        "lucrum": 1
+      }
     },
     {
-      "original_source_line": 407, "registration": "direct", "original_target": "ConfigItems.itemLootbag", "original_metadata": 0,
-      "identifier_evidence": "Oracle ConfigAspects407 registers the common loot bag metadata0 with lucrum8; ThaumcraftLoot registers the flattened loot_bag_common item",
-      "modern_ids": ["thaumcraft:loot_bag_common"],
-      "aspects": {"lucrum": 8}
+      "original_source_line": 407,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemLootbag",
+      "original_metadata": 0,
+      "identifier_evidence": "config_items: loot bag metadata0 is the common bag; the native port flattens the three original metadata variants into three items",
+      "modern_ids": [
+        "thaumcraft:loot_bag_common"
+      ],
+      "aspects": {
+        "lucrum": 8
+      }
     },
     {
-      "original_source_line": 408, "registration": "direct", "original_target": "ConfigItems.itemLootbag", "original_metadata": 1,
-      "identifier_evidence": "Oracle ConfigAspects408 registers the uncommon loot bag metadata1 with lucrum16; ThaumcraftLoot registers the flattened loot_bag_uncommon item",
-      "modern_ids": ["thaumcraft:loot_bag_uncommon"],
-      "aspects": {"lucrum": 16}
+      "original_source_line": 408,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemLootbag",
+      "original_metadata": 1,
+      "identifier_evidence": "config_items: loot bag metadata1 is the uncommon bag; the native port flattens the three original metadata variants into three items",
+      "modern_ids": [
+        "thaumcraft:loot_bag_uncommon"
+      ],
+      "aspects": {
+        "lucrum": 16
+      }
     },
     {
-      "original_source_line": 409, "registration": "direct", "original_target": "ConfigItems.itemLootbag", "original_metadata": 2,
-      "identifier_evidence": "Oracle ConfigAspects409 registers the rare loot bag metadata2 with lucrum32; ThaumcraftLoot registers the flattened loot_bag_rare item",
-      "modern_ids": ["thaumcraft:loot_bag_rare"],
-      "aspects": {"lucrum": 32}
+      "original_source_line": 409,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemLootbag",
+      "original_metadata": 2,
+      "identifier_evidence": "config_items: loot bag metadata2 is the rare bag; the native port flattens the three original metadata variants into three items",
+      "modern_ids": [
+        "thaumcraft:loot_bag_rare"
+      ],
+      "aspects": {
+        "lucrum": 32
+      }
     },
     {
-      "original_source_line": 410, "registration": "direct", "original_target": "ConfigItems.itemNuggetBeef", "original_metadata": "wildcard:32767",
+      "original_source_line": 410,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNuggetBeef",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "Oracle ConfigAspects410 registers the beef nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_beef item",
-      "modern_ids": ["thaumcraft:nugget_beef"],
-      "aspects": {"fames": 1}
+      "modern_ids": [
+        "thaumcraft:nugget_beef"
+      ],
+      "aspects": {
+        "fames": 1
+      }
     },
     {
-      "original_source_line": 411, "registration": "direct", "original_target": "ConfigItems.itemNuggetChicken", "original_metadata": "wildcard:32767",
+      "original_source_line": 411,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNuggetChicken",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "Oracle ConfigAspects411 registers the chicken nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_chicken item",
-      "modern_ids": ["thaumcraft:nugget_chicken"],
-      "aspects": {"fames": 1}
+      "modern_ids": [
+        "thaumcraft:nugget_chicken"
+      ],
+      "aspects": {
+        "fames": 1
+      }
     },
     {
-      "original_source_line": 412, "registration": "direct", "original_target": "ConfigItems.itemNuggetPork", "original_metadata": "wildcard:32767",
+      "original_source_line": 412,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNuggetPork",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "Oracle ConfigAspects412 registers the pork nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_pork item",
-      "modern_ids": ["thaumcraft:nugget_pork"],
-      "aspects": {"fames": 1}
+      "modern_ids": [
+        "thaumcraft:nugget_pork"
+      ],
+      "aspects": {
+        "fames": 1
+      }
     },
     {
-      "original_source_line": 413, "registration": "direct", "original_target": "ConfigItems.itemNuggetFish", "original_metadata": "wildcard:32767",
+      "original_source_line": 413,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemNuggetFish",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "Oracle ConfigAspects413 registers the fish nugget with a wildcard metadata and fames1; ThaumcraftLegacyItems registers the flattened nugget_fish item",
-      "modern_ids": ["thaumcraft:nugget_fish"],
-      "aspects": {"fames": 1}
+      "modern_ids": [
+        "thaumcraft:nugget_fish"
+      ],
+      "aspects": {
+        "fames": 1
+      }
     },
     {
-      "original_source_line": 414, "registration": "complex", "original_target": "ConfigItems.itemTripleMeatTreat", "original_metadata": "wildcard:32767",
+      "original_source_line": 414,
+      "registration": "complex",
+      "original_target": "ConfigItems.itemTripleMeatTreat",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "Oracle ConfigAspects414 registers the triple meat treat with a wildcard metadata; the supplied sano1 is ADDED to the recipe-derived base, the original remove(fames1) applies to the supplied list only",
-      "modern_ids": ["thaumcraft:triple_meat_treat"],
-      "aspects": {"sano": 1}
+      "modern_ids": [
+        "thaumcraft:triple_meat_treat"
+      ],
+      "aspects": {
+        "sano": 1
+      }
     },
     {
-      "original_source_line": 415, "registration": "direct", "original_target": "ConfigItems.itemShard", "original_metadata": 0,
+      "original_source_line": 415,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemShard",
+      "original_metadata": 0,
       "identifier_evidence": "Explicit original primal shard metadata0; existing air_shard identifier",
-      "modern_ids": ["thaumcraft:air_shard"],
-      "aspects": {"praecantatio": 1, "aer": 2, "vitreus": 1}
+      "modern_ids": [
+        "thaumcraft:air_shard"
+      ],
+      "aspects": {
+        "praecantatio": 1,
+        "aer": 2,
+        "vitreus": 1
+      }
     },
     {
-      "original_source_line": 416, "registration": "direct", "original_target": "ConfigItems.itemShard", "original_metadata": 1,
+      "original_source_line": 416,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemShard",
+      "original_metadata": 1,
       "identifier_evidence": "Explicit original primal shard metadata1; existing fire_shard identifier",
-      "modern_ids": ["thaumcraft:fire_shard"],
-      "aspects": {"praecantatio": 1, "ignis": 2, "vitreus": 1}
+      "modern_ids": [
+        "thaumcraft:fire_shard"
+      ],
+      "aspects": {
+        "praecantatio": 1,
+        "ignis": 2,
+        "vitreus": 1
+      }
     },
     {
-      "original_source_line": 417, "registration": "direct", "original_target": "ConfigItems.itemShard", "original_metadata": 2,
+      "original_source_line": 417,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemShard",
+      "original_metadata": 2,
       "identifier_evidence": "Explicit original primal shard metadata2; existing water_shard identifier",
-      "modern_ids": ["thaumcraft:water_shard"],
-      "aspects": {"praecantatio": 1, "aqua": 2, "vitreus": 1}
+      "modern_ids": [
+        "thaumcraft:water_shard"
+      ],
+      "aspects": {
+        "praecantatio": 1,
+        "aqua": 2,
+        "vitreus": 1
+      }
     },
     {
-      "original_source_line": 418, "registration": "direct", "original_target": "ConfigItems.itemShard", "original_metadata": 3,
+      "original_source_line": 418,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemShard",
+      "original_metadata": 3,
       "identifier_evidence": "Explicit original primal shard metadata3; existing earth_shard identifier",
-      "modern_ids": ["thaumcraft:earth_shard"],
-      "aspects": {"praecantatio": 1, "terra": 2, "vitreus": 1}
+      "modern_ids": [
+        "thaumcraft:earth_shard"
+      ],
+      "aspects": {
+        "praecantatio": 1,
+        "terra": 2,
+        "vitreus": 1
+      }
     },
     {
-      "original_source_line": 419, "registration": "direct", "original_target": "ConfigItems.itemShard", "original_metadata": 4,
+      "original_source_line": 419,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemShard",
+      "original_metadata": 4,
       "identifier_evidence": "Explicit original primal shard metadata4; existing order_shard identifier",
-      "modern_ids": ["thaumcraft:order_shard"],
-      "aspects": {"praecantatio": 1, "ordo": 2, "vitreus": 1}
+      "modern_ids": [
+        "thaumcraft:order_shard"
+      ],
+      "aspects": {
+        "praecantatio": 1,
+        "ordo": 2,
+        "vitreus": 1
+      }
     },
     {
-      "original_source_line": 420, "registration": "direct", "original_target": "ConfigItems.itemShard", "original_metadata": 5,
+      "original_source_line": 420,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemShard",
+      "original_metadata": 5,
       "identifier_evidence": "Explicit original primal shard metadata5; existing entropy_shard identifier",
-      "modern_ids": ["thaumcraft:entropy_shard"],
-      "aspects": {"praecantatio": 1, "perditio": 2, "vitreus": 1}
+      "modern_ids": [
+        "thaumcraft:entropy_shard"
+      ],
+      "aspects": {
+        "praecantatio": 1,
+        "perditio": 2,
+        "vitreus": 1
+      }
     },
     {
-      "original_source_line": 423, "registration": "direct", "original_target": "ConfigBlocks.blockCandle", "original_metadata": 0,
+      "original_source_line": 423,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockCandle",
+      "original_metadata": 0,
       "identifier_evidence": "Original white tallow candle now has a native stabilizer block item; other original dye variants are not inferred from this direct row",
-      "modern_ids": ["thaumcraft:tallow_candle"],
-      "aspects": {"lux": 2, "corpus": 1, "praecantatio": 1}
+      "modern_ids": [
+        "thaumcraft:tallow_candle"
+      ],
+      "aspects": {
+        "lux": 2,
+        "corpus": 1,
+        "praecantatio": 1
+      }
     },
     {
-      "original_source_line": 428, "registration": "direct", "original_target": "ConfigItems.itemEssence", "original_metadata": 0,
+      "original_source_line": 427,
+      "registration": "direct",
+      "original_target": "ConfigBlocks.blockAlchemyFurnace",
+      "original_metadata": "wildcard:32767",
+      "identifier_evidence": "Original alchemy furnace block registers a wildcard metadata stack; the native port keeps one thaumcraft:alchemy_furnace block and item",
+      "modern_ids": [
+        "thaumcraft:alchemy_furnace"
+      ],
+      "aspects": {
+        "praecantatio": 8,
+        "aqua": 8,
+        "fabrico": 8
+      }
+    },
+    {
+      "original_source_line": 428,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemEssence",
+      "original_metadata": 0,
       "identifier_evidence": "item_essence:95-102 and retained legacy ItemEssence.getSubItems metadata0; ThaumcraftContent.EMPTY_PHIAL explicitly registers phial_empty",
-      "modern_ids": ["thaumcraft:phial_empty"],
-      "aspects": {"vacuos": 1}
+      "modern_ids": [
+        "thaumcraft:phial_empty"
+      ],
+      "aspects": {
+        "vacuos": 1
+      }
     },
     {
-      "original_source_line": 429, "registration": "direct", "original_target": "ConfigItems.itemEssence", "original_metadata": 1,
+      "original_source_line": 429,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemEssence",
+      "original_metadata": 1,
       "identifier_evidence": "item_essence:95-102 and retained legacy ItemEssence.getSubItems metadata1; ThaumcraftContent.FILLED_PHIAL explicitly registers phial_filled; 8 contained aspects are a separate stack bonus",
-      "modern_ids": ["thaumcraft:phial_filled"],
+      "modern_ids": [
+        "thaumcraft:phial_filled"
+      ],
       "aspects": {}
     },
     {
-      "original_source_line": 430, "registration": "direct", "original_target": "ConfigItems.itemWispEssence", "original_metadata": 0,
+      "original_source_line": 430,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemWispEssence",
+      "original_metadata": 0,
       "identifier_evidence": "Original wisp essence base; the native container's actual aspects are added separately at runtime",
-      "modern_ids": ["thaumcraft:wisp_essence"],
-      "aspects": {"auram": 2}
+      "modern_ids": [
+        "thaumcraft:wisp_essence"
+      ],
+      "aspects": {
+        "auram": 2
+      }
     },
     {
-      "original_source_line": 432, "registration": "complex", "original_target": "ConfigItems.itemPrimalArrow", "original_metadata": 0,
+      "original_source_line": 432,
+      "registration": "complex",
+      "original_target": "ConfigItems.itemPrimalArrow",
+      "original_metadata": 0,
       "identifier_evidence": "Oracle ConfigAspects432 registers the complex object tag of new ItemStack(itemPrimalArrow), that is metadata0 only, with telum1; only the flattened air arrow carries it",
-      "modern_ids": ["thaumcraft:primal_arrow_air"],
-      "aspects": {"telum": 1}
+      "modern_ids": [
+        "thaumcraft:primal_arrow_air"
+      ],
+      "aspects": {
+        "telum": 1
+      }
     },
     {
-      "original_source_line": 433, "registration": "complex", "original_target": "ConfigItems.itemGoggles", "original_metadata": "wildcard:32767",
+      "original_source_line": 433,
+      "registration": "complex",
+      "original_target": "ConfigItems.itemGoggles",
+      "original_metadata": "wildcard:32767",
       "identifier_evidence": "Original Goggles of Revealing now has a real native recipe/material; add sensus4 to recipe-derived tags, never replace the entire item base with the supplied bonus",
-      "modern_ids": ["thaumcraft:goggles_revealing"],
-      "aspects": {"sensus": 4}
+      "modern_ids": [
+        "thaumcraft:goggles_revealing"
+      ],
+      "aspects": {
+        "sensus": 4
+      }
     },
     {
-      "original_source_line": 434, "registration": "complex", "original_target": "ConfigBlocks.blockWoodenDevice", "original_metadata": 1,
+      "original_source_line": 434,
+      "registration": "complex",
+      "original_target": "ConfigBlocks.blockWoodenDevice",
+      "original_metadata": 1,
       "identifier_evidence": "ConfigRecipes214 ArcaneEar output is woodenDevice1; its real native block/item and arcane recipe are registered",
-      "modern_ids": ["thaumcraft:arcane_ear"],
-      "aspects": {"sensus": 4}
+      "modern_ids": [
+        "thaumcraft:arcane_ear"
+      ],
+      "aspects": {
+        "sensus": 4
+      }
     },
     {
-      "original_source_line": 435, "registration": "direct", "original_target": "ConfigItems.itemBaubleBlanks", "original_metadata": 3,
+      "original_source_line": 435,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemBaubleBlanks",
+      "original_metadata": 3,
       "identifier_evidence": "Oracle ConfigAspects435 registers the discount ring metadata3 with praecantatio5; metadata3 is the air discount ring (ItemBaubleBlanks.func_77653_i maps metadata3 to the first primal aspect), flattened to the native discount_ring_aer item",
-      "modern_ids": ["thaumcraft:discount_ring_aer"],
-      "aspects": {"praecantatio": 5}
+      "modern_ids": [
+        "thaumcraft:discount_ring_aer"
+      ],
+      "aspects": {
+        "praecantatio": 5
+      }
     },
     {
-      "original_source_line": 436, "registration": "direct", "original_target": "ConfigItems.itemFocusPech", "original_metadata": 0,
+      "original_source_line": 436,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemFocusPech",
+      "original_metadata": 0,
       "identifier_evidence": "ConfigItems361-362 registers ItemFocusPech/FocusPech; original one-argument ItemStack(Item) selects count1 and metadata0, now the actual native focus_pech item",
-      "modern_ids": ["thaumcraft:focus_pech"],
-      "aspects": {"praecantatio": 5, "venenum": 5, "perditio": 5, "alienis": 5, "telum": 5}
+      "modern_ids": [
+        "thaumcraft:focus_pech"
+      ],
+      "aspects": {
+        "praecantatio": 5,
+        "venenum": 5,
+        "perditio": 5,
+        "alienis": 5,
+        "telum": 5
+      }
     },
     {
-      "original_source_line": 448, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 0,
+      "original_source_line": 448,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemEldritchObject",
+      "original_metadata": 0,
       "identifier_evidence": "Oracle ConfigAspects448 registers the eldritch eye metadata0; ThaumcraftWarp registers the flattened eldritch_eye item",
-      "modern_ids": ["thaumcraft:eldritch_eye"],
-      "aspects": {"alienis": 5, "auram": 3, "praecantatio": 3, "sensus": 3, "spiritus": 3}
+      "modern_ids": [
+        "thaumcraft:eldritch_eye"
+      ],
+      "aspects": {
+        "alienis": 5,
+        "auram": 3,
+        "praecantatio": 3,
+        "sensus": 3,
+        "spiritus": 3
+      }
     },
     {
-      "original_source_line": 449, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 1,
+      "original_source_line": 449,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemEldritchObject",
+      "original_metadata": 1,
       "identifier_evidence": "ConfigAspects449 direct Crimson Rites row; actual native reusable ItemCrimsonRites now registered as crimson_rites",
-      "modern_ids": ["thaumcraft:crimson_rites"],
-      "aspects": {"cognitio": 5, "praecantatio": 3, "alienis": 3, "spiritus": 3}
+      "modern_ids": [
+        "thaumcraft:crimson_rites"
+      ],
+      "aspects": {
+        "cognitio": 5,
+        "praecantatio": 3,
+        "alienis": 3,
+        "spiritus": 3
+      }
     },
     {
-      "original_source_line": 450, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 2,
+      "original_source_line": 450,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemEldritchObject",
+      "original_metadata": 2,
       "identifier_evidence": "Oracle ConfigAspects450 registers the runed tablet metadata2; ThaumcraftLegacyItems registers the flattened eldritch_tablet item",
-      "modern_ids": ["thaumcraft:eldritch_tablet"],
-      "aspects": {"vinculum": 4, "cognitio": 4, "machina": 4}
+      "modern_ids": [
+        "thaumcraft:eldritch_tablet"
+      ],
+      "aspects": {
+        "vinculum": 4,
+        "cognitio": 4,
+        "machina": 4
+      }
     },
     {
-      "original_source_line": 454, "registration": "direct", "original_target": "ConfigItems.itemEldritchObject", "original_metadata": 3,
+      "original_source_line": 454,
+      "registration": "direct",
+      "original_target": "ConfigItems.itemEldritchObject",
+      "original_metadata": 3,
       "identifier_evidence": "Original Primordial Pearl metadata3 now has its native ItemPrimordialPearl behavior and primordial_pearl registry item",
-      "modern_ids": ["thaumcraft:primordial_pearl"],
-      "aspects": {"aer": 16, "terra": 16, "ignis": 16, "aqua": 16, "ordo": 16, "perditio": 16}
+      "modern_ids": [
+        "thaumcraft:primordial_pearl"
+      ],
+      "aspects": {
+        "aer": 16,
+        "terra": 16,
+        "ignis": 16,
+        "aqua": 16,
+        "ordo": 16,
+        "perditio": 16
+      }
     }
   ]
 }

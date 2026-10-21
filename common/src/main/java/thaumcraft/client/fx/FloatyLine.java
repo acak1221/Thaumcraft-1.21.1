@@ -67,8 +67,7 @@ public final class FloatyLine {
         double dcY = fromY - toY;
         double dcZ = fromZ - toZ;
         float dist = (float) Math.sqrt(dcX * dcX + dcY * dcY + dcZ * dcZ);
-        float blocks = Math.round(dist);
-        float length = blocks * ((float) LINK_QUALITY / 2.0F);
+        float length = lineLength(dist);
         if (length <= 0.0F || distance <= 0.0F) return;
         float time = System.nanoTime() / 30000000L;
         int red = color >> 16 & 255;
@@ -98,11 +97,11 @@ public final class FloatyLine {
         int index = 0;
         while ((float) index <= length * distance) {
             float f2 = index / length;
-            float f3 = 1.0F - Math.abs(index - length / 2.0F) / (length / 2.0F);
+            float f3 = fade(index, length);
             double dx = dcX + Math.sin((float) (phase(worldZ, dist, f2, time) / 4.0F)) * 0.5F * f3;
             double dy = dcY + Math.sin((float) (phase(worldX, dist, f2, time) / 3.0F)) * 0.5F * f3;
             double dz = dcZ + Math.sin((float) (phase(worldY, dist, f2, time) / 2.0F)) * 0.5F * f3;
-            float u = (1.0F - f2) * dist - time * speed;
+            float u = scroll(f2, dist, time, speed);
             double centreX = toX + dx * f2;
             double centreY = toY + dy * f2;
             double centreZ = toZ + dz * f2;
@@ -132,9 +131,36 @@ public final class FloatyLine {
         }
     }
 
-    /** The phase of the wobble of the original, the same for the three axes. */
-    private static double phase(double coordinate, float dist, float f2, float time) {
-        return coordinate % 16.0 + (double) (dist * (1.0F - f2) * (float) LINK_QUALITY / 2.0F)
+    /**
+     * The length of the original line: the number of blocks of the distance times the half of the
+     * original link quality (oracle {@code thaumcraft/client/lib/UtilsFX.java:776-778}).
+     */
+    public static float lineLength(float distance) {
+        return Math.round(distance) * ((float) LINK_QUALITY / 2.0F);
+    }
+
+    /**
+     * The fade of the original: {@code 1 - abs(i - length / 2) / (length / 2)}
+     * (oracle {@code thaumcraft/client/lib/UtilsFX.java:786}).
+     */
+    public static float fade(int index, float length) {
+        return 1.0F - Math.abs(index - length / 2.0F) / (length / 2.0F);
+    }
+
+    /**
+     * The scrolling texture coordinate of the original: {@code (1 - f2) * dist - time * speed}
+     * (oracle {@code thaumcraft/client/lib/UtilsFX.java:791}).
+     */
+    public static float scroll(float f2, float distance, float time, float speed) {
+        return (1.0F - f2) * distance - time * speed;
+    }
+
+    /**
+     * The phase of the wobble of the original, the same for the three axes
+     * (oracle {@code thaumcraft/client/lib/UtilsFX.java:787-789}).
+     */
+    public static double phase(double coordinate, float distance, float f2, float time) {
+        return coordinate % 16.0 + (double) (distance * (1.0F - f2) * (float) LINK_QUALITY / 2.0F)
                 - (double) (time % 32767.0F / 5.0F);
     }
 

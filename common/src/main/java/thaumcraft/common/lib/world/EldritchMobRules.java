@@ -126,6 +126,9 @@ public final class EldritchMobRules {
     // ------------------------------------------------------------------ eldritch golem
     public static final float GOLEM_EYE_HEIGHT=3F;
     public static final float GOLEM_HEADLESS_EYE_HEIGHT=3.33F;
+    /** Original EntityEldritchGolem:92 - the size of the golem, func_70105_a(1.75F, 3.5F). */
+    public static final float GOLEM_WIDTH=1.75F;
+    public static final float GOLEM_HEIGHT=3.5F;
     public static final int GOLEM_MELEE_COOLDOWN=10;
     public static final float GOLEM_MELEE_DAMAGE_FACTOR=.75F;
     public static final double GOLEM_MELEE_KNOCKBACK_Y=.2D;
@@ -142,6 +145,14 @@ public final class EldritchMobRules {
     public static final double GOLEM_HEADLESS_KNOCKBACK=1.5D;
 
     public static float golemEyeHeight(boolean headless) { return headless?GOLEM_HEADLESS_EYE_HEIGHT:GOLEM_EYE_HEIGHT; }
+    /**
+     * Original EntityEldritchGolem:92 and :133-135 - the golem is 1.75 wide and 3.5 high, the
+     * headless form only changes the eye height from three to 3.33.
+     */
+    public static net.minecraft.world.entity.EntityDimensions golemDimensions(boolean headless) {
+        return net.minecraft.world.entity.EntityDimensions.scalable(GOLEM_WIDTH,GOLEM_HEIGHT)
+                .withEyeHeight(golemEyeHeight(headless));
+    }
     /** Original golem melee deals three quarters of its attack damage. */
     public static float golemMeleeDamage(float attackDamage) { return attackDamage*GOLEM_MELEE_DAMAGE_FACTOR; }
     /** Original golem beam drains fifteen to nineteen charge per shot. */

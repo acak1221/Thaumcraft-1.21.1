@@ -50,6 +50,7 @@ public final class TileWardingStone extends BlockEntity {
                         Math.cos(angle) * EldritchBlockRules.WARDING_STONE_PUSH);
             }
         }
+        // Original TileWardingStone:47-54 - the ward seals the two blocks above the stone.
         if (stone.count % EldritchBlockRules.WARDING_STONE_SEAL_PERIOD == 0) {
             seal(level, pos, 1);
             seal(level, pos, 2);
@@ -60,8 +61,9 @@ public final class TileWardingStone extends BlockEntity {
     private static void seal(Level level, BlockPos pos, int height) {
         BlockPos target = pos.above(height);
         BlockState state = level.getBlockState(target);
+        // The original keeps an airy block of the third metadata and only replaces a replaceable block.
         if (state.getBlock() == ThaumcraftEldritchBlocks.AIRY.get()
-                && state.getValue(thaumcraft.common.blocks.BlockAiry.VARIANT) == EldritchBlockRules.AIRY_WARDING_FENCE) {
+                && state.getValue(thaumcraft.common.blocks.BlockAiry.VARIANT) == EldritchBlockRules.AIRY_LEAVES_ALT) {
             return;
         }
         if (!state.canBeReplaced()) return;

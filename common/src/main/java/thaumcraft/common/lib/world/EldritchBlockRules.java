@@ -578,6 +578,16 @@ public final class EldritchBlockRules {
     /** TileEldritchObelisk:70 - the obelisk affects living entities within six blocks. */
     public static final double OBELISK_RANGE = 6.0D;
 
+    /**
+     * TileEldritchObelisk:47 and EntityUtils:181-192 - the obelisk searches a cube of the
+     * original range around the middle of its own block. The range is a radius around the
+     * obelisk and never an absolute corner of the world.
+     */
+    public static net.minecraft.world.phys.AABB obeliskBox(net.minecraft.core.BlockPos pos) {
+        return new net.minecraft.world.phys.AABB(pos.getX()+.5D,pos.getY(),pos.getZ()+.5D,
+                pos.getX()+.5D,pos.getY(),pos.getZ()+.5D).inflate(OBELISK_RANGE,OBELISK_RANGE,OBELISK_RANGE);
+    }
+
     /** TileEldritchObelisk:76-77 - the applied effects last forty ticks. */
     public static final int OBELISK_EFFECT_DURATION = 40;
     public static final int OBELISK_EFFECT_AMPLIFIER = 0;
@@ -588,6 +598,14 @@ public final class EldritchBlockRules {
     /** TileEldritchObelisk:72 - only eldritch mobs are affected. */
     public static boolean obeliskAffects(boolean eldritchMob, boolean living) {
         return eldritchMob && living;
+    }
+
+    /**
+     * TileEldritchObelisk:49 - the original skips an eldritch mob that is already slowed down,
+     * so the two effects are only handed out again after they ran out.
+     */
+    public static boolean obeliskAffects(boolean eldritchMob, boolean living, boolean alreadySlowed) {
+        return obeliskAffects(eldritchMob,living) && !alreadySlowed;
     }
 
     // ------------------------------------------------------------------- portal
@@ -729,6 +747,24 @@ public final class EldritchBlockRules {
 
     /** TileMagicBox:404-411 - a box links to its six direct neighbours. */
     public static final int MAGIC_BOX_LINK_DIRECTIONS = 6;
+
+    /**
+     * TileMagicBox:210 - two neighbouring slots are only merged when they hold the same item
+     * with the same tags. The original guarded the merge with {@code isItemEqual} and
+     * {@code areItemStackTagsEqual}, so a different item or a different tag is never merged
+     * into a single stack.
+     */
+    public static boolean magicBoxMerges(net.minecraft.world.item.ItemStack first, net.minecraft.world.item.ItemStack second) {
+        return net.minecraft.world.item.ItemStack.isSameItem(first,second)
+                && net.minecraft.world.item.ItemStack.isSameItemSameComponents(first,second);
+    }
+
+    /**
+     * TileMagicBox:210 - a slot that is already full takes no part in a merge.
+     */
+    public static boolean magicBoxSlotHasRoom(net.minecraft.world.item.ItemStack stack) {
+        return stack.getCount() < stack.getMaxStackSize();
+    }
 
     // ----------------------------------------------------------- warding stones
 

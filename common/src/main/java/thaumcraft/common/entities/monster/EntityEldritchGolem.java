@@ -81,9 +81,13 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
         builder.define(HEADLESS,false);
     }
 
-    /** Original golem eye height is three, or 3.33 once its head is gone. */
+    /**
+     * Original golem eye height is three, or 3.33 once its head is gone. The original set the
+     * size with {@code func_70105_a(1.75F, 3.5F)} and answered the eye height with
+     * {@code func_70047_e()}, so the headless form has its own eye height.
+     */
     @Override public EntityDimensions getDefaultDimensions(Pose pose) {
-        return EntityDimensions.scalable(1.75F,3.5F).withEyeHeight(EldritchMobRules.golemEyeHeight(isHeadless()));
+        return EldritchMobRules.golemDimensions(isHeadless());
     }
 
     @Override protected void registerGoals() {
@@ -100,7 +104,25 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
     }
 
     public boolean isHeadless() { return entityData.get(HEADLESS); }
-    public void setHeadless(boolean headless) { entityData.set(HEADLESS,headless); }
+
+    /**
+     * Original EntityEldritchGolem:114-116 - the golem loses its head and its eye height grows
+     * to 3.33. Minecraft 1.21.1 caches the eye height in the entity, so the dimensions have to
+     * be refreshed whenever the flag changes.
+     */
+    public void setHeadless(boolean headless) {
+        entityData.set(HEADLESS,headless);
+        refreshDimensions();
+    }
+
+    /**
+     * The client learns the headless flag through the data tracker, so it refreshes its
+     * dimensions as well, exactly like the vanilla pose change does.
+     */
+    @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (HEADLESS.equals(key)) refreshDimensions();
+    }
 
     @Override public void addAdditionalSaveData(CompoundTag tag) { super.addAdditionalSaveData(tag); tag.putBoolean("headless",isHeadless()); }
     @Override public void readAdditionalSaveData(CompoundTag tag) {

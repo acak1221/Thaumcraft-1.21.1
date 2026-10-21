@@ -105,6 +105,15 @@ public final class TileMagicBox extends BlockEntity implements Container {
         inventory().setChanged();
     }
 
+    /**
+     * Original TileMagicBox:105-108 - the original sorted the content of the box every time it
+     * changed, so the merge of the equal stacks runs on every insert and every removal.
+     */
+    @Override public void setChanged() {
+        super.setChanged();
+        sort();
+    }
+
     /** Original TileMagicBox:225-233 - everybody may put items into a magic box. */
     public boolean isItemValid(int slot, ItemStack stack) { return true; }
 
@@ -119,7 +128,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
 
     /** Original TileMagicBox:238-260 - the link of the neighbouring boxes is refreshed. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileMagicBox box) {
-        if (level.isClientSide) return;
+        // The original ticked the tile on both sides, so the client knows the size of the chain too.
         if (box.inventory() == box && box.linkedBoxes < 0) box.refreshLinks();
     }
 
@@ -152,21 +161,24 @@ public final class TileMagicBox extends BlockEntity implements Container {
         while (!done) {
             done = true;
             for (int i = 0; i < list.size() - 1; i++) {
-                if (swopSlots(list, i, i + 1)) continue;
-                ItemStack first = list.get(i).copy();
-                ItemStack second = list.get(i + 1).copy();
-                int room = first.getMaxStackSize() - first.getCount();
-                int moved = Math.min(room, second.getCount());
-                if (moved <= 0) continue;
-                first.setCount(first.getCount() + moved);
-                second.setCount(second.getCount() - moved);
-                list.set(i, first);
+                done = swopSlots(list, i, i + 1);
+                ItemStack first = list.get(i);
+                ItemStack second = list.get(i + 1);
+                if (!EldritchBlockRules.magicBoxSlotHasRoom(first)) continue;
+                if (!EldritchBlockRules.magicBoxMerges(first, second)) continue;
+                ItemStack one = first.copy();
+                ItemStack two = second.copy();
+                int moved = Math.min(one.getMaxStackSize() - one.getCount(), two.getCount());
+                one.setCount(one.getCount() + moved);
+                two.setCount(two.getCount() - moved);
+                list.set(i, one);
                 done = false;
-                if (second.isEmpty()) {
-                    list.remove(i + 1);
-                    break;
+                if (two.getCount() > 0) {
+                    list.set(i + 1, two);
+                    continue;
                 }
-                list.set(i + 1, second);
+                list.remove(i + 1);
+                break;
             }
         }
     }
@@ -238,6 +250,8 @@ public final class TileMagicBox extends BlockEntity implements Container {
             if (!stack.isEmpty()) boxContents.add(stack);
         }
         linkedBoxes = tag.contains("linked") ? tag.getShort("linked") : (short) -1;
+        // Original TileMagicBox:114-124 - the original sorted the content after it was loaded.
+        sort();
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {

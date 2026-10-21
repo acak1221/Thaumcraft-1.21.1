@@ -31,6 +31,8 @@ public final class ThaumcraftSettings {
     public static void configureServer(ResearchSettings settings) {
         server = java.util.Objects.requireNonNull(settings);
         WarpEvents.setWussMode(settings.wuss());
+        // The original published the seven research facts in its public Config as well.
+        Config.apply(settings);
     }
     public static void initializeClient() {
         if (clientThread != null && clientThread != Thread.currentThread()) throw new IllegalStateException("Client settings thread changed");
@@ -76,12 +78,14 @@ public final class ThaumcraftSettings {
             ThaumcraftBiomeSettings.configure(properties);
             // Original Config.shaders: a local rendering switch, not a server fact.
             shaders = !"false".equalsIgnoreCase(properties.getProperty("shaders", "true").strip());
+            Config.shaders = shaders;
         } catch (IOException | IllegalArgumentException failure) {
             Thaumcraft.LOG.error("Cannot read Thaumcraft configuration at {}; using original defaults", file, failure);
             configureServer(ResearchSettings.DEFAULTS);
             ThaumcraftTaintSettings.configure(ThaumcraftTaintSettings.DEFAULTS);
             ThaumcraftBiomeSettings.defaults();
             shaders = true;
+            Config.shaders = true;
         }
     }
 }

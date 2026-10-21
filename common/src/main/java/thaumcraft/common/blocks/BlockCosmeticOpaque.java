@@ -28,7 +28,7 @@ import thaumcraft.common.tiles.TileOwned;
  * unbreakable and resists every explosion with 999) became a block of its own; the
  * amber block and the amber brick stay the metadata zero and one of this block.</p>
  */
-public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
+public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity, OriginalPistonPushable {
     public static final MapCodec<BlockCosmeticOpaque> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 1).fieldOf("group").forGetter(BlockCosmeticOpaque::group),
             propertiesCodec()).apply(instance, BlockCosmeticOpaque::new));
@@ -170,10 +170,26 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateD
      * BlockCosmeticOpaque:190-192 and :221-223 - the original created the owned tile for the
      * metadata two only; the amber block and the amber brick got no tile at all, although the
      * 1.7.10 class is a {@code BlockContainer} and claims a tile for every metadata.
-     * The port answers the question per state, so the amber block and the amber brick are
-     * moved by a piston like in the original.
+     * The port answers the question per state, so the amber block and the amber brick carry no
+     * block entity.
      */
     @Override public boolean hasBlockEntityForState(BlockState state) {
         return EldritchBlockRules.cosmeticOpaqueHasTile(variant(state));
+    }
+
+    /**
+     * Oracle BlockCosmeticOpaque:58-59 - the 1.7.10 class extended {@code
+     * net.minecraft.block.BlockContainer}, which implements {@code ITileEntityProvider}, so the
+     * piston of the original never moved the family: the amber block and the amber brick were
+     * refused as well, although they carry no tile.
+     *
+     * <p>The question of the piston is a question of its own in 1.21.1 ({@code
+     * PistonBaseBlock#isPushable} asks {@code !blockState.hasBlockEntity()}, and the answer of the
+     * block entity contract is the answer for the creation of the block entity), so the answer of
+     * the original is written down here and the mixin {@code
+     * thaumcraft.common.mixin.PistonPushabilityMixin} asks it.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.COSMETIC_OPAQUE.isPushableInOriginal(variant(state));
     }
 }

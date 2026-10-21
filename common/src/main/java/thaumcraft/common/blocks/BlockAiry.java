@@ -30,7 +30,7 @@ import thaumcraft.common.tiles.TileWardingStoneFence;
  * fence; the node, the nitor and the energised node of the original family
  * already exist as their own native blocks.
  */
-public final class BlockAiry extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
+public final class BlockAiry extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity, OriginalPistonPushable {
     public static final MapCodec<BlockAiry> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 3).fieldOf("group").forGetter(BlockAiry::group),
             propertiesCodec()).apply(instance, BlockAiry::new));
@@ -181,10 +181,26 @@ public final class BlockAiry extends BaseEntityBlock implements StateDependentBl
      * the 1.7.10 class is a {@code BlockContainer} and claims a tile for every metadata. The
      * port owns the warding fence only, the node, the nitor and the energised node are native
      * blocks of their own, so the port answers the question per state: only the fence has a
-     * tile, and the other airy blocks are moved by a piston like in the original.
+     * tile.
      */
     @Override public boolean hasBlockEntityForState(BlockState state) {
         return variant(state) == EldritchBlockRules.AIRY_WARDING_FENCE;
+    }
+
+    /**
+     * Oracle BlockAiry:77-78 - the 1.7.10 class extended {@code
+     * net.minecraft.block.BlockContainer}, which implements {@code ITileEntityProvider}, so the
+     * piston of the original never moved the family: the variants that never had a tile were
+     * refused as well.
+     *
+     * <p>The question of the piston is a question of its own in 1.21.1 ({@code
+     * PistonBaseBlock#isPushable} asks {@code !blockState.hasBlockEntity()}, and the answer of the
+     * block entity contract is the answer for the creation of the block entity), so the answer of
+     * the original is written down here and the mixin {@code
+     * thaumcraft.common.mixin.PistonPushabilityMixin} asks it.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.AIRY.isPushableInOriginal(variant(state));
     }
 
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

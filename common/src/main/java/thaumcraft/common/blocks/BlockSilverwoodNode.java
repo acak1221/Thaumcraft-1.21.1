@@ -20,7 +20,7 @@ import thaumcraft.common.lib.world.NodeHarvest;
 import thaumcraft.common.tiles.TileNode;
 
 /** Original blockMagicalLog metadata2: a real full log containing an ordinary TileNode, not an aura block beside a tree. */
-public final class BlockSilverwoodNode extends RotatedPillarBlock implements EntityBlock {
+public final class BlockSilverwoodNode extends RotatedPillarBlock implements EntityBlock, OriginalPistonPushable {
     public static final MapCodec<BlockSilverwoodNode> CODEC = simpleCodec(BlockSilverwoodNode::new);
     public BlockSilverwoodNode(Properties properties) { super(properties); }
     @Override public MapCodec<BlockSilverwoodNode> codec() { return CODEC; }
@@ -33,6 +33,21 @@ public final class BlockSilverwoodNode extends RotatedPillarBlock implements Ent
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), pos, state);
+    }
+
+    /**
+     * Oracle BlockMagicalLog:50-51 - the 1.7.10 class extended {@code
+     * net.minecraft.block.BlockRotatedPillar} and did not implement {@code ITileEntityProvider},
+     * so the piston of the original moved the log for every metadata, the silverwood node (the
+     * metadata two, the tile at BlockMagicalLog:160-170) included, and the move destroyed the
+     * tile of the node.
+     *
+     * <p>Minecraft 1.21.1 refuses every block entity block ({@code PistonBaseBlock#isPushable}
+     * ends with {@code return !blockState.hasBlockEntity();}); the mixin {@code
+     * thaumcraft.common.mixin.PistonPushabilityMixin} asks this answer instead.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.SILVERWOOD_NODE.isPushableInOriginal(2);
     }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         if (type != ThaumcraftContent.NODE_BLOCK_ENTITY.get()) return null;

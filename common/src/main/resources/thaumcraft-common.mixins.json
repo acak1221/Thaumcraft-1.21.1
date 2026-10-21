@@ -72,7 +72,8 @@
     "VillagerVillageTradesMixin",
     "WorldGenRegionStepAccess",
     "LevelChunkPendingBlockEntityMixin",
-    "PerStateBlockEntityMixin"
+    "PerStateBlockEntityMixin",
+    "PistonPushabilityMixin"
   ],
   "client": [
     "client.OuterLandsDimensionEffectsMixin",

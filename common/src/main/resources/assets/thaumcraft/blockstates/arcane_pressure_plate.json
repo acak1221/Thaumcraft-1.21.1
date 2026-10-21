@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "variant=2": {
+      "model": "thaumcraft:block/arcane_pressure_plate"
+    },
+    "variant=3": {
+      "model": "thaumcraft:block/arcane_pressure_plate_3"
+    }
+  }
+}

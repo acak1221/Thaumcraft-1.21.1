@@ -355,7 +355,6 @@ public final class EldritchBlockRules {
         items.put("warded_glass", COSMETIC_OPAQUE_OWNED);
         // The original blockStoneDevice metadata fourteen and blockWoodenDevice metadata two and eight.
         items.put("flux_scrubber", DEVICE_STONE_FLUX_SCRUBBER);
-        items.put("arcane_pressure_plate", DEVICE_WOOD_PRESSURE_PLATE);
         // The original blockWoodenDevice metadata eight: one item that carries its colour and its
         // aspect in a data component.
         items.put("banner", DEVICE_WOOD_BANNER);
@@ -549,9 +548,23 @@ public final class EldritchBlockRules {
      */
     public static final float DEVICE_METAL_HARDNESS = 3.0F;
     public static final float DEVICE_METAL_RESISTANCE = 10.2F;
-    /** BlockWoodenDevice - hardness 2.5 and the blast resistance setter value 10, effective 6.0. */
-    public static final float DEVICE_WOOD_HARDNESS = 2.0F;
+    /** BlockWoodenDevice:82 - the hardness of the wooden device family is 2.5. */
+    public static final float DEVICE_WOOD_HARDNESS = 2.5F;
+    /** BlockWoodenDevice:83 - the blast resistance setter value 10, effective 6.0. */
     public static final float DEVICE_WOOD_RESISTANCE = 6.0F;
+
+    /**
+     * BlockWoodenDevice:196-203 - the hardness of the arcane pressure plate is two, or none at
+     * all while the warded stone option is on.
+     */
+    public static final float DEVICE_WOOD_PRESSURE_PLATE_HARDNESS = 2.0F;
+
+    /**
+     * BlockWoodenDevice:204-212 - the blast resistance of the arcane pressure plate is the
+     * absolute value 999, which the original returns from its own getter. It is therefore not
+     * the 0.6 factor of a setter value and must not be scaled.
+     */
+    public static final float DEVICE_WOOD_PRESSURE_PLATE_RESISTANCE = 999.0F;
     /** BlockStoneDevice:72-73 - hardness 3 and the blast resistance setter value 25, effective 15.0. */
     public static final float DEVICE_STONE_HARDNESS = 3.0F;
     public static final float DEVICE_STONE_RESISTANCE = 15.0F;

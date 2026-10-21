@@ -394,8 +394,14 @@ class EldritchBlockRulesTest {
         assertEquals(3.0F, EldritchBlockRules.DEVICE_METAL_HARDNESS);
         // The 1.7.10 setter values 17, 10 and 25 are stored three times and the getter divides by five.
         assertEquals(10.2F, EldritchBlockRules.DEVICE_METAL_RESISTANCE);
-        assertEquals(2.0F, EldritchBlockRules.DEVICE_WOOD_HARDNESS);
+        // Oracle BlockWoodenDevice:82 - the hardness of the wooden device family is 2.5.
+        assertEquals(2.5F, EldritchBlockRules.DEVICE_WOOD_HARDNESS);
         assertEquals(6.0F, EldritchBlockRules.DEVICE_WOOD_RESISTANCE);
+        // Oracle BlockWoodenDevice:196-212 - the arcane pressure plate has the hardness two and
+        // the absolute blast resistance 999, which its own getter returns and which is therefore
+        // not scaled by the 0.6 factor of the 1.7.10 setter.
+        assertEquals(2.0F, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_HARDNESS);
+        assertEquals(999.0F, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_RESISTANCE);
         assertEquals(3.0F, EldritchBlockRules.DEVICE_STONE_HARDNESS);
         assertEquals(15.0F, EldritchBlockRules.DEVICE_STONE_RESISTANCE);
     }
@@ -456,12 +462,11 @@ class EldritchBlockRulesTest {
         assertEquals(3, EldritchBlockRules.variantOf("paving_stone_warding"));
         assertEquals(2, EldritchBlockRules.variantOf("warded_glass"));
         assertEquals(EldritchBlockRules.DEVICE_STONE_FLUX_SCRUBBER, EldritchBlockRules.variantOf("flux_scrubber"));
-        assertEquals(EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE, EldritchBlockRules.variantOf("arcane_pressure_plate"));
         // The original blockWoodenDevice metadata eight: one item that carries its colour in a
         // data component, so one entry is enough.
         assertEquals(EldritchBlockRules.DEVICE_WOOD_BANNER, EldritchBlockRules.variantOf("banner"));
         assertEquals(-1, EldritchBlockRules.variantOf("cosmetic_solid"));
-        assertEquals(6, EldritchBlockRules.VARIANT_ITEMS.size());
+        assertEquals(5, EldritchBlockRules.VARIANT_ITEMS.size());
     }
 
     @Test void theHardnessGroupsKeepTheOriginalPerMetadataValues() {

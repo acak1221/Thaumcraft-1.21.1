@@ -2441,5 +2441,6 @@
   "container.focuspouch": "Сумка для набалдашников",
   "container.thaumcraft.magic_box": "Магический ящик",
   "container.thaumcraft": "Таумкрафт",
-  "container.fake": "Фальшивый инвентарь"
+  "container.fake": "Фальшивый инвентарь",
+  "block.thaumcraft.arcane_pressure_plate": "Магическая нажимная плита"
 }

@@ -47,7 +47,7 @@ class EldritchAndDeviceAssetsTest {
      * because the original recipe result was a block with a metadata.
      */
     private static final Set<String> VARIANT_ITEMS = Set.of("paving_stone_travel", "paving_stone_warding",
-            "warded_glass", "banner", "flux_scrubber", "arcane_pressure_plate", "wand_pedestal_focus");
+            "warded_glass", "banner", "flux_scrubber", "wand_pedestal_focus");
 
     @Test void theTwoRegistrationClassesAreRead() {
         assertFalse(blockIds().isEmpty(), "no block was read from the two registration classes");

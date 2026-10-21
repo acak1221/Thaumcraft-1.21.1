@@ -39,6 +39,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockAiry;
 import thaumcraft.common.blocks.BlockArcaneDoor;
+import thaumcraft.common.blocks.BlockArcanePressurePlate;
 import thaumcraft.common.blocks.BlockCosmeticDoubleSlab;
 import thaumcraft.common.blocks.BlockCosmeticOpaque;
 import thaumcraft.common.blocks.BlockCosmeticStairs;
@@ -56,6 +57,7 @@ import thaumcraft.common.blocks.BlockMirror;
 import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWoodenDevice;
 import thaumcraft.common.blocks.BannerData;
+import thaumcraft.common.blocks.BlockArcanePressurePlate;
 import thaumcraft.common.blocks.ItemArcaneDoor;
 import thaumcraft.common.blocks.ItemMirrorBlock;
 import thaumcraft.common.blocks.ItemVariantBlock;
@@ -213,6 +215,17 @@ public final class ThaumcraftEldritchBlocks {
                     .strength(EldritchBlockRules.DEVICE_METAL_HARDNESS, EldritchBlockRules.DEVICE_METAL_RESISTANCE)
                     .sound(SoundType.METAL).noOcclusion()));
 
+    /**
+     * The arcane pressure plate, the original BlockWoodenDevice metadata two and three. The
+     * original gave it a hardness of two (none at all with the warded stone option) and the
+     * absolute blast resistance 999, and Minecraft 1.21.1 binds both to the block, so the plate
+     * is a block of its own (oracle BlockWoodenDevice:196-212).
+     */
+    public static final RegistrySupplier<BlockArcanePressurePlate> ARCANE_PRESSURE_PLATE = BLOCKS.register("arcane_pressure_plate",
+            () -> new BlockArcanePressurePlate(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_HARDNESS, EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE_RESISTANCE)
+                    .sound(SoundType.WOOD).noOcclusion()));
+
     public static final RegistrySupplier<BlockWoodenDevice> WOODEN_DEVICE = BLOCKS.register("wooden_device",
             () -> new BlockWoodenDevice(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
                     .strength(EldritchBlockRules.DEVICE_WOOD_HARDNESS, EldritchBlockRules.DEVICE_WOOD_RESISTANCE)
@@ -328,7 +341,7 @@ public final class ThaumcraftEldritchBlocks {
      * a block state, so the variant of the wooden device family needs an item of its own.
      */
     public static final RegistrySupplier<Item> ARCANE_PRESSURE_PLATE_ITEM = ITEMS.register("arcane_pressure_plate",
-            () -> new ItemVariantBlock(WOODEN_DEVICE.get(), EldritchBlockRules.DEVICE_WOOD_PRESSURE_PLATE, "arcane_pressure_plate", new Item.Properties()));
+            () -> new BlockItem(ARCANE_PRESSURE_PLATE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> ARCANE_DOOR_ITEM = ITEMS.register("arcane_door", () -> new ItemArcaneDoor(new Item.Properties()));
     public static final RegistrySupplier<Item> MAGIC_BOX_ITEM = ITEMS.register("magic_box", () -> new BlockItem(MAGIC_BOX.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new ItemMirrorBlock(MIRROR.get(), new Item.Properties()));
@@ -380,7 +393,7 @@ public final class ThaumcraftEldritchBlocks {
             () -> BlockEntityType.Builder.of((pos, state) -> new TileBanner(pos, state), WOODEN_DEVICE.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<TileArcanePressurePlate>> PRESSURE_PLATE_TILE = BLOCK_ENTITIES.register("arcane_pressure_plate",
-            () -> BlockEntityType.Builder.of((pos, state) -> new TileArcanePressurePlate(pos, state), WOODEN_DEVICE.get()).build(null));
+            () -> BlockEntityType.Builder.of((pos, state) -> new TileArcanePressurePlate(pos, state), ARCANE_PRESSURE_PLATE.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<TileBrainbox>> BRAINBOX_TILE = BLOCK_ENTITIES.register("brainbox",
             () -> BlockEntityType.Builder.of((pos, state) -> new TileBrainbox(pos, state), METAL_DEVICE.get()).build(null));

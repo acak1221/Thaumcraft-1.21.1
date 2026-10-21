@@ -478,8 +478,8 @@ class FoundationAssetsTest(unittest.TestCase):
             lang = json.loads((converter.ASSETS / f"lang/{locale}.json").read_text())
             self.assertEqual(lang["tile.thaumcraft.stone_device.9.name"], lang["block.thaumcraft.node_stabilizer"])
             notice = lang["tooltip.thaumcraft.node_stabilizer.scope"]
-            self.assertEqual({"en_us": "Ordinary or energized nodes; special-node behaviours and the advanced stabilizer are not yet implemented.",
-                              "ru_ru": "Обычные и возбуждённые узлы; особые типы и улучшенный стабилизатор ещё не перенесены."}[locale], notice)
+            self.assertEqual({"en_us": "Ordinary or energized nodes; the advanced stabilizer differs only in its lock value.",
+                              "ru_ru": "Обычные и возбуждённые узлы; улучшенный стабилизатор отличается только значением запора."}[locale], notice)
 
     def test_stabilizer_bubble_uses_the_original_low_alpha_threshold_without_copying_a_vertex_shader(self) -> None:
         shader = json.loads((converter.ASSETS / "shaders/core/node_stabilizer_bubble.json").read_text())

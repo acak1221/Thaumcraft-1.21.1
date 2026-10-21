@@ -28,9 +28,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.config.ThaumcraftBaubles;
-import thaumcraft.common.config.ThaumcraftBellows;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftLabels;
+import thaumcraft.common.config.ThaumcraftNaturals;
 import thaumcraft.common.config.ThaumcraftTravelGear;
 import thaumcraft.common.container.ContainerHoverHarness;
 import thaumcraft.common.crafting.InfusionStackRecipe;
@@ -109,8 +109,8 @@ public final class TravelGearRuntimeChecks {
             a.clearLane();equip(a,harness(2),6);ItemStack armor=a.player.getItemBySlot(EquipmentSlot.CHEST),originalJar=HarnessData.jar(armor);
             var recipe=recipe(a,"hover_harness");a.require(recipe.research().equals("HOVERHARNESS")&&recipe.instability()==6&&recipe.input().test(new ItemStack(Items.LEATHER_CHESTPLATE))
                             &&recipe.inputDamage().orElse(-1)==0&&recipe.aspects().equals(Map.of("volatus",32,"potentia",32,"machina",32,"iter",16))&&recipe.components().size()==9
-                            &&recipe.components().get(2).test(new ItemStack(ThaumcraftBellows.BELLOWS_ITEM.get()))&&recipe.components().get(3).test(new ItemStack(ThaumcraftBellows.BELLOWS_ITEM.get()))
-                            &&recipe.result().is(ThaumcraftTravelGear.HOVER_HARNESS.get()),"real Harness infusion retains original pristine center,9components, duplicate bellows, exact costs/research/output");
+                            &&recipe.components().get(2).test(new ItemStack(ThaumcraftNaturals.GREATWOOD_PLANKS.get().asItem()))&&recipe.components().get(3).test(new ItemStack(ThaumcraftNaturals.GREATWOOD_PLANKS.get().asItem()))
+                            &&recipe.result().is(ThaumcraftTravelGear.HOVER_HARNESS.get()),"real Harness infusion retains original pristine center,9components, duplicate greatwood planks, exact costs/research/output");
             var item=ThaumcraftTravelGear.HOVER_HARNESS.get();a.require(armor.getMaxDamage()==400&&armor.getRarity()==Rarity.EPIC&&item.getDefense()==3&&item.getEnchantmentValue()==25
                             &&item.getVisDiscount(armor,a.player,Aspect.AIR)==5&&item.getVisDiscount(armor,a.player,Aspect.FIRE)==2&&item.isValidRepairItem(armor,new ItemStack(Items.GOLD_INGOT))
                             &&!item.isValidRepairItem(armor,new ItemStack(Items.LEATHER))&&RunicArmor.finalCharge(armor)==0,"real SPECIAL Harness has400durability/3armor/25enchant/epic, Aer5/other2discount,gold repair,runic0");

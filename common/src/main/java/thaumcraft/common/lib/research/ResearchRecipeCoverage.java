@@ -35,9 +35,13 @@ import java.util.stream.Stream;
  * manager uses, for example thaumcraft:arcane/alchemical_construct). This mapping is the contract the research
  * book uses to display the recipe of a research page.
  *
- * <p>Three original key groups exist:
+ * <p>Four original key groups exist:
  * <ul>
- *   <li>{@link #nativeRecipeIds()} - original recipes that have a native recipe JSON file.</li>
+ *   <li>{@link #nativeRecipeIds()} - original recipes that have a native recipe JSON file. The map names
+ *       all 308 original recipe keys of the oracle ConfigRecipes.java, not only the 272 the research book
+ *       names: the sixteen banners (ConfigRecipes:173), the six primal arrows (:210), the six balanced
+ *       shards (:89), the six aspect clusters and the mixed cluster (:442 and :445) and the second
+ *       kinetic runic girdle (:351) are registered by the original but never shown by name in a page.</li>
  *   <li>{@link #constructBlueprints()} - the nine original <em>wand constructs</em>. The original does not register
  *       those as recipes at all: ConfigRecipes:83-100 stores a plain List and the research page casts it as
  *       (List)recipes.get("..."), never as an IRecipe. They are built in the world, not crafted, so they carry a
@@ -241,6 +245,14 @@ public final class ResearchRecipeCoverage {
         ids.put("ArcaneStone2", "thaumcraft:arcane_stone_bricks");
         ids.put("ArcaneStone3", "thaumcraft:arcane_stone_brick_stairs");
         ids.put("ArcaneStone4", "thaumcraft:arcane_stone_brick_slab");
+        // The original registers the six balanced shards in a loop (ConfigRecipes:89). The research book
+        // never names them, but the native crucible recipes exist and the catalogue has to be complete.
+        ids.put("BalancedShard_0", "thaumcraft:crucible/balanced_shard_air");
+        ids.put("BalancedShard_1", "thaumcraft:crucible/balanced_shard_fire");
+        ids.put("BalancedShard_2", "thaumcraft:crucible/balanced_shard_water");
+        ids.put("BalancedShard_3", "thaumcraft:crucible/balanced_shard_earth");
+        ids.put("BalancedShard_4", "thaumcraft:crucible/balanced_shard_order");
+        ids.put("BalancedShard_5", "thaumcraft:crucible/balanced_shard_entropy");
         ids.put("BathSalts", "thaumcraft:crucible/bath_salts");
         ids.put("Bellows", "thaumcraft:arcane/bellows");
         ids.put("BlockFlesh", "thaumcraft:flesh_block");
@@ -268,6 +280,16 @@ public final class ResearchRecipeCoverage {
         ids.put("BootsTraveller", "thaumcraft:infusion/boots_traveller");
         ids.put("BottleTaint", "thaumcraft:crucible/bottle_taint");
         ids.put("Centrifuge", "thaumcraft:arcane/centrifuge");
+        // The original registers the six aspect clusters and the mixed cluster in a loop
+        // (ConfigRecipes:442 and :445). The research book never names them, but the native crafting
+        // recipes exist and the catalogue has to be complete.
+        ids.put("Clusters0", "thaumcraft:clusters/air");
+        ids.put("Clusters1", "thaumcraft:clusters/fire");
+        ids.put("Clusters2", "thaumcraft:clusters/water");
+        ids.put("Clusters3", "thaumcraft:clusters/earth");
+        ids.put("Clusters4", "thaumcraft:clusters/order");
+        ids.put("Clusters5", "thaumcraft:clusters/entropy");
+        ids.put("Clusters6", "thaumcraft:clusters/mixed");
         ids.put("CoreAlchemy", "thaumcraft:infusion/golem_core_alchemy");
         ids.put("CoreBlank", "thaumcraft:arcane/golem_core_blank");
         ids.put("CoreButcher", "thaumcraft:crucible/golem_core_butcher");
@@ -402,6 +424,10 @@ public final class ResearchRecipeCoverage {
         ids.put("RunicAmuletEmergency", "thaumcraft:infusion/runic_amulet_emergency");
         ids.put("RunicGirdle", "thaumcraft:infusion/runic_girdle");
         ids.put("RunicGirdleKinetic", "thaumcraft:infusion/runic_girdle_kinetic");
+        // The second kinetic runic girdle of the original (ConfigRecipes:351) is a dead registration
+        // (see documentedDuplicateRecipes), but the port still ships the identical recipe, so the
+        // catalogue has to name it.
+        ids.put("RunicGirdleKinetic_2", "thaumcraft:infusion/runic_girdle_kinetic_2");
         ids.put("RunicRing", "thaumcraft:infusion/runic_ring");
         ids.put("RunicRingCharged", "thaumcraft:infusion/runic_ring_charged");
         ids.put("RunicRingHealing", "thaumcraft:infusion/runic_ring_healing");
@@ -520,6 +546,13 @@ public final class ResearchRecipeCoverage {
     private static Set<String> buildOutsideBook() {
         Set<String> keys = new TreeSet<>();
         PAGE_RECIPE_ARRAYS.values().forEach(keys::addAll);
+        // The original registers the six balanced shards (ConfigRecipes:89), the six aspect clusters
+        // and the mixed cluster (ConfigRecipes:442 and :445) and the second kinetic runic girdle
+        // (ConfigRecipes:351) without ever naming them in a research page.
+        for (int index = 0; index < 6; index++) keys.add("BalancedShard_" + index);
+        for (int index = 0; index < 6; index++) keys.add("Clusters" + index);
+        keys.add("Clusters6");
+        keys.add("RunicGirdleKinetic_2");
         return Collections.unmodifiableSet(keys);
     }
 
@@ -566,19 +599,33 @@ public final class ResearchRecipeCoverage {
 
     private static Map<String, String> buildDeferred() {
         Map<String, String> reasons = new LinkedHashMap<>();
-        reasons.put("MirrorEssentia", "the original result is blockMirror metadata 6, the essentia mirror; the native mirror block keeps it as the essentia block state and has no separate essentia mirror item, and a 1.21.1 recipe result cannot carry a block state");
+        // The reason of this one is NOT the recipe format. A 1.21.1 recipe result CAN carry a block
+        // state: the minecraft:block_state component of the item stack holds the block state
+        // properties (BlockItemStateProperties.CODEC is a map of string to string, and
+        // BlockItem.updateBlockStateFromTag applies them to the placed state). The blocker is the
+        // port's own mirror block: it has one item, thaumcraft:mirror, and the essentia mirror is
+        // the same block with the essentia property true. The block entity of the mirror is chosen
+        // by that property (BlockMirror.createBlockEntity), but Level.setBlock keeps the block
+        // entity of a block whose type did not change, so a mirror placed with the block state
+        // component would keep the tile of the ordinary mirror and would never tick. A separate
+        // essentia mirror item (and the block entity it needs) is the missing part.
+        reasons.put("MirrorEssentia", "the original result is blockMirror metadata 6, the essentia mirror; the native mirror block keeps the essentia mirror as the essentia block state and has no separate essentia mirror item. "
+                + "A 1.21.1 recipe result CAN carry a block state (the minecraft:block_state component holds the block state properties), "
+                + "but the mirror block entity is chosen by the essentia property (BlockMirror.createBlockEntity) and Level.setBlock keeps "
+                + "the block entity of a block whose type did not change, so a mirror placed with that component would keep the tile of the "
+                + "ordinary mirror and would never tick. The missing part is a separate essentia mirror item, not a recipe format");
         // The original registers these eight recipes only when another mod supplies the matching metal
         // (Config.foundTinIngot, foundSilverIngot, foundLeadIngot). Vanilla 1.21.1 has no tin, no silver
         // and no lead at all, so the original never registers them either. Copper is vanilla, so its
         // recipes (PureCopper, TransCopper and WandCapCopper) are carried by this port.
-        reasons.put("PureLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot, and 1.21.1 has no lead at all");
-        reasons.put("PureSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot, and 1.21.1 has no silver at all");
-        reasons.put("PureTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot, and 1.21.1 has no tin at all");
-        reasons.put("TransLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot, and 1.21.1 has no lead at all");
-        reasons.put("TransSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot, and 1.21.1 has no silver at all");
-        reasons.put("TransTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot, and 1.21.1 has no tin at all");
-        reasons.put("WandCapSilver", "third-party ore: the original registers this infusion recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item");
-        reasons.put("WandCapSilverInert", "third-party ore: the original registers this arcane recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item");
+        reasons.put("PureLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot, and 1.21.1 has no lead at all. The catalyst side is ready (the tag thaumcraft:original_ore/ore_lead points at the optional convention tag c:ores/lead), the result is missing: the original result is the lead cluster, itemNugget metadata 20, and the port has no lead cluster item");
+        reasons.put("PureSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot, and 1.21.1 has no silver at all. The catalyst side is ready (the tag thaumcraft:original_ore/ore_silver points at the optional convention tag c:ores/silver), the result is missing: the original result is the silver cluster, itemNugget metadata 19, and the port has no silver cluster item");
+        reasons.put("PureTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot, and 1.21.1 has no tin at all. The catalyst side is ready (the tag thaumcraft:original_ore/ore_tin points at the optional convention tag c:ores/tin), the result is missing: the original result is the tin cluster, itemNugget metadata 18, and the port has no tin cluster item");
+        reasons.put("TransLead", "third-party ore: the original registers this crucible recipe only when Config.foundLeadIngot, and 1.21.1 has no lead at all. The catalyst side is ready (the tag thaumcraft:original_ore/nugget_lead points at the optional convention tag c:nuggets/lead), the result is missing: the original result is three lead nuggets, itemNugget metadata 4, and the port has no lead nugget item");
+        reasons.put("TransSilver", "third-party ore: the original registers this crucible recipe only when Config.foundSilverIngot, and 1.21.1 has no silver at all. The catalyst side is ready (the tag thaumcraft:original_ore/nugget_silver points at the optional convention tag c:nuggets/silver), the result is missing: the original result is three silver nuggets, itemNugget metadata 3, and the port has no silver nugget item");
+        reasons.put("TransTin", "third-party ore: the original registers this crucible recipe only when Config.foundTinIngot, and 1.21.1 has no tin at all. The catalyst side is ready (the tag thaumcraft:original_ore/nugget_tin points at the optional convention tag c:nuggets/tin), the result is missing: the original result is three tin nuggets, itemNugget metadata 2, and the port has no tin nugget item");
+        reasons.put("WandCapSilver", "third-party ore: the original registers this infusion recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item. The original result is the charged silver cap, itemWandCap metadata 4; the port has one item per wand cap but no silver one");
+        reasons.put("WandCapSilverInert", "third-party ore: the original registers this arcane recipe only when Config.foundSilverIngot, and 1.21.1 has no silver wand cap item. The original result is the inert silver cap, itemWandCap metadata 5; the port has one item per wand cap but no silver one");
         return Collections.unmodifiableMap(reasons);
     }
 

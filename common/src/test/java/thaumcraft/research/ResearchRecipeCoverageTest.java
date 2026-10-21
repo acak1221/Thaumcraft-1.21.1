@@ -70,6 +70,68 @@ class ResearchRecipeCoverageTest {
     private static final List<String> VARIANT_RECIPES = List.of("PaveTravel", "PaveWard", "WardedGlass",
             "ArcanePressurePlate", "FluxScrubber", "WandPedFocus");
 
+
+    /**
+     * Every original recipe key of the oracle {@code ConfigRecipes.java}, in the order of its
+     * registration. The list is the machine-derived expansion of the 279 {@code put} call sites of
+     * the oracle (the five loop generated families expanded). The catalogue has to be closed over
+     * the three classes of the coverage map: a native recipe, an original wand construct, or a
+     * documented deferral.
+     */
+    private static final List<String> ORIGINAL_CATALOGUE = List.of(
+            "Thaumonomicon", "ArcTable", "ResTable", "Crucible", "InfernalFurnace", "InfusionAltar",
+            "NodeJar", "Thaumatorium", "AdvAlchemyFurnace", "BalancedShard_0", "BalancedShard_1", "BalancedShard_2",
+            "BalancedShard_3", "BalancedShard_4", "BalancedShard_5", "Alumentum", "Nitor", "Thaumium",
+            "VoidMetal", "VoidSeed", "Tallow", "AltGunpowder", "AltSlime", "AltClay",
+            "AltGlowstone", "AltInk", "AltWeb", "AltMossyCobble", "AltIce", "AltCrackedBrick",
+            "AltBonemeal", "PureIron", "PureGold", "PureCopper", "PureTin", "PureSilver",
+            "PureLead", "TransIron", "TransGold", "TransCopper", "TransTin", "TransSilver",
+            "TransLead", "EtherealBloom", "LiquidDeath", "BottleTaint", "GolemStraw", "GolemWood",
+            "GolemTallow", "GolemClay", "GolemFlesh", "GolemStone", "GolemIron", "GolemThaumium",
+            "CoreGather", "CoreFill", "CoreEmpty", "CoreHarvest", "CoreGuard", "CoreButcher",
+            "CoreLiquid", "BathSalts", "SaneSoap", "Banner_0", "Banner_1", "Banner_10",
+            "Banner_11", "Banner_12", "Banner_13", "Banner_14", "Banner_15", "Banner_2",
+            "Banner_3", "Banner_4", "Banner_5", "Banner_6", "Banner_7", "Banner_8",
+            "Banner_9", "PrimalCharm", "ArcaneDoor", "WardedGlass", "IronKey", "FluxScrubber",
+            "GoldKey", "ArcanePressurePlate", "NodeStabilizer", "NodeTransducer", "NodeRelay", "NodeChargeRelay",
+            "FocalManipulator", "GolemFetter", "ArcaneStone1", "ArcaneStone2", "ArcaneStone3", "ArcaneStone4",
+            "PaveTravel", "ArcaneLamp", "ArcaneSpa", "PaveWard", "Levitator", "ArcaneEar",
+            "MirrorGlass", "BoneBow", "PrimalArrow_0", "PrimalArrow_1", "PrimalArrow_2", "PrimalArrow_3",
+            "PrimalArrow_4", "PrimalArrow_5", "InfusionMatrix", "ArcanePedestal", "WardedJar", "JarVoid",
+            "WandCapGold", "WandCapCopper", "WandCapSilverInert", "WandCapThaumiumInert", "WandCapVoidInert", "WandRodGreatwood",
+            "WandRodGreatwoodStaff", "WandRodObsidianStaff", "WandRodSilverwoodStaff", "WandRodIceStaff", "WandRodQuartzStaff", "WandRodReedStaff",
+            "WandRodBlazeStaff", "WandRodBoneStaff", "FocusFire", "FocusFrost", "FocusShock", "FocusTrade",
+            "FocusExcavation", "FocusPrimal", "FocusPouch", "Deconstructor", "ArcaneBoreBase", "EnchantedFabric",
+            "RobeChest", "RobeLegs", "RobeBoots", "Goggles", "HungryChest", "GolemBell",
+            "CoreBlank", "UpgradeAir", "UpgradeEarth", "UpgradeFire", "UpgradeWater", "UpgradeOrder",
+            "UpgradeEntropy", "TinyHat", "TinyFez", "TinyBowtie", "TinyGlasses", "TinyDart",
+            "TinyVisor", "TinyArmor", "TinyHammer", "Filter", "AlchemyFurnace", "Alembic",
+            "Bellows", "Tube", "Resonator", "TubeValve", "TubeFilter", "TubeRestrict",
+            "TubeOneway", "TubeBuffer", "AlchemicalConstruct", "AdvAlchemyConstruct", "Centrifuge", "EssentiaCrystalizer",
+            "MnemonicMatrix", "InfEnchRepair", "InfEnchHaste", "InfEnch0", "InfEnch1", "InfEnch2",
+            "InfEnch3", "InfEnch4", "InfEnch5", "InfEnch6", "InfEnch7", "InfEnch8",
+            "InfEnch9", "InfEnch10", "InfEnch11", "InfEnch12", "InfEnch13", "InfEnch14",
+            "InfEnch15", "InfEnch16", "InfEnch17", "InfEnch18", "InfEnch19", "InfEnch20",
+            "InfEnch21", "WandCapSilver", "WandCapThaumium", "WandCapVoid", "WandRodObsidian", "WandRodIce",
+            "WandRodQuartz", "WandRodReed", "WandRodBlaze", "WandRodBone", "WandRodSilverwood", "WandRodPrimalStaff",
+            "FocusHellbat", "FocusPortableHole", "FocusWarding", "WandPed", "WandPedFocus", "NodeStabilizerAdv",
+            "JarBrain", "AdvancedGolem", "HoverHarness", "HoverGirdle", "VisAmulet", "RunicAmulet",
+            "RunicAmuletEmergency", "RunicRing", "RunicRingCharged", "RunicRingHealing", "RunicGirdle", "RunicGirdleKinetic",
+            "RunicGirdleKinetic_2", "Mirror", "MirrorHand", "MirrorEssentia", "ElementalAxe", "ElementalPick",
+            "ElementalSword", "ElementalShovel", "ElementalHoe", "BootsTraveller", "CoreAlchemy", "CoreSorting",
+            "CoreLumber", "CoreFishing", "CoreUse", "ArcaneBore", "TravelTrunk", "LampGrowth",
+            "LampFertility", "ThaumiumFortressHelm", "ThaumiumFortressChest", "ThaumiumFortressLegs", "VoidRobeHelm", "VoidRobeChest",
+            "VoidRobeLegs", "HelmGoggles", "MaskGrinningDevil", "MaskAngryGhost", "MaskSippingFiend", "SanityCheck",
+            "EssentiaReservoir", "SinStone", "PrimalCrusher", "EldritchEye", "MundaneAmulet", "MundaneRing",
+            "MundaneBelt", "JarLabel", "JarLabelNull", "WandBasic", "WandCapIron", "KnowFrag",
+            "PlankGreatwood", "PlankSilverwood", "BlockFlesh", "BlockThaumium", "BlockTallow", "Clusters0",
+            "Clusters1", "Clusters2", "Clusters3", "Clusters4", "Clusters5", "Clusters6",
+            "Grate", "Phial", "Table", "Scribe1", "Scribe2", "Scribe3",
+            "Thaumometer", "ThaumiumHelm", "ThaumiumChest", "ThaumiumLegs", "ThaumiumBoots", "ThaumiumShovel",
+            "ThaumiumPick", "ThaumiumAxe", "ThaumiumHoe", "ThaumiumSword", "VoidHelm", "VoidChest",
+            "VoidLegs", "VoidBoots", "VoidShovel", "VoidPick", "VoidAxe", "VoidHoe",
+            "VoidSword", "TallowCandle");
+
     @BeforeAll
     static void load() { ResearchCatalog.loadBundled(); }
 
@@ -82,6 +144,32 @@ class ResearchRecipeCoverageTest {
                 "Every unresolved key needs exactly one documented reason.");
         for (String key : EXPECTED_MISSING) {
             assertFalse(ResearchRecipeCoverage.deferredRecipes().get(key).isBlank(), key + " needs a reason");
+        }
+    }
+
+    /**
+     * The catalogue of the original is closed: every one of the 308 original recipe keys is either a
+     * native recipe, an original wand construct, or a documented deferral, and nothing else is
+     * classified. The test pins the exact key set, so a key that disappears from the oracle, and a
+     * key that appears in it, both fail here.
+     */
+    @Test
+    void theWholeOriginalCatalogueIsClassified() {
+        Set<String> classified = new TreeSet<>(ResearchRecipeCoverage.nativeRecipeIds().keySet());
+        classified.addAll(ResearchRecipeCoverage.constructBlueprints().keySet());
+        classified.addAll(ResearchRecipeCoverage.deferredRecipes().keySet());
+        assertEquals(new TreeSet<>(ORIGINAL_CATALOGUE), classified,
+                "The classified original keys are not the 308 keys of the oracle ConfigRecipes.");
+        assertEquals(308, ORIGINAL_CATALOGUE.size());
+        assertEquals(293, ResearchRecipeCoverage.nativeRecipeIds().size());
+        assertEquals(9, ResearchRecipeCoverage.constructBlueprints().size());
+        assertEquals(9, ResearchRecipeCoverage.deferredRecipes().size());
+        // Every key of the catalogue is either resolved or has exactly one documented reason.
+        for (String key : ORIGINAL_CATALOGUE) {
+            boolean resolved = ResearchRecipeCoverage.isResolved(key);
+            boolean deferred = ResearchRecipeCoverage.deferredRecipes().containsKey(key);
+            assertTrue(resolved || deferred, key + " is neither resolved nor deferred");
+            if (deferred) assertFalse(resolved, key + " must not be both resolved and deferred");
         }
     }
 
@@ -100,7 +188,7 @@ class ResearchRecipeCoverageTest {
     @Test
     void everyMappedOriginalKeyResolvesToAPackagedNativeRecipe() {
         Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
-        assertEquals(279, ids.size());
+        assertEquals(293, ids.size());
         Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
         for (Map.Entry<String, String> entry : ids.entrySet()) {
             String id = entry.getValue();
@@ -131,8 +219,48 @@ class ResearchRecipeCoverageTest {
             assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
             assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
         }
-        assertEquals(22, ResearchRecipeCoverage.outsideBookRecipeKeys().size());
+        assertEquals(36, ResearchRecipeCoverage.outsideBookRecipeKeys().size());
         assertEquals(Set.of("BANNERS", "PRIMALARROW"), ResearchRecipeCoverage.pageRecipeArrays().keySet());
+    }
+
+    /**
+     * The original registers fourteen more recipes that no research page names by key: the six
+     * balanced shards (ConfigRecipes:89), the six aspect clusters and the mixed cluster
+     * (ConfigRecipes:442 and :445) and the second kinetic runic girdle (ConfigRecipes:351).
+     *
+     * <p>The port shipped a native recipe for each of them, but the coverage map did not name the
+     * original key, so the catalogue was not closed over the original. This test pins the mapping
+     * and the native recipe of every one of them.</p>
+     */
+    @Test
+    void theOriginalRecipesOutsideTheResearchBookAreMappedToTheirNativeRecipes() {
+        Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
+        Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
+        List<String> shards = List.of("air", "fire", "water", "earth", "order", "entropy");
+        for (int index = 0; index < shards.size(); index++) {
+            String key = "BalancedShard_" + index;
+            assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
+            assertEquals("thaumcraft:crucible/balanced_shard_" + shards.get(index), ids.get(key));
+            assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
+        }
+        for (int index = 0; index < shards.size(); index++) {
+            String key = "Clusters" + index;
+            assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
+            assertEquals("thaumcraft:clusters/" + shards.get(index), ids.get(key));
+            assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
+        }
+        assertEquals("thaumcraft:clusters/mixed", ids.get("Clusters6"));
+        assertTrue(present.contains(ids.get("Clusters6")));
+        assertEquals("thaumcraft:infusion/runic_girdle_kinetic_2", ids.get("RunicGirdleKinetic_2"));
+        assertTrue(present.contains(ids.get("RunicGirdleKinetic_2")));
+        // All fourteen are outside the research book.
+        Set<String> outside = ResearchRecipeCoverage.outsideBookRecipeKeys();
+        for (int index = 0; index < shards.size(); index++) {
+            assertTrue(outside.contains("BalancedShard_" + index));
+            assertTrue(outside.contains("Clusters" + index));
+        }
+        assertTrue(outside.contains("Clusters6"));
+        assertTrue(outside.contains("RunicGirdleKinetic_2"));
     }
 
     @Test

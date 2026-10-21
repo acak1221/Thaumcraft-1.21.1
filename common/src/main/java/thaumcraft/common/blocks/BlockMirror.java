@@ -19,6 +19,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -65,6 +66,14 @@ public final class BlockMirror extends BaseEntityBlock {
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, ESSENTIA);
     }
+
+    /**
+     * The original BlockMirror is not drawn as a block: the 1.7.10 block answers the render type
+     * minus one (OpenTC4 BlockMirror:79-80) and the mirror pane and the tunnel behind it are
+     * drawn by the tile renderer of the port ({@code TileMirrorRenderer}), exactly like the
+     * 1.7.10 {@code TileMirrorRenderer} did.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.INVISIBLE; }
 
     public static Direction facingOf(BlockState state) { return state.getValue(FACING); }
     public static boolean isEssentia(BlockState state) { return state.getValue(ESSENTIA); }

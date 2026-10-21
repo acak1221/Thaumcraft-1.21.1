@@ -6,6 +6,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -28,6 +29,14 @@ public final class BlockEldritchPortal extends BaseEntityBlock {
     }
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
+
+    /**
+     * The original BlockEldritchPortal is not drawn as a block: the 1.7.10 block answers the
+     * render type minus one (OpenTC4 BlockEldritchPortal:78-79) and the gate is drawn by the
+     * tile renderer of the port ({@code TileEldritchPortalRenderer}). The empty model of the
+     * port ({@code assets/thaumcraft/models/block/eldritch_portal.json}) is the 1.7.10 answer.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.INVISIBLE; }
 
     /** BlockEldritchPortal:115-121 - every portal tile exists. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileEldritchPortal(pos, state); }

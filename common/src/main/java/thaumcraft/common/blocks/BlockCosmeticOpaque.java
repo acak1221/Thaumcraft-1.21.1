@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -27,7 +28,7 @@ import thaumcraft.common.tiles.TileOwned;
  * unbreakable and resists every explosion with 999) became a block of its own; the
  * amber block and the amber brick stay the metadata zero and one of this block.</p>
  */
-public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateDependentBlockEntity {
+public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
     public static final MapCodec<BlockCosmeticOpaque> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 1).fieldOf("group").forGetter(BlockCosmeticOpaque::group),
             propertiesCodec()).apply(instance, BlockCosmeticOpaque::new));
@@ -102,6 +103,17 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateD
         if (pending != null) builder.add(pending);
     }
 
+    /**
+     * The original BlockCosmeticOpaque is drawn by the renderer of the family: the 1.7.10
+     * block answers the render id of the family (OpenTC4 BlockCosmeticOpaque:68-69) and the
+     * client registers {@code BlockCosmeticOpaqueRenderer} for it (OpenTC4
+     * {@code client/renderers/block/BlockCosmeticOpaqueRenderer.java:77}), so the amber block,
+     * the amber brick and the warded glass are all visible.
+     * {@code BaseEntityBlock} answers {@code RenderShape.INVISIBLE} for every block entity
+     * block (Minecraft 1.21.1 BaseEntityBlock:22-25), so the port has to say it again.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+
     public static int variant(BlockState state) {
         Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
         if (property != null) return (Integer) state.getValue(property);
@@ -152,5 +164,16 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock implements StateD
         if (!EldritchBlockRules.cosmeticOpaqueHasTile(variant(state))) return null;
         // The warded glass is the metadata two of this block, so the block owns the owned tile.
         return new TileOwned(ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state);
+    }
+
+    /**
+     * BlockCosmeticOpaque:190-192 and :221-223 - the original created the owned tile for the
+     * metadata two only; the amber block and the amber brick got no tile at all, although the
+     * 1.7.10 class is a {@code BlockContainer} and claims a tile for every metadata.
+     * The port answers the question per state, so the amber block and the amber brick are
+     * moved by a piston like in the original.
+     */
+    @Override public boolean hasBlockEntityForState(BlockState state) {
+        return EldritchBlockRules.cosmeticOpaqueHasTile(variant(state));
     }
 }

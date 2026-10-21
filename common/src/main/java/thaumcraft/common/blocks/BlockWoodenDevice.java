@@ -15,6 +15,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -51,6 +52,17 @@ public final class BlockWoodenDevice extends BaseEntityBlock implements StateDep
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
+
+    /**
+     * The original BlockWoodenDevice is drawn by the renderer of the family: the 1.7.10 block
+     * answers the render id of the family (OpenTC4 BlockWoodenDevice:200-201) and the client
+     * registers {@code BlockWoodenDeviceRenderer} for it (OpenTC4
+     * {@code client/renderers/block/BlockWoodenDeviceRenderer.java:145}), so the wooden devices
+     * are visible.
+     * {@code BaseEntityBlock} answers {@code RenderShape.INVISIBLE} for every block entity
+     * block (Minecraft 1.21.1 BaseEntityBlock:22-25), so the port has to say it again.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
     public static int variant(BlockState state) { return state.getValue(VARIANT); }
 

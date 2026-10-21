@@ -14,6 +14,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -57,6 +58,17 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, OPEN, HALF, FLIP);
     }
+
+    /**
+     * The original BlockArcaneDoor is a visible door: the 1.7.10 block answers the render type
+     * seven of the doors (OpenTC4 BlockArcaneDoor:109-110) and it is not drawn as a normal
+     * block (OpenTC4 BlockArcaneDoor:105-107). The port draws the door with its own models
+     * ({@code assets/thaumcraft/models/block/arcane_door_*.json}), so the render shape is the
+     * model of the state.
+     * {@code BaseEntityBlock} answers {@code RenderShape.INVISIBLE} for every block entity
+     * block (Minecraft 1.21.1 BaseEntityBlock:22-25), so the port has to say it again.
+     */
+    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
     /** BlockArcaneDoor:340-357 - the door always carries the owned block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

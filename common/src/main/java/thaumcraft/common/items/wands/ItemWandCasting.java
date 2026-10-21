@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.config.ThaumcraftWandEnchantments;
 import thaumcraft.common.tiles.TileNode;
 import java.util.List;
 import java.util.Collections;
@@ -65,11 +66,20 @@ public final class ItemWandCasting extends Item {
     public ItemWandCasting(Properties properties) { super(properties); }
     public static WandData data(ItemStack stack) { return stack.getOrDefault(ThaumcraftContent.WAND_DATA.get(), WandData.EMPTY); }
     public static int getVis(ItemStack stack, String tag) { return data(stack).amount(tag); }
-    public static int getMaxVis(ItemStack stack) { return data(stack).capacity(); }
+    /**
+     * Original ItemWandCasting:119-121 and :256-258: the sceptre marker of the original wand.
+     *
+     * <p>The original wrote the NBT byte tag "sceptre" on the crafted wand (ArcaneSceptreRecipe:68); the
+     * native marker is the {@code thaumcraft:wand_sceptre} data component. A sceptre holds one and a half
+     * times the capacity of its rod and consumes ten percent less vis.</p>
+     */
+    public static boolean isSceptre(ItemStack stack) { return ThaumcraftWandEnchantments.isSceptre(stack); }
+    /** The capacity of this wand in centivis: the rod capacity, and one and a half times of it for a sceptre. */
+    public static int getMaxVis(ItemStack stack) { return WandMaterials.capacity(data(stack).rod(), isSceptre(stack)); }
     public static int addRealVis(ItemStack stack, String tag, int amount, boolean apply) {
         if (amount <= 0 || !WandData.PRIMALS.contains(tag)) return amount;
         WandData data = data(stack);
-        int accepted = Math.min(amount, data.capacity() - data.amount(tag));
+        int accepted = Math.min(amount, getMaxVis(stack) - data.amount(tag));
         if (apply && accepted > 0) stack.set(ThaumcraftContent.WAND_DATA.get(), data.withAmount(tag, data.amount(tag) + accepted));
         return amount - accepted;
     }
@@ -120,7 +130,9 @@ public final class ItemWandCasting extends Item {
         if (level.isClientSide || !(entity instanceof Player player)) return;
         normalizeModifiers(stack);
         WandData before = data(stack);
-        WandData after = WandRodPassive.tick(before, player.tickCount, player.getRandom()::nextInt);
+        // The passive rod refills up to a tenth of the capacity of the wand it sits in (original
+        // WandRodPrimalOnUpdate:34); a sceptre holds one and a half times the capacity of its rod.
+        WandData after = WandRodPassive.tick(before, getMaxVis(stack), player.tickCount, player.getRandom()::nextInt);
         if (after != before) stack.set(ThaumcraftContent.WAND_DATA.get(), after);
     }
 
@@ -267,12 +279,13 @@ public final class ItemWandCasting extends Item {
 
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
         WandData state = data(stack);
-        tooltip.add(Component.translatable("item.capacity.text").append(" " + state.capacity() / 100));
+        int capacity = getMaxVis(stack);
+        tooltip.add(Component.translatable("item.capacity.text").append(" " + capacity / 100));
         tooltip.add(Component.translatable("tc.port.wand.base_cost", new BigDecimal(Float.toString(WandMaterials.capModifier(state.cap())))
                 .movePointRight(2).stripTrailingZeros().toPlainString()));
         for (String tag : WandData.PRIMALS) if (state.vis().containsKey(tag)) {
             tooltip.add(Component.literal(Aspect.getAspect(tag).getName() + ": "
-                    + BigDecimal.valueOf(state.amount(tag), 2).stripTrailingZeros().toPlainString() + "/" + state.capacity() / 100));
+                    + BigDecimal.valueOf(state.amount(tag), 2).stripTrailingZeros().toPlainString() + "/" + capacity / 100));
         }
         ItemStack focus = FocusData.get(stack);
         if (!focus.isEmpty()) {
@@ -284,7 +297,9 @@ public final class ItemWandCasting extends Item {
         WandData state = data(stack);
         var rod = WandMaterials.rod(state.rod());
         // Original getItemStackDisplayName: a staff is named after the plain rod ("greatwood_staff" -> Greatwood) with the staff noun.
+        // A sceptre is named with the sceptre noun (ItemWandCasting:160).
+        String noun = rod.staff() ? "staff" : isSceptre(stack) ? "sceptre" : "wand";
         return Component.translatable("tc.port.wand.name", Component.translatable("item.Wand." + state.cap() + ".cap"),
-                Component.translatable("item.Wand." + rod.baseTag() + ".rod"), Component.translatable("item.Wand." + (rod.staff() ? "staff" : "wand") + ".obj"));
+                Component.translatable("item.Wand." + rod.baseTag() + ".rod"), Component.translatable("item.Wand." + noun + ".obj"));
     }
 }

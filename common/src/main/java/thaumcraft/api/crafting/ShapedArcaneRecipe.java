@@ -1,5 +1,6 @@
 package thaumcraft.api.crafting;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,24 @@ public class ShapedArcaneRecipe implements IArcaneRecipe {
             nativeMirrored = this.mirrored;
         }
         return nativeRecipe;
+    }
+
+    /**
+     * The public view of a native shaped arcane recipe.
+     *
+     * <p>Forced 1.21.1 change: the native recipe of the recipe manager is the real one; the view keeps
+     * the original argument shape and answers through it.</p>
+     */
+    public static ShapedArcaneRecipe of(ArcaneShapedRecipe recipe) {
+        List<Object> arguments = new ArrayList<>(recipe.pattern());
+        for (var entry : recipe.key().entrySet()) {
+            arguments.add(entry.getKey().charAt(0));
+            arguments.add(entry.getValue());
+        }
+        ShapedArcaneRecipe view = new ShapedArcaneRecipe(recipe.research(), recipe.result(),
+                NativeRecipes.aspects(recipe.vis()), arguments.toArray());
+        view.setMirrored(recipe.mirrored());
+        return view;
     }
 
     @Override public ItemStack getCraftingResult(ArcaneRecipeInput inventory) {

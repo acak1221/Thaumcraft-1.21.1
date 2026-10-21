@@ -47,6 +47,12 @@ public class CrucibleRecipe {
         return new thaumcraft.common.crafting.CrucibleRecipe(key, catalystIngredient, recipeOutput, ArcaneRecipes.aspectCosts(aspects), hash & 0x7FFFFFFF);
     }
 
+    /** The public view of a native crucible recipe. */
+    public static CrucibleRecipe of(thaumcraft.common.crafting.CrucibleRecipe recipe) {
+        return new CrucibleRecipe(recipe.research(), recipe.result(), recipe.catalyst(),
+                NativeRecipes.aspects(recipe.aspects()));
+    }
+
     /** True when the catalyst and the essence both fit this recipe. */
     public boolean matches(AspectList itags, ItemStack cat) {
         if (!catalystMatches(cat)) return false;

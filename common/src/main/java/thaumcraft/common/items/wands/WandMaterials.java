@@ -12,6 +12,13 @@ public final class WandMaterials {
     /** The {@link Rod#passive} of the primal staff: any of the six primals, picked at random (original {@code WandRodPrimalOnUpdate()}). */
     public static final String ANY_PRIMAL = "*";
     private static final String STAFF = "_staff";
+    /**
+     * Original ItemWandCasting:119-121: the capacity of a wand is the capacity of its rod, and the capacity
+     * of a SCEPTRE is one and a half times the capacity of its rod.
+     */
+    public static final int SCEPTRE_CAPACITY_FACTOR = 150;
+    /** The largest amount a wand can hold: the primal staff as a sceptre, 375 whole vis. */
+    public static final int MAX_CAPACITY = 37500;
 
     public record Rod(String tag, int capacity, int craftCost, String passive, boolean runes) {
         public Rod(String tag, int capacity, int craftCost) { this(tag, capacity, craftCost, null, false); }
@@ -83,6 +90,15 @@ public final class WandMaterials {
      */
     public static int focusPotency(int upgradeLevel, Rod rod) { return upgradeLevel + (rod != null && rod.hasRunes() ? 1 : 0); }
     public static int capacity(String rod) { return rod(rod).capacity(); }
+    /**
+     * The capacity of a wand of this rod in centivis, and the capacity of the same wand as a sceptre.
+     *
+     * <p>Original ItemWandCasting:119-121: {@code getRod(stack).getCapacity() * (isSceptre(stack) ? 150 : 100)}.
+     * The rod capacities are whole multiples of fifty vis, so the original multiplication is exact in centivis.</p>
+     */
+    public static int capacity(String rod, boolean sceptre) {
+        return rod(rod).capacity() * (sceptre ? SCEPTRE_CAPACITY_FACTOR : 100) / 100;
+    }
     public static int rodCraftCost(String rod) { return rod(rod).craftCost(); }
     public static int capCraftCost(String cap) { return cap(cap).craftCost(); }
     public static float capModifier(String cap) { return cap(cap).modifier(); }

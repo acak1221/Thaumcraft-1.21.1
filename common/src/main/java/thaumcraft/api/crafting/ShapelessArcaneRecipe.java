@@ -58,6 +58,13 @@ public class ShapelessArcaneRecipe implements IArcaneRecipe {
         return new ArcaneShapelessRecipe(research, ingredients, result, ArcaneRecipes.vis(aspects));
     }
 
+    /** The public view of a native shapeless arcane recipe. */
+    public static ShapelessArcaneRecipe of(ArcaneShapelessRecipe recipe) {
+        Object[] arguments = new Object[recipe.ingredients().size()];
+        for (int index = 0; index < arguments.length; index++) arguments[index] = recipe.ingredients().get(index);
+        return new ShapelessArcaneRecipe(recipe.research(), recipe.result(), NativeRecipes.aspects(recipe.vis()), arguments);
+    }
+
     @Override public int getRecipeSize() { return this.input.size(); }
 
     @Override public ItemStack getRecipeOutput() { return this.output; }

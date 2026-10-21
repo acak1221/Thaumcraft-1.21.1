@@ -168,7 +168,30 @@ public final class BlockWoodenDevice extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof TileBanner banner)) return;
         banner.setFacing(Direction.from2DDataValue(placer.getDirection().get2DDataValue()).getOpposite());
         if (stack.getItem() instanceof DyeItem dye) banner.setColor((byte) dye.getDyeColor().getId());
+        // Original BlockWoodenDevice:121-124: the banner item carries its colour and its aspect.
+        BannerData data = stack.getOrDefault(ThaumcraftEldritchBlocks.BANNER_DATA.get(), BannerData.NONE);
+        if (data.hasColor()) banner.setColor((byte) data.color());
+        if (data.aspect() != null) banner.setAspect(data.aspect());
         banner.setChanged();
         level.sendBlockUpdated(pos, state, state, 3);
+    }
+
+    /**
+     * Original BlockWoodenDevice:421-428 - a broken banner drops the banner item with its colour and
+     * its aspect, not the plain wooden device.
+     */
+    @Override protected List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootParams.Builder builder) {
+        if (EldritchBlockRules.woodenDeviceKind(state.getValue(VARIANT)) == EldritchBlockRules.DEVICE_KIND_BANNER) {
+            ItemStack drop = new ItemStack(ThaumcraftEldritchBlocks.BANNER_ITEM.get());
+            BlockEntity entity = builder.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY);
+            if (entity instanceof TileBanner banner) {
+                int colour = Math.max(EldritchBlockRules.BANNER_COLOUR_NONE, Math.min(15, banner.getColor()));
+                String aspect = banner.getAspect() == null ? "" : banner.getAspect().getTag();
+                BannerData data = new BannerData(colour, aspect);
+                if (data.hasColor() || !data.aspectTag().isEmpty()) drop.set(ThaumcraftEldritchBlocks.BANNER_DATA.get(), data);
+            }
+            return List.of(drop);
+        }
+        return super.getDrops(state, builder);
     }
 }

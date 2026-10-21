@@ -1,0 +1,33 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "BANNERS",
+  "pattern": [
+    "WS",
+    "WS",
+    "WB"
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:purple_wool"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "B": {
+      "item": "minecraft:oak_slab"
+    }
+  },
+  "vis": {
+    "aqua": 5,
+    "terra": 5
+  },
+  "result": {
+    "id": "thaumcraft:banner",
+    "count": 1,
+    "components": {
+      "thaumcraft:banner_data": {
+        "color": 10
+      }
+    }
+  }
+}

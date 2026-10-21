@@ -15,6 +15,11 @@ import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 /** Original WandManager:75-101 / ItemWandCasting:247-259, for native caps, four accessory slots and armor. */
 public final class WandVisDiscount {
     private static final List<EquipmentSlot> ARMOR_SLOTS = List.of(EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD);
+    /**
+     * Original ItemWandCasting:256-258: a sceptre consumes ten percent less vis than the same wand
+     * without the marker.
+     */
+    public static final float SCEPTRE_DISCOUNT = 0.1F;
     private WandVisDiscount() {}
 
     /** Net INTEGER percentage points, including the strongest exhaustion variant. */
@@ -44,26 +49,45 @@ public final class WandVisDiscount {
     public static float modifier(ItemStack wand, Player player, Aspect aspect) {
         float cap = !wand.isEmpty() && wand.getItem() instanceof ItemWandCasting
                 ? WandMaterials.capModifier(ItemWandCasting.data(wand).cap()) : 1.0F;
-        return modifier(cap, percentagePoints(player, aspect));
+        return modifier(cap, percentagePoints(player, aspect), ItemWandCasting.isSceptre(wand));
     }
 
     /** Original arithmetic reducer: convert the integer net discount only once. */
     public static float modifier(float capModifier, int netPercentagePoints) {
+        return modifier(capModifier, netPercentagePoints, false);
+    }
+
+    /**
+     * Original ItemWandCasting:247-259: the cap modifier, the gear discount and the sceptre discount,
+     * never below a tenth.
+     *
+     * @param sceptre the original sceptre marker: ten percent less consumption
+     */
+    public static float modifier(float capModifier, int netPercentagePoints, boolean sceptre) {
         // Do not subtract a gear float and add a separate exhaustion float:
         // .9F - .05F is below .85F, giving424/254, not rounded425/255.
-        return Math.max(capModifier - netPercentagePoints / 100.0F, .1F);
+        return Math.max(capModifier - netPercentagePoints / 100.0F - (sceptre ? SCEPTRE_DISCOUNT : 0F), .1F);
     }
 
     /** Separate casting path: Frugal must NEVER discount arcane recipes. */
     public static float focusModifier(ItemStack wand, Player player, Aspect aspect) {
         float cap = !wand.isEmpty() && wand.getItem() instanceof ItemWandCasting
                 ? WandMaterials.capModifier(ItemWandCasting.data(wand).cap()) : 1F;
-        return focusModifier(cap, percentagePoints(player, aspect), FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.frugal));
+        return focusModifier(cap, percentagePoints(player, aspect), FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.frugal),
+                ItemWandCasting.isSceptre(wand));
     }
 
     public static float focusModifier(float capModifier, int netPercentagePoints, int frugalLevel) {
+        return focusModifier(capModifier, netPercentagePoints, frugalLevel, false);
+    }
+
+    /**
+     * Original ItemWandCasting:247-259: the frugal discount of the focus, then the sceptre discount,
+     * never below a tenth.
+     */
+    public static float focusModifier(float capModifier, int netPercentagePoints, int frugalLevel, boolean sceptre) {
         if (!Float.isFinite(capModifier) || frugalLevel < 0 || frugalLevel > 5) throw new IllegalArgumentException("Invalid focus modifier");
         // Original two FLOAT subtractions, not one combined integer percentage.
-        return Math.max(capModifier - netPercentagePoints / 100F - frugalLevel / 10F, .1F);
+        return Math.max(capModifier - netPercentagePoints / 100F - frugalLevel / 10F - (sceptre ? SCEPTRE_DISCOUNT : 0F), .1F);
     }
 }

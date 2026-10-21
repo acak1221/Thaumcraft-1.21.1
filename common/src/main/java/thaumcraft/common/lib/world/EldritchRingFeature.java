@@ -149,7 +149,7 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
     private static void buildColumn(WorldGenLevel level, RandomSource random, int x, int j, int z) {
         for (int q = 1 - StructurePlacementRules.RING_FLOOR_LAYERS; q <= StructurePlacementRules.RING_CLEARED_LAYERS; ++q) {
             BlockPos pos = new BlockPos(x, j + q, z);
-            boolean writable = !level.isOutsideBuildHeight(pos) && level.ensureCanWrite(pos);
+            boolean writable = !level.isOutsideBuildHeight(pos) && WorldGenWriteArea.canWrite(level, pos);
             BlockState state = writable ? level.getBlockState(pos) : Blocks.AIR.defaultBlockState();
             boolean floor = q <= 0;
             // Oracle WorldGenEldritchRing:74 - the original fills the floor and everything that
@@ -195,7 +195,7 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
                 BlockPos bannerPos = new BlockPos(x + offset[0], j + 1, z + offset[1]);
                 BlockState banner = ThaumcraftOuterLands.bannerState(8);
                 if (banner == null) continue;
-                if (level.isOutsideBuildHeight(bannerPos) || !level.ensureCanWrite(bannerPos)) continue;
+                if (level.isOutsideBuildHeight(bannerPos) || !WorldGenWriteArea.canWrite(level, bannerPos)) continue;
                 level.setBlock(bannerPos, banner, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
                 ThaumcraftOuterLands.configureBanner(level.getBlockEntity(bannerPos),
                         (byte) StructurePlacementRules.bannerFacing(direction));
@@ -209,7 +209,7 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         BlockState state = ThaumcraftOuterLands.state(kind, variant, -1);
         if (state == null) return;
         BlockPos pos = new BlockPos(x, y, z);
-        if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) return;
+        if (level.isOutsideBuildHeight(pos) || !WorldGenWriteArea.canWrite(level, pos)) return;
         level.setBlock(pos, state, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);
     }
 }

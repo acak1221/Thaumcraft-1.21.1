@@ -60,5 +60,5 @@ final class GreatwoodDungeon {
         chest.loadWithComponents(data,level.registryAccess());
         if(level instanceof ServerLevel server){chest.setChanged();spawner.setChanged();server.sendBlockUpdated(chestPos,level.getBlockState(chestPos),level.getBlockState(chestPos),Block.UPDATE_CLIENTS);}
     }
-    private static boolean available(WorldGenLevel level,BlockPos pos) {return !level.isOutsideBuildHeight(pos)&&level.hasChunkAt(pos)&&level.ensureCanWrite(pos);}
+    private static boolean available(WorldGenLevel level,BlockPos pos) {return !level.isOutsideBuildHeight(pos)&&level.hasChunkAt(pos)&&WorldGenWriteArea.canWrite(level, pos);}
 }

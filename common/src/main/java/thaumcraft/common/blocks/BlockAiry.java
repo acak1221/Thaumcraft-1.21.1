@@ -29,7 +29,7 @@ import thaumcraft.common.tiles.TileWardingStoneFence;
  * fence; the node, the nitor and the energised node of the original family
  * already exist as their own native blocks.
  */
-public final class BlockAiry extends BaseEntityBlock {
+public final class BlockAiry extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockAiry> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 3).fieldOf("group").forGetter(BlockAiry::group),
             propertiesCodec()).apply(instance, BlockAiry::new));
@@ -41,7 +41,7 @@ public final class BlockAiry extends BaseEntityBlock {
      *
      * <p>Minecraft 1.21.1 binds the state space of a block to its property, so every group of the
      * original metadata became a block of its own and carries only the states of that group. The
-     * property of a group has therefore the range of that group, and it is chosen before the block
+     * property of a group therefore holds exactly the metadata of that group (they are not always consecutive), and it is chosen before the block
      * is built, because Minecraft builds the state definition inside the block constructor.
      */
     private static final java.util.Map<Integer, Property<Integer>> GROUP_PROPERTIES = new java.util.concurrent.ConcurrentHashMap<>();
@@ -51,7 +51,7 @@ public final class BlockAiry extends BaseEntityBlock {
             java.util.List<Integer> variants = EldritchBlockRules.airyGroupVariants(key);
             // A group with a single metadata value has exactly one state, so it needs no property.
             if (variants.size() < 2) return null;
-            return IntegerProperty.create("variant", variants.get(0), variants.get(variants.size() - 1));
+            return thaumcraft.common.lib.world.FamilyVariant.property(variants);
         });
     }
     /** The block of one group of the original metadata. */

@@ -149,14 +149,14 @@ public final class ThaumcraftVillages {
                 for (int y = origin.getY() + height; y < surface; y++) {
                     BlockPos pos = new BlockPos(worldX, y, worldZ);
                     if (level.getBlockState(pos).isAir()) continue;
-                    if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) break;
+                    if (level.isOutsideBuildHeight(pos) || !thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(level, pos)) break;
                     level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
                 }
                 for (int y = origin.getY() - 1; y >= level.getMinBuildHeight(); y--) {
                     BlockPos pos = new BlockPos(worldX, y, worldZ);
                     BlockState state = level.getBlockState(pos);
                     if (!state.isAir() && state.getFluidState().isEmpty()) break;
-                    if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) break;
+                    if (level.isOutsideBuildHeight(pos) || !thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(level, pos)) break;
                     level.setBlock(pos, Blocks.COBBLESTONE.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
                 }
             }
@@ -187,11 +187,11 @@ public final class ThaumcraftVillages {
                 BlockState ground = level.getBlockState(new BlockPos(worldX, surface - 1, worldZ));
                 if (!VILLAGE_GROUND_BLOCKS.contains(BuiltInRegistries.BLOCK.getKey(ground.getBlock()).toString())) continue;
                 BlockPos floor = new BlockPos(worldX, origin.getY(), worldZ);
-                if (level.isOutsideBuildHeight(floor) || !level.ensureCanWrite(floor)) continue;
+                if (level.isOutsideBuildHeight(floor) || !thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(level, floor)) continue;
                 level.setBlock(floor, ground, Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
                 for (int y = origin.getY() + 1; y < surface; y++) {
                     BlockPos pos = new BlockPos(worldX, y, worldZ);
-                    if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) continue;
+                    if (level.isOutsideBuildHeight(pos) || !thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(level, pos)) continue;
                     BlockState state = level.getBlockState(pos);
                     if (!VILLAGE_GROUND_BLOCKS.contains(BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString())) continue;
                     level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
@@ -239,8 +239,7 @@ public final class ThaumcraftVillages {
         int variant = material.variant();
         if (variant >= 0) {
             IntegerProperty property = variantProperty(state);
-            if (property != null && variant <= property.getPossibleValues().stream()
-                    .mapToInt(Integer::intValue).max().orElse(variant)) {
+            if (property != null && property.getPossibleValues().contains(variant)) {
                 state = state.setValue(property, variant);
             }
         }

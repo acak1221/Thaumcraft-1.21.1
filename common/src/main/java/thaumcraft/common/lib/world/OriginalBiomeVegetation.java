@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * lighting, voxel support and block-state texture faces are platform adapters. */
 final class OriginalBiomeVegetation {
     private OriginalBiomeVegetation() {}
-    static boolean available(WorldGenLevel level,BlockPos pos) {return !level.isOutsideBuildHeight(pos)&&level.hasChunkAt(pos)&&level.ensureCanWrite(pos);}
+    static boolean available(WorldGenLevel level,BlockPos pos) {return !level.isOutsideBuildHeight(pos)&&level.hasChunkAt(pos)&&WorldGenWriteArea.canWrite(level, pos);}
     private static boolean dirt(BlockState state) {return state.is(Blocks.DIRT)||state.is(Blocks.COARSE_DIRT)||state.is(Blocks.PODZOL);}
     static void blob(WorldGenLevel level,RandomSource random,BlockPos origin,BlockState block) {
         int x=origin.getX(),y=origin.getY(),z=origin.getZ();

@@ -208,7 +208,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
             initializeGeneratedFields(values, type, modifier); changed();
         } else {
             if (isRemoved() || !owner.hasChunkAt(worldPosition)
-                    || !owner.ensureCanWrite(worldPosition) || owner.getBlockEntity(worldPosition) != this
+                    || !thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(owner, worldPosition) || owner.getBlockEntity(worldPosition) != this
                     || owner.getBlockState(worldPosition) != getBlockState()
                     || !isNodeHost(getBlockState()))
                 return false;

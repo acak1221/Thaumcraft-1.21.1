@@ -72,7 +72,7 @@ public final class BiomeColumns {
         ChunkAccess chunk = level.getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, false);
         if (chunk == null) return false;
         int y = Mth.clamp(chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15), level.getMinBuildHeight(), level.getMaxBuildHeight() - 1);
-        if (!level.ensureCanWrite(new net.minecraft.core.BlockPos(x, y, z))) return false;
+        if (!WorldGenWriteArea.canWrite(level, new net.minecraft.core.BlockPos(x, y, z))) return false;
         Holder<Biome> target = level.registryAccess().registryOrThrow(Registries.BIOME).getHolder(targetKey).orElse(null);
         if (target == null) throw new IllegalStateException("Missing real native biome " + targetKey.location());
         // RandomState/Sampler are immutable generation inputs. No mutable ServerLevel chunk query, update or packet occurs here.

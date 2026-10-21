@@ -62,7 +62,7 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
     /** Actual ordinary-wild invocation of the shared original all-type factory. */
     public static boolean createRandomNodeAt(WorldGenLevel level, BlockPos pos, RandomSource random) {
         if (!level.getLevel().dimension().equals(Level.OVERWORLD)
-                || level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos) || !level.ensureCanWrite(pos)) return false;
+                || level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos) || !WorldGenWriteArea.canWrite(level, pos)) return false;
         Holder<Biome> biome = BiomeColumns.surfaceHolder(level, pos.getX(), pos.getZ());
         if (biome == null || !biome.is(ThaumcraftNodes.NODE_BIOMES)) return false;
         return NodeGeneration.createRandomNodeAt(level, pos, random, false, false, false);

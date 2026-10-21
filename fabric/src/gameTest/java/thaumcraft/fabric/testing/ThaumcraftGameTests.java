@@ -34,6 +34,7 @@ import thaumcraft.common.testing.TubeRuntimeChecks;
 import thaumcraft.common.testing.JarTransportRuntimeChecks;
 import thaumcraft.common.testing.InfusionRuntimeChecks;
 import thaumcraft.common.testing.InfusionStructureRuntimeChecks;
+import thaumcraft.common.testing.FamilyBlockStatesRuntimeChecks;
 import thaumcraft.common.testing.GolemColorsRuntimeChecks;
 import thaumcraft.common.testing.GolemFireOrderRuntimeChecks;
 import thaumcraft.common.testing.GolemFishingLiveRuntimeChecks;
@@ -472,6 +473,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 5600, batch = "m10_golem_fishing_live")
     public void realFishingGolemsCastIntoPondsAndDeliverCooksAndExtraCatches(GameTestHelper test) {
         GolemFishingLiveRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100)
+    public void everyStateOfTheVariantBlocksHasAModelEntryAndTheGroupBlocksOwnOnlyTheirMetadata(GameTestHelper test) {
+        FamilyBlockStatesRuntimeChecks.run(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 600)
@@ -1639,5 +1645,20 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m13_outer_lands")
     public void outerLandsIsARealRegisteredDimension(GameTestHelper test) {
         thaumcraft.common.testing.OuterLandsRuntimeChecks.levelStemKeepsTheOriginalValues(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m13_outer_lands")
+    public void outerLandsGenerationWritesNoBlockEntityWarnings(GameTestHelper test) {
+        thaumcraft.common.testing.OuterLandsRuntimeChecks.generationLogsNoBlockEntityWarnings(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "m13_block_entity_markers")
+    public void stateDependentBlockEntitiesKeepTheirEntityAndOnlyTheirOwnWarningIsDropped(GameTestHelper test) {
+        thaumcraft.common.testing.BlockEntityMarkerRuntimeChecks.run(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "r14_decoration_write_area")
+    public void forestDecorationStaysInsideTheWriteAreaOfTheFeaturesStep(GameTestHelper test) {
+        thaumcraft.common.testing.DecorationWriteAreaRuntimeChecks.run(test);
     }
 }

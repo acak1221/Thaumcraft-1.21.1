@@ -99,7 +99,7 @@ public final class VillageBankerHome {
 
     /** Writes one block of the component. */
     static boolean set(WorldGenLevel level, BlockPos pos, VillageWorldGenRules.Material material, int rotation) {
-        if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) return false;
+        if (level.isOutsideBuildHeight(pos) || !WorldGenWriteArea.canWrite(level, pos)) return false;
         return level.setBlock(pos, ThaumcraftVillages.state(material, rotation), Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
     }
 }

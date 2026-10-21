@@ -46,7 +46,7 @@ public final class TileManaPod extends BlockEntity implements IAspectContainer {
      * Region writes never query/mutate the ServerLevel's live chunk cache. */
     public static boolean initializeGenerated(WorldGenLevel region,BlockPos pos,RandomSource growthRandom) {
         if(region instanceof ServerLevel server&&!server.getServer().isSameThread())throw new IllegalStateException("Live pod generation requires the server thread");
-        if(!region.hasChunkAt(pos)||!region.ensureCanWrite(pos)||!(region.getBlockEntity(pos) instanceof TileManaPod pod))return false;
+        if(!region.hasChunkAt(pos)||!thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(region, pos)||!(region.getBlockEntity(pos) instanceof TileManaPod pod))return false;
         BlockState state=region.getBlockState(pos);if(!(state.getBlock() instanceof BlockManaPod))return false;
         int age=state.getValue(BlockManaPod.AGE);if(age<7){age++;if(!region.setBlock(pos,state.setValue(BlockManaPod.AGE,age),2))return false;}
         if(region.getBlockEntity(pos)!=pod)return false;

@@ -111,7 +111,7 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
     }
 
     private static boolean single(WorldGenLevel level, RandomSource random, BlockPos pos, BlockState state) {
-        if (level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos) || !level.ensureCanWrite(pos)) return false;
+        if (level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos) || !WorldGenWriteArea.canWrite(level, pos)) return false;
         if (!new TagMatchTest(REPLACEABLE).test(level.getBlockState(pos), random)) return false;
         return level.setBlock(pos, state, Block.UPDATE_CLIENTS);
     }

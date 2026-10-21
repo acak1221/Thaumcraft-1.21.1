@@ -95,6 +95,7 @@ public final class GuiResearchBrowser extends Screen {
             boolean unlocked = completed.contains(node.research.key());
             boolean available = node.research.hasPrerequisites(completed);
             int frameX = badgeFrame(node.research, purchases(node.research));
+            blend();
             graphics.blit(FRAME, node.x - 2, node.y - 2, frameX, 230, 26, 26, 256, 256);
             // Original GuiResearchBrowser:400-402 draws the corner brackets of a
             // special research over the cell of the research.
@@ -135,6 +136,7 @@ public final class GuiResearchBrowser extends Screen {
      */
     private void renderTabs(GuiGraphics graphics) {
         for (Tab tab : tabs) {
+            blend();
             boolean selected = tab.key().equals(category);
             int shift = selected ? 0 : 8;
             graphics.blit(FRAME, tab.x(), tab.y(), selected ? 152 : 176, 232, 24, 24, 256, 256);
@@ -145,6 +147,18 @@ public final class GuiResearchBrowser extends Screen {
             if (icon != null) graphics.blit(icon, tab.x() + 5 + shift, tab.y() + 4, 16, 16, 0, 0, 32, 32, 32, 32);
             if (!selected) graphics.blit(FRAME, tab.x(), tab.y(), 200, 232, 24, 24, 256, 256);
         }
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+
+    /**
+     * Original GuiResearchBrowser:456-458 and :385-386 switch blending on with the source alpha before
+     * the tabs and the cell frames are drawn. {@code GuiGraphics#blit} does not, and a {@code fill} ends
+     * with blending off, so without this the soft shadow of a cell frame and the translucent dim layer of
+     * an unselected tab (texture 200,232: black, alpha 137 of 255 at most) are drawn as solid black.
+     */
+    private static void blend() {
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
     }
 
     /** The original category icon; the corpus keeps it apart from the entry icons. */

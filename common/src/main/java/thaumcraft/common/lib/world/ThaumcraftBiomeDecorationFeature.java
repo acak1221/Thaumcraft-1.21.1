@@ -62,7 +62,12 @@ public final class ThaumcraftBiomeDecorationFeature extends Feature<NoneFeatureC
         {int xx=x+random.nextInt(16)+8,zz=z+random.nextInt(16)+8;OriginalBiomeVegetation.sediment(level,random,ground(level,xx,zz),Blocks.GRAVEL.defaultBlockState(),6,false);}
         int trees=2;if(random.nextInt(10)==0)++trees;
         for(int i=0;i<trees;i++){
-            int xx=x+random.nextInt(16)+8,zz=z+random.nextInt(16)+8;BlockPos pos=top(level,xx,zz);
+            // The 1.7.10 decorator drew the tree at chunk+8..+23 and let World.setBlock generate whatever chunk
+            // the canopy reached into. A 1.21.1 features step writes only one chunk around the chunk it
+            // decorates (-16..+31), so +8 left a Greatwood canopy (up to 16 blocks) eight blocks of room to the
+            // east and south and the whole tree was refused. Drawn from the chunk itself (0..15) every tree up to
+            // sixteen blocks wide fits on every side; the draw count and order are those of the original.
+            int xx=x+random.nextInt(16),zz=z+random.nextInt(16);BlockPos pos=top(level,xx,zz);
             if(kind==0){
                 if(random.nextInt(14)==0)new WorldGenSilverwoodTrees(false,8,5).generate(level,random,pos);
                 else if(random.nextInt(10)==0)new WorldGenGreatwoodTrees(false).generate(level,random,pos,random.nextInt(8)==0);

@@ -36,7 +36,7 @@ import thaumcraft.common.tiles.TileWandPedestal;
  * Oracle: {@code thaumcraft/common/blocks/BlockStoneDevice.java} of the legacy port and
  * {@code thaumcraft/common/tiles/TileWandPedestal.java}, lines 46-398.
  */
-public final class BlockWandPedestal extends BaseEntityBlock {
+public final class BlockWandPedestal extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockWandPedestal> CODEC = simpleCodec(BlockWandPedestal::new);
     /** Whether the block is the focus that sits on top of a pedestal. */
     public static final BooleanProperty FOCUS = BooleanProperty.create("focus");

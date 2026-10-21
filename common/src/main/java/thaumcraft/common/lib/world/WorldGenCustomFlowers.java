@@ -34,6 +34,6 @@ public final class WorldGenCustomFlowers {
         int x = random.nextInt(8) - random.nextInt(8), y = random.nextInt(4) - random.nextInt(4), z = random.nextInt(8) - random.nextInt(8);
         return origin.offset(x, y, z);
     }
-    private static boolean available(WorldGenLevel level, BlockPos pos) { return !level.isOutsideBuildHeight(pos) && level.hasChunkAt(pos) && level.ensureCanWrite(pos); }
+    private static boolean available(WorldGenLevel level, BlockPos pos) { return !level.isOutsideBuildHeight(pos) && level.hasChunkAt(pos) && WorldGenWriteArea.canWrite(level, pos); }
     private static boolean soil(BlockState state) { return state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.SAND) || state.is(Blocks.RED_SAND); }
 }

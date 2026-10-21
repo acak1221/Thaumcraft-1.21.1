@@ -37,7 +37,7 @@ import thaumcraft.common.tiles.TileOwned;
  * banner; every other metadata of the original family already exists as its
  * own native block.
  */
-public final class BlockWoodenDevice extends BaseEntityBlock {
+public final class BlockWoodenDevice extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockWoodenDevice> CODEC = simpleCodec(BlockWoodenDevice::new);
     /** Original BlockWoodenDevice metadata 0..14. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);

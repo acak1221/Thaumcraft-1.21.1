@@ -23,7 +23,7 @@ import thaumcraft.common.tiles.TileEldritchNothing;
  * drops nothing, only exists as a hidden block entity once it is exposed to air
  * and hurts everything that walks into it.
  */
-public final class BlockEldritchNothing extends BaseEntityBlock {
+public final class BlockEldritchNothing extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockEldritchNothing> CODEC = simpleCodec(BlockEldritchNothing::new);
     /** Original metadata 1 marks the exposed variant that carries the block entity. */
     public static final IntegerProperty EXPOSED = IntegerProperty.create("exposed", 0, 1);

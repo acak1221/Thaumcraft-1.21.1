@@ -28,7 +28,7 @@ import thaumcraft.common.tiles.TileWandPedestal;
  * pedestal and the flux scrubber; every other metadata of the original family
  * already exists as its own native block.
  */
-public final class BlockStoneDevice extends BaseEntityBlock {
+public final class BlockStoneDevice extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockStoneDevice> CODEC = simpleCodec(BlockStoneDevice::new);
     /** Original BlockStoneDevice metadata 0..14. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);

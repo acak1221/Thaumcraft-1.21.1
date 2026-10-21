@@ -20,7 +20,7 @@ public final class WorldGenManaPods {
             // The original getHeight must include the canopy just generated.
             if(y>=level.getHeight(Heightmap.Types.WORLD_SURFACE,x,z))break;
             BlockPos pos=new BlockPos(x,y,z);
-            if(!level.hasChunkAt(pos)||!level.ensureCanWrite(pos)||!level.hasChunkAt(pos.below()))return false;
+            if(!level.hasChunkAt(pos)||!WorldGenWriteArea.canWrite(level, pos)||!level.hasChunkAt(pos.below()))return false;
             if(level.isEmptyBlock(pos)&&level.isEmptyBlock(pos.below())) {
                 if(level.getBiome(pos).is(ThaumcraftManaBeans.MAGICAL_BIOMES)&&BlockManaPod.isSupport(level.getBlockState(pos.above()))) {
                     if(level.setBlock(pos,ThaumcraftManaBeans.MANA_POD.get().defaultBlockState().setValue(BlockManaPod.AGE,2+caller.nextInt(5)),2))TileManaPod.initializeGenerated(level,pos,growth);

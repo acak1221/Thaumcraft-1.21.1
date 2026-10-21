@@ -241,7 +241,7 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
 
     private static void placeVine(WorldGenLevel level, int x, int y, int z, Direction support) {
         BlockPos pos = new BlockPos(x, y, z);
-        if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) return;
+        if (level.isOutsideBuildHeight(pos) || !WorldGenWriteArea.canWrite(level, pos)) return;
         BlockState state = Blocks.VINE.defaultBlockState();
         if (support == Direction.EAST) state = state.setValue(VineBlock.EAST, true);
         else if (support == Direction.WEST) state = state.setValue(VineBlock.WEST, true);
@@ -284,13 +284,13 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
 
     private static boolean set(WorldGenLevel level, int x, int y, int z, VillageWorldGenRules.Material material) {
         BlockPos pos = new BlockPos(x, y, z);
-        if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) return false;
+        if (level.isOutsideBuildHeight(pos) || !WorldGenWriteArea.canWrite(level, pos)) return false;
         return level.setBlock(pos, ThaumcraftVillages.state(material, 0),
                 Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
     }
 
     private static boolean setState(WorldGenLevel level, BlockPos pos, BlockState state) {
-        if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) return false;
+        if (level.isOutsideBuildHeight(pos) || !WorldGenWriteArea.canWrite(level, pos)) return false;
         return level.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
     }
 }

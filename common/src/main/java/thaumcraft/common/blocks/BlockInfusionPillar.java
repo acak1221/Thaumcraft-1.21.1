@@ -33,7 +33,7 @@ import thaumcraft.common.config.ThaumcraftMasonry;
 import thaumcraft.common.tiles.TileInfusionPillar;
 
 /** StoneDevice3/4 flattened into a paired block. Only the lower half has the original BE. */
-public final class BlockInfusionPillar extends BaseEntityBlock {
+public final class BlockInfusionPillar extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockInfusionPillar> CODEC = simpleCodec(BlockInfusionPillar::new);
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;

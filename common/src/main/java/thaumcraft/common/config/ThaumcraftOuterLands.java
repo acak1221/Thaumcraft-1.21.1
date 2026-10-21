@@ -250,9 +250,7 @@ public final class ThaumcraftOuterLands {
             if (!"variant".equals(name) && !"type".equals(name)) continue;
             java.util.Collection<Integer> values = intProperty.getPossibleValues();
             if (values.isEmpty()) continue;
-            int min = java.util.Collections.min(values);
-            int max = java.util.Collections.max(values);
-            return state.setValue(intProperty, Math.min(Math.max(variant, min), max));
+            return state.setValue(intProperty, thaumcraft.common.lib.world.FamilyVariant.snap(values, variant));
         }
         return state;
     }

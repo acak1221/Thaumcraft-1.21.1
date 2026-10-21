@@ -150,7 +150,7 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         BlockState state = ThaumcraftVillages.state(material, 0);
         if (state == null) return false;
         BlockPos pos = new BlockPos(x, y, z);
-        if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) return false;
+        if (level.isOutsideBuildHeight(pos) || !WorldGenWriteArea.canWrite(level, pos)) return false;
         return level.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
     }
 }

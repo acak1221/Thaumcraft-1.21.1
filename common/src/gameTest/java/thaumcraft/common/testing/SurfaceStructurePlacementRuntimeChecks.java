@@ -190,7 +190,23 @@ public final class SurfaceStructurePlacementRuntimeChecks {
      * {@code ThaumcraftWorldGenerator:432} hangs a dark aura node over its centre.
      */
     private static void mound(GameTestHelper test, ServerLevel level, long seed) {
-        List<int[]> candidates = chainChunks(seed, StructurePlacementRules.Kind.MOUND, 12);
+        // The mound is refused on water, above the sea level and under a tree (the five ground samples of the original
+        // look through the canopy), so only a small share of the chunks of the chain can carry one, and which ones
+        // depends on where the forest decoration stands. The terrain alone says which chunks can: the surface of
+        // the mound column has to be dry land that the original accepts, from the sea level up to nine blocks above it.
+        // Taking the chunks the terrain allows, instead of the first twelve of the chain, keeps this check about the
+        // mound and not about which trees happen to stand on which column.
+        List<int[]> candidates = new ArrayList<>();
+        for (int[] chunk : chainChunks(seed, StructurePlacementRules.Kind.MOUND, 1000)) {
+            var chance = RandomSource.create(StructurePlacementRules.chunkSeed(seed, chunk[0], chunk[1]));
+            var position = StructurePlacementRules.draw(chance, chunk[0], chunk[1]);
+            var random = level.getChunkSource().randomState();
+            var generator = level.getChunkSource().getGenerator();
+            int surface = generator.getBaseHeight(position.x(), position.z(), Heightmap.Types.WORLD_SURFACE_WG, level, random);
+            int floor = generator.getBaseHeight(position.x(), position.z(), Heightmap.Types.OCEAN_FLOOR_WG, level, random);
+            if (surface == floor && surface > level.getSeaLevel() && surface - 9 < level.getSeaLevel()) candidates.add(chunk);
+            if (candidates.size() == 40) break;
+        }
         test.assertTrue(!candidates.isEmpty(), "the exclusive chain gives chunks to the mound");
         for (int[] candidate : candidates) {
             level.getChunk(candidate[0], candidate[1]);

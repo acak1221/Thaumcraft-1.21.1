@@ -77,7 +77,7 @@ public final class NodeGeneration {
     }
     public static boolean createRandomNodeAt(WorldGenLevel level,BlockPos origin,RandomSource random,boolean silverwood,boolean eerie,boolean small){
         if(level instanceof ServerLevel server&&!server.getServer().isSameThread())throw new IllegalStateException("Runtime node generation requires the server thread");
-        if(!available(level,origin)||!level.ensureCanWrite(origin))return false;
+        if(!available(level,origin)||!WorldGenWriteArea.canWrite(level, origin))return false;
         var biome=BiomeColumns.surfaceHolder(level,origin.getX(),origin.getZ());if(biome==null)return false;
         // Original consumes the COMPLETE generation roll even when the final position is occupied.
         Plan plan=plan(biome,origin,random,silverwood,eerie,small,pos->available(level,pos)?level.getBlockState(pos):null);

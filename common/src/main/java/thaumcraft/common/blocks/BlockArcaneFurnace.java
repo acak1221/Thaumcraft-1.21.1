@@ -47,7 +47,7 @@ import thaumcraft.common.tiles.TileArcaneFurnace;
  * <p>
  * Oracle: {@code thaumcraft/common/blocks/BlockArcaneFurnace.java}, lines 58-402.
  */
-public final class BlockArcaneFurnace extends BaseEntityBlock {
+public final class BlockArcaneFurnace extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockArcaneFurnace> CODEC = simpleCodec(BlockArcaneFurnace::new);
     /** The eleven original metadata values, flattened into a block state. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 9);

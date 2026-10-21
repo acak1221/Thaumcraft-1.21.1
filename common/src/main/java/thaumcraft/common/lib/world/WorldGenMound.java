@@ -241,7 +241,7 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
         BlockPos pos = new BlockPos(x, y, z);
         if (level.isOutsideBuildHeight(pos)) return false;
         if (!level.hasChunk(x >> 4, z >> 4)) return false;
-        if (!level.ensureCanWrite(pos)) return false;
+        if (!WorldGenWriteArea.canWrite(level, pos)) return false;
         return level.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
     }
 }

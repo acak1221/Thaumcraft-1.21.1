@@ -44,7 +44,7 @@ public class ItemVariantBlock extends BlockItem {
             if (!(property instanceof IntegerProperty integer) || !"variant".equals(property.getName())) continue;
             Collection<Integer> values = integer.getPossibleValues();
             if (values.isEmpty()) continue;
-            return state.setValue(integer, Math.clamp(variant, Collections.min(values), Collections.max(values)));
+            return state.setValue(integer, thaumcraft.common.lib.world.FamilyVariant.snap(values, variant));
         }
         return state;
     }

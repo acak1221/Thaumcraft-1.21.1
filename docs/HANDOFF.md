@@ -1,3 +1,23 @@
+## Шум в логе мира и вкладки Таумономикона — 22.10.2026
+
+Лог пользователя (запуск 22:52–23:02) дал три дефекта; все закрыты в рабочем дереве клона
+`Thaumcraft-1.21.1-work` (не закоммичено), подробности и доказательства —
+`docs/analysis/2026-10-22-worldgen-log-and-research-tabs.md`.
+
+* **«Detected setBlock in a far chunk» (91).** Строку пишет сам вопрос `WorldGenRegion.ensureCanWrite`, а
+  не запись; деревья декоратора шли в `chunk+8..+23` при кроне до 16 блоков (область записи −16..+31), и
+  дерево отклонялось целиком. Теперь `WorldGenWriteArea.canWrite` отвечает молча, а начало деревьев — `chunk+0..15`.
+  Оригинал границ не имел (каскадная генерация 1.7.10).
+* **«Tried to load a block entity … but failed» (180).** Маркер `DUMMY` из `WorldGenRegion.setBlock` для блока
+  `EntityBlock` с вариантами без сущности; миксин `LevelChunkPendingBlockEntityMixin` глушит только эту строку
+  для блоков с меткой `StateDependentBlockEntity`.
+* **Вкладки Таумономикона.** `GuiGraphics.blit` не включает смешивание, слой притемнения (чёрный, альфа ≤ 137) рисовался
+  сплошным; `GuiResearchBrowser.blend()`.
+* Проверки: JUnit 1843, GameTest 318/318 на свежем мире, мутации откатывались. Курган-проверка
+  `surfaceStructuresReachTheOverworld` теперь берёт годные по рельефу чанки цепочки (лес меняет, какие чанки свободны от деревьев).
+* **Не закрыто:** блоки `cosmetic_solid*`/`eldritch*` невидимы в клиенте (`BaseEntityBlock` → `RenderShape.INVISIBLE`,
+  у классов нет `getRenderShape`) и не двигаются поршнем (`hasBlockEntity` на весь блок). NeoForge не собирался.
+
 ## NeoForge-паритет и приёмка — 21.10.2026
 
 Модуль `neoforge` доведён до состояния, в котором он выполняет **те же регистрации**, что и

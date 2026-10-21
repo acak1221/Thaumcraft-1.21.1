@@ -32,7 +32,7 @@ import thaumcraft.common.tiles.TileGrate;
  * grate variants and the brainbox; every other metadata of the original
  * family already exists as its own native block.
  */
-public final class BlockMetalDevice extends BaseEntityBlock {
+public final class BlockMetalDevice extends BaseEntityBlock implements StateDependentBlockEntity {
     public static final MapCodec<BlockMetalDevice> CODEC = simpleCodec(BlockMetalDevice::new);
     /** Original BlockMetalDevice metadata 0..14. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);

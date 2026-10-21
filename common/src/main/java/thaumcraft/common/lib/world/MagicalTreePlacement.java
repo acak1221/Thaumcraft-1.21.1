@@ -18,12 +18,17 @@ final class MagicalTreePlacement {
     final WorldGenLevel level;
     private final Map<BlockPos, BlockState> blocks = new LinkedHashMap<>();
     private boolean writable = true;
+    /** Some block of the tree lay outside the chunks a features step may write to. */
+    private boolean outsideWriteArea;
     private final Map<BlockPos, NodeGeneration.Plan> nodes = new LinkedHashMap<>();
 
     MagicalTreePlacement(WorldGenLevel level) { this.level = level; }
 
     boolean available(BlockPos pos) {
-        return !level.isOutsideBuildHeight(pos) && level.hasChunkAt(pos) && level.ensureCanWrite(pos);
+        if (level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos)) return false;
+        if (WorldGenWriteArea.canWrite(level, pos)) return true;
+        outsideWriteArea = true;
+        return false;
     }
 
     BlockState state(BlockPos pos) {
@@ -48,7 +53,10 @@ final class MagicalTreePlacement {
     static boolean replaceableByLeaves(BlockState state) { return state.isAir() || leaves(state) || state.canBeReplaced(); }
 
     boolean finish() {
-        if (!writable || blocks.isEmpty()) return false;
+        if (!writable || blocks.isEmpty()) {
+            if (outsideWriteArea) WorldGenWriteArea.treeRefused();
+            return false;
+        }
         // The old metadata combined species and axis. Flattening it must not
         // lose supporting logs or mark every generated leaf persistent. Compute
         // the native 1..7 distance against the ACTUAL two-tier branches/trunks,

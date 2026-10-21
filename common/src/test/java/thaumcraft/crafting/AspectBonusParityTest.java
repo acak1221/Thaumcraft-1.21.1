@@ -1,7 +1,6 @@
 package thaumcraft.crafting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
@@ -120,29 +119,30 @@ class AspectBonusParityTest {
 
     @Test void thornsAndSmiteKeepTheOriginalAspects() {
         // Oracle getBonusTags: the enchantment branch compares the stored effect id with the
-        // vanilla enchantment constants. Enchantment.field_92091_k is thorns and is merged into
-        // WEAPON, Enchantment.field_77339_k is smite and is merged into ENTROPY.
-        AspectList thorns = bonus(withEnchantment(new ItemStack(Items.IRON_SWORD), Enchantments.THORNS, 3));
+        // vanilla enchantment constants and merges the enchantment LEVEL. Enchantment.field_92091_k
+        // is thorns and is merged into WEAPON, Enchantment.field_77339_k is smite and is merged
+        // into ENTROPY. The pickaxe carries no weapon bonus of its own.
+        AspectList thorns = bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.THORNS, 3));
         assertEquals(3, thorns.getAmount(Aspect.WEAPON));
         assertEquals(0, thorns.getAmount(Aspect.ENTROPY));
         assertEquals(3, thorns.getAmount(Aspect.MAGIC), "the sum of the enchantment levels is magic");
-        AspectList smite = bonus(withEnchantment(new ItemStack(Items.IRON_SWORD), Enchantments.SMITE, 2));
+        AspectList smite = bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.SMITE, 2));
         assertEquals(2, smite.getAmount(Aspect.ENTROPY));
         assertEquals(0, smite.getAmount(Aspect.WEAPON));
         assertEquals(2, smite.getAmount(Aspect.MAGIC));
     }
 
     @Test void theOtherOriginalEnchantmentAspectsAreUnchanged() {
-        assertEquals(1, bonus(withEnchantment(new ItemStack(Items.IRON_SWORD), Enchantments.SHARPNESS, 4)).getAmount(Aspect.WEAPON));
-        assertEquals(2, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.EFFICIENCY, 3)).getAmount(Aspect.TOOL));
-        assertEquals(1, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.UNBREAKING, 3)).getAmount(Aspect.EARTH));
-        assertEquals(2, bonus(withEnchantment(new ItemStack(Items.IRON_SWORD), Enchantments.SILK_TOUCH, 2)).getAmount(Aspect.EXCHANGE));
-        assertEquals(3, bonus(withEnchantment(new ItemStack(Items.IRON_SWORD), Enchantments.FIRE_ASPECT, 2)).getAmount(Aspect.FIRE));
-        assertTrue(bonus(withEnchantment(new ItemStack(Items.IRON_SWORD), Enchantments.KNOCKBACK, 2)).getAmount(Aspect.AIR) == 2);
+        assertEquals(4, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.SHARPNESS, 4)).getAmount(Aspect.WEAPON));
+        assertEquals(3, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.EFFICIENCY, 3)).getAmount(Aspect.TOOL));
+        assertEquals(3, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.UNBREAKING, 3)).getAmount(Aspect.EARTH));
+        assertEquals(2, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.SILK_TOUCH, 2)).getAmount(Aspect.EXCHANGE));
+        assertEquals(2, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.FIRE_ASPECT, 2)).getAmount(Aspect.FIRE));
+        assertEquals(2, bonus(withEnchantment(new ItemStack(Items.IRON_PICKAXE), Enchantments.KNOCKBACK, 2)).getAmount(Aspect.AIR));
     }
 
     private static ItemStack potion(ItemStack stack, Holder<MobEffect> effect, int amplifier) {
-        PotionContents contents = new PotionContents(MobEffects.WATER, Optional.empty(),
+        PotionContents contents = new PotionContents(Optional.empty(), Optional.empty(),
                 List.of(new MobEffectInstance(effect, 200, amplifier)));
         stack.set(DataComponents.POTION_CONTENTS, contents);
         return stack;
@@ -157,8 +157,9 @@ class AspectBonusParityTest {
         assertEquals(3, confusion.getAmount(Aspect.ELDRITCH), "three of the effect aspect per amplifier level");
         assertEquals(0, confusion.getAmount(Aspect.DEATH));
         // The 1.7.10 confusion potion is Potion.confusion and the original merges it into ELDRITCH.
+        // The 1.7.10 weakness potion is Potion.weakness and the original merges it into death.
         AspectList weakness = ObjectAspectResolver.potionTags(potion(new ItemStack(Items.POTION), MobEffects.WEAKNESS, 1));
-        assertEquals(4, weakness.getAmount(Aspect.DEATH), "the 1.7.10 weakness potion is merged into death");
+        assertEquals(6, weakness.getAmount(Aspect.DEATH), "three of the effect aspect per amplifier level");
         assertEquals(0, weakness.getAmount(Aspect.SENSES));
         assertEquals(4, weakness.getAmount(Aspect.MAGIC));
         // The 1.7.10 invisibility potion is merged into senses; the port had no entry at all.

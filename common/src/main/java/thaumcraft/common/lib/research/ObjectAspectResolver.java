@@ -20,7 +20,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -86,7 +85,10 @@ public final class ObjectAspectResolver {
             // the original zero instrumentum entry for the basic wood/iron pair.
             base.merge(Aspect.MAGIC, cost / 2).merge(Aspect.TOOL, cost / 3);
         }
-        if (stack.getItem() instanceof PotionItem) potionTags(stack, base);
+        if (stack.getItem() instanceof PotionItem) {
+            AspectList potion = potionTags(stack);
+            for (Aspect aspect : potion.getAspects()) base.merge(aspect, potion.getAmount(aspect));
+        }
         return cap(base);
     }
 
@@ -133,7 +135,26 @@ public final class ObjectAspectResolver {
         // an eight-unit phial, nor should the new native component be ignored.
         if (stack.getItem() instanceof ItemJarLabel && ItemJarLabel.aspect(stack) != null) result.add(ItemJarLabel.aspect(stack), 1);
         result.add(base);
-        equipmentTags(stack, result);
+        AspectList bonus = bonusTags(stack);
+        for (Aspect aspect : bonus.getAspects()) result.merge(aspect, bonus.getAmount(aspect));
+        // Oracle ThaumcraftCraftingManager.getBonusTags ends with capAspects(aspects, 64):
+        // every aspect of the finished bonus list is capped at 64 before the culling.
+        return cull(cap(result));
+    }
+
+    /**
+     * The original bonus tags of one item: the equipment bonus and the enchantment bonus.
+     *
+     * <p>Oracle {@code ThaumcraftCraftingManager.getBonusTags} merges the equipment bonus of the
+     * item class and then the enchantment bonus into the finished list, and finally adds the sum
+     * of all enchantment levels as MAGIC. The production path is {@link #get(ItemStack, Level)};
+     * this method is the same computation without the object base, so the parity test can pin the
+     * original numbers.</p>
+     */
+    public static AspectList bonusTags(ItemStack stack) {
+        AspectList tags = new AspectList();
+        if (stack == null || stack.isEmpty()) return tags;
+        equipmentTags(stack, tags);
         ItemEnchantments enchantments = stack.getOrDefault(stack.is(Items.ENCHANTED_BOOK)
                 ? DataComponents.STORED_ENCHANTMENTS : DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         int total = 0;
@@ -141,11 +162,11 @@ public final class ObjectAspectResolver {
             int amount = entry.getIntValue();
             String id = entry.getKey().unwrapKey().map(key -> key.location().toString()).orElse("");
             Aspect aspect = ENCHANTMENT_TAGS.get(id);
-            if (aspect != null) result.merge(aspect, amount);
+            if (aspect != null) tags.merge(aspect, amount);
             total += amount;
         }
-        if (total > 0) result.merge(Aspect.MAGIC, total);
-        return cull(result);
+        if (total > 0) tags.merge(Aspect.MAGIC, total);
+        return tags;
     }
 
     private static synchronized RecipeIndex index(Level level) {
@@ -316,14 +337,43 @@ public final class ObjectAspectResolver {
         return result;
     }
 
+    /**
+     * The original sword bonus is the constant five, not a tier scale.
+     *
+     * <p>Oracle {@code ThaumcraftCraftingManager.getBonusTags} (the 1.7.10 jar bytecode) computes
+     * {@code merge(WEAPON, (int)(ItemSword.func_150931_i() + 1.0F))}. The 1.7.10 vanilla
+     * {@code ItemSword} returns the constant base damage 4.0F for every sword - the tool material's
+     * damage is added when the attack-damage attribute modifier is built, not inside
+     * {@code func_150931_i()}. The 1.12 reference of this repository keeps the same expression with
+     * the renamed {@code ItemSword.getAttackDamage()}
+     * ({@code src/main/java/thaumcraft/common/lib/crafting/ThaumcraftCraftingManager.java:92-94}),
+     * and TC 1.12's own {@code ItemThaumiumSword} has to override BOTH {@code getAttackDamage()}
+     * and {@code getAttributeModifiers()} to six
+     * ({@code src/main/java/thaumcraft/common/items/equipment/ItemThaumiumSword.java:17-25}) -
+     * which is only needed when the vanilla value is a constant that does not contain the
+     * material damage. Every sword of the original therefore contributes WEAPON 5.</p>
+     */
+    public static final int SWORD_WEAPON_BONUS = 5;
+
+    /**
+     * The original branch order of {@code getBonusTags} is armour, sword, bow, pickaxe, tool,
+     * shears/hoe, and every branch leaves the chain.
+     *
+     * <p>The 1.7.10 {@code ItemHoe} extends {@code ItemTool}, so a hoe is caught by the tool branch
+     * and never reaches the shears/hoe branch: the original gives a hoe the TOOL bonus of the tool
+     * material and no harvest bonus. The 1.21.1 {@code HoeItem} extends {@code DiggerItem} exactly
+     * like the 1.7.10 {@code ItemHoe} extends {@code ItemTool}, so the native tool branch has to
+     * keep the hoe. The 1.7.10 {@code ItemShears} extends {@code Item} and keeps the harvest
+     * bonus alone, like the 1.21.1 {@code ShearsItem}.</p>
+     */
     private static void equipmentTags(ItemStack stack, AspectList tags) {
         Item item = stack.getItem();
         if (item instanceof ArmorItem armor) tags.merge(Aspect.ARMOR, armor.getDefense());
-        else if (item instanceof SwordItem sword) tags.merge(Aspect.WEAPON, (int) (sword.getTier().getAttackDamageBonus() + 1));
+        else if (item instanceof SwordItem) tags.merge(Aspect.WEAPON, SWORD_WEAPON_BONUS);
         else if (item instanceof BowItem) tags.merge(Aspect.WEAPON, 3).merge(Aspect.FLIGHT, 1);
         else if (item instanceof PickaxeItem pick && legacyHarvestLevel(pick.getTier()) >= 0) tags.merge(Aspect.MINE, legacyHarvestLevel(pick.getTier()) + 1);
-        else if (item instanceof DiggerItem tool && !(item instanceof HoeItem) && legacyHarvestLevel(tool.getTier()) >= 0) tags.merge(Aspect.TOOL, legacyHarvestLevel(tool.getTier()) + 1);
-        else if (item instanceof ShearsItem || item instanceof HoeItem) {
+        else if (item instanceof DiggerItem tool && legacyHarvestLevel(tool.getTier()) >= 0) tags.merge(Aspect.TOOL, legacyHarvestLevel(tool.getTier()) + 1);
+        else if (item instanceof ShearsItem) {
             int durability = stack.getMaxDamage();
             tags.merge(Aspect.HARVEST, durability <= 59 ? 1 : durability <= 131 || durability <= 32 ? 2 : durability <= 250 ? 3 : 4);
         }
@@ -340,24 +390,42 @@ public final class ObjectAspectResolver {
         return -1;
     }
 
-    private static void potionTags(ItemStack stack, AspectList tags) {
+    /**
+     * The original potion aspects of {@code ThaumcraftCraftingManager.getObjectTags}.
+     *
+     * <p>Read from the bytecode of the 1.7.10 jar: the potion branch of {@code getObjectTags}
+     * merges WATER 1 for every potion, ENTRPY 2 for a splash potion, MAGIC of two per amplifier
+     * level for every effect and the effect aspect of three per amplifier level. The effect table
+     * of the original is {@code blindness} DARKNESS, {@code confusion} ELDRITCH, {@code damageBoost}
+     * WEAPON, {@code digSlowdown} TRAP, {@code moveSlowdown} TRAP, {@code digSpeed} TOOL,
+     * {@code fireResistance} ARMOR plus FIRE, {@code harm} DEATH, {@code heal} HEAL,
+     * {@code hunger} DEATH, {@code invisibility} SENSES, {@code jump} FLIGHT, {@code moveSpeed}
+     * MOTION, {@code nightVision} SENSES, {@code poison} POISON, {@code regeneration} HEAL,
+     * {@code resistance} ARMOR, {@code waterBreathing} AIR and {@code weakness} DEATH.</p>
+     */
+    public static AspectList potionTags(ItemStack stack) {
+        AspectList tags = new AspectList();
+        if (stack == null || stack.isEmpty()) return tags;
         tags.merge(Aspect.WATER, 1);
         PotionContents contents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-        if (stack.is(Items.SPLASH_POTION) && contents.hasEffects()) tags.merge(Aspect.ENTROPY, 2);
+        if (stack.is(Items.SPLASH_POTION)) tags.merge(Aspect.ENTROPY, 2);
         for (MobEffectInstance effect : contents.getAllEffects()) {
             int strength = effect.getAmplifier() + 1;
             tags.merge(Aspect.MAGIC, strength * 2);
             Holder<MobEffect> type = effect.getEffect();
-            Aspect aspect = type.equals(MobEffects.BLINDNESS) ? Aspect.DARKNESS : type.equals(MobEffects.WITHER) ? Aspect.ELDRITCH
+            Aspect aspect = type.equals(MobEffects.BLINDNESS) ? Aspect.DARKNESS : type.equals(MobEffects.CONFUSION) ? Aspect.ELDRITCH
+                    : type.equals(MobEffects.WITHER) ? Aspect.ELDRITCH
                     : type.equals(MobEffects.DAMAGE_BOOST) ? Aspect.WEAPON : type.equals(MobEffects.DIG_SLOWDOWN) ? Aspect.TRAP
-                    : type.equals(MobEffects.DIG_SPEED) ? Aspect.TOOL : type.equals(MobEffects.HARM) || type.equals(MobEffects.HUNGER) || type.equals(MobEffects.CONFUSION) ? Aspect.DEATH
-                    : type.equals(MobEffects.HEAL) || type.equals(MobEffects.REGENERATION) ? Aspect.HEAL : type.equals(MobEffects.NIGHT_VISION) || type.equals(MobEffects.WEAKNESS) ? Aspect.SENSES
+                    : type.equals(MobEffects.DIG_SPEED) ? Aspect.TOOL : type.equals(MobEffects.HARM) || type.equals(MobEffects.HUNGER) ? Aspect.DEATH
+                    : type.equals(MobEffects.WEAKNESS) ? Aspect.DEATH : type.equals(MobEffects.HEAL) || type.equals(MobEffects.REGENERATION) ? Aspect.HEAL
+                    : type.equals(MobEffects.NIGHT_VISION) || type.equals(MobEffects.INVISIBILITY) ? Aspect.SENSES
                     : type.equals(MobEffects.JUMP) ? Aspect.FLIGHT : type.equals(MobEffects.MOVEMENT_SLOWDOWN) ? Aspect.TRAP
                     : type.equals(MobEffects.MOVEMENT_SPEED) ? Aspect.MOTION : type.equals(MobEffects.POISON) ? Aspect.POISON
                     : type.equals(MobEffects.DAMAGE_RESISTANCE) ? Aspect.ARMOR : type.equals(MobEffects.WATER_BREATHING) ? Aspect.AIR : null;
             if (type.equals(MobEffects.FIRE_RESISTANCE)) tags.merge(Aspect.ARMOR, strength).merge(Aspect.FIRE, strength * 2);
             else if (aspect != null) tags.merge(aspect, strength * 3);
         }
+        return tags;
     }
 
     private static AspectList cull(AspectList source) {
@@ -380,6 +448,15 @@ public final class ObjectAspectResolver {
         return result;
     }
 
+    /**
+     * The original enchantment table of {@code ThaumcraftCraftingManager.getBonusTags}.
+     *
+     * <p>Read from the 1.7.10 jar bytecode: the enchantment branch of {@code getBonusTags} compares
+     * the stored effect id with the fourteen vanilla enchantment constants and merges the listed
+     * aspect. The two entries that are easy to transpose are {@code Enchantment.field_92091_k}
+     * (thorns), which the original merges into {@code WEAPON}, and {@code Enchantment.field_77339_k}
+     * (smite), which the original merges into {@code ENTROPY}.</p>
+     */
     private static Map<String, Aspect> enchantmentTags() {
         Map<String, Aspect> tags = new LinkedHashMap<>();
         addEnchantments(tags, Aspect.WATER, "aqua_affinity");
@@ -391,9 +468,9 @@ public final class ObjectAspectResolver {
         addEnchantments(tags, Aspect.GREED, "fortune", "looting", "luck_of_the_sea");
         addEnchantments(tags, Aspect.CRAFT, "infinity");
         addEnchantments(tags, Aspect.AIR, "knockback", "punch", "respiration");
-        addEnchantments(tags, Aspect.WEAPON, "power", "sharpness", "smite");
+        addEnchantments(tags, Aspect.WEAPON, "power", "sharpness", "thorns");
         addEnchantments(tags, Aspect.EXCHANGE, "silk_touch");
-        addEnchantments(tags, Aspect.ENTROPY, "thorns");
+        addEnchantments(tags, Aspect.ENTROPY, "smite");
         addEnchantments(tags, Aspect.EARTH, "unbreaking");
         tags.put("thaumcraft:haste", Aspect.MOTION);
         tags.put("thaumcraft:repair", Aspect.TOOL);

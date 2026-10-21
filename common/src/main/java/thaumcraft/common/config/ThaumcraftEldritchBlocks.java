@@ -234,7 +234,16 @@ public final class ThaumcraftEldritchBlocks {
             () -> new EtherealBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
                     .noCollission().sound(SoundType.GRASS).lightLevel(state -> 15)));
 
-    private static BlockBehaviour.Properties eldritchProperties(int group) {
+    /**
+     * The native properties of a block of the eldritch family.
+     *
+     * <p>The hardness, the blast resistance and the light level come from the oracle rules of
+     * the original metadata family, so every native block of a group carries the values of
+     * the metadata it hosts.
+     *
+     * @param group the hardness group of the native block
+     */
+    public static BlockBehaviour.Properties eldritchProperties(int group) {
         return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
                 .strength(EldritchBlockRules.eldritchGroupHardness(group), EldritchBlockRules.eldritchGroupResistance(group))
                 .sound(SoundType.STONE).noOcclusion()

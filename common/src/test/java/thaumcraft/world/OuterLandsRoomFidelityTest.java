@@ -279,6 +279,23 @@ class OuterLandsRoomFidelityTest {
         assertEquals(effects.get("sky_color").getAsInt(), OuterLandsRules.SKY_COLOR, "the sky colour");
     }
 
+    @Test void theDimensionEffectsDocumentCarriesTheOriginalColours() throws Exception {
+        // Oracle WorldProviderOuter:74-115 - the Outer Lands has a black sky, no sky at all,
+        // a cloud height of one and the fog colour 0xA080A0 scaled by 0.15.
+        String path = "data/thaumcraft/dimension_effects/outer_lands.json";
+        JsonObject effects;
+        try (InputStream stream = OuterLandsRoomFidelityTest.class.getClassLoader().getResourceAsStream(path)) {
+            assertNotNull(stream, "missing native dimension effects document " + path);
+            effects = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
+        }
+        assertEquals(OuterLandsRules.packedFogColor(), effects.get("fog_color").getAsInt(), "the fog colour");
+        assertEquals(OuterLandsRules.packedFogColor(), effects.get("cloud_color").getAsInt(), "the cloud colour");
+        assertEquals(OuterLandsRules.CLOUD_HEIGHT, effects.get("cloud_height").getAsFloat(), "the cloud height");
+        assertEquals(OuterLandsRules.AMBIENT_LIGHT, effects.get("ambient_light").getAsFloat(), "the ambient light");
+        assertEquals(OuterLandsRules.SKY_COLOR, effects.get("sky_color").getAsInt(), "the sky colour");
+        assertFalse(effects.get("has_sky").getAsBoolean(), "the Outer Lands has no sky");
+    }
+
     /** The lock of a boss room, the eldritch block with the metadata eight. */
     private static DungeonRooms.Placement lock(DungeonRooms.Builder builder) {
         return builder.placements.stream()

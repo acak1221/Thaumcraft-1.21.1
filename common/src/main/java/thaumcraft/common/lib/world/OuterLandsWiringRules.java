@@ -91,6 +91,66 @@ public final class OuterLandsWiringRules {
     /* ------------------------------------------------------------------ */
 
     /**
+     * One row of the original eldritch metadata table.
+     *
+     * @param metadata the original 1.7 metadata of the oracle block family
+     * @param blockId the native registry id of the block that hosts the metadata
+     * @param variant the value of the native "variant" block state property
+     */
+    public record EldritchVariant(int metadata, String blockId, int variant) {
+        /** The hardness of the metadata (oracle {@code BlockEldritch:231-246}). */
+        public float hardness() { return EldritchBlockRules.eldritchHardness(metadata); }
+
+        /** The blast resistance of the metadata (oracle {@code BlockEldritch:248-260}). */
+        public float resistance() { return EldritchBlockRules.eldritchExplosionResistance(metadata); }
+
+        /** The light level of the metadata (oracle {@code BlockEldritch:120-135}). */
+        public int light() { return EldritchBlockRules.eldritchLight(metadata); }
+    }
+
+    /**
+     * The original eldritch metadata table.
+     *
+     * <p>Oracle {@code BlockEldritch:78-94} gives every metadata its own icon and
+     * {@code :231-260} its own hardness and blast resistance, so the original
+     * family became six native blocks that carry the model of their metadata in
+     * the "variant" block state property. The metadata eleven is the eldritch
+     * crystal of the native port, the original crystal was a metadata of the
+     * separate crystal block.
+     *
+     * <p>The native blockstates of the port are the authority of the grouping:
+     * {@code blockstates/eldritch.json} carries the metadata zero to three,
+     * {@code eldritch_crust.json} the metadata four and five, {@code eldritch_deco.json}
+     * the metadata six, {@code eldritch_doorway.json} the metadata seven and eight and
+     * {@code eldritch_spawner.json} the metadata nine and ten.
+     */
+    public static final java.util.List<EldritchVariant> ELDRITCH_VARIANTS = java.util.List.of(
+            new EldritchVariant(0, ELDRITCH, 0),
+            new EldritchVariant(1, ELDRITCH, 1),
+            new EldritchVariant(2, ELDRITCH, 2),
+            new EldritchVariant(3, ELDRITCH, 3),
+            new EldritchVariant(4, ELDRITCH_CRUST, 4),
+            new EldritchVariant(5, ELDRITCH_CRUST, 5),
+            new EldritchVariant(6, ELDRITCH_DECO, 6),
+            new EldritchVariant(7, ELDRITCH_DOORWAY, 7),
+            new EldritchVariant(8, ELDRITCH_DOORWAY, 8),
+            new EldritchVariant(9, ELDRITCH_SPAWNER, 9),
+            new EldritchVariant(10, ELDRITCH_SPAWNER, 10),
+            new EldritchVariant(11, ELDRITCH_CRYSTAL, 11));
+
+    /**
+     * The row of an original eldritch metadata, or null when the metadata is unknown.
+     *
+     * @param metadata the original 1.7 metadata
+     */
+    public static EldritchVariant eldritchVariant(int metadata) {
+        for (EldritchVariant variant : ELDRITCH_VARIANTS) {
+            if (variant.metadata() == metadata) return variant;
+        }
+        return null;
+    }
+
+    /**
      * The eldritch block that hosts an original {@code BlockEldritch} metadata.
      *
      * <p>Oracle {@code BlockEldritch:231-260} gives every metadata its own
@@ -98,14 +158,8 @@ public final class OuterLandsWiringRules {
      * the six blocks of {@link EldritchBlockRules#ELDRITCH_GROUPS}.
      */
     public static String eldritchBlock(int variant) {
-        return switch (EldritchBlockRules.eldritchGroup(variant)) {
-            case 1 -> ELDRITCH_CRUST;
-            case 2 -> ELDRITCH_DECO;
-            case 3 -> ELDRITCH_DOORWAY;
-            case 4 -> ELDRITCH_SPAWNER;
-            case 5 -> ELDRITCH_CRYSTAL;
-            default -> ELDRITCH;
-        };
+        EldritchVariant row = eldritchVariant(variant);
+        return row == null ? ELDRITCH : row.blockId();
     }
 
     /**

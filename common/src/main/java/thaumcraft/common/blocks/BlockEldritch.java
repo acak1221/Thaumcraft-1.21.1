@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -32,6 +33,7 @@ import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.config.ThaumcraftWarp;
 import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.lib.world.OuterLandsWiringRules;
 import thaumcraft.common.tiles.TileEldritchAltar;
 import thaumcraft.common.tiles.TileEldritchCap;
 import thaumcraft.common.tiles.TileEldritchCrabSpawner;
@@ -179,7 +181,13 @@ public final class BlockEldritch extends BaseEntityBlock {
 
     /** Original ItemEldritchObject metadata two, the eldritch lock key. */
     public static boolean isEldritchLockKey(ItemStack stack) {
-        return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().equals("eldritch_object_2");
+        // Oracle BlockEldritch:278 - the lock accepts the eldritch object with the metadata two.
+        // The original carried the five metadata values on one item; the 1.21.1 port flattens
+        // them into one item each, so the key is the runed tablet.
+        ResourceLocation key = ResourceLocation.parse(OuterLandsWiringRules.eldritchObjectItem(
+                EldritchBlockRules.ELDRITCH_OBJECT_TABLET));
+        ResourceLocation held = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return key.equals(held);
     }
 
     /** BlockEldritch:216-229 - breaking a structural piece removes the whole altar. */

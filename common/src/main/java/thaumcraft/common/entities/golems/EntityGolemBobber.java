@@ -52,9 +52,17 @@ public final class EntityGolemBobber extends Entity {
         double dx = water.getX() + .5 - fisher.getX();
         double dy = water.getY() + 1.0 - fisher.getY();
         double dz = water.getZ() + .5 - fisher.getZ();
-        double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        // Original B:83–91: sqrt(length), NOT length or sqrt(lengthSquared).
-        setDeltaMovement(dx * .1, dy * .1 + Math.sqrt(length) * .08, dz * .1);
+        setDeltaMovement(castDelta(dx, dy, dz));
+    }
+
+    /**
+     * Original EntityGolemBobber:62-71 (the readable 1.7.10 source of TC4 4.2.3.5): the cast velocity is the
+     * direction to the target times 0.1, with {@code sqrt(distance) * 0.08} added to the vertical part. The square
+     * root is taken over the DISTANCE, not over the squared distance and not over the distance itself.
+     */
+    public static Vec3 castDelta(double dx, double dy, double dz) {
+        double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        return new Vec3(dx * .1, dy * .1 + Math.sqrt(distance) * .08, dz * .1);
     }
 
     /** Nullable; resolves only the actual live same-level golem, retrying naturally

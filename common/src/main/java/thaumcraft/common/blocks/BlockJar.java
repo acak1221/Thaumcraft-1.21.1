@@ -41,6 +41,14 @@ import thaumcraft.common.tiles.TileJar;
 public final class BlockJar extends BaseEntityBlock {
     public static final MapCodec<BlockJar> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             propertiesCodec(), Codec.BOOL.optionalFieldOf("void", false).forGetter(BlockJar::isVoid)).apply(instance, BlockJar::new));
+    /**
+     * Original BlockJar:90 - the light level of the jar.
+     *
+     * <p>The original sets the light with the 1.7.10 setter value 0.66 and that setter stores
+     * {@code (int)(15*0.66)} = 9. Every metadata value of the original jar block emits that light, the
+     * brain jar and the node jar included.</p>
+     */
+    public static final int LIGHT = 9;
     private static final VoxelShape SHAPE = box(3, 0, 3, 13, 12, 13);
     private static final SoundEvent JAR = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "jar"));
     private final boolean voidJar;

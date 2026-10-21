@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.blocks.BlockHole;
+import thaumcraft.common.lib.world.HoleBlockRules;
 import thaumcraft.common.tiles.TileHole;
 
 /** The block a Portable Hole leaves behind (original blockHole + TileHole); it has no item. */
@@ -18,7 +19,7 @@ public final class ThaumcraftHoles {
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK_ENTITY_TYPE);
 
     public static final RegistrySupplier<BlockHole> HOLE_BLOCK = BLOCKS.register("hole", () -> new BlockHole(
-            BlockBehaviour.Properties.of().mapColor(MapColor.NONE).sound(SoundType.STONE).lightLevel(state -> 10)));
+            BlockBehaviour.Properties.of().mapColor(MapColor.NONE).sound(SoundType.STONE).lightLevel(state -> HoleBlockRules.HOLE_LIGHT)));
     public static final RegistrySupplier<BlockEntityType<TileHole>> HOLE_BLOCK_ENTITY = BLOCK_ENTITIES.register("hole",
             () -> BlockEntityType.Builder.of(TileHole::new, HOLE_BLOCK.get()).build(null));
     private static boolean registered;

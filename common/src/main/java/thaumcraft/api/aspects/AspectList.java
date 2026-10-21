@@ -3,14 +3,39 @@ package thaumcraft.api.aspects;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
+import thaumcraft.api.ThaumcraftApiHelper;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 
 /** TC4's ordered aspect amounts. add sums; merge takes the maximum. */
-public class AspectList {
+public class AspectList implements Serializable {
     public final LinkedHashMap<Aspect, Integer> aspects = new LinkedHashMap<>();
+
+    /**
+     * Original AspectList:25-36 - the object aspects of an item stack.
+     *
+     * <p>The original wrapped the call in a try/catch and kept an empty list when the add-on
+     * surface threw; the native keeps the same behaviour.</p>
+     */
+    public AspectList(ItemStack stack) {
+        try {
+            AspectList temp = ThaumcraftApiHelper.getObjectAspects(stack);
+            if (temp != null) {
+                for (Aspect tag : temp.getAspects()) {
+                    this.add(tag, temp.getAmount(tag));
+                }
+            }
+        } catch (Exception exception) {
+            // The original swallowed the failure of the add-on surface and kept an empty list.
+        }
+    }
+
+    public AspectList() {
+    }
 
     public AspectList copy() {
         AspectList result = new AspectList();

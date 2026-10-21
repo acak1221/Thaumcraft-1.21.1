@@ -230,14 +230,22 @@ public final class ContainerGolem extends AbstractContainerMenu {
     }
 
     /**
-     * The Order colour buttons of the original menu.
+     * The Order colour cycle of the original menu.
      *
-     * <p>Original {@code ContainerGolem.onButtonClick}:96-109 — a button id <em>below</em> the golem's slot count lowers the
-     * colour of that very slot, and an id from the slot count up to twice the slot count raises it. The colour wraps the
-     * original way: lowering turns {@code -1} (any) into {@code 15} and raises {@code 15} into {@code -1}.</p>
+     * <p>Original {@code ContainerGolem.onButtonClick}:97-108 — the left button lowers the colour of the slot
+     * ({@code colour - 1}, and {@code -1} wraps to {@code 15}) and the right button raises it
+     * ({@code colour + 1}, and {@code 15} wraps to {@code -1}).</p>
      *
-     * @return whether the button was an Order colour button of this golem
+     * @param current the colour of the slot ({@code -1} is "any marker")
+     * @param step    {@code -1} for the left button, {@code +1} for the right button
      */
+    public static int nextColour(int current, int step) {
+        int next = current + step;
+        if (step < 0 && next < GolemMarker.ANY) return GolemMarker.LAST_COLOR;
+        if (step > 0 && next > GolemMarker.LAST_COLOR) return GolemMarker.ANY;
+        return next;
+    }
+
     private boolean adjustColor(int button) {
         int slots = serverGolem.getSlotCount();
         if (slots <= 0 || !serverGolem.canColorSlots()) return false;
@@ -245,11 +253,7 @@ public final class ContainerGolem extends AbstractContainerMenu {
         if (button >= 0 && button < slots) { slot = button; step = -1; }
         else if (button >= slots && button < slots * 2) { slot = button - slots; step = 1; }
         else return false;
-        int current = serverGolem.getSlotColor(slot);
-        int next = current + step;
-        if (step < 0 && next < GolemMarker.ANY) next = GolemMarker.LAST_COLOR;
-        if (step > 0 && next > GolemMarker.LAST_COLOR) next = GolemMarker.ANY;
-        if (!serverGolem.setSlotColor(slot, next)) return false;
+        if (!serverGolem.setSlotColor(slot, nextColour(serverGolem.getSlotColor(slot), step))) return false;
         broadcastChanges();
         return true;
     }

@@ -454,4 +454,6 @@ docs/porting/scope-ledger.json                                                  
 docs/analysis/2026-10-23-agent-w2golems.md                                          (this report)
 ```
 
-Commits: `fix(golems)` ×3, `test(golems)` ×2, `docs(golems)` ×2.
+Commits of this session: `fix(golems)` ×4, `test(golems)` ×1, `docs(golems)` ×3, `chore(golems)` ×1
+(the commit `3a660a77` of the first session of this wave, which named the fence gate as the real gap of the
+door goal, is part of the branch as well).

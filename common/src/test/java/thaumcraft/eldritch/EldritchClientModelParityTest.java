@@ -33,7 +33,7 @@ class EldritchClientModelParityTest {
                 "rr_leg0", "rf_leg0", "lf_leg0", "lr_leg0", "l_claw0", "l_arm"}) {
             assertTrue(root.hasChild(part), "the original crab has the part " + part);
         }
-        assertEquals(21, root.getAllParts().count(), "the original crab has twenty-one parts");
+        assertEquals(21, parts(root), "the original crab has twenty-one parts");
     }
 
     @Test void theCrabKeepsTheOriginalRotationPoints() {
@@ -91,7 +91,7 @@ class EldritchClientModelParityTest {
                 "waist_r3", "waist_l1", "waist_l2", "waist_l3", "leg_r", "leg_l"}) {
             assertTrue(root.hasChild(part), "the original golem has the part " + part);
         }
-        assertEquals(36, root.getAllParts().count(), "the original golem has thirty-six parts");
+        assertEquals(36, parts(root), "the original golem has thirty-six parts");
     }
 
     @Test void theGolemKeepsTheOriginalRotationPoints() {
@@ -148,7 +148,7 @@ class EldritchClientModelParityTest {
                 "Cloak3"}) {
             assertTrue(root.hasChild(part), "the original guardian has the part " + part);
         }
-        assertEquals(54, root.getAllParts().count(), "the original guardian has fifty-four parts");
+        assertEquals(54, parts(root), "the original guardian has fifty-four parts");
     }
 
     @Test void theGuardianKeepsTheOriginalRotationPoints() {
@@ -196,6 +196,11 @@ class EldritchClientModelParityTest {
     }
 
     // ------------------------------------------------------------------ tools
+
+    /** The number of the parts of a model without its own root. */
+    private static long parts(ModelPart root) {
+        return root.getAllParts().filter(part -> part != root).count();
+    }
 
     private static void assertPoint(ModelPart part, float x, float y, float z) {
         assertEquals(x, part.x, EPS, "the x of " + part);

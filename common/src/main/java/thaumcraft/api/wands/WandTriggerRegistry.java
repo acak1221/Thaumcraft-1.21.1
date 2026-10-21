@@ -56,7 +56,17 @@ public class WandTriggerRegistry {
     }
 
     public static boolean hasTrigger(Block block) {
-        return hasTrigger(block, null);
+        return hasTrigger(block, (String) null);
+    }
+
+    /**
+     * The original metadata form.
+     *
+     * <p>Forced 1.21.1 change: 1.21.1 has no block metadata, so the metadata of the original is ignored
+     * and a trigger registered for a block answers for every state of that block.</p>
+     */
+    public static boolean hasTrigger(Block block, int meta) {
+        return hasTrigger(block, (String) null);
     }
 
     public static boolean hasTrigger(Block block, String modid) {

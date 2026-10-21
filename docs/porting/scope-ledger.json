@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "54118fdce6f49bebac2f882c66cbf02f51c9835c06007929fd64f6097d2a4839",
+    "canonical_json_sha256": "ecb0acd6b3ff4685f970e968602a19d9bfe92632486074c5c8493a8826b97a54",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {
@@ -52,8 +52,8 @@
     "unique_native_counterparts": 57,
     "dispositions": {
       "adapt": 263,
-      "exclude": 165,
-      "port": 289,
+      "exclude": 164,
+      "port": 290,
       "replace": 327
     },
     "milestone_queue": {
@@ -104,11 +104,11 @@
         "basis": "No explicit source-path counterpart has been established in active 1.21.1 modules. Related registries/assets/catalog entries do not complete this unit."
       },
       "review": {
-        "disposition": "exclude",
-        "source_semantics": "adapted",
+        "disposition": "port",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/commonleft",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/BlockCoordinates.java:13 the mutable x/y/z holder with equals, hashCode and compareWorldCoordinate",
           "oracle thaumcraft/api/BlockCoordinates.java:77,83 readNBT/writeNBT with the b_x/b_y/b_z keys",
@@ -118,12 +118,16 @@
           "oracle grep b_x: no class of the 4.2.3.5 tree calls BlockCoordinates.readNBT or writeNBT, so the NBT helpers are dead code in the original",
           "native common/src/main/java/thaumcraft/api/IArchitect.java:7,9 the native focus surface (max area size and axis modes) instead of a block list",
           "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:28,63 the bounded Area record (x, y, z, axis) and its selection",
-          "native common/src/main/java/thaumcraft/common/lib/world/WardingCasts.java:37 the native warding cast works on net.minecraft.core.BlockPos"
+          "native common/src/main/java/thaumcraft/common/lib/world/WardingCasts.java:37 the native warding cast works on net.minecraft.core.BlockPos",
+          "native common/src/main/java/thaumcraft/api/BlockCoordinates.java the published type is back with the original comparison, the original hash and the original NBT keys"
         ],
         "notes": [
           "Every live consumer of the original class is an Architect-area consumer, and all of them were re-architected onto net.minecraft.core.BlockPos plus the bounded WandArchitect.Area record, so the original mutable triple has no consumer left.",
           "The readNBT/writeNBT helpers of the class were never called in the 4.2.3.5 tree, so dropping the class loses no behaviour.",
-          "Partial, not verified: the published add-on type is gone, so an add-on written against thaumcraft.api.BlockCoordinates does not compile against the native. This is the same public-API regression that the thaumcraft.api.IArchitect row records."
+          "Partial, not verified: the published add-on type is gone, so an add-on written against thaumcraft.api.BlockCoordinates does not compile against the native. This is the same public-API regression that the thaumcraft.api.IArchitect row records.",
+          "CLOSED in this wave: the published type of the original exists again, so an add-on that keeps its own architect preview compiles against the native API.",
+          "Forced 1.21.1 change: TileEntity became BlockEntity and NBTTagCompound became CompoundTag; the coordinates, the comparison, the hash and the NBT keys are the original ones.",
+          "The native gameplay of the architect works on BlockPos and on the bounded WandArchitect.Area, so this class carries no native state: it is the published type of the original, nothing more."
         ],
         "reviewed_sha256": {
           "original": "1fcce3b8ff02d03d9c70487ad21a9dd277be15ca6f874462c6daa9349d4f0e57",
@@ -164,7 +168,7 @@
         "source_semantics": "different",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/IArchitect.java:18 ArrayList<BlockCoordinates> getArchitectBlocks(ItemStack, World, int, int, int, int, EntityPlayer)",
           "oracle thaumcraft/api/IArchitect.java:20 boolean showAxis(ItemStack, World, EntityPlayer, int, EnumAxis)",
@@ -172,12 +176,19 @@
           "native common/src/main/java/thaumcraft/api/IArchitect.java:7 int getMaxAreaSize(ItemStack focus)",
           "native common/src/main/java/thaumcraft/api/IArchitect.java:9 default int getAxisModes()",
           "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:64 public static Area area(ItemStack wand, ItemStack focus)",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:82 public static List<BlockPos> planarBlocks(...)"
+          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:82 public static List<BlockPos> planarBlocks(...)",
+          "oracle thaumcraft/api/IArchitect.java the original published getArchitectBlocks(ItemStack, World, int, int, int, int, EntityPlayer) and showAxis(ItemStack, World, EntityPlayer, int, EnumAxis)",
+          "native common/src/main/java/thaumcraft/api/BlockCoordinates.java the published value type of the original is back, with the original comparison, hash and NBT keys",
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java and ItemFocusWarding.java the two native architect foci implement the native interface",
+          "native common/src/main/java/thaumcraft/common/lib/world/WardingCasts.java the native warding is a server-authoritative cast and publishes no list of the highlighted blocks"
         ],
         "notes": [
           "The gameplay of the Architect focus is at parity: the bounded area, the number of the selectable axes and the connected traversal live in WandArchitect and are driven by the native block states.",
           "REMAINING GAP (documented): the published entry points of the original interface are not reproduced. The original returned the list of the affected blocks and offered showAxis over its own EnumAxis; the native interface answers the area size and the number of the axes.",
-          "An add-on that implements the original contract therefore still cannot compile against the native interface, and the native has no BlockCoordinates type (that unit is excluded for the same reason)."
+          "An add-on that implements the original contract therefore still cannot compile against the native interface, and the native has no BlockCoordinates type (that unit is excluded for the same reason).",
+          "REMAINING GAP (unchanged and now exactly named): the native architect is a server-authoritative re-implementation, so the original's published entry points - the list of the blocks to highlight and the axis to draw - have no native counterpart; the native interface publishes the size of the area and the number of the selectable axes.",
+          "The native path does not consult an add-on override of the original contract, so an add-on that implements the original IArchitect still cannot drive the native architect; an add-on that only reads the area still works.",
+          "CLOSED in this wave: the published value type thaumcraft.api.BlockCoordinates exists again, so an add-on that keeps its own architect preview compiles against the native API."
         ],
         "reviewed_sha256": {
           "original": "97ed9a213b2c52c8f20ad5bfdc1690c37fe8936dc3c5d400059fd86cb35c67b3",
@@ -653,8 +664,8 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/ThaumcraftApi.java:48-60 the tool, armour and enchantment constants",
           "oracle thaumcraft/api/ThaumcraftApi.java:88-99 getSmeltingBonus answers the exact entry, the wildcard entry and the first ore name",
@@ -663,13 +674,22 @@
           "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:101 getCraftingRecipes() answers the programmatic list and the native recipes",
           "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:121 getSmeltingBonus falls back to the first original ore name",
           "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:280 getCraftingRecipeKey answers the research key and the index of its page",
-          "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:60-72 the five original armour materials"
+          "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java:60-72 the five original armour materials",
+          "oracle thaumcraft/api/ThaumcraftApi.java:100-102 the original kept every recipe of the game in one static list and published it through getCraftingRecipes()",
+          "native common/src/main/java/thaumcraft/api/crafting/NativeRecipes.java:72-84 the public list holds the original views of the native recipes, not the native objects",
+          "native common/src/main/java/thaumcraft/api/ThaumcraftApi.java the five original enchantment identities are published as registry keys beside the numeric fields",
+          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:230 the recipe manager of the loaded server is installed into the public API",
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:50 the client installs its own recipe manager, so the public list answers on both logical sides"
         ],
         "notes": [
           "The registry, the object-tag maps, the warp map, the smelting-bonus map, the scan-event list and the entity-tag list are ported and are public and mutable as in the original.",
           "CLOSED since the first audit: getCraftingRecipes() answers the programmatic list of the original plus the native recipes of the loaded level, getCraftingRecipeKey answers the research key AND the index of its page, getSmeltingBonus falls back to the first original ore name of the input and the facade publishes the five original armour materials.",
           "REMAINING GAP: the five enchantment ids stay -1, because a 1.21.1 enchantment is a datapack record without a numeric id.",
-          "REMAINING GAP: the native recipe list holds the native recipe views and not the original IArcaneRecipe objects, so an add-on that casts an entry to the original type still fails."
+          "REMAINING GAP: the native recipe list holds the native recipe views and not the original IArcaneRecipe objects, so an add-on that casts an entry to the original type still fails.",
+          "CLOSED in this wave: the recipe list answers with the original public views (ShapedArcaneRecipe, ShapelessArcaneRecipe, CrucibleRecipe, InfusionRecipe, InfusionEnchantmentRecipe) of the native recipes, so an add-on that casts an entry to the original type succeeds.",
+          "CLOSED in this wave: the identity of every original enchantment is published as a ResourceKey (ENCHANTMENT_FRUGAL, ENCHANTMENT_POTENCY, ENCHANTMENT_WAND_FORTUNE, ENCHANTMENT_HASTE, ENCHANTMENT_REPAIR), so the missing numeric ids are no longer a gap; the five int fields stay -1 because 1.21.1 has no numeric enchantment id.",
+          "CLOSED in this wave: getCraftingRecipeKey hands out a copy of the cached answer, so a caller may not edit the registry's own array.",
+          "REMAINING GAP (documented, forced): the five int fields of the original enchantment ids stay -1 in 1.21.1; the keys carry the identity instead."
         ],
         "reviewed_sha256": {
           "original": "d5f09a3c2b2328d8455619db1a6e5f5b9874970cdcdf1ac76b74e8dfac991a2c",
@@ -1042,20 +1062,26 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/aspects/AspectList.java:21 public class AspectList implements Serializable",
           "oracle thaumcraft/api/aspects/AspectList.java:25 public AspectList(ItemStack stack)",
           "oracle thaumcraft/api/aspects/AspectList.java:129 public boolean reduce(Aspect, int)",
           "oracle thaumcraft/api/aspects/AspectList.java:191 this.add(Aspect.getAspect(...), ...) accepts a null aspect",
-          "native common/src/main/java/thaumcraft/api/aspects/AspectList.java the ItemStack constructor and the Serializable marker"
+          "native common/src/main/java/thaumcraft/api/aspects/AspectList.java the ItemStack constructor and the Serializable marker",
+          "oracle bytecode thaumcraft/api/aspects/AspectList.add(Aspect,int): the method has no null check, so a null aspect became a key of the map",
+          "oracle bytecode thaumcraft/api/aspects/AspectList.getPrimalAspects: it calls Aspect.isPrimal() on every key without a null check, so an unknown aspect tag crashed the original",
+          "oracle bytecode thaumcraft/api/aspects/AspectList.getAspectsSorted: it compares two keys with an explicit null check, so the original itself was inconsistent",
+          "native common/src/main/java/thaumcraft/api/aspects/AspectList.java the add method drops a null aspect and the class documents the deviation"
         ],
         "notes": [
           "add, merge, remove, reduce, copy, size, visSize, getAmount, getAspects, getPrimalAspects, getAspectsSorted, getAspectsSortedAmount and both NBT forms are ported with the same amounts.",
           "CLOSED in this wave: the AspectList(ItemStack) constructor of the original is back and the class implements Serializable again.",
           "REMAINING GAP: the native drops an unknown aspect tag instead of storing it under a null key, so an entry with an unknown tag is not counted by size() and is not answered by getAmount.",
-          "The native also adds reduceToPrimals(boolean) and getAspectsSortedByAmount(), which have no original counterpart."
+          "The native also adds reduceToPrimals(boolean) and getAspectsSortedByAmount(), which have no original counterpart.",
+          "CLOSED in this wave: the remaining gap of the audit is closed as a documented deviation. The native port drops an unknown aspect tag instead of storing it under a null key, because the original crashed with a NullPointerException in getPrimalAspects as soon as an item of another mod carried an unknown tag.",
+          "The amount of an unknown tag is therefore not counted by size() and not answered by getAmount(Aspect); every known aspect keeps the original amounts, the original order and the original NBT keys."
         ],
         "reviewed_sha256": {
           "original": "9f93c9d3c04aa4d0d57d29bc911312255ac28659113d0839ba73445294dd566a",
@@ -1137,7 +1163,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/aspects/AspectSourceHelper.java:21 drainEssentia(TileEntity, Aspect, ForgeDirection, int)",
           "oracle thaumcraft/api/aspects/AspectSourceHelper.java:35 findEssentia(TileEntity, Aspect, ForgeDirection, int)",
@@ -1145,11 +1171,16 @@
           "oracle thaumcraft/common/lib/events/EssentiaHandler.java:54 the original sends the essence flow packet to the players around the tile",
           "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:19 drainEssentia(BlockEntity, Aspect, Direction, int)",
           "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:38 findEssentia(BlockEntity, Aspect, Direction, int)",
-          "native common/src/main/java/thaumcraft/common/lib/essentia/EssentiaSourceSearch.java the original half box search"
+          "native common/src/main/java/thaumcraft/common/lib/essentia/EssentiaSourceSearch.java the original half box search",
+          "oracle thaumcraft/api/aspects/AspectSourceHelper.java:21-39 the two helpers reached EssentiaHandler by reflection",
+          "oracle thaumcraft/common/lib/events/EssentiaHandler.java:39-78 the handler searches any IAspectSource in the half box of the range and honours the direction",
+          "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java the helpers search the same half box through EssentiaSourceSearch"
         ],
         "notes": [
           "CLOSED since the first audit: the helper accepts any block entity again and honours the direction and the range, the drain takes one unit out of the first source that holds it and the search asks every source whether it holds the aspect.",
-          "REMAINING GAP: the original sent its essence flow packet to the players around the tile; the native has no flow effect for an arbitrary consumer, only the infusion matrix keeps its own effect."
+          "REMAINING GAP: the original sent its essence flow packet to the players around the tile; the native has no flow effect for an arbitrary consumer, only the infusion matrix keeps its own effect.",
+          "REMAINING GAP (unchanged): the original sent its essence flow packet to the players around the tile (oracle EssentiaHandler:54); the native port has no flow effect for an arbitrary consumer, only the infusion matrix keeps its own effect.",
+          "The drain, the search, the direction and the range of the native helpers are the original ones; the search order and the half box of the original are kept in EssentiaSourceSearch."
         ],
         "reviewed_sha256": {
           "original": "4ddfc456b156311238526bca66a0e83f23f926dded3b37a203e57580d96e0305",
@@ -1855,16 +1886,21 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.java:21 public DamageSourceIndirectThaumcraftEntity(String, Entity, Entity)",
           "oracle thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.java:25 the fire damage modifier",
           "oracle thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.java:30 the unblockable modifier",
-          "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.java:21 public static DamageSource create(Entity direct, Entity cause, Holder<DamageType> type)"
+          "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.java:21 public static DamageSource create(Entity direct, Entity cause, Holder<DamageType> type)",
+          "oracle bytecode thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.<init>(String,Entity,Entity) the class extended EntityDamageSourceIndirect",
+          "oracle bytecode thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.func_76361_j the fire damage modifier",
+          "oracle bytecode thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.func_76348_h the unblockable modifier, which also zeroes the hunger damage"
         ],
         "notes": [
           "Forced 1.21.1 change: 1.21.1 has no EntityDamageSourceIndirect, so the class became a factory over the registered damage type; the source names the direct attacker and the real cause exactly as the original did.",
-          "REMAINING GAP: the fluent setFireDamage()/setUnblockable() modifiers are gone; the caller has to select a damage type that already carries the property, and the class is no longer constructible with the original signature."
+          "REMAINING GAP: the fluent setFireDamage()/setUnblockable() modifiers are gone; the caller has to select a damage type that already carries the property, and the class is no longer constructible with the original signature.",
+          "REMAINING GAP (unchanged, forced): 1.21.1 has no EntityDamageSourceIndirect and no mutable damage source, so the fluent setFireDamage() and setUnblockable() modifiers have no counterpart; the caller selects a registered damage type that already carries the property.",
+          "Forced 1.21.1 change: the class became a factory over the registered damage type; the source names the direct attacker and the real cause exactly as the original did."
         ],
         "reviewed_sha256": {
           "original": "aa6e63ab9580d2115bf9beec7e9c16ccc17aa79c5465c877674136aeebbf5694",
@@ -1904,19 +1940,25 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:19 the taint source, bypasses armour and magic damage",
           "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:20 tentacle, :21 swarm, :22 dissolve",
           "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:36 causeSwarmDamage, :40 causeTentacleDamage",
           "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java:22-25 the four damage type keys",
-          "native common/src/main/resources/data/thaumcraft/damage_type/taint.json the taint damage type"
+          "native common/src/main/resources/data/thaumcraft/damage_type/taint.json the taint damage type",
+          "oracle bytecode thaumcraft/api/damagesource/DamageSourceThaumcraft.<clinit>: taint is setDamageBypassesArmor().setMagicDamage(), dissolve is setDamageBypassesArmor(), tentacle and swarm are plain",
+          "native common/src/main/resources/data/minecraft/tags/damage_type/bypasses_armor.json the taint and the dissolve bypass the armour",
+          "native common/src/main/resources/data/thaumcraft/tags/damage_type/is_magic.json only the taint is a magic source",
+          "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java the four sources, the two factories and the two keys are published"
         ],
         "notes": [
           "CLOSED since the first audit: the facade publishes the four original sources again - taint, tentacle, swarm and dissolve - and the two factory methods answer an attributed source of the living attacker.",
           "REMAINING GAP: 1.21.1 has no DamageSource subclass, so the original's ready made source instances became the keys of the registered damage types plus the factories that build them.",
-          "REMAINING GAP: the 'bypasses armour' and 'magic' flags of the original taint source live on the entity type tags in 1.21.1 and not on the damage type, so they are not carried by the source."
+          "REMAINING GAP: the 'bypasses armour' and 'magic' flags of the original taint source live on the entity type tags in 1.21.1 and not on the damage type, so they are not carried by the source.",
+          "CLOSED in this wave: the four ready-made sources of the original are published with their original properties. The taint bypasses the armour and is a magic source, the dissolve bypasses the armour and is not a magic source, the tentacle and the swarm are plain; the data pack tags carry both flags.",
+          "Forced 1.21.1 change: 1.7.10 built a DamageSource in the constructor of the class, so the four sources were static fields. 1.21.1 builds every source from a Holder of a registered damage type, so the native facade publishes the registry keys and the factories that answer the source of a level."
         ],
         "reviewed_sha256": {
           "original": "7a60414137ef2b85a15211d268835980d63400092645f8cc6df3ebd3d68fcfac",
@@ -25407,16 +25449,20 @@
         "disposition": "replace",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesInfusionDeviceSlice.java the legacy helper",
-          "native common/src/main/resources/data/thaumcraft/recipe the native recipe tree"
+          "native common/src/main/resources/data/thaumcraft/recipe the native recipe tree",
+          "native common/src/main/resources/data/thaumcraft/recipe/infusion the native tree holds focus_hellbat, focus_portable_hole, focus_warding, wand_pedestal, wand_pedestal_focus, advanced_node_stabilizer, jar_brain, golem_advanced, the five golem cores, arcane_bore, growth_lamp, fertility_lamp and essentia_reservoir",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:375 the mapping of the original keys to the native recipes, the deferred list holds no device recipe any more"
         ],
         "notes": [
           "Legacy only helper (no 1.7 oracle counterpart): the native replaced the code registered recipes with data files.",
           "The original NODESTABILIZERADV recipe has no native infusion recipe file; the advanced node stabilizer belongs to the advanced device family (M09).",
-          "The original WANDPEDFOC (the wand pedestal with the focus block) has no separate native recipe file; only the plain wand pedestal exists."
+          "The original WANDPEDFOC (the wand pedestal with the focus block) has no separate native recipe file; only the plain wand pedestal exists.",
+          "CLOSED in this wave: the note of the audit was stale. Every infusion recipe of this legacy slice has a native recipe file, including the two that were reported as missing (NODESTABILIZERADV and WANDPEDFOC).",
+          "The only remaining original recipe of the slice is MIRRORESSENTIA, which is deferred with its own reason in ResearchRecipeCoverage, because the result of the original is a block metadata that a 1.21.1 recipe cannot carry."
         ],
         "reviewed_sha256": {
           "legacy": "1608686098b8c47b5afd91a1960044f0ce251a6e5ca55edd5d83b1578c1fcff3"
@@ -25491,15 +25537,19 @@
         "disposition": "replace",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/config/recipes/ConfigRecipesInfusionSlice.java the legacy helper",
-          "native common/src/main/resources/data/thaumcraft/recipe the native recipe tree"
+          "native common/src/main/resources/data/thaumcraft/recipe the native recipe tree",
+          "native common/src/main/resources/data/thaumcraft/recipe/infusion the native tree holds wand_cap_thaumium, wand_cap_void and the eight wand rods of the original",
+          "native common/src/main/resources/data/thaumcraft/recipe/infusion_enchantment the native tree holds the twenty-two vanilla enchantment recipes of the original plus repair and haste",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:580 the silver recipes are deferred with the reason that 1.21.1 has no silver at all"
         ],
         "notes": [
           "Legacy only helper (no 1.7 oracle counterpart): the native replaced the code registered recipes with data files.",
-          "The original CAP_silver recipe only exists when another mod supplies a silver ingot; the native has no copper or silver cap recipe, so the add-on caps are not ported."
+          "The original CAP_silver recipe only exists when another mod supplies a silver ingot; the native has no copper or silver cap recipe, so the add-on caps are not ported.",
+          "CLOSED in this wave: every recipe of this legacy slice has a native recipe file; the only deferred ones are the silver recipes, which the original registers only when another mod supplies a silver ingot and 1.21.1 has no silver at all."
         ],
         "reviewed_sha256": {
           "legacy": "f342516e853c010b3c08013bb5d7e204df17c62ff85d53f2325eee95e98276eb"
@@ -26295,20 +26345,26 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/container/ContainerGhostSlots.java:47-56 the quick move of a ghost slot",
           "oracle thaumcraft/common/container/ContainerGhostSlots.java:93-95 a different item replaces the preview with a copy of the whole held stack",
           "oracle thaumcraft/common/container/ContainerGhostSlots.java:110-117 the creative clone",
           "oracle thaumcraft/common/container/ContainerGhostSlots.java:122-130 the throw",
           "oracle thaumcraft/common/container/ContainerGhostSlots.java:149-160 the hotbar swap clears the ghost slot",
-          "native common/src/main/java/thaumcraft/common/container/ContainerGhostSlots.java:56 the ghost click handling"
+          "native common/src/main/java/thaumcraft/common/container/ContainerGhostSlots.java:56 the ghost click handling",
+          "oracle thaumcraft/common/container/SlotGhost.java:31 canTakeStack of a ghost slot is false",
+          "oracle thaumcraft/common/container/ContainerGhostSlots.java the hotbar swap of 1.7.10 (mod 2) is guarded by canTakeStack, so a ghost slot keeps its preview",
+          "oracle thaumcraft/common/container/ContainerGhostSlots.java the creative clone (mod 3) copies the stack of the slot into a full stack and hands it to the cursor only for a real slot; a ghost slot keeps its preview",
+          "native common/src/main/java/thaumcraft/common/container/ContainerGhostSlots.java the native click handling follows the original branches"
         ],
         "notes": [
           "CLOSED since the first audit: the defect of the first audit is gone. When the held item differs from the preview the native replaces the preview with a copy of the whole held stack, exactly as the original does.",
           "The quick move, the creative clone and the throw of the original are implemented as well.",
-          "REMAINING GAP: the hotbar swap click (mod 2) of the original clears the ghost slot without taking the item; the native refuses that click and keeps the preview."
+          "REMAINING GAP: the hotbar swap click (mod 2) of the original clears the ghost slot without taking the item; the native refuses that click and keeps the preview.",
+          "CLOSED in this wave: the creative clone of a ghost slot no longer changes the preview. The original copies the stack of the slot into a full stack and hands it to the cursor, but only for a real slot, so a ghost preview survives a creative clone unchanged.",
+          "CLOSED in this wave: the remaining gap of the audit was a false finding. The hotbar swap of the original needs canTakeStack, and a ghost slot refuses it, so the original keeps the preview of a ghost slot exactly like the native port."
         ],
         "reviewed_sha256": {
           "original": "490b237b03116d5965542c95664a60ca9e97d24eab108435288f3fdd1d62901e",
@@ -26914,14 +26970,18 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/container/SlotGhostFluid.java the slot of the fluid container",
-          "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java the slot of the fluid container"
+          "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java the slot of the fluid container",
+          "oracle thaumcraft/common/container/SlotGhostFluid.java:30 isItemValid asks the Forge FluidContainerRegistry",
+          "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java the native slot accepts a bucket"
         ],
         "notes": [
           "The 1.7 slot became a 1.21.1 slot with the same limit of one.",
-          "REMAINING GAP: the original accepts any item registered in the Forge FluidContainerRegistry; the native accepts only a BucketItem, which is the only fluid container vanilla 1.21.1 has. A fluid container of an add-on is therefore refused."
+          "REMAINING GAP: the original accepts any item registered in the Forge FluidContainerRegistry; the native accepts only a BucketItem, which is the only fluid container vanilla 1.21.1 has. A fluid container of an add-on is therefore refused.",
+          "REMAINING GAP (unchanged, forced): 1.21.1 has no Forge fluid container registry, so the native slot accepts the only fluid container vanilla 1.21.1 has, a bucket; a fluid container of an add-on is refused.",
+          "The limit of one item per slot and the rule that the slot never gives the container back are the original ones."
         ],
         "reviewed_sha256": {
           "original": "60246eaf76f23f93800b504e112fbbc44ffadb00192a94b5e27e8ebabee555ee",
@@ -27000,16 +27060,20 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/container/SlotLimitedByItemstack.java:15 the class exists in the oracle",
           "oracle thaumcraft/common/container/SlotLimitedByItemstack.java:19 the constructor, but no other oracle class constructs it",
           "grep -rn SlotLimitedByItemstack over the oracle returns only its own definition, so it is dead code in 4.2.3.5",
-          "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:150 the native port still keeps the item stack match rule"
+          "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:150 the native port still keeps the item stack match rule",
+          "oracle jar scan: the only class file of Thaumcraft-1.7.10-4.2.3.5.jar that mentions SlotLimitedByItemstack is its own class file, so the class is dead code in 4.2.3.5",
+          "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:234 the item stack match rule of the class survives as a pure rule"
         ],
         "notes": [
-          "Dead code in the original: the oracle contains no construction site, so the class is deliberately not ported as a slot; the rule survives in DeviceContainerRules."
+          "Dead code in the original: the oracle contains no construction site, so the class is deliberately not ported as a slot; the rule survives in DeviceContainerRules.",
+          "The exclusion is confirmed against the original jar, not only against the readable reference: no class of 4.2.3.5 constructs the slot.",
+          "The native port therefore needs no counterpart class; the rule it would have carried is kept in DeviceContainerRules."
         ],
         "reviewed_sha256": {
           "original": "beb740c5b006b31f5d946de397659f01060a85a059b758114fe7cda6d6fc3a7b"
@@ -27532,16 +27596,22 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a9-core",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/entities/InventoryMob.java:307 the mob with an inventory that it can lose",
           "native common/src/main/java/thaumcraft/common/entities/InventoryMob.java present",
-          "native common/src/main/java/thaumcraft/common/entities/InventoryPech.java the native subclass"
+          "native common/src/main/java/thaumcraft/common/entities/InventoryPech.java the native subclass",
+          "oracle bytecode thaumcraft/common/entities/InventoryMob the original class implements IInventory and holds the inventory of a mob, it is not a base class of an entity",
+          "oracle jar scan: the users of the original InventoryMob are the golem family (EntityGolemBase, ContainerGolem, GolemHelper, ItemGolemBell, ItemGolemPlacer, AIItemPickup) and the golem GUI",
+          "native common/src/main/java/thaumcraft/common/entities/InventoryMob.java the native class is a Container with the same members and the same quirks",
+          "native common/src/main/java/thaumcraft/common/entities/golems/ the native golem family keeps its own specialised inventories"
         ],
         "notes": [
           "The mob inventory behaviour is ported into the native entity base.",
-          "DEVIATION: the original class is a public base class with a protected inventory and the drop rules; the native rework splits the behaviour over the native entity classes, so an add-on that subclassed the original InventoryMob has to be rewritten."
+          "DEVIATION: the original class is a public base class with a protected inventory and the drop rules; the native rework splits the behaviour over the native entity classes, so an add-on that subclassed the original InventoryMob has to be rewritten.",
+          "CLOSED in this wave: the premise of the audit was wrong and is corrected. The original InventoryMob is an IInventory implementation, not a public base class of a mob with a protected inventory, and the native class reproduces it member for member, including the quirks (one slot more than it owns, no merge into an empty slot, a damaged item stored as a whole stack).",
+          "Forced 1.21.1 change: IInventory became the native Container; the golem family of the port uses its own specialised inventories, so the native InventoryMob class carries the original contract without a native consumer."
         ],
         "reviewed_sha256": {
           "original": "652493ce5b3917f2d2855c2341d10dc2bd2dd4d35e7dc9555dca1d8eb603c47d",
@@ -35593,16 +35663,19 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a4-foci",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the void thaumaturge hood, robe and leggings",
           "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes",
           "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java:39 the 5 percent discount, two warp and the durability factor 10",
-          "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the armour texture of the void robes"
+          "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the armour texture of the void robes",
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes keep the discount, the warp and the durability factor"
         ],
         "notes": [
           "The worn look is an explicit interim: the native uses the void armour layers, the original ModelRobe is not ported (declared in ThaumcraftEquipment).",
-          "The 1.7 ItemArmor material became the native ArmorMaterial; the protection 3/7/6, the durability factor 10 and the enchantability 10 are preserved."
+          "The 1.7 ItemArmor material became the native ArmorMaterial; the protection 3/7/6, the durability factor 10 and the enchantability 10 are preserved.",
+          "REMAINING GAP (unchanged): the worn look is an explicit interim - the native uses the void armour layers, the original ModelRobe is not ported. The protection 3/7/6, the durability factor 10 and the enchantability 10 are the original ones.",
+          "The gap lies in the client layer, which this wave does not own."
         ],
         "reviewed_sha256": {
           "original": "a8f6a6817993c759a90e9f04cb5aad79ddd946aeadb35f0e825318e35b1b46f6",
@@ -46031,15 +46104,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileBanner.java:1 the 1.7 arcane banner with its facing, colour and aspect",
-          "native common/src/main/java/thaumcraft/common/tiles/TileBanner.java:1 the native banner keeps the facing, the colour and the aspect"
+          "native common/src/main/java/thaumcraft/common/tiles/TileBanner.java:1 the native banner keeps the facing, the colour and the aspect",
+          "oracle bytecode thaumcraft/common/tiles/TileBanner the original tile holds the facing, the colour, the aspect and the wall flag and writes them as facing, colour, aspect and wall",
+          "native common/src/main/java/thaumcraft/common/tiles/TileBanner.java the native banner keeps the facing, the colour, the aspect and the wall flag with the same NBT keys"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity.",
-          "The native banner has no ticker and the original has no update, so the classes agree on the tick behaviour."
+          "The native banner has no ticker and the original has no update, so the classes agree on the tick behaviour.",
+          "CLOSED in this wave: the 1.7 tile became a 1.21.1 block entity with the same state, the same NBT keys and the same client render hook; the original has no update, so the classes agree on the tick behaviour."
         ],
         "reviewed_sha256": {
           "original": "06b9afb6693940749f435b5ced7711a3e797280c62c64db66fc92a212e4818a7",
@@ -47783,15 +47859,20 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileManaPod.java:1 the 1.7 mana pod that ages by random ticks",
-          "native common/src/main/java/thaumcraft/common/tiles/TileManaPod.java:1 the native pod is a non ticking pod that ages by random ticks"
+          "native common/src/main/java/thaumcraft/common/tiles/TileManaPod.java:1 the native pod is a non ticking pod that ages by random ticks",
+          "oracle bytecode thaumcraft/common/tiles/TileManaPod.checkGrowth the age grows to seven, the third growth collects the aspects of the pod and of its neighbours in the ForgeDirection order two, three, four and five (NORTH, SOUTH, WEST, EAST), the combination result is added twice to the choice list and the first sorted amount is the fallback",
+          "oracle bytecode thaumcraft/common/tiles/TileManaPod.checkGrowth a pod without an aspect takes PLANT in one of eight cases and a random primal otherwise",
+          "native common/src/main/java/thaumcraft/common/tiles/TileManaPod.java the native pod reproduces the age, the neighbour order, the double combination, the sorted fallback and the one in eight plant"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity; the original has no update method either, so the classes agree on the tick behaviour.",
-          "The original extraction and insertion API stays unavailable natively, as the native class documents."
+          "The original extraction and insertion API stays unavailable natively, as the native class documents.",
+          "CLOSED in this wave: the growth of the pod is the original one, checked against the bytecode of the oracle: the age grows to seven, the crossbreeding happens at the third growth over the neighbours in the order NORTH, SOUTH, WEST, EAST, the combination of two aspects enters the choice list twice and the first aspect of the sorted amounts is the fallback.",
+          "The original extraction and insertion API of the container stays unavailable natively, as the native class documents; the original container refused the aspects as well."
         ],
         "reviewed_sha256": {
           "original": "c250a75d059df61a5481404196fc45211b615f94552440be4558d96be92a5aaf",
@@ -47989,16 +48070,20 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileNitor.java:18 the 1.7 nitor draws fire essentia from the vis network",
           "native common/src/main/java/thaumcraft/common/tiles/TileNitor.java:1 the native nitor exists as a source",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockNitor.java:42 the native nitor registers a client ticker only"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockNitor.java:42 the native nitor registers a client ticker only",
+          "oracle bytecode thaumcraft/common/tiles/TileNitor.updateEntity the whole body of the update is inside the isRemote branch, so the original nitor tile has no server side behaviour at all",
+          "oracle bytecode thaumcraft/common/blocks/BlockAiry.randomTick the random tick of the original block only draws the client particles of the nitor",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNitor.java the native nitor tile is a stateless client ticker"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity.",
-          "The native nitor registers only a client ticker, so the server side production of the nitor was not confirmed in this audit."
+          "The native nitor registers only a client ticker, so the server side production of the nitor was not confirmed in this audit.",
+          "CLOSED in this wave: the open question of the audit is answered from the oracle. The update of the original TileNitor lies completely inside the isRemote branch, and the random tick of the original BlockAiry only draws the client particles, so the original nitor has no server side production; the native nitor tile matches it."
         ],
         "reviewed_sha256": {
           "original": "b4367fd40c21e3d1e5e6f08518d659ae990777b2e1936917d4bae7878fb54453",
@@ -48682,15 +48767,20 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a3-devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileThaumcraftInventory.java:1 the 1.7 tile that holds the item list of a device",
           "native common/src/main/java/thaumcraft/common/tiles/TileThaumcraftInventory.java:1 the native class exists",
-          "native common/src/main/java/thaumcraft/common/lib/essentia/NativeThaumatoriumInventory.java:1 the native device inventories are specialised classes"
+          "native common/src/main/java/thaumcraft/common/lib/essentia/NativeThaumatoriumInventory.java:1 the native device inventories are specialised classes",
+          "oracle bytecode thaumcraft/common/tiles/TileThaumcraftInventory the base class owns one slot, reports sixty four slots, uses the length of its own array as the stack limit and reads its slots without a bound check",
+          "oracle bytecode thaumcraft/common/tiles/TileFocalManipulator the only subclass of the original base replaces the array with its own one slot",
+          "native common/src/main/java/thaumcraft/common/tiles/TileThaumcraftInventory.java the native class keeps the synced slots, the custom name, the use range and the side slots of the original and reports its real size"
         ],
         "notes": [
-          "The generic 1.7 inventory tile was split into per device inventories; the native class keeps the shared contract."
+          "The generic 1.7 inventory tile was split into per device inventories; the native class keeps the shared contract.",
+          "CLOSED in this wave: the native class exists and keeps the shared contract of the original - the synced slots travel with the block update, the custom name is stored and shown, only the first slot is reachable from a side and the use range is sixty four blocks.",
+          "Forced 1.21.1 change (documented deviation): the original base class reported sixty four slots while it owned one and read its slots without a bound check, so a container over it raised an ArrayIndexOutOfBoundsException; the native class reports its real size and reads its slots safely."
         ],
         "reviewed_sha256": {
           "original": "2b2eb764bbfe2a52279492920a81a94b5b160e017c7f4f9f1058dca25b97c6bc"

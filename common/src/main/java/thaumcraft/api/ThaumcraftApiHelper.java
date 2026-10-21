@@ -35,7 +35,17 @@ public class ThaumcraftApiHelper {
 
     private ThaumcraftApiHelper() {}
 
-    /** Original cap of six aspects, dropping the least valuable ones first. */
+    /**
+     * Original cap of six aspects, dropping the least valuable ones first.
+     *
+     * <p>Forced 1.21.1 change (documented deviation from the original): the original started the search of
+     * the cheapest aspect at {@code Short.MAX_VALUE} and removed the cheapest one until six aspects were
+     * left (oracle {@code thaumcraft/api/ThaumcraftApiHelper.java:38-70}). When every weighted amount of
+     * the list was at least {@code Short.MAX_VALUE}, the original found no candidate, removed
+     * {@code null} - which changes nothing - and looped forever. The native port stops the culling when
+     * there is nothing left to drop, so the call always terminates; the result of a normal list is the
+     * original one, aspect for aspect.</p>
+     */
     public static AspectList cullTags(AspectList temp) {
         AspectList temp2 = new AspectList();
         for (Aspect tag : temp.getAspects()) {
@@ -66,15 +76,30 @@ public class ThaumcraftApiHelper {
                 low = ta;
                 lowest = tag;
             }
+            // Oracle ThaumcraftApiHelper:68-70 - the original removed the cheapest aspect. When there is
+            // no cheapest aspect at all the original removed null and looped forever; the native port
+            // stops instead of hanging the server.
+            if (lowest == null) break;
             temp2.aspects.remove(lowest);
         }
         return temp2;
     }
 
-    /** Original empty stacks compare equal and never compare counts. */
+    /**
+     * The original stack comparison.
+     *
+     * <p>Original {@code thaumcraft/api/ThaumcraftApiHelper.java:68-74}: two damageable stacks are the
+     * same item whatever their wear is, every other pair is the same item with the same damage value. The
+     * count of a stack is never part of the comparison.</p>
+     *
+     * <p>Forced 1.21.1 change: {@code ItemStack.isItemStackDamageable()} became
+     * {@link ItemStack#isDamageableItem()}. The native port also answers {@code false} for a missing stack
+     * instead of throwing the {@link NullPointerException} of the original.</p>
+     */
     public static boolean areItemsEqual(ItemStack s1, ItemStack s2) {
         if (s1 == null || s1.isEmpty()) return s2 == null || s2.isEmpty();
         if (s2 == null || s2.isEmpty()) return false;
+        if (s1.isDamageableItem() && s2.isDamageableItem()) return s1.getItem() == s2.getItem();
         return s1.getItem() == s2.getItem() && s1.getDamageValue() == s2.getDamageValue();
     }
 
@@ -96,7 +121,15 @@ public class ThaumcraftApiHelper {
         return ThaumcraftApi.internalMethods.getDiscoveredAspects(username);
     }
 
-    /** Row-major 3x3 lookup; the original argument order was column-then-row at every call site. */
+    /**
+     * The original three by three grid lookup of a crafting grid.
+     *
+     * <p>Original {@code thaumcraft/api/ThaumcraftApiHelper.java:95-97} and the oracle
+     * {@code thaumcraft/common/tiles/TileMagicWorkbench.java} read the cell {@code row + column * 3} of
+     * the grid, with the ROW as the first argument: the original recipes call
+     * {@code getStackInRowAndColumn(inv, 1, 0)} for the first cap of the sceptre, which is the slot 1 of
+     * the grid (oracle {@code thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java:42-46}).</p>
+     */
     public static ItemStack getStackInRowAndColumn(Object instance, int row, int column) {
         return ThaumcraftApi.internalMethods.getStackInRowAndColumn(instance, row, column);
     }

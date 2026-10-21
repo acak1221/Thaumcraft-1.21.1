@@ -72,12 +72,31 @@ public final class ThaumcraftApi {
      * field; 1.21.1 registers the material, so the native answers through an accessor.
      */
     public static ArmorMaterial armorMatVoidFortress() { return ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS; }
-    /** Original enchantment ids. 1.21.1 has no numeric enchantment ids; -1 means "not present in this runtime". */
+    /**
+     * Original enchantment ids. 1.21.1 has no numeric enchantment ids; -1 means "not present in this
+     * runtime".
+     *
+     * <p>Forced 1.21.1 change: an enchantment of 1.21.1 is a data pack record whose identity is its
+     * registry key, so the original ids have no counterpart. The identity of every original enchantment is
+     * published as a {@link ResourceKey} next to these fields: {@link #ENCHANTMENT_FRUGAL},
+     * {@link #ENCHANTMENT_POTENCY}, {@link #ENCHANTMENT_WAND_FORTUNE}, {@link #ENCHANTMENT_HASTE} and
+     * {@link #ENCHANTMENT_REPAIR}.</p>
+     */
     public static int enchantFrugal = -1;
     public static int enchantPotency = -1;
     public static int enchantWandFortune = -1;
     public static int enchantHaste = -1;
     public static int enchantRepair = -1;
+    /** The identity of the original frugal enchantment (oracle {@code Config.enchFrugal}). */
+    public static final ResourceKey<net.minecraft.world.item.enchantment.Enchantment> ENCHANTMENT_FRUGAL = enchantmentKey("frugal");
+    /** The identity of the original potency enchantment (oracle {@code Config.enchPotency}). */
+    public static final ResourceKey<net.minecraft.world.item.enchantment.Enchantment> ENCHANTMENT_POTENCY = enchantmentKey("potency");
+    /** The identity of the original wand fortune enchantment (oracle {@code Config.enchWandFortune}). */
+    public static final ResourceKey<net.minecraft.world.item.enchantment.Enchantment> ENCHANTMENT_WAND_FORTUNE = enchantmentKey("wandfortune");
+    /** The identity of the original haste enchantment (oracle {@code Config.enchHaste}). */
+    public static final ResourceKey<net.minecraft.world.item.enchantment.Enchantment> ENCHANTMENT_HASTE = enchantmentKey("haste");
+    /** The identity of the original repair enchantment (oracle {@code Config.enchRepair}). */
+    public static final ResourceKey<net.minecraft.world.item.enchantment.Enchantment> ENCHANTMENT_REPAIR = enchantmentKey("repair");
     /** Original portable hole blacklist; the authoritative native list is the block tag of the same name. */
     public static final ArrayList<Block> portableHoleBlackList = new ArrayList<>();
     /** The original plug point between the public API and the gameplay internals. */
@@ -93,6 +112,11 @@ public final class ThaumcraftApi {
     private static final Map<List<?>, Object[]> keyCache = new HashMap<>();
     private static boolean originalSmeltingBonusesLoaded;
     private ThaumcraftApi() {}
+
+    /** The registry key of one original enchantment of this mod. */
+    private static ResourceKey<net.minecraft.world.item.enchantment.Enchantment> enchantmentKey(String id) {
+        return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath("thaumcraft", id));
+    }
 
     // ------------------------------------------------------------------ smelting bonus
 
@@ -293,7 +317,8 @@ public final class ThaumcraftApi {
         List<?> key = List.of(stack.getItem(), stack.getDamageValue());
         if (keyCache.containsKey(key)) {
             Object[] cached = keyCache.get(key);
-            return cached == null ? null : researchVisible(player, cached);
+            // The cached answer belongs to the registry: a caller may not edit it.
+            return cached == null ? null : researchVisible(player, cached.clone());
         }
         for (ResearchDefinition definition : ResearchCatalog.all()) {
             List<ResearchDefinition.Page> pages = definition.pages();
@@ -369,8 +394,7 @@ public final class ThaumcraftApi {
         BuiltInRegistries.BLOCK.getTag(tag).ifPresent(holders -> holders.forEach(holder -> portableHoleBlackList.add(holder.value())));
     }
 
-    public static void registerScanEventhandler(IScanEventHandler handler) { scanEventhandlers.add(Objects.requireNonNull(handler, "handler")); }
-    public static void registerEntityTag(String entityName, AspectList aspects, EntityTagsNBT... nbt) {
+    public static void registerScanEventhandler(IScanEventHandler handler) { scanEventhandlers.add(Objects.requireNonNull(handler, "handler")); }    public static void registerEntityTag(String entityName, AspectList aspects, EntityTagsNBT... nbt) {
         if (entityName == null || entityName.isEmpty()) throw new IllegalArgumentException("An entity tag requires its original or native registry name");
         scanEntities.add(new EntityTags(entityName, aspects, nbt));
     }

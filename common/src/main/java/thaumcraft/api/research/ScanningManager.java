@@ -19,8 +19,8 @@ public class ScanningManager {
         if (thing != null) things.add(thing);
     }
 
-    /** The registered handlers, in registration order. */
-    public static List<IScanThing> scannableThings() { return things; }
+    /** The registered handlers, in registration order. The registry itself stays private. */
+    public static List<IScanThing> scannableThings() { return List.copyOf(things); }
 
     /** The first registered handler that accepts the target, or null. */
     public static IScanThing find(Player player, Object thing) {

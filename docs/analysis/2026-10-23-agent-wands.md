@@ -219,6 +219,16 @@ mapped 1.21.1 jar):
 The Gradle suite itself was **not** run; the numbers above come from the ad-hoc launcher and are
 reported as such.
 
+**Compile check.** The five changed production files and the four new test classes were compiled
+with `javac` (Java 21) against the mapped 1.21.1 jar, the pre-built `common/build/classes/java/main`
+of the base commit and the Gradle cache dependencies: **no error**. As a control, the whole
+non-client tree of the base commit and of this branch were compiled with the same hand-built
+classpath: **640 errors in both**, all of them pre-existing artifacts of that classpath (the
+*intermediary* architectury jar and the missing access widener — `DeferredRegister.create`,
+`class_3222`, `BlockEntitySupplier has private access`, `lastHurtByPlayerTime has protected
+access`), and **none of them in a file of this wave**. The client tree could not be compiled at
+all with that classpath, for the same reason.
+
 ---
 
 ## 6. What could not be fixed here

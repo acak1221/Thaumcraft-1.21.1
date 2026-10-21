@@ -12,9 +12,17 @@ public final class ResearchTriggerBindings {
             "BONEBOW", Set.of("minecraft:bow", "minecraft:bone"),
             "JARBRAIN", Set.of("thaumcraft:quick_silver"),
             "MIRROR", Set.of("minecraft:ender_pearl"),
-            "PRIMPEARL", Set.of("thaumcraft:primordial_pearl"));
+            "PRIMPEARL", Set.of("thaumcraft:primordial_pearl"),
+            // Original ConfigResearch:414 binds the primal staff rod research to the
+            // primal focus, which the native port owns as thaumcraft:focus_primal.
+            "ROD_primal_staff", Set.of("thaumcraft:focus_primal"));
     private static final Set<String> CLOTHING = Set.of("TINYBOWTIE", "TINYFEZ", "TINYGLASSES", "TINYHAT");
     private ResearchTriggerBindings() {}
+
+    /** The native identity of the original item trigger of a research entry. */
+    public static Set<String> boundItems(String researchKey) {
+        return ITEMS.getOrDefault(researchKey, Set.of());
+    }
 
     public static boolean matches(String researchKey, ResearchClues.Context context) {
         var research = ResearchCatalog.get(researchKey);

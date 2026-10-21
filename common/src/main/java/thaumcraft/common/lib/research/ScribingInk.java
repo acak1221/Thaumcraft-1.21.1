@@ -76,6 +76,23 @@ public final class ScribingInk {
         if (!state.usable()) return false;
         if (!doIt) return true;
 
+        Plan plan = planFor(player, stack);
+        // No shrink/hurtAndBreak: modern >=maximum breaks the empty-at100 item.
+        // Avoid even rewriting a component when creative/Unbreakable/Unbreaking
+        // prevented damage, matching original zero-mutation branches.
+        if (plan.spendsPoint()) stack.setDamageValue(plan.afterDamage());
+        return plan.accepted();
+    }
+
+    /**
+     * The same plan as {@link #consumeFromPlayer} with doIt, but without touching
+     * the stack. The caller owns the mutation, so a staged inventory can be built
+     * explicitly; only this call draws the Unbreaking roll.
+     */
+    public static Plan planFor(Player player, ItemStack stack) {
+        Objects.requireNonNull(player, "player");
+        State state = stateOf(stack);
+        if (!state.usable()) return new Plan(false, state.damage(), state.damage());
         boolean creative = player.getAbilities().instabuild;
         int level = 0;
         if (!creative && state.damageable()) {
@@ -83,12 +100,7 @@ public final class ScribingInk {
                     .getHolderOrThrow(Enchantments.UNBREAKING);
             level = EnchantmentHelper.getItemEnchantmentLevel(unbreaking, stack);
         }
-        Plan plan = planPlayer(state, creative, level, bound -> player.getRandom().nextInt(bound));
-        // No shrink/hurtAndBreak: modern >=maximum breaks the empty-at100 item.
-        // Avoid even rewriting a component when creative/Unbreakable/Unbreaking
-        // prevented damage, matching original zero-mutation branches.
-        if (plan.spendsPoint()) stack.setDamageValue(plan.afterDamage());
-        return plan.accepted();
+        return planPlayer(state, creative, level, bound -> player.getRandom().nextInt(bound));
     }
 
     /** Separate native table path; it intentionally ignores Unbreakable and Unbreaking. */

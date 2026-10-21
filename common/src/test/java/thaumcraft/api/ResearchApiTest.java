@@ -36,6 +36,27 @@ class ResearchApiTest {
         assertEquals(6, ResearchCategories.researchCategories.size());
     }
 
+    @Test void everyOriginalCategoryKeepsItsIconAndItsBackground() {
+        // Original ConfigResearch.initCategories:67-73 registers the six categories
+        // with the texture of their tab icon and the texture of their background.
+        assertEquals("thaumcraft:textures/items/thaumonomiconcheat.png",
+                ResearchCategories.getResearchList("BASICS").icon.toString());
+        assertEquals("thaumcraft:textures/misc/r_thaumaturgy.png",
+                ResearchCategories.getResearchList("THAUMATURGY").icon.toString());
+        assertEquals("thaumcraft:textures/misc/r_crucible.png",
+                ResearchCategories.getResearchList("ALCHEMY").icon.toString());
+        assertEquals("thaumcraft:textures/misc/r_artifice.png",
+                ResearchCategories.getResearchList("ARTIFICE").icon.toString());
+        assertEquals("thaumcraft:textures/misc/r_golemancy.png",
+                ResearchCategories.getResearchList("GOLEMANCY").icon.toString());
+        assertEquals("thaumcraft:textures/misc/r_eldritch.png",
+                ResearchCategories.getResearchList("ELDRITCH").icon.toString());
+        assertEquals("thaumcraft:textures/gui/gui_researchback.png",
+                ResearchCategories.getResearchList("THAUMATURGY").background.toString());
+        assertEquals("thaumcraft:textures/gui/gui_researchbackeldritch.png",
+                ResearchCategories.getResearchList("ELDRITCH").background.toString());
+    }
+
     @Test void aResearchEntryCarriesTheOriginalData() {
         ResearchItem focus = ResearchCategories.getResearch("FOCUSFIRE");
         assertNotNull(focus);

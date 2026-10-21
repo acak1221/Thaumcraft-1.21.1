@@ -75,8 +75,14 @@ public final class UnknownKnowledgeRuntimeChecks {
                         "both flattened variants retain the original note class and stack limit1");
                 roundTrip(test, held);
                 player.setItemInHand(InteractionHand.MAIN_HAND, held); var before = knowledge.save();
-                String expected = ResearchHiddenSelection.choose(knowledge, level.getDayTime());
+                String expected = ResearchHiddenSelection.choose(knowledge, level.getGameTime());
+                // Original ResearchManager.findHiddenResearch:154 seeds the private
+                // RNG with the absolute world time, never with the time of day.
+                String dayTimeChoice = ResearchHiddenSelection.choose(knowledge, level.getDayTime());
                 test.assertTrue(expected != null && !knowledge.isResearchComplete("@" + expected), "actual hidden choice needs no clue");
+                if (level.getGameTime() != level.getDayTime() && !expected.equals(dayTimeChoice)) {
+                    test.assertTrue(!expected.equals(dayTimeChoice), "the hidden choice follows the absolute world time, not the time of day");
+                }
                 var result = player.gameMode.useItem(player, level, held, InteractionHand.MAIN_HAND);
                 var actual = player.getMainHandItem(); var note = ItemResearchNotes.data(actual);
                 test.assertTrue(result.consumesAction()
@@ -107,7 +113,7 @@ public final class UnknownKnowledgeRuntimeChecks {
             player.gameMode.useItem(player, level, priority, InteractionHand.MAIN_HAND);
             test.assertTrue(priority.getCount() == 1 && knowledge.isResearchComplete("NITOR") && priority.is(ThaumcraftUnknownKnowledge.UNKNOWN_NOTE.get()),
                     "the first successful use consumes one completed unknown note to learn NITOR");
-            String afterLearning = ResearchHiddenSelection.choose(knowledge, level.getDayTime()); var beforeReveal = knowledge.save();
+            String afterLearning = ResearchHiddenSelection.choose(knowledge, level.getGameTime()); var beforeReveal = knowledge.save();
             player.gameMode.useItem(player, level, priority, InteractionHand.MAIN_HAND);
             test.assertTrue(player.getMainHandItem().is(ThaumcraftContent.RESEARCH_NOTE.get())
                             && ItemResearchNotes.data(player.getMainHandItem()).key().equals(afterLearning) && knowledge.save().equals(beforeReveal),

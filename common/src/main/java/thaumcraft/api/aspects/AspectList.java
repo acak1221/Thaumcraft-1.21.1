@@ -30,10 +30,34 @@ public class AspectList {
         return result;
     }
 
+    /**
+     * Original AspectList.getAspectsSortedAmount:100-123: the aspects are sorted by
+     * decreasing amount, but an aspect without an amount never moves and equal
+     * amounts keep their declared order.
+     */
     public Aspect[] getAspectsSortedAmount() {
         Aspect[] result = getAspects();
-        Arrays.sort(result, Comparator.comparingInt(this::getAmount).reversed());
+        int start = 0;
+        for (int index = 0; index <= result.length; index++) {
+            if (index < result.length && getAmount(result[index]) > 0) continue;
+            sortByAmount(result, start, index);
+            start = index + 1;
+        }
         return result;
+    }
+
+    /** A stable descending sort of one run of aspects that carry an amount. */
+    private void sortByAmount(Aspect[] aspects, int from, int to) {
+        for (int index = from + 1; index < to; index++) {
+            Aspect aspect = aspects[index];
+            int amount = getAmount(aspect);
+            int position = index - 1;
+            while (position >= from && getAmount(aspects[position]) < amount) {
+                aspects[position + 1] = aspects[position];
+                position--;
+            }
+            aspects[position + 1] = aspect;
+        }
     }
 
     public Aspect[] getAspectsSortedByAmount() { return getAspectsSortedAmount(); }

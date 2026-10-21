@@ -1,6 +1,11 @@
 package thaumcraft.common.lib.research;
 
+import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.lib.research.ResearchNoteData.Cell;
@@ -9,7 +14,11 @@ import static thaumcraft.common.lib.research.ResearchNoteIssuance.Failure.*;
 
 /** Pure admission checks; native inventory/RNG/delivery are tested in real loaders. */
 class ResearchNoteIssuanceTest {
-    @BeforeAll static void load() { ResearchCatalog.loadBundled(); }
+    @BeforeAll static void load() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+        ResearchCatalog.loadBundled();
+    }
 
     @Test void primaryIssuanceNeedsParentsButNoReadersAspectDiscoveryOrResearchPointPrice() {
         var knowledge = new PlayerKnowledge();
@@ -81,5 +90,24 @@ class ResearchNoteIssuanceTest {
         assertFalse(ResearchNoteIssuance.validGeneration("NITOR", new ResearchNoteData("NITOR", 0, false, 1, note.cells())));
         assertFalse(ResearchNoteIssuance.validGeneration("NITOR", note.withCells(
                 List.of(note.cellAt(0, 0), new Cell(1, 0, 2, "aer")), false)));
+    }
+
+    @Test void theOriginalChecksThePaperAndNeverSpendsIt() {
+        var before = new ArrayList<ItemStack>();
+        for (int slot = 0; slot < 36; slot++) before.add(new ItemStack(Items.AIR));
+        before.set(4, new ItemStack(Items.PAPER, 5));
+        before.set(9, new ItemStack(Items.STONE_PICKAXE));
+        // Original InventoryUtils.isPlayerCarrying only reports the slot of the paper.
+        assertEquals(4, ResearchNoteIssuance.paperSlot(before));
+        before.set(4, new ItemStack(Items.AIR));
+        assertEquals(-1, ResearchNoteIssuance.paperSlot(before));
+        before.set(4, new ItemStack(Items.PAPER, 5));
+        // Original ResearchManager.createResearchNoteForPlayer:126-127 spends the ink
+        // and keeps the paper; the staged inventory shows both halves of that rule.
+        var staged = ResearchNoteIssuance.stage(before, 9, new ScribingInk.Plan(true, 0, 1));
+        assertEquals(5, staged.get(4).getCount(), "the original never takes the paper of a note");
+        assertEquals(5, before.get(4).getCount());
+        assertEquals(1, staged.get(9).getDamageValue(), "the ink point of the note is spent");
+        assertEquals(0, before.get(9).getDamageValue());
     }
 }

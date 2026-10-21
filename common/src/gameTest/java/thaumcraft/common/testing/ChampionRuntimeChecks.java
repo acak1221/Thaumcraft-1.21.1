@@ -99,22 +99,34 @@ public final class ChampionRuntimeChecks {
             player.setPos(lane.origin.getX() + 40D, lane.origin.getY(), lane.origin.getZ());
             lane.floor(4);
 
-            // The original warded champion heals itself for one health every twenty five ticks.
-            var warded = lane.add(EntityType.CAVE_SPIDER.create(level));
+            // The original warded champion: the original promotion gave it thirty health more,
+            // double damage and the name of its modifier (oracle EntityUtils.makeChampion:243-254),
+            // the original makeChampion case five gave it half of its maximum health as its ward
+            // (oracle EntityUtils.makeChampion:271-274) and the original modifier regained one
+            // point of that ward on every twenty fifth tick (oracle ChampionModWarded:25-30).
+            var warded = lane.add(EntityType.SPIDER.create(level));
             warded.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
-            level.addFreshEntity(warded);
-            ChampionHooks.setChampionModifier(warded, ChampionModifier.WARDED);
-            warded.setHealth(5F);
+            ChampionJoinRoll.join(level, warded, ChampionModifier.WARDED);
+            test.assertTrue(warded.getMaxHealth() == 46F && warded.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4F
+                            && warded.getCustomName() != null && warded.getCustomName().getString().startsWith("Warded"),
+                    "the warded champion keeps the original thirty health, double damage and name: "
+                            + warded.getMaxHealth() + " " + warded.getAttributeValue(Attributes.ATTACK_DAMAGE)
+                            + " " + warded.getCustomName());
+            test.assertTrue(Math.abs(warded.getAbsorptionAmount() - 23F) < 1e-4F,
+                    "the warded champion carries the original ward of half of its maximum health: "
+                            + warded.getAbsorptionAmount());
+            // The spent ward: the original modifier regains one point of it on the twenty fifth tick.
+            warded.setAbsorptionAmount(0F);
             StringBuilder trace = new StringBuilder();
-            float peak = warded.getHealth();
+            float peak = warded.getAbsorptionAmount();
             for (int tick = 0; tick < 25; tick++) {
                 level.tickNonPassenger(warded);
-                peak = Math.max(peak, warded.getHealth());
-                trace.append(' ').append(warded.getHealth());
+                peak = Math.max(peak, warded.getAbsorptionAmount());
+                trace.append(' ').append(warded.getAbsorptionAmount());
             }
-            test.assertTrue(peak > 5F,
-                    "the warded champion heals one health on its original twenty five tick cycle: peak=" + peak
-                            + " health=" + warded.getHealth() + " ticks=" + warded.tickCount
+            test.assertTrue(peak > 0F,
+                    "the warded champion regains one point of its ward on its original twenty five tick cycle: peak=" + peak
+                            + " ward=" + warded.getAbsorptionAmount() + " ticks=" + warded.tickCount
                             + " id=" + ChampionHooks.championId(warded) + " fire=" + warded.isOnFire() + " trace=" + trace);
         } catch (RuntimeException | Error failure) {
             lane.clean();

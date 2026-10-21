@@ -206,7 +206,12 @@ public final class GolemGuardTargetsRuntimeChecks {
             mob.moveTo(Vec3.atBottomCenterOf(at));
             mob.setNoAi(true);
             mob.setPersistenceRequired();
-            test.assertTrue(level.addFreshEntity(mob), "a real " + type.getDescriptionId() + " is admitted");
+            // The 1.7 original rolled nextInt100 of the world random for every hostile mob that
+            // joined the world (oracle EventHandlerEntity.entitySpawns:391) and a promoted mob
+            // keeps thirty health more and a name of its own. The fixture declares that draw, so
+            // no mob of the lanes is promoted by chance and every tracked mob starts at its own
+            // health, exactly like the ordinary mob the lane measures.
+            test.assertTrue(ChampionJoinRoll.join(level, mob), "a real " + type.getDescriptionId() + " is admitted");
             spawned.add(mob);
             return mob;
         }

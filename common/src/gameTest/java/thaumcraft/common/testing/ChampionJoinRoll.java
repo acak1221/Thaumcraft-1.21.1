@@ -5,10 +5,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import thaumcraft.common.lib.mods.ChampionHooks;
+import thaumcraft.common.lib.mods.ChampionRules;
 
 /**
  * The declared original champion join roll of a test fixture.
@@ -20,6 +22,11 @@ import thaumcraft.common.lib.mods.ChampionHooks;
  * loot are asserted declares that draw here, so the scenario stays deterministic: the declared
  * value keeps the fixture an ordinary mob and the real world stream still advances by the
  * original single draw, so no other scenario loses a world draw.
+ *
+ * <p>The original rolled the champion modifier of a promoted mob from the same world random
+ * (oracle {@code EntityUtils.makeChampion:236}), so a fixture that wants a champion declares that
+ * draw as well: the fixture names the original modifier it keeps and the real world stream still
+ * advances by the original single draw.
  */
 public final class ChampionJoinRoll {
     private ChampionJoinRoll() {}
@@ -28,23 +35,63 @@ public final class ChampionJoinRoll {
     public static final int DECLARED = 97;
 
     /**
-     * Adds the entity to the level with the declared champion join roll.
+     * The declared original roll of a mob that the original promoted: the lowest roll of the
+     * original world random.
+     *
+     * <p>Oracle {@code EventHandlerEntity.entitySpawns:391-419}: the original rolled
+     * {@code nextInt100} of the world random, shifted the roll by the difficulty, the dimension,
+     * the biome and the dangerous location, subtracted the whitelist level of the mob from it and
+     * promoted the mob when the result was zero or below and its base health reached ten. The
+     * roll of zero is therefore the lowest roll that promotes a mob of the whitelist on a normal
+     * world.
+     */
+    public static final int PROMOTED = 0;
+
+    /**
+     * Adds the entity to the level with the declared champion join roll. The mob stays an ordinary
+     * mob of the original: the declared roll is far above the promotion threshold of the original.
      *
      * @return whether the native level admitted the entity.
      */
     public static boolean join(ServerLevel level, Entity entity) {
+        return join(level, entity, DECLARED, ChampionRules.NO_CHAMPION);
+    }
+
+    /**
+     * Adds the entity to the level with the declared champion join roll and the declared champion
+     * modifier roll. The mob becomes a champion of the original and keeps exactly the declared
+     * modifier.
+     *
+     * @param modifierId the id of the original champion modifier the promoted mob keeps.
+     * @return whether the native level admitted the entity.
+     */
+    public static boolean join(ServerLevel level, Entity entity, int modifierId) {
+        return join(level, entity, PROMOTED, modifierId);
+    }
+
+    /**
+     * Adds the entity to the level with the declared champion join roll and the declared champion
+     * modifier roll.
+     *
+     * @return whether the native level admitted the entity.
+     */
+    private static boolean join(ServerLevel level, Entity entity, int roll, int modifierId) {
         // The original rolled once for every hostile mob that joined the world and never for
         // anything else, so the declared draw count follows the original rule exactly. The
         // expectation is read before the join, while the mob still carries its base state.
         int expected = rolls(entity);
-        var roll = new Roll(level);
+        // The original rolled the modifier of a promoted mob from the same world random, but a
+        // creeper never rolled one: the original always made a creeper champion bold.
+        int expectedModifiers = modifierId < 0 || entity instanceof Creeper ? 0 : 1;
+        var declared = new Roll(level, roll, modifierId);
         boolean added;
         try {
             added = level.addFreshEntity(entity);
         } finally {
-            roll.close();
+            declared.close();
         }
-        roll.require(expected);
+        declared.require(expected, expectedModifiers);
+        declared.requireChampion(entity, modifierId);
         return added;
     }
 
@@ -54,23 +101,33 @@ public final class ChampionJoinRoll {
         return ChampionHooks.championId(mob) == ChampionHooks.NOT_ROLLED ? 1 : 0;
     }
 
-    /** The scoped world-RNG input that declares the single original champion join roll. */
+    /** The scoped world-RNG input that declares the original champion join and modifier rolls. */
     private static final class Roll implements AutoCloseable {
         private final ServerLevel level;
         private final Field field;
         private final RandomSource previous;
         private final RandomSource input;
+        private final int roll;
+        private final int modifierId;
         private int draws;
+        private int modifiers;
 
-        Roll(ServerLevel level) {
+        Roll(ServerLevel level, int roll, int modifierId) {
             this.level = level;
+            this.roll = roll;
+            this.modifierId = modifierId;
             this.previous = level.random;
             this.input = new LegacyRandomSource(0) {
                 @Override public int nextInt() { return previous.nextInt(); }
                 @Override public int nextInt(int bound) {
                     // The original champion join roll is the single nextInt100 of the world random.
                     // The real stream still advances by that one draw, only the declared value wins.
-                    if (bound == 100) { draws++; previous.nextInt(100); return DECLARED; }
+                    if (bound == 100) { draws++; previous.nextInt(100); return roll; }
+                    // The original rolled the champion modifier of a promoted mob from the same
+                    // world random, after the join roll, so the declared modifier wins.
+                    if (bound == ChampionRules.modifierCount() && draws > 0 && modifierId >= 0) {
+                        modifiers++; previous.nextInt(bound); return modifierId;
+                    }
                     return previous.nextInt(bound);
                 }
                 @Override public long nextLong() { return previous.nextLong(); }
@@ -89,8 +146,24 @@ public final class ChampionJoinRoll {
         }
 
         /** The original join roll of a mob is exactly one nextInt100 of the world random. */
-        void require(int expected) {
+        void require(int expected, int expectedModifiers) {
             if (draws != expected) throw new AssertionError("the original champion join roll is exactly " + expected + " nextInt100, actual=" + draws);
+            if (modifiers != expectedModifiers) throw new AssertionError("the original champion modifier roll is exactly " + expectedModifiers + " nextInt13, actual=" + modifiers);
+        }
+
+        /**
+         * The declared roll has to reach the original decision: an ordinary mob stays ordinary and
+         * a promoted mob keeps exactly the declared modifier.
+         */
+        void requireChampion(Entity entity, int modifierId) {
+            if (!(entity instanceof Mob mob)) return;
+            int actual = ChampionHooks.championId(mob);
+            if (modifierId < 0) {
+                if (actual >= 0) throw new AssertionError("the original champion join roll keeps the mob ordinary, actual modifier=" + actual);
+            } else if (actual != modifierId) {
+                throw new AssertionError("the original champion join roll promotes the mob with the declared modifier: expected="
+                        + modifierId + " actual=" + actual);
+            }
         }
 
         @Override public void close() {

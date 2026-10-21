@@ -41,9 +41,16 @@ import thaumcraft.common.lib.world.OuterLandsWiringRules;
  *
  * The contract for the parallel groups is:
  * <ul>
- *   <li>{@code thaumcraft:eldritch} - the eldritch block with an integer "variant" property that
- *       accepts the original 1.7 metadata 0..10 (0 altar, 1 obelisk base, 2 obelisk shaft,
- *       3 cap, 4 decoration, 5 library desk, 7 door, 8 door lock, 9 crab spawner, 10 trap).</li>
+ *   <li>{@code thaumcraft:eldritch} - the eldritch altar, the obelisk, the obelisk shaft and
+ *       the capstone; the integer "variant" property accepts the original 1.7 metadata 0..3.</li>
+ *   <li>{@code thaumcraft:eldritch_crust} - the glowing crust and the glyphed eldritch stone,
+ *       the original 1.7 metadata 4 and 5.</li>
+ *   <li>{@code thaumcraft:eldritch_deco} - the decorated eldritch stone, the metadata 6.</li>
+ *   <li>{@code thaumcraft:eldritch_doorway} - the eldritch doorway and the eldritch lock, the
+ *       metadata 7 and 8.</li>
+ *   <li>{@code thaumcraft:eldritch_spawner} - the eldritch crab spawner and the runed eldritch
+ *       trap, the metadata 9 and 10.</li>
+ *   <li>{@code thaumcraft:eldritch_crystal} - the eldritch crystal, the metadata 11.</li>
  *   <li>{@code thaumcraft:cosmetic_solid}, {@code thaumcraft:cosmetic_solid_tough} and
  *       {@code thaumcraft:cosmetic_solid_thaumium} - the cosmetic solid with an integer "variant"
  *       property that accepts the original metadata 0..15 (1 ring floor, 11 wall, 12 rock, 13 no
@@ -92,11 +99,28 @@ public final class ThaumcraftOuterLands {
 
     /** The eldritch block, or null when the eldritch content group has not landed yet. */
     public static Block block(String path) {
-        return BuiltInRegistries.BLOCK.get(id(path));
+        ResourceLocation key = id(path);
+        // The block registry answers with the air block for an unknown id, which would place
+        // air where the original places a block. A missing block is reported instead.
+        if (!BuiltInRegistries.BLOCK.containsKey(key)) return null;
+        return BuiltInRegistries.BLOCK.get(key);
     }
 
     public static Block eldritch() {
         return block("eldritch");
+    }
+
+    /**
+     * The native block that hosts an original eldritch metadata.
+     *
+     * <p>Oracle {@code BlockEldritch:231-260} gives every metadata its own hardness and blast
+     * resistance, so the original family became six native blocks. The native blockstates carry
+     * the model of their metadata, so the metadata decides the block and the variant.
+     *
+     * @param variant the original 1.7 metadata
+     */
+    public static Block eldritchBlock(int variant) {
+        return blockById(OuterLandsWiringRules.eldritchBlock(variant));
     }
 
     /**
@@ -200,7 +224,9 @@ public final class ThaumcraftOuterLands {
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case ELDRITCH -> {
-                Block block = eldritch();
+                // Oracle BlockEldritch:231-260 - the metadata decides the block, because the
+                // hardness, the blast resistance and the light belong to the block in 1.21.1.
+                Block block = eldritchBlock(variant);
                 return block == null ? null : withVariant(block.defaultBlockState(), variant);
             }
             case STAIRS -> {
@@ -249,7 +275,9 @@ public final class ThaumcraftOuterLands {
 
     /** The block of a full registry id, or null when the block does not exist. */
     private static Block blockById(String registryId) {
-        return BuiltInRegistries.BLOCK.get(ResourceLocation.parse(registryId));
+        ResourceLocation key = ResourceLocation.parse(registryId);
+        if (!BuiltInRegistries.BLOCK.containsKey(key)) return null;
+        return BuiltInRegistries.BLOCK.get(key);
     }
 
     /** Applies the original 1.7 stair metadata (0 east, 1 west, 2 south, 3 north, 4..7 upside down). */

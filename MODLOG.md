@@ -1,3 +1,72 @@
+## 2026-10-21 — Outer Lands eldritch variants: the metadata table, the lock key and the boss lock
+
+Every eldritch block of the Outer Lands was placed through one native block, `thaumcraft:eldritch`,
+so every original metadata of the oracle family landed on a block that does not host it. The
+doors, the boss lock, the traps, the glyphed library desks and the crust decorations of the
+labyrinth got a missing model and the hardness, the blast resistance and the light of the wrong
+group; the original per-metadata values never reached the world. The native blockstates of the
+port already carry the real per-metadata models and the oracle `BlockEldritch` decides the
+grouping, so the table is now explicit (`OuterLandsWiringRules.ELDRITCH_VARIANTS`) and the
+resolver of the port (`ThaumcraftOuterLands.state`) follows it:
+
+| original metadata | native block | variant | model | texture | hardness | blast resistance | light |
+|---|---|---|---|---|---|---|---|
+| 0 | `thaumcraft:eldritch` | 0 | `block/eldritch` | `blocks/obsidiantile` | 50 | 20000 | 8 |
+| 1 | `thaumcraft:eldritch` | 1 | `block/eldritch_1` | `blocks/obsidiantile` | 50 | 20000 | 8 |
+| 2 | `thaumcraft:eldritch` | 2 | `block/eldritch_2` | `blocks/obsidiantile` | 50 | 20000 | 8 |
+| 3 | `thaumcraft:eldritch` | 3 | `block/eldritch_3` | `blocks/obsidiantile` | 50 | 20000 | 8 |
+| 4 | `thaumcraft:eldritch_crust` | 4 | `block/eldritch_crust` | `blocks/es_i_1` | 2 | 30 | 12 |
+| 5 | `thaumcraft:eldritch_crust` | 5 | `block/eldritch_crust_5` | `blocks/es_i_2` | 2 | 30 | 12 |
+| 6 | `thaumcraft:eldritch_deco` | 6 | `block/eldritch_deco` | `blocks/deco_1` | 4 | 100 | 5 |
+| 7 | `thaumcraft:eldritch_doorway` | 7 | `block/eldritch_doorway` | `blocks/deco_3` | -1 | `Float.MAX_VALUE` | 12 |
+| 8 | `thaumcraft:eldritch_doorway` | 8 | `block/eldritch_doorway_8` | `blocks/deco_2` | -1 | `Float.MAX_VALUE` | 5 |
+| 9 | `thaumcraft:eldritch_spawner` | 9 | `block/eldritch_spawner` | `blocks/crust` | 15 | 30 | 4 |
+| 10 | `thaumcraft:eldritch_spawner` | 10 | `block/eldritch_spawner_10_0..3` | `blocks/es_5..es_8` | 15 | 30 | 0 |
+
+The hardness, the blast resistance and the light are the values of the oracle `BlockEldritch:120-135`
+and `:231-260`; the textures are the icons of `BlockEldritch:78-94`, the metadata nine being the
+icon of the cosmetic solid with the metadata fourteen. A missing native block is now reported
+instead of answered with the air block of the registry default, which had put air where the
+original puts a block.
+
+Three more defects of the audit are closed against the oracle:
+
+* `BlockEldritch:278` — the eldritch lock accepted the item path `eldritch_object_2`, which no
+  item carries. The original carried the five metadata values of `ItemEldritchObject` on one item
+  and the port flattens them into one item each, so the key is the runed tablet
+  (`thaumcraft:eldritch_tablet`), the same item the key room keeps.
+* `GenBossRoom:44-86` — the doorway of a boss room quadrant without an exit keeps the unknown
+  direction and the coordinates zero, so the original writes the lock, the door and the invisible
+  door of that quadrant into the world origin. The native reproduced the coordinates, but the
+  1.21.1 generation writes into the chunk that is generated: that write is outside of the chunk
+  unless the quadrant is the origin chunk itself, and `WorldGenRegion.getChunk` answers with
+  `IllegalStateException: Requested chunk unavailable during world generation`, which aborts the
+  chunk. **Deviation:** the doorway keeps the corner of its own chunk, the chunk relative zero of
+  the original; the direction of the lock stays the unknown direction of the original.
+* `GenPortal:84` — the portal room is cleared in all four corners; the native cleared only three
+  and left the invisible wall of the lower right corner standing.
+
+Item 11 of the audit is closed as far as the 1.21.1 data model allows: the document
+`data/thaumcraft/dimension_effects/outer_lands.json` that the dimension type references was
+missing and is added with the values of the oracle `WorldProviderOuter` (black sky, no sky, cloud
+height one, no ambient light and the fog colour `0xA080A0` scaled by `0.15` = 1577752). 1.21.1
+has no `dimension_effects` registry: the vanilla client picks the effects of a dimension from
+`ultrawarm`, `natural` and `has_ceiling` and the NeoForge 21.1 client registers custom effects
+through the event `RegisterDimensionSpecialEffectsEvent`. The document is therefore the reference
+of the port and not read by the 1.21.1 client; the remaining visual difference needs a client
+side registration, which is out of the scope of this change.
+
+Items 8 and 9 of the audit stay open and are reported, not guessed: the eerie node over the altar
+of the eldritch ring cannot be created inside a generating chunk, because the shared node factory
+refuses a position whose chunk is not loaded (`NodeGeneration.available`) and would therefore
+desynchronise the random stream of the labyrinth seed from the original, and the centre of the
+ring cannot leave the three to twelve block window of its chunk, because the seven by seven
+footprint of the ring has to fit into the chunk that the 1.21.1 generation writes.
+
+Local: `:common:compileJava` and `:common:test` pass, 1569 JUnit tests in 226 suites, 0 failures,
+0 skipped. `python3 -B scripts/porting/convert_assets.py --verify` reports 0 missing references.
+No runtime, client visual, multiplayer or NeoForge acceptance is claimed.
+
 ## 2026-10-21 — Outer Lands labyrinth fidelity: the maze generator and the eldritch rooms
 
 The critical defect of the a5 eldritch audit is closed. The native labyrinth generator skipped a

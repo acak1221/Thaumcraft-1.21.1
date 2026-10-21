@@ -18,6 +18,7 @@ dependencies {
  compileOnly 'io.github.llamalad7:mixinextras-fabric:0.4.1'
  annotationProcessor 'io.github.llamalad7:mixinextras-fabric:0.4.1'
  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+ testImplementation 'org.junit.platform:junit-platform-launcher'
  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

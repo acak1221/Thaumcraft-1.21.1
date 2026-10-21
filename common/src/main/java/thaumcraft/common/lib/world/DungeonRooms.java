@@ -702,8 +702,10 @@ public final class DungeonRooms {
         for (int a = 3; a <= 13; ++a) {
             for (int b = 3; b <= 13; ++b) {
                 for (int c = 1; c < 12; ++c) {
-                    boolean corner = a <= 4 && b <= 4 || a <= 4 && b >= 12 || a >= 12 && b <= 4;
-                    if (!corner || (a >= 12 && b >= 12)) continue;
+                    // Oracle GenPortal:84 - the portal room is cleared in all four corners.
+                    boolean corner = a <= 4 && b <= 4 || a <= 4 && b >= 12
+                            || a >= 12 && b <= 4 || a >= 12 && b >= 12;
+                    if (!corner) continue;
                     place(out, view, worldRandom, x + a, y + c, z + b, 9, -1, cell);
                 }
             }
@@ -1068,6 +1070,14 @@ public final class DungeonRooms {
                     xx = x + 3;
                     zz = z + 5 + a;
                     facing = 4;
+                }
+                if (facing == OuterLandsRules.DIRECTION_UNKNOWN) {
+                    // Deviation: the original keeps the coordinates zero and writes the doorway
+                    // of a boss room quadrant without an exit into the world origin, which is
+                    // outside of the chunk that is generated in 1.21.1 and would abort the
+                    // generation of the chunk. The doorway keeps the corner of its own chunk.
+                    xx = x;
+                    zz = z;
                 }
                 switch (PAT_DOORWAY[a][b]) {
                     // The lock takes the direction of the side of the room it stands on

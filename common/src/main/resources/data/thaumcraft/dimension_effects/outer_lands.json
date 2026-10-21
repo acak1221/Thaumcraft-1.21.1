@@ -1,0 +1,14 @@
+{
+  "ambient_light": 0.0,
+  "bed_color": 0,
+  "cloud_color": 1577752,
+  "cloud_height": 1.0,
+  "fog_color": 1577752,
+  "fog_end": 0.9,
+  "fog_start": 0.75,
+  "ground_color": 0,
+  "has_sky": false,
+  "sky_color": 0,
+  "sun_color": 0,
+  "moon_color": 0
+}

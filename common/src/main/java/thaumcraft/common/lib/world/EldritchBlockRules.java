@@ -36,6 +36,15 @@ public final class EldritchBlockRules {
      */
     public static final int ELDRITCH_CRYSTAL = 11;
 
+    /**
+     * The original ItemEldritchObject metadata two, the runed tablet.
+     *
+     * <p>Oracle {@code ItemEldritchObject:31-48} carried the five metadata values zero to
+     * four on one item. The 1.21.1 port flattens them into one item each, so the metadata two
+     * is the runed tablet, the key of the eldritch lock and the permanent item of the key room.
+     */
+    public static final int ELDRITCH_OBJECT_TABLET = 2;
+
     /** BlockEldritch:72-75 - family hardness 50 and blast resistance 20000. */
     public static final float ELDRITCH_FAMILY_HARDNESS = 50.0F;
     public static final float ELDRITCH_FAMILY_RESISTANCE = 20000.0F;

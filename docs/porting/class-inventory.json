@@ -16,7 +16,7 @@
     "partial": 42,
     "pending": 892,
     "complete": 0,
-    "active_native_java_files": 1348
+    "active_native_java_files": 1352
   },
   "active_native_sources": [
     {
@@ -2457,12 +2457,17 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java",
       "role": "native_foundation",
-      "sha256": "9f8ecf2c5ed5a984c4589f50c8e4906c5e866dd759fcfcb1fc8063a610e9247d"
+      "sha256": "ac934905e961a01252da24ba99042538680c2110db3c391afd35bb7b626d8d18"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java",
       "role": "native_foundation",
       "sha256": "d22b569e16a3fa393df3d56a9d1f78e246da98ad05e35254f63c59529d76240c"
+    },
+    {
+      "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftCreativeTabs.java",
+      "role": "native_foundation",
+      "sha256": "da521ad0ae0d6abb3a39ab8c02e690f46967508181ae6fdd10579b87d072d8c7"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java",
@@ -2517,7 +2522,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftEssences.java",
       "role": "native_foundation",
-      "sha256": "fac32ba19383f352c7426917afb80d598fa169696dc9969adb4935cd484e5452"
+      "sha256": "a005742c9ddccfb9e38f57364c2d23f261a7efe3b199ebecf45063346f088c7d"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/config/ThaumcraftExplosiveOrbs.java",
@@ -6705,6 +6710,11 @@
       "sha256": "7d3e4498d171b01d6973b3d9889e6a6e24eee62655e412341ebff75a5ee64dce"
     },
     {
+      "path": "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeCreativeTabs.java",
+      "role": "native_foundation",
+      "sha256": "bad7b41a1a13174a25226db42b282182935b600d5edf151d6a3344e82801105d"
+    },
+    {
       "path": "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeEntityAttributes.java",
       "role": "native_foundation",
       "sha256": "de57cbaedbb6cb88bc9ba27e90c02d3e277ad0128649b0ef308434ef699a5755"
@@ -6747,7 +6757,7 @@
     {
       "path": "neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java",
       "role": "native_foundation",
-      "sha256": "bf55cc3a6cb196e35c50bc1c1c75a4fa2b6c2ee2d5db478ceb59a673b9991471"
+      "sha256": "eea48f6d95ab524911b33c48c01fb5e121d0e859dd632b2674e665ed7e8db7c2"
     },
     {
       "path": "neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java",
@@ -6758,6 +6768,16 @@
       "path": "neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeExcavationRemovalMixin.java",
       "role": "native_foundation",
       "sha256": "65d89417eefbfbb764f3c268abf2615f74abf0b04cde56ea034e6b1792dbcc56"
+    },
+    {
+      "path": "neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeFluidDeathMixin.java",
+      "role": "native_foundation",
+      "sha256": "049458f386fb41cfa4dbcff0a081a35fbf5673875e1f3bb4b97621faac95090d"
+    },
+    {
+      "path": "neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeFluidPureMixin.java",
+      "role": "native_foundation",
+      "sha256": "323cd633c0d388a2bb9961be288c1c6cf353d0c9764a6ac7ab7318bc0c155bd4"
     }
   ],
   "legacy_units": [

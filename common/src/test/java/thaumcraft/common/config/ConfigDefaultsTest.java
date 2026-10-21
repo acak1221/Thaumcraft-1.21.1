@@ -34,20 +34,48 @@ class ConfigDefaultsTest {
     }
 
     @Test void theResearchOptionsKeepTheirOriginalDefaults() {
-        assertEquals(0, Config.researchDifficulty);
-        assertEquals(100, Config.aspectTotalCap);
-        assertEquals(0, Config.CresearchDifficulty);
-        assertEquals(100, Config.CaspectTotalCap);
-        assertTrue(Config.hardNode);
-        assertTrue(Config.ChardNode);
-        assertFalse(Config.wuss);
-        assertFalse(Config.Cwuss);
-        assertTrue(Config.allowCheatSheet);
-        assertTrue(Config.CallowCheatSheet);
-        assertTrue(Config.allowMirrors);
-        assertTrue(Config.CallowMirrors);
-        assertTrue(Config.wardedStone);
-        assertTrue(Config.CwardedStone);
+        // The original declared the seven research facts in its static block (oracle
+        // Config.java:830-895). The public options of the native port carry the runtime
+        // values that a configuration replaces, so the declared defaults are published by
+        // Config.Defaults.
+        assertEquals(0, Config.Defaults.RESEARCH_DIFFICULTY);
+        assertEquals(100, Config.Defaults.ASPECT_TOTAL_CAP);
+        assertEquals(0, Config.Defaults.CRESEARCH_DIFFICULTY);
+        assertEquals(100, Config.Defaults.CASPECT_TOTAL_CAP);
+        assertTrue(Config.Defaults.HARD_NODE);
+        assertTrue(Config.Defaults.CHARD_NODE);
+        assertFalse(Config.Defaults.WUSS);
+        assertFalse(Config.Defaults.CWUSS);
+        assertTrue(Config.Defaults.ALLOW_CHEAT_SHEET);
+        assertTrue(Config.Defaults.CALLOW_CHEAT_SHEET);
+        assertTrue(Config.Defaults.ALLOW_MIRRORS);
+        assertTrue(Config.Defaults.CALLOW_MIRRORS);
+        assertTrue(Config.Defaults.WARDED_STONE);
+        assertTrue(Config.Defaults.CWARDED_STONE);
+    }
+
+    /**
+     * The original replaces the public options with the values of its configuration file
+     * (oracle Config.java:388-392 and :457-459), and the cheat sheet is the one option whose
+     * configuration default differs from its declared default: the configuration file writes
+     * {@code false} for it (oracle Config.java:456).
+     */
+    @Test void thePublicOptionsFollowTheAppliedConfiguration() {
+        ResearchSettings saved = new ResearchSettings(Config.allowCheatSheet, Config.wardedStone,
+                Config.allowMirrors, Config.hardNode, Config.wuss, Config.researchDifficulty,
+                Config.aspectTotalCap);
+        try {
+            Config.apply(new ResearchSettings(false, true, false, true, false, 0, 100));
+            assertFalse(Config.allowCheatSheet, "the original's configuration disables the cheat sheet");
+            assertFalse(Config.CallowCheatSheet, "the cheat sheet copy follows the configuration");
+            assertFalse(Config.allowMirrors, "the applied configuration carries the mirrors");
+            assertFalse(Config.CallowMirrors, "the mirrors copy follows the configuration");
+            assertTrue(Config.hardNode, "the applied configuration carries the hard nodes");
+            assertEquals(0, Config.researchDifficulty, "the applied configuration carries the difficulty");
+            assertEquals(100, Config.aspectTotalCap, "the applied configuration carries the aspect cap");
+        } finally {
+            Config.apply(saved);
+        }
     }
 
     @Test void theSpawnOptionsKeepTheirOriginalDefaults() {
@@ -55,6 +83,9 @@ class ConfigDefaultsTest {
         assertTrue(Config.spawnFireBat);
         assertTrue(Config.spawnTaintacle);
         assertTrue(Config.spawnWisp);
+        // The taint settings are runtime values as well, so their declared default is
+        // published by Config.Defaults (oracle Config.java:894).
+        assertTrue(Config.Defaults.SPAWN_TAINT_SPORE);
         assertTrue(Config.spawnTaintSpore);
         assertTrue(Config.spawnPech);
         assertTrue(Config.spawnElder);
@@ -68,6 +99,7 @@ class ConfigDefaultsTest {
         assertEquals(195, Config.biomeEldritchID);
         assertEquals(2, Config.biomeTaintWeight);
         assertEquals(5, Config.biomeMagicalForestWeight);
+        assertEquals(200, Config.Defaults.TAINT_SPREAD_RATE);
         assertEquals(200, Config.taintSpreadRate);
         assertTrue(Config.taintFromFlux);
         assertEquals(-42, Config.dimensionOuterId);
@@ -85,6 +117,7 @@ class ConfigDefaultsTest {
         assertEquals(18, Config.specialNodeRarity);
         assertEquals(5000, Config.notificationDelay);
         assertEquals(15, Config.notificationMax);
+        assertTrue(Config.Defaults.GLOWY_TAINT);
         assertTrue(Config.glowyTaint);
         assertEquals(5, Config.golemDelay);
         assertEquals(10000, Config.golemIgnoreDelay);

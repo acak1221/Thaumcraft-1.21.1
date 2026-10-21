@@ -1,3 +1,30 @@
+## 2026-10-21 — The OpenTC4 comparison wave: nine agents, sixty-two defects
+
+The readable 1.7.10 sources settled what the SRG names of the oracle could not: the mapping of
+`DamageSource.field_76367_g` is the cactus source and `field_76376_m` is the magic source in
+1.7.10, while the 1.12 line of this repository resolves the same fields to IN_WALL and
+INDIRECT_MAGIC. The 1.7.10 `Block.setResistance` stores three times the argument and its getter
+divides it by five, so the effective blast resistance of the original is 0.6 times the setter
+value, and 1.21.1 neither multiplies nor divides.
+
+Nine agents compared the port with the oracle, OpenTC4 and the readable 1.7.10 vanilla tree
+(`/home/Acak/work/mc1710-src`) and fixed sixty-two defects. The worst of them: the wand never
+removed a warded stone block, the smelting bonus registry of the arcane furnace was empty, the
+aura totem of the world generation did not exist, half of the eldritch ring was air, eighty-three
+vanilla object tags of `ConfigAspects` were never carried, the crucible recounted its bellows on
+every tick, the brain jar pulled every orb of a seven block cube and the fire bat had an invented
+light restriction.
+
+`scripts/porting/resolve_srg.py` is the permanent tool for the SRG names, and
+`docs/analysis/2026-10-21-blast-resistance-verification.md` holds the byte code proof of the
+resistance semantics. The consolidated report is
+`docs/analysis/2026-10-21-openTC4-audit-summary.md`, the domain reports are
+`docs/analysis/2026-10-21-openTC4-*.md`.
+
+Verified in the integrated tree: 1773 JUnit tests with no failure, `convert_assets.py --verify`
+with `missing_references: 0`, the 84 Python tests, and 312 Fabric game test scenarios with the
+five known unstable cases. No client run, no multiplayer and no full survival progression.
+
 ## 2026-10-21 — The golems of the 1.7.10 oracle: the damage sources, the goal ladder and the heavy water golem
 
 The readable 1.7.10 vanilla sources (`/home/Acak/work/mc1710-src`) settled three questions the

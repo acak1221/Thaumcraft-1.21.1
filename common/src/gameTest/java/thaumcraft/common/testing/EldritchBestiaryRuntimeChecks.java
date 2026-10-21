@@ -14,6 +14,7 @@ import thaumcraft.common.entities.monster.EntityEldritchCrab;
 import thaumcraft.common.entities.monster.EntityInhabitedZombie;
 import thaumcraft.common.entities.monster.EntityThaumicSlime;
 import thaumcraft.common.entities.monster.EntityWatcher;
+import thaumcraft.common.lib.mods.ChampionModifier;
 import thaumcraft.common.lib.world.EldritchMobRules;
 
 /**
@@ -35,21 +36,32 @@ public final class EldritchBestiaryRuntimeChecks {
             player.setGameMode(GameType.SURVIVAL);
             lane.floor(4);
 
+            // The original eldritch warden is a boss of the original champion whitelist, so the
+            // original always promoted it (oracle EventHandlerEntity.entitySpawns:391-419, the
+            // whitelist level of a boss is two hundred) and the original rolled the champion
+            // modifier of the promoted mob from the world random (oracle
+            // EntityUtils.makeChampion:236). The fixture declares both draws: the warden keeps the
+            // own numbers of a boss, because the original skipped the ordinary champion bonuses
+            // for a boss (oracle EntityUtils.makeChampion:243-254), and it carries the mighty
+            // modifier of the original, which tripled the attack damage of every champion
+            // (oracle EntityUtils.makeChampion:265-270).
             var heavy = lane.add(ThaumcraftEldritchMobs.ELDRITCH_WARDEN.get().create(level));
             var plain = lane.add(ThaumcraftEldritchMobs.ELDRITCH_WARDEN.get().create(level));
             heavy.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
             plain.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 2.5D, 0F, 0F);
-            level.addFreshEntity(heavy);
-            level.addFreshEntity(plain);
+            ChampionJoinRoll.join(level, heavy, ChampionModifier.MIGHTY);
+            ChampionJoinRoll.join(level, plain, ChampionModifier.MIGHTY);
 
-            test.assertTrue(heavy.getMaxHealth() == 200F && heavy.getAttributeValue(Attributes.ATTACK_DAMAGE) == 10F
+            test.assertTrue(heavy.getMaxHealth() == 200F && heavy.getAttributeValue(Attributes.ATTACK_DAMAGE) == 30F
                             && Math.abs(heavy.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.33D) < 1e-6D && heavy.getArmorValue() == 4
                             && heavy.getAttributeValue(Attributes.FOLLOW_RANGE) == 40F
                             && Math.abs(heavy.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) - 0.95D) < 1e-6D,
-                    "the warden keeps the original 200 health, 10 damage, 0.33 speed, 4 armour, 40 follow range and 0.95 knockback resistance: "
+                    "the warden keeps the original 200 health, 30 damage, 0.33 speed, 4 armour, 40 follow range and 0.95 knockback resistance: "
                             + heavy.getMaxHealth() + " " + heavy.getAttributeValue(Attributes.ATTACK_DAMAGE) + " "
                             + heavy.getAttributeValue(Attributes.MOVEMENT_SPEED) + " " + heavy.getArmorValue() + " "
                             + heavy.getAttributeValue(Attributes.FOLLOW_RANGE) + " " + heavy.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+            test.assertTrue(heavy.getCustomName() != null && heavy.getCustomName().getString().contains("Mighty"),
+                    "the warden names itself after the champion modifier of the original: " + heavy.getCustomName());
             test.assertTrue(heavy.getBbWidth() == 1.5F && heavy.getBbHeight() == 3.5F && Math.abs(heavy.getEyeHeight() - 3.1F) < 1e-4F,
                     "the warden keeps the original 1.5 by 3.5 body and the 3.1 eye height");
             test.assertTrue(heavy.getAmbientSoundInterval() == 500, "the warden talks every 500 ticks: " + heavy.getAmbientSoundInterval());
@@ -96,15 +108,26 @@ public final class EldritchBestiaryRuntimeChecks {
             player.setGameMode(GameType.SURVIVAL);
             lane.floor(4);
 
+            // The original eldritch golem is a boss of the original champion whitelist, so the
+            // original always promoted it (oracle EventHandlerEntity.entitySpawns:391-419, the
+            // whitelist level of a boss is two hundred) and the original rolled the champion
+            // modifier of the promoted mob from the world random (oracle
+            // EntityUtils.makeChampion:236). The fixture declares both draws: the golem keeps the
+            // own numbers of a boss, because the original skipped the ordinary champion bonuses
+            // for a boss (oracle EntityUtils.makeChampion:243-254), and it carries the mighty
+            // modifier of the original, which tripled the attack damage of every champion
+            // (oracle EntityUtils.makeChampion:265-270).
             var golem = lane.add(ThaumcraftEldritchMobs.ELDRITCH_GOLEM.get().create(level));
             golem.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
-            level.addFreshEntity(golem);
-            test.assertTrue(golem.getMaxHealth() == 250F && golem.getAttributeValue(Attributes.ATTACK_DAMAGE) == 10F
+            ChampionJoinRoll.join(level, golem, ChampionModifier.MIGHTY);
+            test.assertTrue(golem.getMaxHealth() == 250F && golem.getAttributeValue(Attributes.ATTACK_DAMAGE) == 30F
                             && Math.abs(golem.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.30D) < 1e-6D && golem.getArmorValue() == 6
                             && golem.getAttributeValue(Attributes.FOLLOW_RANGE) == 40F,
-                    "the golem keeps the original 250 health, 10 damage, 0.30 speed, 6 armour and 40 follow range: "
+                    "the golem keeps the original 250 health, 30 damage, 0.30 speed, 6 armour and 40 follow range: "
                             + golem.getMaxHealth() + " " + golem.getAttributeValue(Attributes.ATTACK_DAMAGE) + " "
                             + golem.getAttributeValue(Attributes.MOVEMENT_SPEED) + " " + golem.getArmorValue());
+            test.assertTrue(golem.getCustomName() != null && golem.getCustomName().getString().startsWith("Mighty"),
+                    "the golem names itself after the champion modifier of the original: " + golem.getCustomName());
             test.assertTrue(golem.getBbWidth() == 1.75F && golem.getBbHeight() == 3.5F && Math.abs(golem.getEyeHeight() - 3F) < 1e-4F,
                     "the golem keeps the original 1.75 by 3.5 body and the 3 eye height");
             test.assertTrue(golem.getType().fireImmune(), "the golem is fire immune, as in the original");
@@ -125,11 +148,15 @@ public final class EldritchBestiaryRuntimeChecks {
             var pig = lane.add(EntityType.PIG.create(level));
             pig.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 2.5D, 0F, 0F);
             pig.setNoAi(true);
+            // The mighty champion of the original hits for twenty two and a half, so the pig of
+            // the lane needs more health than its own ten to measure the hit.
+            pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000D);
+            pig.setHealth(1000F);
             level.addFreshEntity(pig);
             float before = pig.getHealth();
             boolean hit = golem.doHurtTarget(pig);
-            test.assertTrue(hit && Math.abs(before - pig.getHealth() - 7.5F) < 1e-3F,
-                    "the golem melee deals three quarters of its ten attack damage: " + (before - pig.getHealth()));
+            test.assertTrue(hit && Math.abs(before - pig.getHealth() - 22.5F) < 1e-3F,
+                    "the golem melee deals three quarters of its thirty attack damage: " + (before - pig.getHealth()));
             test.assertTrue(!golem.doHurtTarget(pig), "the second swing inside the ten tick cooldown is refused");
             test.assertTrue(golem.getAttackTimer() == 10, "the melee cooldown is the original ten ticks: " + golem.getAttackTimer());
         } finally {

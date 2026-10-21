@@ -335,7 +335,11 @@ public final class FrostShardRuntimeChecks {
 
         private <T extends Mob> T target(EntityType<T> type) {
             T target = type.create(level); entities.add(target); target.setNoAi(true); target.setNoGravity(true); target.setPos(targetPosition);
-            test.assertTrue(level.addFreshEntity(target), "actual native collision target is indexed"); return target;
+            // The 1.7 original rolled nextInt100 of the world random for every hostile mob that
+            // joined the world (oracle EventHandlerEntity.entitySpawns:391) and a promoted mob
+            // keeps thirty health more and a name of its own. The fixture declares that draw, so
+            // the zombie of the armour check stays the ordinary zombie of the original.
+            test.assertTrue(ChampionJoinRoll.join(level, target), "actual native collision target is indexed"); return target;
         }
 
         private EntityFrostShard shot(Vec3 position, Vec3 motion) {

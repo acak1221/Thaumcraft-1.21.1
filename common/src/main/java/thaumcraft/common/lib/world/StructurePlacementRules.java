@@ -50,10 +50,30 @@ public final class StructurePlacementRules {
     public static final int RING_RADIUS = 3;
     /** The ring floor is five blocks thick, the ring base included (oracle WorldGenEldritchRing:72-83). */
     public static final int RING_FLOOR_LAYERS = 5;
-    /** The ring clears this many layers above its base. */
+    /** The ring clears this many layers above its base (oracle WorldGenEldritchRing:81-83). */
     public static final int RING_CLEARED_LAYERS = 4;
-    /** One in four ring floor blocks is left empty (oracle WorldGenEldritchRing:75-79). */
-    public static final int RING_FLOOR_AIR_CHANCE = 4;
+    /**
+     * One in four ring floor blocks is obsidian, the other three are the cosmetic
+     * solid (oracle WorldGenEldritchRing:75-79, the 1.7.10 original places
+     * {@code Blocks.obsidian} in the one in four roll and never leaves a hole).
+     */
+    public static final int RING_OBSIDIAN_CHANCE = 4;
+
+    /** The material of one block of the ring floor. */
+    public enum RingFloor {
+        /** The obsidian of the one in four roll. */
+        OBSIDIAN,
+        /** The cosmetic solid of the other three rolls. */
+        COSMETIC_SOLID
+    }
+
+    /**
+     * Oracle WorldGenEldritchRing:75-79 - the one in four roll of the ring floor is
+     * the obsidian, the other three rolls are the cosmetic solid.
+     */
+    public static RingFloor ringFloor(int roll) {
+        return roll == 0 ? RingFloor.OBSIDIAN : RingFloor.COSMETIC_SOLID;
+    }
     /** The obelisk above the altar is one base block plus four shaft blocks. */
     public static final int OBELISK_SHAFT = 4;
     /** The altar spawner variant: 4 of 10 rolls are the type 0 altar, 2 of 10 the type 1 altar. */

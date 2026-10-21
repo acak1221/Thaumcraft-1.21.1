@@ -306,6 +306,17 @@ class VillageWorldGenRulesTest {
         assertEquals(40, StructurePlacementRules.HILLTOP_STONES_CHANCE);
     }
 
+    @Test void theHilltopStonesOfTheOriginalAreDeadCode() {
+        // Oracle ThaumcraftWorldGenerator:424-425 only draws a surface structure when the
+        // surface of the chunk is below the sea level plus nine, oracle
+        // WorldGenHilltopStones:36 refuses a cluster whose base is below eighty five.
+        // The two rules never meet, so the original never grows a hilltop cluster. The
+        // port keeps both rules, so it never grows one either.
+        assertEquals(85, VillageWorldGenRules.HILLTOP_STONE_MIN_Y);
+        assertTrue(VillageWorldGenRules.HILLTOP_STONE_MIN_Y > 63 + 9,
+                "the rules of the original hilltop stones can never meet");
+    }
+
     @Test void theVillageComponentsAreReachable() {
         // The banker home and the wizard tower are placed in the chunks the village
         // plan gives them, so both types have to show up in the plan.
@@ -324,6 +335,59 @@ class VillageWorldGenRulesTest {
         assertTrue(wizards > 0, "the wizard tower must be reachable");
     }
 
+    @Test void everyHouseSlotStaysInsideItsOwnVillageCell() {
+        // The anchor of a village keeps the house slot radius from the border of the
+        // village cell. A slot outside the cell would ask the plan of the neighbouring
+        // cell, that plan has another anchor, and the house would never be built.
+        assertEquals(2, VillageWorldGenRules.HOUSE_SLOT_RADIUS);
+        for (long mixed = 0; mixed < 4096; ++mixed) {
+            int offset = VillageWorldGenRules.anchorOffset(mixed);
+            assertTrue(offset >= VillageWorldGenRules.HOUSE_SLOT_RADIUS,
+                    "the anchor keeps the slot radius from the cell border: " + offset);
+            assertTrue(offset <= VillageWorldGenRules.VILLAGE_CELL_CHUNKS - 1 - VillageWorldGenRules.HOUSE_SLOT_RADIUS,
+                    "the anchor keeps the slot radius from the cell border: " + offset);
+        }
+        for (long seed = 0; seed < 64; ++seed) {
+            for (int cellX = -2; cellX <= 2; ++cellX) {
+                for (int cellZ = -2; cellZ <= 2; ++cellZ) {
+                    VillageWorldGenRules.VillagePlan plan = VillageWorldGenRules.villagePlan(seed, cellX * 32, cellZ * 32);
+                    int cell = VillageWorldGenRules.villageCell(plan.anchorChunkX());
+                    assertEquals(cellX, cell, "the anchor of the village stays in its own cell");
+                    assertEquals(cellZ, VillageWorldGenRules.villageCell(plan.anchorChunkZ()),
+                            "the anchor of the village stays in its own cell");
+                }
+            }
+        }
+    }
+
+    @Test void noHouseOfAVillageIsLostAtTheCellBorder() {
+        // Every slot of every village of a cell has to be reachable from the chunk
+        // that asks for the plan of that cell.
+        int lost = 0;
+        int houses = 0;
+        for (long seed = 0; seed < 32; ++seed) {
+            for (int cellX = 0; cellX < 4; ++cellX) {
+                for (int cellZ = 0; cellZ < 4; ++cellZ) {
+                    VillageWorldGenRules.VillagePlan plan = VillageWorldGenRules.villagePlan(seed, cellX * 32, cellZ * 32);
+                    for (int house = 0; house < plan.houses().size(); ++house) {
+                        ++houses;
+                        int chunkX = plan.anchorChunkX() + VillageWorldGenRules.houseChunkOffsetX(house);
+                        int chunkZ = plan.anchorChunkZ() + VillageWorldGenRules.houseChunkOffsetZ(house);
+                        VillageWorldGenRules.VillagePlan own = VillageWorldGenRules.villagePlan(seed, chunkX, chunkZ);
+                        if (own.anchorChunkX() != plan.anchorChunkX() || own.anchorChunkZ() != plan.anchorChunkZ()) {
+                            ++lost;
+                            continue;
+                        }
+                        assertEquals(house, VillageWorldGenRules.houseIndex(own, chunkX, chunkZ),
+                                "the slot of the village is reachable from its own chunk");
+                    }
+                }
+            }
+        }
+        assertTrue(houses > 0, "the sample holds houses");
+        assertEquals(0, lost, "no house of a village is lost at the border of its cell");
+    }
+
     // ------------------------------------------------------------------ trades
 
     @Test void theBankerKeepsTheOriginalTwelveTrades() {
@@ -334,6 +398,12 @@ class VillageWorldGenRulesTest {
         assertEquals(20, first.payMin());
         assertEquals(22, first.payMax());
         assertEquals("minecraft:emerald", first.receiveItems().get(0));
+        // Oracle VillageBankerManager:47 - seven plus nextInt two, so seven to eight.
+        VillageWorldGenRules.TradeSpec book = trades.get(4);
+        assertEquals("thaumcraft:gold_coin", book.payItem());
+        assertEquals(7, book.payMin());
+        assertEquals(8, book.payMax());
+        assertEquals("minecraft:book", book.receiveItems().get(0));
     }
 
     @Test void theWizardKeepsTheOriginalFifteenTrades() {
@@ -344,6 +414,18 @@ class VillageWorldGenRulesTest {
         assertEquals(6, shards.receiveItems().size());
         assertEquals(2, shards.receiveMin());
         assertEquals(3, shards.receiveMax());
+        // Oracle VillageWizardManager:39 - the resource metadata three, the quicksilver.
+        VillageWorldGenRules.TradeSpec quicksilver = trades.get(2);
+        assertEquals("thaumcraft:quick_silver", quicksilver.payItem());
+        assertEquals(4, quicksilver.payMin());
+        assertEquals(6, quicksilver.payMax());
+        assertEquals("minecraft:emerald", quicksilver.receiveItems().get(0));
+        // Oracle VillageWizardManager:41 - the resource metadata six, the amber.
+        VillageWorldGenRules.TradeSpec amber = trades.get(4);
+        assertEquals("thaumcraft:amber_gem", amber.payItem());
+        assertEquals(4, amber.payMin());
+        assertEquals(6, amber.payMax());
+        assertEquals("minecraft:emerald", amber.receiveItems().get(0));
     }
 
     // ------------------------------------------------------------------ chunk locator

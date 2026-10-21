@@ -74,7 +74,11 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
         for (int[] offset : VillageWorldGenRules.HILLTOP_SAMPLE_OFFSETS) {
             if (!locationIsValidSpawn(level, x + offset[0], base, z + offset[1])) return false;
         }
-        return build(level, random, x, base, z);
+        boolean built = build(level, random, x, base, z);
+        // Oracle ThaumcraftWorldGenerator:452 - the cluster carries a dark aura node
+        // above its chest, five blocks above the base of the cluster.
+        NodeGeneration.createRandomNodeAt(level, new BlockPos(x, base + 5, z), random, false, true, false);
+        return built;
     }
 
     /**
@@ -194,10 +198,15 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
         return biome.hasPrecipitation() && biome.getBaseTemperature() < 0.15F;
     }
 
-    /** Oracle WorldGenHilltopStones:81 - the blocks the ground block replaces. */
+    /**
+     * Oracle WorldGenHilltopStones:81 - the blocks the ground block replaces.
+     *
+     * <p>The original backfills the snow layer, the red and the yellow flower, the
+     * tall grass and the air below the cluster. The fern and the dead bush are not
+     * part of that list, so they stay where they are.
+     */
     private static boolean replaceable(BlockState state) {
-        return state.isAir() || state.is(Blocks.SNOW) || state.is(Blocks.SHORT_GRASS) || state.is(Blocks.FERN)
-                || state.is(Blocks.DEAD_BUSH) || state.is(BlockTags.FLOWERS);
+        return state.isAir() || state.is(Blocks.SNOW) || state.is(Blocks.SHORT_GRASS) || state.is(BlockTags.FLOWERS);
     }
 
     private static boolean isAir(WorldGenLevel level, int x, int y, int z) {

@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#thaumcraft:surface_structure_biomes",
+  "features": "thaumcraft:aura_totem",
+  "step": "top_layer_modification"
+}

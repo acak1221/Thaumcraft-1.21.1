@@ -74,6 +74,9 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         OuterLandsProvider.MazeSavedData maze = OuterLandsProvider.maze(server);
         if (maze.mazesInRange(chunkX, chunkZ, width, height)) return false;
         buildRing(level, random, centreX, j, centreZ);
+        // Oracle ThaumcraftWorldGenerator:446 - the ring carries a dark aura node
+        // above its altar, two blocks above the base of the ring.
+        NodeGeneration.createRandomNodeAt(level, new BlockPos(centreX, j + 2, centreZ), random, false, true, false);
         // Oracle ThaumcraftWorldGenerator:447 - the ring seeds the labyrinth of the Outer Lands.
         long seed = random.nextLong();
         MazeGenerator generator = new MazeGenerator(width, height, seed);
@@ -140,8 +143,8 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
     /**
      * The floor and the cleared air above one ring column (oracle WorldGenEldritchRing:72-83).
      *
-     * <p>The original fills the five layers at and below the ring base, one in four with obsidian,
-     * and clears the four layers above it.
+     * <p>The original fills the five layers at and below the ring base, one in four with
+     * obsidian, and clears the four layers above it.
      */
     private static void buildColumn(WorldGenLevel level, RandomSource random, int x, int j, int z) {
         for (int q = 1 - StructurePlacementRules.RING_FLOOR_LAYERS; q <= StructurePlacementRules.RING_CLEARED_LAYERS; ++q) {
@@ -154,9 +157,11 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
             // "does not render as a full block" test.
             boolean clearable = state.canBeReplaced() || !state.isSolidRender(level, pos) || state.is(BlockTags.LEAVES);
             if (floor || clearable) {
-                // The original leaves one in four floor blocks empty.
-                if (random.nextInt(StructurePlacementRules.RING_FLOOR_AIR_CHANCE) == 0) {
-                    if (writable) level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_NONE);
+                // The original places obsidian in the one in four roll and the
+                // cosmetic solid in the other three (oracle WorldGenEldritchRing:75-79).
+                if (StructurePlacementRules.ringFloor(random.nextInt(StructurePlacementRules.RING_OBSIDIAN_CHANCE))
+                        == StructurePlacementRules.RingFloor.OBSIDIAN) {
+                    if (writable) level.setBlock(pos, Blocks.OBSIDIAN.defaultBlockState(), Block.UPDATE_NONE);
                 } else {
                     BlockState solid = ThaumcraftOuterLands.state(DungeonRooms.Kind.COSMETIC_SOLID, 1, -1);
                     if (solid != null && writable) level.setBlock(pos, solid, Block.UPDATE_NEIGHBORS | Block.UPDATE_CLIENTS);

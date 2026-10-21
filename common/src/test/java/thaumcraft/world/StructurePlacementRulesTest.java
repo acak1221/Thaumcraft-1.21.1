@@ -181,10 +181,23 @@ class StructurePlacementRulesTest {
         assertEquals(3, StructurePlacementRules.RING_RADIUS);
         assertEquals(5, StructurePlacementRules.RING_FLOOR_LAYERS);
         assertEquals(4, StructurePlacementRules.RING_CLEARED_LAYERS);
-        assertEquals(4, StructurePlacementRules.RING_FLOOR_AIR_CHANCE);
+        assertEquals(4, StructurePlacementRules.RING_OBSIDIAN_CHANCE);
         assertEquals(4, StructurePlacementRules.OBELISK_SHAFT);
         assertEquals(10, StructurePlacementRules.ALTAR_VARIANT_ROLLS);
         assertEquals(7, StructurePlacementRules.RING_RADIUS * 2 + 1);
+    }
+
+    @Test void theRingFloorKeepsTheOriginalObsidianRoll() {
+        // Oracle WorldGenEldritchRing:75-79 - the one in four roll is the obsidian,
+        // the other three rolls are the cosmetic solid. The port never leaves a hole.
+        assertEquals(StructurePlacementRules.RingFloor.OBSIDIAN, StructurePlacementRules.ringFloor(0));
+        assertEquals(StructurePlacementRules.RingFloor.COSMETIC_SOLID, StructurePlacementRules.ringFloor(1));
+        assertEquals(StructurePlacementRules.RingFloor.COSMETIC_SOLID, StructurePlacementRules.ringFloor(3));
+        int obsidian = 0;
+        for (int roll = 0; roll < StructurePlacementRules.RING_OBSIDIAN_CHANCE; ++roll) {
+            if (StructurePlacementRules.ringFloor(roll) == StructurePlacementRules.RingFloor.OBSIDIAN) ++obsidian;
+        }
+        assertEquals(1, obsidian, "one in four ring floor blocks is the obsidian");
     }
 
     @Test void altarAndBannerVariantsKeepTheOriginalRolls() {

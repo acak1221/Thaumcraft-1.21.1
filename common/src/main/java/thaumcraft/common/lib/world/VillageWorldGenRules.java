@@ -70,6 +70,18 @@ public final class VillageWorldGenRules {
     };
 
     /**
+     * The house slots of a village reach two chunks around its anchor.
+     *
+     * <p>The anchor of a village therefore keeps that distance from the border of
+     * the village cell. Without it a slot that falls outside the cell would never
+     * be built: the chunk outside the cell asks the plan of its own cell, that
+     * plan has another anchor and the slot of the first village is unreachable.
+     * The original 1.7.10 village never loses a house, because the village piece
+     * system hands the pieces of one village to the chunks of that village.
+     */
+    public static final int HOUSE_SLOT_RADIUS = 2;
+
+    /**
      * Oracle VillageBankerManager:59 and VillageWizardManager:56 both build
      * their piece weight with {@code MathHelper.getIntWithMinMax(random, 0 + i, 1 + i)}.
      * That helper is {@code min + random.nextInt(max - min)}, so the range is
@@ -126,13 +138,24 @@ public final class VillageWorldGenRules {
         int cellX = villageCell(chunkX);
         int cellZ = villageCell(chunkZ);
         long seed = villageSeed(worldSeed, cellX, cellZ);
-        int anchorX = cellX * VILLAGE_CELL_CHUNKS
-                + (int) Long.remainderUnsigned(mix64(seed), VILLAGE_CELL_CHUNKS);
-        int anchorZ = cellZ * VILLAGE_CELL_CHUNKS
-                + (int) Long.remainderUnsigned(mix64(seed ^ 0x9E3779B97F4A7C15L), VILLAGE_CELL_CHUNKS);
+        int anchorX = cellX * VILLAGE_CELL_CHUNKS + anchorOffset(mix64(seed));
+        int anchorZ = cellZ * VILLAGE_CELL_CHUNKS + anchorOffset(mix64(seed ^ 0x9E3779B97F4A7C15L));
         Random random = new Random(mix64(seed ^ 0xD1B54A32D192ED03L));
         int size = villageSize(random.nextInt());
         return new VillagePlan(anchorX, anchorZ, size, villageHouses(size, random));
+    }
+
+    /**
+     * The chunk of the village cell the anchor of the village sits in.
+     *
+     * <p>The offset is clamped so that every house slot of the village stays inside
+     * its own village cell. A slot outside the cell would belong to the plan of the
+     * neighbouring cell, that plan has another anchor, and the house of the first
+     * village would never be built.
+     */
+    public static int anchorOffset(long mixed) {
+        int offset = (int) Long.remainderUnsigned(mixed, VILLAGE_CELL_CHUNKS);
+        return Math.min(Math.max(offset, HOUSE_SLOT_RADIUS), VILLAGE_CELL_CHUNKS - 1 - HOUSE_SLOT_RADIUS);
     }
 
     /** The house slot that owns the chunk, or -1 when the chunk holds no house. */
@@ -144,6 +167,16 @@ public final class VillageWorldGenRules {
             if (HOUSE_CHUNK_OFFSETS[i][0] == dx && HOUSE_CHUNK_OFFSETS[i][1] == dz) return i;
         }
         return -1;
+    }
+
+    /** The chunk offset of a house slot on the x axis. */
+    public static int houseChunkOffsetX(int house) {
+        return HOUSE_CHUNK_OFFSETS[house][0];
+    }
+
+    /** The chunk offset of a house slot on the z axis. */
+    public static int houseChunkOffsetZ(int house) {
+        return HOUSE_CHUNK_OFFSETS[house][1];
     }
 
     /**
@@ -590,7 +623,8 @@ public final class VillageWorldGenRules {
         trades.add(new TradeSpec("thaumcraft:gold_coin", 2, 3, List.of("minecraft:arrow"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 6, 8, List.of("minecraft:white_wool"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 3, 4, List.of("minecraft:paper"), 1, 1));
-        trades.add(new TradeSpec("thaumcraft:gold_coin", 7, 9, List.of("minecraft:book"), 1, 1));
+        // Oracle VillageBankerManager:47 - seven plus nextInt two, so seven to eight coins.
+        trades.add(new TradeSpec("thaumcraft:gold_coin", 7, 8, List.of("minecraft:book"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 16, 20, List.of("minecraft:experience_bottle"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 9, 12, List.of("minecraft:glowstone"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:gold_coin", 2, 3, List.of("minecraft:coal"), 1, 1));
@@ -603,14 +637,19 @@ public final class VillageWorldGenRules {
 
     /**
      * The wizard trades, oracle VillageWizardManager:36-52.
+     *
+     * <p>The third and the fifth trade of the original pay with the resource
+     * metadata three, the quicksilver, and with the resource metadata six, the
+     * amber; the port keeps the two resources apart instead of paying with the
+     * gold coin of the first trade.
      */
     public static List<TradeSpec> wizardTrades() {
         List<TradeSpec> trades = new ArrayList<>(15);
         trades.add(new TradeSpec("thaumcraft:gold_coin", 20, 22, List.of("minecraft:emerald"), 1, 1));
         trades.add(new TradeSpec("minecraft:emerald", 1, 1, List.of("thaumcraft:knowledge_fragment"), 1, 1));
-        trades.add(new TradeSpec("thaumcraft:gold_coin", 4, 6, List.of("minecraft:emerald"), 1, 1));
+        trades.add(new TradeSpec("thaumcraft:quick_silver", 4, 6, List.of("minecraft:emerald"), 1, 1));
         trades.add(new TradeSpec("minecraft:emerald", 1, 1, List.of("thaumcraft:alumentum"), 1, 1));
-        trades.add(new TradeSpec("thaumcraft:gold_coin", 4, 6, List.of("minecraft:emerald"), 1, 1));
+        trades.add(new TradeSpec("thaumcraft:amber_gem", 4, 6, List.of("minecraft:emerald"), 1, 1));
         trades.add(new TradeSpec("minecraft:emerald", 1, 1, List.of("thaumcraft:nitor"), 1, 1));
         trades.add(new TradeSpec("thaumcraft:chicken_nugget", 24, 31, List.of("minecraft:emerald"), 1, 1));
         trades.add(new TradeSpec("minecraft:book", 4, 6, List.of("thaumcraft:knowledge_fragment"), 1, 1));

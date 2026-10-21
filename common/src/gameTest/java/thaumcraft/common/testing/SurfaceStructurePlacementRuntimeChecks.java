@@ -31,15 +31,10 @@ import thaumcraft.common.lib.world.VillageWorldGenRules;
  * fresh normal-noise chunks and observes the structures the original chain selected,
  * without inserting a single block.
  *
- * <p>The two village components are wired the same way, but their feature is not reached
- * by the chunk generation of the game test server; that is an open defect of the village
- * unit and is not asserted here.
+ * <p>The two village components are wired the same way and are checked by
+ * {@link VillageComponentPlacementRuntimeChecks}.
  */
 public final class SurfaceStructurePlacementRuntimeChecks {
-    /** The overworld biomes whose surface the original accepts for the hilltop stones. */
-    private static final java.util.Set<String> STONY_HILLTOPS = java.util.Set.of(
-            "windswept_hills", "windswept_forest", "jagged_peaks", "stony_peaks", "snowy_slopes");
-
     private SurfaceStructurePlacementRuntimeChecks() {}
 
     public static void run(GameTestHelper test) {
@@ -57,7 +52,8 @@ public final class SurfaceStructurePlacementRuntimeChecks {
                 registries.registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS));
         var placed = registries.registryOrThrow(Registries.PLACED_FEATURE);
         for (var feature : List.of(ThaumcraftOuterLands.RING_PLACED, ThaumcraftVillages.HILLTOP_STONES_KEY,
-                ThaumcraftVillages.BANKER_HOMES_KEY, ThaumcraftVillages.WIZARD_TOWERS_KEY, ThaumcraftNodes.NODE_KEY)) {
+                ThaumcraftVillages.BANKER_HOMES_KEY, ThaumcraftVillages.WIZARD_TOWERS_KEY, ThaumcraftNodes.NODE_KEY,
+                ThaumcraftNodes.TOTEM_KEY)) {
             var holder = placed.getHolderOrThrow(feature);
             test.assertTrue(settings.hasFeature(holder.value()),
                     "the overworld biome carries the placed feature " + feature.location());
@@ -75,7 +71,12 @@ public final class SurfaceStructurePlacementRuntimeChecks {
         test.succeed();
     }
 
-    /** The chunk the exclusive chain gives to the eldritch ring carries the ring. */
+    /**
+     * The chunk the exclusive chain gives to the eldritch ring carries the ring.
+     *
+     * <p>Oracle {@code ThaumcraftWorldGenerator:446} also hangs a dark aura node
+     * above the altar of the ring, two blocks above the base of the ring.
+     */
     private static void eldritchRing(GameTestHelper test, ServerLevel level, long seed) {
         Block eldritch = ThaumcraftOuterLands.eldritch();
         test.assertTrue(eldritch != null, "the eldritch block of the ring is registered");
@@ -85,59 +86,65 @@ public final class SurfaceStructurePlacementRuntimeChecks {
             level.getChunk(candidate[0], candidate[1]);
             if (contains(level, candidate[0], candidate[1], eldritch)) {
                 test.assertTrue(true, "the chunk the chain gave to the eldritch ring carries the ring");
+                test.assertTrue(ringHasItsAuraNode(level, candidate[0], candidate[1]),
+                        "the ring carries the dark aura node of the original above its altar");
                 return;
             }
         }
         test.assertTrue(false, "no chunk the chain gave to the eldritch ring carries the ring");
     }
 
-    /** The chunk the exclusive chain gives to the hilltop stones carries the cluster. */
+    /**
+     * The dark aura node of the original above the altar of the ring, two blocks
+     * above the base of the ring (oracle ThaumcraftWorldGenerator:446).
+     *
+     * <p>The column is scanned instead of a fixed height: the ring itself raises
+     * the height map of its column, so the height after the generation is not the
+     * height of the terrain the ring grew on.
+     */
+    private static boolean ringHasItsAuraNode(ServerLevel level, int chunkX, int chunkZ) {
+        var random = RandomSource.create(StructurePlacementRules.chunkSeed(level.getSeed(), chunkX, chunkZ));
+        var draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        int centreX = inside(draw.x(), chunkX);
+        int centreZ = inside(draw.z(), chunkZ);
+        return columnHasAuraNode(level, centreX, centreZ);
+    }
+
+    /** Whether the column of a surface structure carries the aura node of the original. */
+    private static boolean columnHasAuraNode(ServerLevel level, int x, int z) {
+        Block node = thaumcraft.common.config.ThaumcraftContent.AURA_NODE.get();
+        for (int y = level.getMinBuildHeight(); y < level.getMaxBuildHeight(); ++y) {
+            if (level.getBlockState(new BlockPos(x, y, z)).is(node)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * The hilltop stones of the original are dead code.
+     *
+     * <p>Oracle {@code ThaumcraftWorldGenerator:424-425} only draws a surface
+     * structure when the surface of the chunk is below the sea level plus nine,
+     * while {@code WorldGenHilltopStones:36} refuses a cluster whose base is below
+     * eighty five. The two rules never meet, so the original never grows a cluster.
+     * The port keeps both rules, so it does not grow one either; the check therefore
+     * asserts the chain and the dead rule instead of a cluster.
+     */
     private static void hilltopStones(GameTestHelper test, ServerLevel level, long seed) {
-        var generator = level.getChunkSource().getGenerator();
-        var randomState = level.getChunkSource().randomState();
-        var sampler = randomState.sampler();
-        // The original refuses the cluster below y 85 and only on stone, grass or
-        // dirt, so a stony hilltop region is needed.
-        int regionX = 0;
-        int regionZ = 0;
-        boolean found = false;
-        for (int x = 4096; x <= 12288 && !found; x += 32) {
-            for (int z = 4096; z <= 12288 && !found; z += 32) {
-                if (generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, randomState) < 100) continue;
-                String biome = generator.getBiomeSource().getNoiseBiome(x, 100, z, sampler)
-                        .unwrapKey().map(k -> k.location().getPath()).orElse("");
-                if (!STONY_HILLTOPS.contains(biome)) continue;
-                regionX = x;
-                regionZ = z;
-                found = true;
-            }
-        }
-        test.assertTrue(found, "a native stony hilltop region of the overworld noise exists");
-        int baseChunkX = regionX >> 4;
-        int baseChunkZ = regionZ >> 4;
-        List<int[]> candidates = new ArrayList<>();
-        for (int cx = baseChunkX - 24; cx <= baseChunkX + 24 && candidates.size() < 40; cx++) {
-            for (int cz = baseChunkZ - 24; cz <= baseChunkZ + 24 && candidates.size() < 40; cz++) {
-                var random = RandomSource.create(StructurePlacementRules.chunkSeed(seed, cx, cz));
-                var draw = StructurePlacementRules.draw(random, cx, cz);
-                if (draw.kind() != StructurePlacementRules.Kind.HILLTOP_STONES) continue;
-                // The original refuses the cluster below y 85.
-                int centreX = inside(draw.x(), cx);
-                int centreZ = inside(draw.z(), cz);
-                int base = generator.getBaseHeight(centreX, centreZ, Heightmap.Types.WORLD_SURFACE_WG, level, randomState);
-                if (base < 95) continue;
-                candidates.add(new int[] {cx, cz});
-            }
-        }
-        test.assertTrue(!candidates.isEmpty(), "the exclusive chain gives a hilltop chunk to the hilltop stones");
+        List<int[]> candidates = chainChunks(seed, StructurePlacementRules.Kind.HILLTOP_STONES, 8);
+        test.assertTrue(!candidates.isEmpty(), "the exclusive chain gives chunks to the hilltop stones");
+        test.assertTrue(VillageWorldGenRules.HILLTOP_STONE_MIN_Y > level.getSeaLevel() + 9,
+                "the original rules of the hilltop stones can never meet: the cluster needs a base of "
+                        + VillageWorldGenRules.HILLTOP_STONE_MIN_Y + " and the world generator only draws a structure below "
+                        + (level.getSeaLevel() + 9));
+        boolean cluster = false;
         for (int[] candidate : candidates) {
             level.getChunk(candidate[0], candidate[1]);
             if (wispSpawner(level, candidate[0], candidate[1])) {
-                test.assertTrue(true, "the chunk the chain gave to the hilltop stones carries the cluster");
-                return;
+                cluster = true;
+                break;
             }
         }
-        test.assertTrue(false, "no chunk the chain gave to the hilltop stones carries the cluster");
+        test.assertTrue(!cluster, "no hilltop cluster grows, the rules of the original are dead code");
     }
 
     /** The centre of the cluster inside its chunk, the native rule of the feature. */

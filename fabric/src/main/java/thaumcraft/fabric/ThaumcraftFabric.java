@@ -154,5 +154,8 @@ public final class ThaumcraftFabric implements ModInitializer {
                 GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.BANKER_HOMES_KEY);
         BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
                 GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.WIZARD_TOWERS_KEY);
+        // The aura totem of the original world generator, one chunk in 360.
+        BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
+                GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftNodes.TOTEM_KEY);
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.config.ThaumcraftSettings;
 import thaumcraft.common.lib.world.EldritchBlockRules;
@@ -32,17 +33,60 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock {
             propertiesCodec()).apply(instance, BlockCosmeticOpaque::new));
     /** Original BlockCosmeticOpaque metadata 0..2. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
+
+    /**
+     * The variant property of every group of the original metadata.
+     *
+     * <p>Minecraft 1.21.1 binds the state space of a block to its property, so every group of the
+     * original metadata became a block of its own and carries only the states of that group. The
+     * property of a group has therefore the range of that group, and it is chosen before the block
+     * is built, because Minecraft builds the state definition inside the block constructor.
+     */
+    private static final java.util.Map<Integer, Property<Integer>> GROUP_PROPERTIES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static Property<Integer> groupProperty(int group) {
+        return GROUP_PROPERTIES.computeIfAbsent(group, key -> {
+            java.util.List<Integer> variants = EldritchBlockRules.cosmeticOpaqueGroupVariants(key);
+            // A group with a single metadata value has exactly one state, so it needs no property.
+            if (variants.size() < 2) return null;
+            return IntegerProperty.create("variant", variants.get(0), variants.get(variants.size() - 1));
+        });
+    }
+
+    /** The block of one group of the original metadata. */
+    public static BlockCosmeticOpaque group(int group, Properties properties) {
+        return new BlockCosmeticOpaque(group, pendingProperty(group), properties);
+    }
     /** The amber block and the amber brick. */
     public static final int GROUP_AMBER = 0;
     /** The warded glass, the original metadata two. */
     public static final int GROUP_WARDED = 1;
 
+    private final Property<Integer> variantProperty;
     private final int group;
 
     public BlockCosmeticOpaque(int group, Properties properties) {
+        this(group, pendingProperty(group), properties);
+    }
+
+    /**
+     * The property of the group, handed over before the block is built: Minecraft builds the state
+     * definition of a block inside the block constructor, before the fields of the block exist.
+     */
+    private static Property<Integer> pendingProperty(int group) {
+        Property<Integer> property = groupProperty(group);
+        if (property == null) thaumcraft.common.lib.world.FamilyVariant.pending().remove();
+        else thaumcraft.common.lib.world.FamilyVariant.pending().set(property);
+        return property;
+    }
+
+    private BlockCosmeticOpaque(int group, Property<Integer> property, Properties properties) {
         super(properties);
+        thaumcraft.common.lib.world.FamilyVariant.pending().remove();
+        this.variantProperty = property;
         this.group = group;
-        registerDefaultState(stateDefinition.any().setValue(VARIANT,
+        registerDefaultState(property == null ? stateDefinition.any()
+                : stateDefinition.any().setValue(property,
                 group == GROUP_WARDED ? EldritchBlockRules.COSMETIC_OPAQUE_OWNED : 0));
     }
 
@@ -53,13 +97,41 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock {
     public boolean wardedGlass() { return group == GROUP_WARDED; }
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        Property<?> pending = thaumcraft.common.lib.world.FamilyVariant.pending().get();
+        if (pending != null) builder.add(pending);
+    }
 
-    public static int variant(BlockState state) { return state.getValue(VARIANT); }
+    public static int variant(BlockState state) {
+        Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
+        if (property != null) return (Integer) state.getValue(property);
+        // A group with a single metadata value carries no property: the value is the one of the group.
+        if (state.getBlock() instanceof BlockCosmeticOpaque block) {
+            java.util.List<Integer> variants = block.variants();
+            if (variants != null && !variants.isEmpty()) return variants.getFirst();
+        }
+        return 0;
+    }
+
+    /**
+     * The original metadata value of the state of a group, read without the block itself: the
+     * light of the block is asked while the block is still built.
+     */
+    public java.util.List<Integer> variants() { return EldritchBlockRules.cosmeticOpaqueGroupVariants(group()); }
+
+    public static int variantOf(BlockState state, int group) {
+        Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
+        if (property != null) return (Integer) state.getValue(property);
+        java.util.List<Integer> variants = EldritchBlockRules.cosmeticOpaqueGroupVariants(group);
+        return variants.isEmpty() ? 0 : variants.getFirst();
+    }
+
+    /** The variant property of the block, or null when the group has a single metadata value. */
+    public Property<Integer> variantProperty() { return variantProperty; }
 
     /** BlockCosmeticOpaque - the amber block and brick let some light through. */
     @Override protected int getLightBlock(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-        return state.getValue(VARIANT) <= 1 ? 3 : 0;
+        return variant(state) <= 1 ? 3 : 0;
     }
 
     /**
@@ -77,7 +149,7 @@ public final class BlockCosmeticOpaque extends BaseEntityBlock {
 
     /** BlockCosmeticOpaque:216 - only the warded glass carries the owned block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        if (!EldritchBlockRules.cosmeticOpaqueHasTile(state.getValue(VARIANT))) return null;
+        if (!EldritchBlockRules.cosmeticOpaqueHasTile(variant(state))) return null;
         // The warded glass is the metadata two of this block, so the block owns the owned tile.
         return new TileOwned(ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state);
     }

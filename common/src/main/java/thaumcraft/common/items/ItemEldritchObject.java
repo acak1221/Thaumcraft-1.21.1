@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import thaumcraft.common.blocks.BlockEldritch;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.items.EquipmentRules;
+import thaumcraft.common.lib.world.FamilyVariant;
 
 import java.util.List;
 
@@ -88,8 +89,8 @@ public final class ItemEldritchObject extends Item {
         Block eldritch = ThaumcraftEldritchBlocks.ELDRITCH.get();
         for (int height = 1; height <= 7; height++) {
             if (height == 2) continue;
-            level.setBlock(pos.offset(0, height, 0), eldritch.defaultBlockState()
-                    .setValue(BlockEldritch.VARIANT, EquipmentRules.eldritchPlacerVariant(height)), Block.UPDATE_ALL);
+            level.setBlock(pos.offset(0, height, 0),
+                    FamilyVariant.with(eldritch.defaultBlockState(), EquipmentRules.eldritchPlacerVariant(height)), Block.UPDATE_ALL);
         }
         return InteractionResult.SUCCESS;
     }

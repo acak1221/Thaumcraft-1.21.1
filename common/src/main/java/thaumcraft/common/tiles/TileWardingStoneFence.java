@@ -37,7 +37,7 @@ public final class TileWardingStoneFence extends BlockEntity {
     private static boolean isWardingStone(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         return state.getBlock() == ThaumcraftEldritchBlocks.COSMETIC_SOLID.get()
-                && state.getValue(thaumcraft.common.blocks.BlockCosmeticSolid.VARIANT) == EldritchBlockRules.COSMETIC_WARDING_STONE;
+                && thaumcraft.common.blocks.BlockCosmeticSolid.variant(state) == EldritchBlockRules.COSMETIC_WARDING_STONE;
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {

@@ -128,6 +128,8 @@ public final class Hover {
         if(tag.contains("abilities",10)) {CompoundTag abilities=tag.getCompound("abilities");abilities.putBoolean("mayfly",grant.mayFly());abilities.putBoolean("flying",grant.flying());}
     }
     public static void forget(Player player) {
+        // The client disconnect event carries no player, so there is nothing to release then.
+        if(player==null)return;
         State state=STATES.remove(player);if(state!=null&&player instanceof ServerPlayer server)release(server,state,false);
         TravellerBoots.restoreStep(player);if(player.level().isClientSide)effects.forget(player);
     }

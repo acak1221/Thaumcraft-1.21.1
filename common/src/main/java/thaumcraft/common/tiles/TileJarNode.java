@@ -129,8 +129,7 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
         BlockPos pos = new BlockPos(x, y, z);
         if (!level.isClientSide) {
             drop = false;
-            level.setBlock(pos, ThaumcraftEldritchBlocks.AIRY.get().defaultBlockState()
-                    .setValue(thaumcraft.common.blocks.BlockAiry.VARIANT, 0), 3);
+            level.setBlock(pos, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.AIRY.get().defaultBlockState(), 0), 3);
             if (level.getBlockEntity(pos) instanceof TileNode node) {
                 node.restoreFromJar(getAspects(), getNodeType(), getNodeModifier(), getId());
                 level.sendBlockUpdated(pos, level.getBlockState(pos), level.getBlockState(pos), 3);

@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.lib.world.FamilyVariant;
 
 /**
  * Original BlockCosmeticStairs with the eldritch reference: the eldritch tile
@@ -16,8 +17,8 @@ public final class BlockStairsEldritch extends StairBlock {
     public static final MapCodec<BlockStairsEldritch> CODEC = simpleCodec(BlockStairsEldritch::new);
 
     public BlockStairsEldritch(Properties properties) {
-        super(ThaumcraftEldritchBlocks.COSMETIC_SOLID.get().defaultBlockState()
-                .setValue(BlockCosmeticSolid.VARIANT, EldritchBlockRules.COSMETIC_ELDRITCH_TILE), properties);
+        super(FamilyVariant.with(ThaumcraftEldritchBlocks.COSMETIC_SOLID.get().defaultBlockState(),
+                EldritchBlockRules.COSMETIC_ELDRITCH_TILE), properties);
     }
 
     @Override public MapCodec<? extends StairBlock> codec() { return CODEC; }

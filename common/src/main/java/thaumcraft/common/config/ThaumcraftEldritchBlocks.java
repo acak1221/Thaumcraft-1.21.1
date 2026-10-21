@@ -106,22 +106,22 @@ public final class ThaumcraftEldritchBlocks {
 
     /** The eldritch altar, obelisk, obelisk middle and capstone. */
     public static final RegistrySupplier<BlockEldritch> ELDRITCH = BLOCKS.register("eldritch",
-            () -> new BlockEldritch(0, eldritchProperties(0)));
+            () -> BlockEldritch.group(0, eldritchProperties(0)));
     /** The glowing crust and the glyphed eldritch stone. */
     public static final RegistrySupplier<BlockEldritch> ELDRITCH_CRUST = BLOCKS.register("eldritch_crust",
-            () -> new BlockEldritch(1, eldritchProperties(1)));
+            () -> BlockEldritch.group(1, eldritchProperties(1)));
     /** The decorated eldritch stone. */
     public static final RegistrySupplier<BlockEldritch> ELDRITCH_DECO = BLOCKS.register("eldritch_deco",
-            () -> new BlockEldritch(2, eldritchProperties(2)));
+            () -> BlockEldritch.group(2, eldritchProperties(2)));
     /** The eldritch doorway and the eldritch lock. */
     public static final RegistrySupplier<BlockEldritch> ELDRITCH_DOORWAY = BLOCKS.register("eldritch_doorway",
-            () -> new BlockEldritch(3, eldritchProperties(3)));
+            () -> BlockEldritch.group(3, eldritchProperties(3)));
     /** The eldritch crab spawner and the runed eldritch trap. */
     public static final RegistrySupplier<BlockEldritch> ELDRITCH_SPAWNER = BLOCKS.register("eldritch_spawner",
-            () -> new BlockEldritch(4, eldritchProperties(4)));
+            () -> BlockEldritch.group(4, eldritchProperties(4)));
     /** The eldritch crystal. */
     public static final RegistrySupplier<BlockEldritch> ELDRITCH_CRYSTAL = BLOCKS.register("eldritch_crystal",
-            () -> new BlockEldritch(5, eldritchProperties(5)));
+            () -> BlockEldritch.group(5, eldritchProperties(5)));
 
     public static final RegistrySupplier<BlockEldritchNothing> ELDRITCH_NOTHING = BLOCKS.register("eldritch_nothing",
             () -> new BlockEldritchNothing(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
@@ -143,16 +143,16 @@ public final class ThaumcraftEldritchBlocks {
      * and 15; the metadata is the {@code variant} block state.
      */
     public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID = BLOCKS.register("cosmetic_solid",
-            () -> new BlockCosmeticSolid(0, cosmeticProperties(0)));
+            () -> BlockCosmeticSolid.group(0, cosmeticProperties(0)));
     /** The obsidian totem, the obsidian tile and the charged obsidian totem: the metadata 0, 1 and 8. */
     public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID_TOUGH = BLOCKS.register("cosmetic_solid_tough",
-            () -> new BlockCosmeticSolid(1, cosmeticProperties(1)));
+            () -> BlockCosmeticSolid.group(1, cosmeticProperties(1)));
     /** The thaumium block, the pedestal top and the arcane stone: the metadata 4, 6 and 7. */
     public static final RegistrySupplier<BlockCosmeticSolid> COSMETIC_SOLID_THAUMIUM = BLOCKS.register("cosmetic_solid_thaumium",
-            () -> new BlockCosmeticSolid(2, cosmeticProperties(2)));
+            () -> BlockCosmeticSolid.group(2, cosmeticProperties(2)));
 
     public static final RegistrySupplier<BlockCosmeticOpaque> COSMETIC_OPAQUE = BLOCKS.register("cosmetic_opaque",
-            () -> new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_AMBER, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+            () -> BlockCosmeticOpaque.group(BlockCosmeticOpaque.GROUP_AMBER, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
                     .strength(EldritchBlockRules.COSMETIC_OPAQUE_HARDNESS, EldritchBlockRules.COSMETIC_OPAQUE_RESISTANCE)
                     .sound(SoundType.STONE)));
     /**
@@ -160,7 +160,7 @@ public final class ThaumcraftEldritchBlocks {
      * unbreakable while the warded stone option is on and it resists every explosion.
      */
     public static final RegistrySupplier<BlockCosmeticOpaque> COSMETIC_OPAQUE_WARDED = BLOCKS.register("cosmetic_opaque_warded",
-            () -> new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_WARDED, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+            () -> BlockCosmeticOpaque.group(BlockCosmeticOpaque.GROUP_WARDED, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
                     .strength(EldritchBlockRules.COSMETIC_OPAQUE_WARDED_HARDNESS, EldritchBlockRules.COSMETIC_OPAQUE_WARDED_RESISTANCE)
                     .sound(SoundType.STONE)));
 
@@ -251,16 +251,16 @@ public final class ThaumcraftEldritchBlocks {
 
     /** The ordinary airy blocks. */
     public static final RegistrySupplier<BlockAiry> AIRY = BLOCKS.register("airy",
-            () -> new BlockAiry(0, airyProperties(0)));
+            () -> BlockAiry.group(0, airyProperties(0)));
     /** The node and the energised node. */
     public static final RegistrySupplier<BlockAiry> AIRY_NODE = BLOCKS.register("airy_node",
-            () -> new BlockAiry(1, airyProperties(1)));
+            () -> BlockAiry.group(1, airyProperties(1)));
     /** The magic and the void hole. */
     public static final RegistrySupplier<BlockAiry> AIRY_HOLE = BLOCKS.register("airy_hole",
-            () -> new BlockAiry(2, airyProperties(2)));
+            () -> BlockAiry.group(2, airyProperties(2)));
     /** The unbreakable airy block. */
     public static final RegistrySupplier<BlockAiry> AIRY_UNBREAKABLE = BLOCKS.register("airy_unbreakable",
-            () -> new BlockAiry(3, airyProperties(3)));
+            () -> BlockAiry.group(3, airyProperties(3)));
 
     public static final RegistrySupplier<JarBlock> JAR_BRAIN = BLOCKS.register("jar_brain",
             // Original BlockJar:87-90 - the jar block sets hardness 0.3, no blast resistance and
@@ -290,21 +290,21 @@ public final class ThaumcraftEldritchBlocks {
         return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
                 .strength(EldritchBlockRules.eldritchGroupHardness(group), EldritchBlockRules.eldritchGroupResistance(group))
                 .sound(SoundType.STONE).noOcclusion()
-                .lightLevel(state -> EldritchBlockRules.eldritchLight(state.getValue(BlockEldritch.VARIANT)));
+                .lightLevel(state -> EldritchBlockRules.eldritchLight(BlockEldritch.variantOf(state, group)));
     }
 
     private static BlockBehaviour.Properties cosmeticProperties(int group) {
         return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
                 .strength(EldritchBlockRules.cosmeticGroupHardness(group), EldritchBlockRules.cosmeticGroupResistance(group))
                 .sound(SoundType.STONE).noOcclusion()
-                .lightLevel(state -> EldritchBlockRules.cosmeticLight(state.getValue(BlockCosmeticSolid.VARIANT)));
+                .lightLevel(state -> EldritchBlockRules.cosmeticLight(BlockCosmeticSolid.variantOf(state, group)));
     }
 
     private static BlockBehaviour.Properties airyProperties(int group) {
         return BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
                 .strength(EldritchBlockRules.airyGroupHardness(group), EldritchBlockRules.airyGroupResistance(group))
                 .sound(SoundType.WOOL).noOcclusion().noCollission()
-                .lightLevel(state -> EldritchBlockRules.airyLight(state.getValue(BlockAiry.VARIANT)));
+                .lightLevel(state -> EldritchBlockRules.airyLight(BlockAiry.variantOf(state, group)));
     }
 
     // ------------------------------------------------------------------- items
@@ -457,7 +457,7 @@ public final class ThaumcraftEldritchBlocks {
 
     /** The eldritch stairs of the original: the cosmetic stairs over the cosmetic solid metadata 11. */
     public static final RegistrySupplier<BlockCosmeticStairs> STAIRS_ELDRITCH = BLOCKS.register("eldritch_stairs",
-            () -> new BlockCosmeticStairs(COSMETIC_SOLID.get().defaultBlockState().setValue(BlockCosmeticSolid.VARIANT, 11),
+            () -> new BlockCosmeticStairs(thaumcraft.common.lib.world.FamilyVariant.with(COSMETIC_SOLID.get().defaultBlockState(), 11),
                     BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
                             // The 1.7.10 BlockStairs copies the hardness and the blast resistance of
                             // the block it copies the texture of: the cosmetic solid family, the

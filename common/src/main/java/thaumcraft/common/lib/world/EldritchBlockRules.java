@@ -318,6 +318,16 @@ public final class EldritchBlockRules {
         return variants;
     }
 
+    /**
+     * The metadata values of a group of the cosmetic opaque family: the amber block and the amber
+     * brick are the metadata zero and one, the warded glass is the metadata two.
+     */
+    public static java.util.List<Integer> cosmeticOpaqueGroupVariants(int group) {
+        if (group == 0) return java.util.List.of(0, 1);
+        if (group == 1) return java.util.List.of(COSMETIC_OPAQUE_OWNED);
+        return java.util.List.of();
+    }
+
     // ------------------------------------------------------------- cosmetic slabs
 
     /**

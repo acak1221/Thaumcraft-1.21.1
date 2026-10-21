@@ -546,7 +546,7 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         // Oracle BlockCosmeticSolid:288-296 - the metadata eight of the cosmetic solid is
         // the host of the node of the totem of the original.
         return state.is(thaumcraft.common.config.ThaumcraftEldritchBlocks.COSMETIC_SOLID_TOUGH.get())
-                && state.getValue(thaumcraft.common.blocks.BlockCosmeticSolid.VARIANT)
+                && thaumcraft.common.blocks.BlockCosmeticSolid.variant(state)
                         == thaumcraft.common.lib.world.EldritchBlockRules.COSMETIC_OBSIDIAN_TILE_SHADED;
     }
 

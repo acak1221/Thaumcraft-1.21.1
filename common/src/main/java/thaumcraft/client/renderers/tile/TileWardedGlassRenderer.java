@@ -98,7 +98,7 @@ public final class TileWardedGlassRenderer implements BlockEntityRenderer<TileOw
         if (!level.hasChunkAt(pos)) return false;
         var state = level.getBlockState(pos);
         return state.getBlock() == ThaumcraftEldritchBlocks.COSMETIC_OPAQUE_WARDED.get()
-                && state.getValue(BlockCosmeticOpaque.VARIANT) == EldritchBlockRules.COSMETIC_OPAQUE_OWNED;
+                && BlockCosmeticOpaque.variant(state) == EldritchBlockRules.COSMETIC_OPAQUE_OWNED;
     }
 
     /** One face of the warded glass, drawn a hair in front of the block model. */

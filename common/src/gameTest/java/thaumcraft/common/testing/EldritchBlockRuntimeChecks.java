@@ -48,8 +48,7 @@ public final class EldritchBlockRuntimeChecks {
             player.setGameMode(GameType.SURVIVAL);
             lane.floor(3);
             BlockPos altarPos = lane.origin;
-            lane.put(altarPos, ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState()
-                    .setValue(BlockEldritch.VARIANT, EldritchBlockRules.ELDRITCH_ALTAR));
+            lane.put(altarPos, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState(), EldritchBlockRules.ELDRITCH_ALTAR));
             test.assertTrue(level.getBlockEntity(altarPos) instanceof TileEldritchAltar,
                     "the eldritch altar carries the original altar block entity");
             var altar = (TileEldritchAltar) level.getBlockEntity(altarPos);
@@ -98,8 +97,7 @@ public final class EldritchBlockRuntimeChecks {
             player.setPos(lane.origin.getX() + 40D, lane.origin.getY(), lane.origin.getZ());
             lane.floor(4);
             BlockPos obeliskPos = lane.origin;
-            lane.put(obeliskPos, ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState()
-                    .setValue(BlockEldritch.VARIANT, EldritchBlockRules.ELDRITCH_OBELISK));
+            lane.put(obeliskPos, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.ELDRITCH.get().defaultBlockState(), EldritchBlockRules.ELDRITCH_OBELISK));
             test.assertTrue(level.getBlockEntity(obeliskPos) instanceof TileEldritchObelisk,
                     "the eldritch obelisk carries the original obelisk block entity");
 
@@ -181,8 +179,7 @@ public final class EldritchBlockRuntimeChecks {
             player.setGameMode(GameType.CREATIVE);
             lane.floor(3);
             BlockPos stonePos = lane.origin;
-            lane.put(stonePos, ThaumcraftEldritchBlocks.COSMETIC_SOLID.get().defaultBlockState()
-                    .setValue(BlockCosmeticSolid.VARIANT, EldritchBlockRules.COSMETIC_WARDING_STONE));
+            lane.put(stonePos, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.COSMETIC_SOLID.get().defaultBlockState(), EldritchBlockRules.COSMETIC_WARDING_STONE));
             test.assertTrue(level.getBlockEntity(stonePos) instanceof TileWardingStone,
                     "the warding stone carries the original warding stone block entity");
             var stone = (TileWardingStone) level.getBlockEntity(stonePos);

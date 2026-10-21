@@ -58,7 +58,9 @@ public final class ThaumcraftTravelGearClient {
         ItemHoverHarness.setTooltipViewer(()->Minecraft.getInstance().player);
         Hover.setClientEffects(new Hover.ClientEffects(){public void tick(Player player,ItemStack armor,boolean active){wornTick(player,active);}public void forget(Player player){LAST.remove(player);SOUND.remove(player);SPARK.remove(player);}});
         ClientTickEvent.CLIENT_POST.register(ThaumcraftTravelGearClient::keys);
-        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player->{Hover.forget(player);reset();});ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level->reset());
+        // The disconnect event of the client carries no player, so the hover state is only released
+        // for a player that is really there.
+        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player->{if(player!=null)Hover.forget(player);reset();});ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level->reset());
     }
     public static void reset() {LAST.clear();SOUND.clear();SPARK.clear();pressed=false;HarnessArmorRenderer.reset();}
     private static void keys(Minecraft client) {

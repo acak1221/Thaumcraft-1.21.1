@@ -12,8 +12,38 @@
     "variant=1,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v1_l0"
     },
+    "level=1,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=1,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
     "variant=1,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v1_l9"
+    },
+    "level=1,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
     },
     "variant=1,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v1_l18"
@@ -21,8 +51,38 @@
     "variant=2,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v2_l0"
     },
+    "level=2,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=2,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
     "variant=2,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v2_l9"
+    },
+    "level=2,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
     },
     "variant=2,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v2_l18"
@@ -30,8 +90,38 @@
     "variant=3,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v3_l0"
     },
+    "level=3,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=3,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
     "variant=3,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v3_l9"
+    },
+    "level=3,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
     },
     "variant=3,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v3_l18"
@@ -39,8 +129,38 @@
     "variant=4,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v4_l0"
     },
+    "level=4,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=4,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
     "variant=4,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v4_l9"
+    },
+    "level=4,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
     },
     "variant=4,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v4_l18"
@@ -48,8 +168,38 @@
     "variant=5,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v5_l0"
     },
+    "level=5,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=5,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
     "variant=5,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v5_l9"
+    },
+    "level=5,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
     },
     "variant=5,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v5_l18"
@@ -57,8 +207,38 @@
     "variant=6,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v6_l0"
     },
+    "level=6,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=6,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
     "variant=6,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v6_l9"
+    },
+    "level=6,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
     },
     "variant=6,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v6_l18"
@@ -66,8 +246,38 @@
     "variant=7,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v7_l0"
     },
+    "level=7,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
+    "level=7,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
+    },
     "variant=7,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v7_l9"
+    },
+    "level=7,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l0"
     },
     "variant=7,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v7_l18"
@@ -75,8 +285,38 @@
     "variant=8,level=0": {
       "model": "thaumcraft:block/arcane_furnace_v8_l0"
     },
+    "level=8,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=8,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
     "variant=8,level=9": {
       "model": "thaumcraft:block/arcane_furnace_v8_l9"
+    },
+    "level=8,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
     },
     "variant=8,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v8_l18"
@@ -89,6 +329,246 @@
     },
     "variant=9,level=18": {
       "model": "thaumcraft:block/arcane_furnace_v9_l18"
+    },
+    "level=10,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=10,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=11,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=12,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=13,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=14,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=15,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=16,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l9"
+    },
+    "level=17,variant=0": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=1": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=2": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=3": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=4": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=5": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=6": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=7": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=8": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
+    },
+    "level=17,variant=9": {
+      "model": "thaumcraft:block/arcane_furnace_v0_l18"
     }
   }
 }

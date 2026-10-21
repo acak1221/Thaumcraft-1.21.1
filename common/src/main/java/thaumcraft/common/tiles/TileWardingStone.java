@@ -63,12 +63,11 @@ public final class TileWardingStone extends BlockEntity {
         BlockState state = level.getBlockState(target);
         // The original keeps an airy block of the third metadata and only replaces a replaceable block.
         if (state.getBlock() == ThaumcraftEldritchBlocks.AIRY.get()
-                && state.getValue(thaumcraft.common.blocks.BlockAiry.VARIANT) == EldritchBlockRules.AIRY_LEAVES_ALT) {
+                && thaumcraft.common.blocks.BlockAiry.variant(state) == EldritchBlockRules.AIRY_LEAVES_ALT) {
             return;
         }
         if (!state.canBeReplaced()) return;
-        level.setBlock(target, ThaumcraftEldritchBlocks.AIRY.get().defaultBlockState()
-                .setValue(thaumcraft.common.blocks.BlockAiry.VARIANT, EldritchBlockRules.AIRY_WARDING_FENCE), Block.UPDATE_ALL);
+        level.setBlock(target, thaumcraft.common.lib.world.FamilyVariant.with(ThaumcraftEldritchBlocks.AIRY.get().defaultBlockState(), EldritchBlockRules.AIRY_WARDING_FENCE), Block.UPDATE_ALL);
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {

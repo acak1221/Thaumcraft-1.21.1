@@ -176,7 +176,7 @@ class OuterLandsEldritchVariantTest {
             assertNotNull(state, "the state of the metadata " + row.metadata());
             assertEquals(row.blockId(), BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString(),
                     "the block of the metadata " + row.metadata());
-            assertEquals(row.metadata(), state.getValue(BlockEldritch.VARIANT),
+            assertEquals(row.metadata(), BlockEldritch.variant(state),
                     "the variant of the metadata " + row.metadata());
             assertEquals(row.light(), state.getLightEmission(), "the light of the metadata " + row.metadata());
             assertEquals(row.hardness(), state.getBlock().defaultDestroyTime(),

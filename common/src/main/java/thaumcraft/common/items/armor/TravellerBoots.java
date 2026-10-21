@@ -36,5 +36,6 @@ public final class TravellerBoots {
         return worn(player)&&!player.getAbilities().flying&&player.zza>0&&!player.onGround()?TravelGearRules.airAcceleration(Hover.getHover(player)):vanilla;
     }
     public static void jumped(Player player) {if(worn(player))player.setDeltaMovement(player.getDeltaMovement().add(0,TravelGearRules.jumpBonus(),0));}
-    public static void restoreStep(Player player) {Double previous=PREVIOUS_STEP.remove(player);var step=player.getAttribute(Attributes.STEP_HEIGHT);if(previous!=null&&step!=null)step.setBaseValue(previous);}
+    /** The client disconnect event carries no player, so the step of a player that is already gone is left alone. */
+    public static void restoreStep(Player player) {if(player==null)return;Double previous=PREVIOUS_STEP.remove(player);var step=player.getAttribute(Attributes.STEP_HEIGHT);if(previous!=null&&step!=null)step.setBaseValue(previous);}
 }

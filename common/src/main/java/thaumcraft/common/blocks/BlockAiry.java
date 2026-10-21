@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -35,16 +36,58 @@ public final class BlockAiry extends BaseEntityBlock {
     /** Original BlockAiry metadata 0..12. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
 
+    /**
+     * The variant property of every group of the original metadata.
+     *
+     * <p>Minecraft 1.21.1 binds the state space of a block to its property, so every group of the
+     * original metadata became a block of its own and carries only the states of that group. The
+     * property of a group has therefore the range of that group, and it is chosen before the block
+     * is built, because Minecraft builds the state definition inside the block constructor.
+     */
+    private static final java.util.Map<Integer, Property<Integer>> GROUP_PROPERTIES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static Property<Integer> groupProperty(int group) {
+        return GROUP_PROPERTIES.computeIfAbsent(group, key -> {
+            java.util.List<Integer> variants = EldritchBlockRules.airyGroupVariants(key);
+            // A group with a single metadata value has exactly one state, so it needs no property.
+            if (variants.size() < 2) return null;
+            return IntegerProperty.create("variant", variants.get(0), variants.get(variants.size() - 1));
+        });
+    }
+    /** The block of one group of the original metadata. */
+    public static BlockAiry group(int group, Properties properties) {
+        return new BlockAiry(group, pendingProperty(group), properties);
+    }
+
     private final java.util.List<Integer> variants;
+    private final Property<Integer> variantProperty;
     private final int group;
 
     /** The hardness and the blast resistance belong to the block in 1.21.1. */
     public BlockAiry(int group, Properties properties) {
+        this(group, pendingProperty(group), properties);
+    }
+
+    /**
+     * The property of the group, handed over before the block is built: Minecraft builds the state
+     * definition of a block inside the block constructor, before the fields of the block exist.
+     */
+    private static Property<Integer> pendingProperty(int group) {
+        Property<Integer> property = groupProperty(group);
+        if (property == null) thaumcraft.common.lib.world.FamilyVariant.pending().remove();
+        else thaumcraft.common.lib.world.FamilyVariant.pending().set(property);
+        return property;
+    }
+
+    private BlockAiry(int group, Property<Integer> property, Properties properties) {
         super(properties);
+        thaumcraft.common.lib.world.FamilyVariant.pending().remove();
         this.group = group;
         this.variants = EldritchBlockRules.airyGroupVariants(group);
+        this.variantProperty = property;
         if (this.variants.isEmpty()) throw new IllegalArgumentException("Unknown original airy hardness group " + group);
-        registerDefaultState(stateDefinition.any().setValue(VARIANT, this.variants.get(0)));
+        registerDefaultState(property == null ? stateDefinition.any()
+                : stateDefinition.any().setValue(property, this.variants.get(0)));
     }
 
     /** The hardness group of this block. */
@@ -57,26 +100,52 @@ public final class BlockAiry extends BaseEntityBlock {
     public boolean allows(int variant) { return variants.contains(variant); }
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        Property<?> pending = thaumcraft.common.lib.world.FamilyVariant.pending().get();
+        if (pending != null) builder.add(pending);
+    }
 
-    public static int variant(BlockState state) { return state.getValue(VARIANT); }
+    public static int variant(BlockState state) {
+        Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
+        if (property != null) return (Integer) state.getValue(property);
+        // A group with a single metadata value carries no property: the value is the one of the group.
+        if (state.getBlock() instanceof BlockAiry block) {
+            java.util.List<Integer> variants = block.variants();
+            if (variants != null && !variants.isEmpty()) return variants.getFirst();
+        }
+        return 0;
+    }
+
+    /**
+     * The original metadata value of the state of a group, read without the block itself: the
+     * light of the block is asked while the block is still built.
+     */
+    public static int variantOf(BlockState state, int group) {
+        Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
+        if (property != null) return (Integer) state.getValue(property);
+        java.util.List<Integer> variants = EldritchBlockRules.airyGroupVariants(group);
+        return variants.isEmpty() ? 0 : variants.getFirst();
+    }
+
+    /** The variant property of the block, or null when the group has a single metadata value. */
+    public Property<Integer> variantProperty() { return variantProperty; }
 
     /** BlockAiry:216-230 - the per metadata light level. */
-    public static int lightOf(BlockState state) { return EldritchBlockRules.airyLight(state.getValue(VARIANT)); }
+    public static int lightOf(BlockState state) { return EldritchBlockRules.airyLight(variant(state)); }
 
     /** BlockAiry:206-213 - the replaceable metadata values. */
     @Override protected boolean canBeReplaced(BlockState state, net.minecraft.world.item.context.BlockPlaceContext context) {
-        return EldritchBlockRules.airyReplaceable(state.getValue(VARIANT));
+        return EldritchBlockRules.airyReplaceable(variant(state));
     }
 
     /** BlockAiry:263-265 - the leaves metadata values are treated as leaves. */
     @Override protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) {
-        return !EldritchBlockRules.airyIsLeaves(state.getValue(VARIANT));
+        return !EldritchBlockRules.airyIsLeaves(variant(state));
     }
 
     /** BlockAiry:272-280 - most airy variants have no selection box at all. */
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        switch (state.getValue(VARIANT)) {
+        switch (variant(state)) {
             case EldritchBlockRules.AIRY_NODE:
             case EldritchBlockRules.AIRY_LEAVES:
             case EldritchBlockRules.AIRY_LEAVES_ALT:
@@ -93,7 +162,7 @@ public final class BlockAiry extends BaseEntityBlock {
 
     /** BlockAiry:96-100 - the warding fence carries the warding stone block entity. */
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        if (state.getValue(VARIANT) != EldritchBlockRules.AIRY_WARDING_FENCE) return null;
+        if (variant(state) != EldritchBlockRules.AIRY_WARDING_FENCE) return null;
         return new TileWardingStoneFence(pos, state);
     }
 

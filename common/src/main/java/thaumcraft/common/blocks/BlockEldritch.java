@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import thaumcraft.common.config.ThaumcraftContent;
@@ -54,7 +55,31 @@ public final class BlockEldritch extends BaseEntityBlock {
     /** Original BlockEldritch metadata 0..10. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
 
+    /**
+     * The variant property of every group of the original metadata.
+     *
+     * <p>Minecraft 1.21.1 binds the state space of a block to its property, so every group of the
+     * original metadata became a block of its own and carries only the states of that group. The
+     * property of a group has therefore the range of that group, and it is chosen before the block
+     * is built, because Minecraft builds the state definition inside the block constructor.
+     */
+    private static final java.util.Map<Integer, Property<Integer>> GROUP_PROPERTIES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static Property<Integer> groupProperty(int group) {
+        return GROUP_PROPERTIES.computeIfAbsent(group, key -> {
+            java.util.List<Integer> variants = EldritchBlockRules.eldritchGroupVariants(key);
+            // A group with a single metadata value has exactly one state, so it needs no property.
+            if (variants.size() < 2) return null;
+            return IntegerProperty.create("variant", variants.get(0), variants.get(variants.size() - 1));
+        });
+    }
+    /** The block of one group of the original metadata. */
+    public static BlockEldritch group(int group, Properties properties) {
+        return new BlockEldritch(group, pendingProperty(group), properties);
+    }
+
     private final java.util.List<Integer> variants;
+    private final Property<Integer> variantProperty;
     private final int group;
 
     /**
@@ -62,11 +87,29 @@ public final class BlockEldritch extends BaseEntityBlock {
      * the original metadata families that differ become separate blocks.
      */
     public BlockEldritch(int group, Properties properties) {
+        this(group, pendingProperty(group), properties);
+    }
+
+    /**
+     * The property of the group, handed over before the block is built: Minecraft builds the state
+     * definition of a block inside the block constructor, before the fields of the block exist.
+     */
+    private static Property<Integer> pendingProperty(int group) {
+        Property<Integer> property = groupProperty(group);
+        if (property == null) thaumcraft.common.lib.world.FamilyVariant.pending().remove();
+        else thaumcraft.common.lib.world.FamilyVariant.pending().set(property);
+        return property;
+    }
+
+    private BlockEldritch(int group, Property<Integer> property, Properties properties) {
         super(properties);
+        thaumcraft.common.lib.world.FamilyVariant.pending().remove();
         this.group = group;
         this.variants = EldritchBlockRules.eldritchGroupVariants(group);
+        this.variantProperty = property;
         if (this.variants.isEmpty()) throw new IllegalArgumentException("Unknown original eldritch hardness group " + group);
-        registerDefaultState(stateDefinition.any().setValue(VARIANT, this.variants.get(0)));
+        registerDefaultState(property == null ? stateDefinition.any()
+                : stateDefinition.any().setValue(property, this.variants.get(0)));
     }
 
     /** The hardness group of this block. */
@@ -79,16 +122,43 @@ public final class BlockEldritch extends BaseEntityBlock {
     public boolean allows(int variant) { return variants.contains(variant); }
 
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(VARIANT); }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        Property<?> pending = thaumcraft.common.lib.world.FamilyVariant.pending().get();
+        if (pending != null) builder.add(pending);
+    }
 
-    public static int variant(BlockState state) { return state.getValue(VARIANT); }
+    /** The original metadata value of the state, read through the property of that state. */
+    public static int variant(BlockState state) {
+        Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
+        if (property != null) return (Integer) state.getValue(property);
+        // A group with a single metadata value carries no property: the value is the one of the group.
+        if (state.getBlock() instanceof BlockEldritch block) {
+            java.util.List<Integer> variants = block.variants();
+            if (variants != null && !variants.isEmpty()) return variants.getFirst();
+        }
+        return 0;
+    }
+
+    /**
+     * The original metadata value of the state of a group, read without the block itself: the
+     * light of the block is asked while the block is still built.
+     */
+    public static int variantOf(BlockState state, int group) {
+        Property<?> property = thaumcraft.common.lib.world.FamilyVariant.of(state);
+        if (property != null) return (Integer) state.getValue(property);
+        java.util.List<Integer> variants = EldritchBlockRules.eldritchGroupVariants(group);
+        return variants.isEmpty() ? 0 : variants.getFirst();
+    }
+
+    /** The variant property of the block, or null when the group has a single metadata value. */
+    public Property<Integer> variantProperty() { return variantProperty; }
 
     /** BlockEldritch:120-135 - the per metadata light level. */
-    public static int lightOf(BlockState state) { return EldritchBlockRules.eldritchLight(state.getValue(VARIANT)); }
+    public static int lightOf(BlockState state) { return EldritchBlockRules.eldritchLight(variant(state)); }
 
     /** BlockEldritch:189-214 - only the glowing crust, the glyphed variant and the crystal drop anything. */
     @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
-        int variant = state.getValue(VARIANT);
+        int variant = variant(state);
         if (EldritchBlockRules.eldritchDropsResource(variant)) {
             // BlockEldritch:209-211 - one knowledge fragment, never the block itself.
             return List.of(new ItemStack(ThaumcraftContent.MATERIALS.get("knowledge_fragment").get()));
@@ -108,7 +178,7 @@ public final class BlockEldritch extends BaseEntityBlock {
     @Override protected void spawnAfterBreak(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, ItemStack tool, boolean dropExperience) {
         super.spawnAfterBreak(state, level, pos, tool, dropExperience);
         if (!dropExperience) return;
-        int experience = EldritchBlockRules.eldritchExperience(state.getValue(VARIANT), new java.util.Random());
+        int experience = EldritchBlockRules.eldritchExperience(variant(state), new java.util.Random());
         if (experience > 0) popExperience(level, pos, experience);
     }
 
@@ -117,7 +187,7 @@ public final class BlockEldritch extends BaseEntityBlock {
 
     /** The dispatching factory of the shared eldritch block entity type. */
     public static BlockEntity createTile(BlockPos pos, BlockState state) {
-        int variant = state.getValue(VARIANT);
+        int variant = variant(state);
         if (!EldritchBlockRules.eldritchHasTile(variant)) return null;
         return switch (variant) {
             case EldritchBlockRules.ELDRITCH_ALTAR -> new TileEldritchAltar(pos, state);
@@ -145,7 +215,7 @@ public final class BlockEldritch extends BaseEntityBlock {
 
     /** BlockEldritch:262-286 - the altar eye and the lock key interactions. */
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        int variant = state.getValue(VARIANT);
+        int variant = variant(state);
         if (variant == EldritchBlockRules.ELDRITCH_ALTAR) {
             ItemStack held = player.getItemInHand(player.getUsedItemHand());
             if (level.isClientSide || player.isShiftKeyDown() || held.isEmpty()) return InteractionResult.PASS;
@@ -196,7 +266,7 @@ public final class BlockEldritch extends BaseEntityBlock {
 
     /** BlockEldritch:216-229 - breaking a structural piece removes the whole altar. */
     @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && EldritchBlockRules.eldritchBreaksStructure(state.getValue(VARIANT))) {
+        if (!level.isClientSide && EldritchBlockRules.eldritchBreaksStructure(variant(state))) {
             int rx = EldritchBlockRules.eldritchStructureRadiusX();
             int ry = EldritchBlockRules.eldritchStructureRadiusY();
             List<BlockPos> doomed = new ArrayList<>();
@@ -207,7 +277,7 @@ public final class BlockEldritch extends BaseEntityBlock {
                         if (target.equals(pos)) continue;
                         BlockState targetState = level.getBlockState(target);
                         if (targetState.getBlock() == this
-                                && EldritchBlockRules.eldritchStructureMember(targetState.getValue(VARIANT))) {
+                                && EldritchBlockRules.eldritchStructureMember(variant(targetState))) {
                             doomed.add(target);
                         }
                     }

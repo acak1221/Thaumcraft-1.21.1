@@ -65,8 +65,13 @@ public final class DeathAspectOrbDrop {
             float yaw = (float) (Math.random() * 360D);
             var motion = new Vec3((float) (Math.random() * .2D - .1D) * 2F, (float) (Math.random() * .2D) * 2F,
                     (float) (Math.random() * .2D - .1D) * 2F);
-            var orb = EntityAspectOrb.unspawned(server, living.position(), motion, yaw, drop.aspect(), drop.value());
-            if (orb != null) server.addFreshEntity(orb);
+            try {
+                var orb = EntityAspectOrb.unspawned(server, living.position(), motion, yaw, drop.aspect(), drop.value());
+                if (orb != null) server.addFreshEntity(orb);
+            } catch (RuntimeException failure) {
+                // A death must never take the server down with it.
+                thaumcraft.common.Thaumcraft.LOG.warn("Death aspect orb could not be published for {}", drop.aspect().getTag(), failure);
+            }
         }
         return EventResult.pass();
     }

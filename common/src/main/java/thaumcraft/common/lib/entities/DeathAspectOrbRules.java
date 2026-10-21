@@ -45,7 +45,11 @@ public final class DeathAspectOrbRules {
             if (!nextBoolean.getAsBoolean()) continue;
             int amount = reduced.getAmount(aspect);
             if (amount <= 0) continue;
-            drops.add(new Drop(aspect, 1 + nextInt.applyAsInt(amount)));
+            int value = 1 + nextInt.applyAsInt(amount);
+            // The native orb carries the value in a short, so a value outside the short range
+            // would be rejected by the orb factory; the original never had such a value.
+            if (value <= 0 || value > Short.MAX_VALUE) continue;
+            drops.add(new Drop(aspect, value));
         }
         return drops;
     }

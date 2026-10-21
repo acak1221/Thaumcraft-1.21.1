@@ -14,12 +14,16 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.crafting.ArcaneRecipes;
 import thaumcraft.api.crafting.CrucibleRecipe;
 import thaumcraft.api.crafting.InfusionEnchantmentRecipe;
 import thaumcraft.api.crafting.InfusionRecipe;
+import thaumcraft.api.crafting.NativeRecipes;
 import thaumcraft.api.crafting.ShapedArcaneRecipe;
 import thaumcraft.api.crafting.ShapelessArcaneRecipe;
 import thaumcraft.api.internal.IInternalMethodHandler;
@@ -30,6 +34,9 @@ import thaumcraft.common.lib.research.EntityAspectBindings;
 import thaumcraft.common.lib.research.ObjectAspectCatalog;
 import thaumcraft.common.lib.research.ObjectAspectRegistry;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
+import thaumcraft.common.lib.research.ResearchCatalog;
+import thaumcraft.common.lib.research.ResearchDefinition;
+import thaumcraft.common.lib.research.ResearchRecipeCoverage;
 
 /**
  * The public registration facade of the native port.
@@ -97,8 +104,25 @@ public final class ThaumcraftApi {
 
     // ------------------------------------------------------------------ crafting recipes
 
-    /** The original programmatic recipe list. Native datapack recipes are reached through the recipe manager. */
-    public static List<Object> getCraftingRecipes() { return craftingRecipes; }
+    /**
+     * The original programmatic recipe list and the native recipes of the loaded level.
+     *
+     * <p>Forced 1.21.1 change: the original kept every recipe of the game in one static list; 1.21.1
+     * keeps the recipes of a world in the recipe manager of the loaded level. The runtime installs that
+     * manager through {@link #installRecipeManager(RecipeManager, net.minecraft.core.HolderLookup.Provider)}
+     * and this list answers from both.</p>
+     */
+    public static List<Object> getCraftingRecipes() {
+        List<Object> result = new ArrayList<>(craftingRecipes);
+        result.addAll(NativeRecipes.views());
+        return result;
+    }
+
+    /** The runtime installs the recipe manager of the level it loaded; the cached answers belong to it. */
+    public static void installRecipeManager(RecipeManager manager, net.minecraft.core.HolderLookup.Provider registries) {
+        NativeRecipes.install(manager, registries);
+        keyCache.clear();
+    }
 
     public static ShapedArcaneRecipe addArcaneCraftingRecipe(String research, ItemStack result, AspectList aspects, Object... recipe) {
         ShapedArcaneRecipe r = new ShapedArcaneRecipe(research, result, aspects, recipe);
@@ -128,7 +152,7 @@ public final class ThaumcraftApi {
     }
 
     public static InfusionRecipe getInfusionRecipe(ItemStack res) {
-        for (Object r : craftingRecipes) {
+        for (Object r : getCraftingRecipes()) {
             if (!(r instanceof InfusionRecipe recipe)) continue;
             Object output = recipe.getRecipeOutput();
             if (!(output instanceof ItemStack stack) || !sameOutput(stack, res)) continue;
@@ -150,7 +174,7 @@ public final class ThaumcraftApi {
     }
 
     public static CrucibleRecipe getCrucibleRecipe(ItemStack stack) {
-        for (Object r : craftingRecipes) {
+        for (Object r : getCraftingRecipes()) {
             if (!(r instanceof CrucibleRecipe recipe) || !sameOutput(recipe.getRecipeOutput(), stack)) continue;
             return recipe;
         }
@@ -158,7 +182,7 @@ public final class ThaumcraftApi {
     }
 
     public static CrucibleRecipe getCrucibleRecipeFromHash(int hash) {
-        for (Object r : craftingRecipes) {
+        for (Object r : getCraftingRecipes()) {
             if (!(r instanceof CrucibleRecipe recipe) || recipe.hash != hash) continue;
             return recipe;
         }
@@ -168,35 +192,54 @@ public final class ThaumcraftApi {
     /**
      * Original research lookup of the recipe that produces a stack.
      *
-     * <p>Forced 1.21.1 change: the original scanned the research pages for a recipe object; the native corpus
-     * keeps recipe references as keys, so the answer is taken from the registered recipe list and the page
-     * index of the matching research is reported as zero.</p>
+     * <p>Forced 1.21.1 change: the original scanned the research pages for a recipe object; the native
+     * corpus keeps the recipe references as keys, and the page is resolved through the native recipe of
+     * the recipe manager. The answer is the research key and the index of its page, exactly as the
+     * original returned them.</p>
      */
     public static Object[] getCraftingRecipeKey(net.minecraft.world.entity.player.Player player, ItemStack stack) {
         if (player == null || stack == null || stack.isEmpty()) return null;
+        ResearchCatalog.loadBundled();
         List<?> key = List.of(stack.getItem(), stack.getDamageValue());
         if (keyCache.containsKey(key)) {
             Object[] cached = keyCache.get(key);
             return cached == null ? null : researchVisible(player, cached);
         }
-        for (Object r : craftingRecipes) {
-            String research = null;
-            ItemStack output = null;
-            if (r instanceof ShapedArcaneRecipe recipe) { research = recipe.getResearch(); output = recipe.getRecipeOutput(); }
-            else if (r instanceof ShapelessArcaneRecipe recipe) { research = recipe.getResearch(); output = recipe.getRecipeOutput(); }
-            else if (r instanceof CrucibleRecipe recipe) { research = recipe.key; output = recipe.getRecipeOutput(); }
-            else if (r instanceof InfusionRecipe recipe) {
-                research = recipe.getResearch();
-                Object value = recipe.getRecipeOutput();
-                if (value instanceof ItemStack stack2) output = stack2;
+        for (ResearchDefinition definition : ResearchCatalog.all()) {
+            List<ResearchDefinition.Page> pages = definition.pages();
+            for (int index = 0; index < pages.size(); index++) {
+                for (String recipeKey : pageRecipeKeys(definition, pages.get(index))) {
+                    ItemStack output = nativeResult(recipeKey);
+                    if (output == null || !sameOutput(output, stack)) continue;
+                    Object[] found = new Object[]{definition.key(), index};
+                    keyCache.put(key, found);
+                    return researchVisible(player, found);
+                }
             }
-            if (research == null || output == null || !sameOutput(output, stack)) continue;
-            Object[] found = new Object[]{research, 0};
-            keyCache.put(key, found);
-            return researchVisible(player, found);
         }
         keyCache.put(key, null);
         return null;
+    }
+
+    /** The original recipe keys a research page shows: its own recipe, or the array of the original page. */
+    private static List<String> pageRecipeKeys(ResearchDefinition definition, ResearchDefinition.Page page) {
+        if (page.recipeKey() != null) return List.of(page.recipeKey());
+        List<String> array = ResearchRecipeCoverage.pageRecipeArrays().get(definition.key());
+        if (array == null || array.isEmpty()) return List.of();
+        // The original page that shows an ARRAY of recipes (ConfigResearch:194-199).
+        String expression = page.javaExpression();
+        if (expression == null || !expression.endsWith(".toArray(new IArcaneRecipe[0])")) return List.of();
+        return array;
+    }
+
+    /** The result of the native recipe of an original recipe key. */
+    private static ItemStack nativeResult(String recipeKey) {
+        String id = ResearchRecipeCoverage.nativeRecipeId(recipeKey);
+        if (id == null) return null;
+        Recipe<?> recipe = NativeRecipes.byId(ResourceLocation.parse(id));
+        if (recipe == null) return null;
+        ItemStack result = recipe.getResultItem(ArcaneRecipes.registries());
+        return result.isEmpty() ? null : result;
     }
 
     private static Object[] researchVisible(net.minecraft.world.entity.player.Player player, Object[] found) {

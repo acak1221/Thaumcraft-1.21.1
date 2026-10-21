@@ -45,6 +45,9 @@ public final class ClientSetup {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        // The public recipe API answers from the recipe manager of the loaded world.
+        dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level ->
+                thaumcraft.api.ThaumcraftApi.installRecipeManager(level.getRecipeManager(), level.registryAccess()));
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initClient();
         thaumcraft.client.lib.PlayerNotifications.init();
         thaumcraft.client.ThaumcraftMonsterClient.init();

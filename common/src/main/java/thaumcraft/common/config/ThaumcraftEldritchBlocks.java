@@ -8,6 +8,7 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -42,6 +43,7 @@ import thaumcraft.common.blocks.BlockMetalDevice;
 import thaumcraft.common.blocks.BlockMirror;
 import thaumcraft.common.blocks.BlockStoneDevice;
 import thaumcraft.common.blocks.BlockWoodenDevice;
+import thaumcraft.common.blocks.BannerData;
 import thaumcraft.common.blocks.ItemArcaneDoor;
 import thaumcraft.common.blocks.ItemVariantBlock;
 import thaumcraft.common.container.ContainerMagicBox;
@@ -76,10 +78,11 @@ import thaumcraft.common.tiles.TileWardingStoneFence;
  * six and seven another one and the ten ordinary stones a third one.
  */
 public final class ThaumcraftEldritchBlocks {
-    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK_ENTITY_TYPE);
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Thaumcraft.MODID, Registries.MENU);
+    private static final DeferredRegister<DataComponentType<?>> COMPONENTS = DeferredRegister.create(Thaumcraft.MODID, Registries.DATA_COMPONENT_TYPE);
 
     // ------------------------------------------------------------------ blocks
 
@@ -254,6 +257,16 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> MIRROR_ITEM = ITEMS.register("mirror", () -> new BlockItem(MIRROR.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> METAL_DEVICE_ITEM = ITEMS.register("metal_device", () -> new BlockItem(METAL_DEVICE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> WOODEN_DEVICE_ITEM = ITEMS.register("wooden_device", () -> new BlockItem(WOODEN_DEVICE.get(), new Item.Properties()));
+    /**
+     * The banner of the original blockWoodenDevice metadata eight. The original kept it in one item
+     * with the NBT byte "color" and the NBT string "aspect" (ConfigRecipes:185-188), the native item
+     * carries both in one data component.
+     */
+    public static final RegistrySupplier<DataComponentType<BannerData>> BANNER_DATA = COMPONENTS.register("banner_data",
+            () -> DataComponentType.<BannerData>builder().persistent(BannerData.CODEC).networkSynchronized(BannerData.STREAM_CODEC).build());
+    /** The banner item of the original: it places the wooden device with its banner metadata. */
+    public static final RegistrySupplier<Item> BANNER_ITEM = ITEMS.register("banner",
+            () -> new ItemVariantBlock(WOODEN_DEVICE.get(), EldritchBlockRules.DEVICE_WOOD_BANNER, "banner", new Item.Properties()));
     public static final RegistrySupplier<Item> STONE_DEVICE_ITEM = ITEMS.register("stone_device", () -> new BlockItem(STONE_DEVICE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> LOOT_URN_ITEM = ITEMS.register("loot_urn", () -> new BlockLootItem(LOOT_URN.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> LOOT_CRATE_ITEM = ITEMS.register("loot_crate", () -> new BlockLootItem(LOOT_CRATE.get(), new Item.Properties()));
@@ -394,6 +407,7 @@ public final class ThaumcraftEldritchBlocks {
         ITEMS.register();
         BLOCK_ENTITIES.register();
         MENUS.register();
+        COMPONENTS.register();
         CreativeTabRegistry.append(ThaumcraftContent.TAB, ELDRITCH_ITEM, ELDRITCH_CRUST_ITEM, ELDRITCH_DECO_ITEM,
                 ELDRITCH_DOORWAY_ITEM, ELDRITCH_SPAWNER_ITEM, ELDRITCH_CRYSTAL_ITEM,
                 COSMETIC_SOLID_ITEM, COSMETIC_SOLID_TOUGH_ITEM, COSMETIC_SOLID_THAUMIUM_ITEM,
@@ -402,7 +416,7 @@ public final class ThaumcraftEldritchBlocks {
                 COSMETIC_STONE_SLAB_ARCANE_ITEM, COSMETIC_STONE_SLAB_ELDRITCH_ITEM,
                 COSMETIC_WOOD_SLAB_GREATWOOD_ITEM, COSMETIC_WOOD_SLAB_SILVERWOOD_ITEM,
                 STAIRS_ELDRITCH_ITEM, ARCANE_DOOR_ITEM, MAGIC_BOX_ITEM, MIRROR_ITEM,
-                METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM,
+                METAL_DEVICE_ITEM, WOODEN_DEVICE_ITEM, STONE_DEVICE_ITEM, BANNER_ITEM,
                 AIRY_ITEM, AIRY_NODE_ITEM, JAR_BRAIN_ITEM, JAR_NODE_ITEM, ETHEREAL_BLOOM_ITEM);
     }
 }

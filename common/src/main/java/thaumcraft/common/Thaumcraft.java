@@ -213,11 +213,14 @@ public final class Thaumcraft {
             ItemWandCasting.clearNodeUses();
             WandFocusActions.clearCooldowns();
             ItemFocusExcavation.clearAll();
+            thaumcraft.api.ThaumcraftApi.installRecipeManager(null, null);
         });
         LifecycleEvent.SERVER_STARTED.register(server -> {
             ObjectAspectCatalog.validateAgainstRegistries();
             thaumcraft.common.lib.loot.LootTables.initialize();
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStarted(server);
+            // The public recipe API answers from the recipe manager of the loaded world.
+            thaumcraft.api.ThaumcraftApi.installRecipeManager(server.getRecipeManager(), server.registryAccess());
         });
         thaumcraft.common.lib.utils.OriginalOreTags.register();
         thaumcraft.api.ThaumcraftApi.refreshPortableHoleBlackList();

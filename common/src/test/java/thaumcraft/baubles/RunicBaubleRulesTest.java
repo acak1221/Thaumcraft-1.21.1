@@ -237,7 +237,7 @@ class RunicBaubleRulesTest {
         assertEquals(RunicBaubleRules.VIS_STEP, WandRodPassive.STEP);
         WandData wand = new WandData("obsidian", "iron", Map.of());
         assertEquals(RunicBaubleRules.fixedAspectRefill(200, wand.capacity(), wand.amount("terra"), "terra"),
-                WandRodPassive.tick(wand, 200, NO_PICK).amount("terra"));
+                WandRodPassive.tick(wand, wand.capacity(), 200, NO_PICK).amount("terra"));
     }
 
     @Test void thePrimalStaffRefillsOneLowPrimalOnEveryFiftiethTick() {

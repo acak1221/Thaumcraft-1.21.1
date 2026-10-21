@@ -29,7 +29,7 @@ public class InfusionRecipe {
     private ItemStack recipeInput;
     protected Object recipeOutput;
     protected int instability;
-    private final InfusionStackRecipe nativeRecipe;
+    private InfusionStackRecipe nativeRecipe;
 
     public InfusionRecipe(String research, Object output, int inst, AspectList aspects, ItemStack input, ItemStack[] recipe) {
         this.research = research;
@@ -50,6 +50,25 @@ public class InfusionRecipe {
 
     /** The native recipe behind this view. */
     public InfusionStackRecipe nativeRecipe() { return nativeRecipe; }
+
+    /**
+     * The public view of a native infusion recipe.
+     *
+     * <p>Forced 1.21.1 change: the native recipe of the recipe manager is the real one, with its own
+     * component predicates and result patches; the view keeps the original argument shape.</p>
+     */
+    public static InfusionRecipe of(InfusionStackRecipe recipe) {
+        InfusionRecipe view = new InfusionRecipe(recipe.research(), recipe.result(), recipe.instability(),
+                NativeRecipes.aspects(recipe.aspects()), NativeRecipes.sample(recipe.input()), samples(recipe.components()));
+        view.nativeRecipe = recipe;
+        return view;
+    }
+
+    private static ItemStack[] samples(List<Ingredient> components) {
+        ItemStack[] result = new ItemStack[components.size()];
+        for (int index = 0; index < components.size(); index++) result[index] = NativeRecipes.sample(components.get(index));
+        return result;
+    }
 
     public boolean matches(ArrayList<ItemStack> input, ItemStack central, Level world, Player player) {
         if (this.getRecipeInput() == null) return false;

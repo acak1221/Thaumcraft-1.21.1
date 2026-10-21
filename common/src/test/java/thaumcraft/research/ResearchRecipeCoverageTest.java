@@ -107,7 +107,7 @@ class ResearchRecipeCoverageTest {
     @Test
     void everyMappedOriginalKeyResolvesToAPackagedNativeRecipe() {
         Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
-        assertEquals(250, ids.size());
+        assertEquals(272, ids.size());
         Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
         for (Map.Entry<String, String> entry : ids.entrySet()) {
             String id = entry.getValue();
@@ -117,6 +117,29 @@ class ResearchRecipeCoverageTest {
             assertEquals(id, ResearchRecipeCoverage.nativeRecipeId(entry.getKey()));
         }
         assertTrue(present.size() >= ids.size());
+    }
+
+    /**
+     * The original recipes that the research book shows as an ARRAY of recipes: the sixteen banners
+     * and the six primal arrows (ConfigRecipes:184-189 and :217-220). They carry no recipe key of
+     * their own, but they have a native recipe each.
+     */
+    @Test
+    void theBannersAndThePrimalArrowsAreMappedToTheirNativeRecipes() {
+        Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
+        Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
+        for (int index = 0; index < 16; index++) {
+            String key = "Banner_" + index;
+            assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
+            assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
+        }
+        for (int index = 0; index < 6; index++) {
+            String key = "PrimalArrow_" + index;
+            assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
+            assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
+        }
+        assertEquals(22, ResearchRecipeCoverage.outsideBookRecipeKeys().size());
+        assertEquals(Set.of("BANNERS", "PRIMALARROW"), ResearchRecipeCoverage.pageRecipeArrays().keySet());
     }
 
     @Test
@@ -154,7 +177,12 @@ class ResearchRecipeCoverageTest {
         Set<String> classified = new TreeSet<>(ResearchRecipeCoverage.nativeRecipeIds().keySet());
         classified.addAll(ResearchRecipeCoverage.constructBlueprints().keySet());
         classified.addAll(ResearchRecipeCoverage.deferredRecipes().keySet());
-        assertEquals(Set.copyOf(ResearchRecipeCoverage.recipeKeyCounts().keySet()), classified);
+        Set<String> corpus = new TreeSet<>(ResearchRecipeCoverage.recipeKeyCounts().keySet());
+        // The only original recipes outside the corpus are the ones the book shows as an array.
+        Set<String> outside = new TreeSet<>(classified);
+        outside.removeAll(corpus);
+        assertEquals(ResearchRecipeCoverage.outsideBookRecipeKeys(), outside);
+        assertTrue(corpus.stream().allMatch(classified::contains));
     }
 
     @Test

@@ -26,7 +26,9 @@ class WandDataTest {
         mutable.put("terra", 2000);
         assertEquals(100, original.amount("terra"));
         assertThrows(UnsupportedOperationException.class, () -> original.vis().put("terra", 2000));
-        assertEquals(2500, original.withAmount("terra", 9999).amount("terra"));
+        // The component cannot see the sceptre marker of the stack, so it accepts the largest capacity
+        // of its rod: the sceptre capacity of the wooden rod is 3750 centivis (oracle :119-121).
+        assertEquals(3750, original.withAmount("terra", 9999).amount("terra"));
         assertEquals(0, original.withAmount("terra", -100).amount("terra"));
         assertEquals(100, original.amount("terra"));
     }
@@ -35,6 +37,8 @@ class WandDataTest {
         assertTrue(WandData.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{\"vis\":{\"aer\":9999}}")).error().isPresent());
     }
     @Test void malformedJsonReturnsDecodeErrorsWithoutThrowing() {
+        // The limit of the component is the largest capacity of the rod: the sceptre capacity
+        // (oracle ItemWandCasting:119-121), so the plain rod capacity is no longer the limit.
         for (String json : List.of(
                 "{\"rod\":\"copper_staff\"}",
                 "{\"rod\":\"wood_staff\"}",
@@ -44,12 +48,12 @@ class WandDataTest {
                 "{\"vis\":{\"vitium\":100}}",
                 "{\"vis\":{\"unknown\":100}}",
                 "{\"vis\":{\"aer\":-1}}",
-                "{\"vis\":{\"aer\":2501}}",
+                "{\"vis\":{\"aer\":3751}}",
                 "{\"rod\":\"wood\",\"cap\":\"gold\",\"vis\":{\"aer\":5000}}",
-                "{\"rod\":\"greatwood\",\"vis\":{\"aer\":5001}}",
-                "{\"rod\":\"silverwood\",\"vis\":{\"aer\":10001}}",
-                "{\"rod\":\"greatwood_staff\",\"vis\":{\"aer\":12501}}",
-                "{\"rod\":\"primal_staff\",\"vis\":{\"aer\":25001}}")) {
+                "{\"rod\":\"greatwood\",\"vis\":{\"aer\":7501}}",
+                "{\"rod\":\"silverwood\",\"vis\":{\"aer\":15001}}",
+                "{\"rod\":\"greatwood_staff\",\"vis\":{\"aer\":18751}}",
+                "{\"rod\":\"primal_staff\",\"vis\":{\"aer\":37501}}")) {
             var result = assertDoesNotThrow(() -> WandData.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)));
             assertTrue(result.error().isPresent(), json);
             assertTrue(result.result().isEmpty(), json);
@@ -71,9 +75,9 @@ class WandDataTest {
     @Test void codecValidationDoesNotWeakenDirectConstruction() {
         assertThrows(IllegalArgumentException.class, () -> new WandData("unknown", "iron", Map.of()));
         assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "silver", Map.of()));
-        assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "gold", Map.of("aer", 2501)));
-        assertThrows(IllegalArgumentException.class, () -> new WandData("greatwood", "gold", Map.of("aer", 5001)));
-        assertThrows(IllegalArgumentException.class, () -> new WandData("silverwood", "gold", Map.of("aer", 10001)));
+        assertThrows(IllegalArgumentException.class, () -> new WandData("wood", "gold", Map.of("aer", 3751)));
+        assertThrows(IllegalArgumentException.class, () -> new WandData("greatwood", "gold", Map.of("aer", 7501)));
+        assertThrows(IllegalArgumentException.class, () -> new WandData("silverwood", "gold", Map.of("aer", 15001)));
     }
     @Test void allNativeMaterialPairsRoundTripJsonNbtAndNetworkAtTheirRealCapacity() {
         for (var rod : WandMaterials.RODS) for (var cap : WandMaterials.CAPS) {
@@ -94,7 +98,7 @@ class WandDataTest {
         assertEquals(WandData.EMPTY, WandData.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{}")).getOrThrow());
         WandData greatwood = new WandData("greatwood", "gold", Map.of("aer", 2600));
         assertEquals(5000, greatwood.capacity());
-        assertEquals(5000, greatwood.withAmount("aer", Integer.MAX_VALUE).amount("aer"));
+        assertEquals(7500, greatwood.withAmount("aer", Integer.MAX_VALUE).amount("aer"), "the sceptre capacity of the greatwood rod");
         assertEquals(2600, greatwood.amount("aer"));
         assertEquals(2500, WandData.EMPTY.capacity());
     }

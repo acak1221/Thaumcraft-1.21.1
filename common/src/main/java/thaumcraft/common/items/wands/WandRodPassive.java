@@ -27,20 +27,22 @@ public final class WandRodPassive {
     /**
      * The wand after this tick of its carrier: the same instance when nothing happens.
      *
+     * @param capacity the capacity of the wand this rod sits in; a sceptre holds one and a half times
+     *                 the capacity of its rod (original ItemWandCasting:119-121)
      * @param pick {@code nextInt(bound)} of the carrier's random source, asked only by the primal staff and only when a primal is low
      */
-    public static WandData tick(WandData wand, int playerTick, IntUnaryOperator pick) {
+    public static WandData tick(WandData wand, int capacity, int playerTick, IntUnaryOperator pick) {
         String aspect = WandMaterials.rod(wand.rod()).passive();
         if (aspect == null) return wand;
         if (WandMaterials.ANY_PRIMAL.equals(aspect)) {
             if (playerTick % PRIMAL_PERIOD != 0) return wand;
             List<String> low = new ArrayList<>();
-            for (String primal : WandData.PRIMALS) if (wand.amount(primal) < threshold(wand.capacity())) low.add(primal);
+            for (String primal : WandData.PRIMALS) if (wand.amount(primal) < threshold(capacity)) low.add(primal);
             if (low.isEmpty()) return wand;
             String chosen = low.get(pick.applyAsInt(low.size()));
             return wand.withAmount(chosen, wand.amount(chosen) + STEP);
         }
-        if (playerTick % PERIOD != 0 || wand.amount(aspect) >= threshold(wand.capacity())) return wand;
+        if (playerTick % PERIOD != 0 || wand.amount(aspect) >= threshold(capacity)) return wand;
         return wand.withAmount(aspect, wand.amount(aspect) + STEP);
     }
 }

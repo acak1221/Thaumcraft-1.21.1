@@ -59,8 +59,11 @@ public final class ItemAmuletVis extends Item implements IBauble, IRunicArmor {
         ItemStack held = player.getMainHandItem();
         if (held.getItem() instanceof ItemWandCasting) {
             var wand = ItemWandCasting.data(held);
+            // The amulet fills the wand up to its own capacity; a sceptre holds one and a half times
+            // the capacity of its rod (original ItemWandCasting:119-121).
+            int capacity = ItemWandCasting.getMaxVis(held);
             for (Aspect aspect : Aspect.getPrimalAspects()) {
-                int transfer = Math.min(5, Math.min(wand.capacity() - wand.amount(aspect.getTag()), getVis(stack, aspect)));
+                int transfer = Math.min(5, Math.min(capacity - wand.amount(aspect.getTag()), getVis(stack, aspect)));
                 if (transfer <= 0) continue;
                 storeVis(stack, aspect, getVis(stack, aspect) - transfer);
                 wand = wand.withAmount(aspect.getTag(), wand.amount(aspect.getTag()) + transfer);

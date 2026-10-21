@@ -104,6 +104,9 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
         draining = false;
         if (stack.getItem() instanceof ItemWandCasting) {
             WandData data = ItemWandCasting.data(stack);
+            // The pedestal fills the wand up to its own capacity; a sceptre holds one and a half times
+            // the capacity of its rod (original ItemWandCasting:119-121).
+            int capacity = ItemWandCasting.getMaxVis(stack);
             int reserve = LegacyTileRules.wandPedestalReserve(data.cap(), data.rod()) * WHOLE_VIS;
             for (BlockPos nodePos : nodes) {
                 if (!level.hasChunkAt(nodePos)) continue;
@@ -111,7 +114,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
                 AspectList stored = node.getAspects();
                 for (Aspect aspect : Aspect.aspects.values()) {
                     if (stored.getAmount(aspect) <= reserve) continue;
-                    if (data.amount(aspect.getTag()) + WHOLE_VIS > data.capacity()) continue;
+                    if (data.amount(aspect.getTag()) + WHOLE_VIS > capacity) continue;
                     ItemWandCasting.addRealVis(stack, aspect.getTag(), WHOLE_VIS, true);
                     node.takeFromContainer(aspect, WHOLE_VIS);
                     somethingChanged = true;

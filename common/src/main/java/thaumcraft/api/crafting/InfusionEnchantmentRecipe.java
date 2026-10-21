@@ -30,7 +30,7 @@ public class InfusionEnchantmentRecipe {
     public int recipeXP;
     public int instability;
     private final Holder<Enchantment> enchantmentHolder;
-    private final thaumcraft.common.crafting.InfusionEnchantmentRecipe nativeRecipe;
+    private thaumcraft.common.crafting.InfusionEnchantmentRecipe nativeRecipe;
 
     public InfusionEnchantmentRecipe(String research, Holder<Enchantment> input, int inst, AspectList aspects, ItemStack[] recipe) {
         if (input == null) throw new IllegalArgumentException("An enchantment infusion recipe needs an enchantment");
@@ -50,6 +50,26 @@ public class InfusionEnchantmentRecipe {
 
     /** The native recipe behind this view. */
     public thaumcraft.common.crafting.InfusionEnchantmentRecipe nativeRecipe() { return nativeRecipe; }
+
+    /**
+     * The public view of a native enchantment infusion recipe.
+     *
+     * @return the view, or null when the runtime does not know the enchantment of the recipe
+     */
+    public static InfusionEnchantmentRecipe of(thaumcraft.common.crafting.InfusionEnchantmentRecipe recipe) {
+        Holder<Enchantment> holder = NativeRecipes.holder(recipe.enchantment());
+        if (holder == null) return null;
+        InfusionEnchantmentRecipe view = new InfusionEnchantmentRecipe(recipe.research(), holder, recipe.instability(),
+                NativeRecipes.aspects(recipe.aspects()), samples(recipe.components()));
+        view.nativeRecipe = recipe;
+        return view;
+    }
+
+    private static ItemStack[] samples(List<net.minecraft.world.item.crafting.Ingredient> components) {
+        ItemStack[] result = new ItemStack[components.size()];
+        for (int index = 0; index < components.size(); index++) result[index] = NativeRecipes.sample(components.get(index));
+        return result;
+    }
 
     /** The registry holder of the enchanted effect. */
     public Holder<Enchantment> enchantmentHolder() { return enchantmentHolder; }

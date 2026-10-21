@@ -84,7 +84,7 @@ public final class TileMagicWorkbenchCharger extends TileVisNode {
                 ItemStack wand = table.getItem(TileArcaneWorkbench.WAND_SLOT);
                 if (wand.isEmpty() || !(wand.getItem() instanceof ItemWandCasting)) break;
                 WandData data = ItemWandCasting.data(wand);
-                int limit = Math.min(5, data.capacity() - data.amount(tag));
+                int limit = Math.min(5, ItemWandCasting.getMaxVis(wand) - data.amount(tag));
                 if (limit <= 0) continue;
                 tile.charge = new Charge(table, wand, Aspect.getAspect(tag), limit);
                 try {

@@ -1,0 +1,24 @@
+{
+  "type": "thaumcraft:arcane_shaped",
+  "research": "PRIMALARROW",
+  "pattern": [
+    "AAA",
+    "ASA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:arrow"
+    },
+    "S": {
+      "item": "thaumcraft:earth_shard"
+    }
+  },
+  "vis": {
+    "terra": 8
+  },
+  "result": {
+    "id": "thaumcraft:primal_arrow_earth",
+    "count": 8
+  }
+}

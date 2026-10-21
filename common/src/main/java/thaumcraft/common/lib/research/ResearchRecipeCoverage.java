@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
@@ -58,6 +59,10 @@ public final class ResearchRecipeCoverage {
     private static final Map<String, String> CONSTRUCT_BLUEPRINTS = buildConstructBlueprints();
     /** Original TC4 recipe key without a native recipe yet, to the reason why. */
     private static final Map<String, String> DEFERRED = buildDeferred();
+    /** The original research pages that show an ARRAY of recipes instead of one recipe. */
+    private static final Map<String, List<String>> PAGE_RECIPE_ARRAYS = buildPageRecipeArrays();
+    /** The original recipe keys that the research book never names by key. */
+    private static final Set<String> OUTSIDE_BOOK = buildOutsideBook();
     /** Native recipe ids that are actually present in the packaged recipe tree. */
     private static final Set<String> NATIVE_RECIPE_FILES = scanNativeRecipeIds();
 
@@ -72,8 +77,20 @@ public final class ResearchRecipeCoverage {
     /** Original recipe keys with no native recipe yet, with the reason why each one is still open. */
     public static Map<String, String> deferredRecipes() { return DEFERRED; }
 
+    /**
+     * The original research pages that show an ARRAY of recipes.
+     *
+     * <p>Original ConfigResearch:194-199 puts the sixteen banners and the six primal arrows into the
+     * BANNERS and PRIMALARROW pages as an array of recipes; the corpus keeps that array as its legacy
+     * expression, so those pages have no single recipe key.</p>
+     */
+    public static Map<String, List<String>> pageRecipeArrays() { return PAGE_RECIPE_ARRAYS; }
+
     /** Native recipe ids that exist in the packaged data/thaumcraft/recipe tree. */
     public static Set<String> nativeRecipeIdsPresent() { return NATIVE_RECIPE_FILES; }
+
+    /** The original recipe keys that the research book shows as an array of recipes. */
+    public static Set<String> outsideBookRecipeKeys() { return OUTSIDE_BOOK; }
 
     /** The native recipe id of an original key, or null when it has none. */
     public static String nativeRecipeId(String originalKey) { return NATIVE_RECIPE_IDS.get(originalKey); }
@@ -161,6 +178,8 @@ public final class ResearchRecipeCoverage {
         List<String> research = missingResearchKeys();
         StringBuilder text = new StringBuilder();
         text.append("TC4 recipe coverage: ").append(NATIVE_RECIPE_IDS.size()).append(" original keys mapped to a native recipe, ")
+                .append(OUTSIDE_BOOK.size()).append(" of them outside the research book (")
+                .append(String.join(", ", OUTSIDE_BOOK)).append("), ")
                 .append(CONSTRUCT_BLUEPRINTS.size()).append(" original wand constructs (")
                 .append(CONSTRUCT_BLUEPRINTS.keySet().stream().filter(NATIVE_RECIPE_IDS::containsKey).count())
                 .append(" of them anchored on a native blueprint), ")
@@ -213,6 +232,24 @@ public final class ResearchRecipeCoverage {
         ids.put("BlockFlesh", "thaumcraft:flesh_block");
         ids.put("BlockTallow", "thaumcraft:tallow_block");
         ids.put("BlockThaumium", "thaumcraft:thaumium_block");
+        // The original registers sixteen banner recipes (ConfigRecipes:184-189); the research book
+        // shows them as an ARRAY of recipes, so they carry no recipe key of their own.
+        ids.put("Banner_0", "thaumcraft:arcane/banner_white");
+        ids.put("Banner_1", "thaumcraft:arcane/banner_orange");
+        ids.put("Banner_2", "thaumcraft:arcane/banner_magenta");
+        ids.put("Banner_3", "thaumcraft:arcane/banner_light_blue");
+        ids.put("Banner_4", "thaumcraft:arcane/banner_yellow");
+        ids.put("Banner_5", "thaumcraft:arcane/banner_lime");
+        ids.put("Banner_6", "thaumcraft:arcane/banner_pink");
+        ids.put("Banner_7", "thaumcraft:arcane/banner_gray");
+        ids.put("Banner_8", "thaumcraft:arcane/banner_light_gray");
+        ids.put("Banner_9", "thaumcraft:arcane/banner_cyan");
+        ids.put("Banner_10", "thaumcraft:arcane/banner_purple");
+        ids.put("Banner_11", "thaumcraft:arcane/banner_blue");
+        ids.put("Banner_12", "thaumcraft:arcane/banner_brown");
+        ids.put("Banner_13", "thaumcraft:arcane/banner_green");
+        ids.put("Banner_14", "thaumcraft:arcane/banner_red");
+        ids.put("Banner_15", "thaumcraft:arcane/banner_black");
         ids.put("BoneBow", "thaumcraft:arcane/bone_bow");
         ids.put("BootsTraveller", "thaumcraft:infusion/boots_traveller");
         ids.put("BottleTaint", "thaumcraft:crucible/bottle_taint");
@@ -329,6 +366,14 @@ public final class ResearchRecipeCoverage {
         ids.put("PlankGreatwood", "thaumcraft:greatwood_planks");
         ids.put("PlankSilverwood", "thaumcraft:silverwood_planks");
         ids.put("PrimalCharm", "thaumcraft:arcane/primal_charm");
+        // The original registers six primal arrow recipes (ConfigRecipes:217-220); the research book
+        // shows them as an ARRAY of recipes, so they carry no recipe key of their own.
+        ids.put("PrimalArrow_0", "thaumcraft:arcane/primal_arrow_air");
+        ids.put("PrimalArrow_1", "thaumcraft:arcane/primal_arrow_fire");
+        ids.put("PrimalArrow_2", "thaumcraft:arcane/primal_arrow_water");
+        ids.put("PrimalArrow_3", "thaumcraft:arcane/primal_arrow_earth");
+        ids.put("PrimalArrow_4", "thaumcraft:arcane/primal_arrow_order");
+        ids.put("PrimalArrow_5", "thaumcraft:arcane/primal_arrow_entropy");
         ids.put("PrimalCrusher", "thaumcraft:infusion/primal_crusher");
         ids.put("PureGold", "thaumcraft:crucible/pure_gold");
         ids.put("PureIron", "thaumcraft:crucible/pure_iron");
@@ -435,8 +480,30 @@ public final class ResearchRecipeCoverage {
         return Collections.unmodifiableMap(ids);
     }
 
-    private static Map<String, String> buildConstructBlueprints() {
-        Map<String, String> blueprints = new LinkedHashMap<>();
+    /**
+     * The original research pages that show an ARRAY of recipes.
+     *
+     * <p>Original ConfigResearch:194-199 and :216-220: the BANNERS page holds the sixteen banner
+     * recipes and the PRIMALARROW page the six primal arrow recipes.</p>
+     */
+    private static Map<String, List<String>> buildPageRecipeArrays() {        Map<String, List<String>> arrays = new LinkedHashMap<>();
+        List<String> banners = new ArrayList<>();
+        for (int index = 0; index < 16; index++) banners.add("Banner_" + index);
+        arrays.put("BANNERS", List.copyOf(banners));
+        List<String> arrows = new ArrayList<>();
+        for (int index = 0; index < 6; index++) arrows.add("PrimalArrow_" + index);
+        arrays.put("PRIMALARROW", List.copyOf(arrows));
+        return Collections.unmodifiableMap(arrays);
+    }
+
+    /** The original recipe keys that no research page names by key. */
+    private static Set<String> buildOutsideBook() {
+        Set<String> keys = new TreeSet<>();
+        PAGE_RECIPE_ARRAYS.values().forEach(keys::addAll);
+        return Collections.unmodifiableSet(keys);
+    }
+
+    private static Map<String, String> buildConstructBlueprints() {        Map<String, String> blueprints = new LinkedHashMap<>();
         blueprints.put("AdvAlchemyFurnace", "original 3x2x3 wand construct, anchored on the native arcane/advanced_alchemical_construct blueprint (ConfigRecipes:100)");
         blueprints.put("ArcTable", "original 1x2x1 wand construct: wand + arcane table (ConfigRecipes:85)");
         blueprints.put("Crucible", "original 1x2x1 wand construct: wand + bucket (ConfigRecipes:87)");

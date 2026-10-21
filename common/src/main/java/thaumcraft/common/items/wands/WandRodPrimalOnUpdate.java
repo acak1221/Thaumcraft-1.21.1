@@ -44,19 +44,22 @@ public final class WandRodPrimalOnUpdate {
     public void onUpdate(ItemStack stack, Player player) {
         if (stack == null || stack.isEmpty() || player == null) return;
         WandData before = ItemWandCasting.data(stack);
-        WandData after = aspect == null ? anyPrimal(before, player) : fixedAspect(before, player);
+        // Original WandRodPrimalOnUpdate:34 and :40 measure against getMaxVis of the stack itself,
+        // so a sceptre refills up to one and a half times the capacity of its rod.
+        int capacity = ItemWandCasting.getMaxVis(stack);
+        WandData after = aspect == null ? anyPrimal(before, capacity, player) : fixedAspect(before, capacity, player);
         if (after != before) stack.set(ThaumcraftContent.WAND_DATA.get(), after);
     }
 
-    private WandData fixedAspect(WandData wand, Player player) {
+    private WandData fixedAspect(WandData wand, int capacity, Player player) {
         int amount = wand.amount(aspect);
-        int refilled = RunicBaubleRules.fixedAspectRefill(player.tickCount, wand.capacity(), amount, aspect);
+        int refilled = RunicBaubleRules.fixedAspectRefill(player.tickCount, capacity, amount, aspect);
         return refilled == amount ? wand : wand.withAmount(aspect, refilled);
     }
 
-    private WandData anyPrimal(WandData wand, Player player) {
+    private WandData anyPrimal(WandData wand, int capacity, Player player) {
         Map<String, Integer> vis = wand.vis();
-        RunicBaubleRules.AnyPrimalRefill refill = RunicBaubleRules.anyPrimalRefill(player.tickCount, wand.capacity(), vis,
+        RunicBaubleRules.AnyPrimalRefill refill = RunicBaubleRules.anyPrimalRefill(player.tickCount, capacity, vis,
                 player.getRandom()::nextInt);
         if (!refill.due()) return wand;
         return wand.withAmount(refill.aspect(), refill.amount());

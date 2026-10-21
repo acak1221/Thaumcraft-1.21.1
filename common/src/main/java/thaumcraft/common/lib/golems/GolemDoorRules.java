@@ -15,8 +15,11 @@ public final class GolemDoorRules {
     /**
      * Original {@code AIDoorInteract.func_75250_a}:47 — the scan of the points of the current path.
      *
-     * <p>The loop of the original runs from zero to {@code Math.min(currentPathIndex + 2, pathLength)},
-     * so the golem looks at the points it is about to reach and at the two points behind them.</p>
+     * <p>The original loop is
+     * {@code for (int i = 0; i < Math.min(path.getCurrentPathIndex() + 2, path.getPathLength()); ++i)},
+     * so the <b>two</b> is added to the index of the point the golem stands on and the
+     * {@code Math.min} clamps the result against the length of the path: a path that is shorter
+     * than the index never produces a point outside of itself.</p>
      *
      * @param currentPathIndex the index of the point the golem is standing on
      * @param pathLength       the number of points of the path

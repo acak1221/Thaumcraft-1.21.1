@@ -224,6 +224,12 @@ here so that the leader can decide about them.
 | `MaskGrinningDevil` | component `Items.dye` metadata 0 | `minecraft:ink_sac` | the port keeps the ink of the mask |
 | `TinyVisor`, `TinyArmor` | component `Items.iron_helmet` / `Items.iron_chestplate` (any wear) | `minecraft:leather_helmet` / `minecraft:leather_chestplate` | the port accepts leather armour of any wear and no iron one; the game test `GolemDecorationsRuntimeChecks` states that position |
 
+The native item ids of three recipes differ from the original names, but the display names are
+the original ones: `thaumcraft:key_iron` and `thaumcraft:key_gold` are the iron and the gold
+arcane key (the original `itemKey` metadata 0 and 1), `thaumcraft:golem_core_essentia` is the
+"Golem Animation Core: Alchemy" (the original `itemGolemCore` metadata 6) and
+`thaumcraft:unknown_research_note` is the research note (the original `itemResearchNotes`).
+
 The four potions of the runic accessories are not deviations: the original names them by their 1.7
 metadata (8226, 8233, 8257, 16428) and the port names them by their 1.21.1 effect with a
 component predicate (`InfusionPotionRequirement`), which is the exact same potion.

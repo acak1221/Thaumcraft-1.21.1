@@ -20315,11 +20315,16 @@
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:405-416 AIRY_GROUP_HARDNESS {0,2,100,-1} and AIRY_GROUP_RESISTANCE {0,200,50,MAX}",
           "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:63-66 lightOf() uses the same per variant light table",
           "oracle thaumcraft/common/blocks/BlockAiry.java:206-230 the replaceable and leaves metadata sets",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:385-402 airyReplaceable/airyIsLeaves reproduce them"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:385-402 airyReplaceable/airyIsLeaves reproduce them",
+          "oracle thaumcraft/common/blocks/BlockAiry.java:196-197 the render type is minus one, the 1.7.10 airy family is not drawn at all",
+          "oracle thaumcraft/common/blocks/BlockAiry.java:275-289 a tile is created for the metadata 0, 1 and 5 only, the other metadata get none although the class is a BlockContainer",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:115 the render shape stays RenderShape.INVISIBLE, the original answer",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:186 the block entity is decided per state, only the warding fence has a tile in the port"
         ],
         "notes": [
           "the 13 metadata values became a VARIANT block state property; the node, the nitor, the energised node and the holes also exist as their own native blocks",
-          "the family sound stayed the cloth/wool sound type"
+          "the family sound stayed the cloth/wool sound type",
+          "The airy family keeps the invisible answer of the original, the block is not drawn as a block."
         ],
         "reviewed_sha256": {
           "original": "861f381f7327e65c676a4bce22cd9abd790ccd10b754b0ddd4f3a93920009538",
@@ -20451,12 +20456,15 @@
           "oracle thaumcraft/common/blocks/BlockArcaneDoor.java:67 setResistance(999.0f)",
           "oracle thaumcraft/common/blocks/BlockArcaneDoor.java:68 setHardness(Config.wardedStone ? -1.0f : 15.0f)",
           "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneDoor.java:73 getDestroyProgress returns zero while the warded stone option is on",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the door with the effective blast resistance 599.4"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the door with the effective blast resistance 599.4",
+          "oracle thaumcraft/common/blocks/BlockArcaneDoor.java:109-110 the 1.7.10 door answers the render type seven of the doors and is not drawn as a normal block",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneDoor.java:71 the render shape is RenderShape.MODEL again, the port draws the door with its own models"
         ],
         "notes": [
           "The four metadata values of the original became the native block states of one door block (facing, open, half, flip).",
           "CLOSED since the first audit: the hardness follows the warded stone option again - the door is unbreakable while the option is on and has the hardness 15 otherwise.",
-          "The blast resistance keeps the effective value of the original: the 1.7.10 setter value 999 is stored as 2997 and the vanilla getter divides it by five, so the native registers 599.4."
+          "The blast resistance keeps the effective value of the original: the 1.7.10 setter value 999 is stored as 2997 and the vanilla getter divides it by five, so the native registers 599.4.",
+          "The invisible arcane door of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block."
         ],
         "reviewed_sha256": {
           "original": "f79bb0aaceb2d7020a10fdf84c8fab8fd5f194da0fc927d9e491b286efdd474b",
@@ -20688,11 +20696,16 @@
           "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:66 setResistance(5.0f)",
           "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:67 setHardness(1.5f)",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:343 the hardness 1.5",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:344 the effective blast resistance 3.0"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:344 the effective blast resistance 3.0",
+          "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:68-69 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockCosmeticOpaqueRenderer.java:77",
+          "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:190-192 and :221-223 the owned tile is created for the metadata two only, the amber block and the amber brick get no tile",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticOpaque.java:115 the render shape is RenderShape.MODEL again",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticOpaque.java:176 the block entity is decided per state, so the amber block and the amber brick are moved by a piston like in the original"
         ],
         "notes": [
           "The metadata values became separate native blocks (ThaumcraftEldritchBlocks).",
-          "CLOSED since the first audit: the numbers are the effective ones of the original - hardness 1.5 and the blast resistance 5*3/5 = 3.0; the 1.7.10 setter stores three times its argument and the vanilla getter divides the stored value by five."
+          "CLOSED since the first audit: the numbers are the effective ones of the original - hardness 1.5 and the blast resistance 5*3/5 = 3.0; the 1.7.10 setter stores three times its argument and the vanilla getter divides the stored value by five.",
+          "The invisible amber block of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block."
         ],
         "reviewed_sha256": {
           "original": "f9054d0400f73a7c23ac34726e4ecc61b961d4c79faebb3da8cb16c398cd6dd9",
@@ -20776,11 +20789,16 @@
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:227-238 the light (9 for md 2, 4 for md 14)",
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:240-252 the explosion resistance (999 for md 0/1/8, 20 for md 4/6/7)",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:204-241 reproduces all three tables",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:213-215 binds them to three native hardness groups"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:213-215 binds them to three native hardness groups",
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:52 the 1.7.10 class extends net.minecraft.block.Block and does not override getRenderType(), so the vanilla render type zero draws the model of the stone",
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:259-265 hasTileEntity(int) is true for the metadata three (the warding stone) and eight (the node) only",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticSolid.java:120 the render shape is RenderShape.MODEL again, because BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticSolid.java:169 and common/src/main/java/thaumcraft/common/blocks/PerStateBlockEntity.java the block entity is decided per state, so the fourteen stones without a tile are moved by a piston like in the original"
         ],
         "notes": [
           "1.21.1 binds the hardness to the block, so the per metadata hardness became three groups (EldritchBlockRules.COSMETIC_GROUP_HARDNESS)",
-          "the base blast resistance was correctly converted from the 1.7.10 setter value 10 to the effective 6"
+          "the base blast resistance was correctly converted from the 1.7.10 setter value 10 to the effective 6",
+          "The invisible stone of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block, so the family was drawn as nothing although the models of the port are in the assets."
         ],
         "reviewed_sha256": {
           "original": "8c0daef5ad9249901f6ae31fb75b8f44e6e2efe35ef09cba84ea1991389edc62",
@@ -21356,12 +21374,17 @@
           "oracle thaumcraft/common/blocks/BlockEldritch.java:78-94 the icon table obsidiantile/es_i_1/es_i_2/deco_1/deco_2/deco_3/es_5..es_8",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:43-100 the same light, hardness and resistance tables",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:104 the metadata to hardness group map {0,0,0,0,1,1,2,3,3,4,4,5}",
-          "native common/src/main/resources/assets/thaumcraft/blockstates/eldritch.json:2-17 variants 0..3 and the crust, deco, doorway, spawner and crystal block states"
+          "native common/src/main/resources/assets/thaumcraft/blockstates/eldritch.json:2-17 variants 0..3 and the crust, deco, doorway, spawner and crystal block states",
+          "oracle thaumcraft/common/blocks/BlockEldritch.java:140-141 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockEldritchRenderer.java:86",
+          "oracle thaumcraft/common/blocks/BlockEldritch.java:120-122 hasTileEntity(int) is true for the metadata 0, 1, 3, 8, 9 and 10 only",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:141 the render shape is RenderShape.MODEL again, the tile renderer of the port only adds the cap of the altar, the lock and the crab spawner",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:208 the block entity is decided per state, so the stones without a tile are moved by a piston like in the original"
         ],
         "notes": [
           "1.21.1 binds the hardness to the block and not to the block state, so the eleven original metadata values became six blocks of one class.",
           "Every original metadata 0..10 is still reachable: 0..3 on thaumcraft:eldritch, 4..5 on eldritch_crust, 6 on eldritch_deco, 7..8 on eldritch_doorway, 9..10 on eldritch_spawner.",
-          "Every original texture is kept: obsidiantile for 0..3, es_i_1, es_i_2, deco_1, deco_2, deco_3, crust and es_5..es_8."
+          "Every original texture is kept: obsidiantile for 0..3, es_i_1, es_i_2, deco_1, deco_2, deco_3, crust and es_5..es_8.",
+          "The invisible eldritch stone of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block."
         ],
         "reviewed_sha256": {
           "original": "c0fe5d502a2b6ea6246f92270a3498622de1454e0638e15da3a0899ce10f66d8",
@@ -21447,12 +21470,17 @@
           "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:93-100 the block entity only exists while the block is exposed",
           "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:102-106 eight damage for everything that is not a fresh entity",
           "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:108-111 the collision box inset by an eighth",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchNothing.java the exposed state, the empty selection box and the eight damage"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchNothing.java the exposed state, the empty selection box and the eight damage",
+          "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:57-58 the render type is minus one, the 1.7.10 block is not drawn at all and the void is drawn by the tile renderer",
+          "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:61-63 hasTileEntity(int) is true for the metadata one only, the exposed filler",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchNothing.java:47 the render shape stays RenderShape.INVISIBLE, the original answer",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchNothing.java:60 the block entity is decided per state, so the covered filler is moved by a piston like in the original"
         ],
         "notes": [
           "CLOSED since the first audit: the behaviour was compared line by line. The native block has the empty selection box, the collision box inset by an eighth, the eight damage for every entity that is not fresh and not invulnerable, the exposed state that carries the block entity and the light level 3.",
           "Forced 1.21.1 change: 1.21.1 has no per block renderer, so the original client renderer of the invisible wall was replaced by a block state with an exposed flag.",
-          "The native has no item for the block, so the pick block answer of the original (null) is the 1.21.1 default."
+          "The native has no item for the block, so the pick block answer of the original (null) is the 1.21.1 default.",
+          "The block was invisible in the port for the same reason as the visible blocks, and here the answer is the original one: the void is not drawn as a block."
         ],
         "reviewed_sha256": {
           "original": "8ab7f1e86efc35e8958b48e9fdaf8f32464359323ffeaf0343c3ea255ea607fa",
@@ -21497,10 +21525,13 @@
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockEldritchPortal.java:115-128 the gate survives only between two eldritch blocks",
           "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:60-68 the same neighbour rule",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:44-51 the tile ticker of the gate"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:44-51 the tile ticker of the gate",
+          "oracle thaumcraft/common/blocks/BlockEldritchPortal.java:78-79 the render type is minus one, the 1.7.10 gate is not drawn as a block and the gate is drawn by the tile renderer",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:39 the render shape stays RenderShape.INVISIBLE, the original answer"
         ],
         "notes": [
-          "The 1.7 self updating tile became a block entity ticker; the survival rule and the missing collision are kept."
+          "The 1.7 self updating tile became a block entity ticker; the survival rule and the missing collision are kept.",
+          "The gate keeps the invisible answer of the original, the block is not drawn as a block."
         ],
         "reviewed_sha256": {
           "original": "c9dc61d34ebe0dcbdd09bff60c685ba5a7ec9da860e2e7a9a4d06abe9cac22f3",
@@ -22210,11 +22241,14 @@
           "oracle thaumcraft/common/blocks/BlockMagicBox.java:71-85 the right click opens the box interface",
           "oracle thaumcraft/common/blocks/BlockMagicBox.java:87-91 every magic box carries the inventory block entity",
           "native common/src/main/java/thaumcraft/common/blocks/BlockMagicBox.java:41 the ticker of the box",
-          "native common/src/main/java/thaumcraft/common/tiles/TileMagicBox.java the linking of the boxes"
+          "native common/src/main/java/thaumcraft/common/tiles/TileMagicBox.java the linking of the boxes",
+          "oracle thaumcraft/common/blocks/BlockMagicBox.java:22 the 1.7.10 class extends net.minecraft.block.BlockContainer and does not override getRenderType(), so the vanilla render type zero draws the box",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMagicBox.java:41 the render shape is RenderShape.MODEL again"
         ],
         "notes": [
           "CLOSED since the first audit: the block registers the ticker of the box tile, so the tile ticks, refreshes its links and the box chain links as in the original.",
-          "The right click opens the menu with the size of the linked chain and the broken box drops its whole content."
+          "The right click opens the menu with the size of the linked chain and the broken box drops its whole content.",
+          "The invisible magic box of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block."
         ],
         "reviewed_sha256": {
           "original": "b1411f5732fc063df75a0168c56a266eb555026c3531c883fc02b3df491ebd14",
@@ -22486,11 +22520,14 @@
           "oracle thaumcraft/common/blocks/BlockMetalDevice.java:101 setHardness(3.0f)",
           "oracle thaumcraft/common/blocks/BlockMetalDevice.java:102 setResistance(17.0f)",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:572 the hardness 3.0",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:573 the effective blast resistance 10.2"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:573 the effective blast resistance 10.2",
+          "oracle thaumcraft/common/blocks/BlockMetalDevice.java:145-146 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockMetalDeviceRenderer.java:182",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMetalDevice.java:62 the render shape is RenderShape.MODEL again"
         ],
         "notes": [
           "The 15 metadata values were split into separate native blocks (crucible, alembic, alchemy furnace, advanced furnace, thaumatorium, nitor, grate, brainbox).",
-          "CLOSED since the first audit: the blast resistance is the effective value of the original - the 1.7.10 setter value 17 is stored as 51 and the vanilla getter divides it by five, so the native registers 10.2 for every block of the family."
+          "CLOSED since the first audit: the blast resistance is the effective value of the original - the 1.7.10 setter value 17 is stored as 51 and the vanilla getter divides it by five, so the native registers 10.2 for every block of the family.",
+          "The invisible metal device of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block."
         ],
         "reviewed_sha256": {
           "original": "ef73fe617a959d7542f80ee53cc314457dd3685ec626403ce4f735f6fd73457b",
@@ -22573,11 +22610,14 @@
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockMirror.java the mirror of the original",
           "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:107 the ticker of the mirror",
-          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java the eject, the instability and the repair of the link"
+          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java the eject, the instability and the repair of the link",
+          "oracle thaumcraft/common/blocks/BlockMirror.java:79-80 the render type is minus one, the 1.7.10 mirror is not drawn as a block and the pane and the tunnel are drawn by the tile renderer",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:76 the render shape stays RenderShape.INVISIBLE, the original answer"
         ],
         "notes": [
           "The metadata facing became a block state property, as documented in the class comment.",
-          "CLOSED since the first audit: the block registers the ticker of the mirror tile, so the tile ejects, decays its instability and repairs its link exactly as in the original."
+          "CLOSED since the first audit: the block registers the ticker of the mirror tile, so the tile ejects, decays its instability and repairs its link exactly as in the original.",
+          "The mirror keeps the invisible answer of the original, the pane and the tunnel are drawn by the tile renderer."
         ],
         "reviewed_sha256": {
           "original": "5820c14fa88fe9132f506779b467ef2cec3feb4673dde2ff80172d7304a8a92e",
@@ -22827,11 +22867,14 @@
           "oracle thaumcraft/common/blocks/BlockStoneDevice.java:93 setHardness(3.0f)",
           "oracle thaumcraft/common/blocks/BlockStoneDevice.java:94 setResistance(25.0f)",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:592 the hardness 3.0",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:593 the effective blast resistance 15.0"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:593 the effective blast resistance 15.0",
+          "oracle thaumcraft/common/blocks/BlockStoneDevice.java:69-70 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockStoneDeviceRenderer.java:172",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockStoneDevice.java:58 the render shape is RenderShape.MODEL again"
         ],
         "notes": [
           "The metadata values were split into separate native blocks.",
-          "CLOSED since the first audit: the blast resistance is the effective value of the original - the setter value 25 is stored as 75 and the vanilla getter divides it by five, so the native registers 15.0."
+          "CLOSED since the first audit: the blast resistance is the effective value of the original - the setter value 25 is stored as 75 and the vanilla getter divides it by five, so the native registers 15.0.",
+          "The invisible stone device of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block."
         ],
         "reviewed_sha256": {
           "original": "8fcf6dd1ada422f66c74735351a956310209714c482ac6c5a922b5ec320fa881",
@@ -23354,11 +23397,15 @@
           "oracle thaumcraft/common/blocks/BlockWoodenDevice.java:82 setHardness(2.5f)",
           "oracle thaumcraft/common/blocks/BlockWoodenDevice.java:83 setResistance(10.0f)",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:575 the hardness 2.5",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:577 the effective blast resistance 6.0"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:577 the effective blast resistance 6.0",
+          "oracle thaumcraft/common/blocks/BlockWoodenDevice.java:200-201 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockWoodenDeviceRenderer.java:145",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockWoodenDevice.java:65 the render shape is RenderShape.MODEL again",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockArcanePressurePlate.java:72 the arcane pressure plate, the metadata two and three of the wooden device, is drawn as its model again"
         ],
         "notes": [
           "The metadata values were split into separate native blocks (arcane door, magic box, bellows, banner, arcane bore).",
-          "CLOSED since the first audit: the blast resistance is the effective value of the original - the setter value 10 is stored as 30 and the vanilla getter divides it by five, so the native registers 6.0."
+          "CLOSED since the first audit: the blast resistance is the effective value of the original - the setter value 10 is stored as 30 and the vanilla getter divides it by five, so the native registers 6.0.",
+          "The invisible wooden device of the client was a defect of the port: BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block."
         ],
         "reviewed_sha256": {
           "original": "37ba842678298b50252afb8055dcb552d870f2ae1812054f435be150ace97865",

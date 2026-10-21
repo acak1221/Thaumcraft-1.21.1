@@ -91,6 +91,10 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         // and labels must come from this stack, never a synthetic world tile.
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftContent.JAR.get(), JarItemRenderer::render);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftContent.VOID_JAR.get(), JarItemRenderer::render);
+        // Original ItemThaumometerRenderer: the thaumometer is the three
+        // dimensional scanner of the original, not a flat sprite.
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftContent.THAUMOMETER.get(),
+                thaumcraft.client.renderers.item.ItemThaumometerRenderer::render);
         // Original ItemBannerRenderer: the banner item carries its colour and its
         // aspect and is drawn with the banner model instead of a plain cube.
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftEldritchBlocks.BANNER_ITEM.get(),

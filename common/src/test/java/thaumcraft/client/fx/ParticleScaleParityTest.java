@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.PushReaction;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import thaumcraft.client.fx.particles.MonsterSpriteParticle;
 import thaumcraft.client.fx.particles.PrimalWispParticle;
@@ -36,6 +39,12 @@ import thaumcraft.common.tiles.TileCrucible;
  * the taint, the flux gas and the flux goo.</p>
  */
 class ParticleScaleParityTest {
+    /** The 1.21.1 registries need the bootstrap before a block state can be read. */
+    @BeforeAll static void bootstrap() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+    }
+
     @Test void theWispMoteKeepsTheOriginalHalfSize() {
         // The original wisp entity trail uses the size 0.1f, the primal orb trail the size 0.4f.
         assertEquals(0.05F, MonsterSpriteParticle.moteHalfSize(.1F), 1.0E-6);

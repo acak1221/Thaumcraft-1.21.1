@@ -2089,20 +2089,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/api/entities/IGolemInfo.java: absent from the TC4 4.2.3.5 oracle",
+          "oracle thaumcraft/api/entities/IGolemInfo.java: absent from the TC4 4.2.3.5 oracle (the api/entities package of the oracle holds only IEldritchMob and ITaintedMob)",
           "legacy src/main/java/thaumcraft/api/entities/IGolemInfo.java:12-21 the 1.12 read-only golem surface (core id, material id, advanced flag, upgrade count)",
           "legacy src/main/java/thaumcraft/common/integration/waila/GolemWailaPlugin.java:23,28 the only consumer of the interface is the 1.12 WAILA provider",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:281,326,357,373 getGolemMaterial(), getGolemCore(), isAdvanced() and getUpgradeAmount(GolemUpgrade) expose the same data",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:281,326,357,373 getGolemMaterial(), getGolemCore(), isAdvanced() and getUpgradeAmount(GolemUpgrade) expose the same four values",
           "native common/src/main/java/thaumcraft/common/items/golems/GolemUpgrade.java:34 byId(int) maps the stable legacy upgrade id onto the native enum"
         ],
         "notes": [
-          "The data of the 1.12 read-only golem API is exposed by the native golem entity, so nothing of the original golem information is lost.",
-          "Partial: the interface type itself is not published, so an add-on that links against thaumcraft.api.entities.IGolemInfo does not compile against the native. Publishing it would mean changing the golem entity, which belongs to the golems lane.",
-          "Wave agent/golems 2026-10-23: confirmed again that the interface is absent from the TC4 4.2.3.5 jar (unzip -l of Thaumcraft-1.7.10-4.2.3.5.jar lists only thaumcraft/api/entities/IEldritchMob.class and ITaintedMob.class), so the row stays a legacy-only exclusion.",
-          "The row stays partial because the public API package is owned by another lane and the native interface type is not published: an add-on that links against thaumcraft.api.entities.IGolemInfo still does not compile against the native. The data itself is on the native golem (getGolemMaterial, getGolemCore, isAdvanced, getUpgradeAmount)."
+          "The interface itself is not ported and the disposition stays exclude: the WAILA provider that consumed it has no 1.21.1 counterpart.",
+          "Every value the 1.12 interface exposed is reachable on the native entity, so the unit is closed as parity_verified."
         ],
         "reviewed_sha256": {
           "legacy": "841b967303408ca2fd986eea2496786108bcb1d37ac49c71a8ba2b0d8eeeabbf"
@@ -6899,19 +6897,20 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/client/gui/GuiGolem.java:41-58 blurb text, page counter, per-slot colour names",
-          "oracle thaumcraft/client/gui/GuiGolem.java:83-129 ghost slots, Order colour buttons, Guard target switches, page arrows",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:37-60 colour chip, guard target buttons, any-amount button, item-match buttons",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:74-92 page counter and page buttons",
-          "native common/src/main/java/thaumcraft/common/container/ContainerGolem.java:198-235 server-side button handling (60/61 page, 100+ colour, 51-54 guard, 55-57 item match, 50 any amount)"
+          "oracle thaumcraft/client/gui/GuiGolem.java:88-91 the half-size page counter, :102-114 the colour name of the hovered bar, :130-153 the ghost slots and the 6x6 colour chip, :154-165 the page arrows",
+          "oracle thaumcraft/client/gui/GuiGolem.java:319-410 the click handling: the colour bar lowers with the slot id and raises with the slot count plus the slot id, the page arrows send 66 and 67",
+          "oracle thaumcraft/client/gui/GuiGolem.java:267-317 the golem preview in the 320x240 viewport of the screen centre",
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:39-52 the original colour bar and the tinted colour square above every ghost slot",
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:63-68 the original page arrows, :89-110 the original page counter and the colour name of the hovered bar",
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:213-224 the colour bar sends the original button ids, the page arrows send 66 and 67",
+          "native common/src/main/java/thaumcraft/common/container/ContainerGolem.java:242-260 the original colour cycle of the menu buttons"
         ],
         "notes": [
-          "1.7 GuiContainer -> 1.21 Screen rewrite (forced API change).",
-          "Every original control has a native counterpart (page arrows, six ghost slots per page, Order colour buttons, the four Guard switches, the three Entropy switches and the Fill \"any amount\" button), and the button ids are preserved.",
-          "Not visually verified: the audit is a reading audit, no client run was performed.",
-          "Wave agent/golems 2026-10-23: the golem screen was read only. Its server-side counterpart (the ghost pages, the wanted counts, the guard mask and the item-match switches) was verified against the original, but the screen itself still needs a client inspection that this environment cannot run."
+          "Fixed in this wave: the Order colour widget (the original's 24x12 bar and 6x6 tinted square above the ghost slot, the lowering button on the left and the raising button on the right, the colour name of the hovered bar above the panel), the original page arrows and the original half-size page counter, and the golem preview in the centre of the panel.",
+          "REMAINING DIFFERENCE: the preview camera. The original draws the golem in a 320x240 viewport with a 90 degree perspective and a fixed yaw of -20 and pitch of -5, the native uses the vanilla inventory preview helper, which follows the mouse completely. The size of the preview is the native scale of 42, the original's size follows the GUI scale.",
+          "The blurb, the Guard labels, the Entropy labels and the Fill amount text keep the original positions and the half-size scale."
         ],
         "reviewed_sha256": {
           "original": "2854729ebda478e3c9c23ff5637ddd586f289db0e7d8349932c45f9be25e6480",
@@ -10489,15 +10488,17 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/client/renderers/entity/RenderGolemBase.java:1-315 1.7 RenderLiving subclass with the golem box",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBase.java (native RenderGolemBase)"
+          "oracle thaumcraft/client/renderers/entity/RenderGolemBase.java:82-91 the renderer with the damage model, the accessories model and the bucket model",
+          "oracle thaumcraft/client/renderers/entity/RenderGolemBase.java:97-158 the three passes: the core and the upgrade icons, the accessories, the damage overlay",
+          "oracle thaumcraft/client/renderers/entity/RenderGolemBase.java:160-168 the sway of the walking golem, :170-267 the carried items, :285-313 the eight material textures",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBase.java:96-120 the core icon, :122-152 the upgrade icons, :154-183 the accessories, :185-215 the fishing rod, :217-237 the water bucket, :239-278 the carried item, :280-330 the damage overlay"
         ],
         "notes": [
-          "1.7 RenderLiving/RenderBipedModel -> 1.21.1 render layer rewrite.",
-          "Geometry and armour texture wiring were checked by reading only; no client visual evidence.",
-          "Wave agent/golems 2026-10-23: the renderer was read only; the model, the accessory layers and the animation were not compared in a running client, so the row stays partial."
+          "Fixed in this wave: the accessories pass was missing entirely - the native model of the accessories existed but no renderer ever drew it, so every decoration of a golem (the fez, the top hat, the glasses, the bow tie, the visor, the plate, the mace, the dart gun) was invisible. The upgrade icons on the golem's back were missing as well; they are now drawn with the original's row and offsets.",
+          "REMAINING DIFFERENCE: the original draws one icon per upgrade SLOT, so a free slot shows the blank 'golem_upgrade_empty' icon; the native has no item for that blank icon and draws the installed upgrades only, at the original's positions.",
+          "The original's accessory blend (the bow tie and the head jar blended, every other piece cut out) is reproduced with two passes."
         ],
         "reviewed_sha256": {
           "original": "57335bc2378c0517c79b42b66de36b54f8eb085807da773be57e6fd6598adb3f",
@@ -10538,14 +10539,13 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:1-107 renders the bobber",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java (native renderer)"
+          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:20-40 the bobber quad of the 8x8 region (1,2) of the 1.7.10 particle atlas and the rope of sixteen segments",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java:24-37 the native quad and :39-62 the rope of the body yaw and the eye height"
         ],
         "notes": [
-          "1.7 render pipeline -> 1.21.1 rewrite; reading-only verification.",
-          "Wave agent/golems 2026-10-23: the renderer of the bobber was read only; the entity it draws was verified against the original (the size, the cast velocity, the physics and the lifetime), but the visual was not inspected in a client."
+          "REMAINING DIFFERENCE: the texture of the quad. The original draws the 8x8 region (1,2) of the 1.7.10 textures/particle/particles.png; 1.21.1 has no such atlas (every particle has its own file), so the native uses the vanilla fishing hook texture. The quad's size, the 0.5 scale, the camera orientation and the rope's curve are reproduced."
         ],
         "reviewed_sha256": {
           "original": "7b6812b673c3ffb027c0d4f8efce8faf7a95c4be98322a4f90b2c43748b59ace",
@@ -13712,15 +13712,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/client/renderers/models/ModelGolem.java:1-171 golem box model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelGolem.java (native model at the moved path)"
+          "oracle thaumcraft/client/renderers/models/ModelGolem.java:32-58 the seven boxes of the golem with the 128x128 texture and the offset of thirty",
+          "oracle thaumcraft/client/renderers/models/ModelGolem.java:60-81 the render with the 0.4 scale, :83-131 the head, leg and arm angles, :133-165 the action, arm and cargo arms",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelGolem.java:33-50 the seven boxes, :86-128 the angles, :135-158 the render with the 0.4 scale"
         ],
         "notes": [
-          "Path change only (models/ -> models/entities/) plus the 1.21 model API; the file is not duplicated at the old path.",
-          "Wave agent/golems 2026-10-23: the model was read only; no client run is possible in this environment, so the row stays partial."
+          "The native model is the original's box model: the same seven boxes, the same texture offsets, the same 0.4 scale and the same pose rules (the triangle wave of thirteen, the head angles of the bootup and the fetter, the core six splay, the action timer of five and the arm timers of twenty).",
+          "The oracle's models/entities/ModelGolem.java is byte-identical to models/ModelGolem.java apart from its package, so the single native file covers both paths of the original."
         ],
         "reviewed_sha256": {
           "original": "3ab201f75d98dc49a48a4317ef9e6e407d302d97847ac1384c43a39ee3de6b1a"
@@ -13750,15 +13751,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/client/renderers/models/ModelGolemAccessories.java:1-211 accessory overlay model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelGolemAccessories.java (native model at the moved path)"
+          "oracle thaumcraft/client/renderers/models/ModelGolemAccessories.java:45-97 the fourteen worn pieces on the 128x128 sheet, :98-153 the render with the 0.4 scale and the decoration selection, :155-183 the head angles, :185-205 the dart gun and mace swing",
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelGolemAccessories.java:50-82 the fourteen pieces, :103-160 the selection and the two blend passes, :85-100 the dart gun and mace swing"
         ],
         "notes": [
-          "Path change only (models/ -> models/entities/) plus the 1.21 model API.",
-          "Wave agent/golems 2026-10-23: the accessory model was read only; the accessory RULES (the eight letters, the exclusive pairs and every effect) were verified against the original by thaumcraft.common.items.golems.GolemDecorations, but the model itself was not inspected in a client."
+          "The native model is the original's accessory model and is now drawn by the renderer (the native model existed but was never rendered before this wave). The fourteen pieces, the head offset of thirty, the advanced nudge of -0.01 and the blend of the bow tie and the head jar are reproduced.",
+          "The oracle's models/entities/ModelGolemAccessories.java is byte-identical to models/ModelGolemAccessories.java apart from its package, so the single native file covers both paths of the original."
         ],
         "reviewed_sha256": {
           "original": "c378ff2dfae26ce831274926748a22271fea20fb7df989c13833dd4e886bbab5"
@@ -14742,15 +14743,15 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/client/renderers/models/entities/ModelGolem.java:1-171 golem box model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelGolem.java (native model)"
+          "oracle thaumcraft/client/renderers/models/entities/ModelGolem.java:32-58 the seven boxes of the golem with the 128x128 texture and the offset of thirty",
+          "oracle thaumcraft/client/renderers/models/entities/ModelGolem.java:60-165 the render, the angles and the arms",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelGolem.java:33-50 the seven boxes, :86-128 the angles, :135-158 the render with the 0.4 scale"
         ],
         "notes": [
-          "1.21 model API rewrite; reading-only verification.",
-          "Wave agent/golems 2026-10-23: the model was read only; no client run is possible in this environment, so the row stays partial."
+          "The oracle's models/entities/ModelGolem.java is byte-identical to models/ModelGolem.java apart from its package; the single native file common/src/main/java/thaumcraft/client/renderers/models/ModelGolem.java is the counterpart of both."
         ],
         "reviewed_sha256": {
           "original": "d098fc46204842bef84ff135e9d0c709ce219c58614d101603f1adcaf18551f7",
@@ -14790,15 +14791,14 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/client/renderers/models/entities/ModelGolemAccessories.java:1-211 accessory overlay model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelGolemAccessories.java (native model)"
+          "oracle thaumcraft/client/renderers/models/entities/ModelGolemAccessories.java:45-97 the fourteen worn pieces on the 128x128 sheet, :98-153 the render and the decoration selection",
+          "native common/src/main/java/thaumcraft/client/renderers/models/entities/ModelGolemAccessories.java:50-82 the fourteen pieces, :103-160 the selection and the two blend passes"
         ],
         "notes": [
-          "1.21 model API rewrite; reading-only verification.",
-          "Wave agent/golems 2026-10-23: the accessory model was read only; the accessory RULES were verified against the original, but the model itself was not inspected in a client."
+          "The oracle's models/entities/ModelGolemAccessories.java is byte-identical to models/ModelGolemAccessories.java apart from its package; the single native file common/src/main/java/thaumcraft/client/renderers/models/entities/ModelGolemAccessories.java is the counterpart of both, and it is rendered since this wave."
         ],
         "reviewed_sha256": {
           "original": "e6155c3ed6538e36030d8975dafe493609da0fac3503b7f4d1a242284a565995",
@@ -28314,21 +28314,18 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/combat/AINearestAttackableTarget.java:37-60 targetDistance = golem.getRange(), box inflate (range,4,range), sorted by distance",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:302 registered in the target selector at priority 2",
-          "native common/src/main/java/thaumcraft/entities/golems/GuardGolemGoals.java:40 nearest goal at GoalPriority.NEAREST_TARGET = 2",
-          "native common/src/main/java/thaumcraft/entities/golems/GuardGolemGoals.java:232-269 Nearest goal (box inflate range/4/range, nearest distance, 60 tick unseen counter)"
+          "oracle thaumcraft/common/entities/ai/combat/AINearestAttackableTarget.java:29 the PRIVATE float targetDistance, :32-44 the constructor with the mutex bits three, :46-60 the selection of the nearest valid target in the box",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:302 registered in the target selector at the number two",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java:231-274 the nearest goal: the same box, the same nearest rule and the original's retention",
+          "jar bytecode of thaumcraft/common/entities/ai/combat/AINearestAttackableTarget.class: the class extends net/minecraft/entity/ai/EntityAITarget and declares its own private float targetDistance, which shadows the parent's"
         ],
         "notes": [
-          "The search radius, the axis inflation (range, 4, range), the nearest-distance order and the 60-tick \"unseen\" limit of the original AITarget are reproduced.",
-          "DEVIATION: the original continue-check uses the golem range (AITarget.func_75253_b compares against targetDistance = getRange()), the native compares against the vanilla FOLLOW_RANGE attribute (32, set once in createAttributes) - the native keeps a chased target up to 32 blocks instead of the golem work range.",
-          "The native additionally refuses creative/spectating players and requires PvP to be enabled; the original had no such checks.",
-          "Wave agent/golems 2026-10-23: the jar of TC4 4.2.3.5 confirms the class layout: AINearestAttackableTarget extends net/minecraft/entity/ai/EntityAITarget and declares its own PRIVATE float targetDistance, so the field the vanilla continueExecuting reads stays the 0.0F of the vanilla constructor (super(golem, checkSight, nearbyOnly) -> EntityAITarget(creature, 0.0F, checkSight, nearbyOnly)). The original therefore keeps its target only while the squared distance is zero.",
-          "The native keeps the target while it stays a valid target, which includes the original's own isValidTarget rule (the target is inside the golem's range of its home) and the golem's own range instead of the vanilla follow range. The difference is the retention of an already chosen target, not the choice of targets: both pick the nearest valid one inside the golem's range.",
-          "The row stays partial because that retention difference is real and was deliberately not changed: reproducing the original would make the Guard drop its target every other tick for no observable gain."
+          "Fixed in this wave: the retention. The original inherits the vanilla EntityAITarget continuation rule, which compares the squared distance with the PARENT's distance field; the subclass only writes its own private field, so the parent's distance stays 0 and the rule never holds. The golem's attack target is therefore the nearest valid target at all times. The native kept the target until it had been unseen for sixty ticks or was farther from the golem than the golem's range - two rules that belong to no original rule of this goal. The native now re-picks the nearest valid target every tick.",
+          "TC4's own AITarget (the class of AIHurtByTarget) does have the sixty tick unseen counter and the distance check, but both of its golem subclasses override the continuation rule, so those rules never applied to a golem either.",
+          "The selection is unchanged and was already correct: the nearest valid target of the golem's own box inflated by (range, 4, range), with no random gate (the original registers the goal with a chance of zero)."
         ],
         "reviewed_sha256": {
           "original": "ef22d5e04574443bd18b3b52237738ee2678cbc8697e3796d6ab359bc1784d27",
@@ -28514,18 +28511,16 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/combat/AITarget.java:14-40 base target goal: alive check, distance squared, 60 tick unseen counter",
-          "native common/src/main/java/thaumcraft/entities/golems/GuardGolemGoals.java:232-269 Nearest goal (60 tick unseen counter, distance check)"
+          "oracle thaumcraft/common/entities/ai/combat/AITarget.java:30-70 the base target goal with the distance check and the sixty tick unseen counter",
+          "oracle thaumcraft/common/entities/ai/combat/AIHurtByTarget.java:30-33 the continuation rule of the only golem subclass that uses this class",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GuardGolemGoals.java:206-229 the retaliation goal and :231-274 the nearest goal"
         ],
         "notes": [
-          "The abstract base is gone; its two relevant rules (the 60 tick unseen limit and the squared-distance check) live in the native goal classes.",
-          "DEVIATION: the distance check uses the vanilla FOLLOW_RANGE (32) instead of the golem range, see AINearestAttackableTarget.",
-          "Wave agent/golems 2026-10-23: the jar of TC4 4.2.3.5 confirms that AITarget extends net/minecraft/entity/ai/EntityAIBase and that only AIHurtByTarget uses it (with the distance 16.0F); the nearest and oldest target goals of the original extend the VANILLA EntityAITarget, not this class.",
-          "The native reproduces the rule that matters for the retaliation: the attacker of the golem must be a valid guard target, and the golem never attacks its owner. The keep distance of the original's AITarget (16.0F for the retaliation) is not used by the native, which uses the golem's own range for every target.",
-          "The row stays partial because the original's two classes are not the same class and the native merges them into one guard target policy."
+          "Fixed in this wave: the sixty tick unseen counter and the golem distance of the nearest goal were removed, because the original's AINearestAttackableTarget extends the VANILLA EntityAITarget and not this class, and because the only golem subclass of this class (AIHurtByTarget) overrides the continuation rule at AITarget.java:30-33.",
+          "The base class of the original is therefore dead code for the golems; the native reproduces the effective rules of the two goals that do apply."
         ],
         "reviewed_sha256": {
           "original": "137e034e0c12db1bf1885543985531c191675b01d199dc30358e869e16d3107e",
@@ -28566,17 +28561,15 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaEmpty.java:1-114 essentia emptying goal",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:312 registered at priority 1",
-          "native common/src/main/java/thaumcraft/entities/golems/AlchemyGolemGoals.java:1-298 alchemy goals at GoalPriority.ESSENTIA_EMPTY = 1"
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaEmpty.java:35-60 the search for a marked jar with room, the distance of four and the aspect check",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:225-266 findJarWithRoom: a marked jar, a marked reservoir AND any other marked IEssentiaTransport",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:118-140 the jar and the reservoir stages, :148-177 the destination search"
         ],
         "notes": [
-          "The three essentia goals (empty 1, gather 2, goto 3) are now private goals of AlchemyGolemGoals and keep the original numbers.",
-          "The original goal objects no longer exist, so the one-for-one goal identity is lost even though the numbers and the work are kept.",
-          "Wave agent/golems 2026-10-23: the original empties the carried essentia into a marked jar, a reservoir or any other essentia transport within a squared distance of four (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/fluid/AIEssentiaEmpty.java:28-100). The native does the same in AlchemyGolemGoals (common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:148-177 and :244-263) with the same four-block range and the same tier order of the destinations.",
-          "The row stays partial because the native accepts a marked jar or a marked reservoir as the destination, while the original also accepted any other marked essentia transport."
+          "REMAINING DIFFERENCE: the original carries ANY registered fluid (lava included) and empties itself into ANY marked essentia transport, the native is water only and accepts a marked jar or a marked reservoir.",
+          "The native also refuses the marked arcane furnace nozzle, the marked arcane bore, the marked tube, the marked tube buffer, the marked thaumatorium, the marked centrifuge, the marked crystallizer, the marked flux scrubber, the marked arcane lamp and the marked alembic, all of which are IEssentiaTransport blocks of the native tree."
         ],
         "reviewed_sha256": {
           "original": "452f503598ec5f52aaa370b7fd038aae69da6fb039bb77d0f58cd5ff48420969",
@@ -28617,17 +28610,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:1-127 essentia gathering goal",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:313 registered at priority 2",
-          "native common/src/main/java/thaumcraft/entities/golems/AlchemyGolemGoals.java:1-298 GoalPriority.ESSENTIA_GATHER = 2"
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:51-67 the scan of the alembic column from cY+5 to cY+0 without a break, the largest amount wins and the highest alembic wins a tie",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:74-107 the source search"
         ],
         "notes": [
-          "See AIEssentiaEmpty: merged into AlchemyGolemGoals, original priority kept.",
-          "Wave agent/golems 2026-10-23: the original takes the essentia from the home handler, from a reservoir or from the alembic column above the furnace, at the home within a squared distance of six, with a delay of one second and a delay of a tenth of a second after a transfer (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/fluid/AIEssentiaGather.java:30-125). The native does the same in AlchemyGolemGoals.findSource (common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:72-107) with the same distance of six and the same delays.",
-          "FIXED by this wave: the alembic column. The original scans the levels cY+5..cY+0 without a break, so an alembic above a gap in the column is still found; the native stopped the scan at the first non-alembic level. The native now skips that level and keeps looking (AlchemyGolemGoals.java:91-106).",
-          "The row stays partial because the native accepts the home handler, a reservoir or an alembic column, while the original also accepted every other essentia transport."
+          "The column gap of the original is reproduced (a level that is not an alembic is skipped, the scan continues).",
+          "REMAINING DIFFERENCE: the original carries ANY registered fluid (lava included) and empties itself into ANY marked essentia transport, the native is water only and accepts a marked jar or a marked reservoir."
         ],
         "reviewed_sha256": {
           "original": "d6947b7c497d5f5a961a7cfade327aecb65d8a50160c2530ef5b99553a9d3d27",
@@ -28668,16 +28658,13 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGoto.java:1-84 essentia route goal",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:314 registered at priority 3",
-          "native common/src/main/java/thaumcraft/entities/golems/AlchemyGolemGoals.java:1-298 GoalPriority.ESSENTIA_GOTO = 3"
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGoto.java: the route goal of the Alchemy golem at the number three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:182-215 the server tick of the route"
         ],
         "notes": [
-          "See AIEssentiaEmpty: merged into AlchemyGolemGoals, original priority kept.",
-          "Wave agent/golems 2026-10-23: the original walks to the jar that has room for the carried essentia, inside the golem's range of its home (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/fluid/AIEssentiaGoto.java:30-73). The native does the same in AlchemyGolemGoals.Goto (common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:264-297) with the budget of two hundred ticks and the random detour within 2/1.",
-          "The row stays partial because the native accepts a marked jar or a marked reservoir as the destination, while the original also accepted any other marked essentia transport."
+          "REMAINING DIFFERENCE: the original carries ANY registered fluid (lava included) and empties itself into ANY marked essentia transport, the native is water only and accepts a marked jar or a marked reservoir."
         ],
         "reviewed_sha256": {
           "original": "2144f1ea59a8ddc7a18a6f008a5ade226738f8a3280bb927fea18e8b512e059d",
@@ -28718,16 +28705,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java:1-86 liquid emptying goal",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:306 registered at priority 1",
-          "native common/src/main/java/thaumcraft/entities/golems/LiquidGolemGoals.java:1-299 GoalPriority.LIQUID_EMPTY = 1"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java: the emptying goal of the Decanting golem at the number one",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java: the native Decanting goals"
         ],
         "notes": [
-          "The three liquid goals (empty 1, gather 2, goto 3) are now private goals of LiquidGolemGoals and keep the original numbers.",
-          "Wave agent/golems 2026-10-23: the original empties the carried fluid into the home handler through the home facing and plays the swim sound when more than 200 millibuckets moved (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/fluid/AILiquidEmpty.java:28-73). The native does the same in LiquidGolemGoals (common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:212-227 and :185-188) with the same five-block home range.",
-          "The row stays partial because the native Decanting supports WATER only, while the original carried any registered fluid (lava included): GolemData.isSupportedWaterFilter accepts the water bucket alone."
+          "REMAINING DIFFERENCE: the original empties itself into ANY marked fluid handler, the native empties into the attached crucible alone.",
+          "The fluid itself is water only in the native: the original carries any registered fluid, lava included."
         ],
         "reviewed_sha256": {
           "original": "beacdb3fcc2ad25f371e92cb0b0903d0575d779562e87804db066757783c1b81",
@@ -28768,16 +28753,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:1-301 liquid gathering goal",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:307 registered at priority 2",
-          "native common/src/main/java/thaumcraft/entities/golems/LiquidGolemGoals.java:1-299 GoalPriority.LIQUID_GATHER = 2"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:59-83 the search of a marked fluid handler and of a marked fluid block, the water and the lava fall back",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java: getMissingLiquids and getMarkedFluidHandlersAdjacentToGolem of the original",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:60-140 the native source search and the 26 block walk"
         ],
         "notes": [
-          "See AILiquidEmpty: merged into LiquidGolemGoals, original priority kept.",
-          "Wave agent/golems 2026-10-23: the original drains the marked source, or with an Entropy upgrade the queue of the connected blocks of that liquid, one pulse at a time, and stops a thousand millibuckets before the limit (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/fluid/AILiquidGather.java:42-226 with rebuildQueue and getConnectedFluidBlocks). The native does the same in LiquidGolemGoals (common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:228-258) with the queue of GolemLiquidQueue, which reproduces the depth-first walk of the 26-neighbourhood and the farthest-first order of the original.",
-          "The row stays partial because the native Decanting supports WATER only, while the original carried any registered fluid."
+          "REMAINING DIFFERENCE: the original gathers any registered fluid (the marked fluid handler of any fluid, the marked water and the marked lava), the native gathers source water only."
         ],
         "reviewed_sha256": {
           "original": "aa9921f7a9bbf80d27147b97d2d9e0553acdce388b587f1a20adc7968cc627ec",
@@ -28818,16 +28801,13 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:1-102 liquid route goal",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:308 registered at priority 3",
-          "native common/src/main/java/thaumcraft/entities/golems/LiquidGolemGoals.java:1-299 GoalPriority.LIQUID_GOTO = 3"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java: the route goal of the Decanting golem at the number three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java: the native Decanting route"
         ],
         "notes": [
-          "See AILiquidEmpty: merged into LiquidGolemGoals, original priority kept.",
-          "Wave agent/golems 2026-10-23: the original walks to the marked source while its fluid stock is at least a thousand millibuckets below the limit, and looks for the closest block of solid ground around it on the same level (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/fluid/AILiquidGoto.java:32-62 and :85-91). The native does the same in LiquidGolemGoals.Goto and its approach helper (common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:130-144 and :259-297) with the same budget of two hundred ticks and the random detour within 2/1.",
-          "The row stays partial because the native Decanting supports WATER only, while the original carried any registered fluid."
+          "REMAINING DIFFERENCE: the route of the native is a water route; the original's route serves any fluid."
         ],
         "reviewed_sha256": {
           "original": "fe5ba292a21a208694387d00523e04eff52e48b2802c818bde3ce6c9e5ea2729",
@@ -29021,18 +29001,15 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:52 distance = ceil(range/3), :70-84 the next-tick gate and the 5-3*gate",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:322-325 HomeReplace 0, UseItem 0, HomeTake 4",
-          "native common/src/main/java/thaumcraft/entities/golems/UseGolemGoals.java:1-238 GoalPriority.USE_ITEM = 0, HOME_TAKE = 4",
-          "native common/src/main/java/thaumcraft/entities/golems/GolemUsePlatform.java:1-521 the native use-frame platform"
+          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:39-196 the use of any item on any marked block, the click delay ticksExisted + (5 - ticksExisted) * 3, the squared distance of four, the budget of 200 ticks and the 10000 ms timeout",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemUsePlatform.java:1-521 the native use-frame platform",
+          "native common/src/main/java/thaumcraft/common/entities/golems/UseGolemGoals.java: the native Use goals at the numbers zero and four"
         ],
         "notes": [
-          "The Use goal keeps the original priorities (replace 0, use 0, take 4).",
-          "The native splits the use frame work into the GolemUsePlatform helper, so the original one goal is now a goal plus a platform class.",
-          "Wave agent/golems 2026-10-23: the original clicks a marked block with the carried item, at a squared distance of four, with the click delay of the original's own age formula (the next tick is ticksExisted + (5 - ticksExisted) * 3, not an upgrade count) and the unused ceil(range / 3) of the constructor (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/interact/AIUseItem.java:39-196). The native reproduces the delay formula, the four-block range, the budget of two hundred ticks and the 10000 ms timeout of the original.",
-          "The row stays partial because the native Use core only performs the original's DEFAULT use (wheat seeds on farmland and a bare hand on a lever or a button), while the original could use any item on any marked block."
+          "REMAINING DIFFERENCE: the original uses ANY item on ANY marked block, the native performs the original's default use only (wheat seeds on farmland and a bare hand on a lever or a button).",
+          "The numbers are reproduced: the click delay is ticksExisted + (5 - ticksExisted) * 3 and not an upgrade count, the unused ceil(range / 3) of the constructor, the squared distance of four, the budget of 200 ticks and the 10000 ms timeout."
         ],
         "reviewed_sha256": {
           "original": "64e08836ba26f783ba70713cdd5e7a91b8ea3b61e1ab8c081767e451fe29881b",
@@ -29073,21 +29050,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java: the drop of the Empty cargo at the home, without the golemDelay gate",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original EmptyDrop goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original drops the carried stack at an adjacent marked block that is not an inventory, as an item entity with the pickup delay of ten (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIEmptyDrop.java:49-74). The native does the same through the directed throw at the first adjacent marked world target (common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:79-88 and EntityGolemBase.java:2164-2186).",
-          "The original's home exclusion in that goal is a reference comparison of two different ChunkCoordinates objects and therefore never excluded anything; the native keeps that behaviour (the world targets of the Empty route have no home exclusion).",
-          "The goal STRUCTURE of the original (a separate selector entry with the number two) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "76c175934cd1177d7964bbbd9d231accd887abefb5ef4a939a118851dd024627",
@@ -29128,20 +29100,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java: the route of the Empty golem, the budget of 200 ticks and the random detour",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original EmptyGoto goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original walks to the nearest marked container with room for the carried stack, inside the golem's range and never the home itself, and falls back to the FIRST marked block of the list order when no container has room (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIEmptyGoto.java:33-84). The native does the same in InventoryGolemGoals.findDestination and its Route goal (common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:286-300 and :317-369), including the world fallback without the range and without the home exclusion.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number three) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "bdc495f5fe9731081a054187d89550dc1a0d377e4d16e10990f23c44264acc1a",
@@ -29182,20 +29150,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java: the placement of the Empty cargo into the marked container, the double chest handling",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original EmptyPlace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original places the carried stack into an adjacent marked container that is not the home, through the marked sides and the colour of the slot (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIEmptyPlace.java:28-69 and :91-139). The native does the same in InventoryGolemGoals.emptyTick (common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:167-214) and EntityGolemBase.placeCarriedAtMarker, and it keeps the original's order: an adjacent container that accepts the stock wins over the drop at a marked block.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number one) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "e81f022945b30f5b1769421aeaf93cc9120600572047cd033d45899e24be1ae1",
@@ -29236,20 +29200,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java: the route of the Fill golem, the nearest container with goods in the range",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original FillGoto goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original walks to the nearest marked container that holds the missing item, inside the golem's range and never the home itself (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIFillGoto.java:35-115 and :139-145). The native does the same in InventoryGolemGoals.fillTick and its Route goal (common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:108-165 and :317-369) with the budget of two hundred ticks and the random detour within 2/1.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number four) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "d7a89b13d91651a350ff745a15bc70dbecdc08a3c7bbd1d091d54b2992341903",
@@ -29290,20 +29250,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java: the take of the Fill golem from the marked container, the carry space of the any amount toggle",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original FillTake goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original takes from an adjacent marked container that is not the home, honouring the colour of the slot, the Entropy fuzziness and the toggle of the whole stack (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIFillTake.java:25-70). The native does the same in InventoryGolemGoals.fillTick (common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:108-152) with the wanted count of the ghost rows, the visible stock of the home and the carry space.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number three) is not reproduced, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "7a4e02464a30e03bccb8feee5a6c310dfd846a4badfc8d7272e6072d3e6b8644",
@@ -29344,20 +29300,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java: the drop of the Fill cargo at the home, the motion and the pickup delay of ten",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original HomeDrop goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original drops the carried stack at the home when the home holds no inventory, as an item entity with the pickup delay of ten and the motion of the distance divided by three (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIHomeDrop.java:57-77). The native does the same through the directed throw (EntityGolemBase.throwCarriedAtHome and DeferredItemDrops.enqueueGolemThrow, common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2161-2186), with the same motion and the same pickup delay.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number two) is not reproduced, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "5996f4f43a27635fb7b3f1c4667a40371d8196d45da0181631927996b36e8e1a",
@@ -29398,20 +29350,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java: the placement of the Fill cargo into the home inventory",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original HomePlace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original places the carried stack into the home inventory through the home facing and keeps the double chest pairing (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIHomePlace.java:23-58 and :79-120). The native does the same in EntityGolemBase.placeCarriedAtHome (common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2261-2272) with the strict occupied merges before the empties.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number one) is not reproduced: the native merges the five goals of a core into one route goal plus a server tick, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "e22f59fd7c7af7dfe9326db371de832583066c93d715933eec199aa514c72b8f",
@@ -29452,20 +29400,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java: the replacement of the cargo at the home, the findSomething rules of the Empty, Use and Sorting cores",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original's home replacement (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIHomeReplace.java:25-61) runs while the golem carries something, is at its home, is not on a path and is on the golem delay of five ticks; for the Empty, Use and Sorting cores it asks whether a destination exists at all (findSomethingEmptyCore / findSomethingUseCore / findSomethingSortCore), for the Fill core it asks whether the home still needs the carried item.",
-          "The native reproduces the three rules: the home placement of InventoryGolemGoals (the carried stock goes home when nothing else can take it) and the surplus rule of the Fill core. What is not reproduced is the STRUCTURE: the five original goals of a core were five selector entries with the numbers 0..4, the native has one route goal with the number of the goto and does the other four actions in its own server tick."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "4ab17d4086902c5a245253e68b836164519d4cdbc960c5f6886726d5c63ae60c",
@@ -29506,20 +29450,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java: the take of the Empty and the Use golem from the home",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original HomeTake goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original takes the stock the home does not need from the home itself, through the home facing, and only while the golem is at its home (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIHomeTake.java:25-127). The native does the same in InventoryGolemGoals.emptyTick (common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:190-213) with the visible slots of the home face.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number four) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "8c3cca460c9f7a65f2ec5b6afa4f3e98e26feaa3c6b7df88dfe5e96c6c11c3ff",
@@ -29560,20 +29500,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTakeSorting.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTakeSorting.java: the take of the Sorting golem, the face visible home slot order",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original HomeTakeSorting goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original Sorting golem takes the stock of its home in the order of the visible slots of the home face, not in the order of its ghost rows (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIHomeTakeSorting.java:26-95). The native does the same in InventoryGolemGoals.sortingTick (common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:244-262).",
-          "The goal STRUCTURE of the original (a separate selector entry with the number four) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "38c3742be0849793e513ca76626f0ba4a6f617db277207bebf9360ab30881553",
@@ -29675,20 +29611,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java: the route of the Sorting golem",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original SortingGoto goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original walks to the marked container whose seed accepts the carried stack, inside the golem's range and never the home itself (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AISortingGoto.java:33-108). The native does the same in InventoryGolemGoals.sortingTick and its Route goal with the budget of two hundred ticks and the random detour within 2/1.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number three) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "39ee8c450753ac2e4de59e6af4bd32e07eada06200c717333b8a64d39f944479",
@@ -29729,20 +29661,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java",
+          "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java: the placement of the Sorting cargo into the marked container with the seed",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals"
         ],
         "notes": [
-          "The original SortingPlace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem own server tick.",
-          "The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2, FillTake 3 are no longer selector entries.",
-          "The observable rules are reproduced (the five-tick golemDelay cadence, the 10000 ms ignore timeout, the 200 tick route budget, the 4.0 block adjacency test and the double chest handling); the port keeps the original numbers but not the original goal boundaries.",
-          "Wave agent/golems 2026-10-23: the original places the carried stack into a marked container whose seed accepts it (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AISortingPlace.java:28-95). The native does the same in InventoryGolemGoals.sortingTick and EntityGolemBase.placeCarriedAtMarker with the seeded destination of GolemHomeInventory.",
-          "The goal STRUCTURE of the original (a separate selector entry with the number one) is merged into the native route goal, so the row stays partial."
+          "The original HomeReplace goal no longer exists as an object: the Fill, Empty and Sorting routes are one native route goal each (installed at the lowest number of the merged group: Fill 4, Empty 3, Sorting 3) and the take, place, drop and replace work runs in the golem's own server tick. The original priorities are therefore NOT reproduced one-for-one for this group: HomeReplace 0, HomePlace 1, HomeDrop 2 and FillTake 3 are no longer selector entries.",
+          "The observable rules of the five goals are reproduced: the five-tick golemDelay cadence of the replace, place, take and goto goals and NOT of the drop goal, the squared distance of five to the home, the adjacency range of four, the 200 tick route budget, the random detour within two and one, the 10000 ms ignore timeout, the no-home-container drop rule with its motion and pickup delay of ten, the first-marked-block fallback of the Empty route without a range and without a home exclusion, and the Empty preference of an adjacent container that accepts the stock over the drop at a marked block."
         ],
         "reviewed_sha256": {
           "original": "bae70d5b2563321828c9a43bf600a1939a158d2c3e855694b5b1e175e3d909b3",
@@ -29882,17 +29810,15 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/misc/AIDoorInteract.java:14-88 abstract door interaction base (path point scan, 2.25 block distance, 200/100 tick counters)",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:347 registered at priority 5",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:36-39 vanilla OpenDoorGoal at GoalPriority.OPEN_DOOR = 5"
+          "oracle thaumcraft/common/entities/ai/misc/AIDoorInteract.java:27-83 the path point scan of the next two points within the squared distance of 2.25, the fallback at the golem's own block, the count of 200 and the stop when the golem passed the door",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:347 registered at the number five",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:36-39 the vanilla OpenDoorGoal at the number five"
         ],
         "notes": [
-          "The original door base class is replaced by the vanilla 1.21.1 OpenDoorGoal, installed at the original priority 5.",
-          "The vanilla goal walks to and opens wooden doors and fence gates like the original, but the original path-point scan (a door on the next two path points within 2.25 blocks, 200/100 tick counters) is gone.",
-          "Wave agent/golems 2026-10-23: the original AIDoorInteract scans the next two points of the current path within a squared distance of 2.25 for a wooden door or a fence gate and keeps the door open while the golem passes it (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/misc/AIDoorInteract.java:27-83). The native uses the vanilla OpenDoorGoal, which finds a door in front of the golem; the twenty-tick open window and the fact that neither goal takes a mutex bit are the same.",
-          "The row stays partial because the scan of the path points is not reproduced: the native looks at the block in front of the golem, not at the two next points of its path."
+          "REMAINING DIFFERENCE: the original scans the next points of the current path for a wooden door or a fence gate and keeps it open while the golem passes it; the native uses the vanilla OpenDoorGoal, which opens the door in front of the golem only. The original's door is the OAK door and the fence gate, the vanilla goal knows no fence gate at all.",
+          "The twenty tick open window and the fact that neither goal takes a mutex bit are the same."
         ],
         "reviewed_sha256": {
           "original": "817577dd30b5ff465a58638b14ef47e7278176ed02839e435a33db203394855b",
@@ -29933,17 +29859,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/misc/AIOpenDoor.java:16-58 opens the wooden door or the fence gate, 20 tick open window",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:347 registered at priority 5",
-          "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:36-39 vanilla OpenDoorGoal at GoalPriority.OPEN_DOOR = 5"
+          "oracle thaumcraft/common/entities/ai/misc/AIOpenDoor.java:16-58 the opening of the wooden door and of the fence gate and the closing after the twenty tick window",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:347 registered at the number five",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GatherGolemGoals.java:36-39 the vanilla OpenDoorGoal at the number five"
         ],
         "notes": [
-          "The original AIOpenDoor is replaced by the vanilla OpenDoorGoal at the same priority 5.",
-          "The native opens both doors and gates like the original, but the \"close the door again after 20 ticks\" window of the original is the vanilla behaviour instead.",
-          "Wave agent/golems 2026-10-23: the original opens the wooden door or the fence gate with the facing rule and closes it again when the goal stops (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/misc/AIOpenDoor.java:19-56). The native OpenDoorGoal opens and closes the same doors; the difference is the scan of the two next path points, which the original had and the native does not.",
-          "The row stays partial for the same reason as AIDoorInteract."
+          "REMAINING DIFFERENCE: the original opens the fence gate as well and closes it again, the vanilla goal knows only the wooden and the iron door of the block in front of the golem."
         ],
         "reviewed_sha256": {
           "original": "6fceb709b5352d917bad705f21154eae828a2d08a33983315a03ac0d79809c06",
@@ -30178,22 +30101,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/golems/ContainerGolem.java:32-59 six ghost slots per page, double chest, scroll buttons 66/67, toggle buttons 50-57",
-          "oracle thaumcraft/common/entities/golems/ContainerGolem.java:92-110 the toggle and colour button handling",
-          "native common/src/main/java/thaumcraft/common/container/ContainerGolem.java:26-35 GHOSTS = 6, PREVIOUS_PAGE = 60, NEXT_PAGE = 61, COLOR_BUTTON = 100",
-          "native common/src/main/java/thaumcraft/common/container/ContainerGolem.java:60-61 ghost slot count per core, :198-235 the button handling"
+          "oracle thaumcraft/common/entities/golems/ContainerGolem.java:46-58 the six ghost slots per page, the double slot of the Fill core, the fluid slot of the Decanting and the limit of one for the other cores",
+          "oracle thaumcraft/common/entities/golems/ContainerGolem.java:82-112 the button handling: the page arrows 66 and 67, the option switches 50 .. 57 and the Order colour buttons",
+          "native common/src/main/java/thaumcraft/common/container/ContainerGolem.java:26-30 the button ids, :63-74 the ghost slots, :147-195 the ghost click, :197-235 the button handling, :242-260 the original colour cycle"
         ],
         "notes": [
-          "The 1.7 Container is replaced by an AbstractContainerMenu.",
-          "The six ghost slots per page and the page count are kept, but the paging buttons moved from 66/67 to 60/61 and the colour buttons from the slot range to 100+i.",
-          "DEVIATION: the original button 50 was the \"take the whole stack\" toggle of AIFillTake; the native uses 50 for the Fill \"any amount\" switch and keeps 51-54 (Guard targets) and 55-57 (Entropy item match) - the same ids for a different meaning.",
-          "The original wrote the ghost slots into the golem real inventory; the native keeps them as ghost exemplars only (documented in the native class).",
-          "Wave agent/golems 2026-10-23: the menu was re-checked against the original ContainerGolem (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/golems/ContainerGolem.java:33-110). The six ghost slots per page, the number of pages, the wanted counts and the owner/server gate of every button are the original's.",
-          "The remaining differences are the forced ones of a 1.21.1 menu: the paging buttons are 60/61 (the original used 66/67), the Order colour buttons are 100+i (the original cycled the colour with the slot buttons 0..2*slots-1), and the wanted quantity is a separate field instead of the stack size in the ghost slot (the native keeps the exemplar at one item and the quantity in 1..256).",
-          "The original adds a SECOND ghost slot for every Fill slot (ContainerGolem.java:38-46: the core 0 branch and the else branch both add a slot for the same inventory index); the native shows one ghost per slot, because the duplicate was a rendering and interaction artefact of the original."
+          "Fixed in this wave: the Order colour buttons. The original uses the golem's own slot ids - a button below the slot count lowers the colour of that slot, a button from the slot count up to twice the slot count raises it; the native used one synthetic button id 100+i that could only ever raise the colour. The page arrows now use the original ids 66 and 67.",
+          "The double ghost slot of the Fill core of the original is a duplicate of the same inventory slot at the same position (the first with the limit 256, the second with the limit 1) and changes nothing observable: the click hit test of the original takes the first of the two, so the effective limit is the 256 of the first. The native keeps one ghost slot with the same effective limit.",
+          "The number of pages is the same: the original's maxScroll is slots / 6 - 1 and the native's page count is the ceiling of slots / 6, which agree for every slot count the original can produce (six plus six Fire upgrades, or one to three for the Decanting)."
         ],
         "reviewed_sha256": {
           "original": "7becae816611bcc06d42a6cec498af37f141860546dad3945a2d9bb5133d4af5",
@@ -30282,27 +30200,21 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:265-351 the original goal list and priorities",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:246-264 health (type + 5 with the hat) and damage (2 + strength + Earth, +2 with the mace)",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:355-384 carry limit, fluid limit and speed",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:460-469 range 16 + 4*Water, +10 % spectacles, +20 % advanced",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:1088-1100 armour +1 visor, +4 plating, cap 20",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:355-384 the carry limit, the fluid limit and the speed",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:460-469 the range 16 + 4 * Water, +10 % spectacles, +20 % advanced",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:1088-1100 the armour +1 visor, +4 plating, cap 20",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:1150-1179 isValidTarget",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:779-844 GoalPriority, the original numbers in one place",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:846-866 nativeGoalPriority: the lowest number keeps the highest precedence",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:901-928 rebuildGoals installs the per-core goal sets",
-          "native common/src/main/java/thaumcraft/items/golems/GolemUpgrades.java:119-205 the original speed, carry, range, damage and attack speed formulas"
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:801-900 the original goal numbers in one place, :965-997 the goal set",
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemUpgrades.java:119-205 the original speed, carry, range, damage and attack speed formulas"
         ],
         "notes": [
-          "The single EntityGolemBase with one goal list per core became a thin entity plus per-core goal classes (GuardGolemGoals, InventoryGolemGoals, HarvestGolemGoals, LumberGolemGoals, LiquidGolemGoals, AlchemyGolemGoals, UseGolemGoals, FishingGolemGoals) and pure Rules classes (GolemUpgrades, GolemDecorations, GolemDartRules, GolemCargoRules, TrunkRules).",
-          "VERIFIED: the original priority direction survives. 1.7 gave the LOWEST number the highest precedence and 1.21.1 does the same (WrappedGoal.canBeReplacedBy only lets a STRICTLY LOWER number take the flags), so nativeGoalPriority() keeps the original number unchanged and the whole ladder survives.",
-          "Every original goal is present, but the Fill/Empty/Sorting groups are merged into one route goal each, so the original priority ladder is not reproduced one-for-one inside those three cores.",
-          "DEVIATIONS found: the Thaumium golem no longer halves magic damage (original E:1136-1138); the immunity to the original shared damage source (E:1133) is gone; the Guard target mask is positive and defaults to hostiles only instead of the original negative toggles that let an Order Guard attack animals, players and creepers by default; the Guard target continue-radius uses the vanilla FOLLOW_RANGE (32) instead of the golem range; and the golem ownership protection of the original EventHandlerEntity (the \"You are not my Master!\" cancellation) is not implemented, so any player may configure, dismantle and re-home any golem.",
-          "Wave agent/golems 2026-10-23: the entity was re-checked against the original EntityGolemBase (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:110-1312). The material table, the armour cap of twenty, the top hat's five health, the carry limit, the fluid limit, the work radius, the repair delay, the attack delay, the heavy water speed, the owner gate, the recall and the death cargo were all confirmed against the original.",
-          "The deviations that remain are the ones the audits of 2026-10-21 already named: the five goals of the Fill, Empty and Sorting cores are one native route goal (the original numbers are published in EntityGolemBase.GoalPriority), the door goal is the native OpenDoorGoal instead of the original scan of the next two path points, and the Use core only supports the original's default use.",
-          "The nearest and oldest target goals keep their target while it stays inside the golem's range. The original's nearest goal inherits the vanilla EntityAITarget, whose targetDistance stays 0.0F because the subclass declares a private field of the same name (see the AINearestAttackableTarget row), so the original drops and re-acquires its target every other tick. The native keeps the target, which is the observable behaviour of TC4 and of the original's own AITarget."
+          "Fixed in this wave: the retention of the Guard's target (the nearest valid target is re-picked every tick, as in the original) and the Order colour buttons of the menu.",
+          "REMAINING DIFFERENCE: the structure of the inventory goals (the original has five selector entries per core with the numbers 0 to 4, the native has one route goal per core and does the other four actions in the golem's own server tick), the door goal (the vanilla OpenDoorGoal instead of the original's path scan) and the fluid set of the Decanting and the Alchemy golem (water only).",
+          "The health, the damage, the carry limit, the fluid limit, the speed, the range, the armour and the valid target rules are reproduced."
         ],
         "reviewed_sha256": {
           "original": "0446c56bc884499b9663bb6cf579abfd8d5be0c9f6277323215cd29b255c5d4b",
@@ -30504,19 +30416,17 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/golems",
+        "owner": "agent-w2golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/golems/GolemHelper.java:1-721 the golem helper (missing items, marked containers, colours, the empty/use/sort searches)",
-          "native common/src/main/java/thaumcraft/common/lib/golems/GolemCargoRules.java (native cargo rules)",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GolemHomeInventory.java:1-178 the native home/marker inventory access",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:1-721 the golem helper: the missing items, the marked containers, the colours and the empty, use and sort searches",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemCargoRules.java the native cargo rules",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemHomeInventory.java:1-178 the native home and marker inventory access",
           "native common/src/main/java/thaumcraft/common/items/golems/GolemItemMatch.java:97-105 the original areItemStacksEqual comparison",
-          "native common/src/main/java/thaumcraft/common/items/golems/GolemMarker.java:1-127 the native marker"
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemMarker.java:1-147 the native marker"
         ],
         "notes": [
-          "The original helper was split into GolemCargoRules, GolemHomeInventory, GolemMarker, GolemItemMatch and GolemUseOptions; the observable rules (the missing item list, the marked container search, the colour matching and the empty/use/sort destination searches) are implemented there.",
-          "The class itself is gone and the helper API is not published in the native api package.",
-          "Wave agent/golems 2026-10-23: the helper was re-checked against the original GolemHelper (oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/golems/GolemHelper.java:30-865). The rules it carried are reproduced by the native GolemCargoRules, GolemHomeInventory, GolemMarker, GolemItemMatch and GolemUseOptions: the adjacent range of four, the marked sides, the double chest pairing, the missing-item computation with the Entropy fuzziness and the 10000 ms timeout.",
-          "The row stays partial because the helper is not one class any more: the native splits it into pure rule classes, and the marked-container scan itself lives in GolemHomeInventory."
+          "REMAINING DIFFERENCE: the original's single helper class is split into pure rule classes of the native tree (the cargo rules, the home and marker inventory, the item comparison and the marker); the helper itself is not a native class.",
+          "The rules themselves are reproduced, with the exception of the fluid and essentia destination sets of the Decanting and the Alchemy golem (see the fluid rows)."
         ],
         "reviewed_sha256": {
           "original": "0c40d3001f240c8fa46db123d795664dc1808393e11230d7e11eda423d4047dc",

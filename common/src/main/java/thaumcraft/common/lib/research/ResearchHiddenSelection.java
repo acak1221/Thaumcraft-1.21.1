@@ -9,20 +9,21 @@ public final class ResearchHiddenSelection {
     private ResearchHiddenSelection() {}
 
     /**
-     * The original seed: ResearchManager.findHiddenResearch:154 draws
-     * {@code new Random(player.worldObj.getTotalWorldTime()/10L/5L)}. The basis is
-     * the absolute world time, not the time of day, so the same world state always
-     * reveals the same hidden research.
+     * The original seed: ResearchManager.findHiddenResearch:148 draws
+     * {@code new Random(player.worldObj.getWorldTime()/10L/5L)}. The 1.7.10 JAR calls
+     * World.func_72820_D(), which the official mcp_stable-12-1.7.10 mapping names
+     * getWorldTime. The basis is the world time counter, not the time of day, so the
+     * same world state always reveals the same hidden research.
      */
-    public static long seed(long totalWorldTime) { return totalWorldTime / 10L / 5L; }
+    public static long seed(long worldTime) { return worldTime / 10L / 5L; }
 
     /**
-     * @param totalWorldTime the absolute world time (1.7.10 {@code World.getTotalWorldTime()},
-     *                       1.21.1 {@code Level.getGameTime()}), never the time of day.
+     * @param worldTime the world time counter (1.7.10 {@code World.getWorldTime()},
+     *                  1.21.1 {@code Level.getGameTime()}), never the time of day.
      */
-    public static String choose(PlayerKnowledge actor, long totalWorldTime) {
+    public static String choose(PlayerKnowledge actor, long worldTime) {
         List<String> keys = eligible(actor);
-        Random privateChoice = new Random(seed(totalWorldTime));
+        Random privateChoice = new Random(seed(worldTime));
         return keys.isEmpty() ? null : keys.get(privateChoice.nextInt(keys.size()));
     }
     public static List<String> eligible(PlayerKnowledge actor) {

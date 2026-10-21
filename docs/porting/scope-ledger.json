@@ -3280,17 +3280,21 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/api/research/ResearchItem.java:19-29 the fields of the entry",
           "oracle thaumcraft/api/research/ResearchItem.java:90-135 the flag setters",
           "native common/src/main/java/thaumcraft/api/research/ResearchItem.java:81 of(ResearchDefinition) reads every original flag",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java the item triggers of the built in entries"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java the item triggers of the built in entries",
+          "oracle thaumcraft/api/research/ResearchItem.java:90-169 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the builder API, the nine flags and the getItemTriggers/getEntityTriggers/getAspectTriggers accessors",
+          "native common/src/main/java/thaumcraft/api/research/ResearchItem.java:81-109 the public view of a corpus entry copies every original flag, the parents, the hidden parents, the siblings, the entity triggers and the pages",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java:11-18 the item triggers of the corpus live in the common layer"
         ],
         "notes": [
           "The builder API is preserved and every original flag (special, stub, lost, concealed, hidden, virtual, round, auto unlock, secondary) is read from the corpus.",
           "REMAINING GAP: a corpus-backed ResearchItem never carries icon_item/icon_resource, itemTriggers or aspectTriggers: the bundled corpus keeps the per entry icon as a provenance string and the triggers live in the corpus and in ResearchTriggerBindings.",
-          "An add-on that reads getItemTriggers()/getAspectTriggers() from a corpus entry sees null/empty instead of the original's executable triggers."
+          "An add-on that reads getItemTriggers()/getAspectTriggers() from a corpus entry sees null/empty instead of the original's executable triggers.",
+          "REMAINING GAP (blocked): a corpus backed ResearchItem still has no icon_item/icon_resource and no itemTriggers/aspectTriggers. The icon is restored at draw time by ResearchIconDisplay and the triggers are used by ResearchClues/ResearchTriggerBindings, but the original accessors of the public API return null/empty. The fix belongs to the public API owner (common/src/main/java/thaumcraft/api/**): ResearchItem.of(ResearchDefinition) has to copy definition.aspectTriggers() into aspectTriggers and the bound item stacks into itemTriggers."
         ],
         "reviewed_sha256": {
           "original": "d65045e20143c2a10e087f3bc30801853d04f98801ded6f8e985a4571cf8eeb9",
@@ -3331,16 +3335,20 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/api/research/ResearchPage.java:25-32 the fields of a page",
           "oracle thaumcraft/api/research/ResearchPage.java:34-112 every page constructor of the original",
-          "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:128 of(ResearchDefinition.Page)"
+          "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:128 of(ResearchDefinition.Page)",
+          "oracle thaumcraft/api/research/ResearchPage.java:26-32 and the eleven page kinds of the original (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar)",
+          "native common/src/main/java/thaumcraft/api/research/ResearchPage.java:128-135 the public view of a corpus page",
+          "native common/src/main/resources/data/thaumcraft/tc4/research.json the 201 entries carry 294 text pages and the recipe references of the original"
         ],
         "notes": [
           "Forced 1.21.1 changes: IRecipe became Recipe, the furnace lookup needs a Level, StatCollector became Component.",
           "Every page kind and every constructor of the original is present in the native class.",
-          "REMAINING GAP: the bundled corpus only carries text / recipe_reference / legacy_expression pages, so the original's IMAGE, ASPECTS, SMELTING, NORMAL_CRAFTING, CRUCIBLE_CRAFTING, INFUSION_CRAFTING, COMPOUND_CRAFTING and INFUSION_ENCHANTMENT kinds are never produced from the corpus; of() maps legacy_expression to IMAGE, which is a lossy but presentation-only mapping."
+          "REMAINING GAP: the bundled corpus only carries text / recipe_reference / legacy_expression pages, so the original's IMAGE, ASPECTS, SMELTING, NORMAL_CRAFTING, CRUCIBLE_CRAFTING, INFUSION_CRAFTING, COMPOUND_CRAFTING and INFUSION_ENCHANTMENT kinds are never produced from the corpus; of() maps legacy_expression to IMAGE, which is a lossy but presentation-only mapping.",
+          "REMAINING GAP (blocked): the bundled corpus only carries text, recipe_reference and legacy_expression pages, so the original IMAGE, ASPECTS, SMELTING, NORMAL_CRAFTING, CRUCIBLE_CRAFTING, INFUSION_CRAFTING, COMPOUND_CRAFTING and INFUSION_ENCHANTMENT kinds are never produced from the corpus; of() maps legacy_expression to IMAGE, a lossy but presentation-only mapping. The eight array pages of the original (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) need a renderer in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
         ],
         "reviewed_sha256": {
           "original": "7c3318b10863b86c671e0d804eea388b24e2f75ea1549b1915b0339dbb3c8669",
@@ -7084,7 +7092,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:75-76 protected int paneWidth = 256; protected int paneHeight = 230",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:51 panelWidth = Math.min(510, width-16); panelHeight = Math.min(300, height-16)",
@@ -7093,14 +7101,17 @@
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:366 drawForbidden(var42+11, var41+11) for a research with warp > 0",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:84-108 the native node loop has no forbidden marker and no Special overlay",
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:327-348 sibling connectors",
-          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:84-92 only parent connectors are drawn"
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:84-92 only parent connectors are drawn",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java:25-42 the six original category icons and backgrounds (BASICS uses textures/items/thaumonomiconcheat.png, ELDRITCH uses gui_researchbackeldritch.png) are published again",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:21-29 the visibility rule of the original icon loop (completion and the @ clue bypass Hidden/Lost/Concealed, Virtual never draws)"
         ],
         "notes": [
           "The map, the clue/parent/category visibility rules and the authoritative purchase/note actions are reproduced (native ResearchBrowserData.isVisible:21-29 mirrors oracle GuiResearchBrowser:318/371).",
           "Deviation: the panel geometry, the category tabs (text buttons instead of the original's icon tabs), the animated wiggle connectors (straight hLine/vLine), the Special overlay and the warp 'forbidden' marker are not reproduced.",
           "Deviation: the frame u-coordinate of a hidden research is always 86 in the native; the original uses 230 for a hidden research at researchDifficulty -1 or for a hidden secondary research at difficulty 0 (oracle GuiResearchBrowser:389-393).",
           "Deviation: the sibling connectors are missing.",
-          "Unresolved icon expressions fall back to the thaumonomicon icon instead of drawing nothing (native GuiResearchBrowser:100-104)."
+          "Unresolved icon expressions fall back to the thaumonomicon icon instead of drawing nothing (native GuiResearchBrowser:100-104).",
+          "The category icon data is no longer missing: ThaumcraftResearchCategories publishes the six original icons and backgrounds. Drawing them as tab icons is client work in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
         ],
         "reviewed_sha256": {
           "original": "b9d0562345cdbbda6d3688795456e8196b88831e6952304d28826338b0b69563",
@@ -7195,19 +7206,22 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchRecipe.java:25-1313 the research book with all PageType renderers",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:31-129 the native book renders text pages and resolved native recipe pages",
           "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:363 resolves only the cruc.toArray(...) crucible array",
           "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:374 resolves only the raug.toArray(...) infusion array",
           "oracle thaumcraft/common/config/ConfigResearch.java:199 BANNERS page new ResearchPage(banners.toArray(new IArcaneRecipe[0]))",
-          "oracle thaumcraft/common/config/ConfigResearch.java:374 ORE page new ResearchPage(rc.toArray(new IRecipe[0]))"
+          "oracle thaumcraft/common/config/ConfigResearch.java:374 ORE page new ResearchPage(rc.toArray(new IRecipe[0]))",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:56-65 the page order and the completion/concealed text gates of the original",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the 272 original recipe keys with their native or deferred coverage"
         ],
         "notes": [
           "The book renders the original text pages and every recipe page whose original recipe key resolves to a native recipe file (250 mapped keys, verified against the packaged data/thaumcraft/recipe tree).",
           "Deviation: six of the eight array/smelting pages (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) have no native renderer and are not shown at all.",
-          "Deviation: the original's per-PageType renderers (aspect page, image page, infusion-enchantment page, the original's own recipe renderers) are replaced by one native recipe renderer."
+          "Deviation: the original's per-PageType renderers (aspect page, image page, infusion-enchantment page, the original's own recipe renderers) are replaced by one native recipe renderer.",
+          "REMAINING GAP (client, blocked): six of the eight array/smelting pages (BANNERS, JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting page) have no native renderer and are not shown at all. The page data and the recipe coverage are complete in the common layer; only the renderer is missing in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
         ],
         "reviewed_sha256": {
           "original": "c1494ae9ea784462097adadd94458ea893f759949dbab894a8e5d4386bdf39d9",
@@ -7250,17 +7264,20 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchTable.java:68 private final int HEX_SIZE = 9",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:37 HEX and UNKNOWN textures, native hex grid",
           "oracle thaumcraft/client/gui/GuiResearchTable.java:100-102 RESEARCHER_1 / RESEARCHER_2 / RESEARCHDUPE gates",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:178 KnowledgeAccess.get(minecraft.player).isResearchComplete(\"RESEARCHDUPE\")",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:108-142 the original 0.1/0.25/0.5 researcher rolls and the pool/table-bonus funding order"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:108-142 the original 0.1/0.25/0.5 researcher rolls and the pool/table-bonus funding order",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:101-155 the original 0.1/0.25/0.5 researcher rolls, the funding order and the short pool query of the table",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNotePuzzle.java:21-49 the original connectivity and pruning of a solved grid"
         ],
         "notes": [
           "The palette, the hex grid, drag and drop placement, erasing, the researcher bonus rolls, the aspect combination and the paid copy are implemented and the original RNG order and thresholds are preserved.",
-          "Deviation: the original's rune/line drawing and the 6-parchment sheet look are replaced by the native sheet; the server-authoritative edit/combine/copy requests add a revision/session handshake that the original does not have."
+          "Deviation: the original's rune/line drawing and the 6-parchment sheet look are replaced by the native sheet; the server-authoritative edit/combine/copy requests add a revision/session handshake that the original does not have.",
+          "REMAINING GAP (client, blocked): the original rune and line drawing of the table and the original six parchment sheet look are replaced by the native sheet in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
         ],
         "reviewed_sha256": {
           "original": "3f53b3dd1aa87217248213f98ab149c2dc0fce8b8dc7342e3cc638ace0aca557",
@@ -7579,12 +7596,13 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibility.java:11-91 the JEI hidden-recipe state machine",
           "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibilityTicker.java:25-31 its only caller",
           "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java registers the ticker",
-          "native common/src/main/java/thaumcraft contains no client/integration package and no JEI/EMI dependency (no 'jei' reference in common/src/main/java)"
+          "native common/src/main/java/thaumcraft contains no client/integration package and no JEI/EMI dependency (no 'jei' reference in common/src/main/java)",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:21-29 the research visibility rules of the original are honoured in the common layer"
         ],
         "notes": [
           "Excluded: the class only exists to drive the 1.12 JEI plugin (net.minecraftforge JEI API), which has no counterpart in the 1.21.1 port; the port ships no recipe-viewer integration at all.",
@@ -7623,11 +7641,12 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "missing",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/ResearchVisibilityTicker.java:18-32 the client-tick subscriber",
           "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java the JEI plugin that owns it",
-          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:51-57 the native snapshot sync replaces the tick poll"
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:51-57 the native snapshot sync replaces the tick poll",
+          "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeEvents.java:51-57 the explicit server snapshot replaces the client tick poll of the original"
         ],
         "notes": [
           "Excluded with ResearchVisibility: there is no JEI plugin in the 1.21.1 port, so the ticker has no event source.",
@@ -12194,7 +12213,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-clientrender",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:72-75 public class ItemThaumometerRenderer implements IItemRenderer with the scanner.obj model",
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:98-135 the first-person view model with the player arm",
@@ -12207,13 +12226,16 @@
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:155-259 the scan readout with the aspect icons and the name",
           "native common/src/main/java/thaumcraft/client/renderers/item/ItemThaumometerRenderer.java the new native item renderer",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java the original scanner OBJ",
-          "native common/src/main/resources/assets/thaumcraft/models/item/thaumometer.json the builtin item model"
+          "native common/src/main/resources/assets/thaumcraft/models/item/thaumometer.json the builtin item model",
+          "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:72-135 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the IItemRenderer of the original with the scanner.obj model and the first person view model with the player arm",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java the original scanner OBJ of the port"
         ],
         "notes": [
           "Excluded: 1.21.1 removed IItemRenderer/IModelCustom, so the original's custom first-person scanner view model has no target API in the port.",
           "Consequence: the port renders the thaumometer as a normal item and offers no first-person scanner view; this is a visual gap, not a gameplay one.",
           "The thaumometer was a flat sprite before; it is now the three dimensional scanner of the original with its glowing screen.",
-          "Two parts of the original stay open: the two rotations that follow the swing of the arm of the player need the private arm angles of 1.7.10, and the scan readout needs the client side of the research system, which the native port keeps on the server."
+          "Two parts of the original stay open: the two rotations that follow the swing of the arm of the player need the private arm angles of 1.7.10, and the scan readout needs the client side of the research system, which the native port keeps on the server.",
+          "REMAINING GAP (forced): 1.21.1 removed IItemRenderer/IModelCustom, so the first person scanner view model of the original has no target API; the port renders the thaumometer as a normal item model and keeps the three dimensional scanner."
         ],
         "reviewed_sha256": {
           "original": "9d5454e08e83d70d4f7d287f4aa101aeb6315077a3b262d4ad35bdb3d9756a5e",
@@ -34611,7 +34633,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/items/ItemResearchNotes.java:87-104 a solved note completes the research and its direct siblings and consumes one note",
           "native common/src/main/java/thaumcraft/common/items/ItemResearchNotes.java:36-55 the same learning flow via ResearchNoteLearning.learn",
@@ -34619,12 +34641,17 @@
           "native common/src/main/java/thaumcraft/common/lib/research/UnknownKnowledge.java:19-47 the unknown note is a separate native item with the same 7+rand(3) fragment drop",
           "oracle thaumcraft/common/lib/research/ResearchManager.java:154 new Random(player.worldObj.getTotalWorldTime()/10L/5L)",
           "native common/src/main/java/thaumcraft/common/lib/research/UnknownKnowledge.java:24 ResearchHiddenSelection.choose(knowledge, level.getDayTime())",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchHiddenSelection.java:13 new Random(dayTime/10L/5L)"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchHiddenSelection.java:13 new Random(dayTime/10L/5L)",
+          "oracle thaumcraft/common/lib/research/ResearchManager.java:148 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the hidden research seed is new Random(player.worldObj.getWorldTime()/10L/5L), the world time counter; the native uses Level.getGameTime() through ResearchHiddenSelection.seed, so the audit claim of a getDayTime seed was wrong",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchHiddenSelection.java:12-27 the seed is the world time divided by 10 and 5",
+          "oracle thaumcraft/common/items/ItemResearchNotes.java:61-97 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) a solved note completes the research and its direct siblings, consumes one note and plays thaumcraft:learn; metadata 42/24 reveal a hidden research or drop 7 + rand(3) knowledge fragments"
         ],
         "notes": [
           "Deviation (behaviour): the hidden-note seed differs. The original seeds with the absolute world time (/10/5); the native seeds with the day time (/10/5), so the same world state can reveal a different random hidden research.",
           "Deviation: the original metadata 42/24 unknown note became two separate native items (unknown_research_note and unknown_research_note_24); the note tooltip and rarity are split accordingly.",
-          "The original's sibling pass on learning is reproduced by ResearchCompletion.apply (native ResearchCompletion.java:19-23)."
+          "The original's sibling pass on learning is reproduced by ResearchCompletion.apply (native ResearchCompletion.java:19-23).",
+          "CORRECTED in this wave: the hidden-note seed is not a deviation. The original seeds with World.getWorldTime() and the native uses the 1.21.1 equivalent Level.getGameTime(); only the comment of the port named the wrong original method.",
+          "REMAINING GAP (forced): the original metadata 42/24 unknown note became two separate native items (unknown_research_note and unknown_research_note_24); the note tooltip and rarity are split accordingly and ItemUnknownResearchNotes keeps the original metadata."
         ],
         "reviewed_sha256": {
           "original": "8f601ffcf7f493a6a8b2e2cd20273955fa9da6066054220f4f265abfbb9e17c7",
@@ -37117,7 +37144,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/items/relics/ItemThaumometer.java:79-81 getMaxItemUseDuration returns 25",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:31 getUseDuration returns 25",
@@ -37126,12 +37153,18 @@
           "oracle thaumcraft/common/items/relics/ItemThaumometer.java:87-140 the client picks the entity, the node, the block or a scan callback",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:67-103 the same order on the server",
           "oracle thaumcraft/common/items/relics/ItemThaumometer.java:92 Thaumcraft.proxy.blockRunes(...) and :163 the \"thaumcraft:cameraticks\" sound",
-          "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:26-61 no client feedback payload is sent"
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:26-61 no client feedback payload is sent",
+          "oracle thaumcraft/common/items/relics/ItemThaumometer.java:59-60,148-165 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the 25 tick use, the count<=5 completion and the every-second-tick thaumcraft:cameraticks sound with 0.2F loudness and the pitch 0.45F + worldRand.nextFloat()*0.1F",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:31-96 the same use duration, the same 20 tick completion window and the same camera tick, now played by the server",
+          "native common/src/test/java/thaumcraft/scanning/ThaumometerScanParityTest.java the original numbers of the item are asserted"
         ],
         "notes": [
           "The use duration, the 20-tick completion window, the target order (entity -> node -> block -> phenomena callback) and the entity pick range are the original numbers.",
           "Forced change: the scan is resolved on the server; the original's PacketScannedToServer (client picks, server re-validates) has no counterpart because the client no longer chooses the target.",
-          "Deviation (client feedback): the original plays \"thaumcraft:cameraticks\" every second tick of the scan and draws the rune particles at the target; the native port has neither."
+          "Deviation (client feedback): the original plays \"thaumcraft:cameraticks\" every second tick of the scan and draws the rune particles at the target; the native port has neither.",
+          "CLOSED in this wave: the scan was silent. The original plays thaumcraft:cameraticks every second tick of a stable scan at the scanner; the native scan is server owned, so the server broadcasts it at the same volume .2 and pitch .45-.55.",
+          "DEVIATION (documented): the original played the sound on the scanning client only and drew its pitch from the CLIENT world random, so a scan never shifted the server world random that generates the research puzzles. The native plays the sound from the server and draws the pitch from its own generator, which keeps the server world random untouched.",
+          "REMAINING GAP (client, blocked): the original also draws the rune particles at the target every tick of the scan (Thaumcraft.proxy.blockRunes, oracle ItemThaumometer:73/85/115). The rune particles are a client side effect and common/src/main/java/thaumcraft/client/** belongs to the client wave, so the port still has no rune particles."
         ],
         "reviewed_sha256": {
           "original": "f79250eb33a27e1948b031585184c1b34fa0a7eef8b3305df186a73a06573986",
@@ -41725,16 +41758,19 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketScannedToServer.java:44-53 the C2S scan packet with player id, dimension, type, id, meta, entity id, phenomena and prefix",
           "oracle thaumcraft/common/lib/network/playerdata/PacketScannedToServer.java:77-91 the server re-runs ScanManager.completeScan on the received data",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:56-59 the scan is completed on the server without any C2S packet",
-          "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:60-79 the server-side completion and its notifications"
+          "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:60-79 the server-side completion and its notifications",
+          "oracle thaumcraft/common/lib/network/playerdata/PacketScannedToServer.java:44-91 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the C2S scan packet with player id, dimension, type, id, meta, entity id, phenomena and prefix",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:50-96 the server derives the target itself and now also plays the original camera tick of the scan"
         ],
         "notes": [
           "The C2S scan packet is gone: the server derives the target itself, which removes the original's client-authority surface.",
-          "Deviation (client feedback): because nothing crosses the wire any more, the original's client-side scan sound and rune particles are not reproduced (see the ItemThaumometer row)."
+          "Deviation (client feedback): because nothing crosses the wire any more, the original's client-side scan sound and rune particles are not reproduced (see the ItemThaumometer row).",
+          "CLOSED in this wave: the client feedback of the scan was completely absent. The camera tick sound of the original (thaumcraft:cameraticks every second tick, volume .2) is played again from the server; the rune particles of the original remain missing because they need a client side effect in common/src/main/java/thaumcraft/client/**, which belongs to the client wave."
         ],
         "reviewed_sha256": {
           "original": "1eec86b0ebd6816a9f542ab7251c89280cd68701038e0416802fe3de2b1b95b4",
@@ -42478,20 +42514,24 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/lib/research/PlayerKnowledge.java:24-34 wipePlayerKnowledge keeps the warp counter",
           "oracle thaumcraft/common/lib/research/PlayerKnowledge.java the process wide player maps",
           "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:116 reset()",
-          "native common/src/main/java/thaumcraft/common/mixin/PlayerKnowledgeMixin.java the per player state of 1.21.1"
+          "native common/src/main/java/thaumcraft/common/mixin/PlayerKnowledgeMixin.java the per player state of 1.21.1",
+          "native common/src/main/java/thaumcraft/common/mixin/PlayerKnowledgeMixin.java:24-34 the knowledge of the player is written into and read from the player NBT through addAdditionalSaveData/readAdditionalSaveData; in 1.21.1 ServerPlayer.addAdditionalSaveData calls Player.addAdditionalSaveData, Entity.saveWithoutId calls addAdditionalSaveData and PlayerDataStorage.save calls Player.saveWithoutId, so the research progress survives a relog",
+          "oracle thaumcraft/common/lib/research/ResearchManager.java:148 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the hidden research seed is new Random(player.worldObj.getWorldTime()/10L/5L); World.func_72820_D is getWorldTime in mcp_stable-12-1.7.10 and the native uses the 1.21.1 equivalent Level.getGameTime()",
+          "oracle thaumcraft/common/lib/research/ResearchManager.java:24-34 the wipe drops the research, the aspects, the scans and the three warp values but keeps the warp counter; the native reset() does the same",
+          "native common/src/test/java/thaumcraft/research/ResearchNoteMaterialCostTest.java:71-95 the research progress survives a save and load round trip"
         ],
         "notes": [
           "Forced change: the process-wide player-name maps became a per-player object attached by a mixin; the values, the aspect-pool arithmetic and the overdraw quirk are preserved.",
           "CLOSED in this wave: the wipe keeps the warp counter of the player, exactly as the original wipePlayerKnowledge does.",
-          "REMAINING GAP: the short cast of getAspectPoolFor is dropped from the API (the value no longer overflows) and is only applied where the original's signed-short query is observable (the research table).",
-          "REMAINING GAP: the native persists the AutoUnlock research entries, the original skipped them in saveResearchNBT (oracle ResearchManager:793); the native re-grants them on join anyway.",
-          "REMAINING GAP: the .thaum file of the original is replaced by the per-player state of 1.21.1, because a fresh world is the only supported input."
+          "REMAINING GAP (not observable): the signed-short cast of getAspectPoolFor is dropped from the API; it is applied where the original short query is observable (ResearchNoteEditing.queryPool for the research table), and the scan pool can never reach the 65536 wrap because the soft cap stops it near 125.",
+          "REMAINING GAP (equivalent): the native persists the AutoUnlock research entries while the original skipped them in saveResearchNBT (oracle ResearchManager:894); the original re-grants every AutoUnlock research on login (oracle EventHandlerEntity:151-157) and so does the native (KnowledgeEvents.restoreAutoUnlockResearch).",
+          "REMAINING GAP (forced): the .thaum file of the original is replaced by the per-player state of 1.21.1, because a fresh world is the only supported input."
         ],
         "reviewed_sha256": {
           "original": "b5309c2723a39a5ead0afe4c3c061f345131b7a897ef81cbb587d081a940baa1",
@@ -42539,20 +42579,25 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/lib/research/ResearchManager.java the manager of the original",
           "oracle thaumcraft/common/lib/research/ResearchManager.java:126-127 the paper is checked and never taken",
           "oracle thaumcraft/common/lib/research/ResearchManager.java:793 the auto unlock research is not saved",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteIssuance.java:80 the note issuance",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchPurchase.java the admission rules of a purchase"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchPurchase.java the admission rules of a purchase",
+          "oracle thaumcraft/common/lib/research/ResearchManager.java:120-135 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the paper is SPENT: consumeInkFromPlayer(player,false) && player.inventory.consumeInventoryItem(Items.paper); the call target is InventoryPlayer.func_146026_a and the item is Items.field_151121_aF, which mcp_stable-12-1.7.10 names consumeInventoryItem (\"removed one item of specified Item from inventory\") and paper",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteIssuance.java:161-202 the note now spends exactly one paper of the first main-inventory paper stack and one ink point, and the emptied paper slot is reused for the delivered note",
+          "native common/src/test/java/thaumcraft/research/ResearchNoteMaterialCostTest.java the one-paper cost, the freed slot and the one-ink-point cost are asserted",
+          "native common/src/gameTest/java/thaumcraft/common/testing/ResearchNoteIssuanceRuntimeChecks.java:41-78,152-189,191-238 the loader checks now expect the original paper spend and the freed paper slot"
         ],
         "notes": [
           "The 863-line manager was split into focused classes; every live original method has a counterpart (createClue -> ResearchClues, findHiddenResearch -> ResearchHiddenSelection, createNote -> ResearchNoteGenerator, checkResearchCompletion -> ResearchNotePuzzle, completeResearch -> ResearchCompletion, the command behaviour -> ResearchAdministration).",
-          "CORRECTED: the first audit reported that the native consumes one paper per issued note. The native keeps the original: the paper is checked and never taken (ResearchNoteIssuance).",
-          "REMAINING GAP: the process-wide player maps and the .thaum file format of the original were replaced by the per-player capability state.",
-          "REMAINING GAP: findMatchingResearch is not ported; it has no caller in the original, so it was dropped with the dead code.",
+          "CORRECTED in this wave: the first audit (audit-a8) claimed the original only CHECKS the paper. The 1.7.10 JAR and its CFR decompilation prove the opposite: player.inventory.consumeInventoryItem(Items.paper) removes one paper. The port had been changed to keep the paper; it now spends it again.",
+          "CORRECTED in this wave: the hidden-note seed is the world time counter, not the total world time. The original calls World.func_72820_D, which mcp_stable-12-1.7.10 names getWorldTime; the native uses Level.getGameTime(), the 1.21.1 equivalent.",
+          "REMAINING GAP (forced): the process-wide player maps and the .thaum file format of the original are replaced by the per-player state of 1.21.1, because a fresh world is the only supported input.",
+          "REMAINING GAP (deliberate): findMatchingResearch is not ported; it has no caller in the original, so it was dropped with the dead code.",
           "DOCUMENTED DEVIATION: the original's PacketPlayerCompleteToServer did not re-check the aspect cost; the native re-validates every admission rule (an authority fix, documented in ResearchPurchase)."
         ],
         "reviewed_sha256": {
@@ -42647,17 +42692,23 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "native_coverage": "parity_verified",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/lib/research/ScanManager.java the scan manager of the original",
           "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java the native scan manager",
-          "native common/src/main/java/thaumcraft/common/lib/research/ObjectAspectCatalog.java the object aspect bindings"
+          "native common/src/main/java/thaumcraft/common/lib/research/ObjectAspectCatalog.java the object aspect bindings",
+          "oracle thaumcraft/common/lib/research/ScanManager.java:420-472 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the scan reward arithmetic: +2 for a first discovery, sqrt(amount) at the cap and amount=1 at 1.25x the cap, plus the missing-parent rejection",
+          "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:87-127 the same three rules in the same order",
+          "oracle thaumcraft/common/items/relics/ItemThaumometer.java:151-165 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the scan plays thaumcraft:cameraticks on every second tick (count % 2 == 0) with 0.2F loudness and the pitch 0.45F + worldRand.nextFloat()*0.1F",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:50-96 the native scan plays the same camera tick on the server with the same numbers",
+          "native common/src/test/java/thaumcraft/scanning/ThaumometerScanParityTest.java the use duration 25, the 20 tick completion window and the camera tick numbers are asserted"
         ],
         "notes": [
           "The scan reward arithmetic, the aspect discovery rule, the parent-aspect admission and the node aspect scaling are the original numbers.",
+          "CLOSED in this wave: the scan feedback was silent. The camera tick of the original (thaumcraft:cameraticks every second tick, volume .2, pitch .45-.55) is played again.",
           "Forced change: the numeric item and entity hashes of the original cannot exist in a fresh 1.21.1 world; the native uses readable string signatures and a separate object and entity aspect binding catalogue.",
-          "REMAINING GAP: the original's hash functions are therefore not reproduced verbatim - only their observable purpose (one scan per witness, one reward per scan)."
+          "REMAINING GAP (forced): the original's hash functions are therefore not reproduced verbatim - only their observable purpose (one scan per witness, one reward per scan)."
         ],
         "reviewed_sha256": {
           "original": "bdbf7c1881a7b90ac9603eb05e1ed05d18b2bee7070f37ae27ae37852f057bfe",
@@ -48302,7 +48353,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a8-research",
+        "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileResearchTable.java:64 public ItemStack[] contents = new ItemStack[2]",
           "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:68 public static final int SIZE = 2 and :84 the NonNullList inventory",
@@ -48315,13 +48366,17 @@
           "oracle thaumcraft/common/tiles/TileResearchTable.java:141-187 placeAspect (ink, the researcher rolls, the pool debit, the bonus fallback)",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:101-155 the same 0.1/0.25/0.5 rolls and the same funding order",
           "oracle thaumcraft/common/tiles/TileResearchTable.java:398-422 duplicate (the aspect cost plus copies, one paper, one ink sac)",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteCopying.java:14-38 the same cost model"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteCopying.java:14-38 the same cost model",
+          "oracle thaumcraft/common/tiles/TileResearchTable.java:407-441 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the duplicate of a solved note requires and consumes ONE PAPER (Items.field_151121_aF) and ONE BLACK DYE (Items.field_151100_aR with metadata 0); mcp_stable-12-1.7.10 names those fields paper and dye",
+          "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:335-352 the native copy commit requires an ink sac instead of the original black dye",
+          "native common/src/main/java/thaumcraft/common/lib/network/ResearchTableCopyNetworking.java:47 the native copy looks for Items.INK_SAC as the second material"
         ],
         "notes": [
           "The two-slot table, the 64 stack limit, the 600-tick bonus recalculation, the bonus producers and the aspect placement rules keep the original numbers.",
           "Deviation: the original's Material-based block classification is replaced by an explicit 1.21.1 block list plus tags (native TileResearchTable.java:285-301); the bonus pool is a bounded map instead of an AspectList with merge(max) semantics.",
           "Deviation: the original's client-side placeAspect packet became a server-authoritative, revision-checked edit request; the original's overwrite/hole/free-funding exploits are closed (documented in ResearchNoteEditing).",
-          "Not reproduced: the original's replace-the-table-on-copy side effect (oracle TileResearchTable:415) - the native keeps the table and the copied note."
+          "Not reproduced: the original's replace-the-table-on-copy side effect (oracle TileResearchTable:415) - the native keeps the table and the copied note.",
+          "OPEN DEFECT (proved, blocked): the copy of a solved note costs an ink sac in the port, but the original costs one black dye (Items.dye metadata 0 in 1.7.10, minecraft:black_dye in 1.21.1). The fix is two lines - ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC - but common/src/main/java/thaumcraft/common/tiles/** belongs to the block entity wave, so the change was not made in this wave."
         ],
         "reviewed_sha256": {
           "original": "cfa85e36602963466912ff91217764ef5e8c0cd673b71ef521d04124012b3f37",

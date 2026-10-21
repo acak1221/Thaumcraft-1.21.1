@@ -49,7 +49,7 @@ import thaumcraft.common.tiles.TileEldritchTrap;
  * family. The original metadata became the {@link #VARIANT} block state
  * property; every number comes from {@link EldritchBlockRules}.
  */
-public final class BlockEldritch extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity {
+public final class BlockEldritch extends BaseEntityBlock implements StateDependentBlockEntity, PerStateBlockEntity, OriginalPistonPushable {
     public static final MapCodec<BlockEldritch> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.intRange(0, 5).fieldOf("group").forGetter(BlockEldritch::group),
             propertiesCodec()).apply(instance, BlockEldritch::new));
@@ -203,10 +203,26 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
      * one (the obelisk), three (the cap), eight (the lock), nine (the crab spawner) and ten
      * (the runed trap) only, and answered {@code hasTileEntity(int)} with exactly that. The
      * port answers the question per state, so the stones of the family that never had a tile
-     * are moved by a piston like in the original.
+     * carry no block entity.
      */
     @Override public boolean hasBlockEntityForState(BlockState state) {
         return EldritchBlockRules.eldritchHasTile(variant(state));
+    }
+
+    /**
+     * Oracle BlockEldritch:60-61 - the 1.7.10 class extended {@code
+     * net.minecraft.block.BlockContainer}, which implements {@code ITileEntityProvider}, so the
+     * piston of the original never moved the family: the stones that never had a tile were
+     * refused as well.
+     *
+     * <p>The question of the piston is a question of its own in 1.21.1 ({@code
+     * PistonBaseBlock#isPushable} asks {@code !blockState.hasBlockEntity()}, and the answer of the
+     * block entity contract is the answer for the creation of the block entity), so the answer of
+     * the original is written down here and the mixin {@code
+     * thaumcraft.common.mixin.PistonPushabilityMixin} asks it.
+     */
+    @Override public boolean isPushableInOriginal(BlockState state) {
+        return OriginalPistonRule.Family.ELDRITCH.isPushableInOriginal(variant(state));
     }
 
     /** The dispatching factory of the shared eldritch block entity type. */

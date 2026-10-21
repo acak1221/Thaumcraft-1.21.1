@@ -20853,7 +20853,13 @@
           "oracle thaumcraft/common/blocks/BlockAiry.java:196-197 the render type is minus one, the 1.7.10 airy family is not drawn at all",
           "oracle thaumcraft/common/blocks/BlockAiry.java:275-289 a tile is created for the metadata 0, 1 and 5 only, the other metadata get none although the class is a BlockContainer",
           "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:115 the render shape stays RenderShape.INVISIBLE, the original answer",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:186 the block entity is decided per state, only the warding fence has a tile in the port"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:186 the block entity is decided per state, only the warding fence has a tile in the port",
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockAiry.java:77-78 the 1.7.10 class extended net.minecraft.block.BlockContainer, which implements ITileEntityProvider, so the piston of the original never moved the family: the variants without a tile (BlockAiry.java:313-326) were refused as well",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:202 the family answers the question of the original, so the piston refuses the whole family as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "the 13 metadata values became a VARIANT block state property; the node, the nitor, the energised node and the holes also exist as their own native blocks",
@@ -21234,7 +21240,12 @@
           "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:68-69 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockCosmeticOpaqueRenderer.java:77",
           "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:190-192 and :221-223 the owned tile is created for the metadata two only, the amber block and the amber brick get no tile",
           "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticOpaque.java:115 the render shape is RenderShape.MODEL again",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticOpaque.java:176 the block entity is decided per state, so the amber block and the amber brick are moved by a piston like in the original"
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:58-59 the 1.7.10 class extended net.minecraft.block.BlockContainer, which implements ITileEntityProvider, so the piston of the original never moved the family: the amber block and the amber brick were refused as well, although they carry no tile",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticOpaque.java:192 the family answers the question of the original, so the piston refuses the whole family as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "The metadata values became separate native blocks (ThaumcraftEldritchBlocks).",
@@ -21327,7 +21338,12 @@
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:52 the 1.7.10 class extends net.minecraft.block.Block and does not override getRenderType(), so the vanilla render type zero draws the model of the stone",
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:259-265 hasTileEntity(int) is true for the metadata three (the warding stone) and eight (the node) only",
           "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticSolid.java:120 the render shape is RenderShape.MODEL again, because BaseEntityBlock answers RenderShape.INVISIBLE for every block entity block",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticSolid.java:169 and common/src/main/java/thaumcraft/common/blocks/PerStateBlockEntity.java the block entity is decided per state, so the fourteen stones without a tile are moved by a piston like in the original"
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:60-61 the 1.7.10 class extended net.minecraft.block.Block and did not implement ITileEntityProvider, so the piston of the original moved the sixteen stones of the family, the warding stone (the metadata three) and the node (the metadata eight) included, and the move destroyed the tile of the two",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticSolid.java:184 the family answers the question of the original, so the piston moves the whole family as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "1.21.1 binds the hardness to the block, so the per metadata hardness became three groups (EldritchBlockRules.COSMETIC_GROUP_HARDNESS)",
@@ -21826,7 +21842,13 @@
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockCustomPlant.java the plant family",
           "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java the native plants",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the ethereal bloom as its own block"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the ethereal bloom as its own block",
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockCustomPlant.java:55-56 the 1.7.10 class extended net.minecraft.block.BlockBush and did not implement ITileEntityProvider, so the piston of the original moved the plant, the ethereal bloom (the metadata four, the tile at BlockCustomPlant.java:97-108) included, and the move destroyed the tile of the bloom",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:71 the family answers the question of the original, so the piston moves the plant as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "The metadata values became separate native blocks; the ethereal bloom is now its own block.",
@@ -21933,7 +21955,12 @@
           "oracle thaumcraft/common/blocks/BlockEldritch.java:140-141 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockEldritchRenderer.java:86",
           "oracle thaumcraft/common/blocks/BlockEldritch.java:120-122 hasTileEntity(int) is true for the metadata 0, 1, 3, 8, 9 and 10 only",
           "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:141 the render shape is RenderShape.MODEL again, the tile renderer of the port only adds the cap of the altar, the lock and the crab spawner",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:208 the block entity is decided per state, so the stones without a tile are moved by a piston like in the original"
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockEldritch.java:60-61 the 1.7.10 class extended net.minecraft.block.BlockContainer, which implements ITileEntityProvider, so the piston of the original never moved the family: the stones without a tile (BlockEldritch.java:151-153) were refused as well",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:224 the family answers the question of the original, so the piston refuses the whole family as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "1.21.1 binds the hardness to the block and not to the block state, so the eleven original metadata values became six blocks of one class.",
@@ -22029,7 +22056,12 @@
           "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:57-58 the render type is minus one, the 1.7.10 block is not drawn at all and the void is drawn by the tile renderer",
           "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:61-63 hasTileEntity(int) is true for the metadata one only, the exposed filler",
           "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchNothing.java:47 the render shape stays RenderShape.INVISIBLE, the original answer",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchNothing.java:60 the block entity is decided per state, so the covered filler is moved by a piston like in the original"
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:42-43 the 1.7.10 class extended net.minecraft.block.Block and did not implement ITileEntityProvider, so the piston of the original moved the filler for every metadata, the exposed filler (the metadata one) included, and the move destroyed its tile",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchNothing.java:74 the family answers the question of the original, so the piston moves the whole family as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "CLOSED since the first audit: the behaviour was compared line by line. The native block has the empty selection box, the collision box inset by an eighth, the eight damage for every entity that is not fresh and not invulnerable, the exposed state that carries the block entity and the light level 3.",
@@ -22082,7 +22114,13 @@
           "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:60-68 the same neighbour rule",
           "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:44-51 the tile ticker of the gate",
           "oracle thaumcraft/common/blocks/BlockEldritchPortal.java:78-79 the render type is minus one, the 1.7.10 gate is not drawn as a block and the gate is drawn by the tile renderer",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:39 the render shape stays RenderShape.INVISIBLE, the original answer"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:39 the render shape stays RenderShape.INVISIBLE, the original answer",
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockEldritchPortal.java:38-39 the 1.7.10 class extended net.minecraft.block.Block and did not implement ITileEntityProvider, so the piston of the original moved the gate, whose tile existed for every metadata (BlockEldritchPortal.java:115-121), and the move destroyed the tile",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:54 the family answers the question of the original, so the piston moves the gate as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "The 1.7 self updating tile became a block entity ticker; the survival rule and the missing collision are kept.",
@@ -22997,7 +23035,13 @@
           "oracle thaumcraft/common/blocks/BlockMagicalLog.java:59-61 hardness 2.5 and the wood material",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:58 greatwood and silverwood logs with strength(2.5F)",
           "oracle thaumcraft/common/blocks/BlockMagicalLog.java:150-157 the light of the silverwood log",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:72 the silverwood log with light 7"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:72 the silverwood log with light 7",
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockMagicalLog.java:50-51 the 1.7.10 class extended net.minecraft.block.BlockRotatedPillar and did not implement ITileEntityProvider, so the piston of the original moved the log, the silverwood node (the metadata two, the tile at BlockMagicalLog.java:160-170) included, and the move destroyed the tile of the node",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockSilverwoodNode.java:49 the native node answers the question of the original, so the piston moves it as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "the four metadata values became separate native blocks (greatwood, silverwood and their stripped variants)"
@@ -23082,7 +23126,13 @@
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockManaPod.java the pod of the mana beans",
           "native common/src/main/java/thaumcraft/common/blocks/BlockManaPod.java the age state",
-          "native common/src/main/resources/assets/thaumcraft/blockstates/mana_pod.json the model of the pod"
+          "native common/src/main/resources/assets/thaumcraft/blockstates/mana_pod.json the model of the pod",
+          "oracle (vanilla 1.7.10) net/minecraft/block/BlockPistonBase#canPushBlock the last line of the method is \"return !(block instanceof ITileEntityProvider);\": the piston of the original refused a block by its class and never by its metadata, so a BlockContainer was never moved and a plain Block was moved for every metadata",
+          "native (Minecraft 1.21.1) net/minecraft/world/level/block/piston/PistonBaseBlock#isPushable the last line of the method is \"return !blockState.hasBlockEntity();\" and BlockState#hasBlockEntity is \"block instanceof EntityBlock\": the question of the piston of 1.21.1 is the question of the block entity, and the tile of a state is not carried by a move",
+          "oracle thaumcraft/common/blocks/BlockManaPod.java:51-52 the 1.7.10 class extended net.minecraft.block.Block and did not implement ITileEntityProvider, so the piston of the original moved the pod, whose tile existed for every metadata (BlockManaPod.java:232-238), and the move destroyed the tile",
+          "native common/src/main/java/thaumcraft/common/blocks/OriginalPistonRule.java:31 the answer of the original for a family and a metadata, and common/src/main/java/thaumcraft/common/blocks/OriginalPistonPushable.java:33 the contract of the blocks that answer it",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockManaPod.java:56 the family answers the question of the original, so the piston moves the pod as in the original",
+          "native common/src/main/java/thaumcraft/common/mixin/PistonPushabilityMixin.java:44 the common mixin asks the contract instead of the answer of the vanilla code, and it is registered in common/src/main/resources/thaumcraft-common.mixins.json, so both loaders read it"
         ],
         "notes": [
           "The growth stage became a block state property.",

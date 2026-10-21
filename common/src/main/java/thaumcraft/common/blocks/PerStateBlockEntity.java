@@ -27,8 +27,13 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p>A block that implements this interface answers the question of the original per state. The
  * common mixin {@code thaumcraft.common.mixin.PerStateBlockEntityMixin} reads the answer, so
- * the block entity of a state is created only for the states that have one and the piston moves
- * the states that have none.
+ * the block entity of a state is created only for the states that have one.
+ *
+ * <p>The contract answers the question of the block entity and nothing else. The question of the
+ * piston is a question of its own, because the 1.7.10 original refused a block by its class (the
+ * vanilla 1.7.10 {@code net.minecraft.block.BlockPistonBase#canPushBlock} ended with {@code
+ * return !(block instanceof ITileEntityProvider);}) and never by its metadata; see {@link
+ * OriginalPistonPushable} and {@link OriginalPistonRule}.
  */
 public interface PerStateBlockEntity {
     /**

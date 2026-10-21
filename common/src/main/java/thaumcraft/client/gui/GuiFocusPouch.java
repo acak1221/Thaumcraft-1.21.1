@@ -15,7 +15,7 @@ public final class GuiFocusPouch extends AbstractContainerScreen<ContainerFocusP
     // Original GuiFocusPouch draws the sheet and the locked marker with the
     // ordinary alpha blend of the 1.7.10 GUI. The plain 1.21.1 texture blit
     // neither enables nor disables blending, and the sheet of the pouch has
-    // a translucent frame (9950 of 40600 pixels of the drawn region) plus a
+    // a translucent frame (9932 of 40600 pixels of the drawn region) plus a
     // half transparent locked marker (alpha 0..128), so without the blend
     // both are drawn as solid black.
     @Override protected void renderBg(GuiGraphics graphics,float partial,int x,int y){

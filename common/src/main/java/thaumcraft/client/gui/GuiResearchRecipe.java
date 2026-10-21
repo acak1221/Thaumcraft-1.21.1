@@ -101,7 +101,10 @@ public final class GuiResearchRecipe extends Screen {
         // texture blit neither enables nor disables blending, and the book
         // sheet has a translucent edge (11419 of 184320 pixels of the drawn
         // region) while the page icons are the translucent aspect glyphs, so
-        // without the blend both are drawn as solid black.
+        // without the blend both are drawn as solid black. The blend is
+        // switched on again before every icon, because the text of the page
+        // runs through the font render type, whose teardown leaves the blend
+        // off.
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         try {
@@ -123,6 +126,8 @@ public final class GuiResearchRecipe extends Screen {
                     if (draw.text != null) graphics.drawString(font, draw.text, x, y, 0xFF30251B, false);
                     else if (draw.image != null) {
                         var image = draw.image;
+                        RenderSystem.enableBlend();
+                        RenderSystem.defaultBlendFunc();
                         graphics.blit(ResourceLocation.parse(image.texture()), x + (textWidth - draw.width) / 2, y,
                                 draw.width, draw.height, image.u(), image.v(), image.width(), image.height(), 256, 256);
                     } else graphics.hLine(x + 6, x + textWidth - 6, y, 0xFF927A54);

@@ -35,9 +35,13 @@ import java.util.stream.Stream;
  * manager uses, for example thaumcraft:arcane/alchemical_construct). This mapping is the contract the research
  * book uses to display the recipe of a research page.
  *
- * <p>Three original key groups exist:
+ * <p>Four original key groups exist:
  * <ul>
- *   <li>{@link #nativeRecipeIds()} - original recipes that have a native recipe JSON file.</li>
+ *   <li>{@link #nativeRecipeIds()} - original recipes that have a native recipe JSON file. The map names
+ *       all 308 original recipe keys of the oracle ConfigRecipes.java, not only the 272 the research book
+ *       names: the sixteen banners (ConfigRecipes:173), the six primal arrows (:210), the six balanced
+ *       shards (:89), the six aspect clusters and the mixed cluster (:442 and :445) and the second
+ *       kinetic runic girdle (:351) are registered by the original but never shown by name in a page.</li>
  *   <li>{@link #constructBlueprints()} - the nine original <em>wand constructs</em>. The original does not register
  *       those as recipes at all: ConfigRecipes:83-100 stores a plain List and the research page casts it as
  *       (List)recipes.get("..."), never as an IRecipe. They are built in the world, not crafted, so they carry a
@@ -241,6 +245,14 @@ public final class ResearchRecipeCoverage {
         ids.put("ArcaneStone2", "thaumcraft:arcane_stone_bricks");
         ids.put("ArcaneStone3", "thaumcraft:arcane_stone_brick_stairs");
         ids.put("ArcaneStone4", "thaumcraft:arcane_stone_brick_slab");
+        // The original registers the six balanced shards in a loop (ConfigRecipes:89). The research book
+        // never names them, but the native crucible recipes exist and the catalogue has to be complete.
+        ids.put("BalancedShard_0", "thaumcraft:crucible/balanced_shard_air");
+        ids.put("BalancedShard_1", "thaumcraft:crucible/balanced_shard_fire");
+        ids.put("BalancedShard_2", "thaumcraft:crucible/balanced_shard_water");
+        ids.put("BalancedShard_3", "thaumcraft:crucible/balanced_shard_earth");
+        ids.put("BalancedShard_4", "thaumcraft:crucible/balanced_shard_order");
+        ids.put("BalancedShard_5", "thaumcraft:crucible/balanced_shard_entropy");
         ids.put("BathSalts", "thaumcraft:crucible/bath_salts");
         ids.put("Bellows", "thaumcraft:arcane/bellows");
         ids.put("BlockFlesh", "thaumcraft:flesh_block");
@@ -268,6 +280,16 @@ public final class ResearchRecipeCoverage {
         ids.put("BootsTraveller", "thaumcraft:infusion/boots_traveller");
         ids.put("BottleTaint", "thaumcraft:crucible/bottle_taint");
         ids.put("Centrifuge", "thaumcraft:arcane/centrifuge");
+        // The original registers the six aspect clusters and the mixed cluster in a loop
+        // (ConfigRecipes:442 and :445). The research book never names them, but the native crafting
+        // recipes exist and the catalogue has to be complete.
+        ids.put("Clusters0", "thaumcraft:clusters/air");
+        ids.put("Clusters1", "thaumcraft:clusters/fire");
+        ids.put("Clusters2", "thaumcraft:clusters/water");
+        ids.put("Clusters3", "thaumcraft:clusters/earth");
+        ids.put("Clusters4", "thaumcraft:clusters/order");
+        ids.put("Clusters5", "thaumcraft:clusters/entropy");
+        ids.put("Clusters6", "thaumcraft:clusters/mixed");
         ids.put("CoreAlchemy", "thaumcraft:infusion/golem_core_alchemy");
         ids.put("CoreBlank", "thaumcraft:arcane/golem_core_blank");
         ids.put("CoreButcher", "thaumcraft:crucible/golem_core_butcher");
@@ -402,6 +424,10 @@ public final class ResearchRecipeCoverage {
         ids.put("RunicAmuletEmergency", "thaumcraft:infusion/runic_amulet_emergency");
         ids.put("RunicGirdle", "thaumcraft:infusion/runic_girdle");
         ids.put("RunicGirdleKinetic", "thaumcraft:infusion/runic_girdle_kinetic");
+        // The second kinetic runic girdle of the original (ConfigRecipes:351) is a dead registration
+        // (see documentedDuplicateRecipes), but the port still ships the identical recipe, so the
+        // catalogue has to name it.
+        ids.put("RunicGirdleKinetic_2", "thaumcraft:infusion/runic_girdle_kinetic_2");
         ids.put("RunicRing", "thaumcraft:infusion/runic_ring");
         ids.put("RunicRingCharged", "thaumcraft:infusion/runic_ring_charged");
         ids.put("RunicRingHealing", "thaumcraft:infusion/runic_ring_healing");
@@ -520,6 +546,13 @@ public final class ResearchRecipeCoverage {
     private static Set<String> buildOutsideBook() {
         Set<String> keys = new TreeSet<>();
         PAGE_RECIPE_ARRAYS.values().forEach(keys::addAll);
+        // The original registers the six balanced shards (ConfigRecipes:89), the six aspect clusters
+        // and the mixed cluster (ConfigRecipes:442 and :445) and the second kinetic runic girdle
+        // (ConfigRecipes:351) without ever naming them in a research page.
+        for (int index = 0; index < 6; index++) keys.add("BalancedShard_" + index);
+        for (int index = 0; index < 6; index++) keys.add("Clusters" + index);
+        keys.add("Clusters6");
+        keys.add("RunicGirdleKinetic_2");
         return Collections.unmodifiableSet(keys);
     }
 

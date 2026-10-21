@@ -100,7 +100,7 @@ class ResearchRecipeCoverageTest {
     @Test
     void everyMappedOriginalKeyResolvesToAPackagedNativeRecipe() {
         Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
-        assertEquals(279, ids.size());
+        assertEquals(293, ids.size());
         Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
         for (Map.Entry<String, String> entry : ids.entrySet()) {
             String id = entry.getValue();
@@ -131,8 +131,48 @@ class ResearchRecipeCoverageTest {
             assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
             assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
         }
-        assertEquals(22, ResearchRecipeCoverage.outsideBookRecipeKeys().size());
+        assertEquals(36, ResearchRecipeCoverage.outsideBookRecipeKeys().size());
         assertEquals(Set.of("BANNERS", "PRIMALARROW"), ResearchRecipeCoverage.pageRecipeArrays().keySet());
+    }
+
+    /**
+     * The original registers fourteen more recipes that no research page names by key: the six
+     * balanced shards (ConfigRecipes:89), the six aspect clusters and the mixed cluster
+     * (ConfigRecipes:442 and :445) and the second kinetic runic girdle (ConfigRecipes:351).
+     *
+     * <p>The port shipped a native recipe for each of them, but the coverage map did not name the
+     * original key, so the catalogue was not closed over the original. This test pins the mapping
+     * and the native recipe of every one of them.</p>
+     */
+    @Test
+    void theOriginalRecipesOutsideTheResearchBookAreMappedToTheirNativeRecipes() {
+        Map<String, String> ids = ResearchRecipeCoverage.nativeRecipeIds();
+        Set<String> present = ResearchRecipeCoverage.nativeRecipeIdsPresent();
+        List<String> shards = List.of("air", "fire", "water", "earth", "order", "entropy");
+        for (int index = 0; index < shards.size(); index++) {
+            String key = "BalancedShard_" + index;
+            assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
+            assertEquals("thaumcraft:crucible/balanced_shard_" + shards.get(index), ids.get(key));
+            assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
+        }
+        for (int index = 0; index < shards.size(); index++) {
+            String key = "Clusters" + index;
+            assertTrue(ids.containsKey(key), key + " must be mapped to a native recipe");
+            assertEquals("thaumcraft:clusters/" + shards.get(index), ids.get(key));
+            assertTrue(present.contains(ids.get(key)), key + " -> " + ids.get(key));
+        }
+        assertEquals("thaumcraft:clusters/mixed", ids.get("Clusters6"));
+        assertTrue(present.contains(ids.get("Clusters6")));
+        assertEquals("thaumcraft:infusion/runic_girdle_kinetic_2", ids.get("RunicGirdleKinetic_2"));
+        assertTrue(present.contains(ids.get("RunicGirdleKinetic_2")));
+        // All fourteen are outside the research book.
+        Set<String> outside = ResearchRecipeCoverage.outsideBookRecipeKeys();
+        for (int index = 0; index < shards.size(); index++) {
+            assertTrue(outside.contains("BalancedShard_" + index));
+            assertTrue(outside.contains("Clusters" + index));
+        }
+        assertTrue(outside.contains("Clusters6"));
+        assertTrue(outside.contains("RunicGirdleKinetic_2"));
     }
 
     @Test

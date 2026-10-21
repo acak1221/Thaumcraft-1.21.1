@@ -237,6 +237,7 @@ Every fix below is committed in `port/octiles` with the oracle file and line in 
 | Mirror (essentia) | `linked`, `linkX/Y/Z`, `linkDim` | the same | |
 | Flux scrubber | `facing`, `charges`, `power`, `essentia` (`:92-117`) | the same | |
 | Eldritch obelisk | **nothing** | nothing (the `counter` was removed) | fixed |
+| Eldritch portal | **nothing** (`opencount`/`count` are transient) | `opencount`, `count` | minor deviation, client animation only |
 | Infusion pillar | `orientation` (byte) (`TileInfusionPillar.java:31-39`) | the orientation lives in the block state | |
 | Deconstruction table | `Aspect`, `Items`, `CustomName` (`:97-138`) | the same names | |
 | Grate, banner, brainbox, pressure plate, eldritch nothing | the original fields | the same names | |
@@ -278,7 +279,10 @@ Every fix below is committed in `port/octiles` with the oracle file and line in 
    (`TileJarNode.java:110-131`: the stored aspects may not exceed the stored base), the port's
    `TileJarNode` does not. Nothing in the original flow calls it (the jar is only filled through
    `setAspects`), but the API is missing.
-6. **No client acceptance.** Nothing in this pass was verified in a running client; only the server
+6. **The eldritch portal keeps two transient counters in NBT.** The original `TileEldritchPortal`
+   stores nothing; the port saves `opencount` and `count`. Only the client animation and the
+   250-tick ambient sound read them.
+7. **No client acceptance.** Nothing in this pass was verified in a running client; only the server
    unit suite and the compilation of the game-test harness were executed.
 
 ---

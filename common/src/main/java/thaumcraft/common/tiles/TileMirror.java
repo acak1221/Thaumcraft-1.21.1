@@ -269,7 +269,8 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
      * "stack" compound was never read back and the buffered items were lost on every save.
      */
     public static CompoundTag saveOutputStack(ItemStack stack, int slot, HolderLookup.Provider registries) {
-        CompoundTag entry = stack.save(registries);
+        Tag saved = stack.save(registries);
+        CompoundTag entry = saved instanceof CompoundTag compound ? compound : new CompoundTag();
         entry.putByte("Slot", (byte) slot);
         return entry;
     }

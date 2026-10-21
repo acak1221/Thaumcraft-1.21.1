@@ -1,6 +1,6 @@
 package thaumcraft.common.config;
 
-import dev.architectury.registry.registries.CreativeTabRegistry;
+import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.BlockPos;
@@ -29,7 +29,7 @@ import thaumcraft.common.lib.potions.PotionVisExhaust;
 /** TC4 ConfigBlocks:163-164; these are finite blocks, not vanilla source fluids. */
 public final class ThaumcraftFlux {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Thaumcraft.MODID, Registries.BLOCK);
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEMS);
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Thaumcraft.MODID, Registries.ITEM);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(Thaumcraft.MODID, Registries.MOB_EFFECT);
 
     public static final RegistrySupplier<BlockFluxGas> FLUX_GAS = BLOCKS.register("flux_gas", () -> new BlockFluxGas(properties()));

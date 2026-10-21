@@ -41,7 +41,9 @@ public final class ThaumcraftOres {
 
     private static RegistrySupplier<BlockCustomOre> ore(String id, int originalVariant) {
         RegistrySupplier<BlockCustomOre> block = BLOCKS.register(id, () -> new BlockCustomOre(originalVariant,
-                BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.5F, 5.0F)
+                // Original BlockCustomOre:60 - setResistance(5) stores 15 and the getter divides
+                // it by five, so the effective blast resistance is 3.
+                BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.5F, 3.0F)
                         .sound(SoundType.STONE).requiresCorrectToolForDrops()));
         ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
         return block;

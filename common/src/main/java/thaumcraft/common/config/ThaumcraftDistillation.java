@@ -27,7 +27,9 @@ public final class ThaumcraftDistillation {
 
     public static final RegistrySupplier<BlockAlchemyFurnace> ALCHEMY_FURNACE = BLOCKS.register("alchemy_furnace",
             () -> new BlockAlchemyFurnace(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
-                    .strength(3, 25).sound(SoundType.STONE).noOcclusion()
+                    // Original BlockAlchemyFurnace:59 - setResistance(17) stores 51 and the getter
+                    // divides it by five, so the effective blast resistance is 10.2.
+                    .strength(3, 10.2F).sound(SoundType.STONE).noOcclusion()
                     .lightLevel(state -> state.getValue(BlockAlchemyFurnace.LIT) ? 12 : 0)));
     public static final RegistrySupplier<Item> ALCHEMY_FURNACE_ITEM = ITEMS.register("alchemy_furnace",
             () -> new BlockItem(ALCHEMY_FURNACE.get(), new Item.Properties()));

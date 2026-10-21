@@ -3,12 +3,13 @@ package thaumcraft.common.lib.mods;
 import java.util.Random;
 
 /**
- * Original grim champion: every hit weakened the target for two hundred ticks with a
- * forty percent chance.
+ * Original grim champion: every hit withered the target for two hundred ticks with a
+ * forty percent chance. The original effect is {@code Potion.field_82731_v} (wither), not
+ * weakness; the port's own death gaze uses the same field as {@code MobEffects.WITHER}.
  */
 public final class ChampionModGrim implements IChampionModifierEffect {
     @Override public Result performEffect(Context context, Random random) {
-        if (random.nextFloat() < 0.4f) return Result.status(context, Status.WEAKNESS, 200);
+        if (random.nextFloat() < 0.4f) return Result.status(context, Status.WITHER, 200);
         return Result.unchanged(context);
     }
     @Override public Fx showFx(Random random, float width, float height) {

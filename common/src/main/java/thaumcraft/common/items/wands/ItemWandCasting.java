@@ -32,7 +32,10 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 import java.math.BigDecimal;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.wands.FocusUpgradeType;
+import thaumcraft.api.wands.IWandable;
 import thaumcraft.common.items.wands.foci.FocusData;
+import thaumcraft.common.items.wands.foci.FocusUpgradeData;
 import thaumcraft.common.items.wands.foci.WandFocusActions;
 
 /** Component-backed centivis wand. The bounded material catalogue does not imply focus/staff parity. */
@@ -83,6 +86,19 @@ public final class ItemWandCasting extends Item {
     /** Original {@code isStaff}: the rod is a {@code StaffRod}. */
     public static boolean isStaff(ItemStack stack) { return WandMaterials.rod(data(stack).rod()).staff(); }
 
+    /**
+     * Original {@code ItemWandCasting.getFocusPotency}: the potency upgrade of the
+     * installed focus plus one when the wand carries a staff rod with runes (only
+     * the primal staff has them, {@code ConfigItems:325}). Without a focus the
+     * original returns zero, so the rune bonus needs a focus as well.
+     */
+    public static int focusPotency(ItemStack stack) {
+        ItemStack focus = FocusData.get(stack);
+        if (focus.isEmpty()) return 0;
+        return WandMaterials.focusPotency(FocusUpgradeData.level(focus, FocusUpgradeType.potency),
+                WandMaterials.rod(data(stack).rod()));
+    }
+
     /** Writes the wand data and the weapon modifier that belongs to its rod (a staff has it, a wand has not). */
     public static void withData(ItemStack stack, WandData data) {
         stack.set(ThaumcraftContent.WAND_DATA.get(), data);
@@ -114,7 +130,34 @@ public final class ItemWandCasting extends Item {
     }
     @Override public UseAnim getUseAnimation(ItemStack stack) { return UseAnim.BOW; }
 
+    /**
+     * Original {@code ItemWandCasting.onItemUseFirst}: the block and its block entity
+     * answer a wand click through the {@link IWandable} contract. A negative answer
+     * means that the click was not handled at all.
+     */
+    private static InteractionResult dispatchWandable(UseOnContext context) {
+        Level level = context.getLevel();
+        Player player = context.getPlayer();
+        ItemStack stack = context.getItemInHand();
+        BlockPos pos = context.getClickedPos();
+        if (player == null || !level.hasChunkAt(pos)) return InteractionResult.PASS;
+        int side = context.getClickedFace().get3DDataValue();
+        if (level.getBlockState(pos).getBlock() instanceof IWandable wandable) {
+            int result = wandable.onWandRightClick(level, stack, player, pos.getX(), pos.getY(), pos.getZ(), side, 0);
+            if (result >= 0) return result == 1 ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+        }
+        if (level.getBlockEntity(pos) instanceof IWandable wandable) {
+            int result = wandable.onWandRightClick(level, stack, player, pos.getX(), pos.getY(), pos.getZ(), side, 0);
+            if (result >= 0) return result == 1 ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+        }
+        return InteractionResult.PASS;
+    }
+
     @Override public InteractionResult useOn(UseOnContext context) {
+        // Original ItemWandCasting:onItemUseFirst - the IWandable contract of the
+        // clicked block and of its block entity answers the wand click first.
+        InteractionResult wandable = dispatchWandable(context);
+        if (wandable != InteractionResult.PASS) return wandable;
         InteractionResult charger = thaumcraft.common.blocks.BlockMagicWorkbenchCharger.tryWandInteraction(context);
         if (charger != InteractionResult.PASS) return charger;
         InteractionResult thaumatorium = thaumcraft.common.lib.ThaumatoriumFormation.tryForm(context);
@@ -146,6 +189,23 @@ public final class ItemWandCasting extends Item {
         return WandManager.createThaumonomicon(context) ? InteractionResult.CONSUME : InteractionResult.FAIL;
     }
 
+    /**
+     * Original {@code ItemWandCasting.onItemRightClick}: the block and its block entity
+     * answer a wand click without a target through the {@link IWandable} contract. A
+     * null answer means that the click was not handled at all.
+     */
+    private static ItemStack wandableResult(Level level, Player player, ItemStack stack, BlockPos pos) {
+        if (level.getBlockState(pos).getBlock() instanceof IWandable wandable) {
+            ItemStack result = wandable.onWandRightClick(level, stack, player);
+            if (result != null) return result;
+        }
+        if (level.getBlockEntity(pos) instanceof IWandable wandable) {
+            ItemStack result = wandable.onWandRightClick(level, stack, player);
+            if (result != null) return result;
+        }
+        return null;
+    }
+
     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         nodeUses(player).remove(player);
@@ -153,6 +213,12 @@ public final class ItemWandCasting extends Item {
         // Native block reach replaces Forge's getBlockReachDistance; a hardcoded
         // ten-block ray incorrectly allowed ordinary survival to drain remotely.
         HitResult hit = player.pick(player.blockInteractionRange(), 1.0F, true);
+        if (hit instanceof BlockHitResult wandableHit && hit.getType() == HitResult.Type.BLOCK
+                && level.hasChunkAt(wandableHit.getBlockPos())) {
+            // Original ItemWandCasting:492-509 - the IWandable contract without a target.
+            ItemStack result = wandableResult(level, player, stack, wandableHit.getBlockPos());
+            if (result != null) return InteractionResultHolder.success(result);
+        }
         if (hit instanceof BlockHitResult crucibleHit && hit.getType() == HitResult.Type.BLOCK
                 && level.hasChunkAt(crucibleHit.getBlockPos())
                 && level.getBlockEntity(crucibleHit.getBlockPos()) instanceof thaumcraft.common.tiles.TileCrucible crucible) {

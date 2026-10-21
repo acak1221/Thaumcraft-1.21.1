@@ -83,7 +83,7 @@ public final class ItemFocusFire extends ItemFocusBasic {
         wand.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(paid)); player.getInventory().setChanged();
         ItemStack focus = FocusData.get(before);
         var orb = new EntityExplosiveOrb(player.level(), player);
-        orb.setStrength(1F + FocusUpgradeData.level(focus, FocusUpgradeType.potency) * .4F);
+        orb.setStrength(1F + ItemWandCasting.focusPotency(before) * .4F);
         orb.setFiery(FocusUpgradeData.level(focus, FocusUpgradeType.alchemistsfire) > 0);
         player.serverLevel().addFreshEntity(orb);
         // Vanilla1.7 event1009's volume2 fireball launch became native event1018
@@ -129,7 +129,7 @@ public final class ItemFocusFire extends ItemFocusBasic {
         current.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(paid));
         player.getInventory().setChanged();
         var castLevel = player.serverLevel();
-        int potency = FocusUpgradeData.level(FocusData.get(current), FocusUpgradeType.potency);
+        int potency = ItemWandCasting.focusPotency(current);
         int fiery = FocusUpgradeData.level(FocusData.get(current), FocusUpgradeType.alchemistsfire);
         boolean beam = FocusUpgradeData.level(FocusData.get(current), FocusUpgradeType.firebeam) > 0;
         ItemStack committed = current.copy();

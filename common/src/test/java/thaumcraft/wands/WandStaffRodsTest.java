@@ -44,6 +44,24 @@ class WandStaffRodsTest {
         assertEquals(18, WandMaterials.RODS.size());
     }
 
+    @Test void onlyThePrimalStaffCarriesTheRunesOfTheOriginalStaffRod() {
+        // Original ConfigItems:325 - STAFF_ROD_PRIMAL.setRunes(true); no other rod has runes.
+        assertTrue(WandMaterials.PRIMAL_STAFF.hasRunes());
+        for (var rod : WandMaterials.RODS) {
+            if (rod.tag().equals("primal_staff")) continue;
+            assertFalse(rod.hasRunes(), rod.tag());
+        }
+    }
+
+    @Test void theFocusPotencyIsTheUpgradeLevelPlusTheRuneOfTheStaffRod() {
+        // Original ItemWandCasting:262-267 - the focus potency plus one for a staff with runes.
+        assertEquals(0, WandMaterials.focusPotency(0, WandMaterials.WOOD));
+        assertEquals(2, WandMaterials.focusPotency(2, WandMaterials.WOOD));
+        assertEquals(3, WandMaterials.focusPotency(2, WandMaterials.PRIMAL_STAFF));
+        assertEquals(1, WandMaterials.focusPotency(0, WandMaterials.PRIMAL_STAFF));
+        assertEquals(2, WandMaterials.focusPotency(1, WandMaterials.PRIMAL_STAFF));
+    }
+
     @Test void aStaffWandIsAssembledAtRodTimesCapPriceAndHoldsTheWholeStaffCapacity() {
         assertEquals(8 * 6, WandMaterials.assemblyCost("greatwood_staff", "thaumium"));
         assertEquals(32 * 1, WandMaterials.assemblyCost("primal_staff", "iron"));

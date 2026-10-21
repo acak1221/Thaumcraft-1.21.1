@@ -9,10 +9,20 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -21,6 +31,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -104,7 +115,9 @@ public final class ThaumcraftEldritchBlocks {
 
     public static final RegistrySupplier<BlockEldritchNothing> ELDRITCH_NOTHING = BLOCKS.register("eldritch_nothing",
             () -> new BlockEldritchNothing(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(-1.0F, 6000000.0F).sound(SoundType.STONE).noOcclusion().noCollission()));
+                    // Original BlockEldritchNothing:49 - setResistance(6000000) stores 18000000 and
+                    // the getter divides it by five, so the effective blast resistance is 3600000.
+                    .strength(-1.0F, 3600000.0F).sound(SoundType.STONE).noOcclusion().noCollission()));
 
     public static final RegistrySupplier<BlockEldritchPortal> ELDRITCH_PORTAL = BLOCKS.register("eldritch_portal",
             () -> new BlockEldritchPortal(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_MAGENTA)
@@ -125,8 +138,16 @@ public final class ThaumcraftEldritchBlocks {
             () -> new BlockCosmeticSolid(2, cosmeticProperties(2)));
 
     public static final RegistrySupplier<BlockCosmeticOpaque> COSMETIC_OPAQUE = BLOCKS.register("cosmetic_opaque",
-            () -> new BlockCosmeticOpaque(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+            () -> new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_AMBER, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
                     .strength(EldritchBlockRules.COSMETIC_OPAQUE_HARDNESS, EldritchBlockRules.COSMETIC_OPAQUE_RESISTANCE)
+                    .sound(SoundType.STONE)));
+    /**
+     * The warded glass, the original metadata two of the cosmetic opaque family. It is
+     * unbreakable while the warded stone option is on and it resists every explosion.
+     */
+    public static final RegistrySupplier<BlockCosmeticOpaque> COSMETIC_OPAQUE_WARDED = BLOCKS.register("cosmetic_opaque_warded",
+            () -> new BlockCosmeticOpaque(BlockCosmeticOpaque.GROUP_WARDED, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+                    .strength(EldritchBlockRules.COSMETIC_OPAQUE_WARDED_HARDNESS, EldritchBlockRules.COSMETIC_OPAQUE_WARDED_RESISTANCE)
                     .sound(SoundType.STONE)));
 
     public static final RegistrySupplier<BlockCosmeticStoneSlab> COSMETIC_STONE_SLAB_ARCANE = BLOCKS.register("cosmetic_stone_slab_arcane",
@@ -147,15 +168,21 @@ public final class ThaumcraftEldritchBlocks {
 
     public static final RegistrySupplier<BlockArcaneDoor> ARCANE_DOOR = BLOCKS.register("arcane_door",
             () -> new BlockArcaneDoor(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-                    .strength(15.0F, 999.0F).sound(SoundType.METAL).noOcclusion()));
+                    // Original BlockArcaneDoor:68 - setResistance(999) stores 2997 and the getter
+                    // divides it by five, so the effective blast resistance is 599.4.
+                    .strength(15.0F, 599.4F).sound(SoundType.METAL).noOcclusion()));
 
     public static final RegistrySupplier<BlockMagicBox> MAGIC_BOX = BLOCKS.register("magic_box",
             () -> new BlockMagicBox(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(2.5F, 12.5F).sound(SoundType.WOOD).noOcclusion()));
+                    // Original BlockMagicBox:34-38 - hardness 2.5 and NO setResistance at all, so
+                    // the inherited 1.7.10 field stays 0 and the effective blast resistance is 0.
+                    .strength(2.5F, 0.0F).sound(SoundType.WOOD).noOcclusion()));
 
     public static final RegistrySupplier<BlockMirror> MIRROR = BLOCKS.register("mirror",
             () -> new BlockMirror(BlockBehaviour.Properties.of().mapColor(MapColor.ICE)
-                    .strength(1.0F, 10.0F).sound(SoundType.GLASS).noOcclusion()));
+                    // Original BlockMirror:67 - setResistance(10) stores 30 and the getter divides
+                    // it by five, so the effective blast resistance is 6.
+                    .strength(1.0F, 6.0F).sound(SoundType.GLASS).noOcclusion()));
 
     public static final RegistrySupplier<BlockMetalDevice> METAL_DEVICE = BLOCKS.register("metal_device",
             () -> new BlockMetalDevice(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
@@ -192,10 +219,13 @@ public final class ThaumcraftEldritchBlocks {
             () -> new BlockAiry(3, airyProperties(3)));
 
     public static final RegistrySupplier<JarBlock> JAR_BRAIN = BLOCKS.register("jar_brain",
-            () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 15.0F).sound(SoundType.GLASS).noOcclusion()));
+            // Original BlockJar:71 - hardness 0.3 and NO setResistance, so the effective blast
+            // resistance is 0; the original jar emits no light.
+            () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion()));
 
     public static final RegistrySupplier<JarBlock> JAR_NODE = BLOCKS.register("jar_node",
-            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 15.0F).sound(SoundType.GLASS).noOcclusion()));
+            // Original BlockJar:299-305 - the node jar is the only jar that emits light, level 11.
+            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 11)));
 
     public static final RegistrySupplier<EtherealBloomBlock> ETHEREAL_BLOOM = BLOCKS.register("ethereal_bloom",
             () -> new EtherealBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
@@ -243,7 +273,7 @@ public final class ThaumcraftEldritchBlocks {
             () -> new ItemVariantBlock(COSMETIC_SOLID.get(), EldritchBlockRules.variantOf("paving_stone_warding"), "paving_stone_warding", new Item.Properties()));
     /** The warded glass is the metadata two of the cosmetic opaque (ConfigRecipes:192). */
     public static final RegistrySupplier<Item> WARDED_GLASS_ITEM = ITEMS.register("warded_glass",
-            () -> new ItemVariantBlock(COSMETIC_OPAQUE.get(), EldritchBlockRules.variantOf("warded_glass"), "warded_glass", new Item.Properties()));
+            () -> new ItemVariantBlock(COSMETIC_OPAQUE_WARDED.get(), EldritchBlockRules.variantOf("warded_glass"), "warded_glass", new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_OPAQUE_ITEM = ITEMS.register("cosmetic_opaque", () -> new BlockItem(COSMETIC_OPAQUE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ARCANE_ITEM = ITEMS.register("cosmetic_stone_slab_arcane", () -> new BlockItem(COSMETIC_STONE_SLAB_ARCANE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> COSMETIC_STONE_SLAB_ELDRITCH_ITEM = ITEMS.register("cosmetic_stone_slab_eldritch", () -> new BlockItem(COSMETIC_STONE_SLAB_ELDRITCH.get(), new Item.Properties()));
@@ -328,7 +358,7 @@ public final class ThaumcraftEldritchBlocks {
             () -> BlockEntityType.Builder.of((pos, state) -> new TileJarNode(pos, state), JAR_NODE.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<TileOwned>> OWNED_TILE = BLOCK_ENTITIES.register("owned",
-            () -> BlockEntityType.Builder.of((pos, state) -> new TileOwned(pos, state), ARCANE_DOOR.get(), COSMETIC_OPAQUE.get()).build(null));
+            () -> BlockEntityType.Builder.of((pos, state) -> new TileOwned(pos, state), ARCANE_DOOR.get(), COSMETIC_OPAQUE.get(), COSMETIC_OPAQUE_WARDED.get()).build(null));
 
     /** The block entity type of the node inside the cosmetic solid. */
     private static BlockEntityType<TileNode> cosmeticNodeType() { return COSMETIC_NODE_TILE.get(); }
@@ -352,6 +382,8 @@ public final class ThaumcraftEldritchBlocks {
                 Codec.intRange(0, 1).fieldOf("kind").forGetter(JarBlock::kind),
                 propertiesCodec()).apply(instance, JarBlock::new));
         private static final VoxelShape SHAPE = Block.box(3.0D, 0.0D, 3.0D, 13.0D, 12.0D, 13.0D);
+        private static final SoundEvent JAR = SoundEvent.createVariableRangeEvent(
+                ResourceLocation.fromNamespaceAndPath("thaumcraft", "jar"));
         private final int kind;
 
         public JarBlock(int kind, Properties properties) {
@@ -365,6 +397,56 @@ public final class ThaumcraftEldritchBlocks {
         @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return Shapes.block(); }
         @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
             return kind == 0 ? new TileJarBrain(pos, state) : new TileJarNode(pos, state);
+        }
+
+        /**
+         * Original BlockJar:223-242 - a right click on the brain jar hands a random
+         * part of the stored experience back and pauses the jar for forty ticks.
+         */
+        @Override protected ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos,
+                                                            Player player, InteractionHand hand, BlockHitResult hit) {
+            if (kind != 0 || !emptyBrainJar(level, pos)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return ItemInteractionResult.CONSUME;
+        }
+
+        @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+            if (kind != 0 || !emptyBrainJar(level, pos)) return InteractionResult.PASS;
+            return InteractionResult.CONSUME;
+        }
+
+        /** The original hands back a random share of at most sixty four experience. */
+        private static boolean emptyBrainJar(Level level, BlockPos pos) {
+            if (!(level.getBlockEntity(pos) instanceof TileJarBrain jar)) return false;
+            jar.eatDelay = 40;
+            if (level.isClientSide) return true;
+            int amount = level.random.nextInt(Math.min(jar.getXp() + 1, 64));
+            if (amount > 0) {
+                jar.xp -= amount;
+                dropExperience(level, pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, amount);
+                jar.setChanged();
+                level.sendBlockUpdated(pos, level.getBlockState(pos), level.getBlockState(pos), 3);
+            }
+            level.playSound(null, pos, JAR, SoundSource.BLOCKS, .2F, 1F);
+            return true;
+        }
+
+        /** Original BlockJar:182-193 - breaking the brain jar drops the stored experience. */
+        @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+            if (!state.is(newState.getBlock()) && !level.isClientSide
+                    && level.getBlockEntity(pos) instanceof TileJarBrain jar) {
+                dropExperience(level, pos.getX(), pos.getY(), pos.getZ(), jar.getXp());
+            }
+            super.onRemove(state, level, pos, newState, movedByPiston);
+        }
+
+        /** The original splits the experience into orbs of the vanilla orb value. */
+        private static void dropExperience(Level level, double x, double y, double z, int amount) {
+            int remaining = amount;
+            while (remaining > 0) {
+                int value = ExperienceOrb.getExperienceValue(remaining);
+                remaining -= value;
+                level.addFreshEntity(new ExperienceOrb(level, x, y, z, value));
+            }
         }
     }
 

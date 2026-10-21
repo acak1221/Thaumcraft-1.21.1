@@ -33,7 +33,9 @@ public final class ThaumcraftNodeDevices {
 
     public static final RegistrySupplier<BlockNodeStabilizer> NODE_STABILIZER = BLOCKS.register("node_stabilizer",
             () -> new BlockNodeStabilizer(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
-                    .strength(3, 25).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+                    // Original BlockStoneDevice:94 - setResistance(25) stores 75 and the getter
+                    // divides it by five, so the effective blast resistance is 15.
+                    .strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
     public static final RegistrySupplier<Item> NODE_STABILIZER_ITEM = ITEMS.register("node_stabilizer",
             () -> new BlockItem(NODE_STABILIZER.get(), new Item.Properties()) {
                 @Override public void appendHoverText(ItemStack stack, TooltipContext context,
@@ -49,7 +51,9 @@ public final class ThaumcraftNodeDevices {
 
     public static final RegistrySupplier<BlockNodeConverter> NODE_TRANSDUCER = BLOCKS.register("node_transducer",
             () -> new BlockNodeConverter(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
-                    .strength(3, 25).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+                    // Original BlockStoneDevice:94 - setResistance(25) stores 75 and the getter
+                    // divides it by five, so the effective blast resistance is 15.
+                    .strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
     public static final RegistrySupplier<Item> NODE_TRANSDUCER_ITEM = ITEMS.register("node_transducer",
             () -> new BlockItem(NODE_TRANSDUCER.get(), new Item.Properties()));
     public static final RegistrySupplier<BlockEntityType<TileNodeConverter>> NODE_TRANSDUCER_BLOCK_ENTITY = BLOCK_ENTITIES.register("node_transducer",
@@ -63,7 +67,9 @@ public final class ThaumcraftNodeDevices {
 
     public static final RegistrySupplier<BlockVisRelay> VIS_RELAY = BLOCKS.register("vis_relay",
             () -> new BlockVisRelay(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3, 17).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
+                    // Original BlockMetalDevice:102 - setResistance(17) stores 51 and the getter
+                    // divides it by five, so the effective blast resistance is 10.2.
+                    .strength(3, 10.2F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion()));
     public static final RegistrySupplier<Item> VIS_RELAY_ITEM = ITEMS.register("vis_relay",
             () -> new BlockItem(VIS_RELAY.get(), new Item.Properties()));
     public static final RegistrySupplier<BlockEntityType<TileVisRelay>> VIS_RELAY_BLOCK_ENTITY = BLOCK_ENTITIES.register("vis_relay",

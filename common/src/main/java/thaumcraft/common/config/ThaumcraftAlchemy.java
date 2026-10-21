@@ -30,7 +30,9 @@ public final class ThaumcraftAlchemy {
 
     public static final RegistrySupplier<BlockCrucible> CRUCIBLE = BLOCKS.register("crucible",
             () -> new BlockCrucible(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3, 17).sound(SoundType.METAL).noOcclusion()));
+                    // Original BlockMetalDevice:102 - setResistance(17) stores 51 and the getter
+                    // divides it by five, so the effective blast resistance is 10.2.
+                    .strength(3, 10.2F).sound(SoundType.METAL).noOcclusion()));
     public static final RegistrySupplier<Item> CRUCIBLE_ITEM = ITEMS.register("crucible",
             () -> new BlockItem(CRUCIBLE.get(), new Item.Properties()));
     public static final RegistrySupplier<BlockEntityType<TileCrucible>> CRUCIBLE_BLOCK_ENTITY = BLOCK_ENTITIES.register("crucible",

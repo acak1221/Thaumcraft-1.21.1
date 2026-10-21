@@ -27,6 +27,7 @@ import thaumcraft.common.config.ThaumcraftTaint;
 import thaumcraft.common.config.ThaumcraftTaintSettings;
 import thaumcraft.common.entities.EntityFallingTaint;
 import thaumcraft.common.entities.monster.EntityTaintSporeSwarmer;
+import thaumcraft.common.lib.world.TaintBlockRules;
 import thaumcraft.common.lib.world.TaintMaterialRules;
 
 /** Original crust0/soil1 active ecology. Existing flesh_block remains the canonical inert metadata2. */
@@ -39,7 +40,7 @@ public final class BlockTaint extends Block {
     @FunctionalInterface public interface ClientEffects {void droplet(Level level,Vec3 position);}
     private static ClientEffects clientEffects=(level,position)->{};
     private final int metadata;
-    public BlockTaint(Properties properties,int metadata){super(properties.strength(metadata==0?1.75F:metadata==1?1.5F:.2F,6F));if(metadata<0||metadata>2)throw new IllegalArgumentException("Invalid original taint metadata");this.metadata=metadata;}
+    public BlockTaint(Properties properties,int metadata){super(properties.strength(TaintBlockRules.taintHardness(metadata),TaintBlockRules.TAINT_RESISTANCE));if(metadata<0||metadata>2)throw new IllegalArgumentException("Invalid original taint metadata");this.metadata=metadata;}
     public int metadata(){return metadata;}
     public static int metadata(BlockState state){return state.getBlock() instanceof BlockTaint taint?taint.metadata:state.is(ThaumcraftTaint.FLESH.get())?2:-1;}
     public static boolean solidFamily(BlockState state){return metadata(state)>=0;}

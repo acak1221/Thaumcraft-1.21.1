@@ -122,7 +122,8 @@ class ChampionModifierTest {
         ScriptedRandom hits = new ScriptedRandom(0.39f, 0);
         ScriptedRandom misses = new ScriptedRandom(0.41f, 0);
         IChampionModifierEffect.Result grim = new ChampionModGrim().performEffect(attack(10.0f, false), hits);
-        assertEquals(IChampionModifierEffect.Status.WEAKNESS, grim.status());
+        // Original ChampionModGrim:26-30 - Potion.field_82731_v is the WITHER, not weakness.
+        assertEquals(IChampionModifierEffect.Status.WITHER, grim.status());
         assertEquals(200, grim.statusDuration());
         assertEquals(IChampionModifierEffect.Status.NONE, new ChampionModGrim().performEffect(attack(10.0f, false), misses).status());
         IChampionModifierEffect.Result fiery = new ChampionModFire().performEffect(attack(10.0f, false), hits);

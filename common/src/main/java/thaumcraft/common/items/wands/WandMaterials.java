@@ -13,13 +13,16 @@ public final class WandMaterials {
     public static final String ANY_PRIMAL = "*";
     private static final String STAFF = "_staff";
 
-    public record Rod(String tag, int capacity, int craftCost, String passive) {
-        public Rod(String tag, int capacity, int craftCost) { this(tag, capacity, craftCost, null); }
+    public record Rod(String tag, int capacity, int craftCost, String passive, boolean runes) {
+        public Rod(String tag, int capacity, int craftCost) { this(tag, capacity, craftCost, null, false); }
+        public Rod(String tag, int capacity, int craftCost, String passive) { this(tag, capacity, craftCost, passive, false); }
         public String research() { return "ROD_" + tag; }
         /** Original {@code rod instanceof StaffRod}. */
         public boolean staff() { return tag.endsWith(STAFF); }
         /** The tag of the plain rod a staff is made from (the name and texture of a staff use it); the tag itself for a wand rod. */
         public String baseTag() { return staff() ? tag.substring(0, tag.length() - STAFF.length()) : tag; }
+        /** Original {@code StaffRod.hasRunes}: only the primal staff carries the runes. */
+        public boolean hasRunes() { return runes; }
     }
 
     public record Cap(String tag, float modifier, int craftCost) {
@@ -45,7 +48,8 @@ public final class WandMaterials {
     public static final Rod BONE_STAFF = new Rod("bone_staff", 17500, 14, "perditio");
     public static final Rod REED_STAFF = new Rod("reed_staff", 17500, 14, "aer");
     public static final Rod SILVERWOOD_STAFF = new Rod("silverwood_staff", 25000, 24);
-    public static final Rod PRIMAL_STAFF = new Rod("primal_staff", 25000, 32, ANY_PRIMAL);
+    /** Original {@code STAFF_ROD_PRIMAL.setRunes(true)} (ConfigItems:325): the primal staff adds one focus potency. */
+    public static final Rod PRIMAL_STAFF = new Rod("primal_staff", 25000, 32, ANY_PRIMAL, true);
     public static final Cap IRON = new Cap("iron", 1.1F, 1);
     public static final Cap GOLD = new Cap("gold", 1.0F, 3);
     public static final Cap THAUMIUM = new Cap("thaumium", .9F, 6);
@@ -73,6 +77,11 @@ public final class WandMaterials {
 
     public static boolean supportsRod(String tag) { return RODS.stream().anyMatch(rod -> rod.tag().equals(tag)); }
     public static boolean supportsCap(String tag) { return CAPS.stream().anyMatch(cap -> cap.tag().equals(tag)); }
+    /**
+     * Original {@code ItemWandCasting.getFocusPotency}: the potency upgrade of the
+     * installed focus plus one when the wand carries a staff rod with runes.
+     */
+    public static int focusPotency(int upgradeLevel, Rod rod) { return upgradeLevel + (rod != null && rod.hasRunes() ? 1 : 0); }
     public static int capacity(String rod) { return rod(rod).capacity(); }
     public static int rodCraftCost(String rod) { return rod(rod).craftCost(); }
     public static int capCraftCost(String cap) { return cap(cap).craftCost(); }

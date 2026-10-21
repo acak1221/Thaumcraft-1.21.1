@@ -95,7 +95,7 @@ public final class ItemFocusHellbat extends ItemFocusBasic {
         if(bat==null)return;
         bat.moveTo(x,y+bat.getBbHeight(),z,player.getYRot(),0);bat.setTarget(target);
         ItemStack focus=FocusData.get(before);
-        bat.damBonus=FocusUpgradeData.level(focus,FocusUpgradeType.potency);
+        bat.damBonus=ItemWandCasting.focusPotency(before);
         bat.setIsSummoned(true);bat.setIsBatHanging(false);
         if(FocusUpgradeData.level(focus,FocusUpgradeType.devilbats)>0)bat.setIsDevil(true);
         if(FocusUpgradeData.level(focus,FocusUpgradeType.batbombs)>0)bat.setIsExplosive(true);

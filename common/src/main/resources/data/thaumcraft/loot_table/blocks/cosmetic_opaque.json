@@ -6,24 +6,6 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "thaumcraft:warded_glass",
-          "conditions": [
-            {
-              "condition": "minecraft:block_state_property",
-              "block": "thaumcraft:cosmetic_opaque",
-              "properties": {
-                "variant": "2"
-              }
-            }
-          ],
-          "functions": [
-            {
-              "function": "minecraft:explosion_decay"
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
           "name": "thaumcraft:cosmetic_opaque",
           "conditions": [
             {

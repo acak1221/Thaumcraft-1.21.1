@@ -63,6 +63,17 @@ public final class BlockArcaneDoor extends BaseEntityBlock {
         return new TileOwned(thaumcraft.common.config.ThaumcraftEldritchBlocks.OWNED_TILE.get(), pos, state);
     }
 
+    /**
+     * Original BlockArcaneDoor:68 - the door is unbreakable while the warded stone
+     * option is on and has a hardness of fifteen otherwise. Minecraft 1.21.1 binds the
+     * destroy speed to the block state, so the unbreakable state is a mining progress
+     * of zero.
+     */
+    @Override protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+        if (thaumcraft.common.config.ThaumcraftSettings.current().wardedStone()) return 0.0F;
+        return super.getDestroyProgress(state, player, level, pos);
+    }
+
     /** BlockArcaneDoor:104-152 - the closed door is a thin plate, the open one stands aside. */
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         Direction facing = state.getValue(FACING);

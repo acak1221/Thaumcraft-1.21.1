@@ -29,6 +29,7 @@ import thaumcraft.common.entities.monster.EntityTaintSporeSwarmer;
 import thaumcraft.common.entities.monster.EntityTaintSwarm;
 import thaumcraft.common.entities.monster.EntityTaintacle;
 import thaumcraft.common.entities.monster.EntityTaintacleSmall;
+import thaumcraft.common.lib.world.TaintBlockRules;
 
 /** Original BlockTaint/Fibres family and its actual ecological actors. */
 public final class ThaumcraftTaint {
@@ -37,12 +38,12 @@ public final class ThaumcraftTaint {
     private static final DeferredRegister<EntityType<?>> ENTITIES=DeferredRegister.create(Thaumcraft.MODID,Registries.ENTITY_TYPE);
     private static final SoundEvent GORE=SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft","gore"));
     private static final SoundType SOUND=new SoundType(.5F,.8F,GORE,GORE,GORE,GORE,GORE);
-    public static final RegistrySupplier<BlockTaint> CRUST=BLOCKS.register("taint_crust",()->new BlockTaint(properties(2,6),0));
-    public static final RegistrySupplier<BlockTaint> SOIL=BLOCKS.register("taint_soil",()->new BlockTaint(properties(2,6),1));
+    public static final RegistrySupplier<BlockTaint> CRUST=BLOCKS.register("taint_crust",()->new BlockTaint(properties(TaintBlockRules.TAINT_FAMILY_HARDNESS,TaintBlockRules.TAINT_RESISTANCE),0));
+    public static final RegistrySupplier<BlockTaint> SOIL=BLOCKS.register("taint_soil",()->new BlockTaint(properties(TaintBlockRules.TAINT_FAMILY_HARDNESS,TaintBlockRules.TAINT_RESISTANCE),1));
     // Existing flesh_block already owns original metadata2, including its real recipes and golem container identity.
     public static final RegistrySupplier<Block> FLESH=ThaumcraftGolemMaterials.FLESH_BLOCK;
-    public static final RegistrySupplier<BlockTaintFibres> FIBRES=BLOCKS.register("taint_fibres",()->new BlockTaintFibres(properties(1,3).noOcclusion()
-            .lightLevel(state->state.getValue(BlockTaintFibres.TYPE)==2?8:state.getValue(BlockTaintFibres.TYPE)==4?10:0)));
+    public static final RegistrySupplier<BlockTaintFibres> FIBRES=BLOCKS.register("taint_fibres",()->new BlockTaintFibres(properties(TaintBlockRules.FIBRES_HARDNESS,TaintBlockRules.FIBRES_RESISTANCE).noOcclusion()
+            .lightLevel(state->TaintBlockRules.fibreLight(state.getValue(BlockTaintFibres.TYPE)))));
     public static final RegistrySupplier<Item> CRUST_ITEM=ITEMS.register("taint_crust",()->new BlockTaintItem(CRUST.get(),new Item.Properties()));
     public static final RegistrySupplier<Item> SOIL_ITEM=ITEMS.register("taint_soil",()->new BlockTaintItem(SOIL.get(),new Item.Properties()));
     private static final List<RegistrySupplier<Item>> FIBRE_ITEMS=fibres();

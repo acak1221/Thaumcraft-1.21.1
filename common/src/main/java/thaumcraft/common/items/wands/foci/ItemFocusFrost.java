@@ -74,7 +74,7 @@ public final class ItemFocusFrost extends ItemFocusBasic {
 
         ItemStack before = wand.copy(), paid = before.copy();
         Map<String, Integer> costs = activationCost(before, player);
-        int potency = FocusUpgradeData.level(FocusData.get(before), FocusUpgradeType.potency);
+        int potency = ItemWandCasting.focusPotency(before);
         // :61 pays ALL three aspects before even constructing the projectile.
         // The same atomic debit and FLOAT gear/cap modifier apply to creative.
         if (!FocusVis.debit(paid, costs)) return;

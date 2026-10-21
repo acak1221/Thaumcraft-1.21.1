@@ -27,7 +27,9 @@ public final class ThaumcraftFocalManipulation {
 
     public static final RegistrySupplier<BlockFocalManipulator> FOCAL_MANIPULATOR = BLOCKS.register("focal_manipulator",
             () -> new BlockFocalManipulator(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
-                    .strength(3, 25).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
+                    // Original BlockStoneDevice:94 - setResistance(25) stores 75 and the getter
+                    // divides it by five, so the effective blast resistance is 15.
+                    .strength(3, 15).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()));
     public static final RegistrySupplier<Item> FOCAL_MANIPULATOR_ITEM = ITEMS.register("focal_manipulator",
             () -> new BlockItem(FOCAL_MANIPULATOR.get(), new Item.Properties()));
     public static final RegistrySupplier<BlockEntityType<TileFocalManipulator>> FOCAL_MANIPULATOR_BLOCK_ENTITY = BLOCK_ENTITIES.register("focal_manipulator",

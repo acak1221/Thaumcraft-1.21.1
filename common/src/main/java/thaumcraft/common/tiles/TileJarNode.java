@@ -6,12 +6,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.api.wands.IWandable;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
@@ -23,7 +24,7 @@ import thaumcraft.common.tiles.TileNode.NodeType;
  * Original TileJarNode: the node jar. It keeps the aspects and the identity
  * of a node until the player turns it back into a node with a wand.
  */
-public final class TileJarNode extends BlockEntity {
+public final class TileJarNode extends BlockEntity implements IWandable {
     private final AspectList aspects = new AspectList();
     private final AspectList aspectsBase = new AspectList();
     private NodeType nodeType = NodeType.NORMAL;
@@ -57,20 +58,38 @@ public final class TileJarNode extends BlockEntity {
         }
     }
 
-    /** Original TileJarNode:198-206 - the wand turns the jar back into a node. */
-    public InteractionResult onWandRightClick(Level level, BlockPos pos, Player player, ItemStack stack) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
-        drop = false;
-        level.setBlock(pos, ThaumcraftEldritchBlocks.AIRY.get().defaultBlockState()
-                .setValue(thaumcraft.common.blocks.BlockAiry.VARIANT, 0), 3);
-        if (level.getBlockEntity(pos) instanceof TileNode node) {
-            node.setAspects(getAspects());
-            node.setChanged();
-            level.sendBlockUpdated(pos, level.getBlockState(pos), level.getBlockState(pos), 3);
+    /**
+     * Original TileJarNode:222-241 - the wand turns the jar back into a node and
+     * hands the stored aspects, the node type, the node modifier and the identity
+     * of the node to it. The original never consumes the wand.
+     */
+    @Override public int onWandRightClick(Level level, ItemStack stack, Player player, int x, int y, int z, int side, int event) {
+        BlockPos pos = new BlockPos(x, y, z);
+        if (!level.isClientSide) {
+            drop = false;
+            level.setBlock(pos, ThaumcraftEldritchBlocks.AIRY.get().defaultBlockState()
+                    .setValue(thaumcraft.common.blocks.BlockAiry.VARIANT, 0), 3);
+            if (level.getBlockEntity(pos) instanceof TileNode node) {
+                node.restoreFromJar(getAspects(), getNodeType(), getNodeModifier(), getId());
+                level.sendBlockUpdated(pos, level.getBlockState(pos), level.getBlockState(pos), 3);
+            }
+            level.levelEvent(2001, pos, 0);
+            level.playSound(null, pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D,
+                    net.minecraft.sounds.SoundEvents.GLASS_BREAK, net.minecraft.sounds.SoundSource.BLOCKS,
+                    1.0F, .9F + level.random.nextFloat() * .2F);
         }
-        if (!player.getAbilities().instabuild) stack.shrink(1);
-        return InteractionResult.CONSUME;
+        player.swing(InteractionHand.MAIN_HAND);
+        return 0;
     }
+
+    /** Original TileJarNode:243-245 - the contract without a target does nothing. */
+    @Override public ItemStack onWandRightClick(Level level, ItemStack stack, Player player) { return null; }
+
+    /** Original TileJarNode:247-249 - the jar does not use the wand over time. */
+    @Override public void onUsingWandTick(ItemStack stack, Player player, int ticks) {}
+
+    /** Original TileJarNode:251-253 - the jar does not react to a stopped wand. */
+    @Override public void onWandStoppedUsing(ItemStack stack, Level level, Player player, int ticks) {}
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);

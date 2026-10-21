@@ -19,7 +19,7 @@ public interface IChampionModifierEffect {
     int TRIGGER_DAMAGED = 2;
 
     /** Original status effects a champion inflicted on its target. */
-    enum Status { NONE, WEAKNESS, HUNGER, POISON }
+    enum Status { NONE, WEAKNESS, HUNGER, POISON, WITHER }
 
     /** Original client particle kinds. */
     enum Particle { NONE, GENERIC, SPARK, SLIME_JUMP }

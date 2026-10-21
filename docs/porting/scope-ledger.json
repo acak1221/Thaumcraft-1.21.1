@@ -9426,12 +9426,17 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the 2..14 cube of the original es_i_1 crust",
           "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:46-63 the crust is inset by two sixteenths on every side without an eldritch neighbour",
           "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:37-44 the same rule as a pure helper, checked by the test eldritchCrustInsetsOnlyTheExposedSides",
-          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the cube of the isolated crust, from two to fourteen sixteenths"
+          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the cube of the isolated crust, from two to fourteen sixteenths",
+          "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:35-63 the crust, the glyphed stone and the decorated stone are drawn with a box that is inset by two sixteenths on every side whose neighbour is not a solid material",
+          "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:22-33 the inventory of the crust is the same box of two to fourteen sixteenths",
+          "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the crust is the fixed box of two to fourteen sixteenths",
+          "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:18-61 the helper computes the bounds of the joined crust, but no model of the port uses it"
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 baked model that reproduces the original inset cube of the glowing crust.",
           "The isolated crust is the two to fourteen sixteenths cube of the original and the helper computes the bounds of the joined crust as well.",
-          "Blocker: a 1.21.1 baked model has no access to the world, so the cube of the crust cannot be merged with the cube of a solid neighbour; the port keeps the isolated cube of the original."
+          "Blocker: the original insets the crust on the face whose neighbour is not a solid material (Block.isBlockSolid asks the material of the neighbour), so two crust blocks join seamlessly in the original while the port draws a groove of two sixteenths between every block of a field of crust; the helper of the port already computes the bounds of the joined crust but no model uses it.",
+          "The blocker is implementable in 1.21.1 in two ways: six boolean state properties on the crust group with a neighbour update and one model per combination, or a custom BakedModel that reads the neighbours in getQuads. Neither is a small change and both touch the shared BlockEldritch of the six eldritch groups, so the unit stays open."
         ],
         "reviewed_sha256": {
           "legacy": "d6d838f41b40546552b7b61b1b5f16bd606cfc1a5a4176769a9831815729fcac"
@@ -9754,20 +9759,27 @@
       },
       "review": {
         "disposition": "adapt",
-        "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "source_semantics": "equivalent",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderCultistPortal.java:1-126 the cultist portal render model",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java:1-110 the native cultist portal render model",
           "oracle thaumcraft/client/renderers/entity/RenderCultistPortal.java:97-110 the quad of the portal is built from the camera vectors of the 1.7.10 ActiveRenderInfo, so its size depends on the camera",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java:56-65 the same camera facing quad with the same frame, the same scale and the same alpha of the original"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java:56-65 the same camera facing quad with the same frame, the same scale and the same alpha of the original",
+          "oracle thaumcraft/client/renderers/entity/RenderCultistPortal.java:62-70 the four corners of the quad are the corners of a unit square of the basis of ActiveRenderInfo",
+          "oracle thaumcraft/client/renderers/entity/RenderCultistPortal.java:92-108 the four texture coordinates of the corners and the frame of the sheet counted backwards",
+          "oracle thaumcraft/client/renderers/entity/RenderCultistPortal.java:64 the quad is raised by the half height of the portal",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultistPortal.java:74-92 the same four corners with the same four texture coordinates",
+          "native common/src/main/java/thaumcraft/client/renderers/CameraBasis.java:20-64 the basis of the original ActiveRenderInfo, the look angles of the player and the mirror of the third person view",
+          "native common/src/test/java/thaumcraft/eldritch/EldritchPortalParityTest.java the four texture coordinates of the frame and the mirror of the third person view"
         ],
         "notes": [
-          "1.21.1 render pipeline change; the geometry of the model was not compared number by number in this audit.",
+          "1.21.1 render pipeline change; the geometry of the quad is now compared number by number with the oracle.",
           "The frame of the sixteen sheet, the scale of the age, the wobble of the damage, the fade with the health and the camera facing of the quad are kept.",
-          "Blocker: the camera vectors of the 1.7.10 ActiveRenderInfo (rotationX, rotationZ, rotationXY, rotationXZ and rotationYZ) have no equivalent in 1.21.1, so the size of the quad of the original cannot be reproduced; the port draws a quad of one block that always faces the camera."
+          "The original builds the quad from the basis of ActiveRenderInfo, that is from the look angles of the player and not from the camera, and it multiplies the horizontal part of a corner with the scale and the vertical part with the scaley; the native port does the same and it mirrors the quad in the third person view like the original.",
+          "The two opposite corners of the port carried the same texture coordinate before, so the sheet was drawn twisted; the native port now uses the four coordinates of the original."
         ],
         "reviewed_sha256": {
           "original": "ab525da687cc5425126ea27c7ddf7835d64a3e1a7a903e6a871ec6ff37e1d75d",
@@ -13656,10 +13668,15 @@
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 1.12 model of the eldritch crystal",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 the native model of the eldritch crystal",
           "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:27 and :37 the crystal is the Crystal and the Base group of the wavefront file thaumcraft/textures/models/vcrystal.obj",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java the one hundred and four vertices, the twenty texture coordinates, the one hundred and eighty normals and the one hundred and eighty triangles of the two groups of the original file, read from the same file"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java the one hundred and four vertices, the twenty texture coordinates, the one hundred and eighty normals and the one hundred and eighty triangles of the two groups of the original file, read from the same file",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:31 the crystal is loaded from the wavefront file vcrystal.obj",
+          "native common/src/main/resources/assets/thaumcraft/textures/models/vcrystal.obj the wavefront file of the original",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:553-560 the v of the wavefront file is the complement of the v of the model",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCap.java:144 the same complement for the cap of the obelisk"
         ],
         "notes": [
-          "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 version of the model."
+          "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 version of the model.",
+          "The wavefront file of the crystal and the wavefront file of the cap of the obelisk come from the same exporter and the original loads both with the same loader, so both use the same convention: the v of the file runs from the bottom of the image and the v of the model is its complement; the crystal was drawn upside down before."
         ],
         "reviewed_sha256": {
           "legacy": "c3a5d3aef9cb6af64a72c117b8459ea0aa3fd633c95fc7089176de11e7950f82"
@@ -16674,20 +16691,27 @@
       },
       "review": {
         "disposition": "adapt",
-        "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "source_semantics": "equivalent",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:1-82 the crystal renderer",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:1-70 the native crystal renderer",
           "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:37-52 the crystal stands in the middle of the block, turns with the orientation of the crystal and by a quarter turn per position, the base uses the crust sheet and the crystal the vcrystal sheet with the alpha of 0.7",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:48-56 the same translation, the same turns, the same sheets and the same alpha"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:48-56 the same translation, the same turns, the same sheets and the same alpha",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:44-50 the base is drawn with the crust texture and the crystal with its own texture and the alpha of 0.7",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:45-49 the light map of the crystal is overwritten before the crystal is drawn, so it keeps its own brightness",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:52-64 the base with the crust texture and the crystal with the crystal texture and the alpha of 0.7",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:67-78 the crystal is drawn with the full light and not with the light of its block",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:553-560 the wavefront v is the complement of the model v, like the cap of the obelisk",
+          "native common/src/test/java/thaumcraft/eldritch/EldritchPortalParityTest.java the light of the crystal"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit.",
+          "1.21.1 renderer change; the geometry is now compared part by part with the oracle.",
           "The geometry, the sheets and the alpha of the crystal are kept.",
-          "Blocker: the original overwrites the global light map with the value 210 times the shade of the pulse (TileEldritchCrystalRenderer:48-52); the light map of 1.21.1 holds sixteen steps, so the pulse of the crystal cannot be reproduced and the crystal keeps the light of its block."
+          "The original overwrites the coordinates of the light map with (5898, 178) up to (5898, 210) and the light map clamps them to the range of the texture, so the crystal of the original is always drawn with the brightest texel of the light map and the pulse of the original never reaches the screen; the native port draws the crystal with the full light for the same reason.",
+          "The wavefront file of the crystal is loaded by the same loader as the cap of the obelisk and its v runs from the bottom of the image; the native port flips the v of the crystal like it does for the cap, the crystal was drawn upside down before."
         ],
         "reviewed_sha256": {
           "original": "5a5c3471f2debbcd1b0768cda4aa4db3bffd76c51df88e8b77624c0e229e9229",
@@ -16785,11 +16809,18 @@
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:1-520 the native field renderer",
           "oracle thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:60-80 the tunnel is drawn on every face of the filler that touches a solid block",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:40-56 the same faces with the same rule",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelTunnelField.java the sixteen layers of the tunnel with the tunnel, the particle field and the particle field far sheet of the original and with the seed 31100, checked by the test tunnelFieldKeepsTheOriginalLayers"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelTunnelField.java the sixteen layers of the tunnel with the tunnel, the particle field and the particle field far sheet of the original and with the seed 31100, checked by the test tunnelFieldKeepsTheOriginalLayers",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:39-59 the tunnel is drawn on the face whose neighbour is not an opaque cube",
+          "oracle thaumcraft/common/blocks/BlockEldritchNothing.java:52-60 the filler is an opaque cube and has no collision box",
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:60-80 the cosmetic solid is an opaque cube",
+          "oracle thaumcraft/common/blocks/BlockEldritch.java:171-173 the eldritch stone is not an opaque cube",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:44-58 the tunnel is drawn on the face whose neighbour is not an opaque cube",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:70-88 the opaque cube of the neighbour of the 1.7.10"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit.",
-          "The fixed function tunnel of 1.7.10 is replaced by the native model of the tunnel with the same sixteen layers, the same sheets and the same seed."
+          "1.21.1 renderer change; the geometry is now compared part by part with the oracle.",
+          "The fixed function tunnel of 1.7.10 is replaced by the native model of the tunnel with the same sixteen layers, the same sheets and the same seed.",
+          "The port drew the tunnel on the faces that touch a solid block, the exact opposite of the original, so the void was drawn inside the stone and never on the border with the air of the room; the native port now asks the neighbour for its opaque cube like the original."
         ],
         "reviewed_sha256": {
           "original": "fbcce554fde59da87e23df98e8bbe54fd106eceaa606c65864b14a6ed94720be",
@@ -16887,10 +16918,20 @@
           "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:1-92 the portal renderer",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:1-80 the native portal renderer",
           "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:63-104 the gate is a camera facing quad of the sixteen frame sheet, the height follows the opening counter up to thirty and the width up to five, and the colour is magenta",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:37-71 the same quad, the same frame, the same counters and the same colour"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:37-71 the same quad, the same frame, the same counters and the same colour",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:40-45 the scale of the width and the scaley of the height of the gate",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:44-52 the corners of the quad are the corners of a unit square of the basis and the scale and the scaley are their half extents",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:57-59 the gate is drawn in the middle of its own block",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:74-81 the frame of the sheet is turned by ninety degrees",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:78-92 the same four corners with the same four texture coordinates",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchPortalRenderer.java:108-137 the half width, the half height and the four texture coordinates",
+          "native common/src/main/java/thaumcraft/client/renderers/CameraBasis.java:20-64 the basis of the original ActiveRenderInfo",
+          "native common/src/test/java/thaumcraft/eldritch/EldritchPortalParityTest.java the half extents of the gate and the four texture coordinates"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit."
+          "1.21.1 renderer change; the geometry is now compared part by part with the oracle.",
+          "The port drew the gate at half the size of the original and at twice the position of its block, because the 1.21.1 block entity renderer is placed on the corner of the block; the native port now draws the gate in the middle of its own block with the half extents of the original, so a fully opened gate is two blocks wide and two blocks high.",
+          "The frame of the sheet is turned by ninety degrees in the original and the native port draws it the same way."
         ],
         "reviewed_sha256": {
           "original": "5968132b45941cc0b16e1529972e7a3ec9fad24821cbd523aba8e43e22f14357",
@@ -45349,13 +45390,17 @@
           "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:102-107 the count of the guardians and the offset of one to three times minus one to one",
           "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:826-832 the same count and the same offset",
           "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:97-100 the permanent item of the key room carries the metadata two of the eldritch object",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:825 the permanent item with the metadata two"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:825 the permanent item with the metadata two",
+          "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:100-115 the count of the guardians, the offset of one to three times minus one to one and the champion of the first guardian on hard",
+          "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:110 the home of the guardian is the centre of the room with a radius of sixteen",
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:826-832 the count, the offset and the champion of the native",
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsRules.java:203-215 the count of the guardians and the champion rule"
         ],
         "notes": [
           "The guardian count per difficulty and the champion rule are kept.",
-          "The guardian offset of the native is (1..3) times (-1..1); the original never places a guardian more than zero blocks to the positive side, so the native may place it three blocks further away.",
-          "The permanent item of the key room is spawned without the original metadata 2 of the eldritch object and the guardian home is not anchored at the room centre.",
-          "Blocker: the original anchors the guardian of the key room at the centre of the room with a radius of sixteen (oracle GenKeyRoom:110) and the native spawn record of the world package carries no home, so the guardian of the port has no AI home. The fix needs a home field in DungeonRooms.Spawn and a restrictTo call in ThaumcraftOuterLands.spawnRoomEntities."
+          "The guardian offset of the native is (1..3) times (-1..1), the same as the original: MathHelper.getRandomIntegerInRange of 1.7.10 is nextInt(3) + 1 and nextInt(3) - 1.",
+          "The permanent item of the key room is spawned with the metadata two of the eldritch object, like the original.",
+          "Blocker: the original anchors the guardian of the key room at the centre of the room with a radius of sixteen (oracle GenKeyRoom:110) and the native spawn record of the world package carries no home, so the guardian of the port has no home. The fix needs a home field in DungeonRooms.Spawn and a restrictTo call in ThaumcraftOuterLands.spawnRoomEntities, and DungeonRooms is the file of the worldgen agent."
         ],
         "reviewed_sha256": {
           "original": "ee88eb80d4c28a4303718a417e8fdf54199096e2146b79a83cc2a7868c6d164b",

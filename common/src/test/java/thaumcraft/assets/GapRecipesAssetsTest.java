@@ -67,6 +67,9 @@ class GapRecipesAssetsTest {
             new Crucible("EtherealBloom", "crucible/ethereal_bloom", "ETHEREALBLOOM", 159,
                     "thaumcraft:shimmerleaf", "thaumcraft:ethereal_bloom", 1,
                     Map.of("praecantatio", 16, "herba", 16, "sano", 16, "vitium", 8)),
+            // ConfigRecipes:160 registers Items.field_151133_ar as the catalyst. The oracle's own aspect table proves that
+            // field is the vanilla bucket: ConfigAspects:314 gives it METAL 8 + VOID 1 and lines 315-317 derive the water,
+            // lava and milk buckets from it, which are exactly the aspects the original gives Items.BUCKET.
             new Crucible("LiquidDeath", "crucible/bucket_of_death", "LIQUIDDEATH", 160,
                     "minecraft:bucket", "thaumcraft:bucket_death", 1,
                     Map.of("mortuus", 32, "venenum", 32, "perditio", 32)),

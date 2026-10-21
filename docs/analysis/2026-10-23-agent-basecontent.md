@@ -298,4 +298,4 @@ inventory and the real review copies) reproduces the edited file byte for byte a
 
 * `c2e5ba16` `fix(basecontent): grow and breed the thaumic slime in the flux goo, add the flux items`
 * `42b9a9d9` `docs(basecontent): review the base content units against the 1.7.10 oracle`
-* `c79cc71e` `docs(basecontent): the report of the base content wave`
+* `441c7003` `docs(basecontent): the report of the base content wave`

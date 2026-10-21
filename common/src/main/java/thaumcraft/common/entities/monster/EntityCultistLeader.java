@@ -2,6 +2,7 @@ package thaumcraft.common.entities.monster;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -118,12 +119,23 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putByte("title", (byte) (int) entityData.get(TITLE));
+        // Original EntityThaumcraftBoss:66-74 - the boss base keeps its home area.
+        if (hasRestriction()) {
+            tag.putInt("HomeD", (int) getRestrictRadius());
+            tag.putInt("HomeX", getRestrictCenter().getX());
+            tag.putInt("HomeY", getRestrictCenter().getY());
+            tag.putInt("HomeZ", getRestrictCenter().getZ());
+        }
     }
 
     /** Original EntityCultistLeader:127-130 - the praetor reads its title back. */
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         setTitle(tag.getByte("title"));
+        // Original EntityThaumcraftBoss:59-64 - the boss base reads its home area back.
+        if (tag.contains("HomeD")) {
+            restrictTo(new BlockPos(tag.getInt("HomeX"), tag.getInt("HomeY"), tag.getInt("HomeZ")), tag.getInt("HomeD"));
+        }
     }
 
     // ---------------------------------------------------------------- identity

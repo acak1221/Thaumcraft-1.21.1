@@ -1,5 +1,6 @@
 package thaumcraft.common.lib.network;
 
+import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
@@ -20,5 +21,11 @@ public final class ResearchSettingsNetworking {
         ThaumcraftSettings.initializeClient();
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, ResearchSettingsPayload.TYPE, ResearchSettingsPayload.STREAM_CODEC,
                 (payload, context) -> context.queue(() -> ThaumcraftSettings.receive(payload.settings())));
+        // Original EventHandlerNetwork.clientLogsOut (oracle
+        // thaumcraft/common/lib/network/EventHandlerNetwork.java:69-81) restores
+        // the client's own configuration when the connection ends. The common
+        // layer owns that restore, so every loader behaves like the original
+        // instead of only the one that wires a platform disconnect event.
+        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> ThaumcraftSettings.resetClient());
     }
 }

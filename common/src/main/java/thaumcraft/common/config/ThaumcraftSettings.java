@@ -29,7 +29,15 @@ public final class ThaumcraftSettings {
     public static void receive(ResearchSettings settings) {
         requireClientThread(); remote = java.util.Objects.requireNonNull(settings);
     }
-    public static void resetClient() { requireClientThread(); remote = ResearchSettings.DEFAULTS; }
+    /**
+     * Original EventHandlerNetwork.clientLogsOut restores the client's own
+     * configuration after a disconnect. A client that never received a remote
+     * snapshot has nothing to restore, so the unset client thread is allowed.
+     */
+    public static void resetClient() {
+        if (clientThread != null) requireClientThread();
+        remote = ResearchSettings.DEFAULTS;
+    }
     private static void requireClientThread() {
         if (Thread.currentThread() != clientThread) throw new IllegalStateException("Remote settings require the client thread");
     }

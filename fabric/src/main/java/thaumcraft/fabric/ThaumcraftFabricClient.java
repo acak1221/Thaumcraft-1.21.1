@@ -68,6 +68,10 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
             thaumcraft.client.lib.PlayerNotifications.reset();
             thaumcraft.client.ThaumcraftTravelGearClient.reset();
             thaumcraft.client.ThaumcraftTaintSporesClient.reset();
+            // The common network layer owns the original's client-config restore
+            // (oracle EventHandlerNetwork.clientLogsOut) through the Architectury
+            // client event; this call is the loader's own belt-and-braces path
+            // and is idempotent.
             thaumcraft.common.config.ThaumcraftSettings.resetClient();
         });
         net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES)

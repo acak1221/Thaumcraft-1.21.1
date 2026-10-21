@@ -69,6 +69,7 @@
     "ChampionDeathLootMixin"
   ],
   "client": [
+    "client.OuterLandsDimensionEffectsMixin",
     "client.TableOutlineMixin",
     "client.WandFocusKeyMixin",
     "client.MinecraftItemColorsAccess",

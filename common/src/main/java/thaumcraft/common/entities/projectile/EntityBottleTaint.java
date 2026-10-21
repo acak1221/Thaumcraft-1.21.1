@@ -97,9 +97,14 @@ public final class EntityBottleTaint extends ThrowableProjectile {
             return;
         }
         if (!(level() instanceof ServerLevel server)) return;
+        burst(server);
+        discard();
+    }
+
+    /** The original burst at the spot of the bottle: the taint splash and the fibres. */
+    public void burst(ServerLevel server) {
         splashTaint(server);
         growTaintFibres(server);
-        discard();
     }
 
     /** Original splash box: a zero size box at the impact point inflated by five on every axis. */

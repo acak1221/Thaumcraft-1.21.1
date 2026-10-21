@@ -38,7 +38,10 @@ class WandBlockTriggerTest {
         assertTrue(ItemWandCasting.hasBlockTrigger(Blocks.COBBLESTONE.defaultBlockState()),
                 "the wand asks the registry about the clicked block");
         assertTrue(ItemWandCasting.hasBlockTrigger(Blocks.COBBLESTONE.defaultBlockState()));
-        assertFalse(ItemWandCasting.hasBlockTrigger(Blocks.CLAY.defaultBlockState()),
+        // The registry is a global static and ItemWandCasting.hasBlockTrigger is not mod scoped, so
+        // the negative case needs a block that no other test of the suite registers. SAND is such a
+        // block; CLAY is registered by WandTriggerRegistryApiTest and would answer true here.
+        assertFalse(ItemWandCasting.hasBlockTrigger(Blocks.SAND.defaultBlockState()),
                 "a block without a trigger is not one");
         assertTrue(WandTriggerRegistry.performTrigger(null, net.minecraft.world.item.ItemStack.EMPTY, null,
                 1, 2, 3, 0, Blocks.COBBLESTONE.defaultBlockState()));

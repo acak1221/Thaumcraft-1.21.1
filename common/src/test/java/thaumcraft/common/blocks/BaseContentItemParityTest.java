@@ -232,16 +232,22 @@ class BaseContentItemParityTest {
     // ------------------------------------------------------------- the sanity soap
 
     /**
-     * Oracle ItemSanitySoap:35-39 and :76-95 - the soap is used for two hundred ticks and the
+     * Oracle ItemSanitySoap:35-39 and :88-94 - the soap is used for two hundred ticks and the
      * sticky warp comes with a chance of 0.33, plus 0.25 with the Ward and plus 0.25 in the
      * pure fluid.
+     *
+     * <p>The original computes the chance in {@code float}: {@code float chance = 0.33f;} and then
+     * {@code chance += 0.25f;} once for the Ward and once for the pure fluid. The sum is therefore
+     * the single precision {@code 0.33f + 0.25f} (bits {@code 0x3f147ae2}) and not the decimal
+     * literal {@code 0.58f} (bits {@code 0x3f147ae1}); the expectations below are written as the
+     * original's own expressions so that the test documents that arithmetic.</p>
      */
     @Test void theSanitySoapKeepsTheOriginalDurationAndChances() {
-        assertEquals(200, SanitySoapRules.DURATION, "ItemSanitySoap:36 - the two hundred ticks");
-        assertEquals(0.33F, SanitySoapRules.chance(false, false), "ItemSanitySoap:76 - the base chance");
-        assertEquals(0.58F, SanitySoapRules.chance(true, false), "ItemSanitySoap:76 - the Ward adds a quarter");
-        assertEquals(0.58F, SanitySoapRules.chance(false, true), "ItemSanitySoap:76 - the pure fluid adds a quarter");
-        assertEquals(0.83F, SanitySoapRules.chance(true, true), "ItemSanitySoap:76 - both add a quarter");
+        assertEquals(200, SanitySoapRules.DURATION, "ItemSanitySoap:53 - the two hundred ticks");
+        assertEquals(0.33F, SanitySoapRules.chance(false, false), "ItemSanitySoap:88 - the base chance");
+        assertEquals(0.33F + 0.25F, SanitySoapRules.chance(true, false), "ItemSanitySoap:88-90 - the Ward adds a quarter");
+        assertEquals(0.33F + 0.25F, SanitySoapRules.chance(false, true), "ItemSanitySoap:88-93 - the pure fluid adds a quarter");
+        assertEquals(0.33F + 0.25F + 0.25F, SanitySoapRules.chance(true, true), "ItemSanitySoap:88-93 - both add a quarter");
     }
 
     // ------------------------------------------------------------- the triple meat treat

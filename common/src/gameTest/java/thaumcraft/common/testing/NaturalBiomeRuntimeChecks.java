@@ -84,6 +84,15 @@ public final class NaturalBiomeRuntimeChecks {
                     if(state.is(ThaumcraftBiomes.VISHROOM.get()))vishrooms++;
                     if(state.is(ThaumcraftManaBeans.MANA_POD.get())) {
                         test.assertTrue(level.getBiome(pos).is(ThaumcraftManaBeans.MAGICAL_BIOMES)&&BlockManaPod.isSupport(level.getBlockState(pos.above())),"naturally generated pod has a real MAGICAL biome and original wood support");
+                        if(pods.isEmpty()&&state.getValue(BlockManaPod.AGE)<3&&level.getBlockEntity(pos) instanceof TileManaPod stale) {
+                            // The case harvests and replants the first pod of the region, and the
+                            // original plants the age zero (oracle ItemManaBean:192-193). The GameTest
+                            // world keeps that planted pod, so the next run of this case would read it
+                            // instead of the generated one. It is grown back with the original growth
+                            // rule (oracle TileManaPod.checkGrowth) before the case reads it.
+                            while(level.getBlockState(pos).getValue(BlockManaPod.AGE)<3)stale.checkGrowth();
+                            state=level.getBlockState(pos);
+                        }
                         test.assertTrue(state.getValue(BlockManaPod.AGE)>=3&&state.getValue(BlockManaPod.AGE)<=7&&level.getBlockEntity(pos) instanceof TileManaPod pod&&pod.getAspect()!=null,"region generation admits actual typed BE with original generation-plus-growth age3..7");
                         pods.add(pos);
                     }
@@ -108,6 +117,7 @@ public final class NaturalBiomeRuntimeChecks {
     }
     private static void harvestAndReplant(GameTestHelper test,ServerLevel level,FocusUpgradeRuntimeChecks.Actor actor,BlockPos podPos) {
         Aspect expected=((TileManaPod)level.getBlockEntity(podPos)).getAspect();
+        int generatedAge=level.getBlockState(podPos).getValue(BlockManaPod.AGE);
         actor.player.teleportTo(level,podPos.getX()+.5,podPos.getY()-1.5,podPos.getZ()+.5,0,0);
         actor.player.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
         Set<UUID> prior=new HashSet<>();level.getAllEntities().forEach(entity->prior.add(entity.getUUID()));
@@ -137,6 +147,14 @@ public final class NaturalBiomeRuntimeChecks {
         test.assertTrue(level.getBlockState(podPos).is(ThaumcraftManaBeans.MANA_POD.get())&&level.getBlockState(podPos).getValue(BlockManaPod.AGE)==0&&level.getBlockEntity(podPos) instanceof TileManaPod planted&&planted.getAspect()==expected,"native survival planting preserves actual generated aspect into new age0 BE");
         int remaining=actor.player.getInventory().items.stream().filter(stack->stack.is(ThaumcraftManaBeans.MANA_BEAN.get())).mapToInt(ItemStack::getCount).sum();
         test.assertTrue(remaining==count-1,"ordinary survival planting spends exactly one actual harvested bean");
+        // The GameTest world is saved between the runs of this case, and the pod that
+        // the original plants carries the age zero (oracle ItemManaBean:192-193). The
+        // next run of this case would read that planted pod instead of the generated
+        // one, so the generated state of the cell is restored here.
+        level.setBlock(podPos,ThaumcraftManaBeans.MANA_POD.get().defaultBlockState().setValue(BlockManaPod.AGE,generatedAge),3);
+        test.assertTrue(level.getBlockState(podPos).getValue(BlockManaPod.AGE)==generatedAge
+                        &&level.getBlockEntity(podPos) instanceof TileManaPod restored&&restored.getAspect()==expected,
+                "the planted pod is restored to the generated age and aspect for the next run of this case");
     }
     private static void naturalPech(GameTestHelper test,ServerLevel level,FocusUpgradeRuntimeChecks.Actor actor,List<BlockPos> ground) {
         test.assertTrue(level.getDifficulty()!=Difficulty.PEACEFUL,"declared native natural population fixture is non-Peaceful");

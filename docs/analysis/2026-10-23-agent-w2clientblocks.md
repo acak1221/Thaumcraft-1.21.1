@@ -376,6 +376,34 @@ sixteen in `DungeonRooms.generateKeyRoom` (`:826-832`) and call
 
 ---
 
+### 6.5 A risk for the three eldritch entity models (not a defect that is proved, but a check)
+
+While the convention of the wavefront file was proved (§3.9) the layout of the model boxes
+was compared as well, and a difference was found that touches three units of this list
+(`ModelEldritchCrab`, `ModelEldritchGolem` and `ModelEldritchGuardian`, all
+`parity_verified` after the first part of this wave):
+
+* the 1.7.10 `ModelBox` (the readable vanilla source) gives the box the regions north
+  `(u, v+d)`, south `(u+d, v+d)`, east `(u+d+w, v+d)`, west `(u+d+w+d, v+d)`, top
+  `(u+d+w, v)`, bottom `(u+d, v)`, and its local `v` grows upwards, so the `v` of the model
+  space of 1.7.10 runs from the **bottom** of the image;
+* the 1.21.1 `ModelPart$Cube` (the bytecode of the merged jar) gives the same box the
+  regions north `(u+d, v+d)`, west `(u, v+d)`, east `(u+d+w, v)`, up `(u+d+w+d, v)`, down
+  `(u+d, v)`, south `(u+d+w+d, v+d)`, so the `v` of the model space of 1.21.1 runs from the
+  **top** of the image;
+* the port copies the 1.7.10 offsets verbatim (for example `texOffs(40, 12)` for the hood
+  of the guardian against the original `new ModelRenderer(this, 40, 12)`), so the texture of
+  every face of the three models may be mirrored vertically and the region of the east and
+  of the top faces is exchanged.
+
+**The leader should look at the guardian, the crab and the golem on a frame** (item 12 of
+§7). If the models are upside down, the conversion of the three models has to flip the `v`
+of every box (`texOffs(u, textureHeight - v - depth - height)`) and to exchange the east and
+the top faces. That is a change of the three model files and not of the renderers, and it is
+not part of the units that are still open.
+
+---
+
 ## 7. The acceptance criteria for the client
 
 The leader has to check these on a frame of the real client; none of them could be checked
@@ -419,7 +447,10 @@ in this wave (no Gradle, no client).
     stand with its tip at the top (§3.9) and it must keep its own light in an unlit room
     (§3.10).
 
-12. **The link of the ritualist cleric is a ribbon.** A ritualist cleric that channels shows
+12. **The guardian, the crab and the golem are not upside down.** The texture of the faces
+    of the three eldritch entity models must not be mirrored vertically and the plates of
+    the guardian must be on the right side (see §6.5).
+13. **The link of the ritualist cleric is a ribbon.** A ritualist cleric that channels shows
     a dark purple ribbon of the `wispy.png` sheet between its eyes and the ritual target,
     and the ribbon keeps a constant width on the screen while the cleric and the target
     move.
@@ -436,6 +467,9 @@ in this wave (no Gradle, no client).
 
 **All of them are authored but NOT executed**: this wave has no Gradle, the leader runs every
 build and every test suite sequentially with the shared Loom cache.
+
+The branch also carries the merge of the current `work` (the `w2golems` and the `piston`
+waves), so the leader does not have to merge it again before the build.
 
 ## 8. The checks that were run
 

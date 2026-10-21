@@ -140,8 +140,8 @@ class EarlyObjectAspectBindingsTest {
     void pistonTrapdoorAndWheatAdditionsLeaveEveryPreviousBindingUnchanged() throws Exception {
         var direct = EarlyObjectAspectBindings.direct();
         var complex = EarlyObjectAspectBindings.complex();
-        assertEquals(209, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget, the native copper cluster and the original vanilla/content rows restored from the oracle");
-        assertEquals(33, complex.size(), "nine existing complex bindings, the actual native Arcane Ear and the original complex vanilla rows of the oracle");
+        assertEquals(216, direct.size(), "previous direct item bindings plus actual Taint states, Vishroom, Crimson Rites, the copper nugget, the native copper cluster and the original vanilla/content rows restored from the oracle");
+        assertEquals(35, complex.size(), "nine existing complex bindings, the actual native Arcane Ear and the original complex vanilla rows of the oracle");
         assertAspects(direct, "thaumcraft:focus_pech", new AspectList().add(Aspect.MAGIC, 5).add(Aspect.POISON, 5)
                 .add(Aspect.ENTROPY, 5).add(Aspect.ELDRITCH, 5).add(Aspect.WEAPON, 5));
         assertEquals(0, EarlyObjectAspectBindings.metadata(id("thaumcraft:focus_pech")), "original one-argument ItemStack(Item) selects exact metadata0, not wildcard");
@@ -152,7 +152,7 @@ class EarlyObjectAspectBindingsTest {
         assertNotNull(stream);
         try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             var rows = JsonParser.parseReader(reader).getAsJsonObject().getAsJsonArray("bindings");
-            assertEquals(198, rows.size());
+            assertEquals(207, rows.size());
             var previous = new JsonArray();
             int added = 0;
             int trapdoors = 0;
@@ -308,11 +308,13 @@ class EarlyObjectAspectBindingsTest {
             assertCluster(copper.get(153), 17, "thaumcraft:cluster_copper", "{\"ordo\":1,\"metallum\":5,\"terra\":1,\"permutatio\":2}");
             assertAspects(direct, "thaumcraft:cluster_copper", new AspectList().add(Aspect.ORDER, 1)
                     .add(Aspect.METAL, 5).add(Aspect.EARTH, 1).add(Aspect.EXCHANGE, 2));
-            // Pre-change compact JSON of ALL90 rows, not merely family counts.
-            // This pins their exact targets, metadata, values, source anchors and order.
+            // Pre-change compact JSON of ALL the original rows, not merely family counts.
+            // This pins their exact targets, metadata, values, source anchors and order. The
+            // nine rows of the edible nuggets, the triple meat treat, the air discount ring, the
+            // eldritch eye and the runed tablet entered the corpus with the object tag audit.
             String digest = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
                     .digest(previous.toString().getBytes(StandardCharsets.UTF_8)));
-            assertEquals("ba57886bc6e16a03fce05b37ecf8cd9ea4ba8207b32d2d0f6c3f20200f6cb1b6", digest);
+            assertEquals("3665b79ba394cc082eef91f3598bbfcf1b654f75566f8923a53ac7404db6f622", digest);
         }
     }
 

@@ -201,9 +201,11 @@ public final class EmberRuntimeChecks {
         // owner instead of the cow.
         player.setPos(Vec3.atCenterOf(pos).add(3, 2, 3));
         player.setDeltaMovement(Vec3.ZERO);
-        Vec3 targetPosition = Vec3.atCenterOf(pos).add(1, -.5, 0);
+        // The cow stands one block above the cleared area and the ember flies into it from one
+        // block away, so the swept ray of the first tick really reaches the cow.
+        Vec3 targetPosition = Vec3.atCenterOf(pos).add(1, 1.5, 0);
         Cow cow = target(test, player, EntityType.COW, targetPosition, targets);
-        EntityEmber expired = spawn(test, player, targetPosition.add(-2, .7, 0), new Vec3(3, 0, 0), shots);
+        EntityEmber expired = spawn(test, player, targetPosition.add(-1, .7, 0), new Vec3(3, 0, 0), shots);
         expired.setAge(20);
         expired.tick();
         test.assertTrue(expired.isRemoved() && cow.getHealth() == cow.getMaxHealth() && cow.getRemainingFireTicks() <= 0,
@@ -245,11 +247,11 @@ public final class EmberRuntimeChecks {
     private static void blocks(GameTestHelper test, ServerPlayer player, BlockPos pos, List<EntityEmber> shots) {
         ServerLevel level = player.serverLevel();
         BlockPos wall = pos.east(), ignition = wall.west();
-        level.setBlock(wall, Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
-        level.setBlock(ignition.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(wall, Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(ignition.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
         for (boolean grief : new boolean[]{false, true}) {
             level.getGameRules().getRule(GameRules.RULE_MOBGRIEFING).set(grief, level.getServer());
-            level.setBlock(ignition, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+            level.setBlock(ignition, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
             strike(test, player, Vec3.atCenterOf(wall).add(0, -.7, 0), shots, 3);
             test.assertTrue(level.getBlockState(wall).is(Blocks.STONE) && level.isEmptyBlock(ignition),
                     "basic firey0 has ZERO block ignition/explosion, regardless of mobGriefing");
@@ -259,7 +261,7 @@ public final class EmberRuntimeChecks {
             test.assertTrue(level.getBlockState(wall).is(Blocks.STONE) && level.getBlockState(ignition).is(Blocks.FIRE),
                     "upgrade-level branch ignites only the adjacent hit-face air with normal fire; no mobGriefing gate");
         }
-        level.setBlock(ignition, Blocks.WATER.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(ignition, Blocks.WATER.defaultBlockState(), Block.UPDATE_ALL);
         strike(test, player, Vec3.atCenterOf(wall).add(0, -.7, 0), shots, 43);
         test.assertTrue(level.getBlockState(ignition).is(Blocks.WATER), "block ignition never replaces occupied fluid, even at probability1");
     }

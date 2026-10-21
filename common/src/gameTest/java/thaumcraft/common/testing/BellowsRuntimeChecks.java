@@ -166,6 +166,9 @@ public final class BellowsRuntimeChecks {
             test.assertTrue(crucible.getHeat() == 2 && crucible.getWaterAmount() == 1000 && crucible.tagAmount() == 0,
                     "the cached bellows count of the original does not see a bellows placed after the first tick");
             // A fresh crucible tile counts the four bellows again and heats by one plus two each.
+            // The block has to be replaced, because the same state keeps the same tile entity and
+            // with it the cached bellows count.
+            set(level, pos, Blocks.AIR.defaultBlockState());
             set(level, pos, ThaumcraftAlchemy.CRUCIBLE.get().defaultBlockState());
             var counted = (TileCrucible) level.getBlockEntity(pos);
             counted.fillWater(1000, true);

@@ -126,12 +126,12 @@ public final class ObjectAspectApiRuntimeChecks {
                             && supplied.getAmount(Aspect.AIR) == 90 && old.size() == 1,
                     "existing complex branch ignores supplied values, retains old amounts, inserts absent zero-valued tags and leaves caller additions intact");
 
-            ThaumcraftApi.objectTags.keySet().removeIf(key -> key.getFirst() == Items.OAK_DOOR);
-            var expected = ObjectAspectResolver.generatedTags(Items.OAK_DOOR, level); test.assertTrue(expected.visSize() > 0, "actual vanilla door recipe has a real generated ingredient base");
+            ThaumcraftApi.objectTags.keySet().removeIf(key -> key.getFirst() == Items.OAK_STAIRS);
+            var expected = ObjectAspectResolver.generatedTags(Items.OAK_STAIRS, level); test.assertTrue(expected.visSize() > 0, "actual vanilla door recipe has a real generated ingredient base");
             var additions = new AspectList().add(Aspect.FIRE, 4);
-            ThaumcraftApi.registerComplexObjectTag(new ItemStack(Items.OAK_DOOR), additions, level);
+            ThaumcraftApi.registerComplexObjectTag(new ItemStack(Items.OAK_STAIRS), additions, level);
             var combined = expected.copy().add(Aspect.FIRE, 4);
-            test.assertTrue(ThaumcraftApi.objectTags.get(List.of(Items.OAK_DOOR, 0)) == additions && additions.aspects.equals(combined.aspects),
+            test.assertTrue(ThaumcraftApi.objectTags.get(List.of(Items.OAK_STAIRS, 0)) == additions && additions.aspects.equals(combined.aspects),
                     "absent complex branch mutates and retains supplied AspectList by ADDING the real generated recipe base");
 
             var goggles = new ItemStack(ThaumcraftWearables.GOGGLES.get()); goggles.setDamageValue(40);

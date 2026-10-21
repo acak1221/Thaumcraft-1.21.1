@@ -216,7 +216,12 @@ public final class EntityFireBat extends Monster {
         super.dropCustomDeathLoot(level,source,recent);
         if(recent) OriginalMobLoot.rare(looting,random::nextInt); // Original inherited rare hook is empty, but still consumes this draw.
     }
+    /**
+     * Oracle EntityFireBat:350-352 - the original overrides {@code func_70814_o} (the
+     * {@code isValidLightLevel} of the mob) with a plain TRUE, so the fire bat has NO light
+     * restriction at all: the raw brightness roll of the port was invented.
+     */
     public static boolean checkFireBatSpawnRules(EntityType<? extends EntityFireBat> type,ServerLevelAccessor level,MobSpawnType reason,BlockPos pos,RandomSource random) {
-        return level.getMaxLocalRawBrightness(pos)<=random.nextInt(7) && level.getDifficulty()!=Difficulty.PEACEFUL;
+        return level.getDifficulty()!=Difficulty.PEACEFUL;
     }
 }

@@ -2,7 +2,10 @@ package thaumcraft.common.items.relics;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,8 +30,21 @@ import thaumcraft.common.tiles.TileNode;
 
 /** TC4's 25-tick use, completing after 20 stable ticks, on the server. */
 public final class ItemThaumometer extends Item {
+    /** Original ItemThaumometer.getMaxItemUseDuration:25. */
+    public static final int USE_DURATION = 25;
+    /** Original ItemThaumometer.onUsingTick:152 completes the scan when count <= 5, i.e. after 20 ticks. */
+    public static final int SCAN_TICKS = 20;
+    /** Original ItemThaumometer.onUsingTick:160-162 plays the camera tick every second tick. */
+    public static final int CAMERA_TICK_INTERVAL = 2;
+    /** Original ItemThaumometer.onUsingTick:161 loudness. */
+    public static final float CAMERA_VOLUME = 0.2F;
+    /** Original ItemThaumometer.onUsingTick:161 base pitch. */
+    public static final float CAMERA_PITCH = 0.45F;
+    /** Original ItemThaumometer.onUsingTick:161 random pitch spread. */
+    public static final float CAMERA_PITCH_SPREAD = 0.1F;
+
     public ItemThaumometer(Properties properties) { super(properties); }
-    @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return 25; }
+    @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return USE_DURATION; }
 
     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
@@ -53,11 +69,28 @@ public final class ItemThaumometer extends Item {
             player.stopUsingItem();
             return;
         }
-        if (level.getGameTime() - session.startTick() >= 20) {
+        // Original ItemThaumometer.onUsingTick:160-162 plays "thaumcraft:cameraticks"
+        // every second tick of a stable scan, at the scanner, with volume .2 and a
+        // pitch of .45 + worldRand.nextFloat()*.1. The original played it on the
+        // scanning client only; the native scan is server owned, so the server
+        // broadcasts it. At volume .2 the native broadcast radius stays local.
+        if (cameraTickDue(remaining)) cameraTick(level, player);
+        if (level.getGameTime() - session.startTick() >= SCAN_TICKS) {
             ScanManager.completeScan(player, target.signature(), target.aspects(), target.kind(), target.clue());
             stack.remove(ThaumcraftContent.SCAN_SESSION.get());
             player.stopUsingItem();
         }
+    }
+
+    /** The original every-second-tick cadence of the camera tick sound. */
+    public static boolean cameraTickDue(int remaining) {
+        return remaining % CAMERA_TICK_INTERVAL == 0;
+    }
+
+    private static void cameraTick(Level level, ServerPlayer player) {
+        level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "cameraticks")),
+                SoundSource.PLAYERS, CAMERA_VOLUME, CAMERA_PITCH + level.random.nextFloat() * CAMERA_PITCH_SPREAD);
     }
 
     @Override public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remaining) {

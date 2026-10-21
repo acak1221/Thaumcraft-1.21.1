@@ -92,22 +92,34 @@ class ResearchNoteIssuanceTest {
                 List.of(note.cellAt(0, 0), new Cell(1, 0, 2, "aer")), false)));
     }
 
-    @Test void theOriginalChecksThePaperAndNeverSpendsIt() {
+    @Test void theOriginalSpendsExactlyOnePaperAndOneInkPoint() {
         var before = new ArrayList<ItemStack>();
         for (int slot = 0; slot < 36; slot++) before.add(new ItemStack(Items.AIR));
         before.set(4, new ItemStack(Items.PAPER, 5));
         before.set(9, new ItemStack(Items.STONE_PICKAXE));
-        // Original InventoryUtils.isPlayerCarrying only reports the slot of the paper.
+        // Original InventoryPlayer.consumeInventoryItem(Items.paper) takes one paper
+        // from the first main-inventory stack that carries paper.
         assertEquals(4, ResearchNoteIssuance.paperSlot(before));
         before.set(4, new ItemStack(Items.AIR));
         assertEquals(-1, ResearchNoteIssuance.paperSlot(before));
         before.set(4, new ItemStack(Items.PAPER, 5));
-        // Original ResearchManager.createResearchNoteForPlayer:126-127 spends the ink
-        // and keeps the paper; the staged inventory shows both halves of that rule.
-        var staged = ResearchNoteIssuance.stage(before, 9, new ScribingInk.Plan(true, 0, 1));
-        assertEquals(5, staged.get(4).getCount(), "the original never takes the paper of a note");
-        assertEquals(5, before.get(4).getCount());
+        // Original ResearchManager.createResearchNoteForPlayer:108-115 spends the paper
+        // and then the ink point; the staged inventory shows both halves of that rule.
+        var staged = ResearchNoteIssuance.stage(before, 4, 9, new ScribingInk.Plan(true, 0, 1));
+        assertEquals(4, staged.get(4).getCount(), "the original takes exactly one paper of the note");
+        assertEquals(5, before.get(4).getCount(), "the staged copy never mutates the live stack");
         assertEquals(1, staged.get(9).getDamageValue(), "the ink point of the note is spent");
         assertEquals(0, before.get(9).getDamageValue());
+    }
+
+    @Test void theOriginalClearsAnEmptiedPaperStackAndLeavesOtherStacksUntouched() {
+        var before = new ArrayList<ItemStack>();
+        for (int slot = 0; slot < 36; slot++) before.add(new ItemStack(Items.AIR));
+        before.set(2, new ItemStack(Items.PAPER, 1));
+        before.set(6, new ItemStack(Items.PAPER, 7));
+        var staged = ResearchNoteIssuance.stage(before, 2, -1, new ScribingInk.Plan(false, 0, 0));
+        assertTrue(staged.get(2).isEmpty(), "a single paper stack empties and frees its slot");
+        assertEquals(7, staged.get(6).getCount(), "later paper stacks are never debited");
+        assertEquals(1, before.get(2).getCount());
     }
 }

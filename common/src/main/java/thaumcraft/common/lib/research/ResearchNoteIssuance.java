@@ -34,7 +34,7 @@ public final class ResearchNoteIssuance {
         public boolean success() { return failure == Failure.NONE; }
     }
 
-    private record Plan(Failure failure, String key, boolean reused, int ink) {
+    private record Plan(Failure failure, String key, boolean reused, int paper, int ink) {
         Result result() { return new Result(failure, key, reused, false); }
     }
 
@@ -74,12 +74,16 @@ public final class ResearchNoteIssuance {
             return rejected(Failure.INVALID_GENERATION, plan.key);
         }
 
-        // Original ResearchManager.createResearchNoteForPlayer:126-127 checks that
-        // the player carries paper and spends one point of ink. The paper itself
-        // is never taken: InventoryUtils.isPlayerCarrying only reports the slot.
+        // Original ResearchManager.createResearchNoteForPlayer:108-115
+        //   consumeInkFromPlayer(player, false) && player.inventory.consumeInventoryItem(Items.paper)
+        // The 1.7.10 JAR calls InventoryPlayer.func_146026_a(Item), which the official
+        // mcp_stable-12-1.7.10 mapping names consumeInventoryItem ("removed one item of
+        // specified Item from inventory"). The original therefore SPENDS exactly one
+        // paper of the first main-inventory paper stack, and only then damages one ink
+        // point. The paper is not merely checked.
         ScribingInk.Plan ink = ScribingInk.planFor(player, before.get(plan.ink));
         if (!ink.accepted()) return rejected(Failure.MISSING_INK, plan.key);
-        List<ItemStack> staged = stage(before, plan.ink, ink);
+        List<ItemStack> staged = stage(before, plan.paper, plan.ink, ink);
 
         int empty = firstEmpty(staged);
         if (empty >= 0) {
@@ -144,7 +148,7 @@ public final class ResearchNoteIssuance {
     private static Plan plan(Player player, String key) {
         Failure failure = validate(KnowledgeAccess.get(player), key);
         String canonical = failure == Failure.UNKNOWN_RESEARCH ? "" : key;
-        if (failure != Failure.NONE) return new Plan(failure, canonical, false, -1);
+        if (failure != Failure.NONE) return new Plan(failure, canonical, false, -1, -1);
         var items = player.getInventory().items;
         // ResearchManager.getResearchSlot:187-197 searches the main inventory,
         // including either flattened normal/discovery identity, before costs.
@@ -152,22 +156,21 @@ public final class ResearchNoteIssuance {
             ItemStack stack = items.get(slot);
             if (!(stack.getItem() instanceof ItemResearchNotes)) continue;
             ResearchNoteData data = ItemResearchNotes.data(stack);
-            if (data != null && key.equals(data.key())) return new Plan(Failure.NONE, key, true, -1);
+            if (data != null && key.equals(data.key())) return new Plan(Failure.NONE, key, true, -1, -1);
         }
-        // The original checks the paper and spends the ink; the paper is never taken.
-        if (paperSlot(items) < 0) return new Plan(Failure.MISSING_PAPER, key, false, -1);
+        // The original checks the paper and spends it, then spends the ink.
+        int paper = paperSlot(items);
+        if (paper < 0) return new Plan(Failure.MISSING_PAPER, key, false, -1, -1);
         int ink = -1;
         for (int slot = 0; slot < MAIN_SIZE; slot++) {
             if (ScribingInk.consumeFromPlayer(player, items.get(slot), false)) { ink = slot; break; }
         }
-        return new Plan(ink < 0 ? Failure.MISSING_INK : Failure.NONE, key, false, ink);
+        return new Plan(ink < 0 ? Failure.MISSING_INK : Failure.NONE, key, false, paper, ink);
     }
 
     /**
-     * Original InventoryPlayer.inventoryContains(paper) as
-     * InventoryUtils.isPlayerCarrying: the first main-inventory slot that
-     * carries paper. The slot is only located; the original never spends the
-     * paper for a note.
+     * The first main-inventory slot that carries paper, exactly the slot the
+     * original's InventoryPlayer.consumeInventoryItem(Item) removes one item from.
      */
     static int paperSlot(List<ItemStack> items) {
         for (int slot = 0; slot < MAIN_SIZE; slot++) {
@@ -177,16 +180,21 @@ public final class ResearchNoteIssuance {
     }
 
     /**
-     * The original spends one point of ink and never the paper:
-     * ResearchManager.createResearchNoteForPlayer:126-127 only checks that the
-     * player carries paper, and InventoryUtils.isPlayerCarrying returns the slot
-     * without touching the stack. Staging therefore copies every paper stack
-     * unchanged and only the ink stack carries the spent point.
+     * The original spends one paper and one ink point:
+     * ResearchManager.createResearchNoteForPlayer:108-115 first calls
+     * InventoryPlayer.consumeInventoryItem(Items.paper) - which shrinks the first
+     * paper stack by one and clears the slot when it empties - and only then
+     * consumeInkFromPlayer(player, true) damages the first usable scribe tool.
+     * Staging therefore copies every unrelated stack unchanged.
      */
-    static List<ItemStack> stage(List<ItemStack> before, int inkSlot, ScribingInk.Plan ink) {
+    static List<ItemStack> stage(List<ItemStack> before, int paperSlot, int inkSlot, ScribingInk.Plan ink) {
         List<ItemStack> staged = new ArrayList<>(MAIN_SIZE);
         for (int slot = 0; slot < MAIN_SIZE; slot++) {
             ItemStack copy = before.get(slot).copy();
+            if (slot == paperSlot) {
+                copy.shrink(1);
+                if (copy.isEmpty()) copy = ItemStack.EMPTY;
+            }
             if (slot == inkSlot && ink.spendsPoint()) copy.setDamageValue(ink.afterDamage());
             staged.add(copy);
         }

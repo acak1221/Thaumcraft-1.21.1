@@ -21,9 +21,10 @@ public final class UnknownKnowledge {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemUnknownResearchNotes)) return stack;
         var level = player.serverLevel();
-        // Original ResearchManager.findHiddenResearch:154 seeds the private RNG with
-        // the absolute world time (1.7.10 World.getTotalWorldTime), not the time of
-        // day; the same world state must reveal the same hidden research.
+        // Original ResearchManager.findHiddenResearch:148 seeds the private RNG with
+        // the world time counter (1.7.10 World.getWorldTime(), SRG func_72820_D),
+        // not the time of day; the same world state must reveal the same hidden
+        // research. The 1.21.1 equivalent of getWorldTime() is Level.getGameTime().
         String key = ResearchHiddenSelection.choose(KnowledgeAccess.get(player), level.getGameTime());
         if (key == null) {
             ItemStack fragments = new ItemStack(ThaumcraftContent.MATERIALS.get("knowledge_fragment").get(), 7 + level.random.nextInt(3));

@@ -125,11 +125,10 @@ public final class EntityUtils {
         List<Entity> candidates = level.getEntities(entityplayer, expand(entityplayer.getBoundingBox(), vec3d1.x * d, vec3d1.y * d, vec3d1.z * d).inflate(f1));
         double d2 = 0.0;
         for (Entity entity : candidates) {
-            if (entity.distanceToSqr(entityplayer) < minrange) continue;
+            if (belowMinRange(entity.distanceToSqr(entityplayer), minrange)) continue;
             if (!entity.canBeCollidedWith() && !nonCollide) continue;
             if (rayTrace(level, vec3d, new Vec3(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ())) != null) continue;
-            float f2 = Math.max(0.8f, entity.getBbHeight());
-            AABB box = entity.getBoundingBox().inflate(f2);
+            AABB box = entity.getBoundingBox().inflate(pickPadding(entity.getBbWidth()));
             java.util.Optional<Vec3> hit = box.clip(vec3d, vec3d2);
             if (box.contains(vec3d)) {
                 if (!(0.0 < d2) && d2 != 0.0) continue;
@@ -166,8 +165,7 @@ public final class EntityUtils {
             if (!entity.canBeCollidedWith()) continue;
             if (rayTrace(level, vec3d, new Vec3(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ())) != null) continue;
             if (excluded != null && excluded.isInstance(entity)) continue;
-            float f2 = Math.max(0.8f, entity.getBbHeight());
-            AABB box = entity.getBoundingBox().inflate(f2);
+            AABB box = entity.getBoundingBox().inflate(pickPadding(entity.getBbWidth()));
             java.util.Optional<Vec3> hit = box.clip(vec3d, vec3d2);
             if (box.contains(vec3d)) {
                 if (!(0.0 < d2) && d2 != 0.0) continue;
@@ -182,6 +180,45 @@ public final class EntityUtils {
             d2 = d3;
         }
         return pointedEntity;
+    }
+
+    /**
+     * The original {@code Entity.getCollisionBorderSize()} of 1.7.10, which is half the width of the entity.
+     *
+     * <p>Original {@code EntityUtils.getPointedEntity} used it as the padding of the candidate box
+     * ({@code Math.max(0.8F, entity.getCollisionBorderSize())}), so the pad of an ordinary mob is the 0.8 of the
+     * original and only a very wide entity grows the box.</p>
+     */
+    static float pickPadding(float width) {
+        return Math.max(0.8f, width * 0.5f);
+    }
+
+    /**
+     * The original minimum-distance test of {@code EntityUtils.getPointedEntity}.
+     *
+     * <p>The original compared the LINEAR distance ({@code Entity.getDistanceToEntity}, the square root of the
+     * squared distance) with the minimum range; comparing the squared distance with the range instead would
+     * refuse every candidate that lies between the square root of the range and the range itself.</p>
+     */
+    static boolean belowMinRange(double squaredDistance, double minRange) {
+        return squaredDistance < minRange * minRange;
+    }
+
+    /**
+     * The original's mid-body point of the target entity: {@code boundingBox.minY + height / 2}.
+     *
+     * <p>The bottom of the box is the original's anchor, not its top: the top would move the target a whole
+     * entity height too high.</p>
+     */
+    static double[] midBody(double x, double minY, double height, double z) {
+        return new double[]{x, minY + height / 2.0f, z};
+    }
+
+    /**
+     * The original's eye point of the searching entity: {@code boundingBox.minY + eyeHeight}.
+     */
+    static double[] eyePoint(double x, double minY, double eyeHeight, double z) {
+        return new double[]{x, minY + eyeHeight, z};
     }
 
     /**
@@ -282,11 +319,11 @@ public final class EntityUtils {
     /** Original {@code isVisibleTo(float, Entity, Entity, float)}. */
     public static boolean isVisibleTo(float fov, Entity ent, Entity ent2, float range) {
         if (ent == null || ent2 == null) return false;
-        double[] x = new double[]{ent2.getX(), ent2.getBoundingBox().maxY + ent2.getBbHeight() / 2.0f, ent2.getZ()};
-        double[] t = new double[]{ent.getX(), ent.getBoundingBox().maxY + ent.getEyeHeight(), ent.getZ()};
+        double[] x = midBody(ent2.getX(), ent2.getBoundingBox().minY, ent2.getBbHeight(), ent2.getZ());
+        double[] t = eyePoint(ent.getX(), ent.getBoundingBox().minY, ent.getEyeHeight(), ent.getZ());
         Vec3 q = ent.getLookAngle();
         q = new Vec3(q.x * range, q.y * range, q.z * range);
-        Vec3 l = q.add(ent.getX(), ent.getBoundingBox().maxY + ent.getEyeHeight(), ent.getZ());
+        Vec3 l = q.add(ent.getX(), ent.getBoundingBox().minY + ent.getEyeHeight(), ent.getZ());
         double[] b = new double[]{l.x, l.y, l.z};
         return Utils.isLyingInCone(x, t, b, fov);
     }
@@ -295,10 +332,10 @@ public final class EntityUtils {
     public static boolean isVisibleTo(float fov, Entity ent, double xx, double yy, double zz, float range) {
         if (ent == null) return false;
         double[] x = new double[]{xx, yy, zz};
-        double[] t = new double[]{ent.getX(), ent.getBoundingBox().maxY + ent.getEyeHeight(), ent.getZ()};
+        double[] t = eyePoint(ent.getX(), ent.getBoundingBox().minY, ent.getEyeHeight(), ent.getZ());
         Vec3 q = ent.getLookAngle();
         q = new Vec3(q.x * range, q.y * range, q.z * range);
-        Vec3 l = q.add(ent.getX(), ent.getBoundingBox().maxY + ent.getEyeHeight(), ent.getZ());
+        Vec3 l = q.add(ent.getX(), ent.getBoundingBox().minY + ent.getEyeHeight(), ent.getZ());
         double[] b = new double[]{l.x, l.y, l.z};
         return Utils.isLyingInCone(x, t, b, fov);
     }

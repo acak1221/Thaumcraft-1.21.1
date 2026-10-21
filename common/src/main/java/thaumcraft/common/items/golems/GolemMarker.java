@@ -109,11 +109,32 @@ public record GolemMarker(ResourceLocation dimension, BlockPos pos, Direction fa
      * ItemGolemBell.changeMarkers: the bell's click on one block face. Without Order the marker toggles (uncoloured). With Order
      * an existing marker cycles -1 -> 0 -> ... -> 15 -> removed, and a sneaking click removes it at once.
      * Returns the edited list, or {@code null} when adding would exceed {@code limit}.
+     *
+     * <p>The SELECTION is the original's, not a normalised one. Without Order the original searches for the marker with the
+     * colour -1 <em>exactly</em> ({@code markers.indexOf(new Marker(x, y, z, dim, side, -1))}), so a coloured marker of an
+     * earlier Order golem is left alone and an uncoloured marker is added next to it. With Order the original searches the
+     * colours -1 .. 15 in ascending order and takes the LOWEST colour present at that spot
+     * ({@code ItemGolemBell.changeMarkers:119-129} of the 4.2.3.5 original).</p>
      */
     public static List<GolemMarker> click(List<GolemMarker> markers, GolemMarker spot, boolean order, boolean sneaking, int limit) {
         var edited = new ArrayList<>(markers);
         int found = -1;
-        for (int index = 0; index < edited.size(); index++) if (edited.get(index).sameSpot(spot)) { found = index; break; }
+        int color = ANY;
+        if (!order) {
+            // Original: only the uncoloured marker of that spot is found, so a coloured one survives the click.
+            for (int index = 0; index < edited.size(); index++) {
+                GolemMarker marker = edited.get(index);
+                if (marker.sameSpot(spot) && marker.color() == ANY) { found = index; break; }
+            }
+        } else {
+            // Original: the colours -1 .. 15 are searched in ascending order; the lowest colour present wins.
+            for (int candidate = ANY; candidate <= LAST_COLOR && found < 0; candidate++) {
+                for (int index = 0; index < edited.size(); index++) {
+                    GolemMarker marker = edited.get(index);
+                    if (marker.sameSpot(spot) && marker.color() == candidate) { found = index; color = candidate; break; }
+                }
+            }
+        }
         if (found < 0) {
             if (edited.size() >= limit) return null;
             edited.add(spot.withColor(ANY));
@@ -121,7 +142,7 @@ public record GolemMarker(ResourceLocation dimension, BlockPos pos, Direction fa
         }
         GolemMarker existing = edited.remove(found);
         // The original re-adds the recoloured marker at the END of the list, which is its order for first-match routing.
-        if (order && !sneaking && existing.color() < LAST_COLOR) edited.add(existing.withColor(existing.color() + 1));
+        if (order && !sneaking && color < LAST_COLOR) edited.add(existing.withColor(color + 1));
         return edited;
     }
 }

@@ -96,8 +96,12 @@ class GolemColorsTest {
         var added = GolemMarker.click(List.of(), spot, false, false, 64);
         assertEquals(List.of(spot), added);
         assertEquals(List.of(), GolemMarker.click(added, spot, false, false, 64));
-        // A leftover colour from a former Order golem is still the same spot and is removed, not duplicated.
-        assertEquals(List.of(), GolemMarker.click(List.of(marker(1, 7)), spot, false, false, 64));
+        // Original ItemGolemBell.changeMarkers: without Order only the UNCOLOURED marker of that spot is searched
+        // (markers.indexOf(new Marker(x, y, z, dim, side, -1))), so a leftover colour of a former Order golem
+        // survives the click and an uncoloured marker is added next to it.
+        assertEquals(List.of(marker(1, 7), spot), GolemMarker.click(List.of(marker(1, 7)), spot, false, false, 64));
+        assertEquals(List.of(marker(1, 7)), GolemMarker.click(List.of(marker(1, 7), spot), spot, false, false, 64),
+                "the uncoloured marker of that spot is the one the second click removes");
         // Other markers are untouched and the limit is honoured.
         assertEquals(List.of(marker(2, -1), spot), GolemMarker.click(List.of(marker(2, -1)), spot, false, false, 64));
         assertNull(GolemMarker.click(List.of(marker(2, -1)), spot, false, false, 1));

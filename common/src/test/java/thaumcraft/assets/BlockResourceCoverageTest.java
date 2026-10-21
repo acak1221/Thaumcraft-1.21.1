@@ -48,8 +48,7 @@ class BlockResourceCoverageTest {
             "crimson_sword", "discount_ring_aer", "discount_ring_aqua", "discount_ring_ignis",
             "discount_ring_ordo", "discount_ring_perditio", "discount_ring_terra", "eldritch_placer",
             "eldritch_tablet", "nugget_beef", "nugget_chicken", "nugget_fish", "nugget_pork",
-            "primal_arrow_air", "primal_arrow_earth", "primal_arrow_entropy", "primal_arrow_fire",
-            "primal_arrow_order", "primal_arrow_water", "thaumonomicon_cheat", "unknown_research_note",
+            "thaumonomicon_cheat", "unknown_research_note",
             "unknown_research_note_24");
 
     private static final List<String> CANDLES = List.of("black", "blue", "brown", "cyan", "gray", "green", "light_blue", "light_gray", "lime",

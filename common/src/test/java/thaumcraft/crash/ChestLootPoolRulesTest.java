@@ -53,6 +53,10 @@ class ChestLootPoolRulesTest {
         assertNull(ChestLootPoolRules.firstPool(parse("{\"pools\":[\"not a pool\"]}")));
     }
 
+    @Test void aNonArrayPoolListIsIgnored() {
+        assertNull(ChestLootPoolRules.firstPool(parse("{\"pools\":{\"name\":\"main\"}}")));
+    }
+
     @Test void theFirstPoolKeepsItsOwnEntriesArray() {
         JsonObject pool = ChestLootPoolRules.firstPool(parse("{\"pools\":[{\"entries\":[]}]}"));
         assertNotNull(pool);

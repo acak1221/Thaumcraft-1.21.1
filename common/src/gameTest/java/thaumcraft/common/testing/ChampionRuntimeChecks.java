@@ -136,6 +136,36 @@ public final class ChampionRuntimeChecks {
         test.succeed();
     }
 
+    /**
+     * The original whitelist matched the class of the entity, so the cave spider inherited the
+     * level of the spider and was a champion candidate of the original.
+     */
+    public static void caveSpiderIsAChampionCandidate(GameTestHelper test) {
+        var lane = new WaveLane(test, 3, 2, 3);
+        try {
+            ServerLevel level = lane.level;
+            ServerPlayer player = test.makeMockServerPlayerInLevel();
+            player.setGameMode(GameType.CREATIVE);
+            player.setPos(lane.origin.getX() + 40D, lane.origin.getY(), lane.origin.getZ());
+            lane.floor(4);
+
+            // Oracle ConfigEntities:196 - the original whitelisted the class of the spider, so
+            // the cave spider inherited its level and the lowest roll of the original promoted
+            // it (oracle EventHandlerEntity.entitySpawns:391-419).
+            var spider = lane.add(EntityType.CAVE_SPIDER.create(level));
+            spider.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
+            ChampionJoinRoll.join(level, spider, ChampionModifier.BOLD);
+            test.assertTrue(ChampionHooks.championId(spider) == ChampionModifier.BOLD,
+                    "the cave spider of the original spider class is a champion candidate: "
+                            + ChampionHooks.championId(spider));
+        } catch (RuntimeException | Error failure) {
+            lane.clean();
+            throw failure;
+        }
+        lane.clean();
+        test.succeed();
+    }
+
     /** The original venomous champion poisons its victim and the infested one answers a wound. */
     public static void modifiersAnswerHitAndWound(GameTestHelper test) {
         var lane = new WaveLane(test, 3, 2, 3);

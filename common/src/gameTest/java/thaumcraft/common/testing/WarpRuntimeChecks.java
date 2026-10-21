@@ -129,7 +129,12 @@ public final class WarpRuntimeChecks {
         }
         WarpRules.Decision event(int severity) {
             clean(); knowledge().setWarpTemp(150); knowledge().setWarpCounter(150);
-            var decision = WarpEvents.checkWarpEvent(player, new Draws(0, severity));
+            // The original rolled the champion join roll of every mob that joined the world, and
+            // the mind spider of the original spider class is a champion candidate, so the mobs
+            // of the event keep their own numbers only while the declared roll keeps them
+            // ordinary.
+            var decision = ChampionJoinRoll.declared(level, ChampionJoinRoll.DECLARED,
+                    () -> WarpEvents.checkWarpEvent(player, new Draws(0, severity)));
             test.assertTrue(decision.triggered() && decision.effectiveWarp() == 100 && decision.severity() == severity,
                     "accepted native dispatch of severity " + severity + ": " + decision);
             test.assertTrue(knowledge().getWarpTemp() == 149 && knowledge().getWarpCounter() == 125,
@@ -271,7 +276,7 @@ public final class WarpRuntimeChecks {
         <T extends LivingEntity> T spawn(EntityType<T> type, double dx, double dy, double dz) {
             T mob = type.create(level); test.assertTrue(mob != null, "registered native type " + type);
             mob.setPos(player.getX() + dx, player.getY() + dy, player.getZ() + dz); mob.setNoGravity(true);
-            level.addFreshEntity(mob); owned.add(mob); return mob;
+            ChampionJoinRoll.join(level, mob); owned.add(mob); return mob;
         }
         void gaze() {
             clean(); player.setYRot(0); player.setXRot(0);

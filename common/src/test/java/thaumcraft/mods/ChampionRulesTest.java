@@ -13,8 +13,20 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.ZombieVillager;
+import thaumcraft.common.entities.monster.EntityCultistKnight;
+import thaumcraft.common.entities.monster.EntityEldritchGolem;
+import thaumcraft.common.entities.monster.EntityTaintacleGiant;
+import thaumcraft.common.entities.monster.EntityTaintSpider;
 import thaumcraft.common.lib.mods.ChampionModifier;
 import thaumcraft.common.lib.mods.ChampionRules;
+import thaumcraft.common.lib.mods.ChampionWiringRules;
 
 /** Original 1.7 champion selection: the spawn roll, the whitelist levels and the modifier roll. */
 class ChampionRulesTest {
@@ -83,6 +95,45 @@ class ChampionRulesTest {
         assertEquals(0, ChampionRules.tierFor("thaumcraft:brainy_zombie"));
         assertEquals(0, ChampionRules.tierFor("thaumcraft:taint_spider"));
         assertEquals(ChampionRules.TIER_NONE, ChampionRules.tierFor("minecraft:creeper"));
+    }
+
+    @Test void originalWhitelistCoversTheCaveSpiderOfTheOriginalSpiderClass() {
+        // Oracle ConfigEntities:196 - the original whitelisted the class of the spider, so the
+        // cave spider of the original was a champion candidate of the level of the spider.
+        assertEquals(ChampionRules.TIER_COMMON, ChampionRules.tierFor("minecraft:cave_spider"));
+        assertEquals(ChampionRules.TIER_COMMON, ChampionRules.tierFor(CaveSpider.class));
+        assertEquals(ChampionRules.TIER_COMMON, ChampionRules.tierFor(Spider.class));
+    }
+
+    @Test void originalWhitelistMatchesTheClassOfTheEntity() {
+        // Oracle EventHandlerEntity.entitySpawns:409-414 - the original matched the class of the
+        // entity, so every subclass of a whitelisted class inherited the level of its parent.
+        assertEquals(ChampionRules.TIER_COMMON, ChampionRules.tierFor(EntityTaintSpider.class));
+        assertEquals(ChampionRules.TIER_RARE, ChampionRules.tierFor(EntityTaintacleGiant.class));
+        assertEquals(ChampionRules.TIER_UNCOMMON, ChampionRules.tierFor(EntityCultistKnight.class));
+        // The id and the class of a mob answer the same level.
+        assertEquals(ChampionRules.tierFor("thaumcraft:taint_spider"),
+                ChampionRules.tierFor("thaumcraft:taint_spider", EntityTaintSpider.class));
+        assertEquals(ChampionRules.TIER_BOSS,
+                ChampionRules.tierFor("thaumcraft:eldritch_golem", EntityEldritchGolem.class));
+        // The zombie villager of 1.21.1 shares the class of the zombie, the zombie villager of the
+        // original 1.7 was a class of its own that the original never whitelisted.
+        assertEquals(ChampionRules.TIER_NONE, ChampionRules.tierFor(ZombieVillager.class));
+        assertEquals(ChampionRules.TIER_NONE, ChampionRules.tierFor(Creeper.class));
+    }
+
+    @Test void originalWardedChampionTakesHalfOfItsTotalMaxHealthAsItsWard() {
+        // Oracle EntityUtils.makeChampion:271-274 - the ward of the warded champion is half of
+        // the total of the max health attribute, the base of the mob plus the thirty health of
+        // the champion, so a champion of a spider keeps twenty three of ward.
+        AttributeInstance health = new AttributeInstance(Attributes.MAX_HEALTH, instance -> {});
+        health.setBaseValue(16.0D);
+        health.addPermanentModifier(new AttributeModifier(ChampionRules.Adapter.CHAMPION_HEALTH_ID, 30.0D,
+                AttributeModifier.Operation.ADD_VALUE));
+        assertEquals(46.0D, health.getValue(), 1.0E-9D);
+        assertEquals(23, ChampionRules.wardedChampionWard(health));
+        // The base health of the mob alone would only be eight.
+        assertEquals(8, ChampionWiringRules.wardedChampionWard(health.getBaseValue()));
     }
 
     @Test void originalModifierRollIsUniformOverTheThirteenModifiers() {

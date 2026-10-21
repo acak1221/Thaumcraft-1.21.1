@@ -21,9 +21,21 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.player.Player;
 import thaumcraft.api.entities.IThaumcraftBoss;
+import thaumcraft.common.entities.monster.EntityCultist;
+import thaumcraft.common.entities.monster.EntityEldritchCrab;
+import thaumcraft.common.entities.monster.EntityInhabitedZombie;
+import thaumcraft.common.entities.monster.EntityPech;
+import thaumcraft.common.entities.monster.EntityTaintacle;
 import thaumcraft.common.entities.monster.EntityTaintSpider;
+import thaumcraft.common.entities.monster.EntityWatcher;
+import thaumcraft.common.entities.monster.EntityWisp;
 import thaumcraft.common.lib.WarpEvents;
 import thaumcraft.common.lib.ward.WardRules;
 
@@ -57,11 +69,14 @@ public final class ChampionRules {
     /**
      * Original champion whitelist. The 1.7 original matched the entity class, so a
      * subclass inherited the level of its parent; the native ids carry that inherited
-     * level here.
+     * level here and {@link #tierFor(Class)} resolves the class of a mob as well.
      */
     public static final Map<String,Integer> CHAMPION_WHITELIST = Map.ofEntries(
             Map.entry("minecraft:zombie", TIER_COMMON),
             Map.entry("minecraft:spider", TIER_COMMON),
+            // Oracle ConfigEntities:196 - the original whitelisted the class of the spider,
+            // so the cave spider of the original was a champion candidate of the same level.
+            Map.entry("minecraft:cave_spider", TIER_COMMON),
             Map.entry("minecraft:blaze", TIER_COMMON),
             Map.entry("minecraft:enderman", TIER_COMMON),
             Map.entry("minecraft:skeleton", TIER_COMMON),
@@ -81,6 +96,32 @@ public final class ChampionRules {
             // so a boss always became a champion, even while the champion mobs were off.
             Map.entry("thaumcraft:eldritch_warden", TIER_BOSS),
             Map.entry("thaumcraft:eldritch_golem", TIER_BOSS));
+
+    /**
+     * Original champion whitelist classes of the native port. The 1.7 original matched the
+     * entity class (oracle {@code EventHandlerEntity.entitySpawns:409-414}), so every subclass
+     * of a whitelisted class inherited the level of its parent and the native port resolves
+     * the same way.
+     *
+     * <p>The class of the original zombie is not part of this list: 1.21.1 merged the zombie
+     * villager into the class of the zombie, and the zombie villager of the original 1.7 was a
+     * class of its own that the original never whitelisted, so the class of the zombie carries
+     * no class semantics here and the native ids of the zombie family keep their levels.
+     */
+    private static final Map<Class<?>,Integer> CHAMPION_CLASS_WHITELIST = Map.ofEntries(
+            Map.entry(Spider.class, TIER_COMMON),
+            Map.entry(Blaze.class, TIER_COMMON),
+            Map.entry(EnderMan.class, TIER_COMMON),
+            Map.entry(Skeleton.class, TIER_COMMON),
+            Map.entry(Witch.class, TIER_UNCOMMON),
+            Map.entry(EntityEldritchCrab.class, TIER_COMMON),
+            Map.entry(EntityTaintacle.class, TIER_RARE),
+            Map.entry(EntityWisp.class, TIER_UNCOMMON),
+            Map.entry(EntityInhabitedZombie.class, TIER_ELITE),
+            Map.entry(EntityCultist.class, TIER_UNCOMMON),
+            Map.entry(EntityWatcher.class, TIER_RARE),
+            Map.entry(EntityPech.class, TIER_UNCOMMON),
+            Map.entry(IThaumcraftBoss.class, TIER_BOSS));
 
     /**
      * Original spawn roll. The 1.7 original rolled nextInt(100) and shifted the roll by
@@ -126,6 +167,39 @@ public final class ChampionRules {
 
     /** Original whitelist lookup of a native entity id. */
     public static int tierFor(String entityId) { return CHAMPION_WHITELIST.getOrDefault(entityId, TIER_NONE); }
+
+    /**
+     * Original whitelist lookup of the class of a mob. The 1.7 original matched the class of
+     * the entity (oracle {@code EventHandlerEntity.entitySpawns:409-414}), so a subclass of a
+     * whitelisted class inherited the level of its parent and the native port resolves the
+     * same way.
+     */
+    public static int tierFor(Class<?> entityClass) {
+        int tier = TIER_NONE;
+        for (Map.Entry<Class<?>,Integer> entry : CHAMPION_CLASS_WHITELIST.entrySet()) {
+            if (!entry.getKey().isAssignableFrom(entityClass)) continue;
+            tier = Math.max(tier, entry.getValue());
+        }
+        return tier;
+    }
+
+    /**
+     * Original whitelist lookup of a native mob: the id of the mob and the class of the mob.
+     * The original matched the class of the entity, the native ids carry the same levels.
+     */
+    public static int tierFor(String entityId, Class<?> entityClass) {
+        return Math.max(tierFor(entityId), tierFor(entityClass));
+    }
+
+    /**
+     * Original warded champion ward. Oracle {@code EntityUtils.makeChampion:271-274} read the
+     * total of the max health attribute of the champion, the base of the mob plus the thirty
+     * health of the champion, and the ward was half of that total, so a champion of a spider
+     * keeps twenty three of ward and not the eight of its base health.
+     */
+    public static int wardedChampionWard(AttributeInstance health) {
+        return ChampionWiringRules.wardedChampionWard(health.getValue());
+    }
 
     /** Original modifier roll: the 1.7 original rolled nextInt(mods.length). */
     public static int rollModifierIndex(Random random) { return random.nextInt(ChampionModifier.mods.length); }
@@ -238,9 +312,12 @@ public final class ChampionRules {
             }
             if (modifier.id == ChampionModifier.WARDED && health != null) {
                 // Oracle EntityUtils.makeChampion:271-274 - the warded champion adds half of its
-                // maximum health to its absorption, never to its health. 1.21.1 clamps the absorption
-                // by the max absorption attribute, so the ward raises that attribute first.
-                WardRules.addWard(mob, (float) ChampionWiringRules.wardedChampionWard(health.getBaseValue()));
+                // maximum health to its absorption, never to its health. The original read the
+                // total of the max health attribute, the base of the mob plus the thirty health
+                // of the champion, so a champion of a spider keeps a ward of twenty three.
+                // 1.21.1 clamps the absorption by the max absorption attribute, so the ward
+                // raises that attribute first.
+                WardRules.addWard(mob, (float) wardedChampionWard(health));
             }
         }
 
@@ -253,7 +330,7 @@ public final class ChampionRules {
         public static void tickChampion(LivingEntity mob, int modifierId) {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
             if (modifier == null || !modifier.ticks()) return;
-            IChampionModifierEffect.Context context = IChampionModifierEffect.Context.tick(mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
+            IChampionModifierEffect.Context context = IChampionModifierEffect.Context.tick(mob.tickCount, mob.getHealth(), maxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             apply(mob, null, modifier.effect.performEffect(context, random(mob)));
         }
 
@@ -262,7 +339,7 @@ public final class ChampionRules {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
             if (modifier == null || !modifier.attacks() || amount <= 0.0f || target == null) return;
             IChampionModifierEffect.Context context = IChampionModifierEffect.Context.attack(amount, target instanceof Player,
-                    mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
+                    mob.tickCount, mob.getHealth(), maxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             apply(mob, target, modifier.effect.performEffect(context, random(mob)));
         }
 
@@ -278,7 +355,7 @@ public final class ChampionRules {
             if (!(attacker instanceof LivingEntity living)) return amount;
             IChampionModifierEffect.Context context = IChampionModifierEffect.Context.damaged(amount,
                     source.is(DamageTypeTags.BYPASSES_ARMOR), "thorns".equalsIgnoreCase(source.getMsgId()), true,
-                    living instanceof Player, mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
+                    living instanceof Player, mob.tickCount, mob.getHealth(), maxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             IChampionModifierEffect.Result result = modifier.effect.performEffect(context, random(mob));
             apply(mob, living, result);
             return result.amount();
@@ -306,10 +383,15 @@ public final class ChampionRules {
         /** The original world random the champion effects used. */
         private static Random random(LivingEntity mob) { return new WorldRandom(mob.level().getRandom()); }
 
-        /** The original base max health the warded champion used for its ward. */
-        private static float baseMaxHealth(LivingEntity mob) {
+        /**
+         * The original maximum health of a champion. The 1.7 original read the total of the max
+         * health attribute (oracle {@code EntityUtils.makeChampion:272} and
+         * {@code ChampionModWarded:26}), so the thirty health of the champion bonus counted
+         * into the ward of the warded champion.
+         */
+        private static float maxHealth(LivingEntity mob) {
             AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
-            return health == null ? mob.getMaxHealth() : (float) health.getBaseValue();
+            return health == null ? mob.getMaxHealth() : (float) health.getValue();
         }
 
         /** The original status effect of a champion. */

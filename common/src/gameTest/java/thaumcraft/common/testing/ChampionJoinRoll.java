@@ -70,6 +70,25 @@ public final class ChampionJoinRoll {
     }
 
     /**
+     * Declares the original champion join roll of every hostile mob that joins the world
+     * inside the given action. The 1.7 original rolled {@code nextInt100} of the world random
+     * for every {@code EntityMob} that joined the world (oracle
+     * {@code EventHandlerEntity.entitySpawns:391}), so a fixture that asserts the exact
+     * numbers of mobs the world itself spawns declares that draw for the whole window: the
+     * declared value keeps every mob of the window an ordinary mob and the real world stream
+     * still advances by the original single draw per mob, so no other scenario loses a world
+     * draw.
+     */
+    public static <T> T declared(ServerLevel level, int roll, java.util.function.Supplier<T> action) {
+        var declared = new Roll(level, roll, -1);
+        try {
+            return action.get();
+        } finally {
+            declared.close();
+        }
+    }
+
+    /**
      * Adds the entity to the level with the declared champion join roll and the declared champion
      * modifier roll.
      *

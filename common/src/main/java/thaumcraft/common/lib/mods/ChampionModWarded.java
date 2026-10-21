@@ -4,15 +4,17 @@ import java.util.Random;
 
 /**
  * Original warded champion: every twenty fifth tick it regained one point of its ward as
- * long as it was not hurt and its ward was below half of its base max health.
+ * long as it was not hurt and its ward was below half of its maximum health.
  *
  * <p>Oracle {@code ChampionModWarded:25-30}: the 1.7 original raised the absorption of the
- * champion by one point, never its health.
+ * champion by one point, never its health, and it measured the ceiling of the ward against the
+ * total of the max health attribute, so a champion of a spider regenerated its ward up to
+ * twenty three.
  */
 public final class ChampionModWarded implements IChampionModifierEffect {
     @Override public Result performEffect(Context context, Random random) {
         if (context.invulnerable() || context.ticksExisted() % 25 != 0) return Result.unchanged(context);
-        int ward = (int) context.baseMaxHealth() / 2;
+        int ward = (int) context.maxHealth() / 2;
         if (context.absorption() < (float) ward) return Result.warding(context, 1.0f);
         return Result.unchanged(context);
     }

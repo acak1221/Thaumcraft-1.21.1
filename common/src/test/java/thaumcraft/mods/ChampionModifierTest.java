@@ -51,11 +51,11 @@ class ChampionModifierTest {
     private static IChampionModifierEffect.Context damaged(float amount, boolean unblockable, boolean thorns) {
         return IChampionModifierEffect.Context.damaged(amount, unblockable, thorns, true, false, 0, 10.0f, 20.0f, 0.0f, false);
     }
-    private static IChampionModifierEffect.Context tick(int ticks, float health, float baseMaxHealth, boolean invulnerable) {
-        return IChampionModifierEffect.Context.tick(ticks, health, baseMaxHealth, 0.0f, invulnerable);
+    private static IChampionModifierEffect.Context tick(int ticks, float health, float maxHealth, boolean invulnerable) {
+        return IChampionModifierEffect.Context.tick(ticks, health, maxHealth, 0.0f, invulnerable);
     }
-    private static IChampionModifierEffect.Context tick(int ticks, float health, float baseMaxHealth, float absorption, boolean invulnerable) {
-        return IChampionModifierEffect.Context.tick(ticks, health, baseMaxHealth, absorption, invulnerable);
+    private static IChampionModifierEffect.Context tick(int ticks, float health, float maxHealth, float absorption, boolean invulnerable) {
+        return IChampionModifierEffect.Context.tick(ticks, health, maxHealth, absorption, invulnerable);
     }
 
     @Test void originalModifiersKeepTheirIdentityAndTrigger() {
@@ -163,13 +163,17 @@ class ChampionModifierTest {
     @Test void originalWardedChampionRegainsOnePointOfItsWardEveryTwentyFifthTick() {
         // Oracle ChampionModWarded:25-30 - the ward of the warded champion is its absorption,
         // never its health, and it grows by one point every twenty fifth tick while the champion
-        // is not hurt and its ward is below half of its base max health.
+        // is not hurt and its ward is below half of its maximum health.
         assertEquals(1.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
         assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 10.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
         assertEquals(0.0f, new ChampionModWarded().performEffect(tick(26, 5.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
         assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, true), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
         // The ward is never a heal of the champion.
         assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
+        // The ceiling of the ward is half of the total maximum health of the champion, so a
+        // champion of a spider with forty six health regenerates its ward up to twenty three.
+        assertEquals(1.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 46.0f, 22.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
+        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 46.0f, 23.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
     }
 
     @Test void originalInfestedChampionSpawnsASpiderlingWithFortyPercentChance() {

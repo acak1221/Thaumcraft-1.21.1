@@ -67,6 +67,49 @@ Local: `:common:compileJava` and `:common:test` pass, 1569 JUnit tests in 226 su
 0 skipped. `python3 -B scripts/porting/convert_assets.py --verify` reports 0 missing references.
 No runtime, client visual, multiplayer or NeoForge acceptance is claimed.
 
+## 2026-10-21 — Champion ward, headless golem eye height and the champion whitelist
+
+Three production defects of the champion system and of the eldritch bestiary are closed against the
+1.7.10 oracle.
+
+The warded champion took half of its BASE max health as its ward. Oracle `EntityUtils.makeChampion:271-274`
+reads `IAttributeInstance.func_111125_b()`, the TOTAL of the max health attribute, so a champion of a spider (base
+sixteen plus the thirty health of the champion bonus) keeps a ward of twenty three and not eight. The native
+promotion (`ChampionRules.Adapter.promote`) read the base value of the attribute, and the regeneration ceiling of
+the warded champion (`ChampionModWarded:26`) measured the same base value, so the ward of a champion grew back to
+eight and never to twenty three. Both places read the total now, and the effect context of the champion modifiers
+carries the total maximum health instead of the base one. The 1.12 legacy tree of this repository still uses the
+base value; the 1.7.10 oracle is the spec.
+
+The headless eldritch golem kept the eye height of the headed golem. Oracle
+`EntityEldritchGolem.func_70047_e:133-135` answers 3.33 for the headless golem, and the explosion that takes its
+head starts at `y + 3.33` (`EntityEldritchGolem.func_70097_a:199`). The native port emulated the answer with
+`getDefaultDimensions().withEyeHeight(...)`, but 1.21.1 caches the dimensions of a mob and only recomputes them in
+`refreshDimensions()`, and `setHeadless` only wrote the entity data flag, so the cached 3.0 stayed. The golem
+refreshes its cached dimensions with the flag now, and the client mob does the same when the flag arrives as entity
+data.
+
+`minecraft:cave_spider` was missing from the champion whitelist. The original whitelist was a map of classes
+(`ConfigEntities:195-208`) and the spawn roll matched them with `Class.isAssignableFrom`
+(`EventHandlerEntity.entitySpawns:409-414`), so a cave spider was a level zero champion candidate. The native
+whitelist is keyed by the registry id, so the lookup resolves the id AND the class of the mob now: the cave spider
+joins the whitelist with the level of the spider, and every subclass of a whitelisted class inherits the level of
+its parent again (the taintacle giant, the cultist knights and clerics, the mind spider). The class of the original
+zombie stays out of the class list on purpose: 1.21.1 merged the zombie villager into the class of the zombie, and
+the zombie villager of the original 1.7 was a class of its own that the original never whitelisted.
+
+Two fixtures of the harness declare the original champion join roll now, because the mind spider and the cultist
+knight are champion candidates of the original and their exact numbers would otherwise depend on the world random
+of the run: the warp event of the warp scenario and the cultists of the cultist scenario.
+
+The game test source set of this branch did not compile: `EquipmentItemRuntimeChecks` calls
+`ItemBottleTaint.burst(level, pos, player)`, a helper the main tree owns and this branch missed. The helper and the
+`EntityBottleTaint.burst(ServerLevel)` it uses are ported from the main tree, so the scenarios of the harness run
+again.
+
+Local: `:common:compileJava` and `:common:test` pass, 1570 JUnit tests in 225 suites, 0 failures. The focused
+GameTest run passes its eight cases. No client visual, multiplayer or NeoForge acceptance is claimed.
+
 ## 2026-10-21 — Outer Lands labyrinth fidelity: the maze generator and the eldritch rooms
 
 The critical defect of the a5 eldritch audit is closed. The native labyrinth generator skipped a

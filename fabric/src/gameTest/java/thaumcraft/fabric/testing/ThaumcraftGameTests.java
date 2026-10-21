@@ -1499,6 +1499,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void champion_whitelist_covers_the_cave_spider(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.caveSpiderIsAChampionCandidate(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
     public void eldritch_altar_takes_eyes_and_switches_its_spawn_type(GameTestHelper test) {
         thaumcraft.common.testing.EldritchBlockRuntimeChecks.altarTakesEyesAndSwitchesItsSpawnType(test);
     }

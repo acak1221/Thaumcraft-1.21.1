@@ -96,6 +96,10 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
      * Original golem eye height is three, or 3.33 once its head is gone. The original set the
      * size with {@code func_70105_a(1.75F, 3.5F)} and answered the eye height with
      * {@code func_70047_e()}, so the headless form has its own eye height.
+     *
+     * <p>Oracle {@code EntityEldritchGolem.func_70047_e:133-135} answered the eye height of
+     * the mob directly, so the headless golem looked from 3.33 and the explosion that took its
+     * head started at {@code y + 3.33} (oracle {@code EntityEldritchGolem.func_70097_a:199}).
      */
     @Override public EntityDimensions getDefaultDimensions(Pose pose) {
         return EldritchMobRules.golemDimensions(isHeadless());

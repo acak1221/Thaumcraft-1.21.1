@@ -6,6 +6,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.lib.utils.Utils;
 
+import net.minecraft.world.entity.EntityDimensions;
+
 /**
  * Original TC4 eldritch bestiary numbers, cooldowns and special-state transitions.
  *
@@ -132,6 +134,7 @@ public final class EldritchMobRules {
     public static final float GOLEM_HEADLESS_EYE_HEIGHT=3.33F;
     /** Original EntityEldritchGolem:92 - the size of the golem, func_70105_a(1.75F, 3.5F). */
     public static final float GOLEM_WIDTH=1.75F;
+    /** Original body height of the eldritch golem, the 3.5 of the original constructor. */
     public static final float GOLEM_HEIGHT=3.5F;
     public static final int GOLEM_MELEE_COOLDOWN=10;
     public static final float GOLEM_MELEE_DAMAGE_FACTOR=.75F;
@@ -151,7 +154,9 @@ public final class EldritchMobRules {
     public static float golemEyeHeight(boolean headless) { return headless?GOLEM_HEADLESS_EYE_HEIGHT:GOLEM_EYE_HEIGHT; }
     /**
      * Original EntityEldritchGolem:92 and :133-135 - the golem is 1.75 wide and 3.5 high, the
-     * headless form only changes the eye height from three to 3.33.
+     * headless form only changes the eye height from three to 3.33. The 1.7 original answered
+     * the eye height of the mob directly (oracle {@code EntityEldritchGolem.func_70047_e:133-135}),
+     * so the headless golem looked from 3.33.
      */
     public static net.minecraft.world.entity.EntityDimensions golemDimensions(boolean headless) {
         return net.minecraft.world.entity.EntityDimensions.scalable(GOLEM_WIDTH,GOLEM_HEIGHT)

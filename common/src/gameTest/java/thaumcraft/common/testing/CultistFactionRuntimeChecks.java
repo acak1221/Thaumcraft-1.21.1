@@ -40,7 +40,9 @@ public final class CultistFactionRuntimeChecks {
 
             var knight = lane.add(ThaumcraftCultists.CULTIST_KNIGHT.get().create(level));
             knight.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
-            level.addFreshEntity(knight);
+            // The original cultist knight inherits the champion level of the cultist, so the
+            // declared join roll keeps the ordinary numbers of the fixture.
+            ChampionJoinRoll.join(level, knight);
             knight.originalSpawnEquipment(level, level.getCurrentDifficultyAt(lane.origin));
             test.assertTrue(knight.getMaxHealth() == 36F && knight.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4F
                             && Math.abs(knight.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.3D) < 1e-6D
@@ -57,7 +59,7 @@ public final class CultistFactionRuntimeChecks {
 
             var cleric = lane.add(ThaumcraftCultists.CULTIST_CLERIC.get().create(level));
             cleric.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 2.5D, 0F, 0F);
-            level.addFreshEntity(cleric);
+            ChampionJoinRoll.join(level, cleric);
             cleric.originalSpawnEquipment(level, level.getCurrentDifficultyAt(lane.origin));
             test.assertTrue(cleric.getMaxHealth() == 30F && cleric.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4F,
                     "the crimson cleric keeps the original 30 health and 4 damage: " + cleric.getMaxHealth() + " "
@@ -77,7 +79,7 @@ public final class CultistFactionRuntimeChecks {
             for (int index = 0; index < 40; index++) {
                 var doomed = lane.add(ThaumcraftCultists.CULTIST_KNIGHT.get().create(level));
                 doomed.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + .5D, 0F, 0F);
-                level.addFreshEntity(doomed);
+                ChampionJoinRoll.join(level, doomed);
                 doomed.hurt(level.damageSources().playerAttack(player), 1000F);
             }
             for (ItemEntity drop : level.getEntitiesOfClass(ItemEntity.class, lane.area(6))) {
@@ -136,10 +138,10 @@ public final class CultistFactionRuntimeChecks {
             // The original aura of the praetor feeds every cultist within eight blocks.
             var follower = lane.add(ThaumcraftCultists.CULTIST_CLERIC.get().create(level));
             follower.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 3.5D, 0F, 0F);
-            level.addFreshEntity(follower);
+            ChampionJoinRoll.join(level, follower);
             var far = lane.add(ThaumcraftCultists.CULTIST_CLERIC.get().create(level));
             far.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 12.5D, 0F, 0F);
-            level.addFreshEntity(far);
+            ChampionJoinRoll.join(level, far);
             for (int tick = 0; tick < 5; tick++) level.tickNonPassenger(praetor);
             test.assertTrue(follower.hasEffect(MobEffects.REGENERATION)
                             && follower.getEffect(MobEffects.REGENERATION).getAmplifier() == CultistRules.LEADER_AURA_AMPLIFIER,

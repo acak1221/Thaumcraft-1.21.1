@@ -122,7 +122,9 @@ public final class ChampionHooks {
         if (!(mob instanceof Enemy)) return;
         if (championId(mob) != NOT_ROLLED) return;
         SpawnFacts facts = facts(level, mob);
-        int tier = ChampionRules.tierFor(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString());
+        // Oracle EventHandlerEntity.entitySpawns:409-414 - the original matched the class of
+        // the entity, so a subclass of a whitelisted class inherited the level of its parent.
+        int tier = ChampionRules.tierFor(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString(), mob.getClass());
         float health = baseMaxHealth(mob);
         int modifier = roll(level.getRandom(), facts, tier, health);
         setChampionModifier(mob, modifier);

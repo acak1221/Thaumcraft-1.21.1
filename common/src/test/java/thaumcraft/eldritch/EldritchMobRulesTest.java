@@ -107,6 +107,17 @@ class EldritchMobRulesTest {
         assertFalse(EldritchMobRules.golemChargesBeam(true,true,0));
     }
 
+    @Test void originalGolemBodyAndEyeHeightArePreserved() {
+        // Oracle EntityEldritchGolem.func_70047_e:133-135 - the golem keeps its 1.75 by 3.5 body
+        // and looks from three, or from 3.33 once its head is gone.
+        assertEquals(1.75F,EldritchMobRules.golemDimensions(false).width(),1.0E-6F);
+        assertEquals(3.5F,EldritchMobRules.golemDimensions(false).height(),1.0E-6F);
+        assertEquals(3F,EldritchMobRules.golemDimensions(false).eyeHeight(),1.0E-6F);
+        assertEquals(1.75F,EldritchMobRules.golemDimensions(true).width(),1.0E-6F);
+        assertEquals(3.5F,EldritchMobRules.golemDimensions(true).height(),1.0E-6F);
+        assertEquals(3.33F,EldritchMobRules.golemDimensions(true).eyeHeight(),1.0E-6F);
+    }
+
     @Test void originalGolemOnlyLosesItsHeadOnALethalHit() {
         assertTrue(EldritchMobRules.golemBeheads(120F,100F,false));
         assertFalse(EldritchMobRules.golemBeheads(100F,100F,false));

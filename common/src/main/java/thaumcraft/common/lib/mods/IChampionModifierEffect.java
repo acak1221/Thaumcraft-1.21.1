@@ -24,22 +24,27 @@ public interface IChampionModifierEffect {
     /** Original client particle kinds. */
     enum Particle { NONE, GENERIC, SPARK, SLIME_JUMP }
 
-    /** Immutable snapshot of the original performEffect inputs. */
+    /**
+     * Immutable snapshot of the original performEffect inputs. The max health of the snapshot
+     * is the total of the max health attribute of the champion, the base of the mob plus the
+     * thirty health of the champion bonus, because the 1.7 original read the total of the
+     * attribute (oracle {@code EntityUtils.makeChampion:272} and {@code ChampionModWarded:26}).
+     */
     record Context(float amount, boolean unblockable, boolean thorns, boolean targetPresent, boolean targetIsPlayer,
-                   int ticksExisted, float health, float baseMaxHealth, float absorption, boolean invulnerable) {
+                   int ticksExisted, float health, float maxHealth, float absorption, boolean invulnerable) {
         /** Context of a champion that a living attacker hurts. */
         public static Context damaged(float amount, boolean unblockable, boolean thorns, boolean targetPresent, boolean targetIsPlayer,
-                                      int ticksExisted, float health, float baseMaxHealth, float absorption, boolean invulnerable) {
-            return new Context(amount, unblockable, thorns, targetPresent, targetIsPlayer, ticksExisted, health, baseMaxHealth, absorption, invulnerable);
+                                      int ticksExisted, float health, float maxHealth, float absorption, boolean invulnerable) {
+            return new Context(amount, unblockable, thorns, targetPresent, targetIsPlayer, ticksExisted, health, maxHealth, absorption, invulnerable);
         }
         /** Context of a champion that hits a living target. */
         public static Context attack(float amount, boolean targetIsPlayer,
-                                     int ticksExisted, float health, float baseMaxHealth, float absorption, boolean invulnerable) {
-            return new Context(amount, false, false, true, targetIsPlayer, ticksExisted, health, baseMaxHealth, absorption, invulnerable);
+                                     int ticksExisted, float health, float maxHealth, float absorption, boolean invulnerable) {
+            return new Context(amount, false, false, true, targetIsPlayer, ticksExisted, health, maxHealth, absorption, invulnerable);
         }
         /** Context of a champion that ticks. */
-        public static Context tick(int ticksExisted, float health, float baseMaxHealth, float absorption, boolean invulnerable) {
-            return new Context(0.0f, false, false, false, false, ticksExisted, health, baseMaxHealth, absorption, invulnerable);
+        public static Context tick(int ticksExisted, float health, float maxHealth, float absorption, boolean invulnerable) {
+            return new Context(0.0f, false, false, false, false, ticksExisted, health, maxHealth, absorption, invulnerable);
         }
     }
 

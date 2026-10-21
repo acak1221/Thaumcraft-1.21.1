@@ -42641,15 +42641,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/ComponentBankerHome.java:1-120 the village piece of the banker home",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerHome.java the native banker home builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerHome.java the native banker home builder",
+          "oracle ComponentBankerHome:56-105 the 1.7.10 placeBlockAtCurrentPosition takes the metadata first and the local coordinates after it, so the cobble floor, the dirt floor, the two roof variants, the ten roof edge logs, the four corner posts, the plank walls, the two iron bar windows, the three table slots and the door of the native port match the original block for block",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the banker home block list of the original",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the shell, the roof variants, the table slots, the windows and the door of the banker home"
         ],
         "notes": [
-          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature; the block list is kept in VillageWorldGenRules.",
-          "The feature is registered but no biome modifier or biome references the placed feature, so the banker home never generates in a world."
+          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature; the block list is kept in VillageWorldGenRules and the feature is placed by VillageBankerManager."
         ],
         "reviewed_sha256": {
           "original": "1d2a96ab3e59fd24d8a378feabf152e1938a4465190b9d6964ba3360c23e62f2",
@@ -42689,15 +42691,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/ComponentWizardTower.java:1-114 the village piece of the wizard tower",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java the native wizard tower builder"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardTower.java the native wizard tower builder",
+          "oracle ComponentWizardTower:44-96 the hollow interior, the three plank floors, the four cobble pillars, the glass panes, the ladder, the trapdoor, the glowstone, the chest and the door",
+          "oracle ComponentWizardTower:53-64 the twelve cobble corner calls place only ten distinct corner blocks: the calls 57 and 58 repeat the middle floor corners at local x 1, so the two ground floor corners at local x 5 stay open in the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the wizard tower now places the same ten corners and keeps the two open ones",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the ten corners, the missing ground floor pair, the floors, the pillars, the panes, the ladder and the chest"
         ],
         "notes": [
-          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature.",
-          "The feature is registered but never placed, so the wizard tower never generates in a world."
+          "1.21.1 has no village piece system, so the piece became a deterministic chunk feature; the block list is kept in VillageWorldGenRules and the feature is placed by VillageWizardManager.",
+          "The original never spawns the wizard: ComponentWizardTower:95 spawns it at local x 7, outside the six wide piece."
         ],
         "reviewed_sha256": {
           "original": "59ded4f00b6a97364dab48a0274ff79aa618af14bf038b0e049f9af9be11495c",
@@ -42732,15 +42738,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/ThaumcraftVillagerTrades.java:1-292 the 1.12 villager trade lists",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the native banker and wizard trade tables"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the native banker and wizard trade tables",
+          "the legacy 1.12 helper has no oracle counterpart; the native trade tables are the original ones of VillageBankerManager:21-32 and VillageWizardManager:19-33 with the same counts and the same item order",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker and the fifteen wizard rows",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the trade rows of both tables"
         ],
         "notes": [
-          "Legacy-only helper (no oracle counterpart); the native keeps the twelve banker trades and the fifteen wizard trades as data.",
-          "1.21.1 has no villager profession registry yet, so the trade tables are not bound to a trader."
+          "Legacy-only helper (no oracle counterpart); the native keeps the twelve banker trades and the fifteen wizard trades as data and binds them to the thaumcraft:banker and thaumcraft:wizard professions."
         ],
         "reviewed_sha256": {
           "legacy": "8d4971296e3685cc56725651ee1073ccd4417771c4e7b41b4f9b0d71d428f70a"
@@ -42787,11 +42795,19 @@
           "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:481-546 the ore pass with 18 cinnabar, 20 amber and 8 infused stone attempts",
           "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:71-99 the same three ore passes",
           "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:95-100 the 1/150, 1/66 and 1/40 structure chain",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java the ring feature"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java the ring feature",
+          "oracle ThaumcraftWorldGenerator:407-481 the surface pass, the exclusive structure chain 1/150, 1/66 and 1/40, the position draws and the totem 1/360",
+          "oracle ThaumcraftWorldGenerator:483-567 the vegetation pass with the silverwood 1/60, the greatwood 1/25 and the hot sand flowers 1/30 and the ore pass with 18 cinnabar, 20 amber and 8 infused stone attempts",
+          "oracle ThaumcraftWorldGenerator:114-168 the aura totem with its ground rules, its column of four and its node roll of one in four",
+          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java the chain and the chunk random of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTreeFeature.java the vegetation pass of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java the three ore passes of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTotemFeature.java the totem of the original",
+          "native common/src/test/java/thaumcraft/worldgen/OriginalSurfaceGeneratorNumbersTest.java the chain frequencies, the order of the draws and the chunk random of the original"
         ],
         "notes": [
-          "The 1.7 world generator was replaced by a set of 1.21 features (ore, tree, node, decoration, ring and village features).",
-          "The totem of the original (one in 360 chunks) has no native counterpart, and the mound branch of the original has no native counterpart at all."
+          "The 1.7 world generator was replaced by a set of 1.21 features (ore, tree, node, decoration, ring and village features); the surface chain, the vegetation pass, the ore pass and the totem were compared draw by draw against the oracle.",
+          "The wild node pass of the original delegates into the TC4 API jar (thaumcraft.api.expands.worldgen.node.NodeGenerationManager); that API jar is not part of the 4.2.3.5 game jar in this sandbox, so the native port reproduces the pass with the rarity filter 1/36 of Config.nodeRarity instead of a line by line comparison."
         ],
         "reviewed_sha256": {
           "original": "dcb6537b0dc809de1a6b738208e97b9480ce3c8ac4badc82397722bc8f136d28",
@@ -42831,16 +42847,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/VillageBankerManager.java:59 the piece weight 25 and the profession id 191",
           "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerManager.java:20-30 the piece weight and the profession id",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker trades"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker trades",
+          "oracle VillageBankerManager:37-39 the piece weight 25 and the minimum village size draw MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i)",
+          "the 1.7.10 MathHelper.getRandomIntegerInRange is min + random.nextInt(max - min + 1), so the draw is i or i + 1 and not always i",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the draw of the minimum village size is now i + nextInt(2)",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the piece weight, the profession id and the draw of the minimum village size"
         ],
         "notes": [
-          "The Forge village handler became a deterministic chunk feature; the piece weight, the profession id and the trade table are kept.",
-          "The feature never runs because no biome modifier places it."
+          "The Forge village handler became a deterministic chunk feature; the piece weight, the profession id and the trade table are kept."
         ],
         "reviewed_sha256": {
           "original": "a35b07a30700dc876d158a754922ad1b466f1bfc25716bbb054b372e07fddfe9",
@@ -42880,15 +42899,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/VillageWizardManager.java:59 the piece weight 15 and the profession id 190",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardManager.java the piece weight and the profession id"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardManager.java the piece weight and the profession id",
+          "oracle VillageWizardManager:38-40 the piece weight 15 and the minimum village size draw MathHelper.getRandomIntegerInRange(random, 0 + i, 1 + i)",
+          "the 1.7.10 MathHelper.getRandomIntegerInRange is min + random.nextInt(max - min + 1), so the draw is i or i + 1 and not always i",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the draw of the minimum village size is now i + nextInt(2)",
+          "native common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java the fifteen wizard trade rows and the draw of the minimum village size"
         ],
         "notes": [
-          "The Forge village handler became a deterministic chunk feature; the numbers are kept.",
-          "The feature never runs because no biome modifier places it."
+          "The Forge village handler became a deterministic chunk feature; the numbers are kept."
         ],
         "reviewed_sha256": {
           "original": "128a302e8f62440ba47097c3bbed68285d19a6982d3f3b8fd6e61482e897096a",
@@ -42927,15 +42949,21 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenBigMagicTree.java:1-332 the greatwood shaped tree",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenBigMagicTree.java the native big magic tree"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenBigMagicTree.java the native big magic tree",
+          "oracle WorldGenBigMagicTree:23 the field initialiser leafDensity = 1.0F and WorldGenBigMagicTree:39 the leaf node count (int)(1.382 + Math.pow(this.leafDensity * (double)this.heightLimit / (double)13.0F, 2.0F))",
+          "the 4.2.3.5 jar bytecode proves the value: WorldGenBigMagicTree.<init> stores dconst_1 into leafDensity, while WorldGenGreatwoodTrees.<init> stores the constant pool double 0.9",
+          "the port used 0.8, the factor of the unused setScale of WorldGenBigMagicTree:343, and lost one leaf node per layer for the heights 11, 12, 17, 18, 19, 20 and 22",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenBigMagicTree.java the leaf node count is the original formula again",
+          "native common/src/test/java/thaumcraft/worldgen/MagicalTreeCanopyTest.java the leaf node table of the original for the heights 11 to 22"
         ],
         "notes": [
-          "The 1.7 tree generator became a 1.21 feature; the trunk shape was not compared block by block in this audit."
+          "The 1.7 tree generator became a 1.21 feature; the trunk shape was compared block by block against the oracle in this audit.",
+          "The shared first/obstruction shortened height of the original survives in a world scoped state, exactly as the original shared tree instance did."
         ],
         "reviewed_sha256": {
           "original": "502b7ef585732a584c4c856a499a9f92c9d713740af10f8ee885f80d345fd246",
@@ -42974,15 +43002,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenCustomFlowers.java:1-39 the custom flower generator",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenCustomFlowers.java the native custom flower generator"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenCustomFlowers.java the native custom flower generator",
+          "oracle WorldGenCustomFlowers:18-29 eighteen attempts, the offsets nextInt(8) - nextInt(8) horizontally and nextInt(4) - nextInt(4) vertically and the soil grass or sand",
+          "the 1.7.10 Blocks.sand carries the red sand as its metadata one, so the native red sand is the same block of the original and not an addition",
+          "native common/src/test/java/thaumcraft/worldgen/OriginalSurfaceGeneratorNumbersTest.java the eighteen attempts and the two spreads"
         ],
         "notes": [
-          "The 1.7 generator became a 1.21 feature; the flower positions were not compared in this audit."
+          "The 1.7 generator became a 1.21 feature; the flower positions were compared attempt by attempt in this audit."
         ],
         "reviewed_sha256": {
           "original": "5fa24c2a9fe77329dd4655441d2ddd09f5c6028a15422822ca11481ef2e902f6",
@@ -43075,15 +43106,20 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java:1-382 the greatwood tree",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java the native greatwood tree"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java the native greatwood tree",
+          "oracle WorldGenGreatwoodTrees:29,45,355 the leaf density 0.9, the leaf node formula and the height 11 + nextInt(11)",
+          "the 4.2.3.5 jar bytecode stores the constant pool double 0.9 into leafDensity of WorldGenGreatwoodTrees",
+          "oracle WorldGenGreatwoodTrees:101-131 the layer radius, the air or magical leaves rule, the pillar rule and the one in four vine roll",
+          "oracle WorldGenGreatwoodTrees:347-421 the two by two soil search, the two canopy tiers and the spider dungeon with its web and its dungeon chest",
+          "native common/src/test/java/thaumcraft/worldgen/MagicalTreeCanopyTest.java the leaf node table of the original for the heights 11 to 21"
         ],
         "notes": [
-          "The 1.7 tree generator became a 1.21 feature; the trunk shape was not compared block by block in this audit."
+          "The 1.7 tree generator became a 1.21 feature; the trunk shape was compared block by block against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "cabab6198ad997bea76de26799de39af3df78600d5931319e809e62fbd008160",
@@ -43123,14 +43159,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenHilltopStones.java:29-131 the hilltop stones",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the native hilltop stones"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the native hilltop stones",
+          "oracle WorldGenHilltopStones:19-50 the minimum height 85, the five ground samples and the ground blocks stone, grass and dirt with the snow and the tall grass below them",
+          "oracle WorldGenHilltopStones:57-120 the seven by seven footprint, the four layers, the skipped corners, the pillar rule of the odd border and the one in three vine roll",
+          "oracle WorldGenHilltopStones:86-93 the chest with the vanilla dungeon loot rolled twice and the wisp spawner below it",
+          "oracle ThaumcraftWorldGenerator:452 the dark aura node five blocks above the base of the cluster",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenHilltopStones.java the same values and the same order of the draws"
         ],
         "notes": [
-          "The generator, the footprint and the minimum height 85 are ported, but the placed feature is never added to a biome, so the stones never generate."
+          "The generator, the footprint and the minimum height 85 are ported; the original rules are mutually exclusive, so the cluster only grows in a chunk the structure chain gave to it."
         ],
         "reviewed_sha256": {
           "original": "32f84ccdd45ce5ae2d34d6f699a84188fd376ff70218a0020426ae7c0156be8b",
@@ -43169,15 +43210,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenManaPods.java:1-41 the mana pod generator",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenManaPods.java the native mana pod generator"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenManaPods.java the native mana pod generator",
+          "oracle WorldGenManaPods:11-31 the upward search that never goes above 128, the four block drift of the blocked column and the pod age two to six",
+          "the original places the pod on the first free block with a free block below it and only then breaks out of the search",
+          "native common/src/test/java/thaumcraft/worldgen/OriginalSurfaceGeneratorNumbersTest.java the original bounds of the pod search"
         ],
         "notes": [
-          "The 1.7 generator became a 1.21 feature; the pod positions were not compared in this audit."
+          "The 1.7 generator became a 1.21 feature; the pod positions were compared step by step in this audit."
         ],
         "reviewed_sha256": {
           "original": "5443a5727b6de90213867c83f51c38fc0d6634f4c907b423a95c966dc3b1d181",
@@ -43269,14 +43313,16 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/WorldGenMoundTemplate.java:1-64 the 1.12 nineteen layer mound template",
-          "oracle the 4.2.3.5 oracle has no WorldGenMoundTemplate"
+          "oracle the 4.2.3.5 oracle has no WorldGenMoundTemplate",
+          "the oracle has no WorldGenMoundTemplate, the original builds the mound inline; the native port carries the nineteen layer table in common/src/main/java/thaumcraft/common/lib/world/WorldGenMoundTemplate.java",
+          "native common/src/test/java/thaumcraft/world/WorldGenMoundTemplateTest.java the sha256 of the table against the oracle and the 2441 blocks"
         ],
         "notes": [
-          "Legacy-only helper for the 1.12 mound; the original builds the mound inline and the native port has no mound at all."
+          "Legacy-only helper for the 1.12 mound; the original builds the mound inline. The native port carries the same nineteen layer table as the native WorldGenMoundTemplate, verified cell by cell against the oracle."
         ],
         "reviewed_sha256": {
           "legacy": "171b511b39411e0e4c06a31938ad6d0e208ea462e49e9e7fd9a813dbd6178680"
@@ -43314,15 +43360,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java:1-166 the silverwood tree",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the native silverwood tree"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the native silverwood tree",
+          "oracle WorldGenSilverwoodTrees:27-166 the height, the canopy radius 10 + nextInt(8), the knot chance height * 1.5, the four corner logs of the trunk and the shimmerleaf flowers of the worldgen tree",
+          "the 4.2.3.5 jar proves the callers of the class: BlockCustomPlant, ThaumcraftWorldGenerator, BiomeGenMagicalForest and the class itself",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the same geometry and the same order of the draws"
         ],
         "notes": [
-          "The 1.7 tree generator became a 1.21 feature; the trunk shape was not compared block by block in this audit."
+          "The 1.7 tree generator became a 1.21 feature; the trunk shape was compared block by block against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "d6b38ee3e0b14914c88797c3daa7210881c904e9d9429d3a4e1b36f4207b7793",
@@ -43353,14 +43402,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/WorldGenSilverwoodTreesOld.java:1-329 the old silverwood shape",
-          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the single native silverwood generator"
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldGenSilverwoodTrees.java the single native silverwood generator",
+          "the 4.2.3.5 jar proves that the class is dead code: only WorldGenSilverwoodTreesOld.class itself carries the name, no other class of the jar references it",
+          "the readable 1.7.10 reference agrees: no class outside the file instantiates WorldGenSilverwoodTreesOld",
+          "a generator that the original never calls needs no native counterpart, so the single native silverwood generator is the whole original behaviour"
         ],
         "notes": [
-          "The original keeps a second, older silverwood shape; the native port has only one silverwood generator, so the old shape is not ported."
+          "The original keeps a second, older silverwood shape that no class of TC4 4.2.3.5 ever instantiates; the jar and the readable reference both prove the class is dead code, so the native port omits it without any behaviour loss."
         ],
         "reviewed_sha256": {
           "original": "85c1e7d6aab942a416f2b1c2c92bba8c081842b5d0d913a18939236a90df2a0d"
@@ -43398,10 +43450,13 @@
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/WorldgenLootHelper.java:1-25 the 1.12 dungeon chest loot helper",
-          "native common/src/main/resources/data/thaumcraft/loot_table the native loot tables"
+          "native common/src/main/resources/data/thaumcraft/loot_table the native loot tables",
+          "the legacy 1.12 helper has no oracle counterpart; the native port fills the dungeon chests of the hilltop stones, the greatwood dungeon and the mound with the native minecraft:chest/simple_dungeon table",
+          "the original filled them with ChestGenHooks.getInfo(dungeonChest), whose item list is a vanilla 1.7.10 table that is not part of this sandbox, so the item list itself could not be compared line by line"
         ],
         "notes": [
-          "Legacy-only helper (no oracle counterpart); the native fills the chests with datapack loot tables."
+          "Legacy-only helper (no oracle counterpart); the native fills the chests with datapack loot tables.",
+          "The exact item list of the 1.7.10 dungeon chest could not be verified here; the native table is the 1.21.1 dungeon chest."
         ],
         "reviewed_sha256": {
           "legacy": "0bb2e4390545b1f9f5eab5e203d72577c3595739c985b2a14e21d39fa2b339e8"
@@ -43515,15 +43570,18 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/biomes/BiomeGenEerie.java:1-75 the eerie biome",
-          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEerie.java the native eerie biome rules"
+          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenEerie.java the native eerie biome rules",
+          "oracle BiomeGenEerie:16-41 the spawn rows bat 3, witch 8, enderman 4, brainy zombie 32, giant brainy zombie 8, wisp 3 and eldritch guardian 1 and the decorator counters two trees, one flower and two grass",
+          "oracle BiomeGenEerie:44-59 the colours grass 0x404840, foliage 0x405340, the sky 0x222299 and the water 0x2E535F",
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/eerie.json the committed biome document carries exactly these values"
         ],
         "notes": [
-          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were not compared line by line in this audit."
+          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were compared line by line against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "66d7948f5eaaabf4867103b2f8197c13514a74f31e60b294204e15d6f25e45da"
@@ -43592,15 +43650,19 @@
       "review": {
         "disposition": "adapt",
         "source_semantics": "adapted",
-        "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "callsite_audit": "complete",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/biomes/BiomeGenMagicalForest.java:1-168 the magical forest biome",
-          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenMagicalForest.java the native magical forest biome rules"
+          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeGenMagicalForest.java the native magical forest biome rules",
+          "oracle BiomeGenMagicalForest:35-63 the spawn rows wolf 2, horse 2, witch 3, enderman 3, pech 10 and wisp 10, the temperature 0.7, the rainfall 0.6, the decorator counters and the nine red flowers of the weight ten",
+          "oracle BiomeGenMagicalForest:66-73 the tree draw one silverwood in fourteen, then one greatwood in ten, otherwise the big magic tree",
+          "oracle BiomeGenMagicalForest:93-138 the mossy blob count, the one in forty big mushroom on the four by four grid, the ten mana pods from y 64 and the eight vishrooms next to a wood log",
+          "native common/src/main/resources/data/thaumcraft/worldgen/biome/magical_forest.json the committed biome document carries exactly these values"
         ],
         "notes": [
-          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were not compared line by line in this audit."
+          "The 1.7 biome became a rules class plus a biome document; the spawn rows and the colours were compared line by line against the oracle in this audit."
         ],
         "reviewed_sha256": {
           "original": "056aa8eff884f1ba7b4aadac6bfcfbe28d1c22fcf7a47c0fa5791f92cb4249da"
@@ -43678,16 +43740,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/biomes/BiomeHandler.java:1-67 the biome dictionary membership",
           "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeHandler.java the native biome dictionary adapter",
-          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:37-45 the biome type vote table"
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:37-45 the biome type vote table",
+          "oracle Config.registerBiomes:822-858 the thirty one dictionary types with their aura level, their aspect tag and their greatwood chance, and the four TC4 biome memberships magical, spooky, end, forest and wasteland",
+          "native common/src/main/java/thaumcraft/common/lib/world/biomes/BiomeHandler.java the same thirty one rows in the same order and the same four memberships"
         ],
         "notes": [
-          "The Forge biome dictionary became tags and a vote table; the vote counts and the aspect mapping are kept.",
-          "The dictionary membership of the eldritch biome is only used by the ore feature; the aura and greatwood queries of the original have no direct native counterpart."
+          "The Forge biome dictionary became tags and a vote table; the vote counts and the aspect mapping are kept."
         ],
         "reviewed_sha256": {
           "original": "53c833372af29c5cf412397c224f19c30089e5f9d56e5fa68e95c17dfad5d726",

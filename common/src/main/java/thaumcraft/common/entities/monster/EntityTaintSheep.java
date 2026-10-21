@@ -134,6 +134,8 @@ public final class EntityTaintSheep extends Sheep implements ITaintedMob {
     @Override protected SoundEvent getHurtSound(DamageSource source) { return SoundEvents.SHEEP_AMBIENT; }
     @Override protected SoundEvent getDeathSound() { return SoundEvents.SHEEP_AMBIENT; }
     @Override public float getVoicePitch() { return TaintAnimalRules.voicePitch(); }
+    /** Original EntityTaintSheep:63-65 - the total armour of the tainted sheep is a constant one. */
+    @Override public int getArmorValue() { return TaintAnimalRules.armor(TaintedAnimal.SHEEP); }
     @Override public boolean isFood(ItemStack stack) { return false; }
     @Override public boolean canFallInLove() { return false; }
     @Override public InteractionResult mobInteract(Player player,InteractionHand hand) { return InteractionResult.PASS; }

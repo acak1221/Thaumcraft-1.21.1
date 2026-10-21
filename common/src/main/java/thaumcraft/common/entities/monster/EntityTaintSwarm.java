@@ -39,6 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.entities.ITaintedMob;
 import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.lib.entities.OriginalLightRules;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
 import thaumcraft.common.lib.loot.OriginalTaintExperience;
 import thaumcraft.common.lib.loot.OriginalMobTargeting;
@@ -222,12 +223,33 @@ public class EntityTaintSwarm extends Monster implements ITaintedMob {
         return accepted;
     }
     @Override public float getWalkTargetValue(BlockPos pos,LevelReader level) { return .5F-level.getPathfindingCostFromLightLevels(pos); }
+    /**
+     * The original class gate of the taint swarm, without the world.
+     *
+     * <p>Oracle {@code EntityTaintSwarm.getCanSpawnHere:226-233}: the BLOCK light of the cell is
+     * rolled against {@code nextInt(7)}, the mob is not a peaceful one and the walk target value
+     * of the cell has to be at least zero.</p>
+     */
+    public static boolean originalSpawnGate(int blockLight,int roll,boolean peaceful,float pathfindingCost) {
+        return !peaceful&&OriginalLightRules.validClassLightLevel(blockLight,roll)&&.5F-pathfindingCost>=0;
+    }
+
+    /**
+     * Oracle EntityTaintSwarm:226-233 - the original class gate of the taint swarm reads the
+     * BLOCK light of the cell and rolls it against {@code nextInt(7)}.
+     *
+     * <p>The original overrides {@code isValidLightLevel} with a plain TRUE
+     * (oracle EntityTaintSwarm:235-237), so the generic mob darkness gate does not apply to the
+     * swarm and the port must not inherit the sky and block rolls of that gate. The port used the
+     * maximum raw brightness of the cell instead of the block light, so the swarm refused to
+     * spawn under the open sky of the day, and it added the sky roll of the mob gate that the
+     * original never draws for the swarm.</p>
+     */
     public static boolean checkTaintSwarmSpawnRules(EntityType<? extends EntityTaintSwarm> type,ServerLevelAccessor level,MobSpawnType reason,BlockPos pos,RandomSource random) {
-        if(level.getMaxLocalRawBrightness(pos)>random.nextInt(7) || level.getDifficulty()==Difficulty.PEACEFUL
-                ||level.getBrightness(LightLayer.SKY,pos)>random.nextInt(32))return false;
-        var world=level.getLevel();
-        return world.getMaxLocalRawBrightness(pos,world.isThundering()?10:world.getSkyDarken())<=random.nextInt(8)
-                && .5F-level.getPathfindingCostFromLightLevels(pos)>=0;
+        // The original draws its class roll before the inherited spawn gate.
+        int roll=random.nextInt(OriginalLightRules.CLASS_LIGHT_ROLL_BOUND);
+        return originalSpawnGate(level.getBrightness(LightLayer.BLOCK,pos),roll,level.getDifficulty()==Difficulty.PEACEFUL,
+                level.getPathfindingCostFromLightLevels(pos));
     }
     @Override public boolean checkSpawnObstruction(LevelReader world) {
         return world.isUnobstructed(this) && world.noCollision(this,getBoundingBox()) && !world.containsAnyLiquid(getBoundingBox())

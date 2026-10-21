@@ -201,4 +201,14 @@ class TaintAnimalRulesTest {
         assertEquals(1,TaintAnimalRules.shearWoolCount(draws(0)));
         assertEquals(3,TaintAnimalRules.shearWoolCount(draws(2)));
     }
+    @Test void originalArmourOfTheTaintedAnimalsIsKept() {
+        // Oracle EntityTaintChicken:64-66 and EntityTaintPig:66-68 return a constant two,
+        // EntityTaintSheep:63-65 a constant one; the cow and the villager keep the inherited
+        // armour of their equipment.
+        assertEquals(2,TaintAnimalRules.armor(TaintedAnimal.CHICKEN));
+        assertEquals(2,TaintAnimalRules.armor(TaintedAnimal.PIG));
+        assertEquals(1,TaintAnimalRules.armor(TaintedAnimal.SHEEP));
+        assertEquals(0,TaintAnimalRules.armor(TaintedAnimal.COW));
+        assertEquals(0,TaintAnimalRules.armor(TaintedAnimal.VILLAGER));
+    }
 }

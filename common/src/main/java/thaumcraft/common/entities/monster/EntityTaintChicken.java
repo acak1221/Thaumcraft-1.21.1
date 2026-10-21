@@ -90,6 +90,8 @@ public final class EntityTaintChicken extends Chicken implements ITaintedMob {
     /** Original1.7 death sound is the hurt sound, not entity.chicken.death. */
     @Override protected SoundEvent getDeathSound() { return SoundEvents.CHICKEN_HURT; }
     @Override public float getVoicePitch() { return TaintAnimalRules.voicePitch(); }
+    /** Original EntityTaintChicken:64-66 - the total armour of the tainted chicken is a constant two. */
+    @Override public int getArmorValue() { return TaintAnimalRules.armor(TaintedAnimal.CHICKEN); }
     @Override public boolean isFood(ItemStack stack) { return false; }
     @Override public boolean canFallInLove() { return false; }
     @Override public InteractionResult mobInteract(Player player,InteractionHand hand) { return InteractionResult.PASS; }

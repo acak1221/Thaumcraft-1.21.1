@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemData;
+import thaumcraft.common.lib.golems.GolemRouteRules;
 import thaumcraft.common.items.golems.GolemMarker;
 
 /** Ordinary Fill/Empty/Sorting routes; only Fill/Empty have explicit safe world targets. */
@@ -60,7 +61,7 @@ final class InventoryGolemGoals {
         interactionReady = false;
         if (route.running) golem.getNavigation().stop();
     }
-    private void progressed() { clearRoute(); interactionPause = 5; }
+    private void progressed() { clearRoute(); interactionPause = GolemRouteRules.CHEST_WINDOW; }
 
     void serverTick() {
         if (!golem.canWork()) return;
@@ -82,7 +83,7 @@ final class InventoryGolemGoals {
         if (golem.getGolemCore() != GolemData.EMPTY_CORE) return false;
         ItemStack cargo = golem.getCarriedItem();
         for (GolemMarker marker : golem.getMarkers()) {
-            if (golem.distanceToMarkerSqr(marker) < 4 && inventoryAccepts(marker, cargo)) return false;
+            if (GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker)) && inventoryAccepts(marker, cargo)) return false;
         }
         return golem.throwCarriedAtMarker();
     }
@@ -108,7 +109,7 @@ final class InventoryGolemGoals {
     private void fillTick() {
         if (golem.hasCargo()) {
             clearRoute();
-            if (golem.tickCount % 5 == 0 && golem.getNavigation().isDone() && golem.distanceToHomeSqr() <= 5
+            if (GolemRouteRules.decisionTick(golem.tickCount) && golem.getNavigation().isDone() && GolemRouteRules.atHome(golem.distanceToHomeSqr())
                     && golem.placeCarriedAtHome() > 0) progressed();
             return;
         }
@@ -117,7 +118,7 @@ final class InventoryGolemGoals {
         if (golem.getNavigation().isDone() && !watched.isEmpty()) {
             int wanted = fillRequest(watched);
             if (wanted > 0) for (GolemMarker marker : golem.getMarkers()) {
-                if (golem.distanceToMarkerSqr(marker) >= 4 || !golem.markerAccepts(marker, watched)) continue;
+                if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker)) || !golem.markerAccepts(marker, watched)) continue;
                 GolemHomeInventory.Destination source = golem.markedInventory(marker);
                 if (source != null && golem.takeFromInventory(source, marker.face(), watched, wanted) > 0) {
                     progressed();
@@ -128,7 +129,7 @@ final class InventoryGolemGoals {
             // an unstarted remote route merely because navigation is still idle.
             if (wanted <= 0 || target == null || travelStarted) clearRoute();
         }
-        if (golem.tickCount % 5 != 0) return;
+        if (!GolemRouteRules.decisionTick(golem.tickCount)) return;
         if (target != null && !watched.isEmpty() && fillRequest(watched) > 0) {
             GolemHomeInventory.Destination source = golem.markedInventory(target);
             if (source != null && source.firstExtractable(watched, target.face(), golem.itemMatchFlags()) >= 0) return;
@@ -170,13 +171,13 @@ final class InventoryGolemGoals {
             if (!onTimeout(cargo) && golem.getNavigation().isDone()) {
                 // EmptyPlace is adjacent/idle, not independently five-tick gated.
                 for (GolemMarker marker : golem.getMarkers()) {
-                    if (golem.distanceToMarkerSqr(marker) < 4 && golem.placeCarriedAtMarker(marker) > 0) {
+                    if (GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker)) && golem.placeCarriedAtMarker(marker) > 0) {
                         progressed();
                         return;
                     }
                 }
             }
-            if (golem.tickCount % 5 != 0) return;
+            if (!GolemRouteRules.decisionTick(golem.tickCount)) return;
             GolemMarker destination = onTimeout(cargo) ? null : findDestination(cargo);
             if (destination == null) {
                 if (!onTimeout(cargo)) fail(cargo);
@@ -188,7 +189,7 @@ final class InventoryGolemGoals {
             return;
         }
         clearRoute();
-        if (golem.tickCount % 5 != 0 || !golem.getNavigation().isDone() || golem.distanceToHomeSqr() > 5) return;
+        if (!GolemRouteRules.decisionTick(golem.tickCount) || !golem.getNavigation().isDone() || !GolemRouteRules.atHome(golem.distanceToHomeSqr())) return;
         GolemHomeInventory.Destination home = golem.homeInventory();
         if (home == null || !home.current()) return;
         boolean filtered = false;
@@ -216,7 +217,7 @@ final class InventoryGolemGoals {
     private void sortingTick() {
         if (golem.hasCargo()) {
             ItemStack cargo = golem.getCarriedItem(); // Probe only; the entity pays from its actual private field.
-            boolean decisionTick = golem.tickCount % 5 == 0;
+            boolean decisionTick = GolemRouteRules.decisionTick(golem.tickCount);
             // HomeReplace0 precedes Place1/Goto3, but only a timeout or the loss
             // of all seeded destinations authorizes returning just-taken cargo.
             if (decisionTick && shouldReturnSortingCargo(cargo)) {
@@ -226,7 +227,7 @@ final class InventoryGolemGoals {
             }
             if (!onTimeout(cargo) && golem.getNavigation().isDone()) {
                 for (GolemMarker marker : golem.getMarkers()) {
-                    if (golem.distanceToMarkerSqr(marker) < 4 && sortingInventoryAccepts(marker, cargo)
+                    if (GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker)) && sortingInventoryAccepts(marker, cargo)
                             && golem.placeCarriedAtMarker(marker) > 0) {
                         progressed();
                         return;
@@ -244,7 +245,7 @@ final class InventoryGolemGoals {
         clearRoute();
         // HomeTakeSorting4: actual face-visible home slot order, NOT ghost rows
         // or stock totals. A candidate may match a later extractable source slot.
-        if (golem.tickCount % 5 != 0 || !golem.getNavigation().isDone() || golem.distanceToHomeSqr() > 5) return;
+        if (!GolemRouteRules.decisionTick(golem.tickCount) || !golem.getNavigation().isDone() || !GolemRouteRules.atHome(golem.distanceToHomeSqr())) return;
         GolemHomeInventory.Destination home = golem.homeInventory();
         if (home == null || !home.current()) return;
         int[] exposed = home.slots(golem.getHomeFacing());
@@ -310,7 +311,7 @@ final class InventoryGolemGoals {
     private void fail(ItemStack stack) {
         if (!stack.isEmpty() && !onTimeout(stack)) {
             // Original golemIgnoreDelay is wall-clock 10000 ms, not game ticks.
-            failedItems.add(new FailedItem(stack.copyWithCount(1), System.currentTimeMillis() + 10_000L));
+            failedItems.add(new FailedItem(stack.copyWithCount(1), System.currentTimeMillis() + GolemRouteRules.IGNORE_DELAY_MS));
         }
     }
 
@@ -334,7 +335,7 @@ final class InventoryGolemGoals {
             running = true;
             travelStarted = true;
             pursued = target;
-            budget = 200;
+            budget = GolemRouteRules.ROUTE_BUDGET;
             previous = golem.blockPosition();
             if (pursued != null && golem.distanceToMarkerSqr(pursued) < 4) {
                 budget = 0;
@@ -349,9 +350,9 @@ final class InventoryGolemGoals {
             if (pursued == null) return;
             golem.getLookControl().setLookAt(pursued.pos().getX() + .5, pursued.pos().getY() + .5, pursued.pos().getZ() + .5);
             if (--budget != 0 || !golem.blockPosition().equals(previous) || !golem.loadedNavigationArea(golem.blockPosition())) return;
-            Vec3 detour = DefaultRandomPos.getPos(golem, 2, 1);
+            Vec3 detour = DefaultRandomPos.getPos(golem, GolemRouteRules.DETOUR_XZ, GolemRouteRules.DETOUR_Y);
             if (detour != null) {
-                budget = 20;
+                budget = GolemRouteRules.DETOUR_BUDGET;
                 golem.getNavigation().moveTo(detour.x, detour.y, detour.z, 1);
             }
         }

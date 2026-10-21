@@ -100,6 +100,7 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.lib.essentia.EssentiaTransfers;
 import thaumcraft.common.lib.golems.GolemCargoRules;
+import thaumcraft.common.lib.golems.GolemRouteRules;
 import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileCrucible;
 import thaumcraft.common.tiles.TileJar;
@@ -1793,7 +1794,7 @@ public class EntityGolemBase extends AbstractGolem {
     public boolean canTransferWaterTo(TileCrucible actualHome) {
         return waterSourceIntent == null && waterHomeIntent != null && waterHomeIntent == actualHome
                 && waterBindingCurrent() && liquid.ownsDeliveryAttempt(actualHome) && waterMb > 0
-                && getNavigation().isDone() && distanceToHomeSqr() <= 5;
+                && getNavigation().isDone() && GolemRouteRules.atHome(distanceToHomeSqr());
     }
     public boolean detachWaterToCrucible(TileCrucible actualHome, int accepted, int expectedAmountMb) {
         if (!canTransferWaterTo(actualHome) || expectedAmountMb != waterStockBefore || waterMb != expectedAmountMb
@@ -2138,7 +2139,7 @@ public class EntityGolemBase extends AbstractGolem {
     private boolean eligibleDirectedThrow(BlockPos target) {
         if (target == null || !canWork() || !hasCargo() || !getNavigation().isDone()) return false;
         if (core == GolemData.FILL) {
-            return distanceToHomeSqr() <= 5 && target.equals(homeInventoryPosition()) && hasHomeWorldThrowTarget();
+            return GolemRouteRules.atHome(distanceToHomeSqr()) && target.equals(homeInventoryPosition()) && hasHomeWorldThrowTarget();
         }
         if (core == GolemData.EMPTY_CORE) {
             GolemMarker first = firstAdjacentWorldThrowMarker();
@@ -2195,7 +2196,7 @@ public class EntityGolemBase extends AbstractGolem {
         GolemHomeInventory.Destination home = homeInventory();
         if (core == GolemData.EMPTY_CORE || core == GolemData.SORTING || core == GolemData.USE) {
             if (home == null || !source.sharesStorage(home) || face != getHomeFacing()
-                    || tickCount % 5 != 0 || distanceToHomeSqr() > 5) return 0;
+                    || !GolemRouteRules.decisionTick(tickCount) || !GolemRouteRules.atHome(distanceToHomeSqr())) return 0;
             if (core == GolemData.USE && (!use.ownsTake(source, exemplar) || !source.pos().equals(homeInventoryPosition()))) return 0;
         } else if (core == GolemData.FILL) {
             boolean adjacent = false;
@@ -2262,7 +2263,7 @@ public class EntityGolemBase extends AbstractGolem {
     int placeCarriedAtHome() {
         if (core == GolemData.HARVEST || core == GolemData.LUMBER || core == GolemData.GUARD || core == GolemData.FISHING
                 || core == GolemData.LIQUID || core == GolemData.ALCHEMY || core == GolemData.BUTCHER
-                || !getNavigation().isDone() || distanceToHomeSqr() > 5) return 0;
+                || !getNavigation().isDone() || !GolemRouteRules.atHome(distanceToHomeSqr())) return 0;
         // HomeReplace10 is NOT unconditional HomePlace: valid just-taken stock
         // must be allowed to leave home for its seeded destination.
         if (core == GolemData.SORTING && (!canWork() || tickCount % 5 != 0 || !inventories.shouldReturnSortingCargo(carried))) return 0;
@@ -2273,7 +2274,7 @@ public class EntityGolemBase extends AbstractGolem {
     }
     int placeCarriedAtMarker(GolemMarker marker) {
         if (core != GolemData.EMPTY_CORE && core != GolemData.SORTING
-                || marker == null || !getNavigation().isDone() || distanceToMarkerSqr(marker) >= 4
+                || marker == null || !getNavigation().isDone() || !GolemRouteRules.adjacent(distanceToMarkerSqr(marker))
                 || !markerAccepts(marker, carried)) return 0;
         return placeIntoInventory(core == GolemData.SORTING ? markedSortingInventory(marker) : markedInventory(marker), marker.face(), marker);
     }

@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
+import thaumcraft.common.lib.golems.GolemDoorRules;
 
 /**
  * The door goal of the original, reproduced.
@@ -53,17 +54,6 @@ import net.minecraft.world.level.pathfinder.Path;
  * goal of the golem uses, and it is not interruptable.</p>
  */
 final class GolemDoorGoal extends Goal {
-    /** The original's 1.7.10 fence gate direction order: south, west, north, east. */
-    private static int gateIndex(Direction direction) {
-        return switch (direction) {
-            case SOUTH -> 0;
-            case WEST -> 1;
-            case NORTH -> 2;
-            case EAST -> 3;
-            default -> 0;
-        };
-    }
-
     private final EntityGolemBase golem;
     private BlockPos door;
     private boolean gate;
@@ -84,17 +74,17 @@ final class GolemDoorGoal extends Goal {
         Path path = golem.getNavigation().getPath();
         if (path == null || path.isDone()) return false;
         // Original :47-57: the next two points of the path.
-        int limit = Math.min(path.getNextNodeIndex() + 2, path.getNodeCount());
+        int limit = GolemDoorRules.scanLimit(path.getNextNodeIndex(), path.getNodeCount());
         for (int i = 0; i < limit; i++) {
             BlockPos point = path.getNodePos(i);
-            if (golem.distanceToSqr(point.getX(), golem.getY(), point.getZ()) > 2.25) continue;
+            if (!GolemDoorRules.withinReach(golem.distanceToSqr(point.getX(), golem.getY(), point.getZ()))) continue;
             if (!select(point)) continue;
-            count = 200;
+            count = GolemDoorRules.counter();
             return true;
         }
         // Original :58-65: the golem's own block is the fallback.
         if (!select(golem.blockPosition())) return false;
-        count = 200;
+        count = GolemDoorRules.counter();
         return true;
     }
 
@@ -105,7 +95,7 @@ final class GolemDoorGoal extends Goal {
 
     @Override public void start() {
         // Original AIOpenDoor.func_75249_e:134-135 — the base startExecuting is NOT called.
-        openTicks = 20;
+        openTicks = GolemDoorRules.openTicks();
         open();
     }
 
@@ -145,7 +135,7 @@ final class GolemDoorGoal extends Goal {
         // Original AIOpenDoor.func_75249_e:141-146 — a gate that faces the other way is turned first.
         Direction facing = Direction.fromYRot(golem.getYRot());
         Direction gateFacing = state.getValue(HorizontalDirectionalBlock.FACING);
-        if (gateIndex(gateFacing) == (gateIndex(facing) + 2) % 4) {
+        if (GolemDoorRules.gateIndex(gateFacing) == (GolemDoorRules.gateIndex(facing) + 2) % 4) {
             next = next.setValue(HorizontalDirectionalBlock.FACING, facing);
         }
         next = next.setValue(FenceGateBlock.OPEN, true);

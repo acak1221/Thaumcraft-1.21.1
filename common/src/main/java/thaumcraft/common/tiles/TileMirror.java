@@ -178,6 +178,9 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
                 worldPosition.getY() + .5D - face.getStepY() * .3D, worldPosition.getZ() + .5D - face.getStepZ() * .3D, stack);
         item.setDeltaMovement(face.getStepX() * .15F, face.getStepY() * .15F, face.getStepZ() * .15F);
         item.setDefaultPickUpDelay();
+        // Original TileMirror:207 - the 1.7.10 field is Entity.timeUntilPortal, so the
+        // item may not use a portal for twenty ticks. It never delayed the pick up.
+        item.setPortalCooldown(TileParityRules.MIRROR_PORTAL_COOLDOWN);
         return level.addFreshEntity(item);
     }
 
@@ -259,6 +262,23 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
         if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
+    /**
+     * Original TileMirror:330-344 - the slot byte and the stack itself share one compound,
+     * so the fields of the stack sit at the top of the entry. The native reader parses the
+     * entry as an item stack, therefore the stack has to be written there too: a nested
+     * "stack" compound was never read back and the buffered items were lost on every save.
+     */
+    public static CompoundTag saveOutputStack(ItemStack stack, int slot, HolderLookup.Provider registries) {
+        CompoundTag entry = stack.save(registries);
+        entry.putByte("Slot", (byte) slot);
+        return entry;
+    }
+
+    /** The counterpart of {@link #saveOutputStack}: the entry of the original is the stack. */
+    public static ItemStack loadOutputStack(CompoundTag entry, HolderLookup.Provider registries) {
+        return ItemStack.parse(registries, entry).orElse(ItemStack.EMPTY);
+    }
+
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         linked = tag.getBoolean("linked");
@@ -270,7 +290,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
         outputStacks.clear();
         ListTag items = tag.getList("Items", Tag.TAG_COMPOUND);
         for (int i = 0; i < items.size(); i++) {
-            ItemStack stack = ItemStack.parse(registries, items.getCompound(i)).orElse(ItemStack.EMPTY);
+            ItemStack stack = loadOutputStack(items.getCompound(i), registries);
             if (!stack.isEmpty()) outputStacks.add(stack);
         }
     }
@@ -287,10 +307,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
         for (int i = 0; i < outputStacks.size(); i++) {
             ItemStack stack = outputStacks.get(i);
             if (stack == null || stack.isEmpty()) continue;
-            CompoundTag entry = new CompoundTag();
-            entry.putByte("Slot", (byte) i);
-            entry.put("stack", stack.save(registries));
-            items.add(entry);
+            items.add(saveOutputStack(stack, i, registries));
         }
         tag.put("Items", items);
     }

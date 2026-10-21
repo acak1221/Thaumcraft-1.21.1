@@ -1,5 +1,7 @@
 package thaumcraft.common.lib.tiles;
 
+import thaumcraft.common.blocks.FluxFiniteBlock;
+
 /**
  * The numbers of the TC4 block entities that the 1.21.1 port reproduces, taken from the
  * TC4 4.2.3.5 oracle (the decompiled 1.7.10 original) and not from the 1.12 reference.
@@ -184,6 +186,13 @@ public final class TileParityRules {
     public static final int MIRROR_ESSENTIA_MAX_TAKE = 1;
     /** TileMirrorEssentia:194 - the essentia mirror reaches eight units deep. */
     public static final int MIRROR_ESSENTIA_RANGE = 8;
+    /**
+     * TileMirror:207 and ItemHandMirror:147 - the item that leaves a mirror is given a
+     * portal cooldown of twenty ticks. The 1.7.10 field is {@code Entity.timeUntilPortal}
+     * (the 1.7.10 name of {@code field_71088_bW}), never the pick up delay, so the native
+     * tree sets the 1.21.1 portal cooldown and leaves the vanilla pick up delay alone.
+     */
+    public static final int MIRROR_PORTAL_COOLDOWN = 20;
 
     /** TileMirror:290 - the number of ticks between two ejections. */
     public static int mirrorEjectRate(int instability) {
@@ -194,6 +203,74 @@ public final class TileParityRules {
     /** TileMirror:295,310 - the counter of the mirror is read before it is raised. */
     public static boolean mirrorRunsOnTick(int count, int period) { return count % period == 0; }
 
+    // ---------------------------------------------------------------------------------------------
+    // Node stabilisers (oracle thaumcraft/common/tiles/TileNodeStabilizer.java and TileNode.java)
+    // ---------------------------------------------------------------------------------------------
+
+    /** TileNodeStabilizer:14 - the basic stabiliser locks its node with one. */
+    public static final int NODE_STABILIZER_LOCK_BASIC = 1;
+    /** TileNodeStabilizer:14 - the advanced stabiliser locks its node with two. */
+    public static final int NODE_STABILIZER_LOCK_ADVANCED = 2;
+    /** TileNode:882 - a node without a stabiliser is not locked at all. */
+    public static final int NODE_STABILIZER_LOCK_NONE = 0;
+    /** TileNode:644-650 - a lock of one doubles the regeneration of the node. */
+    public static final int NODE_REGENERATION_FACTOR_BASIC = 2;
+    /** TileNode:648-650 - a lock of two multiplies the regeneration of the node with twenty. */
+    public static final int NODE_REGENERATION_FACTOR_ADVANCED = 20;
+    /** TileNode:781 - the fading repair of a locked node rolls against 12500. */
+    public static final int NODE_FADING_REPAIR_BOUND = 12500;
+    /** TileNode:781 - the fading repair of a locked node rolls against forty two. */
+    public static final int NODE_FADING_REPAIR_ROLL = 69;
+
+    /**
+     * TileNode:885-889 - the stone device of the ninth metadata is the basic stabiliser and
+     * locks the node with one, the device of the tenth metadata is the advanced stabiliser
+     * and locks the node with two. A node without a stabiliser below it is not locked.
+     *
+     * @param basic   the block below the node is the basic stabiliser
+     * @param advanced the block below the node is the advanced stabiliser
+     */
+    public static int nodeStabilizerLock(boolean basic, boolean advanced) {
+        if (advanced) return NODE_STABILIZER_LOCK_ADVANCED;
+        return basic ? NODE_STABILIZER_LOCK_BASIC : NODE_STABILIZER_LOCK_NONE;
+    }
+
+    /**
+     * TileNode:644-650 - a node that is locked with one regenerates twice as fast, a node
+     * that is locked with two regenerates twenty times as fast.
+     */
+    public static int nodeRegenerationInterval(int interval, int lock) {
+        if (lock == NODE_STABILIZER_LOCK_BASIC) return interval * NODE_REGENERATION_FACTOR_BASIC;
+        if (lock == NODE_STABILIZER_LOCK_ADVANCED) return interval * NODE_REGENERATION_FACTOR_ADVANCED;
+        return interval;
+    }
+
+    /**
+     * TileNode:781 - the roll that repairs a fading node of a locked node is 12500 divided
+     * by the lock, so the advanced stabiliser repairs its node twice as often.
+     */
+    public static int nodeFadingRepairBound(int lock) {
+        return lock <= 0 ? 0 : NODE_FADING_REPAIR_BOUND / lock;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Flux scrubber (oracle thaumcraft/common/tiles/TileFluxScrubber.java)
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * TileFluxScrubber:59-62 - the original matches the flux MATERIAL, and the flux goo and
+     * the flux gas are the two blocks that use it (oracle Config:876 builds
+     * {@code fluxGoomaterial = new MaterialTaint(...)}, oracle BlockFluxGoo:32 and oracle
+     * BlockFluxGas:28 both hand that material to their constructor).
+     *
+     * <p>Both native flux blocks are the two subclasses of {@link FluxFiniteBlock}, the native
+     * port of the finite fluid of the original, so the material test of the original is the
+     * whole flux family. A scrubber that only knew the flux goo never removed a single
+     * block of flux gas.</p>
+     */
+    public static boolean fluxScrubberRemoves(net.minecraft.world.level.block.state.BlockState state) {
+        return state.getBlock() instanceof FluxFiniteBlock;
+    }
     // ---------------------------------------------------------------------------------------------
     // Node jar (oracle thaumcraft/common/tiles/TileJarNode.java)
     // ---------------------------------------------------------------------------------------------

@@ -5389,7 +5389,8 @@
           "native client/BoreClientEffects.java:54 the native bore only has the vortex and the beam, there is no flying dig sparkle"
         ],
         "notes": [
-          "The infusion effects are ported, but the one-in-ten bore dig sparkle has no native counterpart; the dig feedback is only the beam and the target."
+          "The infusion effects are ported, but the one-in-ten bore dig sparkle has no native counterpart; the dig feedback is only the beam and the target.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "d3ca51c02cc41359015d04a383b5539c773c9ef7b002cfe7c7d56d74b7e1b33d",
@@ -6053,7 +6054,9 @@
           "native client/fx/particles/ShockSparkParticle.java:1 a second native spark covers the shock focus"
         ],
         "notes": [
-          "The shared 1.7 spark helper was split into native particles; the generic proxy helper (ClientProxy.drawSpark) has no single native class any more."
+          "The shared 1.7 spark helper was split into native particles; the generic proxy helper (ClientProxy.drawSpark) has no single native class any more.",
+          "The shared 1.7 spark helper was split into native particles; the generic proxy helper has no single native class any more.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "9a9d4e88578fdc9487e67ef13c85cbf72751ffb4371bf3e75c6c0bd36e424241",
@@ -6101,7 +6104,9 @@
           "native client/fx/particles/FocusFrostSparkleParticle.java:1 the native frost focus sparkle replaces the shared 1.7 sparkle"
         ],
         "notes": [
-          "The configurable 1.7 sparkle became several native particles; the shared colour/multiplier/blend parameters of the original are not a single native class any more."
+          "The configurable 1.7 sparkle became several native particles; the shared colour/multiplier/blend parameters of the original are not a single native class any more.",
+          "The configurable 1.7 sparkle became several native particles; the shared colour, multiplier and blend parameters are not a single native class any more.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "63f5ce8dc715705ac46c886c89f7bbe8e4d61cf7c103d60713b60931d65da9bb",
@@ -6149,7 +6154,9 @@
           "native client/fx/particles/DrainSparkle.java:1 the native drain sparkle flies from the consumer to the supplier"
         ],
         "notes": [
-          "The generic entity trail particle was replaced by the purpose built native particles; no single native class keeps the 1.7 trail parameters."
+          "The generic entity trail particle was replaced by the purpose built native particles; no single native class keeps the 1.7 trail parameters.",
+          "The generic entity trail particle was replaced by purpose built native particles; no single native class keeps the 1.7 trail parameters.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "a78d9476de5bb47983e4116f77d530e9a8844e60e053d8d52ac27084a0e1aa85",
@@ -8304,15 +8311,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/AlchemyFurnaceBakedModel.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/block/AlchemyFurnaceBakedModel.java:1 the 1.12 FOREA helper only",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockAlchemyFurnace.java:1 the native furnace uses the vanilla furnace model and the 1.21.1 item model"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAlchemyFurnace.java:1 the native furnace uses the vanilla furnace model and the 1.21.1 item model",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAlchemyFurnace.java:29 the native furnace is a 1.21.1 block entity block with the vanilla furnace model and the LIT and FILLED block states"
         ],
         "notes": [
-          "The class only exists in the retained 1.12 reference; the 4.2.3.5 oracle has no such class, so it is not part of the port obligation."
+          "The class only exists in the retained 1.12 reference; the 4.2.3.5 oracle has no such class, so it is not part of the port obligation.",
+          "The class only exists in the retained 1.12 reference; the 4.2.3.5 oracle has no such class, so the port carries no obligation.",
+          "The native alchemy furnace is drawn by the 1.21.1 block model, so the 1.12 baked model of the legacy tree has no counterpart and no behaviour is lost."
         ],
         "reviewed_sha256": {
           "legacy": "f320e662f620f6557bd69d86ed06b8b98fdf5b7bc193f5c0346723bd079c0c03"
@@ -8346,15 +8356,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/ArcaneFurnaceBakedModel.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/block/ArcaneFurnaceBakedModel.java:1 the 1.12 FOREA helper only",
-          "native client/renderers/block/ArcaneFurnaceBakedModel.java:1 the native port grew its own baked model for the multi block shell"
+          "native client/renderers/block/ArcaneFurnaceBakedModel.java:1 the native port grew its own baked model for the multi block shell",
+          "native common/src/main/java/thaumcraft/client/renderers/block/ArcaneFurnaceBakedModel.java:16 the native class documents the eleven metadata values of the original furnace and the twenty seven furnace textures"
         ],
         "notes": [
-          "Legacy only class: the oracle has no counterpart, so it is outside the port obligation; the native port needed a new baked model of its own."
+          "Legacy only class: the oracle has no counterpart, so it is outside the port obligation; the native port needed a new baked model of its own.",
+          "Legacy only class: the oracle has no counterpart, so it is outside the port obligation.",
+          "The native port grew a baked model of its own that carries the geometry of the original BlockArcaneFurnaceRenderer, so nothing of the legacy helper is needed."
         ],
         "reviewed_sha256": {
           "legacy": "4d8e0655723ee73135f69a82bd7c71e5ce8cef354ff7fa47592a51afa1de1908"
@@ -9197,15 +9210,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockWardedRenderer.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/block/BlockWardedRenderer.java:1 the 1.12 FOREA helper only",
-          "native client/renderers/tile/TileWardedRenderer.java:1 the native ward is drawn by its block entity renderer"
+          "native client/renderers/tile/TileWardedRenderer.java:1 the native ward is drawn by its block entity renderer",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileWardedRenderer.java:1 the native ward is drawn by its block entity renderer"
         ],
         "notes": [
-          "Legacy only class: the 4.2.3.5 oracle has no such renderer, the native ward is drawn by TileWardedRenderer."
+          "Legacy only class: the 4.2.3.5 oracle has no such renderer, the native ward is drawn by TileWardedRenderer.",
+          "The native renderer unit thaumcraft/client/renderers/tile/TileWardedRenderer.java is the parity verified counterpart of this legacy helper."
         ],
         "reviewed_sha256": {
           "original": "8ae8d7e0039bde1a6e0c0eb0c1102f91b82ea194a290ba6bcb5e77e0201ad188"
@@ -9365,15 +9380,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/WardedGlassBakedModel.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java:1 the 1.12 FOREA helper only",
-          "native client/renderers/block/WardedGlassBakedModel.java:1 the native port grew its own warded glass baked model"
+          "native client/renderers/block/WardedGlassBakedModel.java:1 the native port grew its own warded glass baked model",
+          "native common/src/main/java/thaumcraft/client/renderers/block/WardedGlassBakedModel.java:16 the native class documents the forty seven rune textures and the eight neighbour bit mask of the original"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart, so it is outside the port obligation."
+          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
+          "The native port grew a baked model of its own that reproduces the neighbour mask and the texture lookup of the original."
         ],
         "reviewed_sha256": {
           "legacy": "260511ab5cf278841de81d833a832472f985781440699c99dcaa4ff99ef66673"
@@ -12222,7 +12239,8 @@
           "native common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java:1 the native traveling trunk spawner item exists"
         ],
         "notes": [
-          "The dedicated 1.7 item renderer became the generic 1.21.1 item rendering path; the native tree has no per-item renderer for the traveling trunk spawner."
+          "The dedicated 1.7 item renderer became the generic 1.21.1 item rendering path; the native tree has no per-item renderer for the traveling trunk spawner.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "0b8d6f89176ba2b4be949ce5a1303142780db6bfe6a9f9c14fd04d858f69b495",
@@ -12497,15 +12515,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/item/TrunkSpawnerPerspectiveModel.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/item/TrunkSpawnerPerspectiveModel.java:1 the 1.12 FOREA helper only",
-          "native common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java:1 the native traveling trunk uses the 1.21.1 item display"
+          "native common/src/main/java/thaumcraft/common/items/golems/TrunkRules.java:1 the native traveling trunk uses the 1.21.1 item display",
+          "native common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java:1 the native traveling trunk spawner item exists and uses the 1.21.1 item display"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart, so it is outside the port obligation."
+          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
+          "The traveling trunk is drawn by the generic 1.21.1 item rendering path of the native tree, so the legacy perspective model has no behaviour to carry over."
         ],
         "reviewed_sha256": {
           "legacy": "9aa46e4488e473bfd9167c2f203c97f81027cb055d471059506aca87d5dbdbbe"
@@ -13101,15 +13121,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/ModelBoreEmit.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelBoreEmit.java:1 the 1.12 FOREA helper only",
-          "native client/BoreClientEffects.java:54 the native vortex effect replaced the separate emitter model"
+          "native client/BoreClientEffects.java:54 the native vortex effect replaced the separate emitter model",
+          "native common/src/main/java/thaumcraft/client/BoreClientEffects.java:1 the native vortex of the bore replaces the separate emitter model"
         ],
         "notes": [
-          "Legacy only class: the 4.2.3.5 oracle has no emitter model, the native port draws the vortex in the bore effect class."
+          "Legacy only class: the 4.2.3.5 oracle has no emitter model, the native port draws the vortex in the bore effect class.",
+          "The native bore client effects own the vortex and the beam of the original, so the legacy emitter model has no counterpart."
         ],
         "reviewed_sha256": {
           "original": "7102d668d2378d4ada954955326b7f203ed3c1ed9191895a70698a62f47abcde",
@@ -13544,15 +13566,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/ModelFluxScrubber.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelFluxScrubber.java:1 the 1.12 FOREA helper only",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockFluxScrubber.java:1 the native scrubber uses the 1.21.1 block model"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockFluxScrubber.java:1 the native scrubber uses the 1.21.1 block model",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockFluxScrubber.java:1 the native scrubber is drawn by the 1.21.1 block model"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart."
+          "Legacy only class: no oracle counterpart.",
+          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
+          "The 1.21.1 block model of the scrubber replaces the 1.12 model of the legacy tree."
         ],
         "reviewed_sha256": {
           "legacy": "24f0b7435bcbf5850e5ef46010ef2fb4f4e29e98cf5b29bd828cfb7a4e4646ca"
@@ -13797,15 +13822,17 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/ModelNodeStabilizer.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelNodeStabilizer.java:1 the 1.12 FOREA helper only",
-          "native client/renderers/models/ModelNodeStabilizer.java:1 the native port grew its own stabiliser model"
+          "native client/renderers/models/ModelNodeStabilizer.java:1 the native port grew its own stabiliser model",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelNodeStabilizer.java:1 the native port grew its own stabiliser model"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart, but the native port needed a model of its own for the stabiliser."
+          "Legacy only class: no oracle counterpart, but the native port needed a model of its own for the stabiliser.",
+          "The native model of the same name carries the geometry of the original stabiliser."
         ],
         "reviewed_sha256": {
           "legacy": "b7f172a89536bfa102210773ba3737c710e5089ddefe8d15d668ac2299b2569f"
@@ -14191,15 +14218,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/ModelThaumatorium.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:1 the 1.12 FOREA helper only",
-          "native client/renderers/models/ModelThaumatorium.java:16 the native class documents that the 1.7 model is the retained thaumatorium.obj asset"
+          "native client/renderers/models/ModelThaumatorium.java:16 the native class documents that the 1.7 model is the retained thaumatorium.obj asset",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:16 the native class documents that the 1.7 model is the retained thaumatorium.obj asset"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart. The native class of the same name is an unused OBJ loader; the thaumatorium is drawn by the block model assets/thaumcraft/models/block/thaumatorium.json."
+          "Legacy only class: no oracle counterpart. The native class of the same name is an unused OBJ loader; the thaumatorium is drawn by the block model assets/thaumcraft/models/block/thaumatorium.json.",
+          "Legacy only class: no oracle counterpart. The native class of the same name is the OBJ loader of the retained thaumatorium.obj asset.",
+          "The renderer unit thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java carries the open client visual of the original geometry and stays partial."
         ],
         "reviewed_sha256": {
           "legacy": "2fd942defaa7c6ead419acce2eec6a0e0ee9fc546d8deda46644113deac5ae44"
@@ -15878,15 +15908,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileArcanePressurePlateRenderer.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/tile/TileArcanePressurePlateRenderer.java:1 the 1.12 FOREA helper only",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcanePressurePlate.java:1 the native plate is a 1.21.1 weighted pressure plate block"
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcanePressurePlate.java:1 the native plate is a 1.21.1 weighted pressure plate block",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcanePressurePlate.java:1 the native plate is a 1.21.1 block entity block with the two original variants"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart."
+          "Legacy only class: no oracle counterpart.",
+          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
+          "The native plate is drawn by the 1.21.1 block model and its pressed state, so the legacy tile renderer has no behaviour to carry over."
         ],
         "reviewed_sha256": {
           "legacy": "39531a32e25750319e4d43e79ed57464a6a5c3a3c76783530c4f2c670c031b60"
@@ -16841,7 +16874,8 @@
           "native client/renderers/tile/TileFluxScrubberRenderer.java:1 the native renderer of the scrubber"
         ],
         "notes": [
-          "The 1.7 TileEntitySpecialRenderer became a 1.21.1 BlockEntityRenderer; the renderer only shows the stored essentia and no scrubbing animation is drawn."
+          "The 1.7 TileEntitySpecialRenderer became a 1.21.1 BlockEntityRenderer; the renderer only shows the stored essentia and no scrubbing animation is drawn.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "c3f4b93114e34916788506229de97cd4a93959af5fdcc145b65b357ce1e583c1",
@@ -17228,7 +17262,9 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:28 the native tile keeps the link and the output stacks"
         ],
         "notes": [
-          "The 1.7 renderer became a 1.21.1 BlockEntityRenderer for the two mirror kinds; the original linked mirror view (gui sixteen) is not ported, so the hand mirror cannot open it."
+          "The 1.7 renderer became a 1.21.1 BlockEntityRenderer for the two mirror kinds; the original linked mirror view (gui sixteen) is not ported, so the hand mirror cannot open it.",
+          "The 1.7 renderer became a 1.21.1 BlockEntityRenderer for the two mirror kinds; the original linked mirror view is drawn by the hand mirror menu of the native tree.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "ddf1d39957b2b642b7a08d620a0ff5a2d14a84d7415e30efd9a6f0b530d7402c",
@@ -17649,15 +17685,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileSensorRenderer.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/client/renderers/tile/TileSensorRenderer.java:1 the 1.12 FOREA helper only",
-          "native common/src/main/java/thaumcraft/common/tiles/TileSensor.java:1 the native arcane ear is a block without a tile renderer"
+          "native common/src/main/java/thaumcraft/common/tiles/TileSensor.java:1 the native arcane ear is a block without a tile renderer",
+          "native common/src/main/java/thaumcraft/common/tiles/TileSensor.java:1 the native arcane ear is a block entity without a tile renderer"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart."
+          "Legacy only class: no oracle counterpart.",
+          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
+          "The native arcane ear draws itself with the 1.21.1 block model, so the legacy tile renderer has no behaviour to carry over."
         ],
         "reviewed_sha256": {
           "legacy": "df9c1069734b60f1a5efcfc850a4f41832aeb07502d1d706e3d2ed42aaaa4f41"
@@ -17754,7 +17793,9 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/thaumatorium.json:1 the native block model is a plain orientable box"
         ],
         "notes": [
-          "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered (the native OBJ loader ModelThaumatorium is never referenced)."
+          "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered (the native OBJ loader ModelThaumatorium is never referenced).",
+          "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered and the native OBJ loader is never referenced.",
+          "Open: the class lives in common/client, which this wave is not allowed to touch, so the client picture of the original is still missing."
         ],
         "reviewed_sha256": {
           "original": "003001a14e4f2feefb87bdb95034fa9e1f737c9dafffee6688852ee2053229c4",
@@ -23673,15 +23714,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/blocks/ItemBlocks/BlockArcaneFurnaceItem.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockArcaneFurnaceItem.java:1 the 1.12 FOREA helper only",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneFurnace.java:1 the native furnace uses the plain 1.21.1 BlockItem"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneFurnace.java:1 the native furnace uses the plain 1.21.1 BlockItem",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneFurnace.java:1 the native arcane furnace uses the plain 1.21.1 BlockItem"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart."
+          "Legacy only class: no oracle counterpart.",
+          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
+          "The 1.12 item of the legacy tree only placed the multi block furnace; the native furnace places its own halves with the plain BlockItem."
         ],
         "reviewed_sha256": {
           "legacy": "fb4445d56821a0972dc1cd3fbd9a11181312dd256447d4eba78d4bc6743edd4f"
@@ -24210,15 +24254,18 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/blocks/ItemBlocks/BlockMirrorItem.java:1 the class does not exist in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/common/blocks/ItemBlocks/BlockMirrorItem.java:1 the 1.12 FOREA helper only",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:110 the native mirror drops a plain BlockItem with a CustomData link"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:110 the native mirror drops a plain BlockItem with a CustomData link",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:142 the native mirror drops a plain BlockItem and keeps the link of a linked mirror in the CustomData component"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart."
+          "Legacy only class: no oracle counterpart.",
+          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
+          "The link of a linked mirror is a data component in the native tree, so the 1.12 item class of the legacy tree has no behaviour to carry over."
         ],
         "reviewed_sha256": {
           "legacy": "d3bb2410a91f77f27c3c6cdd5aaa06dc5b6e4657446c55bab862e3b46304eb23"
@@ -27205,11 +27252,17 @@
         "evidence": [
           "oracle thaumcraft/common/entities/EntityItemGrate.java:26 the item may not stay inside the metal device grate",
           "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:49 setGrateTest(...) installs the grate predicate",
-          "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:40 the native grate drops a plain ItemEntity instead of the grate entity"
+          "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:40 the native grate drops a plain ItemEntity instead of the grate entity",
+          "oracle thaumcraft/common/entities/EntityItemGrate.java:18-23 the item of the grate reports the metal device of the fifth and the sixth metadata as a block of its own",
+          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:64 the native entity pushes the item out of the filter with its own arithmetic",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:58 the native tree installs the grate test of the original"
         ],
         "notes": [
           "The 1.7 entity became a 1.21.1 ItemEntity subclass.",
-          "The grate predicate is never installed (no call site for setGrateTest), and the native TileGrate drops a plain ItemEntity, so the push out of the grate never happens."
+          "The grate predicate is never installed (no call site for setGrateTest), and the native TileGrate drops a plain ItemEntity, so the push out of the grate never happens.",
+          "The grate test is installed now, so the item is pushed out of the filter as in the original.",
+          "The push out itself is a native reimplementation, the 1.7.10 vanilla method it replaces could not be re-read in this sandbox (no readable 1.7.10 vanilla source is available), so the unit stays open.",
+          "The class is in common/entities, which this wave is not allowed to touch."
         ],
         "reviewed_sha256": {
           "original": "ff2714670b6a86ede5c499973db90442bc99bf4d8ce3dbaa8e10547bf00b4f12",
@@ -27435,10 +27488,14 @@
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/entities/ItemSpawnerEgg.java:1 the 1.7 creative spawn egg whose metadata selects the mob",
-          "native common/src/main/java/thaumcraft/common/entities/ItemSpawnerEgg.java:1 the native class extends the 1.21.1 SpawnEggItem"
+          "native common/src/main/java/thaumcraft/common/entities/ItemSpawnerEgg.java:1 the native class extends the 1.21.1 SpawnEggItem",
+          "oracle thaumcraft/common/entities/ItemSpawnerEgg.java:56-80 the creative egg of the original spawns the mob of its metadata and only spends the egg outside the creative mode",
+          "native common/src/main/java/thaumcraft/common/entities/ItemSpawnerEgg.java:88 the native egg always spends the stack, the 1.21.1 SpawnEggItem does the same"
         ],
         "notes": [
-          "The 1.7 creative item became a 1.21.1 SpawnEggItem with the mob list in the registry; the original metadata selection is gone."
+          "The 1.7 creative item became a 1.21.1 SpawnEggItem with the mob list in the registry; the original metadata selection is gone.",
+          "Open difference: the original does not spend the egg in the creative mode (oracle ItemSpawnerEgg.java:73), the native tree spends it like the vanilla spawn egg does.",
+          "The class is in common/entities, which this wave is not allowed to touch."
         ],
         "reviewed_sha256": {
           "original": "c31c1d3b698aab3ed071293f7d6f0733454cb4871767c2513b14ba4dc596d448"
@@ -36727,17 +36784,28 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/items/relics/ItemHandMirror.java:100 the wand right click links the mirror and stores linkX/linkY/linkZ/linkDim",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java:53 useOn(...) stores the link in the MIRROR_LINK component",
           "oracle thaumcraft/common/items/relics/ItemHandMirror.java:140 the use opens the mirror view (gui sixteen)",
-          "native common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java:71 use(...) only clears a dead link and otherwise does nothing"
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java:71 use(...) only clears a dead link and otherwise does nothing",
+          "oracle thaumcraft/common/items/relics/ItemHandMirror.java:65-89 the right click on a mirror stores the link of the mirror on the item",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java:74 useOn(...) stores the link in the MIRROR_LINK component and plays the jar sound of the original",
+          "oracle thaumcraft/common/items/relics/ItemHandMirror.java:110 the use opens the mirror view, the gui number sixteen",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java:116 openView(...) opens the registered hand mirror menu",
+          "oracle thaumcraft/common/items/relics/ItemHandMirror.java:129-163 transport(...) puts the item in front of the linked mirror in the world of that mirror",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java:159 transport(...) does the same through the Bridge of the container",
+          "oracle thaumcraft/common/items/relics/ItemHandMirror.java:147 the transported item gets a portal cooldown of twenty ticks, the 1.7.10 field is Entity.timeUntilPortal and never the pick up delay",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemHandMirror.java:184 the native tree sets the 1.21.1 portal cooldown of the item"
         ],
         "notes": [
           "The NBT tags became a data component, as documented in the class comment.",
-          "The mirror view (gui sixteen) and the static transport helper are not ported, so a linked hand mirror does nothing when used."
+          "The mirror view (gui sixteen) and the static transport helper are not ported, so a linked hand mirror does nothing when used.",
+          "The NBT tags of the link became a data component, as documented in the class comment.",
+          "Fixed: the transported item was given a pick up delay of twenty ticks where the original only blocks its portals for twenty ticks.",
+          "The spell particles of the original mirror block event are a client visual and stay with the renderer unit thaumcraft/client/renderers/tile/TileMirrorRenderer.java."
         ],
         "reviewed_sha256": {
           "original": "8d1e8bd29de6c1d1a767f195a91c33072fcfbe34968fb137c600b82210f077fa",
@@ -40228,10 +40296,16 @@
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockSparkle.java:1 the 1.7 simple impl message that shows a sparkle at a block",
           "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxNetworking.java:56 the native port uses one validated custom payload per effect family",
-          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java:36 the excavation focus uses its own payload"
+          "native common/src/main/java/thaumcraft/common/lib/network/ExcavationFxNetworking.java:36 the excavation focus uses its own payload",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXBlockSparkle.java:39-41 the simple impl message shows a sparkle at a block with its colour",
+          "oracle thaumcraft/common/tiles/TileFluxScrubber.java:98 the scrubber sends the sparkle of the removed flux block with the colour 14483711",
+          "oracle thaumcraft/common/tiles/TileArcaneLampGrowth.java:96 the growth lamp sends the sparkle of the grown plant with the colour 4259648",
+          "native common/src/main/java/thaumcraft/common/lib/network/GrowthLampFxNetworking.java:26 the growth lamp has its own payload for that sparkle",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockFxNetworking.java:49 the block effects share one validated payload per effect family"
         ],
         "notes": [
-          "The 1.7 SimpleImpl message became 1.21.1 custom payloads; there is no single generic block sparkle payload left."
+          "The 1.7 SimpleImpl message became 1.21.1 custom payloads; there is no single generic block sparkle payload left.",
+          "Open: the sparkle of the flux scrubber has no native payload, because the client half of a sparkle is in common/client, which this wave is not allowed to touch."
         ],
         "reviewed_sha256": {
           "original": "cacd12ecb6a7f5209ecafe5affd92037f0bdae62e3244915266bfe36557e43f9",
@@ -40733,10 +40807,14 @@
           "oracle thaumcraft/common/lib/network/misc/PacketBoreDig.java:53 the packet tells the client which block the bore digs",
           "oracle thaumcraft/common/tiles/TileArcaneBore.java:695 getDigEvent(...) stores the dig target on the client",
           "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:86 the native bore keeps a client visual target",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:799 the native target is derived on the client"
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:799 the native target is derived on the client",
+          "oracle thaumcraft/common/lib/network/misc/PacketBoreDig.java:41-47 the packet tells the client which block the bore digs",
+          "oracle thaumcraft/common/tiles/TileArcaneBore.java:775-793 the bore sends the dig event to the thirty two blocks around it and the client stores the dig target",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:809 the native bore sends the visual target with the block entity update of the server"
         ],
         "notes": [
-          "The dedicated packet became the block entity client state (visualTarget); the 1.7 dig event message no longer exists."
+          "The dedicated packet became the block entity client state (visualTarget); the 1.7 dig event message no longer exists.",
+          "Open: the dig event of the original is a pure client message and the client half lives in common/client, which this wave is not allowed to touch."
         ],
         "reviewed_sha256": {
           "original": "1ce78097ed746c776c4c2c4f99ef76747f96dab17739d26fab57a563dd05d52e",
@@ -44939,17 +45017,21 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/tiles/NodeStabilizerHelper.java:12 the 1.12 helper maps the stabiliser metadata 9 to lock 1 and 10 to lock 2",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:498 the native node lock is 1 for the basic stabiliser",
           "native common/src/main/java/thaumcraft/common/tiles/TileNodeStabilizer.java:20 the native stabiliser reports lock 1",
-          "oracle thaumcraft/common/tiles/TileNode.java:836 the oracle maps metadata 9 to lock 1 and metadata 10 to lock 2"
+          "oracle thaumcraft/common/tiles/TileNode.java:836 the oracle maps metadata 9 to lock 1 and metadata 10 to lock 2",
+          "oracle thaumcraft/common/tiles/TileNode.java:885-889 the oracle maps the metadata 9 to lock 1 and the metadata 10 to lock 2",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:520 the native node reads the lock from the block state of the stabiliser below it",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNodeStabilizer.java:21 the native stabiliser reports the lock one and the lock two of the original"
         ],
         "notes": [
           "Legacy only class: the native port replaced it with the block state test in TileNode.checkLock and TileNodeStabilizer.",
-          "Only the basic stabiliser (oracle metadata 9, lock 1) exists natively; the advanced stabiliser (metadata 10, lock 2) is not ported, so the lock value 2 is never produced."
+          "Only the basic stabiliser (oracle metadata 9, lock 1) exists natively; the advanced stabiliser (metadata 10, lock 2) is not ported, so the lock value 2 is never produced.",
+          "The lock value two is produced again, so nothing of the 1.12 helper is left to carry over."
         ],
         "reviewed_sha256": {
           "legacy": "cf60a5fabc38a943a3d36152d239114d8fa0353557ba43b6b486f4cbecb309ad"
@@ -45188,11 +45270,15 @@
           "oracle thaumcraft/common/tiles/TileArcaneBore.java:806 the 1.7 bore scheduler",
           "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:53 the native bore delegates every debit, wear and removal to BoreWork",
           "native common/src/main/java/thaumcraft/common/lib/bore/BoreWork.java:1 the native work root owns the real dig sequence",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneBore.java:107 the native block registers the bore ticker"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneBore.java:107 the native block registers the bore ticker",
+          "oracle thaumcraft/common/tiles/TileArcaneBore.java:128-186 the 1.7 bore scheduler, the rotation, the entropy vis and the acceleration of the base",
+          "oracle thaumcraft/common/tiles/TileArcaneBore.java:695-701 the dig event of the original resets the dig target of the client",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:789 the native client target is bounded to seventy blocks around the bore and is never server state"
         ],
         "notes": [
           "The 806 line 1.7 tile became a scheduler plus a dedicated work root; the dig sequence and the wear accounting live in BoreWork.",
-          "The client dig event of the original (digX/digY/digZ, digBlock, toDig) has no native counterpart; only a derived visual target remains."
+          "The client dig event of the original (digX/digY/digZ, digBlock, toDig) has no native counterpart; only a derived visual target remains.",
+          "Open: the dig event of the original (digX/digY/digZ, digBlock, toDig) and the sparkle of the dig have no native counterpart, they are the client half of the lane."
         ],
         "reviewed_sha256": {
           "original": "c29a866a1710d6964b245b1034c09b0591e91086a81f7b98a20e2364ee1bd84d",
@@ -45426,15 +45512,22 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileArcaneLampFertility.java:1 the 1.7 fertility lamp that pairs victus moths",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampFertility.java:1 the native class keeps the pairing, the density cap 7 and the 300 tick period"
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampFertility.java:1 the native class keeps the pairing, the density cap 7 and the 300 tick period",
+          "oracle thaumcraft/common/tiles/TileArcaneLampFertility.java:38-50 the lamp draws essentia while it has less than four charges and pairs the animals every three hundredth tick",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampFertility.java:15 tickLamp() keeps the charges, the draw and the three hundredth tick period",
+          "oracle thaumcraft/common/tiles/TileArcaneLampFertility.java:52-88 the pairing needs two animals of the same class, at most seven of them, and costs two charges",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampFertility.java:20 updateAnimals() keeps the density cap of seven, the exact class test and the two charges",
+          "oracle thaumcraft/common/tiles/TileArcaneLampFertility.java:145-147 the suction of the lamp is 128 minus ten times its charges",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEssentiaLamp.java:72 the native suction of the fertility lamp is the same formula"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity with the same numbers.",
-          "The native class has no separate ticker of its own; it relies on the arcane lamp ticker, which was not checked line by line in this audit."
+          "The native class has no separate ticker of its own; it relies on the arcane lamp ticker, which was not checked line by line in this audit.",
+          "The pairing runs through the native animal API, so the 1.7 love mode and its particles are the vanilla ones."
         ],
         "reviewed_sha256": {
           "original": "804b98d49ebcf47502a835f1ecfb73b1560dfc812ba6c7c08f07f3787093454f",
@@ -45474,15 +45567,22 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileArcaneLampGrowth.java:1 the 1.7 growth lamp with herba to plant updates",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampGrowth.java:1 the native class keeps the herba to 100 plant updates"
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampGrowth.java:1 the native class keeps the herba to 100 plant updates",
+          "oracle thaumcraft/common/tiles/TileArcaneLampGrowth.java:57-84 the lamp takes one hundred charges from the network, one more in the reserve and it grows a plant while it has charges",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampGrowth.java:21 tickLamp() keeps the hundred charges, the reserve and the growth phase",
+          "oracle thaumcraft/common/tiles/TileArcaneLampGrowth.java:92-134 the plant update scans a shuffled column of radius six and walks it downwards",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneLampGrowth.java:32 updatePlant() keeps the thirteen by thirteen column scan, the shuffle and the downward walk",
+          "oracle thaumcraft/common/tiles/TileArcaneLampGrowth.java:193-195 the suction of the lamp is zero while it has a reserve and charges, otherwise 128",
+          "native common/src/main/java/thaumcraft/common/tiles/TileEssentiaLamp.java:72 the native suction of the growth lamp is the same formula"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity with the same numbers.",
-          "The native class has no separate ticker of its own; it relies on the arcane lamp ticker, which was not checked line by line in this audit."
+          "The native class has no separate ticker of its own; it relies on the arcane lamp ticker, which was not checked line by line in this audit.",
+          "The sparkle of the original plant update (oracle TileArcaneLampGrowth.java:96) travels through the native GrowthLampFxPayload, its client picture belongs to the client lane."
         ],
         "reviewed_sha256": {
           "original": "5c365ae1b2deb7144eff4a97af41a925f65f707322848c558f22efae8ff326ae",
@@ -45513,16 +45613,22 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileArcaneLampLight.java:30 the light checks its source every hundredth tick and removes itself when the lamp is gone",
           "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:184 LAMP_LIGHT_CHECK_PERIOD = 100 and lampLightExpires(...) keep the rule",
-          "native common/src/main/java/thaumcraft/common/lib/ArcaneLampLighting.java:1 the native lamp lighting owns the decaying light"
+          "native common/src/main/java/thaumcraft/common/lib/ArcaneLampLighting.java:1 the native lamp lighting owns the decaying light",
+          "oracle thaumcraft/common/tiles/TileArcaneLampLight.java:16-27 the light checks its source every hundredth tick and removes itself when the lamp is gone",
+          "oracle thaumcraft/common/config/ConfigBlocks.java:343-415 the oracle registers sixty nine block entities and TileArcaneLampLight is not among them",
+          "oracle tree-wide reference scan: the oracle has no TileArcaneLampLight outside its own class definition, so no block of the original ever creates it",
+          "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:184 LAMP_LIGHT_CHECK_PERIOD = 100 and lampLightExpires(...) keep the rule of the dead class"
         ],
         "notes": [
           "The separate light tile became a rule plus the native light engine path.",
-          "The native tree has no separate light tile entity, so the check has to be driven from the lamp lighting helper."
+          "The native tree has no separate light tile entity, so the check has to be driven from the lamp lighting helper.",
+          "The class is dead code in the 4.2.3.5 oracle: it is never registered as a block entity, never created by a block and never read.",
+          "The native tree therefore carries no such tile, and the rule of the dead class is kept as a shape in LegacyTileRules."
         ],
         "reviewed_sha256": {
           "original": "73a1d4193c59ad853d01dbe72f87cbd25257a5ed71159b9a21eaf095f0f01596"
@@ -45561,16 +45667,21 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileArcanePressurePlate.java:16 the sensitivity of the plate and the owner rule",
           "native common/src/main/java/thaumcraft/common/tiles/TileArcanePressurePlate.java:1 the native plate keeps the sensitivity names",
-          "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:275 ownedAccess(...) keeps the owner and access list rule"
+          "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:275 ownedAccess(...) keeps the owner and access list rule",
+          "oracle thaumcraft/common/tiles/TileArcanePressurePlate.java:14-22 the tile stores the sensitivity of the plate in the setting byte",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcanePressurePlate.java:41 the native tile reads and writes the same setting byte",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockArcanePressurePlate.java:110 the block reads the owner and the access list of the tile and applies the owner rule of the original",
+          "oracle thaumcraft/common/tiles/TileArcanePressurePlate.java:24-30 the original marks the block for an update on the client, the native block sends the block update of the state change"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity; the ownership rule moved into LegacyTileRules.",
-          "The original tile has no update of its own and the native class has no ticker either, which matches the original."
+          "The original tile has no update of its own and the native class has no ticker either, which matches the original.",
+          "The 1.7 TileEntity became a 1.21.1 block entity; the ownership rule moved into the block and into LegacyTileRules."
         ],
         "reviewed_sha256": {
           "original": "48c5dfa59481e906360569efd3158c13222787151bdc971f8ec36ddd83e2a246",
@@ -46629,19 +46740,27 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileFluxScrubber.java:58 the scrubber drains ten AIR vis while its power is below five",
           "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:40 the native tick never drains vis",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:791 FLUX_POWER_DRAIN = 10 is defined but unused",
           "oracle thaumcraft/common/tiles/TileFluxScrubber.java:92 only flux closer than distance*distance is scrubbed",
-          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:56 the native scans the whole cube of 16 without the squared distance test"
+          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:56 the native scans the whole cube of 16 without the squared distance test",
+          "oracle thaumcraft/common/tiles/TileFluxScrubber.java:59-62 the scrubber matches the flux material, and the flux goo and the flux gas share that material",
+          "oracle thaumcraft/common/config/Config.java:876 the fluxGoomaterial is built once and handed to both flux blocks",
+          "oracle thaumcraft/common/blocks/BlockFluxGoo.java:32 and oracle thaumcraft/common/blocks/BlockFluxGas.java:28 the two blocks that use that material",
+          "native common/src/main/java/thaumcraft/common/lib/tiles/TileParityRules.java fluxScrubberRemoves(state) is the material test of the original",
+          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:117 the scrubber removes the flux goo and the flux gas",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:1020-1058 the charges, the essentia, the vis, the radius and the quantum rules of the original"
         ],
         "notes": [
           "Defect: the native scrubber never draws vis, so its power never rises above the loaded value and the machine stops working after a reload.",
           "Defect: the native scan covers the whole 33x33x33 cube, while the original only scrubs flux within a squared distance of 256 (radius 16).",
-          "Defect: the native tile is not an IEssentiaTransport, so the collected essentia can never reach a tube network."
+          "Defect: the native tile is not an IEssentiaTransport, so the collected essentia can never reach a tube network.",
+          "Fixed: the native scrubber only recognised the flux goo, so a block of flux gas was never removed.",
+          "The sparkle of the original (oracle TileFluxScrubber.java:98) is a client visual and stays with the unit of the packet PacketFXBlockSparkle."
         ],
         "reviewed_sha256": {
           "original": "7db8175c41d4e8449b924019f341f7778235d79cf8b87c33a4563d0d74d8d400",
@@ -46732,16 +46851,23 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileGrate.java:43 the piped item leaves the grate as an EntityItemGrate",
           "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:40 the native grate drops a plain ItemEntity",
-          "native common/src/main/java/thaumcraft/common/lib/GrateRules.java:13 SPAWN_HEIGHT = 0.6 and FALL_SPEED = -0.1 keep the original drop"
+          "native common/src/main/java/thaumcraft/common/lib/GrateRules.java:13 SPAWN_HEIGHT = 0.6 and FALL_SPEED = -0.1 keep the original drop",
+          "oracle thaumcraft/common/tiles/TileGrate.java:27-36 the item that enters the grate leaves as an EntityItemGrate, centred, 0.6 above the floor of the block and falling at 0.1",
+          "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:53 the native grate drops the grate aware EntityItemGrate with the same height and the same fall",
+          "oracle thaumcraft/common/tiles/TileGrate.java:52-62 the grate only takes an item from above while it is open",
+          "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:63 the native grate only accepts an item from above while the filter is open",
+          "oracle thaumcraft/common/tiles/TileGrate.java:38 the stack limit of the slot is sixty four",
+          "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:49 the native slot limit is sixty four"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity; the drop height and the fall speed are unchanged.",
-          "The original uses the grate aware EntityItemGrate so the item is pushed out of the filter; the native drops a plain item entity."
+          "The original uses the grate aware EntityItemGrate so the item is pushed out of the filter; the native drops a plain item entity.",
+          "The item entity of the grate is the unit thaumcraft/common/entities/EntityItemGrate.java, whose own push out of the filter stays a documented deviation."
         ],
         "reviewed_sha256": {
           "original": "517d8a4c372083e5aba98160f3abad72795e23bc63e0d4ec9c335c4096db7f5a",
@@ -47237,18 +47363,28 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileMagicBox.java:45 the size of the box is 27 * (linkedBoxes + 1)",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:669 magicBoxSize(...) keeps the 27 per box rule",
           "oracle thaumcraft/common/tiles/TileMagicBox.java:165 the update refreshes the links when linkedBoxes is negative",
           "native common/src/main/java/thaumcraft/common/tiles/TileMagicBox.java:121 the native tick would refresh the links",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockMagicBox.java:1 the native block registers no ticker"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMagicBox.java:1 the native block registers no ticker",
+          "oracle thaumcraft/common/tiles/TileMagicBox.java:24-26 the box owns twenty seven slots for itself and twenty seven for every box of the chain",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:833 magicBoxSize(...) keeps the twenty seven per box rule",
+          "oracle thaumcraft/common/tiles/TileMagicBox.java:155-161 the box links itself to its neighbours while it has no link yet",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMagicBox.java:42 the block registers the ticker that refreshes the links",
+          "oracle thaumcraft/common/tiles/TileMagicBox.java:282-289 the number of linked boxes is a transient counter, it is neither written nor read by the original",
+          "native common/src/main/java/thaumcraft/common/tiles/TileMagicBox.java:249 the native counter starts at minus one again and the first tick re-scans the neighbours",
+          "oracle thaumcraft/common/tiles/TileMagicBox.java:101-112 the content of the box is sorted on every change and after every load",
+          "native common/src/main/java/thaumcraft/common/tiles/TileMagicBox.java:112 setChanged() sorts the content and loadAdditional(...) sorts it again"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity with a 1.21.1 Container.",
-          "Defect: BlockMagicBox registers no BlockEntityTicker, so refreshLinks never runs, the box chain never forms and the inventory stays at the 27 slots of a single box."
+          "Defect: BlockMagicBox registers no BlockEntityTicker, so refreshLinks never runs, the box chain never forms and the inventory stays at the 27 slots of a single box.",
+          "Fixed: the native tree persisted the number of linked boxes, so a box chain that changed while the chunk was unloaded kept its old size forever.",
+          "Documented deviation: the mod sort of the original (oracle TileMagicBox.java:220-255) builds an inconsistent key, the mod identifier of the second slot is appended to the key of the first one, so the comparison is not a strict order and the sort loop of the original can run forever. The native tree compares the mod identifier and the name of each slot separately, so the sort always terminates."
         ],
         "reviewed_sha256": {
           "original": "ddba2ea5b6e838cc8a01fe5044a6b44340aec1e3acd34ca753a256980f1d5e75",
@@ -47472,7 +47608,7 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileMirror.java:314 the mirror pays its instability with ORDER vis from the vis network",
@@ -47480,12 +47616,22 @@
           "oracle thaumcraft/common/tiles/TileMirror.java:222 the ejected item has a pick up delay of twenty ticks",
           "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:168 the native uses the vanilla default pick up delay of forty ticks",
           "oracle thaumcraft/common/tiles/TileMirror.java:287 the mirror ejects, decays and repairs its link in the update",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:1 the native block registers no ticker"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:1 the native block registers no ticker",
+          "oracle thaumcraft/common/tiles/TileMirror.java:277-299 the mirror ejects its output, decays its instability and repairs a broken link in its update",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:107 the block registers the ticker of both mirror kinds",
+          "oracle thaumcraft/common/tiles/TileMirror.java:301-315 the instability is paid with ORDER vis of the vis network, at most one unit per call, and both mirrors lose it",
+          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:217 checkInstability(...) pays the instability the same way",
+          "oracle thaumcraft/common/tiles/TileMirror.java:330-344 the slot byte and the stack of a buffered item share one compound, so the reader parses the entry itself",
+          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:265 saveOutputStack(...) and loadOutputStack(...) keep that shape",
+          "oracle thaumcraft/common/tiles/TileMirror.java:207 the item of the mirror gets a portal cooldown of twenty ticks, the 1.7.10 field is Entity.timeUntilPortal and never the pick up delay",
+          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:181 the native tree sets the 1.21.1 portal cooldown of the item"
         ],
         "notes": [
           "Defect: the native mirror never draws ORDER vis, so its instability can only decay by one every twenty ticks and can never be paid off.",
           "Defect: BlockMirror registers no BlockEntityTicker, so the mirror tile never ejects its output, never decays its instability and never repairs a broken link.",
-          "The ejected item uses the vanilla 40 tick pick up delay instead of the original 20 ticks, and the transport plays an invented beacon sound instead of the original block update."
+          "The ejected item uses the vanilla 40 tick pick up delay instead of the original 20 ticks, and the transport plays an invented beacon sound instead of the original block update.",
+          "Fixed: the native mirror wrote the buffered items into a nested stack compound while its reader parsed the entry itself, so every buffered item was lost on the next save.",
+          "The block event of the original (oracle TileMirror.java:169 and :188) is a client visual; the native tree plays a beacon sound instead and the spell particles stay with the renderer unit."
         ],
         "reviewed_sha256": {
           "original": "0da1cda3044beaa5dfa6008f52a458511d158ba21831ffd2cc7644d1f0cd96d5",
@@ -47525,18 +47671,24 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileMirrorEssentia.java:198 the essentia mirror pulls from the tube network of its twin",
           "native common/src/main/java/thaumcraft/common/tiles/TileMirrorEssentia.java:136 the native moves an own aspect and amount pair",
           "oracle thaumcraft/common/tiles/TileMirrorEssentia.java:186 the twin provides at most eight units and only one may be taken",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:644 the native keeps the drain cap of eight"
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:644 the native keeps the drain cap of eight",
+          "oracle thaumcraft/common/tiles/TileMirrorEssentia.java:182-194 the mirror is an aspect source, it takes one unit from the network of its twin and the drain reaches eight units",
+          "native common/src/main/java/thaumcraft/common/tiles/TileMirrorEssentia.java:144 the native mirror is an aspect source with the same rule and the same drain cap",
+          "oracle thaumcraft/common/tiles/TileMirrorEssentia.java:216-229 the mirror retries a broken link every fortieth tick and waits twenty ticks longer after every failure",
+          "native common/src/main/java/thaumcraft/common/tiles/TileMirrorEssentia.java:184 the native tile retries the link with the same schedule",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:107 the block registers the ticker of the essentia mirror"
         ],
         "notes": [
           "Defect: the native essentia mirror is not an IAspectSource and no longer pulls essentia from the tube network of its twin; it only moves its own stored pair.",
           "The unit limits (one per request, eight per pull) are kept in EldritchBlockRules.",
-          "The native tile also never ticks, so a broken essentia mirror link is never repaired."
+          "The native tile also never ticks, so a broken essentia mirror link is never repaired.",
+          "The dimension of the link is a dimension key string in the native tree, the int dimension id of the original has no 1.21.1 equivalent."
         ],
         "reviewed_sha256": {
           "original": "416d2374794897c38bcb79d37357cd95c28e3ba3cc44db0f3dd219abeb86d865",
@@ -47789,17 +47941,25 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileNodeStabilizer.java:24 the lock is 1 for metadata 9 and 2 for metadata 10",
           "native common/src/main/java/thaumcraft/common/tiles/TileNodeStabilizer.java:20 the native stabiliser always reports lock 1",
           "oracle thaumcraft/common/tiles/TileNodeStabilizer.java:36 the client count rises while the block above is an aura or an energized node and the plate is unpowered",
-          "native common/src/main/java/thaumcraft/common/tiles/TileNodeStabilizer.java:34 the native keeps the aura node and energized node test and the 37 cap"
+          "native common/src/main/java/thaumcraft/common/tiles/TileNodeStabilizer.java:34 the native keeps the aura node and energized node test and the 37 cap",
+          "oracle thaumcraft/common/tiles/TileNodeStabilizer.java:13-15 the lock is one for the stone device of the ninth metadata and two for the device of the tenth metadata",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNodeStabilizer.java:21 the native tile reads the lock from its own block, the basic or the advanced stabiliser",
+          "oracle thaumcraft/common/tiles/TileNodeStabilizer.java:24-37 the client counter rises to thirty seven while an aura or an energized node stands on an unpowered stabiliser",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNodeStabilizer.java:32 the native client counter keeps the thirty seven cap and the aura and energized node test",
+          "oracle thaumcraft/common/tiles/TileNode.java:885-889 the node reads the lock of the stabiliser below it",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:520 the native node now produces the lock one and the lock two of the original"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity; the client animation counter 0..37 is unchanged.",
-          "Only the basic stabiliser is ported: the advanced stabiliser (oracle metadata 10, lock 2) does not exist, so the lock value 2 is never produced."
+          "Only the basic stabiliser is ported: the advanced stabiliser (oracle metadata 10, lock 2) does not exist, so the lock value 2 is never produced.",
+          "The advanced stabiliser exists in the native tree and its lock value two is produced again.",
+          "Fixed: the native node only knew the basic stabiliser, so the advanced stabiliser never locked its node."
         ],
         "reviewed_sha256": {
           "original": "0bdc12d3823664526c3617486a23ed47924fa892ec11c7bddf5afc11490bafde",
@@ -48203,16 +48363,23 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileThaumatoriumTop.java:36 the top half resolves the lower half and breaks itself when it is gone",
           "native common/src/main/java/thaumcraft/common/tiles/TileThaumatoriumTop.java:21 the native resolves the current lower half on every access",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockThaumatorium.java:41 the native top block registers no ticker"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockThaumatorium.java:41 the native top block registers no ticker",
+          "oracle thaumcraft/common/tiles/TileThaumatoriumTop.java:21-34 the top half looks for its lower half and turns itself into the construct of the metal device metadata nine when it is gone",
+          "oracle thaumcraft/common/config/ConfigRecipes.java:284 the alchemical construct of the original is the metal device of the ninth metadata",
+          "native common/src/main/java/thaumcraft/common/tiles/TileThaumatoriumTop.java:32 the native top half turns into the alchemical construct when the lower half is gone",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockThaumatorium.java:41 the top block registers the ticker that watches the lower half",
+          "oracle thaumcraft/common/tiles/TileThaumatoriumTop.java:124-182 the top half is a proxy of the lower half with one slot",
+          "native common/src/main/java/thaumcraft/common/tiles/TileThaumatoriumTop.java:37 the native top half proxies the lower half for the transport and the inventory"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 proxy block entity that resolves the lower half live instead of caching it.",
-          "The original destroys the orphaned top half; the native has no top ticker and instead converts an invalid structure to the alchemical construct in the block."
+          "The original destroys the orphaned top half; the native has no top ticker and instead converts an invalid structure to the alchemical construct in the block.",
+          "The orphaned half becomes the real alchemical construct block of the native tree, the construct of the metal device metadata nine of the original."
         ],
         "reviewed_sha256": {
           "original": "b68f7b5ad5d657b2925035fe51e321e81b6d5fa6c657b33341886182d7bb8f01",

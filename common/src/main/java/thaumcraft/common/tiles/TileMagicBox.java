@@ -249,7 +249,12 @@ public final class TileMagicBox extends BlockEntity implements Container {
             ItemStack stack = ItemStack.parse(registries, items.getCompound(i)).orElse(ItemStack.EMPTY);
             if (!stack.isEmpty()) boxContents.add(stack);
         }
-        linkedBoxes = tag.contains("linked") ? tag.getShort("linked") : (short) -1;
+        // Original TileMagicBox:282-289 - the number of linked boxes is a transient
+        // counter, it is neither written nor read by the original. The native tree
+        // persisted it, so a box chain that changed while the chunk was unloaded
+        // kept its old size forever. The counter starts at minus one again and the
+        // first tick re-scans the neighbours, exactly as the original does.
+        linkedBoxes = (short) -1;
         // Original TileMagicBox:114-124 - the original sorted the content after it was loaded.
         sort();
     }
@@ -257,7 +262,6 @@ public final class TileMagicBox extends BlockEntity implements Container {
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putByte("sort", sorting);
-        tag.putShort("linked", linkedBoxes);
         if (master != null) {
             tag.putInt("w_x", master.getX());
             tag.putInt("w_y", master.getY());

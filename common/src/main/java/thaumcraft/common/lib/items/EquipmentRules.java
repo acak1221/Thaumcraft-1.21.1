@@ -248,7 +248,13 @@ public final class EquipmentRules {
     public static final double MIRROR_PUSH_OFFSET = 0.3D;
     /** Original ItemHandMirror.transport: the item leaves the mirror with this speed. */
     public static final double MIRROR_ITEM_SPEED = 0.15D;
-    /** Original ItemHandMirror.transport: the item is given twenty ticks to live in the mirror. */
+    /**
+     * Original ItemHandMirror:147 - the transported item is given twenty ticks of portal
+     * cooldown. The 1.7.10 field is {@code Entity.timeUntilPortal} (the 1.7.10 name of
+     * {@code field_71088_bW}), never the pick up delay, so the native tree sets the 1.21.1
+     * portal cooldown; see {@code TileParityRules.MIRROR_PORTAL_COOLDOWN} for the mirror
+     * side of the same rule.
+     */
     public static final int MIRROR_ITEM_LIFETIME = 20;
 
     /** Whether a block id is the mirror the hand mirror can be linked to. */

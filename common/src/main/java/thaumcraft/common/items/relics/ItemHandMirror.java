@@ -31,6 +31,7 @@ import thaumcraft.common.container.ContainerHandMirror;
 import thaumcraft.common.lib.crafting.DeviceContainerRules;
 import thaumcraft.common.lib.crafting.DeviceContainerRules.HandMirrorTarget;
 import thaumcraft.common.lib.items.EquipmentRules;
+import thaumcraft.common.lib.tiles.TileParityRules;
 import thaumcraft.common.tiles.TileMirror;
 
 /**
@@ -180,7 +181,10 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
         item.setDeltaMovement(facing.getStepX() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
                 facing.getStepY() * (float) EquipmentRules.MIRROR_ITEM_SPEED,
                 facing.getStepZ() * (float) EquipmentRules.MIRROR_ITEM_SPEED);
-        item.setPickUpDelay(EquipmentRules.MIRROR_ITEM_LIFETIME);
+        // Oracle ItemHandMirror:147 - the 1.7.10 field is Entity.timeUntilPortal, the
+        // portal cooldown, not the pick up delay. The native tree used the pick up delay
+        // and therefore kept the item out of the player's reach for twenty ticks.
+        item.setPortalCooldown(TileParityRules.MIRROR_PORTAL_COOLDOWN);
         target.addFreshEntity(item);
         // Oracle ItemHandMirror:183-184 - the portal sound and the sound of the mirror.
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.1F, 1.0F);

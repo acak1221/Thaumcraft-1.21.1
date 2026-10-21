@@ -61,10 +61,12 @@ import thaumcraft.common.lib.world.FamilyVariant;
  *       {@code BlockState#hasBlockEntity} is {@code block instanceof EntityBlock} (Minecraft
  *       1.21.1 {@code net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase}:803-805),
  *       so a block that claims a tile for all of its states is never moved by a piston. The
- *       original decided per metadata ({@code hasTileEntity(int)}), so the port answers the
- *       question per state ({@link PerStateBlockEntity}) and the common mixin
- *       {@code thaumcraft.common.mixin.PerStateBlockEntityMixin} gives that answer to the
- *       vanilla code.</li>
+ *       original decided per metadata ({@code hasTileEntity(int)}) for the block entity, so the
+ *       port answers the question of the block entity per state ({@link PerStateBlockEntity}) and
+ *       the common mixin {@code thaumcraft.common.mixin.PerStateBlockEntityMixin} gives that
+ *       answer to the vanilla code. The question of the piston is a question of its own: the
+ *       1.7.10 original refused a block by its class and never by its metadata, and the answer of
+ *       the original is read in {@link PistonPushabilityTest}.</li>
  * </ul>
  *
  * <p>The tests read the port and the oracle only; they need neither a level nor a registry.
@@ -220,33 +222,36 @@ class BlockVisibilityAndPistonTest {
         }
     }
 
-    @Test void theStatesWithoutATileAreTheOnesThePistonMoves() {
-        // The piston asks the state, not the block: PistonBaseBlock#isPushable answers
-        // !blockState.hasBlockEntity(). The answer of the port is the answer of the original
-        // hasTileEntity(int), so the states that never had a tile are moved by a piston.
+    @Test void theStatesWithoutATileAreTheOnesTheBlockEntityContractLeavesEmpty() {
+        // The contract of the block entity answers whether a block entity is created for a state,
+        // and nothing else: the question of the piston is a question of its own, because the
+        // 1.7.10 original refused a block by its class (the vanilla 1.7.10
+        // BlockPistonBase#canPushBlock ended with
+        // "return !(block instanceof ITileEntityProvider);") and never by its metadata. The
+        // question of the piston is read in PistonPushabilityTest.
         // The original family of the cosmetic stones has sixteen metadata values and two of them
-        // carry a tile, so fourteen of them are moved.
-        int cosmeticMoved = 0;
+        // carry a tile, so fourteen of them carry no block entity.
+        int cosmeticWithoutTile = 0;
         for (BlockCosmeticSolid block : COSMETIC) {
             for (int variant : EldritchBlockRules.cosmeticGroupVariants(block.group())) {
-                if (!hasTile(block, variant)) ++cosmeticMoved;
+                if (!hasTile(block, variant)) ++cosmeticWithoutTile;
             }
         }
-        assertEquals(14, cosmeticMoved, "the cosmetic stones the piston moves");
+        assertEquals(14, cosmeticWithoutTile, "the cosmetic stones that carry no block entity");
 
         // The original family of the eldritch stones has the metadata zero to ten, six of them
-        // carry a tile, so five of them are moved. The metadata eleven is the crystal of the
-        // port and it carries its tile.
-        int eldritchMoved = 0;
+        // carry a tile, so five of them carry no block entity. The metadata eleven is the crystal
+        // of the port and it carries its tile.
+        int eldritchWithoutTile = 0;
         for (BlockEldritch block : ELDRITCH) {
             for (int variant : EldritchBlockRules.eldritchGroupVariants(block.group())) {
-                if (!hasTile(block, variant)) ++eldritchMoved;
+                if (!hasTile(block, variant)) ++eldritchWithoutTile;
             }
         }
-        assertEquals(5, eldritchMoved, "the eldritch stones the piston moves");
+        assertEquals(5, eldritchWithoutTile, "the eldritch stones that carry no block entity");
 
-        // The eldritch nothing is moved while it is covered and it stands still while it is
-        // exposed, because the exposed filler is the one that holds the tile of the void.
+        // The eldritch nothing carries the tile of the void while it is exposed and carries none
+        // while it is covered.
         assertTrue(hasTileState(NOTHING, NOTHING.defaultBlockState().setValue(BlockEldritchNothing.EXPOSED, 1)),
                 "the exposed filler holds the tile of the void");
         assertFalse(hasTileState(NOTHING, NOTHING.defaultBlockState().setValue(BlockEldritchNothing.EXPOSED, 0)),

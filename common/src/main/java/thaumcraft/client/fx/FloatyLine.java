@@ -1,5 +1,6 @@
 package thaumcraft.client.fx;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -34,6 +35,24 @@ public final class FloatyLine {
     public static final float DEFAULT_WIDTH = 0.15F;
     /** The original half width of the line of the cultist (oracle RenderCultist.java:77). */
     public static final float CULTIST_WIDTH = 0.25F;
+    /** The original constant alpha of the line of the cultist (oracle RenderCultist.java:138). */
+    public static final float CULTIST_ALPHA = .8F;
+
+    /**
+     * The two original bodies of the line.
+     *
+     * <p>The helper of the library ({@code thaumcraft/client/lib/UtilsFX.java:733-817}) draws the
+     * ribbons with the additive blend {@code (770, 1)}, without the depth write and with the alpha of
+     * the fade {@code f3} of every step. The cultist has its own copy of the body
+     * ({@code thaumcraft/client/renderers/entity/RenderCultist.java:83-163}) with the ordinary alpha
+     * blend {@code (770, 771)}, with the depth write and with the constant alpha {@code 0.8f}.</p>
+     */
+    public enum Flavour {
+        /** The body of the original {@code UtilsFX.drawFloatyLine}. */
+        LIBRARY,
+        /** The body of the original {@code RenderCultist.drawFloatyLine}. */
+        CULTIST
+    }
 
     private static final java.util.Map<ResourceLocation, RenderType> TYPES = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -62,7 +81,8 @@ public final class FloatyLine {
                             double fromX, double fromY, double fromZ,
                             double toX, double toY, double toZ,
                             double worldX, double worldY, double worldZ,
-                            int color, ResourceLocation texture, float speed, float distance, float width) {
+                            int color, ResourceLocation texture, float speed, float distance, float width,
+                            Flavour flavour) {
         double dcX = fromX - toX;
         double dcY = fromY - toY;
         double dcZ = fromZ - toZ;
@@ -73,11 +93,11 @@ public final class FloatyLine {
         int red = color >> 16 & 255;
         int green = color >> 8 & 255;
         int blue = color & 255;
-        var out = buffers.getBuffer(TYPES.computeIfAbsent(texture, FloatyLineType::new));
+        var out = buffers.getBuffer(TYPES.computeIfAbsent(texture, key -> new FloatyLineType(key, flavour)));
         ribbon(out, pose, true, dcX, dcY, dcZ, toX, toY, toZ, worldX, worldY, worldZ,
-                dist, length, distance, time, speed, red, green, blue, width);
+                dist, length, distance, time, speed, red, green, blue, width, flavour);
         ribbon(out, pose, false, dcX, dcY, dcZ, toX, toY, toZ, worldX, worldY, worldZ,
-                dist, length, distance, time, speed, red, green, blue, width);
+                dist, length, distance, time, speed, red, green, blue, width, flavour);
     }
 
     /**
@@ -89,7 +109,7 @@ public final class FloatyLine {
                                double dcX, double dcY, double dcZ, double toX, double toY, double toZ,
                                double worldX, double worldY, double worldZ,
                                float dist, float length, float distance, float time, float speed,
-                               int red, int green, int blue, float width) {
+                               int red, int green, int blue, float width, Flavour flavour) {
         boolean first = true;
         double previousLowX = 0.0D, previousLowY = 0.0D, previousLowZ = 0.0D;
         double previousHighX = 0.0D, previousHighY = 0.0D, previousHighZ = 0.0D;
@@ -102,6 +122,8 @@ public final class FloatyLine {
             double dy = dcY + Math.sin((float) (phase(worldX, dist, f2, time) / 3.0F)) * 0.5F * f3;
             double dz = dcZ + Math.sin((float) (phase(worldY, dist, f2, time) / 2.0F)) * 0.5F * f3;
             float u = scroll(f2, dist, time, speed);
+            // The cultist draws the constant alpha 0.8f, the library helper the fade of the step.
+            float fade = flavour == Flavour.CULTIST ? CULTIST_ALPHA : f3;
             double centreX = toX + dx * f2;
             double centreY = toY + dy * f2;
             double centreZ = toZ + dz * f2;
@@ -115,8 +137,8 @@ public final class FloatyLine {
                 // The original strip: the low edge of a step carries the top of the texture cell.
                 vertex(out, pose, previousLowX, previousLowY, previousLowZ, previousU, 1.0F, red, green, blue, previousFade);
                 vertex(out, pose, previousHighX, previousHighY, previousHighZ, previousU, 0.0F, red, green, blue, previousFade);
-                vertex(out, pose, highX, highY, highZ, u, 0.0F, red, green, blue, f3);
-                vertex(out, pose, lowX, lowY, lowZ, u, 1.0F, red, green, blue, f3);
+                vertex(out, pose, highX, highY, highZ, u, 0.0F, red, green, blue, fade);
+                vertex(out, pose, lowX, lowY, lowZ, u, 1.0F, red, green, blue, fade);
             }
             previousLowX = lowX;
             previousLowY = lowY;
@@ -125,7 +147,7 @@ public final class FloatyLine {
             previousHighY = highY;
             previousHighZ = highZ;
             previousU = u;
-            previousFade = f3;
+            previousFade = fade;
             first = false;
             index++;
         }
@@ -180,27 +202,36 @@ public final class FloatyLine {
      */
     private static final class FloatyLineType extends RenderType {
         private final TextureStateShard shard;
+        private final boolean additive;
+        private final boolean depthWrite;
 
-        private FloatyLineType(ResourceLocation texture) {
+        private FloatyLineType(ResourceLocation texture, Flavour flavour) {
             super("thaumcraft_floaty_line", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS,
                     4096, false, true, () -> {}, () -> {});
             this.shard = new TextureStateShard(texture, false, false);
+            // The library helper disables the depth write, the cultist keeps it.
+            this.depthWrite = flavour == Flavour.CULTIST;
+            this.additive = flavour == Flavour.LIBRARY;
         }
 
         @Override public void setupRenderState() {
             RENDERTYPE_EYES_SHADER.setupRenderState();
             shard.setupRenderState();
-            LIGHTNING_TRANSPARENCY.setupRenderState(); // SRC_ALPHA / ONE, the original blend (770, 1).
+            // The library helper uses the additive blend (770, 1), the cultist the ordinary (770, 771).
+            if (additive) LIGHTNING_TRANSPARENCY.setupRenderState();
+            else TRANSLUCENT_TRANSPARENCY.setupRenderState();
             NO_CULL.setupRenderState();
             LEQUAL_DEPTH_TEST.setupRenderState();
             COLOR_WRITE.setupRenderState();
+            RenderSystem.depthMask(depthWrite);
         }
 
         @Override public void clearRenderState() {
             COLOR_WRITE.clearRenderState();
             LEQUAL_DEPTH_TEST.clearRenderState();
             NO_CULL.clearRenderState();
-            LIGHTNING_TRANSPARENCY.clearRenderState();
+            if (additive) LIGHTNING_TRANSPARENCY.clearRenderState();
+            else TRANSLUCENT_TRANSPARENCY.clearRenderState();
             shard.clearRenderState();
             RENDERTYPE_EYES_SHADER.clearRenderState();
         }

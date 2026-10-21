@@ -74,6 +74,6 @@ public final class TileWandPedestalRenderer implements BlockEntityRenderer<TileW
         float distance = Math.min(tile.getLevel().getGameTime(), 10.0F) / 10.0F;
         FloatyLine.draw(pose, buffers, fromX, fromY, fromZ, toX, toY, toZ,
                 origin.getX() + fromX, origin.getY() + fromY, origin.getZ() + fromZ,
-                tile.drainColor, WISPY, -0.02F, distance, FloatyLine.DEFAULT_WIDTH);
+                tile.drainColor, WISPY, -0.02F, distance, FloatyLine.DEFAULT_WIDTH, FloatyLine.Flavour.LIBRARY);
     }
 }

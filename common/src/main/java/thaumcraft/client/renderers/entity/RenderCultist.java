@@ -77,6 +77,6 @@ public final class RenderCultist<T extends net.minecraft.world.entity.Mob> exten
         float distance = Math.min(cleric.tickCount, 10) / 10F;
         FloatyLine.draw(pose, buffers, fromX, fromY, fromZ, toX, toY, toZ,
                 cleric.getX() + fromX, cleric.getY() + fromY, cleric.getZ() + fromZ,
-                LINK_COLOR, WISPY, -0.03F, distance, FloatyLine.CULTIST_WIDTH);
+                LINK_COLOR, WISPY, -0.03F, distance, FloatyLine.CULTIST_WIDTH, FloatyLine.Flavour.CULTIST);
     }
 }

@@ -36,6 +36,7 @@ import thaumcraft.common.items.ItemCrystalEssence;
 import thaumcraft.common.items.CrystalEssenceData;
 import thaumcraft.common.items.ItemInkwell;
 import thaumcraft.common.items.ItemResearchNotes;
+import thaumcraft.common.lib.CustomSoundType;
 import thaumcraft.common.lib.research.ResearchNoteData;
 import thaumcraft.common.items.PhialData;
 import thaumcraft.common.items.ItemJar;
@@ -59,6 +60,17 @@ public final class ThaumcraftContent {
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Thaumcraft.MODID, Registries.MENU);
     public static final RegistrySupplier<MenuType<ContainerResearchTable>> RESEARCH_TABLE_MENU = MENUS.register("research_table",
             () -> MenuRegistry.ofExtended(ContainerResearchTable::new));
+
+    /**
+     * Original BlockJar:88 - the jar plays the custom sound {@code thaumcraft:jar}.
+     *
+     * <p>The original gives the jar one custom sound type
+     * ({@code this.func_149672_a(new CustomStepSound("jar", 1.0f, 1.0f))}) and that sound type
+     * answers {@code thaumcraft:jar} for the step sound and for the break sound
+     * (oracle {@code thaumcraft/common/blocks/CustomStepSound.java}); the base sound type gives the
+     * same name to the place, the fall and the hit sound as well.</p>
+     */
+    public static final SoundType JAR_SOUND = new CustomSoundType("jar", 1.0F, 1.0F);
 
     public static final RegistrySupplier<DataComponentType<WandData>> WAND_DATA = COMPONENTS.register("wand_data",
             () -> DataComponentType.<WandData>builder().persistent(WandData.CODEC).networkSynchronized(WandData.STREAM_CODEC).build());
@@ -92,8 +104,14 @@ public final class ThaumcraftContent {
     // and the original jar sets no blast resistance at all, so the effective value is 0.
     // Oracle BlockJar:90 - the original calls setLightLevel(0.66f), and 1.7.10 stores
     // (int)(15.0f * 0.66f), which is the light nine of the native block.
-    public static final RegistrySupplier<BlockJar> JAR = BLOCKS.register("jar", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> BlockJar.LIGHT).sound(SoundType.GLASS).noOcclusion()));
-    public static final RegistrySupplier<BlockJar> VOID_JAR = BLOCKS.register("jar_void", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> BlockJar.LIGHT).sound(SoundType.GLASS).noOcclusion(), true));
+    // Original BlockJar:88 - the jar plays the custom sound thaumcraft:jar and not the vanilla
+    // glass sound. The original sets one custom sound type on the jar block
+    // (this.func_149672_a(new CustomStepSound("jar", 1.0f, 1.0f))) and the custom sound type
+    // answers "thaumcraft:jar" for the step sound and for the break sound
+    // (oracle thaumcraft/common/blocks/CustomStepSound.java); the base sound type gives the same
+    // name to the place, the fall and the hit sound as well.
+    public static final RegistrySupplier<BlockJar> JAR = BLOCKS.register("jar", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> BlockJar.LIGHT).sound(JAR_SOUND).noOcclusion()));
+    public static final RegistrySupplier<BlockJar> VOID_JAR = BLOCKS.register("jar_void", () -> new BlockJar(BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).lightLevel(state -> BlockJar.LIGHT).sound(JAR_SOUND).noOcclusion(), true));
     public static final RegistrySupplier<BlockAuraNode> AURA_NODE = BLOCKS.register("aura_node", () -> new BlockAuraNode(BlockBehaviour.Properties.of().strength(-1.0F, 3600000.0F).noOcclusion().noCollission().lightLevel(state -> 8)));
     public static final RegistrySupplier<thaumcraft.common.blocks.BlockSilverwoodNode> SILVERWOOD_KNOT = BLOCKS.register("silverwood_knot",
             () -> new thaumcraft.common.blocks.BlockSilverwoodNode(BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).strength(2.5F).sound(SoundType.WOOD).lightLevel(state -> 7)));

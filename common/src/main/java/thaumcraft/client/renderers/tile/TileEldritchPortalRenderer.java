@@ -43,6 +43,19 @@ public final class TileEldritchPortalRenderer implements BlockEntityRenderer<Til
 
     public TileEldritchPortalRenderer(BlockEntityRendererProvider.Context context) {}
 
+    /**
+     * Original TileEldritchPortal:34-37 - the gate is drawn in a cube of three blocks
+     * around itself, so the block entity renderer of the gate is only culled when the
+     * whole cube is outside of the view.
+     */
+    @Override public boolean shouldRenderOffScreen(TileEldritchPortal tile) { return true; }
+
+    /**
+     * Original TileEldritchPortal:31-33 - the gate is drawn up to ninety six blocks away,
+     * the square root of the 9216 of the original.
+     */
+    @Override public int getViewDistance() { return 96; }
+
     @Override public void render(TileEldritchPortal tile, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (tile.getLevel() == null) return;
         int open = tile.getOpenCount();

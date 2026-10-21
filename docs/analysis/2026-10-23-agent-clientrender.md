@@ -153,7 +153,7 @@ oracle tree (859 classes).
 | `thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java` | no such file in the oracle; TC4 4.2.3.5 has no JEI at all (the only related line is `ClientProxy.java:444`) |
 | `thaumcraft/client/lib/ItemAspectTooltipHandler.java` | no such file in the oracle; a 1.12 artefact |
 
-### 3.2 `partial -> parity_verified` (15)
+### 3.2 `partial -> parity_verified` (19)
 
 | unit | what the audit found |
 |---|---|
@@ -172,6 +172,10 @@ oracle tree (859 classes).
 | `thaumcraft/client/renderers/entity/RenderElectricOrb.java` | the strip start (1 + ticks % 6) / 8, the step 0.125, the rows 0.875/0.75, the bob sin(ticks / 5) * 0.2 + 0.2, the alpha 0.8 and the brightness 220 are kept |
 | `thaumcraft/client/renderers/entity/RenderEmber.java` | the frame (7 + 8 * age / duration) / 16, the row 0.5625, the size 0.25 + age / duration, the alpha 0.9 and the brightness 220 are kept |
 | `thaumcraft/client/renderers/entity/RenderExplosiveOrb.java` | the strip start (ticks % 4) / 16, the row 0.8125, the scale 0.7, the alpha 0.8 and the standard alpha blend of the original `glBlendFunc(770, 771)` are kept |
+| `thaumcraft/client/ClientProxy.java` | every effect of the original facade is either ported or unreachable in the original itself; the three that the earlier audit named as missing are in the tree (the smoke spiral, the arc lightning, the beams of the excavation focus, of the arcane bore and of the relay) and the three that really are missing are dead in the original (the generic beam, the soul trail, the fire scorch) |
+| `thaumcraft/client/lib/QuadHelper.java` | the facing quad and the facing strip of the original `UtilsFX:153-191/219` are rebuilt by `VisNetRender.java:67-73` with the same rotation about the view axis |
+| `thaumcraft/client/renderers/block/BlockRenderer.java` | the sixteenths of the original survive as the literal bounds of the native models and the light of the original is the vanilla lightmap; the manual neighbour test of `renderAllSides` is the culling of 1.21.1 |
+| `thaumcraft/client/renderers/models/ModelVisRelay.java` | the native loads the retained original relay OBJ and asserts the original vertex counts, so the geometry of the port is the geometry of the original |
 
 ### 3.3 `partial` kept, with the gap narrowed (9)
 

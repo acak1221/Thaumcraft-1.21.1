@@ -64,6 +64,19 @@ class DamageTypeRecordsTest {
         assertFalse(values.contains("thaumcraft:swarm"), values.toString());
     }
 
+    @Test void theGolemOrbKeepsTheOriginalMagicSource() throws Exception {
+        // Oracle EntityGolemOrb:78 hurts with DamageSource.causeIndirectMagicDamage, the
+        // magic source that also bypasses the armour.
+        JsonObject magic = record("indirect_magic");
+        assertEquals("indirectMagic", magic.get("message_id").getAsString());
+        assertEquals(0.0F, magic.get("exhaustion").getAsFloat());
+        assertEquals("when_caused_by_living_non_player", magic.get("scaling").getAsString());
+        List<String> bypass = tag("data/minecraft/tags/damage_type/bypasses_armor.json");
+        assertTrue(bypass.contains("thaumcraft:indirect_magic"), bypass.toString());
+        List<String> isMagic = tag("data/thaumcraft/tags/damage_type/is_magic.json");
+        assertTrue(isMagic.contains("thaumcraft:indirect_magic"), isMagic.toString());
+    }
+
     @Test void onlyTheTaintSourceIsMagic() throws Exception {
         List<String> values = tag("data/thaumcraft/tags/damage_type/is_magic.json");
         // Oracle :19 calls setMagicDamage on the taint only.

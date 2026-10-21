@@ -63,10 +63,13 @@ class ProjectileRulesTest {
         assertEquals(240, ProjectileRules.golemOrbLifetime(true));
     }
 
-    @Test void theGolemOrbHomingUsesThePlainDistanceAndTheOriginalAcceleration() {
+    @Test void theGolemOrbHomingDividesByTheSquaredDistanceAndTheOriginalAcceleration() {
+        // Oracle EntityGolemOrb:95-102 - the original divides the delta by
+        // getDistanceSqToEntity, the SQUARED distance to the target.
         assertEquals(0.2D, ProjectileRules.golemOrbHoming(0D, 1D, 1D), 1E-9D);
         assertEquals(0.4D, ProjectileRules.golemOrbHoming(0.2D, 1D, 1D), 1E-9D);
         assertEquals(0.1D, ProjectileRules.golemOrbHoming(0D, 1D, 2D), 1E-9D);
+        assertEquals(0.025D, ProjectileRules.golemOrbHoming(0D, 1D, 8D), 1E-9D);
     }
 
     @Test void theGolemOrbHomingStopsOnAZeroDistance() {

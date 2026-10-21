@@ -33,10 +33,26 @@ public final class CultistRules {
     /** Original EntityCultistKnight: thirty-six health, everything else inherited. */
     public static final double KNIGHT_HEALTH = 36.0;
 
+    // ---------------------------------------------------------------- cultist faction
+    /**
+     * Original {@code EntityAITarget.getTargetDistance}: the follow range attribute of the mob
+     * that calls for help, and sixteen when the mob has no such attribute. The cultist follows
+     * to thirty-two blocks, so the call of a hurt cultist reaches its whole neighbourhood.
+     */
+    public static final double DEFAULT_TARGET_DISTANCE = 16.0;
+
+    /**
+     * Original {@code AICultistHurtByTarget}:35-40 - the radius of the call for help.
+     *
+     * @param followRange the follow range attribute of the caller, {@code null} when it has none
+     */
+    public static double callForHelpRange(Double followRange) {
+        return followRange == null ? DEFAULT_TARGET_DISTANCE : followRange;
+    }
+
     // ---------------------------------------------------------------- cultist drops
     /** Original ItemResource metadata of the three cultist drops. */
-    public static final int RESOURCE_NONE = -1;
-    public static final int RESOURCE_KNOWLEDGE_FRAGMENT = 9;
+    public static final int RESOURCE_NONE = -1;    public static final int RESOURCE_KNOWLEDGE_FRAGMENT = 9;
     public static final int RESOURCE_VOID_SEED = 17;
     public static final int RESOURCE_GOLD_COIN = 18;
 

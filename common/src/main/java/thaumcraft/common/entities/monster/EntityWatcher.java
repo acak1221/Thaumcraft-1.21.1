@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.common.lib.MagicWard;
 import thaumcraft.common.lib.world.EldritchMobRules;
 
 /**
@@ -111,11 +112,12 @@ public class EntityWatcher extends Monster {
 
     /** Original watcher thorns the attacker when it is not gazing. */
     @Override public boolean hurt(DamageSource source,float amount) {
-        if(!isGazing()&&!source.is(DamageTypeTags.BYPASSES_ARMOR)&&source.getDirectEntity() instanceof LivingEntity attacker) {
-            if(!source.is(DamageTypeTags.IS_PROJECTILE)) {
-                attacker.hurt(damageSources().thorns(this),EldritchMobRules.WATCHER_THORNS_DAMAGE);
-                attacker.playSound(SoundEvents.THORNS_HIT,.5F,1.0F);
-            }
+        // Original EntityWatcher:287-293 - the thorns answer every source that is not magic
+        // damage and not an explosion.
+        if(!isGazing()&&!source.is(MagicWard.MAGIC_DAMAGE)&&!source.is(DamageTypeTags.IS_EXPLOSION)
+                &&source.getDirectEntity() instanceof LivingEntity attacker) {
+            attacker.hurt(damageSources().thorns(this),EldritchMobRules.WATCHER_THORNS_DAMAGE);
+            attacker.playSound(SoundEvents.THORNS_HIT,.5F,1.0F);
         }
         return super.hurt(source,amount);
     }

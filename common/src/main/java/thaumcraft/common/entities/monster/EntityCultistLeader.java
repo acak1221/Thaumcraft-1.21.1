@@ -3,6 +3,7 @@ package thaumcraft.common.entities.monster;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -101,7 +102,9 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new EntityCultist.CultistHurtByTargetGoal(this, true));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        // Original EntityAINearestAttackableTarget:52-58 - a target chance of zero scans
+        // every tick. The native goal scans every fifth tick unless the interval is one.
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 1, true, false, null));
     }
 
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
@@ -109,6 +112,18 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
         builder.define(TITLE, 0);
         builder.define(CHAMPION, -1);
         builder.define(ANGER, 0);
+    }
+
+    /** Original EntityCultistLeader:120-130 - the title of the praetor is kept in its saved data. */
+    @Override public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putByte("title", (byte) (int) entityData.get(TITLE));
+    }
+
+    /** Original EntityCultistLeader:127-130 - the praetor reads its title back. */
+    @Override public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        setTitle(tag.getByte("title"));
     }
 
     // ---------------------------------------------------------------- identity

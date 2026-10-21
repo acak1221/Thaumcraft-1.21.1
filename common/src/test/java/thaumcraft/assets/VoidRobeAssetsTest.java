@@ -76,7 +76,7 @@ class VoidRobeAssetsTest {
 
     @Test void theMagicDamageTagAndTheWardHookAreDeclared() throws Exception {
         var values = json("data/thaumcraft/tags/damage_type/is_magic.json").getAsJsonArray("values").asList().stream().map(v -> v.getAsString()).toList();
-        assertEquals(List.of("minecraft:magic", "minecraft:indirect_magic", "thaumcraft:taint"), values);
+        assertEquals(List.of("minecraft:magic", "minecraft:indirect_magic", "thaumcraft:taint", "thaumcraft:indirect_magic"), values);
         var mixins = json("thaumcraft-common.mixins.json").getAsJsonArray("mixins").asList().stream().map(m -> m.getAsString()).toList();
         assertTrue(mixins.contains("LivingEntityMagicWardMixin"), "the ward hook is registered");
     }

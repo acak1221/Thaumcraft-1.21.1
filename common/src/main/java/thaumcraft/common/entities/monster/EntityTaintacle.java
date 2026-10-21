@@ -79,7 +79,7 @@ public class EntityTaintacle extends Monster implements ITaintedMob {
         super.tick();
         if(level() instanceof ServerLevel server&&tickCount%20==0){
             var biome=BiomeColumns.surfaceHolder(server,Mth.floor(getX()),Mth.floor(getZ()));
-            if(biome!=null&&!biome.is(ThaumcraftBiomes.TAINT))actuallyHurt(damageSources().fellOutOfWorld(),1);
+            if(biome!=null&&!biome.is(ThaumcraftBiomes.TAINT))actuallyHurt(damageSources().starve(),1);
         }
         if(level().isClientSide) {
             if(tickCount>getBbHeight()*10F&&(hurtTime>0||attackTime>0||getTarget()!=null&&getTarget().distanceTo(this)<getBbHeight())) {

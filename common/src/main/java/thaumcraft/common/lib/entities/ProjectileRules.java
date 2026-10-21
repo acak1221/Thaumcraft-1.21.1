@@ -95,10 +95,15 @@ public final class ProjectileRules {
         return red ? GOLEM_ORB_LIFETIME_RED : GOLEM_ORB_LIFETIME_BLUE;
     }
 
-    /** Original homing step: the delta is divided by the plain distance, not by its square. */
-    public static double golemOrbHoming(double velocity, double delta, double distance) {
-        if (!(distance > 1E-6D)) return velocity;
-        return velocity + (delta / distance) * GOLEM_ORB_ACCELERATION;
+    /**
+     * Original homing step: the delta is divided by the SQUARED distance to the target and
+     * then scaled by 0.2. The original read {@code getDistanceSqToEntity}, so the pull of the
+     * orb weakens with the square of the distance, and the port used the plain distance,
+     * which made the orb home far stronger than the original.
+     */
+    public static double golemOrbHoming(double velocity, double delta, double squaredDistance) {
+        if (!(squaredDistance > 1E-6D)) return velocity;
+        return velocity + (delta / squaredDistance) * GOLEM_ORB_ACCELERATION;
     }
 
     /** Original {@code MathHelper.clamp(value, -0.25F, 0.25F)} on every motion axis. */

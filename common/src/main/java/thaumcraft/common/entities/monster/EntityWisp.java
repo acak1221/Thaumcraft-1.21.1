@@ -27,7 +27,6 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.AABB;
@@ -35,6 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.common.config.ThaumcraftEssences;
+import thaumcraft.common.lib.entities.OriginalLightRules;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
 import thaumcraft.common.lib.loot.OriginalMobTargeting;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -144,8 +144,9 @@ public final class EntityWisp extends FlyingMob implements Enemy {
     public static boolean checkWispSpawnRules(EntityType<? extends EntityWisp> type,ServerLevelAccessor level,MobSpawnType reason,BlockPos pos,RandomSource random) {
         AABB candidate=type.getDimensions().makeBoundingBox(pos.getX()+.5,pos.getY(),pos.getZ()+.5);
         if(level.getLevel().getEntitiesOfClass(EntityWisp.class,candidate.inflate(16)).size()>=8)return false;
-        if(level.getDifficulty()==Difficulty.PEACEFUL || level.getBrightness(LightLayer.SKY,pos)>random.nextInt(32)) return false;
-        var server=level.getLevel(); return server.getMaxLocalRawBrightness(pos,server.isThundering()?10:server.getSkyDarken())<=random.nextInt(8);
+        if(level.getDifficulty()==Difficulty.PEACEFUL) return false;
+        // Original EntityWisp.isValidLightLevel: the darkened sky light and the block light.
+        return OriginalLightRules.validWispLightLevel(level,pos,random);
     }
     @Override public boolean checkSpawnObstruction(LevelReader level) { return this.level().getEntitiesOfClass(EntityWisp.class,getBoundingBox().inflate(16)).size()<8 && super.checkSpawnObstruction(level); }
     @Override public int getMaxSpawnClusterSize() { return 2; }

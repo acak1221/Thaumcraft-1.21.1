@@ -14,6 +14,6 @@ public final class EntityTaintacleSmall extends EntityTaintacle {
     public EntityTaintacleSmall(EntityType<? extends EntityTaintacleSmall> type,Level level) { super(type,level);xpReward=0; }
     public EntityTaintacleSmall(Level level) { this(ThaumcraftTaint.TAINTACLE_SMALL.get(),level); }
     public static AttributeSupplier.Builder createAttributes() { return EntityTaintacle.createAttributes().add(Attributes.MAX_HEALTH,8).add(Attributes.ATTACK_DAMAGE,2); }
-    @Override public void tick() { super.tick();if(lifetime--<=0)actuallyHurt(damageSources().drown(),10); }
+    @Override public void tick() { super.tick();if(lifetime--<=0)actuallyHurt(damageSources().magic(),10); }
     @Override protected void dropCustomDeathLoot(ServerLevel level,DamageSource source,boolean recentlyHit) {dropNativeEquipment(level,source,recentlyHit);}
 }

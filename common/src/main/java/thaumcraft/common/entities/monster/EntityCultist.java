@@ -1,6 +1,8 @@
 package thaumcraft.common.entities.monster;
 
 import java.util.EnumSet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -71,6 +73,28 @@ public class EntityCultist extends Monster {
         return type != EntityCultistCleric.class && type != EntityCultistLeader.class && type != EntityCultistKnight.class;
     }
 
+    /**
+     * Original EntityCultist:100-115 - the cultist keeps its home area in its saved data.
+     * The ritualist cleric anchors its altar there, so the anchor has to survive a reload.
+     */
+    @Override public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        if (hasRestriction()) {
+            tag.putInt("HomeD", (int) getRestrictRadius());
+            tag.putInt("HomeX", getRestrictCenter().getX());
+            tag.putInt("HomeY", getRestrictCenter().getY());
+            tag.putInt("HomeZ", getRestrictCenter().getZ());
+        }
+    }
+
+    /** Original EntityCultist:100-105 - the cultist reads its home area back. */
+    @Override public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("HomeD")) {
+            restrictTo(new BlockPos(tag.getInt("HomeX"), tag.getInt("HomeY"), tag.getInt("HomeZ")), tag.getInt("HomeD"));
+        }
+    }
+
     // ---------------------------------------------------------------- gear helpers
     /**
      * The registered cultist armour piece of the original equipment table. An empty
@@ -136,6 +160,8 @@ public class EntityCultist extends Monster {
     /**
      * Original Entity.shoot: normalise the direction, spread it by the inaccuracy and scale
      * it by the velocity. The native projectile helper swapped the last two arguments.
+     * The original 1.7.10 {@code EntityThrowable.setThrowableHeading} also aimed the
+     * projectile: it set the yaw from the direction and the pitch from its height.
      */
     public static void originalShoot(net.minecraft.world.entity.projectile.Projectile projectile,
             double x, double y, double z, float velocity, float inaccuracy) {
@@ -147,6 +173,14 @@ public class EntityCultist extends Monster {
         y += (projectile.getRandom().nextDouble() - 0.5) * inaccuracy * 2.0;
         z += (projectile.getRandom().nextDouble() - 0.5) * inaccuracy * 2.0;
         projectile.setDeltaMovement(x * velocity, y * velocity, z * velocity);
+        // Original EntityThrowable.setThrowableHeading: the projectile looks along its motion.
+        float horizontal = (float) Math.sqrt(x * x + z * z);
+        float yaw = (float) (Math.atan2(x, z) * 180.0 / Math.PI);
+        float pitch = (float) (Math.atan2(y, horizontal) * 180.0 / Math.PI);
+        projectile.setYRot(yaw);
+        projectile.yRotO = yaw;
+        projectile.setXRot(pitch);
+        projectile.xRotO = pitch;
     }
 
     // ---------------------------------------------------------------- shared goals
@@ -282,8 +316,20 @@ public class EntityCultist extends Monster {
     }
 
     /**
-     * Original AICultistHurtByTarget: the cultist answers whoever hit it and calls the
-     * other cultists to the same target. A ritualist cleric only wakes up one time in three.
+     * Original {@code EntityAITarget.getTargetDistance}: the follow range attribute of the mob,
+     * or sixteen when the mob has none. The cultist, the cleric, the knight and the praetor
+     * all follow to thirty-two blocks, so the call for help of a hurt cultist reaches the
+     * cultists of the whole thirty-two block neighbourhood.
+     */
+    public static double callForHelpRange(Mob mob) {
+        var attribute = mob.getAttribute(Attributes.FOLLOW_RANGE);
+        return CultistRules.callForHelpRange(attribute == null ? null : attribute.getValue());
+    }
+
+    /**
+     * Original {@code AICultistHurtByTarget}:30-53 - the cultist answers whoever hit it and
+     * calls the other cultists to the same target. A ritualist cleric only wakes up one time
+     * in three.
      */
     public static class CultistHurtByTargetGoal extends Goal {
         private final Mob mob;
@@ -312,7 +358,10 @@ public class EntityCultist extends Monster {
         }
 
         private void callForHelp(LivingEntity revenge) {
-            double range = 16.0;
+            // Original AICultistHurtByTarget:35-40 - the call reaches as far as the original
+            // EntityAITarget.getTargetDistance(), which is the follow range attribute of the
+            // caller and not a fixed sixteen blocks. The cultist follows to thirty-two.
+            double range = callForHelpRange(mob);
             AABB box = new AABB(mob.getX(), mob.getY(), mob.getZ(), mob.getX() + 1.0, mob.getY() + 1.0, mob.getZ() + 1.0)
                     .inflate(range, 10.0, range);
             for (EntityCultist ally : mob.level().getEntitiesOfClass(EntityCultist.class, box, ally -> ally != mob)) {

@@ -2,13 +2,16 @@ package thaumcraft.common.entities.projectile;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,16 +31,24 @@ import thaumcraft.common.lib.entities.ProjectileRules;
  * <p>
  * The original is an {@code EntityThrowable} without gravity whose launch
  * inherits the default throwable speed of 1.5 and the default pitch offset of
- * zero. It homes on its target by adding a fifth of the normalised direction
- * to every motion axis and clamping each axis to a quarter, dies after 160
- * ticks (blue) or 240 ticks (red) and deals the thrower's attack damage
- * attribute times 0.6 (blue) or 1.0 (red) to the entity it hits.
+ * zero. It homes on its target by adding a fifth of the direction, divided by
+ * the SQUARED distance to the target, to every motion axis and clamping each
+ * axis to a quarter, dies after 160 ticks (blue) or 240 ticks (red) and deals
+ * the thrower's attack damage attribute times 0.6 (blue) or 1.0 (red) to the
+ * entity it hits with the magic source that bypasses the armour.
  * <p>
  * Declared native adaptations: the homing target is kept as a synced UUID
  * instead of a spawn packet entity id, the damage uses the native mob
  * projectile damage type, and the client burst is a hook.
  */
 public final class EntityGolemOrb extends ThrowableProjectile {
+    /**
+     * Original {@code DamageSource.causeIndirectMagicDamage} (oracle
+     * {@code thaumcraft/common/entities/projectile/EntityGolemOrb.java:78}): the magic source
+     * that bypasses the armour. The native type carries the same tags.
+     */
+    public static final ResourceKey<DamageType> DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath("thaumcraft", "indirect_magic"));
     private static final EntityDataAccessor<Boolean> RED = SynchedEntityData.defineId(EntityGolemOrb.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> TARGET = SynchedEntityData.defineId(EntityGolemOrb.class, EntityDataSerializers.INT);
     private static Consumer<EntityGolemOrb> clientImpact = ignored -> {};
@@ -108,19 +119,20 @@ public final class EntityGolemOrb extends ThrowableProjectile {
         home();
     }
 
-    /** Original homing: the delta is divided by the plain distance, then scaled by 0.2 and clamped. */
+    /** Original homing: the delta is divided by the squared distance, then scaled by 0.2 and clamped. */
     private void home() {
         LivingEntity target = getTarget();
         if (target == null) return;
-        double distance = Math.sqrt(distanceToSqr(target));
+        // The original divided the delta by getDistanceSqToEntity, the SQUARED distance.
+        double squared = distanceToSqr(target);
         double dx = target.getX() - getX();
         double dy = target.getBoundingBox().minY + (double) target.getBbHeight() * .6D - getY();
         double dz = target.getZ() - getZ();
         Vec3 motion = getDeltaMovement();
         setDeltaMovement(
-                ProjectileRules.clampGolemOrbSpeed(ProjectileRules.golemOrbHoming(motion.x, dx, distance)),
-                ProjectileRules.clampGolemOrbSpeed(ProjectileRules.golemOrbHoming(motion.y, dy, distance)),
-                ProjectileRules.clampGolemOrbSpeed(ProjectileRules.golemOrbHoming(motion.z, dz, distance)));
+                ProjectileRules.clampGolemOrbSpeed(ProjectileRules.golemOrbHoming(motion.x, dx, squared)),
+                ProjectileRules.clampGolemOrbSpeed(ProjectileRules.golemOrbHoming(motion.y, dy, squared)),
+                ProjectileRules.clampGolemOrbSpeed(ProjectileRules.golemOrbHoming(motion.z, dz, squared)));
     }
 
     @Override protected ProjectileDeflection hitTargetOrDeflectSelf(HitResult hit) {
@@ -138,7 +150,11 @@ public final class EntityGolemOrb extends ThrowableProjectile {
         }
         if (hit instanceof EntityHitResult entityHit && getOwner() instanceof LivingEntity owner) {
             float damage = ProjectileRules.golemOrbDamage((float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE), isRed());
-            entityHit.getEntity().hurt(damageSources().mobProjectile(this, owner), damage);
+            // Original EntityGolemOrb:78 - the orb hurts with DamageSource.causeIndirectMagicDamage,
+            // the magic source that also bypasses the armour.
+            var holder = level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
+                    .getHolderOrThrow(DAMAGE_TYPE);
+            entityHit.getEntity().hurt(new DamageSource(holder, this, owner), damage);
         }
         playSound(SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "shock")),
                 1F, 1F + (random.nextFloat() - random.nextFloat()) * .2F);

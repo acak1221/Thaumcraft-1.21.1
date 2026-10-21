@@ -155,10 +155,10 @@ public class EntityTravelingTrunk extends Mob implements OwnableEntity {
             if (!level().isClientSide) recall(player, player.isShiftKeyDown());
             return false; // The bell is a recall tool, never ordinary damage.
         }
-        // Original EntityTravelingTrunk:107 - the same shared immunity the golem has: the original's
-        // DamageSource.field_76367_g, which the 1.7.10 MCP mapping resolves to the "cactus" source.
-        // The 1.12.2 line of this mod names a different field IN_WALL, which is why the legacy
-        // reference reads as IN_WALL.
+        // Original EntityTravelingTrunk:107 - the same shared immunity the golem has: the
+        // original's DamageSource.field_76367_g, which the 1.7.10 MCP mapping resolves to the
+        // "cactus" source. The 1.12.2 line of this mod names a different field IN_WALL, which is
+        // why the legacy reference reads as IN_WALL.
         if (source.is(DamageTypes.CACTUS) || TrunkRules.invulnerable(getUpgrade())) return false;
         return super.hurt(source, amount);
     }

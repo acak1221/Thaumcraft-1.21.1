@@ -48,7 +48,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.phys.Vec3;
@@ -69,6 +68,7 @@ import thaumcraft.common.items.ItemManaBean;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.items.wands.foci.FocusData;
+import thaumcraft.common.lib.entities.OriginalLightRules;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
 import thaumcraft.common.lib.loot.OriginalMobTargeting;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
@@ -152,9 +152,10 @@ public final class EntityPech extends Monster implements RangedAttackMob {
     private void spawnBonus(String id){getAttribute(Attributes.FOLLOW_RANGE).addOrReplacePermanentModifier(new AttributeModifier(ResourceLocation.fromNamespaceAndPath("thaumcraft",id),random.nextGaussian()*.05,AttributeModifier.Operation.ADD_MULTIPLIED_BASE));}
     public static boolean checkPechSpawnRules(EntityType<? extends EntityPech> type,ServerLevelAccessor level,MobSpawnType reason,BlockPos pos,RandomSource random){
         if(!populationAllowed(type,level,pos))return false;
-        if(level.getDifficulty()==Difficulty.PEACEFUL||level.getBrightness(LightLayer.SKY,pos)>random.nextInt(32))return false;
-        var server=level.getLevel();int light=server.getMaxLocalRawBrightness(pos,server.isThundering()?10:server.getSkyDarken());
-        return light<=random.nextInt(8)&&Mob.checkMobSpawnRules(type,level,reason,pos,random);
+        if(level.getDifficulty()==Difficulty.PEACEFUL)return false;
+        // Original EntityMob.isValidLightLevel: the saved sky light and the block light.
+        if(!OriginalLightRules.validMobLightLevel(level,pos,random))return false;
+        return Mob.checkMobSpawnRules(type,level,reason,pos,random);
     }
     private static boolean populationAllowed(EntityType<? extends EntityPech> type,ServerLevelAccessor level,BlockPos pos){
         var biome=level.getBiome(pos);var key=biome.unwrapKey().orElse(null);

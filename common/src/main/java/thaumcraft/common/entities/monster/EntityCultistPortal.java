@@ -175,7 +175,8 @@ public class EntityCultistPortal extends Monster {
         level().addFreshEntity(cultist);
         playSound(EntityCultist.sound("wandfail"), 1.0F, 1.0F);
         int selfDamage = CultistRules.portalSelfDamage(stage, random.nextInt(5));
-        if (selfDamage > 0) hurt(damageSources().magic(), selfDamage);
+        // Original EntityCultistPortal:224 - the portal burns itself with DamageSource.outOfWorld.
+        if (selfDamage > 0) hurt(damageSources().fellOutOfWorld(), selfDamage);
     }
 
     /** Original EntityCultistPortal.spawnBoss. */

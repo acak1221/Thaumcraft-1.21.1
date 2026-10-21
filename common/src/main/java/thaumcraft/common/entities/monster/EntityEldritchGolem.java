@@ -115,7 +115,9 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
         goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,8.0F));
         goalSelector.addGoal(8,new RandomLookAroundGoal(this));
         targetSelector.addGoal(1,new HurtByTargetGoal(this));
-        targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,true));
+        // Original EntityAINearestAttackableTarget:52-58 - a target chance of zero scans
+        // every tick. The native goal scans every fifth tick unless the interval is one.
+        targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,1,true,false,null));
     }
 
     public boolean isHeadless() { return entityData.get(HEADLESS); }

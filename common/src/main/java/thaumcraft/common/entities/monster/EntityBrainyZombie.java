@@ -30,9 +30,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import thaumcraft.common.config.ThaumcraftContent;
+import thaumcraft.common.lib.entities.OriginalLightRules;
 import thaumcraft.common.lib.loot.OriginalMobLoot;
 
 /** TC4's Angry Zombie (original class name BrainyZombie). Native ZombieVillager retains the old single zombie class's curable flag. */
@@ -55,13 +55,13 @@ public class EntityBrainyZombie extends ZombieVillager {
         var dimensions = EntityDimensions.scalable(.6F, 1.8F).withEyeHeight(1.53F);
         return isBaby() ? dimensions.scale(.5F) : dimensions;
     }
-    /** 1.7 hostile light rule: sky<=draw32, then local brightness<=draw8, including thunder's sky subtraction10. */
+    /** 1.7 hostile light rule: the saved sky light against a nextInt(32) roll, then the block
+     * light against a nextInt(8) roll. */
     public static boolean checkBrainySpawnRules(EntityType<? extends EntityBrainyZombie> type, ServerLevelAccessor level,
                                                 MobSpawnType reason, BlockPos pos, RandomSource random) {
-        if (level.getDifficulty() == Difficulty.PEACEFUL || level.getBrightness(LightLayer.SKY, pos) > random.nextInt(32)) return false;
-        var server = level.getLevel();
-        int brightness = server.getMaxLocalRawBrightness(pos, server.isThundering() ? 10 : server.getSkyDarken());
-        return brightness <= random.nextInt(8) && Mob.checkMobSpawnRules(type, level, reason, pos, random);
+        if (level.getDifficulty() == Difficulty.PEACEFUL) return false;
+        if (!OriginalLightRules.validMobLightLevel(level, pos, random)) return false;
+        return Mob.checkMobSpawnRules(type, level, reason, pos, random);
     }
     private record Pack(SpawnGroupData nativePack, boolean villager) implements SpawnGroupData {}
     @Override public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData pack) {

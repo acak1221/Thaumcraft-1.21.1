@@ -12,7 +12,7 @@ public final class ThaumcraftTaintSettings {
     public static boolean spawnTaintSpore() { return values.spawnSpores(); }
     public static boolean glowingTaint() { return values.glowing(); }
     public static Values values() { return values; }
-    public static void configure(Values input) { values=java.util.Objects.requireNonNull(input); }
+    public static void configure(Values input) { values=java.util.Objects.requireNonNull(input); Config.apply(values); }
     public static void load(Properties properties) {
         int rate=200;
         try { rate=Integer.parseInt(properties.getProperty("biome_taint_spread","200").strip()); }

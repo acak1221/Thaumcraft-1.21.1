@@ -130,12 +130,34 @@ public class ResearchPage {
         result.type = switch (page.kind() == null ? "text" : page.kind()) {
             case "text" -> PageType.TEXT;
             case "recipe_reference" -> PageType.ARCANE_CRAFTING;
-            case "legacy_expression" -> PageType.IMAGE;
+            // The corpus keeps the original expression of the eight array and smelting
+            // pages. The original built them from the recipe arrays themselves, so the
+            // page kind of the expression is the kind of the original page.
+            case "legacy_expression" -> legacyType(page.javaExpression());
             default -> PageType.TEXT;
         };
         result.research = page.requiredResearch();
         result.recipeKey = page.recipeKey();
         return result;
+    }
+
+    /**
+     * The original page kind of a retained corpus expression.
+     *
+     * <p>The eight expressions of the corpus are the original array and smelting pages:
+     * {@code oracle thaumcraft/common/config/ConfigResearch.java:199} (BANNERS, an arcane
+     * recipe array), {@code :374} (ORE, a normal recipe array) and the crucible, the jar label,
+     * the primal arrow, the runic augmentation and the sceptre pages. The original built them from
+     * the recipe arrays, so the kind of the page follows the kind of the array.</p>
+     */
+    public static PageType legacyType(String expression) {
+        if (expression == null) return PageType.TEXT;
+        if (expression.contains("CrucibleRecipe")) return PageType.CRUCIBLE_CRAFTING;
+        if (expression.contains("InfusionRecipe")) return PageType.INFUSION_CRAFTING;
+        if (expression.contains("IArcaneRecipe")) return PageType.ARCANE_CRAFTING;
+        if (expression.contains("IRecipe")) return PageType.NORMAL_CRAFTING;
+        if (expression.contains("new ItemStack")) return PageType.SMELTING;
+        return PageType.IMAGE;
     }
 
     /** The original translated text; an unknown key falls back to the raw text. */

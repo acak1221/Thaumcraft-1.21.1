@@ -1404,7 +1404,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "legacy src/main/java/thaumcraft/api/aura/AuraHelper.java the TC6 aura helper with the per chunk aura and the flux accessors",
@@ -3321,7 +3321,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/api/research/ResearchItem.java:19-29 the fields of the entry",
@@ -3376,7 +3376,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/api/research/ResearchPage.java:25-32 the fields of a page",
@@ -4316,7 +4316,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/api/wands/WandTriggerRegistry.java:25 registerWandBlockTrigger(IWandTriggerManager, int, Block, int, String)",
@@ -25344,7 +25344,7 @@
         "disposition": "replace",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/config/Config.java the ~70 configuration options of the original",
@@ -35230,7 +35230,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/items/ItemResearchNotes.java:87-104 a solved note completes the research and its direct siblings and consumes one note",
@@ -40409,7 +40409,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/lib/events/EventHandlerEntity.java:348-356 the owner protection of a golem",

@@ -40,7 +40,8 @@ class EldritchBlockRulesTest {
         assertEquals(30.0F, EldritchBlockRules.eldritchExplosionResistance(EldritchBlockRules.ELDRITCH_GLOWING_CRUST));
         assertEquals(100.0F, EldritchBlockRules.eldritchExplosionResistance(EldritchBlockRules.ELDRITCH_DECO));
         assertEquals(Float.MAX_VALUE, EldritchBlockRules.eldritchExplosionResistance(EldritchBlockRules.ELDRITCH_LOCK));
-        assertEquals(20000.0F, EldritchBlockRules.eldritchExplosionResistance(EldritchBlockRules.ELDRITCH_ALTAR));
+        // The 1.7.10 setter value 20000 is stored as 60000 and the vanilla getter divides it by five.
+        assertEquals(12000.0F, EldritchBlockRules.eldritchExplosionResistance(EldritchBlockRules.ELDRITCH_ALTAR));
     }
 
     @Test void eldritchBlockEntitiesExistForExactlyTheOriginalMetadata() {
@@ -391,11 +392,29 @@ class EldritchBlockRulesTest {
 
     @Test void deviceFamilyHardnessAndResistanceMatchTheOriginal() {
         assertEquals(3.0F, EldritchBlockRules.DEVICE_METAL_HARDNESS);
-        assertEquals(17.0F, EldritchBlockRules.DEVICE_METAL_RESISTANCE);
+        // The 1.7.10 setter values 17, 10 and 25 are stored three times and the getter divides by five.
+        assertEquals(10.2F, EldritchBlockRules.DEVICE_METAL_RESISTANCE);
         assertEquals(2.0F, EldritchBlockRules.DEVICE_WOOD_HARDNESS);
-        assertEquals(10.0F, EldritchBlockRules.DEVICE_WOOD_RESISTANCE);
+        assertEquals(6.0F, EldritchBlockRules.DEVICE_WOOD_RESISTANCE);
         assertEquals(3.0F, EldritchBlockRules.DEVICE_STONE_HARDNESS);
-        assertEquals(25.0F, EldritchBlockRules.DEVICE_STONE_RESISTANCE);
+        assertEquals(15.0F, EldritchBlockRules.DEVICE_STONE_RESISTANCE);
+    }
+
+    @Test void theWardedGlassKeepsItsOriginalHardnessAndBlastResistance() {
+        // BlockCosmeticOpaque:253-266 - the warded glass has a hardness of five (or none
+        // at all with the warded stone option) and always resists an explosion with 999.
+        assertEquals(5.0F, EldritchBlockRules.COSMETIC_OPAQUE_WARDED_HARDNESS);
+        assertEquals(999.0F, EldritchBlockRules.COSMETIC_OPAQUE_WARDED_RESISTANCE);
+        // The amber block and the amber brick keep the hardness 1.5 and the effective
+        // blast resistance 3 of the setter value 5.
+        assertEquals(1.5F, EldritchBlockRules.COSMETIC_OPAQUE_HARDNESS);
+        assertEquals(3.0F, EldritchBlockRules.COSMETIC_OPAQUE_RESISTANCE);
+    }
+
+    @Test void theEldritchFamilyKeepsTheEffectiveResistanceOfItsSetterValue() {
+        // BlockEldritch:68 - setResistance(20000) stores 60000; the getter divides it by five.
+        assertEquals(20000.0F, EldritchBlockRules.ELDRITCH_FAMILY_RESISTANCE);
+        assertEquals(12000.0F, EldritchBlockRules.ELDRITCH_FAMILY_NATIVE_RESISTANCE);
     }
 
     // ---------------------------------------------------------------- cosmetic
@@ -452,7 +471,7 @@ class EldritchBlockRulesTest {
         assertEquals(4.0F, EldritchBlockRules.eldritchGroupHardness(2));
         assertEquals(-1.0F, EldritchBlockRules.eldritchGroupHardness(3));
         assertEquals(15.0F, EldritchBlockRules.eldritchGroupHardness(4));
-        assertEquals(20000.0F, EldritchBlockRules.eldritchGroupResistance(0));
+        assertEquals(12000.0F, EldritchBlockRules.eldritchGroupResistance(0));
         assertEquals(30.0F, EldritchBlockRules.eldritchGroupResistance(1));
         assertEquals(100.0F, EldritchBlockRules.eldritchGroupResistance(2));
         assertEquals(Float.MAX_VALUE, EldritchBlockRules.eldritchGroupResistance(3));

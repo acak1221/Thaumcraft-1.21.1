@@ -48,7 +48,7 @@ public final class ItemFocusPech extends ItemFocusBasic {
         if(player.level()!=level || !player.isAlive() || player.isSpectator() || player.getItemInHand(hand)!=wand || wand.getCount()!=1
                 || !ArcaneVis.isCraftingWand(wand) || !(FocusData.get(wand).getItem() instanceof ItemFocusPech))return;
         ItemStack before=wand.copy(),paid=before.copy(),focus=FocusData.get(before);Map<String,Integer> cost=activationCost(before,player);
-        int strength=FocusUpgradeData.level(focus,FocusUpgradeType.potency),duration=FocusUpgradeData.level(focus,FocusUpgradeType.extend);
+        int strength=ItemWandCasting.focusPotency(before),duration=FocusUpgradeData.level(focus,FocusUpgradeType.extend);
         boolean nightshade=FocusUpgradeData.level(focus,FocusUpgradeType.nightshade)>0;
         if(!FocusVis.debit(paid,cost))return;
         if(player.getItemInHand(hand)!=wand || !ItemStack.matches(wand,before) || !cost.equals(activationCost(wand,player)) || !FocusVis.canPay(wand,cost))return;

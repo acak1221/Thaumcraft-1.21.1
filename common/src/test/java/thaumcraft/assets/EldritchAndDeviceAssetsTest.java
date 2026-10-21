@@ -217,7 +217,9 @@ class EldritchAndDeviceAssetsTest {
             for (String variant : group.getValue()) assertTrue(variants.has(variant), group.getKey() + " misses " + variant);
         }
         JsonObject opaque = ResourceTree.object(ASSETS + "blockstates/cosmetic_opaque.json").getAsJsonObject("variants");
-        assertEquals(3, opaque.size(), "the cosmetic opaque is ONE block with its three original metadata values");
+        assertEquals(2, opaque.size(), "the cosmetic opaque keeps the amber block and the amber brick");
+        JsonObject warded = ResourceTree.object(ASSETS + "blockstates/cosmetic_opaque_warded.json").getAsJsonObject("variants");
+        assertEquals(1, warded.size(), "the warded glass is the metadata two of its own block");
     }
 
     @Test void theAiryFamilyKnowsTheOriginalMetadataOfItsGroup() throws Exception {

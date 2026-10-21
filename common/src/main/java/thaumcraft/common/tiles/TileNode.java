@@ -130,6 +130,18 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         changed();
     }
 
+    /**
+     * Original TileJarNode:222-241 - the wand restores the stored node: its aspects,
+     * its node type, its node modifier and its identity.
+     */
+    public void restoreFromJar(AspectList values, NodeType type, NodeModifier modifier, String id) {
+        setAspects(values);
+        nodeType = type == null ? NodeType.NORMAL : type;
+        nodeModifier = modifier;
+        if (id != null && !id.isEmpty()) scanId = id;
+        changed();
+    }
+
     /** Original TileNode:201-210: refill current vis only, up to its base. */
     @Override public int addToContainer(Aspect aspect, int amount) {
         if (transducing) return amount;

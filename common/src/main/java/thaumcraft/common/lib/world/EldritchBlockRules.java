@@ -36,9 +36,15 @@ public final class EldritchBlockRules {
      */
     public static final int ELDRITCH_CRYSTAL = 11;
 
-    /** BlockEldritch:72-75 - family hardness 50 and blast resistance 20000. */
+    /** BlockEldritch:72-75 - family hardness 50 and the blast resistance setter value 20000. */
     public static final float ELDRITCH_FAMILY_HARDNESS = 50.0F;
     public static final float ELDRITCH_FAMILY_RESISTANCE = 20000.0F;
+    /**
+     * The blast resistance of the family in native units. The 1.7.10 setter value 20000 is
+     * stored as 60000 and the vanilla getter divides the stored value by five, so the
+     * effective value is 12000.
+     */
+    public static final float ELDRITCH_FAMILY_NATIVE_RESISTANCE = 12000.0F;
 
     /** BlockEldritch:120-135 - the per metadata light level. */
     public static int eldritchLight(int variant) {
@@ -92,7 +98,7 @@ public final class EldritchBlockRules {
             case ELDRITCH_LOCK:
                 return Float.MAX_VALUE;
             default:
-                return ELDRITCH_FAMILY_RESISTANCE;
+                return ELDRITCH_FAMILY_NATIVE_RESISTANCE;
         }
     }
 
@@ -103,7 +109,7 @@ public final class EldritchBlockRules {
      */
     public static final int[] ELDRITCH_GROUPS = {0, 0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5};
     public static final float[] ELDRITCH_GROUP_HARDNESS = {50.0F, 2.0F, 4.0F, -1.0F, 15.0F, 50.0F};
-    public static final float[] ELDRITCH_GROUP_RESISTANCE = {20000.0F, 30.0F, 100.0F, Float.MAX_VALUE, 30.0F, 20000.0F};
+    public static final float[] ELDRITCH_GROUP_RESISTANCE = {12000.0F, 30.0F, 100.0F, Float.MAX_VALUE, 30.0F, 12000.0F};
 
     /** The hardness group of an eldritch metadata. */
     public static int eldritchGroup(int variant) {
@@ -288,9 +294,13 @@ public final class EldritchBlockRules {
 
     // ------------------------------------------------------------- cosmetic opaque
 
-    /** BlockCosmeticOpaque:57-58 - family hardness 1.5 and blast resistance 5. */
+    /** BlockCosmeticOpaque:57-58 - family hardness 1.5 and the blast resistance setter value 5, effective 3.0. */
     public static final float COSMETIC_OPAQUE_HARDNESS = 1.5F;
-    public static final float COSMETIC_OPAQUE_RESISTANCE = 5.0F;
+    public static final float COSMETIC_OPAQUE_RESISTANCE = 3.0F;
+    /** BlockCosmeticOpaque:253-259 - the warded glass has a hardness of five, or none at all with the warded stone option. */
+    public static final float COSMETIC_OPAQUE_WARDED_HARDNESS = 5.0F;
+    /** BlockCosmeticOpaque:261-266 - the warded glass always resists an explosion with 999. */
+    public static final float COSMETIC_OPAQUE_WARDED_RESISTANCE = 999.0F;
 
     /** BlockCosmeticOpaque metadata 2 is the owned arcane door variant. */
     public static final int COSMETIC_OPAQUE_OWNED = 2;
@@ -493,15 +503,19 @@ public final class EldritchBlockRules {
         }
     }
 
-    /** BlockMetalDevice:101-103 - hardness 3 and blast resistance 17. */
+    /**
+     * BlockMetalDevice:101-103 - hardness 3 and the blast resistance setter value 17.
+     * The 1.7.10 setter stores three times the argument and the vanilla getter divides
+     * the stored value by five, so the effective blast resistance is 17*3/5 = 10.2.
+     */
     public static final float DEVICE_METAL_HARDNESS = 3.0F;
-    public static final float DEVICE_METAL_RESISTANCE = 17.0F;
-    /** BlockWoodenDevice - hardness 2 and blast resistance 10. */
+    public static final float DEVICE_METAL_RESISTANCE = 10.2F;
+    /** BlockWoodenDevice - hardness 2.5 and the blast resistance setter value 10, effective 6.0. */
     public static final float DEVICE_WOOD_HARDNESS = 2.0F;
-    public static final float DEVICE_WOOD_RESISTANCE = 10.0F;
-    /** BlockStoneDevice:72-73 - hardness 3 and blast resistance 25. */
+    public static final float DEVICE_WOOD_RESISTANCE = 6.0F;
+    /** BlockStoneDevice:72-73 - hardness 3 and the blast resistance setter value 25, effective 15.0. */
     public static final float DEVICE_STONE_HARDNESS = 3.0F;
-    public static final float DEVICE_STONE_RESISTANCE = 25.0F;
+    public static final float DEVICE_STONE_RESISTANCE = 15.0F;
 
     // --------------------------------------------------------------------- altar
 

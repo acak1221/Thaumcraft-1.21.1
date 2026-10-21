@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "variant=2": {
+      "model": "thaumcraft:block/cosmetic_opaque_warded"
+    }
+  }
+}

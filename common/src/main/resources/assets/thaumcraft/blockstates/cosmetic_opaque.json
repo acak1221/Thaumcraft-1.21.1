@@ -5,9 +5,6 @@
     },
     "variant=1": {
       "model": "thaumcraft:block/amber_bricks"
-    },
-    "variant=2": {
-      "model": "thaumcraft:block/warded_glass"
     }
   }
 }

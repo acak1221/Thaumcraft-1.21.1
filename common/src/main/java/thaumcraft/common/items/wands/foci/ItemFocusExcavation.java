@@ -152,7 +152,7 @@ public final class ItemFocusExcavation extends ItemFocusBasic {
                             if (player.containerMenu != player.inventoryMenu) player.containerMenu.broadcastChanges();
                         }
                     } else {
-                        int potency = FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.potency);
+                        int potency = ItemWandCasting.focusPotency(wand);
                         float speed = block.is(FAST_BLOCKS) ? .25F + potency * .25F : .05F + potency * .1F;
                         if (block.is(Blocks.OBSIDIAN)) speed *= 3F;
                         progress.amount = old + speed;

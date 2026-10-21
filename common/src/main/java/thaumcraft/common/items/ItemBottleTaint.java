@@ -1,5 +1,8 @@
 package thaumcraft.common.items;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -36,5 +39,15 @@ public final class ItemBottleTaint extends Item implements IScribeTools {
             if (!player.getAbilities().instabuild) stack.shrink(1);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    }
+
+    /**
+     * The original burst of the bottle at a spot: the taint splash and the taint fibres
+     * of the spot where the thrown bottle broke.
+     */
+    public static void burst(ServerLevel level, BlockPos pos, ServerPlayer player) {
+        EntityBottleTaint bottle = new EntityBottleTaint(level, player);
+        bottle.setPos(pos.getX() + .5D, pos.getY(), pos.getZ() + .5D);
+        bottle.burst(level);
     }
 }

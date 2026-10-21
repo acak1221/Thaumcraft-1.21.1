@@ -93,7 +93,7 @@ public final class ItemFocusShock extends ItemFocusBasic {
         ItemStack focus = FocusData.get(before);
         var orb = new EntityShockOrb(player.level(), player);
         orb.configure(4 + FocusUpgradeData.level(focus, FocusUpgradeType.enlarge) * 2,
-                (int)(5 + FocusUpgradeData.level(focus, FocusUpgradeType.potency) * 1.33));
+                (int)(5 + ItemWandCasting.focusPotency(before) * 1.33));
         player.serverLevel().addFreshEntity(orb);
         player.serverLevel().playSound(null, orb.getX(), orb.getY(), orb.getZ(), ZAP, SoundSource.PLAYERS,
                 1F, 1F + (player.level().random.nextFloat() - player.level().random.nextFloat()) * .2F);
@@ -130,7 +130,7 @@ public final class ItemFocusShock extends ItemFocusBasic {
         wand.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(paid));
         player.getInventory().setChanged();
 
-        int potency = FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.potency);
+        int potency = ItemWandCasting.focusPotency(wand);
         boolean chain = FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.chainlightning) > 0;
         int jumps = chain ? 2 + FocusUpgradeData.level(FocusData.get(wand), FocusUpgradeType.enlarge) * 2 : 0;
         ItemStack committed = wand.copy();

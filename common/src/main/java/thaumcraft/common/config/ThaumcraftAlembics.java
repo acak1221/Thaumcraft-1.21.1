@@ -23,7 +23,9 @@ public final class ThaumcraftAlembics {
 
     public static final RegistrySupplier<BlockAlembic> ALEMBIC = BLOCKS.register("alembic",
             () -> new BlockAlembic(BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3, 17).sound(SoundType.METAL).noOcclusion()));
+                    // Original BlockMetalDevice:102 - setResistance(17) stores 51 and the getter
+                    // divides it by five, so the effective blast resistance is 10.2.
+                    .strength(3, 10.2F).sound(SoundType.METAL).noOcclusion()));
     public static final RegistrySupplier<Item> ALEMBIC_ITEM = ITEMS.register("alembic",
             () -> new BlockItem(ALEMBIC.get(), new Item.Properties()));
     public static final RegistrySupplier<BlockEntityType<TileAlembic>> ALEMBIC_BLOCK_ENTITY = BLOCK_ENTITIES.register("alembic",

@@ -58,7 +58,15 @@ public class EntityTaintSwarm extends Monster implements ITaintedMob {
         super(type,level);
         moveControl=new MoveControl(this) { @Override public void tick() {} };
         jumpControl=new JumpControl(this) { @Override public void tick() {} };
+        applyAttackDamage();
     }
+    /**
+     * Original EntityTaintSwarm:100 - the attack damage is two plus the damage bonus.
+     * The original sets the attribute while the entity is created, so the bonus is
+     * zero there; a swarm that is restored from a save keeps the attribute it was
+     * created with, exactly like the original.
+     */
+    private void applyAttackDamage() { getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(2+damBonus); }
     public static AttributeSupplier.Builder createAttributes() { return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,30).add(Attributes.ATTACK_DAMAGE,2); }
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) { super.defineSynchedData(builder);builder.define(FLAGS,(byte)0); }
     public boolean getIsSummoned() { return (entityData.get(FLAGS)&2)!=0; }

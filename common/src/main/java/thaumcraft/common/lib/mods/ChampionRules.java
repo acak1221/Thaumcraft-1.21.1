@@ -318,6 +318,8 @@ public final class ChampionRules {
                 case WEAKNESS -> MobEffects.WEAKNESS;
                 case HUNGER -> MobEffects.HUNGER;
                 case POISON -> MobEffects.POISON;
+                // Original ChampionModGrim:26-30 - Potion.field_82731_v is the wither.
+                case WITHER -> MobEffects.WITHER;
                 case NONE -> null;
             };
         }

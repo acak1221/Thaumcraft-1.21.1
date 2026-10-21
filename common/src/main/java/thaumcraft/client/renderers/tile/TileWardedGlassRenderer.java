@@ -97,7 +97,7 @@ public final class TileWardedGlassRenderer implements BlockEntityRenderer<TileOw
     private static boolean isGlass(Level level, BlockPos pos) {
         if (!level.hasChunkAt(pos)) return false;
         var state = level.getBlockState(pos);
-        return state.getBlock() == ThaumcraftEldritchBlocks.COSMETIC_OPAQUE.get()
+        return state.getBlock() == ThaumcraftEldritchBlocks.COSMETIC_OPAQUE_WARDED.get()
                 && state.getValue(BlockCosmeticOpaque.VARIANT) == EldritchBlockRules.COSMETIC_OPAQUE_OWNED;
     }
 

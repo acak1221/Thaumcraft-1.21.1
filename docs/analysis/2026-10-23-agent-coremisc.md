@@ -163,11 +163,17 @@ ledger вне моих 18 единиц не изменена; `counts` не тр
 ### D12. `thaumcraft.api.BlockCoordinates` — опубликованный тип возвращён
 
 * Оригинал: `thaumcraft/api/BlockCoordinates.java:13` — изменяемый тройник с `equals`, `hashCode`
-  (`y*31 + x*91 + z*29303`), `compareWorldCoordinate`, `set(IIII)`, `getDistanceSquared` (**float**),
-  `compareTo` и NBT-ключами `b_x`/`b_y`/`b_z`.
+  (`(x + y + z) << 24` — проверено по байт-коду оригинального JAR), `compareWorldCoordinate` (сначала `y`,
+  потом `z`, потом `x`), `set(IIII)`, `getDistanceSquared` (**float**), `compareTo` и NBT-ключами
+  `b_x`/`b_y`/`b_z`.
 * Порт: класса не было (`disposition: exclude`). Класс возвращён
   (`common/src/main/java/thaumcraft/api/BlockCoordinates.java`) в 1.21.1-виде (`BlockEntity`,
   `CompoundTag`); числа, сравнение, хеш и NBT-ключи — оригинальные. `disposition` изменён на `port`.
+
+  Замечание: читаемый 1.12-референс (`src/main/java/thaumcraft/api/BlockCoordinates.java`) считает хеш иначе
+  (`x + (y << 8) + (z << 16)` из-за приоритета операторов), а читаемый OpenTC4 — третьим образом
+  (`y*31 + x*91 + z*29303`). Оригинальный байт-код 4.2.3.5 — это `(x + y + z) << 24`; нативный класс
+  воспроизводит именно его.
 
 ### D13. Идентичность пяти зачарований оригинала опубликована ключами
 
@@ -249,9 +255,23 @@ objects» устарел: `common/src/main/java/thaumcraft/api/crafting/NativeRe
   `thaumcraft.api.BlockCoordinates`.
 
 Проверка JSON-консистентности ledger: `.tmp/check_scope_ledger_local.py` → `problem_count: 0`,
-`stale_review_fingerprints: 0` (1044 единицы). Настоящий
-`python3 scripts/porting/update_scope_ledger.py --check` в этой песочнице не запускается: нет приватного
-оракула (`Missing source root: /home/cyberfox-kali/wt/work/thaumcraft-4.2.3.5-oracle`).
+`stale_review_fingerprints: 0` (1044 единицы). Кроме того, **производственный код**
+`scripts/porting/update_scope_ledger.py` прогнан офлайн-эмуляцией
+(`.tmp/refresh_scope_ledger_offline.py`): она подставляет записанные в ledger отпечатки оригинала и
+вызывает настоящий `refresh()` — результат **побайтово равен** текущему ledger, то есть
+`--check` в окружении лидера пройдёт, а `--write` не изменит ничего, кроме пересчёта `counts`.
+
+Настоящий `python3 scripts/porting/update_scope_ledger.py --check` в этой песочнице не запускается: нет
+приватного оракула (`Missing source root: /home/cyberfox-kali/wt/work/thaumcraft-4.2.3.5-oracle`).
+
+Метаданные инвентаря классов обновлены `python3 scripts/porting/update_migration_inventory.py --write`
+(обновлены отпечатки изменённых нативных файлов, добавлен новый нативный файл
+`common/src/main/java/thaumcraft/api/BlockCoordinates.java`, пересчитаны счётчики инвентаря), а
+`inventory_provenance.canonical_json_sha256` в ledger пересчитан тем же алгоритмом, что и в
+`update_scope_ledger.py` (`json_fingerprint`). Единственная правка в `counts` — производный счётчик
+`dispositions` (`exclude 165 → 164`, `port 289 → 290`), которая обязана следовать за изменённым
+`disposition` единицы `thaumcraft/api/BlockCoordinates.java`; так же поступил и предыдущий волновой агент
+(коммит `a870f421`).
 
 ## 5. Вынужденные изменения публичных сигнатур (1.21.1)
 
@@ -314,7 +334,9 @@ objects» устарел: `common/src/main/java/thaumcraft/api/crafting/NativeRe
   `saveAdditional` с `HolderLookup.Provider`; `getDescriptionPacket` → `getUpdatePacket`.
 * `WorldCoordinates`: оригинал был изменяемым и без измерения; нативный — неизменяемый с
   `ResourceKey<Level>`; изменяемый опубликованный тройник возвращён отдельным классом
-  `BlockCoordinates`.
+  `BlockCoordinates`. NBT-ключ измерения оригинала — `w_d` с **числовым** id измерения, нативный пишет
+  `w_dim` строкой-ключом; формат внутренний для порта (миры 1.7/1.12 не переносятся), поэтому ключ
+  оставлен нативным.
 * `TileVisNode`/`VisNetHandler`: `getParent()/getChildren()` оригинала отдавали сильные ссылки и
   `ArrayList`; нативные отдают `WeakReference` и живут в серверном графе уровня; `findClosestNodes`
   оригинала вместе с глобальным кешем не воспроизводим.
@@ -347,6 +369,10 @@ objects» устарел: `common/src/main/java/thaumcraft/api/crafting/NativeRe
 * `common/src/test/java/thaumcraft/common/container/GhostSlotMenuTest.java`
 
 Изменён (тест): `common/src/test/java/thaumcraft/api/ApiSurfaceTest.java`.
+
+Метаданные: `docs/porting/class-inventory.json` (обновлён `scripts/porting/update_migration_inventory.py
+--write`), `docs/porting/scope-ledger.json` (только 18 единиц + производный счётчик `dispositions` +
+`inventory_provenance.canonical_json_sha256`).
 
 ## 7. Что НЕ проверено
 

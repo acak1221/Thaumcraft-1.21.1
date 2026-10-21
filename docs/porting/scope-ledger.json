@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "54118fdce6f49bebac2f882c66cbf02f51c9835c06007929fd64f6097d2a4839",
+    "canonical_json_sha256": "ecb0acd6b3ff4685f970e968602a19d9bfe92632486074c5c8493a8826b97a54",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {
@@ -52,8 +52,8 @@
     "unique_native_counterparts": 57,
     "dispositions": {
       "adapt": 263,
-      "exclude": 165,
-      "port": 289,
+      "exclude": 164,
+      "port": 290,
       "replace": 327
     },
     "milestone_queue": {

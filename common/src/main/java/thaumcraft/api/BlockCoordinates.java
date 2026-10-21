@@ -55,8 +55,15 @@ public class BlockCoordinates implements Comparable<BlockCoordinates> {
         return this.x == coordinates.x && this.y == coordinates.y && this.z == coordinates.z;
     }
 
+    /**
+     * The original hash of the coordinate.
+     *
+     * <p>Original {@code thaumcraft/api/BlockCoordinates.java}: the hash is the sum of the three
+     * coordinates, shifted by eight and by sixteen bits. The readable 1.12 reference uses another
+     * formula; the 4.2.3.5 bytecode of the original is the one reproduced here.</p>
+     */
     @Override public int hashCode() {
-        return this.y * 31 + this.x * 91 + this.z * 29303;
+        return (this.x + this.y + this.z) << 24;
     }
 
     /**

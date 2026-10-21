@@ -38,6 +38,8 @@ import thaumcraft.common.lib.research.EntityAspectBindings;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
 import thaumcraft.common.lib.research.DeconstructionRules;
 import thaumcraft.common.lib.world.HungryNodeTrace;
+import thaumcraft.common.lib.world.NodeDischargeRules;
+import thaumcraft.common.lib.world.NodeStabilizerRules;
 
 /**
  * TC4 NORMAL/UNSTABLE/HUNGRY node state and lifecycle. Source: original TileNode.setAspects,
@@ -517,7 +519,11 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         if (!level.hasChunkAt(below) || !TileNodeStabilizer.powerAreaLoaded(level, below)) return;
         boolean powered = level.hasNeighborSignal(below);
         BlockState support = powered ? null : level.getBlockState(below);
-        byte next = !powered && support.is(ThaumcraftNodeDevices.NODE_STABILIZER.get()) ? (byte) 1 : 0;
+        // Original TileNode:885-889 - the node stabilizer gives the lock one and the ADVANCED node
+        // stabilizer (the original blockStoneDevice metadata ten) gives the lock two.
+        byte next = (byte) (support == null ? NodeStabilizerRules.NO_LOCK
+                : NodeStabilizerRules.lock(support.is(ThaumcraftNodeDevices.NODE_STABILIZER.get()),
+                        support.is(ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER.get())));
         // Queries are call-outs, not permission to modify a retired/replaced node.
         // Abandon a changed observation, without a new between-samples lock poll.
         if (!current() || !level.hasChunkAt(below) || !TileNodeStabilizer.powerAreaLoaded(level, below) || level.hasNeighborSignal(below) != powered
@@ -552,7 +558,10 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
 
     /** A stronger nearby normal node can bully a weaker one, as in TC4. */
     private boolean handleDischarge() {
-        if (nodeLock == 1 || nodeModifier == NodeModifier.FADING) return false;
+        // Original TileNode:559-560 - ONLY the invisible aura node block (the original blockAiry)
+        // takes part in the discharge. The silverwood knot and the totem host of the original
+        // never discharge and are never drained.
+        if (!mayDischarge(getBlockState().is(ThaumcraftContent.AURA_NODE.get()), nodeLock, nodeModifier)) return false;
         boolean shiny = nodeType == NodeType.HUNGRY || nodeModifier == NodeModifier.BRIGHT;
         int interval = nodeModifier == null ? 2 : shiny ? 1 : nodeModifier == NodeModifier.PALE ? 3 : 2;
         if (count % interval != 0) return false;
@@ -568,6 +577,8 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         if (level.isOutsideBuildHeight(otherPos) || !level.hasChunkAt(otherPos)
                 || !(level.getBlockEntity(otherPos) instanceof TileNode other)
                 || other.level != level || !other.current() || !current()) return false;
+        // Original TileNode:577-579 - the target of a discharge is an unlocked invisible aura node.
+        if (!mayDischargeInto(other.getBlockState().is(ThaumcraftContent.AURA_NODE.get()), other.nodeLock)) return false;
         if (other.transducing || other.nodeLock > 0) return false; // Original lock check BEFORE aspect-selection RNG; atomic capture cannot be bullied.
         int otherAverage = (other.aspects.visSize() + other.aspectsBase.visSize()) / 2;
         int thisAverage = (aspects.visSize() + aspectsBase.visSize()) / 2;
@@ -590,13 +601,33 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         return true;
     }
 
+    /**
+     * Original {@code TileNode:559-560,564-566}: the conditions of a discharge.
+     *
+     * <p>Only the invisible aura node block (the original {@code blockAiry}) discharges, a node
+     * under the node stabilizer (the lock one) never does, and a FADING node never does.</p>
+     */
+    public static boolean mayDischarge(boolean auraNodeHost, int lock, NodeModifier modifier) {
+        return NodeDischargeRules.mayDischarge(auraNodeHost, lock, modifier == NodeModifier.FADING);
+    }
+
+    /**
+     * Original {@code TileNode:577-579}: the target of a discharge.
+     *
+     * <p>The target is an invisible aura node without a stabilizer lock.</p>
+     */
+    public static boolean mayDischargeInto(boolean auraNodeHost, int otherLock) {
+        return NodeDischargeRules.mayDischargeInto(auraNodeHost, otherLock);
+    }
+
     private int regenerationInterval() {
-        int interval = nodeModifier == null ? 600 : switch (nodeModifier) {
-            case BRIGHT -> 400;
-            case PALE -> 900;
-            case FADING -> 0;
+        int interval = nodeModifier == null ? NodeStabilizerRules.BASE_INTERVAL : switch (nodeModifier) {
+            case BRIGHT -> NodeStabilizerRules.BRIGHT_INTERVAL;
+            case PALE -> NodeStabilizerRules.PALE_INTERVAL;
+            case FADING -> NodeStabilizerRules.FADING_INTERVAL;
         };
-        return nodeLock == 1 ? interval * 2 : interval;
+        // Original TileNode:644-650 - the lock one doubles the interval, the lock two multiplies it by twenty.
+        return NodeStabilizerRules.regenerationInterval(interval, nodeLock);
     }
 
     /** Original100-tick stability precedes its separate FADING repair roll. */
@@ -645,7 +676,12 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
     private boolean repairFading() {
         if (count % 100 != 0 || nodeModifier != NodeModifier.FADING || nodeLock == 0) return false;
         int before = count;
-        if (level.random.nextInt(12500) != 69 || !current() || count != before || nodeModifier != NodeModifier.FADING || nodeLock == 0) return false;
+        // Original TileNode:781 - the bound of the repair roll divides by the lock, so the
+        // advanced node stabilizer (the lock two) halves it.
+        int bound = NodeStabilizerRules.fadingRepairBound(nodeLock);
+        if (bound <= 0) return false;
+        if (level.random.nextInt(bound) != NodeStabilizerRules.FADING_REPAIR_ROLL
+                || !current() || count != before || nodeModifier != NodeModifier.FADING || nodeLock == 0) return false;
         nodeModifier = NodeModifier.PALE;
         return true;
     }

@@ -6,16 +6,18 @@ Unit list: `/home/cyberfox-kali/units/w2clientfx.txt` (37 units: 25 `client_rend
 7 `alchemy_and_essentia`, 5 `warp_creatures_and_ecology`).
 
 **The tests written here are authored but NOT executed** — this agent may not run Gradle.
+(The resumed session of section 8 runs them with a plain JUnit launcher instead; that is not Gradle.)
 
-Eleven units moved `partial -> parity_verified`:
+Thirteen units moved `partial -> parity_verified`:
 `thaumcraft/client/fx/WRMat4.java`, `thaumcraft/client/fx/WRVector3.java`,
 `thaumcraft/client/fx/bolt/FXLightningBolt.java`, `thaumcraft/client/fx/bolt/FXLightningBoltCommon.java`,
 `thaumcraft/client/fx/particles/FXBreaking.java`, `thaumcraft/client/fx/particles/FXEssentiaTrail.java`,
 `thaumcraft/client/fx/particles/FXWisp.java`, `thaumcraft/client/fx/particles/FXWispArcing.java`,
 `thaumcraft/client/fx/particles/FXWispEG.java`, `thaumcraft/client/gui/MappingThread.java`,
-`thaumcraft/common/config/MaterialTaint.java`.
+`thaumcraft/common/config/MaterialTaint.java`, `thaumcraft/client/lib/TCFontRenderer.java`,
+`thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java`.
 
-The other twenty-six stay `partial`; each one carries the exact remaining difference in the ledger.
+The other twenty-four stay `partial`; each one carries the exact remaining difference in the ledger.
 
 ---
 
@@ -369,3 +371,199 @@ Each item is a frame the leader must inspect; none of them can be proven by a co
 * The **fibre overlay of the taint** exists in the fabric module only, so the neo forge client has none.
 * The **scanned block overlay** of the original `RenderEventHandler` needs the scan data of the original
   client, which the 1.21.1 port does not keep.
+
+---
+
+# 8. The resumed session (2026-10-22, after the interrupted build)
+
+The session was interrupted while the branch carried the new `ParticleDeflection` helper, and the
+leader reported that `:common:compileJava` failed with about twenty `has protected access in Particle`
+errors. This section records what that blocker was, how it was fixed, what else was found, and what
+the leader must still verify on the real client.
+
+## 8.1 The compile blocker
+
+**What the leader saw.** The leader's committed tree (`f210f523`) fails `:common:compileJava` with
+twenty errors of the shape
+
+```
+common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:52: error: random has protected access in Particle
+common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:55: error: xd has protected access in Particle
+```
+
+I reproduced it against the real remapped 1.21.1 class: `net.minecraft.client.particle.Particle`
+declares `protected double xd; protected double yd; protected double zd;` and
+`protected final RandomSource random`, and it has **no** public setter for the velocity. A class that
+is not a subclass of `Particle` therefore cannot reach them, and the old static helper could never
+compile.
+
+**The fix and why this shape is correct.** The rule now lives in a **pure static function** that the
+particle classes call, and the particle classes assign the result to their own `this.xd/yd/zd`:
+
+* `common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:88-121` —
+  `public static Motion deflect(RandomSource random, boolean westOpen, …, double localX, double localY,
+  double localZ)`. It draws the two random numbers of the original, picks the face with the original
+  comparisons and returns the immutable `record Motion(double x, double y, double z)`.
+* `common/src/main/java/thaumcraft/client/fx/particles/ParticleDeflection.java:55-86` —
+  `public static Motion pushOutOfBlocks(Level level, RandomSource random, AABB box, double x, double y,
+  double z)`: the level bound wrapper that does the block lookups and calls the pure rule.
+* the three callers — `MonsterSpriteParticle.java:76`, `WarpGuardianParticle.java:51` and
+  `InfusionParticle.java:197` — assign `xd/yd/zd` themselves, which is legal because they are
+  subclasses of `Particle` and the protected fields are reachable through `this`.
+
+The behaviour is the original one, byte for byte:
+
+| oracle | rule |
+|---|---|
+| `FXWisp.java:225-294` (and the same body in `FXWispEG.java:110-139`, `FXEssentiaTrail.java:145-197`) | the push out of blocks |
+| `FXWisp.java:233-238` | the six neighbours that are **not** a normal cube are the open faces |
+| `FXWisp.java:241-264` | the face order west, east, down, up, north, south, each with a strict `<` against the best distance, the first distance wins `9999.0` |
+| `FXWisp.java:265-266` | the speed `rand.nextFloat() * 0.05f + 0.025f` and the jitter `(rand.nextFloat() - rand.nextFloat()) * 0.1f` |
+| `FXWisp.java:267-290` | the six assignments of the speed and of the jitter |
+| `FXWisp.java:232` | the condition `!isAirBlock(pos) && isBlockNormalCubeDefault(pos, true) && !isAnyLiquid(boundingBox)` |
+
+The 1.21.1 mapping of the 1.7.10 *normal cube* is `state.isSolidRender(level, pos) &&
+state.isCollisionShapeFullBlock(level, pos)`, the same predicate the port already uses for the
+1.7.10 `isBlockNormalCubeDefault` path in `common/lib/world/WardingCasts.java:62-66`. The old port
+code used `state.isAir() || !state.blocksMotion()`, which is **not** the same: a slab or a stair is not
+a normal cube in 1.7.10 (it is an open face), and `blocksMotion()` is true for it. The liquid test is
+the 1.7.10 `World.isAnyLiquid(AABB)` over the blocks the box of the mote touches.
+
+**The unit test never constructs a block.** `common/src/test/java/thaumcraft/client/fx/ParticleDeflectionTest.java`
+asserts the pure rule only: the six faces, the nearest face, the order of the faces in a tie, the
+speed and the jitter against the values of the real 1.21.1 random (computed with
+`RandomSource.create(seed)`), and the fact that a walled in mote still consumes the two random numbers
+of the original. No `Block` is constructed, so the registry freeze is never disturbed.
+
+## 8.2 The second compile error, in a file of the previous session
+
+`common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:119` called
+`level.getNearestPlayer(x, y, z, 6.0D)`. That four double overload **does not exist in 1.21.1**: the
+compiler bound the call to `getNearestPlayer(TargetingConditions, double, double, double)` and the
+build failed with *incompatible types: double cannot be converted to TargetingConditions*. This error
+was in the leader's tree as well (it came in with the previous session's brain jar commit).
+
+The original (oracle `thaumcraft/common/tiles/TileJarBrain.java:69`) uses the 1.7.10
+`world.getClosestPlayer(x, y, z, 6.0)`, the closest player that is neither in creative mode nor a
+spectator. The 1.21.1 name of that search is
+`getNearestPlayer(x, y, z, distance, excludeCreativePlayers)`, so the call is now
+`level.getNearestPlayer(pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, 6.0D, true)`.
+
+The leader's tree has **two more** errors of the same kind, in
+`common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:536` and `:560`
+(*incompatible types: int cannot be converted to Aspect*). They are not mine; they belong to the
+`w2api` branch and the leader has to merge that fix before the build is green.
+
+## 8.3 A third compile error in the shared test tree
+
+`common/src/test/java/thaumcraft/crafting/AspectBonusParityTest.java:113` used
+`BuiltInRegistries.ENCHANTMENT`, which does not exist in 1.21.1. The test now uses the dynamic
+registry of the brief:
+`RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY).lookupOrThrow(Registries.ENCHANTMENT)`.
+Without that, `:common:compileTestJava` fails for everybody.
+
+## 8.4 How the compile was verified without Gradle
+
+The leader runs every build with one shared Loom cache, so this agent may not start a daemon. The
+build was nevertheless verified with a plain `javac` against **the classpath the project itself uses**:
+the `minecraft-merged` jar of the project loom cache (the official Mojang mappings with the project
+access widener already applied by loom), the mojang remapped architectury and fabric api jars of the
+same cache, the newest datafixerupper and the module cache.
+
+* the `common` main sources of this branch: **0 errors**;
+* the `common` test sources of this branch: **0 errors**;
+* the leader's committed tree (`f210f523`) with the same classpath: **24 errors** — the twenty of the
+  `ParticleDeflection`, the one of the brain jar and the two of the `VisNetHandler`.
+
+The twenty three JUnit tests of this branch (section 5) were also **executed with a plain JUnit
+platform launcher** (`org.junit.platform.launcher`), not with Gradle: twenty two of the client fx
+tests pass. That is the only execution claim of this report; the leader still has to run the Gradle
+suite for the whole repository.
+
+## 8.5 The other defects of this session
+
+1. **The ethereal bloom drew a static square instead of the original light strip**
+   (`TileEtherealBloomRenderer`). The original (oracle
+   `thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java:74-77`) calls
+   `UtilsFX.renderFacingStrip(x + 0.5, y + scale1, z + 0.5, 0, scale1, 1.0, 32, 6, counter % 32,
+   partialTick, 0xAADDFF)`: a **camera facing** square of the half size `scale1` that shows **one cell**
+   of the thirty two by thirty two grid of `nodes.png` and that **scrolls** with the counter of the
+   tile, drawn with the additive blend `(770, 1)`. The native port drew a fixed axis aligned quad with
+   the whole texture and the ordinary alpha blend. The renderer now draws the camera facing square
+   with the original cell, the original colour and the original additive render state
+   (`TileEtherealBloomRenderer.java:49-73` and `:143-170`).
+2. **The cultist link line was a plain polyline** (`RenderCultist.java:56-84`). The original
+   (`RenderCultist.java:77` and `:83-176`) is a pair of crossed textured ribbons. The native port now
+   draws the same ribbons.
+3. **The drain line of the wand pedestal was drawn at twice the position of its block**
+   (`TileWandPedestalRenderer.java:61-79`). The block entity renderer of 1.21.1 draws in the space of
+   its own block (`LevelRenderer` translates the pose by `blockPos - camera` before the call), and the
+   native port used the **world** coordinates there, so the line was drawn at `block + world`. The
+   port now uses the original points relative to the block and the original floaty line.
+4. **The floaty line helper itself** (`common/src/main/java/thaumcraft/client/fx/FloatyLine.java`) is a
+   line by line port of the oracle `UtilsFX.drawFloatyLine` (`UtilsFX.java:733-817`): the distance, the
+   number of blocks, the length `blocks * (golemLinkQuality / 2)` with the original quality sixteen
+   (`Config.java:881`), the loop over `length * distance` steps, the fade `f3`, the sine wobble of the
+   three axes with the phase `coordinate % 16 + dist * (1 - f2) * quality / 2 - (time % 32767 / 5)`,
+   the vertex alpha `f3`, the scrolling coordinate `(1 - f2) * dist - time * speed` and the two crossed
+   ribbons with the additive blend `(770, 1)`.
+5. **The research book font** (`TCFontRenderer`): the proof that the native vanilla font is the
+   equivalent of the original. The oracle class is a copy of the vanilla 1.7.10 `FontRenderer` (the
+   same glyph atlas, `charWidth`, `glyphWidth` and `colorCode` fields) with the extra `FONT_GALACTIC`
+   atlas; the tree wide scan shows that `FONT_GALACTIC` and `textures/font/ascii_sga.png` have **no
+   reference outside their own declaration**, and the only instantiation of the class is
+   `GuiResearchRecipe.java:175` with `FONT_NORMAL`. The original therefore never drew the galactic
+   alphabet and always drew the vanilla font, which is what the native port does.
+
+## 8.6 The units of this session
+
+| unit | before | after | why |
+|---|---|---|---|
+| `thaumcraft/client/renderers/tile/TileEtherealBloomRenderer.java` | partial | **parity_verified** | the light strip is now the original camera facing scrolling cell |
+| `thaumcraft/client/lib/TCFontRenderer.java` | partial | **parity_verified** | the original is the vanilla font renderer with an atlas it never uses |
+| `thaumcraft/client/lib/UtilsFX.java` | partial | partial | the floaty line is the original one now; the equip progress curve and the two texture helpers remain |
+| `thaumcraft/client/fx/particles/FXWisp.java`, `FXWispEG.java`, `FXEssentiaTrail.java` | parity_verified | parity_verified | the push out of blocks is now the original rule, with the normal cube and the liquid test |
+| `thaumcraft/common/tiles/TileJarBrain.java` | partial | partial | the client tick compiles again and uses the original player search; the head turn is still invisible |
+
+## 8.7 The acceptance criteria of this session for the leader on the real client
+
+1. **Ethereal bloom** (`TileEtherealBloomRenderer`): the bloom of the ethereal bloom plant must show a
+   **small bright blue white square that always faces the camera**, it must **grow with the plant**
+   (its side is the growth counter divided by a hundred), it must **scroll through the cells of the
+   nodes texture** while the plant grows, and it must **glow** (additive) instead of washing the plant
+   out with a flat translucent square.
+2. **Cultist ritual link** (`RenderCultist`): the ritualist cleric that is linked to a ritual target
+   must show a **thin wispy ribbon** with the purple tint of the original, it must **wobble** and it
+   must **scroll** along its length. It must not be a plain straight line.
+3. **Wand pedestal drain link** (`TileWandPedestalRenderer`): a wand pedestal that drains a node must
+   show the **wispy line between the pedestal and the node**, and the line must **start at the
+   pedestal** (it was drawn at twice the position of the pedestal before this session).
+4. **Wisp and essentia motes in a solid block** (`MonsterSpriteParticle`, `WarpGuardianParticle`,
+   `InfusionParticle`): a mote that ends up inside a solid block must **leave through the nearest open
+   face** and it must not **tunnel through** a full block. A mote that is walled in on all six sides
+   must keep its own motion.
+5. **Brain jar** (`TileJarBrain`): unchanged from the previous session, but the client tick of the jar
+   now runs at all: an experience orb next to the jar must be **pulled in and swallowed**, and the
+   **brain sigh** must be audible every five to thirty seconds.
+6. **Research book** (`GuiResearchRecipe`): the text of the research book must be the **vanilla
+   1.21.1 font**, and **no galactic alphabet** may appear anywhere (the original never drew one).
+
+## 8.8 The blockers that are still open
+
+* The **equip progress** of the held item: the original eases towards its target with the factor
+  `0.4` of the gap, the native port moves towards it by at most `0.4` per tick. The 1.7.10 vanilla
+  `ItemRenderer.updateEquippedItem` is not part of the oracle, so the port's own transcription was
+  kept.
+* The **animated texture helpers** `getTextureAnimationSize` and `getTextureSize` of the original
+  `UtilsFX` have no native counterpart: the renderers that use them hold the same constants.
+* The **rune particles** of the warding stone (`FXBlockRunes`): the original spawns them from the
+  random update of the block (oracle `BlockCosmeticSolid.java:325-355`); the native port has the rune
+  particle but only the infusion matrix uses it.
+* The **two emissive inner slabs of the inventory render of the levitator**: a 1.21.1 item model has
+  no tint source for the two original colours `0x00A000` and `0xEECCFF`.
+* The **node jar growth** and the **brain jar head turn** still need a block entity renderer for the
+  two jar blocks.
+* The **`FXBoreSparkle`** unit belongs to the `advanced_devices_and_visnet` family and to the
+  `w2devices` agent, not to this unit list. Its agent already added
+  `client/fx/particles/BoreDigSparkleParticle.java` and the dig event of the original; this agent
+  only read it as a cross check and did not touch it.

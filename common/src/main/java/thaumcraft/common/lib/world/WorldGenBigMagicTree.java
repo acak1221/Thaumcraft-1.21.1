@@ -19,6 +19,12 @@ import net.minecraft.world.level.block.Blocks;
  * from1.7. The state is deliberately transient, as it was not saved in TC4.
  * No vanilla fancy-oak feature or Greatwood geometry substitutes this tree. */
 public final class WorldGenBigMagicTree {
+    /** Oracle WorldGenBigMagicTree:354 - the tree draws 11 + nextInt(12) as its height limit. */
+    public static final int MIN_HEIGHT_LIMIT = 11;
+    /** Oracle WorldGenBigMagicTree:354 - the tree draws 11 + nextInt(12) as its height limit. */
+    public static final int HEIGHT_LIMIT_ROLLS = 12;
+    /** Oracle WorldGenBigMagicTree:354 - the tree draws 11 + nextInt(12) as its height limit. */
+    public static final int MAX_HEIGHT_LIMIT = MIN_HEIGHT_LIMIT + HEIGHT_LIMIT_ROLLS - 1;
     private static final int[] OTHER_COORDS = {2, 0, 0, 1, 2, 1};
     private static final Map<ServerLevel, HeightState[]> WORLD_HEIGHTS = new WeakHashMap<>();
     private static final class HeightState { int value; }
@@ -44,7 +50,7 @@ public final class WorldGenBigMagicTree {
         random.setSeed(callerRandom.nextLong());
         base[0] = origin.getX(); base[1] = origin.getY(); base[2] = origin.getZ();
         heightLimit = state.value;
-        if (heightLimit == 0) heightLimit = 11 + random.nextInt(12);
+        if (heightLimit == 0) heightLimit = MIN_HEIGHT_LIMIT + random.nextInt(HEIGHT_LIMIT_ROLLS);
         try {
             if (!validTreeLocation()) return false;
             generateLeafNodeList(); generateLeaves(); generateTrunk(); generateLeafNodeBases();
@@ -52,10 +58,28 @@ public final class WorldGenBigMagicTree {
         } finally { state.value = heightLimit; }
     }
 
+    /**
+     * The number of leaf nodes one layer of the canopy carries.
+     *
+     * <p>Oracle {@code WorldGenBigMagicTree:39}:
+     * {@code (int)(1.382 + Math.pow(this.leafDensity * (double)this.heightLimit / (double)13.0F, 2.0F))}
+     * with {@code leafDensity} of the field initialiser, {@code 1.0F}
+     * ({@code WorldGenBigMagicTree:23}). The {@code 0.8} of
+     * {@code setScale}({@code WorldGenBigMagicTree:343}) is only the scale
+     * factor of the removed 1.6 tree, and {@code setScale} is never called for
+     * the TC4 tree: {@code new WorldGenBigMagicTree(false)} is the only
+     * construction of the original. The factor 0.8 therefore shrank the canopy
+     * of every tree whose height was 11, 12, 17, 18, 19, 20 or 22 by one leaf
+     * node per layer.
+     */
+    public static int leafNodeCount(int heightLimit) {
+        return Math.max(1, (int) (1.382 + Math.pow(heightLimit / 13.0, 2)));
+    }
+
     private void generateLeafNodeList() {
         height = (int)(heightLimit * .6618);
         if (height >= heightLimit) height = heightLimit - 1;
-        int count = Math.max(1, (int)(1.382 + Math.pow(.8 * heightLimit / 13.0, 2)));
+        int count = leafNodeCount(heightLimit);
         int[][] nodes = new int[count * heightLimit][4];
         int y = base[1] + heightLimit - LEAF_DISTANCE_LIMIT;
         int used = 1;

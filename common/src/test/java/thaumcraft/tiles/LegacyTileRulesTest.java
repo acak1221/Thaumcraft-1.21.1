@@ -152,12 +152,32 @@ class LegacyTileRulesTest {
         assertFalse(LegacyTileRules.lampLightExpires(200, true));
     }
 
-    @Test void theDeathFluidHoldsFourQuantaAndHurtsForQuantaPlusOne() {
+    @Test void theDeathFluidHoldsFourQuantaAndHurtsForItsQuanta() {
         assertEquals(4, LegacyTileRules.DEATH_FLUID_QUANTA);
-        assertEquals(1, LegacyTileRules.deathFluidDamage(0));
-        assertEquals(4, LegacyTileRules.deathFluidDamage(3));
+        // The original BlockFluidDeath:57 hurts a living thing with the metadata of its cell plus one, and
+        // the original finite fluid keeps the quanta of a cell in its metadata, so the damage IS the quanta of
+        // the cell: four in the source cell, one in the thinnest cell.
+        assertEquals(4, LegacyTileRules.deathFluidDamage(0), "the source cell holds four quanta");
+        assertEquals(3, LegacyTileRules.deathFluidDamage(1));
+        assertEquals(2, LegacyTileRules.deathFluidDamage(2));
+        assertEquals(1, LegacyTileRules.deathFluidDamage(3), "the thinnest cell holds one quantum");
         assertTrue(LegacyTileRules.deathFluidHurts(false));
         assertFalse(LegacyTileRules.deathFluidHurts(true));
+    }
+
+    @Test void theDeathFluidMetadataOfTheOriginalIsMirrored() {
+        // The original bucket of death pours the fluid with the metadata three (oracle ItemBucketDeath:103)
+        // and the original refill event demands exactly that metadata (oracle EventHandlerWorld:216-223).
+        assertEquals(3, LegacyTileRules.DEATH_FLUID_BUCKET_METADATA);
+        // The original finite fluid keeps the quanta of a cell in its metadata (metadata = quanta - 1), so the
+        // metadata three is the cell with all four quanta, the source cell, and the native level zero is that
+        // very cell.
+        assertEquals(3, LegacyTileRules.deathFluidOriginalMetadata(0), "the source cell is the original metadata three");
+        assertEquals(2, LegacyTileRules.deathFluidOriginalMetadata(1));
+        assertEquals(1, LegacyTileRules.deathFluidOriginalMetadata(2));
+        assertEquals(0, LegacyTileRules.deathFluidOriginalMetadata(3), "the thinnest cell is the original metadata zero");
+        assertEquals(0, LegacyTileRules.deathFluidLevelForOriginalMetadata(3), "the original metadata three is the source cell");
+        assertEquals(3, LegacyTileRules.deathFluidLevelForOriginalMetadata(0));
     }
 
     @Test void theDeathFluidCellTakesTheLevelOfItsStrongestNeighbour() {

@@ -61,6 +61,13 @@ public final class ItemHandMirror extends Item implements ContainerHandMirror.Br
     public static MirrorLink link(ItemStack stack) { return stack.get(ThaumcraftLegacyItems.MIRROR_LINK.get()); }
 
     /**
+     * Original ItemHandMirror.func_77636_d: a hand mirror with an NBT compound glints, and a fresh one does
+     * not. The link is the only state the original mirror ever stored in its NBT, so the linked mirror is the
+     * glinting one.
+     */
+    @Override public boolean isFoil(ItemStack stack) { return DeviceContainerRules.handMirrorGlints(link(stack) != null); }
+
+    /**
      * Original ItemHandMirror.onItemUseFirst: right clicking a mirror links the hand mirror to it, with the jar sound and the original's
      * message. Right clicking anything else does nothing.
      */

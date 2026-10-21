@@ -103,6 +103,23 @@ public final class RunicBaubleRules {
 
     public static List<BlankBauble> blankBaubles() { return BLANKS; }
 
+    /**
+     * The blank baubles the original showed in the creative tab.
+     *
+     * <p>Original ItemBaubleBlanks.func_150895_a (getSubItems) adds exactly three stacks to the tab: the
+     * metadata 0 the amulet, the metadata 1 the ring and the metadata 2 the belt (oracle
+     * {@code thaumcraft/common/items/baubles/ItemBaubleBlanks.java:73-77}). The six discount rings of the
+     * metadata 3..8 are NOT in the tab: they reach the player through the loot bags (oracle
+     * {@code Config.java:536-538} and 572) and through the wizard trade (oracle
+     * {@code VillageWizardManager.java:51}), never through the creative tab.</p>
+     */
+    public static List<BlankBauble> creativeTabBlanks() {
+        return BLANKS.stream().filter(blank -> blank.metadata() <= CREATIVE_TAB_METADATA_LIMIT).toList();
+    }
+
+    /** The highest metadata the original creative tab listed: the belt, the metadata two. */
+    public static final int CREATIVE_TAB_METADATA_LIMIT = 2;
+
     /** The original blank bauble of a metadata value. */
     public static BlankBauble blank(int metadata) {
         for (BlankBauble blank : BLANKS) if (blank.metadata() == metadata) return blank;

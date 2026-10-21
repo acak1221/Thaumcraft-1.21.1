@@ -13,6 +13,7 @@ import thaumcraft.common.items.wands.WandMaterials;
 import thaumcraft.common.items.wands.WandRodPassive;
 import thaumcraft.common.lib.baubles.RunicBaubleRules;
 import thaumcraft.common.lib.baubles.RunicBaubleRules.AnyPrimalRefill;
+import thaumcraft.common.lib.baubles.RunicBaubleRules.BlankBauble;
 import thaumcraft.common.lib.baubles.RunicBaubleRules.Cap;
 import thaumcraft.common.lib.baubles.RunicBaubleRules.CultistPiece;
 import thaumcraft.common.lib.baubles.RunicBaubleRules.DyeShare;
@@ -72,6 +73,18 @@ class RunicBaubleRulesTest {
             assertEquals(RunicBaubleRules.PRIMALS.get(index), RunicBaubleRules.blank(3 + index).discountAspect(), "metadata " + (3 + index));
         assertEquals(9, RunicBaubleRules.blankBaubles().size());
         assertThrows(IllegalArgumentException.class, () -> RunicBaubleRules.blank(9));
+    }
+
+    @Test void onlyTheThreeMundaneBlanksAreInTheCreativeTab() {
+        // Original ItemBaubleBlanks.func_150895_a (getSubItems) lists exactly the metadata 0, 1 and 2
+        // (oracle thaumcraft/common/items/baubles/ItemBaubleBlanks.java:73-77). The six discount rings of the
+        // metadata 3..8 are not in the tab: they come from the loot bags and from the wizard trade.
+        assertEquals(2, RunicBaubleRules.CREATIVE_TAB_METADATA_LIMIT);
+        List<String> shown = RunicBaubleRules.creativeTabBlanks().stream().map(BlankBauble::id).toList();
+        assertEquals(List.of("mundane_amulet", "mundane_ring", "mundane_belt"), shown);
+        for (BlankBauble blank : RunicBaubleRules.blankBaubles())
+            if (blank.metadata() > 2) assertFalse(shown.contains(blank.id()),
+                    "the discount ring " + blank.id() + " must not be in the creative tab");
     }
 
     @Test void theCultistArmourKeepsItsOriginalProtectionDurabilityRarityDiscountAndWarp() {

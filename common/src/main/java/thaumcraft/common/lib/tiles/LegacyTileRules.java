@@ -192,8 +192,52 @@ public final class LegacyTileRules {
 
     /** BlockFluidDeath:41 - one block holds four quanta of death fluid. */
     public static final int DEATH_FLUID_QUANTA = 4;
-    /** BlockFluidDeath:57 - the damage of the death fluid is its quanta plus one. */
-    public static int deathFluidDamage(int quanta) { return quanta + 1; }
+
+    /**
+     * The metadata the original bucket of death pours (oracle ItemBucketDeath:103,
+     * {@code world.setBlock(x, y, z, ConfigBlocks.blockFluidDeath, 3, 3)}) and the metadata the original
+     * refill event demands (oracle EventHandlerWorld:216-223, {@code getBlockMetadata == 3}).
+     *
+     * <p>The original death fluid is a Forge finite fluid (1.7.10 {@code BlockFluidFinite}), and Forge stores
+     * the QUANTA of a cell in its metadata: {@code getQuantaValue} returns {@code metadata + 1}, so the
+     * metadata three is the cell that still holds all four quanta, the source cell. The native port keeps the
+     * vanilla liquid LEVEL property, whose zero IS the source cell, so the two encodings are mirrored:
+     * {@code metadata = 3 - level}.</p>
+     */
+    public static final int DEATH_FLUID_BUCKET_METADATA = 3;
+
+    /**
+     * The metadata of the original 1.7.10 death fluid cell that carries the given native level. The original
+     * stores the quanta of a cell in its metadata (metadata = quanta - 1), so the source cell of the native
+     * level zero is the original metadata three, the cell the original bucket of death pours.
+     */
+    public static int deathFluidOriginalMetadata(int level) {
+        return deathFluidQuanta(level) - 1;
+    }
+
+    /**
+     * The native level of the original death fluid cell that carries the given 1.7.10 metadata. The original
+     * metadata three is the source cell, the native level zero.
+     */
+    public static int deathFluidLevelForOriginalMetadata(int metadata) {
+        return DEATH_FLUID_QUANTA - 1 - metadata;
+    }
+
+    /**
+     * The quanta a native death fluid cell holds: four in the source cell and one less in every step away
+     * from it.
+     */
+    public static int deathFluidQuanta(int level) {
+        if (level <= 0) return DEATH_FLUID_QUANTA;
+        return Math.max(0, DEATH_FLUID_QUANTA - level);
+    }
+
+    /**
+     * BlockFluidDeath:57 - the damage of the death fluid is the metadata of its cell plus one. The original
+     * metadata is the quanta of the cell minus one, so the damage IS the quanta of the cell: four in the
+     * source cell and one in the thinnest cell.
+     */
+    public static int deathFluidDamage(int level) { return deathFluidQuanta(level); }
     /** BlockFluidDeath:57 - the death fluid never hurts a client side world. */
     public static boolean deathFluidHurts(boolean clientSide) { return !clientSide; }
 

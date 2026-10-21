@@ -488,10 +488,14 @@ public final class DeferredItemDrops extends SavedData {
 
     /** Paid Pure bucket pickup overflow/refund, with the original player throw
      * and40-tick pickup delay; it has no PechDrop marker. Caller already consumed
-     * its actual empty container/source before routing this single result. */
+     * its actual empty container/source before routing this single result. The
+     * bucket of death (oracle EventHandlerWorld:212-223) is the second paid
+     * bucket result of the original. */
     public static void enqueueBucketReturn(ServerLevel level, net.minecraft.world.entity.player.Player player, ItemStack actualResult) {
-        if(actualResult==null||actualResult.isEmpty()||!actualResult.is(net.minecraft.world.item.Items.BUCKET)&&!actualResult.is(thaumcraft.common.config.ThaumcraftSpa.BUCKET_PURE.get()))
-            throw new IllegalArgumentException("Paid Pure bucket result required");
+        if(actualResult==null||actualResult.isEmpty()||!actualResult.is(net.minecraft.world.item.Items.BUCKET)
+                &&!actualResult.is(thaumcraft.common.config.ThaumcraftSpa.BUCKET_PURE.get())
+                &&!actualResult.is(thaumcraft.common.config.ThaumcraftLegacyItems.BUCKET_DEATH.get()))
+            throw new IllegalArgumentException("Paid bucket result required");
         enqueuePaidContainerReturn(level,player,actualResult,false);
     }
 

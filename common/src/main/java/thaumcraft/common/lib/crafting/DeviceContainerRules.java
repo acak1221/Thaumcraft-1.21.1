@@ -61,6 +61,13 @@ public final class DeviceContainerRules {
     /** Oracle ContainerHandMirror:65 - an equal stack opens the player inventory. */
     public static boolean handMirrorShowsLinkedInventory(boolean slotEmpty, boolean slotEqualsMirror) { return !slotEmpty && slotEqualsMirror; }
 
+    /**
+     * Oracle ItemHandMirror:96-98 (func_77636_d, hasEffect): a hand mirror glints when it carries an NBT
+     * compound, and the link is the only state the original mirror ever wrote into its NBT, so the linked
+     * mirror is the glinting one.
+     */
+    public static boolean handMirrorGlints(boolean linked) { return linked; }
+
     /** What the hand mirror found when it looked for the mirror it is linked to. */
     public enum HandMirrorTarget {
         /** Oracle ItemHandMirror:158 - the hand mirror carries no link at all. */

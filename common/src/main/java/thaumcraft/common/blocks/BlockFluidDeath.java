@@ -12,7 +12,9 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.config.ThaumcraftLegacyTiles;
 import thaumcraft.common.lib.tiles.LegacyTileRules;
 
@@ -74,13 +77,39 @@ public final class BlockFluidDeath extends LiquidBlock {
     @Override public MapCodec<LiquidBlock> codec() { return CODEC; }
 
     /** The original quants of a cell: four in the source and one less in every step away from it. */
-    public static int quanta(int level) {
-        if (level <= 0) return QUANTA_PER_BLOCK;
-        return Math.max(0, QUANTA_PER_BLOCK - level);
+    public static int quanta(int level) { return LegacyTileRules.deathFluidQuanta(level); }
+
+    /** The damage the death fluid does in a cell: the quanta of the cell. */
+    public static int damage(int level) { return LegacyTileRules.deathFluidDamage(level); }
+
+    /**
+     * The metadata the original bucket of death pours and the original refill event demands
+     * (oracle ItemBucketDeath:103 and EventHandlerWorld:216-223): the metadata three, which the original
+     * finite fluid uses for the cell that still holds all four quanta, the source cell.
+     */
+    public static final int BUCKET_CELL_METADATA = LegacyTileRules.DEATH_FLUID_BUCKET_METADATA;
+
+    /**
+     * The native level of the original bucket cell: the source cell of the native liquid level property.
+     * The original stored the quanta of a cell in its metadata (metadata = quanta - 1), so the original
+     * metadata three is the native level zero.
+     */
+    public static int bucketCellLevel() { return LegacyTileRules.deathFluidLevelForOriginalMetadata(BUCKET_CELL_METADATA); }
+
+    /** The state the original bucket of death pours: the cell whose original metadata is three. */
+    public static BlockState bucketCellState() {
+        return ThaumcraftLegacyTiles.DEATH_FLUID.get().defaultBlockState();
     }
 
-    /** The damage the death fluid does in a cell: the quanta of the cell plus one. */
-    public static int damage(int level) { return LegacyTileRules.deathFluidDamage(level); }
+    /**
+     * Whether the state is the original bucket cell: a death fluid block whose original metadata is three,
+     * the source cell the original bucket of death pours and the original refill event demands.
+     */
+    public static boolean isBucketCell(BlockState state) {
+        if (state == null || !(state.getBlock() instanceof BlockFluidDeath)) return false;
+        if (!state.hasProperty(LEVEL)) return false;
+        return LegacyTileRules.deathFluidOriginalMetadata(state.getValue(LEVEL)) == BUCKET_CELL_METADATA;
+    }
 
     @Override protected FluidState getFluidState(BlockState state) {
         // A state of another block owns no level at all, so it never carries one.
@@ -89,6 +118,20 @@ public final class BlockFluidDeath extends LiquidBlock {
         if (level <= 0) return fluid.getSource(false);
         if (level < QUANTA_PER_BLOCK) return fluid.getFlowing(QUANTA_PER_BLOCK - level, false);
         return Fluids.EMPTY.defaultFluidState();
+    }
+
+    /**
+     * The original refill of the bucket of death (oracle EventHandlerWorld:216-223): the cell whose original
+     * metadata is three is removed and the bucket of death is the result.
+     *
+     * <p>The native liquid pickup would remove the source cell and hand out the AIR bucket of the death fluid
+     * (the original death fluid has no bucket item of its own), so the cell would be lost without a result.
+     * The bucket of death is therefore the pickup of that one cell.</p>
+     */
+    @Override public ItemStack pickupBlock(Player player, LevelAccessor level, BlockPos pos, BlockState state) {
+        if (!isBucketCell(state)) return ItemStack.EMPTY;
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+        return new ItemStack(ThaumcraftLegacyItems.BUCKET_DEATH.get());
     }
 
     /**

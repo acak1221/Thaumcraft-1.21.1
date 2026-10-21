@@ -60,6 +60,12 @@ class DeviceContainerRulesTest {
         assertFalse(DeviceContainerRules.handMirrorCanTransport(true, false));
         assertTrue(DeviceContainerRules.handMirrorCanTransport(true, true));
     }
+    @Test void onlyALinkedHandMirrorGlints() {
+        // Original ItemHandMirror:96-98 (func_77636_d, hasEffect): the hand mirror glints when it carries
+        // an NBT compound, and the link is the only state it ever wrote into its NBT.
+        assertFalse(DeviceContainerRules.handMirrorGlints(false), "a fresh hand mirror does not glint");
+        assertTrue(DeviceContainerRules.handMirrorGlints(true), "a linked hand mirror glints");
+    }
     @Test void handMirrorShowsTheLinkedInventoryForAnEqualStackOnly() {
         assertFalse(DeviceContainerRules.handMirrorShowsLinkedInventory(true, true));
         assertFalse(DeviceContainerRules.handMirrorShowsLinkedInventory(false, false));

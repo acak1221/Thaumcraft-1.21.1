@@ -102,16 +102,19 @@ class EldritchPortalParityTest {
         // RenderCultistPortal:95-108 - the frame is counted backwards and the u
         // of the frame runs from the left to the right and its v from the bottom
         // to the top.
-        float[] uv = RenderCultistPortal.frameUv(15);
+        float[] uv = RenderCultistPortal.frameUv(0);
         assertEquals(8, uv.length, "the four corners of the portal carry two coordinates");
-        assertEquals(1.0F, uv[0], EPS, "the u of the bottom right corner");
+        assertEquals(0.0625F, uv[0], EPS, "the u of the bottom right corner");
         assertEquals(0.0F, uv[1], EPS, "the v of the bottom right corner");
-        assertEquals(1.0F, uv[2], EPS, "the u of the top right corner");
+        assertEquals(0.0625F, uv[2], EPS, "the u of the top right corner");
         assertEquals(1.0F, uv[3], EPS, "the v of the top right corner");
         assertEquals(0.0F, uv[4], EPS, "the u of the top left corner");
         assertEquals(1.0F, uv[5], EPS, "the v of the top left corner");
         assertEquals(0.0F, uv[6], EPS, "the u of the bottom left corner");
         assertEquals(0.0F, uv[7], EPS, "the v of the bottom left corner");
+        // The original counts the frames backwards, the first frame of the
+        // animation is the last one of the sheet.
+        assertEquals(1.0F, RenderCultistPortal.frameUv(15)[0], EPS, "the u of the last frame");
     }
 
     // ------------------------------------------------------------- the crystal

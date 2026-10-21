@@ -71,6 +71,6 @@ public final class CameraBasis {
     /** The original mirror of the basis in the third person view. */
     public static boolean thirdPerson() {
         var minecraft = Minecraft.getInstance();
-        return minecraft.gameRenderer != null && minecraft.gameRenderer.getMainCamera().isThirdPerson();
+        return minecraft.options != null && !minecraft.options.getCameraType().isFirstPerson();
     }
 }

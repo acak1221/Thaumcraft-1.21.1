@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -490,6 +491,16 @@ public final class ThaumcraftEldritchBlocks {
         @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return Shapes.block(); }
         @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
             return kind == 0 ? new TileJarBrain(pos, state) : new TileJarNode(pos, state);
+        }
+
+        /**
+         * Original TileJarBrain:48-50 - the brain jar keeps updating. The original node jar updates as well,
+         * but its own update does nothing, so only the brain jar needs a ticker here.
+         */
+        @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+                Level level, BlockState state, BlockEntityType<T> type) {
+            if (kind != 0) return null;
+            return createTickerHelper(type, JAR_BRAIN_TILE.get(), TileJarBrain::tick);
         }
 
         /**

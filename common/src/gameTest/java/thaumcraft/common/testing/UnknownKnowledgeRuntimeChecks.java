@@ -124,6 +124,10 @@ public final class UnknownKnowledgeRuntimeChecks {
             int index = 0;
             for (Item variant : List.of(ThaumcraftUnknownKnowledge.UNKNOWN_NOTE.get(), ThaumcraftUnknownKnowledge.UNKNOWN_NOTE_24.get())) {
                 player.setGameMode(index++ == 0 ? GameType.CREATIVE : GameType.SURVIVAL);
+                // Every fragment drops where its actor stands, so the second note is used three
+                // blocks away: two knowledge fragments on the same spot would merge into one stack
+                // and the scenario could not read the original amount of each of them.
+                player.setPos(Vec3.atCenterOf(pos).add(3.0 * (index - 1), 0, 0));
                 var held = new ItemStack(variant, 2); player.setItemInHand(InteractionHand.MAIN_HAND, held);
                 var beforeKnowledge = knowledge.save(); Set<UUID> before = new HashSet<>(pendingIds(test));
                 player.gameMode.useItem(player, level, held, InteractionHand.MAIN_HAND);

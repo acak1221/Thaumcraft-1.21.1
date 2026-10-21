@@ -49,6 +49,12 @@ public final class ClientSetup {
         dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level ->
                 thaumcraft.api.ThaumcraftApi.installRecipeManager(level.getRecipeManager(), level.registryAccess()));
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initClient();
+        // The original block visual channels: the arc lightning, the node bolt and the crucible bubbles.
+        thaumcraft.common.lib.network.BlockFxNetworking.initClient(thaumcraft.client.fx.BlockFxClientEffects::accept);
+        // The original EventHandlerNetwork.clientLogsOut restores the client's own state when the connection
+        // ends (oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:69-81). The common layer owns
+        // that restore, so every loader behaves like the original.
+        thaumcraft.client.ClientStateReset.init();
         thaumcraft.client.lib.PlayerNotifications.init();
         thaumcraft.client.ThaumcraftMonsterClient.init();
         thaumcraft.client.ThaumcraftRunicClient.init();

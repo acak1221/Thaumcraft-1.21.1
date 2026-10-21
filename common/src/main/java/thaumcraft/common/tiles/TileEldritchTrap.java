@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -41,6 +42,10 @@ public final class TileEldritchTrap extends BlockEntity {
         }
         if (player == null) return;
         player.hurt(level.damageSources().magic(), 2.0F);
+        // Original TileEldritchTrap:40 - the trap draws the node bolt to the player it hit.
+        if (level instanceof ServerLevel server) thaumcraft.common.lib.network.BlockFxNetworking.sendZap(server,
+                new net.minecraft.world.phys.Vec3(pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D),
+                new net.minecraft.world.phys.Vec3(player.getX(), player.getEyeY(), player.getZ()));
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {

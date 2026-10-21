@@ -2,7 +2,6 @@ package thaumcraft.common.lib.world;
 
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.entities.golems.GolemUsePlatform;
 import thaumcraft.common.items.equipment.ItemElementalAxe;
+import thaumcraft.common.lib.network.BlockFxNetworking;
 
 /**
  * Player chopping with the Axe of the Stream (original ItemElementalAxe.onBlockStartBreak).
@@ -35,12 +35,15 @@ import thaumcraft.common.items.equipment.ItemElementalAxe;
  *
  * Declared adaptations: the 150..299-tick neighbourhood update sweep is not replayed
  * (native leaf shape updates, and the magical logs' own decay start, do that work);
- * feedback is native bubble-pop particles plus the original bubble sound at the anchor.
+ * the feedback is the original crucible bubble channel of the broken log plus the
+ * original bubble sound at the anchor.
  */
 public final class StreamAxeHarvest {
     private static final ThreadLocal<Scope> ACTIVE = new ThreadLocal<>();
     private static final SoundEvent BUBBLE = SoundEvent.createVariableRangeEvent(
             ResourceLocation.fromNamespaceAndPath("thaumcraft", "bubble"));
+    /** The original ItemElementalAxe:152 bubble colour, the java.awt.Color of 0.33/0.33/1.0. */
+    private static final int BUBBLE_COLOUR = 0x5454ff;
 
     private StreamAxeHarvest() {}
 
@@ -70,8 +73,8 @@ public final class StreamAxeHarvest {
             ACTIVE.remove();
         }
         if (scope.removed) {
-            level.sendParticles(ParticleTypes.BUBBLE_POP, anchor.getX() + 0.5, anchor.getY() + 0.5, anchor.getZ() + 0.5,
-                    10, 0.3, 0.3, 0.3, 0.02);
+            // Original ItemElementalAxe:152 - the crucible bubbles of the broken log, in the original colour.
+            BlockFxNetworking.sendBubble(level, anchor, BUBBLE_COLOUR);
             level.playSound(null, anchor, BUBBLE, SoundSource.PLAYERS, 0.15F, 1.0F);
             StreamAxeItemMotion.followNewDrops(player, endpoint, before);
         }

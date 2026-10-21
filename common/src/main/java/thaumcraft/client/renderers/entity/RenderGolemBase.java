@@ -125,8 +125,6 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
         }
     }
 
-    /** Original G:170–191: core11 always displays a rod, independently of cargo
-     * or a live cast. This stack never enters equipment, saves, drops or stock. */
     /**
      * Original RenderGolemBase:116-141 — the installed upgrades are shown as small flat icons in a
      * row on the golem's back. The original draws one icon per upgrade SLOT (the free slots show
@@ -191,6 +189,8 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
         }
     }
 
+    /** Original G:170–191: core11 always displays a rod, independently of cargo
+     * or a live cast. This stack never enters equipment, saves, drops or stock. */
     private static final class FishingRodLayer extends RenderLayer<EntityGolemBase, ModelGolem<EntityGolemBase>> {
         private final ItemRenderer items;
         private final ItemStack rod = new ItemStack(Items.FISHING_ROD);

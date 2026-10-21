@@ -2,15 +2,14 @@ package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import thaumcraft.client.renderers.CameraBasis;
 import thaumcraft.common.tiles.TileEldritchPortal;
 
 /**
@@ -21,17 +20,16 @@ import thaumcraft.common.tiles.TileEldritchPortal;
  * picks the frame with {@code System.nanoTime() / 50000000 % 16} and scales the
  * quad with the opening counter of the portal.
  *
- * <p>Oracle {@code TileEldritchPortalRenderer.java:38-60}: the corners of the
- * quad are the four corners of a unit square in the camera frame
- * ({@code -left - up}, {@code -left + up}, {@code left + up} and
- * {@code left - up}), the horizontal part is multiplied by
- * {@code scale = min(openCount, 5) / 5} and the vertical part by
+ * <p>Oracle {@code TileEldritchPortalRenderer.java:38-81}: the corners of the
+ * quad are the four corners of a unit square of the basis of the original
+ * {@code ActiveRenderInfo} ({@code -left - up}, {@code -left + up},
+ * {@code left + up} and {@code left - up}), the horizontal part of a corner is
+ * multiplied by {@code scale = min(openCount, 5) / 5} and its vertical part by
  * {@code scaley = min(openCount, 30) / 30}. The half width of the gate is
- * therefore {@code scale} and its half height {@code scaley}, so a fully opened
- * gate is two blocks wide and two blocks high. The texture of the frame is
- * turned by ninety degrees in the original: the {@code u} of the frame runs
- * from the bottom to the top of the gate and its {@code v} from the left to the
- * right.
+ * therefore the scale and its half height the scaley, so a fully opened gate is
+ * two blocks wide and two blocks high. The frame of the texture is turned by
+ * ninety degrees in the original: its {@code u} runs from the bottom to the top
+ * of the gate and its {@code v} from the left to the right.
  */
 public final class TileEldritchPortalRenderer implements BlockEntityRenderer<TileEldritchPortal> {
     /** The original portal texture with its sixteen frames. */
@@ -56,37 +54,39 @@ public final class TileEldritchPortalRenderer implements BlockEntityRenderer<Til
         int frame = (int) (time % FRAMES);
         float u = frame / (float) FRAMES;
         float uMax = u + 1.0F / FRAMES;
-        Vec3 centre = Vec3.atCenterOf(tile.getBlockPos());
-        var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        Vector3f look = camera.getLookVector();
-        Vector3f right = new Vector3f(look).cross(new Vector3f(0.0F, 1.0F, 0.0F));
-        if (right.lengthSquared() < 1.0E-6F) right.set(1.0F, 0.0F, 0.0F);
-        right.normalize();
-        Vector3f up = new Vector3f(right).cross(look).normalize();
+        Vector3f left = CameraBasis.left();
+        Vector3f up = CameraBasis.up();
         // Oracle TileEldritchPortalRenderer:44-52 - the scale and the scaley of the
         // original are the half extents of the quad, so the open gate is two blocks
         // wide and two blocks high.
-        float halfWidth = width;
-        float halfHeight = height;
-        Vector3f corner = new Vector3f((float) centre.x, (float) centre.y, (float) centre.z)
-                .add(right.mul(-halfWidth)).add(up.mul(-halfHeight));
-        Vector3f rightUp = right.mul(halfWidth * 2.0F);
-        Vector3f upUp = up.mul(halfHeight * 2.0F);
+        Vector3f bottomRight = new Vector3f(left).negate().sub(up);
+        Vector3f topRight = new Vector3f(left).negate().add(up);
+        Vector3f topLeft = new Vector3f(left).add(up);
+        Vector3f bottomLeft = new Vector3f(left).sub(up);
         VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(PORTAL));
         // The original colour of the portal is magenta.
         int red = 255, green = 0, blue = 255;
-        // Oracle TileEldritchPortalRenderer:76-81 - the frame of the original is
-        // turned by ninety degrees, the u of the frame is the vertical axis of the
-        // gate and its v the horizontal one.
-        vertex(out, pose, corner, u, 0.0F, red, green, blue, light, overlay);
-        vertex(out, pose, corner.add(rightUp), u, 1.0F, red, green, blue, light, overlay);
-        vertex(out, pose, corner.add(rightUp).add(upUp), uMax, 1.0F, red, green, blue, light, overlay);
-        vertex(out, pose, corner.add(upUp), uMax, 0.0F, red, green, blue, light, overlay);
+        pose.pushPose();
+        try {
+            // The 1.21.1 block entity renderer is placed on the corner of the block
+            // (LevelRenderer:1232-1275), so the gate is drawn in the middle of it,
+            // like the original (TileEldritchPortalRenderer:57-59).
+            pose.translate(.5F, .5F, .5F);
+            // Oracle TileEldritchPortalRenderer:76-81 - the frame of the original is
+            // turned by ninety degrees, the u of the frame is the vertical axis of
+            // the gate and its v the horizontal one.
+            vertex(out, pose, bottomRight, width, height, u, 1.0F, red, green, blue, light, overlay);
+            vertex(out, pose, topRight, width, height, uMax, 1.0F, red, green, blue, light, overlay);
+            vertex(out, pose, topLeft, width, height, uMax, 0.0F, red, green, blue, light, overlay);
+            vertex(out, pose, bottomLeft, width, height, u, 0.0F, red, green, blue, light, overlay);
+        } finally { pose.popPose(); }
     }
 
-    private static void vertex(VertexConsumer out, PoseStack pose, Vector3f at, float u, float v,
-                               int red, int green, int blue, int light, int overlay) {
-        out.addVertex(pose.last(), at.x, at.y, at.z)
+    private static void vertex(VertexConsumer out, PoseStack pose, Vector3f corner, float scale, float scaley,
+                               float u, float v, int red, int green, int blue, int light, int overlay) {
+        // The original multiplies the horizontal part of the corner with the scale
+        // and its vertical part with the scaley.
+        out.addVertex(pose.last(), corner.x * scale, corner.y * scaley, corner.z * scale)
                 .setColor(red, green, blue, 255)
                 .setUv(u, v).setOverlay(overlay).setLight(light)
                 .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);

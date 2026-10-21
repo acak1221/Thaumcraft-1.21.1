@@ -8,6 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import thaumcraft.api.entities.IEldritchMob;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
@@ -44,4 +45,15 @@ public final class TileEldritchObelisk extends BlockEntity {
     }
 
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
+
+    /**
+     * Original TileEldritchObelisk:40-43 - the obelisk is five blocks high, so the
+     * block entity renderer of the obelisk is only culled when the whole tower is
+     * outside of the view.
+     */
+    @Override public AABB getRenderBoundingBox() {
+        BlockPos pos = getBlockPos();
+        return new AABB(pos.getX(), pos.getY(), pos.getZ(),
+                pos.getX() + 1, pos.getY() + 5, pos.getZ() + 1);
+    }
 }

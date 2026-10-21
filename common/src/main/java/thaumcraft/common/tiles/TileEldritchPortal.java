@@ -195,4 +195,15 @@ public final class TileEldritchPortal extends BlockEntity {
 
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveWithoutMetadata(registries); }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
+
+    /**
+     * Original TileEldritchPortal:34-37 - the gate is drawn in a cube of three blocks
+     * around itself, so the block entity renderer of the gate is only culled when the
+     * whole cube is outside of the view.
+     */
+    @Override public AABB getRenderBoundingBox() {
+        BlockPos pos = getBlockPos();
+        return new AABB(pos.getX() - 1, pos.getY() - 1, pos.getZ() - 1,
+                pos.getX() + 2, pos.getY() + 2, pos.getZ() + 2);
+    }
 }

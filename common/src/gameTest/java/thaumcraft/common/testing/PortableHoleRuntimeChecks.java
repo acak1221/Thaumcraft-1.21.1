@@ -164,7 +164,9 @@ public final class PortableHoleRuntimeChecks {
         test.assertTrue(PortableHoleRules.maxDepth(0) == 33 && PortableHoleRules.maxDepth(2) == 49 && PortableHoleRules.duration(0) == 120 && PortableHoleRules.duration(3) == 300, "reach and duration numbers");
         var block = ThaumcraftHoles.HOLE_BLOCK.get();
         var state = block.defaultBlockState();
-        test.assertTrue(state.getLightEmission() == 10 && state.getDestroySpeed(test.getLevel(), BlockPos.ZERO) == -1.0F && block.getExplosionResistance() == 6000000.0F
+        // Oracle BlockHole:53 - the original sets the blast resistance to 6000000, and 1.7.10 stores
+        // that three times and divides it by five again, so the effective resistance is 3600000.
+        test.assertTrue(state.getLightEmission() == 10 && state.getDestroySpeed(test.getLevel(), BlockPos.ZERO) == -1.0F && block.getExplosionResistance() == 3600000.0F
                 && state.getCollisionShape(test.getLevel(), BlockPos.ZERO).isEmpty() && state.getShape(test.getLevel(), BlockPos.ZERO).isEmpty()
                 && !state.canBeReplaced() && state.isSolid() && BuiltInRegistries.ITEM.getOptional(id("hole")).isEmpty(),
                 "the hole: light 10, unbreakable, no collision or outline, not replaceable, solid for fluids, and no item");

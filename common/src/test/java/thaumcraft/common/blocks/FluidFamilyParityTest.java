@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -88,10 +89,10 @@ class FluidFamilyParityTest {
      */
     @Test void theDeathFluidIsInTheVanillaWaterTagLikeTheOriginalMaterialWater() throws Exception {
         JsonArray values = waterTag();
-        assertTrue(values.contains("thaumcraft:death_fluid"), "the death fluid is a water of the original");
-        assertTrue(values.contains("thaumcraft:death_fluid_flowing"), "the flowing death fluid is a water of the original");
-        assertTrue(values.contains("thaumcraft:purifying_fluid"), "the purifying fluid is a water of the original");
-        assertTrue(values.contains("thaumcraft:flowing_purifying_fluid"), "the flowing purifying fluid is a water of the original");
+        assertTrue(values.contains(new JsonPrimitive("thaumcraft:death_fluid")), "the death fluid is a water of the original");
+        assertTrue(values.contains(new JsonPrimitive("thaumcraft:death_fluid_flowing")), "the flowing death fluid is a water of the original");
+        assertTrue(values.contains(new JsonPrimitive("thaumcraft:purifying_fluid")), "the purifying fluid is a water of the original");
+        assertTrue(values.contains(new JsonPrimitive("thaumcraft:flowing_purifying_fluid")), "the flowing purifying fluid is a water of the original");
     }
 
     // ------------------------------------------------------------- the purifying fluid

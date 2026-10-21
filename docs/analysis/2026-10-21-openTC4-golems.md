@@ -303,7 +303,7 @@ export GRADLE_USER_HOME=/home/Acak/gradle-homes/ocgolems
 ./gradlew --no-daemon --console=plain :common:test
 ```
 
-Реальный вывод прогона (после правок, с `--rerun`, чтобы тесты не взялись из кэша):
+Реальный вывод прогона (с `--rerun`, чтобы тесты не взялись из кэша):
 
 ```
 > Task :common:compileJava UP-TO-DATE
@@ -320,6 +320,18 @@ BUILD SUCCESSFUL in 21s
 
 По отчёту JUnit (`common/build/test-results/test/TEST-*.xml`):
 **241 набор, 1669 тестов, 0 падений, 0 ошибок, 0 пропущено.**
+
+Повторный запуск ровно требуемой команды (без `--rerun`) на неизменных исходниках:
+
+```
+> Task :common:test UP-TO-DATE
+
+BUILD SUCCESSFUL in 9s
+5 actionable tasks: 5 up-to-date
+```
+
+— то есть тесты были выполнены именно в прогоне выше (с `--rerun`), а этот прогон лишь
+подтвердил, что входы не изменились.
 
 Новые/изменённые тесты:
 * `thaumcraft/golems/GolemDamageRulesTest` — новый: закрепляет, что отказной источник урона —

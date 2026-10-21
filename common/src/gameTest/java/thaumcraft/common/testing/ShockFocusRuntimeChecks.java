@@ -158,7 +158,7 @@ public final class ShockFocusRuntimeChecks {
             // The wall bound only catches a hang: the tick bound is the real limit of the case.
             // A loaded runner stretches the eleven real 250ms cooldowns of the sequence,
             // ten seconds were too few there and sixty seconds failed on the slowest run.
-            wallDeadline = System.nanoTime() + 180_000_000_000L;
+            wallDeadline = System.nanoTime() + 300_000_000_000L;
         }
 
         private void guard(Runnable action, boolean begin) {
@@ -170,7 +170,7 @@ public final class ShockFocusRuntimeChecks {
 
         private void awaitCooldown(Runnable action) {
             if (test.getTick() >= deadline || System.nanoTime() >= wallDeadline) {
-                cleanup.run(); test.fail("real Shock cooldown sequence exceeded one hundred eighty wall seconds/30000 accelerated native ticks; phase=" + phase); return;
+                cleanup.run(); test.fail("real Shock cooldown sequence exceeded three hundred wall seconds/30000 accelerated native ticks; phase=" + phase); return;
             }
             if (WandFocusActions.cooldownMillis(player) > 0) test.runAfterDelay(1, () -> guard(() -> awaitCooldown(action), false));
             else {

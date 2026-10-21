@@ -273,7 +273,12 @@ public final class GolemDartRuntimeChecks {
             // spider of a neighbouring test would silently become its target.
             List<BlockPos> bases = List.of(base.offset(0, 0, 240), base.offset(0, 0, 280), base.offset(0, 0, 320), base.offset(0, 0, 360), base.offset(0, 0, 400),
                     base.offset(0, 0, 440));
-            for (BlockPos pos : bases) forceChunks(pos, 2);
+            for (BlockPos pos : bases) forceChunks(pos, 4);
+            // The native pathfinder of the melee works in a local region of forty eight blocks
+            // around the golem and its target, and the golem refuses the melee while a chunk
+            // of that region is not loaded. The halo of the lanes therefore covers the whole
+            // region, or the melee of the TOO-CLOSE lane would depend on the load order of the
+            // chunks around the lane.
             // PLAIN and INSTALLED-LATE start inside the reach (80% of 16 = 12.8 blocks), so their first dart tells the half-interval wait;
             // QUICK starts beyond it, so its first dart must wait until the golem has walked into the reach.
             lanes.add(new ShootLane("PLAIN", bases.get(0), List.of(), PLAIN_SHOTS, NEAR, false));
@@ -443,7 +448,7 @@ public final class GolemDartRuntimeChecks {
                 if (test.getTick() >= startedAt + IDLE_TICKS) {
                     test.assertTrue(golem.getLeftArmTimer() == 0, name + ": the left arm never rises without a shot");
                     test.assertTrue(!fights || fought && golem.getTarget() == target,
-                            name + ": the Guard took the spider as its target and hurt it in melee (otherwise the quiet launcher proves nothing)");
+                            name + ": the Guard took the spider as its target and hurt it in melee (otherwise the quiet launcher proves nothing); target=" + golem.getTarget());
                     done = true;
                 }
             }

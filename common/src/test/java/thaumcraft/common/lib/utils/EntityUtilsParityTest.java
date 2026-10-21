@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -18,6 +21,12 @@ import org.junit.jupiter.api.Test;
  * (the shared Loom cache is owned by the leader).</p>
  */
 class EntityUtilsParityTest {
+
+    /** The native registries must exist before the class of the helper is loaded. */
+    @BeforeAll static void bootstrap() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+    }
 
     // --------------------------------------------------- the collision border of 1.7.10
 

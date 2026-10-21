@@ -286,6 +286,11 @@ public final class ChampionRules {
          * <p>Oracle {@code EntityUtils.makeChampion:243-254} skipped the first four for a
          * boss, because a boss scales with the players that hunt it, and let the boss name
          * itself after its champion modifier instead.
+         *
+         * <p>The original removed the modifier of the champion before it applied it again
+         * (oracle {@code EntityUtils.makeChampion:241-249}), so a second promotion of the
+         * same modifier replaced the bonus instead of adding it twice. The native attribute
+         * refuses a modifier that is already applied, so the port removes it first as well.
          */
         public static void promote(LivingEntity mob, int modifierId) {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
@@ -293,22 +298,32 @@ public final class ChampionRules {
             AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
             AttributeInstance damage = mob.getAttribute(Attributes.ATTACK_DAMAGE);
             if (ChampionWiringRules.ordinaryChampionBonuses(mob instanceof IThaumcraftBoss)) {
-                if (health != null) health.addPermanentModifier(new AttributeModifier(CHAMPION_HEALTH_ID, modifier.healthBonus(), AttributeModifier.Operation.ADD_VALUE));
+                if (health != null) {
+                    health.removeModifier(CHAMPION_HEALTH_ID);
+                    health.addPermanentModifier(new AttributeModifier(CHAMPION_HEALTH_ID, modifier.healthBonus(), AttributeModifier.Operation.ADD_VALUE));
+                }
                 // The original 1.7 operation two multiplied the total by its amount, the native
                 // operation multiplies the total by one plus its amount.
-                if (damage != null) damage.addPermanentModifier(new AttributeModifier(CHAMPION_DAMAGE_ID, modifier.damageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                if (damage != null) {
+                    damage.removeModifier(CHAMPION_DAMAGE_ID);
+                    damage.addPermanentModifier(new AttributeModifier(CHAMPION_DAMAGE_ID, modifier.damageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                }
                 mob.heal(ChampionModifier.CHAMPION_HEAL);
                 mob.setCustomName(championName(mob, modifier));
             } else if (mob instanceof IThaumcraftBoss boss) {
                 boss.generateName();
             }
             if (modifier.id == ChampionModifier.MIGHTY && damage != null) {
+                damage.removeModifier(MIGHTY_DAMAGE_ID);
                 damage.addPermanentModifier(new AttributeModifier(MIGHTY_DAMAGE_ID, modifier.extraDamageMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             }
             // The original 1.7 operation one was the percentage of the running total.
             if (modifier.id == ChampionModifier.BOLD) {
                 AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
-                if (speed != null) speed.addPermanentModifier(new AttributeModifier(BOLD_SPEED_ID, modifier.speedMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                if (speed != null) {
+                    speed.removeModifier(BOLD_SPEED_ID);
+                    speed.addPermanentModifier(new AttributeModifier(BOLD_SPEED_ID, modifier.speedMultiplier() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                }
             }
             if (modifier.id == ChampionModifier.WARDED && health != null) {
                 // Oracle EntityUtils.makeChampion:271-274 - the warded champion adds half of its

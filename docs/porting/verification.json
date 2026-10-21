@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "captured_utc": "2026-10-21T17:38:38.442159+00:00",
+  "captured_utc": "2026-10-21T18:16:02.230229+00:00",
   "mod_version": "0.1.0-alpha.1",
   "target": "Minecraft 1.21.1 / Java 21",
   "branch": "work",
@@ -15,9 +15,9 @@
     "entrypoint": "Gradle wrapper validation (see log for exact tasks)",
     "exit_code": 0,
     "log": ".tmp/ci-validate.log",
-    "started_ns": 1792604176422280596,
+    "started_ns": 1792606454831315921,
     "inputs_unchanged": true,
-    "input_files": 7435,
+    "input_files": 7441,
     "source_fingerprints_sha256": {
       "AGENTS.md": "c9b5c6a6530c005fe5d8f7bc40a2e414472a0b543c51e648333eea15fda4ddb2",
       "LICENSE": "70128bcd96ab7422380e631a50b22d19c206037a4c2343ca3ead1259835ab4ed",
@@ -56,7 +56,7 @@
       "common/src/gameTest/java/thaumcraft/common/testing/CentrifugeAtomicRuntimeChecks.java": "efffe8fa5b58fac6521f46e3fc08004f065c8322e17607dc8582b1a4bf67a9c2",
       "common/src/gameTest/java/thaumcraft/common/testing/CentrifugeRuntimeChecks.java": "f89c0672daa8713b623e61c623793f420cbedcca0ac9efd0dbab79c93ef8a6dd",
       "common/src/gameTest/java/thaumcraft/common/testing/ChampionJoinRoll.java": "e773de6bb6d93742e3c8da9c8db5a0b180016c7359e36193bb1ec8e2ec887e62",
-      "common/src/gameTest/java/thaumcraft/common/testing/ChampionRuntimeChecks.java": "cd5340b6a5c1263aed4192d28006553b9bdd296bac03ca281ce039e1ee16c939",
+      "common/src/gameTest/java/thaumcraft/common/testing/ChampionRuntimeChecks.java": "a4748504d38a49924e95f86592e3ef4aa31d0b95554f314c63404d4162bd4d2e",
       "common/src/gameTest/java/thaumcraft/common/testing/CheatSheetRuntimeChecks.java": "07775e267d1f2b024188ea8d53d0d33cb1a17fd64d15af3f9f7758bc6635ac00",
       "common/src/gameTest/java/thaumcraft/common/testing/ClusterRuntimeChecks.java": "8a18308b742578cac6c9a8f404f44bf70a7433dc9e73260efcbc246a0c602c07",
       "common/src/gameTest/java/thaumcraft/common/testing/ColoredCandlesRuntimeChecks.java": "175b5e29ecc4bbf42092027e4d0f13d82fdfa0ef88bd0a8797aaf5a33258338b",
@@ -710,8 +710,9 @@
       "common/src/main/java/thaumcraft/common/config/ThaumcraftBiomes.java": "cd4e2baa7103291072c34a33d2bab8bf25674d9f4900762b08eab3b07503fdc1",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftColoredCandles.java": "4224c3d848ecd4eec452624f5c780799f63606a01814c70e5ee65ffa3eea8f0d",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java": "c81952c161d7f8fc6d2bce85050030c29f05c724ce15110373af1618ac0261f1",
-      "common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java": "9f8ecf2c5ed5a984c4589f50c8e4906c5e866dd759fcfcb1fc8063a610e9247d",
+      "common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java": "ac934905e961a01252da24ba99042538680c2110db3c391afd35bb7b626d8d18",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java": "d22b569e16a3fa393df3d56a9d1f78e246da98ad05e35254f63c59529d76240c",
+      "common/src/main/java/thaumcraft/common/config/ThaumcraftCreativeTabs.java": "da521ad0ae0d6abb3a39ab8c02e690f46967508181ae6fdd10579b87d072d8c7",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftCrystalClusters.java": "4f1b7bef498b1bd0eb0c01cc31c6e70dc857902e73dd3003c4f0bd0588336ad6",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftCultists.java": "214b2946ed6b187dc3a1f1ebe776b7615a6f963e5bef9fd8f36d804833ec3035",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftDeconstruction.java": "ae90a71c6e223df1ea7a13eb513ce04c42c4283f0c5854ae612bb5f6bd5671cb",
@@ -722,7 +723,7 @@
       "common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchMobs.java": "53a21b6a0b16021c464eab922f55d8ce03478baca44f7b6890c40e1422fe423f",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftEmbers.java": "ea3e97fadadc80a1236d2ff3ffb7da9d18459fb936522c9e7b635ba93e34f079",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java": "a89db3bcf06acc27cbd4089e43059fa94dec6b7b8bdaf99bbb61459e26708a93",
-      "common/src/main/java/thaumcraft/common/config/ThaumcraftEssences.java": "fac32ba19383f352c7426917afb80d598fa169696dc9969adb4935cd484e5452",
+      "common/src/main/java/thaumcraft/common/config/ThaumcraftEssences.java": "a005742c9ddccfb9e38f57364c2d23f261a7efe3b199ebecf45063346f088c7d",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftExplosiveOrbs.java": "982534e2c6dcadb0c495f319e75305b3ca589b2702e3b39b30124f48b9102cbb",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java": "66c1df80b8869993913f853514bfa330ae710d8ec5e57af4a7ea5b24a11571db",
       "common/src/main/java/thaumcraft/common/config/ThaumcraftFocalManipulation.java": "aad0ba978199395a5269ec0f4f898f7736e49551fcd6830595432562481804d3",
@@ -1172,7 +1173,7 @@
       "common/src/main/java/thaumcraft/common/lib/mods/ChampionModWarded.java": "11083c50bcdef81d0044ccf94f36fa66b5b3726a0c8fe58cf4a8953eb53881b6",
       "common/src/main/java/thaumcraft/common/lib/mods/ChampionModWarp.java": "d5c8549c883a37052ed18c24b5b5d2b4c0cd810efcf7f4338bc33766cfb1397d",
       "common/src/main/java/thaumcraft/common/lib/mods/ChampionModifier.java": "07e3738e6b74d383e411656f9adda4dc7a34c3ef05eca0dfc4c37926b14ce581",
-      "common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java": "13d61db9b5bfed88ee72ff9c49cf4a22a71f627ad5fccf59e20bdff7f5cdc70d",
+      "common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java": "5c6b17f97c3de8c46ffd6685ca9b8bb8f81bb253d2f9f11793c659748635b54d",
       "common/src/main/java/thaumcraft/common/lib/mods/ChampionWiring.java": "b570d543e0978134ff8dc132a9b6d981af957a87848bb19d790eeb5b51665ec1",
       "common/src/main/java/thaumcraft/common/lib/mods/ChampionWiringRules.java": "21ba58abf631e2826e832046b062339923750f97a11c704c73bf0f5214ce4f4b",
       "common/src/main/java/thaumcraft/common/lib/mods/IChampionModifierEffect.java": "bd876669ce577fc2d511e4b2a83212eea2743d78b0aaf5d6ae6d11b60bba6a57",
@@ -5677,13 +5678,16 @@
       "gradlew": "c07475b363508dbe7cf7d1ded1b31f6d44bb97d98d069a455ab862b1fb9b25f0",
       "gradlew.bat": "57931b17dd228e5c24dac90e815d0bf82477e831a4618dfab4136f5446b42a9f",
       "neoforge/build.gradle": "bfca96b1f1c81380e7bd9faeed13804b49735ea0c9a9f208da8d50410a94dfbc",
-      "neoforge/src/gameTest/java/thaumcraft/neoforge/testing/NetworkedGameTestPlayer.java": "f6adaefcf502796e76824bfcb978c988e9f494096ce7eae4174b84b7c3422e90",
+      "neoforge/src/gameTest/java/thaumcraft/neoforge/testing/NetworkedGameTestPlayer.java": "83d226a8c205d424e41d9c1b6f9d806ef773618d59ecb8b7888a815d7869ce9e",
       "neoforge/src/gameTest/java/thaumcraft/neoforge/testing/ThaumcraftGameTestMod.java": "2d65ec6ee74d187ff1ac889df95620ba0a0d46c247e756c45cdeb978feee4f52",
-      "neoforge/src/gameTest/java/thaumcraft/neoforge/testing/ThaumcraftGameTests.java": "95ff526e82636e044f3a68c1a4f6d543dc2ff2acd871f18ecb116076e78683b5",
-      "neoforge/src/gameTest/resources/META-INF/neoforge.mods.toml": "6628f49ef9c9380937f5c1d26bdbcbb7509ac33080406440c07750a524cf54c4",
+      "neoforge/src/gameTest/java/thaumcraft/neoforge/testing/ThaumcraftGameTests.java": "948bfc4268cb2a17640c8d6e4206b2865bad89b221f2051c1cb03d5f8e75144f",
+      "neoforge/src/gameTest/java/thaumcraft/neoforge/testing/mixin/GameTestHelperMockConnectionMixin.java": "96d656135fcb30adc823cc3e3fb6a767167f37973b59d7d9cb487805575b972b",
+      "neoforge/src/gameTest/resources/META-INF/neoforge.mods.toml": "d6579b0a2b818a56c91db2f597537aff10decdf4399c371b5898d18d23d7b9dc",
       "neoforge/src/gameTest/resources/data/thaumcraft/structure/empty.nbt": "0b3b6850ceaee80d83a8f49a586e9cdb4ae00b018620b28ad8f154e9697e2a5e",
+      "neoforge/src/gameTest/resources/thaumcraft-neoforge-gametest.mixins.json": "66df5565a5405c09b6c90d671c2c143ee65412b9abc36e95eeb4a26615575c88",
       "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeBiomeSpawns.java": "48a41394719be2dbd76d93a7ae1a1c4f2626258d26d7740c92225a2e2683e52b",
       "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeBorePlatform.java": "7d3e4498d171b01d6973b3d9889e6a6e24eee62655e412341ebff75a5ee64dce",
+      "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeCreativeTabs.java": "bad7b41a1a13174a25226db42b282182935b600d5edf151d6a3344e82801105d",
       "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeEntityAttributes.java": "de57cbaedbb6cb88bc9ba27e90c02d3e277ad0128649b0ef308434ef699a5755",
       "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeGolemHarvestPlatform.java": "5bfe82ebb536e84eb9e96a50ea89352a48eb39175e91cc7fc01e3df1afaff0ec",
       "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeGolemUsePlatform.java": "347e543c246424706122a205e16e559af1de1f1e5b2f50adfa45b16c547ebf1d",
@@ -5692,9 +5696,11 @@
       "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeSpaStorage.java": "9b5e8b19a5590ee9d64ee4efcfc258f3e27d42acfd81aa0509a6436245cb85f5",
       "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeSpawnPlacements.java": "ed8fa8ab1d8425e8a42a4fcfd8e24f16d2f5258f6d21527792db29600a861292",
       "neoforge/src/main/java/thaumcraft/neoforge/OriginalEntitySpawnsBiomeModifier.java": "d8d71fddce779a928a18e7e6f62793e4c9df61886d13412fb2cd127257db4f20",
-      "neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java": "bf55cc3a6cb196e35c50bc1c1c75a4fa2b6c2ee2d5db478ceb59a673b9991471",
+      "neoforge/src/main/java/thaumcraft/neoforge/ThaumcraftNeoForge.java": "eea48f6d95ab524911b33c48c01fb5e121d0e859dd632b2674e665ed7e8db7c2",
       "neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java": "b67ce120082d2f762b7b23a2d3ad29e76854d40c2ac61ecb3afdb45b7fbd05ca",
       "neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeExcavationRemovalMixin.java": "65d89417eefbfbb764f3c268abf2615f74abf0b04cde56ea034e6b1792dbcc56",
+      "neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeFluidDeathMixin.java": "049458f386fb41cfa4dbcff0a081a35fbf5673875e1f3bb4b97621faac95090d",
+      "neoforge/src/main/java/thaumcraft/neoforge/mixin/NeoForgeFluidPureMixin.java": "323cd633c0d388a2bb9961be288c1c6cf353d0c9764a6ac7ab7318bc0c155bd4",
       "neoforge/src/main/resources/META-INF/accesstransformer.cfg": "2555790b2ba1e07261c7167b212482295e207e34858b861b8f6f1d64db793ab4",
       "neoforge/src/main/resources/META-INF/neoforge.mods.toml": "f6c3035c6271c8ce875e3bd0a40559a5c936ad8ee3ee28d1b16a461a7d653214",
       "neoforge/src/main/resources/data/thaumcraft/neoforge/biome_modifier/aura_totem.json": "aebf798adbd3964daadf60cbf6546fcdb5a581b25f83588db5d7269caf5be59a",
@@ -5707,7 +5713,7 @@
       "neoforge/src/main/resources/data/thaumcraft/neoforge/biome_modifier/tc4_ores.json": "55d69d8fa8ded17737fa66a6197206a445feeb5da89fcefc7808925c924eba5a",
       "neoforge/src/main/resources/data/thaumcraft/neoforge/biome_modifier/village_banker_homes.json": "95a032ba443bdcc7efc823206a672574bd4958d42985937ca0cd15a97f44ee04",
       "neoforge/src/main/resources/data/thaumcraft/neoforge/biome_modifier/village_wizard_towers.json": "ae5db04ab3d9663536cc8054d1f77e8d7bfd53504ba7147d9b2a6f04dd79c846",
-      "neoforge/src/main/resources/thaumcraft-neoforge.mixins.json": "77ad6f1a11a21dd705ef33dc519402267b963cb80e885c63feb2863dd965c1b5",
+      "neoforge/src/main/resources/thaumcraft-neoforge.mixins.json": "6ba6757be136560949cc9794a3919a7f2d76f5f9177468e4fed8abdd6b2940d9",
       "scripts/dev.ps1": "aaeb00be1ba674c7b4f5d263ade10ed43540adcbc6f005cfd9aa7c19c1adacda",
       "scripts/dev.sh": "1dace2cf54f539dd5125b9a50274be7a74b50a41f9c2e97b3cfd8014c46ffadc",
       "scripts/mutation/groups/arcane-ear.json": "ada938fd16da36d88584f9584c59a9a978d6df4be53b9487635643b03603e2a4",
@@ -7459,1362 +7465,1362 @@
       ".tmp/ci-exit.json": {
         "sha256": "67e43e179791c55ee29b39330d2e497b57b9a2e813a449ad7c9021f87e592969",
         "bytes": 11,
-        "mtime_ns": 1792604317529646797
+        "mtime_ns": 1792606561787263703
       },
       ".tmp/ci-validate.log": {
-        "sha256": "2beb369134be1d56532ad4e5d8f18d19356bea9f2f4c2a2b5734a9021dcb11c0",
-        "bytes": 1035599,
-        "mtime_ns": 1792604317232499551
+        "sha256": "361836aca53203a497d2fad4e0a05ba1a74cf9c8c21b781225aaa3f9c6b033e3",
+        "bytes": 1066794,
+        "mtime_ns": 1792606561456439819
       },
       ".tmp/ci-assets.log": {
-        "sha256": "7c97c5bbf8b9b3e37a275309a0659b099fdca5164cbd44bc24634a877e625400",
+        "sha256": "3e44fac6b00c102f96c7cec3cf0334ea29b9246c91a422da72f8ddb46ac56727",
         "bytes": 183,
-        "mtime_ns": 1792604180032539161
+        "mtime_ns": 1792606456451865093
       },
       "common/build/test-results/test/TEST-thaumcraft.api.ApiSurfaceTest.xml": {
-        "sha256": "1b617ebbb9f94bdc29c800b239db0ab00519d11f78691a6c80f95eed093becbb",
+        "sha256": "e5efd1b4cd6d5489e0023e9eebcaf365335cf8ba864ed62bf62d727626575aee",
         "bytes": 648,
-        "mtime_ns": 1792604204836707838
+        "mtime_ns": 1792606472843361653
       },
       "common/build/test-results/test/TEST-thaumcraft.api.AspectApiTest.xml": {
-        "sha256": "8301563496a4685467df7a782efeef01853459abbe295c9bf84412dacac139fb",
-        "bytes": 931,
-        "mtime_ns": 1792604204879136765
+        "sha256": "d19b36c6fa350cbd695e7ea654c3446247d325dc7b1e8590daa670e185bcb757",
+        "bytes": 929,
+        "mtime_ns": 1792606472868059499
       },
       "common/build/test-results/test/TEST-thaumcraft.api.AspectContractTest.xml": {
-        "sha256": "ae5737e45a676c3e7c132745c218626b394cec886f53b0b3426d432608dbafaf",
-        "bytes": 910,
-        "mtime_ns": 1792604204861040775
+        "sha256": "f0eb84587bbe4e48f54f42721065a7ef2542656476c6336760a4be509f7f1293",
+        "bytes": 906,
+        "mtime_ns": 1792606472853544538
       },
       "common/build/test-results/test/TEST-thaumcraft.api.CapabilitiesApiTest.xml": {
-        "sha256": "8a5dded4caabacfdaaec28bab1107f19681f50bdb5e8455c5bbb7f5753fb4bcc",
-        "bytes": 1003,
-        "mtime_ns": 1792604204832325854
+        "sha256": "370f53e7d46666c0eb970089df293754d7fece7ddeceb3b2f1bf5dfb73a7b488",
+        "bytes": 1004,
+        "mtime_ns": 1792606472838572618
       },
       "common/build/test-results/test/TEST-thaumcraft.api.CraftingApiTest.xml": {
-        "sha256": "bd7e01ac3aaf2b4cfca6c8805c9ae6d971594e167f4f6f5923277ddd685a9888",
-        "bytes": 1282,
-        "mtime_ns": 1792604204859407766
+        "sha256": "89b332348c01afbe93ce51307c7a63bdf708fe3099a86e0530a804dec4466db9",
+        "bytes": 1280,
+        "mtime_ns": 1792606472852450295
       },
       "common/build/test-results/test/TEST-thaumcraft.api.CraftingRecipeListTest.xml": {
-        "sha256": "0700047b5475e3147a46b021e6be9e5ded40af37171a1a058f6305400d397973",
-        "bytes": 587,
-        "mtime_ns": 1792604204859621960
+        "sha256": "08b56302282e60da241f1b36966a443be8e29c3d1224e14458c7c411f24c2982",
+        "bytes": 586,
+        "mtime_ns": 1792606472852557400
       },
       "common/build/test-results/test/TEST-thaumcraft.api.DamageSourceThaumcraftTest.xml": {
-        "sha256": "fbd200ed8415390d19ebb598eb3c69a5d9cd3d5f2e24b716625f697be194a1fe",
-        "bytes": 569,
-        "mtime_ns": 1792604204871768066
+        "sha256": "b4fd1a5d6f6abd55a72c3576434b1bc24f3e4b03540b76980c88e5d361337721",
+        "bytes": 567,
+        "mtime_ns": 1792606472862874604
       },
       "common/build/test-results/test/TEST-thaumcraft.api.ItemsBlocksApiTest.xml": {
-        "sha256": "0dfba0c85fdfddb41a759636dd882f953ee3fa83a2cc46a2495786b124485588",
-        "bytes": 1130,
-        "mtime_ns": 1792604204867876888
+        "sha256": "e7a979c9430793d75110e867b7b5f1a0b2512d16f0a0127a16fb1a3923dd6e77",
+        "bytes": 1129,
+        "mtime_ns": 1792606472860121305
       },
       "common/build/test-results/test/TEST-thaumcraft.api.NativeRecipeApiTest.xml": {
-        "sha256": "987d9103a4e91fb1d59d35e51cec681325e4d8b5813174dcba5effd977168b43",
+        "sha256": "aa26955df2c06382ad8a053c231d69bd082486d0ff16ef1413feb489daa784a4",
         "bytes": 1113,
-        "mtime_ns": 1792604204841685113
+        "mtime_ns": 1792606472846939485
       },
       "common/build/test-results/test/TEST-thaumcraft.api.NodesApiTest.xml": {
-        "sha256": "6604f0aac2da46c00df2f3da39c4eab5e675cf3ca90ceff5135bdbea922c54ae",
-        "bytes": 752,
-        "mtime_ns": 1792604204869901057
+        "sha256": "12162df20357df93470753dfae959f8aa7dc4b83edf147e60f94e04436d92112",
+        "bytes": 748,
+        "mtime_ns": 1792606472861507225
       },
       "common/build/test-results/test/TEST-thaumcraft.api.ResearchApiTest.xml": {
-        "sha256": "180a9192d4db74a1076dd8b6e1aaddd2b4fe5384f7202965f3b591f2021e8641",
-        "bytes": 1125,
-        "mtime_ns": 1792604204863499968
+        "sha256": "9ed20896c06bd4e027cdf0876c88c1dafec380f4b707e53b8657bc75820e7f1e",
+        "bytes": 1119,
+        "mtime_ns": 1792606472856246112
       },
       "common/build/test-results/test/TEST-thaumcraft.api.ThaumcraftApiHelperTest.xml": {
-        "sha256": "488435b7ca609499c264b1b2d21e8226acedcccb65136c8a816c1cafdc49f895",
-        "bytes": 1350,
-        "mtime_ns": 1792604204872960971
+        "sha256": "12bf32e357309f780c6b4a7ed55cc553e2f37d848e59bf8889f7dcf2fd5ba346",
+        "bytes": 1346,
+        "mtime_ns": 1792606472863907253
       },
       "common/build/test-results/test/TEST-thaumcraft.api.TheorycraftApiTest.xml": {
-        "sha256": "409b3f47949622c1482505fd221704cf0cef80c34b69ee410aa269d347dd9700",
+        "sha256": "79c06335e33bfe339241d5952dbe4b53c0b32c8fe3f464e41bd8d3c97e1709f8",
         "bytes": 869,
-        "mtime_ns": 1792604204873316118
+        "mtime_ns": 1792606472864081805
       },
       "common/build/test-results/test/TEST-thaumcraft.api.WandApiTest.xml": {
-        "sha256": "4663b33ef4491e5c16485447f3686c3c576a5cbc5ac81b0c4a29b02630988710",
-        "bytes": 1080,
-        "mtime_ns": 1792604204862901282
+        "sha256": "eccb30a46e0028edea5e46686e9060561cdd225072d90ae05c4934233c9f7892",
+        "bytes": 1078,
+        "mtime_ns": 1792606472855654935
       },
       "common/build/test-results/test/TEST-thaumcraft.aspects.AspectParityTest.xml": {
-        "sha256": "fccf1c69a89cd4e3cb6236fc8738eed8702a128e81fdb080895190f7c207f21e",
+        "sha256": "7544cf5795614cd64e6b1edc553e3828fdd64aca2f2dcde86f919ac1f9442211",
         "bytes": 836,
-        "mtime_ns": 1792604204834864700
+        "mtime_ns": 1792606472841173211
       },
       "common/build/test-results/test/TEST-thaumcraft.aspects.EarlyObjectAspectBindingsTest.xml": {
-        "sha256": "1edc7fb1b598c919869a363c37bea689793a80fa578ea13068937f7cdcd0d5dc",
-        "bytes": 1610,
-        "mtime_ns": 1792604204864445696
+        "sha256": "45df90b5fcce43be7756381e1e0fd5f347344b3f0b2273491edbb0c5a2c70619",
+        "bytes": 1609,
+        "mtime_ns": 1792606472856767972
       },
       "common/build/test-results/test/TEST-thaumcraft.aspects.ObjectAspectCatalogTest.xml": {
-        "sha256": "b94c28f3f872d5452527d441400aeb0ebc9fec53832718f1f0a2f9166e2983c3",
-        "bytes": 929,
-        "mtime_ns": 1792604204841070741
+        "sha256": "83e0cde006a678b484b3ba16ec0f95bb08bb4971b7badb8794459ef44634a0e3",
+        "bytes": 927,
+        "mtime_ns": 1792606472846534613
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.AlchemyLeftoversAssetsTest.xml": {
-        "sha256": "8f4cf29cd27064220380849dd462bb9b0f34f551d62e1bd620aa6f45e36d0787",
-        "bytes": 1112,
-        "mtime_ns": 1792604204858863954
+        "sha256": "b58fc04a70f631b2e89612f9163ea89e9b3377c1174154d9cff94c47bbbdb438",
+        "bytes": 1114,
+        "mtime_ns": 1792606472851869865
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.BlockResourceCoverageTest.xml": {
-        "sha256": "9a249f6a8f64b739cdb452e66d6b40fbc31f937e77c90bd8a404abbf2c56d9d5",
-        "bytes": 1515,
-        "mtime_ns": 1792604204873988029
+        "sha256": "a3bc275f94792ed8c6762c682b9aca8014a09fe02e57a9c4d15b3645d1cfed6a",
+        "bytes": 1514,
+        "mtime_ns": 1792606472864395263
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ClusterAssetsTest.xml": {
-        "sha256": "adc0dcd6cc1583baf9fc2573bc8dbbb0aa5456eb2c56d46dd663ca201393624c",
+        "sha256": "181b7ca7fa4efe0ce144a0bb7fa993605c5cb6c11d4cd39851b7826b2cee3c03",
         "bytes": 573,
-        "mtime_ns": 1792604204864960538
+        "mtime_ns": 1792606472857261473
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ColoredCandleAssetsTest.xml": {
-        "sha256": "a294e01c6d7a25862dfd74cbbf98a12d25f13b41b7724bcfc0d2ab262f592779",
+        "sha256": "e04f3c9eef9c2c350bbccbb7d16ad443b1c95f58571e60057a8ee757ee675845",
         "bytes": 1176,
-        "mtime_ns": 1792604204857345129
+        "mtime_ns": 1792606472848141213
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.CosmeticFamilyAssetsTest.xml": {
-        "sha256": "b8f01c2983b724c14a67e28d73b6f40839643d44a2c00736ff4ab415f935d91f",
-        "bytes": 2361,
-        "mtime_ns": 1792604204863801588
+        "sha256": "2b7c11408808801bdc809361f68fa6c2440630d82a054361f9ef30c632863639",
+        "bytes": 2359,
+        "mtime_ns": 1792606472856416767
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.CrucibleRecipeParityTest.xml": {
-        "sha256": "265526ba6a39214d1959f1941abf951016bae52676509bcd0b0c8e1aab672d64",
-        "bytes": 1461,
-        "mtime_ns": 1792604204880542695
+        "sha256": "0ffccaa5e77656c7c49efd67d2ed1bec5b894831253b333586bc085337626b53",
+        "bytes": 1457,
+        "mtime_ns": 1792606472869596629
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.CrystalLootTableTest.xml": {
-        "sha256": "746288eb283c4a3418493b91dad2ca4cc085d676b6e9388109693481c5f13487",
-        "bytes": 611,
-        "mtime_ns": 1792604204860925806
+        "sha256": "7384447d8986d44f474f5b1a6589841fdf596504ae2f1a1ddf92203fb473008e",
+        "bytes": 609,
+        "mtime_ns": 1792606472853304609
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.DamageTypeRecordsTest.xml": {
-        "sha256": "902115b606f5b4cfb65ee73ce80bcd98c2049bf779dfb0d6cd8e16d1f3cc47b8",
-        "bytes": 1170,
-        "mtime_ns": 1792604204878360545
+        "sha256": "2193d5d8b07b3b9a6d35bfeb7e744073b605ab5762a024d94e18093e27c82a44",
+        "bytes": 1171,
+        "mtime_ns": 1792606472867653324
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.DataTagAndDamageTypeTest.xml": {
-        "sha256": "0987d8399c1434d30d92c2c7b002e7f63aa5c7839af6ce1c0315f9ab8a4421cb",
-        "bytes": 1512,
-        "mtime_ns": 1792604204862243673
+        "sha256": "db2b9b9e80b582c15812b5e253876856fac10c0770cf076ce8b704ea72cd267c",
+        "bytes": 1511,
+        "mtime_ns": 1792606472854935368
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.EldritchAndDeviceAssetsTest.xml": {
-        "sha256": "c3daa94383e9448328b3fe2af3bac579045267920f791308c2e2356fde169640",
+        "sha256": "1e7ec0ac184c69c1046ccf9cb2b95fc7f1f3f463ca1c2f202ffdf608d6765116",
         "bytes": 2738,
-        "mtime_ns": 1792604204875108325
+        "mtime_ns": 1792606472865554864
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ElementalHoeAssetsTest.xml": {
-        "sha256": "4e91693e264ed4ff91d4dd49ed26bbc138824f0222ca7d8816643a7fc0a5acfb",
+        "sha256": "e39eaafb716792cfa5268734793532323b9faa38f61ecdfae017142408a6e3d8",
         "bytes": 561,
-        "mtime_ns": 1792604204865654160
+        "mtime_ns": 1792606472857937722
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ElementalPickaxeAssetsTest.xml": {
-        "sha256": "2e901fe98eec1962145f88f0403f90d5602e03ac2574c4c2fc8426d1a3df4ef9",
-        "bytes": 690,
-        "mtime_ns": 1792604204874159255
+        "sha256": "6548e493161a4a6e40c5a3bfa13d436b4f8f87b87c87b09837945a98a13b9bf5",
+        "bytes": 695,
+        "mtime_ns": 1792606472864550639
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ElementalShovelAssetsTest.xml": {
-        "sha256": "a46640d7d3ec81baf687efb8ef714d802e5f4ad3f397d031e1d529208ce50f25",
-        "bytes": 717,
-        "mtime_ns": 1792604204866988374
+        "sha256": "7722df07353d8181eceb7e7ddb8d9801dcb38e221dc0893ed907511cbecbf8f9",
+        "bytes": 716,
+        "mtime_ns": 1792606472859133632
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ElementalSwordAssetsTest.xml": {
-        "sha256": "fda8cdf57de0741ff259fca2fdb4ef9427cc64713ee66727cbb61cbeac3c521d",
-        "bytes": 698,
-        "mtime_ns": 1792604204879007118
+        "sha256": "62192ab518c8c43d22cba5579aa3c04eb3ad815633d9caaa8c1f2a89eef55465",
+        "bytes": 700,
+        "mtime_ns": 1792606472868059499
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.FortressAssetsTest.xml": {
-        "sha256": "7194e276a21fcd0542562b80ef439a76deefbb71508ba78b6ed3cbaa2082b269",
-        "bytes": 827,
-        "mtime_ns": 1792604204875576027
+        "sha256": "c96ef15f09086b0cff2f4f449a6c068261633f0014d0c28070ebee9a36a46b3e",
+        "bytes": 829,
+        "mtime_ns": 1792606472865796505
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.GapCatalogueRecipesTest.xml": {
-        "sha256": "3a6db3be612d36ee88e08d5fe53f13b0cd478e115f0030d18c4f90afd9ac387f",
-        "bytes": 2424,
-        "mtime_ns": 1792604204837846113
+        "sha256": "ab2d033c39a94cfa36e5a611efab0204692d7e8cce5c26f46be78cd75b96a65c",
+        "bytes": 2416,
+        "mtime_ns": 1792606472844297417
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.GapRecipesAssetsTest.xml": {
-        "sha256": "5bb9acc5dab9a4d7121c7b9ab368f43496e474e49ff2d864df684e96a9996757",
+        "sha256": "72c100be3cf34b75428c6ac0275791cd9783d5da387b1960d5e7a7350eab4859",
         "bytes": 1019,
-        "mtime_ns": 1792604204837326523
+        "mtime_ns": 1792606472843833080
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.GolemDartAssetsTest.xml": {
-        "sha256": "ed8e6c98ebbc051ded7a62c9a77b6808b29319bedbbf9f3b27189931ed806eef",
-        "bytes": 683,
-        "mtime_ns": 1792604204866395303
+        "sha256": "1030d2b42c6f23a1a04bf215a748385aadb1d2f7bdf8e2ae1e45595948eec420",
+        "bytes": 685,
+        "mtime_ns": 1792606472858721647
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.GolemFetterAssetsTest.xml": {
-        "sha256": "e2c51c549b89c877ef5a7840af4b3aa43b72d90e59c05fa7f67ed7a3f7b0f63b",
-        "bytes": 681,
-        "mtime_ns": 1792604204875699712
+        "sha256": "e69c6a88be6e40917ae43f3ddc526f3050e9f9e223638d8cfcf898b7a78a728c",
+        "bytes": 683,
+        "mtime_ns": 1792606472865973392
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.GrateAndWoodStairsAssetsTest.xml": {
-        "sha256": "3b98ade903f2e09eb44feae40703afcf1f8fb7d9d8fd385abcc0ee12be2b5b77",
+        "sha256": "dfb662bcc8df3bc4aa440f1ac4c68833a4526b8dd3ffae2b2fdef6937e7a5cc9",
         "bytes": 1652,
-        "mtime_ns": 1792604204878684503
+        "mtime_ns": 1792606472867653324
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.HarnessObjMeshTest.xml": {
-        "sha256": "8bb028d2fda57d559e5f252750fd0d5e951a3ca6804e843147e3fcd015482b4b",
-        "bytes": 585,
-        "mtime_ns": 1792604204866012083
+        "sha256": "400470b2fe3b4bc3ec801938bdcca94a29e898a78dca29c3592d1dbb8a8cf3e0",
+        "bytes": 586,
+        "mtime_ns": 1792606472858395485
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.JsonResourceHygieneTest.xml": {
-        "sha256": "d6b3ac82f4f19825465f2b700631d57fcb8c950567e4257c72d15f1f53891f65",
-        "bytes": 801,
-        "mtime_ns": 1792604204870774091
+        "sha256": "891d3e1ff140c9fa34dc9181f2ceed289a4ce3e13c8f2fdefb117b4459c60fb6",
+        "bytes": 800,
+        "mtime_ns": 1792606472862056031
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.LangParityTest.xml": {
-        "sha256": "0dcf47f6d771f87118351ffd9a21e0487d7368d38e852d664d88af2bf7e534e4",
+        "sha256": "d42ec6bbbbb1308181ce6a32ab2890ae92230866250f015dce04ae28aa8a9f08",
         "bytes": 1307,
-        "mtime_ns": 1792604204835503187
+        "mtime_ns": 1792606472842340554
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.LevitatorAssetsTest.xml": {
-        "sha256": "f8ee71abd4d853edd6438044ce6620e8aa283d25dd7caf5a60125eff880dab09",
+        "sha256": "a47f5262dbb47ac35c5b03a56c72f677deb169d5b930563d804a751b52ff1e72",
         "bytes": 699,
-        "mtime_ns": 1792604204872192786
+        "mtime_ns": 1792606472863216175
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.MixinConfigConsistencyTest.xml": {
-        "sha256": "d4f47df65e7ead47057e148f7bf45580f2ec2e8c02b12a25ac60988ebf4ffe56",
+        "sha256": "56af9fb874835401a1b1d830006f41d17c68671a533a4d6f775df6654c50f8c3",
         "bytes": 1126,
-        "mtime_ns": 1792604204874501247
+        "mtime_ns": 1792606472865022699
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.NativeResourceCodecTest.xml": {
-        "sha256": "bb8254d7f38b585986baca57245c9b6ad43bccae5707e0c4be2e6246f07ebbec",
-        "bytes": 861,
-        "mtime_ns": 1792604204864960538
+        "sha256": "7b8d214aa99d93ba167fdb8fbb55cc4e51d485081df54dfa256e5f0313d5df85",
+        "bytes": 862,
+        "mtime_ns": 1792606472857414104
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.NormalRecipeParityTest.xml": {
-        "sha256": "afe0e4d50d4418d5f07dbda1d581281027deefa61de7639c8aca6d7e098e539e",
-        "bytes": 715,
-        "mtime_ns": 1792604204868983768
+        "sha256": "7f5d653ecfa27678e37c36172b88fa03741c5eb5722b29a135b152814fa68571",
+        "bytes": 713,
+        "mtime_ns": 1792606472860443158
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.PortableHoleAssetsTest.xml": {
-        "sha256": "99f5cdc1a6da96018dcafec5941e5ccfcf6d05bfc081c8e6f79c2d47d2deaa31",
-        "bytes": 809,
-        "mtime_ns": 1792604204873711502
+        "sha256": "f0c13ad8c772d9d80e2c52288574a5f5f5e6d0f4c1071665abf585bf68aced6d",
+        "bytes": 805,
+        "mtime_ns": 1792606472864166046
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.RecipeJsonInvariantsTest.xml": {
-        "sha256": "8cb4e7dae5bae9dff3213f0b300804353cb6ea11e71fcf689a1e002915168a50",
+        "sha256": "35c6c7f36962abebc3caa74bb57b3b017a220cb356e436228931246bc77bcf0c",
         "bytes": 1552,
-        "mtime_ns": 1792604204875894243
+        "mtime_ns": 1792606472866080636
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.RegisteredAssetCoverageTest.xml": {
-        "sha256": "bc9cfcd81151934497b6dd853575340f2f8879329cc8b804b8830c2fd8d67536",
+        "sha256": "390e5d045c4c30e569cf5d1ae884a5fed39a8eee961d8db70e8abc7d3515351a",
         "bytes": 1160,
-        "mtime_ns": 1792604204872709892
+        "mtime_ns": 1792606472863608433
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ResearchLangCoverageTest.xml": {
-        "sha256": "26aa73af5957e55dee9ba1c632f7fc2e8d6389297aec6316bce0a5ad3dbd76c6",
+        "sha256": "491ad9994dca051690a25f6d7192da02bd2e74c7ce0e996a2027fc3d80ef6bcb",
         "bytes": 1271,
-        "mtime_ns": 1792604204854900107
+        "mtime_ns": 1792606472847529199
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.ReservoirAssetsTest.xml": {
-        "sha256": "c3ca939e696e6b05e0aab33ec6877f142493062cc114600a7bdaab24de819b74",
+        "sha256": "9abf2c46e4eb89307e3e48566ee7408da023f406ddd3b1f7479f9968b1b92fdf",
         "bytes": 716,
-        "mtime_ns": 1792604204860229298
+        "mtime_ns": 1792606472852866990
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.SurfaceStructurePlacementAssetsTest.xml": {
-        "sha256": "d994412a0b955656d672a027803da86ff22133624d4d2cb89bd78b754cf229cb",
-        "bytes": 1048,
-        "mtime_ns": 1792604204868189273
+        "sha256": "99fa2b8344023f82404060cfe5a1005189bbe9fad8dc11cf1139e9d620136910",
+        "bytes": 1042,
+        "mtime_ns": 1792606472860247415
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.TravelingTrunkClientAssetsTest.xml": {
-        "sha256": "e6bb77ae8c40a0b3ad85aabe9a25aa4c864e29be870307dcc9a68093731efb3e",
-        "bytes": 876,
-        "mtime_ns": 1792604204836986219
+        "sha256": "a886ac1288a4948b7e01a9f97061cb824c9de74c20ea5cebbaf18746286e2ab3",
+        "bytes": 874,
+        "mtime_ns": 1792606472843639372
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.TrunkSpawnerModelTest.xml": {
-        "sha256": "b4f50c30ebfb85dac595b2cbd5686baf66136e626a6f6fd2a5b85d9ed3728032",
+        "sha256": "7ba21845c4e778c933ef62c44a0bc8b719dcae8ef08b7a2802fe06c53caa6f12",
         "bytes": 441,
-        "mtime_ns": 1792604204833956303
+        "mtime_ns": 1792606472840426237
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.VoidGearAssetsTest.xml": {
-        "sha256": "26701495518a25ac5489a1e1ff9e5abf9d24aa83bcdb0db651561404dd7f7df3",
+        "sha256": "bd6b778a729c7e1064da3a3d5dfad823f371f7fdb27dad457f577000421dd3dd",
         "bytes": 679,
-        "mtime_ns": 1792604204867280281
+        "mtime_ns": 1792606472859532302
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.VoidRobeAssetsTest.xml": {
-        "sha256": "720d99b27492f85537e0a074ed012348a5ca8e153e0daf5a8c03d53525a0c5bd",
-        "bytes": 827,
-        "mtime_ns": 1792604204840373071
+        "sha256": "5366bf22242f0b4a882b60363ca8d80a3e4b4dbdebf811ee48e33e551cc5aa73",
+        "bytes": 824,
+        "mtime_ns": 1792606472846423712
       },
       "common/build/test-results/test/TEST-thaumcraft.assets.WandModelAssetsTest.xml": {
-        "sha256": "c55f3e86987c2e94715bf10e442e05bfd5232413e6494cddff1bcf4bfd82ae40",
-        "bytes": 987,
-        "mtime_ns": 1792604204868406377
+        "sha256": "2f644ea0a631e42cc0e5957624ee24f7a6e405d28f1fc787ac434a077678b308",
+        "bytes": 985,
+        "mtime_ns": 1792606472860588686
       },
       "common/build/test-results/test/TEST-thaumcraft.baubles.AccessorySlotTypesTest.xml": {
-        "sha256": "a7e19473a47eb89bed26ea92cdcb66deb2f3af0d3af4a2298506a8c3e9fc8609",
-        "bytes": 705,
-        "mtime_ns": 1792604204858994072
+        "sha256": "774e1f6e43c8558f624957db3856bcf307c1edbc04030d63a4d1bd38bc2abb7c",
+        "bytes": 701,
+        "mtime_ns": 1792606472852028598
       },
       "common/build/test-results/test/TEST-thaumcraft.baubles.RunicAccessoryRulesTest.xml": {
-        "sha256": "bcca58e4fea9138a777750ffab81ea2698d046eb2bfa4476a70457adbff75da6",
+        "sha256": "e376a38b7f3267c46cf3ae0ec356e53507bd111ff7166ae320597b1f3c8dfdb3",
         "bytes": 475,
-        "mtime_ns": 1792604204876988439
+        "mtime_ns": 1792606472867000860
       },
       "common/build/test-results/test/TEST-thaumcraft.baubles.RunicBaubleRulesTest.xml": {
-        "sha256": "6e523ae66dc0ebf2d9d8d79e4ab9aee2d47367dd7ef10cd1f833c5b41180231f",
-        "bytes": 1735,
-        "mtime_ns": 1792604204861905178
+        "sha256": "90d27f83ce091386c15539fae480767ce05f68a5709129d36fd3eac63eab9452",
+        "bytes": 1730,
+        "mtime_ns": 1792606472854061963
       },
       "common/build/test-results/test/TEST-thaumcraft.baubles.VisAmuletDataTest.xml": {
-        "sha256": "53145d10545342203895bc41314b52ac48e52d5d7791245fe9cf6a876bf93c82",
+        "sha256": "c48ea6a2cf28a89ffc0179bae46c81945e13d01ab32f0f3aa8d2cabba0e26cd3",
         "bytes": 599,
-        "mtime_ns": 1792604204861155293
+        "mtime_ns": 1792606472853779324
       },
       "common/build/test-results/test/TEST-thaumcraft.biomes.BiomePatchPolicyTest.xml": {
-        "sha256": "b4cb1367a6347236879bc69ccb82eb6c3d750cb4ea6d90711bef8a07cfb473a2",
-        "bytes": 774,
-        "mtime_ns": 1792604204836145912
+        "sha256": "b4b82b9675eed62e3cf3fa81c3e1ef8723eb19ed86934dbee0fcedd9877d68ed",
+        "bytes": 773,
+        "mtime_ns": 1792606472842729085
       },
       "common/build/test-results/test/TEST-thaumcraft.biomes.BiomeSettingsTest.xml": {
-        "sha256": "9fc867aeb3c85bb3c5a2d1e4028a9e1349bb1b760cafd39a4cbcfbf2616dee2f",
-        "bytes": 860,
-        "mtime_ns": 1792604204873897266
+        "sha256": "7e77be6f2931a4bd687a1695a949220eaea86921eb11e22ce283621c92508538",
+        "bytes": 862,
+        "mtime_ns": 1792606472864221291
       },
       "common/build/test-results/test/TEST-thaumcraft.biomes.BiomeSurfaceRulesTest.xml": {
-        "sha256": "2f7f803b99d6b3435d5da3965f655ace6f48f26b7a5d4cf76230a82cd46af667",
-        "bytes": 1908,
-        "mtime_ns": 1792604204864340115
+        "sha256": "36c81e31f58a79a7e09c1b71b803a6dfcd7a50f953904b2739b90d8c9a04105e",
+        "bytes": 1904,
+        "mtime_ns": 1792606472856899353
       },
       "common/build/test-results/test/TEST-thaumcraft.biomes.OriginalSpawnRulesTest.xml": {
-        "sha256": "0c5ee9b0300550665c3ca8ee0bf3d72a99d6f77da2755b5412d49c06c991e95b",
+        "sha256": "a7d49dbba80b3df648666429f2c45c46265f43b47c7b44280dc044c4f2c00501",
         "bytes": 1076,
-        "mtime_ns": 1792604204858458131
+        "mtime_ns": 1792606472851568191
       },
       "common/build/test-results/test/TEST-thaumcraft.blocks.JarBlockNumbersTest.xml": {
-        "sha256": "fde8d63ec893f5c1da8c7ce2d1ed4fff2e9519cad64e7eaf5e2f77d5c101b5d7",
+        "sha256": "257c6fcbf0b3a63855c3a0b2c0683e92cd59eac0847eb3c15e9ba239de39164c",
         "bytes": 440,
-        "mtime_ns": 1792604204866757614
+        "mtime_ns": 1792606472858919374
       },
       "common/build/test-results/test/TEST-thaumcraft.bore.ArcaneBoreMathTest.xml": {
-        "sha256": "82fd288985c66cf06b23d27e2ad8732b25f77d10f12d33130ae449c5f790a988",
-        "bytes": 2905,
-        "mtime_ns": 1792604204872112052
+        "sha256": "69ade84c75f6e40e986c7c47d1e30ad24ac7a73948c0c74d718fc5144a883372",
+        "bytes": 2899,
+        "mtime_ns": 1792606472863366261
       },
       "common/build/test-results/test/TEST-thaumcraft.bore.BoreRepairStateTest.xml": {
-        "sha256": "328b59589f388b9d21574803f3c65653a9e9d870d26c56152f3633a9382c6948",
-        "bytes": 730,
-        "mtime_ns": 1792604204866012083
+        "sha256": "f8d5f116396f948a0954f032867dcd7f42e7ffd63e2b8250566d32eaef32b55e",
+        "bytes": 732,
+        "mtime_ns": 1792606472858395485
       },
       "common/build/test-results/test/TEST-thaumcraft.client.ClientEffectsParityTest.xml": {
-        "sha256": "b25d663ad40fe61dfb4e5941e2c41b091a527a9d32b8d34223dc5044d9033dc6",
-        "bytes": 1024,
-        "mtime_ns": 1792604204839447066
+        "sha256": "d1ea303504d6df7690856a38e86db1b0a95b4680078519cb6c5dfe0688fd92f1",
+        "bytes": 1023,
+        "mtime_ns": 1792606472845419176
       },
       "common/build/test-results/test/TEST-thaumcraft.client.WarpPostChainTest.xml": {
-        "sha256": "a0a4921adc60d311b5d3ed6d197531577c625748a88ea263329f6275c461f6d3",
+        "sha256": "9b6ed718d86aaffef80db2cc83b41f24ab5a8efe40b220de8851019f648976e8",
         "bytes": 740,
-        "mtime_ns": 1792604204871974670
+        "mtime_ns": 1792606472863056571
       },
       "common/build/test-results/test/TEST-thaumcraft.client.gui.DeviceGuiLayoutTest.xml": {
-        "sha256": "4230bdc8877c60b17b12b76f4d07ef1ae1d7c59e4d675b86c68e6aa1a453b883",
-        "bytes": 1768,
-        "mtime_ns": 1792604204841685113
+        "sha256": "5fd3085a5996e2b5b7ef18aa45547b14ba53a19370ec84d612e0f78580b614e7",
+        "bytes": 1769,
+        "mtime_ns": 1792606472846939485
       },
       "common/build/test-results/test/TEST-thaumcraft.client.gui.ResearchBrowserFramesTest.xml": {
-        "sha256": "f1c992c6472afa63db4f27dd59a0f5daf30478fe5bb754377c55a59b9301b8ba",
-        "bytes": 739,
-        "mtime_ns": 1792604204872264954
+        "sha256": "3a25d085179a696866352f383d9add3cadcca07750eff3ad978ffaf58e99182d",
+        "bytes": 737,
+        "mtime_ns": 1792606472863302860
       },
       "common/build/test-results/test/TEST-thaumcraft.client.renderers.EldritchBlockModelTest.xml": {
-        "sha256": "c7b597a407722cde4bc64e8a83cbf8f21e06280447e6575020fed58b9c9f63db",
-        "bytes": 1147,
-        "mtime_ns": 1792604204881055242
+        "sha256": "fa4396b2c8d82eab8ab260bc41c6ab1a0aab26d346ea98cfd32c3211dc8284f1",
+        "bytes": 1149,
+        "mtime_ns": 1792606472870180973
       },
       "common/build/test-results/test/TEST-thaumcraft.client.renderers.entity.ClientModelGeometryTest.xml": {
-        "sha256": "720fe88afa3a79c2cc7230a86193a8694d874165f2640a3f0cb5c60df4745ac3",
+        "sha256": "463511af550907c1444c4902f2eab901da842a4c1f8fb36fab091092b6948e00",
         "bytes": 927,
-        "mtime_ns": 1792604204857481429
+        "mtime_ns": 1792606472848697286
       },
       "common/build/test-results/test/TEST-thaumcraft.common.blocks.BlockFamilyParityTest.xml": {
-        "sha256": "3d0906ebe15b5a9fde6542928dc00248e5a6d06f3dc12f91c0b278fae6a1c7bc",
-        "bytes": 1270,
-        "mtime_ns": 1792604204869221602
+        "sha256": "7bc809324bda8dcaf4764149f66a0c2274796fdb517aa5dae746f8f775319439",
+        "bytes": 1266,
+        "mtime_ns": 1792606472860498734
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.BlockFxPayloadTest.xml": {
-        "sha256": "2ff8c6786f5809ac62278a69566d705de63ca108028c9bab427466b9979922c9",
-        "bytes": 949,
-        "mtime_ns": 1792604204866840873
+        "sha256": "10cb89c3406997b36ce435307f43cfe28e5131a8689733e06cafe24fc957fa2e",
+        "bytes": 947,
+        "mtime_ns": 1792606472859071414
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.SpaRulesTest.xml": {
-        "sha256": "7b64205b13f25a2f9686213e0abc7e1c16e04d25d10f1de8b17404d3690c8279",
+        "sha256": "6890f9376d027c75571551a3591ed1357077cf1d47cc8936157b6cd73fec9e42",
         "bytes": 727,
-        "mtime_ns": 1792604204860484259
+        "mtime_ns": 1792606472853061350
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.essentia.EssentiaSourceSearchTest.xml": {
-        "sha256": "e7e55f8b9a2c26d00fc599fbd60c2dc265e6e2b43e136833a3fb46c32f1a1309",
-        "bytes": 1836,
-        "mtime_ns": 1792604204860229298
+        "sha256": "0206ad7aa7f89f3ebe7b9b6879b01b7f37b4c676b29d8c5ab18f589ffa6a265e",
+        "bytes": 1832,
+        "mtime_ns": 1792606472853061350
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.loot.OriginalLootEnchantmentsTest.xml": {
-        "sha256": "7d495f0431d906e4ea3fd6b905e4034c5f1d04c9e4f465e997a4e6fd5a4acb1e",
-        "bytes": 1069,
-        "mtime_ns": 1792604204880383612
+        "sha256": "62d0f6a93c0616b51ff6bf8078188301ee28c648dd0480e3ec0a4ad8468d24fb",
+        "bytes": 1068,
+        "mtime_ns": 1792606472869394015
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.AccessoryPayloadsCodecTest.xml": {
-        "sha256": "f78e42f4f2ead2526b482c910c7c0357597515211ea8b91d99c71b153acb287a",
-        "bytes": 1235,
-        "mtime_ns": 1792604204866617507
+        "sha256": "c8062dedf85b3ce967cb5f174a1ea38d65ac28e9187a4f85958451a7ed3c231d",
+        "bytes": 1233,
+        "mtime_ns": 1792606472858977635
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.FocusSelectionPayloadTest.xml": {
-        "sha256": "9cb72d0852a05733ae01c07d32aaadb917cacb53e72fbb7d240c78fe6692a28b",
-        "bytes": 1426,
-        "mtime_ns": 1792604204865791632
+        "sha256": "4d2570207e20bd015c861235decf275df709dbc615e0e798594504b0cd16775a",
+        "bytes": 1424,
+        "mtime_ns": 1792606472858186637
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.FxPayloadsCodecTest.xml": {
-        "sha256": "009396d4a6b8ef9389800d81575f67d6101979bb2244b67df04ebe2c5d977e39",
+        "sha256": "a5c3e168de0c793fd68f858ce9b82c771248a84308dbd42926916c6b276babc8",
         "bytes": 1018,
-        "mtime_ns": 1792604204855794763
+        "mtime_ns": 1792606472847529199
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ItemKeyPayloadsTest.xml": {
-        "sha256": "63e2bd36fe2f0223eba4a927f59d7ff9c2653b3cd198f64a1c5f686e48f91294",
-        "bytes": 1131,
-        "mtime_ns": 1792604204832532681
+        "sha256": "11dbf3b6954f3c8bfaa0fb97dc693188c4fd2fbfa291bd9a215fd3b875c9eefa",
+        "bytes": 1127,
+        "mtime_ns": 1792606472838968202
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.KnowledgeSyncPayloadTest.xml": {
-        "sha256": "599434720e4eca9fd5834e5389b3a44f0a3e87c19529879dbe80ffd99d068e2b",
+        "sha256": "b3c295cda822a38d5abe56112d4995491896788ad074b6e6354d1886c314f615",
         "bytes": 480,
-        "mtime_ns": 1792604204837846113
+        "mtime_ns": 1792606472844402077
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.PayloadRegistryTest.xml": {
-        "sha256": "24f24d6bfe5e3284933e9eeeca1fed9643d3540cd1a550d72b17ec2684f24d2a",
-        "bytes": 1203,
-        "mtime_ns": 1792604204871611418
+        "sha256": "88fad9924482ad6c710ad7f412f75043645b7f76f8eaa0c2ea97e4c781208b9e",
+        "bytes": 1201,
+        "mtime_ns": 1792606472862760596
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ResearchNoteRequestPayloadTest.xml": {
-        "sha256": "6177a8d3a7ef2af04e4aa1af81398adf7432d20537f46ba20d929a253bc85b24",
-        "bytes": 830,
-        "mtime_ns": 1792604204835748695
+        "sha256": "f3ea914e0318fd8e6f7a63c4f2598ef2808d9e67f74a1ed0f94c0ed5c335eea2",
+        "bytes": 829,
+        "mtime_ns": 1792606472842492498
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ResearchPurchasePayloadTest.xml": {
-        "sha256": "75a344fe83abb5347860bdfba804d14bcc7fab4891a1a2396d443a6abd43deae",
-        "bytes": 809,
-        "mtime_ns": 1792604204876599358
+        "sha256": "f0008ab40029e4a478a1de6e7cc363bcb81eccec1f5e6b0e0a1c40f6c918815b",
+        "bytes": 810,
+        "mtime_ns": 1792606472866372333
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ResearchSettingsPayloadTest.xml": {
-        "sha256": "a94e9f902c49ca7e23d1d85e580b21950cb1de29ad15d1c6343e05e682825c55",
+        "sha256": "d3aac1c850fd896d9fd815854aaf239fe70b6d2e91165c083223a647654da05f",
         "bytes": 692,
-        "mtime_ns": 1792604204841485863
+        "mtime_ns": 1792606472846808172
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ResearchTableCombinePayloadTest.xml": {
-        "sha256": "0e8c520a33eecc5f5ccc4a24a16ca0c5a74337ff26d5aadfbe6c47b0e675e6ff",
-        "bytes": 1245,
-        "mtime_ns": 1792604204861155293
+        "sha256": "aa3349f5b0f959d4b87f1c71380231211de1761c3565a0b85139aeb9629ad1ae",
+        "bytes": 1247,
+        "mtime_ns": 1792606472853779324
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ResearchTableCopyPayloadTest.xml": {
-        "sha256": "c0af85df29675625cf16d09169c54e65cdf6ad8fc6cb1517374aee5bd53d02c5",
-        "bytes": 817,
-        "mtime_ns": 1792604204863801588
+        "sha256": "c36811bae59a2e92a2350984e6c88366ce38527ee0d3e7df048a4e28a235659d",
+        "bytes": 819,
+        "mtime_ns": 1792606472856971049
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ResearchTableEditPayloadTest.xml": {
-        "sha256": "2b42cfdcee44631c690b04b4cdb92772d5b053429a8708a615c257d731c49f4d",
-        "bytes": 1789,
-        "mtime_ns": 1792604204855794763
+        "sha256": "cd555e3f16f5274c494adf44a5a5189bbd817b4bead266148283948279cefca3",
+        "bytes": 1784,
+        "mtime_ns": 1792606472847428377
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.ResearchTableStatePayloadTest.xml": {
-        "sha256": "4d39e5ce84c44b8724ba32b40c75e9624063c11221e2a94c7b882a202037949d",
+        "sha256": "e95a50c4858d3709a3205022977da568facd14c6155b6901d09a364cf048c2e2",
         "bytes": 1364,
-        "mtime_ns": 1792604204872590705
+        "mtime_ns": 1792606472863526737
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.network.WarpPayloadsCodecTest.xml": {
-        "sha256": "929cdecfa3fc73fbb4e48b5178cc2bfa3516fb6473ae23e07c858bb9da368639",
+        "sha256": "39013c4e48a9066974197506086150ea469ffb77cfaaa33f4767f3a08ddb05fe",
         "bytes": 1049,
-        "mtime_ns": 1792604204870132198
+        "mtime_ns": 1792606472861694572
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.primal.PrimalFocusRulesTest.xml": {
-        "sha256": "1f03eacfcb35ef10763e74e4ececf1c0286c961ce6fe200d28df09602fbd67b9",
-        "bytes": 1059,
-        "mtime_ns": 1792604204854264135
+        "sha256": "68c6f2843a73a14290e61f60c8eb9469852d9ae9d272f6ab7016d527edfff6e2",
+        "bytes": 1060,
+        "mtime_ns": 1792606472847299228
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.EntityAspectBindingsTest.xml": {
-        "sha256": "d057a521e3a1dfa1e33ee4c5d84e378173cbab1fceb3061a542fa20c264c4400",
-        "bytes": 830,
-        "mtime_ns": 1792604204866148292
+        "sha256": "264776e27d516874981c8cc13edd6ce2affd5ace76fc678df37b60a514c49034",
+        "bytes": 828,
+        "mtime_ns": 1792606472858560580
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.EntityScanApiTest.xml": {
-        "sha256": "b9020cef67ba6d4d8acfb1f245dcf2124211aae2cc78c351a2db0e3d6dab855e",
-        "bytes": 1005,
-        "mtime_ns": 1792604204839972367
+        "sha256": "5518fcb8121464d79a03608202851a0b52271f3e546dd4308da3f91d0daf69d2",
+        "bytes": 1003,
+        "mtime_ns": 1792606472846085514
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.NodeScanAspectsTest.xml": {
-        "sha256": "dae485f5821ddf1c280bec1cb6a1ff1abf6f02e804b8fbe23bcb4be4bd0ccf46",
+        "sha256": "1b335e171c4607fce16177707c2139b71325e12c13609ed858b01e12bb1a5dab",
         "bytes": 623,
-        "mtime_ns": 1792604204857345129
+        "mtime_ns": 1792606472848263259
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ObjectAspectRegistryTest.xml": {
-        "sha256": "a5b9ae41f0fa557b9c4dce55deb0129a09d22a86e72457cd426e89d9657e7461",
+        "sha256": "8dfb806f16b760fc36b5652846052966f2ea2424cac01be23e4efaf4abd65e9c",
         "bytes": 1220,
-        "mtime_ns": 1792604204857986717
+        "mtime_ns": 1792606472850879237
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ObjectAspectRegistryValidationTest.xml": {
-        "sha256": "26e931c559e9dcbf1c3cd76d3415fb69e3849968c64b7d9d2b8f4b879e9a8cae",
+        "sha256": "bbec5192c93f397e3daec01c1de65e84edbaa58abd2dbf1ee59cb6b9fe392679",
         "bytes": 693,
-        "mtime_ns": 1792604204834404056
+        "mtime_ns": 1792606472840796343
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.PlayerKnowledgeTest.xml": {
-        "sha256": "9f7750d85c07d26048326a4c2654a36eea95020802d6b72c409deb50571ff99e",
-        "bytes": 1353,
-        "mtime_ns": 1792604204866840873
+        "sha256": "6aa76e98aec9c1e3467f12040237a6fbc797be5d34be825e3879d6e531375866",
+        "bytes": 1349,
+        "mtime_ns": 1792606472859133632
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchBrowserDataTest.xml": {
-        "sha256": "988715b2052e45219f1afcf44a03d97062927826093cdcc7dbc06b04c6a91db6",
-        "bytes": 1622,
-        "mtime_ns": 1792604204862243673
+        "sha256": "b2cdecdd68944a892b9d5e988882029e0f95b363eb622ce546efba2639a3197f",
+        "bytes": 1616,
+        "mtime_ns": 1792606472854935368
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchCluesTest.xml": {
-        "sha256": "894837c95c81a9a6fa0aeb0edbddd5fced8ed9f060566440c366c2cc44340f7d",
-        "bytes": 1145,
-        "mtime_ns": 1792604204860367481
+        "sha256": "f46e7e68096abc28f928ac54cfd1b329fb0d7764009fcaf46e4409c57d4ea9d4",
+        "bytes": 1142,
+        "mtime_ns": 1792606472852990085
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchDisplayablePagesTest.xml": {
-        "sha256": "ae974ab124bac92840be32bdde3a3af2153561d501e20f500985d252621ebd4a",
-        "bytes": 503,
-        "mtime_ns": 1792604204867748613
+        "sha256": "ba3d76fa03f933ca5f3add4ea0e21773d8d8162c07ef5fcfc62413b280f0d771",
+        "bytes": 507,
+        "mtime_ns": 1792606472859702516
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchHiddenSelectionTest.xml": {
-        "sha256": "c69a6961146824fc63f1b2df20d416993e18859f0b1d13cb5a0bec97a4101582",
+        "sha256": "a2aa05f7c757f934fec340958bb402e5d41e25b78bde224b7170a9e7124ebfa4",
         "bytes": 1242,
-        "mtime_ns": 1792604204860601117
+        "mtime_ns": 1792606472853304609
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchModeTest.xml": {
-        "sha256": "3465f51e2e3f5c939cc1b4d57c5bf1dafe15b9ab83f4ec4152561ebfc1e12554",
+        "sha256": "0783e125fddbb2e77ccd5daf086b4d7f6afd1d09cc1b029afafdd559c8c36336",
         "bytes": 650,
-        "mtime_ns": 1792604204879573779
+        "mtime_ns": 1792606472868422085
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchNoteCopyingTest.xml": {
-        "sha256": "56919e041cfd1cd7594c5b07ab497708ac5cec8ef674217913fec41c3fa670bc",
+        "sha256": "eca7994ceb936ec04fc1ba89f0caad630c31feab39a310658e3075864ef260ab",
         "bytes": 1301,
-        "mtime_ns": 1792604204854264135
+        "mtime_ns": 1792606472847043563
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchNoteIssuanceTest.xml": {
-        "sha256": "dde28ed6cf4bfe97d79d2fb04b1f9934c11e1a3301fbe3446a8d2c769dce9e25",
-        "bytes": 1480,
-        "mtime_ns": 1792604204864532672
+        "sha256": "b6b397d997d5daf856f14c2580a63e7d60499ea9a5aa37cdfdd200235529b46c",
+        "bytes": 1478,
+        "mtime_ns": 1792606472857175609
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchNoteLearningTest.xml": {
-        "sha256": "24856591e1e8dfa9ffa165b3a7094ab78d9887f9dfef6c5542f0823e7b9208b0",
-        "bytes": 1766,
-        "mtime_ns": 1792604204865654160
+        "sha256": "e656ab0d192b7f7a660ce5dd3b055b45083be20e17209d959e32f01cd782259b",
+        "bytes": 1764,
+        "mtime_ns": 1792606472858075355
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchPurchaseTest.xml": {
-        "sha256": "3f0e17a6696ae34987b2efce46a603896527bfb002cb2142b13a050c38ec9470",
-        "bytes": 2788,
-        "mtime_ns": 1792604204840532678
+        "sha256": "232b9a5c6900925ae41934f314fa5f9ba43798b0507000be35f3c6e2ca9384cd",
+        "bytes": 2780,
+        "mtime_ns": 1792606472846423712
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ResearchTriggerBindingsTest.xml": {
-        "sha256": "5ea3cbad74cfeb9e6225f019a681df6e79f7b62585edfdf6442e704981bb6507",
+        "sha256": "482acd1d2c9992d76c541b401f55a5c91a6e38959aa826be677055af0c19952e",
         "bytes": 638,
-        "mtime_ns": 1792604204873897266
+        "mtime_ns": 1792606472864221291
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.research.ScanCallbackDispatchTest.xml": {
-        "sha256": "585ffe2c05342279e2df97a2cf23975b038faa10d2c6230aa8b6e47b97c76b5f",
+        "sha256": "0c813d4c837d1bfee9b2fc955e8bdf7ad983a9367cc520d784922b569f0caee8",
         "bytes": 866,
-        "mtime_ns": 1792604204840373071
+        "mtime_ns": 1792606472846322258
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.taint.TaintCombatRulesTest.xml": {
-        "sha256": "8d81b10590031ac6ab9586e7ed307d43d3f8be4757e3d3af53a493fff653a160",
+        "sha256": "447a99b335499a0868e3f0985d612a9f827adaf717d20d560d2f85d9ddf86d94",
         "bytes": 621,
-        "mtime_ns": 1792604204866685837
+        "mtime_ns": 1792606472859017882
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.taint.TaintacleRulesTest.xml": {
-        "sha256": "12e629fd51abd2e3f4c201a33bcd89056e66bbda2fc6aa555aa6259137cf3a3c",
+        "sha256": "0a379015df7c3c7e2fe284ccff231c758b1c4bacf8119a57d01ddda9ac382e80",
         "bytes": 902,
-        "mtime_ns": 1792604204873711502
+        "mtime_ns": 1792606472864081805
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.warp.SanitySoapRulesTest.xml": {
-        "sha256": "227ef4281b5deb2adb75faaf9a9980e2dca50f514322246a992d03732278f76a",
-        "bytes": 932,
-        "mtime_ns": 1792604204835148912
+        "sha256": "fb2d76b1a47ba893a63e0bb1bfb978fa40dded92e3f02af9cdaa25c80d1528ff",
+        "bytes": 934,
+        "mtime_ns": 1792606472841420600
       },
       "common/build/test-results/test/TEST-thaumcraft.common.lib.world.NodeGenerationTest.xml": {
-        "sha256": "22de6a365d344ab161b9635fecaec1ea81c612ed61e9347d0810d0ac66a62caf",
+        "sha256": "58222336765a7fc8da3b02b352f85a0e40f69d779713d6f66d57116ac04dbe7e",
         "bytes": 1047,
-        "mtime_ns": 1792604204864445696
+        "mtime_ns": 1792606472856971049
       },
       "common/build/test-results/test/TEST-thaumcraft.crafting.RunicGirdleKineticParityTest.xml": {
-        "sha256": "f678eee8436d60e4b2f3044b61c125f29e3c783b91029ca638ac9beeb4c9807e",
+        "sha256": "a3ad46841dc468da9185b0d479ec886273154c5d2b072767f8072bcbef47ffcf",
         "bytes": 774,
-        "mtime_ns": 1792604204838864345
+        "mtime_ns": 1792606472845005657
       },
       "common/build/test-results/test/TEST-thaumcraft.crafting.ShapelessNBTOreRecipeTest.xml": {
-        "sha256": "70425ff151fa1269f41aa66b0f92302a1fc8a5bf8d2e05de8d7617d99dcd7b2e",
+        "sha256": "3e4f347e91d50a184a1cc4cced81f09f18290b543361088229dfd79341b58e45",
         "bytes": 1017,
-        "mtime_ns": 1792604204867280281
+        "mtime_ns": 1792606472859434165
       },
       "common/build/test-results/test/TEST-thaumcraft.crafting.SmeltingBonusParityTest.xml": {
-        "sha256": "6e5da5cfa1f6e98a5cf4011e534997a40ce114b5f94d348d455b37b02a145513",
-        "bytes": 1050,
-        "mtime_ns": 1792604204880861152
+        "sha256": "ac75aa3c907b3444c7ffe07b380514f2c9640e5a4f6e5177d834e2ffcab7a326",
+        "bytes": 1048,
+        "mtime_ns": 1792606472869761736
       },
       "common/build/test-results/test/TEST-thaumcraft.crystals.CrystalClusterGeometryTest.xml": {
-        "sha256": "33dc098dc4c67cf288b801acc1b54720a3e82cad6c8ef2a9df1f270de3e9fd73",
-        "bytes": 947,
-        "mtime_ns": 1792604204874159255
+        "sha256": "f990a4f36e4779a3994a93856d086b35be56e0fd8511b8ccbc67c46570e7a229",
+        "bytes": 943,
+        "mtime_ns": 1792606472864550639
       },
       "common/build/test-results/test/TEST-thaumcraft.cult.CultistEquipmentRulesTest.xml": {
-        "sha256": "33b8b1188aca640c34d49b22a2a4a999b2b972d52fafed8fe64dcd4aeaa7d6aa",
-        "bytes": 1944,
-        "mtime_ns": 1792604204874651384
+        "sha256": "953ade8a544cb0a90cd6f481302066bcc4e56301362b7c36df6f4c23b9b2af0f",
+        "bytes": 1942,
+        "mtime_ns": 1792606472865124464
       },
       "common/build/test-results/test/TEST-thaumcraft.cult.CultistRoomRulesTest.xml": {
-        "sha256": "446fc8447bf7cfd2731e479466fa7413e0ca66ef33baadf919a9adfa8523be5d",
-        "bytes": 1082,
-        "mtime_ns": 1792604204857737858
+        "sha256": "50baabca2fa69e937fed9f0ef0b1802ec0b0642198d85f0eacf1d216c11d597b",
+        "bytes": 1080,
+        "mtime_ns": 1792606472848697286
       },
       "common/build/test-results/test/TEST-thaumcraft.cult.CultistRulesTest.xml": {
-        "sha256": "f5820f4db25917018a4f155cd7f078dfb4254e11958aed21017dee92f4b76d43",
-        "bytes": 3958,
-        "mtime_ns": 1792604204873191711
+        "sha256": "86843789b84ff8cc26c93b6df77bc5857b2d8dc3fe5d24eed968b50a3fbcbf54",
+        "bytes": 3949,
+        "mtime_ns": 1792606472863970653
       },
       "common/build/test-results/test/TEST-thaumcraft.eldritch.EldritchArcTest.xml": {
-        "sha256": "4a0ce3f7161dcd75542429356804da4c64c03b54f640ce24834b9c6ed2a9e191",
-        "bytes": 912,
-        "mtime_ns": 1792604204856182021
+        "sha256": "b4566a1a1154d2b870d07db35ecb6e66200e9db583de7b3f961712dc88586b3d",
+        "bytes": 910,
+        "mtime_ns": 1792606472847750568
       },
       "common/build/test-results/test/TEST-thaumcraft.eldritch.EldritchBlockRulesTest.xml": {
-        "sha256": "211a674f29634d38a8e80e293541700d34bbd8b5e4b7427889e31b8fe1987f9f",
-        "bytes": 6533,
-        "mtime_ns": 1792604204876075860
+        "sha256": "26465f185698d5460c86922ba304d04579c39ea6c451ecc673db347d97f9477a",
+        "bytes": 6521,
+        "mtime_ns": 1792606472866372333
       },
       "common/build/test-results/test/TEST-thaumcraft.eldritch.EldritchMobEquipmentRulesTest.xml": {
-        "sha256": "1a6e6ee8d9319e5820dfea103199185a5446122114651ef5106004b5065035b2",
-        "bytes": 752,
-        "mtime_ns": 1792604204866148292
+        "sha256": "a00e71870850a4c6449b1745e949387ddc395944565b83d0a00c59315d819e84",
+        "bytes": 750,
+        "mtime_ns": 1792606472858471309
       },
       "common/build/test-results/test/TEST-thaumcraft.eldritch.EldritchMobRulesTest.xml": {
-        "sha256": "8d908d617e8b7fc58c54ba9cc01556f14ca9744e0dd95e1b23ded89b2cc2e772",
-        "bytes": 2187,
-        "mtime_ns": 1792604204837630783
+        "sha256": "c11bccbba353387d64cbb602ca8cf0c57b90a83d1478121fecf731f785c5e012",
+        "bytes": 2183,
+        "mtime_ns": 1792606472843833080
       },
       "common/build/test-results/test/TEST-thaumcraft.eldritch.EldritchObeliskRulesTest.xml": {
-        "sha256": "af569e78b85dd8952fc5780809bab70722e6727e311a892dd7a5f8861b9a94b1",
-        "bytes": 751,
-        "mtime_ns": 1792604204867127339
+        "sha256": "221026cb99f36252f78cb762f206ae27a3932f2e6a704a750429e38555e78814",
+        "bytes": 753,
+        "mtime_ns": 1792606472859434165
       },
       "common/build/test-results/test/TEST-thaumcraft.eldritch.MagicBoxSortRulesTest.xml": {
-        "sha256": "42594484df916b269db69dd2a99acce2be76d16931cbfdc7b18c50feae6bf090",
+        "sha256": "5fc8dd474159ef4a9fee369db58142d954a31d17cd53b085758ff9f59ee373d8",
         "bytes": 810,
-        "mtime_ns": 1792604204861238722
+        "mtime_ns": 1792606472853858495
       },
       "common/build/test-results/test/TEST-thaumcraft.enchantment.EquipmentEnchantmentRulesTest.xml": {
-        "sha256": "bb6596d795b35e2fb1313c17e98578080d6f4bd19fefa2f0918261f64dc8d2ff",
+        "sha256": "f842a7f170f94a252faf8c67f4df1bd7cc4efccb747b19c7df834230838dfcec",
         "bytes": 800,
-        "mtime_ns": 1792604204833341801
+        "mtime_ns": 1792606472840087241
       },
       "common/build/test-results/test/TEST-thaumcraft.enchantment.WandEnchantmentRulesTest.xml": {
-        "sha256": "f64f26eab7991f92ac4cbe0dd5164768d2747cc98f82f3fde0c60a68a0569b70",
-        "bytes": 1661,
-        "mtime_ns": 1792604204877680940
+        "sha256": "31afcaee64f5a66bead0930256ba6928959697d89361ed63518c728e84efb397",
+        "bytes": 1659,
+        "mtime_ns": 1792606472867353863
       },
       "common/build/test-results/test/TEST-thaumcraft.entities.EntityParityRulesTest.xml": {
-        "sha256": "5196824e18e8500b574ed005a2de6bf84ba5ace224b6a23cee7d0adbec2f9ea3",
+        "sha256": "310069e7c13bb1d2d3d8870a1bd2d674ad73cd34417f9e540ca9236e4b5b6cb2",
         "bytes": 1244,
-        "mtime_ns": 1792604204839972367
+        "mtime_ns": 1792606472845886505
       },
       "common/build/test-results/test/TEST-thaumcraft.entities.ProjectileRulesTest.xml": {
-        "sha256": "b267747576bfbae8039753b945aae7edd0fba445dccb9add1172e3228d6d6b84",
-        "bytes": 4225,
-        "mtime_ns": 1792604204865557226
+        "sha256": "fc8fd4a84bd377ab0181cc0ecf71638c236840525ff48a4341dcdf5a936f99fa",
+        "bytes": 4221,
+        "mtime_ns": 1792606472858075355
       },
       "common/build/test-results/test/TEST-thaumcraft.equipment.EquipmentWiringRulesTest.xml": {
-        "sha256": "d23dbaed57fb4763a58e9b068a302de592ad7733cb119617d377ab39e30675dc",
-        "bytes": 1281,
-        "mtime_ns": 1792604204834143099
+        "sha256": "bf3c16dcaaf0fa8a021aa2d4826f116dd7232cedcad4e20ed053545ae5e9c146",
+        "bytes": 1279,
+        "mtime_ns": 1792606472840624415
       },
       "common/build/test-results/test/TEST-thaumcraft.equipment.LegacyItemsRulesTest.xml": {
-        "sha256": "75b4b9a1aecc9890b8b1b0c23ca5676ef9c44163b48120f8c214d6bf25a09f87",
-        "bytes": 2786,
-        "mtime_ns": 1792604204862901282
+        "sha256": "0aedfc531bba3df51f2ad16e10728b236b2ec7c1c8e1797710b22198f121dc2e",
+        "bytes": 2788,
+        "mtime_ns": 1792606472855395576
       },
       "common/build/test-results/test/TEST-thaumcraft.equipment.TravelGearRulesTest.xml": {
-        "sha256": "65fc91ac54e2a74955743a04ba4132a8c3f8ed8afb4985db4b1b7e2f60958959",
+        "sha256": "9700ca89ca6316e4f78ee92fcb4b30c86e9a686f05c5351bab0a1a7fa5867f4c",
         "bytes": 738,
-        "mtime_ns": 1792604204866230459
+        "mtime_ns": 1792606472858560580
       },
       "common/build/test-results/test/TEST-thaumcraft.essentia.BoreInventoryPlanTest.xml": {
-        "sha256": "afd839d5dc4c10d8a238b0f54af692137a7b2475f79b12922a21408c5725a6e6",
-        "bytes": 4021,
-        "mtime_ns": 1792604204876478147
+        "sha256": "03866e7fb4e44dbd65d1329e3cf170dff98ca4125a25d1aca399a05e91bdfb9c",
+        "bytes": 4009,
+        "mtime_ns": 1792606472866283012
       },
       "common/build/test-results/test/TEST-thaumcraft.essentia.ReservoirLiquidTest.xml": {
-        "sha256": "ae81322a9fb7cf66344561d56f7a9651baa9e85a6e233919f7626629cbe7bfd0",
+        "sha256": "7bd3e242a0ca27fcebc6a931f2a951a6bc096d45b55d2f2b9625dfcd479b10c9",
         "bytes": 948,
-        "mtime_ns": 1792604204867400750
+        "mtime_ns": 1792606472859532302
       },
       "common/build/test-results/test/TEST-thaumcraft.foci.FocalManipulatorPayloadTest.xml": {
-        "sha256": "7e09cfc9f3f7fcad9f276b4c57e4a00cd4967b6392395042d003ed89662cb624",
-        "bytes": 1217,
-        "mtime_ns": 1792604204858599721
+        "sha256": "3916dacdae6b27f01dc0b2e6b2ec50a697b9c771b666b377d0568cfba8d74ce4",
+        "bytes": 1213,
+        "mtime_ns": 1792606472851683150
       },
       "common/build/test-results/test/TEST-thaumcraft.foci.FocalUpgradeCostsTest.xml": {
-        "sha256": "145ea0dd16b9dc276eea0304c9ba5fad181c8a1186acc196b42c6c5ad60e6ce0",
+        "sha256": "06db7c8e181afd15cca0e0e904ddf836ce4a516c671aeee5232972a5ec6e023d",
         "bytes": 1147,
-        "mtime_ns": 1792604204867876888
+        "mtime_ns": 1792606472859866599
       },
       "common/build/test-results/test/TEST-thaumcraft.foci.FocusSelectionSourcesTest.xml": {
-        "sha256": "7c7bdcaef023c41f3eb28a0b00eef1ec7acf64ecbb6bfc5761cac2d5293557ee",
-        "bytes": 1141,
-        "mtime_ns": 1792604204858269115
+        "sha256": "777651737f3247964b5e2c90188c392a35f1d6ebe2dc64cebe5e893d1f3d2274",
+        "bytes": 1137,
+        "mtime_ns": 1792606472851155925
       },
       "common/build/test-results/test/TEST-thaumcraft.gear.GearModelGeometryTest.xml": {
-        "sha256": "0fdfa6976020ed9d92fbd4d67f2455701de464f9b7cd980cfee9fd68b2780b47",
+        "sha256": "2d75234149274e44cc063b193547aafd53410508645ce6311cc73ae55e6c64dd",
         "bytes": 921,
-        "mtime_ns": 1792604204879007118
+        "mtime_ns": 1792606472867946393
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemAdvancedTest.xml": {
-        "sha256": "d58bad3ba68ccc9759509835efafc21cf4338d8a69c35f252a262e3681c0a1bb",
+        "sha256": "821c885d08b1872f8357fdd3d9c5ea6ab8f0016a5a2c711447a454e6de1f636e",
         "bytes": 1339,
-        "mtime_ns": 1792604204872458463
+        "mtime_ns": 1792606472863426877
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemCargoRulesTest.xml": {
-        "sha256": "9d9664b22782f9bb51a05817985baab8c16b07ea5773dcda620e6788dabde0b6",
-        "bytes": 701,
-        "mtime_ns": 1792604204874828441
+        "sha256": "d090853c96d3dbfb18a751b529cc75873d78cff771cb915754c34d11fcb27889",
+        "bytes": 697,
+        "mtime_ns": 1792606472865184949
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemColorsTest.xml": {
-        "sha256": "d7b78d0f1a3fb8f0d07c98405c02d08a9b42f2dbb0793c38256204f44a2cfca0",
-        "bytes": 2228,
-        "mtime_ns": 1792604204874321034
+        "sha256": "e2cc93834d8c9ae2642764d85b724d71c3def49a5cd0881f16012fc440982dab",
+        "bytes": 2226,
+        "mtime_ns": 1792606472864669997
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemDamageRulesTest.xml": {
-        "sha256": "9c7db465225ae044c66e87c1a1921bf2739c647283d25307ab405d4551100694",
-        "bytes": 734,
-        "mtime_ns": 1792604204870602915
+        "sha256": "168274b4cf80a0deeb4ed11788ffb080a5cee7e78ffcdb95254d7b6f9e841fbd",
+        "bytes": 732,
+        "mtime_ns": 1792606472861898511
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemDartRulesTest.xml": {
-        "sha256": "a27397979ce8e52aa2a1dafc460231aeff84d28427c16db9a26f78d627b10c81",
-        "bytes": 1247,
-        "mtime_ns": 1792604204857872299
+        "sha256": "eafc6a4b74b6e3d5ede9ace44da25764979f36fd46886bd7497a3493ee22838d",
+        "bytes": 1245,
+        "mtime_ns": 1792606472849372334
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemDataGhostSlotsTest.xml": {
-        "sha256": "932dca2ba956606b3be4161e102528c1af9fe7a374cb923c97017bce2c61e3b9",
-        "bytes": 1418,
-        "mtime_ns": 1792604204838283147
+        "sha256": "c40851bcb850038e05617bf0c9da8550b71bee40f32661ee171cdd12ae000554",
+        "bytes": 1417,
+        "mtime_ns": 1792606472844402077
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemDataUpgradesTest.xml": {
-        "sha256": "f7920071e7e2bc270dcb674c99eb3ba33f4559ee1235978cfdaf7817f34e66b1",
-        "bytes": 1417,
-        "mtime_ns": 1792604204863623724
+        "sha256": "758c2cc7ea142a9ef6565ff0d3da9e339fa52237aca5dfec5e8a6c2fdcfc80d7",
+        "bytes": 1416,
+        "mtime_ns": 1792606472856246112
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemDecorationsTest.xml": {
-        "sha256": "560a6ebd8fa0b721b3640a582aa5eeeb4a322afea7be46f513ed1a9fbf1393ca",
-        "bytes": 1675,
-        "mtime_ns": 1792604204869221602
+        "sha256": "96f13570547bdc3fcf4cc99c6f6077b70194949bb5d95ecfa17610b759a76664",
+        "bytes": 1673,
+        "mtime_ns": 1792606472860793516
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemFishingUpgradesTest.xml": {
-        "sha256": "0cf1ec0f81b9a3bc68789041a92232107e70cdbb668d72c530ed740b0b828821",
-        "bytes": 1035,
-        "mtime_ns": 1792604204858994072
+        "sha256": "58aecb4474d27826f82df16bdd124e39cf6bb66e8348e764e07a0d2337638ae6",
+        "bytes": 1037,
+        "mtime_ns": 1792606472852028598
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemGoalLadderTest.xml": {
-        "sha256": "117f868af843afba8bc24da42ac0bcc39be23ac4d41e7d4287aa239662ae61d4",
-        "bytes": 669,
-        "mtime_ns": 1792604204832325854
+        "sha256": "4b495385e382f8c5fb8a46fbdf693952f2855031ae8c1f076ca9e1eb3463832c",
+        "bytes": 671,
+        "mtime_ns": 1792606472838572618
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemGoalPriorityTest.xml": {
-        "sha256": "0e0cc3172f3bfb432955e9411bfcd4f348f1a4bd1acc1aefa564c3c716d24a71",
-        "bytes": 1442,
-        "mtime_ns": 1792604204872458463
+        "sha256": "200a6c78543b5fde4607cb94090f26d2d0e45e647c1b864f72c49a6e9e00a964",
+        "bytes": 1440,
+        "mtime_ns": 1792606472863526737
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemGuardTargetsTest.xml": {
-        "sha256": "4400d15c0f8df5593dfa0a70824f4b78be3904e2dee637088c17db85e2e9d4db",
-        "bytes": 1813,
-        "mtime_ns": 1792604204841274089
+        "sha256": "2d02b2c34e5eb7a3082bdfe9b6679472aab631a23d679157a5685af42e40ea2f",
+        "bytes": 1815,
+        "mtime_ns": 1792606472846717849
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemItemMatchTest.xml": {
-        "sha256": "56580c8bad3d97e7720eed79b4ed97fc22a9f6068ff746c0f845cc6dda4eaac7",
-        "bytes": 1865,
-        "mtime_ns": 1792604204834864700
+        "sha256": "84b2dd4d8e8be19697be143471627de78b9c54b3378dc8f89f274c67f60b6a91",
+        "bytes": 1867,
+        "mtime_ns": 1792606472841173211
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemLiquidQueueTest.xml": {
-        "sha256": "c3117cab1ae89e6ddd70c3289710aa8a5f47b52391f20441fb793ea45214b96a",
+        "sha256": "5c12c3022f0f9e97ebfe2cb0faea5a2af94181aab2bd58fb7d74c11d1f344306",
         "bytes": 1682,
-        "mtime_ns": 1792604204874828441
+        "mtime_ns": 1792606472865287174
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemOwnershipTest.xml": {
-        "sha256": "24f946396860d6576c98620b41c3e011440b2a0b69251278a73f85f2aa47d09a",
-        "bytes": 932,
-        "mtime_ns": 1792604204866480165
+        "sha256": "eedf2cccf32b48bf8ae4c38f23818c53af03b98ab1d64ec8486f4b2cb40c86cb",
+        "bytes": 934,
+        "mtime_ns": 1792606472858858918
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemReplantTest.xml": {
-        "sha256": "cb4af43e52d01c27e399109d3ff8f40d10513619ff1b26f3a89a1221f06d5422",
-        "bytes": 1142,
-        "mtime_ns": 1792604204839217498
+        "sha256": "2a47e163bb2935cefcd2ddc6eb212ac72d229a3234dead4bb59a1d4dd94f72c5",
+        "bytes": 1140,
+        "mtime_ns": 1792606472845419176
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemUpgradesTest.xml": {
-        "sha256": "22fd5ed8e1f7b4d00d4aa258d274deab66d069cfe8f15f38c6ee51ec53a161b1",
-        "bytes": 3321,
-        "mtime_ns": 1792604204833341801
+        "sha256": "86c64de6a42adfbeb9ff889df887199f246dcaa73be7a8c871a8fe928dda1676",
+        "bytes": 3320,
+        "mtime_ns": 1792606472840283134
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.GolemUseOptionsTest.xml": {
-        "sha256": "81d6bd5685fe5401fc3550e95bf2721318c4de2e0f972e907c994d58f08524b1",
+        "sha256": "ff2f8140d8e06409839420044a035ef3826a2852ad822cd2cbd5ec124c5656ab",
         "bytes": 843,
-        "mtime_ns": 1792604204840202867
+        "mtime_ns": 1792606472846322258
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.LumberGeometryTest.xml": {
-        "sha256": "9d94eddc8927909f5a1a7a166d88be04c8ecbfe5fc0fed62c706234dfc08971d",
-        "bytes": 1227,
-        "mtime_ns": 1792604204856058255
+        "sha256": "47de3dc903b443494a2ebad8319310aad22a5dcaf398ed0f1d6bb9423d59b02b",
+        "bytes": 1229,
+        "mtime_ns": 1792606472847639800
       },
       "common/build/test-results/test/TEST-thaumcraft.golems.TrunkRulesTest.xml": {
-        "sha256": "00b06848ca491b2be8b485750bd61756b1f74ddf7b13247dff10cca00086eac6",
+        "sha256": "f604630887e6a74baee609b56c71aab26dab9c44a90c8849888d088f5d301210",
         "bytes": 1008,
-        "mtime_ns": 1792604204858169285
+        "mtime_ns": 1792606472851155925
       },
       "common/build/test-results/test/TEST-thaumcraft.infusion.InfusionComponentPredicateTest.xml": {
-        "sha256": "f53e3d9899f36b3783ff596c95bc0112b8ee1c5b0aa9fdb95342de7f3467be70",
-        "bytes": 1085,
-        "mtime_ns": 1792604204866480165
+        "sha256": "22098670cc9f67b7bab46657aa3de458480ee1f7de050bff40210e3bc431babc",
+        "bytes": 1087,
+        "mtime_ns": 1792606472858858918
       },
       "common/build/test-results/test/TEST-thaumcraft.infusion.InfusionEnchantmentRulesTest.xml": {
-        "sha256": "6e2d776de9d69cd9d64242625e013122f591059c6f07acdd39045b8139468107",
+        "sha256": "5fb11c7f9b538466ee9be174ffb94583867c10caf4d6278ea1c419b40ac4a225",
         "bytes": 1084,
-        "mtime_ns": 1792604204874321034
+        "mtime_ns": 1792606472864862193
       },
       "common/build/test-results/test/TEST-thaumcraft.infusion.InfusionPotionPredicateTest.xml": {
-        "sha256": "701a3991746c8a1576b32ec943fb4ced94c8593f615fb8d136f895332f6893be",
+        "sha256": "450bb841709e99b19334ee6fc14fbf19697a84ebfb40165cde985840e3903aa7",
         "bytes": 477,
-        "mtime_ns": 1792604204875003836
+        "mtime_ns": 1792606472865331709
       },
       "common/build/test-results/test/TEST-thaumcraft.infusion.InfusionPotionRequirementTest.xml": {
-        "sha256": "c99f39dbd9085bedbecdc37fc8e0c77885a040705b9cbf803e23edaa54fc5fcf",
+        "sha256": "d15335b4084bace017a191b7e3f89510e42a12b9a46ff271572299516a52a219",
         "bytes": 1047,
-        "mtime_ns": 1792604204864532672
+        "mtime_ns": 1792606472857261473
       },
       "common/build/test-results/test/TEST-thaumcraft.integration.CrossSubsystemRulesTest.xml": {
-        "sha256": "a3e5124f5e5b8ce8e78c5422a150b611e3ea88d4f2bda17563dbadc1f59b3ba0",
-        "bytes": 2219,
-        "mtime_ns": 1792604204881055242
+        "sha256": "b4b5ac40d20568827a6d83e9baddef4a39a1598164b63cd766b8dd772d0d729a",
+        "bytes": 2216,
+        "mtime_ns": 1792606472870286064
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ArcaneEarNotesTest.xml": {
-        "sha256": "dc95806e06d9e1c5b8f356f344f1d004cf9d38a1d7ab672db3e03a0a5574eebf",
-        "bytes": 824,
-        "mtime_ns": 1792604204858863954
+        "sha256": "4c906ebe6610db75ce36649c3a12528ca0c1b6226c456ea4d719296ac03cd40b",
+        "bytes": 820,
+        "mtime_ns": 1792606472851869865
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ArcaneLampRulesTest.xml": {
-        "sha256": "f552c4a288aa4e53e23150174713ce1361283b35ef95faab5f75a8828dcdc3ec",
-        "bytes": 711,
-        "mtime_ns": 1792604204863330756
+        "sha256": "6710813de5ee20bd23778404d8349883d6aae2871363d370403ee99c8f9f784c",
+        "bytes": 709,
+        "mtime_ns": 1792606472856062953
       },
       "common/build/test-results/test/TEST-thaumcraft.items.CatalogueGapRulesTest.xml": {
-        "sha256": "08b427fd0e5fb5c39fd520f20c90c16c0177034409e9b02c0208dd420c75eba4",
+        "sha256": "dcc9f91873ee5effeecd858ca642f4487ee8c1bcbf4acf3e77cc411b077a3e7f",
         "bytes": 1253,
-        "mtime_ns": 1792604204859621960
+        "mtime_ns": 1792606472852557400
       },
       "common/build/test-results/test/TEST-thaumcraft.items.CrystalEssenceDataTest.xml": {
-        "sha256": "d8dbe92ded3b70390d8dcc4f068cbaab71413407ef6cc07694985c6cbbd14ab1",
-        "bytes": 1024,
-        "mtime_ns": 1792604204880946225
+        "sha256": "773636a084fab9e25d338f69b31a0a6447974334c43aed8569d25defe847b496",
+        "bytes": 1026,
+        "mtime_ns": 1792606472870093506
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ElementalHoeRulesTest.xml": {
-        "sha256": "1665c2a70b1d7f8b177e73c50250a1a1248a66f4328f810394c1667921c9fcdb",
+        "sha256": "90bea895bebe36a142b86588af56b2b88ed560b15097a336a542dd5bded68d31",
         "bytes": 581,
-        "mtime_ns": 1792604204836145912
+        "mtime_ns": 1792606472842729085
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ElementalShovelGeometryTest.xml": {
-        "sha256": "5410af439bc3b921ef040d0bdd26066a7bdd682b18988ffb1f97d183660de019",
-        "bytes": 1236,
-        "mtime_ns": 1792604204875108325
+        "sha256": "25ac1cf56ac9a83155ef5e25f4feb0244360a707563b49c093d36c185ff6b3f7",
+        "bytes": 1238,
+        "mtime_ns": 1792606472865474441
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ElementalSwordRulesTest.xml": {
-        "sha256": "305d8b8a06590e9c3bb54da3cba1631230b998246c11542bc8d7d050ddf6bd6b",
+        "sha256": "5b73e9406c652ed042117f47adfdb808f6abc52b528f6b0a0dfa007cdca0ecc5",
         "bytes": 809,
-        "mtime_ns": 1792604204828532682
+        "mtime_ns": 1792606472835861295
       },
       "common/build/test-results/test/TEST-thaumcraft.items.FortressRulesTest.xml": {
-        "sha256": "4a77ee05f3454c1ec660793b1732501ed70738b4af93a8a8d71dd31e1eb837c3",
+        "sha256": "397e9ecaf62349a37462411e84698b07248436f5a64e4dc3769bd62c2a68028b",
         "bytes": 699,
-        "mtime_ns": 1792604204833071175
+        "mtime_ns": 1792606472839802608
       },
       "common/build/test-results/test/TEST-thaumcraft.items.GrateRulesTest.xml": {
-        "sha256": "3c618d9abc969be8d1a3976dc517c02034357a8df0dd920eea0fb525c345c261",
-        "bytes": 1365,
-        "mtime_ns": 1792604204835503187
+        "sha256": "e853d754f9a89a9b9a4899169f57af42c1f22a3e4b3929fef5d0fed9fceb10b8",
+        "bytes": 1369,
+        "mtime_ns": 1792606472841420600
       },
       "common/build/test-results/test/TEST-thaumcraft.items.GrowthLampTicksTest.xml": {
-        "sha256": "009bd9a481d270769e655df674c23e2d25ee1faaf5615163d836bbf5e64b2024",
-        "bytes": 1502,
-        "mtime_ns": 1792604204871138456
+        "sha256": "3c450f19ea9a7e45806bfde4d36059bc77375bacbf2edafb6cfb4036cefe2e4d",
+        "bytes": 1500,
+        "mtime_ns": 1792606472862489417
       },
       "common/build/test-results/test/TEST-thaumcraft.items.LevitatorRulesTest.xml": {
-        "sha256": "139987941c9ee1ce52990caf4a171d27c2296eca475cddb4cf6480d5d98e5cd2",
-        "bytes": 966,
-        "mtime_ns": 1792604204859140487
+        "sha256": "d3f4ff1f73b3b0d012652ed00cd7362d53ca6eb7d439bc2a86a6184d3af4c38e",
+        "bytes": 962,
+        "mtime_ns": 1792606472852269220
       },
       "common/build/test-results/test/TEST-thaumcraft.items.MagicWardTest.xml": {
-        "sha256": "ee7c1e680e00494f270b5377eebf3e82fb045cd13a97fcc3de7c9ce56d083a5c",
-        "bytes": 674,
-        "mtime_ns": 1792604204834404056
+        "sha256": "7484d6201b4590b8f27b087279a4b00bceee973f55f8c336fa28fe09b30a14d1",
+        "bytes": 672,
+        "mtime_ns": 1792606472840796343
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ManaBeanEffectTest.xml": {
-        "sha256": "ec2490eecb267512c1fd50f3b6df32f6529f58cc59f2fa29f056b221ebc7ed40",
-        "bytes": 844,
-        "mtime_ns": 1792604204866988374
+        "sha256": "8730dd5c5004d8559e31604a519946e8e1a33bb8d67638f558f7bf573ab1a517",
+        "bytes": 842,
+        "mtime_ns": 1792606472859225267
       },
       "common/build/test-results/test/TEST-thaumcraft.items.PhialDataTest.xml": {
-        "sha256": "eae33cf2a24d2576b101bd6473a6d8dc61e009c43ec5384af68baa4c6a57167e",
+        "sha256": "9acf214ee90ac5e5bef536f8effe5872f2484077e7ca1db825afbf83ee93938c",
         "bytes": 659,
-        "mtime_ns": 1792604204880542695
+        "mtime_ns": 1792606472869596629
       },
       "common/build/test-results/test/TEST-thaumcraft.items.PortableHoleRulesTest.xml": {
-        "sha256": "c4c22eb9ee220e04ecb45b4c884de66b80b97b826778eafb9cffce020639e46f",
+        "sha256": "7167571d18af8ddebc1c7347b4bdc4aa7d68d9735e51497254a025143adcea12",
         "bytes": 1081,
-        "mtime_ns": 1792604204865417439
+        "mtime_ns": 1792606472857676234
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ReservoirRulesTest.xml": {
-        "sha256": "ef15eeda6d5779f82658252030136aaa8ea43013e6de1342b93f5396952396bb",
+        "sha256": "0cd6fdfb40d14892c729e4ea000a516dce7784425437e8468f6364a1754c2a11",
         "bytes": 1586,
-        "mtime_ns": 1792604204836986219
+        "mtime_ns": 1792606472843361653
       },
       "common/build/test-results/test/TEST-thaumcraft.items.SpecialMiningRuleTest.xml": {
-        "sha256": "ad65798f432ca2a694577c50cdbef89a86cefb5f0e18f9930213bac2fa3de908",
+        "sha256": "836a9c00c05c8a7720f370566f66ebbdeb57a9bac082b12e715e82a542e18353",
         "bytes": 702,
-        "mtime_ns": 1792604204870925069
+        "mtime_ns": 1792606472862133989
       },
       "common/build/test-results/test/TEST-thaumcraft.items.StreamAxeGeometryTest.xml": {
-        "sha256": "aed348fb5381aaaf73ea78f46135081d2c12a8a5c6cbb4ed5457df4753b7a931",
-        "bytes": 1921,
-        "mtime_ns": 1792604204867127339
+        "sha256": "444a8f181efceadd774496aa0a258dd5c006f8da90d01611278dd482b79091dc",
+        "bytes": 1923,
+        "mtime_ns": 1792606472859325939
       },
       "common/build/test-results/test/TEST-thaumcraft.items.ThaumatoriumRulesTest.xml": {
-        "sha256": "ad7c0e6966115f43de6f42ae4ce46daa8b6d0c7fd4f660f20cf9fd647a7d53c8",
-        "bytes": 1006,
-        "mtime_ns": 1792604204872709892
+        "sha256": "27ff24aba89d48bb787e07bc4e18d829ef6ea9b6ef30b39c72f9408f35115846",
+        "bytes": 1004,
+        "mtime_ns": 1792606472863799607
       },
       "common/build/test-results/test/TEST-thaumcraft.loot.LootBagRegistrationTest.xml": {
-        "sha256": "a9f8150d5286a4048f1ddc0731e4d7cc662160af6eaae455e436fecc1cb3a54d",
-        "bytes": 950,
-        "mtime_ns": 1792604204859140487
+        "sha256": "5da72bbbc4b31f8b47ed5db16ae386a1f07a8fd834d422c21fa1d430947b3d05",
+        "bytes": 948,
+        "mtime_ns": 1792606472852100525
       },
       "common/build/test-results/test/TEST-thaumcraft.loot.LootBagRulesTest.xml": {
-        "sha256": "74960c7c8045eb68d04e3f758355e1c0f8f5c8244f24e6b31b36e38f65b34990",
+        "sha256": "3ee2cc458fd62b37fc9998622024aac5c0e6068c04ca176548762a83ee5a7e54",
         "bytes": 583,
-        "mtime_ns": 1792604204880199932
+        "mtime_ns": 1792606472869394015
       },
       "common/build/test-results/test/TEST-thaumcraft.loot.LootPotionVariantsTest.xml": {
-        "sha256": "aef8e4041ea514a1c8a77f5611043e6f4a4dce3b1b016a0b36f59d9f99508b8a",
+        "sha256": "4320f7b401f10637f350dec7e4546acf9becf7dfc01440576473931c895cc2a7",
         "bytes": 792,
-        "mtime_ns": 1792604204858169285
+        "mtime_ns": 1792606472851017240
       },
       "common/build/test-results/test/TEST-thaumcraft.machines.AdvancedFurnaceRulesTest.xml": {
-        "sha256": "0480c91489264e3402b60de8f2fd01dd4bace111e77f862094dc57335d012535",
-        "bytes": 763,
-        "mtime_ns": 1792604204872960971
+        "sha256": "fb4a2736928983a1a803d225753063a563d33b04fe4497e8de265d4a567bd969",
+        "bytes": 759,
+        "mtime_ns": 1792606472863799607
       },
       "common/build/test-results/test/TEST-thaumcraft.machines.DeviceContainerRulesTest.xml": {
-        "sha256": "b9a9f4ea82cc2280667e2ab86dd8b0eff5652dfd222d65e409644c39c75a232e",
-        "bytes": 4339,
-        "mtime_ns": 1792604204839733642
+        "sha256": "7826ab8864b8c19cb3a67c1040bb5508206d039fd061ad55e0ea8b5eb4a4418e",
+        "bytes": 4335,
+        "mtime_ns": 1792606472845714058
       },
       "common/build/test-results/test/TEST-thaumcraft.machines.DeviceWiringRulesTest.xml": {
-        "sha256": "531f08008d6db0ca4e438acb75b20c2053d218b3fccbf2602a3733b4fbbda40e",
-        "bytes": 1744,
-        "mtime_ns": 1792604204858371446
+        "sha256": "3df548ea843aca1762e59a0d6ec3d67bc25416c18c08ede208bb07c918ec8695",
+        "bytes": 1746,
+        "mtime_ns": 1792606472851372618
       },
       "common/build/test-results/test/TEST-thaumcraft.mods.ChampionHooksTest.xml": {
-        "sha256": "f4948fef1a07ac00d3d4db920f2073bc6b71a7460d3b6d062ac7430a402e340b",
-        "bytes": 1640,
-        "mtime_ns": 1792604204854900107
+        "sha256": "665ae587847397bae89ce9f21ec143cca3a2068ddcb54b9911155ef49465df4a",
+        "bytes": 1638,
+        "mtime_ns": 1792606472847299228
       },
       "common/build/test-results/test/TEST-thaumcraft.mods.ChampionModifierTest.xml": {
-        "sha256": "067e1b2bfd3b158ae46485c4e82e3f24e6edeabc361d1c72e4f268df129e544b",
-        "bytes": 2050,
-        "mtime_ns": 1792604204873988029
+        "sha256": "772f8607f73908cf7fbfeb82934e50d901168b5aa1c55e98d230943f22210025",
+        "bytes": 2052,
+        "mtime_ns": 1792606472864395263
       },
       "common/build/test-results/test/TEST-thaumcraft.mods.ChampionRulesTest.xml": {
-        "sha256": "3a116d1d571e6ee9055f8a465fdbd7338cd03564a87f84e06ce92e0117976282",
+        "sha256": "9ae23ec243769d936265af792e5008cf895cc8f5b4ccfd92052e585a933f22ee",
         "bytes": 2009,
-        "mtime_ns": 1792604204875308717
+        "mtime_ns": 1792606472865796505
       },
       "common/build/test-results/test/TEST-thaumcraft.mods.ChampionWiringRulesTest.xml": {
-        "sha256": "81b871ec4739c8e7eee324a2be3da6f5d1025a3371b7278c652fc07f0d222c38",
-        "bytes": 1251,
-        "mtime_ns": 1792604204861383759
+        "sha256": "0ec9b0a4dc2ee5346bf7b449d0bb1cf92e7c9ca0f9532e8e6d68e6eaf12aa06e",
+        "bytes": 1247,
+        "mtime_ns": 1792606472853951693
       },
       "common/build/test-results/test/TEST-thaumcraft.notifications.NotificationMotionTest.xml": {
-        "sha256": "aff8b5af301297e8c03863b3f15974c49ee6821d92acbdd388e366421f86cb83",
-        "bytes": 975,
-        "mtime_ns": 1792604204880726305
+        "sha256": "93bed088f023d9258dd03d8e1f1a96b9c20fa4736b20b2ec05e8777b4c37edda",
+        "bytes": 973,
+        "mtime_ns": 1792606472869699717
       },
       "common/build/test-results/test/TEST-thaumcraft.notifications.NotificationQueueTest.xml": {
-        "sha256": "0032dd4c1570e2966035e88af9caf691c93aa0c0dd5472009fd3fed4fa6dd4b2",
-        "bytes": 800,
-        "mtime_ns": 1792604204866395303
+        "sha256": "f7305e95e3b10aa7fc903fe227c453139dc72eca2d8087042e46dbca27863147",
+        "bytes": 798,
+        "mtime_ns": 1792606472858721647
       },
       "common/build/test-results/test/TEST-thaumcraft.pech.PechTradeTest.xml": {
-        "sha256": "205c05e4588bed75aa5d24560dd7a0ab7b32bb0f63eec727fd841c4bd8f913e8",
+        "sha256": "d0d8672ffcf5a7273f167c4f8f79ff85a26b35790a617a545181d1e788e70d8f",
         "bytes": 1300,
-        "mtime_ns": 1792604204857986717
+        "mtime_ns": 1792606472850879237
       },
       "common/build/test-results/test/TEST-thaumcraft.research.AspectOrbQueueTest.xml": {
-        "sha256": "e3b50a9dd3e7826204d9cbb1e8ebff542188a708f8194730f471632105501856",
-        "bytes": 2061,
-        "mtime_ns": 1792604204876599358
+        "sha256": "e616ab479f1d370d5c5ee2c9fff5792774933b2c4f633c45c2ff285cea2e91f4",
+        "bytes": 2058,
+        "mtime_ns": 1792606472866444250
       },
       "common/build/test-results/test/TEST-thaumcraft.research.AspectOrbRulesTest.xml": {
-        "sha256": "87fb06b65e3a59a79c9b4566a14e5be6a008afe4c62e6b05d41b2f54fc9efb15",
-        "bytes": 1065,
-        "mtime_ns": 1792604204858458131
+        "sha256": "67eaae26e680fe437ab9c8becd70f6c0b231b6b406dd043862b12d5c99f38415",
+        "bytes": 1067,
+        "mtime_ns": 1792606472851372618
       },
       "common/build/test-results/test/TEST-thaumcraft.research.CrimsonRitesResearchTest.xml": {
-        "sha256": "f42ce7962c840c2552c5ab76a464c6f4fdf1fb139c1917cb3749bd1babe02cbe",
+        "sha256": "dc1fd642e9908047b868ba547e7843f71f29a1a43b2a0f1ec68051f9e204b779",
         "bytes": 597,
-        "mtime_ns": 1792604204861905178
+        "mtime_ns": 1792606472854061963
       },
       "common/build/test-results/test/TEST-thaumcraft.research.DeconstructionRulesTest.xml": {
-        "sha256": "21fbb283247622a2fb0942fb5e6fee9a549db99ba658df9ee9a16b7141791eb3",
-        "bytes": 1065,
-        "mtime_ns": 1792604204833071175
+        "sha256": "c6ca745bc29051b8f8d4ffde0355f26ed161dd1b1ef15fc96bb39b683ee6b956",
+        "bytes": 1063,
+        "mtime_ns": 1792606472839802608
       },
       "common/build/test-results/test/TEST-thaumcraft.research.HexUtilsTest.xml": {
-        "sha256": "ab8143c1ab027bf0ecd0f0117ea32eced7334bbde32f90d4b90346bb38e1b9c8",
+        "sha256": "6c9070d2e5dd53531af4e27b04276dba83875044bd7927d915ac294af85846ad",
         "bytes": 974,
-        "mtime_ns": 1792604204865950135
+        "mtime_ns": 1792606472858253564
       },
       "common/build/test-results/test/TEST-thaumcraft.research.HungryNodeRulesTest.xml": {
-        "sha256": "ecc2cc7e19d5931a1667cb43128647d3c786aedf47f231615e86bf3e071a980a",
-        "bytes": 1067,
-        "mtime_ns": 1792604204871314983
+        "sha256": "519a863806612d122e448cedce8d4a73c160dd704d5be9bc218164fc321081b3",
+        "bytes": 1065,
+        "mtime_ns": 1792606472862760596
       },
       "common/build/test-results/test/TEST-thaumcraft.research.PlayerKnowledgeWipeTest.xml": {
-        "sha256": "cc6fab6ebc15e516f2b917eb69b294bb37309974cff4d7ebeca46228ad0c8387",
-        "bytes": 577,
-        "mtime_ns": 1792604204872264954
+        "sha256": "91e802400b78cec037f167533dedb8477460af75a4fb475ed2fb5094d13a4123",
+        "bytes": 575,
+        "mtime_ns": 1792606472863366261
       },
       "common/build/test-results/test/TEST-thaumcraft.research.PrimalCharmRulesTest.xml": {
-        "sha256": "94c712ffd751a932e7c7d05edff10166e052046079672b1f2b82eac281eafc29",
-        "bytes": 937,
-        "mtime_ns": 1792604204868589887
+        "sha256": "08362285a3aa4c9b2cd66577320c018b08dbac5f0ca0a9d9ca5defcef02e1cac",
+        "bytes": 935,
+        "mtime_ns": 1792606472860391610
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchAdministrationTest.xml": {
-        "sha256": "f365e51f1f190b99d22d506a14e730e3e377a53955ff8d19e4188b01fd3b8b6f",
-        "bytes": 964,
-        "mtime_ns": 1792604204862399029
+        "sha256": "b70acc727dbce894093a92ec31ef3fdc44200c81eb6c2ee7b54b8da984cdb50f",
+        "bytes": 962,
+        "mtime_ns": 1792606472855395576
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchCatalogTest.xml": {
-        "sha256": "68004d0f7da79b353e801058942f3ed61726c446f9db98b91809806c749a7fc7",
-        "bytes": 1647,
-        "mtime_ns": 1792604204840532678
+        "sha256": "a1ce65819e2046b0670cc2ae08c1c4f80468a8c966c1fd3741b61e44ef09f37d",
+        "bytes": 1643,
+        "mtime_ns": 1792606472846534613
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchCheatSheetTest.xml": {
-        "sha256": "ce65956c81c37d37d2d8071681f3ba76da0231bbfe61f88c52c936c4b290cdde",
-        "bytes": 1576,
-        "mtime_ns": 1792604204874651384
+        "sha256": "99c87ffd08b44521fd0a4103d58eef7fce3f62ff0a8a6a356161b12dc1f2c87f",
+        "bytes": 1572,
+        "mtime_ns": 1792606472865124464
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchConditionsTest.xml": {
-        "sha256": "20bb62dfbbafaf08d7309edd6d243a460afeb99eff86c205ad65bde06c64a772",
-        "bytes": 735,
-        "mtime_ns": 1792604204880199932
+        "sha256": "f105f6830a97f57f5a9df05ee3330b62a0a779d2cd8582cab1b0c923a3f0a95d",
+        "bytes": 731,
+        "mtime_ns": 1792606472868422085
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchNoteDataTest.xml": {
-        "sha256": "5bdf60db5ed1f2523bc75fa68d5dfe689ab039e527a2b871c8fda8ec16778534",
-        "bytes": 4121,
-        "mtime_ns": 1792604204836408548
+        "sha256": "daaae9b8fbcc82819b9c5063c51c92f954d690c19623572be8e9ae53798aec3f",
+        "bytes": 4115,
+        "mtime_ns": 1792606472843240001
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchNoteEditingTest.xml": {
-        "sha256": "98d0494a6c79f4776cd64c1835391d5fadb2a7667c1cbbc0fc3d9c178da9f32a",
-        "bytes": 5017,
-        "mtime_ns": 1792604204857166819
+        "sha256": "04ee13c0c0a1c5ed10044c3b1c9ec588047140236669fbfb2eaff0409f9d7b3a",
+        "bytes": 5013,
+        "mtime_ns": 1792606472848482166
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchNoteGeneratorTest.xml": {
-        "sha256": "740718689d4910fd1d8b6608b55b9d0bb84ceb4e3ccd51ec79fc2969041049e6",
-        "bytes": 1297,
-        "mtime_ns": 1792604204866548355
+        "sha256": "faf6c5784ea2796dafa0d5e0d596b4a3bbad2f147204a1a8942f82c190b4a151",
+        "bytes": 1295,
+        "mtime_ns": 1792606472858919374
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchNoteOverstackCodecTest.xml": {
-        "sha256": "0c5e6a6265b614c8a3f2bd870795f1dc6cf2ac91f913155469e7fdee7d683c2e",
-        "bytes": 1503,
-        "mtime_ns": 1792604204860925806
+        "sha256": "ac5383abd7ef7d59668ff2430a9218ac03a4f8a42d1c1064a222fa9deb84ee44",
+        "bytes": 1499,
+        "mtime_ns": 1792606472853544538
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchNotePuzzleTest.xml": {
-        "sha256": "1a27de1a61b3d72bc556547994fef0e743de87eecadd47ada8634264fcdc20bc",
-        "bytes": 2013,
-        "mtime_ns": 1792604204875003836
+        "sha256": "62c2cd1348df78324fc3f7a02cbed1ac84ec30fb9aeb5a1b94183f140d99a7ef",
+        "bytes": 2011,
+        "mtime_ns": 1792606472865287174
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchRecipeCoverageTest.xml": {
-        "sha256": "d9bbb4ba942e5d350f040c8584cf725c085fd4d0ffe51fe1aa55335f517335e1",
-        "bytes": 2090,
-        "mtime_ns": 1792604204876988439
+        "sha256": "6eba3e4b149c76237103956c443579a5c6501f52f009ba945da32cb6f61d7aae",
+        "bytes": 2088,
+        "mtime_ns": 1792606472867000860
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchRegistrationOrderTest.xml": {
-        "sha256": "8fa25c1c5690e14f63bf7710513fb245f783cbb47525a31ae5e388b48a662ed1",
-        "bytes": 1257,
-        "mtime_ns": 1792604204880946225
+        "sha256": "ed3a942e23b7cb1592b7b8fc7e85e1206986fb254c1c6e48e4b844f492353de2",
+        "bytes": 1254,
+        "mtime_ns": 1792606472870093506
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchSettingsTest.xml": {
-        "sha256": "048266d1391cbdbe66f45329ab480043876ace93bf2d7c304ff9bd7de9342633",
+        "sha256": "3ca6c59c03f8e60c59ba32ebd306d87d580d5ae905c26b2d0da319e1fecdcfbf",
         "bytes": 798,
-        "mtime_ns": 1792604204839217498
+        "mtime_ns": 1792606472845236969
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ResearchTextTest.xml": {
-        "sha256": "5e3fc34752001ea5140bb392929a97b6895f3a3caa06310b67db03af20f3f88f",
-        "bytes": 738,
-        "mtime_ns": 1792604204872590705
+        "sha256": "ec0c0b7576ff696b40ed0001306e4b18929ac3ba937b9735d0f2e68ffc92518d",
+        "bytes": 736,
+        "mtime_ns": 1792606472863608433
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ScribingInkTest.xml": {
-        "sha256": "ce1736d3d5999dd301341b4656e99494a90faaead68c277dbb5126ffcdd1d6a4",
-        "bytes": 2432,
-        "mtime_ns": 1792604204868983768
+        "sha256": "b2d4f4e4194783562fa190cbfb399f461ae8338456c5b92c06b3e3853c149a6c",
+        "bytes": 2428,
+        "mtime_ns": 1792606472860334431
       },
       "common/build/test-results/test/TEST-thaumcraft.research.TableTopologyTest.xml": {
-        "sha256": "f0897cec068caf041827c135e9372a5951f0dde5474155cf7133f54c0b5bc5d5",
-        "bytes": 896,
-        "mtime_ns": 1792604204878360545
+        "sha256": "65909ac8e5225bf4c69a4b6381eae696dfb16ab78637829576be942a924f1e04",
+        "bytes": 898,
+        "mtime_ns": 1792606472867439296
       },
       "common/build/test-results/test/TEST-thaumcraft.research.ThaumcraftSettingsLoadTest.xml": {
-        "sha256": "855e245e3919ddad9d23e440ba1106c7f87d65390bc63077e12949aaf13802cf",
+        "sha256": "478b888de67322dcf2077347fb16ababe283d9c0e5e5cf0c219d1144b6a4bd95",
         "bytes": 15097,
-        "mtime_ns": 1792604204871768066
+        "mtime_ns": 1792606472862133989
       },
       "common/build/test-results/test/TEST-thaumcraft.runic.InfusionRunicRecipeCodecTest.xml": {
-        "sha256": "1a20a50975eaff223e888afeec31242da17210d963a5a5caa9c8af1ef71e18cf",
+        "sha256": "4cda114889dd082ac9bef738becdbc123ac0f5b8f7ec92b8e7718a44476c6489",
         "bytes": 490,
-        "mtime_ns": 1792604204865417439
+        "mtime_ns": 1792606472857778348
       },
       "common/build/test-results/test/TEST-thaumcraft.runic.RunicPayloadTest.xml": {
-        "sha256": "f44243ea9e789522b2d8e1378334395cf94850e77293f2be9676a58fb22d296a",
-        "bytes": 580,
-        "mtime_ns": 1792604204867058327
+        "sha256": "a2a5a5811332a159bc43ba29fc5f729b90af3cb657aac543267f18eea66d1fe7",
+        "bytes": 578,
+        "mtime_ns": 1792606472859225267
       },
       "common/build/test-results/test/TEST-thaumcraft.runic.RunicRulesTest.xml": {
-        "sha256": "9558513e56dc9a71eb4d84ad7d3d5ca815aa0ad35c1deb9b5e18af3b70694a68",
+        "sha256": "80cdaa0a8455789006c8fae00780ef15ba796f27c02975cd12ac042e9aeb41f1",
         "bytes": 1043,
-        "mtime_ns": 1792604204880726305
+        "mtime_ns": 1792606472869761736
       },
       "common/build/test-results/test/TEST-thaumcraft.runic.RunicSettingsTest.xml": {
-        "sha256": "02530da11194373075ecd6ec70413e940b6b1f44e2637b17fc4e227798c3e5ac",
-        "bytes": 15560,
-        "mtime_ns": 1792604204877680940
+        "sha256": "298086ead8db57bda3033ccb2b40fe508517ae125acec4d20601be050c869f23",
+        "bytes": 15559,
+        "mtime_ns": 1792606472867353863
       },
       "common/build/test-results/test/TEST-thaumcraft.scanning.ScanManagerTest.xml": {
-        "sha256": "32d96fcd7f9317de177696f1d06a71126d2a2c5ebcfbccb18ae977e03dbe3984",
+        "sha256": "3a230479143872aa12abd468d10ca78db8898a19f98f8169e8411c8475ff5d1f",
         "bytes": 2008,
-        "mtime_ns": 1792604204838283147
+        "mtime_ns": 1792606472844845071
       },
       "common/build/test-results/test/TEST-thaumcraft.taint.TaintAnimalRulesTest.xml": {
-        "sha256": "4b3fe5b46c8ab2217dbd5c4f21c33f1c011ca419ef58c99b2c20e54da56ff405",
-        "bytes": 2378,
-        "mtime_ns": 1792604204828532682
+        "sha256": "0081289928eabca446c84012f761a364989aff3c236dcfd332ed2592a0518c0c",
+        "bytes": 2374,
+        "mtime_ns": 1792606472835861295
       },
       "common/build/test-results/test/TEST-thaumcraft.taint.TaintBlockRulesTest.xml": {
-        "sha256": "af1af6a915720402c3453d84a5c3b7e61000d9efc66efb085ab7b63bfba04c9a",
-        "bytes": 724,
-        "mtime_ns": 1792604204856815208
+        "sha256": "ddfc45e3f13d34c8b97e262c3c781a7293eb25a66f83fe3bbe97f650ac213da1",
+        "bytes": 720,
+        "mtime_ns": 1792606472848141213
       },
       "common/build/test-results/test/TEST-thaumcraft.taint.TaintMaterialRulesTest.xml": {
-        "sha256": "a7b5aa849150336e8dc44080b09d8209d2ecb1df88f66d6623788e5711c99142",
-        "bytes": 814,
-        "mtime_ns": 1792604204834143099
+        "sha256": "32209de2f85c7f936382459ea9822dab0214ef55159baa48e37605bfee9ddd81",
+        "bytes": 812,
+        "mtime_ns": 1792606472840624415
       },
       "common/build/test-results/test/TEST-thaumcraft.taint.TaintSwarmFlightRulesTest.xml": {
-        "sha256": "b317823c3d74ae3a04e215534d424426cd3ca7a0ec0d6d443c7728f332b6361c",
+        "sha256": "eb5bb44791c302479df8bfe299302480b1fd7f1cf28c91ac1f93867a142204b2",
         "bytes": 611,
-        "mtime_ns": 1792604204833956303
+        "mtime_ns": 1792606472840283134
       },
       "common/build/test-results/test/TEST-thaumcraft.tiles.JarContentsTest.xml": {
-        "sha256": "93e1f53ee5e57603a5877e6266335b8a133d30a8a7cb623d0a5086f65f69395c",
+        "sha256": "3e92e51b06723642a64d55c023c97fa3f68727565d46b6e6f956350a90ba5309",
         "bytes": 830,
-        "mtime_ns": 1792604204865139354
+        "mtime_ns": 1792606472857676234
       },
       "common/build/test-results/test/TEST-thaumcraft.tiles.LegacyTileRulesTest.xml": {
-        "sha256": "b3f88486b8b75d9840e8e0521a78defdf3817f6d6f60801cc640ee1689498c7d",
+        "sha256": "bfde8bd21b9ac75af5d992796df2217cf120d5f0e47ce08133707baed6dbc596",
         "bytes": 4935,
-        "mtime_ns": 1792604204859407766
+        "mtime_ns": 1792606472852450295
       },
       "common/build/test-results/test/TEST-thaumcraft.tiles.TileInventorySurfaceTest.xml": {
-        "sha256": "c6b415ba49742cd03339fe79e3178fbe40a6155427de6500a31a3ec344e07b6d",
-        "bytes": 975,
-        "mtime_ns": 1792604204865139354
+        "sha256": "582d5174484e63426e8255eaafb8eff1ead3392c7fcd20ffd83f0fcf59123807",
+        "bytes": 977,
+        "mtime_ns": 1792606472857414104
       },
       "common/build/test-results/test/TEST-thaumcraft.tiles.TileParityRulesTest.xml": {
-        "sha256": "45ae8705d05a3b6d836512844e861f5fc8b14c10874729bb2d42617560e4fc04",
+        "sha256": "9fbf0a59ef1b8dccec5f74365345a1c2be4562c19935330ca5bf38c92906d9a6",
         "bytes": 3392,
-        "mtime_ns": 1792604204880861152
+        "mtime_ns": 1792606472869980200
       },
       "common/build/test-results/test/TEST-thaumcraft.utils.LegacyUtilsTest.xml": {
-        "sha256": "e3d561f39b4ea30578d82804d01e787c92a67a6a6e921aa8d21f798358917a74",
-        "bytes": 2076,
-        "mtime_ns": 1792604204871974670
+        "sha256": "cc985f8f46b22aa77c6f0fe0b5237bbf721ce2422631e956f831d9287c5bb692",
+        "bytes": 2074,
+        "mtime_ns": 1792606472863056571
       },
       "common/build/test-results/test/TEST-thaumcraft.visnet.EnergizedNodeReducerTest.xml": {
-        "sha256": "0cc711f6dfde99a2fe38f59b23efc5c099233a372e90a11eccdfe7a9d70e13ea",
-        "bytes": 930,
-        "mtime_ns": 1792604204873191711
+        "sha256": "4cfcbbc23398b9d211ef7d6dab77e8227b4382f45f39122f36bf17d9ae59a352",
+        "bytes": 928,
+        "mtime_ns": 1792606472863970653
       },
       "common/build/test-results/test/TEST-thaumcraft.visnet.VisNetFxPayloadTest.xml": {
-        "sha256": "1f0fdfe98c6e184ca0570f9d07c621439a233b0a3218d3596b0734caed5e330c",
+        "sha256": "744efa9442197c8fca391130cd0caa6448900c2bb47c1322c94e6ba9aabe857c",
         "bytes": 882,
-        "mtime_ns": 1792604204835748695
+        "mtime_ns": 1792606472842492498
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.ExcavationVisCostsTest.xml": {
-        "sha256": "ea9c8f7fea13005793b9d9bf0fd1baf26d55594c589cd97b77852cd50d94c4f7",
-        "bytes": 631,
-        "mtime_ns": 1792604204840202867
+        "sha256": "657609bed69f47728b7a62a42241850fb8d8f2dcfa4e42c4344ab05c65390a5c",
+        "bytes": 627,
+        "mtime_ns": 1792606472846085514
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.FocusUpgradeDataTest.xml": {
-        "sha256": "0baf1478828fa50b7bf05c304adb9cfe8ff41ce4297e275f17dad75f399b9225",
-        "bytes": 852,
-        "mtime_ns": 1792604204863623724
+        "sha256": "8e46fa10ce6d45875bab245166d4102934084c7cec7fcf42109e7fc74edf0672",
+        "bytes": 854,
+        "mtime_ns": 1792606472856416767
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.FocusVisArithmeticTest.xml": {
-        "sha256": "51316caa058925d6dcf255bd2af2766e39949af7b2d171f6c8c845f5ed84673f",
-        "bytes": 614,
-        "mtime_ns": 1792604204861383759
+        "sha256": "fc5c9dc9d4989bf9eebbdfc5f2d21463bdb9c7b47223fe8252d4bb3154d4c4ed",
+        "bytes": 616,
+        "mtime_ns": 1792606472853858495
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.VoidCapTest.xml": {
-        "sha256": "4a923acea92960d55471903ac1aa1ebe487a4a700e819934162e916eda0d701a",
+        "sha256": "834581ae9d927d78c24ad68b899d17fe6c81fc6fedc4c35694e9dadafb1f19fd",
         "bytes": 645,
-        "mtime_ns": 1792604204856182021
+        "mtime_ns": 1792606472847947524
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WandArchitectTest.xml": {
-        "sha256": "69b90cb507d70b3b8fc1e3588eac9202c003d2103d306aaddc561a8bfc7eeead",
-        "bytes": 1449,
-        "mtime_ns": 1792604204875576027
+        "sha256": "81d3ba578b8e7b1056541bd8d959457aec7b808e6acc1c364898dc3bf750c8df",
+        "bytes": 1447,
+        "mtime_ns": 1792606472865877459
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WandCraftCostTest.xml": {
-        "sha256": "cf752ac3533f13a16d9b1102e1241c7be55cbcbeed695708dc9817c1d198d97a",
+        "sha256": "53512fc3f98897a89fc757e7b0d684421f8bd74cecac34e90399ed49175f7134",
         "bytes": 572,
-        "mtime_ns": 1792604204836408548
+        "mtime_ns": 1792606472843240001
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WandDataTest.xml": {
-        "sha256": "7edb1f82e51ec378b3ea54eedd58b364553a947b580aafc24449849a0340d01b",
-        "bytes": 1482,
-        "mtime_ns": 1792604204865950135
+        "sha256": "5ec93964dfa547def47f79665a3dfd5f5aae6792ef2e143b5371aae857011ad5",
+        "bytes": 1481,
+        "mtime_ns": 1792606472858253564
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WandRodPassiveTest.xml": {
-        "sha256": "a3d344c3aae44d1c24203b1a35c5ed209c7d879388bd2028c67b40417f67b5ae",
-        "bytes": 941,
-        "mtime_ns": 1792604204857481429
+        "sha256": "a571b5d0fba67d20f7678f8019c5418a623d794647d84a6c6ec35fafe0237f86",
+        "bytes": 937,
+        "mtime_ns": 1792606472848482166
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WandSceptreTest.xml": {
-        "sha256": "9175b882bd87aaa8f83f712ce44160cb41fcb6d1e48068f2151d903d5449e584",
-        "bytes": 909,
-        "mtime_ns": 1792604204841274089
+        "sha256": "444b42ed29f359a677a70934a24b304c1a0899d00204052a225e665942eb6a66",
+        "bytes": 911,
+        "mtime_ns": 1792606472846717849
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WandStaffRodsTest.xml": {
-        "sha256": "d68b20a782710cb3d1e68419eb6f86288fd2adf96d9bc31b33b97f4c3d2d0882",
-        "bytes": 1315,
-        "mtime_ns": 1792604204856815208
+        "sha256": "74d903b3532aee4379025e00add0978a1f5adf5e3c7cf045768004f0e1834182",
+        "bytes": 1311,
+        "mtime_ns": 1792606472848059477
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WandWardedStoneTest.xml": {
-        "sha256": "8611563a056f27016dd176d4410bac47ac1f1fa50b2ebb5855111ce5212dbdaf",
-        "bytes": 945,
-        "mtime_ns": 1792604204875169922
+        "sha256": "707b942eff215b2d03fb55c8a56c99dbe3a359221c611435619036e97e6a9981",
+        "bytes": 943,
+        "mtime_ns": 1792606472865554864
       },
       "common/build/test-results/test/TEST-thaumcraft.wands.WardingOverlayTest.xml": {
-        "sha256": "0c44f1d1081fc2bbacff4af35485357e6d04d53ea8be584a2ffccd24fdca1b64",
-        "bytes": 613,
-        "mtime_ns": 1792604204839733642
+        "sha256": "cf3343a3772d8c1f636c7ffb7b53cd64a33be2a5314b93adb2e2408410f1f5b2",
+        "bytes": 611,
+        "mtime_ns": 1792606472845886505
       },
       "common/build/test-results/test/TEST-thaumcraft.ward.WardRulesTest.xml": {
-        "sha256": "080651e258830bc72b5d41e6a5463dd2f8438ce1cc6c41e2052168e7d3a9b134",
+        "sha256": "3ff9391dc8a2fe152a6a25c41f4d7ca5de9df0b1ccc5c7b1f8a0cd0f698bead1",
         "bytes": 524,
-        "mtime_ns": 1792604204874501247
+        "mtime_ns": 1792606472864862193
       },
       "common/build/test-results/test/TEST-thaumcraft.warp.OriginalMobLootTest.xml": {
-        "sha256": "a32304af6fedfb3a36e514e515155032ea7aae3042c84738a255707b2dc5d062",
+        "sha256": "d4c638d6c1ab763fc1ac74a987816070849184515adb40b99e5f88e976901ceb",
         "bytes": 753,
-        "mtime_ns": 1792604204866757614
+        "mtime_ns": 1792606472859017882
       },
       "common/build/test-results/test/TEST-thaumcraft.warp.PotionEffectRulesTest.xml": {
-        "sha256": "d7b10a251f11ec33cecf1585868608906186f2b6c212ff2c3b2b852295678af5",
-        "bytes": 949,
-        "mtime_ns": 1792604204875308717
+        "sha256": "03c2443c4f19a207e3037c9f0baddd221fff25f00db78f01c79090640d14db2c",
+        "bytes": 947,
+        "mtime_ns": 1792606472865682527
       },
       "common/build/test-results/test/TEST-thaumcraft.warp.WarpAmplifierTest.xml": {
-        "sha256": "994768a3e5993c274f650881ff4822c5676abc0425bc4b86b20bd4c84d06ce3d",
-        "bytes": 585,
-        "mtime_ns": 1792604204856058255
+        "sha256": "2ea31e333ab8913d39a2de2b72a3638ddffca5ed2ce6d53bdd86d994d8fe1e98",
+        "bytes": 581,
+        "mtime_ns": 1792606472847639800
       },
       "common/build/test-results/test/TEST-thaumcraft.warp.WarpNotificationRulesTest.xml": {
-        "sha256": "b27b9cff573fcc24437202d9a2e88eeee42482659bb6fda71e567be1ba40ae89",
+        "sha256": "244617405e51932f6ef4e86920d2b60db033372d309e9c0c9e95a70b9b6e1b66",
         "bytes": 611,
-        "mtime_ns": 1792604204865791632
+        "mtime_ns": 1792606472858186637
       },
       "common/build/test-results/test/TEST-thaumcraft.warp.WarpRulesTest.xml": {
-        "sha256": "e5dbdb69932463edea819d859980023b45389f51101c88653f22d78b6bcc788b",
-        "bytes": 1364,
-        "mtime_ns": 1792604204871009751
+        "sha256": "c512bf71cae717ae7932d0380a646deec16e42fa35f9ca84a734b111ffad9540",
+        "bytes": 1360,
+        "mtime_ns": 1792606472862489417
       },
       "common/build/test-results/test/TEST-thaumcraft.warp.WispLightningShapeTest.xml": {
-        "sha256": "03af4c815a4bdf598138e23fb95801a589063ab801c517610d1e49f391f3c33f",
+        "sha256": "2ec346ae8d69cadee58c8a9d3d3d76a0d23cd68758ba1da36c238afd20974ebd",
         "bytes": 601,
-        "mtime_ns": 1792604204862711160
+        "mtime_ns": 1792606472855654935
       },
       "common/build/test-results/test/TEST-thaumcraft.world.MazeFidelityTest.xml": {
-        "sha256": "c3667903797552c6785e00e4fad22a2dac065a8a948f6920098396b62a732474",
-        "bytes": 679,
-        "mtime_ns": 1792604204834594700
+        "sha256": "736bfb4aa548cce1cd188b6d4eba3e6a601e46816aeb5336a11039e1d1ea45a4",
+        "bytes": 680,
+        "mtime_ns": 1792606472840928615
       },
       "common/build/test-results/test/TEST-thaumcraft.world.NodeEcologyPolicyTest.xml": {
-        "sha256": "95be657df9e83d6d6569d7175ae8b8b7be0ef05780e3ab6ab34cd18303e8dd16",
+        "sha256": "5b016d4522ef390928720999694d9f31d55cd5f1228d4c5ac00b6ad51a2dd37e",
         "bytes": 610,
-        "mtime_ns": 1792604204876075860
+        "mtime_ns": 1792606472866080636
       },
       "common/build/test-results/test/TEST-thaumcraft.world.OuterLandsDimensionRulesTest.xml": {
-        "sha256": "4019d70041d8e1ca0e6c5e1970c07464e48ee1388a78207d3293cb5b76864e1f",
-        "bytes": 866,
-        "mtime_ns": 1792604204868189273
+        "sha256": "878250cc381930ca886409812e41da4f506766436c7e89bb67cea29526dcb051",
+        "bytes": 864,
+        "mtime_ns": 1792606472860121305
       },
       "common/build/test-results/test/TEST-thaumcraft.world.OuterLandsEldritchVariantTest.xml": {
-        "sha256": "a941c4123c615cde3ba6cba1c3156971522127e1bc2e624e45a941dfe6bbb6d1",
-        "bytes": 1540,
-        "mtime_ns": 1792604204856541797
+        "sha256": "6a8ed8ecf760b04a111a0a8cc0e8ce2b317d4cc3c73ad4b516355d9bc02db883",
+        "bytes": 1536,
+        "mtime_ns": 1792606472848059477
       },
       "common/build/test-results/test/TEST-thaumcraft.world.OuterLandsRoomFidelityTest.xml": {
-        "sha256": "83cc93e78c85c395906c4548d10afdf350d41e0f5dda008759ec9ede71de669f",
-        "bytes": 2107,
-        "mtime_ns": 1792604204863330756
+        "sha256": "5402d9324e692e8f16cc59bc1acc48de196326f6680411a20e02ca446a3af88c",
+        "bytes": 2105,
+        "mtime_ns": 1792606472856062953
       },
       "common/build/test-results/test/TEST-thaumcraft.world.OuterLandsRulesTest.xml": {
-        "sha256": "998a44ee3e852b65794bba68f866fa78c7fbaee1d6b48015aa3d818b4f396440",
-        "bytes": 2602,
-        "mtime_ns": 1792604204838864345
+        "sha256": "d8e0166d2490d84633cd3c0a230b0aa3d971a99bb35ee1417c03968985bdd3de",
+        "bytes": 2599,
+        "mtime_ns": 1792606472845005657
       },
       "common/build/test-results/test/TEST-thaumcraft.world.OuterLandsWiringRulesTest.xml": {
-        "sha256": "30902ad5ec0d7d4eb1da76e1b7e9fcd4ad5cd08398cb0c428f8a3ed9429665ff",
+        "sha256": "915b8325fedfe46dea0100bde24b5ecb3b9dfdfddf77b9b60968540c77b093e8",
         "bytes": 2143,
-        "mtime_ns": 1792604204869401314
+        "mtime_ns": 1792606472861334255
       },
       "common/build/test-results/test/TEST-thaumcraft.world.PureFlowRulesTest.xml": {
-        "sha256": "890a2b32e83972cb8c07aee55d79ac3fdf90cd9e83f9ebca75d416a512d09468",
+        "sha256": "e87ae8bbc0d207ae42f90cb493b03ac1725a6f1001865d1428249bc83a93b3ce",
         "bytes": 1035,
-        "mtime_ns": 1792604204866230459
+        "mtime_ns": 1792606472858614803
       },
       "common/build/test-results/test/TEST-thaumcraft.world.StructurePlacementRulesTest.xml": {
-        "sha256": "3121eccfa8181b9f94eb07a6ba4986ae6660d03e96c0301344049ace07a40ca7",
-        "bytes": 2422,
-        "mtime_ns": 1792604204832532681
+        "sha256": "b461de4d3fc95b60cb1c09eaf19713379ff8a7dd64e4496b5ba09251d8524a87",
+        "bytes": 2421,
+        "mtime_ns": 1792606472838968202
       },
       "common/build/test-results/test/TEST-thaumcraft.world.TaintSpreadRulesTest.xml": {
-        "sha256": "2c5063f57d5439f9c48b0c44d6e4ded6fb08c4ea412a166eced1097470acbda0",
-        "bytes": 1028,
-        "mtime_ns": 1792604204837630783
+        "sha256": "92ff7b8a9a1f6a5465135f2fd84bd759ed071c1c12dc3aa853d74cc28e818754",
+        "bytes": 1026,
+        "mtime_ns": 1792606472844297417
       },
       "common/build/test-results/test/TEST-thaumcraft.world.VillageWorldGenRulesTest.xml": {
-        "sha256": "8a2ef30b639b4a931d7906c1505eb1a1b095f4c6c4a325295d47e988be499871",
-        "bytes": 5203,
-        "mtime_ns": 1792604204858599721
+        "sha256": "3b2fb96ee10c33d1f085161e506eb34a7c3ff9641b1070689e2916f234c8448a",
+        "bytes": 5195,
+        "mtime_ns": 1792606472851568191
       },
       "common/build/test-results/test/TEST-thaumcraft.world.WorldGenMoundTemplateTest.xml": {
-        "sha256": "e7108d5725b98e63dd5c20db85c269c87baeab5adc78dac9b876b7152ddd07a0",
-        "bytes": 1067,
-        "mtime_ns": 1792604204858371446
+        "sha256": "1ca646bfb2ad17bb0cf71db15d0f37463370a215dd14748198447a9b2620c79a",
+        "bytes": 1065,
+        "mtime_ns": 1792606472851238793
       },
       "fabric/build/gametest-results.xml": {
-        "sha256": "31f31b189dbbb7f7a3b8c171443f49c16ec2b70a8cd8bdda9e625def80a703ce",
-        "bytes": 42775,
-        "mtime_ns": 1792604291788507018
+        "sha256": "12382de2a0ad8e94bcacf70674e002f302d8faa219d1baece827082e1ee6754c",
+        "bytes": 42779,
+        "mtime_ns": 1792606542547842644
       },
       "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.1.jar": {
-        "sha256": "28a55a49edb71122040ef603ad55cc258e4acc96e991e974dbd78d84c4014bf7",
-        "bytes": 14796083,
-        "mtime_ns": 1792604211220530869
+        "sha256": "4d2e1d788fde379162a2bfb878ac0dbef5687b142f59fc6b3b97aceea743d4a4",
+        "bytes": 14797744,
+        "mtime_ns": 1792606481751858053
       }
     }
   },
@@ -9099,12 +9105,12 @@
         "thaumcraftgametests.tablemenudistanceandstaleidentity",
         "thaumcraftgametests.tablepairacrosschunkboundarypersists",
         "thaumcraftgametests.tablesecondaryquirksandsearchorder",
+        "thaumcraftgametests.taint_crawler_and_seeds_keep_their_numbers",
         "thaumcraftgametests.tainted_animals_convert_into_their_tainted_twin",
-        "thaumcraftgametests.tainted_animals_keep_their_numbers_and_drops",
         "thaumcraftgametests.tablepairactuallyunloadsandreloads",
+        "thaumcraftgametests.tainted_animals_keep_their_numbers_and_drops",
         "thaumcraftgametests.thaumiumequipmentcraftsminesprotectsandrepairs",
         "thaumcraftgametests.tubefilterlabelspaypreservemarkerandfencecallbacks",
-        "thaumcraftgametests.taint_crawler_and_seeds_keep_their_numbers",
         "thaumcraftgametests.theoriginalsmeltingbonusesareregistered",
         "thaumcraftgametests.thepublicrecipelistholdseveryrecipeofthelevel",
         "thaumcraftgametests.villagecomponentsreachtheoverworld",
@@ -9153,12 +9159,12 @@
   "artifacts": [
     {
       "path": "fabric/build/libs/Thaumcraft-fabric-0.1.0-alpha.1.jar",
-      "bytes": 14796083,
-      "sha256": "28a55a49edb71122040ef603ad55cc258e4acc96e991e974dbd78d84c4014bf7",
-      "class_files": 2074,
+      "bytes": 14797744,
+      "sha256": "4d2e1d788fde379162a2bfb878ac0dbef5687b142f59fc6b3b97aceea743d4a4",
+      "class_files": 2076,
       "classfile_major_counts": {
         "52": 1,
-        "65": 2073
+        "65": 2075
       },
       "own_code_classfile_major": 65,
       "minecraft_classes_bundled": false,

@@ -4772,7 +4772,7 @@
     {
       "path": "common/src/main/java/thaumcraft/common/lib/mods/ChampionRules.java",
       "role": "native_foundation",
-      "sha256": "13d61db9b5bfed88ee72ff9c49cf4a22a71f627ad5fccf59e20bdff7f5cdc70d"
+      "sha256": "5c6b17f97c3de8c46ffd6685ca9b8bb8f81bb253d2f9f11793c659748635b54d"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/lib/mods/ChampionWiring.java",

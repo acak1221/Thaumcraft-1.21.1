@@ -67,6 +67,17 @@ public final class ChampionRuntimeChecks {
             test.assertTrue(champion.getHealth() > baseHealth,
                     "the promotion heals the champion for the original twenty five health: " + champion.getHealth());
 
+            // The original removes the modifier of the champion before it applies it again
+            // (oracle EntityUtils.makeChampion:241-249), so a second promotion of the same
+            // modifier replaces the bonus instead of adding it twice.
+            double promotedHealth = champion.getAttributeValue(Attributes.MAX_HEALTH);
+            double promotedDamage = champion.getAttributeValue(Attributes.ATTACK_DAMAGE);
+            ChampionRules.Adapter.promote(champion, ChampionModifier.MIGHTY);
+            test.assertTrue(Math.abs(champion.getAttributeValue(Attributes.MAX_HEALTH) - promotedHealth) < 1e-6D
+                            && Math.abs(champion.getAttributeValue(Attributes.ATTACK_DAMAGE) - promotedDamage) < 1e-6D,
+                    "a second promotion of the same modifier replaces the bonus instead of adding it twice: "
+                            + champion.getAttributeValue(Attributes.MAX_HEALTH) + " / " + champion.getAttributeValue(Attributes.ATTACK_DAMAGE));
+
             // The bold champion keeps the original thirty percent movement speed.
             var bold = lane.add(EntityType.ZOMBIE.create(level));
             bold.moveTo(lane.origin.getX() + .5D, lane.origin.getY(), lane.origin.getZ() + 3.5D, 0F, 0F);

@@ -16530,14 +16530,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileEldritchCrabSpawnerRenderer.java:1-63 the crab spawner renderer",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrabSpawnerRenderer.java:1-60 the native crab spawner renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrabSpawnerRenderer.java:1-60 the native crab spawner renderer",
+          "oracle TileEldritchCrabSpawner:47-67 (jar 4.2.3.5): the client vents the spawner for twenty ticks after the block event of the server and then lets a single particle escape once in twenty ticks, in the colour 0x9988AA; the port renderer only drew the model of the vent",
+          "port common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCrabSpawnerRenderer.java:44-82 draws the particles of the original with the colour of the original",
+          "the scale of 2.0 of the original particle needs the setScale of the original FXVent, which the native FXVent of the client layer does not have; the particle is therefore half as big (documented deviation, the client was not inspected in a game)"
         ],
         "notes": [
-          "1.21.1 renderer change; the geometry was not compared part by part in this audit."
+          "1.21.1 renderer change; the geometry was not compared part by part in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "0031e93dea1786a8c1848a92875fa1c62bc501d05bbf90cb9756b2ba7dfc9028",
@@ -27992,14 +27996,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/combat/AICultistHurtByTarget.java:1-55 the cultist revenge target AI",
-          "native common/src/main/java/thaumcraft/common/lib/cult/CultistRules.java the native cultist AI rules"
+          "native common/src/main/java/thaumcraft/common/lib/cult/CultistRules.java the native cultist AI rules",
+          "oracle AICultistHurtByTarget:30-53 (jar 4.2.3.5): the revenge goal of the cultist answers whoever hit it and calls the cultists of the neighbourhood; the radius of the call is the follow range of the caller and not a constant, so it is thirty two blocks for the cultist and forty for the praetor, and a ritualist cleric only wakes up in a third of the cases",
+          "port common/src/main/java/thaumcraft/common/entities/monster/EntityCultist.java:366-410 keeps the goal with the follow range of the caller and the third of the ritualist"
         ],
         "notes": [
-          "1.21.1 rewrote the AI goal system; the target selection was moved into a rules class and was not compared goal by goal in this audit."
+          "1.21.1 rewrote the AI goal system; the target selection was moved into a rules class and was not compared goal by goal in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "14b2a8f2d01f9fe02fbd5574c1d1ff9ff630c487da4c8c930854d25d3b4b9e5a",
@@ -30842,14 +30849,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/EntityCultist.java:1-128 the cultist",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultist.java the native cultist"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultist.java the native cultist",
+          "oracle EntityCultist:15-110 and EntityThaumcraftBoss:25-253 (jar 4.2.3.5): twenty health, four damage, 0.3 speed, a follow range of thirty two, ten experience, the home area in the saved data, the faction of the cult, the three drops of the cultist and the rare drop of the crimson rites; the port carries the same numbers in CultistRules and in the entity",
+          "the numbers of the cultists were compared with the oracle in the report of the openTC4 audit of the 21.10.2026 (docs/analysis/2026-10-21-openTC4-entities.md, section 3) and they agree"
         ],
         "notes": [
-          "1.21.1 entity rewrite; the statistics live in CultistRules and were not compared line by line in this audit."
+          "1.21.1 entity rewrite; the statistics live in CultistRules and were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "079dd814e1257da745f2bb005e3e3f68377ed05a0b725ea96657adea73c957e8",
@@ -30889,14 +30899,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/EntityCultistCleric.java:1-215 the cultist cleric",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultistCleric.java the native cultist cleric"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultistCleric.java the native cultist cleric",
+          "oracle EntityCultistCleric:31-176 (jar 4.2.3.5): thirty health, the crimson robe, the boots in a tenth of the spawns and two percent on the hard difficulty, the orb above 0.66 and three small fireballs below it with the spread of the square root of the distance, the ritualist flag in the saved data and the home area of the altar; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 entity rewrite; the ritualist flag and the altar home radius 8 are kept but the rest was not compared in this audit."
+          "1.21.1 entity rewrite; the ritualist flag and the altar home radius 8 are kept but the rest was not compared in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "0ceb8bf785f3fe9ca48d077d17c5639339f9c81ce9e5adc4e429d261b15c0aaf",
@@ -30936,14 +30948,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/EntityCultistKnight.java:1-106 the cultist knight",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultistKnight.java the native cultist knight"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityCultistKnight.java the native cultist knight",
+          "oracle EntityCultistKnight:30-72 (jar 4.2.3.5): thirty six health, the crimson plate armour, the rare gear in a twentieth of the spawns and one percent on the hard difficulty and the enchantment of the blade with a quarter of the tension; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 entity rewrite; not compared in detail in this audit."
+          "1.21.1 entity rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "dd29b251196afa968996d2d92afa9868d2f1cfeb219fd052d7358c60b07f511a",
@@ -31997,14 +32011,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/boss/EntityCultistLeader.java:1-216 the cultist leader",
-          "native common/src/main/java/thaumcraft/common/entities/monster/boss/EntityCultistLeader.java the native cultist leader"
+          "native common/src/main/java/thaumcraft/common/entities/monster/boss/EntityCultistLeader.java the native cultist leader",
+          "oracle EntityCultistLeader:35-169 and EntityThaumcraftBoss:25-253 (jar 4.2.3.5): a hundred and twenty five health, five damage, 0.32 speed, forty experience, the fifteen titles, the crimson armour, the void sword on the easy difficulty, the regeneration of the cultists in eight blocks, the aggro table of the boss, the fifty health and half a point of damage per player and the enrage above thirty five points of damage; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 entity rewrite; not compared in detail in this audit."
+          "1.21.1 entity rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "d4b6e1937deae8a6c39a00a2381b9422fd747b1d3fa7128b58f24295c2daad53",
@@ -32044,14 +32060,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/boss/EntityCultistPortal.java:1-295 the cultist portal boss",
-          "native common/src/main/java/thaumcraft/common/entities/monster/boss/EntityCultistPortal.java the native cultist portal boss"
+          "native common/src/main/java/thaumcraft/common/entities/monster/boss/EntityCultistPortal.java the native cultist portal boss",
+          "oracle EntityCultistPortal:219-223 and :204-206 (jar 4.2.3.5): the portal hurts a player whose distance is below 3.0 blocks and draws the roll of its self damage only when it burns itself; the port compared the squared distance with 3.0 (so the portal reached 1.73 blocks) and drew the roll of the self damage at every wave",
+          "port common/src/main/java/thaumcraft/common/entities/monster/EntityCultistPortal.java:183-208 and common/src/main/java/thaumcraft/common/lib/cult/CultistRules.java:314-321 carry the distance of three blocks and the roll only when the portal burns",
+          "test common/src/test/java/thaumcraft/cult/CultistPortalRulesTest.java asserts the original numbers (authored, compiled and executed with a standalone JUnit 5 launcher: 27 of 27 green)"
         ],
         "notes": [
-          "1.21.1 entity rewrite; not compared in detail in this audit."
+          "1.21.1 entity rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "4ee289394cfde4d88537cbb3892fe31d02bd321b5b0ae3cb0bbb5ddb50dc85ce",
@@ -32132,14 +32152,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:1-330 the eldritch golem",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java the native eldritch golem"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java the native eldritch golem",
+          "oracle EntityEldritchGolem:114-136 (jar 4.2.3.5): two hundred and fifty health, ten damage, 0.3 speed, six points of armour, the size of 1.75 by 3.5 and the spawn timer of a hundred ticks; the port carries the same numbers",
+          "the numbers of the eldritch golem were compared with the oracle in the report of the openTC4 audit of the 21.10.2026 (docs/analysis/2026-10-21-openTC4-entities.md, section 3) and they agree"
         ],
         "notes": [
-          "The native moved the class out of the boss package; the boss rules live in EldritchMobRules and were not compared in detail in this audit."
+          "The native moved the class out of the boss package; the boss rules live in EldritchMobRules and were not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "e74ad148ac45022606becb31ef6572436f08c643bb183baa5d98d06858b30df6",
@@ -32179,14 +32202,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:1-399 the eldritch warden",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java the native eldritch warden"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java the native eldritch warden",
+          "oracle EntityEldritchWarden:97-108, :290-327 and :282-287 (jar 4.2.3.5): two hundred health, ten damage, 0.33 speed, four points of armour, the ward of two thirds of the maximum health, the spawn timer of a hundred and fifty ticks, the title of the warden, the orb in four of the five hits with the arm angle of ninety or a hundred and eighty degrees and the screech with the wither and the weakness of four hundred ticks and the warp of three to five points; the port carries the same numbers"
         ],
         "notes": [
-          "The native moved the class out of the boss package; not compared in detail in this audit."
+          "The native moved the class out of the boss package; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "d9fc813eb3ffbe1a7c33c67f1aa91b330bc7114420f2c0fbd8f279863f625932",
@@ -33582,14 +33607,17 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/entities/projectile/EntityEldritchOrb.java:1-90 the eldritch orb",
-          "native common/src/main/java/thaumcraft/common/entities/projectile/EntityEldritchOrb.java the native eldritch orb"
+          "native common/src/main/java/thaumcraft/common/entities/projectile/EntityEldritchOrb.java the native eldritch orb",
+          "oracle EntityEldritchOrb:18-78 (jar 4.2.3.5): the orb has no gravity, lives a hundred ticks, hits every living being that is not undead inside a radius of two for 0.666 of the attack damage of its thrower, weakens it for a hundred and sixty ticks, plays the fizz and sends the event sixteen on the impact; the port carries the same numbers and the same order",
+          "the shadow size of 0.1 of the original has no counterpart in 1.21.1, where the entity has no shadow radius any more (documented deviation)"
         ],
         "notes": [
-          "1.21.1 projectile rewrite; not compared in detail in this audit."
+          "1.21.1 projectile rewrite; not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "2de82f453ffd6e1ffacbd2b7c4e0bb21448e5266a8f68158d670a6f696b69787",
@@ -34407,16 +34435,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/items/ItemEldritchObject.java:1-211 the eldritch object with the metadata 0 eye, 1 tablet, 2 key and 3 pearl",
           "native common/src/main/java/thaumcraft/common/items/ItemEldritchObject.java the native eldritch objects",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:176-183 the eye and the lock key of the original metadata 0 and 2"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:176-183 the eye and the lock key of the original metadata 0 and 2",
+          "oracle ItemEldritchObject:28-212 (jar 4.2.3.5): the five metadata values of the item became five native items (the eldritch eye, the crimson rites, the runed tablet, the primordial pearl and the obelisk placer); the placer builds the altar, the obelisk and its shaft like the original, the eye and the tablet are the keys of the altar and of the lock, and the research of the crimson rites and of the primordial pearl is bound to the items of the native research trigger (CrimsonRitesResearch and ResearchTriggerBindings)"
         ],
         "notes": [
           "The four original metadata values became separate items (the eye, the runed tablet, the obelisk placer and the lock key); the crimson rites and the primordial pearl are separate native items.",
-          "The key room spawns the permanent item without the original metadata 2, see the GenKeyRoom row."
+          "The key room spawns the permanent item without the original metadata 2, see the GenKeyRoom row.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "86fd0538390f3b99224b812d90cf4f64d6c5ecfa67d6a1ace9eb5d9be7538bf5",
@@ -35280,14 +35310,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/items/armor/ItemCultistBoots.java:1-95 the cultist boots",
-          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistBoots.java the native cultist boots"
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistBoots.java the native cultist boots",
+          "oracle ItemCultistBoots:26-79 (jar 4.2.3.5): the boots of the cult add one point of warp, give one percent off every vis payment, are uncommon, are mended with an iron ingot and show the vis discount line and nothing else; the port carries the same numbers and the same tooltip without the call of the super method"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "f96f74bb2532c9b913ac833638dc825bdf218172d1317863e8d84f8d0f9c39f9",
@@ -35327,14 +35359,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/items/armor/ItemCultistLeaderArmor.java:1-123 the cultist leader armour",
-          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistLeaderArmor.java the native cultist leader armour"
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistLeaderArmor.java the native cultist leader armour",
+          "oracle ItemCultistLeaderArmor:25-120 (jar 4.2.3.5): the armour of the praetor is rare, is mended with an iron ingot and has neither warp nor vis discount; the port carries the same rarity, the same repair and no warp and no vis discount"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "b62a9b4ecf63395f79cdb76a906cb9330cd0bbad97d3ea25732786ee1225e4cb",
@@ -35374,14 +35408,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/items/armor/ItemCultistPlateArmor.java:1-124 the cultist plate armour",
-          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistPlateArmor.java the native cultist plate armour"
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistPlateArmor.java the native cultist plate armour",
+          "oracle ItemCultistPlateArmor:26-130 (jar 4.2.3.5): the plate armour of the cult is uncommon, is mended with an iron ingot and has no vis discount; the port carries the same numbers"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "adff8a09de62c6675ae4b2a3ed024861eda5c86d79af118b27c3ed8c5bf15fe3",
@@ -35421,14 +35457,16 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/items/armor/ItemCultistRobeArmor.java:1-148 the cultist robe armour",
-          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistRobeArmor.java the native cultist robe armour"
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemCultistRobeArmor.java the native cultist robe armour",
+          "oracle ItemCultistRobeArmor:26-129 (jar 4.2.3.5): the robe armour of the cult adds one point of warp, gives one percent off every vis payment, is uncommon, is mended with an iron ingot and shows the vis discount line before the lines of the super method; the port carries the same numbers and the same order of the tooltip"
         ],
         "notes": [
-          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit."
+          "1.21.1 armour rewrite with data components; the defence values were not compared line by line in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "5eecde894c14868b6de448d9f25d834d0575e0bdd661c3b1a0c44ea7de3acb59",
@@ -45161,14 +45199,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/MapBossData.java:1-29 the shared boss room data",
-          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1027-1073 the native boss room generation"
+          "native common/src/main/java/thaumcraft/common/lib/world/DungeonRooms.java:1027-1073 the native boss room generation",
+          "oracle MapBossData and TileEldritchLock:81-92 (jar 4.2.3.5): the counter of the boss rooms lives in the saved data of the world, is raised by one for every lock and by a second one in a quarter of the cases and picks the boss with the counter modulo four",
+          "port common/src/main/java/thaumcraft/common/lib/world/OuterLandsBossRooms.java:57-100 keeps the counter in the saved data of the dimension of the lock with the same rules"
         ],
         "notes": [
-          "The shared boss data object became the per quadrant generation; the boss room is built from the cell feature of the quadrant, so the shared object is not needed."
+          "The shared boss data object became the per quadrant generation; the boss room is built from the cell feature of the quadrant, so the shared object is not needed.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "52ca78d8e66596a28f72434de8d8acda7849ecd8c843e5db8019d6c74aedb5a5",
@@ -45358,18 +45399,21 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/TeleporterThaumcraft.java:59 the gate search radius 128",
           "oracle thaumcraft/common/lib/world/dim/TeleporterThaumcraft.java:102-108 the arrival one block beside the gate",
           "oracle thaumcraft/common/lib/world/dim/TeleporterThaumcraft.java:45-51 the arrival above the ground without a gate",
           "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsWiringRules.java:220 the search radius 128",
-          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:94-119 the native arrival"
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:94-119 the native arrival",
+          "oracle TeleporterThaumcraft:17-123 (jar 4.2.3.5): the teleporter of the eldritch gate looks for the nearest gate of the target dimension inside a square of a hundred and twenty eight blocks, drops the player one block beside it and falls back to the surface of the dimension when there is no gate at all",
+          "port common/src/main/java/thaumcraft/common/tiles/TileEldritchPortal.java:95-156 carries the search of the gate, the offset of the landing and the fallback to the surface"
         ],
         "notes": [
           "The search radius, the arrival offset of plus or minus one block and the fallback above the ground are kept.",
-          "The native searches the block entities of the loaded chunks instead of the blocks of the world, so a gate in a chunk that is not loaded is not found."
+          "The native searches the block entities of the loaded chunks instead of the blocks of the world, so a gate in a chunk that is not loaded is not found.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "1fd4e5659f1a2c3f93258fb4d18d214664f59981a868ccfa8d07b8a2e5859f75",
@@ -46701,14 +46745,18 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileEldritchCrabSpawner.java:1-135 the crab spawner",
-          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchCrabSpawner.java the native crab spawner"
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchCrabSpawner.java the native crab spawner",
+          "oracle TileEldritchCrabSpawner:24-124 (jar 4.2.3.5): the spawner announces the coming crab with a block event of the type one that starts a vent of twenty client ticks, plays random.fizz and thaumcraft:gore, looks for the closest player within 16.0 blocks, never lets more than five crabs live around itself and keeps only its facing in the saved data",
+          "the port searched a box of half width sixteen that took creative players, played minecraft:entity.generic.hurt instead of the sound of the gore, never sent the block event and saved the countdown of the original into the saved data",
+          "port common/src/main/java/thaumcraft/common/tiles/TileEldritchCrabSpawner.java:52-146 carries the radius of the search, the block event, the sound of the gore, the vent of the client and the saved data of the original"
         ],
         "notes": [
-          "1.21.1 spawner rewrite; the spawn rules were not compared in detail in this audit."
+          "1.21.1 spawner rewrite; the spawn rules were not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "6abeeeaecd8b3437ef206dbf7758be231ed4c3bd8cacf1ca9efb2e42d8b60923",
@@ -46795,14 +46843,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileEldritchLock.java:1-403 the eldritch lock",
-          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchLock.java the native eldritch lock"
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchLock.java the native eldritch lock",
+          "oracle TileEldritchLock:49-121 (jar 4.2.3.5): the lock counts to a hundred and one, pumps every fifth tick and then builds the arena of one of the four bosses of the Outer Lands, spawns that boss, removes the invisible barrier (blockAiry) of the room and removes itself",
+          "the port deleted every block of the five by five by five room and never spawned a boss, so the Outer Lands of the port held no boss at all",
+          "port common/src/main/java/thaumcraft/common/lib/world/OuterLandsBossRooms.java:1-520 reproduces the four arenas of the oracle (the golem, the warden, the portal of the cult and the hall of the taint) with the counter of the boss map, the exit of the boss room, the pedestals, the loot and the chat messages of the original",
+          "the sparkle packet of the oracle for the removed barrier blocks (PacketFXBlockSparkle with the colour 0x400040) has no native counterpart in this wave and stays a documented gap"
         ],
         "notes": [
-          "1.21.1 tile rewrite; the counter, the facing and the unlock rule were not compared in detail in this audit."
+          "1.21.1 tile rewrite; the counter, the facing and the unlock rule were not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "f3cbb27e94f9f75cd7302635274dcc404a5327d8851c45fa9724f920aac23637",
@@ -46986,14 +47039,19 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileEldritchTrap.java:1-45 the runed eldritch trap",
-          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchTrap.java the native runed trap"
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchTrap.java the native runed trap",
+          "oracle TileEldritchTrap:20-33 (jar 4.2.3.5): the trap looks for the closest player with World.getClosestPlayer(x+0.5, y+0.5, z+0.5, 3.0), hurts that player for 2.0 magic damage and warps half of the hits 1+nextInt(2) temporary warp; the port looked into a box of half width three that took creative players and never warped anybody",
+          "port common/src/main/java/thaumcraft/common/tiles/TileEldritchTrap.java:27-58 now draws the warp of the original after the damage and searches the sphere of the original",
+          "port common/src/main/java/thaumcraft/common/lib/entities/OriginalPlayerSearch.java:39-73 reproduces the vanilla 1.7.10 helper: the strict bound, the creative skip and the quirk that a player on the centre of the search ends it",
+          "test common/src/test/java/thaumcraft/eldritch/EldritchTileRulesTest.java asserts the original numbers (authored, compiled and executed with a standalone JUnit 5 launcher: 27 of 27 green)"
         ],
         "notes": [
-          "1.21.1 tile rewrite; the trap behaviour was not compared in detail in this audit."
+          "1.21.1 tile rewrite; the trap behaviour was not compared in detail in this audit.",
+          "verified against the oracle of the original jar 4.2.3.5 in the eldritch wave of the 23.10.2026 (docs/analysis/2026-10-23-agent-eldritch.md)"
         ],
         "reviewed_sha256": {
           "original": "c8e7e606201d05598c4ef6490cc501f8f52d2a240d96d85ccfd17bb063fd7300",

@@ -1,24 +1,41 @@
 package thaumcraft.common.tiles;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
+import thaumcraft.common.lib.world.OuterLandsBossRooms;
 
 /**
  * Original TileEldritchLock: the eldritch lock. Once it is activated it counts
  * down and then tears the surrounding room down.
+ *
+ * <p>Oracle {@code TileEldritchLock:49-121} - the lock counts to a hundred and one,
+ * pumps every fifth tick and then opens: the arena of one of the four bosses of the
+ * Outer Lands is built and the boss is spawned, the invisible barrier of the room
+ * disappears and the lock itself with it.
  */
 public final class TileEldritchLock extends BlockEntity {
-    /** Original TileEldritchLock:29 - the countdown, minus one means inactive. */
+    /** Original TileEldritchLock:33 - the countdown, minus one means inactive. */
     public int count = -1;
     byte facing = 0;
+
+    /** Original TileEldritchLock:54 - the sound of the counting lock. */
+    public static final SoundEvent PUMP = SoundEvent.createVariableRangeEvent(
+            ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "pump"));
+    /** Original TileEldritchLock:53 - the lock pumps every fifth tick. */
+    public static final int PUMP_INTERVAL = 5;
+    /** Original TileEldritchLock:56 - the lock opens after a hundred and one ticks. */
+    public static final int OPEN_AFTER = 100;
 
     public TileEldritchLock(BlockPos pos, BlockState state) {
         super(ThaumcraftEldritchBlocks.ELDRITCH_TILE.get(), pos, state);
@@ -32,38 +49,28 @@ public final class TileEldritchLock extends BlockEntity {
         if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
-    /** Original TileEldritchLock:40-52 - the lock countdown. */
+    /** Original TileEldritchLock:49-60 - the lock countdown. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileEldritchLock lock) {
         if (lock.count == -1) return;
         lock.count++;
-        if (lock.count % 5 == 0) {
-            // TileEldritchLock:44 - the pump of the opening lock.
-            level.playSound(null, pos, SoundEvents.BEACON_AMBIENT, net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 1.0F);
+        if (lock.count % PUMP_INTERVAL == 0) {
+            // TileEldritchLock:54 - the pump of the opening lock.
+            level.playSound(null, pos, PUMP, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
-        if (lock.count > 100) {
-            lock.breakRoom(level, pos);
+        if (lock.count > OPEN_AFTER) {
+            openLock(level, pos, lock);
         }
     }
 
     /**
-     * Original TileEldritchLock:54-96 - the activated lock removes the room
-     * that surrounds it. The boss room generator itself belongs to the Outer
-     * Lands port; the lock removes its own room here.
+     * Original TileEldritchLock:62-121 - the lock opens the boss room.
+     *
+     * <p>The arena of the boss and the boss itself are built by
+     * {@link OuterLandsBossRooms}, which knows the four arenas of the original.
      */
-    private void breakRoom(Level level, BlockPos pos) {
-        count = -1;
-        level.playSound(null, pos, SoundEvents.GLASS_BREAK, net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 1.0F);
-        for (int a = -2; a <= 2; a++) {
-            for (int b = -2; b <= 2; b++) {
-                for (int c = -2; c <= 2; c++) {
-                    BlockPos target = new BlockPos(pos.getX() + a, pos.getY() + b, pos.getZ() + c);
-                    if (level.getBlockState(target).isAir()) continue;
-                    level.destroyBlock(target, false);
-                }
-            }
-        }
-        level.destroyBlock(pos, false);
-        setChanged();
+    private static void openLock(Level level, BlockPos pos, TileEldritchLock lock) {
+        if (!(level instanceof ServerLevel server)) return;
+        OuterLandsBossRooms.openLock(server, pos);
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {

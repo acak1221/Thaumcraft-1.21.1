@@ -180,9 +180,11 @@ public class EntityCultistPortal extends Monster {
         level().broadcastEntityEvent(cultist, (byte) 3);
         level().addFreshEntity(cultist);
         playSound(EntityCultist.sound("wandfail"), 1.0F, 1.0F);
-        int selfDamage = CultistRules.portalSelfDamage(stage, random.nextInt(5));
-        // Original EntityCultistPortal:224 - the portal burns itself with DamageSource.outOfWorld.
-        if (selfDamage > 0) hurt(damageSources().fellOutOfWorld(), selfDamage);
+        // Original EntityCultistPortal:204-206 - past the stage of the praetor the portal
+        // burns itself. The roll of the original is only drawn when the portal burns.
+        if (stage > CultistRules.PORTAL_BOSS_STAGE) {
+            hurt(damageSources().fellOutOfWorld(), 5 + random.nextInt(5));
+        }
     }
 
     /** Original EntityCultistPortal.spawnBoss. */
@@ -200,7 +202,9 @@ public class EntityCultistPortal extends Monster {
     /** Original EntityCultistPortal.onCollideWithPlayer: eight points of magic damage. */
     private void damageNearbyPlayers() {
         for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(3.0))) {
-            if (distanceToSqr(player) >= 3.0) continue;
+            // Original EntityCultistPortal:220 - the original asks for the distance and not for
+            // the squared distance, so the portal reaches three blocks and not one and a half.
+            if (distanceToSqr(player) >= CultistRules.PORTAL_COLLISION_DISTANCE_SQ) continue;
             if (player.hurt(damageSources().indirectMagic(this, this), 8.0F)) {
                 playSound(EntityCultist.sound("zap"), 1.0F, (random.nextFloat() - random.nextFloat()) * 0.1F + 1.0F);
             }

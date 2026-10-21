@@ -120,12 +120,12 @@ public final class BlockUtils {
 
     /** The original's replacement of the fresh drops by following drops. */
     private static void followFreshDrops(Level level, BlockPos pos, Player player, int color) {
-        if (followingItemSpawner == null || player == null) return;
+        if (followingItemSpawner == null || player == null || !(level instanceof ServerLevel server)) return;
         List<ItemEntity> drops = EntityUtils.getEntitiesInRange(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                 player, ItemEntity.class, 2.0);
         for (ItemEntity drop : drops) {
             if (!drop.isAlive() || drop.tickCount != 0) continue;
-            followingItemSpawner.spawnFollowingItem((ServerLevel) level, drop, player, color);
+            followingItemSpawner.spawnFollowingItem(server, drop, player, color);
             drop.discard();
         }
     }

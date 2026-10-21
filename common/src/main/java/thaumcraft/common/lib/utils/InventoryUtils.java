@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -21,7 +20,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
@@ -525,9 +523,12 @@ public final class InventoryUtils {
         if (stack == null || stack.isEmpty() || level == null) return 0;
         var enchantments = stack.get(DataComponents.ENCHANTMENTS);
         if (enchantments == null) return 0;
-        var registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-        Holder<Enchantment> unbreaking = registry.getOrThrow(Enchantments.UNBREAKING);
-        return enchantments.getLevel(unbreaking);
+        // A registry or an entry that the runtime does not know means "no
+        // unbreaking", never a crash in the durability path.
+        return level.registryAccess().lookup(Registries.ENCHANTMENT)
+                .flatMap(lookup -> lookup.get(Enchantments.UNBREAKING))
+                .map(unbreaking -> enchantments.getLevel(unbreaking))
+                .orElse(0);
     }
 
     // --------------------------------------------------------------------- chests

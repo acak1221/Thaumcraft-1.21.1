@@ -64,7 +64,9 @@ public class ItemApi {
 
     /** The block item of a named block, when the block itself has one. */
     public static ItemStack getBlockItem(String itemString) {
-        Block block = BuiltInRegistries.BLOCK.get(id(itemString));
+        if (itemString == null || itemString.isEmpty()) return null;
+        ResourceLocation id = id(itemString);
+        Block block = id == null ? null : BuiltInRegistries.BLOCK.get(id);
         if (block == null) return null;
         Item item = block.asItem();
         return item instanceof BlockItem ? new ItemStack(item) : null;

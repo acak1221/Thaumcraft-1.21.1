@@ -95,9 +95,10 @@ public class ContainerGhostSlots extends AbstractContainerMenu {
                         slot.set(ItemStack.EMPTY);
                     }
                 } else if (type == ClickType.CLONE) {
-                    // Oracle ContainerGhostSlots:110-117 - the creative clone
-                    // fills the ghost with a full stack.
-                    if (!current.isEmpty()) slot.set(current.copyWithCount(current.getMaxStackSize()));
+                    // Oracle ContainerGhostSlots:110-117 - the creative clone copies the
+                    // stack of the slot into a full stack and hands it to the cursor, but
+                    // only for a real slot: a ghost slot keeps its preview and never
+                    // gives an item to the player.
                 } else if (type == ClickType.THROW) {
                     // Oracle ContainerGhostSlots:122-130 - a throw removes one
                     // ghost item or the whole preview, and never drops it.

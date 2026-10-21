@@ -87,6 +87,18 @@ public class AspectList implements Serializable {
 
     public Aspect[] getAspectsSortedByAmount() { return getAspectsSortedAmount(); }
 
+    /**
+     * The original addition: the amount of an aspect grows by the added one.
+     *
+     * <p>Forced 1.21.1 change (documented deviation from the original): the original stored the aspect
+     * under its own key, so a {@code null} aspect - the aspect of an unknown tag that
+     * {@link Aspect#getAspect(String)} answered for - became a key of the map (oracle
+     * {@code thaumcraft/api/aspects/AspectList.java}, the {@code add} method has no null check). The
+     * original then crashed with a {@link NullPointerException} in {@code getPrimalAspects}, which calls
+     * {@code isPrimal()} on every key without a null check. The native port drops a {@code null} aspect
+     * instead, so an item of another mod never takes the whole aspect list down; the amount of an
+     * unknown tag is then not counted by {@link #size()} and not answered by {@link #getAmount(Aspect)}.</p>
+     */
     public AspectList add(Aspect aspect, int amount) {
         if (aspect != null) this.aspects.put(aspect, getAmount(aspect) + amount);
         return this;

@@ -57,12 +57,29 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
         return result;
     }
 
+    /**
+     * The original three by three grid lookup.
+     *
+     * <p>Original {@code thaumcraft/common/lib/InternalMethodHandler.java} forwards to
+     * {@code TileMagicWorkbench.getStackInRowAndColumn(row, column)}, which reads the slot
+     * {@code row + column * 3} of the grid (oracle {@code TileMagicWorkbench.getStackInRowAndColumn}).
+     * The original recipes call the helper with the ROW first, for example
+     * {@code getStackInRowAndColumn(inv, 1, 0)} for the slot 1 of the sceptre grid
+     * (oracle {@code thaumcraft/common/lib/crafting/ArcaneSceptreRecipe.java:42-46}).</p>
+     */
     @Override public ItemStack getStackInRowAndColumn(Object instance, int row, int column) {
-        if (instance == null || row < 0 || row > 2 || column < 0 || column > 2) return null;
-        int index = row * 3 + column;
-        if (instance instanceof net.minecraft.world.Container container) return container.getItem(index);
-        if (instance instanceof net.minecraft.world.item.crafting.RecipeInput input) return input.getItem(index);
-        return null;
+        if (instance == null || row < 0 || row > 2 || column < 0 || column > 2) return ItemStack.EMPTY;
+        int index = row + column * 3;
+        if (instance instanceof net.minecraft.world.Container container) {
+            if (index >= container.getContainerSize()) return ItemStack.EMPTY;
+            ItemStack stack = container.getItem(index);
+            return stack == null ? ItemStack.EMPTY : stack;
+        }
+        if (instance instanceof net.minecraft.world.item.crafting.RecipeInput input) {
+            ItemStack stack = input.getItem(index);
+            return stack == null ? ItemStack.EMPTY : stack;
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override public AspectList getObjectAspects(ItemStack is) {

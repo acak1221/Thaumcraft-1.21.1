@@ -293,7 +293,8 @@ public final class ThaumcraftApi {
         List<?> key = List.of(stack.getItem(), stack.getDamageValue());
         if (keyCache.containsKey(key)) {
             Object[] cached = keyCache.get(key);
-            return cached == null ? null : researchVisible(player, cached);
+            // The cached answer belongs to the registry: a caller may not edit it.
+            return cached == null ? null : researchVisible(player, cached.clone());
         }
         for (ResearchDefinition definition : ResearchCatalog.all()) {
             List<ResearchDefinition.Page> pages = definition.pages();

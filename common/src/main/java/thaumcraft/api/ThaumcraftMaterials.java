@@ -29,10 +29,16 @@ public final class ThaumcraftMaterials {
     public static final ArmorMaterial ARMORMAT_SPECIAL = new ArmorMaterial(
             Map.of(ArmorItem.Type.HELMET, 1, ArmorItem.Type.CHESTPLATE, 3, ArmorItem.Type.LEGGINGS, 2, ArmorItem.Type.BOOTS, 1),
             25, equipSound(), () -> Ingredient.EMPTY, List.of(), 0, 0);
-    /** Original armorMatVoidFortress: 4/8/7/4, enchantability 10. */
+    /**
+     * Original armorMatVoidFortress: 4/8/7/4, durability 18, enchantability 10.
+     *
+     * <p>Oracle {@code thaumcraft/api/ThaumcraftApi.java:55}:
+     * {@code EnumHelper.addArmorMaterial("VOIDFORTRESS", 18, new int[]{4, 8, 7, 4}, 10)}. The
+     * enchantability of 1.7.10 lives on the item in 1.21.1 and has no place in the material.</p>
+     */
     public static final ArmorMaterial ARMORMAT_VOID_FORTRESS = new ArmorMaterial(
             Map.of(ArmorItem.Type.HELMET, 4, ArmorItem.Type.CHESTPLATE, 8, ArmorItem.Type.LEGGINGS, 7, ArmorItem.Type.BOOTS, 4),
-            10, equipSound(), () -> Ingredient.EMPTY, List.of(), 0, 0);
+            18, equipSound(), () -> Ingredient.EMPTY, List.of(), 0, 0);
 
     private ThaumcraftMaterials() {}
 

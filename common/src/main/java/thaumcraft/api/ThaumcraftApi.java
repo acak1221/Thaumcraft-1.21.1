@@ -60,6 +60,18 @@ public final class ThaumcraftApi {
     public static ArmorMaterial armorMatThaumium() { return ThaumcraftEquipment.THAUMIUM_ARMOR_MATERIAL.get(); }
     public static ArmorMaterial armorMatThaumiumFortress() { return ThaumcraftEquipment.FORTRESS_ARMOR_MATERIAL.get(); }
     public static ArmorMaterial armorMatVoid() { return ThaumcraftEquipment.VOID_ARMOR_MATERIAL.get(); }
+    /**
+     * Original {@code armorMatSpecial} (oracle {@code thaumcraft/api/ThaumcraftApi.java:52}):
+     * durability 25, the defenses 1/3/2/1 and the enchantability 25. The original published it as a
+     * field; 1.21.1 registers the material, so the native answers through an accessor.
+     */
+    public static ArmorMaterial armorMatSpecial() { return ThaumcraftMaterials.ARMORMAT_SPECIAL; }
+    /**
+     * Original {@code armorMatVoidFortress} (oracle {@code thaumcraft/api/ThaumcraftApi.java:55}):
+     * durability 18, the defenses 4/8/7/4 and the enchantability 10. The original published it as a
+     * field; 1.21.1 registers the material, so the native answers through an accessor.
+     */
+    public static ArmorMaterial armorMatVoidFortress() { return ThaumcraftMaterials.ARMORMAT_VOID_FORTRESS; }
     /** Original enchantment ids. 1.21.1 has no numeric enchantment ids; -1 means "not present in this runtime". */
     public static int enchantFrugal = -1;
     public static int enchantPotency = -1;

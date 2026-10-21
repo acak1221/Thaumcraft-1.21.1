@@ -141,7 +141,7 @@ public final class PechRuntimeChecks {
             var arrows=new ArrayList<net.minecraft.world.entity.projectile.Arrow>();a.level.getAllEntities().forEach(entity->{if(entity instanceof net.minecraft.world.entity.projectile.Arrow arrow&&arrow.getOwner()==attacker)arrows.add(arrow);});owned.addAll(arrows);
             a.require(arrows.size()==1&&arrows.getFirst().getBaseDamage()>0&&arrows.getFirst().getDeltaMovement().lengthSqr()>0,"actual NPC Stalker emits a moving native Arrow with its real owner/damage");
             clear();pech=pech(0,0);pech.loot[0]=new ItemStack(Items.DIAMOND,3);
-            long seed=goldSeed();expected=RandomSource.create(seed);boolean pack=expected.nextFloat()<.88F;boolean gold=expected.nextInt(10)<1;a.level.random.setSeed(seed);
+            long seed=goldSeedAfterOrbs();expected=RandomSource.create(seed);consumeOriginalOrbDraws(expected);boolean pack=expected.nextFloat()<.88F;boolean gold=expected.nextInt(10)<1;a.level.random.setSeed(seed);
             pech.hurt(a.level.damageSources().playerAttack(a.player),1000);
             int diamonds=a.items().stream().filter(item->item.getItem().is(Items.DIAMOND)).mapToInt(item->item.getItem().getCount()).sum();
             int coins=a.items().stream().filter(item->item.getItem().is(ThaumcraftContent.MATERIALS.get("gold_coin").get())).mapToInt(item->item.getItem().getCount()).sum();
@@ -157,6 +157,25 @@ public final class PechRuntimeChecks {
             for(var dropped:a.items())if(dropped.getItem().is(ThaumcraftManaBeans.MANA_BEAN.get()))a.require(ItemManaBean.data(dropped.getItem())!=null&&Aspect.getAspect(ItemManaBean.data(dropped.getItem()).firstTag()).isPrimal(),"actual Pech death bean is typed with an original primal");
         }
         private static long goldSeed(){for(long seed=0;seed<10000;seed++){var rng=RandomSource.create(seed);if(rng.nextFloat()<.88F&&rng.nextInt(10)==0)return seed;}throw new AssertionError();}
+        /**
+         * The reduced primals of the original Pech, in the original order.
+         *
+         * <p>Oracle {@code thaumcraft/common/config/ConfigAspects.java:84} registers MAN 2,
+         * MAGIC 2, EXCHANGE 2 and GREED 2 for the Pech of type zero; the reduction to the
+         * primals of {@code ResearchManager.reduceToPrimals} (oracle
+         * {@code thaumcraft/common/lib/research/ResearchManager.java:466-495}) leaves air 8,
+         * order 8, water 14, earth 14, fire 6 and entropy 10.</p>
+         */
+        private static final int[] PECH_ORB_AMOUNTS={8,8,14,14,6,10};
+        /**
+         * The original death aspect orbs of the Pech.
+         *
+         * <p>Oracle {@code thaumcraft/common/lib/events/EventHandlerEntity.java:508-516}: the death
+         * of a mob that was hit by a player draws one world boolean per primal aspect of the mob
+         * and, for every true roll, the value of that aspect, BEFORE the loot of the same death.</p>
+         */
+        private static void consumeOriginalOrbDraws(RandomSource random){for(int amount:PECH_ORB_AMOUNTS)if(random.nextBoolean())random.nextInt(amount);}
+        private static long goldSeedAfterOrbs(){for(long seed=0;seed<10000;seed++){var rng=RandomSource.create(seed);consumeOriginalOrbDraws(rng);if(rng.nextFloat()<.88F&&rng.nextInt(10)==0)return seed;}throw new AssertionError();}
         private static long seedForTame(){for(long seed=0;seed<1000;seed++)if(RandomSource.create(seed).nextInt(10)<5)return seed;throw new AssertionError();}
         void goals(){
             var pech=pech(0,0);var installed=new ArrayList<Goal>();

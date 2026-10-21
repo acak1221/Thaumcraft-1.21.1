@@ -105,6 +105,7 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftTaintAnimals.register();
         thaumcraft.common.config.ThaumcraftTaintCreeper.register();
         thaumcraft.common.entities.monster.TaintDeathConversion.register();
+        thaumcraft.common.entities.DeathAspectOrbDrop.register();
         thaumcraft.common.config.ThaumcraftPrimalFoci.register();
         thaumcraft.common.config.ThaumcraftBiomes.register();
         ThaumcraftOres.register();

@@ -65,7 +65,11 @@ public final class TaintSporeRuntimeChecks {
                 reloaded.playerTouch(a.player);a.require(a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds).size()==5,"a removed original spore cannot replay its already claimed physical burst");
                 var unregistered=ThaumcraftTaint.TAINT_SPORE.get().create(a.level);unregistered.moveTo(a.root.getX(),a.root.getY(),a.root.getZ(),0,0);unregistered.playerTouch(a.player);a.require(!unregistered.isRemoved()&&a.level.getEntitiesOfClass(EntityTaintSpider.class,a.bounds).size()==5,"a detached never-installed entity cannot authorize world child/material writes");
                 cleanup(a);anchor(a);var dying=spore(a,2);
-                try(var random=new WorldInput(a.level,List.of(true))){a.require(dying.hurt(a.player.damageSources().playerAttack(a.player),100),"actual player damage kills an ordinary Spore");random.complete();}
+                // The original death aspect orbs (oracle EventHandlerEntity:508-516) draw one
+                // world boolean per primal aspect of the dead mob before the loot of the same
+                // death. The Spore has four primal aspects; every roll refuses here, so the
+                // original loot boolean below still decides the one item of the death.
+                try(var random=new WorldInput(a.level,List.of(false,false,false,false,true))){a.require(dying.hurt(a.player.damageSources().playerAttack(a.player),100),"actual player damage kills an ordinary Spore");random.complete();}
                 a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty()&&a.items().size()==1,"ordinary Spore die keeps original one item but grants no immediate nativeXP");
                 var deathDraws=new ArrayList<Object>();deathDraws.add(.5F);deathDraws.add(new Roll(2,1));for(int i=0;i<6;i++)deathDraws.add(.5F);
                 // The single burst child spends its original champion join roll after its six
@@ -91,7 +95,10 @@ public final class TaintSporeRuntimeChecks {
                 var swarms=a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds);a.require(swarmer.getSpawnCounter()==500&&swarms.size()==1&&swarms.getFirst().getY()==swarmer.getY()+.5&&swarms.getFirst().getYRot()==90,"actual vulnerable player16 reopens one genuine Swarm burst with original pitch/yaw world draws");
                 var copy=ThaumcraftTaint.TAINT_SWARMER.get().create(a.level);copy.load(swarmer.saveWithoutId(new CompoundTag()));a.require(copy.getSpawnCounter()==500&&copy.getSporeSize()==10,"native swarmer reload retains size but resets the absent-NBT counter500");
                 steps(a,swarmer,1);swarmer.playerTouch(a.player);a.require(a.level.getEntitiesOfClass(EntityTaintSwarm.class,a.bounds).size()==1,"native player collision neither ruptures the Swarmer nor adds an extra immediate Swarm");
-                try(var random=new WorldInput(a.level,List.of(true,false))){a.require(swarmer.hurt(a.player.damageSources().playerAttack(a.player),100),"actual lethal native damage reaches the Swarmer death path");random.complete();}
+                // The original death aspect orbs draw four world booleans of the Swarmer before
+                // the loot of the same death; every roll refuses here, so the two original loot
+                // booleans below still decide the goo and the tendril of the death.
+                try(var random=new WorldInput(a.level,List.of(false,false,false,false,true,false))){a.require(swarmer.hurt(a.player.damageSources().playerAttack(a.player),100),"actual lethal native damage reaches the Swarmer death path");random.complete();}
                 a.require(a.level.getEntitiesOfClass(ExperienceOrb.class,a.bounds).isEmpty(),"actual Swarmer death has no immediate native XP/extra world40 draw before original deathTime20");
                 a.require(a.items().size()==2&&a.items().stream().mapToInt(e->e.getItem().getCount()).sum()==2&&a.items().stream().anyMatch(e->e.getItem().is(ThaumcraftContent.MATERIALS.get("tainted_goo").get()))&&a.items().stream().anyMatch(e->e.getItem().is(ThaumcraftContent.MATERIALS.get("taint_tendril").get())),"actual Swarmer death executes both original world Boolean drops once without native table/equipment duplication");
                 // The original death time one burst spends the gore pitch float, the yaw float of
@@ -120,7 +127,10 @@ public final class TaintSporeRuntimeChecks {
                 a.require(attacked&&a.player.getHealth()<health&&spider.getAttributeValue(Attributes.ATTACK_DAMAGE)==2,"actual native spider attack damages its real player using original attack2 attribute; returned="+attacked+", before="+health+", after="+a.player.getHealth()+", damage="+spider.getAttributeValue(Attributes.ATTACK_DAMAGE)+", playerUpdates="+a.player.tickCount);spider.discard();
                 for(int branch=0;branch<3;branch++){
                     a.purgeOutputs();var victim=ThaumcraftTaint.TAINT_SPIDER.get().create(a.level);victim.moveTo(a.root.getX()+.5,a.root.getY(),a.root.getZ()+.5,0,0);a.require(a.level.addFreshEntity(victim),"actual next native death owns a separate spider identity");
-                    List<Object> draws=branch==0?List.of(new Roll(6,5)):List.of(new Roll(6,0),branch==1);
+                    // The original death aspect orbs draw five world booleans of the tiny
+                    // spider before the loot of the same death; every roll refuses here, so
+                    // the original one-in-six loot roll below still decides the item.
+                    List<Object> draws=branch==0?List.of(false,false,false,false,false,new Roll(6,5)):List.of(false,false,false,false,false,new Roll(6,0),branch==1);
                     try(var random=new WorldInput(a.level,draws)){a.require(victim.hurt(a.player.damageSources().playerAttack(a.player),100),"actual player damage enters tiny spider death loot");random.complete();}
                     if(branch==0)a.require(a.items().isEmpty(),"original five-of-six rejection emits no native string/eye/custom loot");
                     else a.require(a.items().size()==1&&a.items().getFirst().getItem().getCount()==1&&a.items().getFirst().getItem().is(ThaumcraftContent.MATERIALS.get(branch==1?"tainted_goo":"taint_tendril").get()),"actual one-in-six death emits the witnessed Boolean resource once and preserves next world RNG draw");

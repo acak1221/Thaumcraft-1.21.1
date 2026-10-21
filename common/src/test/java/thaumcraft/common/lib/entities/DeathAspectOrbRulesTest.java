@@ -84,7 +84,7 @@ class DeathAspectOrbRulesTest {
     }
 
     @Test void theValueOfAnOrbIsBoundedByTheAmountOfItsAspect() {
-        AspectList aspects = new AspectList().add(Aspect.IGNIS, 3);
+        AspectList aspects = new AspectList().add(Aspect.FIRE, 3);
         // The single primal of the original is fire with the amount three.
         AspectList primals = aspects.reduceToPrimals(false);
         assertEquals(1, primals.size());

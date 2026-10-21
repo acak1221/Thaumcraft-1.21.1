@@ -38,11 +38,24 @@ import thaumcraft.common.lib.research.EntityAspectBindings;
  *   the same guarded orb factory as the node emission, so an invalid orb can never be published.</li>
  * </ul>
  *
- * <p>The order of the world random is the original one: the Forge 1.7.10 patch of
- * {@code EntityLivingBase.onDeath} fires {@code LivingDeathEvent} at the top of the method, before
- * the drop block, and the native {@code EntityEvent.LIVING_DEATH} of Architectury is injected at
- * the head of the 1.21.1 {@code LivingEntity.die}, before {@code dropAllDeathLoot}. The two rolls
- * of an aspect therefore happen before the loot of the same death, exactly like the original.</p>
+ * <p>The order of the world random is the original one, and it is proven:</p>
+ * <ul>
+ *   <li>The Forge 1.7.10 patch of {@code EntityLivingBase.onDeath} starts with
+ *   {@code ForgeHooks.onLivingDeath(this, source)}, which fires the {@code LivingDeathEvent} of
+ *   the original, and only afterwards captures the drops and fires
+ *   {@code ForgeHooks.onLivingDrops} (the Forge 1.7.10 patch of
+ *   {@code net/minecraft/entity/EntityLivingBase.java}, the hunks at {@code @@ -883,6 +888,7 @@},
+ *   {@code @@ -908,6 +914,10 @@} and {@code @@ -923,6 +933,16 @@}). The two rolls of an aspect
+ *   therefore happen BEFORE the loot of the same death, exactly like the original.</li>
+ *   <li>The native {@code EntityEvent.LIVING_DEATH} of Architectury is injected at the head of the
+ *   1.21.1 {@code LivingEntity.die} (the {@code dev.architectury.mixin.fabric.LivingDeathInvoker}
+ *   of the Architectury fabric module), and the native {@code dropAllDeathLoot} is called inside
+ *   that same method, so the native death loot follows the native orbs.</li>
+ * </ul>
+ * <p>The consequence is the original one: the world random of a death that a player caused is
+ * shifted by the aspect rolls of the dead mob, and the loot of that death therefore draws the
+ * values the original would have drawn after the orbs. The GameTests of the lanes that lock the
+ * world random stream of a death declare the orb rolls of their fixture explicitly.</p>
  */
 public final class DeathAspectOrbDrop {
     private static boolean registered;

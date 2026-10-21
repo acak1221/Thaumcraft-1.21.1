@@ -90,7 +90,10 @@ public final class EntityPech extends Monster implements RangedAttackMob {
     private PechMeleeGoal melee;private PechRangedGoal arrows,blasts;private PechAvoidGoal avoid;
     public EntityPech(EntityType<? extends EntityPech> type,Level level){
         super(type,level);xpReward=5;Arrays.fill(loot,ItemStack.EMPTY);
-        if(getNavigation() instanceof GroundPathNavigation navigation){navigation.setCanOpenDoors(true);navigation.setCanFloat(false);}
+        // The original Pech never calls setAvoidsWater, so the navigator of the original does not
+        // refuse the water and the pech swims (1.7.10 EntityLivingBase.handleWaterMovement); the
+        // 1.21.1 navigator binds both to the canFloat flag.
+        if(getNavigation() instanceof GroundPathNavigation navigation){navigation.setCanOpenDoors(true);navigation.setCanFloat(true);}
         setDropChance(EquipmentSlot.MAINHAND,.2F);if(!level.isClientSide)setCombatTask();
     }
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,30).add(Attributes.ATTACK_DAMAGE,6).add(Attributes.MOVEMENT_SPEED,.5);}

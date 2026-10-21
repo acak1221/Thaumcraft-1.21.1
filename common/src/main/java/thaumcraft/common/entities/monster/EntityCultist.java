@@ -68,15 +68,17 @@ public class EntityCultist extends Monster {
      * walkable at all.
      *
      * <p>The 1.7.10 {@code setAvoidsWater(true)} made the pathfinder refuse every water cell
-     * ({@code PathFinder.canEntityStandAt} returned {@code -1}); the 1.21.1 equivalent is a
-     * water path type that the mob may not walk on.
+     * ({@code PathFinder.getSafePoint} returned {@code null} for a water cell); the 1.21.1
+     * equivalent is a mob that cannot float, because the water path type is not walkable for it.
      */
     public void applyOriginalNavigator() {
         if (getNavigation() instanceof GroundPathNavigation ground) {
             ground.setCanOpenDoors(true);
             ground.setCanPassDoors(true);
+            // The original refuses every water cell, so the cultist does not float and the water
+            // path type is not walkable for it.
+            ground.setCanFloat(false);
         }
-        setPathfindingMalus(PathType.WATER, -1.0F);
     }
 
     public static AttributeSupplier.Builder createAttributes() {

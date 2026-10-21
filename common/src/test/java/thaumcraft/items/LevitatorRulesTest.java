@@ -25,18 +25,22 @@ class LevitatorRulesTest {
     }
 
     @Test void anEntityGainsTenthsUntilItRisesFasterThanTheCeiling() {
-        assertEquals(0.1 * 1.0F, LevitatorRules.lifted(0.0, false), 1e-7, "from rest");
-        assertEquals((double) 0.1F - 0.5, LevitatorRules.lifted(-0.5, false), 1e-12, "a fall is slowed by a tenth a tick");
-        assertEquals(0.4F, LevitatorRules.lifted(0.3, false), 1e-6);
-        assertEquals(0.35F + 0.1F, LevitatorRules.lifted(0.3499999, false), 1e-5, "just under the ceiling still gains");
-        assertEquals((double) 0.35F, LevitatorRules.lifted((double) 0.35F, false), 0.0, "at the ceiling nothing is added");
-        assertEquals(0.5, LevitatorRules.lifted(0.5, false), 0.0, "faster than the ceiling is left alone");
+        // Oracle TileLifter:58-59: else if (e.field_70181_x < (double)0.35f) { e.field_70181_x += (double)0.1f; }
+        // The original widens the float literal to a double, so the step is 0.10000000149011612 and not the
+        // double 0.1. The expectations are the original's own expressions.
+        assertEquals(0.0 + (double) 0.1F, LevitatorRules.lifted(0.0, false), "from rest");
+        assertEquals(-0.5 + (double) 0.1F, LevitatorRules.lifted(-0.5, false), "a fall is slowed by a tenth a tick");
+        assertEquals(0.3 + (double) 0.1F, LevitatorRules.lifted(0.3, false));
+        assertEquals(0.3499999 + (double) 0.1F, LevitatorRules.lifted(0.3499999, false), "just under the ceiling still gains");
+        assertEquals((double) 0.35F, LevitatorRules.lifted((double) 0.35F, false), "at the ceiling nothing is added");
+        assertEquals(0.5, LevitatorRules.lifted(0.5, false), "faster than the ceiling is left alone");
     }
 
     @Test void aSneakerKeepsNinetyPercentOfItsFallAndIsNotLifted() {
-        assertEquals(-0.5 * (double) 0.9F, LevitatorRules.lifted(-0.5, true), 1e-12);
-        assertEquals(0.0, LevitatorRules.lifted(0.0, true), 0.0, "at rest a sneaker is not lifted");
-        assertEquals(0.2, LevitatorRules.lifted(0.2, true), 0.0, "rising is not slowed");
+        // Oracle TileLifter:56: e.field_70181_x *= (double)0.9f;
+        assertEquals(-0.5 * (double) 0.9F, LevitatorRules.lifted(-0.5, true));
+        assertEquals(0.0, LevitatorRules.lifted(0.0, true), "at rest a sneaker is not lifted");
+        assertEquals(0.2, LevitatorRules.lifted(0.2, true), "rising is not slowed");
     }
 
     @Test void itemsPushableEntitiesAndHorsesAreLifted() {

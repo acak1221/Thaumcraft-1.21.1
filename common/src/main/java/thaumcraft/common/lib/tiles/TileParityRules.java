@@ -60,7 +60,7 @@ public final class TileParityRules {
 
     /** TileCrucible:315-325 - the fluid height of the crucible. */
     public static float crucibleFluidHeight(int water, int tags) {
-        float base = 0.3F + 0.5F * water / CRUCIBLE_CAPACITY;
+        float base = 0.3F + 0.5F * (water / (float) CRUCIBLE_CAPACITY);
         float height = base + tags / 100F * (1 - base);
         if (height > 1.0F) height = 1.001F;
         if (height == 1.0F) height = 0.9999F;

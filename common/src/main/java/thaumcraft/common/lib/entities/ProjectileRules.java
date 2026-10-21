@@ -106,10 +106,12 @@ public final class ProjectileRules {
         return velocity + (delta / squaredDistance) * GOLEM_ORB_ACCELERATION;
     }
 
-    /** Original {@code MathHelper.clamp(value, -0.25F, 0.25F)} on every motion axis. */
+    /** Original {@code MathHelper.clamp_float((float)motion, -0.25f, 0.25f)} on every motion axis. */
     public static double clampGolemOrbSpeed(double value) {
-        if (value < -GOLEM_ORB_MAX_SPEED) return -GOLEM_ORB_MAX_SPEED;
-        return value > GOLEM_ORB_MAX_SPEED ? GOLEM_ORB_MAX_SPEED : value;
+        // The original narrows the double motion to a float before the clamp (oracle EntityGolemOrb:103-105).
+        float motion = (float) value;
+        if (motion < -0.25F) return -0.25F;
+        return motion > 0.25F ? 0.25F : motion;
     }
 
     // ------------------------------------------------------------------

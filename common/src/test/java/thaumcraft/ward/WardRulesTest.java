@@ -25,9 +25,10 @@ class WardRulesTest {
         // health.
         assertEquals(10, ChampionWiringRules.wardedChampionWard(20.0));
         assertEquals(10.0, WardRules.capacity(ChampionWiringRules.wardedChampionWard(20.0)), 0.0);
-        // The warded praetor takes half of its maximum health as well.
-        assertEquals(62.5F, CultistRules.championAbsorption(125.0F));
-        assertEquals(62.5, WardRules.capacity(CultistRules.championAbsorption(125.0F)), 0.0);
+        // The warded praetor takes half of its maximum health as well: oracle EntityUtils.makeChampion:271-274
+        // truncates the health and divides it with an integer division.
+        assertEquals((float) ((int) 125.0F / 2), CultistRules.championAbsorption(125.0F));
+        assertEquals((float) ((int) 125.0F / 2), WardRules.capacity(CultistRules.championAbsorption(125.0F)));
     }
 
     @Test void aCapacityIsNeverNegative() {

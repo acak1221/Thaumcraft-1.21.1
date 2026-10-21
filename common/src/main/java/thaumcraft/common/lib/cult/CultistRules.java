@@ -285,8 +285,14 @@ public final class CultistRules {
     public static final int CHAMPION_WARDED = 5;
     public static final int CHAMPION_WARP = 6;
 
-    /** Original EntityUtils.makeChampion: the warded champion absorbs half of its health. */
-    public static float championAbsorption(float maxHealth) { return maxHealth / 2.0F; }
+    /**
+     * Original EntityUtils.makeChampion:271-274 - the warded champion absorbs half of its health.
+     *
+     * <p>The original truncates the health to an integer and divides it with an integer division:
+     * {@code int bh = (int)entity.func_110148_a(SharedMonsterAttributes.field_111267_a).func_111125_b() / 2;}
+     * so a health of one hundred and twenty five gives a ward of sixty two and not sixty two and a half.</p>
+     */
+    public static float championAbsorption(float maxHealth) { return (float)((int)maxHealth/2); }
 
     /** Original ChampionModWarp: 33 percent of the hits warp the player by one to three. */
     public static final float WARP_REWARD_CHANCE = 0.33F;

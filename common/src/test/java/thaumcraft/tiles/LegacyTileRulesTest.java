@@ -228,11 +228,11 @@ class LegacyTileRulesTest {
     }
 
     @Test void theValveWheelTurnsTwentyDegreesATick() {
-        assertEquals(20.0F, LegacyTileRules.valveRotation(0.0F, false));
-        assertEquals(40.0F, LegacyTileRules.valveRotation(20.0F, false));
-        assertEquals(360.0F, LegacyTileRules.valveRotation(340.0F, false));
+        assertEquals(0.0F + 20.0F, LegacyTileRules.valveRotation(0.0F, false));
+        assertEquals(20.0F + 20.0F, LegacyTileRules.valveRotation(20.0F, false));
+        assertEquals(340.0F + 20.0F, LegacyTileRules.valveRotation(340.0F, false));
         assertEquals(360.0F, LegacyTileRules.valveRotation(360.0F, false), "it stops at a full turn");
-        assertEquals(0.0F, LegacyTileRules.valveRotation(20.0F, true));
+        assertEquals(20.0F - 20.0F, LegacyTileRules.valveRotation(20.0F, true));
         assertEquals(0.0F, LegacyTileRules.valveRotation(0.0F, true));
     }
 

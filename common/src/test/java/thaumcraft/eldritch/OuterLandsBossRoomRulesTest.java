@@ -38,12 +38,12 @@ class OuterLandsBossRoomRulesTest {
     @Test void aQuarterOfTheLocksCountTwice() {
         // Oracle TileEldritchLock:88-90 - the counter of the boss map is raised by one and
         // by a second one in a quarter of the cases.
-        assertEquals(0.25F, OuterLandsBossRooms.DOUBLE_BOSS_CHANCE, 1.0E-6F);
+        assertEquals(0.25F, OuterLandsBossRooms.DOUBLE_BOSS_CHANCE);
     }
 
     @Test void theBossOfTheArenaIsAnnouncedToThePlayersAroundTheLock() {
         // Oracle TileEldritchLock:126-130 - the squared distance of the announcement.
-        assertEquals(300.0D, OuterLandsBossRooms.ANNOUNCE_DISTANCE_SQ, 1.0E-9D);
+        assertEquals(300.0D, OuterLandsBossRooms.ANNOUNCE_DISTANCE_SQ);
     }
 
     @Test void thePedestalOfTheBossKeepsItsOriginalPattern() {
@@ -57,9 +57,9 @@ class OuterLandsBossRoomRulesTest {
     @Test void theLootUrnOfTheWardenIsRareInOneOfTenCells() {
         // Oracle TileEldritchLock:165-173 - the urn appears in nine of ten cells, ten percent
         // of them are rare and twenty percent of them are uncommon.
-        assertEquals(0.9F, OuterLandsBossRooms.WARDEN_URN_CHANCE, 1.0E-6F);
-        assertEquals(0.1F, OuterLandsBossRooms.WARDEN_URN_RARE, 1.0E-6F);
-        assertEquals(0.3F, OuterLandsBossRooms.WARDEN_URN_UNCOMMON, 1.0E-6F);
+        assertEquals(0.9F, OuterLandsBossRooms.WARDEN_URN_CHANCE);
+        assertEquals(0.1F, OuterLandsBossRooms.WARDEN_URN_RARE);
+        assertEquals(0.3F, OuterLandsBossRooms.WARDEN_URN_UNCOMMON);
         assertEquals(2, OuterLandsBossRooms.wardenUrnMeta(0.05F));
         assertEquals(1, OuterLandsBossRooms.wardenUrnMeta(0.2F));
         assertEquals(0, OuterLandsBossRooms.wardenUrnMeta(0.5F));
@@ -68,10 +68,10 @@ class OuterLandsBossRoomRulesTest {
     @Test void theLootUrnOfTheGolemIsRarerThanTheOneOfTheWarden() {
         // Oracle TileEldritchLock:257-260 - five percent of the urns of the golem are rare,
         // fifteen percent are uncommon and the rest are plain.
-        assertEquals(0.05F, OuterLandsBossRooms.GOLEM_URN_RARE, 1.0E-6F);
-        assertEquals(0.2F, OuterLandsBossRooms.GOLEM_URN_UNCOMMON, 1.0E-6F);
-        assertEquals(0.15F, OuterLandsBossRooms.GOLEM_LOOT_CHANCE, 1.0E-6F);
-        assertEquals(0.3F, OuterLandsBossRooms.GOLEM_CRATE_CHANCE, 1.0E-6F);
+        assertEquals(0.05F, OuterLandsBossRooms.GOLEM_URN_RARE);
+        assertEquals(0.2F, OuterLandsBossRooms.GOLEM_URN_UNCOMMON);
+        assertEquals(0.15F, OuterLandsBossRooms.GOLEM_LOOT_CHANCE);
+        assertEquals(0.3F, OuterLandsBossRooms.GOLEM_CRATE_CHANCE);
         assertEquals(2, OuterLandsBossRooms.golemUrnMeta(0.01F));
         assertEquals(1, OuterLandsBossRooms.golemUrnMeta(0.1F));
         assertEquals(0, OuterLandsBossRooms.golemUrnMeta(0.5F));
@@ -100,8 +100,8 @@ class OuterLandsBossRoomRulesTest {
         assertTrue(OuterLandsBossRooms.cultistRingFour(4, 0));
         assertTrue(OuterLandsBossRooms.cultistRingFour(0, 4));
         assertFalse(OuterLandsBossRooms.cultistRingFour(3, 0));
-        assertEquals(0.33F, OuterLandsBossRooms.CULTIST_RING_THREE_KEEP, 1.0E-6F);
-        assertEquals(0.25F, OuterLandsBossRooms.CULTIST_RING_FOUR_KEEP, 1.0E-6F);
+        assertEquals(0.33F, OuterLandsBossRooms.CULTIST_RING_THREE_KEEP);
+        assertEquals(0.25F, OuterLandsBossRooms.CULTIST_RING_FOUR_KEEP);
     }
 
     @Test void theFloorOfTheTaintIsHollowedInThreeRings() {
@@ -116,7 +116,7 @@ class OuterLandsBossRoomRulesTest {
         assertTrue(OuterLandsBossRooms.taintRingSeven(7, 0));
         assertTrue(OuterLandsBossRooms.taintRingSeven(0, -9));
         assertFalse(OuterLandsBossRooms.taintRingSeven(6, 0));
-        assertEquals(0.33F, OuterLandsBossRooms.TAINT_RING_FIVE_KEEP, 1.0E-6F);
-        assertEquals(0.25F, OuterLandsBossRooms.TAINT_RING_SEVEN_KEEP, 1.0E-6F);
+        assertEquals(0.33F, OuterLandsBossRooms.TAINT_RING_FIVE_KEEP);
+        assertEquals(0.25F, OuterLandsBossRooms.TAINT_RING_SEVEN_KEEP);
     }
 }

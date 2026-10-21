@@ -52,8 +52,9 @@ class CultistRulesTest {
     }
 
     @Test void theEnchantmentChanceAndPowerKeepTheOriginalFormulas() {
-        assertEquals(0.25F, CultistRules.knightEnchantChance(1.0F));
-        assertEquals(0.5F, CultistRules.leaderEnchantChance(1.0F));
+        // Oracle EntityCultistKnight:101 and EntityCultistLeader:148: nextFloat() < 0.25f * f and < 0.5f * f.
+        assertEquals(0.25F * 1.0F, CultistRules.knightEnchantChance(1.0F));
+        assertEquals(0.5F * 1.0F, CultistRules.leaderEnchantChance(1.0F));
         assertEquals(5, CultistRules.knightEnchantPower(1.0F, 0));
         assertEquals(22, CultistRules.knightEnchantPower(1.0F, 17));
         assertEquals(7, CultistRules.leaderEnchantPower(1.0F, 0));
@@ -70,8 +71,9 @@ class CultistRulesTest {
         assertFalse(CultistRules.clericFiresOrb(0.66F));
         assertTrue(CultistRules.clericFiresOrb(0.67F));
         assertEquals(3, CultistRules.clericFireballCount());
-        assertEquals(0.5F, CultistRules.fireballSpread(1.0F));
-        assertEquals(1.0F, CultistRules.fireballSpread(4.0F));
+        // Oracle EntityCultistCleric:118: float f1 = MathHelper.sqrt_float((float)f) * 0.5f;
+        assertEquals((float) Math.sqrt(1.0F) * 0.5F, CultistRules.fireballSpread(1.0F));
+        assertEquals((float) Math.sqrt(4.0F) * 0.5F, CultistRules.fireballSpread(4.0F));
     }
 
     @Test void theRitualistStopsOutsideTheOriginalBlockDistanceOrWithoutTheAltar() {
@@ -165,7 +167,8 @@ class CultistRulesTest {
         assertEquals("mighty", CultistRules.CHAMPION_MOD_NAMES[CultistRules.CHAMPION_MIGHTY]);
         assertEquals("warded", CultistRules.CHAMPION_MOD_NAMES[CultistRules.CHAMPION_WARDED]);
         assertEquals("warp", CultistRules.CHAMPION_MOD_NAMES[CultistRules.CHAMPION_WARP]);
-        assertEquals(62.5F, CultistRules.championAbsorption(125.0F));
+        // Oracle EntityUtils.makeChampion:271-274: int bh = (int)maxHealth / 2, an integer division.
+        assertEquals((float) ((int) 125.0F / 2), CultistRules.championAbsorption(125.0F));
     }
 
     @Test void theWarpedChampionRewardsOneToThreeTemporaryWarp() {

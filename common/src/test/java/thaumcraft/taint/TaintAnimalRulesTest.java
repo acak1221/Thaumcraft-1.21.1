@@ -104,29 +104,33 @@ class TaintAnimalRulesTest {
         assertFalse(TaintAnimalRules.dropsGoldCoin(12,draws(13)));
     }
     @Test void originalFlapAnimationIsKept() {
-        // Original: the flap speed grows by1.2 while airborne and shrinks by0.3 on the ground, clamped to zero and one.
-        assertEquals(1.0F,TaintAnimalRules.flapSpeed(0.0F,false),1.0E-6F);
-        assertEquals(0.0F,TaintAnimalRules.flapSpeed(0.0F,true),1.0E-6F);
-        assertEquals(1.0F,TaintAnimalRules.flapSpeed(0.9F,false),1.0E-6F);
-        assertEquals(0.7F,TaintAnimalRules.flapSpeed(1.0F,true),1.0E-6F);
-        assertEquals(0.2F,TaintAnimalRules.flapSpeed(0.5F,true),1.0E-6F);
-        // One while airborne, then nine tenths per tick.
-        assertEquals(0.9F,TaintAnimalRules.flapAmplitude(1.0F,false),1.0E-6F);
-        assertEquals(0.45F,TaintAnimalRules.flapAmplitude(0.5F,true),1.0E-6F);
-        assertEquals(0.9F,TaintAnimalRules.flapAmplitude(0.5F,false),1.0E-6F);
-        assertEquals(2.0F,TaintAnimalRules.flapPhase(0.0F,1.0F),1.0E-6F);
-        // The original fall damping is nine tenths, not the vanilla0.6.
-        assertEquals(-0.9F,TaintAnimalRules.fallDamping(-1.0F),1.0E-6F);
+        // Original EntityTaintChicken:103: the flap speed grows by 1.2 while airborne and shrinks by 0.3 on
+        // the ground, clamped to zero and one. The original computes the step in double and narrows it:
+        // this.destPos = (float)((double)this.destPos + (double)(this.field_70122_E ? -1 : 4) * 0.3);
+        assertEquals(1.0F,TaintAnimalRules.flapSpeed(0.0F,false));
+        assertEquals(0.0F,TaintAnimalRules.flapSpeed(0.0F,true));
+        assertEquals(1.0F,TaintAnimalRules.flapSpeed(0.9F,false));
+        assertEquals((float)(1.0F+(double)-1*0.3),TaintAnimalRules.flapSpeed(1.0F,true));
+        assertEquals((float)(0.5F+(double)-1*0.3),TaintAnimalRules.flapSpeed(0.5F,true));
+        // One while airborne, then nine tenths per tick: EntityTaintChicken:113 damps in double.
+        assertEquals((float)((double)1.0F*0.9),TaintAnimalRules.flapAmplitude(1.0F,false));
+        assertEquals((float)((double)0.5F*0.9),TaintAnimalRules.flapAmplitude(0.5F,true));
+        assertEquals((float)((double)1.0F*0.9),TaintAnimalRules.flapAmplitude(0.5F,false));
+        assertEquals(0.0F+1.0F*2.0F,TaintAnimalRules.flapPhase(0.0F,1.0F));
+        // The original fall damping is nine tenths, not the vanilla0.6: EntityTaintChicken multiplies the
+        // double motion by the double 0.9.
+        assertEquals((float)((double)-1.0F*0.9),TaintAnimalRules.fallDamping(-1.0F));
     }
     @Test void originalSheepEatingAnglesAreKept() {
+        // Oracle EntityTaintSheep:145-155: the head pitch and the body yaw of the eating sheep.
         assertEquals(0.0F,TaintAnimalRules.sheepHeadAngle(0,0.0F));
         assertEquals(1.0F,TaintAnimalRules.sheepHeadAngle(4,0.0F));
         assertEquals(1.0F,TaintAnimalRules.sheepHeadAngle(36,0.0F));
-        assertEquals(0.5F,TaintAnimalRules.sheepHeadAngle(2,0.0F),1.0E-6F);
-        assertEquals(0.62831855F,TaintAnimalRules.sheepBodyAngle(40,0.0F,0.0F),1.0E-6F);
-        assertEquals(0.0F,TaintAnimalRules.sheepBodyAngle(0,0.0F,0.0F),1.0E-6F);
+        assertEquals((2.0F-0.0F)/4.0F,TaintAnimalRules.sheepHeadAngle(2,0.0F));
+        assertEquals(0.62831855F,TaintAnimalRules.sheepBodyAngle(40,0.0F,0.0F));
+        assertEquals(0.0F,TaintAnimalRules.sheepBodyAngle(0,0.0F,0.0F));
         // The body yaw follows the render yaw when the sheep does not eat.
-        assertEquals(1.0F,TaintAnimalRules.sheepBodyAngle(0,0.0F,57.295776F),1.0E-6F);
+        assertEquals(57.295776F/57.295776F,TaintAnimalRules.sheepBodyAngle(0,0.0F,57.295776F));
     }
     @Test void originalGrassConversionIsKept() {
         assertEquals(250,TaintAnimalRules.GRASS_TRIGGER_INTERVAL);
@@ -140,7 +144,7 @@ class TaintAnimalRulesTest {
         assertEquals(70,TaintAnimalRules.villageSearchDelay(0));
         assertEquals(119,TaintAnimalRules.villageSearchDelay(49));
         assertEquals(32,TaintAnimalRules.VILLAGE_SEARCH_RADIUS);
-        assertEquals(6.0F,TaintAnimalRules.villageRestrictionRadius(10),1.0E-6F);
+        assertEquals(10*0.6F,TaintAnimalRules.villageRestrictionRadius(10));
     }
     @Test void originalCrawlerPoisonIsKept() {
         assertEquals(3,TaintAnimalRules.crawlerFluxSeconds(2));
@@ -163,10 +167,10 @@ class TaintAnimalRulesTest {
         assertEquals(8,TaintAnimalRules.seedExperience(false));
         assertEquals(12,TaintAnimalRules.seedExperience(true));
         assertEquals(1200,TaintAnimalRules.SEED_REREGISTER_INTERVAL);
-        assertEquals(4.0D,TaintAnimalRules.seedAuraRange(1),1.0E-9D);
-        assertEquals(8.0D,TaintAnimalRules.seedAuraRange(2),1.0E-9D);
-        assertEquals(256.0D,TaintAnimalRules.seedTentacleDistanceSquared(1),1.0E-9D);
-        assertEquals(512.0D,TaintAnimalRules.seedTentacleDistanceSquared(2),1.0E-9D);
+        assertEquals(1*4.0D,TaintAnimalRules.seedAuraRange(1));
+        assertEquals(2*4.0D,TaintAnimalRules.seedAuraRange(2));
+        assertEquals(1*256.0D,TaintAnimalRules.seedTentacleDistanceSquared(1));
+        assertEquals(2*256.0D,TaintAnimalRules.seedTentacleDistanceSquared(2));
         assertEquals(100,TaintAnimalRules.seedFluxDuration());
         assertEquals(0,TaintAnimalRules.seedFluxAmplifier(1));
         assertEquals(1,TaintAnimalRules.seedFluxAmplifier(2));

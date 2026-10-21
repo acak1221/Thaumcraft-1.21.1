@@ -73,8 +73,7 @@ class EldritchMobRulesTest {
         assertFalse(EldritchMobRules.wardenFrenzyRingDue(111));
         assertFalse(EldritchMobRules.wardenFrenzyRingDue(121));
         assertEquals(18.75D,EldritchMobRules.wardenFrenzyRadius(0));
-        assertEquals(3.75D,EldritchMobRules.wardenFrenzyRadius(120));
-        assertEquals(1,EldritchMobRules.wardenFrenzyStep(0));
+        assertEquals(3.75D,EldritchMobRules.wardenFrenzyRadius(120));        assertEquals(1,EldritchMobRules.wardenFrenzyStep(0));
         assertEquals(16,EldritchMobRules.wardenFrenzyStep(120));
         assertEquals(180,EldritchMobRules.wardenFrenzySamples(0));
         assertEquals(11,EldritchMobRules.wardenFrenzySamples(120));
@@ -95,7 +94,8 @@ class EldritchMobRulesTest {
     @Test void originalGolemNumbersArePreserved() {
         assertEquals(3F,EldritchMobRules.golemEyeHeight(false));
         assertEquals(3.33F,EldritchMobRules.golemEyeHeight(true));
-        assertEquals(7.5F,EldritchMobRules.golemMeleeDamage(10F));
+        // Oracle EntityEldritchGolem:216: the melee hit is the attack attribute times 0.75f, in float.
+        assertEquals(10F*0.75F,EldritchMobRules.golemMeleeDamage(10F));
         assertEquals(10,EldritchMobRules.GOLEM_MELEE_COOLDOWN);
         assertEquals(.2D,EldritchMobRules.GOLEM_MELEE_KNOCKBACK_Y);
         assertEquals(135,EldritchMobRules.golemBeamDrain(150,0));
@@ -110,12 +110,12 @@ class EldritchMobRulesTest {
     @Test void originalGolemBodyAndEyeHeightArePreserved() {
         // Oracle EntityEldritchGolem.func_70047_e:133-135 - the golem keeps its 1.75 by 3.5 body
         // and looks from three, or from 3.33 once its head is gone.
-        assertEquals(1.75F,EldritchMobRules.golemDimensions(false).width(),1.0E-6F);
-        assertEquals(3.5F,EldritchMobRules.golemDimensions(false).height(),1.0E-6F);
-        assertEquals(3F,EldritchMobRules.golemDimensions(false).eyeHeight(),1.0E-6F);
-        assertEquals(1.75F,EldritchMobRules.golemDimensions(true).width(),1.0E-6F);
-        assertEquals(3.5F,EldritchMobRules.golemDimensions(true).height(),1.0E-6F);
-        assertEquals(3.33F,EldritchMobRules.golemDimensions(true).eyeHeight(),1.0E-6F);
+        assertEquals(1.75F,EldritchMobRules.golemDimensions(false).width());
+        assertEquals(3.5F,EldritchMobRules.golemDimensions(false).height());
+        assertEquals(3F,EldritchMobRules.golemDimensions(false).eyeHeight());
+        assertEquals(1.75F,EldritchMobRules.golemDimensions(true).width());
+        assertEquals(3.5F,EldritchMobRules.golemDimensions(true).height());
+        assertEquals(3.33F,EldritchMobRules.golemDimensions(true).eyeHeight());
     }
 
     @Test void originalGolemOnlyLosesItsHeadOnALethalHit() {
@@ -154,7 +154,7 @@ class EldritchMobRulesTest {
         assertEquals(3F,EldritchMobRules.watcherGazeDamage(2,true));
         assertEquals(5F,EldritchMobRules.watcherGazeDamage(3,true));
         assertEquals(2F,EldritchMobRules.WATCHER_THORNS_DAMAGE);
-        assertEquals(.5F,EldritchMobRules.watcherGazeProgress(40,80),1.0E-6F);
+        assertEquals(40/(float)80,EldritchMobRules.watcherGazeProgress(40,80));
     }
 
     @Test void originalSlimeSizeRulesArePreserved() {
@@ -166,15 +166,17 @@ class EldritchMobRulesTest {
         assertEquals(8,EldritchMobRules.slimeJumpDelay(0));
         assertEquals(23,EldritchMobRules.slimeJumpDelay(15));
         assertEquals(4,EldritchMobRules.slimeAttackStrength(4));
-        assertEquals(.2F,EldritchMobRules.slimeSoundVolume(4),1.0E-6F);
+        // Oracle EntityThaumicSlime:299: the sound volume is 0.1f times the root of the size, in float.
+        assertEquals(.1F*(float)Math.sqrt(4),EldritchMobRules.slimeSoundVolume(4));
         assertEquals(100,EldritchMobRules.slimeMergedSize(99,50));
         assertEquals(60,EldritchMobRules.slimeMergedSize(50,10));
         assertEquals(2,EldritchMobRules.slimeSplitCount(4));
         assertEquals(10,EldritchMobRules.slimeSplitCount(100));
         assertTrue(EldritchMobRules.slimeCanSpit(4));
         assertFalse(EldritchMobRules.slimeCanSpit(3));
-        assertEquals(.75F,EldritchMobRules.slimeDimension(4),1.0E-6F);
-        assertEquals(.5F,EldritchMobRules.slimeDimension(1),1.0E-6F);
+        // Oracle EntityThaumicSlime:102-103: the body is 0.25f times the root of the size plus 0.25f.
+        assertEquals(.25F*(float)Math.sqrt(4)+.25F,EldritchMobRules.slimeDimension(4));
+        assertEquals(.25F*(float)Math.sqrt(1)+.25F,EldritchMobRules.slimeDimension(1));
         assertEquals(4F,EldritchMobRules.slimeHealth(4));
     }
 

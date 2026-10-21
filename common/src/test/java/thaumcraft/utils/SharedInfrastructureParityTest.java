@@ -169,7 +169,7 @@ class SharedInfrastructureParityTest {
     @Test void theDistanceHelpersAreTheOriginalOnes() {
         Vec3 from = new Vec3(1.0, 2.0, 3.0);
         Vec3 to = new Vec3(4.0, 6.0, 3.0);
-        assertEquals(9.0D, Utils.distanceSquared2d(from, to), 1.0E-9);
-        assertEquals(25.0D, Utils.distanceSquared3d(from, to), 1.0E-9);
+        assertEquals(9.0D, Utils.distanceSquared2d(from, to));
+        assertEquals(25.0D, Utils.distanceSquared3d(from, to));
     }
 }

@@ -29,13 +29,13 @@ class EldritchTileRulesTest {
     /* ------------------------------------------------------------------ */
 
     @Test void theTrapWaitsTwentyTicksAndLooksThreeBlocksAroundItself() {
-        assertEquals(3.0D, TileEldritchTrap.PLAYER_RADIUS, 1.0E-9D);
+        assertEquals(3.0D, TileEldritchTrap.PLAYER_RADIUS);
         assertEquals(10, TileEldritchTrap.NEXT_CHECK_MIN);
         assertEquals(25, TileEldritchTrap.NEXT_CHECK_SPAN);
     }
 
     @Test void theTrapHurtsForTwoPointsOfMagicDamage() {
-        assertEquals(2.0F, TileEldritchTrap.TRAP_DAMAGE, 1.0E-6F);
+        assertEquals(2.0F, TileEldritchTrap.TRAP_DAMAGE);
     }
 
     @Test void theTrapWarpsOneOrTwoPointsInHalfOfItsHits() {
@@ -74,7 +74,7 @@ class EldritchTileRulesTest {
     /* ------------------------------------------------------------------ */
 
     @Test void theSpawnerNeedsAPlayerWithinSixteenBlocks() {
-        assertEquals(16.0D, TileEldritchCrabSpawner.ACTIVATION_RADIUS, 1.0E-9D);
+        assertEquals(16.0D, TileEldritchCrabSpawner.ACTIVATION_RADIUS);
     }
 
     @Test void theSpawnerNeverLetsMoreThanFiveCrabsLiveAroundItself() {

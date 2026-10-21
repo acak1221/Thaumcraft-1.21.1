@@ -11,13 +11,14 @@ import thaumcraft.common.lib.MagicWard;
 /** The numbers of the Thaumium Fortress armor (original ItemFortressArmor.getProperties and EventHandlerRunic.entityHurt) without a world. */
 class FortressRulesTest {
     @Test void theSetMultiplierStartsBelowOneAndEachPieceLiftsIt() {
+        // Oracle ItemFortressArmor:149-160: double set = 0.875; set += 0.125; set += 0.05; ratio *= set;
         boolean[] none = {false, false, false}, all = {true, true, true};
-        assertEquals(0.875, FortressRules.set(none, none), 1e-12, "nothing worn");
-        assertEquals(1.0, FortressRules.set(new boolean[]{false, false, true}, none), 1e-12, "one piece is exactly 1");
-        assertEquals(1.125, FortressRules.set(new boolean[]{true, true, false}, none), 1e-12);
-        assertEquals(1.25, FortressRules.set(all, none), 1e-12, "the whole set is a quarter more");
-        assertEquals(1.3, FortressRules.set(all, new boolean[]{false, false, true}), 1e-12, "a mask on the helm adds 0.05");
-        assertEquals(1.4, FortressRules.set(all, all), 1e-12, "a mask on each piece (not obtainable) 0.15");
+        assertEquals(0.875, FortressRules.set(none, none), "nothing worn");
+        assertEquals(0.875 + 0.125, FortressRules.set(new boolean[]{false, false, true}, none), "one piece is exactly 1");
+        assertEquals(0.875 + 0.125 + 0.125, FortressRules.set(new boolean[]{true, true, false}, none));
+        assertEquals(0.875 + 0.125 + 0.125 + 0.125, FortressRules.set(all, none), "the whole set is a quarter more");
+        assertEquals(0.875 + 0.125 + 0.125 + 0.125 + 0.05, FortressRules.set(all, new boolean[]{false, false, true}), "a mask on the helm adds 0.05");
+        assertEquals(0.875 + 0.125 + 0.05 + 0.125 + 0.05 + 0.125 + 0.05, FortressRules.set(all, all), "a mask on each piece (not obtainable) 0.15");
     }
 
     @Test void theMasksTriggerByTheSizeOfTheBlow() {
@@ -32,14 +33,15 @@ class FortressRulesTest {
 
     @Test void fireIsWardedByAFifthOfTheArmorOverTwentyAndTheShareCapsAtOne() {
         assertEquals(20.0, MagicWard.FIRE_DIVISOR);
-        assertEquals(0.15, MagicWard.fireRatio(3), 1e-12);
-        assertEquals(0.35, MagicWard.fireRatio(7), 1e-12);
-        assertEquals(0.3, MagicWard.fireRatio(6), 1e-12);
+        // Oracle ItemFortressArmor:147-149: double ratio = (double)this.field_77879_b / 20.0;
+        assertEquals(3 / 20.0, MagicWard.fireRatio(3));
+        assertEquals(7 / 20.0, MagicWard.fireRatio(7));
+        assertEquals(6 / 20.0, MagicWard.fireRatio(6));
         // The whole set with its bonus: 16 / 20 * 1.25 = exactly everything.
-        assertEquals(0F, MagicWard.reduceByRatios(20F, MagicWard.fireRatio(3) * 1.25, MagicWard.fireRatio(7) * 1.25, MagicWard.fireRatio(6) * 1.25), 1e-5F);
-        assertEquals(0F, MagicWard.reduceByRatios(20F, 0.7, 0.7), 0F, "more than everything is still everything, not less than nothing");
-        assertEquals(10F, MagicWard.reduceByRatios(20F, 0.25, 0.25), 1e-5F);
-        assertEquals(20F, MagicWard.reduceByRatios(20F), 0F);
+        assertEquals(0F, MagicWard.reduceByRatios(20F, MagicWard.fireRatio(3) * 1.25, MagicWard.fireRatio(7) * 1.25, MagicWard.fireRatio(6) * 1.25));
+        assertEquals(0F, MagicWard.reduceByRatios(20F, 0.7, 0.7), "more than everything is still everything, not less than nothing");
+        assertEquals(10F, MagicWard.reduceByRatios(20F, 0.25, 0.25));
+        assertEquals(20F, MagicWard.reduceByRatios(20F));
         assertEquals(3, MagicWard.wearByRatio(20F, 0.15), "20 * 0.15 = 3");
         assertEquals(1, MagicWard.wearByRatio(1F, 0.15), "a small blow still wears one point");
     }

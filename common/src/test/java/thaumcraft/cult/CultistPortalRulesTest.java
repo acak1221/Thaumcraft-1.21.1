@@ -15,17 +15,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class CultistPortalRulesTest {
 
     @Test void thePortalHasFiveHundredHealthAndThirtyExperience() {
-        assertEquals(500.0D, CultistRules.PORTAL_HEALTH, 1.0E-9D);
+        assertEquals(500.0D, CultistRules.PORTAL_HEALTH);
         assertEquals(30, CultistRules.PORTAL_EXPERIENCE);
-        assertEquals(1.5F, CultistRules.PORTAL_WIDTH, 1.0E-6F);
-        assertEquals(3.0F, CultistRules.PORTAL_HEIGHT, 1.0E-6F);
-        assertEquals(1.0D, CultistRules.PORTAL_KNOCKBACK_RESISTANCE, 1.0E-9D);
+        assertEquals(1.5F, CultistRules.PORTAL_WIDTH);
+        assertEquals(3.0F, CultistRules.PORTAL_HEIGHT);
+        assertEquals(1.0D, CultistRules.PORTAL_KNOCKBACK_RESISTANCE);
     }
 
     @Test void thePortalHurtsAPlayerThatStandsWithinThreeBlocks() {
         // Oracle EntityCultistPortal:219-223 - the original asks for the distance and not for
         // the squared distance, so the portal reaches three blocks.
-        assertEquals(9.0D, CultistRules.PORTAL_COLLISION_DISTANCE_SQ, 1.0E-9D);
+        assertEquals(9.0D, CultistRules.PORTAL_COLLISION_DISTANCE_SQ);
     }
 
     @Test void thePortalBurnsItselfOnlyPastTheStageOfThePraetor() {
@@ -39,9 +39,9 @@ class CultistPortalRulesTest {
 
     @Test void thePortalHealsOnePointPerTickUntilTheStageOfThePraetor() {
         // Oracle EntityCultistPortal:181-183.
-        assertEquals(1.0F, CultistRules.portalHeal(0), 1.0E-6F);
-        assertEquals(1.0F, CultistRules.portalHeal(11), 1.0E-6F);
-        assertEquals(0.0F, CultistRules.portalHeal(12), 1.0E-6F);
+        assertEquals(1.0F, CultistRules.portalHeal(0));
+        assertEquals(1.0F, CultistRules.portalHeal(11));
+        assertEquals(0.0F, CultistRules.portalHeal(12));
     }
 
     @Test void thePraetorAnswersAtTheStageTwelve() {

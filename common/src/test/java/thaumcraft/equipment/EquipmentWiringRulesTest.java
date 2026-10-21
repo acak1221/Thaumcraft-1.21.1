@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class EquipmentWiringRulesTest {
     @Test void theBoneBowFiresThePrimalArrowWithTheOriginalSpeed() {
         // Original EventHandlerEntity.bowShot: the primal arrow is created with the charge times the arrow damage of the bow
-        // and the original EntityPrimalArrow leaves with one and a half times that value.
-        assertEquals(3.75F, EquipmentRules.boneBowPrimalArrowSpeed(EquipmentRules.boneBowArrowSpeed(1.0F)), 1.0E-6F);
-        assertEquals(1.875F, EquipmentRules.boneBowPrimalArrowSpeed(EquipmentRules.boneBowArrowSpeed(0.5F)), 1.0E-6F);
+        // and the original EntityPrimalArrow:135 leaves with one and a half times that value, in float.
+        assertEquals(2.5F * 1.5F, EquipmentRules.boneBowPrimalArrowSpeed(EquipmentRules.boneBowArrowSpeed(1.0F)));
+        assertEquals(1.25F * 1.5F, EquipmentRules.boneBowPrimalArrowSpeed(EquipmentRules.boneBowArrowSpeed(0.5F)));
         // The vanilla bow already leaves with three times its charge, which is the original's two times one and a half.
-        assertEquals(3.0F, EquipmentRules.boneBowPrimalArrowSpeed(2.0F), 1.0E-6F);
+        assertEquals(2.0F * 1.5F, EquipmentRules.boneBowPrimalArrowSpeed(2.0F));
     }
 
     @Test void theShotUsesTheFirstPrimalArrowOfTheInventory() {

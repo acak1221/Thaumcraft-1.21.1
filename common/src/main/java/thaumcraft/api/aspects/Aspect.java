@@ -1,5 +1,6 @@
 package thaumcraft.api.aspects;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -60,20 +61,21 @@ public class Aspect {
     public static final Aspect MECHANISM = new Aspect("machina", 0x8080a0, new Aspect[]{MOTION, TOOL});
     public static final Aspect TRAP = new Aspect("vinculum", 0x9a8080, new Aspect[]{MOTION, ENTROPY});
 
-    private final String tag;
+    private String tag;
     private final int color;
-    private final Aspect[] components;
+    private Aspect[] components;
     private final ResourceLocation image;
-    private final int blend;
+    private int blend;
     private String chatcolor = "f";
 
+    /**
+     * Original Aspect:74-84. The original accepts any component array: a compound aspect with
+     * three components is legal and is then reported as primal by {@link #isPrimal()}.
+     */
     public Aspect(String tag, int color, Aspect[] components, ResourceLocation image, int blend) {
         this.tag = Objects.requireNonNull(tag, "tag");
         this.color = color;
         this.components = components == null ? null : components.clone();
-        if (components != null && (components.length != 2 || components[0] == null || components[1] == null)) {
-            throw new IllegalArgumentException("Compound aspects require two components");
-        }
         this.image = Objects.requireNonNull(image, "image");
         this.blend = blend;
         if (aspects.putIfAbsent(tag, this) != null) {
@@ -102,7 +104,30 @@ public class Aspect {
     public ResourceLocation getImage() { return this.image; }
     public int getBlend() { return this.blend; }
     public String getChatcolor() { return this.chatcolor; }
-    public boolean isPrimal() { return this.components == null; }
+
+    /**
+     * Original Aspect:108 - the localised description of the aspect, the translation of
+     * {@code tc.aspect.<tag>}.
+     */
+    public String getLocalizedDescription() { return Component.translatable("tc.aspect." + this.tag).getString(); }
+
+    /**
+     * Original Aspect:145 - an aspect is primal when it has no components or when its component
+     * array does not hold exactly two parents.
+     */
+    public boolean isPrimal() { return this.components == null || this.components.length != 2; }
+
+    /** Original Aspect:116 - the tag of an aspect can be retuned by an add-on. */
+    public void setTag(String tag) { this.tag = tag; }
+
+    /** Original Aspect:124 - the components of an aspect can be retuned by an add-on. */
+    public void setComponents(Aspect[] components) { this.components = components == null ? null : components.clone(); }
+
+    /** Original Aspect:140 - the blend of an aspect can be retuned by an add-on. */
+    public void setBlend(int blend) { this.blend = blend; }
+
+    /** Original Aspect:172 - the chat colour of an aspect can be retuned by an add-on. */
+    public void setChatcolor(String chatcolor) { this.chatcolor = chatcolor; }
 
     public static Aspect getAspect(String tag) { return aspects.get(tag); }
 

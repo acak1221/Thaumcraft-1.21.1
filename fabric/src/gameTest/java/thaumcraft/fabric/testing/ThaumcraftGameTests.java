@@ -68,6 +68,7 @@ import thaumcraft.common.testing.CrystallizerRuntimeChecks;
 import thaumcraft.common.testing.CrystallizerOutputRuntimeChecks;
 import thaumcraft.common.testing.NodeStabilizerRuntimeChecks;
 import thaumcraft.common.testing.NodeStabilizerLifecycleChecks;
+import thaumcraft.common.testing.SurfaceStructurePlacementRuntimeChecks;
 import thaumcraft.common.testing.FluxOverfullRuntimeChecks;
 import thaumcraft.common.testing.VisPowerRecipeRuntimeChecks;
 import thaumcraft.common.testing.NodeTransductionRuntimeChecks;
@@ -621,6 +622,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void naturalNodesDrainAndRegenerate(GameTestHelper test) {
         NaturalNodeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 2400)
+    public void surfaceStructuresReachTheOverworld(GameTestHelper test) {
+        SurfaceStructurePlacementRuntimeChecks.run(test);
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

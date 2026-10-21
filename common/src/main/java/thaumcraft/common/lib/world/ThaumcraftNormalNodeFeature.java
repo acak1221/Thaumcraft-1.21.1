@@ -15,11 +15,16 @@ import thaumcraft.common.config.ThaumcraftBiomeSettings;
 /**
  * Original ThaumcraftWorldGenerator.generateWildNodes:189-215 and
  * createRandomNodeAt:218-399, sharing actual all-type generation with embedded Silverwood and primal impacts.
- * One invocation is ONE chunk attempt, so the placed feature has no count,
- * rarity or in-square modifier. Original special-type rolls are preserved without substitution.
+ *
+ * <p>The original calls the wild node pass once per chunk, rolls
+ * {@code Config.nodeRarity} (36) for it and draws the place of the node inside the chunk.
+ * The native placed feature carries that placement: one attempt per chunk, the rarity
+ * filter of the original and the random place of the chunk
+ * ({@code data/thaumcraft/worldgen/placed_feature/normal_aura_nodes.json}).
  */
 public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfiguration> {
-    public static final int NODE_RARITY = 36; // original Config defaults:872-873
+    /** The original {@code Config.nodeRarity} (oracle Config:872), the rarity the placed feature carries. */
+    public static final int NODE_RARITY = StructurePlacementRules.NODE_RARITY; // original Config defaults:872-873
     public static final int SPECIAL_NODE_RARITY = 18;
 
     public ThaumcraftNormalNodeFeature() { super(NoneFeatureConfiguration.CODEC); }
@@ -31,9 +36,11 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         // nodes; Nether, End and custom-dimension ecology remain pending.
         if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
         RandomSource random = context.random();
-        if (random.nextInt(NODE_RARITY) != 0) return false;
-        int x = (context.origin().getX() & ~15) + random.nextInt(16);
-        int z = (context.origin().getZ() & ~15) + random.nextInt(16);
+        // Oracle ThaumcraftWorldGenerator:190-194 - the rarity roll and the place of the
+        // node inside the chunk belong to the placement of the original, so the feature
+        // only places the node the placement selected.
+        int x = context.origin().getX();
+        int z = context.origin().getZ();
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, 5, z);
         if (!level.hasChunkAt(pos)) return false;
 

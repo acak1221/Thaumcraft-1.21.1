@@ -1,6 +1,5 @@
 package thaumcraft.common.lib.world;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -38,6 +37,11 @@ import thaumcraft.common.config.ThaumcraftVillages;
  * feature; the chance, the seven by seven footprint, the four layers, the
  * pillars, the vines and the centre are the original ones and live in
  * {@link VillageWorldGenRules}.
+ *
+ * <p>The "one chunk in forty" is the third draw of the exclusive chain of the
+ * original (mound, eldritch ring, hilltop stones), so the cluster only grows in
+ * a chunk the chain gave to it: {@link StructurePlacementRules#draw} rolls the
+ * whole chain from the chunk random of the original.
  */
 public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguration> {
     public WorldGenHilltopStones() {
@@ -49,22 +53,41 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
         if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
         int chunkX = context.origin().getX() >> 4;
         int chunkZ = context.origin().getZ() >> 4;
-        Random random = new Random(VillageWorldGenRules.chunkSeed(level.getLevel().getSeed(), chunkX, chunkZ));
-        // Oracle ThaumcraftWorldGenerator:423-424 - the position inside the chunk.
-        int x = chunkX * 16 + random.nextInt(16);
-        int z = chunkZ * 16 + random.nextInt(16);
-        if (VillageWorldGenRules.surfaceStructure(random) != VillageWorldGenRules.SurfaceStructure.HILLTOP_STONES) {
-            return false;
-        }
-        // Oracle ThaumcraftWorldGenerator:424-425 - the cluster grows from nine
-        // below the surface and never below the sea level.
-        int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
-        if (surface - 9 < level.getSeaLevel()) return false;
+        // Oracle ThaumcraftWorldGenerator:423-424 - the position inside the chunk and the
+        // exclusive structure chain are drawn from the chunk random of the original, so the
+        // cluster only grows in a chunk the chain gave to the hilltop stones.
+        RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
+                level.getLevel().getSeed(), chunkX, chunkZ));
+        StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        if (draw.kind() != StructurePlacementRules.Kind.HILLTOP_STONES) return false;
+        // The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
+        // footprint of the cluster has to stay inside it.
+        int x = inside(draw.x(), chunkX);
+        int z = inside(draw.z(), chunkZ);
+        // Oracle ThaumcraftWorldGenerator:424-425 - the cluster grows from nine below the
+        // surface and never below the sea level. The original adds the nine back before it
+        // builds, so the base of the cluster is the first air above the terrain, the
+        // height of the original getHeightValuePos.
+        int base = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        if (base - 9 < level.getSeaLevel()) return false;
         // Oracle WorldGenHilltopStones:63-67 - the five ground samples.
         for (int[] offset : VillageWorldGenRules.HILLTOP_SAMPLE_OFFSETS) {
-            if (!locationIsValidSpawn(level, x + offset[0], surface, z + offset[1])) return false;
+            if (!locationIsValidSpawn(level, x + offset[0], base, z + offset[1])) return false;
         }
-        return build(level, random, x, surface, z);
+        return build(level, random, x, base, z);
+    }
+
+    /**
+     * The centre of the cluster inside its chunk.
+     *
+     * <p>The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
+     * footprint of the cluster has to stay inside the chunk of its centre.
+     */
+    private static int inside(int coordinate, int chunk) {
+        int base = chunk << 4;
+        int low = base + VillageWorldGenRules.HILLTOP_STONE_RADIUS;
+        int high = base + 15 - VillageWorldGenRules.HILLTOP_STONE_RADIUS;
+        return Math.min(Math.max(coordinate, low), high);
     }
 
     /**
@@ -97,7 +120,7 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
     /**
      * Oracle WorldGenHilltopStones:63-119 - the cluster itself.
      */
-    private boolean build(WorldGenLevel level, Random random, int x, int y, int z) {
+    private boolean build(WorldGenLevel level, RandomSource random, int x, int y, int z) {
         BlockState ground = groundBlock(level, x, z);
         boolean vines = !snowy(level, x, z);
         boolean placed = false;
@@ -214,15 +237,17 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
      * Oracle WorldGenHilltopStones:86-93 - the chest with the vanilla dungeon
      * loot, rolled twice.
      */
-    private static void fillDungeonChest(WorldGenLevel level, BlockPos pos, Random random) {
+    private static void fillDungeonChest(WorldGenLevel level, BlockPos pos, RandomSource random) {
         if (!(level.getBlockEntity(pos) instanceof ChestBlockEntity chest)) return;
         ServerLevel server = level.getLevel();
         LootTable table = server.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.SIMPLE_DUNGEON);
         if (table == LootTable.EMPTY) return;
+        // The native chest rolls its loot with the chest parameter set, the one that
+        // allows the origin the vanilla chest tables need.
         LootParams params = new LootParams.Builder(server)
                 .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
                 .withLuck(0.0F)
-                .create(LootContextParamSets.EMPTY);
+                .create(LootContextParamSets.CHEST);
         int slot = 0;
         RandomSource source = RandomSource.create(random.nextLong());
         for (int pass = 0; pass < 2; pass++) {
@@ -234,7 +259,7 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
     }
 
     /** Oracle WorldGenHilltopStones:98 - the spawner holds wisps. */
-    private static void setWispSpawner(WorldGenLevel level, BlockPos pos, Random random) {
+    private static void setWispSpawner(WorldGenLevel level, BlockPos pos, RandomSource random) {
         if (level.getBlockEntity(pos) instanceof SpawnerBlockEntity spawner) {
             spawner.setEntityId(ThaumcraftMonsters.WISP.get(), RandomSource.create(random.nextLong()));
         }

@@ -2,13 +2,16 @@ package thaumcraft.common.config;
 
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
@@ -61,6 +64,26 @@ public final class ThaumcraftVillages {
     public static final ResourceKey<PlacedFeature> BANKER_HOMES_KEY = placed("village_banker_homes");
     public static final ResourceKey<PlacedFeature> WIZARD_TOWERS_KEY = placed("village_wizard_towers");
     public static final ResourceKey<PlacedFeature> HILLTOP_STONES_KEY = placed("hilltop_stones");
+
+    /**
+     * The biomes that may carry the TC4 surface structures.
+     *
+     * <p>Oracle ThaumcraftWorldGenerator.generateSurface:421-456 draws its structures in
+     * every chunk of the overworld, so the tag holds the vanilla overworld biomes and
+     * the three TC4 biomes of the overworld.
+     */
+    public static final TagKey<Biome> SURFACE_STRUCTURE_BIOMES = TagKey.create(Registries.BIOME,
+            ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "surface_structure_biomes"));
+
+    /**
+     * The terrain the village ground levelling may replace. The blocks of
+     * another structure are not in it, so a piece never overwrites them.
+     */
+    public static final Set<String> VILLAGE_GROUND_BLOCKS = Set.of(
+            "minecraft:dirt", "minecraft:grass_block", "minecraft:coarse_dirt", "minecraft:rooted_dirt",
+            "minecraft:podzol", "minecraft:mycelium", "minecraft:mud", "minecraft:sand", "minecraft:sandstone",
+            "minecraft:gravel", "minecraft:clay", "minecraft:stone", "minecraft:andesite", "minecraft:diorite",
+            "minecraft:granite", "minecraft:deepslate", "minecraft:tuff", "minecraft:snow", "minecraft:snow_block");
 
     /** The eldritch stone family of the Outer Lands unit. */
     private static final ResourceLocation ELDRITCH = ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "eldritch");
@@ -127,6 +150,43 @@ public final class ThaumcraftVillages {
                     if (!state.isAir() && state.getFluidState().isEmpty()) break;
                     if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) break;
                     level.setBlock(pos, Blocks.COBBLESTONE.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
+                }
+            }
+        }
+    }
+
+    /**
+     * The ground of a component footprint is levelled to the level of the
+     * component, the way the 1.7.10 village generator prepared the ground of a
+     * piece before it built it.
+     *
+     * <p>Without it a component on a slope is refused by its own space check,
+     * because the terrain of the higher side of the footprint stands in the room
+     * of the piece. Only the terrain is levelled; the blocks of another
+     * structure stay and keep the piece from overwriting them.
+     */
+    public static void levelGround(WorldGenLevel level, BlockPos origin, int rotation,
+                                   int width, int depth) {
+        int rotatedWidth = VillageWorldGenRules.rotatedWidth(width, depth, rotation);
+        int rotatedDepth = VillageWorldGenRules.rotatedDepth(width, depth, rotation);
+        for (int x = 0; x < rotatedWidth; x++) {
+            for (int z = 0; z < rotatedDepth; z++) {
+                int worldX = origin.getX() + x;
+                int worldZ = origin.getZ() + z;
+                if (!level.hasChunk(worldX >> 4, worldZ >> 4)) continue;
+                int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, worldX, worldZ);
+                if (surface - 1 < level.getMinBuildHeight()) continue;
+                BlockState ground = level.getBlockState(new BlockPos(worldX, surface - 1, worldZ));
+                if (!VILLAGE_GROUND_BLOCKS.contains(BuiltInRegistries.BLOCK.getKey(ground.getBlock()).toString())) continue;
+                BlockPos floor = new BlockPos(worldX, origin.getY(), worldZ);
+                if (level.isOutsideBuildHeight(floor) || !level.ensureCanWrite(floor)) continue;
+                level.setBlock(floor, ground, Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
+                for (int y = origin.getY() + 1; y < surface; y++) {
+                    BlockPos pos = new BlockPos(worldX, y, worldZ);
+                    if (level.isOutsideBuildHeight(pos) || !level.ensureCanWrite(pos)) continue;
+                    BlockState state = level.getBlockState(pos);
+                    if (!VILLAGE_GROUND_BLOCKS.contains(BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString())) continue;
+                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_NEIGHBORS);
                 }
             }
         }

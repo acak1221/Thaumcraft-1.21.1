@@ -551,39 +551,13 @@ public final class VillageWorldGenRules {
 
     // ------------------------------------------------------------------ surface structures
 
-    /** The structure a chunk receives, oracle ThaumcraftWorldGenerator:429-453. */
-    public enum SurfaceStructure { NONE, MOUND, ELDRITCH_RING, HILLTOP_STONES }
-
-    /**
-     * The 1.7.10 chunk random seed, {@code worldSeed + chunkX * 341873128712L
-     * + chunkZ * 132897987541L}. The original draws its surface structures
-     * from this stream, so the same chunk always gets the same structure.
+    /*
+     * The exclusive structure chain of the original, oracle
+     * ThaumcraftWorldGenerator:429-453, lives in StructurePlacementRules: the mound
+     * is drawn first, then the eldritch ring, then the hilltop stones, and the chain
+     * only ever gives one structure to a chunk. The chunk random of the original that
+     * feeds the chain is StructurePlacementRules.chunkSeed.
      */
-    public static long chunkSeed(long worldSeed, int chunkX, int chunkZ) {
-        return worldSeed + chunkX * 341873128712L + chunkZ * 132897987541L;
-    }
-
-    /**
-     * The structure of the chunk, oracle ThaumcraftWorldGenerator:429-453. The
-     * original chain is exclusive, so a chunk never carries two structures.
-     * The mound branch is reserved for the original WorldGenMound, which is
-     * not part of this unit.
-     */
-    public static SurfaceStructure surfaceStructure(long chunkSeed) {
-        return surfaceStructure(new Random(chunkSeed));
-    }
-
-    /**
-     * The structure of the chunk, drawn from the original chain. The draw has
-     * to follow the two position draws of the original, so the caller takes
-     * the position from the same stream first.
-     */
-    public static SurfaceStructure surfaceStructure(Random random) {
-        if (random.nextInt(150) == 0) return SurfaceStructure.MOUND;
-        if (random.nextInt(66) == 0) return SurfaceStructure.ELDRITCH_RING;
-        if (random.nextInt(40) == 0) return SurfaceStructure.HILLTOP_STONES;
-        return SurfaceStructure.NONE;
-    }
 
     // ------------------------------------------------------------------ trades
 

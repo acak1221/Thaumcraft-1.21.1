@@ -20,8 +20,17 @@ import net.minecraft.util.RandomSource;
  *       the chunk mapping of a labyrinth cell.</li>
  *   <li>{@code thaumcraft/common/lib/world/dim/MazeHandler.java:142-150} - the "a maze already
  *       covers this area" test.</li>
+ *   <li>{@code thaumcraft/common/lib/world/ChunkProvider.java} - the chunk random of the world
+ *       generator, the stream every structure of the chain draws from.</li>
  *   <li>{@code thaumcraft/common/config/Config.java:449-456,835-873} - node rarity defaults.</li>
  * </ul>
+ *
+ * <p>The exclusive chain cannot be expressed by a 1.21.1 biome modifier, because a
+ * modifier places every feature of a step on its own. The chain therefore lives in
+ * the features: each of them draws the original chain from the chunk random of its
+ * chunk and only the structure the chain selected is built. The port's
+ * {@code worldgen/biome_modifier} files add the features to the overworld biomes,
+ * the features themselves keep the exclusivity.
  */
 public final class StructurePlacementRules {
     private StructurePlacementRules() {}
@@ -97,6 +106,36 @@ public final class StructurePlacementRules {
         if (random.nextInt(ELDRITCH_RING_CHANCE) == 0) return Kind.ELDRITCH_RING;
         if (random.nextInt(HILLTOP_STONES_CHANCE) == 0) return Kind.HILLTOP_STONES;
         return Kind.NONE;
+    }
+
+    /**
+     * The 1.7.10 chunk random of the world generator, oracle
+     * {@code ChunkProvider.func_180889_a}: {@code worldSeed + chunkX * 341873128712L
+     * + chunkZ * 132897987541L}. Every structure of the exclusive chain draws from this
+     * stream, so a chunk always receives the same structure.
+     */
+    public static long chunkSeed(long worldSeed, int chunkX, int chunkZ) {
+        return worldSeed + chunkX * 341873128712L + chunkZ * 132897987541L;
+    }
+
+    /**
+     * The draw of one chunk: the position of the original inside the chunk and the
+     * structure the exclusive chain selected for it.
+     */
+    public record Draw(Kind kind, int x, int z) {}
+
+    /**
+     * Oracle ThaumcraftWorldGenerator.generateSurface:423-453. The original draws the
+     * position inside the chunk first and the exclusive chain after it, so the caller
+     * continues the same stream with the next draw of the original.
+     *
+     * <p>Every structure of the chain calls this with the same chunk random, so only
+     * one of them can win a chunk.
+     */
+    public static Draw draw(RandomSource random, int chunkX, int chunkZ) {
+        int x = chunkX * 16 + random.nextInt(16);
+        int z = chunkZ * 16 + random.nextInt(16);
+        return new Draw(select(random), x, z);
     }
 
     /** The same decision for already drawn rolls; 0 means "hit". */

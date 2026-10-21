@@ -5,6 +5,8 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftWorldgen;
 import thaumcraft.common.config.ThaumcraftNodes;
 import thaumcraft.common.config.ThaumcraftNaturals;
+import thaumcraft.common.config.ThaumcraftOuterLands;
+import thaumcraft.common.config.ThaumcraftVillages;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -138,5 +140,19 @@ public final class ThaumcraftFabric implements ModInitializer {
                 GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftNodes.NODE_KEY);
         BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftNaturals.TREE_BIOMES),
                 GenerationStep.Decoration.VEGETAL_DECORATION, ThaumcraftNaturals.TREES_KEY);
+        // The TC4 surface structures of the exclusive chain (oracle
+        // ThaumcraftWorldGenerator:429-453) and the two village components. 1.21.1 has
+        // no biome modifier registry, so every loader wires the placed features of the
+        // shared datapack into its own biomes. The original world generator ran after
+        // the vanilla decoration, so the structures share the last step with the wild
+        // aura nodes.
+        BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
+                GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftOuterLands.RING_PLACED);
+        BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
+                GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.HILLTOP_STONES_KEY);
+        BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
+                GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.BANKER_HOMES_KEY);
+        BiomeModifications.addFeature(BiomeSelectors.tag(ThaumcraftVillages.SURFACE_STRUCTURE_BIOMES),
+                GenerationStep.Decoration.TOP_LAYER_MODIFICATION, ThaumcraftVillages.WIZARD_TOWERS_KEY);
     }
 }

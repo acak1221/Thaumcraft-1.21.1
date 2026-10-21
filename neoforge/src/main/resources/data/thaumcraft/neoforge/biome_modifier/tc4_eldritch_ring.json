@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#thaumcraft:surface_structure_biomes",
+  "features": "thaumcraft:tc4_eldritch_ring",
+  "step": "top_layer_modification"
+}

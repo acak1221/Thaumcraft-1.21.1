@@ -45,7 +45,9 @@ public final class VillageBankerHome {
     public static boolean build(WorldGenLevel level, RandomSource random, BlockPos origin, int rotation,
                                  boolean tallHouse, int tablePosition) {
         // Oracle ComponentBankerHome:57 - the piece refuses a place where it
-        // would overlap another piece of the village.
+        // would overlap another piece of the village. The ground of the piece
+        // is levelled first, like the village generator of the original did.
+        ThaumcraftVillages.levelGround(level, origin, rotation, WIDTH, DEPTH);
         if (!ThaumcraftVillages.spaceIsFree(level, origin, rotation, WIDTH, DEPTH, HEIGHT)) return false;
         boolean placed = false;
         List<VillageWorldGenRules.Placement> placements = VillageWorldGenRules.bankerHome(tallHouse, tablePosition);

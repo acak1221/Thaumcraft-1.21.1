@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.lib.world.ChunkLoc;
+import thaumcraft.common.lib.world.StructurePlacementRules;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
 import thaumcraft.common.lib.world.VillageWorldGenRules.HouseType;
 import thaumcraft.common.lib.world.VillageWorldGenRules.Material;
@@ -297,41 +298,30 @@ class VillageWorldGenRulesTest {
 
     // ------------------------------------------------------------------ surface structures
 
-    @Test void chunkSeedIsTheOriginalOne() {
-        assertEquals(42L + 16L * 341873128712L + 32L * 132897987541L,
-                VillageWorldGenRules.chunkSeed(42L, 16, 32));
+    @Test void theSurfaceStructureChainLivesInTheStructureRules() {
+        // Oracle ThaumcraftWorldGenerator:429-453 - the exclusive chain of the surface
+        // structures is the rule of StructurePlacementRules.
+        assertEquals(150, StructurePlacementRules.MOUND_CHANCE);
+        assertEquals(66, StructurePlacementRules.ELDRITCH_RING_CHANCE);
+        assertEquals(40, StructurePlacementRules.HILLTOP_STONES_CHANCE);
     }
 
-    @Test void aChunkNeverCarriesTwoStructures() {
-        for (int x = -20; x < 20; x++) {
-            for (int z = -20; z < 20; z++) {
-                long seed = VillageWorldGenRules.chunkSeed(7L, x, z);
-                VillageWorldGenRules.SurfaceStructure first = VillageWorldGenRules.surfaceStructure(seed);
-                VillageWorldGenRules.SurfaceStructure second = VillageWorldGenRules.surfaceStructure(seed);
-                assertEquals(first, second);
+    @Test void theVillageComponentsAreReachable() {
+        // The banker home and the wizard tower are placed in the chunks the village
+        // plan gives them, so both types have to show up in the plan.
+        int bankers = 0;
+        int wizards = 0;
+        for (int x = 0; x < 40; ++x) {
+            for (int z = 0; z < 40; ++z) {
+                VillageWorldGenRules.VillagePlan plan = VillageWorldGenRules.villagePlan(1234L, x, z);
+                int house = VillageWorldGenRules.houseIndex(plan, x, z);
+                if (house < 0) continue;
+                if (plan.houses().get(house) == HouseType.BANKER_HOME) ++bankers;
+                if (plan.houses().get(house) == HouseType.WIZARD_TOWER) ++wizards;
             }
         }
-    }
-
-    @Test void theStructureChainKeepsTheOriginalChances() {
-        int mound = 0;
-        int ring = 0;
-        int stones = 0;
-        for (int x = 0; x < 200; x++) {
-            for (int z = 0; z < 200; z++) {
-                switch (VillageWorldGenRules.surfaceStructure(VillageWorldGenRules.chunkSeed(11L, x, z))) {
-                    case MOUND -> mound++;
-                    case ELDRITCH_RING -> ring++;
-                    case HILLTOP_STONES -> stones++;
-                    default -> { }
-                }
-            }
-        }
-        int chunks = 200 * 200;
-        // One in a hundred and fifty, one in sixty six, one in forty.
-        assertTrue(mound > chunks / 200 && mound < chunks / 100, "mound " + mound);
-        assertTrue(ring > chunks / 90 && ring < chunks / 55, "ring " + ring);
-        assertTrue(stones > chunks / 50 && stones < chunks / 33, "stones " + stones);
+        assertTrue(bankers > 0, "the banker home must be reachable");
+        assertTrue(wizards > 0, "the wizard tower must be reachable");
     }
 
     // ------------------------------------------------------------------ trades

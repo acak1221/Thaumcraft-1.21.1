@@ -24,6 +24,10 @@ import thaumcraft.common.config.ThaumcraftOuterLands;
  * The ring then validates five ground samples, builds itself and seeds the labyrinth through
  * {@code MazeHandler}, exactly like the native {@link OuterLandsProvider.MazeSavedData} does.
  *
+ * <p>The chain is drawn from the chunk random of the original
+ * ({@link StructurePlacementRules#chunkSeed}), so the ring, the hilltop stones and the mound
+ * of the chain always agree on which structure a chunk receives.
+ *
  * <p>Oracle references:
  * <ul>
  *   <li>{@code WorldGenEldritchRing:35-62} - the valid ground blocks and the spawn samples.</li>
@@ -42,22 +46,23 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         WorldGenLevel level = context.level();
         if (!(level.getLevel() instanceof ServerLevel server)) return false;
         if (OuterLandsProvider.isOuterLands(level.getLevel())) return false;
-        int x = context.origin().getX();
-        int z = context.origin().getZ();
-        int chunkX = x >> 4;
-        int chunkZ = z >> 4;
-        // The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
-        // footprint of the ring has to stay inside it. The centre is therefore pulled into the
-        // chunk when the draw put it on the border.
-        int centreX = inside(x, chunkX);
-        int centreZ = inside(z, chunkZ);
+        int chunkX = context.origin().getX() >> 4;
+        int chunkZ = context.origin().getZ() >> 4;
+        // Oracle ThaumcraftWorldGenerator:423-453 - the original draws the position inside
+        // the chunk and then the exclusive structure chain from the chunk random of the
+        // chunk. The ring only wins the chunk when the chain selects it, so the ring and
+        // the hilltop stones can never share a chunk.
+        RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
+                level.getLevel().getSeed(), chunkX, chunkZ));
+        StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        if (draw.kind() != StructurePlacementRules.Kind.ELDRITCH_RING) return false;
+        int centreX = inside(draw.x(), chunkX);
+        int centreZ = inside(draw.z(), chunkZ);
         // Oracle ThaumcraftWorldGenerator:424 - the ring grows nine blocks below the surface.
         int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, centreX, centreZ);
         int randPosY = surface - 9;
         // Oracle ThaumcraftWorldGenerator:425 - the surface structures only grow below the sea level.
         if (randPosY >= level.getSeaLevel()) return false;
-        RandomSource random = context.random();
-        if (StructurePlacementRules.select(random) != StructurePlacementRules.Kind.ELDRITCH_RING) return false;
         int[] size = StructurePlacementRules.ringSize(random);
         int width = size[0];
         int height = size[1];

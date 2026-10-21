@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:is_overworld",
+    "thaumcraft:magical_forest",
+    "thaumcraft:eerie",
+    "thaumcraft:taint"
+  ]
+}

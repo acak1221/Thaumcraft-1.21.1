@@ -43,7 +43,9 @@ public final class VillageWizardTower {
      */
     public static boolean build(WorldGenLevel level, RandomSource random, BlockPos origin, int rotation) {
         // Oracle ComponentWizardTower:48 - the piece refuses a place where it
-        // would overlap another piece of the village.
+        // would overlap another piece of the village. The ground of the piece
+        // is levelled first, like the village generator of the original did.
+        ThaumcraftVillages.levelGround(level, origin, rotation, WIDTH, DEPTH);
         if (!ThaumcraftVillages.spaceIsFree(level, origin, rotation, WIDTH, DEPTH, HEIGHT)) return false;
         boolean placed = false;
         List<VillageWorldGenRules.Placement> placements = VillageWorldGenRules.wizardTower();

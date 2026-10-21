@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#thaumcraft:surface_structure_biomes",
+  "features": "thaumcraft:village_banker_homes",
+  "step": "top_layer_modification"
+}

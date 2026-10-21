@@ -35,6 +35,79 @@ class StructurePlacementRulesTest {
         assertTrue(rings < chunks / 20, "the eldritch ring must stay rare, found " + rings);
     }
 
+    @Test void chunkSeedIsTheOriginalOne() {
+        // Oracle ChunkProvider.func_180889_a - the chunk random of the world generator.
+        assertEquals(42L + 16L * 341873128712L + 32L * 132897987541L,
+                StructurePlacementRules.chunkSeed(42L, 16, 32));
+        assertEquals(42L, StructurePlacementRules.chunkSeed(42L, 0, 0));
+    }
+
+    @Test void theDrawIsTheOriginalPositionInsideTheChunk() {
+        for (int x = -5; x < 5; ++x) {
+            for (int z = -5; z < 5; ++z) {
+                StructurePlacementRules.Draw draw = draw(7L, x, z);
+                assertTrue(draw.x() >= x * 16 && draw.x() < x * 16 + 16, "x inside the chunk: " + draw.x());
+                assertTrue(draw.z() >= z * 16 && draw.z() < z * 16 + 16, "z inside the chunk: " + draw.z());
+            }
+        }
+    }
+
+    @Test void aChunkNeverCarriesTwoStructures() {
+        // The ring and the hilltop stones draw the same chain from the same chunk
+        // random, so they can never win the same chunk.
+        for (int x = -20; x < 20; ++x) {
+            for (int z = -20; z < 20; ++z) {
+                StructurePlacementRules.Draw first = draw(7L, x, z);
+                StructurePlacementRules.Draw second = draw(7L, x, z);
+                assertEquals(first.kind(), second.kind());
+                assertEquals(first.x(), second.x());
+                assertEquals(first.z(), second.z());
+            }
+        }
+    }
+
+    @Test void theStructureChainKeepsTheOriginalChances() {
+        int mound = 0;
+        int ring = 0;
+        int stones = 0;
+        for (int x = 0; x < 200; ++x) {
+            for (int z = 0; z < 200; ++z) {
+                switch (draw(11L, x, z).kind()) {
+                    case MOUND -> mound++;
+                    case ELDRITCH_RING -> ring++;
+                    case HILLTOP_STONES -> stones++;
+                    default -> { }
+                }
+            }
+        }
+        int chunks = 200 * 200;
+        // One in a hundred and fifty, one in sixty six, one in forty.
+        assertTrue(mound > chunks / 200 && mound < chunks / 100, "mound " + mound);
+        assertTrue(ring > chunks / 90 && ring < chunks / 55, "ring " + ring);
+        assertTrue(stones > chunks / 50 && stones < chunks / 33, "stones " + stones);
+    }
+
+    @Test void theDrawContinuesTheStreamOfTheOriginal() {
+        // The oracle draws the position, then the chain, then the size of the ring,
+        // so the caller continues the same stream with the next draw.
+        RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(3L, 4, 5));
+        StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, 4, 5);
+        int[] size = StructurePlacementRules.ringSize(random);
+        // The same stream, replayed by hand in the order of the original.
+        RandomSource replay = RandomSource.create(StructurePlacementRules.chunkSeed(3L, 4, 5));
+        assertEquals(4 * 16 + replay.nextInt(16), draw.x());
+        assertEquals(5 * 16 + replay.nextInt(16), draw.z());
+        assertEquals(StructurePlacementRules.select(replay), draw.kind());
+        int[] replayed = StructurePlacementRules.ringSize(replay);
+        assertEquals(replayed[0], size[0]);
+        assertEquals(replayed[1], size[1]);
+    }
+
+    private static StructurePlacementRules.Draw draw(long worldSeed, int chunkX, int chunkZ) {
+        RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(worldSeed, chunkX, chunkZ));
+        return StructurePlacementRules.draw(random, chunkX, chunkZ);
+    }
+
     @Test void ringSizeKeepsTheOriginalOddSizes() {
         assertEquals(11, StructurePlacementRules.ringSize(0));
         assertEquals(13, StructurePlacementRules.ringSize(1));

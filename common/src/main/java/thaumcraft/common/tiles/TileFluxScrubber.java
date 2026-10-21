@@ -34,6 +34,16 @@ public final class TileFluxScrubber extends BlockEntity implements EssentiaStora
     public int charges = 0;
     public int power = 0;
     public Direction facing = Direction.DOWN;
+    /**
+     * Original TileFluxScrubber:37 - the counter of the scrubber. It is rolled
+     * once, on the client as well as on the server (oracle
+     * {@code thaumcraft/common/tiles/TileFluxScrubber.java:44-46}), and it is the
+     * phase of the bob of the tip of the cap (oracle
+     * {@code thaumcraft/client/renderers/tile/TileFluxScrubberRenderer.java:38}).
+     * The original never writes it to the NBT, so it is rolled again after a
+     * load.
+     */
+    private int count;
     /** The original candidate blocks of the scan, in the order they are drawn. */
     private final List<BlockPos> checklist = new ArrayList<>();
 
@@ -45,6 +55,19 @@ public final class TileFluxScrubber extends BlockEntity implements EssentiaStora
     public int getCharges() { return charges; }
     public int getPower() { return power; }
     public Direction getFacing() { return facing; }
+    /** The counter of the original, the phase of the bob of the tip of the cap. */
+    public int getCount() { return count; }
+
+    /**
+     * Original TileFluxScrubber:44-46 - the counter is rolled when it is zero.
+     * The original rolls it on the client as well, so the client and the server
+     * of a scrubber do not share it.
+     *
+     * @param level the level whose random rolls the counter
+     */
+    public void rollCount(Level level) {
+        if (count == 0) count = level.getRandom().nextInt(1000);
+    }
 
     public void setFacing(Direction facing) {
         this.facing = facing == null ? Direction.DOWN : facing;
@@ -53,6 +76,8 @@ public final class TileFluxScrubber extends BlockEntity implements EssentiaStora
 
     /** Original TileFluxScrubber:33-53 - the scrubber collects and spends its charges. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileFluxScrubber scrubber) {
+        // Original TileFluxScrubber:44-46 - the counter is rolled on both sides.
+        scrubber.rollCount(level);
         if (level.isClientSide) return;
         if (scrubber.charges >= EldritchBlockRules.FLUX_CHARGE_COST) {
             scrubber.charges -= EldritchBlockRules.FLUX_CHARGE_COST;

@@ -9,13 +9,16 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -24,11 +27,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
+import thaumcraft.client.fx.particles.BoreDigSparkleParticle;
 import thaumcraft.common.tiles.TileArcaneBore;
 
 /** Bore-only drawing. Geometry reads a current CLIENT tile and loaded collision
@@ -86,7 +91,8 @@ public final class BoreClientEffects {
         double visible = Minecraft.useFancyGraphics() ? 50 : 25;
         Vec3 origin = Vec3.atCenterOf(tile.getBlockPos());
         if (camera == null || camera.position().distanceToSqr(origin) > visible * visible
-                || Vec3.atCenterOf(tile.clientTarget()).distanceToSqr(origin) > 70 * 70
+                || Vec3.atCenterOf(tile.clientTarget()).distanceToSqr(origin)
+                        > TileArcaneBore.DIG_EVENT_RANGE * (double) TileArcaneBore.DIG_EVENT_RANGE
                 || !Float.isFinite(tile.getAimX()) || !Float.isFinite(tile.getAimZ())) return;
         float yaw = (tile.rotation().x() + 90 - tile.getAimX()) * Mth.DEG_TO_RAD;
         float tilt = (tile.rotation().z() + 90 - tile.getAimZ()) * Mth.DEG_TO_RAD;
@@ -109,6 +115,55 @@ public final class BoreClientEffects {
         finish(buffers, GREEN);
         layer(pose, buffers.getBuffer(ORANGE), end, side, other, length, spin, age, 0xFF8855, collided ? 2 : 0);
         finish(buffers, ORANGE);
+    }
+
+    /**
+     * The dig event of the original bore.
+     *
+     * <p>The original sends a dig event to the clients around the bore (oracle
+     * {@code thaumcraft/common/lib/network/misc/PacketBoreDig.java:53-58}) and the
+     * client answers it with the break sound of the dug block and with the dig
+     * particles of that block (oracle
+     * {@code thaumcraft/common/tiles/TileArcaneBore.java:496-501} and
+     * {@code thaumcraft/client/ClientProxy.java:864-874}).
+     *
+     * <p>The original plays the sound once per dig event and then draws
+     * {@code particleCount(10)} dig effects; every one of them is the flying dig
+     * sparkle in one case out of ten and the block particles of the dug block in
+     * the other nine.
+     *
+     * @param level the client level of the bore
+     * @param bore the position of the bore
+     * @param mining the direction the bore digs in
+     * @param target the block the bore digs
+     */
+    public static void dig(ClientLevel level, BlockPos bore, Direction mining, BlockPos target) {
+        if (level == null || target == null || !level.hasChunkAt(target)) return;
+        BlockState state = level.getBlockState(target);
+        // Original TileArcaneBore:497 - the break sound of the dug block, with
+        // the volume (pitch+1)/2 and the pitch volume*0.8 of the original.
+        SoundType sound = state.getSoundType();
+        level.playLocalSound(target.getX() + .5D, target.getY() + .5D, target.getZ() + .5D, sound.getBreakSound(),
+                SoundSource.BLOCKS, (sound.getPitch() + 1F) / 2F, sound.getVolume() * .8F, false);
+        BlockPos mouth = bore.relative(mining);
+        for (int attempt = 0; attempt < particleCount(10); attempt++) {
+            if (level.random.nextInt(10) == 0) {
+                // Original ClientProxy:867-869 - the flying dig sparkle.
+                var sparkle = BoreDigSparkleParticle.dig(level, target, mouth);
+                if (sparkle != null) Minecraft.getInstance().particleEngine.add(sparkle);
+            } else {
+                // Original ClientProxy:870-873 - the block particles of the dug
+                // block; the native tree uses the block destroy effect of
+                // 1.21.1 for that role.
+                level.addDestroyBlockEffect(target, state);
+            }
+        }
+    }
+
+    /** The original particleCount: nothing at the minimal setting, the base at the decreased one, twice at all. */
+    private static int particleCount(int base) {
+        ParticleStatus setting = Minecraft.getInstance().options.particles().get();
+        return setting == ParticleStatus.MINIMAL ? 0 : setting == ParticleStatus.DECREASED ? base : base * 2;
     }
 
     private static void layer(PoseStack pose, VertexConsumer out, Vec3 end, Vec3 side, Vec3 other, double length,

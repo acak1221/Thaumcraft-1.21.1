@@ -140,6 +140,7 @@ public final class Thaumcraft {
         thaumcraft.common.config.ThaumcraftVisCharging.register();
         thaumcraft.common.config.ThaumcraftThaumatorium.register();
         thaumcraft.common.config.ThaumcraftWards.register();
+        thaumcraft.common.lib.ward.WardedPearl.enableEvents();
         thaumcraft.common.config.ThaumcraftArchitect.register();
         thaumcraft.common.config.ThaumcraftWarp.register();
         thaumcraft.common.config.ThaumcraftMonsters.register();

@@ -27,11 +27,13 @@ import thaumcraft.common.lib.golems.GolemDoorRules;
  */
 class GolemDoorRulesTest {
     @Test void theScanOfThePathStopsAtTheCurrentIndexPlusTwo() {
-        // Original AIDoorInteract.func_75250_a:47.
-        assertEquals(0, GolemDoorRules.scanLimit(0, 10), "a golem that just started walks no point yet");
-        assertEquals(2, GolemDoorRules.scanLimit(1, 10));
+        // Original AIDoorInteract.func_75250_a:47 —
+        // for (int i = 0; i < Math.min(path.getCurrentPathIndex() + 2, path.getPathLength()); ++i)
+        assertEquals(2, GolemDoorRules.scanLimit(0, 10), "the point the golem stands on and the next one");
+        assertEquals(3, GolemDoorRules.scanLimit(1, 10), "the two points behind the current one are scanned as well");
         assertEquals(3, GolemDoorRules.scanLimit(1, 3), "the path is never longer than itself");
         assertEquals(10, GolemDoorRules.scanLimit(20, 10), "the whole path at most");
+        assertEquals(0, GolemDoorRules.scanLimit(0, 0), "a golem that has no point of the path yet scans nothing");
     }
 
     @Test void theDoorOfTheGolemIsWithinTheSquaredDistanceOfTwoAndAQuarter() {

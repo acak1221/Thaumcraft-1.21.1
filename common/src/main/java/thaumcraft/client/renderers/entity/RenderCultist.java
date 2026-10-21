@@ -1,27 +1,28 @@
 package thaumcraft.client.renderers.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
+import thaumcraft.client.fx.FloatyLine;
 import thaumcraft.common.entities.monster.EntityCultistCleric;
 import thaumcraft.common.entities.monster.EntityCultistLeader;
 
 /**
  * Original TC4 RenderCultist: the cultist sheet on the vanilla biped mesh, the leader at
  * 1.25 scale and the ritualist cleric's slow float plus its link line to the ritual target.
- * The original link line was a scrolling wispy.png ribbon drawn by the 1.7 FX engine; the
- * native port draws the same line as a native vertex coloured polyline instead.
+ * The original link line is the scrolling wispy.png ribbon of the 1.7 floaty line helper
+ * (oracle {@code thaumcraft/client/renderers/entity/RenderCultist.java:77}); the native port draws
+ * the same pair of crossed scrolling ribbons.
  */
 public final class RenderCultist<T extends net.minecraft.world.entity.Mob> extends MobRenderer<T, HumanoidModel<T>> {
     private static final ResourceLocation SKIN = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/cultist.png");
+    /** The original texture of the link line. */
+    public static final ResourceLocation WISPY = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/wispy.png");
     /** Original link line colour 0x110011 with the original 0.8 alpha. */
     private static final int LINK_COLOR = 0x110011;
 
@@ -54,37 +55,28 @@ public final class RenderCultist<T extends net.minecraft.world.entity.Mob> exten
     }
 
     /**
-     * Native approximation of the original drawFloatyLine: the same endpoints and the
-     * same tint, drawn as a native polyline instead of a scrolling textured ribbon.
+     * The original link line of the cultist.
+     *
+     * <p>Original RenderCultist.java:77 calls the original floaty line helper with the colour
+     * {@code 0x110011}, the texture {@code textures/misc/wispy.png}, the scroll speed {@code -0.03}, the
+     * draw distance {@code min(ticksExisted, 10) / 10} and the half width {@code 0.25}. The native port
+     * draws the same pair of crossed scrolling ribbons.</p>
      */
     private static void drawLink(net.minecraft.world.entity.Mob cleric, EntityCultistCleric source, float bob, float partial,
                                   PoseStack pose, MultiBufferSource buffers) {
         var target = source.getRitualTarget();
         if (target == null) return;
-        Vec3 start = new Vec3(0, cleric.getBbHeight() * 1.2F, 0);
-        Vec3 end = new Vec3(target.getX() - cleric.getX() + .5D,
-                target.getY() - cleric.getY() + 1.5D - bob,
-                target.getZ() - cleric.getZ() + .5D);
-        Vec3 delta = end.subtract(start);
-        double length = delta.length();
-        if (length < 1.0E-6) return;
-        Vec3 direction = delta.scale(1.0D / length);
-        Vec3 side = direction.cross(new Vec3(0, 1, 0)).normalize();
-        if (side.lengthSqr() < 1.0E-6) side = new Vec3(1, 0, 0);
-        int segments = Math.max(2, (int) Math.min(48, length * 4));
-        VertexConsumer out = buffers.getBuffer(RenderType.lineStrip());
-        double time = System.nanoTime() / 30000000L;
-        for (int i = 0; i <= segments; i++) {
-            Vec3 point = point(start, delta, side, time, i, segments);
-            out.addVertex(pose.last(), (float) point.x, (float) point.y, (float) point.z)
-                    .setColor(LINK_COLOR >> 16 & 255, LINK_COLOR >> 8 & 255, LINK_COLOR & 255, 204)
-                    .setNormal(pose.last(), 0, 1, 0);
-        }
-    }
-
-    private static Vec3 point(Vec3 start, Vec3 delta, Vec3 side, double time, int index, int segments) {
-        float f = index / (float) segments;
-        float wobble = (float) Math.sin(time * .05 + index * .9F) * .25F * (1.0F - Math.abs(f - .5F) * 2.0F);
-        return start.add(delta.scale(f)).add(side.scale(wobble));
+        // The entity renderer draws in the space of its own entity, the original line starts at the
+        // middle of the cleric, one and a half times its height above the floor.
+        double fromX = 0.0D;
+        double fromY = cleric.getBbHeight() * 1.2D;
+        double fromZ = 0.0D;
+        double toX = target.getX() - cleric.getX() + .5D;
+        double toY = target.getY() - cleric.getY() + 1.5D - bob;
+        double toZ = target.getZ() - cleric.getZ() + .5D;
+        float distance = Math.min(cleric.tickCount, 10) / 10F;
+        FloatyLine.draw(pose, buffers, fromX, fromY, fromZ, toX, toY, toZ,
+                cleric.getX() + fromX, cleric.getY() + fromY, cleric.getZ() + fromZ,
+                LINK_COLOR, WISPY, -0.03F, distance, FloatyLine.CULTIST_WIDTH);
     }
 }

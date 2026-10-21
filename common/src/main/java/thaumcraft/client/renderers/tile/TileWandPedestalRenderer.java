@@ -1,17 +1,16 @@
 package thaumcraft.client.renderers.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.client.fx.FloatyLine;
 import thaumcraft.common.tiles.TileWandPedestal;
 
 /**
@@ -22,10 +21,10 @@ import thaumcraft.common.tiles.TileWandPedestal;
  * its own axis and bobs up and down, and the wispy line that connects the
  * pedestal with the node it drains while it works.
  *
- * <p>Deviation: the original wispy line is a 1.7 fixed function beam. The
- * native port draws the same beam with the same {@code wispy.png} texture as a
- * translucent camera facing strip, which keeps the original texture and the
- * original colour but not the original fixed function distortion.
+ * <p>The original wispy line is the 1.7 fixed function helper
+ * {@code UtilsFX.drawFloatyLine} (oracle {@code thaumcraft/client/lib/UtilsFX.java:733-817}): a pair of
+ * crossed textured ribbons that scroll along the line. The native port draws the same ribbons with the
+ * same {@code wispy.png} texture, the same colour and the same numbers.
  */
 public final class TileWandPedestalRenderer implements BlockEntityRenderer<TileWandPedestal> {
     /** The original texture of the drain line. */
@@ -62,52 +61,19 @@ public final class TileWandPedestalRenderer implements BlockEntityRenderer<TileW
     private static void drawBeam(PoseStack pose, MultiBufferSource buffers, TileWandPedestal tile, float bob,
                                  float partialTick, int light, int overlay) {
         var origin = tile.getBlockPos();
-        double fromX = origin.getX() + .5D;
-        double fromY = origin.getY() + 1.65D - bob * 2.0D;
-        double fromZ = origin.getZ() + .5D;
-        double toX = tile.drainX + .5D;
-        double toY = tile.drainY + .5D;
-        double toZ = tile.drainZ + .5D;
-        float length = (float) Math.sqrt((toX - fromX) * (toX - fromX) + (toY - fromY) * (toY - fromY)
-                + (toZ - fromZ) * (toZ - fromZ));
-        if (length <= 0.0F) return;
-        var camera = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-        double dx = camera.x - (fromX + toX) * .5D;
-        double dy = camera.y - (fromY + toY) * .5D;
-        double dz = camera.z - (fromZ + toZ) * .5D;
-        double norm = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (norm < 1.0E-6D) return;
-        dx /= norm;
-        dy /= norm;
-        dz /= norm;
-        // A camera facing strip between the two points.
-        double rx = -dz;
-        double rz = dx;
-        double rl = Math.sqrt(rx * rx + rz * rz);
-        if (rl < 1.0E-6D) {
-            rx = 1.0D;
-            rz = 0.0D;
-            rl = 1.0D;
-        }
-        rx /= rl;
-        rz /= rl;
-        float width = .05F;
-        var out = buffers.getBuffer(RenderType.entityTranslucent(WISPY));
-        int color = tile.drainColor;
-        int red = color >> 16 & 255;
-        int green = color >> 8 & 255;
-        int blue = color & 255;
-        vertex(out, pose, fromX + rx * width, fromY, fromZ + rz * width, 0.0F, 0.0F, red, green, blue, light, overlay);
-        vertex(out, pose, fromX - rx * width, fromY, fromZ - rz * width, 1.0F, 0.0F, red, green, blue, light, overlay);
-        vertex(out, pose, toX - rx * width, toY, toZ - rz * width, 1.0F, 1.0F, red, green, blue, light, overlay);
-        vertex(out, pose, toX + rx * width, toY, toZ + rz * width, 0.0F, 1.0F, red, green, blue, light, overlay);
-    }
-
-    private static void vertex(VertexConsumer out, PoseStack pose, double x, double y, double z, float u, float v,
-                               int red, int green, int blue, int light, int overlay) {
-        out.addVertex(pose.last(), (float) x, (float) y, (float) z)
-                .setColor(red, green, blue, 255)
-                .setUv(u, v).setOverlay(overlay).setLight(light)
-                .setNormal(pose.last(), 0.0F, 1.0F, 0.0F);
+        // The original TileWandPedestalRenderer:52 draws the line from the centre of the pedestal at
+        // the height 1.65 of the block, without the bob of the focus, to the centre of the drained
+        // block. The native block entity renderer draws in the space of its own block, so the two
+        // points of the original are taken relative to that block.
+        double fromX = .5D;
+        double fromY = 1.65D - bob * 2.0D;
+        double fromZ = .5D;
+        double toX = tile.drainX - origin.getX() + .5D;
+        double toY = tile.drainY - origin.getY() + .5D;
+        double toZ = tile.drainZ - origin.getZ() + .5D;
+        float distance = Math.min(tile.getLevel().getGameTime(), 10.0F) / 10.0F;
+        FloatyLine.draw(pose, buffers, fromX, fromY, fromZ, toX, toY, toZ,
+                origin.getX() + fromX, origin.getY() + fromY, origin.getZ() + fromZ,
+                tile.drainColor, WISPY, -0.02F, distance, FloatyLine.DEFAULT_WIDTH);
     }
 }

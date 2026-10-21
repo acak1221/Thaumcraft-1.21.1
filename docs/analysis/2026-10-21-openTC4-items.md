@@ -293,7 +293,7 @@ docs/analysis/2026-10-21-openTC4-items.md                                (это
 ```
 $ export JAVA_HOME=/home/Acak/.jdk21; export PATH=$JAVA_HOME/bin:$PATH
 $ export GRADLE_USER_HOME=/home/Acak/gradle-homes/ocitems
-$ ./gradlew --no-daemon --console=plain :common:test
+$ ./gradlew --no-daemon --console=plain --rerun-tasks :common:test
 ...
 > Task :common:compileJava
 > Task :common:processResources
@@ -303,14 +303,14 @@ $ ./gradlew --no-daemon --console=plain :common:test
 > Task :common:testClasses
 > Task :common:test
 
-BUILD SUCCESSFUL in 39s
-5 actionable tasks: 2 executed, 3 up-to-date
+BUILD SUCCESSFUL in 38s
+5 actionable tasks: 5 executed
 ```
 
-Разбор `common/build/test-results/test/*.xml`:
+Разбор `common/build/test-results/test/*.xml` (240 классов):
 
 ```
-tests 1666 skipped 0 failures 0 errors 0
+classes 240 tests 1666 skipped 0 failures 0 errors 0
 ```
 
 Новые/изменённые тесты:

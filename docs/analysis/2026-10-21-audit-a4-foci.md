@@ -104,18 +104,18 @@
    (`ItemCrimsonSword`). Портовые комментарии это фиксируют как «the native equivalent», но поведение шире.
 
 4. **Ванд-педестал не берёт составные аспекты через блок-фокус.**
-   Оригинал: `oracle thaumcraft/common/tiles/TileWandPedestal.java:238-263` — при блоке-фокусе сверху
+   Оригинал: `oracle thaumcraft/common/tiles/TileWandPedestal.java:224-263` — при блоке-фокусе сверху
    (`hasThingy`) педестал берёт из узла и **примитивные части составного аспекта**, приведённые к примитивам.
    Порт: `native .../tiles/TileWandPedestal.java:103-127` берёт только уже примитивные аспекты; ветки `hasThingy`
    нет.
 
 5. **Дальность луча фокуса Trade фиксирована в 5 блоков.**
-   Оригинал: `oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:120-124` использует
+   Оригинал: `oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:111` использует
    `EntityPlayerMP.field_71134_c.getBlockReachDistance()` (у Forge это 5.0, но значение настраиваемо).
    Порт: `native .../wands/foci/ItemFocusTrade.java:42` и `:57` — жёсткое `player.pick(5, 1, false)`.
 
 6. **Игнорируемые источники урона рунического щита сопоставлены приблизительно.**
-   Оригинал: `oracle thaumcraft/common/lib/events/EventHandlerRunic.java:180` — не действует щит на
+   Оригинал: `oracle thaumcraft/common/lib/events/EventHandlerRunic.java:179-181` — не действует щит на
    `outOfWorld`, `magic`, `starve`, `suffocate`.
    Порт: `native .../lib/runic/RunicShield.java:95-96` — `DROWN` (это suffocate/утопление), `WITHER`
    (в 1.7 «magic» — это общий магический урон, в 1.21 точного аналога нет), `FELL_OUT_OF_WORLD`, `STARVE`.
@@ -128,7 +128,7 @@
    `hemis{frame}`. Текстуры `ripple*.png` в ресурсах при этом лежат.
 
 8. **Оглушение/защита педестала от компаратора не перенесена.**
-   Оригинал: `oracle thaumcraft/common/tiles/TilePedestal.java:186-201` — события 11 и 12 рисуют искры.
+   Оригинал: `oracle thaumcraft/common/tiles/TilePedestal.java:194-211` — события 11 и 12 рисуют искры.
    В 1.21.1 у блок-сущности нет аналога этого события, в нативе его нет.
 
 9. **Блок-стабилизатор инфузии: `Blocks.field_150465_bP` → `AbstractSkullBlock`.**
@@ -179,7 +179,7 @@
 
 `native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalAxe.java:24` утверждает
 «Optional Repair-enchantment self repair is NOT implemented», однако
-`native .../lib/enchantment/EnchantmentRepair.java:241-253` чинит любой предмет, реализующий `IRepairable`,
+`native .../lib/enchantment/EnchantmentRepair.java:28-40` чинит любой предмет, реализующий `IRepairable`,
 а `ItemElementalAxe` его реализует. Поведение в порядке, комментарий вводит в заблуждение.
 
 ## Не перенесено
@@ -190,10 +190,10 @@
 | Рецепт `WANDPEDFOC` (педестал с блоком-фокусом) | `oracle ConfigRecipes.java:342` | нет нативного файла рецепта |
 | Рецепты колпачков из чужого мода (`CAP_silver`, `CAP_copper`) и «особый» модификатор стоимости | `oracle ConfigRecipes.java:331-335`, `oracle thaumcraft/api/wands/WandCap.java:36-45` | аддон-случай оригинала; в порте нет ни самих колпачков, ни `getSpecialCostModifierAspects` в пути цены |
 | Внешний вид надетой пустотной одежды (модель `ModelRobe`) | `oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java` | натив явно помечает слои пустотной брони как «INTERIM» |
-| Клиентские искры элементарных инструментов (кирка/лопата/меч) | `oracle ItemElementalShovel.java:154`, `ItemElementalPickaxe.java`, `ItemElementalSword.java:118-133` | 1.7 `Thaumcraft.proxy.blockSparkle`/`smokeSpiral` не имеют нативного аналога; в порте это объявлено |
-| Скан руды элементарной киркой (клиентский оверлей) | `oracle ItemElementalPickaxe.java:89-90 startScan` | клиентский рендер 1.7, не перенесён |
+| Клиентские искры элементарных инструментов (кирка/лопата/меч) | `oracle ItemElementalShovel.java:158`, `ItemElementalHoe.java:79`, `ItemElementalPickaxe.java`, `ItemElementalSword.java:133` | 1.7 `Thaumcraft.proxy.blockSparkle`/`smokeSpiral` не имеют нативного аналога; в порте это объявлено |
+| Скан руды элементарной киркой (клиентский оверлей) | `oracle ItemElementalPickaxe.java:89 startScan` | клиентский рендер 1.7, не перенесён |
 | «Ripple»-кадры рунического щита для мобов | `oracle thaumcraft/client/fx/other/FXShieldRunes.java:79-84` | ветка заменена на `hemis` для всех целей |
-| Сетка-компаратор педестала (события 11/12) | `oracle thaumcraft/common/tiles/TilePedestal.java:186-201` | в 1.21.1 у блок-сущности нет такого события |
+| Сетка-компаратор педестала (события 11/12) | `oracle thaumcraft/common/tiles/TilePedestal.java:194-211` | в 1.21.1 у блок-сущности нет такого события |
 
 ## Что НЕ удалось проверить
 

@@ -25,7 +25,7 @@
     "evidence": [
       "oracle thaumcraft/api/IRepairableExtended.java:16 boolean doRepair(ItemStack, EntityPlayer, int)",
       "native common/src/main/java/thaumcraft/api/IRepairableExtended.java:8 boolean doRepair(ItemStack, Player, int)",
-      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentRepair.java:248 calls doRepair before the vis payment"
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentRepair.java:35 calls doRepair before the vis payment"
     ],
     "notes": [
       "Forced 1.21.1 change: EntityPlayer became Player; the call order (hook first, then vis payment) is preserved."
@@ -102,8 +102,8 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/api/crafting/InfusionEnchantmentRecipe.java:167 constructor, recipeXP = max(1, getMinCost(1)/3)",
-      "native common/src/main/java/thaumcraft/api/crafting/InfusionEnchantmentRecipe.java:166 recipeXP = max(1, getMinCost(1)/3)",
+      "oracle thaumcraft/api/crafting/InfusionEnchantmentRecipe.java:34-40 constructor and recipeXP = max(1, getMinCost(1)/3)",
+      "native common/src/main/java/thaumcraft/api/crafting/InfusionEnchantmentRecipe.java:43 recipeXP = max(1, getMinCost(1)/3)",
       "native common/src/main/java/thaumcraft/common/crafting/InfusionEnchantmentRecipe.java is the real recipe the api view delegates to"
     ],
     "notes": [
@@ -246,10 +246,10 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/client/gui/GuiFocusPouch.java:176-177 the 175x232 gui",
-      "native common/src/main/java/thaumcraft/client/gui/GuiFocusPouch.java:88 the 175x232 gui",
-      "oracle thaumcraft/client/gui/GuiFocusPouch.java:185 the locked hotbar marker",
-      "native common/src/main/java/thaumcraft/client/gui/GuiFocusPouch.java:90 the locked hotbar marker"
+      "oracle thaumcraft/client/gui/GuiFocusPouch.java:33-34 the 175x232 gui",
+      "native common/src/main/java/thaumcraft/client/gui/GuiFocusPouch.java:13 the 175x232 gui",
+      "oracle thaumcraft/client/gui/GuiFocusPouch.java:41 the locked hotbar marker",
+      "native common/src/main/java/thaumcraft/client/gui/GuiFocusPouch.java:15 the locked hotbar marker"
     ],
     "notes": [
       "The 1.7 GuiContainer became a native AbstractContainerScreen; the art size and the locked slot marker are unchanged."
@@ -339,7 +339,7 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/client/renderers/tile/TileRunicMatrixRenderer.java:33 renders the infusion matrix and its halo",
+      "oracle thaumcraft/client/renderers/tile/TileRunicMatrixRenderer.java:36 renders the infusion matrix and its halo",
       "native common/src/main/java/thaumcraft/client/renderers/tile/TileInfusionMatrixRenderer.java:72 renders the halo when the matrix crafts",
       "native common/src/main/java/thaumcraft/client/renderers/tile/TileInfusionMatrixRenderer.java:24 the retained infuser.png texture"
     ],
@@ -450,9 +450,9 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/container/ContainerFocusPouch.java:143 the eighteen focus slots at 37+slot%6*18, 51+slot/6*18",
+      "oracle thaumcraft/common/container/ContainerFocusPouch.java:47 the eighteen focus slots at 37+slot%6*18, 51+slot/6*18",
       "native common/src/main/java/thaumcraft/common/container/ContainerFocusPouch.java:37 the same eighteen slot coordinates",
-      "oracle thaumcraft/common/container/ContainerFocusPouch.java:162 the player inventory rows at 8+column*18, 151+row*18",
+      "oracle thaumcraft/common/container/ContainerFocusPouch.java:61-63 the player inventory rows at 8+column*18, 151+row*18",
       "native common/src/main/java/thaumcraft/common/container/ContainerFocusPouch.java:40 the same player inventory coordinates"
     ],
     "notes": [
@@ -471,8 +471,8 @@
     "native_coverage": "parity_verified",
     "evidence": [
       "oracle thaumcraft/common/container/InventoryFocusPouch.java:18 an eighteen slot inventory with an ItemFocusBasic filter",
-      "native common/src/main/java/thaumcraft/common/container/InventoryFocusPouch.java:103 an eighteen slot SimpleContainer with the same filter",
-      "native common/src/main/java/thaumcraft/common/container/InventoryFocusPouch.java:112 canPlaceItem requires an ItemFocusBasic"
+      "native common/src/main/java/thaumcraft/common/container/InventoryFocusPouch.java:11 an eighteen slot SimpleContainer with the same filter",
+      "native common/src/main/java/thaumcraft/common/container/InventoryFocusPouch.java:20 canPlaceItem requires an ItemFocusBasic"
     ],
     "notes": [
       "Forced 1.21.1 change: the 1.7 IInventory became a native SimpleContainer; the eighteen slots, the focus only filter and the max stack size one are preserved."
@@ -506,9 +506,9 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/armor/ItemBootsTraveller.java:44 the 350 durability",
+      "oracle thaumcraft/common/items/armor/ItemBootsTraveller.java:42 the 350 durability",
       "native common/src/main/java/thaumcraft/common/items/armor/ItemBootsTraveller.java:14 durability(350), rarity rare",
-      "oracle thaumcraft/common/items/armor/ItemBootsTraveller.java:76-86 the step height 1.0, the 0.055 ground bonus and the 0.03/0.05 air bonus",
+      "oracle thaumcraft/common/items/armor/ItemBootsTraveller.java:75-88 the step height 1.0, the 0.055 ground bonus and the 0.03/0.05 air bonus",
       "native common/src/main/java/thaumcraft/common/items/armor/TravelGearRules.java:8-10 the same numbers"
     ],
     "notes": [
@@ -526,10 +526,10 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/armor/ItemFortressArmor.java:154-172 the special armour ratios armor/25, armor/35 (magic) and armor/20 (fire/explosion) and the set multiplier 0.875+0.125 per piece+0.05 per mask",
+      "oracle thaumcraft/common/items/armor/ItemFortressArmor.java:144-172 the special armour ratios armor/25, armor/35 (magic) and armor/20 (fire/explosion) and the set multiplier 0.875+0.125 per piece+0.05 per mask",
       "native common/src/main/java/thaumcraft/common/items/armor/FortressRules.java:6 SET_BASE 0.875, SET_PER_PIECE 0.125, SET_PER_MASK 0.05",
       "native common/src/main/java/thaumcraft/common/lib/MagicWard.java:27-30 DIVISOR 35 and FIRE_DIVISOR 20",
-      "oracle thaumcraft/common/items/armor/ItemFortressArmor.java:122-135 the goggles and mask NBT",
+      "oracle thaumcraft/common/items/armor/ItemFortressArmor.java:125-132 the goggles and mask NBT",
       "native common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:110 FORTRESS_GOGGLES and FORTRESS_MASK components"
     ],
     "notes": [
@@ -548,9 +548,9 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/armor/ItemGoggles.java:48 the 350 durability",
+      "oracle thaumcraft/common/items/armor/ItemGoggles.java:55 the 350 durability",
       "native common/src/main/java/thaumcraft/common/items/armor/ItemGoggles.java:24 durability(350), rarity rare",
-      "oracle thaumcraft/common/items/armor/ItemGoggles.java:97 the 5 percent vis discount",
+      "oracle thaumcraft/common/items/armor/ItemGoggles.java:92 the 5 percent vis discount",
       "native common/src/main/java/thaumcraft/common/items/armor/ItemGoggles.java:28 the 5 percent vis discount"
     ],
     "notes": [
@@ -588,11 +588,11 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:97 the default colour 6961280 (0x6A3880)",
+      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:102 the default colour 6961280 (0x6A3880)",
       "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:28 DEFAULT_COLOR 0x6A3880",
-      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:139 the 1 percent (boots) and 2 percent vis discount",
+      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:148 the 1 percent (boots) and 2 percent vis discount",
       "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:42 the same discount",
-      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:154-160 the water cauldron wash",
+      "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:156-163 the water cauldron wash",
       "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:83 the same wash"
     ],
     "notes": [
@@ -632,8 +632,8 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/armor/ItemVoidArmor.java:168-180 the self repair (once per inventory tick and once per worn tick) and the one warp",
-      "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidArmor.java:47-52 the same repair and warp",
+      "oracle thaumcraft/common/items/armor/ItemVoidArmor.java:88-105 the self repair (once per inventory tick and once per worn tick) and the one warp",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidArmor.java:27-32 the same repair and warp",
       "native common/src/main/java/thaumcraft/common/items/VoidMetal.java:36-39 armorTick repairs a worn piece twice"
     ],
     "notes": [
@@ -653,7 +653,7 @@
     "evidence": [
       "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the void thaumaturge hood, robe and leggings",
       "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes",
-      "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java:28 the 5 percent discount, two warp, the 0x6A3880 default colour",
+      "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java:39 the 5 percent discount, two warp and the durability factor 10",
       "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the armour texture of the void robes"
     ],
     "notes": [
@@ -731,7 +731,7 @@
     "evidence": [
       "oracle thaumcraft/common/items/baubles/ItemAmuletVis.java:143 the capacities 25000 (metadata 1) and 2500 (metadata 0) centivis",
       "native common/src/main/java/thaumcraft/common/items/baubles/ItemAmuletVis.java:26 the same capacities",
-      "oracle thaumcraft/common/items/baubles/ItemAmuletVis.java:99-105 the transfer of at most five vis every fifth tick",
+      "oracle thaumcraft/common/items/baubles/ItemAmuletVis.java:101-106 the transfer of at most five vis every fifth tick",
       "native common/src/main/java/thaumcraft/common/items/baubles/ItemAmuletVis.java:58-69 the same transfer"
     ],
     "notes": [
@@ -787,9 +787,9 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/baubles/ItemGirdleRunic.java:66 the runic charge 10 (metadata 0) and 9 (kinetic)",
+      "oracle thaumcraft/common/items/baubles/ItemGirdleRunic.java:74 the runic charge 10 (metadata 0) and 9 (kinetic)",
       "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the girdle charges 10 and 9",
-      "oracle thaumcraft/common/items/baubles/ItemGirdleRunic.java:73 the belt bauble slot",
+      "oracle thaumcraft/common/items/baubles/ItemGirdleRunic.java:78 the belt bauble slot",
       "native common/src/main/java/thaumcraft/common/items/baubles/ItemGirdleRunic.java:30 BaubleType.BELT"
     ],
     "notes": [
@@ -809,7 +809,7 @@
     "evidence": [
       "oracle thaumcraft/common/items/baubles/ItemRingRunic.java:94 the runic charge 1 (lesser), 5 (runic) and 4 (charged and healing)",
       "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the ring charges 1, 5, 4, 4",
-      "oracle thaumcraft/common/items/baubles/ItemRingRunic.java:78 the uncommon rarity of the lesser ring only",
+      "oracle thaumcraft/common/items/baubles/ItemRingRunic.java:61-62 the uncommon rarity of the lesser ring only",
       "native common/src/main/java/thaumcraft/common/lib/baubles/RunicBaubleRules.java the same rarity table"
     ],
     "notes": [
@@ -827,7 +827,7 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/equipment/ItemBowBone.java:52 the 512 durability and the stack size 1",
+      "oracle thaumcraft/common/items/equipment/ItemBowBone.java:56 the 512 durability and the stack size 1",
       "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:26-48 the 512 uses, the enchantability 3, the draw divisor 10, the eighteen tick release and the arrow speed 2.5",
       "oracle thaumcraft/common/items/equipment/ItemBowBone.java:79-91 the power formula and the arrow damage 2.5 plus the power bonus",
       "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:70-82 the same formula"
@@ -849,10 +849,10 @@
     "evidence": [
       "oracle thaumcraft/common/items/equipment/ItemCrimsonSword.java:54 the CVOID material 4/200/8.0/3.5/20",
       "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:104-121 the same material and the 7.5 attack damage",
-      "oracle thaumcraft/common/items/equipment/ItemCrimsonSword.java:92-96 the sap (weakness 60, hunger 120) and the pvp exemption",
+      "oracle thaumcraft/common/items/equipment/ItemCrimsonSword.java:88-91 the sap (weakness 60, hunger 120) and the pvp exemption",
       "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:126-139 the same rules",
       "oracle thaumcraft/common/items/equipment/ItemCrimsonSword.java:81-85 the self repair every twenty ticks and the two warp",
-      "native common/src/main/java/thaumcraft/common/items/equipment/ItemCrimsonSword.java:35-46 the same repair and warp"
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemCrimsonSword.java:50-58 the same repair and warp"
     ],
     "notes": [
       "The 1.7 ItemSword became a native SwordItem; the material, the damage, the sap, the self repair, the warp and the rarity are the original's."
@@ -890,8 +890,8 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/equipment/ItemElementalHoe.java:87-122 the 3 x 3 tilling, the bone meal and the sapling growth",
-      "native common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java:12-26 the same numbers (one use for the bone meal, 20/5 and 150/25 for the saplings)",
+      "oracle thaumcraft/common/items/equipment/ItemElementalHoe.java:71-111 the 3 x 3 tilling, the bone meal and the sapling growth",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ElementalHoeRules.java:12-23 the same numbers (one use for the bone meal, 20/5 and 150/25 for the saplings)",
       "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalHoe.java:53-88 the same behaviour"
     ],
     "notes": [
@@ -953,7 +953,7 @@
     "evidence": [
       "oracle thaumcraft/common/items/equipment/ItemElementalSword.java:98-121 the lift (0.08 per tick, the 0.5 ceiling and the 0.2 reset), the 1.2 fall damping and the 2.5 block push",
       "native common/src/main/java/thaumcraft/common/items/equipment/ElementalSwordRules.java:12-22 the same numbers",
-      "oracle thaumcraft/common/items/equipment/ItemElementalSword.java:136-138 one point of wear every twentieth tick",
+      "oracle thaumcraft/common/items/equipment/ItemElementalSword.java:144-146 one point of wear every twentieth tick",
       "native common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java:65-68 the same wear and sound"
     ],
     "notes": [
@@ -972,8 +972,8 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/equipment/ItemPrimalArrow.java:31-40 the six metadata arrows",
-      "native common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalArrow.java:35-55 the six native arrow items and the arrow creation hook",
+      "oracle thaumcraft/common/items/equipment/ItemPrimalArrow.java:29-34 the six metadata arrows",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalArrow.java:26-45 the six native arrow items and the arrow creation hook",
       "oracle thaumcraft/common/entities/projectile/EntityPrimalArrow.java:355-367 the damage 2.1, the earth factor 1.5 and the weak factor 0.8",
       "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:222-228 the same damage factors"
     ],
@@ -992,7 +992,7 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/equipment/ItemPrimalCrusher.java:111-150 the eight neighbours in the plane across the looked at face and one use per neighbour",
+      "oracle thaumcraft/common/items/equipment/ItemPrimalCrusher.java:117-150 the eight neighbours in the plane across the looked at face and one use per neighbour",
       "native common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalCrusher.java:58-92 the same neighbour harvest",
       "oracle thaumcraft/common/items/equipment/ItemPrimalCrusher.java:151-159 the enchantability 20 and the two warp",
       "native common/src/main/java/thaumcraft/common/items/equipment/ItemPrimalCrusher.java the same enchantability and warp"
@@ -1107,7 +1107,7 @@
     "native_coverage": "parity_verified",
     "evidence": [
       "oracle thaumcraft/common/items/equipment/ItemVoidAxe.java:85-89 the wither of 80 ticks on a left click",
-      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidAxe.java:33 the wither through VoidMetal.wither",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidAxe.java:30 the wither through VoidMetal.wither",
       "native common/src/main/java/thaumcraft/common/items/VoidMetal.java:17 TOOL_WITHER 80 and the self repair every 20 ticks"
     ],
     "notes": [
@@ -1126,7 +1126,7 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/equipment/ItemVoidHoe.java:35 the enchantability 5 and the wither of 80 ticks",
+      "oracle thaumcraft/common/items/equipment/ItemVoidHoe.java:64 the enchantability 5 and ItemVoidHoe.java:85 the wither of 80 ticks",
       "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidHoe.java the enchantability 5 and the wither"
     ],
     "notes": [
@@ -1145,7 +1145,7 @@
     "native_coverage": "parity_verified",
     "evidence": [
       "oracle thaumcraft/common/items/equipment/ItemVoidPickaxe.java:85-89 the wither of 80 ticks on a left click",
-      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidPickaxe.java:33 the wither through VoidMetal.wither"
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidPickaxe.java:30 the wither through VoidMetal.wither"
     ],
     "notes": [
       "The legacy additive damage (pickaxe 2 + material 3), the self repair and the one warp are preserved."
@@ -1163,7 +1163,7 @@
     "native_coverage": "parity_verified",
     "evidence": [
       "oracle thaumcraft/common/items/equipment/ItemVoidShovel.java:85-89 the wither of 80 ticks on a left click",
-      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidShovel.java:33 the wither through VoidMetal.wither"
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidShovel.java:30 the wither through VoidMetal.wither"
     ],
     "notes": [
       "The legacy additive damage (shovel 1 + material 3), the self repair and the one warp are preserved."
@@ -1181,7 +1181,7 @@
     "native_coverage": "parity_verified",
     "evidence": [
       "oracle thaumcraft/common/items/equipment/ItemVoidSword.java:88-92 the wither of 60 ticks on a hit",
-      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidSword.java:26 the wither through VoidMetal.wither",
+      "native common/src/main/java/thaumcraft/common/items/equipment/ItemVoidSword.java:31 the wither through VoidMetal.wither",
       "native common/src/main/java/thaumcraft/common/items/VoidMetal.java:17 SWORD_WITHER 60"
     ],
     "notes": [
@@ -1238,7 +1238,7 @@
     "native_coverage": "parity_verified",
     "evidence": [
       "oracle thaumcraft/common/items/wands/ItemFocusPouchBauble.java:21 BaubleType.BELT",
-      "native common/src/main/java/thaumcraft/common/items/wands/ItemFocusPouchBauble.java:74 BaubleType.BELT"
+      "native common/src/main/java/thaumcraft/common/items/wands/ItemFocusPouchBauble.java:10 BaubleType.BELT"
     ],
     "notes": [
       "The native class keeps the original name and the belt slot; the empty bauble hooks are inherited from the native IBauble."
@@ -1417,11 +1417,11 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:70-104 the vis costs (earth 15, the silk and dowsing surcharges)",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:64-84 the vis costs (earth 15, the silk and dowsing surcharges)",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:56-63 the same costs",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:172-186 the break speeds 0.05+potency*0.1, 0.25+potency*0.25 and the obsidian triple",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:176-184 the break speeds 0.05+potency*0.1, 0.25+potency*0.25 and the obsidian triple",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:155-157 the same speeds",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:246-257 the upgrade tables per rank",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:244-256 the upgrade tables per rank",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:69-76 the same tables"
     ],
     "notes": [
@@ -1463,9 +1463,9 @@
     "evidence": [
       "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:38-40 the vis costs (water 5 + fire 2 + entropy 2, the scatter and the boulder surcharges)",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFrost.java:30-38 the same costs",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:86-88 the cooldowns 200 and 500",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:102-104 the cooldowns 200 and 500",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFrost.java:39-41 the same cooldowns",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:48-67 the shard count and damage",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusFrost.java:66-81 the shard count and damage",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFrost.java:92-99 the same numbers"
     ],
     "notes": [
@@ -1482,11 +1482,11 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:47-49 the vis costs (fire 200 + entropy 100 + air 100 and the bomb and devil branches)",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:49-51 the vis costs (fire 200 + entropy 100 + air 100 and the bomb and devil branches)",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:42-49 the same costs",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:154 the 1000 millisecond cooldown",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:145-147 the 1000 millisecond cooldown",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:41 the same cooldown",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:165-166 the VAMPBAT research gate on the vampire upgrade",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:172-174 the VAMPBAT research gate on the vampire upgrade",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusHellbat.java:63 the same research gate"
     ],
     "notes": [
@@ -1504,11 +1504,11 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:41 the vis cost (entropy 10 + air 10)",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:47 the vis cost (entropy 10 + air 10)",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:40 the same cost",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:117-118 the reach 33 + 8 per enlarge and the duration 120 + 60 per extend",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:111 the reach 33 + 8 per enlarge and ItemFocusPortableHole.java:145 the duration 120 + 60 per extend",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java:11-13 the same numbers",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:127-131 the price per depth and the chain length",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPortableHole.java:139-147 the price per depth and the chain length",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/PortableHoleRules.java:27-30 the same price and length"
     ],
     "notes": [
@@ -1526,9 +1526,9 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:96-98 the six clocked costs 50 + random(5)*50",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:89-90 the six clocked costs 50 + random(5)*50",
       "native common/src/main/java/thaumcraft/common/lib/primal/PrimalFocusRules.java:10-14 the same clock",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:84 the 500 millisecond cooldown",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:65-67 the 500 millisecond cooldown",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusPrimal.java:33 the same cooldown"
     ],
     "notes": [
@@ -1547,11 +1547,11 @@
     "evidence": [
       "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:59-61 the vis costs (air 25, air 40 + water 10, air 75 + earth 25)",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:44-50 the same costs",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:105-107 the cooldowns 250, 500 and 1000",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:90-92 the cooldowns 250, 500 and 1000",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:51-53 the same cooldowns",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:136-137 the orb area 4 + enlarge*2 and the damage 5 + potency*1.33",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:127-128 the orb area 4 + enlarge*2 and the damage 5 + potency*1.33",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:95-96 the same numbers",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:186-192 the chain damage (4 or 6) + potency and the 4 + potency chain hits",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:181-183 the chain damage (4 or 6) + potency and the 4 + potency chain hits",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java:158-184 the same numbers"
     ],
     "notes": [
@@ -1569,7 +1569,7 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:53 the vis cost (entropy 5 + earth 5 + order 5, the silk surcharge)",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:61 the vis cost (entropy 5 + earth 5 + order 5, the silk surcharge)",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java:23-29 the same cost",
       "oracle thaumcraft/common/items/wands/foci/ItemFocusTrade.java:239 the area size 3 + enlarge*2",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusTrade.java:38 the same area",
@@ -1591,12 +1591,12 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:48 the vis cost (earth 25 + order 25 + water 10)",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:58 the vis cost (earth 25 + order 25 + water 10)",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusWarding.java:20-22 the same cost",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:170-173 the area size 3 + enlarge and the enlarge requires architect",
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:183-193 the area size 3 + enlarge and the enlarge requires architect",
       "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusWarding.java:34-37 the same rules",
-      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:99-100 the 500 millisecond coordinate retry fence",
-      "native common/src/main/java/thaumcraft/common/items/wands/foci/WardingRules.java:51 RETRY_TICKS 10 (half a second)"
+      "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:115-118 the 500 millisecond coordinate retry fence",
+      "native common/src/main/java/thaumcraft/common/items/wands/foci/WardingRules.java:5 RETRY_TICKS 10 (half a second)"
     ],
     "notes": [
       "The original's owner undo, the light value and the warded block metadata moved into the native WardingCasts."
@@ -1613,7 +1613,7 @@
     "native_coverage": "parity_verified",
     "evidence": [
       "oracle thaumcraft/common/lib/crafting/InfusionRunicAugmentRecipe.java:113-119 the price (int)(32 * 2^charge), the aspects ARMOR/MAGIC/ENERGY and the instability 5 + charge/2",
-      "native common/src/main/java/thaumcraft/common/lib/runic/RunicRules.java:40-48 the same price, aspects and instability",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicRules.java:9-17 the same price, aspects and instability",
       "native common/src/main/java/thaumcraft/common/crafting/InfusionRunicAugmentRecipe.java:39-54 the same components and cost",
       "oracle thaumcraft/common/lib/crafting/InfusionRunicAugmentRecipe.java:96-100 the hardening byte output",
       "native common/src/main/java/thaumcraft/common/lib/runic/RunicArmor.java augment() writes the hardening component"
@@ -1680,7 +1680,7 @@
       "oracle thaumcraft/common/lib/enchantment/EnchantmentPotency.java:25-35 the cost 10 + 11*(level-1) and the maximum level 3",
       "native common/src/main/java/thaumcraft/common/lib/enchantment/WandEnchantmentRules.java:32-35 the same numbers",
       "oracle thaumcraft/common/lib/enchantment/EnchantmentPotency.java:37-39 the applicability (a focus that accepts it, or a book)",
-      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentPotency.java:114-116 only the book branch"
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentPotency.java:49-51 only the book branch"
     ],
     "notes": [
       "Forced 1.21.1 change: a datapack record with a tag.",
@@ -1701,7 +1701,7 @@
       "oracle thaumcraft/common/lib/enchantment/EnchantmentRepair.java:31-39 the cost 20 + 10*(level-1) and the maximum level 2",
       "native common/src/main/java/thaumcraft/common/lib/enchantment/EquipmentEnchantmentRules.java the repair cost and level rules",
       "oracle thaumcraft/common/lib/enchantment/EnchantmentRepair.java:45-47 the applicability (a damageable IRepairable item, or a book)",
-      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentRepair.java:241-253 the same repair path"
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentRepair.java:28-40 the same repair path"
     ],
     "notes": [
       "Forced 1.21.1 change: a datapack record with a tag; the numeric enchantment id became a holder.",
@@ -1722,7 +1722,7 @@
       "oracle thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java:25-35 the cost 15 + 9*(level-1) and the maximum level 3",
       "native common/src/main/java/thaumcraft/common/lib/enchantment/WandEnchantmentRules.java:35-36 the same numbers",
       "oracle thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java:37-39 the applicability (a focus that accepts it, or a book)",
-      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java:178-180 only the book branch"
+      "native common/src/main/java/thaumcraft/common/lib/enchantment/EnchantmentWandFortune.java:52-54 only the book branch"
     ],
     "notes": [
       "Forced 1.21.1 change: a datapack record with a tag; the registry name is the original 'wandfortune'.",
@@ -1740,11 +1740,11 @@
     "callsite_audit": "complete",
     "native_coverage": "parity_verified",
     "evidence": [
-      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:77-145 the runic charge, the 40 tick refresh and the recharge",
+      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:74-145 the runic charge, the 40 tick refresh and the recharge",
       "native common/src/main/java/thaumcraft/common/lib/runic/RunicShield.java:56-92 the same state machine",
-      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:154-157 the interval shieldRecharge - charged*500",
-      "native common/src/main/java/thaumcraft/common/lib/runic/RunicRules.java:53 the same interval",
-      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:203-222 the kinetic (1.5+kinetic*0.5), the healing (240 ticks) and the emergency (8*emergency) upgrades with the 20/20/60 second cooldowns",
+      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:154-156 the interval shieldRecharge - charged*500",
+      "native common/src/main/java/thaumcraft/common/lib/runic/RunicRules.java:22 the same interval",
+      "oracle thaumcraft/common/lib/events/EventHandlerRunic.java:202-225 the kinetic (1.5+kinetic*0.5), the healing (240 ticks) and the emergency (8*emergency) upgrades with the 20/20/60 second cooldowns",
       "native common/src/main/java/thaumcraft/common/lib/runic/RunicShield.java:108-121 the same upgrades and cooldowns",
       "oracle thaumcraft/common/config/Config.java:843-845 the defaults 2000/80/50",
       "native common/src/main/java/thaumcraft/common/lib/runic/RunicSettings.java:12 the same defaults and clamps"
@@ -1826,7 +1826,7 @@
     "evidence": [
       "oracle thaumcraft/common/lib/network/playerdata/PacketRunicCharge.java the charge/maximum pair to the owning player",
       "native common/src/main/java/thaumcraft/common/lib/network/RunicChargePayload.java:9 the native payload",
-      "native common/src/main/java/thaumcraft/client/ThaumcraftRunicClient.java:68-85 the ten icon hud bar"
+      "native common/src/main/java/thaumcraft/client/ThaumcraftRunicClient.java:53-71 the ten icon hud bar"
     ],
     "notes": [
       "Forced 1.21.1 change: a CustomPacketPayload; the original's two shorts became two ints and the hud bar is unchanged."
@@ -1869,7 +1869,7 @@
       "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java:216-237 the same tick",
       "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:349 the instability roll nextInt(500) <= instability",
       "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java:251 the same roll",
-      "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:352-394 the 21 outcome table and the hazard events",
+      "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:350-394 the 21 outcome table and the hazard events",
       "native common/src/main/java/thaumcraft/common/lib/infusion/InfusionInstability.java the same 21 outcomes",
       "oracle thaumcraft/common/tiles/TileInfusionMatrix.java:455-471 the essentia drain and the instability growth (100 - recipeInstability*3, 50 - recipeInstability*2, the cap 25)",
       "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java:285-286 and :328-329 the same rolls",
@@ -1916,7 +1916,7 @@
       "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:60-66 the same clamp",
       "oracle thaumcraft/common/tiles/TilePedestal.java:93-100 the infusion setter keeps the whole stack",
       "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:68-72 the same behaviour",
-      "oracle thaumcraft/common/tiles/TilePedestal.java:199 the 64 block use range",
+      "oracle thaumcraft/common/tiles/TilePedestal.java:168-170 the 64 block use range",
       "native common/src/main/java/thaumcraft/common/tiles/TilePedestal.java:84 the same range"
     ],
     "notes": [
@@ -1937,8 +1937,8 @@
     "evidence": [
       "oracle thaumcraft/common/tiles/TileWandPedestal.java:194-211 the draw every fifth tick and the one vis reserve",
       "native common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java:94-97 and :103-127 the same draw",
-      "oracle thaumcraft/common/tiles/TileWandPedestal.java:199 the iron cap and the wooden rod keep no reserve",
-      "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:243 the same rule",
+      "oracle thaumcraft/common/tiles/TileWandPedestal.java:201-203 the iron cap and the wooden rod keep no reserve",
+      "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:263 the same rule",
       "oracle thaumcraft/common/tiles/TileWandPedestal.java:298-310 the node search over plus and minus eight blocks",
       "native common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java:155-160 the same search"
     ],

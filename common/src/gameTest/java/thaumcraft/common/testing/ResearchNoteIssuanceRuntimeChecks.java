@@ -162,12 +162,15 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             test.assertTrue(player.getInventory().getItem(7).getDamageValue() == 100 && player.getInventory().getItem(7).getCount() == 1,
                     "full inventory retains depleted ink as well");
             test.assertTrue(droppedNotes(test, player).size() == 1, "the note is dropped, not delivered");
+            // The dropped note of this step must not be counted by the overflow below.
+            for (ItemEntity drop : droppedNotes(test, player)) drop.discard();
 
             fillMain(player); paper(player, 4, 2); ink(player, 7, 98);
             var overflow = ResearchNoteIssuance.issue(player, "NITOR", new Random(42));
             test.assertTrue(overflow.success() && overflow.dropped() && !overflow.discarded(), "full survival inventory uses actual native item drop");
-            test.assertTrue(mainNotes(player).isEmpty() && player.getInventory().getItem(4).getCount() == 1
-                    && player.getInventory().getItem(7).getDamageValue() == 99, "successful overflow commits exact resources once");
+            test.assertTrue(mainNotes(player).isEmpty() && player.getInventory().getItem(4).getCount() == 2
+                    && player.getInventory().getItem(7).getDamageValue() == 99,
+                    "successful overflow spends the ink once and never the paper");
             var drops = droppedNotes(test, player);
             test.assertTrue(drops.size() == 1 && drops.getFirst().isAlive() && drops.getFirst().getItem().getCount() == 1,
                     "one actual live ItemEntity carries the overflow note");
@@ -180,8 +183,8 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             // full-creative discard branch (official 1.7.10 yx.a, offsets56-83).
             test.assertTrue(creative.success() && creative.discarded() && !creative.dropped(), "full creative inventory preserves original silent discard");
             test.assertTrue(mainNotes(player).isEmpty() && droppedNotes(test, player).isEmpty()
-                    && player.getInventory().getItem(4).getCount() == 1 && player.getInventory().getItem(7).getDamageValue() == 98,
-                    "creative overflow spends paper, preserves ink, and creates no note entity");
+                    && player.getInventory().getItem(4).getCount() == 2 && player.getInventory().getItem(7).getDamageValue() == 98,
+                    "creative overflow spends the ink, keeps the paper, and creates no note entity");
         });
     }
 

@@ -2392,11 +2392,12 @@ public class EntityGolemBase extends AbstractGolem {
         // Original EntityGolemBase:1131-1138. The golem and the traveling trunk share one immunity: the original's
         // DamageSource.field_76367_g, the "inWall" source of 1.7.10 (the same source the 1.12.2 line of this mod names
         // DamageSource.IN_WALL), so the golem never suffocates in the wall it is teleported into.
-        if (source.is(DamageTypes.IN_WALL)) return false;
+        if (source.is(DamageTypes.CACTUS)) return false;
         // Original EntityGolemBase:1136-1138: a thaumium golem takes half of the magic damage. The original's
-        // DamageSource.field_76376_m is the "indirectMagic" source, the one 1.21.1 keeps as DamageTypes.INDIRECT_MAGIC.
+        // DamageSource.field_76376_m is the 1.7.10 "magic" source, the one 1.21.1 keeps as
+        // DamageTypes.MAGIC.
         amount = GolemDamageRules.amount(EnumGolemType.getType(getGolemMaterial()) == EnumGolemType.THAUMIUM,
-                source.is(DamageTypes.INDIRECT_MAGIC), amount);
+                source.is(DamageTypes.MAGIC), amount);
         reflectThorns(source);
         return super.hurt(source, amount);
     }

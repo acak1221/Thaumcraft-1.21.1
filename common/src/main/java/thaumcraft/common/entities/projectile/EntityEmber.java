@@ -142,12 +142,14 @@ public final class EntityEmber extends ThrowableProjectile {
                 var source = new DamageSource(registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
                         .getHolderOrThrow(DamageTypes.FIREBALL), this, getOwner());
                 if (!target.fireImmune() && target.hurt(source, damage)) target.igniteForSeconds(getFireSeconds());
-            } else if (hit instanceof BlockHitResult blockHit && random.nextFloat() < .025F * firey) {
+            } else if (hit instanceof BlockHitResult blockHit) {
+                if (random.nextFloat() < .025F * firey) {
                 var pos = blockHit.getBlockPos().relative(blockHit.getDirection());
                 // TC4 EntityEmber:96-127: upgrade-level chance, AIR ONLY, raw
                 // normal fire, flags2. No mobGriefing, mayInteract, doFireTick,
                 // flammability or invented friendly/PVP permission bypass.
                 if (level().isEmptyBlock(pos)) level().setBlock(pos, Blocks.FIRE.defaultBlockState(), Block.UPDATE_CLIENTS);
+                }
             }
         }
         discard();

@@ -15,8 +15,8 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -197,6 +197,10 @@ public final class EmberRuntimeChecks {
     }
 
     private static void combat(GameTestHelper test, ServerPlayer player, BlockPos pos, List<EntityEmber> shots, List<Mob> targets) {
+        // The owner must not stand in the flight path of the ember, or the projectile takes the
+        // owner instead of the cow.
+        player.setPos(Vec3.atCenterOf(pos).add(3, 2, 3));
+        player.setDeltaMovement(Vec3.ZERO);
         Vec3 targetPosition = Vec3.atCenterOf(pos).add(1, -.5, 0);
         Cow cow = target(test, player, EntityType.COW, targetPosition, targets);
         EntityEmber expired = spawn(test, player, targetPosition.add(-2, .7, 0), new Vec3(3, 0, 0), shots);

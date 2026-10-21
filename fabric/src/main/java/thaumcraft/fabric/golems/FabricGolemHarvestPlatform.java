@@ -32,6 +32,13 @@ public final class FabricGolemHarvestPlatform implements GolemHarvestPlatform.Br
                 && actor.getGameProfile().getId().equals(GolemHarvestPlatform.MACHINE_UUID)
                 && actor.getGameProfile().getName().equals(GolemHarvestPlatform.MACHINE_NAME);
     }
+    @Override public boolean sharedBreak(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state) {
+        bound(level, actor);
+        // Fabric has no native counterpart of the shared Architectury break event,
+        // so the loader delivers it here, exactly once.
+        return !dev.architectury.event.events.common.BlockEvent.BREAK.invoker()
+                .breakBlock(level, pos, state, actor, null).isFalse();
+    }
     @Override public boolean before(ServerLevel level, ServerPlayer actor, BlockPos pos, BlockState state) {
         bound(level, actor);
         return PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, actor, pos, state, null);

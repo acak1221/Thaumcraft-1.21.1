@@ -43,6 +43,16 @@ public final class NeoForgeBorePlatform implements BorePlatform.Bridge {
     }
 
     @Override
+    public boolean sharedBreak(ServerLevel level, ServerPlayer actor, BlockPos target, BlockState oldState) {
+        bound(level, actor);
+        // NeoForge's native cancellable break event already delivers the shared
+        // Architectury break event, so the shared notification must not be sent a
+        // second time here: one break owes the other mods exactly one
+        // notification. The native event of before() carries it.
+        return true;
+    }
+
+    @Override
     public boolean before(ServerLevel level, ServerPlayer actor, BlockPos target, BlockState oldState) {
         bound(level, actor);
         var event = new BlockEvent.BreakEvent(level, target, oldState, actor);

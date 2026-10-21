@@ -23,6 +23,13 @@ public final class FabricBorePlatform implements BorePlatform.Bridge {
         bound(level, actor);
         return actor;
     }
+    @Override public boolean sharedBreak(ServerLevel level, ServerPlayer actor, BlockPos target, BlockState oldState) {
+        bound(level, actor);
+        // Fabric has no native counterpart of the shared Architectury break event,
+        // so the loader delivers it here, exactly once.
+        return !dev.architectury.event.events.common.BlockEvent.BREAK.invoker()
+                .breakBlock(level, target, oldState, actor, null).isFalse();
+    }
     @Override public boolean before(ServerLevel level, ServerPlayer actor, BlockPos target, BlockState oldState) {
         bound(level, actor);
         return PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, actor, target, oldState, null);

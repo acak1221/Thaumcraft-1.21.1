@@ -243,14 +243,17 @@ public final class VoidGearRuntimeChecks {
     }
 
     private static void guarded(ServerLevel level, Actor attacker, Actor victim, boolean pvp, List<Mob> pigs, Runnable body) {
+        // The original flag of the server has to be restored in every case: a step that turned the
+        // player-versus-player on leaked it into the next step, where the original expects it off.
         try {
             body.run();
         } catch (RuntimeException failure) {
-            level.getServer().setPvpAllowed(pvp);
             pigs.forEach(Mob::discard);
             attacker.close(level);
             victim.close(level);
             throw failure;
+        } finally {
+            level.getServer().setPvpAllowed(pvp);
         }
     }
 
@@ -293,6 +296,9 @@ public final class VoidGearRuntimeChecks {
                 test.assertTrue(!target.hasEffect(MobEffects.WITHER), "nor a void hoe");
                 level.getServer().setPvpAllowed(true);
                 test.runAtTickTime(players + 24, () -> guarded(level, attacker, victim, pvp, pigs, () -> {
+                    // The flag of the server is restored after every step, so the step that needs
+                    // player-versus-player on turns it on itself.
+                    level.getServer().setPvpAllowed(true);
                     player.attack(target);
                     test.assertTrue(target.hasEffect(MobEffects.WITHER) && target.getEffect(MobEffects.WITHER).getDuration() == 80, "and with it on again the axe withers a player for four seconds too");
                     // A mob hitting a player with a void sword: the sword's own rule only spares player-on-player hits.

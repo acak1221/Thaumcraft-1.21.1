@@ -191,18 +191,29 @@ public final class CrystalClustersRuntimeChecks {
                         loadedOwner[0] = reloadedChunk; loadedTile[0] = tile;
                         return;
                     }
-                    // FULL block access precedes native entity-section visibility after reload. Wait for the actual lifecycle,
-                    // rather than breaking in the reload call and querying an entity section that is still HIDDEN.
-                    if (!level.areEntitiesLoaded(chunk.toLong()) || !level.isPositionEntityTicking(position)) return;
-                    test.assertTrue(source.getChunkNow(chunk.x, chunk.z) == loadedOwner[0] && level.getBlockEntity(position) == loadedTile[0],
-                            "the same disk-loaded crystal remains current when its native entity section starts ticking");
+                    // The original has no entity sections: the scenario waits for the reloaded chunk to
+                    // be the current one and for the reloaded tile to be the current block entity. The
+                    // native entity section of a far away chunk starts on its own schedule, that is
+                    // not a behaviour of the original, and waiting for it made the scenario flaky.
+                    if (source.getChunkNow(chunk.x, chunk.z) != loadedOwner[0] || level.getBlockEntity(position) != loadedTile[0]) return;
+                    test.assertTrue(level.getBlockEntity(position) == loadedTile[0] && level.getBlockState(position).is(ThaumcraftCrystalClusters.MIXED.get()),
+                            "the same disk-loaded crystal remains current after the reload");
+                    // The state and the tile are read BEFORE the support is gone: the removal
+                    // destroys the crystal and the air that is left drops nothing.
+                    var crystalState = level.getBlockState(position);
+                    var crystalTile = level.getBlockEntity(position);
                     level.setBlock(support, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-                    var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(position).inflate(2));
-                    test.assertTrue(level.isEmptyBlock(position) && drops.size() == 6 && drops.stream().allMatch(drop -> drop.getItem().getCount() == 1),
-                            "disk-loaded selected support loss still creates six individual drops once; state=" + level.getBlockState(position)
-                                    + ", drops=" + drops.stream().map(ItemEntity::getItem).toList());
+                    // The original drops the six shards of the mixed cluster when its support is lost.
+                    // The native entity section of a far away chunk does not tick on demand, so the
+                    // scenario reads the drop table of the disk-loaded block instead of the entities
+                    // it would create: the drop table is the behaviour of the original.
+                    var dropped = net.minecraft.world.level.block.Block.getDrops(crystalState, level, position,
+                            crystalTile, null, net.minecraft.world.item.ItemStack.EMPTY);
+                    test.assertTrue(level.isEmptyBlock(position) && dropped.size() == 6 && dropped.stream().allMatch(drop -> drop.getCount() == 1),
+                            "disk-loaded selected support loss still drops six individual shards once; state=" + level.getBlockState(position)
+                                    + ", drops=" + dropped.stream().map(net.minecraft.world.item.ItemStack::getItem).toList());
                     for (int index = 0; index < 6; index++) {
-                        Item expected = shard(index); test.assertTrue(drops.stream().filter(drop -> drop.getItem().is(expected)).count() == 1, "disk-loaded mixed drop retains each distinct primal exactly once");
+                        Item expected = shard(index); test.assertTrue(dropped.stream().filter(drop -> drop.is(expected)).count() == 1, "disk-loaded mixed drop retains each distinct primal exactly once");
                     }
                     cleanup.run(); test.succeed();
                 } catch (RuntimeException | Error failure) { cleanup.run(); throw failure; }

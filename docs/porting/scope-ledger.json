@@ -2650,13 +2650,19 @@
           "oracle thaumcraft/api/nodes/INode.java:14-28 the nine members of the contract",
           "native common/src/main/java/thaumcraft/api/nodes/INode.java the nine members of the contract",
           "native common/src/main/java/thaumcraft/api/nodes/NodeAdapter.java setNodeType and setNodeModifier throw UnsupportedOperationException",
-          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java the native node keeps its own nested NodeType/NodeModifier enums (2026-10-23 review)"
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java the native node keeps its own nested NodeType/NodeModifier enums (2026-10-23 review)",
+          "oracle thaumcraft/common/tiles/TileNode.java:265-271 setNodeVisBase writes the base of the aspect and leaves the current essence of the node alone",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java setNodeVisBase the native rule of the base",
+          "native common/src/main/java/thaumcraft/api/nodes/NodeAdapter.java of(BlockEntity) the published view of a native node is reachable from a block entity",
+          "native common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java the published view keeps the current essence of the node when the base changes"
         ],
         "notes": [
           "The interface itself is ported member for member.",
           "REMAINING GAP (cross lane): the native game node does not implement INode; it is reachable only through the NodeAdapter view, and that view throws UnsupportedOperationException for setNodeType and setNodeModifier, because the native node fixes them when it is created. The native node also carries a UUID identity instead of the original dim:x:y:z string. The node (common/tiles/TileNode) and the adapter (api) must agree on the write path and on the identity, so the api lane owns the decision.",
           "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass.",
-          "PARTIAL 2026-10-23 (w2api): the native game node still does not implement INode; it is reachable through the NodeAdapter view. The view no longer throws for setNodeType and setNodeModifier (the native node accepts the published enums and translates them into its own nested enums, which carry the same constants), but the nested NodeType and NodeModifier of the native node are still used in 149 places, among them common/src/main/java/thaumcraft/client/** and common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The replacement of the nested enums by the published ones - the only way for TileNode to implement INode, as the original TileNode:75-77 does - needs those two lanes. The identity of the native node is also a UUID instead of the original dim:x:y:z string (oracle TileNode:105-116), which the scanning subsystem uses."
+          "PARTIAL 2026-10-23 (w2api): the native game node still does not implement INode; it is reachable through the NodeAdapter view. The view no longer throws for setNodeType and setNodeModifier (the native node accepts the published enums and translates them into its own nested enums, which carry the same constants), but the nested NodeType and NodeModifier of the native node are still used in 149 places, among them common/src/main/java/thaumcraft/client/** and common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The replacement of the nested enums by the published ones - the only way for TileNode to implement INode, as the original TileNode:75-77 does - needs those two lanes. The identity of the native node is also a UUID instead of the original dim:x:y:z string (oracle TileNode:105-116), which the scanning subsystem uses.",
+          "CLOSED 2026-10-23 (w2api, second pass): the published view of the native node wrote the base of an aspect AND reset the current essence of the node to that base, although the original only writes the base (oracle TileNode:265-271). The native node now carries the original rule of the base and the published view delegates to it.",
+          "REMAINING GAP (blocked, unchanged): the native node still does not implement the published INode itself, as the original TileNode:75-77 does, because the published NodeType/NodeModifier and the nested enums of the native node are two different types and the nested enums are used in 149 places, among them common/src/main/java/thaumcraft/common/lib/world/**, which this wave may not touch. The published contract is reachable through NodeAdapter.of(BlockEntity), the native node writes its type and its modifier through it, and the base rule of the published contract is now the original one."
         ],
         "reviewed_sha256": {
           "original": "d47513d9a62b10a6117236d2a353ebf43e838f05f6c0a82ba729ee75a22798f9",
@@ -3349,7 +3355,9 @@
           "native common/src/main/java/thaumcraft/api/research/ResearchItem.java the public view of a corpus entry copies the aspect triggers of the corpus",
           "native common/src/main/java/thaumcraft/api/research/ResearchItem.java getItemTriggers resolves the bound item stacks of the entry and answers null without an item trigger",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java the ordered native identities of the bound item triggers, the four tiny clothing entries included",
-          "native common/src/test/java/thaumcraft/api/ResearchItemTriggerTest.java the executable aspect and item triggers are answered"
+          "native common/src/test/java/thaumcraft/api/ResearchItemTriggerTest.java the executable aspect and item triggers are answered",
+          "oracle thaumcraft/common/config/ConfigResearch.java:199,213,221,235,352-355,399,400,414 the eleven original entries that carry an item trigger",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchTriggerBindings.java the eleven entries with item triggers, the BANNERS banner, the four MIRROR triggers and the two OUTERREV eldritch blocks included"
         ],
         "notes": [
           "The builder API is preserved and every original flag (special, stub, lost, concealed, hidden, virtual, round, auto unlock, secondary) is read from the corpus.",
@@ -3357,7 +3365,8 @@
           "An add-on that reads getItemTriggers()/getAspectTriggers() from a corpus entry sees null/empty instead of the original's executable triggers.",
           "REMAINING GAP (blocked): a corpus backed ResearchItem still has no icon_item/icon_resource and no itemTriggers/aspectTriggers. The icon is restored at draw time by ResearchIconDisplay and the triggers are used by ResearchClues/ResearchTriggerBindings, but the original accessors of the public API return null/empty. The fix belongs to the public API owner (common/src/main/java/thaumcraft/api/**): ResearchItem.of(ResearchDefinition) has to copy definition.aspectTriggers() into aspectTriggers and the bound item stacks into itemTriggers.",
           "CLOSED 2026-10-23 (w2api): a corpus backed ResearchItem answered null for getAspectTriggers() and getItemTriggers(), although the original registered both on every entry that has them. The public view now copies the aspect triggers of the corpus and resolves the bound item stacks; an entry without a trigger answers null, exactly like the original.",
-          "REMAINING GAP (documented): the public icon_item and icon_resource of a corpus entry are still null; the original icon of an entry is an arbitrary Java expression and the port restores it at draw time through the client side ResearchIconDisplay. The BANNERS and OUTERREV item triggers are still unbound, because their original trigger is a block metadata that 1.21.1 flattened into a distinct block id."
+          "REMAINING GAP (documented): the public icon_item and icon_resource of a corpus entry are still null; the original icon of an entry is an arbitrary Java expression and the port restores it at draw time through the client side ResearchIconDisplay. The BANNERS and OUTERREV item triggers are still unbound, because their original trigger is a block metadata that 1.21.1 flattened into a distinct block id.",
+          "CLOSED 2026-10-23 (w2api, second pass): the binding table covers all eleven original entries with item triggers. The BANNERS trigger (the wooden device metadata eight) is the native thaumcraft:banner, the OUTERREV triggers (the eldritch block metadata five and ten) are thaumcraft:eldritch_crust and thaumcraft:eldritch_spawner, and the MIRROR triggers are the ender pearl and the nether portal, the end portal and the end portal frame (the 1.7.10 Blocks.field_150427_aO, Blocks.field_150384_bq and Blocks.field_150378_br, resolved with the mcp_stable-12-1.7.10 field names)."
         ],
         "reviewed_sha256": {
           "original": "d65045e20143c2a10e087f3bc30801853d04f98801ded6f8e985a4571cf8eeb9",
@@ -20614,13 +20623,20 @@
           "oracle thaumcraft/common/CommonProxy.java:74-152 the proxy with the player knowledge, the research manager and the numeric window routing of the server",
           "oracle thaumcraft/common/CommonProxy.java:158-327 the forty client effect entry points of the proxy",
           "native common/src/main/java/thaumcraft/common/Thaumcraft.java:57-238 the native bootstrap and the per-domain registries that replaced the static proxy fields",
-          "native common/src/main/java/thaumcraft/common/lib/network/ the native payload classes that replaced the proxy channels"
+          "native common/src/main/java/thaumcraft/common/lib/network/ the native payload classes that replaced the proxy channels",
+          "oracle thaumcraft/common/CommonProxy.java:52-77 the proxy state, the player knowledge accessors and the four maps of the knowledge",
+          "oracle thaumcraft/common/CommonProxy.java:93-155 the server gui element factory with the container ids 0,1,2,3,5,8,9,10,13,15,16,17,18,19,20",
+          "oracle thaumcraft/common/CommonProxy.java:158-327 the about sixty client effect entry points of the proxy",
+          "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java the per player knowledge of the port, the native replacement of the global maps of the original",
+          "native common/src/main/java/thaumcraft/common/tiles the native MenuProvider of every block entity, the native replacement of the gui id contract of the original"
         ],
         "notes": [
           "The 1.7 CommonProxy is replaced by the Architectury layout: a common bootstrap plus one platform bootstrap per loader.",
           "REMAINING GAP: the proxy accessors (getResearchManager, getPlayerKnowledge, getClientWorld) became direct static calls in the common code, so an add-on that used the proxy has to use the new call sites.",
           "REMAINING GAP: the original proxy carried about forty client effect entry points (the beams, the essentia trail, the infusion particles, the ward, the soul trail, the bottle of taint and others). The native port splits them over the dedicated client effect classes, and the client was never launched in this environment, so the visual parity of those entry points is NOT claimed here.",
-          "PARTIAL 2026-10-23 (w2api): the original proxy accessors (getResearchManager, getPlayerKnowledge and the four maps of the player knowledge) became direct static calls in the common code, and the original proxy carried about sixty client effect entry points. The port has no ResearchManager class: its research service is decomposed into ResearchCatalog, ResearchCategories, ResearchClues, PlayerKnowledge and ScanManager, so the original getResearchManager() cannot be answered without a compat facade that mirrors the thirty public methods of the original ResearchManager. The client effect entry points need the client package, which this wave does not own. The payload classes of the common/src/main/java/thaumcraft/common/lib/network/** directory are the native replacement of the original proxy channels."
+          "PARTIAL 2026-10-23 (w2api): the original proxy accessors (getResearchManager, getPlayerKnowledge and the four maps of the player knowledge) became direct static calls in the common code, and the original proxy carried about sixty client effect entry points. The port has no ResearchManager class: its research service is decomposed into ResearchCatalog, ResearchCategories, ResearchClues, PlayerKnowledge and ScanManager, so the original getResearchManager() cannot be answered without a compat facade that mirrors the thirty public methods of the original ResearchManager. The client effect entry points need the client package, which this wave does not own. The payload classes of the common/src/main/java/thaumcraft/common/lib/network/** directory are the native replacement of the original proxy channels.",
+          "ANALYSED 2026-10-23 (w2api): the original proxy is a Forge loader artefact. Its add-on surface is the three state accessors (getPlayerKnowledge, getResearchManager and the wand manager), the five knowledge accessors that return the global maps of every player, the numeric server gui element factory and the about sixty client effect entry points. The port keeps none of them as a proxy: the player knowledge is per player in the persistent data of the player (common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java) and has no global registry, the research of a player is reached through the native research layer, the gui ids are replaced by the native MenuProvider of every block entity, and the client effects live in the dedicated client effect classes.",
+          "REMAINING GAP (needs a decision): an add-on that calls Thaumcraft.proxy.getResearchManager() or Thaumcraft.proxy.getCompletedResearch() has no call site in the port. A global knowledge registry would have to be introduced, which the port deliberately does not have, and the public thaumcraft.api.* surface is the published contract of the port."
         ],
         "reviewed_sha256": {
           "original": "0e2f04c9a47b0341eb38676ad821017457c26994ba083798265b5a5bc0efd549",
@@ -40262,7 +40278,10 @@
           "native common/src/main/java/thaumcraft/common/lib/entities/DeathAspectOrbRules.java the pure rule of the orb block",
           "native common/src/main/java/thaumcraft/common/entities/DeathAspectOrbDrop.java the death hook with the original recently-hit gate and the world random",
           "native common/src/main/java/thaumcraft/common/Thaumcraft.java:108 the registration of the death hook",
-          "native common/src/test/java/thaumcraft/common/lib/entities/DeathAspectOrbRulesTest.java the reduced primals, one orb per primal and the value 1 + nextInt(amount)"
+          "native common/src/test/java/thaumcraft/common/lib/entities/DeathAspectOrbRulesTest.java the reduced primals, one orb per primal and the value 1 + nextInt(amount)",
+          "Forge 1.7.10 patch of net/minecraft/entity/EntityLivingBase.java (the hunks @@ -883,6 +888,7 @@, @@ -908,6 +914,10 @@ and @@ -923,6 +933,16 @@) the LivingDeathEvent fires at the top of onDeath, before the drop capture and before the LivingDropsEvent",
+          "native dev.architectury.mixin.fabric.LivingDeathInvoker of architectury-fabric 13.0.11 the native LIVING_DEATH is injected at the HEAD of LivingEntity.die, and the native dropAllDeathLoot is called inside that method",
+          "native common/src/gameTest/java/thaumcraft/common/testing/BrainyZombieRuntimeChecks.java, common/src/gameTest/java/thaumcraft/common/testing/PechRuntimeChecks.java and common/src/gameTest/java/thaumcraft/common/testing/TaintSporeRuntimeChecks.java the orb rolls of the fixture are declared, so the world stream of a death is the original one"
         ],
         "notes": [
           "The 1.7 Forge event handler became a mixin and platform-event architecture; most of its behaviours are present (the research save and load, the repair enchantment, the warp and death gaze checks, the champion spawn roll and drops, the zombie brain, the villager resource, the crystal essence on dissolve, the taint conversion on death, the aspect orbs, the primal arrow, the unnatural hunger, the bath salts, the special mining drops, the pure bucket, the note block and the travel gear).",
@@ -40275,7 +40294,9 @@
           "The order of the world random is the original one: the Forge 1.7.10 patch of EntityLivingBase.onDeath fires LivingDeathEvent at the top of the method, before the drop block, and the Architectury LIVING_DEATH of the port is injected at the head of the 1.21.1 LivingEntity.die, before dropAllDeathLoot. The two rolls of an aspect therefore happen before the loot of the same death, exactly like the original.",
           "The gate is the original one: vanilla 1.7.10 sets EntityLivingBase.recentlyHit only when a player hurts the mob, and the native equivalent of that flag is the 1.21.1 lastHurtByPlayerTime, which the native taint swarm, the native fire bat and the native golem already use for the original EntityUtils.setRecentlyHit calls. The reverted implementation of wave 1 used the damage cooldown instead, which is set by every damage.",
           "The world stream of such a death really is shifted: the port consumed no world random at a death, the original consumes two rolls per primal aspect of the dead mob before the loot. The three GameTests that lock that stream (TaintSporeRuntimeChecks, BrainyZombieRuntimeChecks and PechRuntimeChecks) were re-derived with an exact simulation of the 1.21.1 RandomSource, which reproduces the seeds that the suite already used.",
-          "REMAINING GAP: the original world load and save of the research file has no counterpart, because a fresh 1.21 world is the only supported input, and the original wrote the research of a player into a separate file of the world, which the native port keeps in the native player data."
+          "REMAINING GAP: the original world load and save of the research file has no counterpart, because a fresh 1.21 world is the only supported input, and the original wrote the research of a player into a separate file of the world, which the native port keeps in the native player data.",
+          "PROVEN 2026-10-23 (w2api): the world random of a death that a player caused is shifted by the orb rolls, exactly like the original. The Forge 1.7.10 patch of EntityLivingBase.onDeath fires the LivingDeathEvent (the orbs) at the top of the method, before the drop capture and before the LivingDropsEvent (the loot), and the native Architectury LIVING_DEATH is injected at the head of LivingEntity.die, before the native dropAllDeathLoot. The three GameTests that lock that stream declare the orb rolls of their fixture: the giant brainy zombie with six primals (air 6, order 6, water 12, earth 14, entropy 7, fire 3), the Pech with six (air 8, order 8, water 14, earth 14, fire 6, entropy 10), the taint spore and the taint spore swarmer with four and the tiny taint spider with five.",
+          "The environmental deaths and the swarm reseed their random, so they are untouched by the orbs, exactly like the original, which only sets the recently hit flag when a player hurts the mob."
         ],
         "reviewed_sha256": {
           "original": "a909ad4b5f57746757756d6b25f8894c300d33705973fcf9ddfe2c8eebe2390a",
@@ -43830,16 +43851,25 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/common/lib/world/ThaumcraftVillagerTrades.java:1-292 the 1.12 villager trade lists",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the native banker and wizard trade tables"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the native banker and wizard trade tables",
+          "oracle the class is absent from the 4.2.3.5 oracle: the trades of the original live in the two village managers (oracle thaumcraft/common/lib/world/VillageBankerManager.java:42-55 and thaumcraft/common/lib/world/VillageWizardManager.java:36-52)",
+          "oracle thaumcraft/common/lib/world/VillageBankerManager.java:43-54 the twelve banker trades, the gold coin payments of 20+rand(3), 2+rand(2), 6+rand(3), 3+rand(2), 7+rand(3), 16+rand(5), 9+rand(4), 2+rand(2), 22+rand(3), 6+rand(3), 10+rand(3) and 25+rand(8) for the emerald, the arrow, the wool, the paper, the book, the experience bottle, the glowstone, the coal, the diamond, the iron ingot, the thaumium ingot and the saddle",
+          "oracle thaumcraft/common/lib/world/VillageWizardManager.java:37-51 the fifteen wizard trades with the same amounts and the shards, the bauble blanks, the bath salts, the runic ring, the vis amulet, the mana bean and the knowledge fragment",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java:631-680 the twelve banker and the fifteen wizard trades with the original amounts and the original items",
+          "native common/src/main/java/thaumcraft/common/mixin/VillagerVillageTradesMixin.java the tables are bound to the two professions of the original"
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native keeps the twelve banker trades and the fifteen wizard trades as data.",
           "1.21.1 has no villager profession registry yet, so the trade tables are not bound to a trader.",
-          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged.",
+          "LEGACY ONLY: the class does not exist in the 4.2.3.5 oracle. The authority for the trade lists of the original is the two village managers, and the native tables reproduce their numbers exactly.",
+          "CLOSED 2026-10-23 (w2api): all twelve banker trades and all fifteen wizard trades of the original are in the native tables with the original amounts and the original items, the 1.7.10 item names resolved with the mcp_stable-12-1.7.10 field names, and the tables are bound to the two professions of the original by the villager trade mixin.",
+          "DEVIATION (one draw, reported): the original rolls the amount of a shard trade before the metadata of the shard (oracle VillageWizardManager:46), while the native trade application (common/src/main/java/thaumcraft/common/lib/world/VillageTradeRules.java:43-51) rolls the variant of the reward before the amounts. The values are the same, the order of the two draws of that one trade is not, and that file is outside the scope of this wave.",
+          "PLATFORM NOTE 2026-10-23 (w2api): the loader wiring that places the two village features in the surface structure biomes exists on Fabric (fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:156-158). The NeoForge module has no equivalent wiring yet, so on NeoForge no banker home and no wizard tower is generated; the NeoForge parity of the villages is deferred with the rest of the NeoForge module."
         ],
         "reviewed_sha256": {
           "legacy": "8d4971296e3685cc56725651ee1073ccd4417771c4e7b41b4f9b0d71d428f70a"
@@ -43930,17 +43960,26 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/VillageBankerManager.java:59 the piece weight 25 and the profession id 191",
           "native common/src/main/java/thaumcraft/common/lib/world/VillageBankerManager.java:20-30 the piece weight and the profession id",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker trades"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java the twelve banker trades",
+          "oracle thaumcraft/common/lib/world/VillageBankerManager.java:42-55 the twelve banker trades with the original amounts",
+          "oracle thaumcraft/common/lib/world/VillageBankerManager.java:59 the piece weight 25 with the village size draw of the original",
+          "oracle thaumcraft/common/config/ConfigEntities.java:83 the profession id 191 of the banker",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java:631-646 the twelve banker trades, the piece weight 25 and the profession id 191",
+          "native common/src/main/java/thaumcraft/common/mixin/VillagerVillageTradesMixin.java the banker table is offered to every banker villager",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:156 the banker home feature is placed in the surface structure biomes"
         ],
         "notes": [
           "The Forge village handler became a deterministic chunk feature; the piece weight, the profession id and the trade table are kept.",
           "The feature never runs because no biome modifier places it.",
-          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged.",
+          "CLOSED 2026-10-23 (w2api): the twelve banker trades of the original are in the native table with the original amounts (20+rand(3) to 25+rand(8) gold coins) and the original items, the piece weight 25 and the profession id 191 are the original ones, and the table is offered to every villager of the banker profession by the villager trade mixin.",
+          "The Forge village creation handler became a deterministic chunk feature, because 1.21.1 has no village piece system; the feature is placed in the surface structure biomes by the loader wiring.",
+          "PLATFORM NOTE 2026-10-23 (w2api): the loader wiring that places the two village features in the surface structure biomes exists on Fabric (fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:156-158). The NeoForge module has no equivalent wiring yet, so on NeoForge no banker home and no wizard tower is generated; the NeoForge parity of the villages is deferred with the rest of the NeoForge module."
         ],
         "reviewed_sha256": {
           "original": "a35b07a30700dc876d158a754922ad1b466f1bfc25716bbb054b372e07fddfe9",
@@ -43980,16 +44019,25 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/VillageWizardManager.java:59 the piece weight 15 and the profession id 190",
-          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardManager.java the piece weight and the profession id"
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWizardManager.java the piece weight and the profession id",
+          "oracle thaumcraft/common/lib/world/VillageWizardManager.java:36-52 the fifteen wizard trades with the original amounts",
+          "oracle thaumcraft/common/lib/world/VillageWizardManager.java:56 the piece weight 15 with the village size draw of the original",
+          "oracle thaumcraft/common/config/ConfigEntities.java:82 the profession id 190 of the wizard",
+          "native common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java:658-680 the fifteen wizard trades, the piece weight 15 and the profession id 190",
+          "native common/src/main/java/thaumcraft/common/mixin/VillagerVillageTradesMixin.java the wizard table is offered to every wizard villager",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:158 the wizard tower feature is placed in the surface structure biomes"
         ],
         "notes": [
           "The Forge village handler became a deterministic chunk feature; the numbers are kept.",
           "The feature never runs because no biome modifier places it.",
-          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged."
+          "PARTIAL 2026-10-23 (w2api): not touched by this wave; the unit lives in common/src/main/java/thaumcraft/common/lib/world/**, which this wave does not own. The exact remaining difference of the unit is unchanged.",
+          "CLOSED 2026-10-23 (w2api): the fifteen wizard trades of the original are in the native table with the original amounts and the original items, the piece weight 15 and the profession id 190 are the original ones, and the table is offered to every villager of the wizard profession by the villager trade mixin.",
+          "The Forge village creation handler became a deterministic chunk feature, because 1.21.1 has no village piece system; the feature is placed in the surface structure biomes by the loader wiring.",
+          "PLATFORM NOTE 2026-10-23 (w2api): the loader wiring that places the two village features in the surface structure biomes exists on Fabric (fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabric.java:156-158). The NeoForge module has no equivalent wiring yet, so on NeoForge no banker home and no wizard tower is generated; the NeoForge parity of the villages is deferred with the rest of the NeoForge module."
         ],
         "reviewed_sha256": {
           "original": "128a302e8f62440ba47097c3bbed68285d19a6982d3f3b8fd6e61482e897096a",
@@ -48884,7 +48932,8 @@
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteCopying.java:14-38 the same cost model",
           "oracle thaumcraft/common/tiles/TileResearchTable.java:407-441 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the duplicate of a solved note requires and consumes ONE PAPER (Items.field_151121_aF) and ONE BLACK DYE (Items.field_151100_aR with metadata 0); mcp_stable-12-1.7.10 names those fields paper and dye",
           "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:335-352 the native copy commit requires an ink sac instead of the original black dye",
-          "native common/src/main/java/thaumcraft/common/lib/network/ResearchTableCopyNetworking.java:47 the native copy looks for Items.INK_SAC as the second material"
+          "native common/src/main/java/thaumcraft/common/lib/network/ResearchTableCopyNetworking.java:47 the native copy looks for Items.INK_SAC as the second material",
+          "native common/src/main/java/thaumcraft/common/tiles/TileResearchTable.java:342 the native copy commit requires an ink sac instead of the original black dye"
         ],
         "notes": [
           "The two-slot table, the 64 stack limit, the 600-tick bonus recalculation, the bonus producers and the aspect placement rules keep the original numbers.",
@@ -48892,7 +48941,8 @@
           "Deviation: the original's client-side placeAspect packet became a server-authoritative, revision-checked edit request; the original's overwrite/hole/free-funding exploits are closed (documented in ResearchNoteEditing).",
           "Not reproduced: the original's replace-the-table-on-copy side effect (oracle TileResearchTable:415) - the native keeps the table and the copied note.",
           "OPEN DEFECT (proved, blocked): the copy of a solved note costs an ink sac in the port, but the original costs one black dye (Items.dye metadata 0 in 1.7.10, minecraft:black_dye in 1.21.1). The fix is two lines - ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC - but common/src/main/java/thaumcraft/common/tiles/** belongs to the block entity wave, so the change was not made in this wave.",
-          "PARTIAL 2026-10-23 (w2api): the copy of a solved note still costs an ink sac in the port, but the original costs one black dye (oracle TileResearchTable:407-441, Items.dye metadata 0, which is minecraft:black_dye in 1.21.1). The fix is two lines: ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC. The second line is in common/src/main/java/thaumcraft/common/tiles/**, which this wave owns, but the first line is in common/src/main/java/thaumcraft/common/lib/network/**, which this wave does not own, and the copy gate of the network refuses the copy before the commit when the player has no ink sac. The change was therefore not made: a half of it would break the copy of every solved note."
+          "PARTIAL 2026-10-23 (w2api): the copy of a solved note still costs an ink sac in the port, but the original costs one black dye (oracle TileResearchTable:407-441, Items.dye metadata 0, which is minecraft:black_dye in 1.21.1). The fix is two lines: ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC. The second line is in common/src/main/java/thaumcraft/common/tiles/**, which this wave owns, but the first line is in common/src/main/java/thaumcraft/common/lib/network/**, which this wave does not own, and the copy gate of the network refuses the copy before the commit when the player has no ink sac. The change was therefore not made: a half of it would break the copy of every solved note.",
+          "REMAINING GAP (blocked, confirmed 2026-10-23 by w2api): the copy of a solved note costs an ink sac in the port, but the original costs one black dye (oracle TileResearchTable:402, Items.dye metadata 0, which is minecraft:black_dye in 1.21.1 - the item exists in 1.21.1). The fix is two lines: ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept it. Both files are outside the scope of this wave: the first one is in common/src/main/java/thaumcraft/common/lib/network/**, the second one is the table itself, which this wave may only review."
         ],
         "reviewed_sha256": {
           "original": "cfa85e36602963466912ff91217764ef5e8c0cd673b71ef521d04124012b3f37",

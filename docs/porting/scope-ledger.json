@@ -8474,16 +8474,18 @@
           "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:62-80 the native owner of the facing quad, the strip, the billboard and the beam draws",
           "oracle thaumcraft/client/lib/UtilsFX.java:733-817 drawFloatyLine draws a pair of crossed textured ribbons with the additive blend (770, 1), the fade f3, the sine wobble of the three axes and the scrolling texture coordinate",
           "native common/src/main/java/thaumcraft/client/fx/FloatyLine.java:38-116 the same two ribbons with the original numbers, the original quality sixteen and the original half widths",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:56-84 the cultist link line with the original colour 0x110011, the original speed -0.03 and the original width 0.25",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java:61-79 the drain line of the wand pedestal with the original speed -0.02, drawn in the space of its own block"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java:61-79 the drain line of the wand pedestal with the original speed -0.02, drawn in the space of its own block",
+          "oracle thaumcraft/client/renderers/entity/RenderCultist.java:83-163 the cultist has its own copy of the body: the ordinary alpha blend (770, 771), the depth write and the constant alpha 0.8f",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:71-95 the cultist link line through the shared helper, with the original colour 0x110011, the original speed -0.03 and the original width 0.25",
+          "native common/src/main/java/thaumcraft/client/fx/FloatyLine.java:49-60 the two original bodies of the line, the library one and the cultist one"
         ],
         "notes": [
           "The helper library was replaced by VisNetRender plus per-renderer implementations of drawTag, drawFloatyLine and the aspect icons.",
           "Not ported: UtilsFX.shootFire/FXScorch (fire focus scorch), the animated-texture helpers (getTextureAnimationSize/getTextureSize, the native renderers that use them hold the same constants) and getTimer have no native counterpart.",
           "Complete callsite audit: UtilsFX has 485 references across the oracle client tree; every reachable effect was mapped to a native owner during the port.",
           "REMAINING GAP: the animated texture helpers getTextureAnimationSize and getTextureSize and the getEquippedProgress and getTimer helpers have no native counterpart. The scorch of the fire focus, UtilsFX.shootFire, is dead code in the original, because the oracle tree never calls it.",
-          "The floaty line helper is now reproduced with the original ribbons. The remaining difference is the equip progress of the held item: the original eases towards its target with the factor 0.4 of the gap, the native moves towards it by at most 0.4 per tick, and the two texture size helpers of the original are constants in the native renderers that use them.",
-          "The equip progress of the held item has a native counterpart, the equip progress of the thaumometer renderer, but its curve is the linear one of the native port and not the eased one of the original."
+          "The equip progress of the held item has a native counterpart, the equip progress of the thaumometer renderer, but its curve is the linear one of the native port and not the eased one of the original.",
+          "The floaty line helper is now reproduced with the original ribbons: the library body is additive and fades every step, the body of the cultist is the ordinary alpha blend with the constant alpha 0.8f."
         ],
         "reviewed_sha256": {
           "original": "6e5ea1fef929e0e74b3e82390a5805b6dbc0f7e0274f0305a73704226f11e1f3",

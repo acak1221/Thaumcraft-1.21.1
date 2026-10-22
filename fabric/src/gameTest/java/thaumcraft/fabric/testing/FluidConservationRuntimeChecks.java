@@ -83,10 +83,24 @@ public final class FluidConservationRuntimeChecks {
                 test.assertTrue(handler.fill(Direction.DOWN,WATER,capacity+1,true)==capacity,"overflow reports accepted, not requested");
                 test.assertTrue(handler.fill(Direction.DOWN,WATER,1,true)==0&&handler.amount(Direction.DOWN)==capacity,"full-tank rejection retains source custody");
                 handler.drain(Direction.DOWN,WATER,capacity,true);
+                for(var face:Direction.values()) {
+                    boolean allowed=!spaTank||face!=Direction.UP;
+                    test.assertTrue(handler.fill(face,WATER,1,true)==(allowed?1:0),"actual handler fill face rule "+face);
+                    test.assertTrue(handler.drain(face,WATER,1,true)==(allowed?1:0)&&handler.amount(Direction.DOWN)==0,"actual handler drain face rule "+face);
+                }
                 if(spaTank) {
                     var spa=(TileSpa)level.getBlockEntity(pos);
                     test.assertTrue(spa.fill(null,FluidStack.empty(),true)==0&&spa.drain(null,FluidStack.empty(),true).isEmpty(),"empty stacks mean nothing");
                     for(var face:Direction.values())test.assertTrue((FluidStorage.SIDED.find(level,pos,face)==null)==(face==Direction.UP),"Spa advertised top face absent only");
+                    for(long nativeAmount:new long[]{1,80,81,80999,81000,404999,405000}) {
+                        var input=FluidStack.create(Fluids.WATER,nativeAmount);
+                        test.assertTrue(spa.fill(null,input,false)==nativeAmount&&spa.fluid().isEmpty(),"native simulation conserves at"+nativeAmount);
+                        test.assertTrue(spa.fill(null,input,true)==nativeAmount&&input.getAmount()==nativeAmount,"native accepted amount and caller immutability at"+nativeAmount);
+                        var rejected=FluidStack.create(Fluids.LAVA,81000);
+                        test.assertTrue(spa.fill(null,rejected,true)==0&&rejected.getAmount()==81000&&spa.getFluidAmountNative()==nativeAmount,"rejected stack neither consumed nor stored");
+                        test.assertTrue(spa.drain(null,Long.MAX_VALUE,false).getAmount()==nativeAmount&&spa.getFluidAmountNative()==nativeAmount,"native drain simulation unchanged");
+                        test.assertTrue(spa.drain(null,Long.MAX_VALUE,true).getAmount()==nativeAmount&&spa.fluid().isEmpty(),"native fill/drain exact down to one droplet");
+                    }
                     var source=FluidStack.create(Fluids.WATER,81);spa.fill(null,source,true);source.setAmount(0);
                     var copy=spa.fluid();copy.setAmount(0);test.assertTrue(spa.getFluidAmountNative()==81,"input and output stacks do not alias real tank");
                 }

@@ -72,4 +72,18 @@ public final class BlockFxNetworking {
         for (ServerPlayer player : level.players())
             if (player.distanceToSqr(Vec3.atCenterOf(target)) <= RANGE * RANGE) NetworkManager.sendToPlayer(player, payload);
     }
+
+    /**
+     * The original PacketFXBlockSparkle: the sparkle burst at a block.
+     *
+     * <p>Oracle {@code thaumcraft/common/lib/network/fx/PacketFXBlockSparkle.java:29-33} and the
+     * thirty two block radius of the {@code sendToAllAround} of the original.</p>
+     */
+    public static void sendSparkle(ServerLevel level, BlockPos target, int rgb) {
+        if (target == null) return;
+        if (!level.getServer().isSameThread()) throw new IllegalStateException("Block effects require the server thread");
+        var payload = BlockFxPayload.sparkle(level.dimension().location(), target, rgb);
+        for (ServerPlayer player : level.players())
+            if (player.distanceToSqr(Vec3.atCenterOf(target)) <= RANGE * RANGE) NetworkManager.sendToPlayer(player, payload);
+    }
 }

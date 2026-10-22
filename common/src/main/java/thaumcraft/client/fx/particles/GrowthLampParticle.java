@@ -23,10 +23,32 @@ public final class GrowthLampParticle extends SingleQuadParticle {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     private static final Tesselator BUFFER = new Tesselator(4096);
     private final int delay;
-    public GrowthLampParticle(ClientLevel level, BlockPos pos) {
+    /** The green of the growth lamp of the original, the colour 0x40ff40. */
+    public static final int GROWTH_LAMP_GREEN = 0x40FF40;
+    public GrowthLampParticle(ClientLevel level, BlockPos pos) { this(level, pos, GROWTH_LAMP_GREEN); }
+    /**
+     * The sparkle of the original block sparkle.
+     *
+     * <p>Oracle {@code thaumcraft/client/ClientProxy.java:632-644} - the colour of the sparkle is
+     * the colour of the packet, the wand colour {@code -9999} asks for a random grey and every
+     * component is spread by {@code 0.2 + random * 0.4} around its own value.</p>
+     */
+    public GrowthLampParticle(ClientLevel level, BlockPos pos, int rgb) {
         super(level, pos.getX() - .1 + level.random.nextFloat() * 1.2, pos.getY() - .1 + level.random.nextFloat() * 1.2, pos.getZ() - .1 + level.random.nextFloat() * 1.2);
         hasPhysics = false; xd = zd = 0; yd = level.random.nextFloat() * .02;
-        setColor(Mth.clamp(64F/255 - .2F + level.random.nextFloat() * .4F, 0, 1), Mth.clamp(.8F + level.random.nextFloat() * .4F, 0, 1), Mth.clamp(64F/255 - .2F + level.random.nextFloat() * .4F, 0, 1));
+        float red, green, blue;
+        if (rgb == thaumcraft.common.lib.network.BlockFxPayload.RANDOM_GREY) {
+            red = .33F + level.random.nextFloat() * .67F;
+            green = .33F + level.random.nextFloat() * .67F;
+            blue = .33F + level.random.nextFloat() * .67F;
+        } else {
+            red = (rgb >> 16 & 0xFF) / 255F;
+            green = (rgb >> 8 & 0xFF) / 255F;
+            blue = (rgb & 0xFF) / 255F;
+        }
+        setColor(Mth.clamp(red - .2F + level.random.nextFloat() * .4F, 0, 1),
+                Mth.clamp(green - .2F + level.random.nextFloat() * .4F, 0, 1),
+                Mth.clamp(blue - .2F + level.random.nextFloat() * .4F, 0, 1));
         alpha = .9F;
         int active = 5 + level.random.nextInt(8); delay = level.random.nextInt(10); lifetime = active + delay;
         quadSize = .1F * (.7F + level.random.nextFloat() * .4F); setSize(.01F, .01F);

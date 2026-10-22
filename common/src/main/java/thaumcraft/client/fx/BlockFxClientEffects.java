@@ -42,6 +42,7 @@ public final class BlockFxClientEffects {
             case BlockFxPayload.ARC -> arc(level, payload);
             case BlockFxPayload.ZAP -> zap(level, payload);
             case BlockFxPayload.BUBBLE -> bubble(level, payload);
+            case BlockFxPayload.SPARKLE -> sparkle(level, payload);
             default -> { /* The payload codec rejects other kinds. */ }
         }
     }
@@ -91,9 +92,23 @@ public final class BlockFxClientEffects {
         }
     }
 
+    /**
+     * The original PacketFXBlockSparkle: the sparkle burst at a block.
+     *
+     * <p>Oracle {@code thaumcraft/common/lib/network/fx/PacketFXBlockSparkle.java:50-52} and
+     * {@code thaumcraft/client/ClientProxy.java:632-644} - the packet asks for seven sparkles and
+     * the client draws them with the colour of the packet.</p>
+     */
+    private static void sparkle(ClientLevel level, BlockFxPayload payload) {
+        int count = count(7);
+        for (int a = 0; a < count; a++) {
+            Minecraft.getInstance().particleEngine.add(
+                    new thaumcraft.client.fx.particles.GrowthLampParticle(level, payload.target(), payload.rgb()));
+        }
+    }
+
     /** The original particleCount: nothing at the minimal setting, the base at the decreased one, twice at all. */
     private static int count(int base) {
         ParticleStatus setting = Minecraft.getInstance().options.particles().get();
-        return setting == ParticleStatus.MINIMAL ? 0 : setting == ParticleStatus.DECREASED ? base : base * 2;
-    }
+        return setting == ParticleStatus.MINIMAL ? 0 : setting == ParticleStatus.DECREASED ? base : base * 2;    }
 }

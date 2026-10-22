@@ -23,6 +23,128 @@ import thaumcraft.common.lib.mods.ChampionRules;
 public final class ChampionRuntimeChecks {
     private ChampionRuntimeChecks() {}
 
+    /** Oracle EntityUtils:272 and ChampionModWarded:26 read getBaseValue, not getAttributeValue. */
+    public static void wardUsesBaseHealth(GameTestHelper test) {
+        var lane = new WaveLane(test, 3, 2, 3);
+        try {
+            var spider = lane.add(EntityType.SPIDER.create(lane.level));
+            spider.setPos(lane.origin.getX(), lane.origin.getY(), lane.origin.getZ());
+            ChampionJoinRoll.join(lane.level, spider, ChampionModifier.WARDED);
+            test.assertTrue(spider.getMaxHealth() == 46F && spider.getAttribute(Attributes.MAX_HEALTH).getBaseValue() == 16D,
+                    "spider fixture carries original base16 and champion bonus30");
+            test.assertTrue(spider.getAbsorptionAmount() == 8F,
+                    "original ward is half BASE health, expected8 actual=" + spider.getAbsorptionAmount());
+            spider.tickCount = 24;
+            lane.level.tickNonPassenger(spider);
+            test.assertTrue(spider.getAbsorptionAmount() == 8F, "ward never regenerates above base-health ceiling8");
+            spider.setAbsorptionAmount(6F);
+            spider.invulnerableTime = 0;
+            spider.tickCount = 24;
+            lane.level.tickNonPassenger(spider);
+            test.assertTrue(spider.getAbsorptionAmount() == 7F, "one native tick25 regenerates exactly one ward");
+            lane.level.tickNonPassenger(spider);
+            test.assertTrue(spider.getAbsorptionAmount() == 7F, "ordinary non-cadence tick gives no ward");
+        } finally { lane.clean(); }
+        test.succeed();
+    }
+
+    public static void warpedHitReachesPlayer(GameTestHelper test) {
+        var lane = new WaveLane(test, 3, 2, 3);
+        try {
+            var player = test.makeMockServerPlayerInLevel();
+            player.setGameMode(GameType.SURVIVAL);
+            player.setPos(lane.origin.getX(), lane.origin.getY(), lane.origin.getZ());
+            var champion = lane.add(EntityType.ZOMBIE.create(lane.level));
+            champion.setPos(player.position());
+            ChampionJoinRoll.join(lane.level, champion, ChampionModifier.WARP);
+            var knowledge = thaumcraft.common.lib.capabilities.KnowledgeAccess.get(player);
+            int before = knowledge.getWarpTemp();
+            player.invulnerableTime = 0;
+            ChampionJoinRoll.declaredWarpEffect(lane.level, .1F, 1,
+                    () -> player.hurt(lane.level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(knowledge.getWarpTemp() == before + 2,
+                    "native player hit awards original two temporary warp exactly once; actual delta=" + (knowledge.getWarpTemp() - before));
+            ChampionJoinRoll.declaredWarpEffect(lane.level, .1F, 1,
+                    () -> player.hurt(lane.level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(knowledge.getWarpTemp() == before + 2, "rejected hit awards no further warp");
+            player.invulnerableTime = 0;
+            ChampionJoinRoll.declaredWarpEffect(lane.level, .9F, 1,
+                    () -> player.hurt(lane.level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(knowledge.getWarpTemp() == before + 2, "unsuccessful chance roll awards no warp");
+        } finally { lane.clean(); }
+        test.succeed();
+    }
+
+    /** Native player damage must dispatch the same champion effects as native mob damage. */
+    public static void effectsReachPlayerVictimsOnce(GameTestHelper test) {
+        var lane = new WaveLane(test, 3, 2, 3);
+        try {
+            var level = lane.level;
+            var player = test.makeMockServerPlayerInLevel();
+            player.setGameMode(GameType.SURVIVAL);
+            player.setPos(lane.origin.getX(), lane.origin.getY(), lane.origin.getZ());
+            var champion = lane.add(EntityType.ZOMBIE.create(level));
+            champion.setPos(player.position());
+            ChampionJoinRoll.join(level, champion, ChampionModifier.VAMPIRIC);
+            var pig = lane.add(EntityType.PIG.create(level));
+            pig.setPos(player.position());
+            level.addFreshEntity(pig);
+            champion.setHealth(10F);
+            pig.hurt(level.damageSources().mobAttack(champion), 4F);
+            test.assertTrue(champion.getHealth() == 12F, "non-player hit still heals exactly once through living-entity hook");
+            champion.setHealth(10F);
+            player.invulnerableTime = 0;
+            test.assertTrue(player.hurt(level.damageSources().mobAttack(champion), 4F), "native player accepts champion hit");
+            test.assertTrue(champion.getHealth() == 12F, "one player hit heals vampiric attacker exactly two, actual=" + champion.getHealth());
+            // A rejected second hit during hurt immunity is not another champion action.
+            player.hurt(level.damageSources().mobAttack(champion), 4F);
+            test.assertTrue(champion.getHealth() == 12F, "rejected player hit must not heal attacker again");
+            ChampionHooks.setChampionModifier(champion, ChampionModifier.VENOMOUS);
+            player.invulnerableTime = 0;
+            ChampionJoinRoll.declaredEffect(level, .1F, () -> player.hurt(level.damageSources().mobAttack(champion), 1F));
+            var poison = player.getEffect(net.minecraft.world.effect.MobEffects.POISON);
+            test.assertTrue(poison != null && poison.getDuration() == 100 && poison.getAmplifier() == 0,
+                    "venomous player victim receives original 100-tick poison, not attacker");
+            test.assertTrue(!champion.hasEffect(net.minecraft.world.effect.MobEffects.POISON), "poison belongs only to victim");
+            player.removeEffect(net.minecraft.world.effect.MobEffects.POISON);
+            player.invulnerableTime = 0;
+            ChampionJoinRoll.declaredEffect(level, .9F, () -> player.hurt(level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(!player.hasEffect(net.minecraft.world.effect.MobEffects.POISON), "failed poison roll has no effect");
+            for (int modifier : new int[]{ChampionModifier.GRIM, ChampionModifier.SICKLY, ChampionModifier.FIERY}) {
+                ChampionHooks.setChampionModifier(champion, modifier);
+                player.invulnerableTime = 0;
+                player.setHealth(20F);
+                ChampionJoinRoll.declaredEffect(level, .1F, () -> player.hurt(level.damageSources().mobAttack(champion), 1F));
+                if (modifier == ChampionModifier.FIERY) {
+                    test.assertTrue(player.getRemainingFireTicks() == 80, "fiery champion sets player alight for exactly four seconds");
+                    player.clearFire();
+                } else {
+                    var effect = modifier == ChampionModifier.GRIM ? net.minecraft.world.effect.MobEffects.WITHER : net.minecraft.world.effect.MobEffects.HUNGER;
+                    var applied = player.getEffect(effect);
+                    test.assertTrue(applied != null && applied.getDuration() == (modifier == ChampionModifier.GRIM ? 200 : 500)
+                            && applied.getAmplifier() == 0, "original champion status reaches player victim");
+                    player.removeEffect(effect);
+                }
+            }
+            ChampionHooks.setChampionModifier(champion, ChampionModifier.WARP);
+            var knowledge = thaumcraft.common.lib.capabilities.KnowledgeAccess.get(player);
+            int before = knowledge.getWarpTemp();
+            player.invulnerableTime = 0;
+            ChampionJoinRoll.declaredWarpEffect(level, .1F, 1, () -> player.hurt(level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(knowledge.getWarpTemp() == before + 2, "one warped champion hit awards exactly the declared original two temporary warp");
+            ChampionJoinRoll.declaredWarpEffect(level, .1F, 1, () -> player.hurt(level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(knowledge.getWarpTemp() == before + 2, "hurt-immunity rejection does not award warp twice");
+            player.invulnerableTime = 0;
+            ChampionJoinRoll.declaredWarpEffect(level, .9F, 1, () -> player.hurt(level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(knowledge.getWarpTemp() == before + 2, "failed warped roll awards no warp");
+            player.setGameMode(GameType.CREATIVE);
+            player.invulnerableTime = 0;
+            ChampionJoinRoll.declaredWarpEffect(level, .1F, 1, () -> player.hurt(level.damageSources().mobAttack(champion), 1F));
+            test.assertTrue(knowledge.getWarpTemp() == before + 2, "creative immunity awards no warp");
+        } finally { lane.clean(); }
+        test.succeed();
+    }
+
     /** The original spawn roll and the original promotion bonuses of a champion. */
     public static void promotionUsesTheOriginalBonuses(GameTestHelper test) {
         var lane = new WaveLane(test, 3, 2, 3);

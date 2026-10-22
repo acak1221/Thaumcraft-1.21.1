@@ -25,9 +25,9 @@ public final class RenderWisp extends EntityRenderer<EntityWisp> {
         try {
             pose.translate(0,.45F,0);pose.mulPose(entityRenderDispatcher.cameraOrientation());
             int frame=wisp.tickCount%16;float u=(frame%4)/4F,v=(frame/4)/4F;
-            // The retained texture is256x256: UtilsFX.getTextureSize(texture,64)==4, hence .01/(4*4).
+            float span=thaumcraft.client.lib.UtilsFX.wispUvSpan(thaumcraft.client.lib.UtilsFX.getTextureSize("textures/misc/wisp.png",64));
             final int tint=color;
-            VisNetRender.draw(WISP,GL11.GL_ONE,false,GameRenderer.getPositionTexColorShader(),out -> VisNetRender.quad(out,pose,1,1,tint,u,u+.249375F,v,v+.249375F));
+            VisNetRender.draw(WISP,GL11.GL_ONE,false,GameRenderer.getPositionTexColorShader(),out -> VisNetRender.quad(out,pose,1,1,tint,u,u+span,v,v+span));
             VisNetRender.draw(VisNetRender.PARTICLES,GL11.GL_ONE,false,out -> VisNetRender.quad(out,pose,.4F+Mth.sin((wisp.tickCount+partial)/10)*.1F,1,0xffffff,frame/16F,(frame+1)/16F,5/16F,6/16F));
         } finally { pose.popPose(); }
     }

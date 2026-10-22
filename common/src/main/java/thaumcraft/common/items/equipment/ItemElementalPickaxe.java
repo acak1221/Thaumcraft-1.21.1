@@ -53,6 +53,14 @@ public class ItemElementalPickaxe extends PickaxeItem implements IRepairable {
             var pos = context.getClickedPos();
             level.playSound(null, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, FAIL, SoundSource.PLAYERS, 0.2F, 0.2F + level.random.nextFloat() * 0.2F);
         }
+        // Oracle ItemElementalPickaxe.java:89-92: the client half starts the scan with the
+        // deadline now + 5000 and swings the arm. The client class is referenced only in this
+        // client-only branch, like the animateTick effects of the blocks.
+        if (player != null && context.getLevel().isClientSide) {
+            thaumcraft.client.lib.ScanOverlay.start(player, context.getClickedPos(),
+                    System.currentTimeMillis() + thaumcraft.client.lib.ScanOverlay.DURATION_MILLIS);
+            player.swing(context.getHand());
+        }
         return InteractionResult.PASS;
     }
 }

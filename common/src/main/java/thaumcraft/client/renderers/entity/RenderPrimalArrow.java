@@ -83,8 +83,9 @@ public class RenderPrimalArrow<T extends AbstractArrow> extends EntityRenderer<T
             pose.mulPose(entityRenderDispatcher.cameraOrientation());
             float size = .5F;
             int frame = arrow.tickCount % 16;
-            float u0 = (frame % 4) / 4F, u1 = (frame % 4 + 1) / 4F;
-            float v0 = (frame / 4) / 4F, v1 = (frame / 4 + 1) / 4F;
+            float span = thaumcraft.client.lib.UtilsFX.wispUvSpan(thaumcraft.client.lib.UtilsFX.getTextureSize("textures/misc/wisp.png", 64));
+            float u0 = (frame % 4) / 4F, u1 = u0 + span;
+            float v0 = (frame / 4) / 4F, v1 = v0 + span;
             RenderType type2 = type < 5 ? RenderType.entityTranslucent(WISP) : RenderType.entityCutout(WISP);
             VertexConsumer out = buffers.getBuffer(type2);
             vertex(out, pose, -size, -size, 0, u1, v1, color >> 16 & 255, color >> 8 & 255, color & 255, alpha);

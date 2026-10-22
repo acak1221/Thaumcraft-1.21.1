@@ -30,6 +30,7 @@ public final class ClientStateReset {
 
     /** The idempotent restore of the client's own state. */
     public static void reset() {
+        thaumcraft.client.lib.ScanOverlay.clear();
         ThaumcraftWarpClient.reset();
         ThaumcraftRunicClient.reset();
         PlayerNotifications.reset();

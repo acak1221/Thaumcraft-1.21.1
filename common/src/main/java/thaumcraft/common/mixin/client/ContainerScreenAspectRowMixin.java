@@ -20,7 +20,7 @@ import thaumcraft.client.gui.HoveredSlotAspectRow;
  *
  * <p>1.21.1 draws a screen in two steps: {@code Screen#render} and then the final
  * {@code Screen#renderWithTooltip} ({@code net.minecraft.client.gui.screens.Screen}), which
- * first calls {@code renderTooltip} and then draws the deferred tooltip. The TAIL of
+ * first calls {@code render} and then draws the deferred tooltip (vanilla Screen:180-185). The TAIL of
  * {@code renderWithTooltip} is therefore exactly the point of the original: after the screen and
  * after its tooltip. The method is {@code final}, so the injection is the only legal hook, and
  * it runs once per frame for every screen. The guard restricts it to

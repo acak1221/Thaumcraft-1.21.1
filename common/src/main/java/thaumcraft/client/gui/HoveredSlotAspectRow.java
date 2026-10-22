@@ -30,7 +30,7 @@ import thaumcraft.common.lib.research.ObjectAspectResolver;
  * the comment of the original configuration), and with the flag true the row is always shown
  * unless the shift key is held (oracle {@code ClientTickEventsFML.java:301-309}).</p>
  *
- * <p>The icon itself is the COLOURED aspect icon with alpha 1: line 702 of the oracle calls
+ * <p>The icon itself is the coloured aspect icon with alpha 1: line 710 of the oracle calls
  * {@code UtilsFX.drawTag(x + shiftx, y + shifty, tag, tags.getAmount(tag), 0, z)} — the
  * six-argument overload at {@code UtilsFX.java:540-542}, which forwards
  * {@code blend = 771, alpha = 1.0f, bw = false}. Only the three-argument overload
@@ -90,13 +90,21 @@ public final class HoveredSlotAspectRow {
         ItemStack stack = slot.getItem();
         if (stack.isEmpty()) return;
         // Original ClientTickEventsFML:685-687 - only a scanned object shows its row.
-        String id = "@" + BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
         var scanned = KnowledgeAccess.get(player).getScannedItems();
-        if (scanned == null || (!scanned.contains(id) && !scanned.contains("#" + id))) return;
+        if (!isScanned(scanned, id)) return;
         // Original ClientTickEventsFML:688-690 - the object tags and the bonus tags.
         AspectList tags = ObjectAspectResolver.get(stack, player.level());
         if (tags == null || tags.size() == 0) return;
         Aspect[] aspects = tags.getAspectsSortedAmount();
+        graphics.flush();
+        boolean depth = org.lwjgl.opengl.GL11.glIsEnabled(org.lwjgl.opengl.GL11.GL_DEPTH_TEST);
+        graphics.pose().pushPose();
+        // Tooltip text lives at z=400 in native GuiGraphics. The original disables depth
+        // for the entire row (ClientTickEventsFML:693-724), so it must cover that text too.
+        graphics.pose().translate(0, 0, 500);
+        RenderSystem.disableDepthTest();
+        try {
         int index = 0;
         for (Aspect aspect : aspects) {
             if (aspect == null) continue;
@@ -115,6 +123,15 @@ public final class HoveredSlotAspectRow {
             }
             index++;
         }
+        } finally {
+            graphics.flush();
+            graphics.pose().popPose();
+            if (depth) RenderSystem.enableDepthTest(); else RenderSystem.disableDepthTest();
+        }
+    }
+
+    public static boolean isScanned(java.util.Set<String> scanned, String id) {
+        return scanned != null && (scanned.contains("@" + id) || scanned.contains("#" + id));
     }
 
     /**

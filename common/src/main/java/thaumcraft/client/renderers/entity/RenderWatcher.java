@@ -42,10 +42,18 @@ public final class RenderWatcher extends MobRenderer<EntityWatcher, ModelWatcher
     private static final RenderType BEAM_TYPE = new BeamType();
 
     public RenderWatcher(EntityRendererProvider.Context context) {
-        super(context, new ModelWatcher(ModelWatcher.createBodyLayer().bakeRoot()), .5F);
+        super(context, new ModelWatcher(ModelWatcher.createBodyLayer().bakeRoot()), 0);
     }
 
     @Override public ResourceLocation getTextureLocation(EntityWatcher watcher) { return SKIN; }
+
+    public static boolean drawsWatcher() { return false; }
+
+    @Override public boolean shouldRender(EntityWatcher watcher, net.minecraft.client.renderer.culling.Frustum frustum,
+                                           double x, double y, double z) {
+        // A no-op render body alone still allows EntityRenderDispatcher to draw shadow/fire.
+        return drawsWatcher();
+    }
 
     /**
      * The original never registered this renderer, so the watcher was never drawn.

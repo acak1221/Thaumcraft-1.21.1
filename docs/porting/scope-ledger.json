@@ -8120,7 +8120,7 @@
         "owner": "agent-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/lib/KeyHandler.java:1-157 the 1.12 copy of the TC4 key handler (focus G, hover H, misc unbound)",
-          "oracle thaumcraft/common/lib/events/KeyHandler.java:8-11 the TC4 original: keyF 'Change Wand Focus' default 33, keyH 'Activate Hover Harness' default 35, keyG 'Misc Wand Toggle' default 34",
+          "oracle thaumcraft/common/lib/events/KeyHandler.java:36-38 the TC4 original: keyF 'Change Wand Focus' default 33, keyH 'Activate Hover Harness' default 35, keyG 'Misc Wand Toggle' default 34",
           "jar Thaumcraft-1.7.10-4.2.3.5.jar!thaumcraft/common/lib/events/KeyHandler.class the constructor of the original itself: bipush 33 -> keyF 'Change Wand Focus', bipush 35 -> keyH 'Activate Hover Harness', bipush 34 -> keyG 'Misc Wand Toggle', and the jar has NO thaumcraft/api/Keys.class at all",
           "the 1.7.10 key codes 33/35/34 are LWJGL2 Keyboard.KEY_F/KEY_H/KEY_G, and the original's own field names (keyF, keyH, keyG) and binding names ('Change Wand Focus', 'Activate Hover Harness', 'Misc Wand Toggle') agree with them",
           "native common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java:23-24 CHANGE_FOCUS defaults to GLFW_KEY_F",
@@ -8134,7 +8134,8 @@
           "The native documents that the original's 'Misc Wand Toggle' action (PacketItemKeyToServer id 1) is not ported: ThaumcraftMiscKeyClient only drives the Earthmover shovel orientation and the wand architect toggle.",
           "Complete callsite audit: the legacy class exists only in the retained 1.12 reference tree; the native key handling lives in ThaumcraftFocusClient / ThaumcraftTravelGearClient / ThaumcraftMiscKeyClient.",
           "The earlier audit of this row repeated the wrong defaults of the retained 1.12 reference and cited an oracle file that does not exist; the 4.2.3.5 jar binds the three keys to F, H and G by default, and the port binds them the same way again.",
-          "The three keys stay assignable in the vanilla controls screen, exactly as the original key bindings were assignable in its own options screen."
+          "The three keys stay assignable in the vanilla controls screen, exactly as the original key bindings were assignable in its own options screen.",
+          "CORRECTED AGAIN: the evidence of this row now cites the real oracle lines 36-38 of thaumcraft/common/lib/events/KeyHandler.java, where the three key bindings of the original are declared. The 4.2.3.5 jar has no thaumcraft/api/Keys class at all, and the KEY_NONE claim came from the later 1.7.10/1.12 copy of the tree."
         ],
         "reviewed_sha256": {
           "legacy": "75c159063e9e16ec5c9837e723465135aa4d404751156abe73c5ef86c8c85ef2"

@@ -278,7 +278,8 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
     @Override public void handleEntityEvent(byte event) {
         if(event==4) {
             attackTimer=EldritchMobRules.GOLEM_MELEE_COOLDOWN;
-            playSound(SoundEvents.IRON_GOLEM_ATTACK,1.0F,1.0F);
+            // Entity.playSound broadcasts with a null player; ClientLevel ignores that route.
+            if(!isSilent())level().playLocalSound(getX(),getY(),getZ(),SoundEvents.IRON_GOLEM_ATTACK,getSoundSource(),1.0F,1.0F,false);
         } else if(event==18)spawnTimer=150;
         else if(event==19) {
             if(arcing==0) {
@@ -297,8 +298,8 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
                     arcY=y;
                     arcZ=z;
                     arcing=EldritchMobRules.golemArcTicks(level().random.nextInt(5));
-                    // Original EntityEldritchGolem:270: the arc starts with the golem's voice.
-                    playSound(sound("jacobs"),.8F,1F+(level().random.nextFloat()-level().random.nextFloat())*.05F);
+                    // Original EntityEldritchGolem:270 uses the world's local sound call, not a server broadcast.
+                    level().playLocalSound(getX(),getY(),getZ(),sound("jacobs"),getSoundSource(),.8F,1F+(level().random.nextFloat()-level().random.nextFloat())*.05F,false);
                 }
             }
         } else super.handleEntityEvent(event);

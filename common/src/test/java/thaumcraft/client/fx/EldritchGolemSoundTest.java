@@ -6,6 +6,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EldritchGolemSoundTest {
+    @Test void clientEntityEventsUseLocalSoundInsteadOfNullPlayerBroadcast() throws Exception {
+        String source = Files.readString(Path.of("src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java"));
+        String handler = source.substring(source.indexOf("public void handleEntityEvent(byte event)"), source.indexOf("public int getAttackTimer()"));
+        assertFalse(handler.contains("playSound("), "Entity.playSound uses playSound(null,...), ignored by ClientLevel");
+        assertEquals(2, handler.split("playLocalSound\\(", -1).length - 1, "both client event sounds need local playback");
+    }
+
     @Test void vanillaGolemSoundsMustNotUseTheThaumcraftNamespace() throws Exception {
         String source = Files.readString(Path.of("src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java"));
         // TC4 oracle EntityEldritchGolem:150,154,158,248 uses vanilla mob.irongolem.*.

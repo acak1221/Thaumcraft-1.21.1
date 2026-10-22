@@ -351,7 +351,7 @@ public final class ThaumcraftRecipeDisplay {
      *
      * <p>Original {@code thaumcraft/common/config/ConfigResearch.java:110-144}: the page holds the
      * three sceptre recipes as an array of arcane recipes, and every one of them is the grid
-     * {@code " TF"}, {@code " RT"}, {@code "T  "} of two wand caps, one wand rod and the primal
+     * {@code " TF"}, {@code " RT"}, {@code "T  "} of three wand caps, one wand rod and the primal
      * charm. The native recipe {@code thaumcraft:arcane/wand_sceptre} is a <em>special</em>
      * recipe whose ingredients are empty, so the diagram of the page is built from the display
      * fixture of that very recipe.</p>

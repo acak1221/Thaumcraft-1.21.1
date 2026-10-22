@@ -39,12 +39,8 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
  * from the model of the player, as the original
  * {@code RenderPlayer.renderFirstPersonArm:318-324} does.
  *
- * <p>Two parts of the original have no equivalent in the native port and stay
- * open: the two rotations that follow the swing of the arm of the player
- * (original ItemThaumometerRenderer:103-104) need the private arm angles of
- * 1.7.10, and the scan readout of the original - the aspect icons and the name
- * of the scanned target - needs the client side of the research system, which
- * the native port keeps on the server.
+ * <p>The original arm lag uses the public native xBob/yBob interpolants; the scan
+ * readout is drawn on the scanner face from synchronized research knowledge.
  */
 public final class ItemThaumometerRenderer {
     /** Original ItemThaumometerRenderer:95 - the size factor of the first person view. */
@@ -116,10 +112,11 @@ public final class ItemThaumometerRenderer {
         // Original ItemThaumometerRenderer:99-100.
         pose.translate(1.0F, 0.75F, -1.0F);
         pose.mulPose(Axis.YN.rotationDegrees(135.0F));
-        // Original ItemThaumometerRenderer:103-104 rotates with the difference
-        // between the rotation of the player and the swing of its arm. The arm
-        // angles of 1.7.10 have no public equivalent in 1.21.1, so the two
-        // rotations of the original are left out.
+        // Oracle :101-104. LocalPlayer's xBob/yBob are the native arm pitch/yaw lag.
+        pose.mulPose(Axis.XP.rotationDegrees(ThaumometerArmPose.lagDegrees(
+                player.getXRot(), player.xBobO, player.xBob, partial)));
+        pose.mulPose(Axis.YP.rotationDegrees(ThaumometerArmPose.lagDegrees(
+                player.getYRot(), player.yBobO, player.yBob, partial)));
         // Original ItemThaumometerRenderer:107, the equip progress of the item in the hand.
         // The 1.7.10 client read the private fields of its ItemRenderer; the native port
         // reproduces the original curve, see thaumcraft.client.lib.UtilsFX.

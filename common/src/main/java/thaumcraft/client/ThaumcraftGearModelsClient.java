@@ -242,7 +242,8 @@ public final class ThaumcraftGearModelsClient {
         if (context != ItemDisplayContext.FIRST_PERSON_RIGHT_HAND && context != ItemDisplayContext.FIRST_PERSON_LEFT_HAND
                 && context != ItemDisplayContext.THIRD_PERSON_RIGHT_HAND && context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND) return;
         var mc = Minecraft.getInstance();
-        var player = mc.player;
+        var wielder = thaumcraft.client.renderers.item.WandRenderContext.wielder();
+        if (!(wielder instanceof Player player)) return;
         // Original ItemWandRenderer:88 - the pose needs a player that uses an item.
         if (player == null || player.getUseItem().isEmpty()) return;
         float partial = mc.getTimer().getGameTimeDeltaPartialTick(false);

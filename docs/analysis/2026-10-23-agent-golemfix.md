@@ -263,11 +263,28 @@ failure.
 
 ### 4.2 The whole suite
 
-See §6 — the run of the whole suite on a clean world.
+```
+$ rm -rf fabric/run-gametest/world
+$ ./gradlew :fabric:runGameTest
+...
+[13:09:40] [Server thread/INFO] (Minecraft) All 325 required tests passed :)
+```
+
+`fabric/build/gametest-results.xml` lists **325 cases, 0 failures** — the three golem scenarios
+among them.
+
+Two earlier attempts of the same command died in the memory of the machine, **not** in the code:
+the first was killed by the **kernel OOM killer** (the game server exited with 137) while three
+other wave agents ran their own game servers, and the second exhausted the **2 GB heap** of the
+game server (`OutOfMemoryError: Java heap space` in `PalettedContainer.pack` while a chunk was
+saved, in the `thaumcraft_gametest:natural` dimension, at the end of the last test batch). The
+third attempt, with the same sources and the same clean world, was green. The three focused
+scenarios were green in **every** attempt, including the two that died.
 
 ### 4.3 The unit tests
 
-`:common:test` is green; the new `thaumcraft.golems.GolemLadderGoalStructureTest` has eight tests:
+`:common:test` is green: **340 test classes, 2260 tests, 0 failures, 0 errors, 0 skipped**. The new
+`thaumcraft.golems.GolemLadderGoalStructureTest` has eight tests:
 
 ```
 thaumcraft.golems.GolemLadderGoalStructureTest tests= 8 failures= 0 errors= 0 skipped= 0
@@ -361,15 +378,23 @@ wave-3 rewrite and are corrected to the current lines; its verdict is untouched.
 | the three scenarios at `agent/w3rest` | idem | 3 of 3 passed |
 | the three scenarios at `agent/w3golems` | idem | **3 of 3 failed**, the leader's text |
 | the three scenarios with the fix | idem | 3 of 3 passed |
-| the whole suite with the fix | `:fabric:runGameTest` on a clean world | see §6.1 |
-| the unit tests | `:common:test` | green, 0 failures |
+| the whole suite with the fix | `:fabric:runGameTest` on a clean world | **325 cases, 0 failures** |
+| the unit tests | `:common:test` | **2260 tests, 0 failures, 0 errors, 0 skipped** (340 classes) |
 
 ### 6.1 The whole suite
 
-The first attempt of the whole suite was killed by the **kernel OOM killer** (the game server
-exited with 137) — the machine was running the game servers of three other wave agents at the same
-time and 13 GB of the 15 GB of the swap was already in use. The run was repeated with the daemon
-heap of this lane capped at 1 GB; the result is in §6.2.
+Three attempts of the whole suite were made on a clean world with the same sources:
+
+| attempt | result |
+|---|---|
+| 1 | killed by the **kernel OOM killer** (exit 137) during the last test batch: the machine ran the game servers of three other wave agents at the same time and 13 GB of the 15 GB of the swap were already in use |
+| 2 | the **2 GB heap** of the game server ran out (`OutOfMemoryError: Java heap space` in `PalettedContainer.pack` while the chunk `[1, 67]` of the `thaumcraft_gametest:natural` dimension was saved, at the end of the last test batch) |
+| 3 | **green**: `All 325 required tests passed :)`, `gametest-results.xml` with 325 cases and 0 failures |
+
+The three focused scenarios were green in **every** attempt, including the two that died in the
+memory of the machine. The two deaths are in the memory of the machine, not in the ladder: the
+second one happened while a chunk of the `natural` dimension was saved, and the suite had already
+run 158 of its 158 test batches.
 
 ---
 
@@ -387,6 +412,11 @@ heap of this lane capped at 1 GB; the result is in §6.2.
   difference is visible only in the failure case, where the original would hold the ladder for ten
   seconds without doing anything. It is documented in the notes of the two drop units and was left
   as it is: it is not the regression and it is not observable in the scenarios.
+* **The navigation of an exhausted route.** The original's `resetTask` of the route
+  (`AIFillGoto.func_75251_c`:134-137) only clears the destination and the counter; the native
+  stops the navigator as well (`InventoryGolemGoals.java`, the `stop()` of the route). This
+  difference predates this wave (the wave-2 port stopped the navigation as well), it is not
+  observable in the three scenarios and it was left as it is.
 * The other open items of the wave-3 report (the fluid set of the Decanting and the Alchemy golem,
   the marked essentia transports, the Use core and the three switches of its menu, the texture of
   the bobber) are **not** touched by this wave.

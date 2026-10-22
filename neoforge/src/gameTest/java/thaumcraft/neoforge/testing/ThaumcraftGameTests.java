@@ -1608,4 +1608,34 @@ public final class ThaumcraftGameTests {
     public void advancedGolemsGainSlotSpeedRangeAndKeepTheirFlag(GameTestHelper test) {
         thaumcraft.common.testing.GolemAdvancedRuntimeChecks.run(test);
     }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "survival_progression")
+    public void survival_chain_recipes_yield_their_items(GameTestHelper test) {
+        thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.chainRecipesYieldTheirItems(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "survival_progression")
+    public void survival_chain_ingredients_close_on_natural_acquisition(GameTestHelper test) {
+        thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.chainIngredientsCloseOnNaturalAcquisition(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "survival_progression")
+    public void survival_chain_research_is_purchasable_with_the_earned_pool(GameTestHelper test) {
+        thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.chainResearchIsPurchasableWithTheEarnedPool(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "survival_progression")
+    public void survival_chain_needs_no_creative_mode_or_fixture(GameTestHelper test) {
+        thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.chainNeedsNoCreativeModeOrFixture(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 400, batch = "survival_progression")
+    public void survival_outer_lands_is_reachable_from_the_overworld(GameTestHelper test) {
+        thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.outerLandsIsReachableFromTheOverworld(test);
+    }
+
+    @GameTest(template = "empty", templateNamespace = "thaumcraft", timeoutTicks = 300, batch = "survival_progression")
+    public void survival_boss_loot_is_the_primordial_pearl(GameTestHelper test) {
+        thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.bossLootIsThePrimordialPearl(test);
+    }
 }

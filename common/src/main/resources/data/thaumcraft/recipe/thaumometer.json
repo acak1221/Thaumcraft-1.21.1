@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "pattern": [" S ", "IGI", " S "],
+  "pattern": ["S S", "IGI", "S S"],
   "key": {
     "I": {"item": "minecraft:gold_ingot"},
     "G": {"item": "minecraft:glass"},

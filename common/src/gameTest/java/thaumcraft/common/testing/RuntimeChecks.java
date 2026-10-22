@@ -106,9 +106,9 @@ public final class RuntimeChecks {
         checkRecipe(test, "phial_empty", ThaumcraftContent.EMPTY_PHIAL.get(), 8,
                 null, Items.CLAY_BALL, null, Items.GLASS, null, Items.GLASS, null, Items.GLASS, null);
         checkRecipe(test, "thaumometer", ThaumcraftContent.THAUMOMETER.get(), 1,
-                null, ThaumcraftContent.SHARDS.get("aer").get(), null,
+                ThaumcraftContent.SHARDS.get("aer").get(), null, ThaumcraftContent.SHARDS.get("ignis").get(),
                 Items.GOLD_INGOT, Items.GLASS, Items.GOLD_INGOT,
-                null, ThaumcraftContent.SHARDS.get("balanced").get(), null);
+                ThaumcraftContent.SHARDS.get("aqua").get(), null, ThaumcraftContent.SHARDS.get("terra").get());
         test.succeed();
     }
 

@@ -9087,22 +9087,25 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3levitator",
         "evidence": [
-          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:18-38 the inventory lifter: the base cube plus two emissive inner slabs (0.01..0.99 x 0.9..0.99 and 0.01..0.99 x 0.1..0.9)",
-          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:40-80 the world lifter draws the glow faces onto the neighbouring blocks",
-          "native common/src/main/resources/assets/thaumcraft/models/block/levitator.json a plain cube_bottom_top model (liftertop / lifterside / arcaneearbottom)",
-          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:40-80 the world lifter, the glow faces onto the neighbouring blocks",
-          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:18-38 the inventory lifter, the base cube and the two emissive inner slabs",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java:80-108 the glow faces of the original, the lightmap coordinate 180 and the colours 0x00A000 and 0xDD11FF",
-          "native common/src/main/resources/assets/thaumcraft/models/block/levitator.json the plain cube_bottom_top model"
+          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:32-53 the inventory art of the lifter: the cube of the block plus the two emissive inner slabs of the animatedglow sheet, 0.01..0.99 by 0.9..0.99 in the colour BlockCustomOreItem.colors[4] and 0.01..0.99 by 0.1..0.9 in the colour BlockCustomOreItem.colors[5]",
+          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:90-92 shouldRender3DInInventory is true, so the item of the lifter was drawn in 3D by that handler",
+          "forge 1.7.10 fml/src/main/java/cpw/mods/fml/client/registry/RenderingRegistry.java renderItemAsFull3DBlock and renderInventoryBlock route the inventory of such a block to renderInventoryBlock, the FML patch of RenderBlocks calls them for the render type of the block",
+          "oracle thaumcraft/common/blocks/BlockLifter.java:73-75 the render type of the lifter is the render id of its own handler",
+          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:55-88 the world lifter draws the cube and the glow faces of the block",
+          "native common/src/main/resources/assets/thaumcraft/models/item/levitator.json the inventory model of the original: the cube plus the two emissive slabs of the bounds 0.16..15.84 by 14.4..15.84 (tint 0) and 0.16..15.84 by 1.6..14.4 (tint 1) of the animatedglow sheet",
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:233-234 the item colour of the two slabs: the tint 0 is colors[4] = 0x00A000 and the tint 1 is colors[5] = 0xEECCFF",
+          "native common/src/main/resources/assets/thaumcraft/models/block/levitator.json the plain cube_bottom_top model of the world block (liftertop / lifterside / arcaneearbottom)",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java:80-109 the glow faces of the original in the world, the lightmap coordinate 180 and the colours 0x00A000 and 0xDD11FF"
         ],
         "notes": [
           "The levitator block itself is ported (BlockLevitator/TileLevitator/LevitatorRules) and its base cube model matches the original's bottom/top/side icons.",
-          "Deviation: the original's two emissive inner glow slabs and the glow faces projected onto neighbouring blocks are absent from the native model.",
-          "Complete callsite audit: BlockLifterRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the two emissive inner slabs of the original inventory render, 0.01 to 0.99 by 0.9 to 0.99 and 0.01 to 0.99 by 0.1 to 0.9, are not in the native model. The glow faces of the world render are reproduced by the native block entity renderer."
+          "The inventory art of the original was a model of its own and not the plain block model: the original drew the cube and the two emissive inner slabs of the animatedglow sheet. The port keeps that art in the item model and tints the two slabs with the ore colours of the original.",
+          "The two slabs of the original lie inside the opaque cube (0.01..0.99 against 0..1), so the visible art of the inventory slot is the cube in the original and in the port; the port keeps the two slabs and their tints because the original drew them.",
+          "The world glow of the original is drawn one hundredth of a block inside its own face; the port keeps the opaque cube of the block and draws the panels outside it, the only deliberate difference of the world renderer.",
+          "Complete callsite audit: BlockLifterRenderer is registered only in ClientProxy.setupBlockRenderers."
         ],
         "reviewed_sha256": {
           "original": "53c5995f1518bc7599fbbb416dd0a08d73d440a51eb545d0e190cff089474df6"
@@ -12785,24 +12788,23 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "parity_verified",
-        "owner": "agent-clientrender",
+        "owner": "agent-w3levitator",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/LifterItemColor.java:1-18 a 1.12 item colour handler for the lifter",
           "oracle tree: no file named LifterItemColor exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/resources/assets/thaumcraft/models/item/levitator.json the native item model, with no colour handler",
           "legacy src/main/java/thaumcraft/client/renderers/item/LifterItemColor.java the 1.12 item colour of the lifter",
           "oracle thaumcraft/common/blocks/BlockCustomOreItem.java:17 the original colour table of the ores",
-          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:26-40 the original inventory art tints the levitator with colours 4 and 5",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java the glowing faces of the levitator",
-          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:17-38 draws the inventory art of the lifter: the base cube and two glow slabs of the bounds 0.01..0.99 x 0.9..0.99 and 0.01..0.99 x 0.1..0.9 that are INSIDE the opaque cube",
-          "native common/src/main/resources/assets/thaumcraft/models/item/levitator.json is the cube of the original (top liftertop, side lifterside, bottom arcaneearbottom) and the slabs of the original are hidden inside it"
+          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:36-51 the original inventory art tints the lifter with the colours 4 and 5",
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:233-234 the native item colour of the lifter: the tint 0 is colors[4] = 0x00A000 and the tint 1 is colors[5] = 0xEECCFF",
+          "native common/src/main/resources/assets/thaumcraft/models/item/levitator.json the native item model with the two emissive slabs of the tint 0 and the tint 1",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java the glowing faces of the levitator in the world"
         ],
         "notes": [
           "Legacy-only 1.12 artefact with no TC4 original counterpart.",
-          "Deviation: the original BlockLifterRenderer tinted the lifter item with BlockCustomOreItem.colors[4]; the native lifitator item has no colour handler.",
+          "The class itself is not ported; its role is taken by the native item colour registration of ClientSetup.java:233-234, which tints the two emissive slabs of the item model with BlockCustomOreItem.colors[4] and colors[5] exactly as the original tinted them.",
           "Complete callsite audit: the class exists only in the retained 1.12 reference tree and is referenced by no native code.",
-          "The glowing faces of the levitator are now drawn in the world; the inventory art of the levitator is not tinted with the original ore colours, the native item model shows the plain block.",
-          "The class is a 1.12 artefact with no original counterpart, and the visible inventory art of the original is the plain cube, which the port has."
+          "The glowing faces of the levitator are drawn in the world by the native block entity renderer.",
+          "The inventory art of the original is a model of its own (oracle BlockLifterRenderer.java:32-53): the cube plus the two emissive inner slabs. The port has that art in models/item/levitator.json; the two slabs lie inside the opaque cube, so the visible art of the inventory slot is the cube in the original and in the port."
         ],
         "reviewed_sha256": {
           "legacy": "fad6473fe923574f7c1e776fe62d20e1d86a3d9e107f5478337d7099542c4edd"
@@ -17578,16 +17580,16 @@
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
         "native_coverage": "parity_verified",
-        "owner": "port-clientrender",
+        "owner": "agent-w3levitator",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/tile/TileLifterRenderer.java:1-101 a 1.12 tile entity renderer for the lifter",
           "oracle tree: no file named TileLifterRenderer exists in the TC4 4.2.3.5 decompilation (the original draws the lifter in BlockLifterRenderer)",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/ has no TileLifterRenderer; the native levitator uses a JSON model",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java the native block entity renderer of the lifter; the port has no TileLifterRenderer class",
           "legacy src/main/java/thaumcraft/client/renderers/tile/TileLifterRenderer.java the 1.12 renderer of the lifter",
-          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:66-92 the original glowing faces",
+          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:55-88 the original glowing faces",
           "oracle thaumcraft/common/blocks/BlockCustomOreItem.java:17 the original colour table",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java the new native renderer of the levitator",
-          "native common/src/main/java/thaumcraft/client/ClientSetup.java the registration of the block entity renderer"
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:162 the registration of the block entity renderer"
         ],
         "notes": [
           "Legacy-only 1.12 artefact with no TC4 original counterpart.",

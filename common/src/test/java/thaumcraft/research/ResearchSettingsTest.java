@@ -29,17 +29,18 @@ class ResearchSettingsTest {
     }
     @Test void remoteServerSettingsStayOnTheClientThreadAndResetWithoutChangingIntegratedServerFacts() throws Exception {
         var before = ThaumcraftSettings.server();
-        var authoritative = new ResearchSettings(false, false, true, true, false, 1, 37);
-        var remote = new ResearchSettings(true, true, false, false, true, -1, 5);
+        var authoritative = new ResearchSettings(true, false, false, false, true, 1, 37);
+        var remote = new ResearchSettings(false, true, true, true, false, -1, 5);
         var problem = new AtomicReference<Throwable>();
         ThaumcraftSettings.configureServer(authoritative);
         try {
             Thread client = new Thread(() -> {
                 try {
-                    ThaumcraftSettings.initializeClient(); assertEquals(ResearchSettings.DEFAULTS, ThaumcraftSettings.current());
+                    ThaumcraftSettings.initializeClient(); assertEquals(authoritative, ThaumcraftSettings.current());
                     ThaumcraftSettings.receive(remote); assertEquals(remote, ThaumcraftSettings.current());
                     assertEquals(authoritative, ThaumcraftSettings.server());
-                    ThaumcraftSettings.resetClient(); assertEquals(ResearchSettings.DEFAULTS, ThaumcraftSettings.current());
+                    ThaumcraftSettings.resetClient(); assertEquals(authoritative, ThaumcraftSettings.current());
+                    assertEquals(authoritative, ThaumcraftSettings.server());
                 } catch (Throwable failure) { problem.set(failure); }
             }, "settings-client-test");
             client.start(); client.join(5000);

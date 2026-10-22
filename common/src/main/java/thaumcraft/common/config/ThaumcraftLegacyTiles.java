@@ -91,8 +91,11 @@ public final class ThaumcraftLegacyTiles {
     private static BlockBehaviour.Properties arcaneFurnace() {
         return BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
                 .strength(10.0F, 300.0F).sound(SoundType.STONE).noOcclusion()
-                .lightLevel(state -> state.getBlock() instanceof BlockArcaneFurnace
-                        && state.getValue(BlockArcaneFurnace.VARIANT) == 0 ? LegacyTileRules.FURNACE_LIGHT : 0);
+                // BlockArcaneFurnace:215-221 - the core and the output nozzle light up to thirteen.
+                .lightLevel(state -> state.getBlock() instanceof BlockArcaneFurnaceNozzle
+                        || state.getBlock() instanceof BlockArcaneFurnace
+                                && state.getValue(BlockArcaneFurnace.VARIANT) == 0
+                        ? LegacyTileRules.FURNACE_LIGHT : 0);
     }
 
     private static BlockBehaviour.Properties stoneDevice() {
@@ -110,8 +113,11 @@ public final class ThaumcraftLegacyTiles {
         ITEMS.register();
         BLOCK_ENTITIES.register();
         List<RegistrySupplier<Item>> items = new ArrayList<>();
-        // The arcane furnace and the death fluid have no item in the original either.
+        // The death fluid has no item in the original either.
         items.add(ITEMS.register("wand_pedestal", () -> new BlockItem(WAND_PEDESTAL.get(), new Item.Properties())));
+        // The original registers the arcane furnace with the default item block
+        // (oracle ConfigBlocks.java:336), so the furnace has an item of its own.
+        items.add(ITEMS.register("arcane_furnace", () -> new BlockItem(ARCANE_FURNACE.get(), new Item.Properties())));
         // The compound recharge focus, the original blockStoneDevice metadata eight: a 1.21.1 recipe result cannot carry the focus
         // block state, so the focus needs an item of its own (ConfigRecipes:342).
         items.add(ITEMS.register("wand_pedestal_focus", () -> new ItemWandPedestalFocus(WAND_PEDESTAL.get(), new Item.Properties())));

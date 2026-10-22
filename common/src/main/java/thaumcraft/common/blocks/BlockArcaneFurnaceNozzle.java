@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import thaumcraft.common.config.ThaumcraftLegacyTiles;
 
 /**
  * Original BlockArcaneFurnace metadata 10: the output nozzle of the arcane furnace.
@@ -42,6 +43,11 @@ public final class BlockArcaneFurnaceNozzle extends Block {
     @Override protected MapCodec<? extends Block> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+    }
+
+    /** The default state of the nozzle: the original metadata ten block. */
+    public static BlockState state() {
+        return ThaumcraftLegacyTiles.ARCANE_FURNACE_NOZZLE.get().defaultBlockState();
     }
 
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }

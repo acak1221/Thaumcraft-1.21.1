@@ -169,9 +169,28 @@ public final class BlockArcaneFurnace extends BaseEntityBlock implements StateDe
         return LegacyTileRules.furnaceLevel(variant, metaAbove, metaBelow, aboveIsFurnace, belowIsFurnace);
     }
 
-    private static void updateLevel(Level level, BlockPos pos, BlockState state) {
+    /**
+     * BlockArcaneFurnace:194-213 - the render level of a shell block, worked out
+     * from the blocks above and below it.
+     *
+     * <p>The native wand construct of the arcane furnace calls this after it has
+     * placed the whole shell, because the level of a cell depends on the cells
+     * above and below it.</p>
+     */
+    public static void updateLevel(Level level, BlockPos pos, BlockState state) {
+        if (!(state.getBlock() instanceof BlockArcaneFurnace)) return;
         int level0 = calculateLevel(level, pos, state.getValue(VARIANT));
         if (level0 != state.getValue(LEVEL)) level.setBlock(pos, state.setValue(LEVEL, level0), Block.UPDATE_CLIENTS);
+    }
+
+    /**
+     * The state of one cell of the furnace: the original metadata value became
+     * the {@code variant} block state.
+     *
+     * @param variant the original metadata zero to nine
+     */
+    public static BlockState state(int variant) {
+        return ThaumcraftLegacyTiles.ARCANE_FURNACE.get().defaultBlockState().setValue(VARIANT, variant);
     }
 
     /**

@@ -21218,7 +21218,11 @@
           "oracle thaumcraft/common/blocks/BlockArcaneFurnace.java:215 the shell levels 0/9/18 and the light 13",
           "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:96 furnaceLevel(...) keeps the 0/9/18 rule",
           "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:50 FURNACE_LIGHT keeps the light 13",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneFurnace.java:78 the native block registers the furnace ticker"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockArcaneFurnace.java:78 the native block registers the furnace ticker",
+          "oracle thaumcraft/common/config/ConfigBlocks.java:336 the original registers the arcane furnace with the default item block, so the furnace has an item of its own",
+          "oracle thaumcraft/common/blocks/BlockArcaneFurnace.java:215-221 the core and the output nozzle light up to thirteen",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyTiles.java the item of the arcane furnace and the light of the core and of the nozzle (2026-10-23)",
+          "native common/src/main/resources/assets/thaumcraft/models/item/arcane_furnace.json the model of the item of the furnace (2026-10-23)"
         ],
         "notes": [
           "The 1.7 metadata shell became 1.21.1 block state variants; the numbers live in LegacyTileRules with oracle line references."
@@ -25768,6 +25772,9 @@
         "evidence": [
           "oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/config/ConfigRecipes.java:38-512 the whole original catalogue: 279 ConfigResearch.recipes.put call sites, five of them inside a loop, expanded to 308 distinct original recipe keys",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original keys: 293 native recipes, 9 original wand constructs, 9 documented deferrals",
+          "oracle thaumcraft/common/config/ConfigRecipes.java:89-92 the InfernalFurnace construct of the original: the three by three by three blueprint of the research page, the fifty vis of fire and fifty vis of earth and the three trigger blocks of the event two",
+          "native common/src/main/java/thaumcraft/common/lib/ArcaneFurnaceFormation.java the native construct of the InfernalFurnace research page, with the original blueprint and the original vis price (2026-10-23)",
+          "native common/src/gameTest/java/thaumcraft/common/testing/SurvivalProgressionRuntimeChecks.java the survival acceptance of the InfernalFurnace construct and of the meat nuggets it pays (2026-10-23)",
           "native common/src/main/resources/data/thaumcraft/recipe/ the 344 native recipe files that carry them",
           "native common/src/test/java/thaumcraft/research/ResearchRecipeCoverageTest.java the catalogue guard that pins the 308 original keys, the 293 native recipe ids and the outside-book set",
           "native common/src/test/java/thaumcraft/assets/RecipeIngredientParityTest.java the content guard that pins the original ingredient of the ten recipes this wave restored",
@@ -38391,11 +38398,17 @@
           "oracle thaumcraft/common/config/ConfigRecipes.java:83 the original registers the eldritch altar as the wand trigger of the event six and the original dispatch of WandManager.performTrigger:730-734 asks for the complete OCULUS research first",
           "native common/src/main/java/thaumcraft/common/lib/eldritch/OculusFormation.java the native oculus trigger with the original conditions and the original six hundred vis (2026-10-23)",
           "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the oculus dispatch of the wand (2026-10-23)",
-          "native common/src/gameTest/java/thaumcraft/common/testing/SurvivalProgressionRuntimeChecks.java the survival acceptance of the oculus and of the gate into the Outer Lands (2026-10-23)"
+          "native common/src/gameTest/java/thaumcraft/common/testing/SurvivalProgressionRuntimeChecks.java the survival acceptance of the oculus and of the gate into the Outer Lands (2026-10-23)",
+          "oracle thaumcraft/common/items/wands/WandManager.java:332-407 createArcaneFurnace: the three by three by three shell of nether bricks, obsidian, lava and one iron bar becomes the arcane furnace, the twenty seven candidate volumes, the fifty vis of fire and fifty vis of earth and the original metadata of every cell",
+          "oracle thaumcraft/common/config/ConfigRecipes.java:90-92 the original registers the nether brick, the obsidian and the iron bars as the trigger blocks of the event two, and the original dispatch of WandManager.performTrigger:718-720 asks for the complete INFERNALFURNACE research first",
+          "native common/src/main/java/thaumcraft/common/lib/ArcaneFurnaceFormation.java the native arcane furnace construct with the original blueprint, the original iron bar rule, the original candidate search and the original vis price (2026-10-23)",
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the dispatch of the arcane furnace construct (2026-10-23)",
+          "native common/src/gameTest/java/thaumcraft/common/testing/SurvivalProgressionRuntimeChecks.java the survival acceptance of the arcane furnace construct and of the four meat nuggets it pays (2026-10-23)"
         ],
         "notes": [
           "The 806 line manager was split into WandManager, WandVisDiscount, WandArchitect, FocusSelectionSources, FocusData, FocusUpgradeData and WandMaterials, each with the original arithmetic; the architect area of the original toggleMisc is the WandArchitect.Area record.",
           "CLOSED 2026-10-23: the focus gate of the original is restored. A wand with an installed focus leaves the bookshelf alone (WandManager:459-478); the port made a Thaumonomicon from a bookshelf in every case.",
+          "CLOSED 2026-10-23: the event two construct of the original, the arcane furnace, is ported. The port had the block, the tiles and the smelting bonus, but no way to build the furnace, so the four meat nuggets of the original had no source at all.",
           "DEVIATION: the class no longer exposes the original public static entry points, so an add-on that called e.g. WandManager.toggleMisc or the architect area helpers has to be rewritten against the new classes."
         ],
         "reviewed_sha256": {

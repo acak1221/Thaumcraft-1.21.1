@@ -57,11 +57,16 @@ class SurfaceStructurePlacementAssetsTest {
                 default -> { }
             }
         }
-        // Oracle ThaumcraftWorldGenerator:190 - one chunk in Config.nodeRarity.
-        assertEquals(ThaumcraftNormalNodeFeature.NODE_RARITY, chance, "the rarity of the wild nodes");
-        assertEquals(36, chance);
+        // Oracle ThaumcraftWorldGenerator:190 - one chunk in Config.nodeRarity. The rarity
+        // roll and the place of the node inside the chunk are the first two draws of the
+        // random of the chunk of the original, and the totem of the chunk reads the same
+        // stream, so the two features stay exclusive the way the auraGen flag of the
+        // original makes them exclusive (oracle :419 and :455). The feature therefore draws
+        // them itself and the placed feature only asks for the call.
+        assertEquals(null, chance, "the rarity of the wild nodes is the draw of the feature");
+        assertEquals(36, ThaumcraftNormalNodeFeature.NODE_RARITY);
         assertTrue(count, "the original calls the wild node pass once per chunk");
-        assertTrue(inSquare, "the original draws the place of the node inside the chunk");
+        assertFalse(inSquare, "the place of the node inside the chunk is the draw of the feature");
         assertTrue(biome, "the node belongs to the biomes of the node tag");
     }
 

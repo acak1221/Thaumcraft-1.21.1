@@ -35,15 +35,17 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         // This minimum unit intentionally registers only ordinary Overworld
         // nodes; Nether, End and custom-dimension ecology remain pending.
         if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
-        RandomSource random = context.random();
-        // Oracle ThaumcraftWorldGenerator:190-194 - the rarity roll and the place of the
-        // node inside the chunk belong to the placement of the original, so the feature
-        // only places the node the placement selected.
-        int x = context.origin().getX();
-        int z = context.origin().getZ();
-        int y = wildNodeY(level, random, x, z);
-        if (y < 0) return false;
-        return createRandomNodeAt(level, new BlockPos(x, y, z), random);
+        // Oracle ThaumcraftWorldGenerator:189-215 - the whole wild node pass of the original
+        // draws from the random of the chunk (the random of the chunk provider of 1.7.10),
+        // so the port draws it from the random of the chunk seed. The rarity roll of the
+        // pass is the first draw of that stream, and the totem of the chunk reads the same
+        // stream, so the two are exclusive the way the auraGen flag of the original makes
+        // them exclusive (oracle :419 and :455).
+        int chunkX = context.origin().getX() >> 4;
+        int chunkZ = context.origin().getZ() >> 4;
+        RandomSource random = RandomSource.create(
+                StructurePlacementRules.chunkSeed(level.getLevel().getSeed(), chunkX, chunkZ));
+        return placeWildNode(level, random, chunkX, chunkZ);
     }
 
     /**

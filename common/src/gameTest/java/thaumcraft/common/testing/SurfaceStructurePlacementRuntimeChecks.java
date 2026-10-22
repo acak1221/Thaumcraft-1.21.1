@@ -22,6 +22,7 @@ import thaumcraft.common.config.ThaumcraftNodes;
 import thaumcraft.common.config.ThaumcraftOuterLands;
 import thaumcraft.common.config.ThaumcraftVillages;
 import thaumcraft.common.lib.world.StructurePlacementRules;
+import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
 import thaumcraft.common.tiles.TileNode;
 
@@ -296,14 +297,17 @@ public final class SurfaceStructurePlacementRuntimeChecks {
     /**
      * The chunks the roll of the totem gives to the totem, with the column of the totem.
      *
-     * <p>The roll is the same one the feature draws: the chain of the original first, then
-     * the one in 360 of the totem, then the position inside the chunk.
+     * <p>The roll is the same one the feature draws: the rarity roll of the wild node pass
+     * first (the totem yields to a wild aura node of the chunk, oracle
+     * {@code ThaumcraftWorldGenerator:419} and {@code :455}), then the chain of the original,
+     * then the one in 360 of the totem, then the position inside the chunk.
      */
     private static List<int[]> totemChunks(long seed, int limit) {
         List<int[]> chunks = new ArrayList<>();
         for (int chunkX = 0; chunkX < 2048 && chunks.size() < limit; ++chunkX) {
             for (int chunkZ = 0; chunkZ < 64 && chunks.size() < limit; ++chunkZ) {
                 var random = RandomSource.create(StructurePlacementRules.chunkSeed(seed, chunkX, chunkZ));
+                if (random.nextInt(ThaumcraftNormalNodeFeature.NODE_RARITY) == 0) continue;
                 var draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
                 if (draw.kind() != StructurePlacementRules.Kind.NONE) continue;
                 if (random.nextInt(StructurePlacementRules.TOTEM_CHANCE) != 0) continue;

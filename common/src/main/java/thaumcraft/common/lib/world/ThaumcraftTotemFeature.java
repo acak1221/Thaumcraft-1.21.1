@@ -54,10 +54,18 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         int chunkZ = context.origin().getZ() >> 4;
         RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
                 level.getLevel().getSeed(), chunkX, chunkZ));
+        // Oracle ThaumcraftWorldGenerator:190 - the wild node pass of the original draws its
+        // rarity roll first, from the random of the chunk. The totem of the original is drawn
+        // after the wild node pass and after the exclusive chain of the structures
+        // (oracle :419 and :455) and it yields to a chunk that already carries an aura node,
+        // which is what the auraGen flag of the original stands for.
+        boolean wildNode = random.nextInt(ThaumcraftNormalNodeFeature.NODE_RARITY) == 0;
         // The exclusive structure chain comes first: the original draws the totem after the
         // chain and refuses the chunk that already received a structure with an aura node.
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
         if (draw.kind() != StructurePlacementRules.Kind.NONE) return false;
+        // Oracle ThaumcraftWorldGenerator:455 - the totem needs a chunk without an aura node.
+        if (wildNode) return false;
         // Oracle ThaumcraftWorldGenerator:149 - the rarity of the totem.
         if (random.nextInt(TOTEM_CHANCE) != 0) return false;
         // Oracle ThaumcraftWorldGenerator:151-152 - the position inside the chunk.

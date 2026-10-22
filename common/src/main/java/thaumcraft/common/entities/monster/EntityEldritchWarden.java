@@ -416,10 +416,13 @@ public class EntityEldritchWarden extends EntityThaumcraftBoss implements Ranged
                 if(field==null)continue;
                 level().setBlock(pos,field,3);
                 level().scheduleTick(pos,field.getBlock(),250+getRandom().nextInt(150));
-                // Original EntityEldritchWarden:231 - three of every ten field blocks draw the arc
-                // lightning, the rest draw the plain sparkle of the original PacketFXBlockSparkle.
-                if(level() instanceof ServerLevel server&&getRandom().nextFloat()<.3F)
-                    thaumcraft.common.lib.network.BlockFxNetworking.sendArc(server,this,pos);
+                // Original EntityEldritchWarden:231-234 - three of every ten field blocks draw the arc
+                // lightning, the other seven draw the plain sparkle of the original
+                // PacketFXBlockSparkle with the violet 0x800080.
+                if(level() instanceof ServerLevel server) {
+                    if(getRandom().nextFloat()<.3F) thaumcraft.common.lib.network.BlockFxNetworking.sendArc(server,this,pos);
+                    else thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(server,pos,0x800080);
+                }
             }
             playSound(sound("zap"),1.0F,.9F+level().random.nextFloat()*.1F);
         }

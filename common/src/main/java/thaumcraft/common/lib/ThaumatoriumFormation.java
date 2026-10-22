@@ -28,6 +28,7 @@ public final class ThaumatoriumFormation {
         if (!level.hasChunkAt(base.below()) || !level.hasChunkAt(base.above()) || !(level.getBlockEntity(base.below()) instanceof TileCrucible)
                 || !level.getBlockState(base).is(ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT.get()) || !level.getBlockState(base.above()).is(ThaumcraftDistillation.ALCHEMICAL_CONSTRUCT.get())) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (!(level instanceof net.minecraft.server.level.ServerLevel server)) return InteractionResult.FAIL;
         if (!(context.getPlayer() instanceof ServerPlayer player) || !KnowledgeAccess.get(player).isResearchComplete("THAUMATORIUM")) return InteractionResult.FAIL;
         ItemStack wand = context.getItemInHand();
         ItemStack originalWand = wand.copy();
@@ -45,6 +46,10 @@ public final class ThaumatoriumFormation {
         player.setItemInHand(context.getHand(), paid);
         level.updateNeighborsAt(base, level.getBlockState(base).getBlock()); level.updateNeighborsAt(base.above(), level.getBlockState(base.above()).getBlock());
         level.playSound(null, base, SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand")), SoundSource.BLOCKS, 1, 1);
+        // Original WandManager:244,245 - both halves of the new thaumatorium flash with the
+        // original random grey of the block sparkle.
+        thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(server, base, -9999);
+        thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(server, base.above(), -9999);
         return InteractionResult.CONSUME;
     }
 }

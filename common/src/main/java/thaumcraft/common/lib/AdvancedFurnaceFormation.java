@@ -130,6 +130,10 @@ public final class AdvancedFurnaceFormation {
         if(!complete) return InteractionResult.CONSUME;
         for(Piece piece:pieces) if(loaded(world,piece.pos) && world.getBlockState(piece.pos)==piece.formed && reversionFlags(world,piece.pos)==Block.UPDATE_ALL) world.updateNeighborsAt(piece.pos,piece.formed.getBlock());
         world.playSound(null,center,net.minecraft.sounds.SoundEvent.createVariableRangeEvent(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft","wand")),net.minecraft.sounds.SoundSource.BLOCKS,1,1);
+        // Original WandManager:793-800 - the new machine flashes with the original random
+        // grey of the PacketFXBlockSparkle over the whole three by two by three volume.
+        for(int x=-1;x<=1;x++) for(int y=0;y<=1;y++) for(int z=-1;z<=1;z++)
+            thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(world,center.offset(x,y,z),-9999);
         return InteractionResult.CONSUME;
         } catch(RuntimeException failure) { thaumcraft.common.Thaumcraft.LOG.warn("Advanced furnace installation interrupted after payment at {}",center,failure); return InteractionResult.CONSUME; }
     }

@@ -124,7 +124,12 @@ public final class WardingCasts {
             if (!stillCasting(player, level, wand, hand, binding, pos, face, eye, look) || level.getBlockEntity(pos) != ward
                     || level.getBlockState(pos) != expected || !ward.ownedBy(player.getUUID())) return false;
             boolean restored = level.setBlock(pos, back, Block.UPDATE_ALL);
-            if (restored) level.scheduleTick(pos, back.getBlock(), 2);
+            if (restored) {
+                level.scheduleTick(pos, back.getBlock(), 2);
+                // Original ItemFocusWarding:151 - the restored block flashes with the
+                // original orange 16556032 (0xFCA000) of the block sparkle.
+                thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(level, pos, 16556032);
+            }
             return restored;
         }
         BlockState original = level.getBlockState(pos);
@@ -150,6 +155,9 @@ public final class WardingCasts {
             ward.initialize(original, player.getUUID());
             level.sendBlockUpdated(pos, replacement, replacement, Block.UPDATE_CLIENTS);
             level.updateNeighborsAt(pos, replacement.getBlock());
+            // Original ItemFocusWarding:137 - the warded block flashes with the original
+            // orange 16556032 (0xFCA000) of the block sparkle.
+            thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(level, pos, 16556032);
             return true;
         } finally { CREATING.remove(); }
     }

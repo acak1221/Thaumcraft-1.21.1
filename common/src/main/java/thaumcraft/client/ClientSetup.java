@@ -54,6 +54,8 @@ public final class ClientSetup {
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initClient();
         // The original block visual channels: the arc lightning, the node bolt and the crucible bubbles.
         thaumcraft.common.lib.network.BlockFxNetworking.initClient(thaumcraft.client.fx.BlockFxClientEffects::accept);
+        // The original block sparkle packet: one burst of sparkles at a block with a colour.
+        thaumcraft.common.lib.network.BlockSparkleFxNetworking.initClient(thaumcraft.client.fx.BlockSparkleClientEffects::accept);
         // The original EventHandlerNetwork.clientLogsOut restores the client's own state when the connection
         // ends (oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:69-81). The common layer owns
         // that restore, so every loader behaves like the original.

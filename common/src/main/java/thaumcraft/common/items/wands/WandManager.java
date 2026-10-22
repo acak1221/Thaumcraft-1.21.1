@@ -56,6 +56,9 @@ public final class WandManager {
             return false;
         }
         level.sendParticles(ParticleTypes.ENCHANT, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 24, 0.3, 0.3, 0.3, 0.05);
+        // Original WandManager:420 - the bookshelf flashes with the original random
+        // grey of the PacketFXBlockSparkle.
+        thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(level, pos, -9999);
         level.playSound(null, pos, SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "wand")), SoundSource.PLAYERS, 1, 1);
         return true;
     }

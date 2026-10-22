@@ -269,6 +269,9 @@ public final class OuterLandsBossRooms {
                     for (int c = -2; c <= 2; ++c) {
                         BlockPos target = lockPos.offset(a, b, c);
                         if (!level.getBlockState(target).is(airy)) continue;
+                        // Oracle TileEldritchLock:130 - every removed eldritch field block
+                        // flashes with the original dark violet 0x400040 of the block sparkle.
+                        thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(level, target, 0x400040);
                         level.removeBlock(target, false);
                     }
                 }

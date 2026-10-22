@@ -11,6 +11,7 @@ logs
 .gradle-float/
 .gradle-fix9/
 .gradle-fix4b/
+.gradle-fix5b/
 .gradle-neoforge/
 .gradle-client/
 .gradle-client2/

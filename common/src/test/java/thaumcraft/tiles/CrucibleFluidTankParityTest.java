@@ -13,9 +13,10 @@ import thaumcraft.common.tiles.TileCrucible;
  *
  * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:61-71,373-410}: the crucible is a Forge
  * {@code IFluidHandler} with a tank of one thousand millibuckets. It accepts water only, it never takes
- * more than the free space of the tank and it never gives away more than it holds. The drain of a named
- * fluid refuses a stack that is not exactly the content of the tank, because the Forge comparison of
- * 1.7.10 compares the amounts as well.</p>
+ * more than the free space of the tank and it never gives away more than it holds. The fill answers
+ * with the amount the tank accepted, so an overflow is partly taken and partly refused. The drain of a
+ * named fluid refuses a stack that is not exactly the content of the tank, because the Forge
+ * comparison of 1.7.10 compares the amounts as well.</p>
  */
 class CrucibleFluidTankParityTest {
     @Test void theTankHoldsOneThousandMillibuckets() {
@@ -24,10 +25,14 @@ class CrucibleFluidTankParityTest {
     }
 
     @Test void theTankNeverTakesMoreThanItsFreeSpace() {
-        // Oracle TileCrucible:381 - the original tank refuses the overflow.
+        // Oracle TileCrucible:373-382 - the original hands the fill over to the Forge tank
+        // of 1.7.10, and that tank answers with the amount it accepted: the free space of
+        // the tank and the requested amount, whichever is smaller. A thousand and one
+        // millibuckets therefore fill the thousand of the tank and only the overflow is
+        // refused, so the answer is a thousand and not zero.
         assertEquals(500, TileCrucible.acceptedFill(0, 500));
         assertEquals(1000, TileCrucible.acceptedFill(0, 1000));
-        assertEquals(0, TileCrucible.acceptedFill(0, 1001));
+        assertEquals(1000, TileCrucible.acceptedFill(0, 1001));
         assertEquals(250, TileCrucible.acceptedFill(750, 500));
         assertEquals(0, TileCrucible.acceptedFill(1000, 1));
         assertEquals(0, TileCrucible.acceptedFill(0, -5));

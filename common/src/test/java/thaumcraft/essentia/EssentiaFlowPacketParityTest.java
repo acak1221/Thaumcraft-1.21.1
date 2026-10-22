@@ -51,10 +51,16 @@ class EssentiaFlowPacketParityTest {
     }
 
     @Test void thePhaseCountsBackOverTheShrinkingTail() {
-        // Oracle ClientTickEventsFML.java:263-266.
+        // Oracle ClientTickEventsFML.java:263-266: the phase is the client tick while the
+        // trail keeps its full size and counts back by the missing ticks of the shrinking
+        // tail. The tail starts at five ticks left, and at that moment nothing is missing
+        // yet, so the phase is still the client tick. It counts back from the fourth tick.
         assertEquals(1000, EssentiaFlowClientEffects.phase(1000, 15));
         assertEquals(1000, EssentiaFlowClientEffects.phase(1000, 6));
-        assertEquals(999, EssentiaFlowClientEffects.phase(1000, 5));
+        assertEquals(1000, EssentiaFlowClientEffects.phase(1000, 5));
+        assertEquals(999, EssentiaFlowClientEffects.phase(1000, 4));
+        assertEquals(998, EssentiaFlowClientEffects.phase(1000, 3));
+        assertEquals(997, EssentiaFlowClientEffects.phase(1000, 2));
         assertEquals(996, EssentiaFlowClientEffects.phase(1000, 1));
     }
 
@@ -73,12 +79,20 @@ class EssentiaFlowPacketParityTest {
     }
 
     @Test void theByteDeltaWrapsLikeTheOriginal() {
-        // The original wrote the delta as a byte, so a source that is more than 127
-        // blocks away wraps. The native keeps that wrap instead of hiding it.
+        // Oracle EssentiaHandler.java:54 - the sender casts the difference of the two
+        // positions to a byte, and the client reads it back as a byte
+        // (PacketFXEssentiaSource.java:59), so a source that is more than 127 blocks away
+        // wraps: the delta of two hundred is the byte minus fifty six.
+        assertEquals(-56, (int) (byte) (0 - -200));
         var payload = new EssentiaFlowFxPayload(
                 ResourceLocation.fromNamespaceAndPath("thaumcraft", "overworld"),
                 new BlockPos(0, 0, 0), (byte) 200, (byte) 0, (byte) 0, 0);
-        assertEquals(-200, payload.source().getX());
+        // The client of the original rebuilds the source with tx = x - dx
+        // (PacketFXEssentiaSource.java:65-67), so the wrapped delta puts the source
+        // fifty six blocks away and not two hundred.
+        assertEquals(56, payload.source().getX());
+        assertEquals(0, payload.source().getY());
+        assertEquals(0, payload.source().getZ());
     }
 
     @Test void theTargetPointRadiusIsTheOriginalOne() {

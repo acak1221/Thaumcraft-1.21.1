@@ -1,7 +1,0 @@
-{
-  "type": "minecraft:crafting_shaped",
-  "category": "misc",
-  "pattern": ["###", "###", "###"],
-  "key": {"#": {"tag": "thaumcraft:original_ore/nugget_iron"}},
-  "result": {"id": "minecraft:iron_ingot", "count": 1}
-}

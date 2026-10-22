@@ -174,7 +174,7 @@ public final class ContainerGolem extends AbstractContainerMenu {
                 ItemStack next;
                 if (type == ClickType.QUICK_MOVE && button == 0 || type == ClickType.PICKUP && cursor.isEmpty()) {
                     next = ItemStack.EMPTY;
-                } else if (type == ClickType.PICKUP && GolemData.isSupportedWaterFilter(cursor)) {
+                } else if (type == ClickType.PICKUP && GolemData.isSupportedFluidFilter(cursor)) {
                     next = cursor.copy();
                 } else return;
                 serverGolem.setFilter(0, next);

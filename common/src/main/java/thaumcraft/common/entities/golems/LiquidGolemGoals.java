@@ -9,28 +9,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
+import thaumcraft.common.items.golems.GolemFluidCargo;
 import thaumcraft.common.items.golems.GolemLiquidQueue;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.items.golems.GolemUpgrade;
-import thaumcraft.common.items.golems.GolemWaterCargo;
-import thaumcraft.common.tiles.TileCrucible;
+import thaumcraft.common.lib.fluid.GolemFluidAccess;
+import thaumcraft.common.lib.fluid.GolemFluidBlocks;
+import thaumcraft.common.lib.fluid.GolemFluidHandler;
 
 /**
- * Ordinary marked source water -> separate mB stock -> attached crucible only. With an Entropy upgrade the golem drains, one bucket per
- * pulse, the queue {@link GolemLiquidQueue} builds from the marked block instead of the marked block itself.
+ * The Decanting golem of the original, fluid for fluid.
+ *
+ * <p>Oracle {@code thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java},
+ * {@code AILiquidGather.java} and {@code AILiquidGoto.java} with the searches of
+ * {@code thaumcraft/common/entities/golems/GolemHelper.java:331-446}:</p>
+ *
+ * <ul>
+ *   <li>the <b>home</b> is any {@code IFluidHandler} at the home cell of the golem and the wanted
+ *       fluids are the ones that it can take there ({@code getMissingLiquids}:341-369);</li>
+ *   <li>the <b>source</b> is any marked {@code IFluidHandler} of the wanted fluid
+ *       ({@code getMarkedFluidHandlers}:420-429) or a marked fluid block of it
+ *       ({@code getMarkedFluidBlocks}:431-446);</li>
+ *   <li>the <b>cargo</b> is a {@code FluidStack}, that is a fluid and an amount in millibuckets.</li>
+ * </ul>
+ *
+ * <p>With an Entropy upgrade the golem drains, one block per pulse, the queue
+ * {@link GolemLiquidQueue} builds from the marked block instead of the marked block itself.</p>
  */
 final class LiquidGolemGoals {
     private final EntityGolemBase golem;
-    private TileCrucible home;
+    private BlockPos home;
+    private ResourceLocation wanted;
     private BlockPos source, route, origin;
     private ServerLevel routeLevel;
     private Path ownedPath;
@@ -39,9 +58,11 @@ final class LiquidGolemGoals {
     private int pathCount, gatherCount;
     private BlockPos attemptSource, attemptAnchor;
     private BlockState attemptState;
+    private BlockPos attemptHandler;
+    private Direction attemptHandlerFace;
+    private ResourceLocation attemptFluid;
     // Per marked block: the sources still to drain (Entropy). Rebuilt when empty; targets are re-validated at every pulse.
     private final Map<BlockPos, ArrayDeque<BlockPos>> queues = new HashMap<>();
-    private TileCrucible deliveryAttempt;
 
     private record Source(BlockPos pos, BlockState state) {}
 
@@ -58,37 +79,60 @@ final class LiquidGolemGoals {
     boolean ownsCollectionAttempt(BlockPos anchor, BlockPos pos, BlockState state) {
         return ownsCollectionAttempt(pos, state) && attemptAnchor != null && attemptAnchor.equals(anchor);
     }
-    boolean ownsDeliveryAttempt(TileCrucible actualHome) { return emptying && deliveryAttempt == actualHome && actualHome != null; }
+    boolean ownsCollectionAttempt(BlockPos pos, Direction face) {
+        return gathering && watched && attemptHandler != null && attemptHandler.equals(pos) && attemptHandlerFace == face;
+    }
+    boolean ownsDeliveryAttempt(BlockPos actualHome) { return emptying && deliveryAttempt != null && deliveryAttempt.equals(actualHome); }
+    private BlockPos deliveryAttempt;
+    /** The fluid of the block that the current gather attempt drains. */
+    ResourceLocation anchorFluid() { return attemptFluid; }
     static boolean loaded(ServerLevel level, BlockPos pos) {
         return !level.isOutsideBuildHeight(pos) && level.getWorldBorder().isWithinBounds(pos) && level.hasChunkAt(pos);
     }
-    static boolean sourceWater(ServerLevel level, BlockPos pos, BlockState state) {
-        return loaded(level, pos) && state.is(Blocks.WATER) && state.getFluidState().isSource()
-                && !state.hasBlockEntity() && level.getBlockEntity(pos) == null;
+    /**
+     * Whether the block is a source of the wanted fluid.
+     *
+     * <p>Oracle {@code GolemHelper.getMarkedFluidBlocks}:431-446: a marked block is a source of the
+     * wanted fluid when it holds that fluid and the fluid of the block is a full source.</p>
+     */
+    static boolean sourceFluid(ServerLevel level, BlockPos pos, BlockState state, ResourceLocation fluid) {
+        return loaded(level, pos) && GolemFluidBlocks.isFluid(state, fluid) && GolemFluidBlocks.isSource(state);
     }
-    private boolean ready() { return golem.liquidReady() && golem.currentWaterHome(home); }
-    private boolean room() { return golem.waterSpace() >= GolemWaterCargo.BUCKET; }
+    private boolean ready() { return golem.liquidReady(); }
+    private boolean room() { return golem.fluidSpace() >= GolemFluidCargo.BUCKET; }
     private double distance(BlockPos pos) {
         return golem.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5);
     }
-    private Source sourceAt(ServerLevel server, GolemMarker marker) {
+    private Source sourceAt(ServerLevel server, GolemMarker marker, ResourceLocation fluid) {
         // Dimension rejection precedes ALL reads at a marker's coordinates.
         if (!marker.dimension().equals(server.dimension().location()) || !loaded(server, marker.pos())) return null;
         BlockState state = server.getBlockState(marker.pos());
-        return sourceWater(server, marker.pos(), state) ? new Source(marker.pos(), state) : null;
+        return sourceFluid(server, marker.pos(), state, fluid) ? new Source(marker.pos(), state) : null;
     }
-    private List<Source> nearbySources() {
+    /** The marked fluid blocks of the wanted fluid next to the golem. */
+    private List<Source> nearbySources(ResourceLocation fluid) {
         List<Source> result = new ArrayList<>();
         if (!(golem.level() instanceof ServerLevel server)) return result;
         Set<BlockPos> seen = new HashSet<>();
         for (GolemMarker marker : golem.getMarkers()) {
             if (!marker.dimension().equals(server.dimension().location()) || !seen.add(marker.pos()) || distance(marker.pos()) >= 4) continue;
-            Source found = sourceAt(server, marker);
+            Source found = sourceAt(server, marker, fluid);
             if (found != null) result.add(found);
         }
         return result; // Marker list order; faces of one block never pay twice in a pulse.
     }
-    private Source nearestSource(ServerLevel server) {
+    /**
+     * The marked fluid handlers of the wanted fluid next to the golem.
+     *
+     * <p>Oracle {@code GolemHelper.getMarkedFluidHandlersAdjacentToGolem}:409-418: a marked cell
+     * that holds the wanted fluid and stands next to the golem.</p>
+     */
+    private List<GolemMarker> nearbyHandlers(ResourceLocation fluid) {
+        List<GolemMarker> result = new ArrayList<>();
+        for (GolemMarker marker : GolemHelper.getMarkedFluidHandlersAdjacentToGolem(golem, fluid)) result.add(marker);
+        return result;
+    }
+    private Source nearestSource(ServerLevel server, ResourceLocation fluid) {
         Source best = null;
         double nearest = Double.MAX_VALUE, range = golem.getRange() * golem.getRange();
         Set<BlockPos> seen = new HashSet<>();
@@ -96,17 +140,17 @@ final class LiquidGolemGoals {
             if (!marker.dimension().equals(server.dimension().location()) || !seen.add(marker.pos())) continue;
             double distance = distance(marker.pos());
             if (distance > range || distance >= nearest) continue;
-            Source candidate = sourceAt(server, marker);
+            Source candidate = sourceAt(server, marker, fluid);
             if (candidate != null) { best = candidate; nearest = distance; }
         }
         return best; // Inclusive actor range, strict-nearer tie; no home radius or unmarked search.
     }
     /**
      * What the next pulse drains for a marked block that is next to the golem: the marked block itself, or with Entropy the head of its
-     * queue (original AILiquidGather:225-262). Entries that are no longer ordinary source water or no longer in range are skipped; when
+     * queue (original AILiquidGather:225-262). Entries that are no longer ordinary source fluid or no longer in range are skipped; when
      * the queue is spent the marked block is the target.
      */
-    private Source nextTarget(ServerLevel server, Source anchor) {
+    private Source nextTarget(ServerLevel server, Source anchor, ResourceLocation fluid) {
         if (golem.getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0) return anchor;
         Set<BlockPos> marked = new HashSet<>();
         for (GolemMarker marker : golem.getMarkers()) marked.add(marker.pos());
@@ -115,15 +159,15 @@ final class LiquidGolemGoals {
         ArrayDeque<BlockPos> queue = queues.get(anchor.pos());
         if (queue == null || queue.isEmpty()) {
             queue = new ArrayDeque<>(GolemLiquidQueue.build(anchor.pos(), range,
-                    pos -> loaded(server, pos) && server.getBlockState(pos).is(Blocks.WATER),
-                    pos -> loaded(server, pos) && sourceWater(server, pos, server.getBlockState(pos))));
+                    pos -> loaded(server, pos) && server.getBlockState(pos).getFluidState().isSource(),
+                    pos -> loaded(server, pos) && sourceFluid(server, pos, server.getBlockState(pos), fluid)));
             queues.put(anchor.pos(), queue);
         }
         while (!queue.isEmpty()) {
             BlockPos pos = queue.poll();
             if (!loaded(server, pos) || !GolemLiquidQueue.inRange(anchor.pos(), pos, range)) continue;
             BlockState state = server.getBlockState(pos);
-            if (sourceWater(server, pos, state)) return new Source(pos.immutable(), state);
+            if (sourceFluid(server, pos, state, fluid)) return new Source(pos.immutable(), state);
         }
         return anchor;
     }
@@ -142,14 +186,29 @@ final class LiquidGolemGoals {
         }
         return best;
     }
+    /** The wanted fluids of the original: the fluids the home can take. */
+    private List<ResourceLocation> wantedFluids() { return GolemHelper.getMissingLiquids(golem); }
+    /** The wanted fluid that the cargo of the golem is, or null. */
+    private ResourceLocation carriedFluid() {
+        ResourceLocation id = golem.getFluidId();
+        if (id == null || golem.getFluidAmountMb() <= 0) return null;
+        return id;
+    }
+    /** The first wanted fluid that the world offers a source of. */
+    private ResourceLocation firstWantedWithSource(ServerLevel server) {
+        for (ResourceLocation fluid : wantedFluids()) {
+            if (!nearbySources(fluid).isEmpty() || !nearbyHandlers(fluid).isEmpty()) return fluid;
+        }
+        return null;
+    }
     /** Decisions are actual server ticks, not modern selector's half-rate admission checks. */
     void serverTick() {
         if (!golem.liquidReady()) { reset(); return; }
         if (golem.tickCount % 5 != 0) return;
         try {
-            TileCrucible actual = golem.permittedWaterHome();
+            BlockPos actual = golem.permittedFluidHome();
             if (actual == null) { reset(); return; }
-            if (home != null && home != actual) reset();
+            if (home != null && !home.equals(actual)) reset();
             home = actual;
             if (!room()) {
                 clearSource();
@@ -159,32 +218,39 @@ final class LiquidGolemGoals {
             if (moving || gathering || emptying) return;
             emptyReady = canEmpty();
             if (emptyReady) { clearSource(); return; }
-            if (watched && golem.getNavigation().isDone() && !nearbySources().isEmpty()) {
+            if (!(golem.level() instanceof ServerLevel server)) { clearSource(); return; }
+            ResourceLocation candidate = firstWantedWithSource(server);
+            if (candidate == null) { clearSource(); return; }
+            wanted = candidate;
+            if (watched && golem.getNavigation().isDone() && !nearbySources(candidate).isEmpty()) {
                 gatherReady = true;
                 gotoReady = false;
                 return;
             }
-            Source selected = nearestSource((ServerLevel) golem.level());
+            Source selected = nearestSource(server, candidate);
             if (selected == null) { clearSource(); return; }
             source = selected.pos();
             watched = true;
-            if (golem.getNavigation().isDone() && !nearbySources().isEmpty()) {
+            if (golem.getNavigation().isDone() && !nearbySources(candidate).isEmpty()) {
                 gatherReady = true;
                 gotoReady = false;
                 route = null;
             } else {
-                route = approach((ServerLevel) golem.level(), source);
+                route = approach(server, source);
                 gotoReady = true;
                 gatherReady = false;
             }
         } catch (RuntimeException failure) {
             reset();
-            Thaumcraft.LOG.warn("Golem Decanting decision failed; retaining water cargo", failure);
+            Thaumcraft.LOG.warn("Golem Decanting decision failed; retaining fluid cargo", failure);
         }
     }
     private boolean canEmpty() {
-        return ready() && golem.getWaterAmountMb() > 0 && home.getWaterAmount() < TileCrucible.CAPACITY
-                && golem.getNavigation().isDone() && golem.distanceToHomeSqr() <= 5;
+        // Oracle AILiquidEmpty:45-55 - a cargo, an idle navigator, the squared distance of five and the wanted set.
+        ResourceLocation carried = carriedFluid();
+        if (carried == null || !ready() || !golem.getNavigation().isDone()) return false;
+        if (golem.distanceToHomeSqr() > 5) return false;
+        return wantedFluids().contains(carried);
     }
     private void stopOwnedPath() {
         if (ownedPath != null && golem.level() == routeLevel && golem.getNavigation().getPath() == ownedPath) golem.getNavigation().stop();
@@ -196,13 +262,16 @@ final class LiquidGolemGoals {
         watched = moving = gathering = gotoReady = gatherReady = false;
         source = route = origin = null;
         pathCount = gatherCount = 0;
+        attemptSource = attemptAnchor = attemptHandler = null;
+        attemptState = null;
+        attemptHandlerFace = null;
+        attemptFluid = null;
     }
     void reset() {
-        clearSource(); // Never touches actual waterMb, native item cargo or paid fishing output.
+        clearSource(); // Never touches actual fluid cargo, native item cargo or paid fishing output.
         home = deliveryAttempt = null;
+        wanted = null;
         emptying = emptyReady = false;
-        attemptSource = attemptAnchor = null;
-        attemptState = null;
         queues.clear();
     }
     private abstract class LiquidGoal extends Goal {
@@ -218,16 +287,17 @@ final class LiquidGolemGoals {
             if (attempted || !emptying) return;
             attempted = true; // Even the intervening tickRunningGoals pass cannot repeat a one-shot fill.
             if (!canEmpty()) return;
-            TileCrucible actual = home;
+            BlockPos actual = home;
             deliveryAttempt = actual;
-            try { golem.deliverWaterToHome(actual); }
+            try { golem.deliverFluidToHome(actual); }
             finally { deliveryAttempt = null; }
         }
         @Override public void stop() { emptying = false; }
     }
     private final class Gather extends LiquidGoal {
         @Override public boolean canUse() {
-            return gatherReady && watched && ready() && room() && golem.getNavigation().isDone() && !nearbySources().isEmpty();
+            return gatherReady && watched && ready() && room() && golem.getNavigation().isDone()
+                    && wanted != null && !nearbySources(wanted).isEmpty();
         }
         @Override public boolean canContinueToUse() {
             return gathering && watched && gatherCount < 20 && ready() && room() && golem.getNavigation().isDone();
@@ -235,19 +305,35 @@ final class LiquidGolemGoals {
         @Override public boolean isInterruptable() { return false; }
         @Override public void start() { gatherReady = false; gathering = true; gatherCount = 0; }
         @Override public void tick() {
-            if (!gathering || !watched || !ready() || !room() || !golem.getNavigation().isDone()) { clearSource(); return; }
+            if (!gathering || !watched || !ready() || !room() || !golem.getNavigation().isDone() || wanted == null) { clearSource(); return; }
             if (gatherCount >= 20) { clearSource(); return; }
             if (++gatherCount < 10) return;
-            for (Source candidate : nearbySources()) {
+            // Oracle AILiquidGather:141-160 - the marked fluid handlers come first, then the marked fluid blocks.
+            for (GolemMarker marker : nearbyHandlers(wanted)) {
                 if (!gathering || !watched || !ready() || !room()) return;
-                int before = golem.getWaterAmountMb();
-                Source target = nextTarget((ServerLevel) golem.level(), candidate);
+                int before = golem.getFluidAmountMb();
+                attemptHandler = marker.pos();
+                attemptHandlerFace = marker.face();
+                attemptFluid = wanted;
+                try { golem.collectMarkedHandlerFluid(marker.pos(), marker.face(), wanted, golem.fluidSpace()); }
+                finally { attemptHandler = null; attemptHandlerFace = null; attemptFluid = null; }
+                if (golem.getFluidAmountMb() != before) {
+                    gatherCount = 0;
+                    if (!room()) clearSource();
+                    return; // At most ONE source, including a paid operation whose feedback threw.
+                }
+            }
+            for (Source candidate : nearbySources(wanted)) {
+                if (!gathering || !watched || !ready() || !room()) return;
+                int before = golem.getFluidAmountMb();
+                Source target = nextTarget((ServerLevel) golem.level(), candidate, wanted);
                 attemptAnchor = candidate.pos();
                 attemptSource = target.pos();
                 attemptState = target.state();
-                try { golem.collectMarkedSourceWater(candidate.pos(), target.pos(), target.state()); }
-                finally { attemptSource = attemptAnchor = null; attemptState = null; }
-                if (golem.getWaterAmountMb() != before) {
+                attemptFluid = wanted;
+                try { golem.collectMarkedSourceFluid(candidate.pos(), target.pos(), target.state()); }
+                finally { attemptSource = attemptAnchor = null; attemptState = null; attemptFluid = null; }
+                if (golem.getFluidAmountMb() != before) {
                     gatherCount = 0;
                     if (!room()) clearSource();
                     return; // At most ONE source, including a paid operation whose feedback threw.
@@ -293,7 +379,7 @@ final class LiquidGolemGoals {
             moving = gotoReady = false;
             route = null;
             pathCount = 0;
-            if (!ready() || !room() || !golem.getNavigation().isDone() || nearbySources().isEmpty()) watched = false;
+            if (!ready() || !room() || !golem.getNavigation().isDone() || nearbySources(wanted).isEmpty()) watched = false;
         }
     }
 }

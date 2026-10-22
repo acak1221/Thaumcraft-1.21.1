@@ -379,10 +379,14 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
         return core == NO_CORE || core == FILL || core == EMPTY_CORE || core == GATHER || core == HARVEST || core == LUMBER || core == GUARD || core == LIQUID || core == ALCHEMY || core == USE || core == BUTCHER || core == SORTING || core == FISHING;
     }
 
-    /** Water-only Decanting uses a single pristine filled-container exemplar,
-     * never the container's count/components as owned fluid or wanted stock. */
-    public static boolean isSupportedWaterFilter(ItemStack exemplar) {
-        return exemplar != null && (exemplar.isEmpty() || ItemStack.matches(exemplar, new ItemStack(Items.WATER_BUCKET)));
+    /** The Decanting filter is any filled container, never the container's count or components as owned fluid.
+     *
+     * <p>Oracle {@code GolemHelper.getMissingLiquids}:354-363 asks the registry of the original for
+     * the fluid of every filled container of the inventory of the golem. An empty filter is no
+     * container at all and therefore no restriction.</p>
+     */
+    public static boolean isSupportedFluidFilter(ItemStack exemplar) {
+        return exemplar != null && (exemplar.isEmpty() || thaumcraft.common.lib.fluid.GolemFluidAccess.fluidOfFilledContainer(exemplar) != null);
     }
 
     private static List<Integer> defaultWantedCounts(int core, List<ItemStack> filters) {
@@ -464,8 +468,8 @@ public record GolemData(int core, List<ItemStack> filters, List<Integer> wantedC
             if (wanted == null || (filter.isEmpty() || core == LIQUID ? wanted != 0 : wanted < 1 || wanted > MAX_WANTED)) {
                 throw new IllegalArgumentException("Wanted count must be 0 for fluid/EMPTY or 1..256 for a populated item filter");
             }
-            if (core == LIQUID && (slot == 0 ? !isSupportedWaterFilter(filter) : !filter.isEmpty())) {
-                throw new IllegalArgumentException("Water-only Decanting has only one pristine water-bucket ghost filter");
+            if (core == LIQUID && (slot == 0 ? !isSupportedFluidFilter(filter) : !filter.isEmpty())) {
+                throw new IllegalArgumentException("Decanting has only one filled-container ghost filter");
             }
             if (core == USE && wanted != (filter.isEmpty() ? 0 : 1)) {
                 throw new IllegalArgumentException("Use item filters are whitelist-only, with wanted count 0/1");

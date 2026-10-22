@@ -36,7 +36,7 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemUpgrade;
-import thaumcraft.common.items.golems.GolemWaterCargo;
+import thaumcraft.common.items.golems.GolemFluidCargo;
 import thaumcraft.common.lib.world.TreeLogTraversal;
 
 /** Loader protection callbacks around finite crop/water work.
@@ -113,11 +113,11 @@ public final class GolemHarvestPlatform {
     /** Only the exact native WATER-source -> AIR pair has a callback-free
      * lifecycle body inside LevelChunk.setBlockState. Never generalize to BEs,
      * arbitrary blocks, flowing fluids or third-party fluid providers. */
-    static boolean collectSourceWater(EntityGolemBase golem, BlockPos target, BlockState expected) {
+    static boolean collectSourceFluid(EntityGolemBase golem, BlockPos target, BlockState expected, net.minecraft.resources.ResourceLocation fluid) {
         if (golem == null || !(golem.level() instanceof ServerLevel level) || bridge == null || target == null) return false;
         BlockPos pos = target.immutable();
         LevelChunk chunk = loadedWaterChunk(level, pos);
-        if (!waterEligible(level, golem, chunk, pos, expected)) return false;
+        if (!waterEligible(level, golem, chunk, pos, expected, fluid)) return false;
         Bridge platform = bridge;
         boolean committed = false;
         try {
@@ -126,24 +126,24 @@ public final class GolemHarvestPlatform {
             actor.setPos(golem.getX(), golem.getY(), golem.getZ());
             actor.setYRot(golem.getYRot());
             actor.setXRot(golem.getXRot());
-            if (!waterEligible(level, golem, chunk, pos, expected) || !level.mayInteract(actor, pos)) return false;
+            if (!waterEligible(level, golem, chunk, pos, expected, fluid) || !level.mayInteract(actor, pos)) return false;
             if (!platform.sharedBreak(level, actor, pos, expected)) {
                 platform.canceled(level, actor, pos, expected);
                 return false;
             }
-            if (!waterEligible(level, golem, chunk, pos, expected) || !bound(platform, level, actor)
+            if (!waterEligible(level, golem, chunk, pos, expected, fluid) || !bound(platform, level, actor)
                     || actor.distanceToSqr(golem) != 0 || !level.mayInteract(actor, pos)) return false;
             if (!platform.before(level, actor, pos, expected)) {
                 platform.canceled(level, actor, pos, expected);
                 return false;
             }
-            if (!waterEligible(level, golem, chunk, pos, expected) || !bound(platform, level, actor)
+            if (!waterEligible(level, golem, chunk, pos, expected, fluid) || !bound(platform, level, actor)
                     || actor.distanceToSqr(golem) != 0 || !level.mayInteract(actor, pos)) {
                 platform.canceled(level, actor, pos, expected);
                 return false;
             }
-            int oldAmount = golem.getWaterAmountMb();
-            new GolemWaterCargo(oldAmount + GolemWaterCargo.BUCKET)
+            int oldAmount = golem.getFluidAmountMb();
+            new GolemFluidCargo(fluid, oldAmount + GolemFluidCargo.BUCKET)
                     .validate(golem.getGolemMaterial(), golem.getUpgradeAmount(GolemUpgrade.EARTH));
             BlockState air = Blocks.AIR.defaultBlockState();
             // The native chunk API owns palette counts, heightmaps, skylight,
@@ -155,10 +155,10 @@ public final class GolemHarvestPlatform {
                 Thaumcraft.LOG.warn("Water drain at {} changed outside its finite native contract; no cargo grant or restoration", pos);
                 return false;
             }
-            if (!golem.creditCollectedSourceWater(pos, oldAmount)) {
+            if (!golem.creditCollectedSourceFluid(pos, oldAmount)) {
                 // No external notification has run. Restore only our unchanged
                 // AIR, never a replacement/refilled source or committed stock.
-                if (golem.getWaterAmountMb() == oldAmount && loadedWaterChunk(level, pos) == chunk
+                if (golem.getFluidAmountMb() == oldAmount && loadedWaterChunk(level, pos) == chunk
                         && chunk.getBlockState(pos) == air && chunk.setBlockState(pos, expected, false) == air) {
                     notifyWaterChange(level, chunk, pos, air, expected);
                 }
@@ -186,11 +186,11 @@ public final class GolemHarvestPlatform {
         return chunk != null && chunk.getLevel() == level && chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING) ? chunk : null;
     }
 
-    private static boolean waterEligible(ServerLevel level, EntityGolemBase golem, LevelChunk chunk, BlockPos pos, BlockState expected) {
+    private static boolean waterEligible(ServerLevel level, EntityGolemBase golem, LevelChunk chunk, BlockPos pos, BlockState expected, net.minecraft.resources.ResourceLocation fluid) {
         if (chunk == null || loadedWaterChunk(level, pos) != chunk || expected == null
-                || !expected.is(Blocks.WATER) || expected.getBlock().getClass() != LiquidBlock.class
                 || !expected.getFluidState().isSource() || expected.hasBlockEntity()
-                || chunk.getBlockState(pos) != expected || !golem.canCollectSourceWater(pos, expected)
+                || fluid == null || !thaumcraft.common.lib.fluid.GolemFluidBlocks.isFluid(expected, fluid)
+                || chunk.getBlockState(pos) != expected || !golem.canCollectSourceFluid(pos, expected)
                 || !level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) return false;
         // Guard the immediate native notification/shape halo. Normal downstream
         // Minecraft propagation is not a universal addon callback sandbox.

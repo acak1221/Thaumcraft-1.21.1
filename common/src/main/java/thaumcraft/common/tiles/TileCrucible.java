@@ -179,23 +179,12 @@ public final class TileCrucible extends BlockEntity {
         return net.minecraft.world.level.material.Fluids.WATER;
     }
 
-    /** Finite Decanting transfer. Both raw owners change before any sync hook:
-     * a failed post-fill notification never refunds or replays accepted water. */
-    public int fillWaterFromGolem(EntityGolemBase golem, int requestedAmountMb) {
-        if (!(level instanceof ServerLevel server) || !server.getServer().isSameThread()
-                || !isCurrent() || golem == null || golem.level() != server
-                || !golem.canTransferWaterTo(this) || requestedAmountMb <= 0) return 0;
-        int owned = golem.getWaterAmountMb();
-        int accepted = Math.min(Math.min(requestedAmountMb, owned), CAPACITY - water);
-        if (accepted <= 0 || !golem.detachWaterToCrucible(this, accepted, owned)) return 0;
-        water += accepted; // Raw credit immediately after raw cargo debit: no callback in between.
-        try { changed(); }
-        catch (RuntimeException feedback) {
-            Thaumcraft.LOG.warn("Golem filled {}mB at {}; notification failed, transfer is not replayed", accepted, worldPosition, feedback);
-        }
-        return accepted;
-    }
-
+    /**
+     * The original's tank of the crucible is water only and the Decanting golem pays it through the
+     * loader independent fluid handler of the common layer, so the tile owns no transfer of its own.
+     *
+     * @see thaumcraft.common.lib.fluid.GolemFluidAccess
+     */
     private boolean isCurrent() {
         return level != null && !isRemoved() && level.hasChunkAt(worldPosition) && level.getBlockEntity(worldPosition) == this
                 && level.getBlockState(worldPosition).is(ThaumcraftAlchemy.CRUCIBLE.get());

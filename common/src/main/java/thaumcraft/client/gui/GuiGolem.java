@@ -211,7 +211,7 @@ public final class GuiGolem extends ThaumcraftContainerScreen<ContainerGolem> {
                 graphics.drawWordWrap(font, Component.translatable("tc.port.golem.water_filter"), 0, 0, 136, 0xffdddddd);
                 var golem = menu.golem();
                 if (golem != null) graphics.drawString(font,
-                        Component.translatable("tooltip.thaumcraft.golem.water_cargo", golem.getWaterAmountMb()), 0, 54, 0xffdddddd, false);
+                        Component.translatable("tooltip.thaumcraft.golem.fluid_cargo", golem.getFluidAmountMb()), 0, 54, 0xffdddddd, false);
             } finally { graphics.pose().popPose(); }
         }
         if (menu.canSwitchUseOptions()) {

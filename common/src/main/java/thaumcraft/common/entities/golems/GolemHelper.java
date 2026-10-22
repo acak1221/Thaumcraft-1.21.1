@@ -4,10 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemMarker;
+import thaumcraft.common.lib.fluid.GolemFluidAccess;
+import thaumcraft.common.lib.fluid.GolemFluidBlocks;
+import thaumcraft.common.lib.fluid.GolemFluidHandler;
 
 /**
  * The one entry point of the searches of the golem.
@@ -20,11 +28,13 @@ import thaumcraft.common.items.golems.GolemMarker;
  * original is here, with the original's name and the original's rule, and it delegates to the pure
  * rule classes of the native tree. The rules themselves are unchanged.</p>
  *
- * <p>The searches of the <b>fluid</b> half of the original ({@code findJarWithRoom},
- * {@code getMarkedFluidHandlers}, {@code getMarkedFluidBlocks}, {@code getMissingLiquids},
- * {@code findPossibleLiquid} and {@code getReggedLiquids}) are still owned by the Decanting and the
- * Alchemy goals of the native tree, because the 1.21.1 common module has no loader independent fluid
- * handler API yet; see the report of the wave for the exact blocker.</p>
+ * <p>The searches of the <b>fluid</b> half of the original ({@code getReggedLiquids},
+ * {@code getMissingLiquids}, {@code getMarkedFluidHandlers},
+ * {@code getMarkedFluidHandlersAdjacentToGolem}, {@code getMarkedFluidBlocks} and
+ * {@code findPossibleLiquid}) are here again, with the original's names and the original's rule.
+ * They ask the loader independent fluid handler API of the common layer
+ * ({@link thaumcraft.common.lib.fluid.GolemFluidAccess}), which the Fabric and the NeoForge module
+ * answer with their own transfer API.</p>
  */
 public final class GolemHelper {
     /**
@@ -266,5 +276,125 @@ public final class GolemHelper {
     public static boolean adjacent(EntityGolemBase golem, BlockPos pos) {
         if (golem == null || pos == null) return false;
         return golem.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) < ADJACENT_RANGE;
+    }
+
+    // ---------------------------------------------------------------------
+    // The fluid half of the original (oracle GolemHelper:331-446).
+    // ---------------------------------------------------------------------
+
+    /**
+     * Original {@code getReggedLiquids}:331-339 — every registered fluid.
+     *
+     * <p>The original registers the water and the lava of the game and the fluids of the addons.
+     * The 1.21.1 registry also holds the empty fluid and the two flowing variants, which are no
+     * fluid of their own in 1.7.10: they share the empty bucket.</p>
+     */
+    public static List<ResourceLocation> getReggedLiquids() {
+        List<ResourceLocation> results = new ArrayList<>();
+        for (Fluid fluid : BuiltInRegistries.FLUID) {
+            if (fluid.getBucket() == Items.BUCKET) continue; // The empty fluid and the flowing variants.
+            ResourceLocation id = BuiltInRegistries.FLUID.getKey(fluid);
+            if (id != null) results.add(id);
+        }
+        return results;
+    }
+
+    /**
+     * Original {@code getMissingLiquids}:341-369 — the fluids the home of the golem can take.
+     *
+     * <p>The home is any fluid handler (oracle {@code GolemHelper}:348-352). The cargo of the golem
+     * decides the fluid: a loaded cargo accepts only its own fluid. The filter of the golem must
+     * be a filled container when it holds one (oracle {@code GolemHelper}:354-363).</p>
+     */
+    public static List<ResourceLocation> getMissingLiquids(EntityGolemBase golem) {
+        List<ResourceLocation> results = new ArrayList<>();
+        if (golem == null) return results;
+        GolemFluidHandler home = golem.fluidHome();
+        if (home == null) return results;
+        Direction facing = golem.getHomeFacing();
+        ItemStack filter = golem.getFilter(0);
+        boolean filtered = filter != null && !filter.isEmpty();
+        for (ResourceLocation id : getReggedLiquids()) {
+            if (golem.getFluidAmountMb() > 0 && !id.equals(golem.getFluidId())) continue;
+            if (!home.canFill(facing, id)) continue;
+            if (filtered && GolemFluidAccess.fluidOfFilledContainer(filter) == null) continue;
+            results.add(id);
+        }
+        return results;
+    }
+
+    /**
+     * Original {@code getMarkedFluidHandlers}:420-429 — the marked cells that hold the fluid.
+     *
+     * <p>The original probes every marked cell with a drain of one millibucket that it never
+     * commits, so a cell that holds another fluid is not a source of this one.</p>
+     */
+    public static List<GolemMarker> getMarkedFluidHandlers(EntityGolemBase golem, ResourceLocation fluid) {
+        List<GolemMarker> results = new ArrayList<>();
+        if (golem == null || fluid == null || !(golem.level() instanceof ServerLevel server)) return results;
+        for (GolemMarker marker : golem.getMarkers()) {
+            if (!marker.dimension().equals(server.dimension().location())) continue;
+            if (!holdsFluid(server, marker, fluid)) continue;
+            results.add(marker);
+        }
+        return results;
+    }
+
+    /** Original {@code getMarkedFluidHandlersAdjacentToGolem}:409-418 — the same, next to the golem. */
+    public static List<GolemMarker> getMarkedFluidHandlersAdjacentToGolem(EntityGolemBase golem, ResourceLocation fluid) {
+        List<GolemMarker> results = new ArrayList<>();
+        for (GolemMarker marker : getMarkedFluidHandlers(golem, fluid)) {
+            if (!adjacent(golem, marker.pos())) continue;
+            results.add(marker);
+        }
+        return results;
+    }
+
+    /** Original {@code getMarkedFluidBlocks}:431-446 — the marked cells that are a source of the fluid. */
+    public static List<GolemMarker> getMarkedFluidBlocks(EntityGolemBase golem, ResourceLocation fluid) {
+        List<GolemMarker> results = new ArrayList<>();
+        if (golem == null || fluid == null || !(golem.level() instanceof ServerLevel server)) return results;
+        for (GolemMarker marker : golem.getMarkers()) {
+            if (!marker.dimension().equals(server.dimension().location())) continue;
+            BlockState state = server.getBlockState(marker.pos());
+            if (!GolemFluidBlocks.isFluid(state, fluid) || !GolemFluidBlocks.isSource(state)) continue;
+            results.add(marker);
+        }
+        return results;
+    }
+
+    /**
+     * Original {@code findPossibleLiquid}:371-407 — the nearest marked source of the fluid.
+     *
+     * <p>A marked fluid handler comes first; a marked fluid block is the fall back. The range is
+     * the range of the golem and the nearer one wins.</p>
+     */
+    public static BlockPos findPossibleLiquid(EntityGolemBase golem, ResourceLocation fluid) {
+        if (golem == null || fluid == null) return null;
+        double range = golem.getRange() * golem.getRange();
+        BlockPos best = null;
+        double nearest = Double.MAX_VALUE;
+        for (GolemMarker marker : getMarkedFluidHandlers(golem, fluid)) {
+            double distance = golem.distanceToSqr(marker.pos().getX() + .5, marker.pos().getY() + .5, marker.pos().getZ() + .5);
+            if (distance > range || distance >= nearest) continue;
+            nearest = distance;
+            best = marker.pos();
+        }
+        if (best != null) return best;
+        for (GolemMarker marker : getMarkedFluidBlocks(golem, fluid)) {
+            double distance = golem.distanceToSqr(marker.pos().getX() + .5, marker.pos().getY() + .5, marker.pos().getZ() + .5);
+            if (distance > range || distance >= nearest) continue;
+            nearest = distance;
+            best = marker.pos();
+        }
+        return best;
+    }
+
+    /** Whether the marked cell holds the fluid on its marked side. */
+    private static boolean holdsFluid(ServerLevel server, GolemMarker marker, ResourceLocation fluid) {
+        if (!LiquidGolemGoals.loaded(server, marker.pos())) return false;
+        GolemFluidHandler handler = GolemFluidAccess.of(server, marker.pos());
+        if (handler == null) return false;
+        return handler.drain(marker.face(), fluid, 1, false) > 0;
     }
 }

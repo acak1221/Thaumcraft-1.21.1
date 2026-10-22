@@ -1825,7 +1825,7 @@
   "tooltip.thaumcraft.golem.marker_color": "Marker colour: %s",
   "tooltip.thaumcraft.golem.core_fishing": "Fishing: cast into nearby water for fish, junk or treasure. A player or Gather golem collects the catch.",
   "tooltip.thaumcraft.golem.core_liquid": "Decanting: collect marked water sources and refill the attached crucible. Other fluids and tanks are not yet ported.",
-  "tooltip.thaumcraft.golem.water_cargo": "Carried water: %s mB",
+  "tooltip.thaumcraft.golem.fluid_cargo": "Carried fluid: %s mB",
   "tooltip.thaumcraft.golem.core_alchemy": "Alchemy: carry essentia from the attached alembic to marked normal warded jars. Networks and void jars are not yet ported.",
   "tooltip.thaumcraft.golem.aspect_cargo": "Carried essentia: %s × %s",
   "tooltip.thaumcraft.golem.core_butcher": "Butcher: cull surplus adult farm animals. Named, leashed and allied animals are excluded; needs more than two eligible animals of the same kind.",

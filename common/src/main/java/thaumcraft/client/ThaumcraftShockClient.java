@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import thaumcraft.client.fx.particles.TypeSparkleParticle;
 import thaumcraft.common.lib.network.ShockFxNetworking;
 import thaumcraft.common.lib.network.ShockFxPayload;
 
@@ -59,8 +60,34 @@ public final class ThaumcraftShockClient {
                 || !level.hasChunkAt(BlockPos.containing(payload.origin())) || !level.hasChunkAt(BlockPos.containing(payload.target()))) return;
         var caster = level.getEntity(payload.casterId());
         if (caster == null || caster.isRemoved() || !caster.getBoundingBox().inflate(3).contains(payload.origin())) return;
+        // Oracle ItemFocusShock:157-175 - five sparkles at the point where the ray hit a block
+        // and five at the centre of the pointed entity.
+        if (payload.blockHit() != null) sparkles(level, payload.blockHit(), .15F);
+        if (payload.entityHit() != null) sparkles(level, payload.entityHit(), .3F);
         if (BOLTS.size() == MAX_BOLTS) BOLTS.removeFirst();
         BOLTS.add(new Bolt(payload));
+    }
+
+    /**
+     * The five sparkles of the original at one point.
+     *
+     * <p>Oracle {@code ItemFocusShock.java:161-166} and {@code :170-175}: the position of every
+     * sparkle is the point with a random offset of the spread on the three axes, the size is
+     * {@code 2.0f + rand.nextFloat()}, the type is two and the gravity is
+     * {@code 0.05f + rand.nextFloat() * 0.05f}, and the proxy of the original draws the particle
+     * when {@code rand.nextInt(6) < particleCount(2)}.</p>
+     */
+    private static void sparkles(net.minecraft.client.multiplayer.ClientLevel level, Vec3 at, float spread) {
+        for (int i = 0; i < 5; i++) {
+            double x = at.x + (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * spread;
+            double y = at.y + (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * spread;
+            double z = at.z + (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * spread;
+            float size = 2.0F + level.getRandom().nextFloat();
+            float gravity = .05F + level.getRandom().nextFloat() * .05F;
+            if (level.getRandom().nextInt(6) < TypeSparkleParticle.particleCount()) {
+                Minecraft.getInstance().particleEngine.add(new TypeSparkleParticle(level, x, y, z, size, 2, 6, gravity));
+            }
+        }
     }
 
     private static void tick(Minecraft client) {

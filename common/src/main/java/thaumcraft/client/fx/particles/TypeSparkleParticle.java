@@ -42,10 +42,23 @@ public final class TypeSparkleParticle extends Particle {
 
     private final float size;
     private final int multiplier;
+    private final float gravity;
 
     public TypeSparkleParticle(ClientLevel level, double x, double y, double z, float size, int type, int multiplier) {
+        this(level, x, y, z, size, type, multiplier, 0F);
+    }
+
+    /**
+     * The sparkle of the original with its gravity.
+     *
+     * <p>Oracle {@code FXSparkle.java:168-172} ({@code setGravity}) and the tick of the original
+     * ({@code FXSparkle.java:172-176}): the motion of the particle falls with
+     * {@code 0.04 * gravity} every tick.</p>
+     */
+    public TypeSparkleParticle(ClientLevel level, double x, double y, double z, float size, int type, int multiplier, float gravity) {
         super(level, x, y, z);
         this.multiplier = multiplier;
+        this.gravity = gravity;
         lifetime = 3 * multiplier;
         hasPhysics = false;
         xd = yd = zd = 0;
@@ -93,6 +106,8 @@ public final class TypeSparkleParticle extends Particle {
     @Override public void tick() {
         xo = x; yo = y; zo = z;
         if (age++ >= lifetime) { remove(); return; }
+        // The original falls with 0.04 * gravity every tick.
+        yd -= .04F * gravity;
         move(xd, yd, zd);
         xd *= .9080000019073486F; yd *= .9080000019073486F; zd *= .9080000019073486F;
     }
@@ -111,6 +126,6 @@ public final class TypeSparkleParticle extends Particle {
         // The original shrinks the quad over the life of the particle.
         float quad = size * (lifetime - age + 1) / lifetime;
         VisNetRender.draw(VisNetRender.PARTICLES, GL11.GL_ONE, false, out ->
-                VisNetRender.quad(out, pose, quad, 1, rgb, u, u + .0624375F, .25F, .3124375F));
+                VisNetRender.quad(out, pose, quad, ALPHA, rgb, u, u + .0624375F, .25F, .3124375F));
     }
 }

@@ -71,3 +71,13 @@ license does not relicense it. Source client JAR SHA256:
 source PNG SHA256:`b99ec87194c344874949bcf3dcc40745128800c82def4a75c48b6d38e1694575`.
 Only the required small crop is retained, with deterministic extraction in
 `scripts/porting/extract_research_toast.py`; no original JAR or full atlas is included.
+
+### Blurred-vision post program
+
+`assets/minecraft/shaders/program/thaumcraft_blur.{json,fsh}` and
+`thaumcraft_blur_vertex.vsh` under `common/src/main/resources` adapt Mojang's
+Minecraft 1.7.10 `blur.json`, `blur.fsh` and `sobel.vsh` to GLSL 150 syntax and
+collision-free program names. The squared asymmetric sample weights are retained.
+Source official client JAR SHA1: `e80d9b3bf5085002218d4be59e668bac718abbc6`.
+Minecraft and these assets are owned by Mojang/Microsoft; this repository's
+source license does not relicense them. No external distribution is authorized.

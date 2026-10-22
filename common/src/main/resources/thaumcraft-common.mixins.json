@@ -89,7 +89,9 @@
     "client.WarpPostEffectsMixin",
     "client.WardedHitParticleMixin",
     "client.ResearchPopupScreenMixin",
-    "client.Tc4BiomeColorMixin"
+    "client.Tc4BiomeColorMixin",
+    "client.ContainerScreenAspectRowMixin",
+    "client.AbstractContainerScreenAccess"
   ],
   "injectors": {
     "defaultRequire": 1

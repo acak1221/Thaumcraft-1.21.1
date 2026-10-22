@@ -120,8 +120,7 @@ public final class ItemThaumometerRenderer {
         // Original ItemThaumometerRenderer:107, the equip progress of the item in the hand.
         // The 1.7.10 client read the private fields of its ItemRenderer; the native port
         // reproduces the original curve, see thaumcraft.client.lib.UtilsFX.
-        float progress = thaumcraft.client.lib.UtilsFX.getEquippedProgress(player.getMainHandItem(),
-                net.minecraft.world.InteractionHand.MAIN_HAND, player.tickCount, partial);
+        float progress = thaumcraft.client.lib.UtilsFX.getEquippedProgress(partial);
         pose.translate(-0.7F * FIRST_PERSON_SCALE,
                 -(-0.65F * FIRST_PERSON_SCALE) + (1.0F - progress) * 1.5F,
                 0.9F * FIRST_PERSON_SCALE);

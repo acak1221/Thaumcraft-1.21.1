@@ -10,7 +10,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -25,13 +24,13 @@ import net.minecraft.world.item.ItemStack;
  *   <li>{@link #getTextureAnimationSize(String)} and {@link #getTextureSize(String, int)} are
  *       the original animated texture helpers (oracle {@code UtilsFX.java:469-507}): they read
  *       the size of the PNG of the mod and divide it.</li>
- *   <li>{@link #getEquippedProgress(ItemStack, InteractionHand, int, float)} is the equip
+ *   <li>{@link #getEquippedProgress(float)} is the equip
  *       progress of the held item. The original read the private fields
  *       {@code equippedProgress} and {@code prevEquippedProgress} of the 1.7.10
  *       {@code ItemRenderer} by reflection (oracle {@code UtilsFX.java:861-877}); the 1.21.1
- *       {@code ItemInHandRenderer} has no such field - the equip animation of the item was
- *       removed from the vanilla client - so the native port reproduces the original curve
- *       of the 1.7.10 {@code ItemRenderer.updateEquippedItem} (see the method).</li>
+ *       {@code ItemInHandRenderer} has mainHandHeight/oMainHandHeight, but its target now
+ *       cubes attack strength (vanilla ItemInHandRenderer:549-574). A tick-driven tracker
+ *       preserves the 1.7.10 curve without that combat-cooldown addition.</li>
  *   <li>{@link #getGuiZLevel()} is the original GUI z level (oracle
  *       {@code UtilsFX.java:906-913}); the 1.21.1 GUI has no z level, the depth of the
  *       screens is owned by the render state, so the native value is zero.</li>
@@ -58,10 +57,10 @@ public final class UtilsFX {
     private static final Map<Object, Integer> TEXTURE_SIZE_CACHE = new HashMap<>();
 
     private static ItemStack equippedStack;
-    private static InteractionHand equippedHand;
+    private static int equippedSlot = -1;
     private static float equippedProgress;
     private static float prevEquippedProgress;
-    private static int equippedTick = -1;
+    private static Object equippedLevel;
 
     private UtilsFX() {}
 
@@ -119,13 +118,20 @@ public final class UtilsFX {
         try (InputStream stream = Minecraft.getInstance().getResourceManager().open(location)) {
             byte[] header = stream.readNBytes(24);
             if (header.length < 24) throw new IOException("Image not found: " + path);
-            DataInputStream data = new DataInputStream(new java.io.ByteArrayInputStream(header));
-            data.readInt();// the length of the IHDR chunk
-            data.readInt();// "IHDR"
-            int width = data.readInt();
-            int height = data.readInt();
-            return new int[]{width, height};
+            return pngSize(header);
         }
+    }
+
+    /** PNG signature (8), IHDR length (4), IHDR type (4), then width/height.
+     * Pure header parsing keeps ImageIO's dimensions without depending on a client in tests. */
+    public static int[] pngSize(byte[] header) throws IOException {
+        if (header.length < 24) throw new IOException("Truncated PNG header");
+        DataInputStream data = new DataInputStream(new java.io.ByteArrayInputStream(header));
+        if (data.readLong() != 0x89504e470d0a1a0aL || data.readInt() != 13 || data.readInt() != 0x49484452)
+            throw new IOException("Not a PNG IHDR");
+        int width = data.readInt(), height = data.readInt();
+        if (width <= 0 || height <= 0) throw new IOException("Invalid PNG dimensions");
+        return new int[]{width, height};
     }
 
     /**
@@ -134,8 +140,8 @@ public final class UtilsFX {
      * <p>The original read the two private fields of the 1.7.10 {@code ItemRenderer} by
      * reflection (oracle {@code UtilsFX.java:861-877}) and interpolated them with the
      * partial tick (oracle {@code ItemThaumometerRenderer.java:106}). The 1.21.1
-     * {@code net.minecraft.client.renderer.ItemInHandRenderer} has no
-     * {@code equippedProgress} field, so the native port reproduces the curve of the 1.7.10
+     * {@code net.minecraft.client.renderer.ItemInHandRenderer} adds attack-strength easing,
+     * so the native port separately reproduces the curve of the 1.7.10
      * vanilla {@code ItemRenderer.updateEquippedItem}:</p>
      *
      * <ul>
@@ -146,40 +152,47 @@ public final class UtilsFX {
      *   <li>below {@code 0.1} the tracked item is replaced by the current one.</li>
      * </ul>
      *
-     * @param held        the stack in the hand
-     * @param hand        the hand that holds the stack
-     * @param tick        the tick counter of the player
      * @param partialTick the partial tick of the frame
      * @return the interpolated progress, between zero and one
      */
-    public static float getEquippedProgress(ItemStack held, InteractionHand hand, int tick, float partialTick) {
-        if (tick != equippedTick) {
-            equippedTick = tick;
-            prevEquippedProgress = equippedProgress;
-            boolean same = equippedHand == hand && sameStack(equippedStack, held);
-            if (equippedStack == null && held == null) same = true;
-            if (held != null && equippedStack != null && !sameStack(equippedStack, held)
-                    && held.getItem() == equippedStack.getItem()
-                    && held.getDamageValue() == equippedStack.getDamageValue()) {
-                equippedStack = held;
-                same = true;
-            }
-            float delta = (same ? 1.0F : 0.0F) - equippedProgress;
-            if (delta < -EQUIP_STEP) delta = -EQUIP_STEP;
-            if (delta > EQUIP_STEP) delta = EQUIP_STEP;
-            equippedProgress += delta;
-            if (equippedProgress < EQUIP_RESET) {
-                equippedStack = held;
-                equippedHand = hand;
-            }
-        }
+    public static float getEquippedProgress(float partialTick) {
         return prevEquippedProgress + (equippedProgress - prevEquippedProgress) * partialTick;
     }
 
-    /** The identity of the two stacks, the 1.7.10 test of the same item instance. */
-    private static boolean sameStack(ItemStack first, ItemStack second) {
-        if (first == null || second == null) return first == second;
-        return first == second;
+    /** Vanilla 1.7.10 bly.a:518-544 (MCP ItemRenderer.updateEquippedItem).
+     * Run even when the thaumometer is NOT rendered, including third-person and open menus. */
+    public static void tick(Minecraft client) {
+        if (client.player == null || equippedLevel != client.level) {
+            equippedStack = null;
+            equippedSlot = -1;
+            prevEquippedProgress = equippedProgress = 0;
+            equippedLevel = client.level;
+        }
+        if (client.player == null) return;
+        if (client.isPaused()) return;
+        ItemStack current = client.player.getMainHandItem();
+        ItemStack held = current.isEmpty() ? null : current;
+        int slot = client.player.getInventory().selected;
+        prevEquippedProgress = equippedProgress;
+        boolean same = equippedSlot == slot && held == equippedStack;
+        if (equippedStack == null && held == null) same = true;
+        if (held != null && equippedStack != null && held != equippedStack
+                && held.getItem() == equippedStack.getItem()
+                && held.getDamageValue() == equippedStack.getDamageValue()) {
+            equippedStack = held;
+            same = true;
+        }
+        equippedProgress = equipStep(equippedProgress, same);
+        if (equippedProgress < EQUIP_RESET) { equippedStack = held; equippedSlot = slot; }
+    }
+
+    public static float equipStep(float progress, boolean same) {
+        return progress + Math.max(-EQUIP_STEP, Math.min(EQUIP_STEP, (same ? 1 : 0) - progress));
+    }
+
+    /** RenderWisp:65-72 / RenderPrimalArrow:112-119: keep the unusual width/64 nudge. */
+    public static float wispUvSpan(int textureSize) {
+        return (textureSize - .01F) / (textureSize * 4F);
     }
 
     /**

@@ -28,7 +28,8 @@ public final class TileNodeEnergizedRenderer implements BlockEntityRenderer<Tile
             if(aspects.size()>0){var type=node.getNodeType();int strip=switch(type){case NORMAL->1;case UNSTABLE->6;case DARK->2;case TAINTED->5;case PURE->4;case HUNGRY->3;};float scale=.1F+average/aspects.size()/150F;if(type==NodeType.HUNGRY)scale*=.75F;if(type==NodeType.UNSTABLE)angle=0;VisNetRender.billboard(pose,VisNetRender.NODES,angle,scale,alpha,32,strip,frame,0xffffff,type==NodeType.DARK || type==NodeType.TAINTED?GL11.GL_ONE_MINUS_SRC_ALPHA:GL11.GL_ONE);}
             // Original Energized38-42: retained4096x256 =>16 horizontal frames,
             // 40ms + TESR camera-relative X phase; fixed scale.33 / alpha.9.
-            double relativeX=node.getBlockPos().getX()-Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().x;int ringFrame=(int)(((double)(now/40000000L)+relativeX)%16);VisNetRender.facingQuad(pose,VisNetRender.RING,.33F,.9F,16,ringFrame,true);
+            int frames=thaumcraft.client.lib.UtilsFX.getTextureAnimationSize("textures/items/lightningringv.png");
+            double relativeX=node.getBlockPos().getX()-Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().x;int ringFrame=(int)(((double)(now/40000000L)+relativeX)%frames);VisNetRender.facingQuad(pose,VisNetRender.RING,.33F,.9F,frames,ringFrame,true);
         }finally{pose.popPose();}
     }
     @Override public int getViewDistance(){return 64;}

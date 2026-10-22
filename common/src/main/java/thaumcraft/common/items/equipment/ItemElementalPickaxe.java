@@ -20,8 +20,8 @@ import thaumcraft.api.IRepairable;
  * Pickaxe of the Core (original ItemElementalPickaxe, Api THAUMIUM_ELEMENTAL: tier 3, 1500 uses, speed 10, damage bonus 3, enchantability
  * 18, repaired with the Thaumium ingot). What it hits burns for two seconds (a player target only with player-versus-player on), and the
  * stone it mines may give a native cluster (see {@link thaumcraft.common.lib.utils.SpecialMining}). A right click costs five uses and
- * plays the failing-wand sound. The original also started a client-side ore scan there (a see-through overlay of every ore within eight
- * blocks for five seconds): that render is not ported.
+ * plays the failing-wand sound; on the client it also starts the original ore scan (a see-through overlay of every ore within eight
+ * blocks for five seconds, {@code thaumcraft.client.lib.ScanOverlay}) and swings the arm.
  */
 public class ItemElementalPickaxe extends PickaxeItem implements IRepairable {
     /** Seconds of fire for a hit, original {@code setFire(2)}. */
@@ -52,6 +52,14 @@ public class ItemElementalPickaxe extends PickaxeItem implements IRepairable {
         if (context.getLevel() instanceof ServerLevel level) {
             var pos = context.getClickedPos();
             level.playSound(null, pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5, FAIL, SoundSource.PLAYERS, 0.2F, 0.2F + level.random.nextFloat() * 0.2F);
+        }
+        // Oracle ItemElementalPickaxe.java:89-92: the client half starts the scan with the
+        // deadline now + 5000 and swings the arm. The client class is referenced only in this
+        // client-only branch, like the animateTick effects of the blocks.
+        if (player != null && context.getLevel().isClientSide) {
+            thaumcraft.client.lib.ScanOverlay.start(player, context.getClickedPos(),
+                    System.currentTimeMillis() + thaumcraft.client.lib.ScanOverlay.DURATION_MILLIS);
+            player.swing(context.getHand());
         }
         return InteractionResult.PASS;
     }

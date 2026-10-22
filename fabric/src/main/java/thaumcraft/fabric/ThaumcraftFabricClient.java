@@ -133,6 +133,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
             thaumcraft.client.ThaumcraftArchitectClient.render(context.matrixStack(), buffers, partialTick, context.camera());
             thaumcraft.client.ThaumcraftGolemClient.renderMarkers(context.matrixStack(), buffers, partialTick, context.camera());
             buffers.endBatch(net.minecraft.client.renderer.RenderType.lines());
+            thaumcraft.client.lib.ScanOverlay.render(context.matrixStack(), partialTick);
         });
     }
 }

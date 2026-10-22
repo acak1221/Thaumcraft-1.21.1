@@ -57,10 +57,22 @@ public final class VisNetRender {
         drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.TRIANGLE_STRIP,vertices);
     }
     private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,VertexFormat.Mode mode,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,destination,depthWrite,selected,format,mode,false,true,vertices);
+    }
+    private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,VertexFormat.Mode mode,boolean cull,boolean depthTest,Consumer<VertexConsumer> vertices){
         Objects.requireNonNull(selected,"Native effect shader must be registered before drawing");
         try(NativeState ignored=new NativeState()){
-            RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,destination);RenderSystem.enableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);RenderSystem.disableCull();
+            RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,destination);if(depthTest)RenderSystem.enableDepthTest();else RenderSystem.disableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);if(cull)RenderSystem.enableCull();else RenderSystem.disableCull();
             var mesh=MESH.begin(mode,format);vertices.accept(mesh);BufferUploader.drawWithShader(mesh.buildOrThrow());
+        }
+    }
+    /** RenderEventHandler:421-454: see-through additive scan, original packed light supplied per vertex.
+     * Fluid faces retain the ordinary alpha threshold; ore strips use 1/255. */
+    public static void drawScan(ResourceLocation texture,boolean fluid,Consumer<VertexConsumer> vertices){
+        ShaderInstance selected=fluid?net.minecraft.client.renderer.GameRenderer.getParticleShader():thaumcraft.client.fx.particles.MonsterSpriteParticle.litShader();
+        try(NativeState ignored=new NativeState()){
+            Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
+            drawFormat(texture,GL11.GL_ONE,false,selected,DefaultVertexFormat.PARTICLE,VertexFormat.Mode.QUADS,fluid,false,vertices);
         }
     }
     /** UtilsFX facing-strip UVs. Positions supplied by a caller-owned pose. */

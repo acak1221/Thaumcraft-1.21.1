@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.client.renderers.models.gear.HarnessArmorRenderer;
 import thaumcraft.client.renderers.models.gear.ModelFortressArmor;
 import thaumcraft.client.renderers.models.gear.ModelGearArmor;
 import thaumcraft.client.renderers.models.gear.ModelHoverHarness;
@@ -22,8 +23,10 @@ import thaumcraft.client.renderers.models.gear.ModelLeaderArmor;
 import thaumcraft.client.renderers.models.gear.ModelRobe;
 import thaumcraft.client.renderers.models.gear.ModelWand;
 import thaumcraft.api.wands.ItemFocusBasic;
+import thaumcraft.common.items.armor.HarnessData;
 import thaumcraft.common.items.armor.ItemFortressArmor;
 import thaumcraft.common.items.armor.ItemRobeArmor;
+import thaumcraft.common.items.armor.ItemVoidRobeArmor;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandMaterials;
 import thaumcraft.common.items.wands.foci.FocusData;
@@ -159,6 +162,37 @@ public final class ThaumcraftGearModelsClient {
                 } finally { pose.popPose(); }
             }
         } finally { pose.popPose(); }
+    }
+
+    /**
+     * The loader independent dispatch of the original TC4 gear models.
+     *
+     * <p>The Fabric loader registers the three renderers of the Fabric
+     * {@code ArmorRenderer} API and the NeoForge loader draws the very same pieces from its own
+     * armour layer. Both call the renderers of this class, so the two loaders cannot draw the
+     * gear differently: the void robe, the Thaumium Fortress armour and the hover harness with
+     * the chest cube and the retained OBJ pack.</p>
+     *
+     * <p>The cultist plate and the cultist leader armour are NOT drawn here: the Fabric
+     * loader never registered them, so they keep the native armour layer on both loaders.</p>
+     *
+     * @return true when the original TC4 model drew the piece
+     */
+    public static boolean renderGearItem(PoseStack pose, MultiBufferSource buffers, ItemStack armor, LivingEntity entity,
+                                          EquipmentSlot slot, int light, HumanoidModel<LivingEntity> context) {
+        if (armor.getItem() instanceof ItemVoidRobeArmor) {
+            renderRobe(pose, buffers, armor, entity, slot, light, context);
+            return true;
+        }
+        if (armor.getItem() instanceof ItemFortressArmor) {
+            renderFortressArmor(pose, buffers, armor, entity, slot, light, context);
+            return true;
+        }
+        if (HarnessData.isHarness(armor)) {
+            HarnessArmorRenderer.render(pose, buffers, armor, entity, slot, light, context);
+            return true;
+        }
+        return false;
     }
 
     /**

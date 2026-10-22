@@ -6250,9 +6250,9 @@
       "sha256": "1cc881cc6a1e74e44fa5a2cd5e39e44596fef3e8984267403a42fda3a9c60778"
     },
     {
-      "path": "common/src/main/java/thaumcraft/common/mixin/client/RobeArmorLayerMixin.java",
+      "path": "fabric/src/main/java/thaumcraft/fabric/mixin/client/FabricRobeArmorLayerMixin.java",
       "role": "native_foundation",
-      "sha256": "ec18cdb6606d082a10692703f42ec1f755e2ea4aaca940e1a2bf695a0d97e5fa"
+      "sha256": "996e4da1dcaf25b4b69d0f8ecb22a6e5c84940592bdb8632141b4a684a229205"
     },
     {
       "path": "common/src/main/java/thaumcraft/common/mixin/client/TableOutlineMixin.java",

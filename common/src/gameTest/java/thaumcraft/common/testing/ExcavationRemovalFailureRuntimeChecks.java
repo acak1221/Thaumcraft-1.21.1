@@ -2,9 +2,6 @@ package thaumcraft.common.testing;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.BlockEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
@@ -15,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -212,32 +210,20 @@ public final class ExcavationRemovalFailureRuntimeChecks {
     }
 
     /** Counts actual loader AFTER callbacks; never invokes harvesting/events by hand.
-     * Restore EXACT old invoker, including when native onRemove throws. */
+     * The loader owns the phase: Fabric decorates its own AFTER event, NeoForge observes its
+     * own native removal. Neither loader class is named here. */
     private static final class AfterProbe implements AutoCloseable {
-        private final Object event, previous;
-        private final Field invoker;
+        private final NativeBreakPhases probe;
         private AfterProbe(Context context) {
-            try {
-                Class<?> owner = Class.forName("net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents");
-                event = owner.getField("AFTER").get(null);
-                invoker = event.getClass().getSuperclass().getDeclaredField("invoker"); invoker.setAccessible(true);
-                previous = invoker.get(event);
-                Class<?> callback = Class.forName(owner.getName() + "$After");
-                invoker.set(event, Proxy.newProxyInstance(callback.getClassLoader(), new Class<?>[]{callback}, (proxy, method, args) -> {
-                    Object result;
-                    try { result = method.invoke(previous, args); }
-                    catch (InvocationTargetException failure) { throw failure.getCause(); }
-                    if (args != null && args.length == 5 && args[0] == context.level && args[1] == context.actor.player) {
-                        if (context.actor.root.equals(args[2])) context.primaryAfter++;
-                        if (context.fault.equals(args[2])) context.extraAfter++;
-                    }
-                    return result;
-                }));
-            } catch (ReflectiveOperationException failure) { throw new IllegalStateException("Native removal AFTER observer unavailable", failure); }
+            probe = NativeBreakPhases.Holder.factory().install(context.level, context.actor.player,
+                    NativeBreakPhases.Phase.AFTER, new NativeBreakPhases.Listener() {
+                        @Override public void after(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
+                            if (level != context.level || player != context.actor.player) return;
+                            if (context.actor.root.equals(pos)) context.primaryAfter++;
+                            if (context.fault.equals(pos)) context.extraAfter++;
+                        }
+                    });
         }
-        @Override public void close() {
-            try { invoker.set(event, previous); }
-            catch (IllegalAccessException failure) { throw new IllegalStateException("Cannot restore native removal AFTER observer", failure); }
-        }
+        @Override public void close() { probe.close(); }
     }
 }

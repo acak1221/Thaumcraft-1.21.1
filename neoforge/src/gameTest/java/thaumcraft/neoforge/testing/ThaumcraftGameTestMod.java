@@ -27,6 +27,10 @@ public final class ThaumcraftGameTestMod {
 
     public ThaumcraftGameTestMod(IEventBus bus) {
         bus.addListener((RegisterGameTestsEvent event) -> event.register(ThaumcraftGameTests.class));
+        // The shared harness observes the loader's own block-break phases. NeoForge
+        // owns the native BlockEvent.BreakEvent and the real removal; the shared
+        // side never names a loader class.
+        thaumcraft.common.testing.NativeBreakPhases.Holder.install(NeoForgeBreakPhases::install);
         // The test-only blocks of the shared harness must enter the native registry
         // before it freezes. The Fabric harness registers them in its mod
         // initializer; NeoForge has no such phase, but its RegisterEvent fires

@@ -15,7 +15,11 @@ logs
 .gradle-client/
 .gradle-client2/
 .gradle-mp/
+<<<<<<< HEAD
 .gradle-lev/
+=======
+.gradle-neo/
+>>>>>>> agent/w3neo
 build/
 out/
 run/

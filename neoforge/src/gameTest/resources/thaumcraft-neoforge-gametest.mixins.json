@@ -7,7 +7,7 @@
     "GameTestHelperMockConnectionMixin",
     "BoreNativeGameEventMixin",
     "GameTestSelectionMixin",
-    "GameTestHelperMockPlayerMixin"
+    "NeoForgeBreakPhaseMixin"
   ],
   "injectors": {
     "defaultRequire": 1

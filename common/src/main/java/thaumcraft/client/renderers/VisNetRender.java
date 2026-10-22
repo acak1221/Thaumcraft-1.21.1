@@ -57,11 +57,20 @@ public final class VisNetRender {
         drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.TRIANGLE_STRIP,vertices);
     }
     private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,VertexFormat.Mode mode,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,destination,depthWrite,selected,format,mode,false,vertices);
+    }
+    private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,VertexFormat.Mode mode,boolean cull,Consumer<VertexConsumer> vertices){
         Objects.requireNonNull(selected,"Native effect shader must be registered before drawing");
         try(NativeState ignored=new NativeState()){
-            RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,destination);RenderSystem.enableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);RenderSystem.disableCull();
+            RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,destination);RenderSystem.enableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);if(cull)RenderSystem.enableCull();else RenderSystem.disableCull();
             var mesh=MESH.begin(mode,format);vertices.accept(mesh);BufferUploader.drawWithShader(mesh.buildOrThrow());
         }
+    }
+    /** Additive quad that KEEPS face culling, e.g. the original UtilsFX.renderQuadCenteredFromTexture,
+     * which never touched the cull state of the world pass (oracle RenderEventHandler:492-500). */
+    public static void drawCulled(ResourceLocation texture,int destination,boolean depthWrite,Consumer<VertexConsumer> vertices){
+        ShaderInstance selected=Objects.requireNonNull(shader,"Root must pass node_stabilizer_bubble to VisNetClientEffects.setShader before VisNet rendering");
+        drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.QUADS,true,vertices);
     }
     /** UtilsFX facing-strip UVs. Positions supplied by a caller-owned pose. */
     public static void billboard(PoseStack pose,ResourceLocation texture,float angle,float scale,float alpha,int frames,int strip,int frame,int colour,int destination){

@@ -108,10 +108,29 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
      * of the mound, without side effects.
      */
     static boolean samplesPass(WorldGenLevel level, int i, int k) {
+        if (!level.hasChunk(i >> 4, k >> 4)) return false;
         // Oracle ThaumcraftWorldGenerator:424 - the mound grows nine blocks below the surface.
         int j = level.getHeight(Heightmap.Types.WORLD_SURFACE, i, k) - DEPTH;
         // Oracle ThaumcraftWorldGenerator:425 - the surface structures only grow below the sea level.
         if (j >= level.getSeaLevel()) return false;
+        // Native adaptation: local origins 14/15 plus the 19-block footprint reach TWO
+        // chunks east/south. Per-block guards used to silently truncate those mounds.
+        // Refuse the whole placement before ground reads, template, loot or node writes;
+        // keep the oracle's drawn position rather than moving a structure to another site.
+        // Include the trapped chest's TNT below the template, even if this roll is untrapped.
+        for (int x : new int[] {i, i + SIZE - 1}) {
+            for (int z : new int[] {k, k + SIZE - 1}) {
+                for (int y : new int[] {j - 1, j + LAYERS - 1}) {
+                    BlockPos corner = new BlockPos(x, y, z);
+                    if (level.isOutsideBuildHeight(corner) || !WorldGenWriteArea.canWrite(level, corner)) return false;
+                }
+            }
+        }
+        for (int cx = i >> 4; cx <= (i + SIZE - 1) >> 4; cx++) {
+            for (int cz = k >> 4; cz <= (k + SIZE - 1) >> 4; cz++) {
+                if (!level.hasChunk(cx, cz)) return false;
+            }
+        }
         // Oracle WorldGenMound:64 - the five ground samples of the mound.
         return locationIsValidSpawn(level, i + 9, j + 9, k + 9)
                 && locationIsValidSpawn(level, i, j + 9, k)

@@ -518,8 +518,10 @@ class NeoForgeLoaderParityTest {
         String fabric = read("fabric/src/main/java/thaumcraft/fabric/mixin/client/FabricRobeArmorLayerMixin.java");
         assertTrue(fabric.contains("ItemRobeArmor"), "the Fabric redirect opts the robes into the native check");
         String neoforge = read("neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java");
-        assertTrue(neoforge.contains("getDefaultDyeColor"), "the NeoForge loader publishes the robe colour natively");
-        assertTrue(neoforge.contains("ItemRobeArmor.armorTint"), "the NeoForge loader uses the shared robe colour");
+        assertTrue(neoforge.contains("NeoForgeRobeDye.register(event)"), "the NeoForge loader publishes the robe colour natively");
+        String dye = read("neoforge/src/main/java/thaumcraft/neoforge/client/NeoForgeRobeDye.java");
+        assertTrue(dye.contains("getDefaultDyeColor"), "the NeoForge loader uses the native client item extension");
+        assertTrue(dye.contains("ItemRobeArmor.armorTint"), "the NeoForge loader uses the shared robe colour");
     }
 
     // ------------------------------------------------------------------ the shared constants

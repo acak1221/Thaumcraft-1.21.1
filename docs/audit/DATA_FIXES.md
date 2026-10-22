@@ -51,3 +51,38 @@ No automatic replacement with defaults is a repair.
   tests passed. These are owner-unit tests, not a live player lifecycle GameTest.
 - Player loss prevented: research progression, discoveries/pools, scans, warp,
   and four equipped accessory slots.
+
+## F06 — six stock owners
+
+- Sites: `loadAdditional` in `TilePedestal`, `TileResearchTable`, `TileMirror`,
+  `TileMagicBox`, `TileArcaneFurnace`, `TileThaumcraftInventory` (and its actual
+  `TileWandPedestal` subclass's tick/save/load fences).
+- Input: `id="missing_addon:owned_item"` in each owner's native stack row;
+  wrong-element inventory lists and invalid research bonus tags also tested.
+- Tests: `StackOwnerSaveIntegrityTest.pedestalRetainsUnreadStack`,
+  `researchTableRetainsUnreadStack`, `mirrorRetainsUnreadStack`,
+  `magicBoxRetainsUnreadStack`, `arcaneFurnaceRetainsUnreadStack`,
+  `sharedInventoryRetainsUnreadStack`, `wrongCollectionElementsAndInvalidBonusAreRetained`,
+  `retirementArchiveIsLosslessAndDeduplicatesOnlyIdenticalRecords`.
+- Before: failed item decode became EMPTY and the next save omitted the owned
+  item; bad table rows/bonuses were truncated or filtered.
+- After: parsers throw on unread stacks; validation precedes owner changes;
+  the loader logs class/position/reason and retains the entire original owner.
+  Menus, insertion/extraction, processing, mirror transfers and table commits
+  are fenced. Saves preserve the opaque owner rather than writing absent stock.
+- Retirement: `RetainedDataBlockEntity` archives rejected data on server attachment,
+  live rejection, and removal to overworld SavedData
+  `thaumcraft_rejected_block_entities`. Records include dimension, position, owner,
+  blockstate and full payload. This is an offline-repair archive, **not** a second
+  inventory or an automatic item grant. Removal can never consume the only copy.
+- Red proof: all six native loaders failed the malformed missing-item tests before
+  their fixes. The research test initially encountered an unrelated pre-registry
+  constructor limitation; it was rerun with the old parser after fixing that
+  fixture, and failed at the intended re-save equality assertion.
+- Green proof: eight owner/archive JUnit cases and existing valid/empty inventory
+  regressions pass. Fabric `rejectedPedestalSurvivesPhysicalBlockRemoval` passed
+  on a headless server: real registered pedestal, unknown saved item, physical
+  block replacement, retained archive payload, and archive reload. Runtime
+  removal of each of the other five owner types is not separately claimed.
+- Player loss prevented: pedestal output, research tools/notes and bonus pools,
+  mirror buffered deliveries, linked-box stock, furnace inventory and pedestal wand.

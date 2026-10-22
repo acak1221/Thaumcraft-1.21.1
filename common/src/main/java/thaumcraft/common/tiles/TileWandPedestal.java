@@ -83,6 +83,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, TileWandPedestal tile) {
+        if (tile.isDataRejected()) return;
         if (tile.level != level || !pos.equals(tile.worldPosition) || tile.isRemoved() || tile.getBlockState() != state) return;
         if (tile.nodes == null) tile.findNodes(level);
         ++tile.counter;
@@ -214,6 +215,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
 
     /** TileWandPedestal:321-323 - the pedestal only accepts a wand or a vis amulet. */
     @Override public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (isDataRejected()) return false;
         if (slot != 0 || stack.isEmpty()) return false;
         return stack.getItem() instanceof ItemWandCasting || stack.getItem() instanceof ItemAmuletVis;
     }
@@ -224,6 +226,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         tag.putBoolean("draining", draining);
         tag.putByte("facing", (byte) facing.get3DDataValue());
@@ -231,6 +234,7 @@ public class TileWandPedestal extends TileThaumcraftInventory implements IAspect
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        if (isDataRejected()) return;
         draining = tag.getBoolean("draining");
         nodes = null;
         somethingChanged = false;

@@ -86,6 +86,10 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "rejected_owner_custody")
+    public void rejectedPedestalSurvivesPhysicalBlockRemoval(GameTestHelper test) {
+        thaumcraft.common.testing.RejectedOwnerRuntimeChecks.pedestal(test);
+    }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "mound_rng_isolation")
     public void moundGenerationRandomIsIsolated(GameTestHelper test) {
         thaumcraft.common.lib.world.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);

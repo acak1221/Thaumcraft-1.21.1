@@ -24,7 +24,7 @@ import thaumcraft.common.lib.world.EldritchBlockRules;
  * Original TileMagicBox: the linked storage box. Boxes that touch each other
  * share their content and the first box of the chain owns it.
  */
-public final class TileMagicBox extends BlockEntity implements Container {
+public final class TileMagicBox extends RetainedDataBlockEntity implements Container {
     private final ArrayList<ItemStack> boxContents = new ArrayList<>();
     /** The position of the box that owns the shared content. */
     private BlockPos master;
@@ -34,10 +34,11 @@ public final class TileMagicBox extends BlockEntity implements Container {
     public TileMagicBox(BlockPos pos, BlockState state) {
         super(ThaumcraftEldritchBlocks.MAGIC_BOX_TILE.get(), pos, state);
     }
+    TileMagicBox(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type,pos,state); }
 
     /** The sorting mode of the box. */
     public int getSorting() { return sorting; }
-    public void setSorting(byte sorting) { this.sorting = sorting; }
+    public void setSorting(byte sorting) { if (!isDataRejected()) this.sorting = sorting; }
     /** The number of boxes that are linked to this one. */
     public int getLinkedBoxes() { return Math.max(0, linkedBoxes); }
 
@@ -48,10 +49,11 @@ public final class TileMagicBox extends BlockEntity implements Container {
 
     /** Original TileMagicBox:62-66 - the master owns the shared content. */
     private ArrayList<ItemStack> contents() {
+        if (isDataRejected()) return new ArrayList<>();
         if (master == null) return boxContents;
         if (level == null) return boxContents;
         if (!(level.getBlockEntity(master) instanceof TileMagicBox box)) return boxContents;
-        return box.boxContents;
+        return box.isDataRejected() ? new ArrayList<>() : box.boxContents;
     }
 
     /** Original TileMagicBox:68-73 - the inventory of the chain. */
@@ -70,6 +72,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
     }
 
     @Override public ItemStack removeItem(int slot, int amount) {
+        if (inventory().isDataRejected()) return ItemStack.EMPTY;
         ArrayList<ItemStack> list = contents();
         if (slot < 0 || slot >= list.size()) return ItemStack.EMPTY;
         ItemStack stack = list.get(slot);
@@ -81,6 +84,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
     }
 
     @Override public ItemStack removeItemNoUpdate(int slot) {
+        if (inventory().isDataRejected()) return ItemStack.EMPTY;
         ArrayList<ItemStack> list = contents();
         if (slot < 0 || slot >= list.size()) return ItemStack.EMPTY;
         ItemStack removed = list.remove(slot);
@@ -89,6 +93,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
     }
 
     @Override public void setItem(int slot, ItemStack stack) {
+        if (isDataRejected() || inventory().isDataRejected()) return;
         ArrayList<ItemStack> list = contents();
         if (stack != null && stack.getCount() > getMaxStackSize()) stack.setCount(getMaxStackSize());
         if (slot >= 0 && slot < list.size()) {
@@ -101,6 +106,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
     }
 
     @Override public void clearContent() {
+        if (isDataRejected() || inventory().isDataRejected()) return;
         contents().clear();
         inventory().setChanged();
     }
@@ -115,10 +121,12 @@ public final class TileMagicBox extends BlockEntity implements Container {
     }
 
     /** Original TileMagicBox:225-233 - everybody may put items into a magic box. */
-    public boolean isItemValid(int slot, ItemStack stack) { return true; }
+    public boolean isItemValid(int slot, ItemStack stack) { return !isDataRejected() && !inventory().isDataRejected(); }
+    @Override public boolean canPlaceItem(int slot, ItemStack stack) { return isItemValid(slot,stack); }
 
     /** Original TileMagicBox:218-221 - the player must be close to the box. */
     @Override public boolean stillValid(Player player) {
+        if (isDataRejected() || inventory().isDataRejected()) return false;
         if (level == null) return false;
         if (player.level() != level) return false;
         if (!level.hasChunkAt(worldPosition)) return false;
@@ -128,12 +136,14 @@ public final class TileMagicBox extends BlockEntity implements Container {
 
     /** Original TileMagicBox:238-260 - the link of the neighbouring boxes is refreshed. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileMagicBox box) {
+        if (box.isDataRejected() || box.inventory().isDataRejected()) return;
         // The original ticked the tile on both sides, so the client knows the size of the chain too.
         if (box.inventory() == box && box.linkedBoxes < 0) box.refreshLinks();
     }
 
     /** Original TileMagicBox:398-411 - the chain of boxes is found around the master. */
     public void refreshLinks() {
+        if (isDataRejected()) return;
         if (inventory() != this) return;
         linkedBoxes = 0;
         List<BlockPos> found = new ArrayList<>();
@@ -147,6 +157,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
         for (Direction dir : Direction.values()) {
             BlockPos next = pos.relative(dir);
             if (!(level.getBlockEntity(next) instanceof TileMagicBox box)) continue;
+            if (box.isDataRejected()) continue;
             if (found.contains(next)) continue;
             found.add(next);
             findBoxes(next, found);
@@ -221,6 +232,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
 
     /** Original TileMagicBox:64-70 - the whole content is dropped when the box breaks. */
     public void dropContents(Level level, BlockPos pos) {
+        if (isDataRejected() || inventory().isDataRejected()) return;
         ArrayList<ItemStack> list = contents();
         if (list.isEmpty()) return;
         for (ItemStack stack : list) {
@@ -237,6 +249,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
     public List<ItemStack> getContents() { return contents(); }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (retainMalformed(tag, () -> { for (Tag value:compoundList(tag,"Items")) requiredStack(registries,value); })) return;
         super.loadAdditional(tag, registries);
         sorting = tag.getByte("sort");
         master = null;
@@ -246,7 +259,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
         boxContents.clear();
         ListTag items = tag.getList("Items", Tag.TAG_COMPOUND);
         for (int i = 0; i < items.size(); i++) {
-            ItemStack stack = ItemStack.parse(registries, items.getCompound(i)).orElse(ItemStack.EMPTY);
+            ItemStack stack = requiredStack(registries, items.getCompound(i));
             if (!stack.isEmpty()) boxContents.add(stack);
         }
         // Original TileMagicBox:282-289 - the number of linked boxes is a transient
@@ -260,6 +273,7 @@ public final class TileMagicBox extends BlockEntity implements Container {
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         tag.putByte("sort", sorting);
         if (master != null) {

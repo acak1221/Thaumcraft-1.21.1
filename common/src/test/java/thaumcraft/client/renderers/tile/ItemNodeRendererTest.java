@@ -53,8 +53,19 @@ class ItemNodeRendererTest {
         // Original ItemNodeRenderer:115 - sin(ticks / (14 - count)) * 0.25 + 0.5.
         assertEquals(0.5F, ItemNodeRenderer.stripPulse(0.0F, 0), 1.0E-6F,
                 "the pulse of the first strip starts at one half");
-        assertEquals(0.25F, ItemNodeRenderer.stripPulse((float) (Math.PI / 2.0), 0), 1.0E-6F,
-                "the pulse of the first strip falls to a quarter at a quarter of a period");
+        // The period of the pulse of the first strip is 2 * PI * 14 ticks, so a
+        // quarter of a period is 14 * PI / 2 ticks: the sine is at its top there
+        // and the pulse of the strip is at its top too.
+        assertEquals(0.75F, ItemNodeRenderer.stripPulse((float) (14.0 * Math.PI / 2.0), 0), 1.0E-6F,
+                "the pulse of the first strip is three quarters at a quarter of a period");
+        // Three quarters of a period is 3 * 14 * PI / 2 ticks: the sine is at its
+        // bottom and the pulse of the strip falls to its own quarter.
+        assertEquals(0.25F, ItemNodeRenderer.stripPulse((float) (3.0 * 14.0 * Math.PI / 2.0), 0), 1.0E-6F,
+                "the pulse of the first strip falls to a quarter at three quarters of a period");
+        // The pulse repeats itself after a whole period of the original.
+        assertEquals(ItemNodeRenderer.stripPulse(3.0F, 0),
+                ItemNodeRenderer.stripPulse((float) (3.0 + 2.0 * Math.PI * 14.0), 0), 1.0E-6F,
+                "the pulse of the first strip repeats itself after its period");
         // The divisor shrinks with the index of the aspect, so the later strips pulse faster.
         assertTrue(ItemNodeRenderer.stripPulse(1.0F, 3) != ItemNodeRenderer.stripPulse(1.0F, 0),
                 "the pulse of the later strips uses the smaller divisor of the original");
@@ -66,8 +77,8 @@ class ItemNodeRendererTest {
                 "forty of an aspect with the pulse of one half is a size of six tenths");
         assertEquals(0.2F, ItemNodeRenderer.stripSize(0.5F, 0), 1.0E-6F,
                 "an aspect without essence keeps the base of the size");
-        assertEquals(1.0F, ItemNodeRenderer.stripSize(0.5F, 100), 1.0E-6F,
-                "a full hundred of an aspect doubles the pulse");
+        assertEquals(1.2F, ItemNodeRenderer.stripSize(0.5F, 100), 1.0E-6F,
+                "a full hundred of an aspect doubles the pulse and adds the base of the size");
     }
 
     @Test void theAlphaOfAStripIsTheOriginalOne() {

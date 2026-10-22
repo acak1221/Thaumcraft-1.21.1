@@ -302,11 +302,18 @@ public final class SurfaceStructurePlacementRuntimeChecks {
      * The chunks the roll of the totem gives to the totem, with the column of the totem.
      *
      * <p>The draws are the draws of {@link ThaumcraftTotemFeature#placePass}, in the same order,
-     * because a random stream is only reproducible when it is consumed identically: the scattered
-     * temple of the chunk (no draw of its own, it asks the structure starts), the rarity roll of
-     * the wild node pass (oracle {@code ThaumcraftWorldGenerator:419}), the draws of the exclusive
-     * structure chain ({@code :429-436}), the {@code !auraGen} short circuit ({@code :149}), then
-     * the one in {@code 360} of the totem and the position inside the chunk.</p>
+     * because a random stream is only reproducible when it is consumed identically: the rarity roll
+     * of the wild node pass (oracle {@code ThaumcraftWorldGenerator:419}), the draws of the
+     * exclusive structure chain ({@code :429-436}), the {@code !auraGen} short circuit
+     * ({@code :149}), then the one in {@code 360} of the totem and the position inside the chunk.</p>
+     *
+     * <p>The scattered temple is the one input that is <b>not</b> reproduced inline: asking the
+     * chunk for its structure starts forces the generation of every chunk of this scan, which is
+     * tens of thousands of chunks and used to exhaust the heap. {@code AuraGenRules.scatteredTemple}
+     * consumes no random, so it is safe to defer: the prediction is computed as if there were no
+     * temple, and a candidate that does carry one is dropped afterwards. That is exact for every
+     * chunk <b>without</b> a temple - and a chunk <b>with</b> one never reaches the totem, so its
+     * stream position is irrelevant.</p>
      */
     private static List<int[]> totemChunks(ServerLevel level, long seed, int limit) {
         List<int[]> chunks = new ArrayList<>();
@@ -317,18 +324,21 @@ public final class SurfaceStructurePlacementRuntimeChecks {
                 // without structures, or a flat world, never reaches the pass at all.
                 if (!ThaumcraftBiomeSettings.worldgen().structures()) continue;
                 if (level.getChunkSource().getGenerator() instanceof FlatLevelSource) continue;
-                // The same order as ThaumcraftTotemFeature.placePass.
-                boolean auraGen = false;
+                // The draws of placePass, with the temple treated as absent (see the note above).
                 boolean wildNode = false;
                 if (ThaumcraftBiomeSettings.worldgen().auraNodes()) {
-                    auraGen = AuraGenRules.scatteredTemple(level, chunkX, chunkZ) != null;
-                    wildNode = ThaumcraftNormalNodeFeature.wildNodeDecision(level, random, chunkX, chunkZ, auraGen);
+                    wildNode = ThaumcraftNormalNodeFeature.wildNodeDecision(level, random, chunkX, chunkZ, false);
                 }
                 StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
-                if (AuraGenRules.finalAuraGen(auraGen, wildNode,
+                if (AuraGenRules.finalAuraGen(false, wildNode,
                         AuraGenRules.structureBuilt(level, chunkX, chunkZ, draw.kind()))) continue;
                 if (random.nextInt(StructurePlacementRules.TOTEM_CHANCE) != 0) continue;
-                chunks.add(new int[] {chunkX, chunkZ, chunkX * 16 + random.nextInt(16), chunkZ * 16 + random.nextInt(16)});
+                int x = chunkX * 16 + random.nextInt(16);
+                int z = chunkZ * 16 + random.nextInt(16);
+                // A chunk that carries a scattered temple never grows the totem (:419, :455).
+                // Only the handful of candidates reach this expensive query.
+                if (AuraGenRules.scatteredTemple(level, chunkX, chunkZ) != null) continue;
+                chunks.add(new int[] {chunkX, chunkZ, x, z});
             }
         }
         return chunks;

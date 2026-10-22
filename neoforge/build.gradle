@@ -38,8 +38,11 @@ loom.runs {
  gameTest {
   server()
   // A fixed heap, for the same reason as the Fabric run: the suite generates
-  // real chunks and must not depend on the size of the machine.
-  vmArg '-Xmx2G'
+  // real chunks and must not depend on the size of the machine. Measured on
+  // Fabric, and the same generator: -Xmx2G dies in the chunk save path
+  // (ChunkSerializer.write -> ChunkMap.save), which serialises every generated
+  // chunk at once; -Xmx2600M passes. 3G leaves room on a 7 GB runner.
+  vmArg '-Xmx3G'
   source sourceSets.gameTest
   // Common main is supplied by Architectury's transformed dependency JAR.
   // Registering its raw output here would duplicate that generated JPMS module.

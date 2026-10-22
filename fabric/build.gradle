@@ -235,12 +235,18 @@ if (clientSmokeScope != 'full') {
 }
 def clientTestModRoots = files(sourceSets.clientTest.output)
 def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
-// The heap of the GameTest server. The default stays the 2 GB of the CI
-// runner; a lane that runs the whole suite on a machine with more memory can
-// raise it with -PgameTestHeap=3G (the suite of 325 scenarios needs 3 GB:
-// see docs/analysis/2026-10-23-agent-memory.md, the chunk save path of the
-// final save holds the NBT of every generated chunk at once).
-def gameTestHeap = providers.gradleProperty('gameTestHeap').getOrElse('2G')
+// The heap of the GameTest server.
+//
+// Measured, not guessed: -Xmx2G dies with OutOfMemoryError in the chunk save path
+// (ChunkSerializer.write -> ChunkMap.save, which holds the NBT of every generated chunk at
+// once) and it dies even on the commit whose CI run was green, so 2G was already borderline
+// and the growth of the suite pushed it over. -Xmx2600M passes, -Xmx3G passes repeatedly.
+// The GitHub runner has 7 GB, so 3G leaves room for the daemon and the OS.
+//
+// The final save is still the peak: it serialises roughly 20 000 chunk records in one go.
+// docs/analysis/2026-10-23-agent-memory.md measured the cause; shrinking that peak is a
+// separate task (the suite would have to release generated chunks as it goes).
+def gameTestHeap = providers.gradleProperty('gameTestHeap').getOrElse('3G')
 // The multiplayer acceptance talks to an EXTERNAL dedicated server process.
 def multiplayerAddress = providers.gradleProperty('multiplayerAddress').getOrElse('127.0.0.1:25565')
 def multiplayerPlayer = providers.gradleProperty('multiplayerPlayer').getOrElse('MPProbe')

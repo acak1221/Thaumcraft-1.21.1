@@ -20,6 +20,21 @@ import thaumcraft.common.entities.monster.EntityWatcher;
  * The original beam was a 1.7 FX tube with two side quads and a scrolling end cap; the
  * native port rebuilds the same geometry with native vertex buffers instead of the
  * removed 1.7 FX engine.
+ *
+ * <p><b>The watcher was never drawn by TC4 4.2.3.5.</b> The renderer of the oracle
+ * ({@code thaumcraft/client/renderers/entity/RenderWatcher.java:1-153}) has <b>zero</b>
+ * references outside its own file: {@code ClientProxy} never registers it, and the entity
+ * itself is never registered either - the oracle tree only mentions {@code EntityWatcher}
+ * in {@code ConfigEntities.java:206}, where it is put into the champion whitelist. The
+ * original {@code EntityWatcher} is therefore unreachable dead code, and a watcher that
+ * existed would have been <b>invisible</b>.</p>
+ *
+ * <p>Minecraft 1.21.1 has no fallback for an entity type without a renderer: the client
+ * throws when it has to draw an entity whose type has no renderer. The native port
+ * therefore registers a renderer for the watcher, but it draws <b>nothing</b>, so the
+ * watcher stays invisible exactly like in the original. Restoring the body of the original
+ * renderer is a single call of {@link #drawWatcher} and is a deliberate deviation from the
+ * original.</p>
  */
 public final class RenderWatcher extends MobRenderer<EntityWatcher, ModelWatcher> {
     private static final ResourceLocation SKIN = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/watcher.png");
@@ -32,7 +47,17 @@ public final class RenderWatcher extends MobRenderer<EntityWatcher, ModelWatcher
 
     @Override public ResourceLocation getTextureLocation(EntityWatcher watcher) { return SKIN; }
 
+    /**
+     * The original never registered this renderer, so the watcher was never drawn.
+     * The native renderer draws nothing for the same reason.
+     */
     @Override public void render(EntityWatcher watcher, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+        // The body of the original renderer is kept below in drawWatcher; it stays
+        // unreachable because the original never drew the watcher.
+    }
+
+    /** The faithful port of the original renderer body, unreachable by the rule above. */
+    private void drawWatcher(EntityWatcher watcher, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
         super.render(watcher, yaw, partial, pose, buffers, light);
         LivingEntity target = watcher.getTargetedEntity();
         if (target == null) return;

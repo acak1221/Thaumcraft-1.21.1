@@ -82,6 +82,8 @@ public final class ModelWand {
         public static final float STAFF_ROD_XZ = 1.2F, STAFF_ROD_Y = 2.0F, STAFF_ROD_SHIFT = -.1F;
         /** Original render120-123: the cap's scale, staff and wand. */
         public static final float STAFF_CAP_XZ = 1.3F, STAFF_CAP_Y = 1.1F, WAND_CAP_XZ = 1.2F, WAND_CAP_Y = 1.0F;
+        /** Original render126-134: the sceptre draws the cap twice, the second one higher and flat. */
+        public static final float SCEPTRE_CAP_SCALE = 1.3F, SCEPTRE_CAP_SHIFT_Y = .3F, SCEPTRE_CAP_SCALE_Y = .66F;
         /** Original render139-144: the staff's extra cap ring. */
         public static final float STAFF_RING_Y = .66F, STAFF_RING_SHIFT = .225F, STAFF_BOTTOM_SHIFT = .65F;
         /** Original render194-199: the focus scale, staff and wand. */

@@ -24,6 +24,8 @@ import thaumcraft.client.renderers.models.gear.ModelKnightArmor;
 import thaumcraft.client.renderers.models.gear.ModelLeaderArmor;
 import thaumcraft.client.renderers.models.gear.ModelRobe;
 import thaumcraft.client.renderers.models.gear.ModelWand;
+import thaumcraft.client.renderers.item.PrimalWandFocusRenderer;
+import thaumcraft.client.renderers.item.WandContextPose;
 import thaumcraft.client.renderers.item.WandUsePose;
 import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.items.armor.HarnessData;
@@ -33,6 +35,7 @@ import thaumcraft.common.items.armor.ItemVoidRobeArmor;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandMaterials;
 import thaumcraft.common.items.wands.foci.FocusData;
+import thaumcraft.common.items.wands.foci.ItemFocusPrimal;
 
 /**
  * Client-only bindings of the ported 1.7.10 gear models: the taumaturge robe
@@ -125,13 +128,23 @@ public final class ThaumcraftGearModelsClient {
      * with the focus colour. The sceptre, the ornament, the focus depth layer
      * and the runes of the original need items this port does not have.
      *
+     * <p>The renderer only runs when the model of the wand resolves to a builtin entity model:
+     * the shape models of the 990 combinations of rod, cap and focus name
+     * {@code minecraft:builtin/entity} as their root model, so the loader hooks of this class are
+     * reached exactly like the original {@code ItemWandRenderer} was reached through the Forge
+     * item renderer registry. The geometry of the rod, the cap, the cap ring, the bottom cap, the
+     * ornament and the focus comes from {@link ModelWand} and from
+     * {@link thaumcraft.client.renderers.item.PrimalWandFocusRenderer}, both in the model space of
+     * the original: one unit is a sixteenth of a block.</p>
+     *
      * <p>Original {@code thaumcraft/client/renderers/item/ItemWandRenderer.java:87} applies the
      * model basis correction of a hundred and eighty degrees about X before the model is drawn.
      * The model of the original is authored with the rod above the origin and the focus cube
      * below it, so the correction is what makes the focus of the wand point up, exactly like the
-     * original. The use pose of the original follows the correction (oracle
-     * {@code ItemWandRenderer.java:88-113}) and is therefore expressed in the corrected
-     * basis.</p>
+     * original. The context pose of the original precedes the correction (oracle
+     * {@code ItemWandRenderer.java:59-86}, {@link thaumcraft.client.renderers.item.WandContextPose})
+     * and the use pose of the original follows it (oracle {@code ItemWandRenderer.java:88-113}),
+     * so the use pose is expressed in the corrected basis.</p>
      */
     public static void renderWand(ItemStack stack, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (!(stack.getItem() instanceof ItemWandCasting)) return;
@@ -139,9 +152,12 @@ public final class ThaumcraftGearModelsClient {
         var rod = WandMaterials.rod(data.rod());
         var cap = WandMaterials.cap(data.cap());
         boolean staff = rod.staff();
+        boolean sceptre = ItemWandCasting.isSceptre(stack);
         var model = wandModel();
         pose.pushPose();
         try {
+            // Original ItemWandRenderer:59-86 - the pose of the display context.
+            WandContextPose.apply(pose, context, staff);
             // Original ItemWandRenderer:87 - the model basis correction.
             pose.mulPose(Axis.XP.rotationDegrees(180.0F));
             // Original ItemWandRenderer:88-113 - the use pose of the wand.
@@ -161,7 +177,20 @@ public final class ThaumcraftGearModelsClient {
                 if (staff) pose.scale(ModelWand.Geometry.STAFF_CAP_XZ, ModelWand.Geometry.STAFF_CAP_Y, ModelWand.Geometry.STAFF_CAP_XZ);
                 else pose.scale(ModelWand.Geometry.WAND_CAP_XZ, ModelWand.Geometry.WAND_CAP_Y, ModelWand.Geometry.WAND_CAP_XZ);
                 var capBuffer = buffers.getBuffer(RenderType.entityCutoutNoCull(ModelWand.capTexture(cap.tag())));
-                model.renderCap(pose, capBuffer, light, overlay);
+                if (sceptre) {
+                    // Original ModelWand:126-134 - a sceptre draws the cap, and a second flat cap above it.
+                    pose.pushPose();
+                    try {
+                        pose.scale(ModelWand.Geometry.SCEPTRE_CAP_SCALE, ModelWand.Geometry.SCEPTRE_CAP_SCALE, ModelWand.Geometry.SCEPTRE_CAP_SCALE);
+                        model.renderCap(pose, capBuffer, light, overlay);
+                    } finally { pose.popPose(); }
+                    pose.pushPose();
+                    try {
+                        pose.translate(0, ModelWand.Geometry.SCEPTRE_CAP_SHIFT_Y, 0);
+                        pose.scale(1, ModelWand.Geometry.SCEPTRE_CAP_SCALE_Y, 1);
+                        model.renderCap(pose, capBuffer, light, overlay);
+                    } finally { pose.popPose(); }
+                } else model.renderCap(pose, capBuffer, light, overlay);
                 if (staff) {
                     pose.translate(0, ModelWand.Geometry.STAFF_RING_SHIFT, 0);
                     pose.pushPose();
@@ -175,6 +204,12 @@ public final class ThaumcraftGearModelsClient {
             } finally { pose.popPose(); }
             var focusStack = FocusData.get(stack);
             if (!focusStack.isEmpty() && focusStack.getItem() instanceof ItemFocusBasic basic) {
+                // Original ModelWand:173-181 - the animated depth layer of a focus precedes the
+                // focus cube, so the translucent cube of the original shows it.
+                if (focusStack.getItem() instanceof ItemFocusPrimal) {
+                    int tick = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
+                    PrimalWandFocusRenderer.renderDepthLayer(pose, buffers, light, overlay, tick, staff);
+                }
                 int rgb = basic.getFocusColor(focusStack);
                 int tint = (int) (0.95F * 255) << 24 | (rgb & 0xFFFFFF);
                 pose.pushPose();

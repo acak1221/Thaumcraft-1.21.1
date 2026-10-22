@@ -1,6 +1,7 @@
 package thaumcraft.assets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,6 +68,31 @@ class WandModelAssetsTest {
         assertTrue(wrong.isEmpty(), "wrong selections: " + wrong);
     }
 
+    @Test void theShapeChainReachesTheBuiltinItemRendererWithoutADisplayTransform() throws Exception {
+        // A wand model only reaches the builtin item renderer when its root model is
+        // minecraft:builtin/entity (BlockModel.bake returns BuiltInModel for exactly that root),
+        // and the renderer then applies the context pose and the use pose of the original itself,
+        // so the display transform of the model has to be the identity.
+        for (String kind : List.of("wand", "staff")) {
+            JsonObject shape = json("assets/thaumcraft/models/item/" + kind + "_shape.json");
+            assertEquals("minecraft:builtin/entity", shape.get("parent").getAsString(), kind + " shape root");
+            assertTrue(!shape.has("display"), kind + " shape must not add a display transform on top of the original renderer");
+            assertEquals("#rod", shape.getAsJsonObject("textures").get("particle").getAsString(), kind + " shape particle");
+            // The focused child carries its own geometry on top of the shape root; the primal child
+            // is a pure alias that only re-parents, because the primal wand reuses the plain shape.
+            JsonObject focused = json("assets/thaumcraft/models/item/" + kind + "_focus_shape.json");
+            assertEquals("thaumcraft:item/" + kind + "_shape", focused.get("parent").getAsString(),
+                    kind + "_focus_shape inherits the shape root");
+            assertFalse(focused.has("display"), kind + "_focus_shape must not add a display transform");
+            assertEquals(2, focused.size(), kind + "_focus_shape carries exactly its parent and its elements");
+            assertTrue(focused.has("elements"), kind + "_focus_shape carries its own geometry");
+            JsonObject primal = json("assets/thaumcraft/models/item/" + kind + "_primal_shape.json");
+            assertEquals("thaumcraft:item/" + kind + "_shape", primal.get("parent").getAsString(),
+                    kind + "_primal_shape re-parents to the shape root");
+            assertEquals(1, primal.size(), kind + "_primal_shape adds nothing to the shape root");
+        }
+    }
+
     @Test void thePropertyValuesAreExactBinaryFractionsInOrder() {
         assertTrue(WandMaterials.RODS.size() <= WandModels.ROD_SCALE + 1 && WandMaterials.CAPS.size() <= WandModels.CAP_SCALE + 1,
                 "the scales must hold every rod and cap: more parts need a bigger power of two (and the generator's scales)");
@@ -130,13 +156,14 @@ class WandModelAssetsTest {
             JsonObject shape = json("assets/thaumcraft/models/item/" + kind + "_primal_shape.json");
             assertEquals("thaumcraft:item/" + kind + "_shape", shape.get("parent").getAsString());
             assertEquals(1, shape.size(), "inherit exact original body/display only; direct renderer owns both focus cubes without an atlas/opaque-cube substitute");
-            double[][] bounds = Geometry.depthBounds(kind.equals("staff"));
-            double[] expectedFrom = kind.equals("wand") ? new double[]{6.72, 15.41, 6.72} : new double[]{6.68, 29.138, 6.68};
-            double[] expectedTo = kind.equals("wand") ? new double[]{9.28, 17.97, 9.28} : new double[]{9.32, 31.962, 9.32};
-            for (int axis = 0; axis < 3; axis++) {
-                assertEquals(expectedFrom[axis], bounds[0][axis], 1e-8, "original renderer depth scale/translation and native cap anchor");
-                assertEquals(expectedTo[axis], bounds[1][axis], 1e-8);
-            }
+            // Original ModelWand:173-181: the depth layer is a one block cube of the strip,
+            // scaled to .16 and moved down by .09 - or .165/.1765/.165 and .15 for a staff.
+            Geometry.Depth depth = Geometry.depth(kind.equals("staff"));
+            double[] expected = kind.equals("wand") ? new double[]{.16, .16, .16, -.09} : new double[]{.165, .1765, .165, -.15};
+            assertEquals(expected[0], depth.x(), 1e-9, "original depth scale X");
+            assertEquals(expected[1], depth.y(), 1e-9, "original depth scale Y");
+            assertEquals(expected[2], depth.z(), 1e-9, "original depth scale Z");
+            assertEquals(expected[3], depth.translationY(), 1e-9, "original depth shift");
         }
         JsonArray frames = json("assets/thaumcraft/textures/items/focus_primal_depth.png.mcmeta").getAsJsonObject("animation").getAsJsonArray("frames");
         int[] actual = Geometry.frames(); assertEquals(frames.size(), actual.length);

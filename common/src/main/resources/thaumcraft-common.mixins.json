@@ -86,8 +86,7 @@
     "client.WarpPostEffectsMixin",
     "client.WardedHitParticleMixin",
     "client.ResearchPopupScreenMixin",
-    "client.Tc4BiomeColorMixin",
-    "client.PrimalWandItemRendererMixin"
+    "client.Tc4BiomeColorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

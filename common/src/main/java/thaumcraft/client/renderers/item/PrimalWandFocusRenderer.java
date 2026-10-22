@@ -2,71 +2,43 @@ package thaumcraft.client.renderers.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemStack;
-import thaumcraft.common.items.wands.ItemWandCasting;
-import thaumcraft.common.items.wands.WandMaterials;
-import thaumcraft.common.items.wands.foci.FocusData;
-import thaumcraft.common.items.wands.foci.ItemFocusPrimal;
 
-/** Original ModelWand:173-210. Direct textures keep its tiny animated depth strip outside the global block atlas. */
+/**
+ * Original ModelWand:173-181: the animated depth layer of a primal focus.
+ *
+ * <p>The original draws a one block cube of the {@code focus_primal_depth} icon inside the focus
+ * of the wand, shrunk to {@code 0.16} (a staff {@code 0.165 / 0.1765 / 0.165}) and moved down by
+ * {@code 0.09} (a staff {@code 0.15}), before the translucent focus cube is drawn over it. The
+ * cube is drawn in the model frame of the wand, so the context pose, the model basis correction
+ * and the use pose of {@link thaumcraft.client.ThaumcraftGearModelsClient#renderWand} carry it
+ * exactly like the focus cube itself.</p>
+ *
+ * <p>The icon is an animated strip of thirty frames, so the port keeps it in its own sheet
+ * instead of the block atlas; the frame of the strip is the frame of the original's {@code
+ * mcmeta} animation, and the six faces of the cube are the six {@code BlockRenderer.drawFaces}
+ * faces of the original.</p>
+ */
 public final class PrimalWandFocusRenderer {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/wand.png");
     private static final ResourceLocation DEPTH = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/items/focus_primal_depth.png");
-    private static ModelPart shell;
     private PrimalWandFocusRenderer() {}
 
-    private static ModelPart shell() {
-        if (shell == null) {
-            var mesh = new MeshDefinition();
-            // The original addBox happens while the renderer's texture size is32x32.
-            // Its later setTextureSize64x32/mirror assignment does not rebuild already-created cube UVs.
-            mesh.getRoot().addOrReplaceChild("focus", CubeListBuilder.create().texOffs(0, 0).addBox(-3, -6, -3, 6, 6, 6), PartPose.ZERO);
-            shell = LayerDefinition.create(mesh, 32, 32).bakeRoot().getChild("focus");
-        }
-        return shell;
-    }
-
-    /** ItemRenderer has already applied the selected model's display transform and its -.5 centering. */
-    public static void render(ItemStack stack, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        if (!(stack.getItem() instanceof ItemWandCasting)) return;
-        ItemStack focus = FocusData.get(stack);
-        if (!(focus.getItem() instanceof ItemFocusPrimal primal)) return;
-        boolean staff = WandMaterials.rod(ItemWandCasting.data(stack).rod()).staff();
-        var player = Minecraft.getInstance().player;
-        int ticks = player == null ? 0 : player.tickCount;
-        int pulse = Geometry.pulse(ticks);
-        // Modern emissive rendering keeps ambient world light from masking the original pulse.
-        // Original lightmap coordinate195..215 is represented by continuous per-vertex brightness at fullbright.
-        float brightness = pulse / 240F;
-        int color = primal.getFocusColor(focus);
-        int red = (int) ((color >> 16 & 255) * brightness), green = (int) ((color >> 8 & 255) * brightness), blue = (int) ((color & 255) * brightness);
-        int tint = 0x99000000 | red << 16 | green << 8 | blue; // Original alpha0.6, not a second opaque focus cube.
+    /**
+     * Original ModelWand:173-181: the depth layer, in the model frame of the wand.
+     *
+     * @param staff whether the wand is a staff, which uses the larger and lower layer
+     * @param tick  the tick of the world, which selects the frame of the strip and the pulse
+     */
+    public static void renderDepthLayer(PoseStack pose, MultiBufferSource buffers, int light, int overlay, int tick, boolean staff) {
+        Geometry.Depth depth = Geometry.depth(staff);
         pose.pushPose();
         try {
-            // Centers of the existing native wand/staff top-cap shapes; old item renderer's X180 reverses model Y/Z.
-            pose.translate(.5D, Geometry.anchor(staff), .5D);
-            pose.mulPose(Axis.XP.rotationDegrees(180));
-            pose.pushPose();
-            try {
-                Geometry.Depth depth = Geometry.depth(staff);
-                pose.translate(0, depth.translationY(), 0); pose.scale((float) depth.x(), (float) depth.y(), (float) depth.z());
-                renderDepth(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(DEPTH)), light, overlay, Geometry.frame(ticks));
-            } finally { pose.popPose(); }
-            if (staff) { pose.translate(0, -.0475D, 0); pose.scale(.525F, .5525F, .525F); }
-            else pose.scale(.5F, .5F, .5F);
-            shell().render(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), LightTexture.FULL_BRIGHT, overlay, tint);
+            pose.translate(0, depth.translationY(), 0);
+            pose.scale((float) depth.x(), (float) depth.y(), (float) depth.z());
+            renderDepth(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(DEPTH)), light, overlay, Geometry.frame(tick));
         } finally { pose.popPose(); }
     }
 
@@ -94,15 +66,10 @@ public final class PrimalWandFocusRenderer {
         private static final int[] FRAMES = {0,1,1,2,3,4,5,6,6,7,8,9,10,11,11,12,13,14,15,16,16,17,18,19,20,21,21,22,23,24,25,26,26,27,28,29};
         public record Depth(double x, double y, double z, double translationY) {}
         private Geometry() {}
-        public static double anchor(boolean staff) { return (staff ? 28.15D : 15.25D) / 16D; }
+        /** Original ModelWand:177-179 and :183-185: the scale and the shift of the depth layer. */
         public static Depth depth(boolean staff) { return staff ? new Depth(.165D,.1765D,.165D,-.15D) : new Depth(.16D,.16D,.16D,-.09D); }
         public static int frame(int tick) { return FRAMES[Math.floorMod(tick,FRAMES.length)]; }
         public static int pulse(int tick) { return (int)(195F + Mth.sin(tick / 3F) * 10F + 10F); }
         public static int[] frames() { return FRAMES.clone(); }
-        public static double[][] depthBounds(boolean staff) {
-            Depth depth = depth(staff); double center = anchor(staff) - depth.translationY();
-            return new double[][]{{(0.5D-depth.x()/2)*16,(center-depth.y()/2)*16,(0.5D-depth.z()/2)*16},
-                    {(0.5D+depth.x()/2)*16,(center+depth.y()/2)*16,(0.5D+depth.z()/2)*16}};
-        }
     }
 }

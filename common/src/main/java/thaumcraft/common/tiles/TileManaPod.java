@@ -40,18 +40,58 @@ public final class TileManaPod extends BlockEntity implements IAspectContainer {
         var growth=chooseAspect(level,worldPosition,age,aspect,level.random);
         if(growth.changed()){aspect=growth.aspect();changed();}
     }
-    /** WorldGenRegion-safe initialization after the real pod state/BE was
-     * admitted. The generator owns a separate deterministic native worldgen
-     * growth stream; runtime block growth still consumes the WORLD stream.
-     * Region writes never query/mutate the ServerLevel's live chunk cache. */
+    /**
+     * WorldGenRegion-safe initialization after the real pod state/BE was admitted.
+     * The generator owns a separate deterministic native worldgen growth stream;
+     * runtime block growth still consumes the WORLD stream.
+     * Region writes never query/mutate the ServerLevel's live chunk cache.
+     *
+     * <p>While a chunk is generated, {@code WorldGenRegion#setBlock} stores a
+     * {@code DUMMY} block entity marker instead of a real tile, and
+     * {@code LevelChunk#promotePendingBlockEntity} creates the real tile from that
+     * marker WITHOUT its data. The aspect of the original lives in the tile itself
+     * (oracle {@code TileManaPod.java:36-39,42-94}: the growth writes the aspect and
+     * the tile saves it), so the port writes the aspect into the pending block entity
+     * data of the chunk: the promoted tile then carries it, exactly as the original's
+     * own tile does. The age of the original grows in the same call
+     * (oracle {@code WorldGenManaPods.java:26-29}: the metadata two to six is placed
+     * and {@code checkGrowth} raises it once, so the world carries the age three to
+     * seven).</p>
+     */
     public static boolean initializeGenerated(WorldGenLevel region,BlockPos pos,RandomSource growthRandom) {
         if(region instanceof ServerLevel server&&!server.getServer().isSameThread())throw new IllegalStateException("Live pod generation requires the server thread");
-        if(!region.hasChunkAt(pos)||!thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(region, pos)||!(region.getBlockEntity(pos) instanceof TileManaPod pod))return false;
+        if(!region.hasChunkAt(pos)||!thaumcraft.common.lib.world.WorldGenWriteArea.canWrite(region,pos))return false;
         BlockState state=region.getBlockState(pos);if(!(state.getBlock() instanceof BlockManaPod))return false;
         int age=state.getValue(BlockManaPod.AGE);if(age<7){age++;if(!region.setBlock(pos,state.setValue(BlockManaPod.AGE,age),2))return false;}
-        if(region.getBlockEntity(pos)!=pod)return false;
-        var growth=chooseAspect(region,pos,age,pod.aspect,growthRandom);if(growth.changed())pod.aspect=growth.aspect();
-        if(region instanceof ServerLevel)pod.changed();
+        Aspect existing=region.getBlockEntity(pos) instanceof TileManaPod live?live.getAspect():pendingAspect(region,pos);
+        var growth=chooseAspect(region,pos,age,existing,growthRandom);if(!growth.changed())return true;
+        if(region.getBlockEntity(pos) instanceof TileManaPod live){live.setAspect(growth.aspect());return true;}
+        return writePendingAspect(region,pos,growth.aspect());
+    }
+    /** The chunk that owns the cell, without ever requesting another one. */
+    private static net.minecraft.world.level.chunk.ChunkAccess chunkOf(WorldGenLevel region,BlockPos pos) {
+        if(region instanceof ServerLevel server)return server.getChunkSource().getChunkNow(pos.getX()>>4,pos.getZ()>>4);
+        return region.getChunk(pos.getX()>>4,pos.getZ()>>4,net.minecraft.world.level.chunk.status.ChunkStatus.BIOMES,false);
+    }
+    /** The aspect the pending tile already carries, if any. */
+    private static Aspect pendingAspect(WorldGenLevel region,BlockPos pos) {
+        var chunk=chunkOf(region,pos);if(chunk==null)return null;
+        var tag=chunk.getBlockEntityNbt(pos);if(tag==null)return null;
+        return Aspect.getAspect(tag.getString("aspect"));
+    }
+    /**
+     * The aspect of the original is written into the pending block entity data of the
+     * chunk, so the real tile of the promoted chunk carries it. The marker of the
+     * generation region is replaced by a real tile record of this port.
+     */
+    private static boolean writePendingAspect(WorldGenLevel region,BlockPos pos,Aspect aspect) {
+        var chunk=chunkOf(region,pos);if(chunk==null)return false;
+        var tag=chunk.getBlockEntityNbt(pos);
+        if(tag==null){tag=new CompoundTag();tag.putInt("x",pos.getX());tag.putInt("y",pos.getY());tag.putInt("z",pos.getZ());}
+        tag.putString("id",net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE
+                .getKey(ThaumcraftManaBeans.MANA_POD_BLOCK_ENTITY.get()).toString());
+        tag.putString("aspect",aspect.getTag());
+        chunk.setBlockEntityNbt(tag);
         return true;
     }
     private record Growth(Aspect aspect,boolean changed) {}

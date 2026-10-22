@@ -91,10 +91,33 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
      * so the port keeps the Plains soil of the original's own block rule for the two Cave plants,
      * which is the soil the original's world generator puts them on
      * (oracle BiomeGenMagicalForest:147).</p>
+     *
+     * <p>The inherited soil is asked FIRST and for EVERY plant type, exactly as the Forge 1.7.10
+     * table of {@code Block.canSustainPlant} does: the check of the inherited {@code BlockBush}
+     * soil (grass, dirt, farmland) comes before the switch of the plant type, so the Desert plant
+     * of the original (the cinderpearl, the metadata three) also stands on the inherited soil
+     * and only ADDS the sand to it. The table of the original is:</p>
+     *
+     * <pre>
+     * Block.canSustainPlant (Forge 1.7.10, patches/minecraft/net/minecraft/block/Block.java.patch)
+     *   if (plantable instanceof BlockBush &amp;&amp; ((BlockBush) plantable).func_149854_a(this)) return true;
+     *   switch (plantType) {
+     *     case Desert: return this == Blocks.sand;
+     *     case Plains: return this == Blocks.grass || this == Blocks.dirt || this == Blocks.farmland;
+     *   }
+     * </pre>
+     *
+     * <p>The oracle's own block carries no soil rule of its own
+     * (oracle {@code BlockCustomPlant.java:130-132} answers {@code canPlaceBlockAt} with a plain
+     * {@code true}), so the whole rule is the Forge table above.</p>
      */
     public static boolean soilSupports(PlantType type, BlockState soil) {
+        // The inherited BlockBush soil is asked first, for every plant type.
+        if (soil.is(Blocks.GRASS_BLOCK) || soil.is(Blocks.DIRT) || soil.is(Blocks.COARSE_DIRT)
+                || soil.is(Blocks.PODZOL) || soil.is(Blocks.FARMLAND)) return true;
+        // The Desert type adds the sand of the original (both old metadata variants).
         if (type == PlantType.DESERT) return soil.is(Blocks.SAND) || soil.is(Blocks.RED_SAND);
-        return soil.is(Blocks.GRASS_BLOCK) || soil.is(Blocks.DIRT) || soil.is(Blocks.COARSE_DIRT) || soil.is(Blocks.PODZOL) || soil.is(Blocks.FARMLAND);
+        return false;
     }
 
     @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {

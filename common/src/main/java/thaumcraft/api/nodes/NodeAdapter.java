@@ -7,17 +7,16 @@ import thaumcraft.common.tiles.TileNode;
 /**
  * The public view of the native aura node.
  *
- * <p>Forced 1.21.1 change: the native node keeps its own nested {@code NodeType} and {@code NodeModifier}
- * enums, so the published enums are translated by name; the two enums carry the same constants (oracle
- * {@code thaumcraft/api/nodes/NodeType.java} and {@code NodeModifier.java}). The type and the modifier
- * of the native node are written through the published contract, exactly as the original
- * {@code TileNode:245-252} does.</p>
- *
- * <p>Forced 1.21.1 change: the original node itself implements the published contract (oracle
+ * <p>The original TC4 node itself implements the published contract (oracle
  * {@code thaumcraft/common/tiles/TileNode.java:75-77}), so an add-on casts the block entity of a
- * node to {@link INode}. The native node cannot implement the published interface without
- * unifying the two node type enums, so {@link #of(net.minecraft.world.level.block.entity.BlockEntity)}
- * is the documented bridge to the same contract.</p>
+ * node to {@link INode}. The native node does the same: it implements {@link INode} with the
+ * published {@link NodeType} and {@link NodeModifier} enums, exactly as the original published
+ * them. This adapter stays as the documented bridge for an add-on that holds a reference to the
+ * native node and wants the published view of it; both views share the same state, the same
+ * write path and the same identity.</p>
+ *
+ * <p>Forced 1.21.1 change: none of the members changed; the native node carries the published
+ * enums, so no translation by name is needed any more.</p>
  */
 public class NodeAdapter implements INode {
     private final TileNode node;
@@ -40,7 +39,7 @@ public class NodeAdapter implements INode {
     /** The native node behind this view. */
     public TileNode node() { return node; }
 
-    @Override public String getId() { return node.getScanId(); }
+    @Override public String getId() { return node.getId(); }
 
     @Override public AspectList getAspects() { return node.getAspects(); }
 
@@ -48,7 +47,7 @@ public class NodeAdapter implements INode {
 
     @Override public AspectList getAspectsBase() { return node.getAspectsBase(); }
 
-    @Override public NodeType getNodeType() { return NodeType.valueOf(node.getNodeType().name()); }
+    @Override public NodeType getNodeType() { return node.getNodeType(); }
 
     @Override public void setNodeType(NodeType nodeType) {
         node.setNodeType(nodeType);
@@ -59,7 +58,7 @@ public class NodeAdapter implements INode {
     }
 
     @Override public NodeModifier getNodeModifier() {
-        return node.getNodeModifier() == null ? null : NodeModifier.valueOf(node.getNodeModifier().name());
+        return node.getNodeModifier();
     }
 
     @Override public int getNodeVisBase(Aspect aspect) { return node.getNodeVisBase(aspect); }

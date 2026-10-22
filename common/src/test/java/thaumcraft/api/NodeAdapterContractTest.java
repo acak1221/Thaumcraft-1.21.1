@@ -27,9 +27,12 @@ import thaumcraft.common.tiles.TileNode;
  * contract, writes its type and its modifier through it and changes only the base of an
  * aspect when the base of that aspect is set.</p>
  *
- * <p>Forced 1.21.1 change: the native node keeps its own nested type and modifier enums, so
- * the published view of the node translates them by name. The test never constructs a block: it
- * only uses the already registered air block of the vanilla bootstrap.</p>
+ * <p>Forced 1.21.1 change: none of the members of the contract changed. The published enums
+ * {@code thaumcraft.api.nodes.NodeType} and {@code thaumcraft.api.nodes.NodeModifier} are the
+ * canonical ones and the native node itself implements the published contract, exactly as the
+ * original node did, so the published view and the node share their state, their write path and
+ * their identity. The test never constructs a block: it only uses the already registered air
+ * block of the vanilla bootstrap.</p>
  *
  * <p>Forced 1.21.1 change: the original node has no type of its own — the 1.7.10
  * {@code net.minecraft.tileentity.TileEntity} derives the type from the block the entity sits on
@@ -60,6 +63,19 @@ class NodeAdapterContractTest {
         assertNull(node.getLevel(), "the detached node of the original is not in a world");
     }
 
+    @Test void theNodeItselfImplementsThePublishedContract() {
+        // Oracle TileNode:75-77 - the original node implements INode itself, so an add-on casts
+        // the block entity of a node to the published contract.
+        TileNode node = nativeNode();
+        INode view = node;
+        assertEquals(node.getScanId(), view.getId(), "the node and the published view share the identity");
+        view.setNodeType(NodeType.DARK);
+        assertEquals(NodeType.DARK, node.getNodeType(), "the node writes its type through the contract");
+        view.setNodeModifier(NodeModifier.PALE);
+        assertEquals(NodeModifier.PALE, node.getNodeModifier(), "the node writes its modifier through the contract");
+        assertEquals(NodeType.DARK, NodeAdapter.of(node).getNodeType(), "the published view sees the same type");
+    }
+
     @Test void thePublishedViewAnswersTheOriginalContract() {
         TileNode node = nativeNode();
         INode view = NodeAdapter.of(node);
@@ -69,7 +85,7 @@ class NodeAdapterContractTest {
         assertNull(view.getNodeModifier(), "the original node has no modifier until one is written");
         view.setNodeType(NodeType.UNSTABLE);
         assertEquals(NodeType.UNSTABLE, view.getNodeType(), "the type is written through the published contract");
-        assertEquals(TileNode.NodeType.UNSTABLE, node.getNodeType(), "the native node carries the written type");
+        assertEquals(NodeType.UNSTABLE, node.getNodeType(), "the native node carries the written type");
         view.setNodeModifier(NodeModifier.BRIGHT);
         assertEquals(NodeModifier.BRIGHT, view.getNodeModifier());
         view.setNodeModifier(null);

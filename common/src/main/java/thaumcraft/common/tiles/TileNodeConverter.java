@@ -18,8 +18,8 @@ import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.lib.visnet.EnergizedNodeReducer;
 import thaumcraft.common.lib.visnet.VisNodeFailures;
-import thaumcraft.common.tiles.TileNode.NodeModifier;
-import thaumcraft.common.tiles.TileNode.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 /** Original TileNodeConverter33-157. In particular conversion precedes count++,
  * and neighbor checkStatus resets an energized count to1000 (even unpowered). */

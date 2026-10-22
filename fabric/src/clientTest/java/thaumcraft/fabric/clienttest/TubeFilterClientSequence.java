@@ -93,6 +93,7 @@ import thaumcraft.common.tiles.TileArcaneWorkbench;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileTube;
+import thaumcraft.api.nodes.NodeType;
 
 /** A finite M06b continuation, never a replay or a resource-restoring fixture. */
 public final class TubeFilterClientSequence {
@@ -296,7 +297,7 @@ public final class TubeFilterClientSequence {
         var worn = List.of(ThaumcraftWearables.GOGGLES.get(), ThaumcraftWearables.ROBE_CHESTPLATE.get(), ThaumcraftWearables.ROBE_LEGGINGS.get(), ThaumcraftWearables.ROBE_BOOTS.get());
         for (int index = 0; index < ARMOR.size(); index++) { ItemStack value = player.getItemBySlot(ARMOR.get(index)); require(value.is(worn.get(index)) && value.getDamageValue() == (index >= 2 ? 1 : 0), "actual worn gear0/0/1/1"); savedArmor.add(value.copy()); }
         for (ItemStack value : player.getInventory().items) if (!value.isEmpty()) savedStacks.add(value.copy());
-        var level = player.serverLevel(); scanOld(level); var source = node(player); require(source.getNodeType() == TileNode.NodeType.NORMAL && source.getScanId().equals("9bbeaa03-a122-4968-ac6c-131f416e1365") && aspects(source.getAspectsBase()).equals(Map.of("aer", 80, "aqua", 80, "ignis", 80, "ordo", 80, "perditio", 80, "terra", 80)), "ACTUAL existing saved NORMAL node UUID/base80, current is read and NEVER reset");
+        var level = player.serverLevel(); scanOld(level); var source = node(player); require(source.getNodeType() == NodeType.NORMAL && source.getScanId().equals("9bbeaa03-a122-4968-ac6c-131f416e1365") && aspects(source.getAspectsBase()).equals(Map.of("aer", 80, "aqua", 80, "ignis", 80, "ordo", 80, "perditio", 80, "terra", 80)), "ACTUAL existing saved NORMAL node UUID/base80, current is read and NEVER reset");
         report.put("actual_node_before_RAW_snbt", beTag(source).toString()); patch(level);
         level.setBlockAndUpdate(workbench, ThaumcraftArcane.ARCANE_WORKBENCH.get().defaultBlockState()); level.setBlockAndUpdate(furnace, ThaumcraftDistillation.ALCHEMY_FURNACE.get().defaultBlockState()); for (int depth = 1; depth <= 2; depth++) level.setBlockAndUpdate(furnace.above(depth), ThaumcraftAlembics.ALEMBIC.get().defaultBlockState().setValue(BlockAlembic.FACING, Direction.SOUTH)); level.setBlockAndUpdate(jarPos, ThaumcraftContent.JAR.get().defaultBlockState());
         require(oven(level).isEmpty() && oven(level).getVis() == 0 && alembic(level, 1).getAmount() == 0 && alembic(level, 2).getAmount() == 0 && alembic(level, 1).getFilter() == null && alembic(level, 2).getFilter() == null && jar(level).getAmount() == 0 && jar(level).getFilter() == null, "all NEW devices genuinely empty/unlabelled");

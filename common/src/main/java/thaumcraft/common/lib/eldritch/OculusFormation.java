@@ -24,6 +24,7 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.world.EldritchBlockRules;
 import thaumcraft.common.tiles.TileEldritchAltar;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
 
 /**
  * Original {@code WandManager.createOculus} (oracle
@@ -90,7 +91,7 @@ public final class OculusFormation {
         BlockPos above = pos.above();
         if (!level.hasChunkAt(above)) return InteractionResult.PASS;
         if (!(level.getBlockEntity(above) instanceof TileNode node)) return InteractionResult.PASS;
-        if (node.getNodeType() != TileNode.NodeType.DARK) return InteractionResult.PASS;
+        if (node.getNodeType() != NodeType.DARK) return InteractionResult.PASS;
         // Original WandManager.java:432 - the OCULUS research, checked before the vis is paid.
         if (!KnowledgeAccess.get(actor).isResearchComplete("OCULUS")) return InteractionResult.FAIL;
         // Original WandManager.java:432 - a labyrinth has to cover the altar. The call

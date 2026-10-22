@@ -31,6 +31,8 @@ import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNodeEnergized;
 import thaumcraft.common.tiles.TileVisRelay;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Original energized35-175, ResearchManager470-494 MAX, VisNet29-181 and graph
  * first/40. Raw network int1 is1 centivis-compatible quantum, NOT100 or essentia.
@@ -54,7 +56,7 @@ public final class VisNetRuntimeChecks {
     private static void maximumAndEpochs(Fixture f) {
         f.reset();
         var base = new AspectList().add(Aspect.EARTH, 9).add(Aspect.METAL, 16);
-        var source = NodeTransductionRuntimeChecks.energize(f, f.base, base, null, TileNode.NodeType.NORMAL);
+        var source = NodeTransductionRuntimeChecks.energize(f, f.base, base, null, NodeType.NORMAL);
         f.check(source.getAuraBase().aspects.equals(base.aspects) && source.getVisBase().getAmount(Aspect.EARTH) == 4
                         && source.getVisBase().getAmount(Aspect.ORDER) == 4 && source.getVisBase().size() == 2
                         && source.getAvailableVis().visSize() == 0 && source.consumeVis(Aspect.EARTH, 1) == 0,
@@ -109,10 +111,10 @@ public final class VisNetRuntimeChecks {
         // Explicit square-boundary oracles, not expectations computed by the
         // same production helper under test. Truncate BEFORE floor(sqrt).
         int[][] amountsAndRates = {{7, 2, 2, 1}, {8, 3, 2, 2}, {15, 4, 3, 2}, {17, 4, 3, 2}};
-        var mods = new TileNode.NodeModifier[] {TileNode.NodeModifier.BRIGHT, TileNode.NodeModifier.PALE, TileNode.NodeModifier.FADING};
+        var mods = new NodeModifier[] {NodeModifier.BRIGHT, NodeModifier.PALE, NodeModifier.FADING};
         for (var row : amountsAndRates) for (int m = 0; m < mods.length; m++) {
             f.reset();
-            var source = NodeTransductionRuntimeChecks.energize(f, f.base, new AspectList().add(Aspect.EARTH, row[0]), mods[m], TileNode.NodeType.NORMAL);
+            var source = NodeTransductionRuntimeChecks.energize(f, f.base, new AspectList().add(Aspect.EARTH, row[0]), mods[m], NodeType.NORMAL);
             f.check(source.getAuraBase().getAmount(Aspect.EARTH) == row[0] && source.getVisBase().getAmount(Aspect.EARTH) == row[m + 1],
                     "original float/int/sqrt boundary base" + row[0] + "/" + mods[m] + " has literal rate" + row[m + 1]);
             NodeTransductionRuntimeChecks.sourceTick(f, source);
@@ -124,7 +126,7 @@ public final class VisNetRuntimeChecks {
 
     private static void unstable(Fixture f) {
         f.reset();
-        var source = NodeTransductionRuntimeChecks.energize(f, f.base, new AspectList().add(Aspect.AIR, 1).add(Aspect.EARTH, 16), null, TileNode.NodeType.UNSTABLE);
+        var source = NodeTransductionRuntimeChecks.energize(f, f.base, new AspectList().add(Aspect.AIR, 1).add(Aspect.EARTH, 16), null, NodeType.UNSTABLE);
         int[] call = {0};
         try (var rng = new InputRandom(f, bound -> {
             int i = ++call[0];
@@ -149,7 +151,7 @@ public final class VisNetRuntimeChecks {
     private static void strictPersistence(Fixture f) {
         f.reset();
         var source = NodeTransductionRuntimeChecks.energize(f, f.base,
-                new AspectList().add(Aspect.EARTH, 9).add(Aspect.METAL, 16).add(Aspect.AIR, 25), TileNode.NodeModifier.BRIGHT, TileNode.NodeType.NORMAL);
+                new AspectList().add(Aspect.EARTH, 9).add(Aspect.METAL, 16).add(Aspect.AIR, 25), NodeModifier.BRIGHT, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         f.check(VisNetHandler.drainVis(f.level, f.base.east(), Aspect.EARTH, 2) == 2, "real epoch partially spent BEFORE native save");
         var saved = source.saveWithFullMetadata(f.level.registryAccess());
@@ -161,7 +163,7 @@ public final class VisNetRuntimeChecks {
         source = NodeTransductionRuntimeChecks.reload(f, source, saved, TileNodeEnergized.class);
         f.check(source.getAvailableVis().visSize() == 0 && source.getRefillEpoch() == 0 && source.getNodeCounter() == 0
                         && source.getAuraBase().aspects.equals(old.getAuraBase().aspects)
-                        && source.getVisBase().aspects.equals(old.getVisBase().aspects) && source.getNodeModifier() == TileNode.NodeModifier.BRIGHT,
+                        && source.getVisBase().aspects.equals(old.getVisBase().aspects) && source.getNodeModifier() == NodeModifier.BRIGHT,
                 "ACTUAL current factory reload keeps BASE/AEB/type/mod/id but ZERO unused pulse/transient graph");
         f.check(VisNetHandler.drainVis(f.level, f.base.east(), Aspect.EARTH, 1) == 0, "saved partially spent pulse cannot resurrect BEFORE new actual source tick");
         NodeTransductionRuntimeChecks.sourceTick(f, source);
@@ -222,7 +224,7 @@ public final class VisNetRuntimeChecks {
     private static void rangesAndNegativeCaches(Fixture f) {
         f.reset(); BlockPos sourcePos = f.base.west(7), consumer = f.base;
         f.check(VisNetHandler.drainVis(f.level, consumer, Aspect.EARTH, 1) == 0, "actual NEGATIVE drainer cache before any owned source");
-        var source = NodeTransductionRuntimeChecks.energize(f, sourcePos, new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var source = NodeTransductionRuntimeChecks.energize(f, sourcePos, new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         f.check(VisNetHandler.drainVis(f.level, consumer, Aspect.EARTH, 1) == 1, "source registration invalidates actual cached NEGATIVE lookup");
         f.check(VisNetHandler.drainVis(f.level, sourcePos, Aspect.EARTH, 1) == 0
@@ -249,7 +251,7 @@ public final class VisNetRuntimeChecks {
 
     private static void selectionAndLos(Fixture f) {
         f.reset();
-        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(4), new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(4), new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         var near = relay(f, f.base.west(2).south(2), (byte) -1); relayTick(f, near);
         var child = relay(f, f.base, (byte) -1); relayTick(f, child);
@@ -260,7 +262,7 @@ public final class VisNetRuntimeChecks {
         // A fresh SINGLE-path graph prevents the closer relay from providing a
         // legitimate alternate path during the following LOS timing case.
         f.reset();
-        source = NodeTransductionRuntimeChecks.energize(f, f.base.west(4), new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        source = NodeTransductionRuntimeChecks.energize(f, f.base.west(4), new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         child = relay(f, f.base, Direction.EAST, (byte) -1);
         f.put(f.base.west(), Blocks.WATER); // nonAIR support, deliberately no collision in the native fluid-NONE ray
@@ -298,7 +300,7 @@ public final class VisNetRuntimeChecks {
 
     private static void colorsAndMultipleRoots(Fixture f) {
         f.reset();
-        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         var fire = relay(f, f.base, (byte) 1); relayTick(f, fire);
         var earth = relay(f, f.base.east(7), (byte) 3); relayTick(f, earth);
@@ -312,7 +314,7 @@ public final class VisNetRuntimeChecks {
                 "FIRE-colored relay really forwards TERRA: color is NOT an aspect filter; TWO paths to SAME ROOT share8 with no independent budget");
 
         f.reset();
-        source = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        source = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         var nearest = relay(f, f.base, (byte) -1); relayTick(f, nearest);
         var farther = relay(f, f.base.south(3), (byte) -1); relayTick(f, farther);
@@ -321,8 +323,8 @@ public final class VisNetRuntimeChecks {
                 "per-ROOT consumer chooses ONE nearest descendant (d2=36, not45); native pulse proves chosen branch, no duplicate farther-path budget");
 
         f.reset();
-        var left = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
-        var right = NodeTransductionRuntimeChecks.energize(f, f.base.east(7), new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var left = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
+        var right = NodeTransductionRuntimeChecks.energize(f, f.base.east(7), new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, left); NodeTransductionRuntimeChecks.sourceTick(f, right);
         f.check(VisNetHandler.drainVis(f.level, f.base, Aspect.EARTH, 12) == 12
                         && left.getAvailableVis().getAmount(Aspect.EARTH) + right.getAvailableVis().getAmount(Aspect.EARTH) == 4,
@@ -331,7 +333,7 @@ public final class VisNetRuntimeChecks {
 
     private static void relayPersistence(Fixture f) {
         f.reset();
-        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(7), new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         var relay = relay(f, f.base, (byte) -1);
         var baseline = relay.saveWithFullMetadata(f.level.registryAccess());

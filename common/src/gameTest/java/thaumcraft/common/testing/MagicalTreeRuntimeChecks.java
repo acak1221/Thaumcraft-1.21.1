@@ -33,6 +33,7 @@ import thaumcraft.common.blocks.BlockMagicalLeaves;
 import thaumcraft.common.config.ThaumcraftNaturals;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
 
 /** One native growth→survival harvest→real recipe/leaf loot check; loader wiring belongs to root. */
 public final class MagicalTreeRuntimeChecks {
@@ -109,13 +110,13 @@ public final class MagicalTreeRuntimeChecks {
                     for (BlockPos knot : knots) {
                         test.assertTrue(level.getBlockEntity(knot) instanceof TileNode, "a grown knot owns the actual shared native TileNode");
                         var embedded = (TileNode) level.getBlockEntity(knot);
-                        test.assertTrue(embedded.isNatural() && embedded.getNodeType() == TileNode.NodeType.PURE
+                        test.assertTrue(embedded.isNatural() && embedded.getNodeType() == NodeType.PURE
                                         && embedded.getAspects().size() > 0 && embedded.getAspects().aspects.equals(embedded.getAspectsBase().aspects),
                                 "actual generated knot contains initialized original PURE current and independent BASE stock");
                         var nbt = embedded.saveWithoutMetadata(level.registryAccess());
                         var copy = new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), knot, embedded.getBlockState());
                         copy.loadWithComponents(nbt, level.registryAccess());
-                        test.assertTrue(copy.getScanId().equals(embedded.getScanId()) && copy.getNodeType() == TileNode.NodeType.PURE
+                        test.assertTrue(copy.getScanId().equals(embedded.getScanId()) && copy.getNodeType() == NodeType.PURE
                                         && copy.getAspects().aspects.equals(embedded.getAspects().aspects)
                                         && copy.getAspectsBase().aspects.equals(embedded.getAspectsBase().aspects),
                                 "grown native knot's scan identity/current/BASE/type survive the actual TileNode codec");

@@ -27,6 +27,7 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.testing.NodeTransductionRuntimeChecks.InputRandom;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Explicit native node/item/branch INPUT fixtures, not survival pearl acquisition or inspected-client evidence. */
 public final class PrimordialPearlRuntimeChecks {
@@ -57,7 +58,7 @@ public final class PrimordialPearlRuntimeChecks {
             f.level.setBlock(pos, (shell ? Blocks.BEDROCK : Blocks.AIR).defaultBlockState(), TubeVariantsRuntimeChecks.QUIET);
         }
     }
-    private static TileNode node(Fixture f, BlockPos pos, AspectList values, TileNode.NodeModifier modifier) {
+    private static TileNode node(Fixture f, BlockPos pos, AspectList values, NodeModifier modifier) {
         f.level.setBlock(pos, Blocks.AIR.defaultBlockState(), TubeVariantsRuntimeChecks.QUIET);
         f.put(pos, ThaumcraftContent.AURA_NODE.get());
         TileNode node = (TileNode) f.level.getBlockEntity(pos);
@@ -100,7 +101,7 @@ public final class PrimordialPearlRuntimeChecks {
                         && node.getAspectsBase().aspects.containsKey(Aspect.FIRE) && node.getAspectsBase().aspects.containsKey(Aspect.LIGHT)
                         && node.getNodeVisBase(Aspect.METAL) == 7 && node.getAspects().getAmount(Aspect.FIRE) == 2,
                 "negative target is REFUSED, zero BASE key retained, false compound roll skips, lowered BASE leaves current temporarily over capacity");
-        f.check(node.getNodeModifier() == TileNode.NodeModifier.BRIGHT && node.getRegenerationTicks() == regeneration
+        f.check(node.getNodeModifier() == NodeModifier.BRIGHT && node.getRegenerationTicks() == regeneration
                         && node.getScanId().equals(id) && node.isNatural() && node.getTickCount() == 0,
                 "one null→BRIGHT upgrade retains actual regeneration cache, identity, natural flag and transient count");
         var paid = node.saveWithoutMetadata(f.level.registryAccess());
@@ -108,7 +109,7 @@ public final class PrimordialPearlRuntimeChecks {
         f.check(node.saveWithoutMetadata(f.level.registryAccess()).equals(paid), "node state after empty-handed use remains paid result");
     }
     private static void fallbackAndCreativePayment(Fixture f, BlockPos pos) {
-        var node = node(f, pos, new AspectList().add(Aspect.AIR,3), TileNode.NodeModifier.FADING);
+        var node = node(f, pos, new AspectList().add(Aspect.AIR,3), NodeModifier.FADING);
         f.mode(GameType.CREATIVE); var pearl = pearl(f);
         try (var rng = new InputRandom(f, bound -> bound == 3 ? 2 : 0, true)) {
             f.check(f.use(pos).consumesAction(), "native creative wrapper accepts original consumable use");
@@ -121,13 +122,13 @@ public final class PrimordialPearlRuntimeChecks {
                 "original fallback raises lowered BASE1→2 and addToContainer REDUCES overfull current3→2");
         for (Aspect aspect : Aspect.getPrimalAspects()) if (aspect != Aspect.AIR)
             f.check(node.getNodeVisBase(aspect) == 2 && node.getAspects().getAmount(aspect) == 1, "new primal receives BASE2 but ONE actual current unit: " + aspect.getTag());
-        f.check(node.getNodeModifier() == TileNode.NodeModifier.FADING && node.getRegenerationTicks() == -1,
+        f.check(node.getNodeModifier() == NodeModifier.FADING && node.getRegenerationTicks() == -1,
                 "false fading coin stops the modifier chain without a second pale/null upgrade or regeneration reset");
         f.mode(GameType.SURVIVAL);
     }
     private static void researchedAndSave(Fixture f, BlockPos pos) {
         KnowledgeAccess.get(f.player).addResearch("PRIMNODE");
-        var node = node(f, pos, new AspectList().add(Aspect.AIR,3), TileNode.NodeModifier.PALE);
+        var node = node(f, pos, new AspectList().add(Aspect.AIR,3), NodeModifier.PALE);
         pearl(f);
         try (var rng = new InputRandom(f, bound -> bound == 9 ? 8 : bound == 4 ? 3 : 0, true)) {
             f.check(f.use(pos).consumesAction(), "actual actor's PRIMNODE selects researched random bounds");
@@ -137,7 +138,7 @@ public final class PrimordialPearlRuntimeChecks {
                 "researched first pass m−2+8 raises capacity without inventing current refill when fallbackr3 is below BASE9");
         for (Aspect aspect : Aspect.getPrimalAspects()) if (aspect != Aspect.AIR)
             f.check(node.getNodeVisBase(aspect) == 3 && node.getAspects().getAmount(aspect) == 1, "researched fallback bound4 admits capacity3, only one current unit");
-        f.check(node.getNodeModifier() == TileNode.NodeModifier.PALE, "false pale coin retains modifier without null/bright followthrough");
+        f.check(node.getNodeModifier() == NodeModifier.PALE, "false pale coin retains modifier without null/bright followthrough");
         var saved = node.saveWithFullMetadata(f.level.registryAccess());
         f.level.removeBlockEntity(pos);
         var restored = (TileNode) net.minecraft.world.level.block.entity.BlockEntity.loadStatic(pos, node.getBlockState(), saved, f.level.registryAccess());
@@ -150,7 +151,7 @@ public final class PrimordialPearlRuntimeChecks {
     }
     private static void nativeExplosionAndFlux(Fixture f, BlockPos pos) {
         KnowledgeAccess.get(f.player).removeResearch("PRIMNODE");
-        node(f, pos, new AspectList().add(Aspect.AIR,1), TileNode.NodeModifier.BRIGHT);
+        node(f, pos, new AspectList().add(Aspect.AIR,1), NodeModifier.BRIGHT);
         f.put(pos.above(), Blocks.GLASS); pearl(f);
         f.chat(); // Discard prior operations' packets before observing THIS native blast.
         int[] previousBound = {0}, placementDraws = {0}; boolean[] explosionShuffled = {false};

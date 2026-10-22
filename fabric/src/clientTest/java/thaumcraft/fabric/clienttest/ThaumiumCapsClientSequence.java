@@ -90,6 +90,7 @@ import thaumcraft.common.tiles.TileInfusionMatrix;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TilePedestal;
+import thaumcraft.api.nodes.NodeType;
 
 /** Focused continuation of the REAL accepted M07 save, not a replay of its acquisition. */
 public final class ThaumiumCapsClientSequence {
@@ -258,7 +259,7 @@ public final class ThaumiumCapsClientSequence {
                 require(client.player.getMainHandItem().isEmpty(), "fresh node mining starts with the genuinely empty action hand");
                 onServer(client, () -> {
                     var player = serverPlayer(client); var node = node(player.level(), harvestNode);
-                    require(node.getNodeType() == TileNode.NodeType.NORMAL && node.getAspects().size() == 1 && node.getAspects().getAmount(Aspect.AIR) == 70
+                    require(node.getNodeType() == NodeType.NORMAL && node.getAspects().size() == 1 && node.getAspects().getAmount(Aspect.AIR) == 70
                             && node.getNodeVisBase(Aspect.AIR) == 70, "separate fresh70current/70base AIR-only INPUT, never an already charged/drained old node");
                     harvestArmed = true;
                     // Inside genuine survival reach, outside the real pickup
@@ -1285,7 +1286,7 @@ public final class ThaumiumCapsClientSequence {
             wand = player.getMainHandItem(); before = ItemWandCasting.data(wand); previous = before;
             sourceBefore = aspects(node(player.level(), at).getAspects()); sourcePrevious = sourceBefore;
             started = player.serverLevel().getGameTime();
-            require(!player.isUsingItem() && node(player.level(), at).getNodeType() == TileNode.NodeType.NORMAL, "native charge observer baseline, no active item/session injection");
+            require(!player.isUsingItem() && node(player.level(), at).getNodeType() == NodeType.NORMAL, "native charge observer baseline, no active item/session injection");
         }
 
         void observe() {
@@ -1483,7 +1484,7 @@ public final class ThaumiumCapsClientSequence {
             require(!level.hasChunkAt(nearby) || !(level.getBlockEntity(nearby) instanceof TileNode), "finite input must be isolated from native node bullying; never delete/alter a nearby existing node: " + nearby);
         level.setBlockAndUpdate(at, ThaumcraftContent.AURA_NODE.get().defaultBlockState());
         node(level, at).setAspects(aspects); // Declared finite NODE INPUT only, never a wand/essence/output write.
-        require(node(level, at).getNodeType() == TileNode.NodeType.NORMAL, "only bounded NORMAL node fixtures");
+        require(node(level, at).getNodeType() == NodeType.NORMAL, "only bounded NORMAL node fixtures");
         inputs.add(Map.of("fixture", "finite NORMAL node INPUT", "position", at.toShortString(), "current_and_base", aspects(aspects), "purpose", purpose,
                 "naturally_found_claimed", false));
     }

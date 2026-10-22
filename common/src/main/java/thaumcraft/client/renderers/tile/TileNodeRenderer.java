@@ -22,7 +22,8 @@ import thaumcraft.api.nodes.IRevealer;
 import thaumcraft.common.items.relics.ItemThaumometer;
 import thaumcraft.common.tiles.TileJarNode;
 import thaumcraft.common.tiles.TileNode;
-import thaumcraft.common.tiles.TileNode.NodeModifier;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 /**
  * Native billboards using TC4's ORIGINAL 32x32 node-strip atlas, not a block
@@ -145,16 +146,16 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
 
     /** The shared body of the original {@code renderNode}. */
     private static void drawNode(Minecraft minecraft, float partialTick, PoseStack pose, MultiBufferSource buffers,
-                                 int blockX, thaumcraft.api.aspects.AspectList aspects, TileNode.NodeType type,
-                                 TileNode.NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age) {
+                                 int blockX, thaumcraft.api.aspects.AspectList aspects, NodeType type,
+                                 NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age) {
         long now = System.nanoTime();
         int frame = (int)Math.floorMod(now / 40000000L + blockX, 32L);
         pose.pushPose();
         pose.translate(.5, .5, .5);
         pose.mulPose(minecraft.gameRenderer.getMainCamera().rotation());
-        if (modifier == TileNode.NodeModifier.BRIGHT) alpha *= 1.5f;
-        else if (modifier == TileNode.NodeModifier.PALE) alpha *= .66f;
-        else if (modifier == TileNode.NodeModifier.FADING) alpha *= Mth.sin(age / 3) * .25f + .33f;
+        if (modifier == NodeModifier.BRIGHT) alpha *= 1.5f;
+        else if (modifier == NodeModifier.PALE) alpha *= .66f;
+        else if (modifier == NodeModifier.FADING) alpha *= Mth.sin(age / 3) * .25f + .33f;
         float total = 0;
         int count = 0;
         float angle = 0;
@@ -186,9 +187,9 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
             case HUNGRY -> 3;
         };
         float coreSize = .1f + total / aspects.size() / 150;
-        if (type == TileNode.NodeType.HUNGRY) coreSize *= .75f;
-        if (type != TileNode.NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
-        boolean dark = type == TileNode.NodeType.DARK || type == TileNode.NodeType.TAINTED;
+        if (type == NodeType.HUNGRY) coreSize *= .75f;
+        if (type != NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
+        boolean dark = type == NodeType.DARK || type == NodeType.TAINTED;
         quad(pose, buffers.getBuffer(dark ? translucent : additive), coreSize * size, alpha, 0xffffff, frame, strip);
         pose.popPose();
     }

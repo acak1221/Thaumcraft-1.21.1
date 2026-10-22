@@ -26,7 +26,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.WorldCoordinates;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
-import thaumcraft.api.aspects.IAspectContainer;
+import thaumcraft.api.nodes.INode;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.items.wands.ItemWandCasting;
@@ -47,12 +49,15 @@ import thaumcraft.common.lib.world.NodeStabilizerRules;
  * UNSTABLE emissions/FADING repair and HUNGRY entity/block ecology are included; other special-node ecology,
  * advanced stabilization and jars remain separate unimplemented units. Real
  * energized conversion/network routing live in the separate M09b node family.
+ *
+ * <p>Forced 1.21.1 change: none of the node types. The published enums
+ * {@code thaumcraft.api.nodes.NodeType} and {@code thaumcraft.api.nodes.NodeModifier} are the
+ * canonical ones, exactly as the original published them (oracle
+ * {@code thaumcraft/api/nodes/NodeType.java} and {@code NodeModifier.java}), and the node itself
+ * implements the published contract {@link INode}, exactly as the original node did (oracle
+ * {@code thaumcraft/common/tiles/TileNode.java:75-77}).</p>
  */
-public final class TileNode extends BlockEntity implements IAspectContainer {
-    // Storage vocabulary, not an implementation of the full thaumcraft.api.nodes API.
-    public enum NodeType { NORMAL, UNSTABLE, DARK, TAINTED, HUNGRY, PURE }
-    public enum NodeModifier { BRIGHT, PALE, FADING }
-
+public final class TileNode extends BlockEntity implements INode {
     private AspectList aspects = new AspectList();
     private AspectList aspectsBase = new AspectList();
     private String scanId = UUID.randomUUID().toString();
@@ -118,50 +123,41 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
         return getType() == null || super.isValidBlockState(state);
     }
     @Override public AspectList getAspects() { return aspects.copy(); }
-    public AspectList getAspectsBase() { return aspectsBase.copy(); }
-    public int getNodeVisBase(Aspect aspect) { return aspectsBase.getAmount(aspect); }
+    @Override public AspectList getAspectsBase() { return aspectsBase.copy(); }
+    @Override public int getNodeVisBase(Aspect aspect) { return aspectsBase.getAmount(aspect); }
+    /**
+     * Original {@code TileNode:98-101}: the identity of the node.
+     *
+     * <p>Forced 1.21.1 change: the original derived the identity from the position of the node
+     * ({@code dim:x:y:z}); the native port keeps a stable random identity for the node, so that
+     * the identity of a node that is rebuilt at the same position is not silently changed. The
+     * identity is persisted with the node and is the same one that the scan of the node uses.</p>
+     */
+    @Override public String getId() { return getScanId(); }
     public String getScanId() { return scanId; }
-    public NodeType getNodeType() { return nodeType; }
+    @Override public NodeType getNodeType() { return nodeType; }
     /**
      * Original {@code TileNode:245-247}: the type of the node is written through the public
      * {@code thaumcraft.api.nodes.INode} contract.
-     *
-     * <p>Forced 1.21.1 change: the native node keeps its own nested {@code NodeType} enum, so
-     * the published enum is translated into the native one by name. The published and the native
-     * enums carry the same six constants (oracle {@code thaumcraft/api/nodes/NodeType.java}).</p>
      */
-    public void setNodeType(thaumcraft.api.nodes.NodeType type) {
+    public void setNodeType(NodeType type) {
         if (type == null) return;
-        this.nodeType = nativeType(type);
+        this.nodeType = type;
         changed();
     }
     /**
      * Original {@code TileNode:250-252}: the modifier of the node is written through the public
      * {@code thaumcraft.api.nodes.INode} contract. A {@code null} modifier clears it.
      */
-    public void setNodeModifier(thaumcraft.api.nodes.NodeModifier modifier) {
-        this.nodeModifier = nativeModifier(modifier);
+    public void setNodeModifier(NodeModifier modifier) {
+        this.nodeModifier = modifier;
         changed();
-    }
-    /**
-     * The native type of a published type.
-     *
-     * <p>Forced 1.21.1 change: the native node keeps its own nested {@code NodeType} enum, so the
-     * published enum is translated by name. The two enums carry the same six constants (oracle
-     * {@code thaumcraft/api/nodes/NodeType.java}).</p>
-     */
-    public static NodeType nativeType(thaumcraft.api.nodes.NodeType type) {
-        return type == null ? null : NodeType.valueOf(type.name());
-    }
-    /** The native modifier of a published modifier; the two enums carry the same three constants. */
-    public static NodeModifier nativeModifier(thaumcraft.api.nodes.NodeModifier modifier) {
-        return modifier == null ? null : NodeModifier.valueOf(modifier.name());
     }
     /** Original ScanManager235-274, reading current stock without consuming it. */
     public AspectList getScanAspects() {
         return thaumcraft.common.lib.research.NodeScanAspects.get(aspects.copy(), nodeType);
     }
-    public NodeModifier getNodeModifier() { return nodeModifier; }
+    @Override public NodeModifier getNodeModifier() { return nodeModifier; }
     public boolean isNatural() { return natural; }
     public byte getLock() { return nodeLock; }
     public int getTickCount() { return count; }
@@ -238,8 +234,11 @@ public final class TileNode extends BlockEntity implements IAspectContainer {
      * <p>The original writes only the base:
      * {@code if (this.aspectsBase.getAmount(aspect) < nodeVisBase) this.aspectsBase.merge(aspect, nodeVisBase);
      * else this.aspectsBase.reduce(aspect, this.aspectsBase.getAmount(aspect) - nodeVisBase);}</p>
+     *
+     * <p>Forced 1.21.1 change: none. The original takes a {@code short} and so does the
+     * published contract, including its narrowing quirk.</p>
      */
-    public void setNodeVisBase(Aspect aspect, int amount) {
+    @Override public void setNodeVisBase(Aspect aspect, short amount) {
         if (aspect == null) return;
         if (aspectsBase.getAmount(aspect) < amount) aspectsBase.merge(aspect, amount);
         else aspectsBase.reduce(aspect, aspectsBase.getAmount(aspect) - amount);

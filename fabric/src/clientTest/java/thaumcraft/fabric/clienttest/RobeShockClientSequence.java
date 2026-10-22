@@ -96,6 +96,7 @@ import thaumcraft.common.tiles.TileInfusionMatrix;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TilePedestal;
+import thaumcraft.api.nodes.NodeType;
 
 /** Eight focused scenes in a NEW owned copy of the accepted stopped goggles world. */
 public final class RobeShockClientSequence {
@@ -582,7 +583,7 @@ public final class RobeShockClientSequence {
         var values = new AspectList(); for (String tag : WandData.PRIMALS) values.add(Aspect.getAspect(tag), 80);
         for (BlockPos at : BlockPos.betweenClosed(chargingNode.offset(-4, -4, -4), chargingNode.offset(4, 4, 4))) require(!level.hasChunkAt(at) || !(level.getBlockEntity(at) instanceof TileNode), "finite INPUT isolated from old/native nodes, no bullying or deletion");
         level.setBlockAndUpdate(chargingNode, ThaumcraftContent.AURA_NODE.get().defaultBlockState()); node(level, chargingNode).setAspects(values); // Declared finite NORMAL NODE INPUT only.
-        require(node(level, chargingNode).getNodeType() == TileNode.NodeType.NORMAL, "ordinary NORMAL fixture");
+        require(node(level, chargingNode).getNodeType() == NodeType.NORMAL, "ordinary NORMAL fixture");
         inputs.add(Map.of("fixture", "finite NORMAL node current+base INPUT", "position", chargingNode.toShortString(), "primals_each", 80, "naturally_found_claimed", false));
         long beforeTime = level.getDayTime(); level.setDayTime(6000); level.setWeatherParameters(0, 12000, false, false);
         inputs.add(Map.of("fixture", "daylight/clear weather and bounded floor/camera/workbench/anvil/full cauldron/sand/cactus", "old_day_time", beforeTime, "new_day_time", 6000, "cauldron_initial_level", 3, "normal_ticks_retained", true));

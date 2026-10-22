@@ -86,6 +86,7 @@ import thaumcraft.common.lib.research.ResearchCatalog;
 import thaumcraft.common.tiles.TileArcaneWorkbench;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
 
 /** Five bounded scenes in root's NEW private copy; no old acquisition is replayed. */
 public final class FrostClientSequence {
@@ -268,7 +269,7 @@ public final class FrostClientSequence {
         }
         require(tcBlocks >= 114 && oldBEs.size() >= 34 && jars == 12 && units == 173 && candles == 72, "all accepted114TC/34BE minimum plus extended previous Excavation bench/protected chest, twelve jars173units/72candles");
         require(level.getBlockEntity(center.offset(176, 0, 0)) instanceof TileArcaneWorkbench oldBench && oldBench.isEmpty() && level.getBlockEntity(center.offset(186, 0, -3)) instanceof ChestBlockEntity oldChest && oldChest.isEmpty(), "previous Excavation workbench1650/protected earned chest1660 included and untouched");
-        TileNode node = node(player); require(node.getNodeType() == TileNode.NodeType.NORMAL && aspects(node.getAspectsBase()).equals(Map.of("aer", 80, "aqua", 80, "ignis", 80, "ordo", 80, "perditio", 80, "terra", 80)), "ACTUAL saved clothing NORMAL node with80/primal base, current is NOT reset");
+        TileNode node = node(player); require(node.getNodeType() == NodeType.NORMAL && aspects(node.getAspectsBase()).equals(Map.of("aer", 80, "aqua", 80, "ignis", 80, "ordo", 80, "perditio", 80, "terra", 80)), "ACTUAL saved clothing NORMAL node with80/primal base, current is NOT reset");
         var saved = new LinkedHashMap<String, Object>(); saved.put("main_stacks_snbt", player.getInventory().items.stream().filter(value -> !value.isEmpty()).map(value -> snbt(value, player)).toList()); saved.put("armor_snbt", savedArmor.stream().map(value -> snbt(value, player)).toList()); saved.put("payer_snbt", snbt(expectedWand, player)); saved.put("offhand_snbt", snbt(apple, player)); saved.put("actual_earned_diamond_snbt", snbt(savedDiamond, player)); saved.put("total_saved_XP", initialXp); saved.put("prior_native_ore_XP_included", 4); saved.put("old_TC_blocks_found", tcBlocks); saved.put("old_non_node_BEs_found", oldBEs.size()); saved.put("actual_visited_saved_node_snbt", beTag(node).toString()); report.put("actual_saved_inputs", saved);
         patch(level); level.setBlockAndUpdate(workbench, ThaumcraftArcane.ARCANE_WORKBENCH.get().defaultBlockState());
         for (int x = -5; x <= 5; x++) for (int y = 0; y <= 5; y++) { BlockPos at = wall.offset(x, y, 0); require(level.isEmptyBlock(at), "wide wall only in new empty fixture cells"); level.setBlockAndUpdate(at, Blocks.STONE_BRICKS.defaultBlockState()); }

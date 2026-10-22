@@ -46,6 +46,7 @@ import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileArcaneWorkbench;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNodeEnergized;
+import thaumcraft.api.nodes.NodeType;
 
 /** Real recipes/menu, paid17-cell formation, renewable source epochs, dropped input and all four shared output ports.
  * Raw materials, late crafting wand, ordinary node capacities and physical pearls are explicit SERVER INPUT fixtures. */
@@ -58,7 +59,7 @@ public final class AdvancedFurnaceRuntimeChecks {
             recipe(f); f.reset();
             var core=form(f,f.base,true);
             var upper=(ChestBlockEntity)f.level.getBlockEntity(f.base.above()); var upperBefore=upper.saveWithoutMetadata(f.level.registryAccess());
-            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,TileNode.NodeType.NORMAL);
+            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,NodeType.NORMAL);
             warm(f,core,source,50);
             f.check(core.getHeat()==550 && core.getPower1()==550 && core.getPower2()==550 && core.getVis()==0
                             && core.getBlockState().getValue(BlockAdvancedAlchemyFurnace.LIGHT)==13,
@@ -189,7 +190,7 @@ public final class AdvancedFurnaceRuntimeChecks {
         f.check(unbound.getEssentiaAmount(null)==0 && unbound.getEssentiaType(null)==null,"original unbound int-unboxing NPE is bounded to safe zero/null without fabricated stock");
     }
     private static void capacityAndEnergy(Fixture f) {
-        var core=form(f,f.base,false); var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,TileNode.NodeType.NORMAL);
+        var core=form(f,f.base,false); var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,NodeType.NORMAL);
         var missing=physical(f,f.base,new ItemStack(Items.COAL)); var before=core.saveWithoutMetadata(f.level.registryAccess());
         f.level.getBlockState(f.base).entityInside(f.level,f.base,missing);
         f.check(missing.getItem().getCount()==1 && before.equals(core.saveWithoutMetadata(f.level.registryAccess())),"real input with missing three energy pools is refused unchanged"); missing.discard();
@@ -218,7 +219,7 @@ public final class AdvancedFurnaceRuntimeChecks {
         f.check(core.isStandaloneCreative() && AdvancedFurnaceFormation.structure(core)==AdvancedFurnaceFormation.Status.COMPLETE && formed==1
                         && gift.getCount()==1 && f.player.getMainHandItem()==gift,
                 "persisted standaloneCreative path operates with only native core; never auto-spawns17 components and preserves ordinary creative item counts");
-        var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,TileNode.NodeType.NORMAL);
+        var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,NodeType.NORMAL);
         warm(f,core,source,50); var input=physical(f,f.base,new ItemStack(Items.COAL,2));
         f.level.getBlockState(f.base).entityInside(f.level,f.base,input);
         f.check(core.getVis()==ObjectAspectResolver.get(new ItemStack(Items.COAL),f.level).visSize() && input.getItem().getCount()==1,

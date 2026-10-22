@@ -27,6 +27,8 @@ import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftNaturals;
 import thaumcraft.common.lib.world.BiomeColumns;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Real biome storage/vanilla packet and actual disk unload/reload of a real embedded node; no inspected-client claim. */
 public final class NodeBiomeStorageRuntimeChecks {
@@ -86,7 +88,7 @@ public final class NodeBiomeStorageRuntimeChecks {
             var placed = level.getBlockEntity(position);
             test.assertTrue(placed instanceof TileNode && placed.getType() == ThaumcraftContent.NODE_BLOCK_ENTITY.get(), "actual embedded log owns the shared registered native TileNode");
             var node = (TileNode) placed;
-            node.initializeGenerated(new AspectList().add(Aspect.AIR, 15).add(Aspect.ORDER, 6), TileNode.NodeType.PURE, null);
+            node.initializeGenerated(new AspectList().add(Aspect.AIR, 15).add(Aspect.ORDER, 6), NodeType.PURE, null);
             String scanId = node.getScanId();
             source.removeRegionTicket(TICKET, chunkPos, 0, position);
             test.onEachTick(() -> {
@@ -99,7 +101,7 @@ public final class NodeBiomeStorageRuntimeChecks {
                             "actual ServerLevel unload is followed by a fresh disk-loaded chunk and TileNode");
                     TileNode loaded = (TileNode) restored; var state = level.getBlockState(position);
                     test.assertTrue(state.is(ThaumcraftContent.SILVERWOOD_KNOT.get()) && state.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Z
-                                    && loaded.getNodeType() == TileNode.NodeType.PURE && loaded.getNodeModifier() == null && loaded.getScanId().equals(scanId)
+                                    && loaded.getNodeType() == NodeType.PURE && loaded.getNodeModifier() == null && loaded.getScanId().equals(scanId)
                                     && loaded.getAspects().getAmount(Aspect.AIR) == 15 && loaded.getAspects().getAmount(Aspect.ORDER) == 6
                                     && loaded.getAspectsBase().aspects.equals(loaded.getAspects().aspects),
                             "real native disk reload preserves knot axis, PURE type, UUID, current vis and base capacity");
@@ -109,7 +111,7 @@ public final class NodeBiomeStorageRuntimeChecks {
                             "embedded node remains a luminous full log and original pick-block identity is plain Silverwood");
 
                     // Declared zero-vis/FADING fixture isolates the original count1200 pruning boundary through the real ticker.
-                    loaded.initializeGenerated(new AspectList().add(Aspect.AIR, 0), TileNode.NodeType.NORMAL, TileNode.NodeModifier.FADING);
+                    loaded.initializeGenerated(new AspectList().add(Aspect.AIR, 0), NodeType.NORMAL, NodeModifier.FADING);
                     var ticker = ThaumcraftContent.SILVERWOOD_KNOT.get().getTicker(level, state, ThaumcraftContent.NODE_BLOCK_ENTITY.get());
                     test.assertTrue(ticker != null, "real knot block provides the actual native node ticker");
                     for (int tick = 0; tick < 1199; tick++) ticker.tick(level, position, state, loaded);

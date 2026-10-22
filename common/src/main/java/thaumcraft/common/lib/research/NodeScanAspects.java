@@ -3,7 +3,7 @@ package thaumcraft.common.lib.research;
 import java.util.Objects;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
-import thaumcraft.common.tiles.TileNode.NodeType;
+import thaumcraft.api.nodes.NodeType;
 
 /** Original generateNodeAspects: per-tag scaling, then type-specific MAX and ADD operations in their exact order. */
 public final class NodeScanAspects {

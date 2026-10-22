@@ -7,8 +7,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.junit.jupiter.api.Test;
 import thaumcraft.api.aspects.Aspect;
-import thaumcraft.common.tiles.TileNode.NodeModifier;
-import thaumcraft.common.tiles.TileNode.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 /** Declared biome100/aer and unavailable environment; scripted RNG validates every original bound and draw position. */
 class NodeGenerationTest {

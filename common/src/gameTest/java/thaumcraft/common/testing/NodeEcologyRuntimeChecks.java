@@ -49,6 +49,8 @@ import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.testing.NodeTransductionRuntimeChecks.InputRandom;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Real registered nodes/biomes/mobs; explicit RNG branch inputs never inject a biome or mob reward. */
 public final class NodeEcologyRuntimeChecks {
@@ -136,10 +138,10 @@ public final class NodeEcologyRuntimeChecks {
             }
             f.put(target, block);
         }
-        void fresh(TileNode.NodeType type, boolean embedded) {
+        void fresh(NodeType type, boolean embedded) {
             put(pos, embedded ? ThaumcraftContent.SILVERWOOD_KNOT.get() : ThaumcraftContent.AURA_NODE.get());
             node = (TileNode) level.getBlockEntity(pos);
-            node.initializeGenerated(new AspectList().add(Aspect.AIR, 10), type, TileNode.NodeModifier.FADING);
+            node.initializeGenerated(new AspectList().add(Aspect.AIR, 10), type, NodeModifier.FADING);
         }
         void phase49() {
             for (int tick = 0; tick < 49; tick++) TileNode.serverTick(level, pos, level.getBlockState(pos), node);
@@ -167,32 +169,32 @@ public final class NodeEcologyRuntimeChecks {
         }
         void pure() {
             paint(pos, ThaumcraftBiomes.MAGICAL_FOREST); paint(sampled, ThaumcraftBiomes.EERIE);
-            fresh(TileNode.NodeType.PURE, false); phase49(); offsets(8, true);
+            fresh(NodeType.PURE, false); phase49(); offsets(8, true);
             biome(sampled, ThaumcraftBiomes.EERIE, "a wild PURE aura node cannot convert arbitrary untainted Eerie terrain");
 
-            paint(sampled, ThaumcraftBiomes.TAINT); fresh(TileNode.NodeType.PURE, false); phase49(); offsets(8, true);
+            paint(sampled, ThaumcraftBiomes.TAINT); fresh(NodeType.PURE, false); phase49(); offsets(8, true);
             biome(sampled, ThaumcraftBiomes.MAGICAL_FOREST, "a wild PURE node really cleanses the actual Taint biome on tick50");
 
-            paint(sampled, ThaumcraftBiomes.EERIE); fresh(TileNode.NodeType.PURE, true); phase49(); offsets(8, true);
+            paint(sampled, ThaumcraftBiomes.EERIE); fresh(NodeType.PURE, true); phase49(); offsets(8, true);
             biome(sampled, ThaumcraftBiomes.MAGICAL_FOREST, "an actual embedded Silverwood PURE node also converts an untainted biome");
             for (int denied : new int[]{0, 2}) {
                 paint(sampled, ThaumcraftBiomes.EERIE); NodeEcologyPolicy.biomeBlacklist.put(ThaumcraftBiomes.EERIE, denied);
-                fresh(TileNode.NodeType.PURE, true); phase49(); offsets(8, true);
+                fresh(NodeType.PURE, true); phase49(); offsets(8, true);
                 biome(sampled, ThaumcraftBiomes.EERIE, "PURE respects the sampled target biome blacklist level" + denied);
             }
             NodeEcologyPolicy.biomeBlacklist.put(ThaumcraftBiomes.EERIE, 1);
-            fresh(TileNode.NodeType.PURE, true); phase49(); offsets(8, true);
+            fresh(NodeType.PURE, true); phase49(); offsets(8, true);
             biome(sampled, ThaumcraftBiomes.MAGICAL_FOREST, "original blacklist level1 still allows real PURE conversion");
             for (int denied : new int[]{0, 2}) {
                 paint(sampled, ThaumcraftBiomes.TAINT); NodeEcologyPolicy.dimensionBlacklist.put(level.dimension(), denied);
-                fresh(TileNode.NodeType.PURE, false); phase49(); offsets(8, false);
+                fresh(NodeType.PURE, false); phase49(); offsets(8, false);
                 biome(sampled, ThaumcraftBiomes.TAINT, "dimension blacklist prevents PURE before consuming offset RNG");
             }
         }
         void embeddedHarvest() {
             f.check(level.isPositionEntityTicking(pos), "real embedded-harvest fixture has active native entity sections before creating drops");
-            fresh(TileNode.NodeType.PURE, true);
-            node.initializeGenerated(new AspectList().add(Aspect.AIR, 25).add(Aspect.ORDER, 4), TileNode.NodeType.PURE, TileNode.NodeModifier.FADING);
+            fresh(NodeType.PURE, true);
+            node.initializeGenerated(new AspectList().add(Aspect.AIR, 25).add(Aspect.ORDER, 4), NodeType.PURE, NodeModifier.FADING);
             var knot = level.getBlockState(pos); var original = node;
             f.check(knot.is(BlockTags.LOGS) && knot.getCollisionShape(level, pos).bounds().equals(new AABB(0, 0, 0, 1, 1, 1))
                             && knot.getLightEmission() == 7 && knot.getDestroySpeed(level, pos) == 2.5F
@@ -208,7 +210,7 @@ public final class NodeEcologyRuntimeChecks {
                     "actual thaumometer ray acquires the embedded node UUID rather than a plain-log item session");
             scanner.getItem().releaseUsing(scanner, level, f.player, 25); f.player.stopUsingItem();
 
-            node.initializeGenerated(new AspectList().add(Aspect.AIR, 5).add(Aspect.ORDER, 4), TileNode.NodeType.PURE, null);
+            node.initializeGenerated(new AspectList().add(Aspect.AIR, 5).add(Aspect.ORDER, 4), NodeType.PURE, null);
             var wand = new ItemStack(ThaumcraftContent.WAND.get()); var vis = WandData.EMPTY;
             for (Aspect primal : Aspect.getPrimalAspects()) vis = vis.withAmount(primal.getTag(), primal == Aspect.AIR ? 2450 : 2500);
             wand.set(ThaumcraftContent.WAND_DATA.get(), vis); f.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, wand);
@@ -225,7 +227,7 @@ public final class NodeEcologyRuntimeChecks {
             tick(); NodeEcologyPolicy.dimensionBlacklist.remove(level.dimension());
             f.check(node.getAspects().getAmount(Aspect.AIR) == 5 && node.getNodeVisBase(Aspect.AIR) == 5,
                     "the actual embedded-node lifecycle restores one real missing current unit at count600");
-            node.initializeGenerated(new AspectList().add(Aspect.AIR, 25).add(Aspect.ORDER, 4), TileNode.NodeType.PURE, TileNode.NodeModifier.FADING);
+            node.initializeGenerated(new AspectList().add(Aspect.AIR, 25).add(Aspect.ORDER, 4), NodeType.PURE, NodeModifier.FADING);
             f.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
             var old = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(8)).stream().map(Entity::getUUID).toList();
             try {
@@ -240,7 +242,7 @@ public final class NodeEcologyRuntimeChecks {
                                             && ThaumcraftEssences.WISP_ESSENCE.get().getAspects(entity.getItem()).getAmount(Aspect.AIR) == 2),
                     "real player harvest pays one plain Silverwood log plus exactly original three AIR2 essences from CURRENT25, with no ORDER4 or whole-node item");
             drops.forEach(Entity::discard);
-            fresh(TileNode.NodeType.PURE, true); node.initializeGenerated(new AspectList().add(Aspect.AIR, 25), TileNode.NodeType.PURE, TileNode.NodeModifier.FADING);
+            fresh(NodeType.PURE, true); node.initializeGenerated(new AspectList().add(Aspect.AIR, 25), NodeType.PURE, NodeModifier.FADING);
             f.check(level.destroyBlock(pos, true), "ordinary environmental native destruction removes a second real knot");
             var unpaid = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(8), entity -> !old.contains(entity.getUUID())); mobs.addAll(unpaid);
             f.check(unpaid.size() == 1 && unpaid.getFirst().getItem().is(ThaumcraftNaturals.SILVERWOOD_LOG.get().asItem()) && unpaid.getFirst().getItem().getCount() == 1,
@@ -253,15 +255,15 @@ public final class NodeEcologyRuntimeChecks {
         void darkBiomes() {
             paint(pos, ThaumcraftBiomes.MAGICAL_FOREST); paint(sampled, ThaumcraftBiomes.TAINT);
             NodeEcologyPolicy.biomeBlacklist.put(ThaumcraftBiomes.TAINT, 0);
-            fresh(TileNode.NodeType.DARK, false); phase49(); offsets(12, true);
+            fresh(NodeType.DARK, false); phase49(); offsets(12, true);
             biome(sampled, ThaumcraftBiomes.EERIE, "DARK converts its sampled target despite that target's blacklist, with hardNodes=false");
             for (int denied : new int[]{0, 2}) {
                 paint(sampled, ThaumcraftBiomes.TAINT); NodeEcologyPolicy.biomeBlacklist.put(ThaumcraftBiomes.MAGICAL_FOREST, denied);
-                fresh(TileNode.NodeType.DARK, false); phase49(); offsets(12, false);
+                fresh(NodeType.DARK, false); phase49(); offsets(12, false);
                 biome(sampled, ThaumcraftBiomes.TAINT, "DARK checks the center biome blacklist before consuming offsets");
             }
             NodeEcologyPolicy.biomeBlacklist.put(ThaumcraftBiomes.MAGICAL_FOREST, 1);
-            fresh(TileNode.NodeType.DARK, false); phase49(); offsets(12, true);
+            fresh(NodeType.DARK, false); phase49(); offsets(12, true);
             biome(sampled, ThaumcraftBiomes.EERIE, "center blacklist level1 allows DARK despite the sampled target level0");
             NodeEcologyPolicy.biomeBlacklist.clear();
         }
@@ -269,41 +271,41 @@ public final class NodeEcologyRuntimeChecks {
             paint(pos, ThaumcraftBiomes.MAGICAL_FOREST); paint(sampled, ThaumcraftBiomes.EERIE);
             NodeEcologyPolicy.dimensionBlacklist.put(level.dimension(), 0);
             NodeEcologyPolicy.biomeBlacklist.put(ThaumcraftBiomes.EERIE, 0);
-            fresh(TileNode.NodeType.TAINTED, false); phase49(); offsets(8, true);
+            fresh(NodeType.TAINTED, false); phase49(); offsets(8, true);
             biome(sampled, ThaumcraftBiomes.TAINT, "TAINTED still converts a real biome with hardNodes=false and without PURE/DARK blacklist gates");
             NodeEcologyPolicy.dimensionBlacklist.clear(); NodeEcologyPolicy.biomeBlacklist.clear();
 
             var fibre = pos.east(2); put(fibre, Blocks.AIR); put(fibre.below(), Blocks.STONE); put(fibre.above(), Blocks.AIR);
-            fresh(TileNode.NodeType.TAINTED, false); phase49(); hard(true);
+            fresh(NodeType.TAINTED, false); phase49(); hard(true);
             try (var rng = new TaintNodeInput(f)) { tick(); rng.assertDraws(); }
             f.check(level.getBlockState(fibre).is(ThaumcraftTaint.FIBRES.get()) && level.getBlockState(fibre).getValue(BlockTaintFibres.TYPE) == 0,
                     "hard TAINTED ecology invokes the actual native spreadFibres and creates its supported TYPE0 block after the original ordered offsets");
             put(fibre, Blocks.AIR); put(fibre.below(), Blocks.AIR); hard(false);
 
             paint(pos, ThaumcraftBiomes.MAGICAL_FOREST);
-            fresh(TileNode.NodeType.NORMAL, false); node.takeVis("aer", 1);
+            fresh(NodeType.NORMAL, false); node.takeVis("aer", 1);
             for (int tick = 0; tick < 99; tick++) tick();
             paint(pos, ThaumcraftBiomes.TAINT); var current = node.getAspects(); var base = node.getAspectsBase();
             try (var rng = new InputRandom(f, bound -> { f.check(bound == 500, "native Taint infection reads original bound500"); return 0; }, true)) {
                 tick(); f.check(rng.bounds.equals(List.of(500)), "non-PURE/non-TAINTED infection has exactly the original one-in500 draw on tick100");
             }
-            f.check(node.getNodeType() == TileNode.NodeType.TAINTED && node.getAspects().aspects.equals(current.aspects) && node.getAspectsBase().aspects.equals(base.aspects),
+            f.check(node.getNodeType() == NodeType.TAINTED && node.getAspects().aspects.equals(current.aspects) && node.getAspectsBase().aspects.equals(base.aspects),
                     "actual Taint biome infects the current normal node while preserving physical current/BASE aura");
 
             paint(pos, ThaumcraftBiomes.MAGICAL_FOREST); paint(sampled, ThaumcraftBiomes.EERIE);
-            fresh(TileNode.NodeType.DARK, false); phase49(); offsets(12, true);
+            fresh(NodeType.DARK, false); phase49(); offsets(12, true);
             for (int tick = 0; tick < 49; tick++) tick();
             paint(pos, ThaumcraftBiomes.TAINT);
             try (var rng = new InputRandom(f, bound -> { f.check(bound == 500, "infection precedes DARK offset draws in the original tick order"); return 0; }, true)) {
-                tick(); f.check(rng.bounds.equals(List.of(500)) && node.getNodeType() == TileNode.NodeType.TAINTED,
+                tick(); f.check(rng.bounds.equals(List.of(500)) && node.getNodeType() == NodeType.TAINTED,
                         "a DARK node infected on tick100 cannot execute its former DARK biome/spawn handler afterward");
             }
 
             paint(pos, ThaumcraftBiomes.MAGICAL_FOREST); paint(sampled, ThaumcraftBiomes.MAGICAL_FOREST);
-            fresh(TileNode.NodeType.PURE, false); phase49(); offsets(8, true);
+            fresh(NodeType.PURE, false); phase49(); offsets(8, true);
             for (int tick = 0; tick < 49; tick++) tick();
             paint(pos, ThaumcraftBiomes.TAINT); offsets(8, true);
-            f.check(node.getNodeType() == TileNode.NodeType.PURE, "actual PURE node is immune to Taint infection and spends no bound500 draw");
+            f.check(node.getNodeType() == NodeType.PURE, "actual PURE node is immune to Taint infection and spends no bound500 draw");
         }
         void darkRoom() {
             for (BlockPos mutable : BlockPos.betweenClosed(pos.offset(-9, -3, -9), pos.offset(9, 8, 9))) {
@@ -313,7 +315,7 @@ public final class NodeEcologyRuntimeChecks {
                 put(target, shell ? Blocks.BEDROCK : Blocks.AIR);
             }
             level.getServer().setDifficulty(Difficulty.HARD, true);
-            fresh(TileNode.NodeType.NORMAL, false); hard(false); // No ecological writes or spawns while asynchronous room lighting settles.
+            fresh(NodeType.NORMAL, false); hard(false); // No ecological writes or spawns while asynchronous room lighting settles.
         }
         boolean darkRoomReady() {
             BlockPos spawn = pos.offset(4, 0, 4);
@@ -329,7 +331,7 @@ public final class NodeEcologyRuntimeChecks {
                 giant.setPos(Vec3.atLowerCornerOf(pos).add(offset)); giant.setNoAi(true); giant.setNoGravity(true);
                 f.check(level.addFreshEntity(giant), "three actual existing hostile owners are admitted"); mobs.add(giant);
             }
-            fresh(TileNode.NodeType.DARK, false); hard(true); // Earlier native lighting ticks legitimately advanced the waiting ordinary tile.
+            fresh(NodeType.DARK, false); hard(true); // Earlier native lighting ticks legitimately advanced the waiting ordinary tile.
             phase49();
             try (var rng = new DarkSpawnInput(f, true)) {
                 tick(); rng.assertDraws(true);
@@ -339,7 +341,7 @@ public final class NodeEcologyRuntimeChecks {
                             && !born.getFirst().isBaby() && born.getFirst().getMainHandItem().isEmpty() && born.getFirst().getOffhandItem().isEmpty(),
                     "original <=3 cap admits one actual fourth Giant in unsupported air, using unfinalized native construction and exact positional draws");
             mobs.add(born.getFirst());
-            fresh(TileNode.NodeType.DARK, false); phase49();
+            fresh(NodeType.DARK, false); phase49();
             try (var rng = new DarkSpawnInput(f, false)) {
                 tick(); rng.assertDraws(false);
             }

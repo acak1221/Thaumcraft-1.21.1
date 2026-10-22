@@ -59,9 +59,44 @@ import thaumcraft.client.renderers.models.ModelEldritchGuardian;
  * component alone, which is exactly what the 1.21.1 polygon does with
  * {@code normal.mul(-1, 1, 1)}. The test below proves that with the real 1.21.1
  * classes, so the mirrored boxes of the port need no compensation at all.</p>
+ *
+ * <h3>The two implementations side by side</h3>
+ *
+ * <p>The 1.7.10 side is the official Mojang {@code client.jar} of 1.7.10 (the classes
+ * {@code net.minecraft.client.model.ModelBox} and {@code net.minecraft.client.model.TexturedQuad}
+ * of the jar, read with the official MCP mapping
+ * {@code de.oceanlabs.mcp:mcp_stable:12-1.7.10}), the 1.21.1 side is the remapped jar
+ * {@code net.minecraft.client.model.geom.ModelPart}:</p>
+ *
+ * <table>
+ *   <caption>The mirror of a box, step by step</caption>
+ *   <tr><th>step</th><th>1.7.10</th><th>1.21.1</th></tr>
+ *   <tr><td>the extent in X</td>
+ *       <td>{@code ModelBox}: the minimum and the maximum X are swapped</td>
+ *       <td>{@code ModelPart.Cube}: the minimum and the maximum X are swapped</td></tr>
+ *   <tr><td>the texture region</td>
+ *       <td>{@code TexturedQuad}: the four vertices are remapped with the region of the face</td>
+ *       <td>{@code ModelPart.Polygon}: the four vertices are remapped with the region of the face</td></tr>
+ *   <tr><td>the winding</td>
+ *       <td>{@code TexturedQuad.flip}: the four vertices are reversed</td>
+ *       <td>{@code ModelPart.Polygon}: the four vertices are reversed</td></tr>
+ *   <tr><td>the normal</td>
+ *       <td>{@code TexturedQuad}: the cross product of the (reversed) vertices</td>
+ *       <td>{@code ModelPart.Polygon}: the direction of the face, the X negated</td></tr>
+ * </table>
+ *
+ * <p>The two are the same numbers: for the box of two model units the mirrored quad of
+ * the 1.7.10 jar is {@code (0,0,0) u=0.03125 v=0.03125}, {@code (2,0,0) u=0.01563 v=0.03125},
+ * {@code (2,0,2) u=0.01563 v=0.00000}, {@code (0,0,2) u=0.03125 v=0.00000} and the 1.21.1
+ * model gives the same quad in world units. The only difference is the unit: the 1.7.10 box
+ * keeps the model units, the 1.21.1 cube divides them by sixteen when it is compiled
+ * ({@code ModelPart.Cube.compile}), so the mirror of the test is about {@code 2/16} and
+ * not about {@code 2}.</p>
  */
 class EldritchWardenEyeAndMirrorParityTest {
     private static final float EPS = 1.0E-5F;
+    /** The width of the tested box in world units: the 1.21.1 model divides the model units by sixteen. */
+    private static final float BOX = 2.0F / 16.0F;
 
     // ------------------------------------------------------- the warden's hood eye
 
@@ -93,11 +128,14 @@ class EldritchWardenEyeAndMirrorParityTest {
         // The mirror of the 1.7.10 ModelBox swaps the minimum and the maximum X and winds
         // every quad the other way: the vertex j of a mirrored quad is the vertex three
         // minus j of the plain quad with the X mirrored about the centre of the box.
+        // The 1.21.1 cube is compiled in world units, the model units are divided by
+        // sixteen (ModelPart.Cube.compile, net.minecraft.client.model.geom.ModelPart:288-290),
+        // so the box of two model units is BOX wide in the buffer of the test.
         for (int face = 0; face < 6; face++) {
             for (int vertex = 0; vertex < 4; vertex++) {
                 float[] source = plain.get(face * 4 + 3 - vertex);
                 float[] target = mirrored.get(face * 4 + vertex);
-                assertEquals(2.0F - source[0], target[0], EPS, "the mirrored x of the vertex " + vertex + " of the face " + face);
+                assertEquals(BOX - source[0], target[0], EPS, "the mirrored x of the vertex " + vertex + " of the face " + face);
                 assertEquals(source[1], target[1], EPS, "the y of the vertex " + vertex + " of the face " + face);
                 assertEquals(source[2], target[2], EPS, "the z of the vertex " + vertex + " of the face " + face);
                 assertEquals(source[3], target[3], EPS, "the u of the vertex " + vertex + " of the face " + face);

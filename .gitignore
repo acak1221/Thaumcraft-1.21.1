@@ -17,6 +17,7 @@ logs
 .gradle-mp/
 .gradle-lev/
 .gradle-neo/
+.gradle-arb/
 build/
 out/
 run/

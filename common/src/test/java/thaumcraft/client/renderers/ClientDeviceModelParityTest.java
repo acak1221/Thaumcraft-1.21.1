@@ -1,6 +1,7 @@
 package thaumcraft.client.renderers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonArray;
@@ -102,11 +103,19 @@ class ClientDeviceModelParityTest {
     }
 
     @Test void theLevitatorBlockModelStaysThePlainCube() {
-        // Original BlockLifterRenderer:57-64 - the world render draws the cube and the glow
-        // faces of the neighbours; the two inner slabs belong to the inventory render only.
+        // Original BlockLifterRenderer:55-88 - the world render draws the cube of the block
+        // itself and the glow faces of the neighbours; the two inner slabs belong to the
+        // inventory render only (oracle BlockLifterRenderer:32-53). The world cube of the
+        // original is the ordinary cube of the block, so the world model of the port is the
+        // cube of the parent and carries no element of its own: it cannot carry the slabs.
         JsonObject block = model("block/levitator");
-        assertEquals(0, block.getAsJsonArray("elements").size(),
+        JsonArray elements = block.getAsJsonArray("elements");
+        assertTrue(elements == null || elements.isEmpty(),
                 "the world render of the original draws the cube of the levitator, not the slabs");
+        assertEquals("minecraft:block/cube_bottom_top", block.get("parent").getAsString(),
+                "the cube of the world model of the levitator");
+        assertFalse(block.getAsJsonObject("textures").has("glow"),
+                "the glow of the original is drawn by the world renderer, not by a model element");
     }
 
     // --------------------------------------------------------- the essentia tank

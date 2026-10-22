@@ -1,3 +1,29 @@
+## 2026-10-23 — Repository audit: ledger closed, integrated acceptance still pending
+
+At base `c6feeda7`, recomputing every ledger unit gives **1044/1044
+`parity_verified`, 0 partial/missing/not_assessed**. The status documents' leading
+1017/27 checkpoint (and older 976, 969, 945 totals) is superseded. This is ledger
+code closure, not proof of a fresh green build or visual acceptance.
+
+The last integrated numbers recorded in the wave-4/5 status summary are 2384
+JUnit, 325 Fabric GameTest and 90 Python, on earlier inputs. Wave-7/8 reports
+record javac/resource checks, **not executed JUnit/GameTests or client frames**.
+The wave-3 client smoke reached 66/66 frames (65 accepted, last-frame fix after
+the run); two physical clients reached 37/37 stages. Neither accepts subsequent
+renderer/input changes. NeoForge visual acceptance remains unperformed. This
+audit ran no Gradle or game; the `a3tests` lane owns the new integrated gates.
+
+Later reports supersede the earlier mirror, particle-budget, scattered-feature
+and chunk-replay impossibility claims. Ore inset is controlled by anisotropic
+filtering, not Fast/Fancy or particle settings. The old font atlas is absent,
+not a verified extraction. See `docs/audit/REPO_FINDINGS.md` for exact arbitration
+and hygiene findings, and `THIRD_PARTY_NOTICES.md` for checked asset provenance.
+
+**Everything below is historical evidence on its stated inputs.** Old test
+counts, remaining-unit counts, claims that the client cannot run, and pending
+acceptance statements are not the current state. They are retained rather than
+rewritten as tests that never happened.
+
 ## 2026-10-21 — Closing wave: the client lanes of the scope ledger
 
 The OpenTC4 comparison left 126 units of the scope ledger without a native

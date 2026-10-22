@@ -6,7 +6,8 @@
         "name": "thaumcraft:heartbeat",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.heartbeat"
   },
   "spill": {
     "category": "master",
@@ -15,7 +16,8 @@
         "name": "thaumcraft:spill",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.spill"
   },
   "bubble": {
     "category": "master",
@@ -24,7 +26,8 @@
       "thaumcraft:bubble2",
       "thaumcraft:bubble3",
       "thaumcraft:bubble4"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.bubble"
   },
   "alembicknock": {
     "category": "master",
@@ -33,21 +36,24 @@
         "name": "thaumcraft:alembicknock",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.alembicknock"
   },
   "creak": {
     "category": "master",
     "sounds": [
       "thaumcraft:creak1",
       "thaumcraft:creak2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.creak"
   },
   "squeek": {
     "category": "master",
     "sounds": [
       "thaumcraft:squeek1",
       "thaumcraft:squeek2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.squeek"
   },
   "golemironshoot": {
     "category": "master",
@@ -56,7 +62,8 @@
         "name": "thaumcraft:golemironshoot",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.golemironshoot"
   },
   "jar": {
     "category": "master",
@@ -65,7 +72,8 @@
       "thaumcraft:jar2",
       "thaumcraft:jar3",
       "thaumcraft:jar4"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.jar"
   },
   "swarm": {
     "category": "master",
@@ -73,7 +81,8 @@
       "thaumcraft:swarm1",
       "thaumcraft:swarm2",
       "thaumcraft:swarm3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.swarm"
   },
   "swarmattack": {
     "category": "master",
@@ -82,14 +91,16 @@
         "name": "thaumcraft:swarmattack",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.swarmattack"
   },
   "fly": {
     "category": "master",
     "sounds": [
       "thaumcraft:fly1",
       "thaumcraft:fly2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.fly"
   },
   "key": {
     "category": "master",
@@ -98,7 +109,8 @@
         "name": "thaumcraft:key",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.key"
   },
   "doorfail": {
     "category": "master",
@@ -107,7 +119,8 @@
         "name": "thaumcraft:doorfail",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.doorfail"
   },
   "cameraticks": {
     "category": "master",
@@ -116,7 +129,8 @@
         "name": "thaumcraft:cameraticks",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.cameraticks"
   },
   "cameraclack": {
     "category": "master",
@@ -124,7 +138,8 @@
       "thaumcraft:cameraclack1",
       "thaumcraft:cameraclack2",
       "thaumcraft:cameraclack3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.cameraclack"
   },
   "pump": {
     "category": "master",
@@ -132,14 +147,16 @@
       "thaumcraft:pump1",
       "thaumcraft:pump2",
       "thaumcraft:pump3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.pump"
   },
   "page": {
     "category": "master",
     "sounds": [
       "thaumcraft:page1",
       "thaumcraft:page2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.page"
   },
   "learn": {
     "category": "master",
@@ -148,14 +165,16 @@
         "name": "thaumcraft:learn",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.learn"
   },
   "write": {
     "category": "master",
     "sounds": [
       "thaumcraft:write1",
       "thaumcraft:write2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.write"
   },
   "erase": {
     "category": "master",
@@ -164,7 +183,8 @@
         "name": "thaumcraft:erase",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.erase"
   },
   "brain": {
     "category": "master",
@@ -173,7 +193,8 @@
       "thaumcraft:brain2",
       "thaumcraft:brain3",
       "thaumcraft:brain4"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.brain"
   },
   "crystal": {
     "category": "master",
@@ -182,7 +203,8 @@
         "name": "thaumcraft:crystal",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.crystal"
   },
   "wispdead": {
     "category": "master",
@@ -191,7 +213,8 @@
         "name": "thaumcraft:wispdead",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.wispdead"
   },
   "wisplive": {
     "category": "master",
@@ -199,7 +222,8 @@
       "thaumcraft:wisplive1",
       "thaumcraft:wisplive2",
       "thaumcraft:wisplive3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.wisplive"
   },
   "wand": {
     "category": "master",
@@ -207,7 +231,8 @@
       "thaumcraft:wand1",
       "thaumcraft:wand2",
       "thaumcraft:wand3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.wand"
   },
   "wandfail": {
     "category": "master",
@@ -216,7 +241,8 @@
         "name": "thaumcraft:wandfail",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.wandfail"
   },
   "rumble": {
     "category": "master",
@@ -225,7 +251,8 @@
         "name": "thaumcraft:rumble",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.rumble"
   },
   "ice": {
     "category": "master",
@@ -233,7 +260,8 @@
       "thaumcraft:ice1",
       "thaumcraft:ice2",
       "thaumcraft:ice3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.ice"
   },
   "jacobs": {
     "category": "master",
@@ -242,7 +270,8 @@
         "name": "thaumcraft:jacobs",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.jacobs"
   },
   "hhoff": {
     "category": "master",
@@ -251,7 +280,8 @@
         "name": "thaumcraft:hhoff",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.hhoff"
   },
   "hhon": {
     "category": "master",
@@ -260,7 +290,8 @@
         "name": "thaumcraft:hhon",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.hhon"
   },
   "pech_idle": {
     "category": "master",
@@ -268,7 +299,8 @@
       "thaumcraft:pech_idle1",
       "thaumcraft:pech_idle2",
       "thaumcraft:pech_idle3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.pech_idle"
   },
   "pech_trade": {
     "category": "master",
@@ -277,7 +309,8 @@
         "name": "thaumcraft:pech_trade",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.pech_trade"
   },
   "pech_dice": {
     "category": "master",
@@ -286,14 +319,16 @@
         "name": "thaumcraft:pech_dice",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.pech_dice"
   },
   "pech_hit": {
     "category": "master",
     "sounds": [
       "thaumcraft:pech_hit1",
       "thaumcraft:pech_hit2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.pech_hit"
   },
   "pech_death": {
     "category": "master",
@@ -302,21 +337,24 @@
         "name": "thaumcraft:pech_death",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.pech_death"
   },
   "pech_charge": {
     "category": "master",
     "sounds": [
       "thaumcraft:pech_charge1",
       "thaumcraft:pech_charge2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.pech_charge"
   },
   "shock": {
     "category": "master",
     "sounds": [
       "thaumcraft:shock1",
       "thaumcraft:shock2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.shock"
   },
   "fireloop": {
     "category": "master",
@@ -325,14 +363,16 @@
         "name": "thaumcraft:fireloop",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.fireloop"
   },
   "zap": {
     "category": "master",
     "sounds": [
       "thaumcraft:zap1",
       "thaumcraft:zap2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.zap"
   },
   "craftfail": {
     "category": "master",
@@ -341,7 +381,8 @@
         "name": "thaumcraft:craftfail",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.craftfail"
   },
   "craftstart": {
     "category": "master",
@@ -350,7 +391,8 @@
         "name": "thaumcraft:craftstart",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.craftstart"
   },
   "runicshieldeffect": {
     "category": "master",
@@ -359,7 +401,8 @@
         "name": "thaumcraft:runicshieldeffect",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.runicshieldeffect"
   },
   "runicshieldcharge": {
     "category": "master",
@@ -368,35 +411,40 @@
         "name": "thaumcraft:runicshieldcharge",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.runicshieldcharge"
   },
   "swing": {
     "category": "master",
     "sounds": [
       "thaumcraft:swing1",
       "thaumcraft:swing2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.swing"
   },
   "wind": {
     "category": "master",
     "sounds": [
       "thaumcraft:wind1",
       "thaumcraft:wind2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.wind"
   },
   "tool": {
     "category": "master",
     "sounds": [
       "thaumcraft:tool1",
       "thaumcraft:tool2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.tool"
   },
   "gore": {
     "category": "master",
     "sounds": [
       "thaumcraft:gore1",
       "thaumcraft:gore2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.gore"
   },
   "roots": {
     "category": "master",
@@ -404,7 +452,8 @@
       "thaumcraft:roots1",
       "thaumcraft:roots2",
       "thaumcraft:roots3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.roots"
   },
   "tentacle": {
     "category": "master",
@@ -412,7 +461,8 @@
       "thaumcraft:tentacle1",
       "thaumcraft:tentacle2",
       "thaumcraft:tentacle3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.tentacle"
   },
   "upgrade": {
     "category": "master",
@@ -421,7 +471,8 @@
         "name": "thaumcraft:upgrade",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.upgrade"
   },
   "whispers": {
     "category": "master",
@@ -430,7 +481,8 @@
         "name": "thaumcraft:whispers",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.whispers"
   },
   "monolith": {
     "category": "master",
@@ -439,7 +491,8 @@
         "name": "thaumcraft:monolith",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.monolith"
   },
   "infuser": {
     "category": "master",
@@ -448,7 +501,8 @@
         "name": "thaumcraft:infuser",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.infuser"
   },
   "infuserstart": {
     "category": "master",
@@ -457,14 +511,16 @@
         "name": "thaumcraft:infuserstart",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.infuserstart"
   },
   "egidle": {
     "category": "master",
     "sounds": [
       "thaumcraft:egidle1",
       "thaumcraft:egidle2"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.egidle"
   },
   "egattack": {
     "category": "master",
@@ -473,7 +529,8 @@
         "name": "thaumcraft:egattack",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.egattack"
   },
   "egdeath": {
     "category": "master",
@@ -482,7 +539,8 @@
         "name": "thaumcraft:egdeath",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.egdeath"
   },
   "egscreech": {
     "category": "master",
@@ -491,7 +549,8 @@
         "name": "thaumcraft:egscreech",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.egscreech"
   },
   "crabclaw": {
     "category": "master",
@@ -500,7 +559,8 @@
         "name": "thaumcraft:crabclaw",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.crabclaw"
   },
   "crabdeath": {
     "category": "master",
@@ -509,7 +569,8 @@
         "name": "thaumcraft:crabdeath",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.crabdeath"
   },
   "crabtalk": {
     "category": "master",
@@ -517,7 +578,8 @@
       "thaumcraft:crabtalk1",
       "thaumcraft:crabtalk2",
       "thaumcraft:crabtalk3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.crabtalk"
   },
   "chant": {
     "category": "master",
@@ -525,7 +587,8 @@
       "thaumcraft:chant1",
       "thaumcraft:chant2",
       "thaumcraft:chant3"
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.chant"
   },
   "coins": {
     "category": "master",
@@ -534,7 +597,8 @@
         "name": "thaumcraft:coins",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.coins"
   },
   "urnbreak": {
     "category": "master",
@@ -543,7 +607,8 @@
         "name": "thaumcraft:urnbreak",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.urnbreak"
   },
   "evilportal": {
     "category": "master",
@@ -552,6 +617,7 @@
         "name": "thaumcraft:evilportal",
         "stream": false
       }
-    ]
+    ],
+    "subtitle": "subtitles.thaumcraft.evilportal"
   }
 }

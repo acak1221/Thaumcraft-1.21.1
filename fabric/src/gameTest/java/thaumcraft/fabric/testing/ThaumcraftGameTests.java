@@ -86,6 +86,25 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void sound_registry_covers_bundled_events(GameTestHelper helper) {
+        try (var input = ThaumcraftGameTests.class.getResourceAsStream("/assets/thaumcraft/sounds.json")) {
+            if (input == null) throw new IllegalStateException("Bundled sounds.json missing");
+            var sounds = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(input,
+                    java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+            for (String id : sounds.keySet()) {
+                var key = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", id);
+                helper.assertTrue(net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.containsKey(key),
+                        "Unregistered bundled sound " + key);
+                helper.assertTrue(net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.get(key).getLocation().equals(key),
+                        "Registered sound points at a different audio location: " + key);
+            }
+            helper.succeed();
+        } catch (java.io.IOException failure) {
+            throw new IllegalStateException(failure);
+        }
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1200, batch = "g7_save_chunks")
     public void saveCycleChunkDiskReload(GameTestHelper test) {
         thaumcraft.common.testing.SaveCycleRuntimeChecks.chunks(test);

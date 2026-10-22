@@ -99,14 +99,20 @@ public final class BiomeRuntimeChecks {
             if((level.canSeeSky(origin)||level.getRawBrightness(origin,0)>=8)&&waited<40){test.runAfterDelay(2,()->awaitDarkPlants(test,origin,saved,bounds,prior,waited+2));return;}
             test.assertTrue(level.isEmptyBlock(origin)&&!level.canSeeSky(origin)&&level.getRawBrightness(origin,0)<8,"real opaque enclosure reaches native darkness before any self-luminous plant is inserted");
             var plants=List.<Block>of(ThaumcraftBiomes.VISHROOM.get(),ThaumcraftPlants.SHIMMERLEAF.get(),ThaumcraftPlants.CINDERPEARL.get());
-            for(var plant:plants)test.assertTrue(plant.defaultBlockState().canSurvive(level,origin),"original Forge BlockBush soil rule admits each actual plant in unmodified native darkness: "+plant);
+            // Oracle BlockCustomPlant:130-132 answers canPlaceBlockAt with a plain true, so the plant
+            // is never refused a position; the rule that keeps it there is the inherited 1.7.10
+            // BlockBush.func_149718_j (canBlockStay, the official client jar, the class ajr): the
+            // grass, the dirt or the farmland below the plant.
+            for(var plant:plants)test.assertTrue(plant.defaultBlockState().canSurvive(level,origin),"original BlockBush stay rule admits each actual plant in unmodified native darkness: "+plant);
             for(var plant:plants){
                 level.setBlock(origin.below(),Blocks.GRASS_BLOCK.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
                 level.setBlock(origin,plant.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
                 level.getBlockState(origin).randomTick(level,origin,RandomSource.create(715));
                 test.assertTrue(level.getBlockState(origin).is(plant),"actual random tick retains the grass-supported plant under the real roof");
                 level.setBlock(origin.below(),Blocks.STONE.defaultBlockState(),Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE);
-                test.assertTrue(!plant.defaultBlockState().canSurvive(level,origin),"removing original plains/desert soil still invalidates each luminous plant");
+                // The original plant did not override canBlockStay, so it breaks on the next random
+                // tick (oracle BlockCustomPlant:134-136 calls the inherited BlockBush update tick).
+                test.assertTrue(!plant.defaultBlockState().canSurvive(level,origin),"removing the original BlockBush soil still invalidates each luminous plant");
                 level.getBlockState(origin).randomTick(level,origin,RandomSource.create(716));
                 test.assertTrue(level.isEmptyBlock(origin),"actual invalid-soil random tick removes the real plant");
             }

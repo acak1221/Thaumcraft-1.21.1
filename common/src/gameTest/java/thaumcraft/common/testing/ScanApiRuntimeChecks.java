@@ -108,7 +108,12 @@ public final class ScanApiRuntimeChecks {
             test.assertTrue(EntityAspectBindings.describe(first).signature().equals(EntityAspectBindings.describe(second).signature()), "fixture mobs share the same persistent knowledge key");
             aim(player, first.getEyePosition()); f.start(); String original = f.tool.get(ThaumcraftContent.SCAN_SESSION.get()).signature();
             first.setPos(f.side); second.setPos(f.front); aim(player, second.getEyePosition()); f.tick();
-            test.assertTrue(!f.tool.has(ThaumcraftContent.SCAN_SESSION.get()) && !player.isUsingItem() && original.equals("entity:" + first.getId())
+            // Oracle ScanResult.equals:26-43 compares the entity ID (func_145782_y) of a type two
+            // scan, so another mob of the same type is a DIFFERENT target: the original
+            // ItemThaumometer.onUsingTick:153-167 finds the new scan unequal to its start scan and
+            // only clears startScan - the instrument stays raised until its twenty five ticks are
+            // over (the original stops the use only in the completion branch, :157).
+            test.assertTrue(!f.tool.has(ThaumcraftContent.SCAN_SESSION.get()) && player.isUsingItem() && original.equals("entity:" + first.getId())
                             && f.knowledge.getScannedEntities().isEmpty(), "retargeting another identical mob cancels before any reward, using the original entity-ID equality rule");
             first.discard(); second.discard();
             var drop1 = new ItemEntity(f.level, f.front.x, f.front.y + 1, f.front.z, new ItemStack(Items.STONE), 0, 0, 0);
@@ -132,16 +137,25 @@ public final class ScanApiRuntimeChecks {
             ThaumcraftApi.registerScanEventhandler((stack, world, actor) -> { calls[0]++; return ScanResult.item(new ItemStack(Items.STONE)); });
             var unsupported = EntityType.ARMOR_STAND.create(f.level); test.assertTrue(unsupported != null, "unsupported native physical entity fixture exists");
             unsupported.setNoGravity(true); unsupported.setPos(f.front); f.add(unsupported); aim(player, unsupported.getEyePosition());
-            test.assertTrue(!player.gameMode.useItem(player, f.level, f.tool, InteractionHand.MAIN_HAND).consumesAction() && calls[0] == 0,
+            // Oracle ItemThaumometer:88-96 - the pointed entity IS the scan target and the method
+            // returns before the addon callbacks of :134-138, so a physical entity that carries no
+            // scan aspects occludes the callbacks instead of falling through to a different reward.
+            // Oracle ItemThaumometer:142-149 - the original always raises the instrument
+            // (p.setItemInUse), so the use consumes the action even when no scan ever starts.
+            test.assertTrue(player.gameMode.useItem(player, f.level, f.tool, InteractionHand.MAIN_HAND).consumesAction() && calls[0] == 0
+                            && !f.knowledge.hasScannedItem("@minecraft:stone"),
                     "an unsupported physical entity occludes addon callbacks instead of falling through to a different reward"); unsupported.discard();
             var block = BlockPos.containing(f.front).above(); var old = f.level.getBlockState(block); f.level.setBlock(block, Blocks.STONE.defaultBlockState(), 3);
             try { aim(player, Vec3.atCenterOf(block)); f.start(); test.assertTrue(calls[0] == 0, "a real physical block precedes all scan callbacks"); player.stopUsingItem(); f.tool.remove(ThaumcraftContent.SCAN_SESSION.get()); }
             finally { f.level.setBlock(block, old, 3); }
-            player.setXRot(-90); player.setYRot(0); calls[0] = 0;
+            // Aim into the open sky: the ray hits nothing, so the addon callbacks are really asked.
+            aim(player, player.getEyePosition().add(0.0, 6.0, 0.0)); calls[0] = 0;
             ThaumcraftApi.scanEventhandlers.clear();
             ThaumcraftApi.registerScanEventhandler((stack, world, actor) -> new ScanResult((byte) 99, 0, 0, null, "invalid first"));
             ThaumcraftApi.registerScanEventhandler((stack, world, actor) -> { calls[0]++; return ScanResult.item(new ItemStack(Items.STONE)); });
-            test.assertTrue(!player.gameMode.useItem(player, f.level, f.tool, InteractionHand.MAIN_HAND).consumesAction() && calls[0] == 0,
+            // Oracle ItemThaumometer:134-138 - the first nonnull callback result ends the dispatch,
+            // and the instrument is raised whatever that result is (oracle ItemThaumometer:147).
+            test.assertTrue(player.gameMode.useItem(player, f.level, f.tool, InteractionHand.MAIN_HAND).consumesAction() && calls[0] == 0,
                     "the first nonnull callback, including an invalid one, prevents all later callbacks");
             ThaumcraftApi.scanEventhandlers.clear();
             ThaumcraftApi.registerScanEventhandler((stack, world, actor) -> null);

@@ -190,17 +190,37 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
         return cinderpearl ? PlantType.DESERT : PlantType.PLAINS;
     }
 
+    /**
+     * The stay rule of the original plant, the soil of the inherited {@code BlockBush}.
+     *
+     * <p>Original: the 1.7.10 {@code BlockBush.func_149854_a} (the official client jar, the class
+     * {@code ajr}) - the MCP name of the method is {@code canPlaceBlockOn} and the MCP mapping
+     * describes it as "is the block grass, dirt or farmland". The three blocks are the whole table
+     * of the method.</p>
+     */
     @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {
-        return soilSupports(itemPlantType(), soil, level, pos);
+        return bushSoil(soil);
     }
 
     /**
-     * Original BlockCustomPlant:130-132 - the original plant answers {@code canPlaceBlockAt}
-     * with a plain {@code true}, so it can be placed on every soil and it never dies when the
-     * block below it changes. 1.21.1 asks the same question in {@code canSurvive}.
+     * The stay rule of the original plant.
+     *
+     * <p>Oracle {@code thaumcraft/common/blocks/BlockCustomPlant.java:130-132} answers
+     * {@code canPlaceBlockAt} with a plain {@code true}: the original plant is never refused a
+     * position, and the soil rule of the original is the rule of the ITEM
+     * ({@code BlockCustomPlantItem:74} asks the soil through the Forge table of
+     * {@code Block.canSustainPlant}), see {@link PlantItem#canPlace}.</p>
+     *
+     * <p>The rule that removes the plant again is the inherited 1.7.10 {@code BlockBush}: the
+     * plant did <b>not</b> override {@code func_149718_j} ({@code canBlockStay}, the official
+     * client jar, the class {@code ajr}), so the plant breaks on the next neighbour change
+     * ({@code func_149695_a}) and on the next random tick ({@code func_149674_a}, which the oracle
+     * calls at {@code BlockCustomPlant:136}) when the block below it is not the grass, the dirt or
+     * the farmland. 1.21.1 asks that same question in {@code canSurvive}, which
+     * {@code BushBlock.updateShape} and the random tick of this plant use to remove it.</p>
      */
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return true;
+        return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below());
     }
 
     /**
@@ -261,8 +281,17 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
             return super.getPlacementState(context);
         }
 
-        /** Original BlockCustomPlantItem:54 - the soil below has to support the plant. */
-        @Override protected boolean mustSurvive() { return true; }
+        /**
+         * Original BlockCustomPlantItem:54 - the item asks the soil for its own plant type.
+         *
+         * <p>Oracle {@code BlockCustomPlant:130-132} answers {@code canPlaceBlockAt} with a plain
+         * {@code true}, so the original plant is never refused a position: the only gate of the
+         * placement is the soil table of the item below. 1.21.1 asks the block whether it can
+         * survive at the placement position ({@code BlockItem.canPlace}, the vanilla
+         * {@code mustSurvive()} gate), so that gate is switched off here and the soil rule of the
+         * original item is asked by {@link #canPlace(BlockPlaceContext, BlockState)} alone.</p>
+         */
+        @Override protected boolean mustSurvive() { return false; }
 
         /**
          * Original BlockCustomPlantItem:54 - the item asks the soil for its own plant type with

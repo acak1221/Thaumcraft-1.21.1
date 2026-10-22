@@ -163,6 +163,30 @@ public final class MultiplayerPairLink {
         return newline < 0 ? "" : content.substring(newline + 1).trim();
     }
 
+    /**
+     * One "seq\npayload" entry, read with a SINGLE file read.
+     *
+     * <p>Reading the sequence and the body with two separate reads is a race:
+     * the writer can replace the file between the two reads, so a reader can
+     * see the sequence of one version and the body of the next one. The pair
+     * link therefore always reads the whole entry at once.</p>
+     */
+    public record Entry(int sequence, String payload) {}
+
+    public static Entry readEntry(Path file) {
+        String content = read(file);
+        if (content == null) return null;
+        int newline = content.indexOf('\n');
+        if (newline < 0) return null;
+        int sequence;
+        try {
+            sequence = Integer.parseInt(content.substring(0, newline).trim());
+        } catch (NumberFormatException malformed) {
+            return null;
+        }
+        return new Entry(sequence, content.substring(newline + 1).trim());
+    }
+
     private static Object field(Object owner, String name) throws ReflectiveOperationException {
         for (Class<?> type = owner.getClass(); type != null; type = type.getSuperclass()) {
             try {

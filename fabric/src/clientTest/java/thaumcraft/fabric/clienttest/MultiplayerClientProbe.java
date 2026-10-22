@@ -496,9 +496,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     /** The golem bell reset over the real C2S channel. */
     private boolean stageGolemBell(Minecraft client) throws Exception {
         if (!giveItems(client, "thaumcraft:golem_bell 1")) return false;
-        int bellSlot = slotOf(client, thaumcraft.common.config.ThaumcraftGolems.GOLEM_BELL.get());
-        if (bellSlot < 0) return false;
-        selectSlot(client, bellSlot);
+        if (!holdItemOf(client, thaumcraft.common.config.ThaumcraftGolems.GOLEM_BELL.get())) return false;
         if (stageData.get("bell_sent") == null) {
             NetworkManager.sendToServer(new GolemBellResetPayload(InteractionHand.MAIN_HAND));
             stageData.put("bell_sent", true);
@@ -961,7 +959,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         }
         int inkSlot = slotOf(client, ThaumcraftContent.INKWELL.get());
         if (inkSlot < 0) return false;
-        selectSlot(client, inkSlot);
+        if (!holdItemOf(client, ThaumcraftContent.INKWELL.get())) return false;
         if (stageTicks % 20 == 0) interact(client, tablePos);
         return false;
     }
@@ -1082,16 +1080,27 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         if (stageData.get("summoned") == null) {
-            BlockPos pos = client.player.blockPosition().offset(5, 0, 0);
+            // The guardian only uses its ranged attack at twenty to forty
+            // blocks, so it is summoned far away and the distance is kept.
+            BlockPos pos = client.player.blockPosition().offset(30, 0, 0);
             client.getConnection().sendCommand("summon thaumcraft:eldritch_guardian " + pos.getX() + " " + pos.getY()
                     + " " + pos.getZ());
             stageData.put("summoned", true);
+            stageData.put("guardian", pos);
             return false;
+        }
+        BlockPos guardian = (BlockPos) stageData.get("guardian");
+        // The lead stays twenty-eight blocks away, so the guardian keeps using
+        // its ranged attack instead of walking into melee range.
+        if (stageTicks % 20 == 0) {
+            client.getConnection().sendCommand("tp " + playerName + " " + (guardian.getX() - 28) + " " + guardian.getY()
+                    + " " + guardian.getZ());
         }
         int warpEvent = s2cCounts.getOrDefault("thaumcraft:warp_event", new AtomicInteger()).get();
         int sonic = s2cCounts.getOrDefault("thaumcraft:guardian_sonic", new AtomicInteger()).get();
         evidence.put("wire_warp_event_packets", warpEvent);
         evidence.put("wire_guardian_sonic_packets", sonic);
+        evidence.put("wire_guardian_position", List.of(guardian.getX(), guardian.getY(), guardian.getZ()));
         if (warpEvent == 0 || sonic == 0) {
             if (stageTicks < 1800) return false;
             throw new IllegalStateException("The eldritch guardian produced no clientbound effect: warp_event=" + warpEvent
@@ -1110,15 +1119,20 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         if (stageData.get("summoned") == null) {
+            // The original wisp only looks for a player once in a thousand
+            // ticks, so three of them make the zap reachable.
             BlockPos pos = client.player.blockPosition().offset(2, 1, 0);
-            client.getConnection().sendCommand("summon thaumcraft:wisp " + pos.getX() + " " + pos.getY() + " " + pos.getZ());
+            for (int index = 0; index < 3; index++) {
+                client.getConnection().sendCommand("summon thaumcraft:wisp " + (pos.getX() + index) + " " + pos.getY()
+                        + " " + pos.getZ());
+            }
             stageData.put("summoned", true);
             return false;
         }
         int zap = s2cCounts.getOrDefault("thaumcraft:wisp_zap", new AtomicInteger()).get();
         evidence.put("wire_wisp_zap_packets", zap);
         if (zap == 0) {
-            if (stageTicks < 2000) return false;
+            if (stageTicks < 2400) return false;
             client.getConnection().sendCommand("difficulty peaceful");
             throw new IllegalStateException("The wisp never produced its clientbound zap");
         }
@@ -1150,11 +1164,29 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             throw new IllegalStateException("The two clients disagree about the player list: peer=" + peerValue("players")
                     + " lead=" + listed);
         }
+        // The second client is a helper: it must not die while the acceptance
+        // runs, and the creative mode is also the state the original's
+        // closest-player rule has to refuse later.
+        if (!"creative".equals(peerValue("gm"))) {
+            if (stageData.get("creative") == null) {
+                client.getConnection().sendCommand("gamemode creative " + peerName);
+                stageData.put("creative", true);
+            }
+            return false;
+        }
         return true;
     }
 
     /** The knowledge snapshot of one player must never reach the other player. */
     private boolean stagePairPerPlayerKnowledge(Minecraft client) {
+        if (stageData.get("cleanup") == null) {
+            // The eldritch guardian and the wisp of the wire stages would warp
+            // every player that walks into them, so they are removed first.
+            client.getConnection().sendCommand("kill @e[type=thaumcraft:eldritch_guardian]");
+            client.getConnection().sendCommand("kill @e[type=thaumcraft:wisp]");
+            stageData.put("cleanup", true);
+            return false;
+        }
         if (!bringPeerNextToLead(client)) return false;
         if (stageData.get("grant") == null) {
             client.getConnection().sendCommand("thaumcraft research " + peerName + " " + PEER_RESEARCH);
@@ -1240,6 +1272,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
 
     /** The golem bell of the OTHER player: the original refuses the stranger. */
     private boolean stagePairGolemBellOwner(Minecraft client) throws Exception {
+        if (!bringPeerNextToLead(client)) return false;
         if (stageData.get("give") == null) {
             if (!giveToPeer(client, "thaumcraft:golem_bell 1")) return false;
             stageData.put("give", true);
@@ -1260,9 +1293,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         if (golem == null) return false;
         evidence.put("pair_golem_owner_on_client", golem.getOwnerName());
         if (stageData.get("bell") == null) {
-            int bellSlot = slotOf(client, thaumcraft.common.config.ThaumcraftGolems.GOLEM_BELL.get());
-            if (bellSlot < 0) return false;
-            selectSlot(client, bellSlot);
+            if (!holdItemOf(client, thaumcraft.common.config.ThaumcraftGolems.GOLEM_BELL.get())) return false;
             stageData.put("bell", true);
             return false;
         }
@@ -1295,6 +1326,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
 
     /** The travelling trunk of the OTHER player: only its owner may open the water trunk. */
     private boolean stagePairTravelingTrunkOwner(Minecraft client) throws Exception {
+        if (!bringPeerNextToLead(client)) return false;
         if (stageData.get("summon") == null) {
             Map<String, String> status = peerStatus();
             int px = Integer.parseInt(status.getOrDefault("x", "0"));
@@ -1336,9 +1368,28 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
      * open the MAIN half, and both players must see the same table.
      */
     private boolean stagePairResearchTablePartner(Minecraft client) throws Exception {
-        if (!ensureResearchTablePair(client)) return false;
-        evidence.put("pair_research_table_variant", variantAt(client, tablePos));
+        if (stageData.get("tables") == null) {
+            // The eldritch guardian may have knocked the lead back, so the
+            // pair stage uses a FRESH pair of tables at the lead's position.
+            tablePos = client.player.blockPosition().offset(1, 0, 0);
+            tablePartner = tablePos.north();
+            client.getConnection().sendCommand("setblock " + tablePos.getX() + " " + tablePos.getY() + " " + tablePos.getZ()
+                    + " thaumcraft:table");
+            client.getConnection().sendCommand("setblock " + tablePartner.getX() + " " + tablePartner.getY() + " "
+                    + tablePartner.getZ() + " thaumcraft:table");
+            stageData.put("tables", true);
+            return false;
+        }
+        int variant = variantAt(client, tablePos);
+        if (variant < 2) {
+            if (!holdItemOf(client, ThaumcraftContent.INKWELL.get())) return false;
+            if (stageTicks % 20 == 0) interact(client, tablePos);
+            return false;
+        }
+        evidence.put("pair_research_table_variant", variant);
         evidence.put("pair_research_table_partner_variant", variantAt(client, tablePartner));
+        // The second client has to stand next to the partner half.
+        if (!bringPeerNextToLead(client)) return false;
         if (stageData.get("peer_open") == null) {
             pairCommand("OPEN_TABLE", tablePartner.getX() + "," + tablePartner.getY() + "," + tablePartner.getZ());
             stageData.put("peer_open", true);
@@ -1395,6 +1446,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
                     + " thaumcraft:eldritch_spawner[variant=10]");
             stageData.put("place", true);
             stageData.put("trap", trap);
+            stageData.put("lead_warp_before", KnowledgeAccess.get(client.player).getTotalWarp());
+            stageData.put("peer_warp_before", peerValue("warp"));
             return false;
         }
         BlockPos trap = (BlockPos) stageData.get("trap");
@@ -1408,9 +1461,11 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         int leadWarp = KnowledgeAccess.get(client.player).getTotalWarp();
+        int leadWarpBefore = (Integer) stageData.get("lead_warp_before");
+        evidence.put("pair_lead_warp_before_trap", leadWarpBefore);
         evidence.put("pair_lead_warp_after_trap", leadWarp);
         evidence.put("pair_trap_position", List.of(trap.getX(), trap.getY(), trap.getZ()));
-        if (leadWarp <= 0) {
+        if (leadWarp <= leadWarpBefore) {
             if (stageTicks < 600) return false;
             throw new IllegalStateException("The runed eldritch trap never warped the non-creative player");
         }
@@ -1422,9 +1477,12 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         if (!pairReplied()) return false;
         evidence.put("pair_peer_status_after_trap", pairAnswer);
         String peerWarp = pairValue(pairAnswer, "warp");
+        String peerWarpBefore = (String) stageData.get("peer_warp_before");
+        evidence.put("pair_peer_warp_before_trap", peerWarpBefore);
         evidence.put("pair_peer_warp_after_trap", peerWarp);
-        if (peerWarp != null && !peerWarp.equals("0")) {
-            throw new IllegalStateException("The creative player was warped by the trap: warp=" + peerWarp);
+        if (peerWarp != null && peerWarpBefore != null && !peerWarp.equals(peerWarpBefore)) {
+            throw new IllegalStateException("The creative player was warped by the trap: warp=" + peerWarpBefore
+                    + " -> " + peerWarp);
         }
         return true;
     }
@@ -1449,11 +1507,9 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
 
     /** True once the second client answered the command that was sent last. */
     private boolean pairReplied() {
-        int sequence = MultiplayerPairLink.readSequence(MultiplayerPairLink.resultFile(pairDirectory));
-        if (sequence != pairSequence) return false;
-        String payload = MultiplayerPairLink.readPayload(MultiplayerPairLink.resultFile(pairDirectory));
-        if (payload == null) return false;
-        pairAnswer = payload;
+        var entry = MultiplayerPairLink.readEntry(MultiplayerPairLink.resultFile(pairDirectory));
+        if (entry == null || entry.sequence() != pairSequence) return false;
+        pairAnswer = entry.payload();
         return true;
     }
 
@@ -1558,8 +1614,10 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     private static String uuidIntArray(String uuid) {
         if (uuid == null || uuid.isBlank()) return "[I;0,0,0,0]";
         UUID parsed = UUID.fromString(uuid);
-        return "[I;" + (parsed.getMostSignificantBits() >> 32) + "," + (parsed.getMostSignificantBits() & 0xffffffffL)
-                + "," + (parsed.getLeastSignificantBits() >> 32) + "," + (parsed.getLeastSignificantBits() & 0xffffffffL) + "]";
+        // The NBT int array holds SIGNED 32 bit values, so a UUID whose high
+        // half is above 2^31 must be written with its negative counterpart.
+        return "[I;" + (int) (parsed.getMostSignificantBits() >> 32) + "," + (int) parsed.getMostSignificantBits()
+                + "," + (int) (parsed.getLeastSignificantBits() >> 32) + "," + (int) parsed.getLeastSignificantBits() + "]";
     }
 
     // ------------------------------------------------------------------- driver
@@ -1767,9 +1825,42 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     }
 
     private static void selectSlot(Minecraft client, int slot) {
+        // The vanilla carried item packet only accepts a HOTBAR slot; the
+        // server refuses every other index with "tried to set an invalid
+        // carried item" and the hand never changes.
+        if (slot < 0 || slot > 8) return;
         if (client.player.getInventory().selected == slot) return;
         client.player.getInventory().selected = slot;
         client.getConnection().send(new ServerboundSetCarriedItemPacket(slot));
+    }
+
+    /**
+     * Puts an item into the main hand. An item outside the hotbar has to be
+     * moved into it first, because the vanilla carried item packet only
+     * accepts a hotbar index.
+     */
+    private boolean holdItemOf(Minecraft client, net.minecraft.world.item.Item item) {
+        int slot = slotOf(client, item);
+        if (slot < 0) return false;
+        if (slot < 9) {
+            selectSlot(client, slot);
+            return true;
+        }
+        moveToHotbar(client, slot);
+        return false;
+    }
+
+    /** Moves an inventory slot into the first hotbar slot with two real clicks. */
+    private void moveToHotbar(Minecraft client, int inventorySlot) {
+        var menu = client.player.inventoryMenu;
+        int from = -1, to = -1;
+        for (int index = 0; index < menu.slots.size(); index++) {
+            if (menu.slots.get(index).getContainerSlot() == inventorySlot) from = index;
+            if (menu.slots.get(index).getContainerSlot() == 0) to = index;
+        }
+        if (from < 0 || to < 0) return;
+        client.gameMode.handleInventoryMouseClick(menu.containerId, from, 0, ClickType.PICKUP, client.player);
+        client.gameMode.handleInventoryMouseClick(menu.containerId, to, 0, ClickType.PICKUP, client.player);
     }
 
     /**

@@ -322,7 +322,9 @@ loom.runs {
   server()
   name 'Thaumcraft dedicated-server multiplayer target'
   runDir 'run-multiplayer-server'
-  vmArg "-Xmx$multiplayerHeap"
+  // The server of the two-player acceptance shares the host with two physical
+  // clients, so it gets the smaller heap of the three processes.
+  vmArg '-Xmx640M'
   vmArg '-Xms192M'
   programArgs '--nogui'
  }
@@ -515,7 +517,7 @@ tasks.register('prepareMultiplayerRun') {
   def report = isolatedRoot.resolve('multiplayer-client-report.json')
   if (java.nio.file.Files.exists(report)) java.nio.file.Files.delete(report)
   def optionsFile = isolatedRoot.resolve('options.txt').toFile()
-  optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\nrenderDistance:4\nsimulationDistance:4\nmaxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
+  optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\nrenderDistance:4\nsimulationDistance:5\nmaxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
  }
 }
 tasks.register('prepareMultiplayerPeerRun') {
@@ -527,7 +529,7 @@ tasks.register('prepareMultiplayerPeerRun') {
   def report = isolatedRoot.resolve('multiplayer-peer-report.json')
   if (java.nio.file.Files.exists(report)) java.nio.file.Files.delete(report)
   def optionsFile = isolatedRoot.resolve('options.txt').toFile()
-  optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\nrenderDistance:4\nsimulationDistance:4\nmaxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
+  optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\nrenderDistance:4\nsimulationDistance:5\nmaxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
   java.nio.file.Files.createDirectories(multiplayerPairDir)
   ['lead.cmd', 'peer.result', 'peer.status'].each { name ->
    def stale = multiplayerPairDir.resolve(name)
@@ -563,4 +565,4 @@ tasks.named('runMultiplayerPeerClient') {
   logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest'])
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest', multiplayerPeerClient: 'clientTest'])

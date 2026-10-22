@@ -20,10 +20,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
@@ -70,9 +67,10 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
     private Path pairDirectory;
 
     private int handledSequence = -1;
-    private int issuedSequence = 0;
     private String pendingToken;
     private String pendingArguments = "";
+    /** The sequence of the command that is being answered right now. */
+    private int answerSequence = -1;
     private int pendingTicks;
     private boolean pendingClicked;
     private boolean finished;
@@ -109,10 +107,7 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
 
     private void tick(Minecraft client) {
         if (finished) return;
-        if (client.player == null || client.level == null) {
-            if (client.getConnection() != null) return;
-            return;
-        }
+        if (client.player == null || client.level == null) return;
         if (!reported) {
             reported = true;
             evidence.put("player", client.player.getGameProfile().getName());
@@ -131,11 +126,14 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
             }
             return;
         }
-        int sequence = MultiplayerPairLink.readSequence(MultiplayerPairLink.commandFile(pairDirectory));
-        if (sequence < 0 || sequence <= handledSequence) return;
-        String payload = MultiplayerPairLink.readPayload(MultiplayerPairLink.commandFile(pairDirectory));
+        var entry = MultiplayerPairLink.readEntry(MultiplayerPairLink.commandFile(pairDirectory));
+        if (entry == null) return;
+        int sequence = entry.sequence();
+        if (sequence <= handledSequence) return;
+        String payload = entry.payload();
         handledSequence = sequence;
-        if (payload == null) return;
+        answerSequence = sequence;
+        if (payload == null || payload.isEmpty()) return;
         int space = payload.indexOf(' ');
         String token = space < 0 ? payload : payload.substring(0, space);
         String arguments = space < 0 ? "" : payload.substring(space + 1).trim();
@@ -158,25 +156,21 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 pendingToken = "EQUIP";
                 pendingArguments = "";
                 pendingTicks = 0;
-                equipAccessory(client);
             }
             case "BELL_GOLEM" -> {
                 pendingToken = "BELL";
                 pendingArguments = "";
                 pendingTicks = 0;
-                bellGolem(client);
             }
             case "OPEN_TRUNK" -> {
                 pendingToken = "TRUNK";
                 pendingArguments = "";
                 pendingTicks = 0;
-                openTrunk(client);
             }
             case "OPEN_TABLE" -> {
                 pendingToken = "TABLE";
                 pendingArguments = arguments;
                 pendingTicks = 0;
-                openTable(client, arguments);
             }
             case "GAMEMODE" -> {
                 pendingToken = "GM";
@@ -220,7 +214,25 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 + " research=" + knowledge.getResearchComplete().size()
                 + " accessories=" + accessories
                 + " players=" + players
-                + " entities=" + entityCount(client);
+                + " entities=" + entityCount(client)
+                + " census_acc=" + census.clientbound("thaumcraft:accessories_contents")
+                + " census_know=" + census.clientbound("thaumcraft:knowledge_sync")
+                + " census_settings=" + census.clientbound("thaumcraft:research_settings")
+                + " held=" + inventorySummary(player);
+    }
+
+    /** The contents of the peer's own inventory, so a lost item is visible. */
+    private static String inventorySummary(net.minecraft.world.entity.player.Player player) {
+        StringBuilder summary = new StringBuilder();
+        var items = player.getInventory().items;
+        for (int slot = 0; slot < items.size(); slot++) {
+            ItemStack stack = items.get(slot);
+            if (stack.isEmpty()) continue;
+            if (summary.length() > 0) summary.append(',');
+            summary.append(slot).append('=').append(net.minecraft.core.registries.BuiltInRegistries.ITEM
+                    .getKey(stack.getItem()).getPath());
+        }
+        return summary.toString();
     }
 
     private boolean continuePending(Minecraft client) {
@@ -254,6 +266,26 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 return false;
             }
             case "BELL" -> {
+                if (!pendingClicked) {
+                    pendingClicked = true;
+                    int bellSlot = bellSlot(client);
+                    EntityGolemBase golem = closestGolem(client);
+                    if (bellSlot < 0 || golem == null) {
+                        reply("BELL selected=0 bell=" + bellSlot + " golem="
+                                + (golem == null ? "none" : golem.getOwnerName()));
+                        pendingToken = null;
+                        return true;
+                    }
+                    if (bellSlot >= 9) {
+                        // The carried item packet only accepts a hotbar slot, so
+                        // the bell has to be moved into the hotbar first.
+                        moveToHotbar(client, bellSlot);
+                        return false;
+                    }
+                    selectHeld(client, bellSlot);
+                    client.gameMode.interact(client.player, golem, InteractionHand.MAIN_HAND);
+                    return false;
+                }
                 if (bellSelected(client)) {
                     reply("BELL selected=1");
                     pendingToken = null;
@@ -262,6 +294,17 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 return false;
             }
             case "TRUNK" -> {
+                if (!pendingClicked) {
+                    pendingClicked = true;
+                    EntityTravelingTrunk trunk = closestTrunk(client);
+                    if (trunk == null) {
+                        reply("TRUNK open=0 trunk=none");
+                        pendingToken = null;
+                        return true;
+                    }
+                    client.gameMode.interact(client.player, trunk, InteractionHand.MAIN_HAND);
+                    return false;
+                }
                 if (client.player.containerMenu instanceof ContainerTravelingTrunk) {
                     reply("TRUNK open=1");
                     pendingToken = null;
@@ -270,6 +313,11 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 return false;
             }
             case "TABLE" -> {
+                if (!pendingClicked) {
+                    pendingClicked = true;
+                    openTable(client, pendingArguments);
+                    return false;
+                }
                 if (client.player.containerMenu instanceof ContainerResearchTable menu) {
                     var main = menu.mainPos();
                     reply("TABLE open=1 main=" + main.getX() + "," + main.getY() + "," + main.getZ());
@@ -324,11 +372,7 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 break;
             }
         }
-        if (source < 0 || !(player.containerMenu instanceof ContainerAccessories)) {
-            reply("EQUIP count=0");
-            pendingToken = null;
-            return;
-        }
+        if (source < 0) return;
         int container = player.containerMenu.containerId;
         // The accessory container maps the hotbar 0..8 to the container slots 31..39.
         int containerSlot = source < 9 ? 31 + source : 4 + (source - 9);
@@ -336,37 +380,34 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         client.gameMode.handleInventoryMouseClick(container, 0, 0, ClickType.PICKUP, player);
     }
 
-    /** The peer's own bell on the peer's own golem. */
-    private void bellGolem(Minecraft client) {
-        var player = client.player;
-        int bellSlot = -1;
-        var items = player.getInventory().items;
+    /** The inventory slot of the peer's own golem bell. */
+    private static int bellSlot(Minecraft client) {
+        var items = client.player.getInventory().items;
         for (int slot = 0; slot < items.size(); slot++) {
-            if (items.get(slot).is(ThaumcraftGolems.GOLEM_BELL.get())) { bellSlot = slot; break; }
+            if (items.get(slot).is(ThaumcraftGolems.GOLEM_BELL.get())) return slot;
         }
-        EntityGolemBase golem = closestGolem(client);
-        if (bellSlot < 0 || golem == null) {
-            reply("BELL selected=0");
-            pendingToken = null;
-            return;
-        }
-        if (player.getInventory().selected != bellSlot) {
-            player.getInventory().selected = bellSlot;
-            client.getConnection().send(new ServerboundSetCarriedItemPacket(bellSlot));
-        }
-        client.gameMode.interact(player, golem, InteractionHand.MAIN_HAND);
+        return -1;
     }
 
-    /** The peer's own travelling trunk. */
-    private void openTrunk(Minecraft client) {
-        var player = client.player;
-        EntityTravelingTrunk trunk = closestTrunk(client);
-        if (trunk == null) {
-            reply("TRUNK open=0");
-            pendingToken = null;
-            return;
+    /** Selects a HOTBAR slot; the vanilla carried item packet refuses any other. */
+    private static void selectHeld(Minecraft client, int slot) {
+        if (slot < 0 || slot > 8) return;
+        if (client.player.getInventory().selected == slot) return;
+        client.player.getInventory().selected = slot;
+        client.getConnection().send(new net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket(slot));
+    }
+
+    /** Moves an inventory slot into the first hotbar slot with two real clicks. */
+    private void moveToHotbar(Minecraft client, int inventorySlot) {
+        var menu = client.player.inventoryMenu;
+        int from = -1, to = -1;
+        for (int index = 0; index < menu.slots.size(); index++) {
+            if (menu.slots.get(index).getContainerSlot() == inventorySlot) from = index;
+            if (menu.slots.get(index).getContainerSlot() == 0) to = index;
         }
-        client.gameMode.interact(player, trunk, InteractionHand.MAIN_HAND);
+        if (from < 0 || to < 0) return;
+        client.gameMode.handleInventoryMouseClick(menu.containerId, from, 0, ClickType.PICKUP, client.player);
+        client.gameMode.handleInventoryMouseClick(menu.containerId, to, 0, ClickType.PICKUP, client.player);
     }
 
     /** The peer's own right click on the research table's PARTNER half. */
@@ -391,7 +432,8 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         return count;
     }
 
-    private static int accessoryCount(Minecraft client) {        var inventory = PlayerAccessories.get(client.player);
+    private static int accessoryCount(Minecraft client) {
+        var inventory = PlayerAccessories.get(client.player);
         int count = 0;
         for (int slot = 0; slot < 4; slot++) if (!inventory.getItem(slot).isEmpty()) count++;
         return count;
@@ -436,10 +478,10 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         MultiplayerPairLink.writeAtomic(MultiplayerPairLink.statusFile(pairDirectory), status(client) + "\n");
     }
 
+    /** The answer always carries the sequence of the command it answers. */
     private void reply(String text) {
-        issuedSequence = handledSequence;
         MultiplayerPairLink.writeAtomic(MultiplayerPairLink.resultFile(pairDirectory),
-                handledSequence + "\n" + text + "\n");
+                answerSequence + "\n" + text + "\n");
         LOGGER.info("Multiplayer peer answered {}", text);
     }
 
@@ -448,13 +490,6 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         failure.printStackTrace(new PrintWriter(writer));
         String text = writer.toString();
         return text.length() > 4000 ? text.substring(0, 4000) : text;
-    }
-
-    /** The peer stops itself once the lead closed the acceptance. */
-    public void stop(Minecraft client) {
-        finished = true;
-        writeReport("SCRIPT_PASSED");
-        client.stop();
     }
 
     private void writeReport(String status) {

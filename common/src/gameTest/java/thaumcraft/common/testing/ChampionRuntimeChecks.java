@@ -54,6 +54,7 @@ public final class ChampionRuntimeChecks {
             var player = test.makeMockServerPlayerInLevel();
             player.setGameMode(GameType.SURVIVAL);
             player.setPos(lane.origin.getX(), lane.origin.getY(), lane.origin.getZ());
+            for (int tick = 0; tick < 61; tick++) player.tick(); // Native login damage protection expires.
             var champion = lane.add(EntityType.ZOMBIE.create(lane.level));
             champion.setPos(player.position());
             ChampionJoinRoll.join(lane.level, champion, ChampionModifier.WARP);
@@ -83,6 +84,7 @@ public final class ChampionRuntimeChecks {
             var player = test.makeMockServerPlayerInLevel();
             player.setGameMode(GameType.SURVIVAL);
             player.setPos(lane.origin.getX(), lane.origin.getY(), lane.origin.getZ());
+            for (int tick = 0; tick < 61; tick++) player.tick(); // Native login damage protection expires.
             var champion = lane.add(EntityType.ZOMBIE.create(level));
             champion.setPos(player.position());
             ChampionJoinRoll.join(level, champion, ChampionModifier.VAMPIRIC);

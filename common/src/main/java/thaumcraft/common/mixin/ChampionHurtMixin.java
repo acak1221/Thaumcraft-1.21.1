@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import thaumcraft.common.lib.mods.ChampionHooks;
 
@@ -15,7 +16,9 @@ import thaumcraft.common.lib.mods.ChampionHooks;
  * event with its attacking modifier. The native port stands in the same place, before
  * the armour of the victim, and keeps the order of the original event.
  */
-@Mixin(LivingEntity.class)
+// Player overrides actuallyHurt without calling LivingEntity's implementation.
+// Wrap each implementation, not hurt() as well, to dispatch accepted hits once.
+@Mixin({LivingEntity.class, Player.class})
 public abstract class ChampionHurtMixin {
     /** The original living hurt event of the champion modifiers. */
     @WrapMethod(method = "actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V")

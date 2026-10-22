@@ -5056,7 +5056,6 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/fx/beams/FXBeamWand.java the wand beam effect",
           "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java, ShockSparkParticle.java, FrostSparkleParticle.java the native focus beams",
           "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:149 the native fire beam damage formula",
-          "REMAINING DIFFERENCE: the original beam starts at the wand tip (oracle FXBeamWand.java) and the native focus particles start at the player; the wand tip origin belongs to the wand renderer lane (ledger units ItemWandRenderer, WandPerspectiveModel, FirstPersonWandTipOrigin)",
           "oracle thaumcraft/client/fx/beams/FXBeamWand.java:37-297 the beam of the original: the fan of three planes that turns around the axis of the beam (:229-255), the rotation of the fan that follows the time of the world (:171), the slide of the texture (:201-206), the width of a plane (:235-238), the opacity of four tenths and its fade to a tenth in the last four ticks (:177-180), the lifetime of eight and the refresh at four (:84,95-101) and the impact of the beam (:261-263,269-297)",
           "oracle thaumcraft/client/fx/beams/FXBeamWand.java:209-228 the origin of the original is the eye of the player, moved by the yaw and the pitch and by the look vector times 0.3 - it is NOT the tip of the wand",
           "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:161-163 the native origin of the beam is the very same one (the eye, the yaw, the pitch and the look times 0.3)",
@@ -5067,11 +5066,11 @@
         "notes": [
           "Not a class-for-class port: the original single beam effect class became per-focus particle systems in 1.21.1.",
           "DEVIATION: the original FXBeamWand drawing routine has no single native counterpart, so an exact visual comparison is not possible from the source alone.",
-          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either.",
           "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was stated wrongly. The original beam does NOT start at the wand tip: its origin is the eye of the player, moved by the yaw and the pitch and by the look vector times 0.3 (oracle FXBeamWand:209-228), and the native already used exactly that origin (ItemFocusExcavation:161-163).",
           "The real difference was the drawing routine: the original draws a fan of three planes that turns around the axis of the beam, with a width that pulses over four ticks and an opacity of four tenths that fades to a tenth, while the native drew two camera facing ribbons whose opacity ramped up and faded to zero.",
           "The native now draws the fan of the original with the numbers of the original, and the impact is the camera facing quad of the particle atlas of the original with the frame of the age over sixteen and the size endMod / 2 / (6 - impact).",
-          "Forced 1.21.1 change: the fan of the original is drawn with the depth test of the native late world pass, the original drew it in the particle pass."
+          "Forced 1.21.1 change: the fan of the original is drawn with the depth test of the native late world pass, the original drew it in the particle pass.",
+          "CORRECTED 2026-10-23 (leader, w5legacy finding): the row carried a stale \"REMAINING GAP\" and a stale \"REMAINING DIFFERENCE\" string that claimed the original beam starts at the wand tip. Both were disproved by the same row's own evidence: the original origin is the eye of the player moved by the yaw, the pitch and the look vector times 0.3 (oracle FXBeamWand:37,58-62,209-228) and the native already used exactly that origin (ItemFocusExcavation:161-163). The 1.12 origin helper (WandEffectOrigin) has no original counterpart and is closed as a deliberate exclude."
         ],
         "reviewed_sha256": {
           "original": "4559e4022f06675edec351ba7719325e313414498c15dd37a44fdaff279c957c",

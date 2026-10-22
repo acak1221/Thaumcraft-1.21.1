@@ -171,15 +171,21 @@ The condition of an entry is the original's `shouldExecute`, the action is the o
 | entry | the original | the native |
 |---|---|---|
 | `HomeReplace` (0) | `AIHomeReplace.func_75250_a`:37-59, `func_75249_e`:92-127, `func_75253_b`:72-74 | `:275-305` — no `count`, only the chest window |
-| `HomePlace` (1) | `AIHomePlace.func_75250_a`:35-63, `func_75249_e`:85-120, `func_75253_b`:65-67 | `:308-331` |
+| `HomePlace` (1) | `AIHomePlace.func_75250_a`:35-63, `func_75249_e`:85-120, `func_75253_b`:65-67 | `:308-331` — no `count`, only the chest window (the original's `AIHomePlace` has no counter of two hundred) |
 | `HomeDrop` (2) | `AIHomeDrop.func_75250_a`:37-48, `func_75249_e`:71-89, `func_75253_b`:50-52 | `:338-356` |
 | `FillTake` (3) | `AIFillTake.func_75250_a`:38-79, `func_75253_b`:81-83 | `:362-405` |
 | `EmptyPlace` (1) | `AIEmptyPlace.func_75250_a`:41-77, `func_75249_e`:100-140, `func_75253_b`:79-81 | `:408-443` |
 | `EmptyDrop` (2) | `AIEmptyDrop.func_75250_a`:30-44, `func_75249_e`:58-79, `func_75253_b`:46-48 | `:446-465` |
-| `HomeTake` (4) | `AIHomeTake.func_75250_a`:37-106, `func_75253_b`:108-110 | `:468-517` |
+| `HomeTake` (4) | `AIHomeTake.func_75250_a`:37-106, `func_75253_b`:108-110 | `:468-517` — no `count`, only the chest window |
 | `SortingPlace` (1) | `AISortingPlace.func_75250_a`:41-74, `func_75249_e`:97-137, `func_75253_b`:76-78 | `:521-556` |
 | `HomeTakeSorting` (4) | `AIHomeTakeSorting.func_75250_a`:38-71, `func_75249_e`:94-139, `func_75253_b`:73-75 | `:558-608` |
 | the route (4/3/3) | `AIFillGoto:52-145`, `AIEmptyGoto:49-120`, `AISortingGoto:49-114` | `:611-700` |
+
+**The counter of two hundred exists in five entries of the original, not in all of them.** The
+oracle's fields are decisive: `AIHomeReplace`, `AIHomePlace` and `AIHomeTake` have **no** `count`
+field at all (`AIHomePlace.java:27-28`), their continuation is `shouldExecute() || countChest > 0`,
+and only `AIEmptyPlace`, `AIEmptyDrop`, `AIHomeDrop`, `AIFillTake`, `AIHomeTakeSorting` and the
+three routes carry the counter of two hundred. The native reproduces that per entry.
 
 The rules themselves were **not** re-derived: the wave-2 rule classes are the single source of the
 numbers and the new structure calls them.

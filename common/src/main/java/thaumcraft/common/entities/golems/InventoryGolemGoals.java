@@ -342,15 +342,15 @@ final class InventoryGolemGoals {
 
         @Override void ladderStart() {
             if (golem.placeCarriedAtHome() <= 0) return;
-            // Original AIHomePlace.func_75249_e:109 — the counter of the ladder and the chest window.
-            count = GolemLadderRules.PARTIAL_HOLD;
+            // Original AIHomePlace.func_75249_e:109 — only the chest window; the goal of the
+            // original has NO counter of two hundred (oracle AIHomePlace.java:27-28).
             countChest = GolemRouteRules.CHEST_WINDOW;
             openChest(golem.homeInventoryPosition());
         }
 
         @Override public boolean canContinueToUse() {
-            // Original AIHomePlace.func_75253_b:65-67 — the ladder is held while the counter is positive.
-            return count > 0 && (ladderCanUse() || countChest > 0);
+            // Original AIHomePlace.func_75253_b:65-67 — no count at all.
+            return countChest > 0 || ladderCanUse();
         }
     }
 
@@ -480,7 +480,9 @@ final class InventoryGolemGoals {
         }
 
         @Override public boolean canContinueToUse() {
-            return count > 0 && (ladderCanUse() || countChest > 0);
+            // Original AIEmptyDrop.func_75253_b:46-48 — the counter of two hundred and the
+            // condition of the goal; the drop has no chest window.
+            return count > 0 && ladderCanUse();
         }
     }
 

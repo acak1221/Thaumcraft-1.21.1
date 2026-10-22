@@ -29838,7 +29838,7 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:35-39 the goal needs the cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:44-61 the goal places the cargo into the home container of the golem, with the double chest",
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:65-67 the goal continues while its counter of two hundred is positive and the chest window of five ticks lasts",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:27-28 and :65-67 the goal of the original has NO counter of two hundred: it continues while it still wants to run or the chest window of five ticks lasts",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:85-120 the placement, the counter of two hundred and the five tick chest window",
           "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:308-331 the native AIHomePlace: the condition, the placement, the counter of two hundred and the chest window of five ticks",
           "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2263-2273 the placement of the cargo into the home inventory",

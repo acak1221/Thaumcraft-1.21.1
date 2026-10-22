@@ -9,8 +9,7 @@ original jar,
     /home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle
 
 and leaves the suite green. `/home/cyberfox-kali/OpenTC4` was only read as a second opinion; the
-oracle wins everywhere (for the village piece weight the two agree, for the trade tables the
-oracle carries the exact metadata numbers).
+oracle wins everywhere.
 
 | # | test | verdict |
 |---|------|---------|
@@ -22,6 +21,9 @@ oracle carries the exact metadata numbers).
 One production defect, three wrong expectations. No test was weakened: every assertion that
 survived asserts the original value, and the two assertions that were wrong were replaced by the
 original value, not deleted.
+
+The GameTest suite was run as well (the second half of this report): it was red with three
+pre-existing failures, all of them in other domains, and those are settled too.
 
 ---
 
@@ -126,8 +128,10 @@ The registered path is unchanged: the GameTest `pickaxeOfTheCoreBurnsWearsAndFin
 `common/src/gameTest/java/thaumcraft/common/testing/ElementalPickaxeRuntimeChecks.java:154-176`)
 still swaps raw iron, raw gold and the cinnabar ore into their clusters.
 
-The test itself is unchanged — it is the specification — and only its comment was extended with
-the defaulting of the registry (`SpecialMiningSafetyTest.java:50-62`).
+The test is the specification and stays — it was strengthened, not weakened: it now states its
+premise (the unit test JVM knows the vanilla items only, so the cluster of the table is missing
+there) and asserts the rule itself (the result is the original raw iron and not an empty stack),
+not only the count (`SpecialMiningSafetyTest.java:48-69`).
 
 ---
 
@@ -252,34 +256,188 @@ assertEquals("thaumcraft:nugget_beef", wizard.get(8).payItem());
 
 ---
 
-## Files changed
+# The GameTest suite
+
+`:fabric:runGameTest` was red with **three** failures that had nothing to do with the four JUnit
+tests. All three are proved below to be older than this branch (the same three fail at the
+branch point `55458da2`), and all three are settled now.
+
+| case | verdict | what it was |
+|------|---------|-------------|
+| `fluxOriginalExposureAndGooTail` | **production** bug | the goo tail of the original is one else-if chain, the port ended the tick after a failed breed roll |
+| `fluxMovesAndExhaustsWithOriginalRules` | **stale test** | the case still expected the M11 placeholder, the port implements the real slime and the taint branch now |
+| `fullInventoryReusesFreedPaperSlotOrDrops` | **stale test** | the case expected the creative note issuance to spend an ink point, the original does not |
+
+Two more cases of the suite turned out to be **stateful** (they poison the GameTest world for the
+next run) and are repaired as well: `magicalBiomesGenerateNaturallyAndSpawnActualPech` and
+`surfaceStructuresReachTheOverworld`.
+
+## 5. `fluxOriginalExposureAndGooTail` — the goo tail was a nested condition, the original is a chain
+
+**Original.** `thaumcraft/common/blocks/BlockFluxGoo.java:103-136` (the update tick):
+
+```java
+int meta = world.func_72805_g(x, y, z);
+if (meta >= 2 && meta < 6 && world.func_147437_c(x, y + 1, z) && rand.nextInt(25) == 0) {
+    // the cell is emptied, a size one slime is born
+} else if (meta >= 6 && world.func_147437_c(x, y + 1, z)) {
+    if (rand.nextInt(25) == 0) { /* the cell is emptied, a size two slime is born */ }
+    else if (Config.taintFromFlux && rand.nextInt(50) == 0) { /* the taint takes the cell */ }
+} else if (rand.nextInt(30) == 0) {
+    /* the decay: the cell loses one quantum, then the boolean and the gas above */
+}
+```
+
+One **else-if chain**: the breed roll is part of the *condition* of the first branch, so a failed
+roll falls through to the thirty roll of the decay branch. `Config.taintFromFlux` is true by
+default (`Config.java:838`, `:496`).
+
+**Port.** `common/src/main/java/thaumcraft/common/blocks/BlockFluxGoo.java:109-121` (before the
+fix): the breed branch ended the tick after a failed roll, so the cell never decayed and never
+turned into the flux gas of the original. The port's own comment stated the fall-through, the
+code did not do it.
+
+**Verdict: the production code was wrong.**
+
+**Fix** (`BlockFluxGoo.java:109-120`): the breed branch only ends the tick when the roll breeds
+the slime, a missed roll continues with the decay branch of the original (its own thirty roll
+and boolean).
+
+## 6. `fluxMovesAndExhaustsWithOriginalRules` — the case still expected the M11 placeholder
+
+The case asserted *"real M11 slime/taint still explicitly DEFERRED: no vanilla slime, fake entity
+debit or invented ninth-unit spill"* and that the high goo stays untouched. The port implements
+the branch of the original now (`BlockFluxGoo.java:112-137`, the commit of the `basecontent`
+agent *grow and breed the thaumic slime in the flux goo*): the breed roll empties the cell and
+births a real thaumic slime, the fifty roll turns the cell into the taint fibres.
+
+**Verdict: the test was stale, the production code is right** (the oracle
+`BlockFluxGoo.java:106-124`).
+
+**Fix**: the two flux cases read the implemented and original behaviour:
+
+- the high goo births a real size two slime and empties the cell — and the champion hook of the
+  original draws from the world random when the mob is born
+  (`thaumcraft/common/lib/events/EventHandlerEntity.java:391`), so the case declares that draw;
+- the taint roll turns the cell into the taint fibres;
+- a missed breed roll and a missed taint roll leave the high goo untouched.
+
+## 7. `fullInventoryReusesFreedPaperSlotOrDrops` — the creative ink of the original
+
+**Original.** `thaumcraft/common/lib/research/ResearchManager.java:199-209` spends the ink with
+the vanilla `ItemStack.damageItem(1, player)`. The audited bytecode of that vanilla method
+(`docs/analysis/2026-10-15-scribing-ink-semantics.md:19`, the SRG `func_77972_a`, offsets 0–20)
+returns for a creative player **before** the damageability, the enchantments and the RNG: no
+consumption, no random call. The same document, line 50, states the outcome for the full
+creative inventory: *"a fully occupied creative inventory with a paper stack of two gives
+paper1, an **unchanged** usable inkwell, zero notes in the inventory and zero dropped notes"*.
+
+**Verdict: the test was wrong** (it expected the ink to be spent in creative), the production
+code of the port (`common/src/main/java/thaumcraft/common/lib/research/ScribingInk.java`,
+`planPlayer`: `if (creative || !state.damageable()) return new Plan(true, damage, damage);`) is
+right.
+
+**Fix** (`ResearchNoteIssuanceRuntimeChecks.java`): the creative case expects the unchanged ink
+(`getDamageValue() == 98`) and says why.
+
+## 8. `magicalBiomesGenerateNaturallyAndSpawnActualPech` — the case poisoned its own world
+
+The case harvests the first pod of the generated region and replants the bean there. The original
+plants the age zero (`thaumcraft/common/items/ItemManaBean.java:192-193`), and the GameTest world
+keeps that planted pod, so the **next** run of the case read the planted pod instead of the
+generated one and the "generation-plus-growth age 3..7" check failed (the pod of the run had the
+age 0).
+
+**Fix** (`NaturalBiomeRuntimeChecks.java`): the case grows a stale planted pod back with the
+original growth rule (`TileManaPod.checkGrowth`) before it reads it, and restores the generated
+age and the aspect of the cell after the replant. The case is repeatable (verified with two
+consecutive runs).
+
+## 9. `surfaceStructuresReachTheOverworld` — the candidate selection of the mound case
+
+The case picked the chunks of the exclusive chain by the terrain alone and then looked for the
+mound in them. The mound of the original grows nine blocks below the **live** surface of its
+column and is refused when that base reaches the sea level
+(`thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:424-425`), and the live surface
+carries the decoration of the chunk, so a chunk whose trees raise the surface carries no mound.
+The terrain alone therefore does not say which chunks can: for a world seed whose forest stands
+on the chain's chunks, no candidate carried the mound and the case failed.
+
+**Fix** (`SurfaceStructurePlacementRuntimeChecks.java`): the case asks the live surface of the
+generated chunk, exactly the rule the feature applies, and the content assertions of the mound
+(the chest, the two spawners, the loot container, the shell, the aura node) stay as they are.
+
+## 10. The taint of the flux cases reached the other cases of the level
+
+After the fixes of 5 and 6, the full suite reported
+`unstableNodesEmitPaidAspectOrbsAndCanStabilise` as failed: the taint fibres of the original
+spread over the level (`thaumcraft/common/blocks/BlockTaintFibres.java:84-100` — the fibres grow
+into the neighbours and the taint biome follows them), so the taint of the flux case reached the
+structure of the node case and the natural unstable node was gone before its thaumometer could
+observe it.
+
+**Fix** (both flux cases): the cell and the biome of the column are restored after the taint
+check, so the taint never spreads into the other cases of the level.
+
+---
+
+# Files changed
 
 ```
-common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java              (+6)  production fix, failure 2
-common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java       (+4)  javadoc of the fold, failure 3
-common/src/test/java/thaumcraft/crash/SpecialMiningSafetyTest.java               (~)  failures 1 and 2
-common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java         (~)  failures 3 and 4
+common/src/main/java/thaumcraft/common/lib/utils/SpecialMining.java              (+6)   production fix, failure 2
+common/src/main/java/thaumcraft/common/blocks/BlockFluxGoo.java                  (~)    production fix, the goo tail
+common/src/main/java/thaumcraft/common/lib/world/VillageWorldGenRules.java       (+4)   javadoc of the fold, failure 3
+common/src/test/java/thaumcraft/crash/SpecialMiningSafetyTest.java               (~)    failures 1 and 2
+common/src/test/java/thaumcraft/worldgen/VillageComponentParityTest.java         (~)    failures 3 and 4
+common/src/gameTest/java/thaumcraft/common/testing/FluxOverfullRuntimeChecks.java (~)   the goo tail and the taint cleanup
+common/src/gameTest/java/thaumcraft/common/testing/FluxRuntimeChecks.java        (~)    the slime and the taint cleanup
+common/src/gameTest/java/thaumcraft/common/testing/ResearchNoteIssuanceRuntimeChecks.java (~) the creative ink
+common/src/gameTest/java/thaumcraft/common/testing/NaturalBiomeRuntimeChecks.java (~)   the mana pod cell
+common/src/gameTest/java/thaumcraft/common/testing/SurfaceStructurePlacementRuntimeChecks.java (~) the mound candidates
 ```
 
 No unit test constructs a `Block`; the special mining rule is a pure static function
 (`SpecialMining.succeeds`, `SpecialMining.find`) and the village rule is a pure static function
 (`VillageWorldGenRules.pieceWeightMinSize`), both called by the production code.
 
-## Verification
+# Verification
 
-- `:common:test` — **2059 tests, 0 failures, 0 errors, 0 skipped** (the four tests of this
-  report are green: `SpecialMiningSafetyTest` 6/6, `VillageComponentParityTest` 9/9, and the
-  village table of `thaumcraft.world.VillageWorldGenRulesTest` 39/39 is still green).
-  The run used a private Gradle home
-  (`GRADLE_USER_HOME=<worktree>/.gradle-fix4`), so the shared Loom cache of the leader was not
-  touched.
-- `:fabric:runGameTest` — see below.
+- `:common:test` — **2059 tests, 0 failures, 0 errors, 0 skipped** (the four tests of this report
+  are green: `SpecialMiningSafetyTest` 6/6, `VillageComponentParityTest` 9/9, and the village
+  table of `thaumcraft.world.VillageWorldGenRulesTest` 39/39 is still green).
+- `:fabric:runGameTest` — **318 tests, all passed**, twice in a row in the same world (the first
+  run after a clean `fabric/run-gametest/world`, the second on the world the first one left). The
+  three failures of the suite before this agent are gone, and the two stateful cases of the
+  section above are repaired.
+- Both runs used a private Gradle home
+  (`GRADLE_USER_HOME=<worktree>/.gradle-fix4`, which is ignored by the repository), so the shared
+  Loom cache of the leader was not touched. The machine was under the memory pressure of the
+  other agents, so the daemon heap was lowered to 1 GiB for the GameTest runs.
 
-## Commits
+# Commits
 
 | commit | what |
 |--------|------|
 | `chore(build): ignore the private gradle home of the test agent` | `.gradle-fix4/` is never committed |
 | `fix(utils): an unknown cluster keeps the original drop` | the production defect of failure 2 and the boundary test of failure 1 |
 | `fix(worldgen): the piece weight draw and the trade rows of the village` | failures 3 and 4 |
+| `test(utils): the unknown replacement test states its premise and the drop it keeps` | the strengthened case of failure 2 |
+| `fix(flux): a failed breed roll falls through to the decay of the original` | the goo tail of the original |
+| `test(flux): the goo tail cases assert the original slime and taint branches` | the stale M11 expectations |
+| `test(research): the creative note issuance keeps the ink of the original` | the creative ink of the original |
+| `test(worldgen): the mana pod case restores the cell it harvests` | the stateful mana pod case |
+| `test(worldgen): the mound case selects the chunks the original rule accepts` | the mound candidates |
+| `test(flux): the taint cases restore their cell, the taint would spread` | the taint spread into the other cases |
 | `docs(testfix4): the four red tests against the oracle` | this report |
+
+# Open points
+
+- The scope ledger was not touched: this agent had no unit list
+  (`/home/cyberfox-kali/units/testfix4.txt` does not exist), and the units of the touched files
+  (`thaumcraft/common/lib/utils/Utils.java`, `thaumcraft/common/lib/world/VillageBankerManager.java`,
+  `thaumcraft/common/lib/world/VillageWizardManager.java`) are already `parity_verified` in
+  `docs/porting/scope-ledger.json`. The leader regenerates the counts.
+- The GameTest world of a worktree is a real world: a case that changes it (the mana pod case,
+  the taint of the flux cases) has to restore what it changed, and that is now done. A world that
+  was saved by an older build can still hold a planted pod; the mana pod case repairs that pod
+  itself on its next run.

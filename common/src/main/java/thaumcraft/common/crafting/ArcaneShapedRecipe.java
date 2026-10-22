@@ -92,7 +92,7 @@ public record ArcaneShapedRecipe(String research, List<String> pattern, Map<Stri
                     if (!symbol.equals(" ")) ingredient = key.get(symbol);
                 }
                 ItemStack stack = input.getItem(x + y * 3);
-                if (!ingredient.test(stack)) return false;
+                if (!ArcaneIngredientMatching.matches(ingredient, stack)) return false;
                 // Original filled OR labelled jars were ItemJarFilled, not the
                 // blockJar item named by plain shaped ingredients (e.g. JarVoid).
                 // Flattening them to one native Item must not erase contents.

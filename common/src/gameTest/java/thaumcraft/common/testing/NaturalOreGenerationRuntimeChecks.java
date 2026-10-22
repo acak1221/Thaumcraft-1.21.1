@@ -54,12 +54,12 @@ public final class NaturalOreGenerationRuntimeChecks {
                         String tag = infused.get(state.getBlock());
                         if (tag != null) {
                             counts.merge(tag, 1, Integer::sum);
-                            if (shards.size() < 2) {
+                            if (shards.size() < 4) {
                                 test.assertTrue(pickaxe.isCorrectToolForDrops(state), "normal iron pickaxe can harvest infused stone");
                                 var drops = Block.getDrops(state, level, pos.immutable(), null, null, pickaxe);
                                 for (var stack : drops) {
                                     test.assertTrue(stack.is(ThaumcraftContent.SHARDS.get(tag).get()), "natural infused stone drops its original primal shard");
-                                    for (int count = 0; count < stack.getCount() && shards.size() < 2; count++) shards.add(stack.copyWithCount(1));
+                                    for (int count = 0; count < stack.getCount() && shards.size() < 4; count++) shards.add(stack.copyWithCount(1));
                                 }
                             }
                         } else if (state.is(ThaumcraftOres.CINNABAR.get())) counts.merge("cinnabar", 1, Integer::sum);
@@ -68,9 +68,12 @@ public final class NaturalOreGenerationRuntimeChecks {
                 }
             }
         }
-        test.assertTrue(shards.size() == 2, "actual new terrain generates harvestable shards without fixture block insertion");
+        test.assertTrue(shards.size() == 4, "actual new terrain generates harvestable shards without fixture block insertion");
+        // The original thaumometer is four shards in the four corners of the
+        // three by three (oracle ConfigRecipes:458), two gold ingots and a glass.
         var grid = NonNullList.withSize(9, ItemStack.EMPTY);
-        grid.set(1, shards.get(0)); grid.set(7, shards.get(1));
+        grid.set(0, shards.get(0)); grid.set(2, shards.get(1));
+        grid.set(6, shards.get(2)); grid.set(8, shards.get(3));
         grid.set(3, new ItemStack(Items.GOLD_INGOT)); grid.set(5, new ItemStack(Items.GOLD_INGOT));
         grid.set(4, new ItemStack(Items.GLASS));
         var input = CraftingInput.of(3, 3, grid);

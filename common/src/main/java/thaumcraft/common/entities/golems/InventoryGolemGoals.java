@@ -273,8 +273,19 @@ final class InventoryGolemGoals {
         /** The original's {@code shouldExecute}. */
         abstract boolean ladderCanUse();
 
-        /** The original's {@code startExecuting}. */
-        abstract void ladderStart();
+        /**
+         * The original's {@code startExecuting} — the action of the entry.
+         *
+         * <p>The 1.7.10 selector calls {@code EntityAIBase.startExecuting} (the oracle's
+         * {@code func_75249_e}) when the entry takes the ladder; the 1.21.1 selector calls
+         * {@link Goal#start()} in the same place ({@code GoalSelector.tick}, the "goalUpdate" pass:
+         * {@code wrappedGoal.start()}). The action of an entry is therefore the 1.21.1
+         * {@code start()} itself, and this declaration is <b>abstract</b> so that the compiler
+         * refuses an entry without an action: an entry that only overrides {@code canUse()} would
+         * take the two exclusive flags of the ladder and never do anything, and the golem would
+         * stand still for ever.</p>
+         */
+        @Override public abstract void start();
 
         void openChest(BlockPos pos) {
             chest = pos;
@@ -312,7 +323,7 @@ final class InventoryGolemGoals {
             };
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIHomeReplace.func_75249_e:99-119 — the cargo goes into the home inventory.
             if (golem.placeCarriedAtHome() <= 0) return;
             countChest = GolemRouteRules.CHEST_WINDOW;
@@ -340,7 +351,7 @@ final class InventoryGolemGoals {
             return home.roomFor(golem.getCarriedItem(), golem.getHomeFacing()) > 0;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             if (golem.placeCarriedAtHome() <= 0) return;
             // Original AIHomePlace.func_75249_e:109 — only the chest window; the goal of the
             // original has NO counter of two hundred (oracle AIHomePlace.java:27-28).
@@ -368,7 +379,7 @@ final class InventoryGolemGoals {
             return golem.hasHomeWorldThrowTarget();
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIHomeDrop.func_75249_e:72 — the counter of the ladder.
             if (golem.throwCarriedAtHome()) count = GolemLadderRules.PARTIAL_HOLD;
         }
@@ -393,7 +404,7 @@ final class InventoryGolemGoals {
             return takeSource(watched, wanted) != null;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             int wanted = fillRequest(watched);
             if (wanted <= 0) return;
             GolemMarker marker = takeSource(watched, wanted);
@@ -442,7 +453,7 @@ final class InventoryGolemGoals {
             return false;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             ItemStack cargo = golem.getCarriedItem();
             for (GolemMarker marker : containersWithRoom(cargo)) {
                 if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker))) continue;
@@ -474,7 +485,7 @@ final class InventoryGolemGoals {
             return golem.firstAdjacentWorldThrowMarker() != null;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIEmptyDrop.func_75249_e:60 — the counter of the ladder.
             if (golem.throwCarriedAtMarker()) count = GolemLadderRules.PARTIAL_HOLD;
         }
@@ -494,7 +505,7 @@ final class InventoryGolemGoals {
     private final class HomeTake extends LadderGoal {
         @Override boolean ladderCanUse() { return candidate() != null; }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             Take take = candidate();
             if (take == null) return;
             GolemHomeInventory.Destination home = golem.homeInventory();
@@ -556,7 +567,7 @@ final class InventoryGolemGoals {
             return false;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             ItemStack cargo = golem.getCarriedItem();
             for (GolemMarker marker : golem.getMarkers()) {
                 if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker))) continue;
@@ -584,7 +595,7 @@ final class InventoryGolemGoals {
     private final class HomeTakeSorting extends LadderGoal {
         @Override boolean ladderCanUse() { return candidate() != null; }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             Take take = candidate();
             if (take == null) return;
             GolemHomeInventory.Destination home = golem.homeInventory();
@@ -648,7 +659,7 @@ final class InventoryGolemGoals {
             };
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIFillGoto.func_75249_e:139-144 and AIEmptyGoto.func_75249_e:114-120.
             count = GolemLadderRules.PARTIAL_HOLD;
             travelStarted = true;

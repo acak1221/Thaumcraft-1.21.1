@@ -36,9 +36,15 @@ class ExcavationBeamRulesTest {
         assertEquals(0.0F, ThaumcraftExcavationClient.spin(0L, 0.0F), 1.0E-6F, "the fan starts at zero");
         assertEquals(5.0F, ThaumcraftExcavationClient.spin(0L, 1.0F), 1.0E-6F, "the fan turns five degrees a tick");
         assertEquals(5.0F, ThaumcraftExcavationClient.spin(1L, 0.0F), 1.0E-6F, "the fan turns five degrees a tick");
-        assertEquals(360.0F, ThaumcraftExcavationClient.spin(72L, 0.0F), 1.0E-6F,
-                "the fan of the original wraps after seventy two ticks");
-        assertEquals(0.0F, ThaumcraftExcavationClient.spin(72L, 0.0F) - 360.0F, 1.0E-6F, "the fan wraps");
+        // The fan climbs five degrees a tick and wraps back to zero after the
+        // seventy two ticks of the divisor of the original: the seventy first
+        // tick is the last one before the wrap.
+        assertEquals(355.0F, ThaumcraftExcavationClient.spin(71L, 0.0F), 1.0E-6F,
+                "the fan of the original is at three hundred and fifty five degrees after seventy one ticks");
+        assertEquals(0.0F, ThaumcraftExcavationClient.spin(72L, 0.0F), 1.0E-6F,
+                "the fan of the original wraps back to zero after seventy two ticks");
+        assertEquals(5.0F, ThaumcraftExcavationClient.spin(72L, 1.0F), 1.0E-6F,
+                "the partial tick of the wrapped fan turns five degrees again");
     }
 
     @Test void theTextureOfTheBeamSlidesWithTheAgeOfThePlayer() {

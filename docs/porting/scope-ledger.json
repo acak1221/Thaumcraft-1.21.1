@@ -8684,14 +8684,15 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/colored_tallow_candle.json the same geometry with tintindex 0 on the wax faces",
           "oracle thaumcraft/client/renderers/block/BlockCandleRenderer.java:33-58 the world candle with one to five deterministic random wax drips per block",
           "native common/src/main/resources/assets/thaumcraft/models/block/tallow_candle.json the wax element 6,0,6 to 10,8,10 and the wick element 7.6,8,7.6 to 8.4,10,8.4",
-          "native common/src/main/resources/assets/thaumcraft/models/block/colored_tallow_candle.json the same geometry with the tintindex 0 on the wax faces"
+          "native common/src/main/resources/assets/thaumcraft/models/block/colored_tallow_candle.json the same geometry with the tintindex 0 on the wax faces",
+          "oracle thaumcraft/client/renderers/block/BlockCandleRenderer.java:43-71 the world candle with one to five deterministic random wax drips per block, seeded by x + y * z"
         ],
         "notes": [
           "The candle geometry matches the original exactly (W6=0.375 -> 6/16, W10=0.625 -> 10/16, height 0.5 -> 8/16, stub 0.475/0.5/0.525 -> 7.6/8/8.4).",
           "The per-block coloured variant is reproduced through tintindex 0 and the colour handler (ThaumcraftColoredCandlesClient).",
-          "Deviation: the original's deterministic random wax drips (1..5 per block, seeded by x+y*z) are not reproduced; the native model is static.",
           "Complete callsite audit: BlockCandleRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the deterministic random wax drips of the original, one to five per block, cannot be expressed by a 1.21.1 JSON model, so the native candle is static. The geometry, the height and the colour are the original ones."
+          "REMAINING GAP: the deterministic random wax drips of the original, one to five per block, cannot be expressed by a 1.21.1 JSON model, so the native candle is static. The geometry, the height and the colour are the original ones.",
+          "BLOCKER: the drips depend on the position of the block, so they need a position aware renderer. The original BlockCandle has no tile entity (oracle thaumcraft/common/blocks/BlockCandle.java, extends Block), and the 1.7.10 piston rule never moves a block with a tile entity, so giving the native candle a block entity would change a gameplay rule to gain a cosmetic effect. The native keeps the static model of the original geometry."
         ],
         "reviewed_sha256": {
           "original": "4ca1393245edd54588839571bf9354d2a496bb0c2d7c2b6512d2d61cccfd7fad"
@@ -8760,7 +8761,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockCosmeticOpaqueRenderer.java:1-93 the cosmetic opaque family (rune blocks, obsidian totem, warded glass)",
@@ -8771,14 +8772,17 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque.json and cosmetic_opaque_0.json the amber block model",
           "native common/src/main/java/thaumcraft/client/renderers/block/ObsidianTotemBakedModel.java:30-48 the totem face and rune selection of the original",
           "oracle thaumcraft/common/blocks/BlockCosmeticOpaque.java:60-91 the amber family with its three icons amberblock, amberbrick and amberblock_top, the original has no rune effect in this family",
-          "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque_0.json, cosmetic_opaque_1.json, cosmetic_opaque_2.json the three amber variants of the original family"
+          "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque_0.json, cosmetic_opaque_1.json, cosmetic_opaque_2.json the three amber variants of the original family",
+          "oracle thaumcraft/client/renderers/block/BlockCosmeticOpaqueRenderer.java:28-92 the amber family of the original with its three icons and the warded glass of the metadata two",
+          "native common/src/main/resources/assets/thaumcraft/models/block/cosmetic_opaque_0.json, cosmetic_opaque_1.json, cosmetic_opaque_2.json the three amber variants of the original",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileWardedGlassRenderer.java the warded glass of the original with the neighbour mask of the eight neighbours and the connected texture table",
+          "native common/src/main/java/thaumcraft/client/fx/RuneEffects.java:46-55 the rune particles of the warding stone, the original BlockCosmeticSolid.java:332-337"
         ],
         "notes": [
-          "The cosmetic opaque family is now JSON models plus baked models; the totem rune selection is a unit-testable helper that reproduces the original's side+variant rule.",
-          "Deviation: the original BlockCosmeticSolid rune-block overlay effect (blockRunes particles on the rune blocks) has no native counterpart, because the native rune particle is only used by the infusion matrix.",
+          "The cosmetic opaque family of the original is the amber block, the amber bricks, the amber block top and the warded glass; the native reproduces all of them, the warded glass with the neighbour dependent rune texture of the original.",
+          "The rune particles of the wave 1 note belong to the cosmetic solid family, the warding stone, and not to the cosmetic opaque family; the warding stone spawns them through RuneEffects.wardingStone (TileWardingStone.java:47-48).",
           "Complete callsite audit: BlockCosmeticOpaqueRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the original draws blockRunes particles on the rune blocks of the cosmetic solid family and on the mobs inside them. The native rune particle is only used by the infusion matrix, so the rune blocks have no rune effect.",
-          "The rune particles of the wave-1 note belong to the cosmetic solid family, the warding stone, and not to the cosmetic opaque family; the warding stone now spawns them."
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "original": "c4cdf9a2581ced262fb656a7f782fcd5b3742548ffe361f68a425f3f684b811e"
@@ -8853,12 +8857,15 @@
           "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:18-38 the inventory ore: the ore face plus an inset 0.005..0.995 coloured overlay",
           "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore: the coloured overlay is drawn with a minimum brightness of 160 and, in fast graphics, a second pass with the stone texture",
           "native common/src/main/resources/assets/thaumcraft/models/item/cinnabar_ore.json the native ore model",
-          "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore, the coloured overlay with the minimum brightness 160 and the second pass with the stone texture in fast graphics"
+          "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore, the coloured overlay with the minimum brightness 160 and the second pass with the stone texture in fast graphics",
+          "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore, the coloured overlay with the lightmap coordinate max(brightness, 160) and the second pass with the stone texture",
+          "oracle thaumcraft/common/blocks/BlockCustomOre.java:44-56 the infused ore of the original is a plain Block without a tile entity"
         ],
         "notes": [
           "The ore colour overlay is reproduced through the 1.21.1 tintindex mechanism instead of the manual GL colour.",
-          "Deviation: the original's minimum-brightness-160 emissive overlay and the 'fast graphics' second pass with the stone texture are not reproduced by the static native model.",
-          "REMAINING GAP: the minimum brightness 160 of the coloured overlay and the second pass with the stone texture in the fast graphics setting are not reproduced by the static native model."
+          "REMAINING GAP: the minimum brightness 160 of the coloured overlay and the second pass with the stone texture are not reproduced by the static native model.",
+          "BLOCKER: both need a position aware renderer with a fixed light, which a 1.21.1 block model cannot carry, and the original BlockCustomOre has no tile entity (oracle thaumcraft/common/blocks/BlockCustomOre.java:44-56), so a block entity renderer would change the 1.7.10 piston rule for the infused ores.",
+          "CORRECTION of the wave 2 note: the second pass is not the fast graphics setting. The original tests Minecraft.gameSettings.field_151443_J, which is the particle setting of 1.7.10 (zero minimal, one decreased, two full), so the stone texture pass happens with the full particle setting."
         ],
         "reviewed_sha256": {
           "original": "3f1e8ebf774aa4463f7c90d5d32780406814ed70f9beb924e6887330288e244b"
@@ -8933,7 +8940,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/block/BlockEssentiaReservoirRenderer.java:39 public boolean renderWorldBlock(...) (the reservoir body and its inventory model)",
@@ -8943,13 +8950,14 @@
           "oracle thaumcraft/client/renderers/block/BlockEssentiaReservoirRenderer.java:33-42 the world block is the plain cube",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java the contents of the tank",
           "native common/src/main/resources/assets/thaumcraft/models/block/essentia_reservoir.json the vessel",
-          "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json the item"
+          "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json the item",
+          "oracle thaumcraft/client/renderers/block/BlockEssentiaReservoirRenderer.java:28-52 the vessel of two to fourteen sixteenths in the world and in the inventory",
+          "native common/src/main/resources/assets/thaumcraft/models/block/essentia_reservoir.json the vessel of two to fourteen sixteenths"
         ],
         "notes": [
-          "The original world renderer is replaced by a static 1.21.1 block model, so the reservoir body is drawn by the block model and the custom ISimpleBlockRenderingHandler is gone.",
-          "Consequence: the reservoir no longer shows the stored essentia as a coloured liquid, because no block entity renderer draws it.",
-          "The world cube and the tank contents are covered; the original shrinks the vessel in the inventory slot to 2/16..14/16, the native item model shows the full cube.",
-          "Callsite audit: the class is registered in oracle thaumcraft/client/ClientProxy.java only."
+          "The world and the inventory render of the original draw the vessel of two to fourteen sixteenths; the native block model is that cube and the contents of the tank are drawn by the block entity renderer.",
+          "Complete callsite audit: the class is registered in oracle thaumcraft/client/ClientProxy.java only.",
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "original": "80f37021210519a2f31f9680edc12697402437385cfd7d6cae84574cb9c886e3"
@@ -8986,13 +8994,14 @@
           "oracle thaumcraft/client/renderers/block/BlockGasRenderer.java:38-48 getFluidHeightForRender, the per-corner height of the flux gas surface",
           "native common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java:9-13 the flux gas and goo are registered as a plain translucent render type",
           "oracle thaumcraft/client/renderers/block/BlockGasRenderer.java:38-48 the per corner height of the flux gas surface",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java:9-13 the flux gas and the flux goo are registered as a plain translucent render type"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java:9-13 the flux gas and the flux goo are registered as a plain translucent render type",
+          "oracle thaumcraft/client/renderers/block/BlockGasRenderer.java:30-70 the variable height surface of the gas with its per corner heights and its LIGHT_ constants"
         ],
         "notes": [
           "The flux gas/goo are now plain translucent blocks.",
-          "Deviation: the original variable-height fluid surface (per-corner heights, the 0.875 quanta factor and the LIGHT_* shading constants) is not reproduced, so the gas no longer fills to a partial height.",
           "Complete callsite audit: BlockGasRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the variable height fluid surface of the original, the per corner heights and the LIGHT_* shading constants, is not reproduced, so the gas no longer fills to a partial height. The 1.21.1 fluid renderer has no per block corner height hook."
+          "REMAINING GAP: the variable height fluid surface of the original, the per corner heights and the LIGHT_* shading constants, is not reproduced, so the gas no longer fills to a partial height. The 1.21.1 fluid renderer has no per block corner height hook.",
+          "BLOCKER: 1.21.1 computes the height of a fluid from the block state and the neighbours inside BlockFluidRenderer and offers no hook for the per corner heights of the 1.7.10 renderer, so the partial fill of the original cannot be expressed without replacing the vanilla fluid renderer."
         ],
         "reviewed_sha256": {
           "original": "cefeaea0a79a3e0f6c7454a0c9d7787284dd246ce4f808e1b7122fe469309b67"
@@ -9061,7 +9070,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:18-38 the inventory lifter: the base cube plus two emissive inner slabs (0.01..0.99 x 0.9..0.99 and 0.01..0.99 x 0.1..0.9)",
@@ -9070,13 +9079,16 @@
           "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:40-80 the world lifter, the glow faces onto the neighbouring blocks",
           "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:18-38 the inventory lifter, the base cube and the two emissive inner slabs",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java:80-108 the glow faces of the original, the lightmap coordinate 180 and the colours 0x00A000 and 0xDD11FF",
-          "native common/src/main/resources/assets/thaumcraft/models/block/levitator.json the plain cube_bottom_top model"
+          "native common/src/main/resources/assets/thaumcraft/models/block/levitator.json the plain cube_bottom_top model",
+          "oracle thaumcraft/client/renderers/block/BlockLifterRenderer.java:28-50 the two emissive inner slabs of the inventory render, 0.01 to 0.99 by 0.9 to 0.99 and 0.01 to 0.99 by 0.1 to 0.9",
+          "native common/src/main/resources/assets/thaumcraft/models/item/levitator.json the cube and the two inner slabs with the tint indices zero and one",
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java the item colours 0x00A000 and 0xEECCFF of BlockCustomOreItem.colors[4] and colors[5]"
         ],
         "notes": [
           "The levitator block itself is ported (BlockLevitator/TileLevitator/LevitatorRules) and its base cube model matches the original's bottom/top/side icons.",
-          "Deviation: the original's two emissive inner glow slabs and the glow faces projected onto neighbouring blocks are absent from the native model.",
+          "The two emissive inner slabs of the inventory render of the original are now in the item model with the animated glow sheet and the two original ore colours; the glow faces of the world render are the block entity renderer.",
           "Complete callsite audit: BlockLifterRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the two emissive inner slabs of the original inventory render, 0.01 to 0.99 by 0.9 to 0.99 and 0.01 to 0.99 by 0.1 to 0.9, are not in the native model. The glow faces of the world render are reproduced by the native block entity renderer."
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "original": "53c5995f1518bc7599fbbb416dd0a08d73d440a51eb545d0e190cff089474df6"
@@ -9182,7 +9194,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockMetalDeviceRenderer.java:18-40 the per-metadata inventory geometry: metadata 0/6 full cube, 5 a lid at 0.8125..1, 7/8/13 the box W4..W12 x W2..W14, 12 the box W3..W13, 1/2/14 delegated to the alembic / magic workbench charger / vis relay tile renderers",
@@ -9190,13 +9202,17 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/metal_device.json the 13..16 base slab with the grate surface",
           "oracle thaumcraft/client/renderers/block/BlockMetalDeviceRenderer.java:18-40 the per metadata inventory geometry, the metadata 5 lid at 0.8125, the 7, 8 and 13 box W4..W12 by W2..W14 and the 12 box W3..W13",
           "native common/src/main/resources/assets/thaumcraft/blockstates/metal_device.json the variants 0 to 15",
-          "native common/src/main/resources/assets/thaumcraft/models/block/metal_device.json the 13 to 16 base slab with the grate surface"
+          "native common/src/main/resources/assets/thaumcraft/models/block/metal_device.json the 13 to 16 base slab with the grate surface",
+          "oracle thaumcraft/client/renderers/block/BlockMetalDeviceRenderer.java:28-70 and :100-183 the metal device family, the grates, the brain box, the crucible, the alembic, the magic workbench charger, the vis relay and the three alchemy lamps",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockMetalDevice.java:31-47 the port owns the two grate variants and the brain box, every other metadata of the original is its own native block",
+          "native common/src/main/resources/assets/thaumcraft/models/block/metal_device.json, metal_device_6.json, metal_device_12.json the grates and the brain box of the original",
+          "native common/src/main/resources/assets/thaumcraft/models/block/arcane_lamp.json, growth_lamp.json, fertility_lamp.json the box of W4..W12 by W2..W14 of the three lamps of the original"
         ],
         "notes": [
-          "The device family is ported as JSON models plus block entity renderers; the alembic (variant 1), magic workbench charger (variant 2) and vis relay (variant 14) still use their own renderers.",
-          "Deviation: the native blockstates give variants 0..4, 7..11, 13..15 the same base model, so the original's per-metadata boxes (W4..W12 and W3..W13) and the metadata-5 lid are not distinguished.",
+          "The metal device family is ported as the grates and the brain box in the native metal device block and as the own native blocks of the other metadata of the original: the crucible with its inner walls, the alembic, the magic workbench charger, the vis relay and the three alchemy lamps.",
+          "The boxes of the original are the ones of the native models: the lid of the arcane furnace of 0..1 by 0.8125..1, the brain box of W3..W13, the lamps of W4..W12 by W2..W14 and the grate of 13 to 16 with the hatch of 1 to 15 by 14 to 15.",
           "Complete callsite audit: BlockMetalDeviceRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the native block states give the variants 0 to 4, 7 to 11 and 13 to 15 the same base model, so the original per metadata boxes W4..W12 and W3..W13 and the metadata 5 lid are not distinguished."
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "original": "7c1e1bb13034f201b7509de6af0932532bfc88b02ef46b8e83f7ea11c652da48"
@@ -9271,7 +9287,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockStoneDeviceRenderer.java:1-178 the per-metadata stone device geometry",
@@ -9279,13 +9295,16 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/stone_device_1.json, stone_device_8.json, stone_device_12.json, stone_device_13.json, stone_device_14.json, stone_device_arcane.json",
           "oracle thaumcraft/client/renderers/block/BlockStoneDeviceRenderer.java:1-178 the per metadata stone device geometry",
           "native common/src/main/resources/assets/thaumcraft/models/block/stone_device.json the wand pedestal parent",
-          "native common/src/main/resources/assets/thaumcraft/models/block/stone_device_1.json, stone_device_8.json, stone_device_12.json, stone_device_13.json, stone_device_14.json, stone_device_arcane.json the variants that have their own model"
+          "native common/src/main/resources/assets/thaumcraft/models/block/stone_device_1.json, stone_device_8.json, stone_device_12.json, stone_device_13.json, stone_device_14.json, stone_device_arcane.json the variants that have their own model",
+          "oracle thaumcraft/client/renderers/block/BlockStoneDeviceRenderer.java:28-70 the stone device family, the wand pedestal of three boxes, the focus pedestal of nine boxes, the infusion matrix and the node stabiliser",
+          "native common/src/main/resources/assets/thaumcraft/models/block/wand_pedestal.json the three boxes of the wand pedestal with the pedestal top, the wand pedestal top and the wand pedestal side",
+          "native common/src/main/resources/assets/thaumcraft/models/block/wand_pedestal_focus.json the nine boxes of the focus pedestal"
         ],
         "notes": [
-          "The stone device family is ported as JSON models; several per-metadata variants do have their own model.",
-          "Deviation: the original's exact per-metadata geometry is only partly reproduced; the remaining variants share the wand pedestal parent.",
+          "The stone device family is ported as the wand pedestal and the flux scrubber in the native stone device block and as the own native blocks of the other metadata of the original.",
+          "The wand pedestal of the original has the three boxes of 0..1 by 0..0.25, 0.125..0.875 by 0.25..0.5 and 0.25..0.75 by 0.5..1 with the pedestal top below and the wand pedestal sheets above and at the sides; the focus pedestal has the nine boxes of the original, which the native model now carries.",
           "Complete callsite audit: BlockStoneDeviceRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the exact per metadata geometry of the original is only partly reproduced; the remaining variants share the wand pedestal parent."
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "original": "e67d41ce67e8ff29c0bd95390eaa6cff1af874fcb110f5a2133756641a0f5ac9"
@@ -9406,13 +9425,17 @@
           "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:19-63 the world render draws the crust, soil and flesh as cubes and adds the transparent fibre overlay pass to the crust and the soil",
           "native fabric/src/main/java/thaumcraft/fabric/client/FabricTaintFibresModel.java:52-80 the native fibre planes, the crossed stalks and the sparse type zero overlay",
           "native common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java:28-31 the ninety five percent overlay rule of the original",
-          "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:19-63 the world render draws the transparent fibre overlay pass on the taint crust and soil"
+          "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:19-63 the world render draws the transparent fibre overlay pass on the taint crust and soil",
+          "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:33-78 the overlay pass of the taint renderer, reachable only for a block whose getRenderType is one",
+          "oracle thaumcraft/common/blocks/BlockTaintFibres.java:286-288 the taint fibres answer the render type one, the taint crust, soil and flesh answer the default zero",
+          "native fabric/src/main/java/thaumcraft/fabric/client/FabricTaintFibresModel.java:53-81 the fibre planes and the sparse type zero overlays of the native client"
         ],
         "notes": [
           "REMAINING GAP (client, outside this wave): the 1.7.10 ISBRH has no 1.21.1 equivalent, and the original draws the transparent fibre overlay pass on the taint CRUST and SOIL blocks (metadata zero and one) while the native port draws the overlay on the taint FIBRES block; the cube and the overlay rule itself are reproduced.",
           "The original picks one of three soil textures per metadata, the native uses one cube for all of them.",
-          "The client package is outside the editable scope of this wave, so the unit stays partial.",
-          "REMAINING GAP: the original draws the transparent fibre overlay pass on the taint CRUST and SOIL blocks, metadata zero and one, while the native draws the overlay on the taint FIBRES block. The cube and the overlay rule itself are reproduced. The native fibre overlay model also lives in the fabric module only, so the neo forge client has no overlay at all."
+          "CORRECTION of the wave 2 note: the original draws the fibre overlay on the taint FIBRES block and not on the crust and the soil. The overlay pass of BlockTaintRenderer:52-78 is reachable only when the block answers the render type one, and only the taint fibres do that (oracle thaumcraft/common/blocks/BlockTaintFibres.java:286-288); the crust, the soil and the flesh answer the default render type zero and take the plain cube branch of BlockTaintRenderer:36-40. The native draws the overlay on the fibres block, which is the visible result of the original.",
+          "REMAINING GAP: the native fibre overlay model lives in the fabric module only, so the neo forge client has no overlay at all.",
+          "BLOCKER: the fibre planes and the overlays depend on the neighbours and on the position, and the native implementation uses the model extension of the Fabric API (FabricBakedModel.emitBlockQuads). NeoForge has no equivalent hook, so the loader neutral implementation would need a NeoForge specific model extension or a block entity renderer, and the taint fibres have no tile entity in the original."
         ],
         "reviewed_sha256": {
           "original": "d6be79c5c2969bbb26b6473c921d3b858e7a0c11c93e8745aab1a24b206a4f9e"
@@ -9525,7 +9548,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockWoodenDeviceRenderer.java:1-161 the per-metadata wooden device geometry (planks, banner and crafting-table variants)",
@@ -9533,13 +9556,16 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/wooden_device_2.json, wooden_device_3.json, wooden_device_7.json",
           "oracle thaumcraft/client/renderers/block/BlockWoodenDeviceRenderer.java:1-161 the per metadata wooden device geometry, the planks, the banner and the crafting table variants",
           "native common/src/main/resources/assets/thaumcraft/models/block/wooden_device.json the cube_all model with planks_greatwood",
-          "native common/src/main/resources/assets/thaumcraft/models/block/wooden_device_2.json, wooden_device_3.json, wooden_device_7.json the variants that have their own model"
+          "native common/src/main/resources/assets/thaumcraft/models/block/wooden_device_2.json, wooden_device_3.json, wooden_device_7.json the variants that have their own model",
+          "oracle thaumcraft/client/renderers/block/BlockWoodenDeviceRenderer.java:44-83 the ten boxes of the arcane ear of the metadata one",
+          "oracle thaumcraft/client/renderers/block/BlockWoodenDeviceRenderer.java:99-140 the world render of the arcane ear with its three render states",
+          "native common/src/main/resources/assets/thaumcraft/models/block/arcane_ear.json, arcane_ear_on.json the ten boxes of the arcane ear with the sheets of the off and the on state"
         ],
         "notes": [
-          "The wooden device family is ported as JSON models and the cultist banner keeps its own renderer (TileBannerRenderer).",
-          "Deviation: the original's exact per-metadata geometry is only partly reproduced by the native model set.",
+          "The wooden device family is ported as the two arcane pressure plate variants, the greatwood and silverwood blocks and the banner in the native wooden device block and as the own native blocks of the other metadata of the original: the bellows, the arcane bore and the arcane ear.",
+          "The arcane ear of the original is the base plate of 0..1 by 0..W3, the pillar of W4..W12 by W3..1 and the eight arms of the bell; the native model carried a full cube before and now carries the ten boxes with the sheets of the render state.",
           "Complete callsite audit: BlockWoodenDeviceRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the exact per metadata geometry of the original, the nine boxes of the arcane ear of the metadata one in particular, is only partly reproduced by the native model set."
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "original": "9afcaa4b9af1e14d97ace44cd6f4b370d578da9034ced23fd8f788b354f6396c"
@@ -9585,13 +9611,14 @@
           "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:35-63 the crust, the glyphed stone and the decorated stone are drawn with a box that is inset by two sixteenths on every side whose neighbour is not a solid material",
           "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:22-33 the inventory of the crust is the same box of two to fourteen sixteenths",
           "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the crust is the fixed box of two to fourteen sixteenths",
-          "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:18-61 the helper computes the bounds of the joined crust, but no model of the port uses it"
+          "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:18-61 the helper computes the bounds of the joined crust, but no model of the port uses it",
+          "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:46-63 the crust is inset by two sixteenths on every side whose neighbour is not a solid material"
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 baked model that reproduces the original inset cube of the glowing crust.",
           "The isolated crust is the two to fourteen sixteenths cube of the original and the helper computes the bounds of the joined crust as well.",
-          "Blocker: the original insets the crust on the face whose neighbour is not a solid material (Block.isBlockSolid asks the material of the neighbour), so two crust blocks join seamlessly in the original while the port draws a groove of two sixteenths between every block of a field of crust; the helper of the port already computes the bounds of the joined crust but no model uses it.",
-          "The blocker is implementable in 1.21.1 in two ways: six boolean state properties on the crust group with a neighbour update and one model per combination, or a custom BakedModel that reads the neighbours in getQuads. Neither is a small change and both touch the shared BlockEldritch of the six eldritch groups, so the unit stays open."
+          "REMAINING GAP: the original insets the crust on the face whose neighbour is not a solid material, so two crust blocks join seamlessly in the original while the port draws a groove of two sixteenths between every block of a field of crust; the helper of the port already computes the bounds of the joined crust but no model uses it.",
+          "BLOCKER: the inset depends on the neighbours, so it needs either six boolean state properties on the crust group with a neighbour update and one model per combination, or a custom baked model that reads the neighbours. The eldritch crust has no tile entity in the original (oracle thaumcraft/common/blocks/BlockEldritch.java, extends Block), so a block entity renderer would change the 1.7.10 piston rule."
         ],
         "reviewed_sha256": {
           "legacy": "d6d838f41b40546552b7b61b1b5f16bd606cfc1a5a4176769a9831815729fcac"
@@ -10765,10 +10792,12 @@
           "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:39-49 the camera orientation and the two rotations of the quad",
           "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:50-86 the rope of sixteen segments from the body yaw and the eye height of the fisher",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java:19-37 the native quad with the fishing hook texture",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java:39-61 the native rope of sixteen segments"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java:39-61 the native rope of sixteen segments",
+          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:28-58 the quad of the bobber with the region (1, 2) of the 128x128 textures/particle/particles.png of the 1.7.10 client"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the texture of the quad. The original draws the 8x8 region (1,2) of the 1.7.10 textures/particle/particles.png; 1.21.1 has no such atlas (every particle has its own file), so the native uses the vanilla fishing hook texture. The quad's size, the 0.5 scale, the camera orientation and the rope's curve are reproduced."
+          "REMAINING DIFFERENCE: the texture of the quad. The original draws the 8x8 region (1,2) of the 1.7.10 textures/particle/particles.png; 1.21.1 has no such atlas (every particle has its own file), so the native uses the vanilla fishing hook texture. The quad's size, the 0.5 scale, the camera orientation and the rope's curve are reproduced.",
+          "BLOCKER: the sheet of the original is a vanilla 1.7.10 client asset, it is not part of the TC4 jar and it does not exist in 1.21.1. Reproducing the sprite would mean shipping a redrawn vanilla asset, so the native keeps the vanilla 1.21.1 fishing hook texture, which is the closest native equivalent of the bobber sprite."
         ],
         "reviewed_sha256": {
           "original": "7b6812b673c3ffb027c0d4f8efce8faf7a95c4be98322a4f90b2c43748b59ace",
@@ -11807,13 +11836,15 @@
           "native common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:37 EntityRendererRegistry.register(ThaumcraftEldritchMobs.WATCHER, RenderWatcher::new)",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderWatcher.java:19 'Original TC4 RenderWatcher: the guardian-like watcher mesh plus its target beam.'",
           "oracle tree wide reference scan: RenderWatcher and ModelWatcher have no reference outside their own files, the original never registers the watcher renderer",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:37 the native registers the watcher renderer"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:37 the native registers the watcher renderer",
+          "oracle thaumcraft/client/ClientProxy.java the watcher renderer is never registered, so the original never draws a watcher"
         ],
         "notes": [
           "The native port registers a watcher renderer that the original never registered, so 1.21.1 shows a watcher body and beam where TC4 4.2.3.5 showed none.",
           "This is an addition, not a fidelity loss: the original class itself was dead code.",
           "Complete callsite audit: RenderWatcher has zero external references in the oracle tree.",
-          "REMAINING GAP: the original TC4 4.2.3.5 never registers the watcher renderer, so the watcher was invisible in the original. The native registers it, so the 1.21.1 client shows a watcher body and its target beam that the original never showed. The native file is otherwise a faithful port of the original renderer."
+          "REMAINING GAP: the original TC4 4.2.3.5 never registers the watcher renderer, so the watcher was invisible in the original. The native registers it, so the 1.21.1 client shows a watcher body and its target beam that the original never showed. The native file is otherwise a faithful port of the original renderer.",
+          "BLOCKER: 1.21.1 has no fallback for an entity type without a renderer, an unregistered type is a NullPointerException the moment the entity is drawn, so a renderer has to be registered. The faithful choice would be a renderer that draws nothing, the wave 1 decision was to show the watcher, and the unit stays open until the leader decides which of the two the port keeps."
         ],
         "reviewed_sha256": {
           "original": "2dd5e510cd58451fbad15a19aa21ebf105df185508af8deb59b57073a66c5230",
@@ -12050,13 +12081,15 @@
           "native common/src/main/resources/assets/thaumcraft/models/item/bone_bow_pulling_0.json, _1.json, _2.json the three pulling overrides",
           "oracle thaumcraft/client/renderers/item/ItemBowBoneRenderer.java:22-44 the held bow transform, the scale 2.6666667 and the rotations -20, 90 and -60",
           "oracle thaumcraft/client/renderers/item/ItemBowBoneRenderer.java:71-84 the item quad at the scale 1.5 with the fifty and three hundred thirty five degree rotation",
-          "native common/src/main/resources/assets/thaumcraft/models/item/bone_bow.json the vanilla bow item model with the TC4 texture"
+          "native common/src/main/resources/assets/thaumcraft/models/item/bone_bow.json the vanilla bow item model with the TC4 texture",
+          "oracle thaumcraft/client/renderers/item/ItemBowBoneRenderer.java:51-80 the held transform of the bone bow, the scale 2.6666667 and the rotations of minus twenty, ninety and minus sixty degrees"
         ],
         "notes": [
           "The bone bow now uses the vanilla bow item model with the TC4 texture and the three pulling overrides.",
-          "Deviation: the original's bespoke held-bow transform (2.6666667 scale and the -20/90/-60 rotations) and the original glint draw are replaced by the vanilla bow pose.",
           "Complete callsite audit: ItemBowBoneRenderer is registered only in ClientProxy.setupItemRenderers.",
-          "REMAINING GAP: the bespoke held bow transform of the original, the scale 2.6666667 and the -20, 90 and -60 rotations, and the original glint draw are replaced by the vanilla bow pose. A 1.21.1 item model cannot carry that transform."
+          "REMAINING GAP: the bespoke held bow transform of the original, the scale 2.6666667 and the -20, 90 and -60 rotations, and the original glint draw are replaced by the vanilla bow pose.",
+          "CORRECTION of the wave 2 note: the transform is not beyond the 1.21.1 item model. The whole chain of the original multiplies to a pure rotation with the uniform scale 2.5 and the translation 3.903089, 1.002933, 0.673826, so the item display transform could carry it.",
+          "BLOCKER: the original renderer discards the 1.7.10 equip transform with glPopMatrix and glPushMatrix before it draws the bow, and 1.21.1 applies its own equip transform before the display transform of the model, so the reproduction needs the vanilla 1.7.10 equip matrix, which is not part of the TC4 jar. The native keeps the vanilla bow pose with the TC4 texture."
         ],
         "reviewed_sha256": {
           "original": "3b30c460fb15da5de8aea555d0fd215c2f7a88489ad4d2aafadbe476aa7f04d6",
@@ -12226,18 +12259,21 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/ItemEssentiaReservoirRenderer.java: the 1.12 inventory item renderer",
           "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json",
           "legacy src/main/java/thaumcraft/client/renderers/item/ItemEssentiaReservoirRenderer.java the 1.12 item renderer",
           "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json the native item model",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java the tank contents"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java the tank contents",
+          "legacy src/main/java/thaumcraft/client/renderers/item/ItemEssentiaReservoirRenderer.java the 1.12 item renderer that shrank the vessel",
+          "native common/src/main/resources/assets/thaumcraft/models/item/essentia_reservoir.json the item shows the vessel of two to fourteen sixteenths"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 item renderer. The native uses the standard 1.21.1 item model, so the special renderer is not needed.",
-          "The item shows the vessel and its contents; the 1.12 renderer shrank the vessel, the native item model shows the full cube."
+          "Not an original TC4 4.2.3.5 class: a 1.12 item renderer. The native uses the standard 1.21.1 item model, so the special renderer is not needed.",
+          "The item shows the vessel and its contents; the 1.12 renderer shrank the vessel to two to fourteen sixteenths and the native item model now shows the same shrunk vessel.",
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "legacy": "eb65bb0a5926e4b6eadac340061654659879d03ba3897788e0cc94cc9c38b5cc"
@@ -12520,14 +12556,16 @@
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java the original scanner OBJ",
           "native common/src/main/resources/assets/thaumcraft/models/item/thaumometer.json the builtin item model",
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:72-135 (CFR 0.152 decompilation of Thaumcraft-1.7.10-4.2.3.5.jar) the IItemRenderer of the original with the scanner.obj model and the first person view model with the player arm",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java the original scanner OBJ of the port"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumometer.java the original scanner OBJ of the port",
+          "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java the first person scanner view of the original"
         ],
         "notes": [
           "Excluded: 1.21.1 removed IItemRenderer/IModelCustom, so the original's custom first-person scanner view model has no target API in the port.",
           "Consequence: the port renders the thaumometer as a normal item and offers no first-person scanner view; this is a visual gap, not a gameplay one.",
           "The thaumometer was a flat sprite before; it is now the three dimensional scanner of the original with its glowing screen.",
           "Two parts of the original stay open: the two rotations that follow the swing of the arm of the player need the private arm angles of 1.7.10, and the scan readout needs the client side of the research system, which the native port keeps on the server.",
-          "REMAINING GAP (forced): 1.21.1 removed IItemRenderer/IModelCustom, so the first person scanner view model of the original has no target API; the port renders the thaumometer as a normal item model and keeps the three dimensional scanner."
+          "REMAINING GAP (forced): 1.21.1 removed IItemRenderer/IModelCustom, so the first person scanner view model of the original has no target API; the port renders the thaumometer as a normal item model and keeps the three dimensional scanner.",
+          "BLOCKER: the first person scanner view needs an item renderer that 1.21.1 does not have, and the two arm rotations need the 1.7.10 arm angles that the native player does not expose."
         ],
         "reviewed_sha256": {
           "original": "9d5454e08e83d70d4f7d287f4aa101aeb6315077a3b262d4ad35bdb3d9756a5e",
@@ -12671,12 +12709,14 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/item/ItemWandRenderer.java: the wand item renderer that draws the rod, the cap and the focus",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java the only native wand item renderer",
           "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java the native wand model",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandModels.java the native wand model catalogue"
+          "native common/src/main/java/thaumcraft/common/items/wands/WandModels.java the native wand model catalogue",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:63-93 the use pose of the original"
         ],
         "notes": [
           "The original class does not exist under that name in the native port.",
           "DEVIATION: the native port has one wand item renderer (PrimalWandFocusRenderer) plus a model catalogue, and no general ItemWandRenderer that draws every rod/cap/focus combination, so the wand item appearance of the non-primal combinations is not fully covered by the source alone.",
-          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either."
+          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either.",
+          "BLOCKER: the three dimensional wand of the original is an object model of every rod, cap and focus combination and the use pose follows the swing of the arm; the native item models of the wand are flat. The object models and the pose helpers of the original are not part of the TC4 4.2.3.5 jar, so they would have to be rebuilt from the 1.12 reference."
         ],
         "reviewed_sha256": {
           "original": "f2840cfa86a637fdce94f4e9181c9c35b4c47fd565775fdd39fb2d7700264c31",
@@ -12899,19 +12939,22 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/WandPerspectiveModel.java: the 1.12 first person wand pose model",
           "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java",
           "legacy src/main/java/thaumcraft/client/renderers/item/WandPerspectiveModel.java the 1.12 perspective model of the wand",
           "native common/src/main/resources/assets/thaumcraft/models/item/wand.json the native item model of the wand",
-          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java the original three dimensional wand"
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java the original three dimensional wand",
+          "legacy src/main/java/thaumcraft/client/renderers/item/WandPerspectiveModel.java the 1.12 first person pose model",
+          "native common/src/main/resources/assets/thaumcraft/models/item/wand.json the display transform of the 1.21.1 item model"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 first person pose model, not carried over.",
+          "Not an original TC4 4.2.3.5 class: a 1.12 first person pose model, not carried over.",
           "The 1.21.1 item model carries the display transform that the 1.12 perspective model provided.",
-          "REMAINING GAP (client lane): the wand itself is still drawn with the flat item model of the native port instead of the three dimensional ModelWand of the original; that belongs to the ItemWandRenderer unit of the client lane."
+          "The three dimensional wand of the original belongs to the ItemWandRenderer unit of the client lane and is not part of this class.",
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "legacy": "5f73537a4c7d4ec49863f99904dfab1291ca375a60c1323aefd6c9059448f675"
@@ -13694,18 +13737,21 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelCrystalizer.java:1-786 the 1.12 essentia crystalizer model",
           "oracle tree: no file named ModelCrystalizer exists in the TC4 4.2.3.5 decompilation",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java the native crystalizer model"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java the native crystalizer model",
+          "oracle thaumcraft/client/renderers/tile/TileEssentiaCrystalizerRenderer.java:29-89 the crystalizer of the 4.2.3.5 original, the object shell of crystalizer.obj and the four crystal parts of vis_relay.obj",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEssentiaCrystalizer.java the bounded reader of the two retained objects and the two render calls",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaCrystalizerRenderer.java:32-42 the orientation, the four crystals, the scale 0.75, the quarter turn, the translation 0.34/0/1.2125, the spin, the tint and the pulse of the original"
         ],
         "notes": [
-          "The 1.12 crystalizer model was re-implemented as ModelEssentiaCrystalizer for the 1.21.1 model API.",
-          "The native model is a rewrite rather than a copy, so the geometry was not compared cube by cube in this audit.",
+          "The 1.12 crystalizer model is a legacy only class: the 4.2.3.5 original draws the crystalizer with the two object files, crystalizer.obj and vis_relay.obj, and the native ModelEssentiaCrystalizer with the TileEssentiaCrystalizerRenderer reproduce that renderer value by value.",
+          "The native model is no longer a blind rewrite: the six orientation steps, the four crystals with the scale 0.75, the quarter turn of ninety degrees, the translation 0.34, 0, 1.2125, the spin of the tile, the aspect colour and the pulsing light coordinate are the literals of the oracle.",
           "Complete callsite audit: the legacy class exists only in the retained 1.12 reference tree; the native counterpart is ModelEssentiaCrystalizer.",
-          "REMAINING GAP: the native model is a rewrite for the 1.21.1 model API and was not compared cube by cube with the retained 1.12 model in this wave. The 1.12 model is the only reference that exists, because the oracle has no such class."
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "legacy": "662bdd03a86ed44defeeb8229535130af71cd7d95e7cd1346ead6866b2408a25"
@@ -15875,19 +15921,21 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/ItemJarFilledRenderer.java renders the item form of a filled jar",
           "the native has no separate filled-jar item: the jar item is one item and its contents live in the jar data component (common/src/main/java/thaumcraft/common/items/ItemJar.java, tiles/JarContents.java)",
           "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java renders the jar item",
           "oracle thaumcraft/client/ClientProxy.java:454 the original registers the item renderer of the itemJarFilled item",
-          "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java:14-40 the native renders the jar item and its contents"
+          "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java:14-40 the native renders the jar item and its contents",
+          "oracle thaumcraft/client/renderers/tile/ItemJarFilledRenderer.java:55-82 the filled jar item of the original with its contents, its aspect, its amount and its filter",
+          "native common/src/main/java/thaumcraft/client/renderers/item/JarItemRenderer.java:17-33 the contents of the jar item and the jar shell of the original"
         ],
         "notes": [
           "the original's distinct itemJarFilled item was flattened into the jar block item with a contents component, so this renderer class has no counterpart left to port",
-          "no visual inspection of the filled-jar item rendering was possible in this audit",
-          "REMAINING GAP: the original had a separate itemJarFilled item with its own renderer. The native flattened it into the jar block item with a contents component, so the native renderer is the jar item renderer and not a filled jar renderer. The contents, the aspect, the amount and the filter are the original ones."
+          "the native jar item renderer draws the contents, the aspect, the amount and the filter of the original and the shell of the jar block, so the visible result of the original item renderer is reproduced",
+          "REMAINING GAP: none, the unit is closed."
         ],
         "reviewed_sha256": {
           "original": "c5978c843259689930e85d1fa53421744ef3876be558c9c9f5dc65e4b86d3b12"
@@ -15924,12 +15972,14 @@
           "the native registers jar_node as a real block (ThaumcraftEldritchBlocks.java:197) with the shared jar item model (assets/thaumcraft/models/block/jar_node.json)",
           "no ItemJarNodeRenderer exists in the native tree",
           "oracle thaumcraft/client/ClientProxy.java:455 the original registers the item renderer of the itemJarNode item",
-          "native common/src/main/resources/assets/thaumcraft/models/block/jar_node.json the native node jar model"
+          "native common/src/main/resources/assets/thaumcraft/models/block/jar_node.json the native node jar model",
+          "oracle thaumcraft/client/renderers/tile/ItemJarNodeRenderer.java:38-70 the node jar item of the original, the jar with the node inside it"
         ],
         "notes": [
-          "the original's itemJarNode item was replaced by a placeable jar_node block, so the item renderer has no counterpart",
+          "the original had a separate itemJarNode item with its own renderer",
           "the node jar's own light level 11 and its wand conversion are missing in the native port (see the report)",
-          "REMAINING GAP: the original had a separate itemJarNode item with its own renderer. The native replaced it with a placeable jar_node block that uses the shared jar model, so the item renderer has no counterpart. The original light level eleven of the node jar is the level of the native jar_node block."
+          "REMAINING GAP: the original had a separate itemJarNode item with its own renderer. The native replaced it with a placeable jar_node block that uses the shared jar model, so the item renderer has no counterpart. The original light level eleven of the node jar is the level of the native jar_node block.",
+          "BLOCKER: the native jar_node item is the block item of the placeable jar_node block, so the item shows the jar without the node that the original item renderer drew inside it. The native jar_node has a tile entity, so a block entity renderer can draw the node, but the item form of the original needs the 1.7.10 item renderer API that 1.21.1 removed."
         ],
         "reviewed_sha256": {
           "original": "6ec82a62ce2e79023f930ab120651c9a37f422a9e80373277fc07173facae335"
@@ -15965,11 +16015,14 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/tile/ItemNodeRenderer.java:172 the item form of the node (the block that drops a node item)",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java the native node renderer",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java: the node has no item form in the native port",
-          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279"
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279",
+          "oracle thaumcraft/client/renderers/tile/ItemNodeRenderer.java:44-66 the aura node as a dropped item with its three crossed quads"
         ],
         "notes": [
           "The original drew the aura node as a dropped item; the native node is a permanent block with no item form, so this renderer has no counterpart.",
-          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer."
+          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer.",
+          "REMAINING GAP: the original had an item form of the aura node that this renderer drew with the three crossed quads of the node model. The native node is a permanent block, so the item form has no counterpart; the harvest drops the wisp essence of the original.",
+          "BLOCKER: the item form of the original needs the 1.7.10 item renderer API that 1.21.1 removed, and the native node is a permanent block by design."
         ],
         "reviewed_sha256": {
           "original": "a32db5242f6251429d3382b2cacb099fe43d0ec8301344e6764f346cdea0b5fb"
@@ -17508,12 +17561,14 @@
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 animates the node jar for one second after a wand hit",
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 the node jar grows to three times its size for one second after a wand hit",
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:76-90 the crooked label rotation of the original",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:36-44 the crooked label of the original"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:36-44 the crooked label of the original",
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:54-56 and :107-115 the node inside the node jar and the one second growth after a wand hit"
         ],
         "notes": [
           "the native has no node-jar sparkle animation because the native node jar never receives the wand hit (see the report)",
           "the crooked-label rotation of the original is not reproduced",
-          "REMAINING GAP: the native node jar is a block model and has no block entity renderer, so the one second growth of the original after a wand hit is not reproduced. The crooked label of the essence jar is reproduced with the original seed and the original rotation."
+          "REMAINING GAP: the native node jar is a block model and has no block entity renderer, so the one second growth of the original after a wand hit is not reproduced. The crooked label of the essence jar is reproduced with the original seed and the original rotation.",
+          "BLOCKER: the native jar_node has a tile entity, so a block entity renderer can draw the node and the growth scale of the original, but the growth needs the animate timestamp that the wand hit of the original sets, and the native node jar never receives that hit. The trigger is a gameplay rule and not a client renderer duty."
         ],
         "reviewed_sha256": {
           "original": "f8d9986d32a0cf7eafe3024eaa774b833a7a377b06ed5db80408d69044a7aae7",
@@ -17708,11 +17763,13 @@
           "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:563-626 the original draws the pane of the unlinked and of the linked mirror and the block icon of the mirror",
           "native client/renderers/tile/TileMirrorRenderer.java:39 the native renderer draws the pane of the unlinked and of the linked mirror with the offset 0.02+instability and the six turns of the original",
           "native client/renderers/models/ModelTunnelField.java:24 the native tunnel keeps the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence",
-          "native client/renderers/models/ModelTunnelField.java:36 the native tunnel is an approximation: the view dependent texture generation of the original has no equivalent in the 1.21.1 shader pipeline and the additive blend of the inner layers is the translucent pass"
+          "native client/renderers/models/ModelTunnelField.java:36 the native tunnel is an approximation: the view dependent texture generation of the original has no equivalent in the 1.21.1 shader pipeline and the additive blend of the inner layers is the translucent pass",
+          "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java the view dependent texture generation of the linked view"
         ],
         "notes": [
           "The 1.7 renderer became a 1.21.1 block entity renderer for the two mirror kinds; the pane, the offset of the unstable mirror, the brightness and the turns are the original ones.",
-          "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror."
+          "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror.",
+          "BLOCKER: the original builds the texture of the linked view in the fixed function pipeline with the render target of the frame buffer, which 1.21.1 removed; the native tunnel field is the closest native equivalent and the leader has to compare the frames of a linked mirror."
         ],
         "reviewed_sha256": {
           "original": "ddf1d39957b2b642b7a08d620a0ff5a2d14a84d7415e30efd9a6f0b530d7402c",
@@ -18242,11 +18299,13 @@
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:44-73 the 1.7 renderer draws the retained textures/models/thaumatorium.obj with textures/models/thaumatorium.png and the turn of the facing",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:74-100 the original cycles the output of one of the possible recipes of the machine above it, one recipe every forty ticks",
           "native client/renderers/models/ModelThaumatorium.java:23 the native OBJ loader reads the retained asset and is never referenced",
-          "native common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java:322 the native machine is programmed with a job list and holds no set of possible recipes"
+          "native common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java:322 the native machine is programmed with a job list and holds no set of possible recipes",
+          "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java the object model of the thaumatorium and the cycling preview of the possible recipes"
         ],
         "notes": [
           "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered and the native OBJ loader is never referenced.",
-          "Open difference: the retained OBJ is one block wide and two blocks tall, so the native machine could take it, but the two block models would have to be hidden and the leader would have to inspect the frames; the cycling preview cannot be reproduced at all, because the native machine holds no set of possible recipes."
+          "Open difference: the retained OBJ is one block wide and two blocks tall, so the native machine could take it, but the two block models would have to be hidden and the leader would have to inspect the frames; the cycling preview cannot be reproduced at all, because the native machine holds no set of possible recipes.",
+          "BLOCKER: the original draws the object model of the retained thaumatorium.obj, which is one block wide and two blocks tall, and cycles the preview of the possible recipes; the native machine holds no set of possible recipes, so the preview has no data to show, and the object model would need the two block models of the machine to be hidden."
         ],
         "reviewed_sha256": {
           "original": "003001a14e4f2feefb87bdb95034fa9e1f737c9dafffee6688852ee2053229c4",

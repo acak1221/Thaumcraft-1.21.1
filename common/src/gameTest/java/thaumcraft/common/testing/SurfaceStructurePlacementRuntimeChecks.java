@@ -204,7 +204,15 @@ public final class SurfaceStructurePlacementRuntimeChecks {
             var generator = level.getChunkSource().getGenerator();
             int surface = generator.getBaseHeight(position.x(), position.z(), Heightmap.Types.WORLD_SURFACE_WG, level, random);
             int floor = generator.getBaseHeight(position.x(), position.z(), Heightmap.Types.OCEAN_FLOOR_WG, level, random);
-            if (surface == floor && surface > level.getSeaLevel() && surface - 9 < level.getSeaLevel()) candidates.add(chunk);
+            if (surface != floor || surface <= level.getSeaLevel() || surface - 9 >= level.getSeaLevel()) continue;
+            // The mound grows nine blocks below the live surface of the column, and the
+            // original refuses it when that base reaches the sea level (oracle
+            // ThaumcraftWorldGenerator:424-425). The live surface carries the decoration
+            // of the chunk, so the chunk is generated before the base is asked for.
+            level.getChunk(chunk[0], chunk[1]);
+            int live = level.getHeight(Heightmap.Types.WORLD_SURFACE, position.x(), position.z());
+            if (live - 9 >= level.getSeaLevel()) continue;
+            candidates.add(chunk);
             if (candidates.size() == 40) break;
         }
         test.assertTrue(!candidates.isEmpty(), "the exclusive chain gives chunks to the mound");

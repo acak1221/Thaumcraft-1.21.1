@@ -54,7 +54,7 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger("thaumcraft-multiplayer-peer");
     private static final int PENDING_TIMEOUT_TICKS = 200;
 
-    private final MultiplayerPairLink.Census census = new MultiplayerPairLink.Census();
+    private final MultiplayerPairLink.Census census = MultiplayerPairLink.CENSUS;
     private final Map<String, Object> evidence = new LinkedHashMap<>();
     private final List<String> stepLog = new ArrayList<>();
     private final List<String> failures = new ArrayList<>();
@@ -182,6 +182,17 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 pendingArguments = arguments;
                 pendingTicks = 0;
             }
+            case "GIVE" -> {
+                // The peer gives ITSELF the item. The vanilla give command is a
+                // SIGNED command, and the offline-mode server drops a signed
+                // command whose signature does not match its chat chain
+                // SILENTLY, which happens with the command of the OTHER
+                // client far more often than with its own.
+                for (String item : arguments.split(",")) {
+                    if (!item.isBlank()) client.getConnection().sendCommand("give " + playerName + " " + item.trim());
+                }
+                reply("GIVE " + arguments);
+            }
             case "COUNT" -> {
                 pendingToken = "COUNT";
                 pendingArguments = arguments;
@@ -278,8 +289,13 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                     }
                     if (bellSlot >= 9) {
                         // The carried item packet only accepts a hotbar slot, so
-                        // the bell has to be moved into the hotbar first.
-                        moveToHotbar(client, bellSlot);
+                        // the bell has to be moved into the hotbar first. The
+                        // SERVER does it, because the state id of the closed
+                        // player inventory is stale on the client.
+                        if (pendingTicks % 20 == 0) {
+                            client.getConnection().sendCommand("item replace entity " + playerName
+                                    + " hotbar.0 with thaumcraft:golem_bell");
+                        }
                         return false;
                     }
                     selectHeld(client, bellSlot);
@@ -302,6 +318,9 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                         pendingToken = null;
                         return true;
                     }
+                    // The golem bell in the hand makes the trunk interaction
+                    // PASS, and the trunk then never opens.
+                    selectEmptyHand(client);
                     client.gameMode.interact(client.player, trunk, InteractionHand.MAIN_HAND);
                     return false;
                 }
@@ -376,8 +395,10 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         int container = player.containerMenu.containerId;
         // The accessory container maps the hotbar 0..8 to the container slots 31..39.
         int containerSlot = source < 9 ? 31 + source : 4 + (source - 9);
-        client.gameMode.handleInventoryMouseClick(container, containerSlot, 0, ClickType.PICKUP, player);
-        client.gameMode.handleInventoryMouseClick(container, 0, 0, ClickType.PICKUP, player);
+        // The vanilla quick move of the accessory container puts the stack into
+        // the first accessory slot of its type. Two pick up clicks would leave
+        // the stack on the cursor, which the server then refuses.
+        client.gameMode.handleInventoryMouseClick(container, containerSlot, 0, ClickType.QUICK_MOVE, player);
     }
 
     /** The inventory slot of the peer's own golem bell. */
@@ -389,6 +410,17 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         return -1;
     }
 
+    /** Selects the first empty hotbar slot, so the hand holds nothing. */
+    private static void selectEmptyHand(Minecraft client) {
+        var items = client.player.getInventory().items;
+        for (int slot = 0; slot < 9; slot++) {
+            if (items.get(slot).isEmpty()) {
+                selectHeld(client, slot);
+                return;
+            }
+        }
+    }
+
     /** Selects a HOTBAR slot; the vanilla carried item packet refuses any other. */
     private static void selectHeld(Minecraft client, int slot) {
         if (slot < 0 || slot > 8) return;
@@ -397,17 +429,20 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         client.getConnection().send(new net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket(slot));
     }
 
-    /** Moves an inventory slot into the first hotbar slot with two real clicks. */
+    /**
+     * Moves an inventory slot into the hotbar with the vanilla quick move.
+     *
+     * <p>The quick move never touches the cursor, so the server's accessory
+     * menu is not refused because of a leftover cursor stack.</p>
+     */
     private void moveToHotbar(Minecraft client, int inventorySlot) {
         var menu = client.player.inventoryMenu;
-        int from = -1, to = -1;
+        int from = -1;
         for (int index = 0; index < menu.slots.size(); index++) {
-            if (menu.slots.get(index).getContainerSlot() == inventorySlot) from = index;
-            if (menu.slots.get(index).getContainerSlot() == 0) to = index;
+            if (menu.slots.get(index).getContainerSlot() == inventorySlot) { from = index; break; }
         }
-        if (from < 0 || to < 0) return;
-        client.gameMode.handleInventoryMouseClick(menu.containerId, from, 0, ClickType.PICKUP, client.player);
-        client.gameMode.handleInventoryMouseClick(menu.containerId, to, 0, ClickType.PICKUP, client.player);
+        if (from < 0) return;
+        client.gameMode.handleInventoryMouseClick(menu.containerId, from, 0, ClickType.QUICK_MOVE, client.player);
     }
 
     /** The peer's own right click on the research table's PARTNER half. */

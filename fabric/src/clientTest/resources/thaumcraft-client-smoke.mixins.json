@@ -10,6 +10,6 @@
     "BoreOrdinaryNodeTickObserverMixin", "BoreNormalStopObserverMixin", "BoreMobileTickObserverMixin",
     "BoreInheritedItemTickObserverMixin", "BoreCustodyMenuObserverMixin",
     "BoreAmbientDeathLootObserverMixin", "BoreAmbientSpawnObserverMixin", "BoreItemManagerLifecycleObserverMixin"],
-  "client": ["FocalInputIsolationMixin", "BoreClientHeartbeatMixin", "BoreInputIsolationMixin"],
+  "client": ["FocalInputIsolationMixin", "BoreClientHeartbeatMixin", "BoreInputIsolationMixin", "MultiplayerCensusMixin"],
   "injectors": {"defaultRequire": 1}
 }

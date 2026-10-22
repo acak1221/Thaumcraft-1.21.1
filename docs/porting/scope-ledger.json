@@ -4427,7 +4427,10 @@
           "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87 renderHud, common/src/main/java/thaumcraft/client/fx/particles/ResourceParticle.java:79 the particle-count gate",
           "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 replaces the single FML proxy with the native bootstrap and the purpose specific Thaumcraft*Client classes",
           "the two facade effects that the earlier audit named as missing are in the native tree: the smoke spiral (ClientSetup.java:86/93), the arc lightning (ThaumcraftEldritchClient.java:51), the beam of the excavation focus (ThaumcraftExcavationClient.java:35), the beam of the arcane bore (TileArcaneBoreRenderer.java:31) and the beam of the relay (TileVisRelayRenderer.java:39)",
-          "the three facade effects that the earlier audit named as missing are dead in the original: the generic beam (oracle thaumcraft/client/ClientProxy.java:696-698 has no caller), the soul trail (ClientProxy.java:773, no caller) and the fire scorch (thaumcraft/client/lib/UtilsFX.java:110, no caller)"
+          "the three facade effects that the earlier audit named as missing are dead in the original: the generic beam (oracle thaumcraft/client/ClientProxy.java:696-698 has no caller), the soul trail (ClientProxy.java:773, no caller) and the fire scorch (thaumcraft/client/lib/UtilsFX.java:110, no caller)",
+          "oracle thaumcraft/client/ClientProxy.java:464-517 setupEntityRenderers registers a renderer for every entity the original adds; the native mirror is common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java with the 56 entity types of the port and the 56 (entity type, renderer) bindings, registered by ClientSetup.init()",
+          "the seven entity types the client smoke found without a renderer (bottle_taint, golem_orb, primal_arrow, taint_crawler, taint_seed, taint_seed_prime, taintacle_giant) now have one: the native table binds them to the vanilla ThrownItemRenderer, to RenderGolemOrb, to RenderPrimalArrowEntity, to RenderTaintCrawler, to RenderTaintSeed and to RenderTaintacle(1.0F,14) (oracle ClientProxy.java:476,488,494,513 and the 1.12.2 backport ProxyEntities.java:199-201)",
+          "the guard common/src/test/java/thaumcraft/client/renderers/entity/EntityRendererCoverageTest.java asserts that every entity type the port registers has a client renderer; 1.21.1 looks the renderer up by entity type and has no fallback (EntityRenderDispatcher.getRenderer answers this.renderers.get(entity.getType()))"
         ],
         "notes": [
           "The single FML proxy was replaced by ClientSetup plus ~50 purpose-specific Thaumcraft*Client classes; there is no native ClientProxy.",
@@ -10264,7 +10267,8 @@
           "oracle thaumcraft/client/renderers/entity/RenderElectricOrb.java:1-78 the electric orb renderer shared by the golem orb and the shock orb",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java the native electric orb renderer",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java:40-43 keeps the strip start (1 + ticks % 6) / 8, the step 0.125, the rows 0.875 and 0.75 of the red golem orb and the bob sin(ticks / 5) * 0.2 + 0.2 of the original RenderElectricOrb:29-44",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java:58 keeps the alpha of 0.8 and the brightness of 220 of the original RenderElectricOrb:40/46"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderElectricOrb.java:58 keeps the alpha of 0.8 and the brightness of 220 of the original RenderElectricOrb:40/46",
+          "the renderer is registered for the golem orb: common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java binds thaumcraft:golem_orb to RenderGolemOrb, the subclass that answers the red row of the original (oracle thaumcraft/client/renderers/entity/RenderElectricOrb.java:45-47 and thaumcraft/client/ClientProxy.java:476)"
         ],
         "notes": [
           "Same shared renderer for both original entities; only the rendering backend changed.",
@@ -11023,7 +11027,8 @@
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderPrimalArrow.java:1-148 the primal arrow with its bow-like model and the elemental trail",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderPrimalArrow.java the native primal arrow renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderPrimalArrow.java the native primal arrow renderer",
+          "the renderer is registered for the primal arrow: common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java binds thaumcraft:primal_arrow to RenderPrimalArrowEntity, the subclass that answers the original primal type and the original spent life counter (oracle thaumcraft/client/ClientProxy.java:488 and thaumcraft/client/renderers/entity/RenderPrimalArrow.java:39,64)"
         ],
         "notes": [
           "Same arrow body and the same per-element trail effect; the 1.7 Render class became the 1.21.1 EntityRenderer.",
@@ -11608,7 +11613,8 @@
         "owner": "audit-a2-warp",
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderTaintacle.java rl = textures/models/taintacle.png",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintacle.java:11-12 textures/models/taintacle.png with the length parameter"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderTaintacle.java:11-12 textures/models/taintacle.png with the length parameter",
+          "the renderer is registered for the giant taintacle with the shadow of one and the length of fourteen: common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java binds thaumcraft:taintacle_giant to RenderTaintacle(context,1.0F,14) (oracle thaumcraft/client/ClientProxy.java:494)"
         ],
         "notes": [
           "Same sheet; the length parameter of the original model is kept."
@@ -32767,7 +32773,8 @@
         "evidence": [
           "oracle thaumcraft/common/entities/monster/boss/EntityTaintacleGiant.java:53-54 health 125, damage 9",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java:40 TAINTACLE_GIANT = Stats(125F,9F,...)",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacleGiant.java:38-41 the attribute row"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityTaintacleGiant.java:38-41 the attribute row",
+          "the giant taintacle is drawn by the original taintacle renderer with the shadow of one and the length of fourteen (oracle thaumcraft/client/ClientProxy.java:494); the native registration is common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java"
         ],
         "notes": [
           "Same numbers; the 35 damage cap and the 200 tick enrage are in EldritchMobRules."
@@ -34029,7 +34036,8 @@
           "oracle thaumcraft/common/entities/projectile/EntityBottleTaint.java the thrown bottle (gravity 0.05, speed 0.5, pitch -20)",
           "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:389-401 the same gravity, speed, pitch, 5 block spread, 10 patches and 100 tick poison",
           "native common/src/main/java/thaumcraft/common/entities/projectile/EntityBottleTaint.java:60-140 the native throwable bottle",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:28-29 the bottle_taint entity type is registered"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftProjectiles.java:28-29 the bottle_taint entity type is registered",
+          "the entity carries the stack of the bottle of taint so that the native thrown item renderer can draw it: the entity implements net.minecraft.world.entity.projectile.ItemSupplier and answers the bottle stack (common/src/main/java/thaumcraft/common/entities/projectile/EntityBottleTaint.java:76-83); the original drew the bottle item on the snowball model (oracle thaumcraft/client/ClientProxy.java:513)"
         ],
         "notes": [
           "The flying bottle is ported with the original gravity, launch speed, launch pitch, the 5 block poison splash, the ten fibre patches and the 100 tick taint poison; the tainted mob and the undead are skipped exactly as in the original.",
@@ -34316,7 +34324,8 @@
         "owner": "audit-a7-golems",
         "evidence": [
           "oracle thaumcraft/common/entities/projectile/EntityGolemOrb.java:1-130 the golem orb projectile",
-          "native common/src/main/java/thaumcraft/common/entities/projectile/EntityGolemOrb.java (native orb projectile)"
+          "native common/src/main/java/thaumcraft/common/entities/projectile/EntityGolemOrb.java (native orb projectile)",
+          "the red flag of the orb is read by the client renderer: common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemOrb.java asks EntityGolemOrb.isRed() for the row of the particle strip (oracle thaumcraft/client/renderers/entity/RenderElectricOrb.java:45-47)"
         ],
         "notes": [
           "1.7 Entity -> 1.21.1 projectile rewrite; the native reuses this orb for the eldritch golem beam (EntityEldritchGolem:198-211)."
@@ -34409,7 +34418,8 @@
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/entities/projectile/EntityPrimalArrow.java:380 the primal arrow",
           "native common/src/main/java/thaumcraft/common/entities/projectile/EntityPrimalArrow.java present",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderPrimalArrow.java the native renderer"
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderPrimalArrow.java the native renderer",
+          "the entity answers the spent life counter of the original arrow (the ticks it spent in the ground) so that the arrow fades exactly like the original: common/src/main/java/thaumcraft/common/entities/projectile/EntityPrimalArrow.java spentLife() reads the native inGroundTime (oracle thaumcraft/common/entities/projectile/EntityPrimalArrow.java:163-165 and thaumcraft/client/renderers/entity/RenderPrimalArrow.java:64)"
         ],
         "notes": [
           "Same class name, same package path; the 1.21.1 change is the arrow base class and the entity type registration."

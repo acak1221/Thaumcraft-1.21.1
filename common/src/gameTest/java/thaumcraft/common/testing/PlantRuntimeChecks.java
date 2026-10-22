@@ -138,7 +138,7 @@ public final class PlantRuntimeChecks {
         var hit = new BlockHitResult(Vec3.atCenterOf(soil).add(0.0, 0.5, 0.0), Direction.UP, soil, false);
         var used = player.gameMode.useItemOn(player, level, player.getItemInHand(InteractionHand.MAIN_HAND),
                 InteractionHand.MAIN_HAND, hit);
-        boolean placed = used.consumesAction() && level.getBlockState(soil.above()).is(item.getItem());
+        boolean placed = used.consumesAction() && level.getBlockState(soil.above()).getBlock() == Block.byItem(item.getItem());
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         return placed;
     }

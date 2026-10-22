@@ -10,7 +10,7 @@ Fresh native worlds only. Malformed-save recovery is not legacy-world migration.
 | Hunt | Checked | Result / limit |
 | --- | ---: | --- |
 | Save/load | 69 source pairs | 59 explicit BE pairs, 6 SavedData pairs, 3 player owners, 1 golem entity pair. Schema/body inspection, **not 69 executed round-trip tests**. Four confirmed asymmetric state/recovery paths fixed below. |
-| Player data | 3 owners × 4 transitions = 12 paths | Knowledge (including research, scans, warp), accessories, runic charge; dimension, reconnect, respawn, restart inspected. Live multiplayer/restart execution not claimed. |
+| Player data | 3 owners × 4 transitions = 12 paths | Knowledge (including research, scans, warp), accessories, runic charge; dimension, reconnect, respawn, restart inspected. Accessory player-NBT reload and real death/respawn passed one focused Fabric GameTest; live multiplayer/restart execution not claimed. |
 | Components | 26 registrations indexed; 25 persistent | Seven value families inspected deeply (wand, phial, label, crystal, wisp, vis amulet, banner); no proven component Java-type mismatch. Remaining codecs not exhaustively behavior-tested here. |
 | Silent loss | 15 loader sites | Three fixed; 12 source-established destructive malformed/missing-registry-input paths remain (F05–F09). One site means one owner loader, not each field or catch. |
 | Item/block retirement | 4 requested owner families | Jar, crucible, golem, research table compared at source level. No new gameplay acceptance claim. |
@@ -201,10 +201,15 @@ not need disk writers. Resetting transient counters is generally oracle behavior
    empty codec execution, especially partial DataResults and addon removal.
 5. End-to-end dedicated-server restart, chunk unload, canceled spawn callbacks,
    and multiplayer transitions remain unexecuted in this audit checkpoint.
+   A focused headless accessory test did pass real death/respawn and player NBT
+   reload; this does not close the broader lifecycle matrix.
 
 ## Verification
 
 Regression tests added for F01–F04: all eight new cases passed in the full
 **2,469-test** common suite (zero failures/errors/skips). Build/test outcomes are recorded in
 `docs/analysis/2026-10-23-agent-h5data.md`; source proof is distinct from executed
-JUnit/GameTest evidence. No original/donor files were changed.
+JUnit/GameTest evidence. The existing Fabric
+`accessoriesUseNativeMenuPersistenceAndDeathCustody` GameTest also passed
+(one required test), including real death/respawn and player NBT reload.
+No original/donor files were changed.

@@ -55,10 +55,17 @@ test only; no public production restore/enqueue API was added.
   The root
   settings include all three projects, so Loom also configures NeoForge despite
   the Fabric property; no NeoForge build/test task was requested.
-* Focused Fabric headless GameTest started after JUnit:
+* Focused Fabric headless GameTest **PASS** after JUnit:
   `:fabric:runGameTest -PgameTestFilter=accessoriesUseNativeMenuPersistenceAndDeathCustody`
-  with the same Java 21/private Gradle home. Result pending. Added regression
-  tests are not a substitute for broader gameplay acceptance.
+  with the same Java 21/private Gradle home. Build successful in 1m 48s; one
+  required test passed and the server shut down after saving all dimensions.
+  Evidence: `fabric/build/gametest-focused-results.xml`,
+  `fabric/run-gametest/logs/latest.log` (generated, not committed).
+  This existing test exercises real accessory menus, full player NBT reload,
+  duplicate-slot quarantine, actual death drops, and PlayerList respawn with and
+  without keepInventory. It does not prove logout/rejoin, dimension changes,
+  a restart, or malformed outer attachment recovery. The added malformed-list
+  regression cases remain JUnit evidence, not new GameTest cases.
 
 ## Remaining / unproven
 

@@ -52,8 +52,8 @@
     "unique_native_counterparts": 57,
     "dispositions": {
       "adapt": 263,
-      "exclude": 164,
-      "port": 290,
+      "exclude": 163,
+      "port": 291,
       "replace": 327
     },
     "milestone_queue": {
@@ -1164,7 +1164,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/aspects/AspectSourceHelper.java:21 drainEssentia(TileEntity, Aspect, ForgeDirection, int)",
@@ -1178,11 +1178,20 @@
           "oracle thaumcraft/common/lib/events/EssentiaHandler.java:39-78 the handler searches any IAspectSource in the half box of the range and honours the direction",
           "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java the helpers search the same half box through EssentiaSourceSearch",
           "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:34-64 the drain takes one unit out of the first source of the original half box and the search asks every source of it, exactly as oracle EssentiaHandler:49-56 and :71-78",
-          "open difference: the essence flow packet of the original (oracle EssentiaHandler:54, PacketFXEssentiaSource:50-77) and its client drawing (oracle ClientTickEventsFML:250-269) are missing, because the drawing needs the client particle effect FXEssentiaTrail of the client lane (thaumcraft/client/fx/ParticleEngine.java)"
+          "open difference: the essence flow packet of the original (oracle EssentiaHandler:54, PacketFXEssentiaSource:50-77) and its client drawing (oracle ClientTickEventsFML:250-269) are missing, because the drawing needs the client particle effect FXEssentiaTrail of the client lane (thaumcraft/client/fx/ParticleEngine.java)",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXEssentiaSource.java:20-78 the essence flow packet of the original with the byte deltas of the source",
+          "oracle thaumcraft/common/lib/events/EssentiaHandler.java:54 the only sender of that packet, the target point of thirty two blocks around the consumer",
+          "native common/src/main/java/thaumcraft/common/lib/network/EssentiaFlowFxPayload.java the payload with the byte deltas of the original and the source rebuilt from them",
+          "native common/src/main/java/thaumcraft/common/lib/network/EssentiaFlowFxNetworking.java the sender with the thirty two block target point of the original",
+          "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:40-52 the drain sends the packet of the original after the successful take",
+          "oracle thaumcraft/client/lib/ClientTickEventsFML.java:249-269 the client flow map with the fifteen ticks, the shrinking tail and the lower destination of an infusion matrix",
+          "native common/src/main/java/thaumcraft/client/fx/EssentiaFlowClientEffects.java the flow map, the key, the scale rule and the phase rule of the original",
+          "native common/src/main/java/thaumcraft/client/fx/particles/EssentiaTrailParticle.java the trail of the original with its size, lifetime, homing and push out of blocks"
         ],
         "notes": [
-          "CLOSED since the first audit: the helper accepts any block entity again and honours the direction and the range, the drain takes one unit out of the first source that holds it and the search asks every source whether it holds the aspect (native AspectSourceHelper:34-64, the drain and the search of oracle EssentiaHandler:49-56 and :71-78). The search order and the half box of the original are kept in EssentiaSourceSearch.",
-          "REMAINING GAP: the essence flow packet of the original (oracle EssentiaHandler:54, PacketFXEssentiaSource:50-77) and its client drawing (oracle ClientTickEventsFML:250-269) are missing, because the drawing needs the client particle effect FXEssentiaTrail of the client lane; the native port has no flow effect for an arbitrary consumer, only the infusion matrix keeps its own effect."
+          "the essence flow packet of the original and its client drawing are now reproduced; the flow map, its key, the fifteen ticks, the shrinking tail, the lower destination of an infusion matrix and the trail itself are the original ones",
+          "the public contract of the helper (drainEssentia and findEssentia) was already the original one and is unchanged",
+          "the client half lives in a new file of the client lane of the port and touches no file of the client lane, so the client agent and this lane do not collide"
         ],
         "reviewed_sha256": {
           "original": "4ddfc456b156311238526bca66a0e83f23f926dded3b37a203e57580d96e0305",
@@ -15958,22 +15967,27 @@
       "native_counterparts": [],
       "class_inventory_mapping": null,
       "review": {
-        "disposition": "exclude",
-        "source_semantics": "not_applicable",
+        "disposition": "port",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/ItemJarNodeRenderer.java renders the item form of the node jar",
           "the native registers jar_node as a real block (ThaumcraftEldritchBlocks.java:197) with the shared jar item model (assets/thaumcraft/models/block/jar_node.json)",
           "no ItemJarNodeRenderer exists in the native tree",
           "oracle thaumcraft/client/ClientProxy.java:455 the original registers the item renderer of the itemJarNode item",
-          "native common/src/main/resources/assets/thaumcraft/models/block/jar_node.json the native node jar model"
+          "native common/src/main/resources/assets/thaumcraft/models/block/jar_node.json the native node jar model",
+          "oracle thaumcraft/client/renderers/tile/ItemJarNodeRenderer.java:36-87 the item renderer of the original: the node in three crossed planes and the glass shell of the jar",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/ItemJarNodeRenderer.java the native renderer with the three crossed planes and the shell",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java the shared node body, the item variant without the camera rotation of the world",
+          "fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java the builtin item renderer registry of Fabric",
+          "neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java the item renderer registry of NeoForge"
         ],
         "notes": [
-          "the original's itemJarNode item was replaced by a placeable jar_node block, so the item renderer has no counterpart",
-          "the node jar's own light level 11 and its wand conversion are missing in the native port (see the report)",
-          "REMAINING GAP: the original had a separate itemJarNode item with its own renderer. The native replaced it with a placeable jar_node block that uses the shared jar model, so the item renderer has no counterpart. The original light level eleven of the node jar is the level of the native jar_node block."
+          "the original had a separate itemJarNode item with its own renderer; the native keeps the jar_node block and gives its item the same renderer, so the item form of the node jar exists again",
+          "the light level eleven of the node jar is the level of the native jar_node block (oracle BlockJar:314-320)",
+          "the one offset of the original for the dropped item and for the held item is not repeated: the native item pipeline applies its own transform, like the native jar item renderer"
         ],
         "reviewed_sha256": {
           "original": "6ec82a62ce2e79023f930ab120651c9a37f422a9e80373277fc07173facae335"
@@ -17544,7 +17558,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:38-104 renders the jar liquid, the aspect label and the node-jar animation",
@@ -17555,12 +17569,17 @@
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:36-44 the crooked label of the original",
           "the node jar and the brain jar now have their own block entity renderers: the stored node glows in the node jar (native TileJarNodeRenderer.java, TileNodeRenderer.renderJarNode) and the brain turns to look at the closest orb or player in the brain jar (native TileJarBrainRenderer.java)",
           "the one second growth of the node jar is dead code in the original: oracle TileJarRenderer.java:107-115 applies GL11.glScalef after every draw call of that renderer and pops the matrix immediately, so the scale never reaches a vertex; the native tree therefore does not grow the node either",
-          "REMAINING DIFFERENCE: the item form of the node jar and of the filled jar (oracle ItemJarNodeRenderer, ItemJarFilledRenderer) is still the ordinary jar model of the native tree"
+          "REMAINING DIFFERENCE: the item form of the node jar and of the filled jar (oracle ItemJarNodeRenderer, ItemJarFilledRenderer) is still the ordinary jar model of the native tree",
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:60-104 the content frame of the jar, the liquid and the crooked label",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:32-44 the crooked label with the original seed and the original rotation",
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:107-115 the growth of the node jar is dead code: the scale is applied after every draw call and the matrix is popped immediately",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarNodeRenderer.java the node of the jar and native TileJarBrainRenderer.java the brain of the jar",
+          "the item form of the node jar and of the filled jar: the native item renderer of the node jar and the native jar item with its contents"
         ],
         "notes": [
-          "the native has no node-jar sparkle animation because the native node jar never receives the wand hit (see the report)",
-          "the crooked-label rotation of the original is not reproduced",
-          "REMAINING GAP: the native node jar is a block model and has no block entity renderer, so the one second growth of the original after a wand hit is not reproduced. The crooked label of the essence jar is reproduced with the original seed and the original rotation."
+          "the crooked label of the essence jar is reproduced with the original seed and the original rotation",
+          "the one second growth of the node jar of the original is dead code and is therefore not reproduced, exactly like the original",
+          "the item form of the node jar has its own renderer again and the filled jar keeps the native jar item with its contents"
         ],
         "reviewed_sha256": {
           "original": "f8d9986d32a0cf7eafe3024eaa774b833a7a377b06ed5db80408d69044a7aae7",
@@ -25358,7 +25377,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/blocks/ItemJarNode.java the item that carries the aspects, the node type, the node modifier and the identity",
@@ -25366,13 +25385,20 @@
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the drop of the node jar",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java the stored aspects, the type, the modifier and the identity",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:525-538 the drop of the node jar carries the block entity data of the tile",
-          "open difference: the native node jar is a block and not an item, so the item form of the original ItemJarNode does not exist; the aspects, the node type, the node modifier and the identity survive the break and the placement in the block entity data of the drop"
+          "open difference: the native node jar is a block and not an item, so the item form of the original ItemJarNode does not exist; the aspects, the node type, the node modifier and the identity survive the break and the placement in the block entity data of the drop",
+          "oracle thaumcraft/common/blocks/ItemJarNode.java:56-214 the item of the original with setAspects, setNodeAttributes, getNodeType, getNodeModifier and getNodeId",
+          "oracle thaumcraft/common/blocks/ItemJarNode.java:63-64 the stack limit of the item of the original is one",
+          "oracle thaumcraft/common/blocks/ItemJarNode.java:133-145 the placement hands the aspects and the node attributes to the placed tile",
+          "native common/src/main/java/thaumcraft/common/blocks/ItemJarNode.java the published contract of the original with the 1.21.1 data component",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the item of the jar_node block with the stack limit one",
+          "oracle thaumcraft/common/blocks/BlockJar.java:184-193 the drop of the node jar carries the aspects, the type, the modifier and the identity",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the drop of the native node jar with the same four pieces of data",
+          "oracle thaumcraft/common/config/ConfigResearch.java:379-382 the research NODEJAR hands the item with the four primal aspects of forty units to the player",
+          "native common/src/main/java/thaumcraft/client/gui/ResearchIconDisplay.java the icon of the NODEJAR research is the item with the four primal aspects"
         ],
         "notes": [
-          "The itemJarNode item was replaced by a placeable jar_node block.",
-          "CLOSED in this wave: breaking the node jar no longer loses the stored node - the drop carries the block entity data of the tile, so the aspects, the node type, the node modifier and the identity survive the break and the placement.",
-          "REMAINING GAP: the original published an item with the NBT API of the node (setAspects, setNodeAttributes, getNodeType, getNodeModifier, getNodeId) and the original research NODEJAR handed that item to the player; the native jar_node is a block and the node jar is not created by a research yet.",
-          "REMAINING GAP: the original published an item with the NBT API of the node, setAspects, setNodeAttributes, getNodeType, getNodeModifier and getNodeId, and the original research NODEJAR handed that item to the player. The native jar_node is a block, so the item form of the node jar does not exist. The aspects, the node type, the node modifier and the identity survive the break and the placement."
+          "the item form of the node jar exists again and it carries the aspects, the node type, the node modifier and the identity through the break and the placement",
+          "forced 1.21.1 change: the data of the item lives in the block entity data component and the key names of the node attributes are the key names of the tile, because the 1.21.1 placement reads the block entity data component back into the tile"
         ],
         "reviewed_sha256": {
           "original": "232fffb2c6ad6670bd16373d2bfd1cb2215a1525f47f916e7de05e7b473314f8"
@@ -47390,7 +47416,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileCrucible.java:66-77 heat, the 1000 mB water tank and the aspect list",
@@ -47402,13 +47428,19 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:166-172 the same formula",
           "oracle thaumcraft/common/tiles/TileCrucible.java:99-101 the heat sources are the material fire, the material lava and the nitor",
           "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:155-161 the heat source test now uses the fire block and not the fire block tag",
-          "open difference: the player crafting event of the original (oracle EventHandlerWorld:149-168, PlayerEvent.ItemCraftedEvent) has no 1.21.1 counterpart on Fabric, because 1.21.1 has no item crafted event at all; the heat source rule, the craft rate, the water price and the fluid height of the crucible are the original ones"
+          "open difference: the player crafting event of the original (oracle EventHandlerWorld:149-168, PlayerEvent.ItemCraftedEvent) has no 1.21.1 counterpart on Fabric, because 1.21.1 has no item crafted event at all; the heat source rule, the craft rate, the water price and the fluid height of the crucible are the original ones",
+          "oracle thaumcraft/common/tiles/TileCrucible.java:61-71 the crucible is a Forge IFluidHandler with a tank of one thousand millibuckets of water",
+          "oracle thaumcraft/common/tiles/TileCrucible.java:373-410 the fill, the drain, canFill, canDrain and the tank info of the original",
+          "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java the fluid rules of the original in millibuckets",
+          "fabric/src/main/java/thaumcraft/fabric/fluid/FabricCrucibleStorage.java the tank of the crucible through the transfer API of Fabric",
+          "neoforge/src/main/java/thaumcraft/neoforge/NeoForgeCrucibleFluidHandler.java the tank of the crucible through the FluidHandler capability of NeoForge",
+          "oracle thaumcraft/common/tiles/TileCrucible.java:253-259 the craft fires the player crafting event of the original for the player who threw the item",
+          "native common/src/main/java/thaumcraft/common/tiles/TileCrucible.java the craft fires the shared PlayerEvent.CRAFT_ITEM with the fake matrix of the input item"
         ],
         "notes": [
-          "the original's Forge IFluidHandler (a 1000 mB water tank readable by other mods) has no counterpart: the native exposes fillWater(int) only (native TileCrucible.java:41,68-76)",
-          "the original's FML player-crafting event on a crucible craft is not fired",
-          "the original's heat source test used Material.FIRE; the native uses the FIRE block tag, so campfires and soul campfires also heat the crucible",
-          "REMAINING GAP: the original Forge IFluidHandler, a 1000 mB water tank that other mods can read and fill, has no 1.21.1 counterpart, and the original player crafting event on a crucible craft is not fired. The heat source difference is closed: the 1.7.10 fire MATERIAL is the fire block alone, so a campfire or a soul campfire did not heat the crucible and the vanilla fire block tag must not be used."
+          "the water tank of the original is now reachable for other mods on both loaders; the rule itself (water only, one thousand millibuckets, the refused fill still marks the tile dirty) is the original one",
+          "the player crafting event of the original is fired, so the sticky warp of a crafted output reaches the player who threw the item",
+          "the heat source rule, the craft rate, the water price and the fluid height of the crucible are the original ones"
         ],
         "reviewed_sha256": {
           "original": "69ba9c53c0a495ccaa4e784b00e462a11c57c53c1e7bd3a50207f7be8310618a",
@@ -48521,7 +48553,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileJarBrain.java:13-14 xp and xpMax 2000",
@@ -48534,13 +48566,24 @@
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:495-502 the brain jar now has the ticker of the original",
           "oracle thaumcraft/common/tiles/TileJarBrain.java:69 the client looks for the closest player with the 1.7.10 world.getClosestPlayer(x, y, z, 6.0), which skips the creative players and the spectators",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:117-122 the 1.21.1 name of that search, getNearestPlayer(x, y, z, distance, excludeCreativePlayers)",
-          "open difference: the native brain jar is a block model without a block entity renderer, so the head turn of the original is computed with the original numbers but is not visible; the renderer belongs to the client lane (thaumcraft/client/renderers/tile/TileJarRenderer.java). The sigh is audible and the jar swallows the orbs and hands the experience back exactly as the original does"
+          "open difference: the native brain jar is a block model without a block entity renderer, so the head turn of the original is computed with the original numbers but is not visible; the renderer belongs to the client lane (thaumcraft/client/renderers/tile/TileJarRenderer.java). The sigh is audible and the jar swallows the orbs and hands the experience back exactly as the original does",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarBrainRenderer.java the head turn of the brain in the jar",
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:166-167 both rotations of the brain are around the Y axis",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarBrainRenderer.java the turn of the brain around the Y axis",
+          "oracle thaumcraft/common/blocks/BlockJar.java:238-257 the right click hands a random share of the stored experience back and pauses the jar for forty ticks",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the right click of the brain jar with the share of at most sixty four experience",
+          "oracle thaumcraft/common/blocks/BlockJar.java:197-208 the broken brain jar drops its stored experience",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the drop of the broken brain jar",
+          "oracle thaumcraft/common/blocks/BlockJar.java:340-351 the comparator output of the brain jar",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the comparator output of the brain jar",
+          "oracle thaumcraft/common/blocks/BlockJar.java:322-334 the green spell particle of a full brain jar",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the green particle of the full brain jar"
         ],
         "notes": [
-          "the original eats every orb inside the 0.1..1.1 block box; the native eats the closest orb within distance 1.0 and then waits 5 ticks (eatDelay 5) instead of the original's 40",
-          "MISSING: the client-side head rotation and the periodic sigh sound of the original are not implemented (native tick returns on the client side)",
-          "the native's jar_brain block has no use handler, so the original's right-click xp release is missing",
-          "REMAINING GAP: the native brain jar is a block model and has no block entity renderer, so the head turn of the original is computed with the original numbers but is not visible. The sigh is audible. The jar swallows the orbs and hands the experience back exactly as the original does."
+          "the head turn of the original is visible: the brain of the jar is drawn by the block entity renderer of the native",
+          "the head turn of the native was rotated around the Z axis; the original rotates it around the Y axis twice, so the native now rotates it around the Y axis",
+          "the right click release, the drop of the broken jar, the comparator output and the green particle of a full jar are the original ones",
+          "the enchantment power bonus of the original (oracle BlockJar:306-312) has no 1.21.1 counterpart: the enchanting table lost its power bonus"
         ],
         "reviewed_sha256": {
           "original": "8e5a3dcd7926f4ca4b51c345b700b1960f77c82e673560668b378e61c487c18f",
@@ -48681,7 +48724,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileJarNode.java:99-144 the node jar keeps the aspects, the base aspects, the node type, the modifier and the node id",
@@ -48690,13 +48733,19 @@
           "oracle thaumcraft/common/tiles/TileJarNode.java:222-241 the wand turns the jar back into a node and copies the aspects and the node attributes",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:128-146 the same conversion, without shrinking the wand",
           "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java:160-165 the wand dispatch of the native reaches the jar",
-          "open difference: the native node jar is a block model without a block entity renderer, so the growth of the original for one second after the wand hit is not reproduced; the renderer belongs to the client lane. The aspects, the base aspects, the node type, the node modifier, the identity, the aspect container behaviour and the wand conversion are the original ones"
+          "open difference: the native node jar is a block model without a block entity renderer, so the growth of the original for one second after the wand hit is not reproduced; the renderer belongs to the client lane. The aspects, the base aspects, the node type, the node modifier, the identity, the aspect container behaviour and the wand conversion are the original ones",
+          "oracle thaumcraft/common/tiles/TileJarNode.java:204-219 the client event nine of the original: the burst of block sparkles and the one second animation timer",
+          "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java the client event nine of the native with the timer of the original",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java the burst of thirty six block sparkles with the random grey colour",
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:107-115 the growth of the node jar is dead code: the scale is applied after every draw call and the matrix is popped immediately",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarNodeRenderer.java the node of the jar, without a growth",
+          "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java the same conversion"
         ],
         "notes": [
-          "MISSING: nothing in the native tree calls IWandable.onWandRightClick, so the native TileJarNode.onWandRightClick (native tiles/TileJarNode.java:61-73) is dead code and the node jar can never be turned back into a node",
-          "the native method also shrinks the wand stack, which the original never does",
-          "the original's IAspectContainer behaviour on the node jar (adding node aspects) is not implemented",
-          "REMAINING GAP: the original client event nine makes the node jar grow to three times its size for one second after the wand hit. The native node jar is a block model and has no block entity renderer, so that growth is not reproduced. The aspects, the base aspects, the node type, the node modifier, the identity, the aspect container behaviour and the wand conversion are the original ones."
+          "the client event nine of the original is now answered by the native: the burst of thirty six block sparkles with five particles each and the random grey colour, and the one second animation timer",
+          "the one second growth of the original is dead code and is therefore not reproduced, exactly like the original",
+          "the aspects, the base aspects, the node type, the node modifier, the identity, the aspect container behaviour and the wand conversion are the original ones",
+          "the server half of the event nine belongs to the wand ritual that traps a node in a jar; that ritual does not exist in the native tree and belongs to the wands lane"
         ],
         "reviewed_sha256": {
           "original": "72c3bc1c98aec80463607a04082f38fc323d0126aa5bdc01e73e4d5ebe990747",

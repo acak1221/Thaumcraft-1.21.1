@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.common.container.ContainerAlchemyFurnace;
 
 /** Original 176x166 art and bars, fed only by the server menu's full live integers. */
-public final class GuiAlchemyFurnace extends AbstractContainerScreen<ContainerAlchemyFurnace> {
+public final class GuiAlchemyFurnace extends ThaumcraftContainerScreen<ContainerAlchemyFurnace> {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/gui_alchemyfurnace.png");
 
     public GuiAlchemyFurnace(ContainerAlchemyFurnace menu, Inventory inventory, Component title) {

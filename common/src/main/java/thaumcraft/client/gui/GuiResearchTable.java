@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 /** Original-sized palette, combination circles and hex editing; server snapshots own materials. */
-public final class GuiResearchTable extends AbstractContainerScreen<ContainerResearchTable> {
+public final class GuiResearchTable extends ThaumcraftContainerScreen<ContainerResearchTable> {
     private static final ResourceLocation BACKGROUND = texture("gui/guiresearchtable2.png");
     private static final ResourceLocation PARCHMENT = texture("misc/parchment3.png");
     private static final ResourceLocation HEX = texture("gui/hex1.png"), UNKNOWN = texture("aspects/_unknown.png");

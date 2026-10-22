@@ -14,7 +14,7 @@ import thaumcraft.common.container.ContainerArcaneBore;
 
 /** Original176x141 art/half-size stats. Native synced slots and menu data only;
  * no client recomputation of Fortune/speed/area, start action or charge display. */
-public final class GuiArcaneBore extends AbstractContainerScreen<ContainerArcaneBore> {
+public final class GuiArcaneBore extends ThaumcraftContainerScreen<ContainerArcaneBore> {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/gui_arcanebore.png");
 
     public GuiArcaneBore(ContainerArcaneBore menu, Inventory inventory, Component title) {

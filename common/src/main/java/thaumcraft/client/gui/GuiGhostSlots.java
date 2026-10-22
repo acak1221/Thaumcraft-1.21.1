@@ -23,7 +23,7 @@ import thaumcraft.common.container.SlotGhost;
  * slots of the menu, so the vanilla screen draws them, and the menu refuses
  * every click that would turn a preview into real stock.</p>
  */
-public final class GuiGhostSlots extends AbstractContainerScreen<ContainerGhostSlots> {
+public final class GuiGhostSlots extends ThaumcraftContainerScreen<ContainerGhostSlots> {
     /** The vanilla player inventory art of the container. */
     private static final ResourceLocation CONTAINER_ART = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
     /** The original ghost slot frame, the material frame of the golem configuration. */

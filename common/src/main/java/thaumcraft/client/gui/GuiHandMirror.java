@@ -24,7 +24,7 @@ import thaumcraft.common.lib.crafting.DeviceContainerRules;
  * closes the mirror menu for that case, so the client owns the player
  * inventory screen and takes the menu over from the mirror menu.</p>
  */
-public final class GuiHandMirror extends AbstractContainerScreen<ContainerHandMirror> {
+public final class GuiHandMirror extends ThaumcraftContainerScreen<ContainerHandMirror> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/guihandmirror.png");
 
     public static final int IMAGE_WIDTH = 176;

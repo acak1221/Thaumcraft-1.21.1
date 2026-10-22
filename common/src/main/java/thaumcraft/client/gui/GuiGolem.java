@@ -16,7 +16,7 @@ import thaumcraft.common.lib.utils.Utils;
 /** Ordinary core settings, one fluid ghost or six item ghosts; none for Sorting/Guard. An Order Guard shows its four target
  * switches (original GuiGolem:167-189) at the original positions. No client-side filter mutation, upgrade controls or
  * fabricated preview entity: every switch is server state, shown from synced menu data. */
-public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
+public final class GuiGolem extends ThaumcraftContainerScreen<ContainerGolem> {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/guigolem.png");
     /** Original GuiGolem:74-77 — an advanced golem shows a random threat line in one case of four. */
     private int threat = -1;

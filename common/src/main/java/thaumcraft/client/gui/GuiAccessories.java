@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.common.container.ContainerAccessories;
 
 /** Native four-slot accessory menu; inventory art and slot positions remain ordinary GUI coordinates. */
-public final class GuiAccessories extends AbstractContainerScreen<ContainerAccessories> {
+public final class GuiAccessories extends ThaumcraftContainerScreen<ContainerAccessories> {
     private static final ResourceLocation BACKGROUND=ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
     public GuiAccessories(ContainerAccessories menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=176;imageHeight=166;}
     @Override protected void renderBg(GuiGraphics graphics,float partial,int mouseX,int mouseY){

@@ -21,7 +21,7 @@ import thaumcraft.common.lib.crafting.DeviceContainerRules;
  * original server positions, so the art is drawn eighteen pixels lower here
  * and every frame lines up with the slot that owns it.</p>
  */
-public final class GuiMagicBox extends AbstractContainerScreen<ContainerMagicBox> {
+public final class GuiMagicBox extends ThaumcraftContainerScreen<ContainerMagicBox> {
     /** Original GuiMagicBox:30 - the vanilla generic container art. */
     private static final ResourceLocation CONTAINER_ART = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
     /** Original TileMagicBox:111 - the box is called "Magic Box" and the name is never translated. */

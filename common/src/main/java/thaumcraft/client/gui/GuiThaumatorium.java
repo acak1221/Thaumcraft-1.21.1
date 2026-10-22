@@ -10,7 +10,7 @@ import thaumcraft.common.container.ContainerThaumatorium;
 import thaumcraft.api.aspects.Aspect;
 
 /** Original art and input position, with a bounded row of recipe choices sent by the authoritative menu. */
-public final class GuiThaumatorium extends AbstractContainerScreen<ContainerThaumatorium> {
+public final class GuiThaumatorium extends ThaumcraftContainerScreen<ContainerThaumatorium> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/gui_thaumatorium.png");
     private int page;
     public GuiThaumatorium(ContainerThaumatorium menu, Inventory inventory, Component title) { super(menu, inventory, title); imageWidth = 176; imageHeight = 166; }

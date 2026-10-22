@@ -24,7 +24,7 @@ import thaumcraft.common.container.ContainerSpa;
 /** Original176x166 spa art,48px fluid fill inside55px gauge and8x8 toggle.
  * Sprite comes from the actual registered native fluid renderer; the loader
  * supplies original WHITE, not a newly applied fluid or biome tint. */
-public final class GuiSpa extends AbstractContainerScreen<ContainerSpa> {
+public final class GuiSpa extends ThaumcraftContainerScreen<ContainerSpa> {
     private static final ResourceLocation BACKGROUND=ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/gui/gui_spa.png");
     private static final SoundEvent CLICK=SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft","cameraclack"));
     public record FluidVisual(TextureAtlasSprite sprite,int argb) {}

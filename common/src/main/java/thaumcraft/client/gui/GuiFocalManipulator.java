@@ -30,7 +30,7 @@ import thaumcraft.common.tiles.TileFocalManipulator;
 /** Original 192x233 layout and remaining-vis display, with cosmetic local
  * selection and session/revision-bound START. The one physical focus slot is
  * native menu inventory; neither selection nor ACK creates a result or progress. */
-public final class GuiFocalManipulator extends AbstractContainerScreen<ContainerFocalManipulator> {
+public final class GuiFocalManipulator extends ThaumcraftContainerScreen<ContainerFocalManipulator> {
     private static final ResourceLocation BACKGROUND = texture("gui/gui_wandtable.png");
     private static final ResourceLocation PARTICLES = texture("misc/particles.png");
     private static final SoundEvent CLICK = SoundEvent.createVariableRangeEvent(

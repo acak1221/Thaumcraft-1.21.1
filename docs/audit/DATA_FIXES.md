@@ -86,3 +86,40 @@ No automatic replacement with defaults is a repair.
   removal of each of the other five owner types is not separately claimed.
 - Player loss prevented: pedestal output, research tools/notes and bonus pools,
   mirror buffered deliveries, linked-box stock, furnace inventory and pedestal wand.
+
+## F08 — partly paid infusion session
+
+- Site: `TileInfusionMatrix.loadAdditional`, predicate and stack readers.
+- Inputs: invalid `ingredient` predicate, string-element `recipein`, missing-addon
+  central stack; fixtures include central/output counts, outstanding essentia,
+  remaining XP and recipe-player UUID/name.
+- Tests: `InfusionSessionSaveIntegrityTest.malformedPredicateDoesNotBecomeAnEmptyIngredient`,
+  `wrongRequirementElementDoesNotBecomeNoRequirements`,
+  `unreadCentralStackDoesNotErasePaidSession`, and valid-empty control
+  `validEmptyRequirementsAreStillReadable`.
+- Before: invalid predicate became `Ingredient.EMPTY`; wrong-element list became
+  no requirements; missing item became an empty central snapshot. Saving destroyed
+  the selected session and its recoverability.
+- After: strict predicate/stack/list/debt/scalar validation precedes **all** session
+  assignments. Errors log the position/reason and retain the entire session
+  verbatim. `current()` fences cycling, start/activation and essentia demand.
+  Shared rejected-owner custody also archives the session before block removal.
+  Player loss prevented: partly paid crafting work, exact selected requirements,
+  output/central binding and remaining debts. No recipe rematching or sentinel repair.
+- Red proof: all three malformed-session JUnit tests failed before the fix;
+  all pass after. Fabric `rejectedInfusionSurvivesPhysicalBlockRemoval` passed:
+  real matrix rejects malformed requirements, cannot request essentia, and preserves
+  the whole paid session in the archive after physical block replacement.
+
+## Final verification
+
+- Java 21, isolated `GRADLE_USER_HOME=.gradle-f1`, one invocation at a time.
+- `./gradlew :common:test`: **2,490 tests, zero failures/errors/skips** after
+  the final source changes. Log: `.tmp/f1data/common-test-final.log` (ignored).
+- Two focused Fabric headless GameTests passed, one required test per run:
+  `rejectedPedestalSurvivesPhysicalBlockRemoval` and
+  `rejectedInfusionSurvivesPhysicalBlockRemoval`. The latter log is
+  `.tmp/f1data/f08-gametest.log` (ignored).
+- No full-client, multiplayer, server-restart, or NeoForge acceptance is claimed.
+  The Gradle wrapper configured all existing modules while running the common task;
+  no NeoForge test/build task was requested.

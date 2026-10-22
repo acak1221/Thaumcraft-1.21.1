@@ -17,6 +17,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.IEssentiaTransport;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
+import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileAlembic;
@@ -128,7 +129,9 @@ final class AlchemyGolemGoals {
     static int space(BlockEntity tile) {
         return tile instanceof TileJar jar ? jar.getMaxAmount() - jar.getAmount()
                 : tile instanceof TileEssentiaReservoir reservoir ? reservoir.getSpace()
-                : tile instanceof IEssentiaTransport ? 1 : 0;
+                // The original hands the whole cargo to a generic transport and keeps
+                // what it took (AIEssentiaEmpty:110); the transport decides the amount.
+                : tile instanceof IEssentiaTransport ? GolemAspectCargo.MAX_AMOUNT : 0;
     }
     /**
      * The marked side the original's payment would use.

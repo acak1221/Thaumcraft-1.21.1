@@ -70,6 +70,10 @@ public final class ThaumcraftSettings {
                         + "spawn_eldercreatures=true\nspawn_taintacles=true\n"
                         + "generate_trees=true\ngenerate_taint=true\ngenerate_aura_nodes=true\n"
                         + "generate_structures=true\ngenerate_cinnibar_ore=true\ngenerate_amber_ore=true\ngenerate_infused_stone=true\n"
+                        + "# The regeneration category of the original: every option is off, so the chunk\n"
+                        + "# regeneration of the original never touches a chunk until one of them is on.\n"
+                        + "regen_key=DEFAULT\naura_nodes=false\nstructures=false\ncinnibar_ore=false\n"
+                        + "amber_ore=false\ninfused_stone=false\ntrees=false\n"
                         + "shaders=true\n",
                         StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
             }

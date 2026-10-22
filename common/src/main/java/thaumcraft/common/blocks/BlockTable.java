@@ -131,11 +131,14 @@ public final class BlockTable extends BaseEntityBlock {
 
     /** Called by the concrete inkwell early-use hook, never by generic IScribeTools. */
     public static InteractionResult tryCreateResearchTable(Level level, BlockPos pos, Player player, InteractionHand hand) {
+        if (player == null) return InteractionResult.PASS;
         ItemStack held = player.getItemInHand(hand);
         if (!(held.getItem() instanceof ItemInkwell) || !level.hasChunkAt(pos)) return InteractionResult.PASS;
         BlockState before = level.getBlockState(pos);
         if (!(before.getBlock() instanceof BlockTable table) || !(level.getBlockEntity(pos) instanceof TileTable)
                 || !TableTopology.canStartConversion(before.getValue(VARIANT))) return InteractionResult.PASS;
+        if (player.level() != level || !player.isAlive() || player.isSpectator()
+                || !player.canInteractWithBlock(pos, 0) || !level.mayInteract(player, pos)) return InteractionResult.FAIL;
 
         int side = -1;
         BlockPos partner = null;
@@ -154,6 +157,8 @@ public final class BlockTable extends BaseEntityBlock {
             break;
         }
         if (side < 0) return InteractionResult.PASS;
+        // Both halves change kind; permission on the clicked half is not enough.
+        if (!level.mayInteract(player, partner)) return InteractionResult.FAIL;
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (level instanceof ServerLevel serverLevel && !serverLevel.getServer().isSameThread()) {
             throw new IllegalStateException("Research table conversion requires the server thread");

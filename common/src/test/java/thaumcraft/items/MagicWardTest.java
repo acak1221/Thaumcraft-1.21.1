@@ -10,25 +10,18 @@ class MagicWardTest {
     @Test void aPieceAbsorbsItsArmorOverThirtyFive() {
         // Oracle ItemVoidRobeArmor:229-240: double ratio = (double)this.field_77879_b / 35.0;
         assertEquals(35.0, MagicWard.DIVISOR);
-        assertEquals(3 / 35.0, MagicWard.ratio(3));
-        assertEquals(7 / 35.0, MagicWard.ratio(7));
-        assertEquals(6 / 35.0, MagicWard.ratio(6));
+        assertEquals(0.08571428571428572, MagicWard.ratio(3));
+        assertEquals(0.2, MagicWard.ratio(7));
+        assertEquals(0.17142857142857143, MagicWard.ratio(6));
     }
 
     @Test void theFullSetTakesSixteenThirtyFifthsOfTheDamageInOneStep() {
         // Forge's ApplyArmor scales the damage by twenty five, takes the shares off in one step and
         // divides by twenty five again; the shares are the armor over thirty five.
-        assertEquals(wardedDamage(20F, 3 / 35.0 + 7 / 35.0 + 6 / 35.0), MagicWard.reduce(20F, 3, 7, 6));
-        assertEquals(wardedDamage(20F, 7 / 35.0), MagicWard.reduce(20F, 7), "the robe alone absorbs a fifth");
+        assertEquals(10.857142F, MagicWard.reduce(20F, 3, 7, 6));
+        assertEquals(16F, MagicWard.reduce(20F, 7), "the robe alone absorbs a fifth");
         assertEquals(20F, MagicWard.reduce(20F), "no ward, no change");
         assertEquals(0F, MagicWard.reduce(0F, 3, 7, 6));
-    }
-
-    /** Forge's own step: the damage is scaled by twenty five, the share comes off, the scale comes off again. */
-    private static float wardedDamage(float damage, double total) {
-        double scaled = damage * 25.0;
-        scaled -= scaled * Math.min(total, 1.0);
-        return (float) (scaled / 25.0);
     }
 
     @Test void aPieceIsWornByWhatItAbsorbedButAtLeastOnePoint() {

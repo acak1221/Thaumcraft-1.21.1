@@ -40,10 +40,10 @@ class EntityUtilsParityTest {
     @Test void thePickPaddingIsTheOriginalCollisionBorder() {
         // Oracle EntityUtils:79 - Math.max(0.8F, entity.getCollisionBorderSize()) and the border is
         // (float)this.width * 0.5F.
-        assertEquals(Math.max(0.8F, 0.6F * 0.5F), EntityUtils.pickPadding(0.6f), "an ordinary mob keeps the 0.8 floor");
-        assertEquals(Math.max(0.8F, 0.0F * 0.5F), EntityUtils.pickPadding(0.0f));
-        assertEquals(Math.max(0.8F, 1.6F * 0.5F), EntityUtils.pickPadding(1.6f), "a 1.6 wide mob has a border of exactly 0.8");
-        assertEquals(Math.max(0.8F, 16.0F * 0.5F), EntityUtils.pickPadding(16.0f), "a 16 wide entity has a border of 8");
+        assertEquals(0.8F, EntityUtils.pickPadding(0.6f), "an ordinary mob keeps the 0.8 floor");
+        assertEquals(0.8F, EntityUtils.pickPadding(0.0f));
+        assertEquals(0.8F, EntityUtils.pickPadding(1.6f), "a 1.6 wide mob has a border of exactly 0.8");
+        assertEquals(8.0F, EntityUtils.pickPadding(16.0f), "a 16 wide entity has a border of 8");
     }
 
     // ------------------------------------------------------------- the minimum range

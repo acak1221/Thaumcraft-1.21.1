@@ -9,23 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class LegacyItemsRulesTest {
     @Test void boneBowDrawsTwiceAsFastAsTheVanillaBowAndCapsAtOne() {
         // Original ItemBowBone.func_77615_a:79-84: f = (float)j / 10.0f; f = (f * f + f * 2.0f) / 3.0f, capped at one.
-        // The single precision sum is not always the decimal literal (the draw of two ticks is 0.14666666, not
-        // 0.14666667), so the expectation is the original's own expression.
+        // Pin single-precision oracle results, not a second implementation of the curve.
         assertEquals(0.0F, EquipmentRules.boneBowPower(0));
-        assertEquals(boneBowPower(1), EquipmentRules.boneBowPower(1));
-        assertEquals(boneBowPower(2), EquipmentRules.boneBowPower(2));
-        assertEquals(boneBowPower(5), EquipmentRules.boneBowPower(5));
+        assertEquals(0.07F, EquipmentRules.boneBowPower(1));
+        assertEquals(0.14666666F, EquipmentRules.boneBowPower(2));
+        assertEquals(0.41666666F, EquipmentRules.boneBowPower(5));
         assertEquals(1.0F, EquipmentRules.boneBowPower(10));
         assertEquals(1.0F, EquipmentRules.boneBowPower(18));
         assertEquals(1.0F, EquipmentRules.boneBowPower(72000));
         // The vanilla bow needs twenty ticks for full power, the bone bow ten.
         assertTrue(EquipmentRules.boneBowPower(10) > 1.0F - 1.0E-6F);
-    }
-
-    /** The original's own draw power: {@code f = (float)draw / 10.0f; f = (f * f + f * 2.0f) / 3.0f}. */
-    private static float boneBowPower(int draw) {
-        float f = draw / 10.0F;
-        return (f * f + f * 2.0F) / 3.0F;
     }
 
     @Test void boneBowOnlyFiresFromTheOriginalMinimumPower() {

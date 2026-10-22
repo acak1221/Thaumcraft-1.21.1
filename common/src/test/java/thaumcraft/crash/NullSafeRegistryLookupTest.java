@@ -1,6 +1,5 @@
 package thaumcraft.crash;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -30,7 +29,7 @@ class NullSafeRegistryLookupTest {
     }
 
     @Test void theCropKeyOfAMissingBlockDoesNotThrow() {
-        assertDoesNotThrow(() -> CropUtils.key(null, 3));
+        assertEquals("#3", CropUtils.key((net.minecraft.world.level.block.Block) null, 3));
     }
 
     @Test void theCropKeyOfARegisteredBlockIsTheRegistryForm() {

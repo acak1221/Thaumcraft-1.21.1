@@ -54,21 +54,12 @@ class TileParityRulesTest {
     @Test void theFluidHeightOfTheCrucibleFollowsTheOriginalCurve() {
         // Oracle TileCrucible:315-325: the amount is divided by the capacity first, the base is
         // 0.3f + 0.5f of it and the aspects add their share of the rest.
-        assertEquals(crucibleHeight(0, 0), TileParityRules.crucibleFluidHeight(0, 0));
-        assertEquals(crucibleHeight(1000, 0), TileParityRules.crucibleFluidHeight(1000, 0));
-        assertEquals(crucibleHeight(1000, 100), TileParityRules.crucibleFluidHeight(1000, 100),
+        assertEquals(0.3F, TileParityRules.crucibleFluidHeight(0, 0));
+        assertEquals(0.8F, TileParityRules.crucibleFluidHeight(1000, 0));
+        assertEquals(0.9999F, TileParityRules.crucibleFluidHeight(1000, 100),
                 "a full crucible never reaches exactly one");
-        assertEquals(crucibleHeight(1000, 200), TileParityRules.crucibleFluidHeight(1000, 200),
+        assertEquals(1.001F, TileParityRules.crucibleFluidHeight(1000, 200),
                 "an overfull crucible is clamped just above one");
-    }
-
-    /** The original's own fluid height: {@code base = 0.3f + 0.5f * (amount / capacity)}. */
-    private static float crucibleHeight(int water, int tags) {
-        float base = 0.3F + 0.5F * (water / (float) 1000);
-        float height = base + tags / 100F * (1 - base);
-        if (height > 1.0F) height = 1.001F;
-        if (height == 1.0F) height = 0.9999F;
-        return height;
     }
 
     // ----------------------------------------------------------------------------------------------

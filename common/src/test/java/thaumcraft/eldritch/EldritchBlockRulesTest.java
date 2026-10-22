@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** Pure rule checks for the original TC4 eldritch, cosmetic and device families. */
 class EldritchBlockRulesTest {
-    private static final Random RANDOM = new Random(20261020L);
 
     // ------------------------------------------------------------------ eldritch
     @Test void eldritchLightMatchesTheOriginalMetadataTable() {
@@ -58,17 +57,18 @@ class EldritchBlockRulesTest {
     }
 
     @Test void eldritchDropsAndExperienceMatchTheOriginal() {
+        Random random = new Random(20261020L);
         assertTrue(EldritchBlockRules.eldritchDropsSelf(EldritchBlockRules.ELDRITCH_GLOWING_CRUST));
         assertFalse(EldritchBlockRules.eldritchDropsSelf(EldritchBlockRules.ELDRITCH_GLYPHED));
         assertTrue(EldritchBlockRules.eldritchDropsResource(EldritchBlockRules.ELDRITCH_GLYPHED));
         for (int i = 0; i < 64; i++) {
-            int glyphed = EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_GLYPHED, RANDOM);
+            int glyphed = EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_GLYPHED, random);
             assertTrue(glyphed >= 1 && glyphed <= 4);
-            int runed = EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_RUNED, RANDOM);
+            int runed = EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_RUNED, random);
             assertTrue(runed >= 1 && runed <= 4);
-            int crab = EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_CRAB_SPAWNER, RANDOM);
+            int crab = EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_CRAB_SPAWNER, random);
             assertTrue(crab >= 6 && crab <= 10);
-            assertEquals(0, EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_ALTAR, RANDOM));
+            assertEquals(0, EldritchBlockRules.eldritchExperience(EldritchBlockRules.ELDRITCH_ALTAR, random));
         }
     }
 
@@ -99,8 +99,9 @@ class EldritchBlockRulesTest {
     }
 
     @Test void altarMazeSizeIsAlwaysOddAndBetweenFifteenAndTwentyNine() {
+        Random random = new Random(20261020L);
         for (int i = 0; i < 64; i++) {
-            int size = EldritchBlockRules.altarMazeSize(RANDOM);
+            int size = EldritchBlockRules.altarMazeSize(random);
             assertTrue(size >= 15 && size <= 29);
             assertEquals(1, size % 2);
         }
@@ -340,10 +341,11 @@ class EldritchBlockRulesTest {
 
     // -------------------------------------------------------------------- loot
     @Test void lootContainerDropsOneToThreePlusRarityItems() {
+        Random random = new Random(20261020L);
         for (int i = 0; i < 64; i++) {
-            int common = EldritchBlockRules.lootDropCount(0, RANDOM);
+            int common = EldritchBlockRules.lootDropCount(0, random);
             assertTrue(common >= 1 && common <= 3);
-            int rare = EldritchBlockRules.lootDropCount(2, RANDOM);
+            int rare = EldritchBlockRules.lootDropCount(2, random);
             assertTrue(rare >= 3 && rare <= 5);
         }
         assertEquals(0, EldritchBlockRules.lootRarity(-1));

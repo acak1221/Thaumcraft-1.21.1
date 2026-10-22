@@ -63,6 +63,15 @@ class ResearchNoteCopyingTest {
     }
     @Test void alreadyLearnedResearchMayStillBeCopiedForAnotherReader() {
         var actor = funded(); actor.addResearch("NITOR");
-        assertNotNull(ResearchNoteCopying.plan(actor, note("NITOR", true, 0), 1));
+        var before = actor.save();
+        var copy = ResearchNoteCopying.plan(actor, note("NITOR", true, 0), 1);
+        assertNotNull(copy);
+        assertEquals(2, copy.count());
+        assertEquals(1, copy.note().copies());
+        assertEquals(Map.of("lux", 3, "ignis", 1), copy.costs());
+        assertEquals(7, copy.knowledge().getAspectPoolFor("lux"));
+        assertEquals(9, copy.knowledge().getAspectPoolFor("ignis"));
+        assertTrue(copy.knowledge().isResearchComplete("NITOR"));
+        assertEquals(before, actor.save(), "planning must not spend the reader's resources");
     }
 }

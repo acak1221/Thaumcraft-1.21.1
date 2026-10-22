@@ -87,8 +87,10 @@ public final class ItemJarNode extends BlockItem implements IEssentiaContainerIt
     /** The writer of the node attributes of the original item. */
     public static void writeNodeAttributes(CompoundTag tag, NodeType type, NodeModifier mod, String id) {
         tag.putInt("type", type == null ? 0 : type.ordinal());
-        if (mod != null) tag.putInt("modifier", mod.ordinal());
-        else tag.remove("modifier");
+        // Original ItemJarNode:188-190 - the modifier is written only when it is
+        // not null; the tile of the original reads a missing modifier as none,
+        // so the native writes the minus one of the original tile here.
+        tag.putInt("modifier", mod == null ? -1 : mod.ordinal());
         tag.putString("nodeId", id == null ? "" : id);
     }
 

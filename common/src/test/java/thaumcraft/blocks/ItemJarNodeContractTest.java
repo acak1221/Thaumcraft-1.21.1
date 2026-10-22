@@ -32,9 +32,12 @@ class ItemJarNodeContractTest {
         CompoundTag tag = new CompoundTag();
         ItemJarNode.writeNodeAttributes(tag, NodeType.NORMAL, NodeModifier.PALE, "");
         assertEquals(NodeModifier.PALE, ItemJarNode.nodeModifierOf(tag));
-        // The original writes the modifier only when it is not null.
+        // The original writes the modifier only when it is not null; the native
+        // writes the minus one of the original tile, so the placed jar has no
+        // modifier at all.
         ItemJarNode.writeNodeAttributes(tag, NodeType.NORMAL, null, "");
         assertNull(ItemJarNode.nodeModifierOf(tag));
+        assertEquals(-1, tag.getInt("modifier"));
     }
 
     @Test void anItemWithoutDataCarriesNoNode() {

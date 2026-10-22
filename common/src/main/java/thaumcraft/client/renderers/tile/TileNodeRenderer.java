@@ -170,7 +170,7 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
                                     NodeModifier modifier, float alpha, float size, float age) {
         long now = System.nanoTime();
         int frame = (int) Math.floorMod(now / 40000000L + 1L, 32L);
-        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, true, age, now);
+        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, true, age, now, true);
     }
 
     /** The body of the node, without the camera rotation of the world. */
@@ -178,6 +178,20 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
                                      thaumcraft.api.aspects.AspectList aspects, NodeType type,
                                      NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age,
                                      long now) {
+        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, depthIgnore, age, now, false);
+    }
+
+    /**
+     * The body of the node.
+     *
+     * <p>The item form of the original divides the alpha of the aspects by the whole
+     * count of the aspects (oracle {@code ItemNodeRenderer.java:117}), the node of the
+     * world divides it by the half count (oracle {@code TileNodeRenderer.java:103}).</p>
+     */
+    private static void drawNodeBody(PoseStack pose, MultiBufferSource buffers, int frame,
+                                     thaumcraft.api.aspects.AspectList aspects, NodeType type,
+                                     NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age,
+                                     long now, boolean itemForm) {
         pose.pushPose();
         if (modifier == NodeModifier.BRIGHT) alpha *= 1.5f;
         else if (modifier == NodeModifier.PALE) alpha *= .66f;
@@ -193,7 +207,7 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
             float pulse = Mth.sin(age / (14 - count)) * .25f + .5f;
             float scale = .2f + pulse * (amount / 50f);
             angle = (float)((now / 5000000L) % (5000 + 500L * count)) / (5000 + 500f * count) * Mth.TWO_PI;
-            float opacity = alpha / Math.max(1, aspects.size() / 2f);
+            float opacity = alpha / (itemForm ? Math.max(1, aspects.size()) : Math.max(1, aspects.size() / 2f));
             if (aspect.getBlend() == 771) opacity *= 1.5f;
             pose.pushPose();
             pose.mulPose(Axis.ZP.rotation(angle));

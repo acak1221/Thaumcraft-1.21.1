@@ -1622,12 +1622,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     private boolean giveToPeer(Minecraft client, String... itemArguments) {
         String key = "peer_give_sent";
         if (stageData.get(key) == null) {
-            StringBuilder paths = new StringBuilder();
-            for (String argument : itemArguments) {
-                if (paths.length() > 0) paths.append(',');
-                paths.append(argument.substring(argument.lastIndexOf(':') + 1).trim().split(" ")[0]);
-            }
-            pairCommand("GIVE", paths.toString());
+            pairCommand("GIVE", String.join(",", itemArguments));
             stageData.put(key, true);
             return false;
         }
@@ -1638,14 +1633,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             if (!held.contains(path)) complete = false;
         }
         if (complete) return true;
-        if (stageTicks % 40 == 0) {
-            StringBuilder paths = new StringBuilder();
-            for (String argument : itemArguments) {
-                if (paths.length() > 0) paths.append(',');
-                paths.append(argument.substring(argument.lastIndexOf(':') + 1).trim().split(" ")[0]);
-            }
-            pairCommand("GIVE", paths.toString());
-        }
+        if (stageTicks % 40 == 0) pairCommand("GIVE", String.join(",", itemArguments));
         if (stageTicks > 600) {
             throw new IllegalStateException("The second client never received " + itemArguments[0]
                     + "; its own inventory holds: " + held);

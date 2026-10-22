@@ -241,6 +241,27 @@ private Entity getSafeCopy(Entity entity) {
 }
 ```
 
+### 2.1 The log of the last complete client session (54 frames, `INFUSION`)
+
+`fabric/run-clienttest/logs/latest.log` of the last run of this worktree contains
+**exactly one ERROR** — the harness' own timeout of the infusion stage
+(`Infusion sequence failed at step=PLACE_WAIT; batch=0; transfer=0; placement=44;
+recipe=tallow_candle`, `InfusionClientSequence.tick(InfusionClientSequence.java:186)`,
+caused by `Infusion client timeout: … paid=0/63; ingredients=0/7`) — and **no exception
+of the port at all**. The 18 WARN lines are:
+
+| warning | whose |
+|---------|-------|
+| `Missing sound for event: minecraft:item.goat_horn.play` and `minecraft:entity.goat.screaming.horn_break` (6×) | vanilla (the goat horn sounds are not in the client assets) |
+| `Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2` (3×) | vanilla, the known harmless shader warning of that program |
+| `Missing data pack generated_3cda65a` (1×) | vanilla/Fabric (the generated data pack is referenced by the level but not present) |
+| `Can't keep up! Is the server overloaded? Running … ticks behind` (7×) | the sandbox: three or four Minecraft clients and several Gradle daemons share 15.7 GB |
+| `TranslationConventionLogWarnings` — "Untranslated Item Tags detected" (1×) | **the port's assets**: 33 item tags have no `tag.item.<namespace>.<path>` translation, so a recipe viewer shows the raw tag id. The list is exact: `tag.item.c.item.ores` (`common/src/main/resources/data/c/tags/item/ores.json`), `tag.item.thaumcraft.item.shards`, `.original_raw_fish`, `.original_log_wood`, `.brown_dyes`, `.original_stone`, `.iron_nuggets`, `.wooden_sticks`, `.tallow_candles`, `.blue_dyes`, `.black_dyes`, `.iron_ingots`, `.original_shards`, `tag.item.minecraft.item.logs`, `.head_armor`, `.stairs`, `.slabs`, `.pickaxes`, `.logs_that_burn`, `.shovels` and 13 more. It is a cosmetic gap, not a crash |
+
+There is **no** "No data fixer registered for thaumcraft:*" line in this log: the port
+registers no data fixers.
+
+
 ---
 
 ## 3. The run
@@ -258,6 +279,8 @@ every screenshot file present with the recorded size.
 | this session, run A (four-dimension world, **without** the port fix) | 03:41 | `SCRIPT_FAILED` (harness: the research category tabs are not vanilla buttons) | 42 | `DISTILLATION` |
 | this session, run B (the **probe** world with three level stems) | 03:31 | `SCRIPT_FAILED` (the same harness defect, later) | 39 | `DISTILLATION` |
 | this session, run C (four-dimension world, **with** the port fix) | 03:52 | `SCRIPT_FAILED` (harness: the focus sequence timed out) | 34 | `DISTILLATION` |
+| this session, run D (four-dimension world, with the port fix **and** the key fix, the X focus directed at this client's own `_NET_WM_PID` window) | 05:39 | `SCRIPT_FAILED` (harness: the infusion stage timed out with 44 of the 72 candles placed while the server was 16-43 s behind) | 54 | `INFUSION` |
+| the sibling worktree of this wave (`agent/clientrun2`, the same code and the same port fix) | 05:19 | `SCRIPT_FAILED` (the sandbox killed the client in the `INFUSION` stage) | 55 | `INFUSION` |
 | the leader's runs in this worktree (`.tmp/cr-smoke2..8.log`) | 03:05-04:29 | every one of them ended in `SCRIPT_FAILED` (harness) or was killed by the OOM killer (exit 137) while three other clients and several Gradle daemons shared the 15 GB of RAM of this sandbox | 5-8 | `PURCHASE_LOW_SYNC`, `ISSUANCE_BASELINE`, `DISTILLATION` |
 
 **Run C is the proof of the port fix**: the world opened directly — the run produced no
@@ -376,9 +399,10 @@ to the table above:
 ## 5. Still unverified / open
 
 1. **The `full` scope has not produced a `SCRIPT_PASSED` run in this environment.** The
-   remaining blocker is in the harness, not in the port: the focus sequence needs the X
-   focus of the client window and another agent's focus loop steals it from one of the
-   two open Minecraft windows.
+   port is no longer the blocker: with the port fix (§1.5) and the key fix (§2, row 5)
+   the client opens the world, plays the whole research/notes/table/alchemy/distillation/
+   focus/tubes/infusion story and produced **54 and 55 real frames** in two runs of this
+   wave. What stops the run is the sandbox:
 
    **What this session added.** The focus stealing is avoidable and was avoided: the
    X11 window of a GLFW client carries the `_NET_WM_PID` property of its own process, so

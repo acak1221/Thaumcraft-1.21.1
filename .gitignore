@@ -14,6 +14,7 @@ logs
 .gradle-client/
 .gradle-client2/
 .gradle-mp/
+.gradle-fix3/
 build/
 out/
 run/

@@ -189,7 +189,7 @@ public final class WarpEvents {
         var id = BuiltInRegistries.ITEM.getKey(output.getItem());
         if (!id.getNamespace().equals("thaumcraft")) return 0;
         int amount = switch (id.getPath()) {
-            case "focus_hellbat", "sinister_loadstone", "brain_jar", "bucket_death", "bottle_taint", "golem_flesh", "focus_primal", "staff_rod_primal" -> 1;
+            case "focus_hellbat", "compass_stone", "jar_brain", "bucket_death", "bottle_taint", "golem_flesh", "focus_primal", "staff_rod_primal" -> 1;
             default -> 0;
         };
         if (amount > 0) {

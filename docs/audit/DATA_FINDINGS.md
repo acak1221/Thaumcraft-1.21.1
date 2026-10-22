@@ -204,6 +204,7 @@ not need disk writers. Resetting transient counters is generally oracle behavior
 
 ## Verification
 
-Regression tests added for F01–F04. Build/test outcomes are recorded in
+Regression tests added for F01–F04: all eight new cases passed in the full
+**2,469-test** common suite (zero failures/errors/skips). Build/test outcomes are recorded in
 `docs/analysis/2026-10-23-agent-h5data.md`; source proof is distinct from executed
 JUnit/GameTest evidence. No original/donor files were changed.

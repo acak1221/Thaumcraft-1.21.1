@@ -48,11 +48,17 @@ test only; no public production restore/enqueue API was added.
   ./gradlew :common:test --no-daemon -Penabled_platforms=fabric
   ```
 
-  Final outcome to be recorded after the running build completes. The root
+  **PASS** in 12m 9s: 384 suites, **2,469 tests**, zero failures, errors or
+  skipped tests. All eight added regression cases passed; the four affected
+  suites contain 17 passing cases in total. Results:
+  `common/build/test-results/test/TEST-*.xml` (generated, not committed).
+  The root
   settings include all three projects, so Loom also configures NeoForge despite
   the Fabric property; no NeoForge build/test task was requested.
-* No headless GameTest/server smoke has yet been completed on these changes.
-  Added regression tests are not a substitute for that acceptance.
+* Focused Fabric headless GameTest started after JUnit:
+  `:fabric:runGameTest -PgameTestFilter=accessoriesUseNativeMenuPersistenceAndDeathCustody`
+  with the same Java 21/private Gradle home. Result pending. Added regression
+  tests are not a substitute for broader gameplay acceptance.
 
 ## Remaining / unproven
 

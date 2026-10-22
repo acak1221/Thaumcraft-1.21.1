@@ -12753,12 +12753,21 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/item/ItemWandRenderer.java: the wand item renderer that draws the rod, the cap and the focus",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java the only native wand item renderer",
           "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java the native wand model",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandModels.java the native wand model catalogue"
+          "native common/src/main/java/thaumcraft/common/items/wands/WandModels.java the native wand model catalogue",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:45-119 the renderer of the original: the transforms of the context (:59-86), the model basis correction of a hundred and eighty degrees about X (:87), the use pose (:88-113) and the drawing of the model (:114-118)",
+          "oracle thaumcraft/client/renderers/models/gear/ModelWand.java:53-81 the geometry of the original: the cap at zero, the rod at two with a height of eighteen and the bottom cap at twenty",
+          "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java:31-43 the native geometry is the very same one",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:117-170 the native wand renderer draws the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java and native neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java both loaders call the very same renderer"
         ],
         "notes": [
           "The original class does not exist under that name in the native port.",
           "DEVIATION: the native port has one wand item renderer (PrimalWandFocusRenderer) plus a model catalogue, and no general ItemWandRenderer that draws every rod/cap/focus combination, so the wand item appearance of the non-primal combinations is not fully covered by the source alone.",
-          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either."
+          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either.",
+          "REMAINING GAP (restated 2026-10-23 (w4wands)): the native wand renderer draws the model without the original's model basis correction (a hundred and eighty degrees about X, oracle ItemWandRenderer:87) and without the original's use pose (:88-113 - the raise of the wand over three ticks, the thirty three degrees of the third person, the ten plus ten degrees of the first person, the sixty degrees of the startup and the WAVE and CHARGE waves of the focus).",
+          "The two belong together: the use pose of the original is expressed in the basis that the correction establishes, so it can only be ported once the correction is confirmed by a client frame. The 1.7.10 model space has its Y axis downwards while the 1.21.1 model space has it upwards, so the correction decides which end of the wand is up.",
+          "The exact change: apply the correction of a hundred and eighty degrees about X to the native wand renderer and then the original's use pose around the pivot one block above the model, with the numbers of the oracle ItemWandRenderer:88-113 and the elapsed time of the use, which the 1.21.1 LivingEntity.getTicksUsingItem() counts up like the 1.7.10 EntityPlayer.getItemInUseDuration() (MCP stable 12-1.7.10: field_71057_bx).",
+          "Everything else of the unit is at parity: the geometry of the model is the original's, the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus are drawn, and the two loaders call the same renderer."
         ],
         "reviewed_sha256": {
           "original": "f2840cfa86a637fdce94f4e9181c9c35b4c47fd565775fdd39fb2d7700264c31",

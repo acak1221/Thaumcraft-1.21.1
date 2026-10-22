@@ -13,6 +13,33 @@ import thaumcraft.common.container.ContainerTravelingTrunk;
 public final class PermissionRuntimeChecks {
     private PermissionRuntimeChecks() {}
 
+    // Vanilla's makeMockServerPlayerInLevel anonymous subclass hardcodes
+    // isSpectator=false and isCreative=true, regardless of setGameMode!
+    private static final class Actor implements AutoCloseable {
+        private final net.minecraft.network.Connection connection = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+        private final io.netty.channel.embedded.EmbeddedChannel channel = new io.netty.channel.embedded.EmbeddedChannel(connection);
+        private final ServerPlayer player;
+
+        private Actor(GameTestHelper test) {
+            var level = test.getLevel();
+            player = new ServerPlayer(level.getServer(), level,
+                    new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "permission_actor"),
+                    net.minecraft.server.level.ClientInformation.createDefault());
+            level.getServer().getPlayerList().placeNewPlayer(connection, player,
+                    net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
+            player.setGameMode(GameType.SURVIVAL);
+        }
+
+        @Override public void close() {
+            player.containerMenu = player.inventoryMenu;
+            player.getInventory().clearContent();
+            player.server.getPlayerList().remove(player);
+            player.discard();
+            connection.disconnect(net.minecraft.network.chat.Component.literal("permission test complete"));
+            channel.finishAndReleaseAll();
+        }
+    }
+
     public static void trunkRejectsSpectator(GameTestHelper test) { trunk(test, "spectator"); }
     public static void trunkRejectsRemote(GameTestHelper test) { trunk(test, "remote"); }
     public static void trunkRejectsOtherViewer(GameTestHelper test) { trunk(test, "other_viewer"); }
@@ -23,8 +50,10 @@ public final class PermissionRuntimeChecks {
         var level = test.getLevel();
         var pos = test.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
         var before = level.getBlockState(pos);
-        ServerPlayer player = test.makeMockServerPlayerInLevel();
+        var actor = new Actor(test);
+        ServerPlayer player = actor.player;
         player.setGameMode(GameType.SPECTATOR);
+        test.assertTrue(player.isSpectator(), "denied-break actor really is a spectator");
         player.setPos(pos.getX() + .5, pos.getY(), pos.getZ() + .5);
         var blocks = java.util.List.of(
                 thaumcraft.common.config.ThaumcraftArcane.ARCANE_WORKBENCH.get(),
@@ -48,6 +77,7 @@ public final class PermissionRuntimeChecks {
             }
         } finally {
             level.setBlockAndUpdate(pos, before);
+            actor.close();
         }
         test.succeed();
     }
@@ -59,9 +89,11 @@ public final class PermissionRuntimeChecks {
         var before = level.getBlockState(pos);
         var otherBefore = level.getBlockState(other);
         var table = thaumcraft.common.config.ThaumcraftContent.TABLE.get().defaultBlockState();
-        ServerPlayer player = test.makeMockServerPlayerInLevel();
+        var actor = new Actor(test);
+        ServerPlayer player = actor.player;
         player.setPos(pos.getX() + .5, pos.getY(), pos.getZ() + .5);
         player.setGameMode(GameType.SPECTATOR);
+        test.assertTrue(player.isSpectator(), "conversion actor really is a spectator");
         player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
                 new ItemStack(thaumcraft.common.config.ThaumcraftContent.INKWELL.get()));
         level.setBlockAndUpdate(pos, table);
@@ -75,6 +107,7 @@ public final class PermissionRuntimeChecks {
         } finally {
             level.setBlockAndUpdate(pos, before);
             level.setBlockAndUpdate(other, otherBefore);
+            actor.close();
         }
         test.succeed();
     }
@@ -83,7 +116,8 @@ public final class PermissionRuntimeChecks {
         var level = test.getLevel();
         var pos = test.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
         var before = level.getBlockState(pos);
-        ServerPlayer player = test.makeMockServerPlayerInLevel();
+        var actor = new Actor(test);
+        ServerPlayer player = actor.player;
         level.setBlockAndUpdate(pos, thaumcraft.common.config.ThaumcraftAlchemy.CRUCIBLE.get().defaultBlockState());
         var tile = (thaumcraft.common.tiles.TileCrucible) level.getBlockEntity(pos);
         tile.fillWater(1000, true);
@@ -100,12 +134,16 @@ public final class PermissionRuntimeChecks {
         } finally {
             tile.spillRemnants();
             level.setBlockAndUpdate(pos, before);
+            actor.close();
         }
         test.succeed();
     }
 
     private static void trunk(GameTestHelper test, String refusal) {
-        ServerPlayer player = test.makeMockServerPlayerInLevel();
+        var actors = new java.util.ArrayList<Actor>();
+        var actor = new Actor(test);
+        actors.add(actor);
+        ServerPlayer player = actor.player;
         var trunk = ThaumcraftGolems.TRUNK.get().create(test.getLevel());
         var pos = test.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
         trunk.setPos(pos.getX() + .5, pos.getY(), pos.getZ() + .5);
@@ -116,12 +154,17 @@ public final class PermissionRuntimeChecks {
         player.containerMenu = menu;
         trunk.inventory.setItem(0, new ItemStack(Items.DIAMOND));
         switch (refusal) {
-            case "spectator" -> player.setGameMode(GameType.SPECTATOR);
+            case "spectator" -> {
+                player.setGameMode(GameType.SPECTATOR);
+                test.assertTrue(player.isSpectator(), "trunk actor really is a spectator");
+            }
             case "remote" -> player.setPos(trunk.getX() + 40, trunk.getY(), trunk.getZ());
             case "closed_menu" -> player.containerMenu = player.inventoryMenu;
             case "dead" -> player.setHealth(0);
             case "other_viewer" -> {
-                player = test.makeMockServerPlayerInLevel();
+                var other = new Actor(test);
+                actors.add(other);
+                player = other.player;
                 player.setPos(trunk.position());
                 player.containerMenu = menu;
             }
@@ -138,6 +181,7 @@ public final class PermissionRuntimeChecks {
         } finally {
             player.containerMenu = player.inventoryMenu;
             trunk.discard();
+            for (var connected : actors) connected.close();
         }
         test.succeed();
     }

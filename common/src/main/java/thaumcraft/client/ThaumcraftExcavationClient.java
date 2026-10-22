@@ -199,7 +199,9 @@ public final class ThaumcraftExcavationClient {
             // Original FXBeamWand:230-234 - the frame of the beam: the local Y is the direction
             // of the beam, the local X and Z are the two sides of the fan.
             pose.mulPose(Axis.YP.rotationDegrees(yaw(direction)));
-            pose.mulPose(Axis.XP.rotationDegrees(elevation(direction)));
+            // Local +Y is the beam length, not +Z. Elevation is measured
+            // above the XZ plane, so tilt +Y by its complementary angle.
+            pose.mulPose(Axis.XP.rotationDegrees(90.0F - elevation(direction)));
             // Original FXBeamWand:239 - the fan turns around the axis of the beam.
             pose.mulPose(Axis.YP.rotationDegrees(spin(gameTime, partial)));
             for (int plane = 0; plane < PLANES; plane++) {

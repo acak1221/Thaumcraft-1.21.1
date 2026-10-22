@@ -82,6 +82,75 @@ public final class WandArchitect {
     public static List<BlockPos> planarBlocks(BlockPos anchor, Direction face, Area radii, Predicate<BlockPos> eligible) {
         return connected(anchor, face, radii, true, eligible);
     }
+
+    /**
+     * The axes the client draws for the trade focus.
+     *
+     * <p>Oracle {@code ItemFocusTrade:301-319} - the trade focus draws two axes per face and the
+     * selected dimension of the area picks the first or the second of them; the dimension zero
+     * draws both.</p>
+     *
+     * @param area the area of the wand
+     * @param side the face of the anchor, the ordinal of the original direction
+     * @param axis the axis of the preview
+     * @return whether that axis is part of the preview
+     */
+    public static boolean showAxis(Area area, int side, thaumcraft.api.IArchitect.EnumAxis axis) {
+        int dimension = area == null ? 0 : area.axis();
+        return switch (side) {
+            case 0, 1 -> (axis == thaumcraft.api.IArchitect.EnumAxis.X && (dimension == 0 || dimension == 1))
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.Z && (dimension == 0 || dimension == 2));
+            case 2, 3 -> (axis == thaumcraft.api.IArchitect.EnumAxis.Y && (dimension == 0 || dimension == 1))
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.X && (dimension == 0 || dimension == 2));
+            case 4, 5 -> (axis == thaumcraft.api.IArchitect.EnumAxis.Y && (dimension == 0 || dimension == 1))
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.Z && (dimension == 0 || dimension == 2));
+            default -> false;
+        };
+    }
+
+    /**
+     * The axes the client draws for the warding focus.
+     *
+     * <p>Oracle {@code ItemFocusWarding:288-309} - the warding focus draws all three axes when
+     * the dimension of the area is zero and otherwise exactly the axis of the selected dimension
+     * for the face of the anchor.</p>
+     *
+     * @param area the area of the wand
+     * @param side the face of the anchor, the ordinal of the original direction
+     * @param axis the axis of the preview
+     * @return whether that axis is part of the preview
+     */
+    public static boolean showAxisWarding(Area area, int side, thaumcraft.api.IArchitect.EnumAxis axis) {
+        int dimension = area == null ? 0 : area.axis();
+        if (dimension == 0) return true;
+        return switch (side) {
+            case 0, 1 -> (axis == thaumcraft.api.IArchitect.EnumAxis.X && dimension == 1)
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.Z && dimension == 2)
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.Y && dimension == 3);
+            case 2, 3 -> (axis == thaumcraft.api.IArchitect.EnumAxis.Y && dimension == 1)
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.X && dimension == 2)
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.Z && dimension == 3);
+            case 4, 5 -> (axis == thaumcraft.api.IArchitect.EnumAxis.Y && dimension == 1)
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.Z && dimension == 2)
+                    || (axis == thaumcraft.api.IArchitect.EnumAxis.X && dimension == 3);
+            default -> false;
+        };
+    }
+
+    /**
+     * The face of the anchor of the original direction ordinal.
+     *
+     * <p>Oracle {@code ItemFocusTrade:301-319} and {@code ItemFocusWarding:288-309} switch on the
+     * ordinal of the direction of 1.7.10; the native directions keep that order.</p>
+     *
+     * @param side the ordinal of the original direction
+     * @return the native direction, or null when the ordinal is not a face
+     */
+    public static Direction face(int side) {
+        Direction[] directions = Direction.values();
+        return side < 0 || side >= directions.length ? null : directions[side];
+    }
+
     /** Bounded DFS, original DOWN/UP/NORTH/SOUTH/WEST/EAST order; an ineligible cell stops traversal in that direction. */
     public static List<BlockPos> connected(BlockPos anchor, Direction face, Area radii, boolean planar, Predicate<BlockPos> eligible) {
         var out = new ArrayList<BlockPos>();

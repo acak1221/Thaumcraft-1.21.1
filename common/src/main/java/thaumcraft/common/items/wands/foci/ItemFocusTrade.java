@@ -37,6 +37,38 @@ public final class ItemFocusTrade extends ItemFocusBasic implements IArchitect {
     }
     @Override public int getMaxAreaSize(ItemStack focus) { return 3 + FocusUpgradeData.level(focus, FocusUpgradeType.enlarge) * 2; }
     @Override public int getAxisModes() { return 2; }
+
+    /**
+     * Original {@code ItemFocusTrade:229-297} - the blocks the trade focus would touch.
+     *
+     * <p>The original walked the connected cells of the area, skipped the face of the anchor and
+     * its opposite and accepted only a cell of the same block and metadata as the anchor that is
+     * exposed, that is not air, that is not softer than zero and that the player may use.</p>
+     */
+    @Override public java.util.ArrayList<thaumcraft.api.BlockCoordinates> getArchitectBlocks(ItemStack wand, Level world, int x, int y, int z, int side, Player player) {
+        java.util.ArrayList<thaumcraft.api.BlockCoordinates> out = new java.util.ArrayList<>();
+        if (world == null || player == null) return out;
+        net.minecraft.core.Direction face = WandArchitect.face(side);
+        if (face == null) return out;
+        net.minecraft.core.BlockPos anchor = new net.minecraft.core.BlockPos(x, y, z);
+        if (!world.hasChunkAt(anchor)) return out;
+        var source = world.getBlockState(anchor);
+        var area = WandArchitect.enabled(wand) ? WandArchitect.area(wand, FocusData.get(wand)) : new WandArchitect.Area(0, 0, 0, 0);
+        for (var cell : WandArchitect.planarBlocks(anchor, face, area, candidate ->
+                world.getBlockState(candidate) == source && TradeSwaps.exposed(world, candidate)
+                        && !world.isEmptyBlock(candidate) && world.getBlockState(candidate).getDestroySpeed(world, candidate) >= 0.0F
+                        && world.mayInteract(player, candidate))) {
+            out.add(new thaumcraft.api.BlockCoordinates(cell.getX(), cell.getY(), cell.getZ()));
+        }
+        return out;
+    }
+
+    /** Original {@code ItemFocusTrade:301-319} - the axes the client draws. */
+    @Override public boolean showAxis(ItemStack wand, Level world, Player player, int side, IArchitect.EnumAxis axis) {
+        var area = WandArchitect.enabled(wand) ? WandArchitect.area(wand, FocusData.get(wand)) : new WandArchitect.Area(0, 0, 0, 0);
+        return WandArchitect.showAxis(area, side, axis);
+    }
+
     @Override public ItemStack onFocusRightClick(ItemStack wand, Level level, Player player, InteractionHand hand) {
         if (!(player instanceof ServerPlayer actor) || level.isClientSide || !TradeSwaps.actor(actor, wand)) return wand;
         HitResult ray = player.pick(5, 1, false);

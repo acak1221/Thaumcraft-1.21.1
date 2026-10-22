@@ -332,7 +332,9 @@ public final class FluxOverfullRuntimeChecks {
         // one-in-fifty roll; it never reaches the thirty roll of a thin cell.
         var originalBiome = BiomeColumns.surfaceHolder(f.level, f.base.getX(), f.base.getZ());
         seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
-        try (var random = new Script(f, i(25, 0))) { tick(f, f.base, random.random); random.done("thick cell original25 roll, NOT30"); }
+        // The born slime enters the world, so the native champion join roll of
+        // the port asks the level for its one-in-hundred roll as well.
+        try (var random = new Script(f, i(25, 0), i(100, 1))) { tick(f, f.base, random.random); random.done("thick cell original25 roll, NOT30"); }
         var born = f.level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(f.base).inflate(2));
         f.check(f.level.isEmptyBlock(f.base) && born.size() == 1 && born.getFirst().getSlimeSize() == 2,
                 "the original one-in-twenty-five roll of a thick cell empties the cell and breeds the real size two thaumic slime");

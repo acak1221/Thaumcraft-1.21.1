@@ -116,7 +116,10 @@ public final class BlockFluxGoo extends FluxFiniteBlock {
                 return;
             }
             // A failed roll leaves the first branch of the original chain and
-            // reaches its 30 decay; the cell keeps every unit but one.
+            // reaches its 30 decay; the cell keeps every unit but one. An
+            // external replacement of the cell ends the tail of the port, as
+            // every other owned write of the flux does.
+            if (!step.coherent()) return;
         } else if (metadata >= TAINT_METADATA && airAbove) {
             int spawn = random.nextInt(BREED_ROLL);
             if (spawn == 0) {

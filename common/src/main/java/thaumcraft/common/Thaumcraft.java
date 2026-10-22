@@ -64,6 +64,7 @@ public final class Thaumcraft {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        thaumcraft.common.config.ThaumcraftSounds.register();
         thaumcraft.common.config.ThaumcraftSettings.load(dev.architectury.platform.Platform.getConfigFolder().resolve("thaumcraft.properties"));
         thaumcraft.common.lib.network.ResearchSettingsNetworking.initServer();
         thaumcraft.common.lib.network.WarpMessageNetworking.initServer();

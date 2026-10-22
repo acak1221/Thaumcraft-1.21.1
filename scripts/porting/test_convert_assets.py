@@ -776,11 +776,15 @@ class FoundationAssetsTest(unittest.TestCase):
         source = json.loads((converter.SOURCE / "sounds.json").read_text(encoding="utf-8"))
         target = json.loads((converter.ASSETS / "sounds.json").read_text(encoding="utf-8"))
         self.assertEqual(len(source), len(target))
-        self.assertEqual(source["runicShieldEffect"], target["runicshieldeffect"])
-        self.assertEqual(source["runicShieldCharge"], target["runicshieldcharge"])
+        self.assertEqual({**source["runicShieldEffect"], "subtitle": "subtitles.thaumcraft.runicshieldeffect"}, target["runicshieldeffect"])
+        self.assertEqual({**source["runicShieldCharge"], "subtitle": "subtitles.thaumcraft.runicshieldcharge"}, target["runicshieldcharge"])
         self.assertNotIn("runicShieldEffect", target)
         for event_key, definition in target.items():
             self.assertRegex(event_key, r"^[a-z0-9/._-]+$")
+            self.assertEqual(f"subtitles.thaumcraft.{event_key}", definition["subtitle"])
+            for locale in ("en_us", "ru_ru"):
+                language = json.loads((converter.ASSETS / "lang" / f"{locale}.json").read_text(encoding="utf-8"))
+                self.assertTrue(language[definition["subtitle"]].strip())
             for sound in definition.get("sounds", []):
                 reference = sound if isinstance(sound, str) else sound["name"]
                 self.assertRegex(reference, r"^[a-z0-9._-]+:[a-z0-9/._-]+$")

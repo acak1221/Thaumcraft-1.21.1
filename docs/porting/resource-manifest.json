@@ -10259,10 +10259,10 @@
       "target": "common/src/main/resources/assets/thaumcraft/sounds.json",
       "source_sha256": "11be5eb9832f406a9a6ff6f9bffd3799a7984e7cb85bd4f303d0caa2387cbc8a",
       "source_hash_policy": "canonical_lf",
-      "sha256": "6f52bf20b62d9c875f8976031b2f984cccdd6a87d137cf17296f7c28a8522252",
+      "sha256": "f5813bedb43077b4cc4b5c0b97b7b4c447a17b74f84397c5c86e95cf59f12900",
       "target_hash_policy": "canonical_lf",
       "role": "sound_event_definitions",
-      "transformation": "lowercase_event_ids_and_resource_references",
+      "transformation": "lowercase_event_ids_and_resource_references_with_subtitles",
       "event_id_mappings": [
         {
           "legacy_key": "heartbeat",
@@ -12439,7 +12439,7 @@
   "sound_events": {
     "source_sha256": "11be5eb9832f406a9a6ff6f9bffd3799a7984e7cb85bd4f303d0caa2387cbc8a",
     "source_hash_policy": "canonical_lf",
-    "sha256": "6f52bf20b62d9c875f8976031b2f984cccdd6a87d137cf17296f7c28a8522252",
+    "sha256": "f5813bedb43077b4cc4b5c0b97b7b4c447a17b74f84397c5c86e95cf59f12900",
     "target_hash_policy": "canonical_lf",
     "event_id_mappings": [
       {

@@ -150,6 +150,7 @@ def convert_sound_definitions(legacy: dict[str, Any]) -> tuple[dict[str, Any], l
         new_key = key_map[old_key]
         resource_location(f"thaumcraft:{new_key}")
         converted = copy.deepcopy(definition)
+        converted["subtitle"] = f"subtitles.thaumcraft.{new_key}"
         event_map.append({"legacy_key": old_key, "modern_key": new_key,
                           "legacy_id": f"thaumcraft:{old_key}", "modern_id": f"thaumcraft:{new_key}"})
         for index, sound in enumerate(converted.get("sounds", [])):
@@ -178,7 +179,7 @@ def create_sounds_json() -> dict[str, Any]:
     return {"source": source.relative_to(ROOT).as_posix(), "target": target.relative_to(ROOT).as_posix(),
             "source_sha256": sha256(canonical_file_bytes(source)), "source_hash_policy": "canonical_lf",
             "sha256": sha256(canonical_file_bytes(target)), "target_hash_policy": "canonical_lf",
-            "role": "sound_event_definitions", "transformation": "lowercase_event_ids_and_resource_references",
+            "role": "sound_event_definitions", "transformation": "lowercase_event_ids_and_resource_references_with_subtitles",
             "event_id_mappings": events, "reference_id_mappings": references}
 
 
@@ -454,6 +455,9 @@ def convert_languages(mappings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         source = SOURCE / "lang" / f"{locale}.lang"
         entries, duplicates = read_lang(source)
         original_count = len(entries)
+        subtitles = json.loads((ROOT / "scripts/porting/sound-subtitles.json").read_text(encoding="utf-8"))
+        for sound, translations in subtitles.items():
+            entries[f"subtitles.thaumcraft.{sound}"] = translations[locale]
         # Other porting tasks may add native GUI/tooltip keys. Regeneration owns
         # original keys and this manifest's name aliases, not unrelated additions.
         target = ASSETS / "lang" / f"{locale}.json"

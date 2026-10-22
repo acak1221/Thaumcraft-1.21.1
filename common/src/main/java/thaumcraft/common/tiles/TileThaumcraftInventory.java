@@ -112,6 +112,10 @@ public class TileThaumcraftInventory extends BlockEntity implements WorldlyConta
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         customName = tag.contains("CustomName") ? Component.Serializer.fromJson(tag.getString("CustomName"), registries) : null;
+        // Lists are complete snapshots, not patches. In particular, the empty
+        // ItemsSynced update after removing a wand must clear the previous wand.
+        // Original readCustomNBT allocates a fresh inventory before reading.
+        itemStacks.clear();
         readSlots(tag.getList("Items", Tag.TAG_COMPOUND), registries, false);
         readSlots(tag.getList("ItemsSynced", Tag.TAG_COMPOUND), registries, true);
     }

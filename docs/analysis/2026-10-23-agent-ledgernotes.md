@@ -217,6 +217,21 @@ file of the oracle. The only two "missing files" are
 are genuinely absent from the 4.2.3.5 oracle — which is exactly what their
 notes say.
 
+## The native citations of the `TileNode` row
+
+The evidence of the `TileNode` row was written against a tree that has since
+moved the rules of the node into the shared `NodeStabilizerRules`, and it
+carried the absolute path of the oracle on the machine of the audit
+(`/home/Acak/work/...`). Both are corrected on that row:
+
+| was | now |
+|---|---|
+| `oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/.../TileNode.java:<five citations>` | `oracle thaumcraft/common/tiles/TileNode.java:<the same five citations>` |
+| `native .../TileNode.java:555 private int regenerationInterval() ...` | `native .../NodeStabilizerRules.java:24,51 the regeneration ladder ... called by the native TileNode:703-711` |
+| `native .../TileNode.java:610 if (level.random.nextInt(12500) != 69 ...)` | `native .../NodeStabilizerRules.java:27-28,72 the FADING repair roll nextInt(12500 / lock) == 69` |
+| `native .../TileNode.java:309 public void drainIntoWand(...)` | `native .../TileNode.java:408 public void drainIntoWand(...)` |
+| `native .../TileNode.java:325 int tap = 1; ...` | `native .../TileNode.java:424-426 int tap = 1; ...` |
+
 ## The verdicts
 
 **No verdict was changed.** `disposition`, `source_semantics`,
@@ -264,5 +279,8 @@ of 28 rows differ.
   (the ledger: 14 rows of notes rewritten, the evidence of 28 rows restored,
   the two false evidence strings removed, the three wrong citations
   corrected).
+* `59b8acc4` — `docs(ledger): the TileNode evidence points at the code of today`
+  (the native citations of the `TileNode` row and the absolute path of the
+  oracle on the machine of the audit).
 
 The report of this pass is this file.

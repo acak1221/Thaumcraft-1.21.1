@@ -73,35 +73,35 @@ public final class TileMirrorRenderer<T extends BlockEntity> implements BlockEnt
         try {
             switch (facing) {
                 case DOWN -> {
-                    pose.translate(.5F, 1.5F, 1.5F);
+                    pose.translate(0, 1, 1);
                     pose.mulPose(Axis.XP.rotationDegrees(-90.0F));
                 }
                 case UP -> {
-                    pose.translate(.5F, .5F, .5F);
                     pose.mulPose(Axis.XP.rotationDegrees(90.0F));
                 }
-                case NORTH -> pose.translate(.5F, .5F, 1.5F);
+                case NORTH -> pose.translate(0, 0, 1);
                 case SOUTH -> {
-                    pose.translate(1.5F, .5F, .5F);
+                    pose.translate(1, 0, 0);
                     pose.mulPose(Axis.YP.rotationDegrees(180.0F));
                 }
                 case WEST -> {
-                    pose.translate(1.5F, .5F, 1.5F);
+                    pose.translate(1, 0, 1);
                     pose.mulPose(Axis.YP.rotationDegrees(90.0F));
                 }
                 default -> {
-                    pose.translate(.5F, .5F, .5F);
                     pose.mulPose(Axis.YP.rotationDegrees(-90.0F));
                 }
             }
             pose.translate(0.0F, 0.0F, -offset);
-            float[][] corners = {{-.5F, .5F}, {.5F, .5F}, {.5F, -.5F}, {-.5F, -.5F}};
-            float[][] uv = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
+            // Oracle translateFromOrientation:628-647 and UtilsFX:402-405 use
+            // a 0..1 quad. A world-space +.5 is not a rotated local centre.
+            float[][] corners = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
+            float[][] uv = {{1, 0}, {0, 0}, {0, 1}, {1, 1}};
             for (int index = 0; index < 4; index++) {
                 out.addVertex(pose.last(), corners[index][0], corners[index][1], 0.0F)
                         .setColor(255, 255, 255, 255)
                         .setUv(uv[index][0], uv[index][1]).setOverlay(overlay).setLight(light)
-                        .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
+                        .setNormal(pose.last(), 0.0F, 0.0F, -1.0F);
             }
         } finally {
             pose.popPose();

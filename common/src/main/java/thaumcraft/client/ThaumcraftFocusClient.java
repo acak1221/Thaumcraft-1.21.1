@@ -41,6 +41,8 @@ public final class ThaumcraftFocusClient {
         if (initialized) return;
         initialized = true;
         KeyMappingRegistry.register(CHANGE_FOCUS);
+        dev.architectury.event.events.client.ClientGuiEvent.RENDER_HUD.register((graphics, tracker) ->
+                GuiFocusSelect.renderClosing(graphics, tracker.getGameTimeDeltaPartialTick(false)));
         // Scancode bindings cannot be polled with glfwGetKey. Observe, never
         // cancel, native input; keysym/mouse bindings also have physical polling.
         ClientRawInputEvent.KEY_PRESSED.register((client, key, scanCode, action, modifiers) -> {

@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TreeMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -33,7 +34,8 @@ import thaumcraft.common.items.wands.FocusSelectionSources;
 public final class GuiFocusSelect extends Screen {
     private static final ResourceLocation RADIAL = texture("textures/misc/radial.png");
     private static final ResourceLocation RADIAL_INNER = texture("textures/misc/radial2.png");
-    private static final int PAGE_SIZE = 12;
+    private static GuiFocusSelect fading;
+    private final FocusRadialAnimation animation = new FocusRadialAnimation();
     private final InteractionHand hand;
     private final LocalPlayer openingPlayer;
     private final ClientLevel openingLevel;
@@ -42,7 +44,6 @@ public final class GuiFocusSelect extends Screen {
     private final ItemStack equipped;
     private final List<Choice> choices = new ArrayList<>();
     private final List<FocusButton> focusButtons = new ArrayList<>();
-    private int page;
     private int selectedIndex = -1;
     private boolean keyboardNavigation;
     private boolean closed;
@@ -54,6 +55,7 @@ public final class GuiFocusSelect extends Screen {
     public GuiFocusSelect(InteractionHand hand) {
         super(Component.translatable("key.thaumcraft.change_focus"));
         this.hand = hand;
+        fading = null;
         Minecraft client = Minecraft.getInstance();
         openingPlayer = client.player;
         openingLevel = client.level;
@@ -66,9 +68,22 @@ public final class GuiFocusSelect extends Screen {
     }
 
     private static List<Choice> availableChoices(LocalPlayer player, boolean copy) {
-        var result = new ArrayList<Choice>();
-        for(var choice:FocusSelectionSources.choices(player))result.add(new Choice(choice.address(),choice.focus()));
-        return result;
+        // Original TreeMap: equal sorting keys replace earlier previews; worn
+        // pouches precede the 36 main slots. Keep physical addresses server-side.
+        var sources = new ArrayList<>(FocusSelectionSources.choices(player));
+        sources.sort(Comparator.comparingInt(choice -> sourceOrder(choice.address())));
+        var result = new TreeMap<String, Choice>();
+        for (var choice : sources) result.put(((ItemFocusBasic) choice.focus().getItem()).getSortingHelper(choice.focus()),
+                new Choice(choice.address(), choice.focus()));
+        return new ArrayList<>(result.values());
+    }
+
+    private static int sourceOrder(int address) {
+        if (FocusSelectionSources.isWornPouch(address))
+            return FocusSelectionSources.outerSlot(address) * 18 + FocusSelectionSources.pouchSlot(address);
+        if (FocusSelectionSources.isInventoryPouch(address))
+            return 72 + FocusSelectionSources.outerSlot(address) * 19 + 1 + FocusSelectionSources.pouchSlot(address);
+        return 72 + address * 19;
     }
 
     private static ResourceLocation texture(String path) {
@@ -79,25 +94,13 @@ public final class GuiFocusSelect extends Screen {
         centerX = width / 2;
         centerY = height / 2;
         focusButtons.clear();
-        int start = page * PAGE_SIZE;
-        int count = Math.min(PAGE_SIZE, choices.size() - start);
-        // Original radius, topmost first, clockwise 360/count spacing and
-        // 20x20 hitboxes. Paging only bounds large inventories of duplicates.
-        radius = 16F + count * 2.5F;
+        int count = choices.size();
+        radius = FocusRadialAnimation.radius(count);
         for (int offset = 0; offset < count; offset++) {
-            int index = start + offset;
-            double angle = -Math.PI / 2 + Math.PI * 2 * offset / count;
-            FocusButton button = new FocusButton(index,
-                    centerX + (int)Math.round(Math.cos(angle) * radius) - 10,
-                    centerY + (int)Math.round(Math.sin(angle) * radius) - 10);
+            FocusButton button = new FocusButton(offset, centerX - 10, centerY - 10);
             focusButtons.add(addRenderableWidget(button));
         }
-        if (pageCount() > 1) {
-            addRenderableWidget(new QuietButton(centerX - 130, 42, 76, 16,
-                    Component.translatable("tc.port.focus.previous"), button -> changePage(-1)));
-            addRenderableWidget(new QuietButton(centerX + 54, 42, 76, 16,
-                    Component.translatable("tc.port.focus.next"), button -> changePage(1)));
-        }
+        positionFoci();
         Button remove = new QuietButton(centerX - 128, height - 24, 170, 20,
                 Component.translatable("tc.port.focus.remove", minecraft.options.keyShift.getTranslatedKeyMessage(),
                         ThaumcraftFocusClient.CHANGE_FOCUS.getTranslatedKeyMessage()), button -> request(-1));
@@ -130,7 +133,7 @@ public final class GuiFocusSelect extends Screen {
         } else if (!down) {
             int index = keyboardNavigation ? selectedIndex : choiceAt(mouseX(), mouseY());
             if (index >= 0) request(choices.get(index).inventorySlot());
-            else onClose();
+            else finishSelection();
         }
     }
 
@@ -162,7 +165,52 @@ public final class GuiFocusSelect extends Screen {
         // No local equip, inventory mutation, vis prediction or success sound.
         // Original cameraticks is played by a successful server transition.
         FocusSelectionNetworking.request(hand, inventorySlot);
+        finishSelection();
+    }
+
+    private void finishSelection() {
+        fading = this;
         onClose();
+    }
+
+    /** Closing is a HUD animation, not a screen: immediately re-grab the cursor. */
+    public static void renderClosing(GuiGraphics graphics, float partialTick) {
+        GuiFocusSelect screen = fading;
+        if (screen == null) return;
+        Minecraft client = Minecraft.getInstance();
+        if (client.screen != null || client.player != screen.openingPlayer || client.level != screen.openingLevel
+                || ThaumcraftFocusClient.wandHand(client.player) != screen.hand || screen.animation.scale() <= 0) {
+            fading = null;
+            return;
+        }
+        screen.positionFoci();
+        screen.renderRadial(graphics, -10000, -10000, partialTick);
+        screen.advanceAnimation(false);
+    }
+
+    private void advanceAnimation(boolean active) {
+        if (animation.advance(System.currentTimeMillis(), active)) {
+            for (FocusButton button : focusButtons)
+                button.hoverScale = FocusRadialAnimation.hover(button.hoverScale, selectedIndex == button.index);
+        }
+    }
+
+    private void positionFoci() {
+        for (FocusButton button : focusButtons) {
+            float angle = FocusRadialAnimation.angle(button.index, choices.size(), animation.scale()) * (float)Math.PI / 180F;
+            button.offsetX = net.minecraft.util.Mth.cos(angle) * radius;
+            button.offsetY = net.minecraft.util.Mth.sin(angle) * radius;
+            button.setX(centerX + (int)button.offsetX - 10);
+            button.setY(centerY + (int)button.offsetY - 10);
+        }
+    }
+
+    private void renderRadial(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        float angle = delta + (openingPlayer.tickCount % 720) / 2F;
+        drawRing(graphics, RADIAL, radius * 2.75F * animation.scale(), angle);
+        drawRing(graphics, RADIAL_INNER, radius * 2.55F * animation.scale(), -angle);
+        if (!equipped.isEmpty()) graphics.renderItem(equipped, centerX - 8, centerY - 8);
+        for (FocusButton button : focusButtons) button.render(graphics, mouseX, mouseY, delta);
     }
 
     @Override public void onClose() {
@@ -183,19 +231,17 @@ public final class GuiFocusSelect extends Screen {
             onClose();
             return;
         }
+        positionFoci();
         if (!keyboardNavigation) selectedIndex = choiceAt(mouseX, mouseY);
         // No vanilla blurred menu background: TC4's radial overlays the world.
         graphics.fill(0, 0, width, 38, 0x60000000);
         centered(graphics, title, 10, 0xFFE8D8B4);
         centered(graphics, Component.translatable("tc.port.focus.current", equipped.isEmpty()
                 ? Component.translatable("tc.port.focus.none") : equipped.getHoverName()), 26, 0xFFCDBFDD);
-        if (pageCount() > 1) {
-            centered(graphics, Component.translatable("tc.port.focus.page", page + 1, pageCount()), 46, 0xFFE8D8B4);
-        }
-        float angle = (openingPlayer.tickCount % 720 + delta) / 2F;
-        drawRing(graphics, RADIAL, radius * 2.75F, angle);
-        drawRing(graphics, RADIAL_INNER, radius * 2.55F, -angle);
-        graphics.renderOutline(centerX - 10, centerY - 10, 20, 20, 0xFF86729B);
+        // Rings precede equipped icon and orbiting foci, as in the oracle.
+        float angle = delta + (openingPlayer.tickCount % 720) / 2F;
+        drawRing(graphics, RADIAL, radius * 2.75F * animation.scale(), angle);
+        drawRing(graphics, RADIAL_INNER, radius * 2.55F * animation.scale(), -angle);
         if (!equipped.isEmpty()) graphics.renderItem(equipped, centerX - 8, centerY - 8);
         super.render(graphics, mouseX, mouseY, delta);
         // The centre line names the focused focus and nothing else. The original
@@ -227,6 +273,7 @@ public final class GuiFocusSelect extends Screen {
         } else if (!equipped.isEmpty() && Math.abs(mouseX - centerX) <= 10 && Math.abs(mouseY - centerY) <= 10) {
             graphics.renderTooltip(font, equipped, mouseX, mouseY);
         }
+        advanceAnimation(true); // Original renders before advancing the 5ms gate.
     }
 
     private void centered(GuiGraphics graphics, Component text, int y, int color) {
@@ -270,6 +317,7 @@ public final class GuiFocusSelect extends Screen {
 
     private void drawRing(GuiGraphics graphics, ResourceLocation texture, float diameter, float angle) {
         int size = Math.round(diameter);
+        if (size <= 0) return;
         graphics.pose().pushPose();
         graphics.pose().translate(centerX, centerY, 0);
         graphics.pose().mulPose(Axis.ZP.rotationDegrees(angle));
@@ -289,22 +337,9 @@ public final class GuiFocusSelect extends Screen {
         return Component.translatable("tc.port.focus.entry", choice.preview().getHoverName(), choice.inventorySlot() + 1);
     }
 
-    private int pageCount() { return Math.max(1, (choices.size() + PAGE_SIZE - 1) / PAGE_SIZE); }
-
-    private void changePage(int direction) {
-        page = Math.floorMod(page + direction, pageCount());
-        selectedIndex = -1;
-        clearFocus();
-        rebuildWidgets();
-    }
-
     private void cycle(int direction) {
         if (choices.isEmpty()) return;
         int index = Math.floorMod((selectedIndex < 0 ? (direction > 0 ? -1 : 0) : selectedIndex) + direction, choices.size());
-        if (page != index / PAGE_SIZE) {
-            page = index / PAGE_SIZE;
-            rebuildWidgets();
-        }
         selectedIndex = index;
         keyboardNavigation = true;
         for (FocusButton button : focusButtons) if (button.index == index) setFocused(button);
@@ -388,6 +423,8 @@ public final class GuiFocusSelect extends Screen {
 
     private final class FocusButton extends AbstractButton {
         private final int index;
+        private float hoverScale = 1F;
+        private double offsetX, offsetY;
 
         private FocusButton(int index, int x, int y) {
             super(x, y, 20, 20, entryMessage(choices.get(index)));
@@ -396,19 +433,19 @@ public final class GuiFocusSelect extends Screen {
 
         @Override public void onPress() { request(choices.get(index).inventorySlot()); }
 
+        @Override public boolean isMouseOver(double x, double y) {
+            int mx = (int)(x - centerX - offsetX), my = (int)(y - centerY - offsetY);
+            return mx >= -10 && mx <= 10 && my >= -10 && my <= 10;
+        }
+
         @Override protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-            boolean selected = selectedIndex == index;
-            if (selected || isHoveredOrFocused()) {
-                graphics.fill(getX() - 2, getY() - 2, getRight() + 2, getBottom() + 2, 0xB044315B);
-                graphics.renderOutline(getX() - 2, getY() - 2, 24, 24, 0xFFE2C685);
-            }
-            float scale = selected || isHoveredOrFocused() ? 1.3F : 1F;
+            float scale = animation.scale() * hoverScale;
+            if (scale <= 0) return;
             graphics.pose().pushPose();
-            graphics.pose().translate(getX() + 10, getY() + 10, 0);
-            graphics.pose().scale(scale, scale, 1);
+            graphics.pose().translate(centerX + offsetX * animation.scale(), centerY + offsetY * animation.scale(), 100);
+            graphics.pose().scale(scale, scale, scale);
             ItemStack stack = choices.get(index).preview();
             graphics.renderItem(stack, -8, -8);
-            graphics.renderItemDecorations(font, stack, -8, -8);
             graphics.pose().popPose();
         }
 

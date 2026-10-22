@@ -278,8 +278,13 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                     }
                     if (bellSlot >= 9) {
                         // The carried item packet only accepts a hotbar slot, so
-                        // the bell has to be moved into the hotbar first.
-                        moveToHotbar(client, bellSlot);
+                        // the bell has to be moved into the hotbar first. The
+                        // SERVER does it, because the state id of the closed
+                        // player inventory is stale on the client.
+                        if (pendingTicks % 20 == 0) {
+                            client.getConnection().sendCommand("item replace entity " + playerName
+                                    + " hotbar.0 with thaumcraft:golem_bell");
+                        }
                         return false;
                     }
                     selectHeld(client, bellSlot);
@@ -302,6 +307,9 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                         pendingToken = null;
                         return true;
                     }
+                    // The golem bell in the hand makes the trunk interaction
+                    // PASS, and the trunk then never opens.
+                    selectEmptyHand(client);
                     client.gameMode.interact(client.player, trunk, InteractionHand.MAIN_HAND);
                     return false;
                 }
@@ -376,8 +384,10 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         int container = player.containerMenu.containerId;
         // The accessory container maps the hotbar 0..8 to the container slots 31..39.
         int containerSlot = source < 9 ? 31 + source : 4 + (source - 9);
-        client.gameMode.handleInventoryMouseClick(container, containerSlot, 0, ClickType.PICKUP, player);
-        client.gameMode.handleInventoryMouseClick(container, 0, 0, ClickType.PICKUP, player);
+        // The vanilla quick move of the accessory container puts the stack into
+        // the first accessory slot of its type. Two pick up clicks would leave
+        // the stack on the cursor, which the server then refuses.
+        client.gameMode.handleInventoryMouseClick(container, containerSlot, 0, ClickType.QUICK_MOVE, player);
     }
 
     /** The inventory slot of the peer's own golem bell. */
@@ -387,6 +397,17 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
             if (items.get(slot).is(ThaumcraftGolems.GOLEM_BELL.get())) return slot;
         }
         return -1;
+    }
+
+    /** Selects the first empty hotbar slot, so the hand holds nothing. */
+    private static void selectEmptyHand(Minecraft client) {
+        var items = client.player.getInventory().items;
+        for (int slot = 0; slot < 9; slot++) {
+            if (items.get(slot).isEmpty()) {
+                selectHeld(client, slot);
+                return;
+            }
+        }
     }
 
     /** Selects a HOTBAR slot; the vanilla carried item packet refuses any other. */

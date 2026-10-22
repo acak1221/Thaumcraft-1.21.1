@@ -195,7 +195,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         stages.add(new Stage("wire_research_table_copy", this::stageWireCopy));
         stages.add(new Stage("wire_client_toggles", this::stageWireToggles));
         stages.add(new Stage("wire_eldritch_trap", this::stageWireTrap));
-        stages.add(new Stage("wire_eldritch_guardian", this::stageWireGuardian));
+        stages.add(new Stage("wire_eldritch_warp_event", this::stageWireWarpEvent));
+        stages.add(new Stage("wire_guardian_sonic", this::stageWireGuardianSonic));
         stages.add(new Stage("wire_wisp_zap", this::stageWireWisp));
         if (pairDirectory != null) {
             stages.add(new Stage("pair_per_player_knowledge", this::stagePairPerPlayerKnowledge));
@@ -1067,8 +1068,15 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         return false;
     }
 
-    /** The eldritch guardian: its warp event and its sonic screech. */
-    private boolean stageWireGuardian(Minecraft client) throws Exception {
+    /**
+     * The eldritch guardian's warp event.
+     *
+     * <p>The original sends it to every player whose SQUARED distance is below
+     * 256 (a radius of sixteen blocks, oracle
+     * {@code thaumcraft/common/entities/monster/EntityEldritchGuardian.java}:162-168),
+     * so the guardian has to be near the player.</p>
+     */
+    private boolean stageWireWarpEvent(Minecraft client) throws Exception {
         if (!ensureProtection(client)) return false;
         if (stageData.get("difficulty") == null) {
             client.getConnection().sendCommand("difficulty normal");
@@ -1077,8 +1085,33 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         if (stageData.get("summoned") == null) {
-            // The guardian only uses its ranged attack at twenty to forty
-            // blocks, so it is summoned far away and the distance is kept.
+            BlockPos pos = client.player.blockPosition().offset(8, 0, 0);
+            client.getConnection().sendCommand("summon thaumcraft:eldritch_guardian " + pos.getX() + " " + pos.getY()
+                    + " " + pos.getZ());
+            stageData.put("summoned", true);
+            return false;
+        }
+        int warpEvent = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:warp_event", new AtomicInteger()).get();
+        evidence.put("wire_warp_event_packets", warpEvent);
+        if (warpEvent == 0) {
+            if (stageTicks < 900) return false;
+            throw new IllegalStateException("The eldritch guardian produced no clientbound warp event");
+        }
+        return true;
+    }
+
+    /**
+     * The eldritch guardian's sonic screech.
+     *
+     * <p>The guardian only uses its ranged attack at twenty to forty blocks, so
+     * it is summoned far away and the lead keeps that distance. The warp event
+     * of the same guardian needs the opposite distance, which is why the two
+     * channels have two stages.</p>
+     */
+    private boolean stageWireGuardianSonic(Minecraft client) throws Exception {
+        if (!ensureProtection(client)) return false;
+        if (stageData.get("summoned") == null) {
+            client.getConnection().sendCommand("kill @e[type=thaumcraft:eldritch_guardian]");
             BlockPos pos = client.player.blockPosition().offset(30, 0, 0);
             client.getConnection().sendCommand("summon thaumcraft:eldritch_guardian " + pos.getX() + " " + pos.getY()
                     + " " + pos.getZ());
@@ -1093,15 +1126,12 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             client.getConnection().sendCommand("tp " + playerName + " " + (guardian.getX() - 28) + " " + guardian.getY()
                     + " " + guardian.getZ());
         }
-        int warpEvent = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:warp_event", new AtomicInteger()).get();
         int sonic = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:guardian_sonic", new AtomicInteger()).get();
-        evidence.put("wire_warp_event_packets", warpEvent);
         evidence.put("wire_guardian_sonic_packets", sonic);
         evidence.put("wire_guardian_position", List.of(guardian.getX(), guardian.getY(), guardian.getZ()));
-        if (warpEvent == 0 || sonic == 0) {
+        if (sonic == 0) {
             if (stageTicks < 1800) return false;
-            throw new IllegalStateException("The eldritch guardian produced no clientbound effect: warp_event=" + warpEvent
-                    + " guardian_sonic=" + sonic);
+            throw new IllegalStateException("The eldritch guardian produced no clientbound sonic screech");
         }
         return true;
     }
@@ -1813,20 +1843,15 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             selectSlot(client, slot);
             return true;
         }
-        int containerSlot = containerSlotOf(client, slot);
-        if (containerSlot < 0) return false;
-        client.gameMode.handleInventoryMouseClick(client.player.inventoryMenu.containerId, containerSlot, 0,
-                ClickType.QUICK_MOVE, client.player);
-        return false; // The move is confirmed by the next inventory sync.
-    }
-
-    /** The menu slot of an inventory slot. */
-    private static int containerSlotOf(Minecraft client, int inventorySlot) {
-        var menu = client.player.inventoryMenu;
-        for (int index = 0; index < menu.slots.size(); index++) {
-            if (menu.slots.get(index).getContainerSlot() == inventorySlot) return index;
+        // The item is put into the first hotbar slot by the SERVER. A client
+        // side inventory click is not usable here: the vanilla click packet
+        // carries the state id of the menu, and the state id of the closed
+        // player inventory is stale on the client.
+        if (stageTicks % 20 == 0) {
+            String id = BuiltInRegistries.ITEM.getKey(item).toString();
+            client.getConnection().sendCommand("item replace entity " + playerName + " hotbar.0 with " + id);
         }
-        return -1;
+        return false; // The move is confirmed by the next inventory sync.
     }
 
     /**

@@ -27,8 +27,8 @@ import thaumcraft.client.renderers.models.ModelNodeStabilizer;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.tiles.TileNodeStabilizer;
 
-/** Basic lock1 ONLY. Original renderer41-99 + UtilsFX153-191, independently
- * adapted after actively reading pinned OpenTC4. No advanced red/power facade. */
+/** Original TileNodeStabilizerRenderer41-99: both locks use the same OBJ.
+ * Lock2 tints only the piston overlay (1,.2,.2) and active bubble (0xFF4444). */
 public final class TileNodeStabilizerRenderer implements BlockEntityRenderer<TileNodeStabilizer> {
     private static final RenderType BASE=new StabilizerType("base","node_stabilizer"),OVER=new StabilizerType("over","node_stabilizer_over");
     private static final ResourceLocation BUBBLE=ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/misc/node_bubble.png");
@@ -41,15 +41,15 @@ public final class TileNodeStabilizerRenderer implements BlockEntityRenderer<Til
      * position_tex_color; fragment discards color.a <= 0.003921569, NOT vanilla .1.
      * Sampler0 / ModelViewMat / ProjMat / ColorModulator; no new vertex shader. */
     public static void setBubbleShader(ShaderInstance shader){bubbleShader=Objects.requireNonNull(shader,"native stabilizer bubble shader");}
-    @Override public void render(TileNodeStabilizer tile,float partialTick,PoseStack pose,MultiBufferSource buffers,int light,int overlay){int ticks=cameraTicks();renderModel(model,tile.getAnimationCount(),ticks,true,pose,buffers,light,overlay);if(tile.getAnimationCount()>0){if(buffers instanceof MultiBufferSource.BufferSource nativeBuffers){nativeBuffers.endBatch(BASE);nativeBuffers.endBatch(OVER);}bubble(tile.getAnimationCount(),ticks,pose);}}
-    public static void renderItem(ItemStack stack,ItemDisplayContext context,PoseStack pose,MultiBufferSource buffers,int light,int overlay){if(!stack.is(ThaumcraftNodeDevices.NODE_STABILIZER_ITEM.get()))return;ModelNodeStabilizer mesh=itemModel;if(mesh==null){mesh=new ModelNodeStabilizer(Minecraft.getInstance().getResourceManager());itemModel=mesh;}renderModel(mesh,0,0,false,pose,buffers,light,overlay);}
+    @Override public void render(TileNodeStabilizer tile,float partialTick,PoseStack pose,MultiBufferSource buffers,int light,int overlay){int ticks=cameraTicks();renderModel(model,tile.getAnimationCount(),ticks,true,tile.isAdvanced(),pose,buffers,light,overlay);if(tile.getAnimationCount()>0){if(buffers instanceof MultiBufferSource.BufferSource nativeBuffers){nativeBuffers.endBatch(BASE);nativeBuffers.endBatch(OVER);}bubble(tile.getAnimationCount(),ticks,tile.isAdvanced(),pose);}}
+    public static void renderItem(ItemStack stack,ItemDisplayContext context,PoseStack pose,MultiBufferSource buffers,int light,int overlay){boolean advanced=stack.is(ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER_ITEM.get());if(!advanced&&!stack.is(ThaumcraftNodeDevices.NODE_STABILIZER_ITEM.get()))return;ModelNodeStabilizer mesh=itemModel;if(mesh==null){mesh=new ModelNodeStabilizer(Minecraft.getInstance().getResourceManager());itemModel=mesh;}renderModel(mesh,0,0,false,advanced,pose,buffers,light,overlay);}
     private static int cameraTicks(){var camera=Minecraft.getInstance().getCameraEntity();return camera==null?0:camera.tickCount;}
-    private static void renderModel(ModelNodeStabilizer model,int count,int ticks,boolean world,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
+    private static void renderModel(ModelNodeStabilizer model,int count,int ticks,boolean world,boolean advanced,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
         pose.pushPose();try{pose.translate(.5,0,.5);pose.mulPose(Axis.XN.rotationDegrees(90));model.render("lock",pose,buffers.getBuffer(BASE),light,overlay);
-            for(int a=0;a<4;a++){pose.pushPose();try{pose.mulPose(Axis.ZP.rotationDegrees(90*a));pose.mulPose(Axis.YP.rotationDegrees(45));pose.translate(0,0,count/100F);model.render("piston",pose,buffers.getBuffer(BASE),light,overlay);float pulse=Mth.sin((ticks+a*5)/3F)*.1F+.9F;int glow=world?50+(int)(170F*(count/37F*pulse)):light;model.render("piston",pose,buffers.getBuffer(OVER),glow,overlay);}finally{pose.popPose();}}
+            for(int a=0;a<4;a++){pose.pushPose();try{pose.mulPose(Axis.ZP.rotationDegrees(90*a));pose.mulPose(Axis.YP.rotationDegrees(45));pose.translate(0,0,count/100F);model.render("piston",pose,buffers.getBuffer(BASE),light,overlay);float pulse=Mth.sin((ticks+a*5)/3F)*.1F+.9F;int glow=world?50+(int)(170F*(count/37F*pulse)):light;model.render("piston",pose,buffers.getBuffer(OVER),glow,overlay,advanced?0xFF3333:0xFFFFFF);}finally{pose.popPose();}}
         }finally{pose.popPose();}
     }
-    private static void bubble(int count,int ticks,PoseStack pose){
+    private static void bubble(int count,int ticks,boolean advanced,PoseStack pose){
         // A separate immediate native quad preserves SRC_ALPHA/ONE and the
         // original very low alpha test without entity-shader lighting/cutout.
         ShaderInstance shader=Objects.requireNonNull(bubbleShader,"Root must register thaumcraft:node_stabilizer_bubble before rendering an open stabilizer");
@@ -57,10 +57,10 @@ public final class TileNodeStabilizerRenderer implements BlockEntityRenderer<Til
         pose.pushPose();try{pose.translate(.5,1.5,.5);pose.mulPose(Minecraft.getInstance().gameRenderer.getMainCamera().rotation());RenderSystem.setShader(()->shader);RenderSystem.setShaderTexture(0,BUBBLE);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,GL11.GL_ONE);RenderSystem.enableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(false);RenderSystem.disableCull();float opacity=count/37F*(Mth.sin(ticks/8F)*.1F+.5F);int alpha=(int)(opacity*255F);var mesh=QUAD.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
             // Literal UtilsFX153-191 facing-quad corner/UV order, not the
             // differently oriented strip/particle atlas helper.
-            vertex(mesh,pose,-.9F,-.9F,0,1,alpha);vertex(mesh,pose,-.9F,.9F,1,1,alpha);vertex(mesh,pose,.9F,.9F,1,0,alpha);vertex(mesh,pose,.9F,-.9F,0,0,alpha);BufferUploader.drawWithShader(mesh.buildOrThrow());}
+            int colour=advanced?0xFF4444:0xFFFFFF;vertex(mesh,pose,-.9F,-.9F,0,1,alpha,colour);vertex(mesh,pose,-.9F,.9F,1,1,alpha,colour);vertex(mesh,pose,.9F,.9F,1,0,alpha,colour);vertex(mesh,pose,.9F,-.9F,0,0,alpha,colour);BufferUploader.drawWithShader(mesh.buildOrThrow());}
         finally{pose.popPose();RenderSystem.setShader(()->oldShader);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(colour[0],colour[1],colour[2],colour[3]);RenderSystem.blendFuncSeparate(src,dst,srcAlpha,dstAlpha);if(blend)RenderSystem.enableBlend();else RenderSystem.disableBlend();RenderSystem.depthMask(depthWrite);RenderSystem.depthFunc(depthFunction);if(depthTest)RenderSystem.enableDepthTest();else RenderSystem.disableDepthTest();if(cull)RenderSystem.enableCull();else RenderSystem.disableCull();}
     }
-    private static void vertex(VertexConsumer out,PoseStack pose,float x,float y,float u,float v,int alpha){out.addVertex(pose.last(),x,y,0).setUv(u,v).setColor(255,255,255,alpha);}
+    private static void vertex(VertexConsumer out,PoseStack pose,float x,float y,float u,float v,int alpha,int colour){out.addVertex(pose.last(),x,y,0).setUv(u,v).setColor(colour>>16&255,colour>>8&255,colour&255,alpha);}
     /** Native Fabric has no Forge getRenderBoundingBox BE hook. Route through
      * the native offscreen-BER set so the upper bubble is not one-cell culled,
      * then retain a bounded distance from the original TWO-high render volume. */

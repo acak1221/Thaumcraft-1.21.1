@@ -134,6 +134,7 @@ public final class ThaumcraftNeoForgeClient {
         event.registerItem(renderer(TileCentrifugeRenderer::renderItem), ThaumcraftTubes.CENTRIFUGE.get().asItem());
         event.registerItem(renderer(TileEssentiaCrystalizerRenderer::renderItem), ThaumcraftTubes.ESSENTIA_CRYSTALLIZER.get().asItem());
         event.registerItem(renderer(TileNodeStabilizerRenderer::renderItem), ThaumcraftNodeDevices.NODE_STABILIZER.get().asItem());
+        event.registerItem(renderer(TileNodeStabilizerRenderer::renderItem), ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER_ITEM.get());
         event.registerItem(renderer(TileNodeConverterRenderer::renderItem), ThaumcraftNodeDevices.NODE_TRANSDUCER.get().asItem());
         event.registerItem(renderer(TileVisRelayRenderer::renderItem), ThaumcraftNodeDevices.VIS_RELAY.get().asItem());
         event.registerItem(renderer(TileMagicWorkbenchChargerRenderer::renderItem),

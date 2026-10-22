@@ -112,6 +112,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftTubes.CENTRIFUGE.get(), TileCentrifugeRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftTubes.ESSENTIA_CRYSTALLIZER.get(), TileEssentiaCrystalizerRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftNodeDevices.NODE_STABILIZER.get(), TileNodeStabilizerRenderer::renderItem);
+        BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftNodeDevices.ADVANCED_NODE_STABILIZER_ITEM.get(), TileNodeStabilizerRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftNodeDevices.NODE_TRANSDUCER.get(), TileNodeConverterRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftNodeDevices.VIS_RELAY.get(), TileVisRelayRenderer::renderItem);
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftVisCharging.VIS_CHARGE_RELAY_ITEM.get(),

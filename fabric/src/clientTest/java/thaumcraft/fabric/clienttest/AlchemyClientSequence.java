@@ -57,6 +57,9 @@ final class AlchemyClientSequence {
         ticks++;
         if (ticks > 600) throw new IllegalStateException("Alchemy client step timed out: " + step
                 + "; water=" + (client.level.getBlockEntity(bowl) instanceof TileCrucible tile ? tile.getWaterAmount() : -1)
+                + "; heat=" + (client.level.getBlockEntity(bowl) instanceof TileCrucible tile ? tile.getHeat() : -1)
+                + "; heat_source=" + client.level.getBlockState(bowl.below())
+                + "; aspects=" + (client.level.getBlockEntity(bowl) instanceof TileCrucible tile ? aspectString(tile) : "")
                 + "; slot4=" + client.player.getInventory().getItem(4)
                 + "; nearby=" + client.level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new AABB(bowl).inflate(7)).stream()
                 .map(entity -> entity.getItem() + "@" + entity.position()).toList());
@@ -284,6 +287,16 @@ final class AlchemyClientSequence {
             player.teleportTo(bowl.getX() - 1.5, bowl.getY(), bowl.getZ() + 1.5);
         });
     }
+    private static String aspectString(TileCrucible tile) {
+        var aspects = tile.getAspects();
+        StringBuilder out = new StringBuilder();
+        for (var aspect : aspects.getAspects()) {
+            if (out.length() > 0) out.append(',');
+            out.append(aspect.getTag()).append('=').append(aspects.getAmount(aspect));
+        }
+        return out.toString();
+    }
+
     private TileCrucible tile(Minecraft client) { return (TileCrucible) client.level.getBlockEntity(bowl); }
     private static int nitorSlot(Minecraft client) {
         for (int slot = 0; slot < 9; slot++) if (client.player.getInventory().getItem(slot).is(ThaumcraftContent.MATERIALS.get("nitor").get())) return slot;

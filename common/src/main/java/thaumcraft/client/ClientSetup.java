@@ -145,6 +145,12 @@ public final class ClientSetup {
         BlockEntityRendererRegistry.register(ThaumcraftContent.TABLE_BLOCK_ENTITY.get(), TileTableRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftContent.RESEARCH_TABLE_BLOCK_ENTITY.get(), TileResearchTableRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftContent.JAR_BLOCK_ENTITY.get(), TileJarRenderer::new);
+        // The original node jar and brain jar are block entity renderers of their own:
+        // the stored node glows in the node jar and the brain turns in the brain jar.
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_NODE_TILE.get(),
+                thaumcraft.client.renderers.tile.TileJarNodeRenderer::new);
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_BRAIN_TILE.get(),
+                thaumcraft.client.renderers.tile.TileJarBrainRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftNodeDevices.NODE_STABILIZER_BLOCK_ENTITY.get(), TileNodeStabilizerRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftNodeDevices.NODE_TRANSDUCER_BLOCK_ENTITY.get(), TileNodeConverterRenderer::new);
         BlockEntityRendererRegistry.register(ThaumcraftNodeDevices.ENERGIZED_NODE_BLOCK_ENTITY.get(), TileNodeEnergizedRenderer::new);
@@ -201,6 +207,10 @@ public final class ClientSetup {
         // Cutout discards blending and writes an opaque blue depth shell,
         // hiding real essentia. TC4 jars use the translucent world render pass.
         RenderTypeRegistry.register(RenderType.translucent(), ThaumcraftContent.JAR.get(), ThaumcraftContent.VOID_JAR.get());
+        // The node jar and the brain jar use the same glass shell as the ordinary jar
+        // (oracle BlockJarRenderer:64-77 draws every metadata value with the same faces).
+        RenderTypeRegistry.register(RenderType.translucent(), thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_BRAIN.get(),
+                thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_NODE.get());
         RenderTypeRegistry.register(RenderType.translucent(), thaumcraft.common.config.ThaumcraftTubes.ESSENTIA_RESERVOIR.get());
         RenderTypeRegistry.register(RenderType.translucent(), thaumcraft.common.config.ThaumcraftLamps.AMBER_BLOCK.get(), thaumcraft.common.config.ThaumcraftLamps.AMBER_BRICKS.get());
         // These are original shard colors, which differ from aspect HUD colors.

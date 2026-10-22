@@ -37,8 +37,10 @@ import thaumcraft.api.nodes.NodeType;
 public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/nodes.png");
     private static final RenderType FAINT = new NodeRenderType("faint", false, false);
-    private static final RenderType ADDITIVE = new NodeRenderType("revealed_additive", true, false);
-    private static final RenderType TRANSLUCENT = new NodeRenderType("revealed_translucent", true, true);
+    /** The additive sheet of the node strips; the original draws them with SRC_ALPHA/ONE. */
+    static final RenderType ADDITIVE = new NodeRenderType("revealed_additive", true, false);
+    /** The alpha blended sheet of the node strips. */
+    static final RenderType TRANSLUCENT = new NodeRenderType("revealed_translucent", true, true);
     /** The original node of a node jar keeps the depth test: only the revealed node ignores it. */
     private static final RenderType ADDITIVE_DEPTH = new NodeRenderType("jar_additive", false, false);
     private static final RenderType TRANSLUCENT_DEPTH = new NodeRenderType("jar_translucent", false, true);
@@ -194,7 +196,8 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
         pose.popPose();
     }
 
-    private static void quad(PoseStack pose, VertexConsumer buffer, float size, float alpha, int color, int frame, int strip) {
+    /** One quad of the node atlas; shared with the item form of the node. */
+    static void quad(PoseStack pose, VertexConsumer buffer, float size, float alpha, int color, int frame, int strip) {
         float u0 = frame / 32f, u1 = (frame + 1) / 32f;
         float v0 = strip / 32f, v1 = (strip + 1) / 32f;
         int opacity = Mth.clamp((int)(alpha * 255), 0, 255);

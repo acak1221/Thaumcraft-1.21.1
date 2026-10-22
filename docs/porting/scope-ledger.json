@@ -1412,12 +1412,17 @@
           "legacy src/main/java/thaumcraft/api/aura/AuraHelper.java the TC6 aura helper with the per chunk aura and the flux accessors",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:16 public final class AuraHelper",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:29 public static TileNode node(Level level, BlockPos pos)",
-          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 drainVis over the essence of the node at the position"
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 drainVis over the essence of the node at the position",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60 the drain of the retained surface reaches the VIS NETWORK at the position, the selection the legacy handler had (legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:25-33)",
+          "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:530-546 the network drain walks the primal aspects in the original order and is bounded by the request",
+          "test common/src/test/java/thaumcraft/api/AuraHelperDrainTest.java the drain reaches the network and not the node at the position, in the original's primal order"
         ],
         "notes": [
           "Not an original TC4 class: a TC6 helper. The native projects it onto the aura node: the vis accessors read and write the node at the position.",
           "REMAINING GAP: the TC6 per-chunk aura, the per-chunk base and the flux accessors have no counterpart, because TC4 4.2.3.5 has no per-chunk aura at all (the aura is the aura node, oracle TileNodeEnergized:27,165).",
-          "REMAINING GAP (api lane): the one working method of the 1.12 handler drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis), while the native AuraHelper.drainVis drains the node AT the position. An add-on that expected the network wide drain sees a different result; the api lane owns AuraHelper."
+          "REMAINING GAP (api lane): the one working method of the 1.12 handler drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis), while the native AuraHelper.drainVis drains the node AT the position. An add-on that expected the network wide drain sees a different result; the api lane owns AuraHelper.",
+          "CLOSED 2026-10-23 (w4wands): the REMAINING GAP of the api lane was stale. The native drainVis drains the VIS NETWORK at the position (common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60), the very selection the retained 1.12 handler had (legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:25-33), so an add-on that expected the network wide drain sees the same result.",
+          "The TC6 per-chunk aura, the per-chunk base and the flux accessors have no counterpart, because TC4 4.2.3.5 has no per-chunk aura at all (the aura is the aura node, oracle TileNodeEnergized:27,165); the native projects the vis accessors onto the aura node."
         ],
         "reviewed_sha256": {
           "legacy": "0165281eb205905d5cb51884d37399c40734c1011cf7b61dcc90d650f20f460b"
@@ -2633,9 +2638,9 @@
       },
       "review": {
         "disposition": "port",
-        "source_semantics": "equivalent",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/api/nodes/INode.java:12-29 the nine members of the contract",
@@ -2643,13 +2648,26 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:60 the node itself implements the published contract now and the published enums are the canonical ones, the nested NodeType and NodeModifier enums are gone (oracle TileNode:75-77)",
           "native common/src/main/java/thaumcraft/api/nodes/NodeAdapter.java:42-71 the published view shares the state, the write path and the identity with the node",
           "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so the port cannot change it without invalidating the accepted client run",
-          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java the node itself implements the published contract and shares it with the view"
+          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java the node itself implements the published contract and shares it with the view",
+          "oracle thaumcraft/api/nodes/INode.java:12-29 the published contract with its eight own members and the nine it inherits from IAspectContainer",
+          "oracle thaumcraft/api/aspects/IAspectContainer.java:9-29 the nine inherited members",
+          "oracle thaumcraft/common/tiles/TileNode.java:75-77 the original node itself implements the published contract",
+          "oracle thaumcraft/common/tiles/TileNode.java:240-271 the type, the modifier and the base are written through that contract",
+          "oracle thaumcraft/common/tiles/TileNode.java:98-115 the identity of the original is derived from the position of the node (dim:x:y:z)",
+          "native common/src/main/java/thaumcraft/api/nodes/INode.java:1-60 the published contract with every member of the original and the identity difference documented in the contract itself",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:60,128-160 the node itself implements the published contract with the published enums",
+          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java every member of the original contract is present with its original signature, and the identity of the node is the persisted UUID",
+          "fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 the accepted client evidence parses the identity with UUID.fromString",
+          "fabric/src/clientTest/java/thaumcraft/fabric/clienttest/BoreClientSequence.java:870-871 the accepted scan records carry the phenomena string @NODE1b1965a9-747f-4d43-82ff-91e1f0ab443b"
         ],
         "notes": [
           "The interface itself is ported member for member (oracle INode:12-29, the nine members of the contract; native INode:13-29).",
           "CLOSED 2026-10-23 (w3rest): the published enums are the canonical ones and the node itself implements the published contract (native TileNode:60, the implementation of oracle TileNode:75-77), so the two node type enums of the port are one type, and the node and the published view share their state, their write path and their identity (native NodeAdapter:42-71, the view over the node; the write path of the type and of the modifier is the contract of oracle TileNode:240-271). The nested TileNode.NodeType and TileNode.NodeModifier are gone.",
           "REMAINING GAP: the identity of the native node is a random UUID that is persisted with the node (native TileNode:63,136,206-210,862-863,881), the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave: fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT, so the port cannot change it without invalidating the accepted client run.",
-          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass."
+          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass.",
+          "CLOSED 2026-10-23 (w4wands): the published contract is complete - every member the original published is present with the original's semantics, and the test asserts the names and the signatures of all seventeen of them.",
+          "The identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave (the client test parses it with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so the port cannot change it without invalidating the accepted client run.",
+          "The aspect lists of the native node are copies, so an add-on can never mutate the state of a node through the published view; the values are the original's."
         ],
         "reviewed_sha256": {
           "original": "d47513d9a62b10a6117236d2a353ebf43e838f05f6c0a82ba729ee75a22798f9",
@@ -5023,18 +5041,28 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w3clientfx",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/fx/beams/FXBeamWand.java the wand beam effect",
           "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java, ShockSparkParticle.java, FrostSparkleParticle.java the native focus beams",
           "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:149 the native fire beam damage formula",
-          "REMAINING DIFFERENCE: the original beam starts at the wand tip (oracle FXBeamWand.java) and the native focus particles start at the player; the wand tip origin belongs to the wand renderer lane (ledger units ItemWandRenderer, WandPerspectiveModel, FirstPersonWandTipOrigin)"
+          "REMAINING DIFFERENCE: the original beam starts at the wand tip (oracle FXBeamWand.java) and the native focus particles start at the player; the wand tip origin belongs to the wand renderer lane (ledger units ItemWandRenderer, WandPerspectiveModel, FirstPersonWandTipOrigin)",
+          "oracle thaumcraft/client/fx/beams/FXBeamWand.java:37-297 the beam of the original: the fan of three planes that turns around the axis of the beam (:229-255), the rotation of the fan that follows the time of the world (:171), the slide of the texture (:201-206), the width of a plane (:235-238), the opacity of four tenths and its fade to a tenth in the last four ticks (:177-180), the lifetime of eight and the refresh at four (:84,95-101) and the impact of the beam (:261-263,269-297)",
+          "oracle thaumcraft/client/fx/beams/FXBeamWand.java:209-228 the origin of the original is the eye of the player, moved by the yaw and the pitch and by the look vector times 0.3 - it is NOT the tip of the wand",
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:161-163 the native origin of the beam is the very same one (the eye, the yaw, the pitch and the look times 0.3)",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java:106-260 the native beam is now the fan of three planes of the original with the impact of the original",
+          "native common/src/main/resources/assets/thaumcraft/textures/misc/particles.png the particle atlas of the original (256x256), the sheet of the impact of the original",
+          "test common/src/test/java/thaumcraft/wands/ExcavationBeamRulesTest.java the fan, the rotation, the slide and the frame of the original"
         ],
         "notes": [
           "Not a class-for-class port: the original single beam effect class became per-focus particle systems in 1.21.1.",
           "DEVIATION: the original FXBeamWand drawing routine has no single native counterpart, so an exact visual comparison is not possible from the source alone.",
-          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either."
+          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either.",
+          "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was stated wrongly. The original beam does NOT start at the wand tip: its origin is the eye of the player, moved by the yaw and the pitch and by the look vector times 0.3 (oracle FXBeamWand:209-228), and the native already used exactly that origin (ItemFocusExcavation:161-163).",
+          "The real difference was the drawing routine: the original draws a fan of three planes that turns around the axis of the beam, with a width that pulses over four ticks and an opacity of four tenths that fades to a tenth, while the native drew two camera facing ribbons whose opacity ramped up and faded to zero.",
+          "The native now draws the fan of the original with the numbers of the original, and the impact is the camera facing quad of the particle atlas of the original with the frame of the age over sixteen and the size endMod / 2 / (6 - impact).",
+          "Forced 1.21.1 change: the fan of the original is drawn with the depth test of the native late world pass, the original drew it in the particle pass."
         ],
         "reviewed_sha256": {
           "original": "4559e4022f06675edec351ba7719325e313414498c15dd37a44fdaff279c957c",
@@ -8378,7 +8406,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w3clientfx",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java:79 ArrayList<BlockCoordinates> architectBlocks",
@@ -8393,13 +8421,28 @@
           "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:228-233 centered() draws the line once, at centredOffset(centerX, font.width(label)) = centre - font.width(text) / 2, the expression the original uses",
           "test common/src/test/java/thaumcraft/client/gui/FocusRadialLabelTest.java the centre line rule: it names the focused focus, it has no hover-dependent placeholder, it is centred with the original's expression and it is drawn once",
           "REMAINING DIFFERENCE: the architect preview of the original (oracle REHWandHandler.java:79,311,319, the list of the architect blocks) is not drawn as a world overlay by the native radial screen",
-          "the radial itself is reproduced: the centre line names the focused focus only and is drawn once at centre - font.width(text) / 2 (native GuiFocusSelect.java:201-233), the expression the original uses (oracle GuiResearchRecipe.java:452-453)"
+          "the radial itself is reproduced: the centre line names the focused focus only and is drawn once at centre - font.width(text) / 2 (native GuiFocusSelect.java:201-233), the expression the original uses (oracle GuiResearchRecipe.java:452-453)",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:79,311-313,319 the list of the architect blocks and the hidden inner faces",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:185-295 the radial focus menu; the only text of it is the tooltip of the hovered focus at the mouse, the original draws no centre label",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:297-316 the architect overlay: the anchor is the block under the crosshair, the area comes from the focus and the axes come from the focus",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:323-368 the rune texture of a face is the original lookup table of the eight neighbour flags",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:370-372 a face that touches another block of the area is not drawn",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:391-394 the colour of a block and the alpha of a fifth",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:429-479 the arrows of the axes with the colour of the player age and the alpha of a third",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java the native world overlay of the Architect focus",
+          "native common/src/main/java/thaumcraft/common/lib/world/WardingOverlay.java:12-47 the original lookup table of the rune textures and the eight neighbours of a face",
+          "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:201-233 the radial of the original, the centre line names the focused focus only and is drawn once",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java and native neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java the late world render of both loaders",
+          "test common/src/test/java/thaumcraft/wands/ArchitectOverlayTest.java the mask of a face, the hidden inner faces and the alphas of the original"
         ],
         "notes": [
           "The held-F radial focus selection is ported as GuiFocusSelect, and the Architect block list became a server-side BlockPos list computed by WandArchitect.",
           "DEVIATION: the original REHWandHandler was a client-side handler that held the whole architect block list in the client and drew the selection overlays; the native moves the area to the server and to a bounded Area record.",
           "REMAINING GAP (client lane): the selection overlay of the original is drawn by the client handler; the native computes the same area on the server and draws it in the client gui.",
-          "FIXED (client lane, 2026-10-23): the centre label of the radial was two overlapping text runs in the client smoke frame 43. The radial is rendered twice into the same frame (the game with the real cursor, the client smoke with a scripted hover point), and the centre line carried a hover-dependent placeholder next to the name of the focused focus. The centre line now names the focused focus only and is drawn once, at centre - font.width(text) / 2."
+          "FIXED (client lane, 2026-10-23): the centre label of the radial was two overlapping text runs in the client smoke frame 43. The radial is rendered twice into the same frame (the game with the real cursor, the client smoke with a scripted hover point), and the centre line carried a hover-dependent placeholder next to the name of the focused focus. The centre line now names the focused focus only and is drawn once, at centre - font.width(text) / 2.",
+          "CLOSED 2026-10-23 (w4wands): the world overlay of the Architect focus was missing. The native now draws the area of the focus as translucent blocks whose face carries the rune texture of the eight neighbours of the face, with the colours, the alpha of a fifth and the hidden inner faces of the original, and the arrows of the axes at the anchor with the alpha of a third.",
+          "The radial focus menu of the original was already reproduced by the native GuiFocusSelect (the centre line names the focused focus only and is drawn once at centre - font.width(text) / 2, the expression the original uses).",
+          "Forced 1.21.1 change: the original drew the silhouette of the jar block with the rune texture of the warded glass; the native draws the cube of the block, because the 1.7.10 block renderer cannot draw one model with the texture of another."
         ],
         "reviewed_sha256": {
           "original": "c6a51c95a42eedf9d6ef600e763bee7cabfd31229fbe6a63034fe5d9c31a2342",
@@ -12749,12 +12792,21 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/item/ItemWandRenderer.java: the wand item renderer that draws the rod, the cap and the focus",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java the only native wand item renderer",
           "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java the native wand model",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandModels.java the native wand model catalogue"
+          "native common/src/main/java/thaumcraft/common/items/wands/WandModels.java the native wand model catalogue",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:45-119 the renderer of the original: the transforms of the context (:59-86), the model basis correction of a hundred and eighty degrees about X (:87), the use pose (:88-113) and the drawing of the model (:114-118)",
+          "oracle thaumcraft/client/renderers/models/gear/ModelWand.java:53-81 the geometry of the original: the cap at zero, the rod at two with a height of eighteen and the bottom cap at twenty",
+          "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelWand.java:31-43 the native geometry is the very same one",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:117-170 the native wand renderer draws the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java and native neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java both loaders call the very same renderer"
         ],
         "notes": [
           "The original class does not exist under that name in the native port.",
           "DEVIATION: the native port has one wand item renderer (PrimalWandFocusRenderer) plus a model catalogue, and no general ItemWandRenderer that draws every rod/cap/focus combination, so the wand item appearance of the non-primal combinations is not fully covered by the source alone.",
-          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either."
+          "REMAINING GAP (client lane): the use pose of the original (ItemWandRenderer:63-93) and the three dimensional wand of the original are client renderer duties; the 1.12 helpers WandPoseMath, WandUsePose and WandUsePoseSampler have no native counterpart either.",
+          "REMAINING GAP (restated 2026-10-23 (w4wands)): the native wand renderer draws the model without the original's model basis correction (a hundred and eighty degrees about X, oracle ItemWandRenderer:87) and without the original's use pose (:88-113 - the raise of the wand over three ticks, the thirty three degrees of the third person, the ten plus ten degrees of the first person, the sixty degrees of the startup and the WAVE and CHARGE waves of the focus).",
+          "The two belong together: the use pose of the original is expressed in the basis that the correction establishes, so it can only be ported once the correction is confirmed by a client frame. The 1.7.10 model space has its Y axis downwards while the 1.21.1 model space has it upwards, so the correction decides which end of the wand is up.",
+          "The exact change: apply the correction of a hundred and eighty degrees about X to the native wand renderer and then the original's use pose around the pivot one block above the model, with the numbers of the oracle ItemWandRenderer:88-113 and the elapsed time of the use, which the 1.21.1 LivingEntity.getTicksUsingItem() counts up like the 1.7.10 EntityPlayer.getItemInUseDuration() (MCP stable 12-1.7.10: field_71057_bx).",
+          "Everything else of the unit is at parity: the geometry of the model is the original's, the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus are drawn, and the two loaders call the same renderer."
         ],
         "reviewed_sha256": {
           "original": "f2840cfa86a637fdce94f4e9181c9c35b4c47fd565775fdd39fb2d7700264c31",
@@ -16042,17 +16094,27 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/tile/ItemNodeRenderer.java:172 the item form of the node (the block that drops a node item)",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java the native node renderer",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java: the node has no item form in the native port",
-          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279"
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279",
+          "oracle thaumcraft/client/renderers/tile/ItemNodeRenderer.java:37-170 the item renderer of the original: the fixture node with the four primal aspects at forty each (:39), the two crossed quads of the node atlas (:60-68), the alpha of one half (:75), the atlas of thirty two frames (:100), the pulse of a strip (:115), the size of a strip (:116), the alpha of a strip (:117) and the core strip of the type (:127)",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/ItemNodeRenderer.java the native item renderer of the node, with the numbers of the original as pure static functions",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:38,197-206 the shared node atlas and the quad of the node strips",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java the Fabric registration of the item renderer of the aura node item",
+          "native neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java the NeoForge registration of the same renderer",
+          "test common/src/test/java/thaumcraft/client/renderers/tile/ItemNodeRendererTest.java the fixture node, the alpha, the scale, the atlas, the frame, the pulse, the size and the core of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279, the gameplay drop of the original"
         ],
         "notes": [
           "The original drew the aura node as a dropped item; the native node is a permanent block with no item form, so this renderer has no counterpart.",
-          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer."
+          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer.",
+          "CLOSED 2026-10-23 (w4wands): the native node item was a static shard texture, while the original draws the item of the invisible aura node as the node itself, in two crossed quads of the 32 frame node atlas. The native now draws it that way and both loaders register the renderer.",
+          "The gameplay drop of the original is the wisp essence of BlockAiry:265-279 (NodeHarvest) and never a node item, so that half of the unit was already at parity.",
+          "Forced 1.21.1 change: the 1.7.10 item space is a sixteenth of a block and the native item space is not, so the placement of the node inside the item is the native one; every number of the strips is the original's."
         ],
         "reviewed_sha256": {
           "original": "a32db5242f6251429d3382b2cacb099fe43d0ec8301344e6764f346cdea0b5fb"
@@ -36567,7 +36629,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the void thaumaturge hood, robe and leggings",
@@ -36577,13 +36639,24 @@
           "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes keep the discount, the warp and the durability factor",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:181 renderGearItem draws the original void robe model; both loaders call it",
           "native neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgeGearArmorMixin.java:48 the NeoForge armour layer mixin that draws it",
-          "open difference: the worn look is the client side of the original ModelRobe, which 1.21.1 can only draw with the layer renderer of the client lane; the protection 3/7/6, the durability factor 10 and the enchantability 10 are the original ones"
+          "open difference: the worn look is the client side of the original ModelRobe, which 1.21.1 can only draw with the layer renderer of the client lane; the protection 3/7/6, the durability factor 10 and the enchantability 10 are the original ones",
+          "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java:98-100 the worn look of the void thaumaturge is two sheets, the _overlay sheet and the plain sheet",
+          "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java:187-189 the piece always has the overlay layer of the original",
+          "official 1.7.10 client.jar net.minecraft.client.renderer.entity.RenderPlayer (notch bop):52-100 the first layer binds getArmorTexture(stack, entity, slot, null) and tints it with the colour of the stack, the second layer binds getArmorTexture(stack, entity, slot, \"overlay\") and stays untinted",
+          "official 1.7.10 client.jar net.minecraft.client.renderer.entity.RenderLivingBase (notch boh):113-121 the second layer is drawn after the first one",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:219-239 the native void thaumaturge draws the dyed cloth first and the untinted trim after it",
+          "native common/src/main/java/thaumcraft/common/items/armor/VoidRobeLayers.java the pure rule of the two worn layers",
+          "test common/src/test/java/thaumcraft/gear/VoidRobeLayersTest.java the two layers, their sheets and the default dye of the original",
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java:39-74 the discount of five, the warp of two, the durability factor of ten, the epic rarity, the self repair and the wash of the original"
         ],
         "notes": [
           "The worn look is an explicit interim: the native uses the void armour layers, the original ModelRobe is not ported (declared in ThaumcraftEquipment).",
           "The 1.7 ItemArmor material became the native ArmorMaterial; the protection 3/7/6, the durability factor 10 and the enchantability 10 are preserved.",
           "REMAINING GAP (unchanged): the worn look is an explicit interim - the native uses the void armour layers, the original ModelRobe is not ported. The protection 3/7/6, the durability factor 10 and the enchantability 10 are the original ones.",
-          "The gap lies in the client layer, which this wave does not own."
+          "The gap lies in the client layer, which this wave does not own.",
+          "CLOSED 2026-10-23 (w4wands): the worn look was an explicit interim. The native drew the plain trim sheet alone and tinted it with the dye, so the dyed cloth of the robe was never drawn at all; the two sheets of the original are disjoint (of the 32768 pixels of the 256x128 sheet the plain one owns 6224 and the overlay one 5652, and only 21 pixels belong to both).",
+          "The native now draws the dyed cloth sheet first and the untinted trim sheet after it, exactly as the 1.7.10 renderer does, and both loaders draw it (the Fabric armour renderer and the NeoForge armour layer mixin).",
+          "The protection 3/7/6, the durability factor 10, the enchantability 10, the five percent vis discount, the two warp, the epic rarity, the self repair and the wash in a water cauldron are the original ones."
         ],
         "reviewed_sha256": {
           "original": "a8f6a6817993c759a90e9f04cb5aad79ddd946aeadb35f0e825318e35b1b46f6",
@@ -49273,7 +49346,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileNode.java:606-630 the regeneration interval 600 (400 BRIGHT, 900 PALE, 0 FADING) and the lock multipliers x2 (lock 1) and x20 (lock 2)",
@@ -49296,7 +49369,13 @@
           "oracle thaumcraft/common/tiles/TileNode.java:240-271 the type, the modifier and the base are written through that contract",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:60,136,206-210 the node implements the published contract with the published enums, so the two types of the port are one type and the node writes its type and its modifier through the contract of the original",
           "deviation: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself, and the behaviour is the same; the native adds a server thread guard, a current state guard and a prepared orb emission frame that the original did not have",
-          "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT)"
+          "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT)",
+          "oracle thaumcraft/common/tiles/TileNode.java:98-115 the identity of the original is derived from the position of the node",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:128-146 the identity of the native node and the reason why the format is kept",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeStabilizerRules.java:24,51 the regeneration ladder 600 (400 BRIGHT, 900 PALE, 0 FADING) and the lock multipliers x2 (lock 1) and x20 (lock 2)",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeDischargeRules.java the conditions of the discharge of the original",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:408-435 the wand tap of the original, one unit plus one per NODETAPPER research",
+          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java the node itself implements the published contract with the published enums"
         ],
         "notes": [
           "The 600/400/900/0 regeneration ladder, the x2 lock multiplier, the 2/1/3 discharge interval, the 1+(base/1.5) roll for a bright node, the 1200 tick pruning, the 100/42 and 100/69 stability rolls and the fifth-tick wand tap are all ported with the original numbers (oracle TileNode:606-630, :547-604, :726-748, :649 and :398-427).",
@@ -49305,7 +49384,10 @@
           "CLOSED 2026-10-23 (w3rest): the node implements the published thaumcraft.api.nodes.INode itself (native TileNode:60, the implementation of oracle TileNode:75-77) and the published enums are the canonical ones, so the two node type enums of the port are one type and the node writes its type and its modifier through the contract of the original (oracle TileNode:240-271). The nested TileNode.NodeType and TileNode.NodeModifier are gone.",
           "REMAINING GAP: the identity of the native node is a random UUID that is persisted with the node (native TileNode:63,136,206-210,862-863,881), the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave: fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT, so the port cannot change it without invalidating the accepted client run.",
           "DEVIATION: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself; the behaviour is the same.",
-          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have."
+          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have.",
+          "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was the identity format. The identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (the client test parses it with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so it cannot change.",
+          "The deviation of the original's handleDarkNode and handlePureNode biome effects, which live in the shared NodeEcology of the port, and the server thread guard, the current state guard and the prepared orb emission frame of the native, are the documented deviations of this row.",
+          "The regeneration ladder, the two locks, the discharge, the stabiliser repair and the wand tap of the original are the native ones."
         ],
         "reviewed_sha256": {
           "original": "b672c7d42f8c9f2af611c6576235dbafa6a6ae4e96adf0b67809318e1a782348",
@@ -50532,18 +50614,26 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/commonleft",
         "evidence": [
           "oracle thaumcraft/common/world/aura/AuraChunk.java: absent from the TC4 4.2.3.5 oracle; TC4 has no per-chunk aura, the aura is the aura node (oracle thaumcraft/common/tiles/TileNodeEnergized.java:27,165)",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraChunk.java:6 the 1.12 chunk state holder (base, vis, flux)",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:15,19,23 the 1.12 handler itself refuses the chunk state with UnsupportedOperationException",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:20,26,48 the native projection of the add-on surface onto the TC4 aura node",
-          "open difference: the TC6 per chunk aura state (the base, the vis and the flux) has no counterpart in the 4.2.3.5 oracle, and the 1.12 handler refused it with an UnsupportedOperationException as well, so the holder itself has no native counterpart to point at"
+          "open difference: the TC6 per chunk aura state (the base, the vis and the flux) has no counterpart in the 4.2.3.5 oracle, and the 1.12 handler refused it with an UnsupportedOperationException as well, so the holder itself has no native counterpart to point at",
+          "oracle thaumcraft/common/world/aura/AuraChunk.java: absent from the TC4 4.2.3.5 oracle; TC4 has no per-chunk aura at all, the aura of the original is the aura node (oracle thaumcraft/common/tiles/TileNodeEnergized.java:27,165 getAuraBase)",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraChunk.java:5-30 the 1.12 TC6 chunk state holder with its base, its vis and its flux",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:15-23 the two accessors of that state refuse it with UnsupportedOperationException, so even the retained 1.12 reference never served it",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:22-74 the native projection of the add-on surface onto the TC4 aura node",
+          "Complete callsite audit: the only consumer of the class is the retained 1.12 facade src/main/java/thaumcraft/api/aura/AuraHelper.java:5-6,17,25,30 and no native source refers to it"
         ],
         "notes": [
           "TC4 has no per-chunk aura: the native keeps the essence in the aura node and projects the add-on accessors onto it, so the vis of the legacy chunk state is reachable.",
-          "REMAINING GAP: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well, so the holder itself has no native counterpart to point at."
+          "REMAINING GAP: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well, so the holder itself has no native counterpart to point at.",
+          "CLOSED 2026-10-23 (w4wands): the TC6 per-chunk aura state has no TC4 original counterpart, so the holder itself is deliberately not ported and the disposition stays exclude.",
+          "Everything the legacy chunk state could hold is reachable on the TC4 aura node (the essence of the node is the aura of the original), so no value of the original is lost; the holder is a TC6 artefact, not a missing TC4 behaviour.",
+          "The remaining difference of the row was therefore never a difference of the original: there is no original of this class at all."
         ],
         "reviewed_sha256": {
           "legacy": "63c22abddf12b0f553991b5b91a25bc1fb9c98cb635c74102c2c32f9ce65c415"
@@ -50577,18 +50667,25 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/commonleft",
         "evidence": [
           "oracle thaumcraft/common/world/aura/AuraHandler.java: absent from the TC4 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:27-33 drainVis floors the amount and delegates to the VisNet handler",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 the native drainVis(level, pos, amount, simulate) over the essence of the node",
           "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:516,517 the native VisNet drain with an aspect",
-          "open difference: the legacy drainVis drained the VIS NETWORK at the position (the 1.12 AuraHandler:27-33), the native projection drains the node AT the position, so the two do not select the same source of vis; the class itself has no counterpart in the 4.2.3.5 oracle"
+          "open difference: the legacy drainVis drained the VIS NETWORK at the position (the 1.12 AuraHandler:27-33), the native projection drains the node AT the position, so the two do not select the same source of vis; the class itself has no counterpart in the 4.2.3.5 oracle",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:25-33 the one working method of the 1.12 handler drains the VIS NETWORK at the position (VisNetHandler.drainVis(world, x, y, z, requested, simulate))",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60 the native projection drains the VIS NETWORK at the position (VisNetHandler.drainVis(level, pos, amount, simulate)), the same selection the legacy handler had",
+          "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:530-546 the network drain walks the primal aspects in the original order (Aspect.getPrimalAspects()) and is bounded by the request",
+          "oracle thaumcraft/api/visnet/VisNetHandler.java:29 the original publishes the aspect drain only; the aspect-less form of the 1.12 tree is a later addition",
+          "test common/src/test/java/thaumcraft/api/AuraHelperDrainTest.java the drain of the retained surface reaches the network and not the node at the position, in the original's primal order"
         ],
         "notes": [
           "The vis drain of the 1.12 handler is projected onto the native aura node; the chunk state and the flux have no TC4 counterpart.",
-          "REMAINING GAP: the legacy drainVis drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis) and the native projection drains the node AT the position, so the two do not select the same source of vis. The api lane owns AuraHelper, the projection of this handler."
+          "REMAINING GAP: the legacy drainVis drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis) and the native projection drains the node AT the position, so the two do not select the same source of vis. The api lane owns AuraHelper, the projection of this handler.",
+          "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was stale. The native projection drains the VIS NETWORK at the position (common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60), not the node AT the position, so the two select the same source of vis.",
+          "The chunk state and the flux have no TC4 counterpart and the retained 1.12 handler refused them itself (legacy AuraHandler:15-23), so the class is deliberately not ported and the disposition stays exclude."
         ],
         "reviewed_sha256": {
           "legacy": "11f597a010debe4d5ace27d99fdb588558f79a59b75591b2f89232a25e9c3db4"

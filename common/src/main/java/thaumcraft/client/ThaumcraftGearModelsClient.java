@@ -45,8 +45,17 @@ import thaumcraft.common.items.wands.foci.FocusData;
 public final class ThaumcraftGearModelsClient {
     /** The original robe sheet of the cultists. */
     public static final ResourceLocation CULTIST_ROBE_TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/cultist_robe_armor.png");
-    /** The original robe sheet of the void thaumaturge. */
+    /** The original robe sheet of the void thaumaturge: the metal trim, drawn untinted. */
     public static final ResourceLocation VOID_ROBE_TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/void_robe_armor.png");
+    /**
+     * The original robe sheet of the void thaumaturge: the dyed cloth.
+     *
+     * <p>Oracle {@code thaumcraft/common/items/armor/ItemVoidRobeArmor.java:98-100}: the worn look of
+     * the void thaumaturge is <b>two</b> sheets. The layer that carries the dye is the
+     * {@code _overlay} sheet (the cloth), the layer that carries the trim is the plain sheet, and
+     * the plain sheet is drawn <em>after</em> the dyed one, so the trim stays untinted.</p>
+     */
+    public static final ResourceLocation VOID_ROBE_OVERLAY_TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/void_robe_armor_overlay.png");
     /** The original fortress armour sheet. */
     public static final ResourceLocation FORTRESS_TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/fortress_armor.png");
     /** The original cultist plate armour sheet. */
@@ -199,6 +208,13 @@ public final class ThaumcraftGearModelsClient {
      * The original ModelRobe for a worn robe. The helm and the greaves use the
      * armoured model and the chest and the boots the cloth model, exactly as
      * the original ItemCultistRobeArmor:112-115 does.
+     *
+     * <p>Oracle {@code thaumcraft/common/items/armor/ItemVoidRobeArmor.java:98-100,187-189}: the
+     * void thaumaturge is drawn in <b>two</b> layers, the dyed cloth sheet
+     * ({@code void_robe_armor_overlay.png}) first and the untinted trim sheet
+     * ({@code void_robe_armor.png}) after it. The cultist robe has no colour and therefore no
+     * second layer (the original's {@code hasOverlay} stays false there), so it is drawn once with
+     * its own sheet.</p>
      */
     public static void renderRobe(PoseStack pose, MultiBufferSource buffers, ItemStack armor, Entity entity, EquipmentSlot slot, int light, HumanoidModel<?> context) {
         boolean armoured = slot == EquipmentSlot.HEAD || slot == EquipmentSlot.LEGS;
@@ -206,9 +222,19 @@ public final class ThaumcraftGearModelsClient {
         // Original ItemVoidRobeArmor:205-226 carries the dye colour, the cultist
         // robe has none; its sheet is already the original colour.
         boolean voidRobe = armor.getItem() instanceof thaumcraft.common.items.armor.ItemVoidRobeArmor;
-        ResourceLocation texture = voidRobe ? VOID_ROBE_TEXTURE : CULTIST_ROBE_TEXTURE;
-        int tint = voidRobe ? 0xff000000 | ItemRobeArmor.color(armor) : -1;
-        renderGear(pose, buffers, model, texture, entity, slot, light, context, tint);
+        if (!voidRobe) {
+            renderGear(pose, buffers, model, CULTIST_ROBE_TEXTURE, entity, slot, light, context, -1,
+                    RenderType.entityCutoutNoCull(CULTIST_ROBE_TEXTURE));
+            return;
+        }
+        int tint = 0xff000000 | ItemRobeArmor.color(armor);
+        // The original's two worn layers, the dyed cloth first and the untinted trim after it.
+        for (var layer : thaumcraft.common.items.armor.VoidRobeLayers.WORN_LAYERS) {
+            ResourceLocation sheet = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/" + layer.sheet());
+            renderGear(pose, buffers, model, sheet, entity, slot, light, context,
+                    layer.dyed() ? tint : -1,
+                    layer.dyed() ? RenderType.entityTranslucent(sheet) : RenderType.entityCutoutNoCull(sheet));
+        }
     }
 
     /**
@@ -250,6 +276,14 @@ public final class ThaumcraftGearModelsClient {
     /** The shared drawing path: the wearer's pose, the original slot visibility and the sheet. */
     private static void renderGear(PoseStack pose, MultiBufferSource buffers, ModelGearArmor model,
                                    ResourceLocation texture, Entity entity, EquipmentSlot slot, int light, HumanoidModel<?> context, int tint) {
+        renderGear(pose, buffers, model, texture, entity, slot, light, context, tint,
+                RenderType.entityCutoutNoCull(texture));
+    }
+
+    /** The shared drawing path with an explicit sheet type, for the two layers of the void robe. */
+    private static void renderGear(PoseStack pose, MultiBufferSource buffers, ModelGearArmor model,
+                                   ResourceLocation texture, Entity entity, EquipmentSlot slot, int light, HumanoidModel<?> context,
+                                   int tint, RenderType type) {
         if (entity instanceof LivingEntity living) {
             // The original cloth swing uses the same limb swing and limb swing
             // amount as the worn model; the wearer's own animation supplies them.
@@ -265,7 +299,7 @@ public final class ThaumcraftGearModelsClient {
         // exactly as the original copies the biped rotations of the player model.
         model.copyPose(context);
         model.showSlot(slot);
-        var buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
+        var buffer = buffers.getBuffer(type);
         model.renderToBuffer(pose, buffer, light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, tint);
     }
 

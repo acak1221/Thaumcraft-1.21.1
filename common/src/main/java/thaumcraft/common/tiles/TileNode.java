@@ -129,11 +129,18 @@ public final class TileNode extends BlockEntity implements INode {
      * Original {@code TileNode:98-101}: the identity of the node.
      *
      * <p>Forced 1.21.1 change: the original derived the identity from the position of the node
-     * ({@code dim:x:y:z}); the native port keeps a stable random identity for the node, so that
-     * the identity of a node that is rebuilt at the same position is not silently changed. The
-     * identity is persisted with the node and is the same one that the scan of the node uses.</p>
+     * ({@code dim:x:y:z}, oracle {@code TileNode:98-115}); the native port keeps a stable random
+     * identity for the node, so that the identity of a node that is rebuilt at the same position is
+     * not silently changed. The identity is persisted with the node and is the same one that the
+     * scan of the node uses.</p>
+     *
+     * <p>The format is bound into the accepted evidence of the port: the client test
+     * {@code fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509}
+     * parses it with {@code UUID.fromString} and the accepted saved worlds carry the UUIDs in
+     * their node NBT, so it must not change.</p>
      */
     @Override public String getId() { return getScanId(); }
+    /** The persisted identity of the node; the scan of the node uses it as its phenomena key. */
     public String getScanId() { return scanId; }
     @Override public NodeType getNodeType() { return nodeType; }
     /**

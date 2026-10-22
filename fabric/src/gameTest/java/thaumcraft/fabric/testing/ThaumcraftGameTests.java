@@ -86,6 +86,11 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "mound_rng_isolation")
+    public void moundGenerationRandomIsIsolated(GameTestHelper test) {
+        thaumcraft.common.lib.world.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "bore_chunk_envelope_native_prerequisite")
     public void boreNativeChunkEnvelopeIsNotLiveOwnerTag(GameTestHelper test) {
         thaumcraft.common.testing.BoreClientPrerequisiteRuntimeChecks.nativeChunkEnvelopeIsNotLiveOwnerTag(test);

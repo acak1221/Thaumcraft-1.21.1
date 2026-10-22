@@ -217,9 +217,10 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
      *
      * <p>The original rolls the random of the world for it: three rolls in ten give the
      * crate, the others the urn.
+     * During native generation that second stream belongs to the region, not the shared live server level.
      */
     static BlockState lootState(WorldGenLevel level, RandomSource random, int rarity) {
-        boolean crate = level.getLevel().getRandom().nextFloat() < 0.3F;
+        boolean crate = level.getRandom().nextFloat() < 0.3F;
         Block block = crate ? ThaumcraftEldritchBlocks.LOOT_CRATE.get() : ThaumcraftEldritchBlocks.LOOT_URN.get();
         return block.defaultBlockState().setValue(
                 thaumcraft.common.blocks.BlockLoot.RARITY, Math.min(rarity, 2));

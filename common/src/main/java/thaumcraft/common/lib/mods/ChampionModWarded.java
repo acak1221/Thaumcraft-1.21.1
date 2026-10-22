@@ -8,8 +8,8 @@ import java.util.Random;
  *
  * <p>Oracle {@code ChampionModWarded:25-30}: the 1.7 original raised the absorption of the
  * champion by one point, never its health, and it measured the ceiling of the ward against the
- * total of the max health attribute, so a champion of a spider regenerated its ward up to
- * twenty three.
+ * base max health attribute, so a champion of a spider regenerated its ward up to
+ * eight, excluding the champion's thirty health bonus.
  */
 public final class ChampionModWarded implements IChampionModifierEffect {
     @Override public Result performEffect(Context context, Random random) {

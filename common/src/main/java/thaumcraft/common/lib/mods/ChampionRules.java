@@ -193,12 +193,11 @@ public final class ChampionRules {
 
     /**
      * Original warded champion ward. Oracle {@code EntityUtils.makeChampion:271-274} read the
-     * total of the max health attribute of the champion, the base of the mob plus the thirty
-     * health of the champion, and the ward was half of that total, so a champion of a spider
-     * keeps twenty three of ward and not the eight of its base health.
+     * base max health (SRG func_111125_b), not the total including the champion's thirty
+     * bonus health. A spider's base sixteen health therefore grants eight ward.
      */
     public static int wardedChampionWard(AttributeInstance health) {
-        return ChampionWiringRules.wardedChampionWard(health.getValue());
+        return ChampionWiringRules.wardedChampionWard(health.getBaseValue());
     }
 
     /** Original modifier roll: the 1.7 original rolled nextInt(mods.length). */
@@ -328,8 +327,8 @@ public final class ChampionRules {
             if (modifier.id == ChampionModifier.WARDED && health != null) {
                 // Oracle EntityUtils.makeChampion:271-274 - the warded champion adds half of its
                 // maximum health to its absorption, never to its health. The original read the
-                // total of the max health attribute, the base of the mob plus the thirty health
-                // of the champion, so a champion of a spider keeps a ward of twenty three.
+                // base max health attribute (func_111125_b), excluding the champion bonus:
+                // a spider receives eight absorption, not twenty three.
                 // 1.21.1 clamps the absorption by the max absorption attribute, so the ward
                 // raises that attribute first.
                 WardRules.addWard(mob, (float) wardedChampionWard(health));
@@ -345,7 +344,7 @@ public final class ChampionRules {
         public static void tickChampion(LivingEntity mob, int modifierId) {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
             if (modifier == null || !modifier.ticks()) return;
-            IChampionModifierEffect.Context context = IChampionModifierEffect.Context.tick(mob.tickCount, mob.getHealth(), maxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
+            IChampionModifierEffect.Context context = IChampionModifierEffect.Context.tick(mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             apply(mob, null, modifier.effect.performEffect(context, random(mob)));
         }
 
@@ -354,7 +353,7 @@ public final class ChampionRules {
             ChampionModifier modifier = ChampionModifier.byId(modifierId);
             if (modifier == null || !modifier.attacks() || amount <= 0.0f || target == null) return;
             IChampionModifierEffect.Context context = IChampionModifierEffect.Context.attack(amount, target instanceof Player,
-                    mob.tickCount, mob.getHealth(), maxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
+                    mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             apply(mob, target, modifier.effect.performEffect(context, random(mob)));
         }
 
@@ -370,7 +369,7 @@ public final class ChampionRules {
             if (!(attacker instanceof LivingEntity living)) return amount;
             IChampionModifierEffect.Context context = IChampionModifierEffect.Context.damaged(amount,
                     source.is(DamageTypeTags.BYPASSES_ARMOR), "thorns".equalsIgnoreCase(source.getMsgId()), true,
-                    living instanceof Player, mob.tickCount, mob.getHealth(), maxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
+                    living instanceof Player, mob.tickCount, mob.getHealth(), baseMaxHealth(mob), mob.getAbsorptionAmount(), mob.invulnerableTime > 0);
             IChampionModifierEffect.Result result = modifier.effect.performEffect(context, random(mob));
             apply(mob, living, result);
             return result.amount();
@@ -399,14 +398,12 @@ public final class ChampionRules {
         private static Random random(LivingEntity mob) { return new WorldRandom(mob.level().getRandom()); }
 
         /**
-         * The original maximum health of a champion. The 1.7 original read the total of the max
-         * health attribute (oracle {@code EntityUtils.makeChampion:272} and
-         * {@code ChampionModWarded:26}), so the thirty health of the champion bonus counted
-         * into the ward of the warded champion.
+         * Original base max health (oracle EntityUtils:272 / ChampionModWarded:26,
+         * func_111125_b), excluding attribute modifiers.
          */
-        private static float maxHealth(LivingEntity mob) {
+        private static float baseMaxHealth(LivingEntity mob) {
             AttributeInstance health = mob.getAttribute(Attributes.MAX_HEALTH);
-            return health == null ? mob.getMaxHealth() : (float) health.getValue();
+            return health == null ? mob.getMaxHealth() : (float) health.getBaseValue();
         }
 
         /** The original status effect of a champion. */

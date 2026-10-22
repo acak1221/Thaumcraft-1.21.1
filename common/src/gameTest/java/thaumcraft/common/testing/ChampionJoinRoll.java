@@ -109,6 +109,13 @@ public final class ChampionJoinRoll {
         }
     }
 
+    /** Declare the warped champion's nextInt(3) as well as its chance roll. */
+    public static void declaredWarpEffect(ServerLevel level, float value, int amountRoll, Runnable action) {
+        var declared = new Roll(level, DECLARED, -1, value);
+        declared.warpAmountRoll = amountRoll;
+        try { action.run(); } finally { declared.close(); }
+    }
+
     /**
      * Adds the entity to the level with the declared champion join roll and the declared champion
      * modifier roll.
@@ -152,6 +159,7 @@ public final class ChampionJoinRoll {
         private final Float effect;
         private int draws;
         private int modifiers;
+        private Integer warpAmountRoll;
 
         Roll(ServerLevel level, int roll, int modifierId, Float effect) {
             this.level = level;
@@ -162,6 +170,7 @@ public final class ChampionJoinRoll {
             this.input = new LegacyRandomSource(0) {
                 @Override public int nextInt() { return previous.nextInt(); }
                 @Override public int nextInt(int bound) {
+                    if (bound == 3 && warpAmountRoll != null) { previous.nextInt(bound); return warpAmountRoll; }
                     // The original champion join roll is the single nextInt100 of the world random.
                     // The real stream still advances by that one draw, only the declared value wins.
                     if (bound == 100) { draws++; previous.nextInt(100); return roll; }

@@ -1714,6 +1714,36 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void champion_effects_reach_player_victims_once(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.effectsReachPlayerVictimsOnce(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void champion_warp_reaches_player_victim_once(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.warpedHitReachesPlayer(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void infusion_jar_brain_awards_warp_once(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionWarpAuditChecks.jarBrainAwardsWarpOnce(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void infusion_compass_stone_awards_warp_once(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionWarpAuditChecks.compassStoneAwardsWarpOnce(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void champion_ward_uses_original_base_health(GameTestHelper test) {
+        thaumcraft.common.testing.ChampionRuntimeChecks.wardUsesBaseHealth(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void public_warp_api_preserves_original_guards(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionWarpAuditChecks.publicWarpApiPreservesOriginalGuards(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
     public void champion_whitelist_covers_the_cave_spider(GameTestHelper test) {
         thaumcraft.common.testing.ChampionRuntimeChecks.caveSpiderIsAChampionCandidate(test);
     }

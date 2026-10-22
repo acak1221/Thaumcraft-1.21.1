@@ -86,6 +86,46 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_trunk_other_viewer")
+    public void permissionTrunkOtherViewer(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsOtherViewer(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_trunk_closed_menu")
+    public void permissionTrunkClosedMenu(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsClosedMenu(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_trunk_dead")
+    public void permissionTrunkDeadViewer(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsDeadViewer(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_denied_break")
+    public void permissionSpectatorCannotBreakContainers(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.spectatorCannotBreakContainers(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_research_conversion")
+    public void permissionResearchConversionSpectator(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.researchConversionRejectsSpectator(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_crucible_remote")
+    public void permissionCrucibleRemoteWand(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.crucibleRejectsRemoteWand(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_trunk_spectator")
+    public void permissionTrunkSpectator(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsSpectator(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "permission_trunk_remote")
+    public void permissionTrunkRemote(GameTestHelper test) {
+        thaumcraft.common.testing.PermissionRuntimeChecks.trunkRejectsRemote(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "mound_rng_isolation")
     public void moundGenerationRandomIsIsolated(GameTestHelper test) {
         thaumcraft.common.lib.world.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);

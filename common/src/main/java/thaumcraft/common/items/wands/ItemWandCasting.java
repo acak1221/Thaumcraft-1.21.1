@@ -202,6 +202,11 @@ public final class ItemWandCasting extends Item {
         // Original ItemWandCasting:389-390 - the registered block triggers come next.
         InteractionResult trigger = dispatchBlockTrigger(context);
         if (trigger != InteractionResult.PASS) return trigger;
+        // Original WandManager:427-441 - the wand trigger of the event six, the eldritch
+        // altar that opens the gate into the Outer Lands. The original answered it
+        // through the wand trigger registry, which 1.21.1 has no metadata for.
+        InteractionResult oculus = thaumcraft.common.lib.eldritch.OculusFormation.tryWandInteraction(context);
+        if (oculus != InteractionResult.PASS) return oculus;
         InteractionResult charger = thaumcraft.common.blocks.BlockMagicWorkbenchCharger.tryWandInteraction(context);
         if (charger != InteractionResult.PASS) return charger;
         InteractionResult thaumatorium = thaumcraft.common.lib.ThaumatoriumFormation.tryForm(context);

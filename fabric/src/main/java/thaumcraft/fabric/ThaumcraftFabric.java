@@ -95,6 +95,9 @@ public final class ThaumcraftFabric implements ModInitializer {
         thaumcraft.common.config.ThaumcraftEldritchMobs.registerAttributes(
                 (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                         (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));
+        net.minecraft.world.entity.SpawnPlacements.register(thaumcraft.common.config.ThaumcraftEldritchMobs.INHABITED_ZOMBIE.get(),
+                net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                thaumcraft.common.entities.monster.EntityInhabitedZombie::checkInhabitedSpawnRules);
         thaumcraft.common.config.ThaumcraftCultists.registerAttributes(
                 (type, builder) -> net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                         (net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, builder));

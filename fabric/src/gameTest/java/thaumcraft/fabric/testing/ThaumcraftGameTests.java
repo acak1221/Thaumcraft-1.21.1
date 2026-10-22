@@ -1593,6 +1593,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.SpawnLightAuditRuntimeChecks.daylight(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "g13_spawn_inhabited")
+    public void spawnAuditInhabitedPlacement(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnLightAuditRuntimeChecks.inhabitedPlacement(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "r14_biome_source")
     public void originalBiomesUseActualRegistrySourcesAndSpawnRows(GameTestHelper test) {
         thaumcraft.common.testing.BiomeRuntimeChecks.source(test);

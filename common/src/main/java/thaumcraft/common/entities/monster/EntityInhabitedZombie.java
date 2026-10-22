@@ -94,6 +94,14 @@ public class EntityInhabitedZombie extends Zombie implements IEldritchMob {
         super.die(source);
     }
 
+    /** Original inherited EntityMob light gate, before instance isolation/collision checks. */
+    public static boolean checkInhabitedSpawnRules(EntityType<? extends EntityInhabitedZombie> type,
+            ServerLevelAccessor level,MobSpawnType reason,net.minecraft.core.BlockPos pos,net.minecraft.util.RandomSource random) {
+        return level.getDifficulty()!=net.minecraft.world.Difficulty.PEACEFUL
+                &&thaumcraft.common.lib.entities.OriginalLightRules.validMobLightLevel(level,pos,random)
+                &&net.minecraft.world.entity.Mob.checkMobSpawnRules(type,level,reason,pos,random);
+    }
+
     /** Original inhabited zombie keeps its distance from other inhabited zombies. */
     @Override public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level,MobSpawnType reason) {
         var box=new net.minecraft.world.phys.AABB(getX(),getY(),getZ(),getX()+1D,getY()+1D,getZ()+1D)

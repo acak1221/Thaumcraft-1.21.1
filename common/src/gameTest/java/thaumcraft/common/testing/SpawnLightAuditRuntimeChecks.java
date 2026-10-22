@@ -11,6 +11,31 @@ import thaumcraft.common.config.ThaumcraftTaint;
 
 public final class SpawnLightAuditRuntimeChecks {
     private SpawnLightAuditRuntimeChecks() {}
+    public static void inhabitedPlacement(GameTestHelper test) {
+        var level = test.getLevel();
+        var pos = new BlockPos(test.absolutePos(BlockPos.ZERO).getX(), 200, test.absolutePos(BlockPos.ZERO).getZ());
+        var floor = level.getBlockState(pos.below());
+        long time = level.getDayTime();
+        try {
+            level.setBlock(pos.below(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 2);
+            level.setDayTime(6000); level.updateSkyBrightness();
+            test.assertTrue(!SpawnPlacements.checkSpawnRules(thaumcraft.common.config.ThaumcraftEldritchMobs.INHABITED_ZOMBIE.get(), level,
+                    MobSpawnType.NATURAL, pos, RandomSource.create(0)), "inhabited zombie has a registered original monster daylight gate, not the default always-true placement");
+            level.setDayTime(18000); level.updateSkyBrightness();
+            for (long seed = 0; seed < 128; seed++) {
+                var expected = RandomSource.create(seed);
+                boolean allowed = level.getBrightness(LightLayer.SKY, pos) <= expected.nextInt(32)
+                        && level.getMaxLocalRawBrightness(pos, level.isThundering() ? 10 : level.getSkyDarken()) <= expected.nextInt(8);
+                var actual = RandomSource.create(seed);
+                test.assertTrue(SpawnPlacements.checkSpawnRules(thaumcraft.common.config.ThaumcraftEldritchMobs.INHABITED_ZOMBIE.get(), level,
+                        MobSpawnType.NATURAL, pos, actual) == allowed && actual.nextLong() == expected.nextLong(), "inhabited registered predicate keeps inherited original monster night rolls");
+            }
+        } finally {
+            level.setBlock(pos.below(), floor, 2); level.setDayTime(time); level.updateSkyBrightness();
+        }
+        test.succeed();
+    }
+
     public static void daylight(GameTestHelper test) {
         var level = test.getLevel();
         var pos = new BlockPos(test.absolutePos(BlockPos.ZERO).getX(), 200, test.absolutePos(BlockPos.ZERO).getZ());

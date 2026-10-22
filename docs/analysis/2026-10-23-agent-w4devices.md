@@ -183,8 +183,11 @@ items that did not exist. The six items of the tin, the silver and the lead were
 * the creative tab keeps the gate of the original: the six items of the tin, the silver and the
   lead are not listed (the 1.21.1 tree has no tin, no silver and no lead ore), the vanilla
   iron nugget is listed (the original always listed the iron nugget);
-* the two ore dictionary recipes of the original that the port missed are added
-  (`iron_ingot_from_nuggets.json`, `quick_silver_from_drops.json`).
+* the ore dictionary recipe of the original that the port missed is added
+  (`iron_ingot_from_nuggets.json`: nine iron nuggets into an iron ingot,
+  `oracle ConfigRecipes:402`) and the recipe of the nine quicksilver drops now asks the ore
+  dictionary tag of the original (`quick_silver_from_drops.json`, `oracle ConfigRecipes:404`)
+  instead of the concrete item, like the recipe of the iron nuggets.
 
 ### 3.4 `WorldgenLootHelper` — the chests of the structures carried the wrong loot
 
@@ -355,7 +358,7 @@ javac(test) exit: 0
 * `common/src/main/resources/assets/thaumcraft/models/item/{tin,silver,lead}_nugget.json`, `cluster_{tin,silver,lead}.json` — **new**.
 * `common/src/main/resources/assets/thaumcraft/lang/{en_us,ru_ru}.json` — the names of the six new items.
 * `common/src/main/resources/data/thaumcraft/tags/item/original_ore/{nugget,cluster}_{tin,silver,lead}.json` — the items of the port.
-* `common/src/main/resources/data/thaumcraft/recipe/iron_ingot_from_nuggets.json`, `quick_silver_from_drops.json` — **new**.
+* `common/src/main/resources/data/thaumcraft/recipe/iron_ingot_from_nuggets.json` — **new**; `quick_silver_from_drops.json` — the ingredient is now the ore dictionary tag of the original.
 * `common/src/test/java/thaumcraft/common/entities/EntityItemGrateParityTest.java` — **new**.
 * `common/src/test/java/thaumcraft/common/blocks/PlantSoilRuleParityTest.java` — **new**.
 * `common/src/test/java/thaumcraft/common/lib/world/DungeonChestLootParityTest.java` — **new**.

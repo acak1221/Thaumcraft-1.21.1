@@ -22,10 +22,12 @@ import thaumcraft.common.lib.network.ShovelOrientationNetworking;
  * item key packet.
  */
 public final class ThaumcraftMiscKeyClient {
-    // Original Keys.keyG (oracle thaumcraft/api/Keys.java:9) is bound to
-    // Keyboard.KEY_NONE, so the key of the original is NOT bound by default.
-    // The port keeps that: the player assigns the key in the vanilla controls.
-    public static final KeyMapping MISC_TOGGLE = new KeyMapping("key.thaumcraft.misc_toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, KeyMapping.CATEGORY_MISC);
+    // Original KeyHandler.keyG (oracle thaumcraft/common/lib/events/KeyHandler.java:38)
+    // is `new KeyBinding("Misc Wand Toggle", 34, "key.categories.misc")`: LWJGL2
+    // Keyboard.KEY_G is 34, so the original binds the misc wand toggle to G BY
+    // DEFAULT. The oracle has no thaumcraft/api/Keys.java; the KEY_NONE claim
+    // came from the later 1.7.10/1.12 copies, not from the 4.2.3.5 jar.
+    public static final KeyMapping MISC_TOGGLE = new KeyMapping("key.thaumcraft.misc_toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, KeyMapping.CATEGORY_MISC);
     private static boolean initialized;
 
     private ThaumcraftMiscKeyClient() {}

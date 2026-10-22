@@ -10,6 +10,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.lib.world.EldritchBlockRules;
+import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /**
  * Original TileMagicBox: the linked storage box. Boxes that touch each other
@@ -219,16 +221,14 @@ public final class TileMagicBox extends BlockEntity implements Container {
         return net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace();
     }
 
-    /** Original TileMagicBox:64-70 - the whole content is dropped when the box breaks. */
+    /** Oracle BlockMagicBox:72-75 and InventoryUtils:354-378: transfer all physical stock. */
     public void dropContents(Level level, BlockPos pos) {
+        if (!(level instanceof ServerLevel server)) return;
         ArrayList<ItemStack> list = contents();
         if (list.isEmpty()) return;
-        for (ItemStack stack : list) {
-            net.minecraft.world.entity.item.ItemEntity item = new net.minecraft.world.entity.item.ItemEntity(level,
-                    pos.getX() + .5D, pos.getY() + .5D, pos.getZ() + .5D, stack.copy());
-            item.setDefaultPickUpDelay();
-            level.addFreshEntity(item);
-        }
+        // No synchronous entity callbacks inside LevelChunk's removal. The
+        // durable queue copies components/counts before this owner is cleared.
+        DeferredItemDrops.enqueue(server, pos, list);
         list.clear();
         setChanged();
     }

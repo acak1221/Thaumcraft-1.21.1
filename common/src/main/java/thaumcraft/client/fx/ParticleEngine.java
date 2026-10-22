@@ -27,6 +27,6 @@ public final class ParticleEngine {
         if (level != null) PARTICLES.forEach(level.dimension(), particle -> particle.render(null, camera, partialTick));
     }
 
-    /** A dimension switch retains inactive queues; disconnect/resource reload releases them. */
+    /** Level replacement, disconnect and resource reload release world-owned particles. */
     public static void clear() { PARTICLES.clear(); }
 }

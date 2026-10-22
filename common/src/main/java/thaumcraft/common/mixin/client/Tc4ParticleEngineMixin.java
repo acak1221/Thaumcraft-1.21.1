@@ -21,7 +21,9 @@ public abstract class Tc4ParticleEngineMixin {
 
     @Inject(method = "setLevel", at = @At("HEAD"))
     private void thaumcraft$disconnect(ClientLevel next, CallbackInfo ci) {
-        if (next == null) thaumcraft.client.fx.ParticleEngine.clear();
+        // Particles retain their actual ClientLevel, not just its dimension key.
+        // Returning to a dimension must not resume particles from the old level.
+        if (next != level || next == null) thaumcraft.client.fx.ParticleEngine.clear();
     }
 
     @Inject(method = "close", at = @At("HEAD"))

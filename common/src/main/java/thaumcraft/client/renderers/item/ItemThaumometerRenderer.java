@@ -49,6 +49,8 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 public final class ItemThaumometerRenderer {
     /** Original ItemThaumometerRenderer:95 - the size factor of the first person view. */
     private static final float FIRST_PERSON_SCALE = 0.8F;
+    /** Original ItemThaumometerRenderer:154 - the scale of the scan screen quad. */
+    private static final float SCREEN_SCALE = 2.5F;
     private static final ModelThaumometer MODEL = new ModelThaumometer();
 
     private ItemThaumometerRenderer() {}
@@ -68,9 +70,13 @@ public final class ItemThaumometerRenderer {
                     pose.mulPose(Axis.XN.rotationDegrees(90.0F));
                     pose.mulPose(Axis.ZN.rotationDegrees(30.0F));
                 } else if (context == ItemDisplayContext.GUI) {
+                    // Original ItemThaumometerRenderer:141-145 - the inventory chain. Note the
+                    // LAST rotation turns about the Y axis with a negative angle, not about Z:
+                    // glRotatef(248, 0, -1, 0) is Axis.YN 248, and Z would lay the scanner on
+                    // its back in the slot instead of showing its face.
                     pose.mulPose(Axis.XP.rotationDegrees(60.0F));
                     pose.mulPose(Axis.ZN.rotationDegrees(30.0F));
-                    pose.mulPose(Axis.ZN.rotationDegrees(248.0F));
+                    pose.mulPose(Axis.YN.rotationDegrees(248.0F));
                 }
             }
             // Original ItemThaumometerRenderer:148-149.
@@ -207,15 +213,25 @@ public final class ItemThaumometerRenderer {
         int ticks = player == null ? 0 : player.tickCount;
         int jitter = player == null || player.level() == null ? 0 : player.level().getRandom().nextInt(2);
         int brightness = (int) (190.0F + (float) Math.sin(ticks - jitter) * 10.0F + 10.0F);
-        int light = LightTexture.pack(brightness % 16, (brightness / 16) % 16);
-        var out = buffers.getBuffer(RenderType.entityTranslucent(ModelThaumometer.SCREEN));
-        float[] points = {-0.5F, 0.5F, 0.0F, 0.5F, 0.5F, 0.0F, 0.5F, -0.5F, 0.0F, -0.5F, -0.5F, 0.0F};
-        float[] uv = {0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F};
-        for (int index = 0; index < 4; index++) {
-            out.addVertex(pose.last(), points[index * 3], points[index * 3 + 1], points[index * 3 + 2])
-                    .setColor(255, 255, 255, 255)
-                    .setUv(uv[index * 2], uv[index * 2 + 1]).setOverlay(overlay).setLight(light)
-                    .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
+        int light = ThaumometerReadout.lightmap(brightness);
+        // Original ItemThaumometerRenderer:154 renders the screen through
+        // UtilsFX.renderQuadCenteredFromTexture(..., 2.5f, ...), which does a glScalef(2.5)
+        // before the unit quad (oracle UtilsFX:761). Without that scale the screen is a
+        // fifth of the face of the scanner and the body reads as a hollow golden ring.
+        pose.pushPose();
+        try {
+            pose.scale(SCREEN_SCALE, SCREEN_SCALE, SCREEN_SCALE);
+            var out = buffers.getBuffer(RenderType.entityTranslucent(ModelThaumometer.SCREEN));
+            float[] points = {-0.5F, 0.5F, 0.0F, 0.5F, 0.5F, 0.0F, 0.5F, -0.5F, 0.0F, -0.5F, -0.5F, 0.0F};
+            float[] uv = {0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F};
+            for (int index = 0; index < 4; index++) {
+                out.addVertex(pose.last(), points[index * 3], points[index * 3 + 1], points[index * 3 + 2])
+                        .setColor(255, 255, 255, 255)
+                        .setUv(uv[index * 2], uv[index * 2 + 1]).setOverlay(overlay).setLight(light)
+                        .setNormal(pose.last(), 0.0F, 0.0F, 1.0F);
+            }
+        } finally {
+            pose.popPose();
         }
     }
 

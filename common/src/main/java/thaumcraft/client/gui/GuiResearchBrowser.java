@@ -30,6 +30,11 @@ import java.util.regex.Pattern;
 public final class GuiResearchBrowser extends Screen {
     private static final Pattern TEXTURE = Pattern.compile("new ResourceLocation\\(\"thaumcraft\",\\s*\"([^\"]+)\"\\)");
     private static final ResourceLocation FRAME = texture("textures/gui/gui_research.png");
+    /** Original GuiResearchBrowser:290 - the background is a 112x98 window of the sheet. */
+    private static final int ORIGINAL_BACKGROUND_WINDOW_WIDTH = 112;
+    private static final int ORIGINAL_BACKGROUND_WINDOW_HEIGHT = 98;
+    /** The original category sheets are 512x512 (gui_researchback.png / gui_researchbackeldritch.png). */
+    private static final int BACKGROUND_SHEET_SIZE = 512;
     private final List<Node> nodes = new ArrayList<>();
     private final List<Tab> tabs = new ArrayList<>();
     private String category = thaumcraft.client.lib.ResearchNotifications.selectedCategory();
@@ -86,8 +91,12 @@ public final class GuiResearchBrowser extends Screen {
         int originY = graphTop + graphHeight / 2 + (int)panY;
         for (var research : entries) nodes.add(new Node(research, originX + research.column() * 24, originY + research.row() * 24));
         graphics.enableScissor(graphLeft, graphTop, graphLeft + graphWidth, graphTop + graphHeight);
-        graphics.blit(texture("textures/gui/" + (category.equals("ELDRITCH") ? "gui_researchbackeldritch.png" : "gui_researchback.png")),
-                graphLeft, graphTop, 0, 0, graphWidth, graphHeight, 512, 512);
+        // Original GuiResearchBrowser:277-292 draws the category background as a 112x98 WINDOW
+        // of the sheet under a glScalef(2,2,1), so the window covers 224x196 screen pixels and the
+        // rest of the sheet is panned into view, never squeezed into the frame. Blitting the whole
+        // 512x512 sheet to graphWidth x graphHeight instead resamples the parchment texture by a
+        // different factor on each axis, which is what made the graph paper look washed out.
+        drawCategoryBackground(graphics, category, graphLeft, graphTop, graphWidth, graphHeight);
         drawConnectors(graphics, completed, originX, originY, delta);
         for (Node node : nodes) {
             boolean unlocked = completed.contains(node.research.key());
@@ -183,8 +192,47 @@ public final class GuiResearchBrowser extends Screen {
      * to black along the line, the alpha grows from zero to 0.6 and the whole line wobbles with
      * the sine of the ticks of the player.</p>
      */
-    private void drawConnectors(GuiGraphics graphics, Set<String> completed, int originX, int originY, float partialTick) {
-        Map<String, int[]> positions = new LinkedHashMap<>();
+    /**
+     * The category background of the original graph.
+     *
+     * <p>Original {@code GuiResearchBrowser:277-292}: the sheet is bound, the pose is scaled by
+     * {@code (2, 2, 1)}, and a <b>112x98</b> window of it is blitted at the pane origin, with the
+     * sheet offset by the pan of the map ({@code vx}, {@code vy}). One texel of the sheet is
+     * therefore two screen pixels, on <b>both</b> axes. The previous revision blitted the whole
+     * 512x512 sheet into {@code graphWidth x graphHeight} instead, which resamples the parchment by
+     * a different factor on each axis - that is what made the graph paper look washed out and
+     * blurry.</p>
+     *
+     * <p>This keeps the original window and the original density. The graph of the port is wider
+     * than one 224 px window, so the window is repeated on its own grid, which is how the original
+     * paper continues when the map is panned: every tile samples the same 112x98 texels, so the
+     * texel density never changes.</p>
+     */
+    private void drawCategoryBackground(GuiGraphics graphics, String category, int left, int top, int width, int height) {
+        ResourceLocation sheet = texture("textures/gui/"
+                + (category.equals("ELDRITCH") ? "gui_researchbackeldritch.png" : "gui_researchback.png"));
+        // Original GuiResearchBrowser:290 - the 112x98 window and the glScalef(2, 2, 1) over it.
+        int windowWidth = ORIGINAL_BACKGROUND_WINDOW_WIDTH;
+        int windowHeight = ORIGINAL_BACKGROUND_WINDOW_HEIGHT;
+        int stepX = windowWidth * 2;
+        int stepY = windowHeight * 2;
+        // The pan of the original is divided by the scale of two before the blit (:285-286).
+        int offsetX = Math.floorDiv((int) panX, 2);
+        int offsetY = Math.floorDiv((int) panY, 2);
+        for (int y = 0; y < height; y += stepY) {
+            for (int x = 0; x < width; x += stepX) {
+                int drawWidth = Math.min(stepX, width - x);
+                int drawHeight = Math.min(stepY, height - y);
+                // A partial tile samples only the texels it covers, so the density stays 1:2.
+                int texWidth = Math.max(1, (drawWidth + 1) / 2);
+                int texHeight = Math.max(1, (drawHeight + 1) / 2);
+                graphics.blit(sheet, left + x, top + y, offsetX, offsetY, drawWidth, drawHeight,
+                        texWidth, texHeight, BACKGROUND_SHEET_SIZE, BACKGROUND_SHEET_SIZE);
+            }
+        }
+    }
+
+    private void drawConnectors(GuiGraphics graphics, Set<String> completed, int originX, int originY, float partialTick) {        Map<String, int[]> positions = new LinkedHashMap<>();
         for (var research : ResearchBrowserData.categoryEntries(category)) {
             positions.put(research.key(), new int[] {originX + research.column() * 24, originY + research.row() * 24});
         }

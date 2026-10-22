@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:builtin/entity",
-  "gui_light": "side",
+  "gui_light": "front",
   "textures": {"particle": "thaumcraft:items/thaumometer"},
   "display": {
     "gui": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
-    "ground": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [1, 1, 1]},
     "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
     "thirdperson_righthand": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
     "thirdperson_lefthand": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},

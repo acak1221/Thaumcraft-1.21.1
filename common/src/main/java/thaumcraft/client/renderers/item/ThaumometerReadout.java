@@ -209,10 +209,33 @@ public final class ThaumometerReadout {
         return (int) (190.0F + (float) Math.sin(ticks - jitter) * 10.0F + 10.0F);
     }
 
+    /**
+     * The 1.7.10 lightmap coordinate of the original, converted to the 1.21.1 pack.
+     *
+     * <p>Original {@code UtilsFX.renderQuadCenteredFromTexture}:766-786 hands the brightness to
+     * {@code Tessellator.setBrightness} (MCP {@code func_78380_c}), which stores it as the composed
+     * lightmap coordinate of a fixed-function texture unit: the Block light lives in the low 16
+     * bits and the Sky light in the high 16, and the layer is sampled in 1/16 units
+     * ({@code OpenGlHelper.setLightmapTextureCoords(lightmapTexUnit, brightness % 65536,
+     * brightness / 65536)} with the vanilla {@code 240.0F} for full brightness).</p>
+     *
+     * <p>So a brightness of 190..210 is <b>Block 11..13 and Sky 0</b>, not the
+     * {@code pack(brightness % 16, (brightness / 16) % 16)} of an earlier revision, which turned
+     * the same number into Block 14/8/2 and Sky 11/12/13 - a light that changed two components
+     * in opposite directions as the value drifted, and made the screen flicker and wash out.</p>
+     */
+    public static int lightmap(int brightness) {
+        // 1.7.10: block = brightness % 65536, sky = brightness / 65536, both in 1/16 units.
+        // LightTexture.pack then shifts the 0..15 levels into the packed coordinate itself
+        // (pack(block, sky) = block << 4 | sky << 20), so the levels are handed over unscaled.
+        int block = (brightness & 0xFFFF) / 16;
+        int sky = (brightness >>> 16) / 16;
+        return LightTexture.pack(Math.min(block, 15), Math.min(sky, 15));
+    }
+
     /** The packed light of the readout of the original. */
     public static int packedLight(int ticks, int jitter) {
-        int value = brightness(ticks, jitter);
-        return LightTexture.pack(value % 16, (value / 16) % 16);
+        return lightmap(brightness(ticks, jitter));
     }
 
     /** The text of the readout, for the tests and for the log. */

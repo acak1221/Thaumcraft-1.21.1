@@ -30,6 +30,9 @@ public final class ThaumcraftNeoForge {
         NeoForgeSpawnPlacements.register(bus);
         NeoForgeBiomeSpawns.register(bus);
         NeoForgeInteractions.register(bus);
+        // Oracle EventHandlerWorld:225-245 - the original cancelled a block placement next to an
+        // active eldritch boss of the Outer Lands.
+        NeoForgeBossPlacement.register(bus);
         NeoForgeLootTables.register(bus);
         NeoForgeBorePlatform.init();
         NeoForgeGolemHarvestPlatform.init();

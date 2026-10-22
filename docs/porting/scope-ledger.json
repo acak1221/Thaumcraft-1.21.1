@@ -38379,7 +38379,12 @@
           "oracle thaumcraft/common/items/wands/WandManager.java:661-709 toggleMisc and the areax/areay/areaz/aread of the architect area",
           "oracle thaumcraft/common/items/wands/WandManager.java:75-101 the total vis discount over the gear",
           "native common/src/main/java/thaumcraft/common/items/wands/WandManager.java the focus gate of the Thaumonomicon (2026-10-23)",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java the areax/areay/areaz/aread area and the bounded traversal of the original toggleMisc"
+          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java the areax/areay/areaz/aread area and the bounded traversal of the original toggleMisc",
+          "oracle thaumcraft/common/items/wands/WandManager.java:427-441 createOculus: the eldritch altar with four eyes, a dark node above it, a labyrinth over the altar and one hundred whole vis of every primal aspect open the gate into the Outer Lands",
+          "oracle thaumcraft/common/config/ConfigRecipes.java:83 the original registers the eldritch altar as the wand trigger of the event six and the original dispatch of WandManager.performTrigger:730-734 asks for the complete OCULUS research first",
+          "native common/src/main/java/thaumcraft/common/lib/eldritch/OculusFormation.java the native oculus trigger with the original conditions and the original six hundred vis (2026-10-23)",
+          "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the oculus dispatch of the wand (2026-10-23)",
+          "native common/src/gameTest/java/thaumcraft/common/testing/SurvivalProgressionRuntimeChecks.java the survival acceptance of the oculus and of the gate into the Outer Lands (2026-10-23)"
         ],
         "notes": [
           "The 806 line manager was split into WandManager, WandVisDiscount, WandArchitect, FocusSelectionSources, FocusData, FocusUpgradeData and WandMaterials, each with the original arithmetic; the architect area of the original toggleMisc is the WandArchitect.Area record.",
@@ -47364,7 +47369,10 @@
           "oracle thaumcraft/common/tiles/TileEldritchAltar.java:150-191 the four clerics and the success rule of three",
           "oracle thaumcraft/common/tiles/TileEldritchAltar.java:217-226 the labyrinth size 15 plus nextInt(8) times 2",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:544-551 the timer, the period, the cleric count and the cultist cap",
-          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchAltar.java:62-78 the native labyrinth size"
+          "native common/src/main/java/thaumcraft/common/tiles/TileEldritchAltar.java:62-78 the native labyrinth size",
+          "oracle thaumcraft/common/items/wands/WandManager.java:432 the altar answers the oculus only while it carries exactly four eyes and is not open yet",
+          "oracle thaumcraft/common/tiles/TileEldritchAltar.java:217-226 checkForMaze answers true only when a labyrinth already covers the altar, and creates one otherwise",
+          "native common/src/main/java/thaumcraft/common/lib/eldritch/OculusFormation.java the altar is the target of the original oculus (2026-10-23)"
         ],
         "notes": [
           "The timer, the spawn period, the four cleric offsets, the success rule, the cultist cap of eight and the labyrinth size are kept."

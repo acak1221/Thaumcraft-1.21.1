@@ -3,6 +3,7 @@ package thaumcraft.client.renderers.tile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import net.minecraft.util.Mth;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,18 +26,29 @@ class JarRendererParityTest {
     @Test void theBrainBobsWithTheOriginalSine() {
         // sin(0/14) * 0.03 + 0.03
         assertEquals(.03F, TileJarBrainRenderer.bob(0), 1.0E-6F);
-        // The bob is bounded by 0.03 and 0.06, exactly like the original.
         for (int tick = 0; tick < 512; tick++) {
             float bob = TileJarBrainRenderer.bob(tick);
-            assertTrue(bob >= .03F - 1.0E-6F && bob <= .06F + 1.0E-6F,
-                    "the original brain bob stays between 0.03 and 0.06, not " + bob);
+            // Original TileJarRenderer.java:157: the bob is MathHelper.sin(ticks / 14) * 0.03
+            // + 0.03. The sine of 1.7.10 is the table of 65536 values that is read with the
+            // factor 10430.378f (the bytecode of the 1.7.10 client, MathHelper.sin) - the very
+            // table of the 1.21.1 Mth.sin.
+            assertEquals(Mth.sin(tick / 14.0F) * 0.03F + 0.03F, bob, 1.0E-6F,
+                    "the bob of the original is the sine of the original");
+            // The sine of the tick divided by fourteen is negative between the ticks 44 and 88
+            // and between every later pair of that span, so the bob of the original leaves 0.03.
+            assertTrue(bob >= -1.0E-4F && bob <= .06F + 1.0E-4F,
+                    "the bob of the original is the sine of the original times 0.03 plus 0.03, not " + bob);
         }
+        // The sine of the original is -1 at the tick 66, so the bob of the original is 0 there.
+        assertEquals(0F, TileJarBrainRenderer.bob(66), 1.0E-4F,
+                "the bob of the original is 0 at the tick 66");
     }
 
     @Test void theBrainTurnWrapsTheDifferenceIntoOneCircle() {
-        // The original: the difference of the two angles is wrapped into [-pi, pi] and
-        // interpolated with the frame.
-        assertEquals(0F, TileJarBrainRenderer.turn(1F, 1F, .5F), 1.0E-6F);
+        // The original TileJarRenderer.java:160-165: the difference of the two angles is wrapped
+        // into [-pi, pi] and the turn is the second angle plus the wrapped difference times the
+        // frame. Two equal angles therefore turn to the angle itself.
+        assertEquals(1F, TileJarBrainRenderer.turn(1F, 1F, .5F), 1.0E-6F);
         assertEquals(1.5F, TileJarBrainRenderer.turn(2F, 1F, .5F), 1.0E-6F);
         // 5 - 1 = 4 is above pi, so it wraps to 4 - 2*pi.
         float wrapped = TileJarBrainRenderer.turn(5F, 1F, 1F);

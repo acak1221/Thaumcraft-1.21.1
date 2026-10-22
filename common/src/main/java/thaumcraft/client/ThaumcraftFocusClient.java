@@ -19,11 +19,15 @@ import thaumcraft.common.lib.network.GolemBellNetworking;
 
 /** Shared item-key input: wand selection or bell-link reset, both server-owned. */
 public final class ThaumcraftFocusClient {
-    // Original Keys.keyF (oracle thaumcraft/api/Keys.java:7) is bound to
-    // Keyboard.KEY_NONE, so the key of the original is NOT bound by default.
-    // The port keeps that: the player assigns the key in the vanilla controls.
+    // Original KeyHandler.keyF (oracle thaumcraft/common/lib/events/KeyHandler.java:36)
+    // is `new KeyBinding("Change Wand Focus", 33, "key.categories.misc")`: LWJGL2
+    // Keyboard.KEY_F is 33, so the original binds the wand focus key to F BY
+    // DEFAULT. The oracle has no thaumcraft/api/Keys.java at all; the KEY_NONE
+    // claim came from the later 1.7.10/1.12 copies, not from the 4.2.3.5 jar.
+    // The port keeps the original default: F, and therefore the same key as
+    // the vanilla offhand swap, which WandFocusKeyMixin coalesces.
     public static final KeyMapping CHANGE_FOCUS = new KeyMapping("key.thaumcraft.change_focus",
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, KeyMapping.CATEGORY_MISC);
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F, KeyMapping.CATEGORY_MISC);
     private static boolean initialized;
     private static boolean pressHandled;
     private static boolean rawKeyDown;

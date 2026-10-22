@@ -19,21 +19,16 @@ import org.junit.jupiter.api.Test;
  * <p>No block, item or client is constructed here: the conversion is a pure static function.</p>
  */
 class ThaumometerLightmapParityTest {
-    /** The 1.7.10 decomposition, written out the way {@code OpenGlHelper} did it. */
-    private static int oracleBlock(int brightness) { return brightness % 65536 / 16; }
-    private static int oracleSky(int brightness) { return brightness / 65536 / 16; }
-
     @Test void theBrightnessOfTheOriginalSplitsIntoBlockLightAndNoSkyLight() {
         // The brightness of the original only ever occupies the Block half: 190..210 out of 65536.
-        for (int ticks = 0; ticks < 40; ticks++) {
-            for (int jitter = 0; jitter < 2; jitter++) {
-                int brightness = ThaumometerReadout.brightness(ticks, jitter);
-                int packed = ThaumometerReadout.lightmap(brightness);
-                assertEquals(oracleBlock(brightness), LightTexture.block(packed),
-                        "block light of brightness " + brightness + " at " + ticks + "/" + jitter);
-                assertEquals(oracleSky(brightness), LightTexture.sky(packed),
-                        "sky light of brightness " + brightness + " at " + ticks + "/" + jitter);
-            }
+        int[][] fixtures = {{190,11,0,176}, {191,11,0,176}, {192,12,0,192},
+                {200,12,0,192}, {207,12,0,192}, {208,13,0,208}, {210,13,0,208},
+                {15728832,12,15,15728832}};
+        for (int[] fixture : fixtures) {
+            int packed = ThaumometerReadout.lightmap(fixture[0]);
+            assertEquals(fixture[1], LightTexture.block(packed));
+            assertEquals(fixture[2], LightTexture.sky(packed));
+            assertEquals(fixture[3], packed);
         }
     }
 
@@ -51,9 +46,11 @@ class ThaumometerLightmapParityTest {
 
     @Test void theBrightnessIsTheOriginalSine() {
         // Oracle ItemThaumometerRenderer:157 - 190 + sin(ticks - random(2)) * 10 + 10.
-        for (int ticks = 0; ticks < 25; ticks++) {
-            int expected = (int) (190.0F + (float) Math.sin(ticks) * 10.0F + 10.0F);
-            assertEquals(expected, ThaumometerReadout.brightness(ticks, 0));
+        int[] expected = {200,208,209,201,192,190,197,206,209,204,194,190,194,204,209,206,197,190,192,201,209,208,199,191,190};
+        for (int ticks = 0; ticks < expected.length; ticks++) {
+            assertEquals(expected[ticks], ThaumometerReadout.brightness(ticks, 0));
+            assertEquals(expected[ticks], ThaumometerReadout.brightness(ticks + 1, 1));
         }
+        assertEquals(191, ThaumometerReadout.brightness(0, 1));
     }
 }

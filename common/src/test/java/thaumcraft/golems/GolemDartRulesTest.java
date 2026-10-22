@@ -41,17 +41,17 @@ class GolemDartRulesTest {
 
     @Test void theSpreadNarrowsByOneAndThreeQuartersForEveryWaterUpgrade() {
         // Oracle EntityGolemBase:1182: 7.0f - (float)this.getUpgradeAmount(3) * 1.75f, in float.
-        assertEquals(7.0F - 0 * 1.75F, GolemDartRules.inaccuracy(0));
-        assertEquals(7.0F - 1 * 1.75F, GolemDartRules.inaccuracy(1));
-        assertEquals(7.0F - 2 * 1.75F, GolemDartRules.inaccuracy(2));
-        assertEquals(7.0F - 4 * 1.75F, GolemDartRules.inaccuracy(4));
-        assertEquals(7.0F - 5 * 1.75F, GolemDartRules.inaccuracy(5), "no clamping: the original spread simply changes sign");
+        assertEquals(7F, GolemDartRules.inaccuracy(0));
+        assertEquals(5.25F, GolemDartRules.inaccuracy(1));
+        assertEquals(3.5F, GolemDartRules.inaccuracy(2));
+        assertEquals(0F, GolemDartRules.inaccuracy(4));
+        assertEquals(-1.75F, GolemDartRules.inaccuracy(5), "no clamping");
     }
 
     @Test void theDartDoesFourTenthsOfTheAttackAsAFloatProduct() {
-        assertEquals((double) (6F * 0.4F), GolemDartRules.damage(6F));
-        assertEquals((double) (8F * 0.4F), GolemDartRules.damage(8F));
-        assertEquals((double) (2.5F * 0.4F), GolemDartRules.damage(2.5F));
+        assertEquals(2.4000000953674316D, GolemDartRules.damage(6F));
+        assertEquals(3.200000047683716D, GolemDartRules.damage(8F));
+        assertEquals(1D, GolemDartRules.damage(2.5F));
         assertTrue(GolemDartRules.damage(6F) != 2.4D, "the float product 2.4000000953... is what the arrow receives");
         assertEquals(1.6F, GolemDartRules.SPEED);
     }
@@ -64,17 +64,15 @@ class GolemDartRulesTest {
     }
 
     @Test void aShotNeedsTheTargetWithinEightyPercentOfTheRange() {
-        float reach = 16F * 0.8F; // 12.8
-        assertTrue(GolemDartRules.inReach((double) (reach * reach), 16F), "exactly at the reach");
+        assertTrue(GolemDartRules.inReach(163.8400115966797D, 16F), "exactly at the float-widened reach");
         assertTrue(GolemDartRules.inReach(100.0, 16F));
-        assertFalse(GolemDartRules.inReach((double) (reach * reach) + 0.01, 16F));
+        assertFalse(GolemDartRules.inReach(163.84001159667972D, 16F));
         assertFalse(GolemDartRules.inReach(169.0, 16F));
         // Water upgrades widen it with the range (16 + 4 per upgrade).
         assertTrue(GolemDartRules.inReach(256.0, 20F), "16 blocks away needs 80% of 20");
         assertFalse(GolemDartRules.inReach(256.0, 16F));
         // The square is taken in float, then widened: not the exact double product.
-        float awkward = 17.6F * GolemDartRules.REACH_FACTOR;
-        awkward *= awkward;
-        assertTrue(GolemDartRules.inReach((double) awkward, 17.6F));
+        assertTrue(GolemDartRules.inReach(198.24642944335938D, 17.6F));
+        assertFalse(GolemDartRules.inReach(198.2464294433594D, 17.6F));
     }
 }

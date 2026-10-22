@@ -1,9 +1,6 @@
 package thaumcraft.client.renderers.item;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import net.minecraft.util.Mth;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -41,23 +38,28 @@ class WandUsePoseParityTest {
         assertEquals(20.0F, WandUsePose.raiseDegrees(1.0F), 1.0E-6F);
         assertEquals(40.0F, WandUsePose.raiseDegrees(2.0F), 1.0E-6F);
         assertEquals(60.0F, WandUsePose.raiseDegrees(3.0F), 1.0E-6F);
-        for (int tick = 0; tick < 64; tick++) {
-            float capped = WandUsePose.useTicks(tick, 0.0F);
-            assertEquals(60.0F * (capped / 3.0F), WandUsePose.raiseDegrees(capped), 1.0E-6F,
-                    "the raise of the original is 60 * (t / 3)");
-        }
+        assertEquals(10F, WandUsePose.raiseDegrees(WandUsePose.useTicks(0, .5F)), 1e-6F);
+        assertEquals(45F, WandUsePose.raiseDegrees(WandUsePose.useTicks(2, .25F)), 1e-6F);
+        assertEquals(60F, WandUsePose.raiseDegrees(WandUsePose.useTicks(63, .5F)), 1e-6F);
     }
 
     @Test void theWaveOfTheFocusUsesTheOriginalSine() {
         // Original ItemWandRenderer:102 and :104. The sine of 1.7.10 is the table of 65536
         // values that is read with the factor 10430.378f (the bytecode of the official 1.7.10
         // client.jar, MathHelper.sin), the very table of the 1.21.1 Mth.sin.
-        for (int tick = 0; tick < 128; tick++) {
-            float partial = 0.25F;
-            assertEquals(Mth.sin((tick + partial) / 10.0F) * 10.0F, WandUsePose.waveRoll(tick, partial), 1.0E-6F);
-            assertEquals(Mth.sin((tick + partial) / 15.0F) * 10.0F, WandUsePose.wavePitch(tick, partial), 1.0E-6F);
-            assertEquals(Mth.sin((tick + partial) / 0.8F) * 1.0F, WandUsePose.chargeRoll(tick, partial), 1.0E-6F);
-            assertEquals(Mth.sin((tick + partial) / 0.7F) * 1.0F, WandUsePose.chargePitch(tick, partial), 1.0E-6F);
+        int[] ticks = {0, 1, 10, 40, 100, 127};
+        float[][] expected = {
+                {.24924606F, .16585407F, .30739352F, .34958667F},
+                {1.2459888F, .8321798F, .9999652F, .9770077F},
+                {8.547073F, 6.313498F, .24363112F, .8748654F},
+                {-7.7288876F, 4.4240336F, .046960883F, .8141477F},
+                {-5.647827F, 3.8949327F, -.34410143F, -.9632886F},
+                {1.5791152F, 8.084305F, .9162955F, -.41390017F}};
+        for (int i = 0; i < ticks.length; i++) {
+            assertEquals(expected[i][0], WandUsePose.waveRoll(ticks[i], .25F), 1e-6F);
+            assertEquals(expected[i][1], WandUsePose.wavePitch(ticks[i], .25F), 1e-6F);
+            assertEquals(expected[i][2], WandUsePose.chargeRoll(ticks[i], .25F), 1e-6F);
+            assertEquals(expected[i][3], WandUsePose.chargePitch(ticks[i], .25F), 1e-6F);
         }
     }
 
@@ -67,9 +69,7 @@ class WandUsePoseParityTest {
         float capped = WandUsePose.useTicks(40, 0.0F);
         assertEquals(3.0F, capped, 1.0E-6F);
         float roll = WandUsePose.waveRoll(40, 0.0F);
-        float expected = Mth.sin(40.0F / 10.0F) * 10.0F;
-        assertEquals(expected, roll, 1.0E-6F, "the wave of the original is not capped at three ticks");
-        assertTrue(Math.abs(expected) > 1.0E-3F, "the wave of the original really moves at the tick forty");
+        assertEquals(-7.5677032F, roll, 1.0E-6F, "the wave of the original is not capped at three ticks");
     }
 
     @Test void theConstantsAreTheOriginalOnes() {

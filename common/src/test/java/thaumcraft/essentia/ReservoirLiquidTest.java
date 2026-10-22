@@ -22,11 +22,11 @@ class ReservoirLiquidTest {
     }
 
     @Test void theTankGrowsWithTheStoredUnits() {
-        assertEquals(3 / 16F, ReservoirRules.liquidTop(0), "an empty reservoir shows nothing");
-        assertEquals(3 / 16F + 10 / 16F / 256, ReservoirRules.liquidTop(1), "one unit is a two hundred fifty sixth of the tank");
-        assertEquals(3 / 16F + 10 / 16F / 4, ReservoirRules.liquidTop(64), "a quarter full is a quarter of the tank");
-        assertEquals(3 / 16F + 10 / 16F / 2, ReservoirRules.liquidTop(128), "half full is half of the tank");
-        assertEquals(3 / 16F + 10 / 16F, ReservoirRules.liquidTop(256), "full fills the whole tank");
+        assertEquals(.1875F, ReservoirRules.liquidTop(0), "empty");
+        assertEquals(.18994140625F, ReservoirRules.liquidTop(1), "one unit");
+        assertEquals(.34375F, ReservoirRules.liquidTop(64), "quarter");
+        assertEquals(.5F, ReservoirRules.liquidTop(128), "half");
+        assertEquals(.8125F, ReservoirRules.liquidTop(256), "full");
         for (int units = 1; units <= 256; units++) {
             assertTrue(ReservoirRules.liquidTop(units) >= ReservoirRules.liquidTop(units - 1), "monotone at " + units);
         }
@@ -56,16 +56,15 @@ class ReservoirLiquidTest {
     @Test void theColourWalksToTheAspectColourInTwentyTicks() {
         ReservoirColour colour = new ReservoirColour();
         List<Aspect> stored = List.of(Aspect.FIRE);
-        float red = 0xFF / 255F, green = 0x5A / 255F, blue = 0x01 / 255F;
         colour.update(stored, 20);
         assertEquals(Aspect.FIRE, colour.displayAspect());
         // The original moves the colour on the very tick the aspect is picked.
-        assertEquals(1F - (1F - red) / 20F, colour.red(), 1.0E-6F, "fire is 0xff5a01");
-        assertEquals(1F - (1F - green) / 20F, colour.green(), 1.0E-6F);
-        assertEquals(1F - (1F - blue) / 20F, colour.blue(), 1.0E-6F);
+        assertEquals(1F, colour.red(), 1.0E-6F, "fire is 0xff5a01");
+        assertEquals(.9676471F, colour.green(), 1.0E-6F);
+        assertEquals(.9501961F, colour.blue(), 1.0E-6F);
         for (int count = 21; count <= 39; count++) colour.update(stored, count);
-        assertEquals(red, colour.red(), 1.0E-6F, "after twenty ticks the colour is the aspect's colour");
-        assertEquals(green, colour.green(), 1.0E-6F);
-        assertEquals(blue, colour.blue(), 1.0E-6F);
+        assertEquals(1F, colour.red(), 1.0E-6F, "after twenty ticks");
+        assertEquals(.3529412F, colour.green(), 1.0E-6F);
+        assertEquals(.003921569F, colour.blue(), 1.0E-6F);
     }
 }

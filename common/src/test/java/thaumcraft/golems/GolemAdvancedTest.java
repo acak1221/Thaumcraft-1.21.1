@@ -56,21 +56,21 @@ class GolemAdvancedTest {
 
     @Test void speedIsAirThenTimesOnePointOne() {
         assertEquals(0.38F, GolemUpgrades.speed(0.38F, 0, false), 0F);
-        assertEquals(0.38F * 1.1F, GolemUpgrades.speed(0.38F, 0, true), 0F);
-        float expected = 0.38F * (1.0F + 2 * 0.15F);
-        expected *= 1.1F;
-        assertEquals(expected, GolemUpgrades.speed(0.38F, 2, true), 0F, "float products in the original order");
-        assertEquals(GolemUpgrades.speed(0.33F, 1), GolemUpgrades.speed(0.33F, 1, false), 0F, "the two-argument form stays ordinary");
+        assertEquals(0.418F, GolemUpgrades.speed(0.38F, 0, true), 0F);
+        assertEquals(0.5434F, GolemUpgrades.speed(0.38F, 2, true), 0F, "oracle float products in original order");
+        assertEquals(0.3795F, GolemUpgrades.speed(0.33F, 1, false), 0F);
+        assertEquals(0.3795F, GolemUpgrades.speed(0.33F, 1), 0F);
     }
 
     @Test void rangeAddsTwentyPercentOrTwoWhicheverIsLarger() {
         assertEquals(16F, GolemUpgrades.range(0, false));
-        assertEquals(16F + 3.2F, GolemUpgrades.range(0, true), 1e-6F);
-        assertEquals(20F + 4F, GolemUpgrades.range(1, true), 1e-6F);
-        assertEquals(24F + 24F * 0.2F, GolemUpgrades.range(2, true), 1e-6F);
+        assertEquals(19.2F, GolemUpgrades.range(0, true), 0F);
+        assertEquals(24F, GolemUpgrades.range(1, true), 0F);
+        assertEquals(28.8F, GolemUpgrades.range(2, true), 0F);
+        float[] ordinary = {16F, 20F, 24F};
         for (int water = 0; water <= 2; water++) {
-            assertEquals(GolemUpgrades.range(water), GolemUpgrades.range(water, false), 0F);
-            assertTrue(GolemUpgrades.range(water, true) >= GolemUpgrades.range(water) + 2F);
+            assertEquals(ordinary[water], GolemUpgrades.range(water), 0F);
+            assertEquals(ordinary[water], GolemUpgrades.range(water, false), 0F);
         }
     }
 

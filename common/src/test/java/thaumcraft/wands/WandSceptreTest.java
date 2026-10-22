@@ -29,9 +29,14 @@ class WandSceptreTest {
         assertEquals(18750, WandMaterials.capacity("greatwood_staff", true));
         assertEquals(26250, WandMaterials.capacity("obsidian_staff", true));
         assertEquals(37500, WandMaterials.capacity("primal_staff", true));
-        for (WandMaterials.Rod rod : WandMaterials.RODS) {
-            assertEquals(rod.capacity(), WandMaterials.capacity(rod.tag(), false), rod.tag());
-            assertEquals(rod.capacity() * 3 / 2, WandMaterials.capacity(rod.tag(), true), rod.tag());
+        String[] tags = {"wood","greatwood","silverwood","obsidian","blaze","ice","quartz","bone","reed",
+                "greatwood_staff","obsidian_staff","blaze_staff","ice_staff","quartz_staff","bone_staff","reed_staff","silverwood_staff","primal_staff"};
+        int[] ordinary = {2500,5000,10000,7500,7500,7500,7500,7500,7500,12500,17500,17500,17500,17500,17500,17500,25000,25000};
+        int[] sceptres = {3750,7500,15000,11250,11250,11250,11250,11250,11250,18750,26250,26250,26250,26250,26250,26250,37500,37500};
+        assertEquals(java.util.Set.of(tags), WandMaterials.RODS.stream().map(WandMaterials.Rod::tag).collect(java.util.stream.Collectors.toSet()));
+        for (int i = 0; i < tags.length; i++) {
+            assertEquals(ordinary[i], WandMaterials.capacity(tags[i], false), tags[i]);
+            assertEquals(sceptres[i], WandMaterials.capacity(tags[i], true), tags[i]);
         }
         assertEquals(37500, WandMaterials.MAX_CAPACITY, "the primal staff as a sceptre is the largest wand");
     }

@@ -46,6 +46,7 @@ jobs:
       - name: Build Fabric and run fresh JUnit and GameTest checks
         run: |
           set -o pipefail
+          rm -rf fabric/run-gametest/world
           ./gradlew --no-daemon --console=plain --build-cache :common:test --rerun :fabric:clientTestClasses :fabric:build :fabric:runGameTest 2>&1 | tee .tmp/ci-validate.log
           python -c 'from pathlib import Path; Path(".tmp/ci-exit.json").write_text("{\"code\":0}\n", encoding="utf-8")'
       - name: Show failed game tests with their messages
@@ -74,6 +75,8 @@ jobs:
           --build-exit-json .tmp/ci-exit.json
           --build-log .tmp/ci-validate.log
           --asset-test-log .tmp/ci-assets.log
+      - name: Verify full-suite and fresh isolated regression scenarios agree
+        run: python -B scripts/porting/verify-gametest-order.py
       - name: Keep logs and reports for debugging
         if: always()
         uses: actions/upload-artifact@v4
@@ -85,6 +88,7 @@ jobs:
           path: |
             .tmp/ci-*.json
             .tmp/ci-*.log
+            .tmp/order-verification/
             common/build/test-results/test/
             common/build/reports/tests/test/
             fabric/build/gametest-results.xml

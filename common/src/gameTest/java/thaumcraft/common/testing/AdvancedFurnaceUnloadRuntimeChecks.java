@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.GameTestInfo;
+import net.minecraft.gametest.framework.GameTestListener;
+import net.minecraft.gametest.framework.GameTestRunner;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -23,7 +26,15 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
     private AdvancedFurnaceUnloadRuntimeChecks() {}
     public static void run(GameTestHelper test) {
         var check=new Check(test);
-        try { check.prepare(); } catch(RuntimeException|Error failure) { check.close(); throw failure; }
+        try {
+            BoreWorkRuntimeChecks.testInfo(test).addListener(new GameTestListener() {
+                @Override public void testStructureLoaded(GameTestInfo info) {}
+                @Override public void testPassed(GameTestInfo info, GameTestRunner runner) { check.close(); }
+                @Override public void testFailed(GameTestInfo info, GameTestRunner runner) { check.close(); }
+                @Override public void testAddedForRerun(GameTestInfo old, GameTestInfo next, GameTestRunner runner) { check.close(); }
+            });
+            check.prepare();
+        } catch(RuntimeException|Error failure) { check.close(); throw failure; }
     }
     private static final class Check {
         final GameTestHelper test; final Fixture f; final BlockPos center,shell; final ChunkPos coreChunk,shellChunk;
@@ -64,16 +75,14 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
                                 +"; core="+source.getChunkDebugData(coreChunk)+", shell="+source.getChunkDebugData(shellChunk)
                                 +", oldCoreRemoved="+oldCore.isRemoved()+", oldShellRemoved="+oldShell.isRemoved()); pollUnload(); return;
                     }
-                    source.addRegionTicket(OWNED,coreChunk,0,center);coreTicket=true;polls=0;pollCoreReload();
+                    source.addRegionTicket(OWNED,coreChunk,0,center);coreTicket=true;reloadCore();
                 } catch(RuntimeException|Error failure) { close(); throw failure; }
             });
         }
-        void pollCoreReload() {
+        void reloadCore() {
             test.runAfterDelay(5,()-> {
                 try {
-                    polls++;
-                    var chunk=f.level.getChunkSource().getChunkNow(coreChunk.x,coreChunk.z);
-                    if(chunk==null) { f.check(polls<40,"native radius0 ticket asynchronously reloads the actually saved core chunk");pollCoreReload();return; }
+                    var chunk=GameTestChunkAwait.ticketed(test,coreChunk);
                     var loaded=chunk.getBlockEntity(center);
                     f.check(loaded instanceof TileAlchemyFurnaceAdvanced next && next!=oldCore && machine.equals(next.machineId())
                                     && center.equals(next.ownerPosition()) && next.isCurrent()
@@ -94,16 +103,14 @@ public final class AdvancedFurnaceUnloadRuntimeChecks {
                     f.check(f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z)==null,
                             "own partial disassembly never force-loads saved remote shell terrain through inner-parts' indirect shape updates; shell="
                                     +f.level.getChunkSource().getChunkDebugData(shellChunk));
-                    f.level.getChunkSource().addRegionTicket(OWNED,shellChunk,0,shell); shellTicket=true; polls=0; pollReload();
+                    f.level.getChunkSource().addRegionTicket(OWNED,shellChunk,0,shell); shellTicket=true; reloadShell();
                 } catch(RuntimeException|Error failure) { close(); throw failure; }
             });
         }
-        void pollReload() {
+        void reloadShell() {
             test.runAfterDelay(5,()-> {
                 try {
-                    polls++;
-                    var chunk=f.level.getChunkSource().getChunkNow(shellChunk.x,shellChunk.z);
-                    if(chunk==null) { f.check(polls<200,"native radius0 ticket asynchronously reloads actual saved shell terrain"); pollReload(); return; }
+                    var chunk=GameTestChunkAwait.ticketed(test,shellChunk);
                     var loaded=chunk.getBlockEntity(shell);
                     f.check(loaded instanceof TileAlchemyFurnaceAdvancedPart part && part!=oldShell && machine.equals(part.machineId()) && center.equals(part.ownerPosition()),
                             "actual disk-backed chunk reload creates a NEW native BE retaining exact paid owner UUID/position");

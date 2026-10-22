@@ -1,5 +1,6 @@
 package thaumcraft.integration;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -76,5 +77,47 @@ class GameTestIsolationTest {
             assertTrue(source(name).contains("GolemChunks.refresh("),
                     name + " takes its ring of chunks back: another scenario may release a chunk of it");
         }
+    }
+
+    @Test void everyFabricScenarioHasAnOwnershipAndGlobalStateVerdict() throws IOException {
+        Path fabric = Path.of("../fabric/src/gameTest");
+        String mixins = Files.readString(fabric.resolve("resources/thaumcraft-gametest-selection.mixins.json"));
+        for (String name : new String[] {"GameTestStateGuardMixin", "GameTestForcedChunkGuardMixin",
+                "GameTestRegionTicketGuardMixin", "GameTestConnectedPlayerGuardMixin"}) {
+            assertTrue(mixins.contains('"' + name + '"'), name + " must actually be loaded");
+        }
+        String hook = Files.readString(fabric.resolve("java/thaumcraft/fabric/testing/mixin/GameTestStateGuardMixin.java"));
+        assertTrue(hook.contains("tickInternal()V") && hook.contains("shift = At.Shift.AFTER"),
+                "check after synchronous finally blocks but before native verdict reporting");
+        String guard = source("GameTestStateGuard.java");
+        for (String invariant : new String[] {"info.getTestName()", "before.settings", "before.recipes",
+                "before.live", "RESOURCES", "info.fail("}) {
+            assertTrue(guard.contains(invariant), "native isolation verdict retains " + invariant);
+        }
+    }
+
+    @Test void nativeReloadUsesABoundedRealTimeBudgetWithoutAnotherTicket() throws IOException {
+        String wait = source("GameTestChunkAwait.java");
+        assertTrue(wait.contains("System.nanoTime()") && wait.contains("Duration.ofSeconds(10)"),
+                "asynchronous disk/light completion needs an explicit monotonic deadline");
+        assertTrue(wait.contains("source.pollTask()") && wait.contains("source.getChunkNow("),
+                "service the existing native load while observing FULL visibility");
+        assertFalse(wait.contains("source.getChunk(") || wait.contains("source.getChunkFuture(")
+                || wait.contains("addRegionTicket("), "awaiting must not acquire extra terrain or an UNKNOWN ticket");
+        String furnace = source("AdvancedFurnaceUnloadRuntimeChecks.java");
+        assertTrue(furnace.contains("GameTestChunkAwait.ticketed(test,coreChunk)")
+                && furnace.contains("GameTestChunkAwait.ticketed(test,shellChunk)"));
+        assertFalse(furnace.contains("polls<40") || furnace.contains("polls<200"),
+                "do not reintroduce an accelerated-test-tick disk deadline");
+        assertTrue(furnace.contains("testFailed(GameTestInfo") && furnace.contains("testAddedForRerun(GameTestInfo"),
+                "native timeout/failure/rerun must close the fixture too");
+    }
+
+    @Test void theEmberCollisionFixtureDeclaresAnOrdinaryChampionJoinInput() throws IOException {
+        String ember = source("EmberRuntimeChecks.java");
+        assertTrue(ember.contains("ChampionJoinRoll.join(player.serverLevel(), target)"),
+                "a random native champion starts at45/50 health and invalidates an exact-health fixture");
+        assertTrue(ember.contains("ordinary collision target starts at full health and cold"),
+                "establish the owned target precondition before the transaction under test");
     }
 }

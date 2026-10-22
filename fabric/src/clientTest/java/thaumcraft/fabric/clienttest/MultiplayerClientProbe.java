@@ -1296,13 +1296,13 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             stageData.put("give", true);
             return false;
         }
+        // The second client's own census is read from its status, so the
+        // assertion never depends on the answer of a question.
         if (stageData.get("before") == null) {
-            pairCommand("COUNT", "thaumcraft:accessories_contents");
-            stageData.put("before", true);
+            stageData.put("before", peerAccessoryPayloads());
             return false;
         }
-        if (!pairReplied()) return false;
-        int peerBefore = parseCount(pairAnswer);
+        int peerBefore = (Integer) stageData.get("before");
         evidence.put("pair_peer_accessories_payloads_before", peerBefore);
         if (stageData.get("equip") == null) {
             pairCommand("EQUIP_ACCESSORY", "");
@@ -1311,18 +1311,14 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         }
         if (!pairReplied()) return false;
         evidence.put("pair_peer_equip_answer", pairAnswer);
-        if (stageData.get("after") == null) {
-            pairCommand("COUNT", "thaumcraft:accessories_contents");
-            stageData.put("after", true);
-            return false;
-        }
-        if (!pairReplied()) return false;
-        int peerAfter = parseCount(pairAnswer);
+        int peerAfter = peerAccessoryPayloads();
         int leadCount = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:accessories_contents", new AtomicInteger()).get();
         evidence.put("pair_peer_accessories_payloads_after", peerAfter);
         evidence.put("pair_lead_accessories_payloads", leadCount);
         if (peerAfter <= peerBefore) {
-            throw new IllegalStateException("The second client received no accessory snapshot after equipping one");
+            if (stageTicks < 600) return false;
+            throw new IllegalStateException("The second client received no accessory snapshot after equipping one: before="
+                    + peerBefore + " after=" + peerAfter);
         }
         int leadAccessories = 0;
         var inventory = PlayerAccessories.get(client.player);
@@ -1354,7 +1350,20 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         EntityGolemBase golem = peerOwnedGolem(client);
-        if (golem == null) return false;
+        if (golem == null) {
+            // The golem of the other player is summoned again until it is on
+            // the client of the lead.
+            if (stageTicks % 100 == 0) {
+                Map<String, String> status = peerStatus();
+                int px = Integer.parseInt(status.getOrDefault("x", "0"));
+                int py = Integer.parseInt(status.getOrDefault("y", "0"));
+                int pz = Integer.parseInt(status.getOrDefault("z", "0"));
+                BlockPos pos = new BlockPos(px + 1, py, pz);
+                client.getConnection().sendCommand("summon thaumcraft:golem " + pos.getX() + " " + pos.getY() + " "
+                        + pos.getZ() + " {Owner:\"" + peerName + "\"}");
+            }
+            return false;
+        }
         evidence.put("pair_golem_owner_on_client", golem.getOwnerName());
         if (stageData.get("bell") == null) {
             if (!holdItemOf(client, thaumcraft.common.config.ThaumcraftGolems.GOLEM_BELL.get())) return false;
@@ -1590,6 +1599,17 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
 
     private String peerValue(String key) {
         return peerStatus().get(key);
+    }
+
+    /** The number of accessory snapshots the SECOND client really received. */
+    private int peerAccessoryPayloads() {
+        String value = peerValue("census_acc");
+        if (value == null) return -1;
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException malformed) {
+            return -1;
+        }
     }
 
     /** One "key=value" field of the second client's answer. */

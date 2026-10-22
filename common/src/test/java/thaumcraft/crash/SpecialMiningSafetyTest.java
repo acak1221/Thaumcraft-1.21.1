@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -53,10 +55,15 @@ class SpecialMiningSafetyTest {
      * and never {@code null}; the drop may not be replaced by that empty stack.
      */
     @Test void anUnknownReplacementKeepsTheOriginalDrop() {
+        // The unit test JVM knows the vanilla items only, so the cluster of the table is missing
+        // there and the lookup of the port falls back to the air item.
+        assertFalse(BuiltInRegistries.ITEM.containsKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "cluster_iron")),
+                "the iron cluster is not registered in the unit test JVM");
         ItemStack dropped = new ItemStack(Items.RAW_IRON, 3);
         ItemStack result = SpecialMining.find(dropped, 1.0F, RandomSource.create(7L));
         assertNotNull(result);
         assertFalse(result.isEmpty());
+        assertEquals(Items.RAW_IRON, result.getItem(), "the original drop is kept");
         assertEquals(dropped.getCount(), result.getCount(), "the drop count is preserved");
         assertNotNull(result.getItem(), "a result never carries a missing item");
     }

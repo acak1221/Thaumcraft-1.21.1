@@ -21,7 +21,7 @@ import thaumcraft.common.lib.items.EquipmentRules;
  * The original TC4 equipment and relic items inside a real dedicated server: the bone bow with
  * its original durability, enchantment value and draw curve, the crimson blade and the primal
  * crusher with their original damage and warp, the bottle of taint that poisons the ground it
- * bursts on, the sanity checker that reads the warp of its holder and the death bucket that
+ * bursts on, the sanity checker that does nothing when it is used and the death bucket that
  * pours the original death fluid.
  */
 public final class EquipmentItemRuntimeChecks {
@@ -141,14 +141,15 @@ public final class EquipmentItemRuntimeChecks {
             test.assertTrue(bottle.getMaxStackSize() == EquipmentRules.BOTTLE_TAINT_MAX_STACK_SIZE,
                     "the bottle of taint keeps its original stack size: " + bottle.getMaxStackSize());
 
-            // The original sanity checker reads the warp of its holder.
+            // Oracle ItemSanityChecker:27-55 - the sanity checker of the 4.2.3.5 carries its
+            // rarity and nothing else: it does NOTHING when it is used.
             var checker = new ItemStack(ThaumcraftLegacyItems.SANITY_CHECKER.get());
             test.assertTrue(checker.getMaxStackSize() == 1 && checker.getRarity() == net.minecraft.world.item.Rarity.UNCOMMON,
                     "the sanity checker is the original single uncommon relic: " + checker.getRarity());
             player.setItemInHand(InteractionHand.MAIN_HAND, checker);
             var reading = checker.use(level, player, InteractionHand.MAIN_HAND);
-            test.assertTrue(reading.getResult().consumesAction(),
-                    "the sanity checker reads the warp of its holder: " + reading.getResult());
+            test.assertTrue(reading.getResult() == net.minecraft.world.InteractionResult.PASS,
+                    "the sanity checker of the 4.2.3.5 does nothing when it is used: " + reading.getResult());
 
             // The original death bucket pours the original death fluid.
             var bucket = new ItemStack(ThaumcraftLegacyItems.BUCKET_DEATH.get());

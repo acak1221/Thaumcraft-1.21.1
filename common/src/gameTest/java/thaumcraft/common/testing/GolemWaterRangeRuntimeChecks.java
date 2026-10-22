@@ -12,6 +12,9 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.GameTestInfo;
+import net.minecraft.gametest.framework.GameTestListener;
+import net.minecraft.gametest.framework.GameTestRunner;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.ClientInformation;
@@ -69,46 +72,66 @@ public final class GolemWaterRangeRuntimeChecks {
         level.getAllEntities().forEach(entity -> existingEntities.add(entity.getId()));
         // The golems' pathfinder refuses to plan across unloaded chunks; release only the chunks this test forced.
         List<ChunkPos> forced = new ArrayList<>();
-        var center = new ChunkPos(base);
-        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {
-            var chunk = new ChunkPos(center.x + dx, center.z + dz);
-            if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
-        }
-        for (BlockPos pos : original.keySet()) {
-            level.setBlock(pos, pos.getY() == base.getY() - 1 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET);
-        }
-        for (int index = 0; index < TRUNK; index++) level.setBlock(trunk.above(index), Blocks.OAK_LOG.defaultBlockState(), QUIET);
-        level.setBlock(melon, Blocks.MELON.defaultBlockState(), QUIET);
-
         var connection = new Connection(PacketFlow.SERVERBOUND);
         var channel = new EmbeddedChannel(connection);
         var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "wat-" + UUID.randomUUID().toString().substring(0, 8)),
                 ClientInformation.createDefault());
         EntityGolemBase lumber = worker(level, GolemData.LUMBER, lumberHome), harvest = worker(level, GolemData.HARVEST, harvestHome);
 
+        boolean[] done = {false}, cleaned = {false}, touched = {false}, installed = {false}, felled = {false}, broken = {false};
         Runnable cleanup = () -> {
+            if (cleaned[0]) return;
+            cleaned[0] = true;
+            done[0] = true;
             try {
                 lumber.discard();
                 harvest.discard();
                 level.getEntitiesOfClass(ItemEntity.class, new AABB(Vec3.atLowerCornerOf(base.offset(-RADIUS - 2, -2, -RADIUS - 26)),
                         Vec3.atLowerCornerOf(base.offset(RADIUS + 3, 12, RADIUS + 3))), item -> !existingEntities.contains(item.getId())).forEach(Entity::discard);
-                original.forEach((pos, state) -> level.setBlock(pos, state, QUIET));
-                for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
+                if (touched[0]) original.forEach((pos, state) -> level.setBlock(pos, state, QUIET));
             } finally {
                 try {
-                    if (level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player);
-                } finally { player.discard(); channel.finishAndReleaseAll(); }
+                    for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
+                    forced.clear();
+                } finally {
+                    try {
+                        if (level.getServer().getPlayerList().getPlayer(player.getUUID()) == player) level.getServer().getPlayerList().remove(player);
+                    } finally {
+                        try { player.discard(); } finally { channel.finishAndReleaseAll(); }
+                    }
+                }
             }
         };
-        boolean[] done = {false}, installed = {false}, felled = {false}, broken = {false};
         try {
+            // The native listener also covers framework timeouts and failures outside our callbacks.
+            BoreWorkRuntimeChecks.testInfo(test).addListener(new GameTestListener() {
+                @Override public void testStructureLoaded(GameTestInfo actual) {}
+                @Override public void testPassed(GameTestInfo actual, GameTestRunner runner) { cleanup.run(); }
+                @Override public void testFailed(GameTestInfo actual, GameTestRunner runner) { cleanup.run(); }
+                @Override public void testAddedForRerun(GameTestInfo previous, GameTestInfo next, GameTestRunner runner) { cleanup.run(); }
+            });
+            var center = new ChunkPos(base);
+            for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {
+                var chunk = new ChunkPos(center.x + dx, center.z + dz);
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
+            }
+            touched[0] = true;
+            for (BlockPos pos : original.keySet()) {
+                level.setBlock(pos, pos.getY() == base.getY() - 1 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET);
+            }
+            for (int index = 0; index < TRUNK; index++) level.setBlock(trunk.above(index), Blocks.OAK_LOG.defaultBlockState(), QUIET);
+            level.setBlock(melon, Blocks.MELON.defaultBlockState(), QUIET);
             level.getServer().getPlayerList().placeNewPlayer(connection, player, CommonListenerCookie.createInitial(player.getGameProfile(), false));
             player.setNoGravity(true);
+            player.setGameMode(GameType.SURVIVAL);
+            player.setPos(base.getX() + .5, base.getY() + 40, base.getZ() + .5);
+            test.assertTrue(player.level() == level && level.getServer().getPlayerList().getPlayer(player.getUUID()) == player && player.isAlive(),
+                    "this scenario owns a live connected survival actor in its own level");
             test.assertTrue(level.mayInteract(player, base) && level.mayInteract(player, harvestHome), "fixture is not under unrelated spawn protection");
             test.assertTrue(level.addFreshEntity(lumber) && lumber.hasSupportedCore() && level.addFreshEntity(harvest) && harvest.hasSupportedCore(),
                     "a real Lumber worker and a real Harvest worker are admitted");
             test.assertTrue(lumber.getRange() == 16F && harvest.getRange() == 16F, "both start with the ordinary range 16");
-        } catch (RuntimeException failure) {
+        } catch (RuntimeException | Error failure) {
             done[0] = true;
             cleanup.run();
             throw failure;
@@ -127,7 +150,7 @@ public final class GolemWaterRangeRuntimeChecks {
                 test.assertTrue(lumber.getRange() == 20F && harvest.getRange() == 20F && lumber.getUpgradeAmount(GolemUpgrade.WATER) == 1,
                         "both golems report range 20 after the real installation");
                 installed[0] = true;
-            } catch (RuntimeException failure) {
+            } catch (RuntimeException | Error failure) {
                 done[0] = true;
                 cleanup.run();
                 throw failure;
@@ -153,7 +176,7 @@ public final class GolemWaterRangeRuntimeChecks {
                     cleanup.run();
                     test.succeed();
                 }
-            } catch (RuntimeException failure) {
+            } catch (RuntimeException | Error failure) {
                 done[0] = true;
                 cleanup.run();
                 throw failure;
@@ -185,9 +208,16 @@ public final class GolemWaterRangeRuntimeChecks {
         player.setShiftKeyDown(false);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ThaumcraftGolems.UPGRADE_WATER.get()));
         player.setPos(golem.position().add(1.2, 0, 0));
-        test.assertTrue(golem.interact(player, InteractionHand.MAIN_HAND) == InteractionResult.CONSUME && golem.getUpgradeAmount(GolemUpgrade.WATER) == 1
+        test.assertTrue(player.isAlive() && !player.isRemoved() && player.level() == golem.level(),
+                "the owned upgrade actor remains alive in the worker's level after the scan window: health=" + player.getHealth());
+        test.assertTrue(golem.canConfigure(player) && player.canInteractWithEntity(golem, 0)
+                        && golem.level().mayInteract(player, golem.blockPosition()) && player.mayUseItemAt(golem.blockPosition(), Direction.UP, player.getMainHandItem()),
+                "the owned survival actor has native configuration, reach and use permissions at the running worker");
+        var result = golem.interact(player, InteractionHand.MAIN_HAND);
+        test.assertTrue(result == InteractionResult.CONSUME && golem.getUpgradeAmount(GolemUpgrade.WATER) == 1
                         && player.getMainHandItem().isEmpty(),
-                "a real player installs one Water upgrade on the running " + golem.getGolemCore() + " worker through the native interaction");
+                "a real player installs one Water upgrade on the running " + golem.getGolemCore() + " worker through the native interaction: result="
+                        + result + ", upgrades=" + golem.getUpgradeAmount(GolemUpgrade.WATER) + ", held=" + player.getMainHandItem());
     }
 
     private static int logs(ServerLevel level, BlockPos trunk) {

@@ -54,4 +54,7 @@ fabric/run/
 neoforge/run/
 **/run-gametest/
 **/run-clienttest/
+**/run-multiplayer/
+**/run-multiplayer-server/
+.gradle-mp/
 %SystemDrive%/

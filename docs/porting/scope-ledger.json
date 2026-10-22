@@ -8786,7 +8786,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockCosmeticOpaqueRenderer.java:1-93 the cosmetic opaque family (rune blocks, obsidian totem, warded glass)",
@@ -8959,7 +8959,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/block/BlockEssentiaReservoirRenderer.java:39 public boolean renderWorldBlock(...) (the reservoir body and its inventory model)",
@@ -9211,7 +9211,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockMetalDeviceRenderer.java:18-40 the per-metadata inventory geometry: metadata 0/6 full cube, 5 a lid at 0.8125..1, 7/8/13 the box W4..W12 x W2..W14, 12 the box W3..W13, 1/2/14 delegated to the alembic / magic workbench charger / vis relay tile renderers",
@@ -9300,7 +9300,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockStoneDeviceRenderer.java:1-178 the per-metadata stone device geometry",
@@ -9554,7 +9554,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockWoodenDeviceRenderer.java:1-161 the per-metadata wooden device geometry (planks, banner and crafting-table variants)",
@@ -12255,7 +12255,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/ItemEssentiaReservoirRenderer.java: the 1.12 inventory item renderer",
@@ -12927,7 +12927,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/WandPerspectiveModel.java: the 1.12 first person wand pose model",
@@ -13722,7 +13722,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelCrystalizer.java:1-786 the 1.12 essentia crystalizer model",
@@ -15903,7 +15903,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/ItemJarFilledRenderer.java renders the item form of a filled jar",

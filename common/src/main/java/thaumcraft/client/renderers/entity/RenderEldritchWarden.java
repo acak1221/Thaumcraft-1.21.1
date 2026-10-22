@@ -23,6 +23,18 @@ import thaumcraft.common.entities.monster.EntityEldritchWarden;
  */
 public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWarden> {
     private static final ResourceLocation SKIN = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/eldritch_warden.png");
+    /**
+     * The original scale of the warden's hood eye: {@code GL11.glScaled(1.01, 1.01, 1.01)}
+     * (oracle {@code thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:470}).
+     */
+    public static final float HOOD_EYE_SCALE = 1.01F;
+    /**
+     * The original blend of the warden's hood eye: {@code glEnable(GL_BLEND)} and
+     * {@code glBlendFunc(GL_SRC_ALPHA, GL_ONE)}, that is additive
+     * (oracle {@code ModelEldritchGuardian.java:468-469}). {@code RenderType.eyes} is the
+     * additive and emissive render type of 1.21.1.
+     */
+    public static final RenderType HOOD_EYE_RENDER_TYPE = RenderType.eyes(SKIN);
     private final ModelPart root;
     private final ModelPart hood1, armL1, armR1, legpanelC1, legpanelC2, legpanelC3;
     private final ModelPart cloak1, cloak2, cloak3;
@@ -84,8 +96,8 @@ public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWar
                 pose.pushPose();
                 eye.visible = true;
                 try {
-                    pose.scale(1.01F, 1.01F, 1.01F);
-                    eye.render(pose, buffers.getBuffer(RenderType.eyes(SKIN)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xffffffff);
+                    pose.scale(HOOD_EYE_SCALE, HOOD_EYE_SCALE, HOOD_EYE_SCALE);
+                    eye.render(pose, buffers.getBuffer(HOOD_EYE_RENDER_TYPE), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xffffffff);
                 } finally {
                     eye.visible = false;
                     pose.popPose();

@@ -86,7 +86,7 @@ public record ArcaneShapelessRecipe(String research, List<Ingredient> ingredient
             if (stack.getItem() instanceof ItemJar && !ItemJar.isEmptyIngredient(stack)) return false;
             int matched = -1;
             for (int index = 0; index < remaining.size(); index++) {
-                if (remaining.get(index).test(stack)) { matched = index; break; }
+                if (ArcaneIngredientMatching.matches(remaining.get(index), stack)) { matched = index; break; }
             }
             if (matched < 0) return false;
             remaining.remove(matched);

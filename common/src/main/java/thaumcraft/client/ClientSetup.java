@@ -110,6 +110,7 @@ public final class ClientSetup {
         ThaumcraftAlchemyClient.init();
         ThaumcraftNaturalClient.init();
         ThaumcraftPlantClient.init();
+        ThaumcraftHolesClient.init();
         ThaumcraftBiologicalLampClient.init();
         ThaumcraftDistillationClient.init();
         ThaumcraftAdvancedFurnaceClient.init();

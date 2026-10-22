@@ -253,6 +253,7 @@ loom.runs {
   vmArg '-Dfabric-api.gametest'
   if (!gameTestFilter.isBlank()) vmArg "-Dthaumcraft.gameTestFilter=${gameTestFilter}"
   vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file(gameTestFilter.isBlank() ? 'gametest-results.xml' : 'gametest-focused-results.xml').get().asFile.absolutePath}"
+  vmArg '-Xmx2G'
   runDir 'run-gametest'
  }
  clientSmoke {

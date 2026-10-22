@@ -15,6 +15,14 @@ public final class WardedBehaviour {
 
     /** Null for ordinary, missing or quarantined wards. Never invent a restorable stone state. */
     public static BlockState original(BlockGetter level, BlockPos pos) {
+        // A generation region answers a read outside its own region by asking the
+        // SERVER's chunk source for that chunk. The request puts a proto chunk into
+        // the server's chunk map, and the chunk map only finishes it when something
+        // asks for it at full status. A world generation feature must therefore
+        // never read a block it cannot already see.
+        if (level instanceof net.minecraft.world.level.WorldGenLevel gen
+                && !(gen instanceof net.minecraft.server.level.ServerLevel)
+                && !gen.hasChunkAt(pos)) return null;
         if (!(level.getBlockState(pos).getBlock() instanceof BlockWarded)) return null;
         if (!(level.getBlockEntity(pos) instanceof TileWarded tile) || !tile.validWard()) return null;
         BlockState original = tile.originalState();

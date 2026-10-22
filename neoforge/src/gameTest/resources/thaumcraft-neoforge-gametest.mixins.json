@@ -6,7 +6,8 @@
   "mixins": [
     "GameTestHelperMockConnectionMixin",
     "BoreNativeGameEventMixin",
-    "GameTestSelectionMixin"
+    "GameTestSelectionMixin",
+    "GameTestHelperMockPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

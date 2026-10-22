@@ -41,10 +41,12 @@ class BlockRenderRulesParityTest {
 
     @Test void oneWaxDripOfTheOriginAtTheOrigin() {
         // BlockCandleRenderer.java:45-62 with seed x + y * z = 0: one drip, even index,
-        // side = true, loc = 2, height = W1 * (1 + 0).
+        // side = true, loc = 2, and the height quanta measured from new Random(0):
+        // nextInt(5)=0 -> count 1, nextBoolean()=true, nextInt(2)=0 -> loc 2, nextInt(3)=2
+        // -> height = W1 * (1 + 2) = 3/16, not W1 * (1 + 0).
         CandleDripRules.Candle candle = CandleDripRules.candle(0, 0, 0);
         assertEquals(1, candle.drips().size());
-        assertBox(candle.drips().get(0), 0.4375F, 0.0F, 0.3125F, 0.5F, 0.0625F, 0.375F);
+        assertBox(candle.drips().get(0), 0.4375F, 0.0F, 0.3125F, 0.5F, 0.1875F, 0.375F);
     }
 
     @Test void theSeedIsTheOriginalSumOfThePosition() {
@@ -96,8 +98,9 @@ class BlockRenderRulesParityTest {
         assertEquals(0.109375F, GasSurfaceRules.heightForRender(true, false, 0, true, false, 1), EPS);
         assertEquals(1.0F, GasSurfaceRules.heightForRender(false, false, 0, false, true, 0), EPS);
         assertEquals(0.0F, GasSurfaceRules.heightForRender(false, false, 0, false, false, 0), EPS);
-        // A foreign block samples the original minus one, the negative ignored by the average.
-        assertEquals(-0.875F, GasSurfaceRules.heightForRender(false, false, 0, false, false, -1), EPS);
+        // A foreign block samples the original minus one quanta, which is quanta / 8 * 0.875
+        // with quanta = -1, that is -0.109375 - not the -0.875 of the full factor.
+        assertEquals(-0.109375F, GasSurfaceRules.heightForRender(false, false, 0, false, false, -1), EPS);
     }
 
     @Test void theAverageKeepsTheLastOverrideUnlessAFullOneWasSeen() {
@@ -107,9 +110,11 @@ class BlockRenderRulesParityTest {
         assertEquals(0.9F, GasSurfaceRules.heightAverage(new float[]{0.1F, 0.2F, 0.3F, 0.9F}), EPS);
         // Without an override the mean of the non negative samples is used.
         assertEquals(0.5F, GasSurfaceRules.heightAverage(new float[]{0.2F, 0.4F, 0.8F, 0.6F}), EPS);
-        // Negative samples are ignored and an all negative corner is zero.
+        // Negative samples are ignored by the total, but a corner where every sample is negative
+        // divides 0.0 by the count 0: the original answers NaN, and the port must not "fix" that.
         assertEquals(0.3F, GasSurfaceRules.heightAverage(new float[]{-1.0F, -1.0F, 0.4F, 0.2F}), EPS);
-        assertEquals(0.0F, GasSurfaceRules.heightAverage(new float[]{-1.0F, -1.0F, -1.0F, -1.0F}), EPS);
+        assertTrue(Float.isNaN(GasSurfaceRules.heightAverage(new float[]{-1.0F, -1.0F, -1.0F, -1.0F})),
+                "the original divides by a zero count and answers NaN");
     }
 
     @Test void theFourCornersAreTheOriginalNeighbourhoodAverages() {

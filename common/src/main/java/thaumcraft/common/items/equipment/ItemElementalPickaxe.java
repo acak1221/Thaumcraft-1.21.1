@@ -59,8 +59,10 @@ public class ItemElementalPickaxe extends PickaxeItem implements IRepairable {
         if (player != null && context.getLevel().isClientSide) {
             thaumcraft.client.lib.ScanOverlay.start(player, context.getClickedPos(),
                     System.currentTimeMillis() + thaumcraft.client.lib.ScanOverlay.DURATION_MILLIS);
-            player.swing(context.getHand());
         }
-        return InteractionResult.PASS;
+        // The legacy false result is not a native PASS: this click already paid
+        // for a scan. SUCCESS requests the client swing; CONSUME stops fallback
+        // on the authoritative server without requesting a second swing.
+        return player == null ? InteractionResult.PASS : InteractionResult.sidedSuccess(context.getLevel().isClientSide);
     }
 }

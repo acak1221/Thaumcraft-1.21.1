@@ -1,6 +1,7 @@
 package thaumcraft.common.container;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -8,10 +9,12 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.entities.golems.EntityTravelingTrunk;
+import thaumcraft.common.items.golems.TrunkRules;
 
 /**
  * Original ContainerTravelingTrunk: the trunk's {@code rows * 9} slots at {@code (8 + 18 i, 15 + 23 j)}, then the player's inventory.
@@ -54,12 +57,13 @@ public final class ContainerTravelingTrunk extends AbstractContainerMenu {
     }
 
     @Override public boolean clickMenuButton(Player player, int button) {
-        if (button != STAY_BUTTON || trunk == null || !stillValid(player)) return false;
+        if (button != STAY_BUTTON || !active(player)) return false;
         trunk.setStay(!trunk.getStay());
         return true;
     }
 
     @Override public ItemStack quickMoveStack(Player player, int index) {
+        if (!active(player) || index < 0 || index >= slots.size()) return ItemStack.EMPTY;
         ItemStack moved = ItemStack.EMPTY;
         Slot slot = slots.get(index);
         if (slot != null && slot.hasItem()) {
@@ -74,7 +78,19 @@ public final class ContainerTravelingTrunk extends AbstractContainerMenu {
     }
 
     @Override public boolean stillValid(Player player) {
-        return trunk == null || trunk.isAlive() && player.level() == trunk.level() && player.distanceToSqr(trunk) <= 100;
+        return player == viewer && player.isAlive() && !player.isSpectator()
+                && (trunk == null ? player.level().isClientSide : trunk.isAlive() && player.level() == trunk.level()
+                && player.distanceToSqr(trunk) <= 100 && trunk.level().mayInteract(player, trunk.blockPosition())
+                && TrunkRules.mayOpen(trunk.getUpgrade(), trunk.isOwner(player)));
+    }
+
+    private boolean active(Player player) {
+        return trunk != null && player instanceof ServerPlayer server && server.server.isSameThread()
+                && player.containerMenu == this && stillValid(player);
+    }
+
+    @Override public void clicked(int slot, int button, ClickType type, Player player) {
+        if (trunk == null ? stillValid(player) : active(player)) super.clicked(slot, button, type, player);
     }
 
     @Override public void removed(Player player) {

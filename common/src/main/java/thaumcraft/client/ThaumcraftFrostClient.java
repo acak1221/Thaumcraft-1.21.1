@@ -1,15 +1,12 @@
 package thaumcraft.client;
 
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
-import thaumcraft.client.renderers.entity.RenderFrostShard;
 import thaumcraft.client.fx.particles.FocusFrostSparkleParticle;
-import thaumcraft.common.config.ThaumcraftFrost;
 import thaumcraft.common.entities.projectile.EntityFrostShard;
 
 /** Client-only native renderer and actual tracked-entity impact events; no trail or test FX. */
@@ -21,7 +18,6 @@ public final class ThaumcraftFrostClient {
     public static void init() {
         if (initialized) return;
         initialized = true;
-        EntityRendererRegistry.register(ThaumcraftFrost.FROST_SHARD, RenderFrostShard::new);
         EntityFrostShard.setClientImpactHandler(ThaumcraftFrostClient::impact);
         EntityFrostShard.setClientTrailHandler(FocusFrostSparkleParticle::trail);
     }

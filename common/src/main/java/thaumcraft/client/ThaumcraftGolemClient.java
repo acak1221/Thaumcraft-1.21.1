@@ -1,7 +1,6 @@
 package thaumcraft.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.registry.item.ItemPropertiesRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import net.minecraft.client.Camera;
@@ -14,10 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import thaumcraft.client.gui.GuiGolem;
 import thaumcraft.client.gui.GuiTravelingTrunk;
-import thaumcraft.client.renderers.entity.RenderDart;
-import thaumcraft.client.renderers.entity.RenderGolemBase;
-import thaumcraft.client.renderers.entity.RenderGolemBobber;
-import thaumcraft.client.renderers.entity.RenderTravelingTrunk;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemMarker;
@@ -32,10 +27,6 @@ public final class ThaumcraftGolemClient {
     public static void init() {
         if (initialized) return;
         initialized = true;
-        EntityRendererRegistry.register(ThaumcraftGolems.GOLEM, RenderGolemBase::new);
-        EntityRendererRegistry.register(ThaumcraftGolems.GOLEM_BOBBER, RenderGolemBobber::new);
-        EntityRendererRegistry.register(ThaumcraftGolems.TRUNK, RenderTravelingTrunk::new);
-        EntityRendererRegistry.register(ThaumcraftGolems.DART, RenderDart::new);
         MenuRegistry.registerScreenFactory(ThaumcraftGolems.GOLEM_MENU.get(), GuiGolem::new);
         MenuRegistry.registerScreenFactory(ThaumcraftGolems.TRUNK_MENU.get(), GuiTravelingTrunk::new);
         for (var placer : ThaumcraftGolems.placerItems()) ItemPropertiesRegistry.register(placer, HAS_CORE,

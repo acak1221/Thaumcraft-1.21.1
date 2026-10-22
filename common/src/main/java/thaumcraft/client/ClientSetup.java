@@ -4,10 +4,8 @@ import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.resources.ResourceLocation;
 import thaumcraft.client.gui.GuiResearchBrowser;
@@ -24,7 +22,6 @@ import thaumcraft.common.tiles.TileNodeConverter;
 import thaumcraft.common.lib.network.OpenThaumonomiconPayload;
 import net.minecraft.client.renderer.RenderType;
 import thaumcraft.common.config.ThaumcraftContent;
-import thaumcraft.common.config.ThaumcraftProjectiles;
 import thaumcraft.common.config.ThaumcraftOres;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.lib.network.KnowledgeEvents;
@@ -46,6 +43,11 @@ public final class ClientSetup {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        // Every entity type of the port needs a client renderer: 1.21.1 looks the renderer up
+        // by entity type and has no fallback, so an unregistered type crashes the client with
+        // a NullPointerException as soon as the entity is drawn. The list mirrors the original
+        // ClientProxy.setupEntityRenderers (oracle thaumcraft/client/ClientProxy.java:464-517).
+        thaumcraft.client.renderers.entity.ThaumcraftEntityRenderers.registerAll();
         // The public recipe API answers from the recipe manager of the loaded world.
         dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level ->
                 thaumcraft.api.ThaumcraftApi.installRecipeManager(level.getRecipeManager(), level.registryAccess()));
@@ -71,12 +73,6 @@ public final class ClientSetup {
         thaumcraft.client.ThaumcraftPrimalFociClient.init();
         thaumcraft.client.ThaumcraftEldritchItemsClient.init();
         thaumcraft.client.ThaumcraftSpaClient.init();
-        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINT_SWARM,
-                thaumcraft.client.renderers.entity.RenderTaintSwarm::new);
-        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE,
-                context -> new thaumcraft.client.renderers.entity.RenderTaintacle(context, .6F, 10));
-        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaint.TAINTACLE_SMALL,
-                context -> new thaumcraft.client.renderers.entity.RenderTaintacle(context, .2F, 6));
         thaumcraft.common.entities.monster.EntityTaintacle.setClientEffects(thaumcraft.client.fx.particles.TaintacleAriseParticle::arise);
         // Original ClientProxy.slimeJumpFX: the thaumic slime launch and landing bursts.
         thaumcraft.common.entities.monster.EntityThaumicSlime.setClientEffects(
@@ -104,8 +100,6 @@ public final class ClientSetup {
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftManaBeans.MANA_POD.get());
         thaumcraft.client.ThaumcraftFireSpecialClient.init();
         thaumcraft.client.ThaumcraftShockOrbsClient.init();
-        dev.architectury.registry.client.level.entity.EntityRendererRegistry.register(
-                thaumcraft.common.config.ThaumcraftAspectOrbs.ORB, thaumcraft.client.renderers.entity.RenderAspectOrb::new);
         KnowledgeEvents.initClient();
         ThaumcraftArcaneClient.init();
         ThaumcraftNodeClient.init();
@@ -166,24 +160,15 @@ public final class ClientSetup {
             // Supplier FIRST, consumer SECOND; no client source/vis query.
             VisNetClientEffects.drain(client.level, payload.target(), payload.origin(), payload.rgb());
         });
-        EntityRendererRegistry.register(ThaumcraftContent.SPECIAL_ITEM, thaumcraft.client.renderers.entity.RenderSpecialItem::new);
-        EntityRendererRegistry.register(ThaumcraftContent.INVENTORY_ITEM, ItemEntityRenderer::new);
-        // Original TC4 shares RenderSpecialItem between EntitySpecialItem and
-        // EntityPermanentItem (oracle thaumcraft/client/renderers/entity/RenderSpecialItem.java:1-119)
-        // and renders EntityFollowingItem with RenderFollowingItem.
-        // Every item entity needs its own registration: 1.21.1 looks the renderer up by
-        // entity type and has no fallback, so an unregistered type crashes the client
-        // with a NullPointerException as soon as the entity is drawn.
-        EntityRendererRegistry.register(ThaumcraftProjectiles.PERMANENT_ITEM, thaumcraft.client.renderers.entity.RenderSpecialItem::new);
-        EntityRendererRegistry.register(ThaumcraftProjectiles.FOLLOW_ITEM, thaumcraft.client.renderers.entity.RenderFollowingItem::new);
-        EntityRendererRegistry.register(ThaumcraftProjectiles.ITEM_GRATE, ItemEntityRenderer::new);
+        // The entity renderers are registered above: the original TC4 shares RenderSpecialItem
+        // between EntitySpecialItem and EntityPermanentItem (oracle
+        // thaumcraft/client/renderers/entity/RenderSpecialItem.java:1-119) and renders
+        // EntityFollowingItem with RenderFollowingItem.
         thaumcraft.client.ThaumcraftEldritchClient.init();
         thaumcraft.client.ThaumcraftDeviceGuiClient.init();
         thaumcraft.client.ThaumcraftGearModelsClient.init();
         thaumcraft.client.ThaumcraftChampionClient.init();
         thaumcraft.client.ThaumcraftReservoirClient.init();
-        EntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftTaintCreeper.TAINT_CREEPER,
-                thaumcraft.client.renderers.entity.RenderTaintCreeper::new);
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OpenThaumonomiconPayload.TYPE,
                 OpenThaumonomiconPayload.STREAM_CODEC, (payload, context) -> context.queue(() -> {
                     var minecraft = Minecraft.getInstance();

@@ -147,6 +147,15 @@ public final class EntityPrimalArrow extends AbstractArrow {
         if (inGroundTime >= ProjectileRules.PRIMAL_ARROW_IN_GROUND_LIMIT) discard();
     }
 
+    /**
+     * Original {@code EntityPrimalArrow.field_70252_j}: the number of ticks the arrow
+     * already spent in the ground. The original renderer fades the arrow with it
+     * (oracle {@code thaumcraft/client/renderers/entity/RenderPrimalArrow.java:64}).
+     */
+    public int spentLife() {
+        return Math.min(100, inGroundTime);
+    }
+
     @Override protected void onHitEntity(EntityHitResult hit) {
         Entity target = hit.getEntity();
         int type = getArrowType();

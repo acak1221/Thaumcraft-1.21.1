@@ -7,21 +7,15 @@ import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.platform.GlStateManager;
 import dev.architectury.event.events.client.ClientTickEvent;
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.effect.MobEffect;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftWarp;
 import thaumcraft.common.lib.network.WarpEventNetworking;
-import thaumcraft.client.renderers.entity.RenderEldritchGuardian;
-import thaumcraft.client.renderers.entity.RenderEldritchOrb;
-import thaumcraft.client.renderers.entity.RenderMindSpider;
 
 /** Original heartbeat/vignette100, mist2400/200, and the four effect post chains; no server-only class reaches client rendering.
  *
@@ -78,9 +72,6 @@ public final class ThaumcraftWarpClient {
             var entity = level == null ? null : level.getEntity(source);
             if (entity != null) Minecraft.getInstance().particleEngine.add(new thaumcraft.client.fx.particles.WarpSonicParticle(level, entity));
         });
-        EntityRendererRegistry.register(ThaumcraftWarp.MIND_SPIDER, RenderMindSpider::new);
-        EntityRendererRegistry.register(ThaumcraftWarp.ELDRITCH_GUARDIAN, RenderEldritchGuardian::new);
-        EntityRendererRegistry.register(ThaumcraftWarp.ELDRITCH_ORB, RenderEldritchOrb::new);
         thaumcraft.common.entities.projectile.EntityEldritchOrb.setClientImpactEffect(thaumcraft.client.fx.particles.WarpOrbParticle::explode);
         thaumcraft.common.entities.monster.EntityEldritchGuardian.setClientAmbient(thaumcraft.client.fx.particles.WarpGuardianParticle::ambient);
         ClientTickEvent.CLIENT_POST.register(client -> tick());

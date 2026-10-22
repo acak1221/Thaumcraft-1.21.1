@@ -12,8 +12,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
@@ -22,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.entities.ITaintedMob;
 import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftInfusion;
+import thaumcraft.common.config.ThaumcraftLegacyItems;
 import thaumcraft.common.config.ThaumcraftProjectiles;
 import thaumcraft.common.config.ThaumcraftTaint;
 import thaumcraft.common.lib.entities.ProjectileRules;
@@ -44,7 +47,7 @@ import thaumcraft.common.lib.world.BiomeColumns;
  * array, the taint poison is the registered flux taint effect, and the client
  * burst is a hook instead of a proxy call.
  */
-public final class EntityBottleTaint extends ThrowableProjectile {
+public final class EntityBottleTaint extends ThrowableProjectile implements ItemSupplier {
     private static Consumer<EntityBottleTaint> clientImpact = ignored -> {};
 
     public EntityBottleTaint(EntityType<? extends EntityBottleTaint> type, Level level) {
@@ -69,6 +72,16 @@ public final class EntityBottleTaint extends ThrowableProjectile {
     }
 
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {}
+
+    /**
+     * Original RenderSnowball drew the bottle of taint item on the snowball model
+     * (oracle {@code thaumcraft/client/ClientProxy.java:513}). The native 1.21.1 renderer of
+     * a thrown item asks the projectile for the stack it carries, so the bottle is the
+     * stack of the original item.
+     */
+    @Override public ItemStack getItem() {
+        return new ItemStack(ThaumcraftLegacyItems.BOTTLE_TAINT.get());
+    }
 
     @Override protected double getDefaultGravity() {
         return ProjectileRules.BOTTLE_TAINT_GRAVITY;

@@ -130,7 +130,8 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
         if (aspects.size() == 0) return;
         var viewer = minecraft.player;
         if (viewer == null) return;
-        double distance = viewer.distanceTo(Vec3.atCenterOf(jar.getBlockPos()));
+        // 1.21.1 has no Entity#distanceTo(Vec3) any more, only the squared one.
+        double distance = Math.sqrt(viewer.distanceToSqr(Vec3.atCenterOf(jar.getBlockPos())));
         if (distance > JAR_VIEW_DISTANCE) return;
         float age = viewer.tickCount + partialTick;
         float alpha = (float)((JAR_VIEW_DISTANCE - distance) / JAR_VIEW_DISTANCE);

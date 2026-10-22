@@ -183,8 +183,43 @@ public final class BlockAiry extends BaseEntityBlock implements StateDependentBl
      * blocks of their own, so the port answers the question per state: only the fence has a
      * tile.
      */
-    @Override public boolean hasBlockEntityForState(BlockState state) {
-        return variant(state) == EldritchBlockRules.AIRY_WARDING_FENCE;
+    @Override public boolean hasBlockEntityForState(BlockState state) {        return variant(state) == EldritchBlockRules.AIRY_WARDING_FENCE;
+    }
+
+    /**
+     * Oracle BlockAiry:299-311 - the client tick of the airy family.
+     *
+     * <p>The metadata ten and the metadata eleven throw a spark of the size {@code 0.33 + h} with
+     * {@code h = random * 0.33} at the height {@code 0.1515 + h / 2} over the block: the metadata
+     * ten is the white spark of the original with the colour {@code 0.65 + random * 0.1 / 1 / 1} and
+     * the alpha {@code 0.8}, the metadata eleven is the blue spark with the colour
+     * {@code 0.3 - random * 0.1 / 0 / 0.5 + random * 0.2}. One tick in fifty plays the original
+     * "jacobs" sound.</p>
+     */
+    @Override public void animateTick(BlockState state, Level level, BlockPos pos, net.minecraft.util.RandomSource random) {
+        super.animateTick(state, level, pos, random);
+        int metadata = variant(state);
+        if (metadata != 10 && metadata != 11) return;
+        if (!(level instanceof net.minecraft.client.multiplayer.ClientLevel client)) return;
+        float h = random.nextFloat() * .33F;
+        double x = pos.getX() + client.random.nextFloat();
+        double y = pos.getY() + .1515F + h / 2F;
+        double z = pos.getZ() + client.random.nextFloat();
+        float size = .33F + h;
+        if (metadata == 10) {
+            thaumcraft.client.fx.particles.ShockSparkParticle.spark(client, x, y, z, size,
+                    .65F + client.random.nextFloat() * .1F, 1F, 1F, .8F);
+        } else {
+            thaumcraft.client.fx.particles.ShockSparkParticle.spark(client, x, y, z, size,
+                    .3F - client.random.nextFloat() * .1F, 0F, .5F + client.random.nextFloat() * .2F, 1F);
+        }
+        if (random.nextInt(50) == 0) {
+            client.playLocalSound(pos.getX(), pos.getY(), pos.getZ(),
+                    net.minecraft.sounds.SoundEvent.createVariableRangeEvent(
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "jacobs")),
+                    net.minecraft.sounds.SoundSource.BLOCKS, .5F,
+                    1F + (client.random.nextFloat() - client.random.nextFloat()) * .2F, false);
+        }
     }
 
     /**

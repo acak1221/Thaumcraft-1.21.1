@@ -197,13 +197,13 @@ class GolemUpgradesTest {
     }
 
     @Test void cargoValidationFollowsTheEarthCountNotJustTheMaterial() {
-        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000).validate(7, 2);
-        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000).validate(7, 1), "8000 mB needs both Earth upgrades");
-        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 6000).validate(7, 0));
-        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 6000).validate(7, 1);
-        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 5000).validate(7, 0);
-        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 3000).validate(2, 0), "Tallow without Earth holds two buckets");
-        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 4000).validate(2, 1);
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 8000).validate(7, 2);
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 8000).validate(7, 1), "8000 mB needs both Earth upgrades");
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 6000).validate(7, 0));
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 6000).validate(7, 1);
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 5000).validate(7, 0);
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 3000).validate(2, 0), "Tallow without Earth holds two buckets");
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 4000).validate(2, 1);
         new GolemAspectCargo(Aspect.AIR, 64).validate(7, 2);
         assertThrows(IllegalArgumentException.class, () -> new GolemAspectCargo(Aspect.AIR, 64).validate(7, 1));
         assertThrows(IllegalArgumentException.class, () -> new GolemAspectCargo(Aspect.AIR, 33).validate(7, 0));
@@ -223,7 +223,7 @@ class GolemUpgradesTest {
         assertEquals(aspect, GolemAspectCargo.MAX_AMOUNT);
         assertEquals(8000, water);
         assertEquals(64, aspect);
-        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8001));
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 8001));
         assertThrows(IllegalArgumentException.class, () -> new GolemAspectCargo(Aspect.AIR, 65));
     }
 

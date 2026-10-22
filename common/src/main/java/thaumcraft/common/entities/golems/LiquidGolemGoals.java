@@ -194,10 +194,20 @@ final class LiquidGolemGoals {
         if (id == null || golem.getFluidAmountMb() <= 0) return null;
         return id;
     }
-    /** The first wanted fluid that the world offers a source of. */
+    /**
+     * The first wanted fluid that the world offers a source of.
+     *
+     * <p>Oracle {@code AILiquidGoto.func_75250_a} asks {@code GolemHelper.findPossibleLiquid} for
+     * every wanted fluid, and that search covers the <b>whole range of the golem</b>
+     * (oracle {@code GolemHelper.findPossibleLiquid}:371-407 compares the squared distance of the
+     * marked cell against {@code golem.getRange() * golem.getRange()}). Only the gather step that
+     * follows is bound by the adjacent squared distance of four. Gating here on adjacency would
+     * leave a golem that stands away from its water with no candidate at all, so it would walk
+     * nowhere.</p>
+     */
     private ResourceLocation firstWantedWithSource(ServerLevel server) {
         for (ResourceLocation fluid : wantedFluids()) {
-            if (!nearbySources(fluid).isEmpty() || !nearbyHandlers(fluid).isEmpty()) return fluid;
+            if (GolemHelper.findPossibleLiquid(golem, fluid) != null) return fluid;
         }
         return null;
     }
@@ -250,7 +260,23 @@ final class LiquidGolemGoals {
         ResourceLocation carried = carriedFluid();
         if (carried == null || !ready() || !golem.getNavigation().isDone()) return false;
         if (golem.distanceToHomeSqr() > 5) return false;
-        return wantedFluids().contains(carried);
+        if (!wantedFluids().contains(carried)) return false;
+        return homeHasRoom(carried);
+    }
+    /**
+     * Whether the home of the golem would accept some of the carried fluid right now.
+     *
+     * <p>Oracle {@code AILiquidEmpty.func_75249_e} fills the home and debits the cargo by what the
+     * home accepted ({@code AILiquidEmpty:63-68}); a home that is already full accepts nothing, so
+     * the empty driver has nothing to do. Without this probe a golem whose cargo is full and whose
+     * home is full answers «empty» for ever: it never enters the gather driver again and the whole
+     * Decanting core stalls. The probe is a non-committing fill of one millibucket, exactly the
+     * shape the original uses when it asks a handler what it would take.</p>
+     */
+    private boolean homeHasRoom(ResourceLocation carried) {
+        if (!(golem.level() instanceof ServerLevel server) || home == null) return false;
+        GolemFluidHandler handler = GolemFluidAccess.of(server, home);
+        return handler != null && handler.fill(golem.getHomeFacing(), carried, 1, false) > 0;
     }
     private void stopOwnedPath() {
         if (ownedPath != null && golem.level() == routeLevel && golem.getNavigation().getPath() == ownedPath) golem.getNavigation().stop();

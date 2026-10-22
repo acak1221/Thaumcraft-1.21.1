@@ -506,7 +506,7 @@ public final class GolemUpgradeRuntimeChecks {
                 @SuppressWarnings("unchecked") List<Integer> upgrades = (List<Integer>) row[0];
                 int amount = (Integer) row[1];
                 var placer = placerStack(thaumium, GolemData.LIQUID, upgrades);
-                new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), amount).writeToPlacer(placer);
+                new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), amount).writeToPlacer(placer);
                 var result = place(placer);
                 test.assertTrue(result == row[2], amount + " mB with " + upgrades.size() + " Earth: placement " + result + ", expected " + row[2]);
                 if (result == InteractionResult.CONSUME) {
@@ -523,10 +523,10 @@ public final class GolemUpgradeRuntimeChecks {
 
             // Full round trip of the maximum: placer -> golem -> NBT -> bell -> placer -> golem.
             var maximum = placerStack(thaumium, GolemData.LIQUID, List.of(EARTH, EARTH));
-            new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000).writeToPlacer(maximum);
+            new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 8000).writeToPlacer(maximum);
             test.assertTrue(place(maximum) == InteractionResult.CONSUME, "a Thaumium Decanting placer with two Earth places 8000 mB");
             var golem = placedGolem();
-            test.assertTrue(golem.getFluidAmountMb() == 8000 && golem.getFluidCargo().equals(new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000))
+            test.assertTrue(golem.getFluidAmountMb() == 8000 && golem.getFluidCargo().equals(new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("water"), 8000))
                             && golem.getUpgradeAmount(GolemUpgrade.EARTH) == 2 && golem.getFluidCarryLimit() == 8000,
                     "the golem holds 8000 of its 8000 mB");
 

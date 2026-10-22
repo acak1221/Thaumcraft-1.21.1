@@ -820,6 +820,9 @@ public class EntityGolemBase extends AbstractGolem {
         configurationOpeners.remove(player);
     }
     public boolean canWork() {
+        return canWorkInner();
+    }
+    private boolean canWorkInner() {
         return !level().isClientSide && !ItemGolemPlacer.isPlacementInProgress()
                 && isAlive() && current() && hasHome && !fettered && EnumGolemType.isSupported(material) && !unsupported && !retiring
                 && unreadCarried == null && unreadFluidCargo == null && unreadAspect == null
@@ -1805,11 +1808,23 @@ public class EntityGolemBase extends AbstractGolem {
         if (busy || !liquidReady()) return null;
         busy = true;
         try {
-            BlockPos home = homeInventoryPosition();
-            if (!(level() instanceof ServerLevel server) || !LiquidGolemGoals.loaded(server, home)) return null;
-            if (!currentFluidHome(home) || !GolemHarvestPlatform.mayInteract(this, home)) return null;
-            return currentFluidHome(home) ? home : null;
+            return resolvePermittedFluidHome();
         } finally { busy = false; }
+    }
+    /**
+     * The home preflight of an operation that already owns the busy guard.
+     *
+     * <p>Oracle {@code EntityGolemBase.collectMarkedSourceWater} calls {@code findWaterHome()}
+     * directly, without re-entering the guard of the preflight; the guard is the one the caller
+     * holds. A re-entering preflight refuses here, because {@code busy} is already true, and the
+     * whole drain then fails silently.</p>
+     */
+    private BlockPos resolvePermittedFluidHome() {
+        if (!liquidReady()) return null;
+        BlockPos home = homeInventoryPosition();
+        if (!(level() instanceof ServerLevel server) || !LiquidGolemGoals.loaded(server, home)) return null;
+        if (!currentFluidHome(home) || !GolemHarvestPlatform.mayInteract(this, home)) return null;
+        return currentFluidHome(home) ? home : null;
     }
     private void bindFluidWork(ServerLevel server, BlockPos home, BlockPos source, BlockState state) {
         fluidWorkLevel = server;
@@ -1912,7 +1927,7 @@ public class EntityGolemBase extends AbstractGolem {
         int before = fluidMb;
         busy = true;
         try {
-            BlockPos home = permittedFluidHome();
+            BlockPos home = resolvePermittedFluidHome();
             if (home == null) { liquid.reset(); return false; }
             bindFluidWork(server, home, source, state);
             fluidAnchorIntent = anchor.immutable();
@@ -1934,7 +1949,7 @@ public class EntityGolemBase extends AbstractGolem {
         int before = fluidMb;
         busy = true;
         try {
-            BlockPos home = permittedFluidHome();
+            BlockPos home = resolvePermittedFluidHome();
             if (home == null) { liquid.reset(); return false; }
             bindFluidWork(server, home, null, null);
             fluidHandlerIntent = pos.immutable();

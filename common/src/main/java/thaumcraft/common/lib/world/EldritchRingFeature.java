@@ -55,6 +55,13 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
         RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
                 level.getLevel().getSeed(), chunkX, chunkZ));
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        return placeSelected(level, random, draw, chunkX, chunkZ);
+    }
+
+    /** Regeneration continues its caller's stream; fresh generation keeps its original stream above. */
+    public boolean placeSelected(WorldGenLevel level, RandomSource random, StructurePlacementRules.Draw draw,
+                                 int chunkX, int chunkZ) {
+        if (!(level.getLevel() instanceof ServerLevel server)) return false;
         if (draw.kind() != StructurePlacementRules.Kind.ELDRITCH_RING) return false;
         int centreX = inside(draw.x(), chunkX);
         int centreZ = inside(draw.z(), chunkZ);

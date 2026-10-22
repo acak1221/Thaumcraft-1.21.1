@@ -8,6 +8,9 @@ import java.util.Properties;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 import thaumcraft.common.config.OriginalRegenSettings;
+import thaumcraft.common.lib.world.StructurePlacementRules;
+import net.minecraft.util.RandomSource;
+import java.util.Random;
 
 /**
  * The chunk marker of the original and the chunk regeneration queue.
@@ -22,6 +25,28 @@ import thaumcraft.common.config.OriginalRegenSettings;
  * not a transcription of the port.</p>
  */
 class ChunkRegenerationParityTest {
+    @Test void structureReplayContinuesTheAlreadyConsumedRegenerationRandom() {
+        // Oracle ServerTickEventsFML:96 and ThaumcraftWorldGenerator:406-453 pass ONE
+        // Random through vegetation, ores, aura and then the structure chain.
+        long seed = ChunkRegeneration.chunkSeed(123456789L, -17, 240);
+        Random oracle = new Random(seed);
+        RandomSource replay = RandomSource.create(seed);
+        for (int i = 0; i < 100; i++) {
+            assertEquals(oracle.nextInt(16), replay.nextInt(16));
+        }
+        int x = -17 * 16 + oracle.nextInt(16);
+        int z = 240 * 16 + oracle.nextInt(16);
+        var kind = oracle.nextInt(150) == 0 ? StructurePlacementRules.Kind.MOUND
+                : oracle.nextInt(66) == 0 ? StructurePlacementRules.Kind.ELDRITCH_RING
+                : oracle.nextInt(40) == 0 ? StructurePlacementRules.Kind.HILLTOP_STONES
+                : StructurePlacementRules.Kind.NONE;
+        var draw = StructurePlacementRules.draw(replay, -17, 240);
+        assertEquals(x, draw.x());
+        assertEquals(z, draw.z());
+        assertEquals(kind, draw.kind());
+        assertEquals(oracle.nextLong(), replay.nextLong());
+    }
+
     @Test void markerPresenceNotTruthControlsRegeneration() {
         // Oracle EventHandlerWorld:125 calls hasKey, NOT getBoolean.
         CompoundTag chunk = new CompoundTag();

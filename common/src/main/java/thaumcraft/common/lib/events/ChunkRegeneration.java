@@ -1,7 +1,6 @@
 package thaumcraft.common.lib.events;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,19 +12,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.OriginalRegenSettings;
 import thaumcraft.common.config.ThaumcraftBiomeSettings;
-import thaumcraft.common.config.ThaumcraftOuterLands;
-import thaumcraft.common.config.ThaumcraftVillages;
-import thaumcraft.common.lib.world.AuraGenRules;
 import thaumcraft.common.lib.world.ChunkLoc;
 import thaumcraft.common.lib.world.StructurePlacementRules;
 import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
 import thaumcraft.common.lib.world.ThaumcraftOreFeature;
 import thaumcraft.common.lib.world.ThaumcraftTreeFeature;
+import thaumcraft.common.lib.world.WorldGenMound;
+import thaumcraft.common.lib.world.WorldGenHilltopStones;
+import thaumcraft.common.lib.world.EldritchRingFeature;
+import thaumcraft.common.lib.world.NodeEcologyPolicy;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 
 /**
  * The chunk save and chunk load marker of the original and the chunk regeneration queue.
@@ -203,8 +202,11 @@ public final class ChunkRegeneration {
             }
             // Oracle ThaumcraftWorldGenerator:429-453 - the exclusive structure chain. The
             // totem that follows it in the fresh generation is not replayed (see the class note).
-            if (worldgen.structures() && settings.structures()) {
-                placeStructure(level, chunkX, chunkZ);
+            if (worldgen.structures() && settings.structures()
+                    && level.dimension().equals(Level.OVERWORLD)
+                    && NodeEcologyPolicy.dimensionLevel(level.dimension()) == -1
+                    && !(level.getChunkSource().getGenerator() instanceof FlatLevelSource)) {
+                placeStructure(level, random, chunkX, chunkZ);
             }
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.error("[Thaumcraft] Chunk regeneration failed for chunk at {}; the chunk keeps its terrain",
@@ -219,22 +221,16 @@ public final class ChunkRegeneration {
      * The structure chain of the regeneration: oracle ThaumcraftWorldGenerator:429-453.
      *
      * <p>The chain draws the position and its three rolls from the chunk random, and only the
-     * selected structure is built. Each native structure feature owns the same draw, so the
-     * selected one is invoked with a context whose origin is the chunk; the feature re-derives
-     * the chain from the chunk seed exactly as it does during a fresh generation.</p>
+     * selected structure is built. Unlike the independent fresh-generation features, replay
+     * continues the stream already consumed by vegetation, ores and aura; it must not reseed
+     * with the fresh-generation chunk seed (oracle ServerTickEventsFML:96).</p>
      */
-    private static boolean placeStructure(ServerLevel level, int chunkX, int chunkZ) {
-        StructurePlacementRules.Kind kind = AuraGenRules.chainKind(level.getSeed(), chunkX, chunkZ);
-        if (kind == StructurePlacementRules.Kind.NONE) return false;
-        FeaturePlaceContext<NoneFeatureConfiguration> context = new FeaturePlaceContext<>(
-                Optional.empty(), level, level.getChunkSource().getGenerator(),
-                RandomSource.create(StructurePlacementRules.chunkSeed(level.getSeed(), chunkX, chunkZ)),
-                new BlockPos(chunkX << 4, level.getMinBuildHeight(), chunkZ << 4),
-                NoneFeatureConfiguration.INSTANCE);
-        return switch (kind) {
-            case MOUND -> ThaumcraftVillages.MOUND.get().place(context);
-            case ELDRITCH_RING -> ThaumcraftOuterLands.RING.get().place(context);
-            case HILLTOP_STONES -> ThaumcraftVillages.HILLTOP_STONES.get().place(context);
+    private static boolean placeStructure(ServerLevel level, RandomSource random, int chunkX, int chunkZ) {
+        StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        return switch (draw.kind()) {
+            case MOUND -> new WorldGenMound().placeSelected(level, random, draw);
+            case ELDRITCH_RING -> new EldritchRingFeature().placeSelected(level, random, draw, chunkX, chunkZ);
+            case HILLTOP_STONES -> new WorldGenHilltopStones().placeSelected(level, random, draw, chunkX, chunkZ);
             case NONE -> false;
         };
     }

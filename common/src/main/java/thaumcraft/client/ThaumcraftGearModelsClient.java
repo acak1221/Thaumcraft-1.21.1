@@ -1,6 +1,7 @@
 package thaumcraft.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
@@ -12,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.client.renderers.models.gear.HarnessArmorRenderer;
@@ -22,6 +24,7 @@ import thaumcraft.client.renderers.models.gear.ModelKnightArmor;
 import thaumcraft.client.renderers.models.gear.ModelLeaderArmor;
 import thaumcraft.client.renderers.models.gear.ModelRobe;
 import thaumcraft.client.renderers.models.gear.ModelWand;
+import thaumcraft.client.renderers.item.WandUsePose;
 import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.items.armor.HarnessData;
 import thaumcraft.common.items.armor.ItemFortressArmor;
@@ -121,6 +124,14 @@ public final class ThaumcraftGearModelsClient {
      * in its own material sheet, the cap in its own sheet and the focus cube
      * with the focus colour. The sceptre, the ornament, the focus depth layer
      * and the runes of the original need items this port does not have.
+     *
+     * <p>Original {@code thaumcraft/client/renderers/item/ItemWandRenderer.java:87} applies the
+     * model basis correction of a hundred and eighty degrees about X before the model is drawn.
+     * The model of the original is authored with the rod above the origin and the focus cube
+     * below it, so the correction is what makes the focus of the wand point up, exactly like the
+     * original. The use pose of the original follows the correction (oracle
+     * {@code ItemWandRenderer.java:88-113}) and is therefore expressed in the corrected
+     * basis.</p>
      */
     public static void renderWand(ItemStack stack, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         if (!(stack.getItem() instanceof ItemWandCasting)) return;
@@ -131,6 +142,11 @@ public final class ThaumcraftGearModelsClient {
         var model = wandModel();
         pose.pushPose();
         try {
+            // Original ItemWandRenderer:87 - the model basis correction.
+            pose.mulPose(Axis.XP.rotationDegrees(180.0F));
+            // Original ItemWandRenderer:88-113 - the use pose of the wand.
+            applyWandUsePose(pose, stack, context);
+            // Original ModelWand:95-98 - the staff shift of the model itself.
             if (staff) pose.translate(0, .2, 0);
             pose.pushPose();
             try {
@@ -171,6 +187,70 @@ public final class ThaumcraftGearModelsClient {
                 } finally { pose.popPose(); }
             }
         } finally { pose.popPose(); }
+    }
+
+    /**
+     * The original ItemWandRenderer:88-113 - the use pose of the wand.
+     *
+     * <p>The original raises the wand while the player uses it: the pose turns around a pivot one
+     * block above the model, the third person view rolls the wand by thirty three degrees around
+     * Z, the first person view turns it by ten degrees around X and ten degrees around Z, and
+     * the wand itself is raised by up to sixty degrees around -X over the first three ticks of the
+     * use. A focus with the WAVE animation adds a wave of ten degrees, a focus with the CHARGE
+     * animation adds a wave of one degree.</p>
+     *
+     * <p>The original only poses the wand in the hand: its wielder is only known for the
+     * {@code EQUIPPED} and the {@code EQUIPPED_FIRST_PERSON} context, so the inventory and the
+     * dropped item are never posed.</p>
+     */
+    private static void applyWandUsePose(PoseStack pose, ItemStack stack, ItemDisplayContext context) {
+        if (context != ItemDisplayContext.FIRST_PERSON_RIGHT_HAND && context != ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                && context != ItemDisplayContext.THIRD_PERSON_RIGHT_HAND && context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND) return;
+        var mc = Minecraft.getInstance();
+        var player = mc.player;
+        // Original ItemWandRenderer:88 - the pose needs a player that uses an item.
+        if (player == null || player.getUseItem().isEmpty()) return;
+        float partial = mc.getTimer().getGameTimeDeltaPartialTick(false);
+        // The 1.7.10 EntityPlayer.getItemInUseDuration() (MCP stable 12-1.7.10: field_71057_bx)
+        // counts the elapsed use up, and so does the 1.21.1 LivingEntity.getTicksUsingItem().
+        int ticks = player.getTicksUsingItem();
+        // Original ItemWandRenderer:93 - the pivot of the pose.
+        pose.translate(0, WandUsePose.PIVOT_Y, 0);
+        if (context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND) {
+            // Original ItemWandRenderer:97-98.
+            pose.mulPose(Axis.XP.rotationDegrees(WandUsePose.FIRST_PERSON_PITCH));
+            pose.mulPose(Axis.ZP.rotationDegrees(WandUsePose.FIRST_PERSON_ROLL));
+        } else {
+            // Original ItemWandRenderer:95.
+            pose.mulPose(Axis.ZP.rotationDegrees(WandUsePose.THIRD_PERSON_ROLL));
+        }
+        // Original ItemWandRenderer:100 - the raise of the wand around -X.
+        pose.mulPose(Axis.XN.rotationDegrees(WandUsePose.raiseDegrees(WandUsePose.useTicks(ticks, partial))));
+        applyWandFocusWave(pose, stack, player, ticks, partial);
+        // Original ItemWandRenderer:112 - the pivot is released again.
+        pose.translate(0, -WandUsePose.PIVOT_Y, 0);
+    }
+
+    /**
+     * Original ItemWandRenderer:101-111 - the wave of the focus.
+     *
+     * <p>The original carries the WAVE animation on the wand itself while the wand is used on a
+     * node (oracle {@code ItemWandCasting.java:550}), and a focus with the WAVE animation waves
+     * as well. The native keeps the node use of the wand in
+     * {@link ItemWandCasting#isUsingNode(net.minecraft.world.entity.LivingEntity)}.</p>
+     */
+    private static void applyWandFocusWave(PoseStack pose, ItemStack stack, Player player, int ticks, float partial) {
+        var focusStack = FocusData.get(stack);
+        var focus = focusStack.getItem() instanceof ItemFocusBasic basic ? basic : null;
+        boolean wave = ItemWandCasting.isUsingNode(player)
+                || focus != null && focus.getAnimation(focusStack) == ItemFocusBasic.WandFocusAnimation.WAVE;
+        if (wave) {
+            pose.mulPose(Axis.ZP.rotationDegrees(WandUsePose.waveRoll(ticks, partial)));
+            pose.mulPose(Axis.XP.rotationDegrees(WandUsePose.wavePitch(ticks, partial)));
+        } else if (focus != null && focus.getAnimation(focusStack) == ItemFocusBasic.WandFocusAnimation.CHARGE) {
+            pose.mulPose(Axis.ZP.rotationDegrees(WandUsePose.chargeRoll(ticks, partial)));
+            pose.mulPose(Axis.XP.rotationDegrees(WandUsePose.chargePitch(ticks, partial)));
+        }
     }
 
     /**

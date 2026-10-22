@@ -260,7 +260,7 @@ public final class ThaumcraftExcavationClient {
      */
     public static float scroll(int slide, float partial) {
         float value = slide + partial;
-        return -value * 0.2F - (float) Math.sin(-value * 0.1F);
+        return -value * 0.2F - Mth.floor(-value * 0.1F);
     }
 
     private static float length(Vec3 end) { return (float) end.length(); }

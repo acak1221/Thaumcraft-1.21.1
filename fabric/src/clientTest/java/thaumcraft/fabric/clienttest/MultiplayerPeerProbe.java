@@ -54,7 +54,7 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger("thaumcraft-multiplayer-peer");
     private static final int PENDING_TIMEOUT_TICKS = 200;
 
-    private final MultiplayerPairLink.Census census = new MultiplayerPairLink.Census();
+    private final MultiplayerPairLink.Census census = MultiplayerPairLink.CENSUS;
     private final Map<String, Object> evidence = new LinkedHashMap<>();
     private final List<String> stepLog = new ArrayList<>();
     private final List<String> failures = new ArrayList<>();
@@ -397,17 +397,20 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
         client.getConnection().send(new net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket(slot));
     }
 
-    /** Moves an inventory slot into the first hotbar slot with two real clicks. */
+    /**
+     * Moves an inventory slot into the hotbar with the vanilla quick move.
+     *
+     * <p>The quick move never touches the cursor, so the server's accessory
+     * menu is not refused because of a leftover cursor stack.</p>
+     */
     private void moveToHotbar(Minecraft client, int inventorySlot) {
         var menu = client.player.inventoryMenu;
-        int from = -1, to = -1;
+        int from = -1;
         for (int index = 0; index < menu.slots.size(); index++) {
-            if (menu.slots.get(index).getContainerSlot() == inventorySlot) from = index;
-            if (menu.slots.get(index).getContainerSlot() == 0) to = index;
+            if (menu.slots.get(index).getContainerSlot() == inventorySlot) { from = index; break; }
         }
-        if (from < 0 || to < 0) return;
-        client.gameMode.handleInventoryMouseClick(menu.containerId, from, 0, ClickType.PICKUP, client.player);
-        client.gameMode.handleInventoryMouseClick(menu.containerId, to, 0, ClickType.PICKUP, client.player);
+        if (from < 0) return;
+        client.gameMode.handleInventoryMouseClick(menu.containerId, from, 0, ClickType.QUICK_MOVE, client.player);
     }
 
     /** The peer's own right click on the research table's PARTNER half. */

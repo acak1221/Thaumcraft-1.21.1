@@ -38,6 +38,9 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 public final class MultiplayerPairLink {
     private MultiplayerPairLink() {}
 
+    /** The one census of the process; the clientTest mixin installs it. */
+    public static final Census CENSUS = new Census();
+
     /** The file the LEAD writes and the PEER reads. */
     public static Path commandFile(Path directory) { return directory.resolve("lead.cmd"); }
     /** The file the PEER writes and the LEAD reads. */

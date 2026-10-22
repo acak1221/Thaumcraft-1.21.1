@@ -5,10 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.networking.NetworkManager;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
@@ -16,12 +12,10 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.Connection;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -70,7 +64,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -107,9 +100,6 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     private final Map<String, Object> evidence = new LinkedHashMap<>();
     private final List<String> stepLog = new ArrayList<>();
     private final List<String> failures = new ArrayList<>();
-    private final Map<String, AtomicInteger> s2cCounts = new ConcurrentHashMap<>();
-    private final Map<String, AtomicInteger> c2sCounts = new ConcurrentHashMap<>();
-    private final List<String> systemMessages = java.util.Collections.synchronizedList(new ArrayList<>());
     private final Map<String, Object> stageData = new LinkedHashMap<>();
 
     private String runDirectory = ".";
@@ -120,7 +110,6 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     private int stage;
     private int stageTicks;
     private boolean finished;
-    private Channel censusChannel;
     private String expectedResearch = "";
     private BlockPos tablePos;
     private BlockPos tablePartner;
@@ -242,8 +231,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
 
     private int giveReplies() {
         int count = 0;
-        synchronized (systemMessages) {
-            for (String message : systemMessages) if (message.startsWith("Gave ")) count++;
+        synchronized (MultiplayerPairLink.CENSUS.messages) {
+            for (String message : MultiplayerPairLink.CENSUS.messages) if (message.startsWith("Gave ")) count++;
         }
         return count;
     }
@@ -328,7 +317,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         evidence.put("client_aspects", new ArrayList<>(aspects));
         evidence.put("client_research", new ArrayList<>(research));
         evidence.put("client_research_count", research.size());
-        evidence.put("knowledge_sync_packets", s2cCounts.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get());
+        evidence.put("knowledge_sync_packets", MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get());
         if (!aspects.containsAll(List.of("aer", "ignis", "aqua", "terra", "ordo", "perditio"))) {
             throw new IllegalStateException("The knowledge snapshot did not carry the six primal aspects: " + aspects);
         }
@@ -388,8 +377,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         evidence.put("note_request_answer", answer);
         evidence.put("paper_before", stageData.get("paper_before"));
         evidence.put("paper_after", inventoryCount(client, Items.PAPER));
-        evidence.put("note_request_packets", c2sCounts.getOrDefault("thaumcraft:research_note_request", new AtomicInteger()).get());
-        if (c2sCounts.getOrDefault("thaumcraft:research_note_request", new AtomicInteger()).get() != 1) {
+        evidence.put("note_request_packets", MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:research_note_request", new AtomicInteger()).get());
+        if (MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:research_note_request", new AtomicInteger()).get() != 1) {
             throw new IllegalStateException("The client did not send exactly one research note request");
         }
         return true;
@@ -412,8 +401,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         evidence.put("granted_research", key);
-        evidence.put("knowledge_sync_packets_after_grant", s2cCounts.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get());
-        if (s2cCounts.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get() == 0) {
+        evidence.put("knowledge_sync_packets_after_grant", MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get());
+        if (MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get() == 0) {
             throw new IllegalStateException("No clientbound knowledge snapshot crossed the wire after the grant");
         }
         return true;
@@ -447,14 +436,14 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         }
         evidence.put("purchase_answer", lastMessageContaining("Research completed"));
         evidence.put("purchased_research", PURCHASE_RESEARCH);
-        evidence.put("purchase_packets", c2sCounts.getOrDefault("thaumcraft:research_purchase", new AtomicInteger()).get());
-        evidence.put("research_notice_packets", s2cCounts.getOrDefault("thaumcraft:research_notice", new AtomicInteger()).get());
+        evidence.put("purchase_packets", MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:research_purchase", new AtomicInteger()).get());
+        evidence.put("research_notice_packets", MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:research_notice", new AtomicInteger()).get());
         evidence.put("research_notice_highlighted", ResearchNotifications.highlighted(PURCHASE_RESEARCH));
-        evidence.put("aspect_pool_packets", s2cCounts.getOrDefault("thaumcraft:aspect_pool", new AtomicInteger()).get());
-        if (s2cCounts.getOrDefault("thaumcraft:research_notice", new AtomicInteger()).get() == 0) {
+        evidence.put("aspect_pool_packets", MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:aspect_pool", new AtomicInteger()).get());
+        if (MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:research_notice", new AtomicInteger()).get() == 0) {
             throw new IllegalStateException("The purchase produced no clientbound research notice");
         }
-        if (s2cCounts.getOrDefault("thaumcraft:aspect_pool", new AtomicInteger()).get() == 0) {
+        if (MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:aspect_pool", new AtomicInteger()).get() == 0) {
             throw new IllegalStateException("The purchase produced no clientbound aspect-pool receipt");
         }
         return true;
@@ -486,8 +475,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         evidence.put("client_focus_after", String.valueOf(focus));
         if (focus.isEmpty()) return false;
         evidence.put("selected_focus", BuiltInRegistries.ITEM.getKey(focus.getItem()).toString());
-        evidence.put("focus_selection_packets", c2sCounts.getOrDefault("thaumcraft:focus_selection", new AtomicInteger()).get());
-        if (c2sCounts.getOrDefault("thaumcraft:focus_selection", new AtomicInteger()).get() != 1) {
+        evidence.put("focus_selection_packets", MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:focus_selection", new AtomicInteger()).get());
+        if (MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:focus_selection", new AtomicInteger()).get() != 1) {
             throw new IllegalStateException("The client did not send exactly one focus selection");
         }
         return true;
@@ -502,7 +491,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             stageData.put("bell_sent", true);
             return false;
         }
-        int sent = c2sCounts.getOrDefault("thaumcraft:golem_bell_reset", new AtomicInteger()).get();
+        int sent = MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:golem_bell_reset", new AtomicInteger()).get();
         if (sent != 1) return false;
         evidence.put("golem_bell_reset_packets", sent);
         return true;
@@ -517,7 +506,15 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         }
         boolean menu = client.player.containerMenu instanceof ContainerAccessories;
         boolean screen = client.screen instanceof GuiAccessories;
-        if (!menu && !screen) return false;
+        if (!menu && !screen) {
+            if (stageTicks % 100 == 0) {
+                evidence.put("accessory_cursor", String.valueOf(client.player.inventoryMenu.getCarried()));
+                evidence.put("accessory_container_menu", String.valueOf(client.player.containerMenu.getClass().getSimpleName()));
+                LOGGER.info("Multiplayer probe accessory menu waits: cursor={} menu={}",
+                        client.player.inventoryMenu.getCarried(), client.player.containerMenu.getClass().getSimpleName());
+            }
+            return false;
+        }
         evidence.put("accessory_menu_opened", menu);
         evidence.put("accessory_screen_opened", screen);
         if (!screen) throw new IllegalStateException("The accessory container opened without a client screen");
@@ -554,8 +551,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             evidence.put("research_table_menu_opened", true);
             evidence.put("research_table_variant", variantAt(client, tablePos));
             evidence.put("research_table_partner_variant", variantAt(client, tablePartner));
-            evidence.put("research_table_state_packets", s2cCounts.getOrDefault("thaumcraft:research_table_state", new AtomicInteger()).get());
-            if (s2cCounts.getOrDefault("thaumcraft:research_table_state", new AtomicInteger()).get() == 0) {
+            evidence.put("research_table_state_packets", MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:research_table_state", new AtomicInteger()).get());
+            if (MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:research_table_state", new AtomicInteger()).get() == 0) {
                 throw new IllegalStateException("The research table opened without its authoritative state payload");
             }
             return true;
@@ -635,8 +632,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         var placed = after.cellAt(cell.get(0), cell.get(1));
         if (placed != null && placed.type() != 0) {
             evidence.put("edit_result_aspect", placed.aspect());
-            evidence.put("table_edit_packets", c2sCounts.getOrDefault("thaumcraft:research_table_edit", new AtomicInteger()).get());
-            evidence.put("table_state_packets", s2cCounts.getOrDefault("thaumcraft:research_table_state", new AtomicInteger()).get());
+            evidence.put("table_edit_packets", MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:research_table_edit", new AtomicInteger()).get());
+            evidence.put("table_state_packets", MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:research_table_state", new AtomicInteger()).get());
             client.player.closeContainer();
             return true;
         }
@@ -718,9 +715,9 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             if (answer != null) evidence.put("server_golem_query", answer);
             if (stageTicks > 400) {
                 List<String> recent = new ArrayList<>();
-                synchronized (systemMessages) {
-                    for (int i = Math.max(0, systemMessages.size() - 6); i < systemMessages.size(); i++) {
-                        recent.add(systemMessages.get(i));
+                synchronized (MultiplayerPairLink.CENSUS.messages) {
+                    for (int i = Math.max(0, MultiplayerPairLink.CENSUS.messages.size() - 6); i < MultiplayerPairLink.CENSUS.messages.size(); i++) {
+                        recent.add(MultiplayerPairLink.CENSUS.messages.get(i));
                     }
                 }
                 evidence.put("recent_server_messages", recent);
@@ -857,7 +854,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         evidence.put("reconnect_research", new ArrayList<>(new TreeSet<>(knowledge.getResearchComplete())));
         evidence.put("reconnect_aspects", new ArrayList<>(new TreeSet<>(knowledge.getAspectsDiscovered().keySet())));
         evidence.put("knowledge_sync_packets_total",
-                s2cCounts.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get());
+                MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:knowledge_sync", new AtomicInteger()).get());
         return true;
     }
 
@@ -884,7 +881,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             stageData.put("used", true);
             return false;
         }
-        int count = s2cCounts.getOrDefault("thaumcraft:open_thaumonomicon", new AtomicInteger()).get();
+        int count = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:open_thaumonomicon", new AtomicInteger()).get();
         evidence.put("wire_open_thaumonomicon_packets", count);
         if (count == 0) {
             if (stageTicks < 200) return false;
@@ -921,8 +918,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             stageData.put("combined", true);
             return false;
         }
-        int sent = c2sCounts.getOrDefault("thaumcraft:research_table_combine", new AtomicInteger()).get();
-        int discovered = s2cCounts.getOrDefault("thaumcraft:aspect_discovery", new AtomicInteger()).get();
+        int sent = MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:research_table_combine", new AtomicInteger()).get();
+        int discovered = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:aspect_discovery", new AtomicInteger()).get();
         evidence.put("wire_research_table_combine_packets", sent);
         evidence.put("wire_aspect_discovery_packets", discovered);
         evidence.put("wire_combined_aspect", COMBINE_RESULT);
@@ -990,7 +987,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             }
             return false;
         }
-        int sent = c2sCounts.getOrDefault("thaumcraft:research_table_copy", new AtomicInteger()).get();
+        int sent = MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:research_table_copy", new AtomicInteger()).get();
         evidence.put("wire_research_table_copy_packets", sent);
         evidence.put("wire_research_table_copy_observed", sent > 0);
         if (sent == 0) {
@@ -1010,9 +1007,9 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             stageData.put("sent", true);
             return false;
         }
-        int architect = c2sCounts.getOrDefault("thaumcraft:architect_toggle", new AtomicInteger()).get();
-        int hover = c2sCounts.getOrDefault("thaumcraft:hover_toggle", new AtomicInteger()).get();
-        int shovel = c2sCounts.getOrDefault("thaumcraft:shovel_orientation", new AtomicInteger()).get();
+        int architect = MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:architect_toggle", new AtomicInteger()).get();
+        int hover = MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:hover_toggle", new AtomicInteger()).get();
+        int shovel = MultiplayerPairLink.CENSUS.serverbound.getOrDefault("thaumcraft:shovel_orientation", new AtomicInteger()).get();
         evidence.put("wire_architect_toggle_packets", architect);
         evidence.put("wire_hover_toggle_packets", hover);
         evidence.put("wire_shovel_orientation_packets", shovel);
@@ -1040,8 +1037,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         BlockPos trap = (BlockPos) stageData.get("trap");
-        int blockFx = s2cCounts.getOrDefault("thaumcraft:block_fx", new AtomicInteger()).get();
-        int warpMessage = s2cCounts.getOrDefault("thaumcraft:warp_message", new AtomicInteger()).get();
+        int blockFx = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:block_fx", new AtomicInteger()).get();
+        int warpMessage = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:warp_message", new AtomicInteger()).get();
         evidence.put("wire_block_fx_packets", blockFx);
         evidence.put("wire_warp_message_packets", warpMessage);
         evidence.put("wire_lead_warp_after_trap", KnowledgeAccess.get(client.player).getTotalWarp());
@@ -1096,8 +1093,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             client.getConnection().sendCommand("tp " + playerName + " " + (guardian.getX() - 28) + " " + guardian.getY()
                     + " " + guardian.getZ());
         }
-        int warpEvent = s2cCounts.getOrDefault("thaumcraft:warp_event", new AtomicInteger()).get();
-        int sonic = s2cCounts.getOrDefault("thaumcraft:guardian_sonic", new AtomicInteger()).get();
+        int warpEvent = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:warp_event", new AtomicInteger()).get();
+        int sonic = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:guardian_sonic", new AtomicInteger()).get();
         evidence.put("wire_warp_event_packets", warpEvent);
         evidence.put("wire_guardian_sonic_packets", sonic);
         evidence.put("wire_guardian_position", List.of(guardian.getX(), guardian.getY(), guardian.getZ()));
@@ -1129,7 +1126,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             stageData.put("summoned", true);
             return false;
         }
-        int zap = s2cCounts.getOrDefault("thaumcraft:wisp_zap", new AtomicInteger()).get();
+        int zap = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:wisp_zap", new AtomicInteger()).get();
         evidence.put("wire_wisp_zap_packets", zap);
         if (zap == 0) {
             if (stageTicks < 2400) return false;
@@ -1254,7 +1251,7 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         }
         if (!pairReplied()) return false;
         int peerAfter = parseCount(pairAnswer);
-        int leadCount = s2cCounts.getOrDefault("thaumcraft:accessories_contents", new AtomicInteger()).get();
+        int leadCount = MultiplayerPairLink.CENSUS.clientbound.getOrDefault("thaumcraft:accessories_contents", new AtomicInteger()).get();
         evidence.put("pair_peer_accessories_payloads_after", peerAfter);
         evidence.put("pair_lead_accessories_payloads", leadCount);
         if (peerAfter <= peerBefore) {
@@ -1551,8 +1548,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     /** The give command of the vanilla server answers "Gave <item> to <player>". */
     private int giveRepliesFor(String target) {
         int count = 0;
-        synchronized (systemMessages) {
-            for (String message : systemMessages) {
+        synchronized (MultiplayerPairLink.CENSUS.messages) {
+            for (String message : MultiplayerPairLink.CENSUS.messages) {
                 if (message.startsWith("Gave ") && message.contains(" to " + target)) count++;
             }
         }
@@ -1706,45 +1703,10 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     // ------------------------------------------------------------------ helpers
 
     private void installCensus(Connection connection) {
-        try {
-            Channel channel = (Channel) field(connection, "channel");
-            if (channel == censusChannel) return;
-            censusChannel = channel;
-            var handler = new ChannelDuplexHandler() {
-                @Override
-                public void channelRead(ChannelHandlerContext context, Object message) throws Exception {
-                    if (message instanceof ClientboundCustomPayloadPacket packet) {
-                        count(s2cCounts, packet.payload().type().id().toString());
-                    } else if (message instanceof ClientboundSystemChatPacket packet) {
-                        systemMessages.add(packet.content().getString());
-                    } else if (message instanceof ClientboundPlayerChatPacket packet) {
-                        systemMessages.add(packet.unsignedContent().getString());
-                    }
-                    super.channelRead(context, message);
-                }
-
-                @Override
-                public void write(ChannelHandlerContext context, Object message, ChannelPromise promise) throws Exception {
-                    if (message instanceof ServerboundCustomPayloadPacket packet) {
-                        count(c2sCounts, packet.payload().type().id().toString());
-                    }
-                    super.write(context, message, promise);
-                }
-            };
-            // The native Connection handler is a SimpleChannelInboundHandler and
-            // never forwards an inbound packet, so the census has to sit BEFORE
-            // it to observe the clientbound payloads at all.
-            var pipeline = channel.pipeline();
-            for (String name : pipeline.names()) {
-                if (pipeline.get(name) instanceof Connection) {
-                    pipeline.addBefore(name, "thaumcraft-multiplayer-census", handler);
-                    return;
-                }
-            }
-            pipeline.addLast("thaumcraft-multiplayer-census", handler);
-        } catch (ReflectiveOperationException failure) {
-            throw new IllegalStateException("Cannot install the multiplayer payload census", failure);
-        }
+        // The clientTest mixin installs the census when the play connection is
+        // built, so the join time payloads are observed too. This call is the
+        // fallback for a connection that was built before the mixin ran.
+        MultiplayerPairLink.CENSUS.install(connection);
     }
 
     /** The ids the physical client registered for one Fabric payload registry. */
@@ -1784,16 +1746,16 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     }
 
     private String awaitMessage(java.util.function.Predicate<String> matcher) {
-        synchronized (systemMessages) {
-            for (String message : systemMessages) if (matcher.test(message)) return message;
+        synchronized (MultiplayerPairLink.CENSUS.messages) {
+            for (String message : MultiplayerPairLink.CENSUS.messages) if (matcher.test(message)) return message;
         }
         return null;
     }
 
     private String lastMessageContaining(String needle) {
         String found = null;
-        synchronized (systemMessages) {
-            for (String message : systemMessages) if (message.contains(needle)) found = message;
+        synchronized (MultiplayerPairLink.CENSUS.messages) {
+            for (String message : MultiplayerPairLink.CENSUS.messages) if (message.contains(needle)) found = message;
         }
         return found;
     }
@@ -1838,6 +1800,11 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
      * Puts an item into the main hand. An item outside the hotbar has to be
      * moved into it first, because the vanilla carried item packet only
      * accepts a hotbar index.
+     *
+     * <p>The move uses the vanilla quick move (a shift click), which moves the
+     * item between the main inventory and the hotbar WITHOUT touching the
+     * cursor. Two pick up clicks would leave the item on the cursor, and the
+     * server then refuses the accessory menu while the cursor is not empty.</p>
      */
     private boolean holdItemOf(Minecraft client, net.minecraft.world.item.Item item) {
         int slot = slotOf(client, item);
@@ -1846,21 +1813,20 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             selectSlot(client, slot);
             return true;
         }
-        moveToHotbar(client, slot);
-        return false;
+        int containerSlot = containerSlotOf(client, slot);
+        if (containerSlot < 0) return false;
+        client.gameMode.handleInventoryMouseClick(client.player.inventoryMenu.containerId, containerSlot, 0,
+                ClickType.QUICK_MOVE, client.player);
+        return false; // The move is confirmed by the next inventory sync.
     }
 
-    /** Moves an inventory slot into the first hotbar slot with two real clicks. */
-    private void moveToHotbar(Minecraft client, int inventorySlot) {
+    /** The menu slot of an inventory slot. */
+    private static int containerSlotOf(Minecraft client, int inventorySlot) {
         var menu = client.player.inventoryMenu;
-        int from = -1, to = -1;
         for (int index = 0; index < menu.slots.size(); index++) {
-            if (menu.slots.get(index).getContainerSlot() == inventorySlot) from = index;
-            if (menu.slots.get(index).getContainerSlot() == 0) to = index;
+            if (menu.slots.get(index).getContainerSlot() == inventorySlot) return index;
         }
-        if (from < 0 || to < 0) return;
-        client.gameMode.handleInventoryMouseClick(menu.containerId, from, 0, ClickType.PICKUP, client.player);
-        client.gameMode.handleInventoryMouseClick(menu.containerId, to, 0, ClickType.PICKUP, client.player);
+        return -1;
     }
 
     /**
@@ -1908,18 +1874,18 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             }
             root.add("evidence", evidenceJson);
             JsonObject s2cJson = new JsonObject();
-            for (Map.Entry<String, AtomicInteger> entry : new TreeMap<>(s2cCounts).entrySet()) {
+            for (Map.Entry<String, AtomicInteger> entry : new TreeMap<>(MultiplayerPairLink.CENSUS.clientbound).entrySet()) {
                 s2cJson.addProperty(entry.getKey(), entry.getValue().get());
             }
             root.add("clientbound_payloads", s2cJson);
             JsonObject c2sJson = new JsonObject();
-            for (Map.Entry<String, AtomicInteger> entry : new TreeMap<>(c2sCounts).entrySet()) {
+            for (Map.Entry<String, AtomicInteger> entry : new TreeMap<>(MultiplayerPairLink.CENSUS.serverbound).entrySet()) {
                 c2sJson.addProperty(entry.getKey(), entry.getValue().get());
             }
             root.add("serverbound_payloads", c2sJson);
             JsonArray messagesJson = new JsonArray();
-            synchronized (systemMessages) {
-                for (String message : systemMessages) messagesJson.add(message);
+            synchronized (MultiplayerPairLink.CENSUS.messages) {
+                for (String message : MultiplayerPairLink.CENSUS.messages) messagesJson.add(message);
             }
             root.add("server_messages", messagesJson);
             Path target = Path.of(runDirectory).resolve(reportFile);

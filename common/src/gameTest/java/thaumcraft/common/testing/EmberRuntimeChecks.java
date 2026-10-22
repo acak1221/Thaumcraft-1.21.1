@@ -272,7 +272,12 @@ public final class EmberRuntimeChecks {
         T target = type.create(player.serverLevel());
         target.setNoAi(true); target.setPos(position);
         targets.add(target);
-        test.assertTrue(player.serverLevel().addFreshEntity(target), "real living collision target spawns");
+        // Exact-health collision fixtures require an ordinary target, not the
+        // preceding scenarios' arbitrary position in the shared champion RNG stream.
+        test.assertTrue(ChampionJoinRoll.join(player.serverLevel(), target), "real living collision target spawns with a declared ordinary join roll");
+        test.assertTrue(target.getHealth() == target.getMaxHealth() && target.getRemainingFireTicks() <= 0,
+                "ordinary collision target starts at full health and cold before any ember; health="
+                        + target.getHealth() + "/" + target.getMaxHealth() + ", fire=" + target.getRemainingFireTicks());
         return target;
     }
 

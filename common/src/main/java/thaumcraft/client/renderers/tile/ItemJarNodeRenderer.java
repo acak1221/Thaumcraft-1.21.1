@@ -23,7 +23,7 @@ import thaumcraft.common.config.ThaumcraftEldritchBlocks;
  * and the node modifier of the item itself.</p>
  *
  * <p>The three rotations of the original are {@code glRotatef(90, 0, 1, 0)} and
- * {@code glRotatef(90, 1, 0, 0)}, so they are around the Z axis and around the X axis.</p>
+     * {@code glRotatef(90, 1, 0, 0)}, so they are around the Y axis and around the X axis.</p>
  */
 public final class ItemJarNodeRenderer {
     /** The place of the node inside the item. */
@@ -45,7 +45,7 @@ public final class ItemJarNodeRenderer {
             pose.translate(NODE_X, NODE_Y, NODE_Z);
             float age = Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount;
             TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
-            pose.mulPose(Axis.ZP.rotationDegrees(90));
+            pose.mulPose(Axis.YP.rotationDegrees(90));
             TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);
             pose.mulPose(Axis.XP.rotationDegrees(90));
             TileNodeRenderer.drawItemNode(pose, buffers, aspects, type, modifier, .5F, NODE_SIZE, age);

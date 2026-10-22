@@ -1,3 +1,4 @@
 {
-  "parent": "thaumcraft:block/jar_node"
+  "parent": "thaumcraft:item/jar",
+  "textures": {"particle": "thaumcraft:blocks/jar_side"}
 }

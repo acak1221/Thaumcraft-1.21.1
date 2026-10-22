@@ -94,7 +94,10 @@ public final class ThaumcraftExcavationClient {
     private static void tick(Minecraft client) {
         if (client.level == null || client.player == null) { clear(); return; }
         BEAMS.entrySet().removeIf(entry -> {
-            Beam beam = entry.getValue(); ++beam.age; if (beam.impact > 0) --beam.impact;
+            Beam beam = entry.getValue();
+            beam.previousSize = Math.min(beam.age / 4.0F, 1.0F);
+            ++beam.age;
+            if (beam.impact > 0) --beam.impact;
             var caster = client.level.getEntity(entry.getKey());
             return --beam.remaining <= 0 || !client.level.dimension().location().equals(beam.dimension)
                     || caster == null || caster.isRemoved() || client.player.distanceToSqr(beam.origin) > 64 * 64;
@@ -199,7 +202,9 @@ public final class ThaumcraftExcavationClient {
             // Original FXBeamWand:230-234 - the frame of the beam: the local Y is the direction
             // of the beam, the local X and Z are the two sides of the fan.
             pose.mulPose(Axis.YP.rotationDegrees(yaw(direction)));
-            pose.mulPose(Axis.XP.rotationDegrees(elevation(direction)));
+            // Local +Y is the beam length, not +Z. Elevation is measured
+            // above the XZ plane, so tilt +Y by its complementary angle.
+            pose.mulPose(Axis.XP.rotationDegrees(90.0F - elevation(direction)));
             // Original FXBeamWand:239 - the fan turns around the axis of the beam.
             pose.mulPose(Axis.YP.rotationDegrees(spin(gameTime, partial)));
             for (int plane = 0; plane < PLANES; plane++) {
@@ -255,7 +260,7 @@ public final class ThaumcraftExcavationClient {
      */
     public static float scroll(int slide, float partial) {
         float value = slide + partial;
-        return -value * 0.2F - (float) Math.sin(-value * 0.1F);
+        return -value * 0.2F - Mth.floor(-value * 0.1F);
     }
 
     private static float length(Vec3 end) { return (float) end.length(); }

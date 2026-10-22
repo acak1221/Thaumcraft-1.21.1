@@ -189,16 +189,11 @@ public final class ThaumcraftNeoForgeClient {
             @Override public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager,
                                                             ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler,
                                                             Executor prepareExecutor, Executor applyExecutor) {
-                CompletableFuture<Void> future = new CompletableFuture<>();
-                applyExecutor.execute(() -> {
-                    try {
-                        resetClientState();
-                        future.complete(null);
-                    } catch (RuntimeException failure) {
-                        future.completeExceptionally(failure);
-                    }
-                });
-                return future;
+                // Even a listener with no preparation work must signal the barrier:
+                // SimpleReloadInstance removes preparingListeners only in wait().
+                return CompletableFuture.<Void>completedFuture(null)
+                        .thenCompose(barrier::wait)
+                        .thenRunAsync(ThaumcraftNeoForgeClient::resetClientState, applyExecutor);
             }
 
             @Override public String getName() {
@@ -237,6 +232,7 @@ public final class ThaumcraftNeoForgeClient {
         ThaumcraftArchitectClient.render(pose, buffers, partialTick, event.getCamera());
         ThaumcraftGolemClient.renderMarkers(pose, buffers, partialTick, event.getCamera());
         buffers.endBatch(RenderType.lines());
+        thaumcraft.client.lib.ScanOverlay.render(pose, partialTick);
     }
 
     /** The disconnect reset of the Fabric ClientPlayConnectionEvents.DISCONNECT. */

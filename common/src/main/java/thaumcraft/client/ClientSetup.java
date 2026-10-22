@@ -187,6 +187,7 @@ public final class ClientSetup {
         // thaumcraft/client/renderers/entity/RenderSpecialItem.java:1-119) and renders
         // EntityFollowingItem with RenderFollowingItem.
         thaumcraft.client.ThaumcraftEldritchClient.init();
+        thaumcraft.client.ThaumcraftEldritchBlocksClient.init();
         thaumcraft.client.ThaumcraftDeviceGuiClient.init();
         thaumcraft.client.ThaumcraftGearModelsClient.init();
         thaumcraft.client.ThaumcraftChampionClient.init();

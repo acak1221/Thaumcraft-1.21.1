@@ -406,7 +406,9 @@ def create_models() -> list[dict[str, Any]]:
     mappings.extend(create_jar_models()[:1])
     model("block/aura_node", {"textures": {"particle": "thaumcraft:blocks/empty"}, "elements": []})
     write_json(ASSETS / "blockstates/aura_node.json", {"variants": {"": {"model": "thaumcraft:block/aura_node"}}})
-    item_model("aura_node", "items/shard")
+    # Both loader registrations are reached only by a builtin/entity model.
+    model("item/aura_node", {"parent": "minecraft:builtin/entity",
+                             "textures": {"particle": "thaumcraft:items/shard"}})
     mappings.append(legacy_mapping("blockairy", 0, "aura_node", ["blocks/empty", "items/shard"],
                                    ["tile.thaumcraft.airy.0.name"], registry="block_and_item",
                                    visual_status="empty_block_diagnostic_item_marker"))

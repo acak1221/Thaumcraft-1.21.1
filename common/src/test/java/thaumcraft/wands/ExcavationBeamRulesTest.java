@@ -48,11 +48,10 @@ class ExcavationBeamRulesTest {
     }
 
     @Test void theTextureOfTheBeamSlidesWithTheAgeOfThePlayer() {
-        // Original FXBeamWand:201-206 - -value * 0.2 - sin(-value * 0.1).
+        // Original FXBeamWand:205 uses MathHelper.func_76141_d: floor, not sin.
         assertEquals(0.0F, ThaumcraftExcavationClient.scroll(0, 0.0F), 1.0E-6F, "the texture starts at rest");
-        float value = 10.0F;
-        assertEquals(-value * 0.2F - (float) Math.sin(-value * 0.1F),
-                ThaumcraftExcavationClient.scroll(10, 0.0F), 1.0E-6F, "the slide of the original");
+        assertEquals(-1.0F, ThaumcraftExcavationClient.scroll(10, 0.0F), 1.0E-6F, "the slide of the original");
+        assertEquals(-0.2F, ThaumcraftExcavationClient.scroll(11, 0.0F), 1.0E-6F, "negative floor wraps at the next tick");
         assertTrue(ThaumcraftExcavationClient.scroll(11, 0.0F) != ThaumcraftExcavationClient.scroll(10, 0.0F),
                 "the slide follows the age of the player");
     }

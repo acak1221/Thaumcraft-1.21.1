@@ -103,7 +103,7 @@ public final class BlockFxClientEffects {
         int count = count(7);
         for (int a = 0; a < count; a++) {
             Minecraft.getInstance().particleEngine.add(
-                    new thaumcraft.client.fx.particles.GrowthLampParticle(level, payload.target(), payload.rgb()));
+                    new thaumcraft.client.fx.particles.BlockSparkleParticle(level, payload.target(), payload.rgb()));
         }
     }
 

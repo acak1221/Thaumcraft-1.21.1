@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +42,9 @@ class ClientDeviceModelParityTest {
 
     private static JsonObject model(String path) {
         try (InputStream stream = ClientDeviceModelParityTest.class
-                .getClassLoader().getResourceAsStream(ASSETS + "models/" + path + ".json"))) {
+                .getClassLoader().getResourceAsStream(ASSETS + "models/" + path + ".json")) {
             if (stream == null) throw new IllegalStateException("the model " + path + " is missing");
-            return JsonParser.parseReader(new String(stream.readAllBytes(), StandardCharsets.UTF_8)).getAsJsonObject();
+            return JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
         } catch (IOException error) {
             throw new IllegalStateException("the model " + path + " cannot be read", error);
         }

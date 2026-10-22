@@ -29546,12 +29546,17 @@
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:20-34 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:44-47 the drop at the first adjacent marked block that is not an inventory and not the home",
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:48-69 the drop with the motion of the original and the pickup delay of ten",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:79-88 the native drop of the Empty golem",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2130-2135 the first adjacent marked block, the home of the golem excluded"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:501-521 the native drop of the Empty golem, the entry of the number two with its condition, its action and its continuation",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2130-2135 the first adjacent marked block, the home of the golem excluded",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:511-514 the action of the drop of the Empty golem, the item is thrown at the first adjacent marked block that is no inventory",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the empty lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
           "Fixed in this wave: the native dropped the cargo of the Empty golem at the home of the golem as well; the original excludes it (AIEmptyDrop:49).",
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the drop goal are reproduced: no five tick cadence, the adjacent marked block that is not an inventory, the exclusion of the home, the motion of the original and the pickup delay of ten."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The drop keeps the number two of the Empty core and the motion of the original with the pickup delay of ten.",
+          "The remaining difference: the original sets the counter of 200 in its startExecuting whatever the drop did (oracle AIHomeDrop:72), the native sets it only when the item really left the golem."
         ],
         "reviewed_sha256": {
           "original": "76c175934cd1177d7964bbbd9d231accd887abefb5ef4a939a118851dd024627",
@@ -29596,11 +29601,14 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java:39-83 the goal needs the cargo and the five tick cadence, then the nearest container with room inside the range of the golem and outside the home, and the first marked block that is not an inventory as the fallback",
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java:85-110 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:286-300 the native destination of the Empty route, the inventories first and the first marked block as the fallback",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:318-368 the route goal with the budget of 200 and the detour"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:779-790 the native destination of the Empty route, the inventories first and the first marked block as the fallback",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:680-805 the route entry with the budget of 200 and the detour, the number three of the Empty core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the empty lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the route goal are reproduced: the five tick cadence, the nearest container with room inside the range of the golem, the exclusion of the home, the first marked block that is not an inventory as the fallback without a range and the budgets of 200 and 20."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The route keeps the number three of the Empty core, the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20."
         ],
         "reviewed_sha256": {
           "original": "bdc495f5fe9731081a054187d89550dc1a0d377e4d16e10990f23c44264acc1a",
@@ -29646,11 +29654,16 @@
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:31-33 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:40-67 the place into an adjacent marked container of the matching colour, with the double chest",
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:90-130 the placement and the five tick chest window",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:167-189 the native places the cargo into an adjacent marked container",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2273-2278 the placement at a marked container of the Empty golem"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:461-492 the native places the cargo into an adjacent marked container, the entry of the number one of the Empty core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2273-2278 the placement at a marked container of the Empty golem",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:476-487 the action of the place of the Empty golem, the cargo goes into the adjacent marked container and the chest window of five ticks opens",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the empty lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original, which has no equivalent for a mob in 1.21.1. The observable rules of the place goal are reproduced, including the missing five tick cadence."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The place keeps the number one of the Empty core and the missing five tick cadence.",
+          "The remaining difference is the chest interaction of the original: the visible lid of a chest cannot be animated by a mob in 1.21.1 (the lid follows the players that have the menu open), so the audible part and the five tick window of the original are reproduced, the lid is not."
         ],
         "reviewed_sha256": {
           "original": "e81f022945b30f5b1769421aeaf93cc9120600572047cd033d45899e24be1ae1",
@@ -29696,12 +29709,15 @@
           "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:52-90 the goal needs no cargo, the five tick cadence, a wanted item and a container with the goods",
           "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:91-117 the nearest container with the goods inside the range of the golem and outside the home",
           "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:124-145 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:131-165 the native picks the first missing exemplar with a supply and its nearest source",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:318-368 the route goal with the budget of 200 and the detour",
-          "native common/src/main/java/thaumcraft/common/lib/golems/GolemRouteRules.java:26-83 the cadence, the budgets and the detour of the original as pure functions"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:757-777 the native picks the first missing exemplar with a supply and its nearest source",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:680-805 the route entry with the budget of 200 and the detour, the number four of the Fill core",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemRouteRules.java:26-83 the cadence, the budgets and the detour of the original as pure functions",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the fill lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the route goal are reproduced: the five tick cadence, the nearest source inside the range of the golem, the exclusion of the home, the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The route keeps the number four of the Fill core, the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20."
         ],
         "reviewed_sha256": {
           "original": "d7a89b13d91651a350ff745a15bc70dbecdc08a3c7bbd1d091d54b2992341903",
@@ -29746,11 +29762,16 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:38-41 the goal needs no cargo, a watched item, an idle navigator and a wanted item, and it has NO five tick cadence",
           "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:42-78 the take from an adjacent marked container of the matching colour, with the amount of the carry room",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:116-130 the native takes the wanted amount from an adjacent marked container",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2189-2234 the take of the original with the amount of the carry room"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:412-453 the native takes the wanted amount from an adjacent marked container, the entry of the number three of the Fill core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2189-2234 the take of the original with the amount of the carry room",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:424-436 the action of the take of the Fill golem, the wanted amount leaves the adjacent marked container and the counters of 200 and 5 are set",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the fill lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the take goal are reproduced: no five tick cadence, the adjacent marked container, the colour of the slot, the amount of the carry room and the five tick chest window."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The take keeps the number three of the Fill core, the cleared watch and the missing five tick cadence.",
+          "The remaining difference is the chest interaction of the original: the visible lid of a chest cannot be animated by a mob in 1.21.1 (the lid follows the players that have the menu open), so the audible part and the five tick window of the original are reproduced, the lid is not."
         ],
         "reviewed_sha256": {
           "original": "7a4e02464a30e03bccb8feee5a6c310dfd846a4badfc8d7272e6072d3e6b8644",
@@ -29796,10 +29817,15 @@
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:37-47 the goal needs the cargo, an idle navigator and the squared distance of five to the home, and it has NO five tick cadence",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:71-90 the drop at the home with the motion of the original and the pickup delay of ten",
           "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2161-2186 the drop at the home of the Fill golem",
-          "native common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java:423-452 the motion of the original and the pickup delay of ten"
+          "native common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java:423-452 the motion of the original and the pickup delay of ten",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:385-404 the native drop of the Fill golem, the entry of the number two with its condition, its action and its continuation",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.golemfetterholdsgolemswhileitsredstonesignallasts the free lane of the fetter is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the drop goal are reproduced: no five tick cadence, the idle navigator, the squared distance of five to the home, the home must not be an inventory, the motion of the original and the pickup delay of ten."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The drop keeps the number two of the Fill core and the missing five tick cadence.",
+          "The remaining difference: the original sets the counter of 200 in its startExecuting whatever the drop did (oracle AIHomeDrop:72), the native sets it only when the item really left the golem."
         ],
         "reviewed_sha256": {
           "original": "5996f4f43a27635fb7b3f1c4667a40371d8196d45da0181631927996b36e8e1a",
@@ -29846,10 +29872,15 @@
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:44-61 the goal places the cargo into the home container of the golem, with the double chest",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:85-120 the placement and the five tick chest window",
           "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2261-2272 the placement of the cargo into the home inventory",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:108-115 the Fill route places the cargo at the home"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:352-376 the native places the cargo at the home, the entry of the number one of the Fill core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:365-371 the action of the place of the Fill golem, the cargo goes into the home inventory and the chest window of five ticks opens",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.ordercoloursroutemarkersandslotsandthebellcyclesthem the routing part is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction: the original opens the chest of the transfer for five ticks (Config.golemChestInteract), which has no equivalent for a mob in 1.21.1. The five tick window itself is reproduced (GolemRouteRules.CHEST_WINDOW)."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The place keeps the number one of the Fill core; the original's goal has no counter of 200 at all (oracle AIHomePlace.java:27-28).",
+          "The remaining difference is the chest interaction of the original: the visible lid of a chest cannot be animated by a mob in 1.21.1 (the lid follows the players that have the menu open), so the audible part and the five tick window of the original are reproduced, the lid is not."
         ],
         "reviewed_sha256": {
           "original": "e22f59fd7c7af7dfe9326db371de832583066c93d715933eec199aa514c72b8f",
@@ -29895,13 +29926,14 @@
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original registers five goals per core with the numbers 0 to 4, all with the mutex bits 3",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:37-48 the goal needs the cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:49-59 the Empty, the Use and the Sorting core replace the cargo when no destination is left, the Fill core never does (getItemsNeeded returns null for it)",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:167-214 the Empty route replaces the cargo at the home when no destination accepts it",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:216-262 the Sorting route replaces the cargo when it cannot be delivered"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:316-344 the native replaces the cargo at the home when no destination accepts it, the entry of the number zero of the Empty and the Sorting core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:334-339 the action of the replacement, the cargo goes into the home inventory",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the empty and the sorting lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure. The original registers five selector entries per core (the replace 0, the place 1, the drop 2, the take 3 and the goto 4) that exclude each other with the mutex bits 3; the native has one route goal per core (the goto) and performs the other four actions in its own server tick, in the order of the original.",
-          "The observable rules of the replace goal are reproduced: the cargo, the five tick cadence, the idle navigator, the squared distance of five to the home and the rule that the Fill core never replaces (the original's getItemsNeeded returns null for the Fill core, oracle GolemHelper:448-471).",
-          "REMAINING DIFFERENCE: the original's goal keeps the mutex of the ladder for up to 200 ticks when a transfer only placed part of the cargo, so the ladder is blocked for ten seconds; the native retries at the next decision tick."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The replace keeps the number zero of the Empty, the Sorting, the Gather and the Use core, and the rule that the Fill core never replaces (the original's getItemsNeeded returns null for the Fill core, oracle GolemHelper:448-471)."
         ],
         "reviewed_sha256": {
           "original": "4ab17d4086902c5a245253e68b836164519d4cdbc960c5f6886726d5c63ae60c",
@@ -29946,11 +29978,16 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:27-31 the goal needs no cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:32-70 the take of the wanted item out of the home container of the golem",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:190-214 the native take of the Empty route out of the home",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2189-2234 the take of the original with the amount of the carry room"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:528-576 the native take of the Empty route out of the home, the entry of the number four of the Empty core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2189-2234 the take of the original with the amount of the carry room",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:534-543 the action of the take of the Empty golem, the wanted item leaves the home inventory and the chest window of five ticks opens",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the empty lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original, which has no equivalent for a mob in 1.21.1. The observable rules of the take goal are reproduced, including the five tick cadence and the squared distance of five to the home."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The take keeps the number four of the Empty core and the five tick cadence.",
+          "The remaining difference is the chest interaction of the original: the visible lid of a chest cannot be animated by a mob in 1.21.1 (the lid follows the players that have the menu open), so the audible part and the five tick window of the original are reproduced, the lid is not."
         ],
         "reviewed_sha256": {
           "original": "8c3cca460c9f7a65f2ec5b6afa4f3e98e26feaa3c6b7df88dfe5e96c6c11c3ff",
@@ -29994,10 +30031,15 @@
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeTakeSorting.java the take of the Sorting golem out of the home, with the face visible order of the slots",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:244-262 the native take of the Sorting route in the face visible order of the home"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:624-669 the native take of the Sorting route in the face visible order of the home, the entry of the number four of the Sorting core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:630-640 the action of the take of the Sorting golem, the wanted item leaves the home inventory and the counters of 200 and 5 are set",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the sorting lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original. The observable rules of the take goal are reproduced: the five tick cadence, the squared distance of five to the home and the face visible order of the slots of the home."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The take keeps the number four of the Sorting core, the counter of 200 and the face visible order of the slots of the home.",
+          "The remaining difference is the chest interaction of the original: the visible lid of a chest cannot be animated by a mob in 1.21.1 (the lid follows the players that have the menu open), so the audible part and the five tick window of the original are reproduced, the lid is not."
         ],
         "reviewed_sha256": {
           "original": "38c3742be0849793e513ca76626f0ba4a6f617db277207bebf9360ab30881553",
@@ -30042,8 +30084,8 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIItemPickup.java",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original per-core goal list and its priorities",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:33-37 the native route goals (Fill 4, Empty 3, Sorting 3)",
-          "native common/src/main/java/thaumcraft/entities/golems/InventoryGolemGoals.java:65-315 the native transfer work of the five original goals",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:79-91 the native route goals (Fill 4, Empty 3, Sorting 3)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:316-805 the native transfer work of the five original goals",
           "native common/src/main/java/thaumcraft/entities/golems/GatherGolemGoals.java:35,57-109 the native Gather pickup goal at priority 2",
           "oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIItemPickup.java:23-49 the selection: the golem delay of five ticks, the items inside the golem's range of its HOME, an item whose pickup delay fell below five, a filter that wants the item and a carried stack that matches it, and the item nearest to the golem wins",
           "oracle /home/cyberfox-kali/OpenTC4/src/main/java/thaumcraft/common/entities/inventory/AIItemPickup.java:61-94 the pickup: within a squared distance of two the amount is min(stack, carry space), the item entity keeps its identity and the sound is random.pop at 0.2",
@@ -30103,11 +30145,15 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java:39-77 the goal needs the cargo and the five tick cadence, then the nearest marked container that holds the item and has room, inside the range of the golem and outside the home",
           "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java:79-104 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:286-300 the native destination of the Sorting route, the inventories only and no world target fallback",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2118-2125 the marked container of the Sorting golem, the range of the golem"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:793-804 the native destination of the Sorting route, the inventories only and no world target fallback",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2118-2125 the marked container of the Sorting golem, the range of the golem",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:680-805 the route entry with the budget of 200 and the detour, the number three of the Sorting core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the sorting lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the route goal are reproduced: the five tick cadence, the nearest marked container that holds the item and has room, the range of the golem, the exclusion of the home and the absence of a world target fallback."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The route keeps the number three of the Sorting core, the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20."
         ],
         "reviewed_sha256": {
           "original": "39ee8c450753ac2e4de59e6af4bd32e07eada06200c717333b8a64d39f944479",
@@ -30152,11 +30198,16 @@
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:31-33 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
           "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:40-64 the place into an adjacent marked container that already holds the same item",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:227-235 the native places the cargo into an adjacent marked container with the seed",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2273-2278 the placement at a marked container of the Sorting golem"
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:584-617 the native places the cargo into an adjacent marked container with the seed, the entry of the number one of the Sorting core",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2273-2278 the placement at a marked container of the Sorting golem",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:599-611 the action of the place of the Sorting golem, the cargo goes into the adjacent marked container that holds the seed",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:293 the action of an entry is the vanilla start() that the 1.21.1 selector calls when the entry takes the ladder, the hook the original's startExecuting (the oracle's func_75249_e) is called through; the wave-3 rewrite left the hook unwired, so every entry took the two exclusive flags and the golem stood still",
+          "gametest thaumcraftgametests.entropyswitcheschangewhatrealgolemsfetchemptyandsort the sorting lane is green after the fix of the action hook of the ladder"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original. The observable rules of the place goal are reproduced, including the seed rule (the container must already hold the item) and the missing five tick cadence."
+          "Fixed in this wave: the action of an entry of the ladder was a dead hook (ladderStart) that the 1.21.1 selector never calls, so every entry took the two exclusive flags of the ladder and did nothing and the golem stood still; the action of an entry is the vanilla start() now, the hook the original's startExecuting is called through, and it is abstract in the base of the entries.",
+          "The structure of the original is reproduced: the five selector entries of the core, the original's numbers, the mutex bits three as the two exclusive flags MOVE and LOOK, and the counters of 200 and 5 of the original. The place keeps the number one of the Sorting core, the seed rule and the missing five tick cadence.",
+          "The remaining difference is the chest interaction of the original: the visible lid of a chest cannot be animated by a mob in 1.21.1 (the lid follows the players that have the menu open), so the audible part and the five tick window of the original are reproduced, the lid is not."
         ],
         "reviewed_sha256": {
           "original": "bae70d5b2563321828c9a43bf600a1939a158d2c3e855694b5b1e175e3d909b3",

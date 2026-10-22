@@ -535,6 +535,14 @@ public final class TileCrucible extends BlockEntity {
                 Thaumcraft.LOG.error("Unknown crucible deferred-action version; retaining data in quarantine");
                 return queue;
             }
+            for (String name : new String[]{"Outputs", "Spills", "Quarantined"}) {
+                if (tag.contains(name) && (!(tag.get(name) instanceof ListTag rows)
+                        || !rows.isEmpty() && rows.getElementType() != Tag.TAG_COMPOUND)) {
+                    queue.quarantined.add(tag.copy());
+                    Thaumcraft.LOG.error("Malformed crucible deferred-action collection {}; retaining whole owner", name);
+                    return queue;
+                }
+            }
             for (Tag raw : tag.getList("Quarantined", Tag.TAG_COMPOUND)) queue.quarantined.add(raw.copy());
             for (Tag raw : tag.getList("Outputs", Tag.TAG_COMPOUND)) {
                 CompoundTag row = (CompoundTag) raw;

@@ -49096,7 +49096,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "parity_verified",
+        "native_coverage": "partial",
         "owner": "audit-a9-core",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/tiles/TileNode.java:606-630 the regeneration interval 600 (400 BRIGHT, 900 PALE, 0 FADING) and the lock multipliers x2 (lock 1) and x20 (lock 2)",
@@ -49117,7 +49117,8 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java the advanced stabilizer lock and the discharge host (2026-10-23)",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java the node implements the published contract with the published enums, so the two types of the port are one type and the node writes its type and its modifier through the contract of the original (oracle TileNode:240-271)",
           "deviation: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself, and the behaviour is the same; the native adds a server thread guard, a current state guard and a prepared orb emission frame that the original did not have",
-          "deviation: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115); the format is bound into the accepted evidence of the wave"
+          "deviation: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115); the format is bound into the accepted evidence of the wave",
+          "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT)"
         ],
         "notes": [
           "The 600/400/900/0 regeneration ladder, the x2 lock multiplier, the 2/1/3 discharge interval, the 1+(base/1.5) roll for a bright node, the 1200 tick pruning, the 100/42 and 100/69 stability rolls and the fifth-tick wand tap are all ported with the original numbers.",
@@ -49126,7 +49127,8 @@
           "REMAINING GAP (cross lane): the native node does not implement the public thaumcraft.api.nodes.INode and it keeps its own nested NodeType/NodeModifier enums. The public view is the api layer's NodeAdapter, whose setNodeType and setNodeModifier throw, and the node identity of the native node is a UUID instead of the original dim:x:y:z string. Closing the contract needs the api lane (coremisc), because the adapter and the node must agree on the write path and on the identity.",
           "DEVIATION: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself; the behaviour is the same.",
           "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have.",
-          "CLOSED 2026-10-23 (w3rest): the node implements the published thaumcraft.api.nodes.INode itself and the published enums are the canonical ones, so the two node type enums of the port are one type and the node writes its type and its modifier through the contract of the original. The identity of the node stays a random UUID, the format is bound into the accepted evidence of the wave."
+          "CLOSED 2026-10-23 (w3rest): the node implements the published thaumcraft.api.nodes.INode itself and the published enums are the canonical ones, so the two node type enums of the port are one type and the node writes its type and its modifier through the contract of the original. The identity of the node stays a random UUID, the format is bound into the accepted evidence of the wave.",
+          "OPEN 2026-10-23 (w3rest): everything but the identity is at parity now - the node implements the published contract with the published enums, so the two node type enums of the port are one type, and the write path of the type and of the modifier is the contract of the original. The identity of the node is still a random UUID where the original derived it from the position of the node."
         ],
         "reviewed_sha256": {
           "original": "b672c7d42f8c9f2af611c6576235dbafa6a6ae4e96adf0b67809318e1a782348",

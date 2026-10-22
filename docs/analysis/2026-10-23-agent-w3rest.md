@@ -99,13 +99,15 @@ The classpath needed three corrections that the raw Loom cache does not carry:
   through the *shared* call sites as well (the two client renderers of
   `thaumcraft/client/renderers/tile/` and the thirteen files of `fabric/src/clientTest/`), so no
   half-migrated state is left behind.
-* **The identity stays a UUID** and that is the remaining difference of the unit: the original
-  derived it from the position (`dim:x:y:z`, oracle `TileNode:98-115`), the port keeps a stable
-  random identity that is persisted with the node. The format is bound into the accepted
-  evidence of the wave (`fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509`
+* **The identity stays a UUID** and that is the remaining difference of the unit (and of the
+  `TileNode` unit, which carries the same difference): the original derived it from the position
+  (`dim:x:y:z`, oracle `TileNode:98-115`), the port keeps a stable random identity that is
+  persisted with the node. The format is bound into the accepted evidence of the wave
+  (`fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509`
   parses the identity with `UUID.fromString`, and the accepted saved worlds carry the UUIDs in
   their node NBT), so the port cannot change it without invalidating the accepted client run.
-  The unit therefore stays `partial` with exactly this difference.
+  Both units therefore stay `partial` with exactly this difference — the id format is a value the
+  contract returns, so it is a behaviour, not a bookkeeping detail.
 * **Test** `common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java` gained
   `theNodeItselfImplementsThePublishedContract`; `common/src/test/java/thaumcraft/api/NodeTypeContractTest.java`
   lost the translation test, because there is no second set of enums any more.

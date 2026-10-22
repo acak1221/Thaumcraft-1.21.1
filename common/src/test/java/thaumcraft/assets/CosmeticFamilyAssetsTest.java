@@ -163,7 +163,15 @@ class CosmeticFamilyAssetsTest {
 
     @Test void theEldritchStairsTakeTheTextureOfTheOriginalMetadataEleven() throws Exception {
         // ConfigBlocks:297 - the eldritch stairs are the cosmetic stairs of the metadata eleven.
-        assertEquals("thaumcraft:blocks/es_1", face(modelTextures("thaumcraft:block/eldritch_stairs"), "side"));
+        // The original draws the icon of the ancient stone from the hash of the position
+        // (oracle BlockCosmeticSolid:157-162), so the port carries the index of the texture in
+        // the block state and every index has its own model of every stair shape.
+        assertEquals("thaumcraft:blocks/es_1", face(modelTextures("thaumcraft:block/eldritch_stairs_0"), "side"));
+        assertEquals("thaumcraft:blocks/es_2", face(modelTextures("thaumcraft:block/eldritch_stairs_1"), "side"));
+        assertEquals("thaumcraft:blocks/es_3", face(modelTextures("thaumcraft:block/eldritch_stairs_2"), "side"));
+        assertEquals("thaumcraft:blocks/es_4", face(modelTextures("thaumcraft:block/eldritch_stairs_3"), "side"));
+        assertEquals("thaumcraft:blocks/es_4", face(modelTextures("thaumcraft:block/eldritch_stairs_outer_3"), "side"));
+        assertEquals(160, variants("eldritch_stairs").size(), "forty states of the stair times four textures");
     }
 
     @Test void everyGroupBlockHasALootTableAndIsNamedInBothLanguages() throws Exception {

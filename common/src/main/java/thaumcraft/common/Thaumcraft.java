@@ -210,6 +210,9 @@ public final class Thaumcraft {
             DeferredItemDrops.tick(level);
             thaumcraft.common.lib.GrowthLampTicks.tick(level);
             thaumcraft.common.lib.utils.AspectOrbQueue.tick(level);
+            // The chunk regeneration queue of the original (oracle ServerTickEventsFML:83-104):
+            // ten chunks of the dimension per world tick.
+            thaumcraft.common.lib.events.ChunkRegeneration.tick(level);
         });
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register(level -> {
             thaumcraft.common.lib.world.WardingCasts.clear(level);

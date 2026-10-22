@@ -74,7 +74,8 @@
     "WorldGenRegionStepAccess",
     "LevelChunkPendingBlockEntityMixin",
     "PerStateBlockEntityMixin",
-    "PistonPushabilityMixin"
+    "PistonPushabilityMixin",
+    "Tc4ChunkRegenerationMarkerMixin"
   ],
   "client": [
     "client.OuterLandsDimensionEffectsMixin",

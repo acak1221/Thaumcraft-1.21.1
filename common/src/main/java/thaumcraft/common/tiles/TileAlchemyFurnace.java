@@ -37,6 +37,7 @@ import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftDistillation;
 import thaumcraft.common.container.ContainerAlchemyFurnace;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
+import thaumcraft.common.lib.essentia.EssentiaTransfers;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /**
@@ -62,6 +63,8 @@ public final class TileAlchemyFurnace extends BlockEntity implements WorldlyCont
     private int count;
     private boolean processing;
     private boolean transferring;
+    private TileAlembic preparedAlembic;
+    private Aspect preparedAspect;
     private boolean evacuating;
 
     public TileAlchemyFurnace(BlockPos pos, BlockState state) {
@@ -85,7 +88,7 @@ public final class TileAlchemyFurnace extends BlockEntity implements WorldlyCont
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, TileAlchemyFurnace tile) {
-        if (!(level instanceof ServerLevel server) || !tile.isCurrent() || tile.processing) return;
+        if (!(level instanceof ServerLevel server) || !tile.isCurrent() || tile.processing || EssentiaTransfers.isLocked(tile)) return;
         if (!server.getServer().isSameThread()) throw new IllegalStateException("Alchemy furnace ticking requires the server thread");
         tile.processing = true;
         try { tile.serverTick(server); }
@@ -216,20 +219,27 @@ public final class TileAlchemyFurnace extends BlockEntity implements WorldlyCont
         if (!isCurrent() || type == null || aspects.getAmount(type) <= 0 || target.isRemoved()
                 || level.getBlockEntity(target.getBlockPos()) != target || target.getLevel() != level
                 || before < 0 || before >= target.getMaxAmount() || before > 0 && target.getAspect() != type) return false;
-        int remainder = target.addToContainer(type, 1);
-        if (remainder != 0) return false;
-        // Only an actually accepted unit is paid. No output interface/pipe
-        // simulation, and zero-valued source entries cannot mint essentia.
-        if (target.getAspect() != type || target.getAmount() != before + 1) return false;
-        if (target.isRemoved() || level.getBlockEntity(target.getBlockPos()) != target) {
-            // A synchronous native update replaced the destination. Its buffer
-            // is no longer real storage, so retain the source unit. Never mutate
-            // the replacement BE or debit for a detached destination.
-            return false;
-        }
+        preparedAlembic = target;
+        preparedAspect = type;
+        try {
+            var attempt = EssentiaTransfers.pushFurnaceOne(this, target, type);
+            if (attempt.failure() != null)
+                thaumcraft.common.Thaumcraft.LOG.warn("Furnace transfer notification failed at {}", worldPosition, attempt.failure());
+            return attempt.committedUnits() == 1;
+        } finally { preparedAlembic = null; preparedAspect = null; }
+    }
+
+    /** Only the actual private extraction phase can authorize this paired transfer. */
+    public boolean hasPreparedAlembicTransfer(TileAlembic target, Aspect type) {
+        return processing && transferring && preparedAlembic == target && preparedAspect == type
+                && type != null && aspects.getAmount(type) > 0;
+    }
+
+    /** Field-only debit: the executor writes BOTH endpoints before any notification. */
+    public void debitAlembicTransferRaw(TileAlembic target, Aspect type) {
+        EssentiaTransfers.requireMutation(this);
+        if (!hasPreparedAlembicTransfer(target, type)) throw new IllegalStateException("Missing native furnace transfer");
         aspects.remove(type, 1);
-        if (isCurrent()) setChanged();
-        return true;
     }
 
     /** Original checks all six adjacent directions, exact orientation, and no redstone power. */
@@ -333,6 +343,7 @@ public final class TileAlchemyFurnace extends BlockEntity implements WorldlyCont
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (EssentiaTransfers.isLocked(this)) throw new IllegalStateException("Furnace reload during essentia transfer");
         super.loadAdditional(tag, registries);
         items.clear();
         ContainerHelper.loadAllItems(tag, items, registries);

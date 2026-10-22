@@ -653,6 +653,21 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         TubeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "g5_vis_essentia")
+    public void furnaceAlembicCallbackConservesEssentia(GameTestHelper test) {
+        thaumcraft.common.testing.VisEssentiaAccountingChecks.furnaceAlembicCallback(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "g5_vis_network")
+    public void g5PrimalNetworkAccounting(GameTestHelper test) {
+        thaumcraft.common.testing.VisEssentiaAccountingChecks.primalNetwork(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "g5_vis_caps")
+    public void g5CapsAndSpendingAccounting(GameTestHelper test) {
+        thaumcraft.common.testing.VisEssentiaAccountingChecks.capsAndSpending(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void jarsPullFromNativeTransportAndKeepManualActions(GameTestHelper test) {
         JarTransportRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());

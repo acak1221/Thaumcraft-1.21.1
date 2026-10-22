@@ -26,11 +26,18 @@ final class GolemChunks {
     /** Loads and forces the ring around {@code fixture}; returns only the chunks forced here, for the caller to release. */
     static List<ChunkPos> hold(ServerLevel level, Iterable<BlockPos> fixture) {
         List<ChunkPos> forced = new ArrayList<>();
-        for (ChunkPos chunk : ring(fixture)) {
-            if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
-            level.getChunk(chunk.x, chunk.z);
+        boolean acquired = false;
+        try {
+            for (ChunkPos chunk : ring(fixture)) {
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
+                level.getChunk(chunk.x, chunk.z);
+            }
+            acquired = true;
+            return forced;
+        } finally {
+            // A caller cannot release a partially acquired list it never received.
+            if (!acquired) for (ChunkPos chunk : forced) level.setChunkForced(chunk.x, chunk.z, false);
         }
-        return forced;
     }
 
     /**

@@ -10,13 +10,12 @@ import thaumcraft.common.lib.utils.SpecialMining;
 /** The roll of the original special mining ({@code Utils.findSpecialMiningResult}, Config:799-801) without a world. */
 class SpecialMiningRuleTest {
     @Test void theChanceGrowsByAnEighthOfAQuarterPerFortuneLevel() {
-        // Oracle EventHandlerWorld:181 and TileArcaneBore:343: float chance = 0.2f + (float)fortune * 0.075f.
-        // The single precision sum is not always the decimal literal (fortune two is 0.35000002, not 0.35),
-        // so the expectation is the original's own expression.
-        assertEquals(0.2F + 0 * 0.075F, SpecialMining.chance(0));
-        assertEquals(0.2F + 1 * 0.075F, SpecialMining.chance(1));
-        assertEquals(0.2F + 2 * 0.075F, SpecialMining.chance(2));
-        assertEquals(0.2F + 3 * 0.075F, SpecialMining.chance(3));
+        // Oracle EventHandlerWorld:182: float chance = 0.2f + (float)fortune * 0.075f.
+        // Pin the oracle's single-precision results (fortune two is not 0.35F).
+        assertEquals(0.2F, SpecialMining.chance(0));
+        assertEquals(0.275F, SpecialMining.chance(1));
+        assertEquals(0.35000002F, SpecialMining.chance(2));
+        assertEquals(0.425F, SpecialMining.chance(3));
     }
 
     @Test void theThresholdIsInclusiveAndScaledByTheEntrysOwnFactor() {

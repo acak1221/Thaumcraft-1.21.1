@@ -73,13 +73,13 @@ public final class GrateRuntimeChecks {
         ServerLevel level = test.getLevel();
         BlockPos origin = test.absolutePos(new BlockPos(3, 100, 3));
         Set<ChunkPos> forced = new LinkedHashSet<>();
-        for (int x = (origin.getX() - 3) >> 4; x <= ((origin.getX() + 40) >> 4); x++) for (int z = (origin.getZ() - 8) >> 4; z <= ((origin.getZ() + 8) >> 4); z++) {
-            level.getChunk(x, z);
-            ChunkPos chunk = new ChunkPos(x, z);
-            if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }
-        }
         List<Entity> spawned = new ArrayList<>();
         try {
+            for (int x = (origin.getX() - 3) >> 4; x <= ((origin.getX() + 40) >> 4); x++) for (int z = (origin.getZ() - 8) >> 4; z <= ((origin.getZ() + 8) >> 4); z++) {
+                level.getChunk(x, z);
+                ChunkPos chunk = new ChunkPos(x, z);
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }
+            }
             definitions(test, level, origin);
             recipes(test, level);
             interaction(test, level, player, origin, spawned);

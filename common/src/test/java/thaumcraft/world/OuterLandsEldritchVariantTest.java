@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -176,7 +175,7 @@ class OuterLandsEldritchVariantTest {
     }
 
     @Test void theResolverPutsEveryMetadataOnItsBlock() {
-        assumeTrue(!FAMILY_BLOCKS.isEmpty(), "the block registry was frozen before this class was loaded");
+        assertFalse(FAMILY_BLOCKS.isEmpty(), "the fixture registry must exist; a bootstrap failure must not skip coverage");
         for (Row row : ROWS) {
             BlockState state = ThaumcraftOuterLands.state(DungeonRooms.Kind.ELDRITCH, row.metadata(), -1);
             assertNotNull(state, "the state of the metadata " + row.metadata());
@@ -193,7 +192,7 @@ class OuterLandsEldritchVariantTest {
     }
 
     @Test void theResolverKnowsEveryNativeBlockOfTheFamily() {
-        assumeTrue(!FAMILY_BLOCKS.isEmpty(), "the block registry was frozen before this class was loaded");
+        assertFalse(FAMILY_BLOCKS.isEmpty(), "the fixture registry must exist; a bootstrap failure must not skip coverage");
         for (Row row : ROWS) {
             Block block = ThaumcraftOuterLands.eldritchBlock(row.metadata());
             assertNotNull(block, "the block of the metadata " + row.metadata());
@@ -206,7 +205,7 @@ class OuterLandsEldritchVariantTest {
     @Test void theEldritchLockAcceptsTheRunedTablet() {
         // Oracle BlockEldritch:278 - the lock of a boss room opens with the eldritch object
         // with the metadata two, the runed tablet of the key room.
-        assumeTrue(TABLET != null, "the item registry was frozen before this class was loaded");
+        assertNotNull(TABLET, "the tablet fixture must exist; a bootstrap failure must not skip coverage");
         assertTrue(BlockEldritch.isEldritchLockKey(new ItemStack(TABLET)), "the runed tablet opens the lock");
         assertFalse(BlockEldritch.isEldritchLockKey(new ItemStack(Items.STONE)), "a stone does not open the lock");
         assertEquals("thaumcraft:eldritch_tablet", OuterLandsWiringRules.eldritchObjectItem(

@@ -134,6 +134,14 @@ class ResearchTableEditPayloadTest {
 
     @Test void theEncodedFrameIsDeterministic() {
         var payload = new ResearchTableEditPayload(2, 3L, 4L, ResearchNoteEditing.Action.PLACE, 1, 1, "aqua");
-        assertArrayEquals(wire(payload), wire(payload));
+        // Native protocol fixture: 25-byte body; menu, two big-endian longs,
+        // PLACE=0, signed axial coordinates, then length-prefixed UTF-8.
+        int[] expected = {25, 2,
+                0, 0, 0, 0, 0, 0, 0, 3,
+                0, 0, 0, 0, 0, 0, 0, 4,
+                0, 1, 1, 4, 97, 113, 117, 97};
+        assertArrayEquals(expected, PayloadWire.unsigned(wire(payload)));
+        wire(new ResearchTableEditPayload(7, 9L, 0L, ResearchNoteEditing.Action.ERASE, -1, 1, null));
+        assertArrayEquals(expected, PayloadWire.unsigned(wire(payload)), "intervening encodes cannot change the frame");
     }
 }

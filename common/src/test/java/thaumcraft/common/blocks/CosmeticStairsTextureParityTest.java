@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -23,8 +22,10 @@ import org.junit.jupiter.api.Test;
  *
  * <p>The cosmetic stairs reach that branch with the side index plus a hundred
  * ({@code oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:38-40}), so the bound of
- * the draw of a stair is {@code 12445 + side}. The expected values below were measured on the
- * JVM with the formula of the oracle, they are not a transcription of the port.</p>
+ * the draw of a stair is {@code 12445 + side}. The face vectors below are frozen evaluations
+ * of the oracle with Java-compatible signed-int/hash/48-bit RNG semantics; no expected
+ * algorithm runs in this test. The audit added vectors using an independent Python evaluator,
+ * not by calling the port.</p>
  *
  * <p>No test of this file constructs a block: the rule under test is a pure static function.</p>
  */
@@ -37,19 +38,6 @@ class CosmeticStairsTextureParityTest {
         }
     }
 
-    /** The oracle rule of BlockCosmeticSolid:157-162 as it is reached by the stairs. */
-    private static int oracleIndex(int x, int y, int z, int side) {
-        String key = x + "" + y + "" + z;
-        Random random = new Random(Math.abs(key.hashCode() * 100) + 1);
-        return random.nextInt(12345 + 100 + side) % 4;
-    }
-
-    /** The seed of the original: the hash of the concatenated coordinates times a hundred plus one. */
-    private static long oracleSeed(int x, int y, int z) {
-        String key = x + "" + y + "" + z;
-        return Math.abs(key.hashCode() * 100) + 1;
-    }
-
     @Test void theTextureIndexIsTheDrawOfTheOriginal() {
         // The up face of the stair: the side index one plus the hundred of the stairs.
         assertEquals(0, BlockCosmeticStairs.textureIndex(0, 0, 0));
@@ -59,17 +47,27 @@ class CosmeticStairsTextureParityTest {
     }
 
     @Test void theTextureIndexMatchesTheOracleForEverySide() {
+        // Frozen outputs of oracle BlockCosmeticSolid:157-162, reached with side+100
+        // from BlockCosmeticStairs:38-40; no local copy of the hash/RNG algorithm.
+        int[] origin = {3, 0, 1, 2, 3, 0};
+        int[] remote = {3, 2, 2, 0, 1, 0};
         for (int side = 0; side < 6; ++side) {
-            assertEquals(oracleIndex(0, 0, 0, side), BlockCosmeticStairs.textureIndex(0, 0, 0, side), "side " + side);
-            assertEquals(oracleIndex(-17, 71, 240, side), BlockCosmeticStairs.textureIndex(-17, 71, 240, side), "side " + side);
+            assertEquals(origin[side], BlockCosmeticStairs.textureIndex(0, 0, 0, side), "side " + side);
+            assertEquals(remote[side], BlockCosmeticStairs.textureIndex(-17, 71, 240, side), "side " + side);
         }
     }
 
-    @Test void theSeedIsTheHashOfTheConcatenatedCoordinates() {
-        assertEquals(4766401L, oracleSeed(0, 0, 0));
-        assertEquals(4869001L, oracleSeed(1, 2, 3));
-        assertEquals(747880125L, oracleSeed(-5, 64, 12));
-        assertEquals(793276953L, oracleSeed(100, -60, 77));
+    @Test void coordinateHashingSelectsTheOracleFaceVectors() {
+        // Exercise production output, not a seed helper that production never calls.
+        int[][] positions = {{0, 0, 0}, {1, 2, 3}, {-5, 64, 12}, {100, -60, 77}};
+        int[][] faces = {{3, 0, 1, 2, 3, 0}, {0, 3, 1, 1, 2, 1},
+                {0, 1, 0, 1, 0, 1}, {3, 1, 2, 1, 0, 3}};
+        for (int i = 0; i < positions.length; i++) {
+            int[] pos = positions[i];
+            for (int side = 0; side < 6; side++) {
+                assertEquals(faces[i][side], BlockCosmeticStairs.textureIndex(pos[0], pos[1], pos[2], side));
+            }
+        }
     }
 
     @Test void theTextureIndexIsInTheRangeOfTheFourTextures() {
@@ -91,12 +89,14 @@ class CosmeticStairsTextureParityTest {
     @Test void theTextureIndexDependsOnThePositionAndIsStable() {
         assertNotEquals(BlockCosmeticStairs.textureIndex(-20, 64, -5), BlockCosmeticStairs.textureIndex(-19, 64, -5),
                 "two stairs of the same kind look different");
-        assertEquals(oracleIndex(-20, 64, -5, 1), BlockCosmeticStairs.textureIndex(-20, 64, -5),
+        assertEquals(3, BlockCosmeticStairs.textureIndex(-20, 64, -5),
                 "the texture of the left stair is the draw of the original");
-        assertEquals(oracleIndex(-19, 64, -5, 1), BlockCosmeticStairs.textureIndex(-19, 64, -5),
+        assertEquals(1, BlockCosmeticStairs.textureIndex(-19, 64, -5),
                 "the texture of the right stair is the draw of the original");
-        assertEquals(BlockCosmeticStairs.textureIndex(10, 64, 10), BlockCosmeticStairs.textureIndex(10, 64, 10),
-                "the texture of a stair is stable");
+        assertEquals(2, BlockCosmeticStairs.textureIndex(10, 64, 10));
+        BlockCosmeticStairs.textureIndex(-17, 71, 240);
+        assertEquals(2, BlockCosmeticStairs.textureIndex(10, 64, 10),
+                "an intervening lookup must not alter the texture");
     }
 
     @Test void theStateCarriesTheFourTextures() {

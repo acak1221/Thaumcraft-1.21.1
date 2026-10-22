@@ -71,7 +71,7 @@ class ChunkRegenerationParityTest {
 
     @Test void theChunkWithoutTheMarkerIsNotMarked() {
         CompoundTag tag = new CompoundTag();
-        assertFalse(tag.getCompound("Thaumcraft").getBoolean("DEFAULT"),
+        assertFalse(ChunkRegeneration.hasMarker(tag, "DEFAULT"),
                 "a chunk of a world without Thaumcraft carries no marker");
     }
 

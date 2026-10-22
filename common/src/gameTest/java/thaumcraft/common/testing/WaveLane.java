@@ -54,7 +54,13 @@ final class WaveLane {
         // necessarily a ticking chunk. The entities and the block entities of the lane only
         // tick when their chunk is loaded and ticking, so the lane holds its own chunks.
         forced.addAll(GolemChunks.hold(level, List.of(origin)));
-        roof(4);
+        boolean opened = false;
+        try {
+            roof(4);
+            opened = true;
+        } finally {
+            if (!opened) clean();
+        }
     }
 
     /** A real stone floor under the lane, so the mobs actually stand on something. */

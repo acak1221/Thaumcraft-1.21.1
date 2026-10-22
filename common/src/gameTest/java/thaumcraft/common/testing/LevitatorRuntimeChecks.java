@@ -77,13 +77,13 @@ public final class LevitatorRuntimeChecks {
         numbers(test, level);
         BlockPos origin = test.absolutePos(new BlockPos(3, 100, 3));
         Set<ChunkPos> forced = new LinkedHashSet<>();
-        for (int x = (origin.getX() - 3) >> 4; x <= ((origin.getX() + 52) >> 4); x++) for (int z = (origin.getZ() - 3) >> 4; z <= ((origin.getZ() + 3) >> 4); z++) {
-            level.getChunk(x, z);
-            ChunkPos chunk = new ChunkPos(x, z);
-            if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }
-        }
         List<Entity> spawned = new ArrayList<>();
         try {
+            for (int x = (origin.getX() - 3) >> 4; x <= ((origin.getX() + 52) >> 4); x++) for (int z = (origin.getZ() - 3) >> 4; z <= ((origin.getZ() + 3) >> 4); z++) {
+                level.getChunk(x, z);
+                ChunkPos chunk = new ChunkPos(x, z);
+                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(x, z, true); forced.add(chunk); }
+            }
             // Real lifts: stand-alone, powered, powered from above, a pig, an armor stand, and a stack of three.
             BlockPos lift = origin.offset(12, 0, 0), powered = origin.offset(18, 0, 0), above = origin.offset(24, 0, 0), pigPos = origin.offset(30, 0, 0),
                     standPos = origin.offset(36, 0, 0), stack = origin.offset(48, 0, 0);

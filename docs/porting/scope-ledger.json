@@ -5106,16 +5106,27 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/fx/beams/WandEffectOrigin.java: the 1.12 beam origin helper",
           "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java, ItemFocusFrost.java, ItemFocusShock.java the native focus entry points",
-          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java, ShockSparkParticle.java, FrostSparkleParticle.java the native per focus beam particles (2026-10-23 review)"
+          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java, ShockSparkParticle.java, FrostSparkleParticle.java the native per focus beam particles (2026-10-23 review)",
+          "oracle tree: the private 4.2.3.5 oracle has no class named WandEffectOrigin (grep -rl 'WandEffectOrigin' over the 859 oracle files: 0 hits)",
+          "oracle tree: the directory thaumcraft/client/fx/beams/ of the oracle holds exactly six files (FXArc, FXBeam, FXBeamBore, FXBeamGolemBoss, FXBeamPower, FXBeamWand) and no WandEffectOrigin",
+          "oracle grep TipCalibration / debugFrame: no file of the 4.2.3.5 tree mentions the per staff/sceptre/wand calibration table or the debug frame of this 1.12 helper",
+          "oracle thaumcraft/client/fx/beams/FXBeamWand.java:37,58-62 the beam of the original starts at the player itself: the offset field is 0 for the local player and height/2 + 0.25 for a remote one",
+          "oracle thaumcraft/client/fx/beams/FXBeamWand.java:209-228 the origin of the original is the position of the player, moved by the yaw and the pitch and by the look vector times 0.3 - it is NOT the tip of the wand",
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:162-163 the native origin of the beam is the very same one (the eye, the yaw, the pitch and the look times 0.3)",
+          "native grep wandTip/tipOrigin over common/src, fabric/src and neoforge/src: no reference at all, so no native code expects this helper",
+          "legacy callsite audit: the only callers of the 1.12 helper are the 1.12 tree itself (src/main/java/thaumcraft/client/fx/beams/FXBeamWand.java:115,119-120,180; src/main/java/thaumcraft/client/ClientProxy.java:1926-1927; src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:23)"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 helper, deliberately not carried over; the native foci compute their own origin.",
-          "REMAINING GAP (client lane): the native beam of a focus starts at the player, while the original drew it from the wand tip. The origin of the original beam belongs to the FXBeamWand unit, not to this 1.12 helper."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The private oracle has no WandEffectOrigin, no calibration table and no debug frame; it exists only in the retained 1.12 reference tree, where it feeds the 1.12 FXBeamWand, the 1.12 ClientProxy and the 1.12 TileNodeRenderer.",
+          "STALE NOTE CORRECTED 2026-10-23 (w5legacy): the old note said the native beam starts at the player while the original drew it from the wand tip. The premise is false. The original starts the beam at the player itself: oracle FXBeamWand:37,58-62 (the offset is 0 for the local player) and :209-228 (the position of the player moved by the yaw and the pitch and by the look vector times 0.3).",
+          "The native already used exactly that origin (ItemFocusExcavation:162-163), and the FXBeamWand row is parity_verified since the w4wands wave, which reproduced the fan of the original. There is no wand tip origin left to port.",
+          "The 1.12 helper is the ANIMATED wand tip of the 1.12 tree (a per staff/sceptre/wand calibration table and the use pose of the 1.12 ItemWandRenderer). The original has neither, and the 1.21.1 port has no reference to a wand tip at all.",
+          "Nothing of the original is lost by the exclusion."
         ],
         "reviewed_sha256": {
           "legacy": "c3ad507ffbbd1cac9aa1f463a78e683028b8161ca66a88ec008c1b7a96b01247"
@@ -7789,16 +7800,25 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/JeiRecipeData.java: the 1.12 JEI integration data holder",
           "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+          "oracle tree: the private 4.2.3.5 oracle has no thaumcraft/client/integration directory at all (find -type d -name 'integration*' over the oracle tree: 0 hits), so the original never published this class",
+          "oracle tree: the private 4.2.3.5 oracle has no class named JeiRecipeData (grep -rl 'JeiRecipeData' over the 859 oracle files: 0 hits)",
+          "oracle grep 'mezz.jei' / IRecipeCategory / IRecipeWrapper / IRecipeLayout: 0 hits; the only recipe-viewer line of the original is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "legacy src/main/java/thaumcraft/client/integration/jei/JeiRecipeData.java:1-15 the 1.12 holder imports the 1.12 only mezz.jei API",
+          "legacy callsite audit: the only caller is the 1.12 JEI plugin (src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java:45,50,56)",
+          "native grep 'jei' over common/src, fabric/src and neoforge/src: no dependency and no integration package at all",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:41 the coverage map of all 308 original recipe keys of the oracle ConfigRecipes.java; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:587-607 the native draws the aspects of a recipe, the counterpart of the aspect row of the 1.12 wrapper"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over and the JEI recipe browser itself has no native counterpart.",
-          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The private oracle has no thaumcraft/client/integration/jei directory at all, so the original never published it; it exists only in the retained 1.12 reference tree.",
+          "The 1.21.1 port ships no JEI/EMI dependency, so the class is deliberately not carried over and no recipe-viewer integration exists.",
+          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them (native ResearchRecipeCoverage, native ThaumcraftRecipeDisplay)."
         ],
         "reviewed_sha256": {
           "legacy": "cdb2816098136e6c210fedb3d413e9382e0d43c7aab8967a0093f8cf85c5348c"
@@ -7974,16 +7994,25 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeCategory.java: the 1.12 JEI recipe category",
           "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+          "oracle tree: the private 4.2.3.5 oracle has no thaumcraft/client/integration directory at all (find -type d -name 'integration*' over the oracle tree: 0 hits), so the original never published this class",
+          "oracle tree: the private 4.2.3.5 oracle has no class named ThaumcraftRecipeCategory (grep -rl 'ThaumcraftRecipeCategory' over the 859 oracle files: 0 hits)",
+          "oracle grep 'mezz.jei' / IRecipeCategory / IRecipeLayout: 0 hits; the only recipe-viewer line of the original is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeCategory.java:1-11 the 1.12 category implements the 1.12 only mezz.jei.api.recipe.IRecipeCategory",
+          "legacy callsite audit: the only caller is the 1.12 JEI plugin (src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java:33,35,37)",
+          "native grep 'jei' over common/src, fabric/src and neoforge/src: no dependency and no integration package at all",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:41 the coverage map of all 308 original recipe keys of the oracle ConfigRecipes.java; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display that shows those recipes in the research book"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over and the JEI recipe browser itself has no native counterpart.",
-          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The private oracle has no thaumcraft/client/integration/jei directory at all, so the original never published it; it exists only in the retained 1.12 reference tree.",
+          "The 1.21.1 port ships no JEI/EMI dependency, so the class is deliberately not carried over and no recipe-viewer integration exists.",
+          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them (native ResearchRecipeCoverage, native ThaumcraftRecipeDisplay)."
         ],
         "reviewed_sha256": {
           "legacy": "340f5098de257eebb9c9a49d6fad95b391fbbe3a895cd6ae8a2a434b66361ce6"
@@ -8017,16 +8046,26 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeWrapper.java: the 1.12 JEI recipe wrapper",
           "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java the native recipe display",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the coverage map of all 308 original recipe keys; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+          "oracle tree: the private 4.2.3.5 oracle has no thaumcraft/client/integration directory at all (find -type d -name 'integration*' over the oracle tree: 0 hits), so the original never published this class",
+          "oracle tree: the private 4.2.3.5 oracle has no class named ThaumcraftRecipeWrapper (grep -rl 'ThaumcraftRecipeWrapper' over the 859 oracle files: 0 hits)",
+          "oracle grep 'mezz.jei' / IRecipeWrapper / IGuiItemStackGroup: 0 hits; the only recipe-viewer line of the original is oracle thaumcraft/client/ClientProxy.java:444 Loader.isModLoaded(\"NotEnoughItems\")",
+          "legacy src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeWrapper.java:1-20 the 1.12 wrapper implements the 1.12 only mezz.jei.api.recipe.IRecipeWrapper and draws the aspect row of a recipe with UtilsFX.drawTag",
+          "legacy callsite audit: the only callers are the 1.12 JEI plugin (src/main/java/thaumcraft/client/integration/jei/ThaumcraftJeiPlugin.java:26-27,33,35,37,49-57) and the 1.12 category (src/main/java/thaumcraft/client/integration/jei/ThaumcraftRecipeCategory.java:9)",
+          "native grep 'jei' over common/src, fabric/src and neoforge/src: no dependency and no integration package at all",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java:41 the coverage map of all 308 original recipe keys of the oracle ConfigRecipes.java; the recipes the 1.12 JEI plugin would have shown are the native recipe tree",
+          "oracle thaumcraft/client/gui/GuiResearchRecipe.java:318-345 the original draws the aspect row of a recipe in the research book; native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:587-607 the native does the same"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 JEI integration. The native port has no JEI dependency, so the class is deliberately not carried over and the JEI recipe browser itself has no native counterpart.",
-          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The private oracle has no thaumcraft/client/integration/jei directory at all, so the original never published it; it exists only in the retained 1.12 reference tree.",
+          "The 1.21.1 port ships no JEI/EMI dependency, so the class is deliberately not carried over and no recipe-viewer integration exists.",
+          "The recipe DATA the 1.12 plugin would have shown is covered: every one of the 308 original recipe keys of the oracle is a native recipe file, and the research book of the port shows them (native ResearchRecipeCoverage, native ThaumcraftRecipeDisplay).",
+          "The aspect row of a recipe, which the 1.12 wrapper drew with UtilsFX.drawTag, is drawn by the native research book (native ThaumcraftRecipeDisplay:587-607), the same place the original drew it (oracle GuiResearchRecipe:318-345)."
         ],
         "reviewed_sha256": {
           "legacy": "c33dd092674d012c5b65b6edce41cdff745f2cedcf67f674794005e0ecc09e79"
@@ -8118,14 +8157,22 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/client/lib/EldritchDiagnostics.java does not exist in the 4.2.3.5 oracle",
-          "legacy src/main/java/thaumcraft/client/lib/EldritchDiagnostics.java:16-30 client-only FPS counters of the 1.12 port"
+          "legacy src/main/java/thaumcraft/client/lib/EldritchDiagnostics.java:16-30 client-only FPS counters of the 1.12 port",
+          "oracle tree: the private 4.2.3.5 oracle has no class named EldritchDiagnostics (grep -rl 'EldritchDiagnostics' over the 859 oracle files: 0 hits)",
+          "oracle grep 'EldritchPerf' / nothingTESRCalls / obeliskTESRCalls / fieldHelperFaces: 0 hits - the 4.2.3.5 tree has no FPS instrumentation of any kind",
+          "legacy src/main/java/thaumcraft/client/lib/EldritchDiagnostics.java:11-16,44-86 the 1.12 development instrument: per frame counters of an Eldritch dimension FPS investigation, logged every sixty frames",
+          "legacy callsite audit: every call site of the 1.12 tree is commented out (src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java:26,48,50,52; src/main/java/thaumcraft/client/renderers/tile/LayeredFieldPlaneHelper.java:67,79), so the class is dead code even in the retained 1.12 reference",
+          "native grep EldritchDiagnostics over common/src, fabric/src and neoforge/src: no reference at all",
+          "oracle thaumcraft/client/ClientProxy.java:533-541,609 the eldritch rendering of the original is the world renderers and the eldritch block renderer; the native has the same ones (native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchNothingRenderer.java, native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchRenderer.java)"
         ],
         "notes": [
-          "Legacy-only development instrumentation (per frame counters of a 1.12 experiment). It has no original counterpart and no runtime counterpart in the native port, so it is not part of the TC4 specification."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. It is a 1.12 development instrument (per frame counters of an Eldritch FPS investigation), and the original has no counterpart of it and no need for one.",
+          "It is dead code even in the retained 1.12 reference: every call site of the 1.12 tree is commented out, and the native port has no reference to it.",
+          "The eldritch rendering it measured is the original's and is present in the native (the world renderers and the eldritch block renderer)."
         ],
         "reviewed_sha256": {
           "legacy": "2409526d5f4636a3c77f1930bf4e4bf872860199c5a751ec0bb9612452ca1dc0"
@@ -12062,7 +12109,7 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/FirstPersonWandTipOrigin.java: the 1.12 first person wand tip origin",
@@ -12070,12 +12117,19 @@
           "legacy src/main/java/thaumcraft/client/renderers/item/FirstPersonWandTipOrigin.java the 1.12 helper for the origin of the wand beam",
           "legacy src/main/java/thaumcraft/client/fx/beams/FXBeamWand.java the 1.12 beam effect",
           "oracle thaumcraft/client/fx/beams/FXBeamWand.java the original beam effect",
-          "native common/src/main/java/thaumcraft/client/ the native tree has no wand beam origin"
+          "native common/src/main/java/thaumcraft/client/ the native tree has no wand beam origin",
+          "oracle tree: the private 4.2.3.5 oracle has no class named FirstPersonWandTipOrigin (grep -rl 'FirstPersonWandTipOrigin' over the 859 oracle files: 0 hits)",
+          "oracle grep gluUnProject / GL_MODELVIEW_MATRIX / GL_PROJECTION_MATRIX / GL_VIEWPORT / glGetFloatv / glGetIntegerv: 0 hits - the original never reads the GL matrices back, so it never recovers a world space wand tip from the drawn model",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:45-119 the first person wand of the original is drawn by transforms only (:59-86), by the model basis correction (:87) and by the use pose (:88-113); the first person case is :73-75 and :94-99",
+          "oracle thaumcraft/client/fx/beams/FXBeamWand.java:209-228 the only origin of the original's wand beam is the position of the player moved by the yaw and the pitch and by the look vector times 0.3",
+          "legacy src/main/java/thaumcraft/client/renderers/item/FirstPersonWandTipOrigin.java:52-59 the 1.12 helper captures the wand tip by inverting the GL projection matrix of the first person hand pass (GLU.gluUnProject)",
+          "legacy callsite audit: the only callers are the 1.12 tree (src/main/java/thaumcraft/client/fx/beams/FXBeamWand.java:101; src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:127; src/main/java/thaumcraft/client/renderers/item/ItemWandRenderer.java:121; src/main/java/thaumcraft/client/lib/RenderEventHandler.java:437)",
+          "native grep wandTip/tipOrigin over common/src, fabric/src and neoforge/src: no reference at all, so no native code expects this helper"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 helper, folded into the native wand item renderer.",
-          "Open gap: the native port draws no beam from the wand tip, so the origin helper has no counterpart.",
-          "REMAINING GAP (client lane): the tip origin of the original beam is the business of the original FXBeamWand class, whose row carries the same gap; this 1.12 helper has no original counterpart of its own."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The oracle has no such class and no readback of the GL matrices, so the original never recovered a world space wand tip; the helper exists only in the retained 1.12 reference tree.",
+          "STALE NOTE CORRECTED 2026-10-23 (w5legacy): the old note said the native port draws no beam from the wand tip, so the origin helper has no counterpart. The premise is false: the original never drew its beam from the wand tip. Oracle FXBeamWand:37,58-62,209-228 - the beam starts at the player itself, moved by the yaw and the pitch and by the look vector times 0.3 - and the native uses exactly that origin (ItemFocusExcavation:162-163).",
+          "The FXBeamWand row is parity_verified since the w4wands wave, which reproduced the fan of the original, so there is no wand tip origin left to port and the 1.12 readback of the GL matrices has no original contract to lose."
         ],
         "reviewed_sha256": {
           "legacy": "75b565e70c2c932bfcb563930f5186f117afca31796bcae4276574dcd6e8fbf7"
@@ -12308,14 +12362,23 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/ItemEldritchRenderer.java:1-85 1.12 item renderer of the eldritch tiles",
-          "oracle the 4.2.3.5 oracle has no item eldritch renderer"
+          "oracle the 4.2.3.5 oracle has no item eldritch renderer",
+          "oracle tree: the private 4.2.3.5 oracle has no class named ItemEldritchRenderer (grep -rl 'ItemEldritchRenderer' over the 859 oracle files: 0 hits)",
+          "oracle grep TileEntityItemStackRenderer / renderByItem / setTileEntityItemStackRenderer: 0 hits - the 4.2.3.5 tree never uses the item stack renderer API, and 1.21.1 removed it",
+          "oracle thaumcraft/client/ClientProxy.java:453-462 the complete list of the item renderers of the original: the filled jar, the node jar, the aura node, the thaumometer, the casting wand, the trunk spawner, the bone bow and the wooden device - no eldritch tile among them",
+          "oracle thaumcraft/client/ClientProxy.java:533-541,609 the eldritch tiles of the original are rendered in the world only (the special tile renderers and the eldritch block renderer); they are world structures, not items",
+          "legacy src/main/java/thaumcraft/client/renderers/item/ItemEldritchRenderer.java:18-84 the 1.12 item stack renderer that draws the eldritch tiles in the inventory",
+          "legacy callsite audit: the only caller is the 1.12 tree (src/main/java/thaumcraft/client/ClientProxy.java:886 eldritchItem.setTileEntityItemStackRenderer(new ItemEldritchRenderer()))",
+          "native grep ItemEldritchRenderer over common/src, fabric/src and neoforge/src: no reference at all",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileEldritchCapRenderer.java, TileEldritchObeliskRenderer.java, TileEldritchLockRenderer.java, TileEldritchCrabSpawnerRenderer.java the native has the same world renderers of the original"
         ],
         "notes": [
-          "Legacy-only item renderer. The native port renders the eldritch tiles in the world, not as an item preview, so there is no counterpart."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The oracle has no TileEntityItemStackRenderer at all and its complete list of item renderers (ClientProxy:453-462) contains no eldritch tile; the eldritch tiles of the original are world structures drawn by the world renderers (ClientProxy:533-541,609), which the native has.",
+          "The 1.21.1 port has no item stack renderer API and no reference to this class; the eldritch tiles are drawn in the world exactly as the original draws them."
         ],
         "reviewed_sha256": {
           "legacy": "fbec2f1cd182b123da13d03e74d9f46620fb8534117ca8781c9bfb9f28a69ae6"
@@ -13078,19 +13141,26 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/WandPoseMath.java: the 1.12 wand pose arithmetic",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java",
           "legacy src/main/java/thaumcraft/client/renderers/item/WandPoseMath.java the 1.12 CPU counterpart of the wand pose",
           "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:63-93 the original raises the wand while the player uses an item",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java the native wand renderer without the use pose"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java the native wand renderer without the use pose",
+          "oracle tree: the private 4.2.3.5 oracle has no class named WandPoseMath (grep -rl 'WandPoseMath' over the 859 oracle files: 0 hits)",
+          "oracle grep transformPoint / contextRotateX / contextRotateZ / startupRotateX / waveRotateX / waveRotateZ: 0 hits - none of the six members of the 1.12 pose appears in the 4.2.3.5 tree",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:88-113 the use pose of the original is inline in the renderer: the elapsed use time capped at three ticks (:89-92), the raise of the wand by one block (:93), the thirty three degrees of the third person (:95), the ten plus ten degrees of the first person (:97-98), the sixty degrees of the startup (:100), the WAVE animation (:101-105) and the CHARGE animation (:106-110), and the pivot one block below (:112)",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:87 the model basis correction of a hundred and eighty degrees about X in which the pose of the original is expressed",
+          "legacy src/main/java/thaumcraft/client/renderers/item/WandPoseMath.java:14-30 the 1.12 arithmetic that applies the pose to a point in the corrected basis",
+          "legacy callsite audit: the only caller is the 1.12 tree (src/main/java/thaumcraft/client/fx/beams/WandEffectOrigin.java:13,79)",
+          "native grep WandPoseMath over common/src, fabric/src and neoforge/src: no reference at all"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 pose helper, not carried over.",
-          "Open gap: the native port does not raise the wand while the player uses a focus, so the pose has no counterpart.",
-          "REMAINING GAP (client lane): the use pose of the original ItemWandRenderer:63-93 is a client renderer duty; this 1.12 helper has no original counterpart of its own."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The oracle has no such class and none of its six members; the use pose of the original lives inline in the original's ItemWandRenderer:88-113, and the 1.12 helper only mirrors it for the 1.12 tree.",
+          "STALE NOTE CORRECTED 2026-10-23 (w5legacy): the old note claimed the native port does not raise the wand while a focus is used, so this helper has no counterpart. The remaining difference is real, but it is NOT this row's: the owner of the use pose is the original's ItemWandRenderer, whose own row (thaumcraft/client/renderers/item/ItemWandRenderer.java) is open and owned by another lane. This 1.12 helper has no original counterpart of its own, so the row closes as a legacy-only exclusion.",
+          "When the ItemWandRenderer row closes, the native will draw the pose with the numbers of oracle ItemWandRenderer:88-113 (the raise over three ticks, the thirty three degrees, the ten plus ten, the sixty degrees of the startup and the WAVE and CHARGE waves) in the basis that the correction of :87 establishes. The numbers of the 1.12 sampler are the numbers of the original."
         ],
         "reviewed_sha256": {
           "legacy": "7337cc98c361cb4d1dedc6f4ce9cf30ff9d183d52b6ae525caa70d47742a45d3"
@@ -13168,19 +13238,26 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/WandUsePose.java: the 1.12 wand use pose enum",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java",
           "legacy src/main/java/thaumcraft/client/renderers/item/WandUsePose.java the 1.12 pose of the used wand",
           "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:63-93 the original raises the wand while the player uses an item",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java the native wand renderer without the use pose"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java the native wand renderer without the use pose",
+          "oracle tree: the private 4.2.3.5 oracle has no class named WandUsePose (grep -rl 'WandUsePose' over the 859 oracle files: 0 hits)",
+          "oracle grep startup / contextRotateX / contextRotateZ / startupRotateX / waveRotateX / waveRotateZ as pose members: 0 hits - the 1.12 pose enum has no counterpart in the 4.2.3.5 tree",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:88-113 the use pose of the original is inline in the renderer: the elapsed use time capped at three ticks (:89-92), the raise of the wand by one block (:93), the thirty three degrees of the third person (:95), the ten plus ten degrees of the first person (:97-98), the sixty degrees of the startup (:100), the WAVE animation (:101-105) and the CHARGE animation (:106-110), and the pivot one block below (:112)",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:87 the model basis correction of a hundred and eighty degrees about X in which the pose of the original is expressed",
+          "legacy src/main/java/thaumcraft/client/renderers/item/WandUsePose.java:11-25 the 1.12 pose holder with its six fields",
+          "legacy callsite audit: the only callers are the 1.12 tree (src/main/java/thaumcraft/client/fx/beams/WandEffectOrigin.java:14,71; src/main/java/thaumcraft/client/renderers/item/WandPoseMath.java:14; src/main/java/thaumcraft/client/renderers/item/WandUsePoseSampler.java:35)",
+          "native grep WandUsePose over common/src, fabric/src and neoforge/src: no reference at all"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 pose enum, not carried over.",
-          "Open gap: the native port does not raise the wand while the player uses a focus, so the pose has no counterpart.",
-          "REMAINING GAP (client lane): the use pose of the original ItemWandRenderer:63-93 is a client renderer duty; this 1.12 helper has no original counterpart of its own."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The oracle has no such class and none of its six members; the use pose of the original lives inline in the original's ItemWandRenderer:88-113, and the 1.12 holder only mirrors it for the 1.12 tree.",
+          "STALE NOTE CORRECTED 2026-10-23 (w5legacy): the old note claimed the native port does not raise the wand while a focus is used, so the pose has no counterpart. The remaining difference is real, but it is NOT this row's: the owner of the use pose is the original's ItemWandRenderer, whose own row (thaumcraft/client/renderers/item/ItemWandRenderer.java) is open and owned by another lane. This 1.12 holder has no original counterpart of its own, so the row closes as a legacy-only exclusion.",
+          "When the ItemWandRenderer row closes, the native will draw the pose with the numbers of oracle ItemWandRenderer:88-113 in the basis that the correction of :87 establishes. The numbers of the 1.12 holder are the numbers of the original."
         ],
         "reviewed_sha256": {
           "legacy": "d476f5a6d3b599e829063cbcf9353e5206800f50a03260bfcf5f07556fe419be"
@@ -13214,19 +13291,26 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "missing",
+        "native_coverage": "parity_verified",
         "owner": "port-clientrender",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/item/WandUsePoseSampler.java: the 1.12 pose sampler",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java",
           "legacy src/main/java/thaumcraft/client/renderers/item/WandUsePoseSampler.java the 1.12 sampler of the wand pose",
           "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:63-93 the original raises the wand while the player uses an item",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java the native wand renderer without the use pose"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java the native wand renderer without the use pose",
+          "oracle tree: the private 4.2.3.5 oracle has no class named WandUsePoseSampler (grep -rl 'WandUsePoseSampler' over the 859 oracle files: 0 hits)",
+          "oracle grep 'sample(' with an elapsed time and a WandFocusAnimation: 0 hits - the 1.12 sampler has no counterpart in the 4.2.3.5 tree, the original computes the pose inline",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:88-113 the use pose of the original is inline in the renderer: the elapsed use time capped at three ticks (:89-92), the raise of the wand by one block (:93), the thirty three degrees of the third person (:95), the ten plus ten degrees of the first person (:97-98), the sixty degrees of the startup (:100), the WAVE animation (:101-105) and the CHARGE animation (:106-110), and the pivot one block below (:112)",
+          "oracle thaumcraft/client/renderers/item/ItemWandRenderer.java:87 the model basis correction of a hundred and eighty degrees about X in which the pose of the original is expressed",
+          "legacy src/main/java/thaumcraft/client/renderers/item/WandUsePoseSampler.java:16-36 the 1.12 sampler: the raise over three ticks, the thirty three degrees, the ten plus ten degrees and the WAVE and CHARGE waves",
+          "legacy callsite audit: the only callers are the 1.12 tree (src/main/java/thaumcraft/client/fx/beams/WandEffectOrigin.java:15,71; src/main/java/thaumcraft/client/renderers/item/ItemWandRenderer.java:272)",
+          "native grep WandUsePoseSampler over common/src, fabric/src and neoforge/src: no reference at all"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 sampler, not carried over.",
-          "Open gap: the native port does not raise the wand while the player uses a focus, so the sampler has no counterpart.",
-          "REMAINING GAP (client lane): the use pose of the original ItemWandRenderer:63-93 is a client renderer duty; this 1.12 helper has no original counterpart of its own."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The oracle has no such class; the original computes the use pose inline in its ItemWandRenderer:88-113, and the 1.12 sampler only mirrors it for the 1.12 tree.",
+          "STALE NOTE CORRECTED 2026-10-23 (w5legacy): the old note claimed the native port does not raise the wand while a focus is used, so the sampler has no counterpart. The remaining difference is real, but it is NOT this row's: the owner of the use pose is the original's ItemWandRenderer, whose own row (thaumcraft/client/renderers/item/ItemWandRenderer.java) is open and owned by another lane. This 1.12 sampler has no original counterpart of its own, so the row closes as a legacy-only exclusion.",
+          "The numbers of the 1.12 sampler are the numbers of the original (oracle ItemWandRenderer:88-113), so nothing is lost by the exclusion: when the ItemWandRenderer row closes, the native will draw the pose with those numbers."
         ],
         "reviewed_sha256": {
           "legacy": "75cc7d717ffcc1e3ab5cec59ed1960bdbc790ce05dec1caa7b8e6abb44f7b14d"
@@ -34799,19 +34883,28 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "not_assessed",
+        "native_coverage": "parity_verified",
         "owner": "port/golems",
         "evidence": [
           "oracle thaumcraft/common/integration/waila/GolemWailaPlugin.java: absent from the TC4 4.2.3.5 oracle (WAILA did not exist for 1.7.10)",
           "legacy src/main/java/thaumcraft/common/integration/waila/GolemWailaPlugin.java:17,23,28 the 1.12 WAILA provider that writes the golem material, core and upgrades into the hover tooltip",
           "native grep waila/huduma/journeymap in common/src, fabric/src and neoforge/src: no reference at all, so the mod has neither a soft nor a hard dependency and loads without WAILA",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:32 the native golem screen draws the material frame and the core blurb"
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:32 the native golem screen draws the material frame and the core blurb",
+          "oracle tree: the class is absent from the TC4 4.2.3.5 oracle (grep -i 'waila' over the 859 oracle files: 0 hits; WAILA did not exist for 1.7.10)",
+          "oracle tree: the private 4.2.3.5 oracle has no class named GolemWailaPlugin (grep -rl 'GolemWailaPlugin' over the 859 oracle files: 0 hits)",
+          "oracle thaumcraft/common/entities/golems/ItemTrunkSpawner.java:76-91 the original's own way of showing the upgrade of a golem: the name of the upgrade in the hover text of the trunk spawner item that carries the golem",
+          "native common/src/main/java/thaumcraft/common/items/golems/ItemTrunkSpawner.java:28-38 the native reproduces exactly that (the name of the upgrade in blue at :33, the contents line at :37)",
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:52,159-169 the native golem screen shows the material frame and the core blurb of the original",
+          "oracle thaumcraft/client/gui/GuiGolem.java:102,134,167,237,330,399 the golem screen of the original only tests the amounts of the upgrades (4 and 5) to enable its features; it never lists the installed upgrades either",
+          "legacy src/main/java/thaumcraft/common/integration/waila/GolemWailaPlugin.java:16-34,41-69 the 1.12 WAILA provider that writes the material, the core and the upgrade list into the hover tooltip of the golem entity",
+          "legacy callsite audit: the class has no caller in the retained 1.12 tree; it is registered by the WAILA annotation @WailaPlugin (:16)",
+          "native grep waila/huduma/journeymap over common/src, fabric/src and neoforge/src: no reference at all, so the mod has neither a soft nor a hard dependency and loads without WAILA"
         ],
         "notes": [
-          "Documented gap: WAILA has no 1.21.1 version, so the hover lines cannot be ported as an integration. The native carries no WAILA code and no WAILA reference, so the mod loads unchanged without it.",
-          "The information the plugin showed is only partly reproduced: the golem screen shows the material and the core, while the list of installed upgrades is shown nowhere in the native.",
-          "not_assessed: the integration target does not exist in 1.21.1, so there is no native counterpart to assess.",
-          "Wave agent/golems 2026-10-23: confirmed again that the class is absent from the TC4 4.2.3.5 jar (WAILA did not exist for 1.7.10), so the row stays a legacy-only exclusion with not_assessed coverage: there is no native counterpart to assess because the integration target does not exist in 1.21.1."
+          "Excluded with evidence: the class is NOT an original TC4 4.2.3.5 class. The oracle has no WAILA integration at all (WAILA did not exist for 1.7.10), so the original never published it; it exists only in the retained 1.12 reference tree.",
+          "WAILA has no 1.21.1 version, so the hover integration cannot be ported as an integration. The native carries no WAILA code and no WAILA reference, so the mod loads unchanged without it.",
+          "The information the plugin showed is present in the native and in the original's own places: the installed upgrade is named in the hover text of the trunk spawner item, exactly as the original does it (oracle ItemTrunkSpawner:76-91 -> native ItemTrunkSpawner:28-38), and the golem screen shows the material and the core (native GuiGolem:52,159-169).",
+          "The list of the installed upgrades is NOT shown on the golem screen - but the original did not show it there either (oracle GuiGolem only tests the upgrade amounts at :102,:134,:167,:237,:330,:399), so no original contract is lost. The only thing that is missing is the 1.12 hover tooltip of the golem ENTITY, which the original never had either. If that list is ever wanted, it belongs to the GuiGolem row, not to this one."
         ],
         "reviewed_sha256": {
           "legacy": "a24009669787a5a831822a6fa3b1248c8702d327cb5941ebc3e72fa642ab3543"

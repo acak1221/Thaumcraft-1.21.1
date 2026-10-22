@@ -185,6 +185,13 @@ public final class ChunkRegeneration {
             // Oracle ThaumcraftWorldGenerator:143 - the original loads the chunk of the
             // regeneration before it writes into it.
             chunk = level.getChunk(chunkX, chunkZ);
+            // Oracle :130-136,548-555: Nether replay is wild aura ONLY; its totem
+            // gate (:149) rejects dimension -1 before consuming any random draws.
+            if (level.dimension().equals(Level.NETHER)) {
+                if (thaumcraft.common.lib.world.AuraDimensionRules.netherReplayAura(worldgen.auraNodes(), settings.auraNodes())) {
+                    ThaumcraftNormalNodeFeature.placeWildNode(level, random, chunkX, chunkZ, false);
+                }
+            } else if (!level.dimension().equals(Level.END)) {
             // Oracle ThaumcraftWorldGenerator:421 - the vegetation pass.
             if (ThaumcraftBiomeSettings.current().generateTrees() && settings.trees()) {
                 ThaumcraftTreeFeature.placePass(level, random, chunkX, chunkZ);
@@ -207,6 +214,7 @@ public final class ChunkRegeneration {
                     && NodeEcologyPolicy.dimensionLevel(level.dimension()) == -1
                     && !(level.getChunkSource().getGenerator() instanceof FlatLevelSource)) {
                 placeStructure(level, random, chunkX, chunkZ);
+            }
             }
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.error("[Thaumcraft] Chunk regeneration failed for chunk at {}; the chunk keeps its terrain",

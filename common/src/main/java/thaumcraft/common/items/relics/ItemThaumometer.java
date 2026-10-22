@@ -1,6 +1,7 @@
 package thaumcraft.common.items.relics;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -146,26 +147,27 @@ public final class ItemThaumometer extends Item {
             if (item.isEmpty()) return null;
             var id = BuiltInRegistries.ITEM.getKey(item.getItem());
             return new Target("@" + id, "entity:" + entity.getId(), ObjectAspectResolver.scanTags(item, level),
-                    ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item), entityRune(entity));
+                    ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item), entityRune(entity),
+                    item.getHoverName().getString(), null);
         }
         if (entity != null) {
             var scanned = EntityAspectBindings.describe(entity);
             // An unsupported entity occludes the block behind it; its aspects never come from a different target.
             return scanned == null ? null : new Target(scanned.signature(), "entity:" + entity.getId(), scanned.aspects(),
-                    ScanManager.ScanKind.ENTITY, scanned.clue(), entityRune(entity));
+                    ScanManager.ScanKind.ENTITY, scanned.clue(), entityRune(entity), entity.getName().getString(), null);
         }
         if (block.getType() != HitResult.Type.BLOCK) {
             var callback = ScanCallbacks.first(instrument, level, player);
             // Original ItemThaumometer:134-138 asks the scan event handlers, and the original
             // draws no rune for a phenomena target.
             return callback == null ? null : new Target(callback.signature(), callback.sessionKey(), callback.aspects(),
-                    callback.kind(), callback.clue(), null);
+                    callback.kind(), callback.clue(), null, "?", null);
         }
         if (!level.hasChunkAt(block.getBlockPos())) return null;
         if (level.getBlockEntity(block.getBlockPos()) instanceof TileNode node) {
             return new Target("@NODE" + node.getScanId(), "node:NODE" + node.getScanId(), node.getScanAspects(),
                     ScanManager.ScanKind.PHENOMENA, null, ScanRunes.block(block.getBlockPos().getX(),
-                            block.getBlockPos().getY(), block.getBlockPos().getZ()));
+                            block.getBlockPos().getY(), block.getBlockPos().getZ()), "?", nodeName(node));
         }
         var state = level.getBlockState(block.getBlockPos());
         // TC4 scans the stack returned by getPickBlock, not the block registry
@@ -177,7 +179,42 @@ public final class ItemThaumometer extends Item {
         var id = BuiltInRegistries.ITEM.getKey(picked.getItem());
         return new Target("@" + id, "item:" + id + ":" + grouped.metadata(), ObjectAspectResolver.scanTags(picked, level),
                 ScanManager.ScanKind.ITEM, ResearchClues.Context.item(grouped.stack()),
-                ScanRunes.block(block.getBlockPos().getX(), block.getBlockPos().getY(), block.getBlockPos().getZ()));
+                ScanRunes.block(block.getBlockPos().getX(), block.getBlockPos().getY(), block.getBlockPos().getZ()),
+                picked.getHoverName().getString(), null);
+    }
+
+    /**
+     * The name of a node, as the original readout draws it.
+     *
+     * <p>Original {@code thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:194-197}:
+     * the type of the node and, when the node has one, its modifier, separated by a comma.</p>
+     */
+    private static String nodeName(TileNode node) {
+        String name = Component.translatable("nodetype." + node.getNodeType().name() + ".name").getString();
+        if (node.getNodeModifier() == null) return name;
+        return name + ", " + Component.translatable("nodemod." + node.getNodeModifier().name() + ".name").getString();
+    }
+
+    /**
+     * The client half of the scan readout of the original.
+     *
+     * <p>Oracle {@code thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:161,266-311}
+     * resolves the target of the readout on the client with a ray cast and draws the name of the
+     * target, the aspect icons of a target that was already scanned and the type of a node. The
+     * native scan is server owned, but the target of the readout is a pure client side ray cast,
+     * so the client resolves the very same target with the very same rule.</p>
+     *
+     * @param name      the name of the target, the empty string when the original draws none
+     * @param aspects   the aspects of the target, the empty list when it has none
+     * @param node      the type of a node, the empty string for every other target
+     */
+    public record Readout(String name, AspectList aspects, ScanManager.ScanKind kind, String signature, String node) {}
+
+    /** The target of the readout of the original, or null when the player looks at nothing. */
+    public static Readout readout(Player player, ItemStack instrument) {
+        Target target = findTarget(player, instrument);
+        if (target == null) return null;
+        return new Readout(target.name(), target.aspects(), target.kind(), target.signature(), target.nodeName());
     }
 
     /** Original ItemThaumometer:92 - the rune over the pointed entity. */
@@ -207,5 +244,5 @@ public final class ItemThaumometer extends Item {
     }
 
     private record Target(String signature, String sessionKey, AspectList aspects, ScanManager.ScanKind kind,
-                          ResearchClues.Context clue, ScanRunes.Rune rune) {}
+                          ResearchClues.Context clue, ScanRunes.Rune rune, String name, String nodeName) {}
 }

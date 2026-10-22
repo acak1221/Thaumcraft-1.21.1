@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -57,6 +58,19 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
             propertiesCodec()).apply(instance, BlockEldritch::new));
     /** Original BlockEldritch metadata 0..10. */
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 15);
+
+    /**
+     * The neighbour mask of the eldritch crust, {@code 1 << 6} values.
+     *
+     * <p>Oracle {@code BlockEldritchRenderer:35-63} insets a box side by two sixteenths unless the
+     * neighbour on that side is a solid material, so a field of crust joins seamlessly while an
+     * exposed face keeps the groove. The original asked the world during the draw; a 1.21.1
+     * {@code BakedModel#getQuads} has neither the position nor the level, so the six flags have to
+     * ride on the state. Bit {@code n} is set when the face {@code Direction.get3DDataValue() == n}
+     * has a solid neighbour, which is exactly the condition under which the original draws no inset
+     * on that side.</p>
+     */
+    public static final IntegerProperty CRUST_NEIGHBOR_MASK = IntegerProperty.create("crust_mask", 0, 63);
 
     /**
      * The variant property of every group of the original metadata.
@@ -128,6 +142,52 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         Property<?> pending = thaumcraft.common.lib.world.FamilyVariant.pending().get();
         if (pending != null) builder.add(pending);
+        // Only the crust group carries the six neighbour flags; the classifier decides by group.
+        if (hostsCrustMask(group)) builder.add(CRUST_NEIGHBOR_MASK);
+    }
+
+    /** Whether this group is the eldritch crust, the only group the neighbour mask is baked for. */
+    private static boolean hostsCrustMask(int group) {
+        return EldritchBlockRules.eldritchGroupVariants(group).contains(EldritchBlockRules.ELDRITCH_GLOWING_CRUST);
+    }
+
+    /**
+     * The six neighbour flags of the crust.
+     *
+     * <p>Oracle {@code BlockEldritchRenderer:35-63}: a side draws no inset when the block on that
+     * side is a solid material. Bit {@code n} is set for the face with
+     * {@code Direction.get3DDataValue() == n}.</p>
+     */
+    public static int crustMask(BlockGetter level, BlockPos pos) {
+        int mask = 0;
+        for (Direction face : Direction.values()) {
+            BlockPos neighbour = pos.relative(face);
+            // Block.isBlockSolid: the neighbour counts when its material is solid, which is what
+            // the original passed to the renderer.
+            if (level.getBlockState(neighbour).isSolidRender(level, neighbour)) {
+                mask |= 1 << face.get3DDataValue();
+            }
+        }
+        return mask;
+    }
+
+    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbour,
+                                               net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
+        if (state.hasProperty(CRUST_NEIGHBOR_MASK)) {
+            // The mask of the crust depends on one neighbour per face, so a change on any side
+            // recomputes it. The original read the world at draw time and needed no update.
+            int mask = crustMask(level, pos);
+            if (state.getValue(CRUST_NEIGHBOR_MASK) != mask) state = state.setValue(CRUST_NEIGHBOR_MASK, mask);
+        }
+        return super.updateShape(state, direction, neighbour, level, pos, neighbourPos);
+    }
+
+    @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+        BlockState state = super.getStateForPlacement(context);
+        if (state != null && state.hasProperty(CRUST_NEIGHBOR_MASK)) {
+            state = state.setValue(CRUST_NEIGHBOR_MASK, crustMask(context.getLevel(), context.getClickedPos()));
+        }
+        return state;
     }
 
     /**

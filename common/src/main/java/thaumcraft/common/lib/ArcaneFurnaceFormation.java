@@ -177,7 +177,9 @@ public final class ArcaneFurnaceFormation {
                     if (current.isAir()) continue;
                     int metadata = 1 + dz * 3 + dx;
                     BlockState target;
-                    if (current.is(Blocks.LAVA) || current.is(Blocks.FLOWING_LAVA)) {
+                    // In 1.21.1 the flowing lava is a state of the lava block, so
+                    // one check covers the original lava and flowing lava.
+                    if (current.is(Blocks.LAVA)) {
                         target = core();
                     } else if (current.is(Blocks.IRON_BARS)) {
                         target = nozzle();

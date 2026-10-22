@@ -33,12 +33,16 @@ class ArcaneFurnaceFormationTest {
                 for (int dz = 0; dz < 3; dz++) {
                     boolean corner = (dx == 0 || dx == 2) && (dz == 0 || dz == 2);
                     if (dx == 1 && dz == 1) {
-                        assertSame(Blocks.AIR, ArcaneFurnaceFormation.expected(layer, dx, dz),
-                                "the middle of the top layer of the original shell is empty");
-                        assertSame(Blocks.LAVA, ArcaneFurnaceFormation.expected(1, dx, dz),
-                                "the middle of the middle layer of the original shell is lava");
-                        assertSame(Blocks.OBSIDIAN, ArcaneFurnaceFormation.expected(2, dx, dz),
-                                "the middle of the bottom layer of the original shell is obsidian");
+                        if (layer == 0) {
+                            assertSame(Blocks.AIR, ArcaneFurnaceFormation.expected(layer, dx, dz),
+                                    "the middle of the top layer of the original shell is empty");
+                        } else if (layer == 1) {
+                            assertSame(Blocks.LAVA, ArcaneFurnaceFormation.expected(layer, dx, dz),
+                                    "the middle of the middle layer of the original shell is lava");
+                        } else {
+                            assertSame(Blocks.OBSIDIAN, ArcaneFurnaceFormation.expected(layer, dx, dz),
+                                    "the middle of the bottom layer of the original shell is obsidian");
+                        }
                         continue;
                     }
                     assertSame(corner ? Blocks.NETHER_BRICKS : Blocks.OBSIDIAN,

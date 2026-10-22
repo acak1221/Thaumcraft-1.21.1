@@ -52,7 +52,7 @@ class FocusVisArithmeticTest {
         // A gear discount of 90 on a .9 cap leaves .9F - .9F = 0 in the RAW formula; the original
         // clamps it to .1F, so 1000 centivis still cost 100 - the cast is never free.
         assertEquals(.1F, WandVisDiscount.modifier(.9F, 90));
-        // The original rejects a negative gear discount, an out-of-range Frugal and a NaN cap.
+        // Native API validation rejects an out-of-range Frugal and a NaN cap.
         assertThrows(IllegalArgumentException.class, () -> WandVisDiscount.focusModifier(.9F, 0, -1));
         assertThrows(IllegalArgumentException.class, () -> WandVisDiscount.focusModifier(.9F, 0, 6));
         assertThrows(IllegalArgumentException.class, () -> WandVisDiscount.focusModifier(Float.NaN, 0, 0));

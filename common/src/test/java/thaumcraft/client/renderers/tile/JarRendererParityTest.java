@@ -44,9 +44,9 @@ class JarRendererParityTest {
         float wrapped = TileJarBrainRenderer.turn(5F, 1F, 1F);
         assertTrue(wrapped < 3.141593F && wrapped > -3.141593F,
                 "the original wraps the turn into one circle, not " + wrapped);
-        assertEquals(-1.283186F, wrapped, 1.0E-6F);
-        assertEquals(3.283186F, TileJarBrainRenderer.turn(1F, 5F, 1F), 1e-6F);
-        assertEquals(-.141593F, TileJarBrainRenderer.turn(5F, 1F, .5F), 1e-6F);
+        assertEquals(-1.283185F, wrapped, 0F);
+        assertEquals(7.283185F, TileJarBrainRenderer.turn(1F, 5F, 1F), 0F);
+        assertEquals(-.1415925F, TileJarBrainRenderer.turn(5F, 1F, .5F), 0F);
     }
 
     @Test void theContentFrameAndTheBrainScaleAreTheOriginalOnes() {

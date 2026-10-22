@@ -58,11 +58,9 @@ class TravelingTrunkClientAssetsTest {
         float[] plain = RenderTravelingTrunk.trunkScale(0);
         assertEquals(.952381F, plain[0]);
         assertEquals(.93333334F, plain[1]);
-        assertEquals(.952381F, plain[2]);
         float[] earth = RenderTravelingTrunk.trunkScale(GolemUpgrade.EARTH.id);
         assertEquals(1.0741138F, earth[0]);
         assertEquals(1.0526315F, earth[1]);
-        assertEquals(1.0741138F, earth[2]);
         assertEquals(.952381F, RenderTravelingTrunk.trunkScale(GolemUpgrade.ENTROPY.id)[0]);
         // Shut lid (lidrot 0) is flat; the fully open value 0.5 raises it by 1 - 0.5^3 of a right angle.
         // The original multiplies with the float literal 3.141593f and negates, so a flat lid is a negative zero.

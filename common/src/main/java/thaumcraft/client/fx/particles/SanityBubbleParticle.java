@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import thaumcraft.client.renderers.VisNetRender;
 
 /** Original FXBubble(age1), additive particles row1, block-light240, noclip .002 lift and final three pop cells. */
-public final class SanityBubbleParticle extends SingleQuadParticle {
+public final class SanityBubbleParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
     private int remaining,frame=16;
     public SanityBubbleParticle(ClientLevel level,double x,double y,double z,float r,float g,float b){this(level,x,y,z,r,g,b,1);}
     public SanityBubbleParticle(ClientLevel level,double x,double y,double z,float r,float g,float b,int initialAge){

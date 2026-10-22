@@ -12,7 +12,8 @@ import thaumcraft.client.renderers.VisNetRender;
 import thaumcraft.common.entities.projectile.EntityPrimalOrb;
 
 /** Original FXWisp2/3/4 for all six primal colours, including type-five standard-alpha wisps. */
-public final class PrimalWispParticle extends SingleQuadParticle {
+public final class PrimalWispParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return destination == 1 ? 0 : 1; }
     private final float initialSize;
     private final int destination;
     private final Entity target;

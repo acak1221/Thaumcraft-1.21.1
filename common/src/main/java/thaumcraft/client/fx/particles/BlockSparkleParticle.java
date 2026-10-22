@@ -35,7 +35,7 @@ import thaumcraft.common.lib.network.BlockSparkleFxPayload;
  * replaced by a random grey {@code 0.33 + random * 0.67} per channel and per particle
  * (oracle {@code ClientProxy.java:637-643}).</p>
  */
-public class BlockSparkleParticle extends SingleQuadParticle {
+public class BlockSparkleParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     private static final Tesselator BUFFER = new Tesselator(4096);
     /** The original FXGeneric start particle of the block sparkle. */

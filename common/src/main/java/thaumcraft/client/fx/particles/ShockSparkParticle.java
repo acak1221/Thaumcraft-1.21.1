@@ -8,7 +8,8 @@ import net.minecraft.client.particle.SingleQuadParticle;
 import thaumcraft.client.renderers.VisNetRender;
 
 /** Original FXSpark, particles2 first three8x8 rows,5..9ticks, optional horizontal flip and no movement. */
-public final class ShockSparkParticle extends SingleQuadParticle {
+public final class ShockSparkParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 2; }
     private final int row;
     private final boolean flip;
     public ShockSparkParticle(ClientLevel level,double x,double y,double z,float size) {

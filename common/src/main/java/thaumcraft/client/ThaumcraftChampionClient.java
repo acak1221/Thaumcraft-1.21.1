@@ -52,7 +52,8 @@ public final class ThaumcraftChampionClient {
      * particle walks the frames of its cell range of the particle sheet, the spark
      * walks the eight frames of its own strip of the second sheet.
      */
-    private static final class ChampionParticle extends SingleQuadParticle {
+    private static final class ChampionParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+        @Override public int tc4Layer() { return spark ? 2 : 0; }
         private final IChampionModifierEffect.Fx fx;
         private final boolean spark;
         private final int frameBase;

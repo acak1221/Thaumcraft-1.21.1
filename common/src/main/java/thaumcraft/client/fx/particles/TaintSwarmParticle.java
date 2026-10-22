@@ -22,7 +22,8 @@ import thaumcraft.common.config.ThaumcraftTaint;
 
 /** Original FXSwarm's eight animated cells, curved noisy pursuit/repulsion,
  * liquid-aware push-out, target-death50 fade and shared three-buzz timer. */
-public final class TaintSwarmParticle extends SingleQuadParticle {
+public final class TaintSwarmParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 1; }
     private static final ArrayList<Long> BUZZ=new ArrayList<>();
     private final Entity target;
     private final float size,speed,turn;

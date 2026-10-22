@@ -18,7 +18,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
 /** Original FXSlimyBubble144..150, lifetime15..19, rise0.005, lift at age5 and final half-speed tail. */
-public final class SlurryBubbleParticle extends SingleQuadParticle {
+public final class SlurryBubbleParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 1; }
     private static final ResourceLocation TEXTURE=ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/misc/particles.png");
     private static final Tesselator MESH=new Tesselator(2048);
     private int frame=144;

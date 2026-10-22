@@ -45,7 +45,8 @@ import net.minecraft.world.phys.Vec3;
  * <p>The atlas cell of the original is the fixed {@code (9, 1)} cell of the particle sheet (oracle
  * {@code :92-95}), because the original computed a per age cell at {@code :83} and never used it.</p>
  */
-public final class EssentiaTrailParticle extends SingleQuadParticle {
+public final class EssentiaTrailParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 1; }
     private static final ResourceLocation TEXTURE =
             ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     private static final Tesselator BUFFER = new Tesselator(4096);
@@ -129,7 +130,7 @@ public final class EssentiaTrailParticle extends SingleQuadParticle {
             RenderSystem.setShader(GameRenderer::getParticleShader);
             RenderSystem.setShaderTexture(0, TEXTURE);
             RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.disableCull();
             RenderSystem.depthMask(false);
             var buffer = BUFFER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);

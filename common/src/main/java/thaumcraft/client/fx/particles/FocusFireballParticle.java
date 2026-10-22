@@ -11,7 +11,7 @@ import thaumcraft.common.entities.projectile.EntityExplosiveOrb;
 
 /** Original ExplosiveOrb's stationary FXGeneric trail: cells151..159,7–11
  * ticks, scale2..3, alpha.8 with half-alpha at first/last animation frames. */
-public final class FocusFireballParticle extends SingleQuadParticle {
+public final class FocusFireballParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
     private FocusFireballParticle(ClientLevel level, double x, double y, double z, int lifetime, float scale) {
         super(level,x,y,z); this.lifetime=lifetime; quadSize=.1F*scale; alpha=.8F;
         hasPhysics=false; gravity=0; xd=yd=zd=0; xo=x;yo=y;zo=z;

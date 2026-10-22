@@ -25,7 +25,7 @@ import net.minecraft.util.Mth;
  * particle lives {@code 3 * 2} ticks, its half extent is {@code 0.1 * 0.2 * 3} and it shrinks over
  * its life. Its colour is overwritten with the arc colour and its gravity is zero.
  */
-public final class FXArcSparkle extends SingleQuadParticle {
+public final class FXArcSparkle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
     /** Original FXSparkle:123: {@code 0.1 * particleSize} with the original particle size of 0.2. */
     private static final float EXTENT = .1F * .2F * 3F;
     /** Original FXSparkle:128: the half opacity of the sparkle. */

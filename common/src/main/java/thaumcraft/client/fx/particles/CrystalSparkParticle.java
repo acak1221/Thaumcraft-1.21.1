@@ -20,7 +20,8 @@ import net.minecraft.world.level.Level;
 import thaumcraft.common.lib.crystals.CrystalClusterGeometry;
 
 /** Original FXSpark: stationary5..9-tick,8x8 particles2 atlas, additive layer2 and alpha.8. */
-public final class CrystalSparkParticle extends SingleQuadParticle {
+public final class CrystalSparkParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 2; }
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles2.png");
     private static final Tesselator BUFFER = new Tesselator(256);
     private final int first;

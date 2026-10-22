@@ -33,7 +33,8 @@ import net.minecraft.world.phys.Vec3;
  * the right hand side of the quad. The original's own quirk of the grey pixels of the
  * {@code bloomColor} program is a different program and is not repeated here.
  */
-public final class FXSmokeSpiral extends Particle {
+public final class FXSmokeSpiral extends Particle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 1; }
     /** Original FXSmokeSpiral:44 and :64, the alpha of the smoke cell. */
     private static final float ALPHA = .66F;
     /** Original FXSmokeSpiral:58, the half size of the billboard is 0.15 of the particle scale. */

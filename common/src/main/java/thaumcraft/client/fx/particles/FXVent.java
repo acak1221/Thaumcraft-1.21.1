@@ -17,7 +17,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
 /** Native ParticleEngine adaptation of TC4 FXVent; no second particle manager. */
-public final class FXVent extends SingleQuadParticle {
+public final class FXVent extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 1; }
     private static final Tesselator BUFFER = new Tesselator(256);
     private float scale;
 

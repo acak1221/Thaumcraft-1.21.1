@@ -32,7 +32,7 @@ import thaumcraft.client.renderers.VisNetRender;
  * ({@code EntityFX.java:41}) and the constructor of the original multiplies with the size of the
  * call.</p>
  */
-public final class TypeSparkleParticle extends Particle {
+public final class TypeSparkleParticle extends Particle implements thaumcraft.client.fx.Tc4Particle {
     /** The first frame of the sheet of the original. */
     public static final int FIRST_FRAME = 16;
     /** The quarter of the particle of the original. */

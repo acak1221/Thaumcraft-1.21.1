@@ -16,7 +16,8 @@ import thaumcraft.common.entities.projectile.EntityPechBlast;
  * Native particle lifetime/removal and voxel collision replace EntityFX. Both
  * additive motes and standard-alpha dark sparkle retain the original1/255
  * shader threshold, full light, exact atlas cells, gravity and drag. */
-public final class PechCurseParticle extends SingleQuadParticle {
+public final class PechCurseParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return sparkle ? 1 : 0; }
     private final boolean sparkle;
     private final float originalSize;
     private PechCurseParticle(ClientLevel level,double x,double y,double z,int type,boolean impact){

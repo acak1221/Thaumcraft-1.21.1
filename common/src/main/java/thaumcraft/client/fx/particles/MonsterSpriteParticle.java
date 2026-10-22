@@ -18,7 +18,8 @@ import thaumcraft.common.entities.monster.EntityFireBat;
 import thaumcraft.common.entities.monster.EntityWisp;
 
 /** Original FXWisp mote, FXBurst's node-strip and firebat FXGeneric's nine atlas cells. */
-public final class MonsterSpriteParticle extends SingleQuadParticle {
+public final class MonsterSpriteParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return kind == Kind.BURST ? -1 : 0; }
     private enum Kind { MOTE,BURST,EXPLOSIVE }
     private static ShaderInstance litShader;
     private final Kind kind;

@@ -31,7 +31,8 @@ import thaumcraft.common.tiles.TileNitor;
  * smoke without editing the shared block atlas or registering vanilla stand-ins.
  * Native camera billboarding/shader/collision still require inspected client evidence.
  */
-public final class ResourceParticle extends SingleQuadParticle {
+public final class ResourceParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return smoke ? 1 : 0; }
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     // A separate small native buffer: ParticleEngine already has its CUSTOM
     // buffer open while invoking render, so do not nest its singleton builder.

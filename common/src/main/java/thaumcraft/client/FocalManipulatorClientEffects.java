@@ -36,7 +36,7 @@ public final class FocalManipulatorClientEffects implements TileFocalManipulator
         client.particleEngine.add(new CraftSparkle(level, tile, x, y, z, red, green, blue, life, scale));
     }
 
-    private static final class CraftSparkle extends Particle {
+    private static final class CraftSparkle extends Particle implements thaumcraft.client.fx.Tc4Particle {
         private final WeakReference<TileFocalManipulator> origin;
         private final BlockPos source;
         private final float halfSize;

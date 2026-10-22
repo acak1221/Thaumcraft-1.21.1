@@ -14,7 +14,7 @@ import thaumcraft.client.renderers.VisNetRender;
 import thaumcraft.common.entities.projectile.EntityFrostShard;
 
 /** Original frosty shard's white type6 sparkles,18ticks,gravity.005,shrink/drag. */
-public final class FocusFrostSparkleParticle extends Particle {
+public final class FocusFrostSparkleParticle extends Particle implements thaumcraft.client.fx.Tc4Particle {
     private final float size;
     private FocusFrostSparkleParticle(ClientLevel level,double x,double y,double z) {
         super(level,x,y,z);lifetime=18;hasPhysics=false;xd=yd=zd=0;xo=x;yo=y;zo=z;

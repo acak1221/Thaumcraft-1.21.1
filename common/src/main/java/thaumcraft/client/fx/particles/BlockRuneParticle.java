@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
  * halved. The lifetime is three times the duration of the caller, the gravity of the original is
  * applied as {@code motionY -= 0.04 * gravity} and the particle has no collision.</p>
  */
-public final class BlockRuneParticle extends SingleQuadParticle {
+public final class BlockRuneParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
     /** The original texture of the rune. */
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     /** The original row of the sheet the rune is drawn from. */

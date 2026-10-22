@@ -34,7 +34,8 @@ public final class CrystallizerClientEffects {
     }
     /** Native ParticleEngine form of the same original white FXVent behaviour.
      * Particle-local heading randomness is distinct from the six caller draws. */
-    private static final class Vent extends SingleQuadParticle {
+    private static final class Vent extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+        @Override public int tc4Layer() { return 1; }
         private static final Tesselator BUFFER=new Tesselator(256);private float scale;
         private Vent(ClientLevel level,double x,double y,double z,double dx,double dy,double dz){super(level,x,y,z);setSize(.02F,.02F);scale=random.nextFloat()*.1F+.05F;hasPhysics=false;setColor(1,1,1);float length=Mth.sqrt((float)(dx*dx+dy*dy+dz*dz));xd=heading(dx/length);yd=heading(dy/length);zd=heading(dz/length);}
         private double heading(double unit){return(unit+random.nextGaussian()*(random.nextBoolean()?-1:1)*.0075F*5)*.125F;}

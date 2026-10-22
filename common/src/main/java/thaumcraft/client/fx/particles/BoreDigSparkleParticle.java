@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
  * world, exactly like the native port of the sibling infusion particles
  * ({@code InfusionParticle}), and it never moves a game item.
  */
-public final class BoreDigSparkleParticle extends SingleQuadParticle {
+public final class BoreDigSparkleParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
     /** The original sheet of the sparkle: sixteen cells, the second row is used. */
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     private static final Tesselator BUFFER = new Tesselator(256);

@@ -32,7 +32,14 @@ import thaumcraft.common.mixin.client.MinecraftItemColorsAccess;
  * the atlas cells, homing, colour, fade and timing. Native no-collision movement
  * replaces their old push-out-of-solid-block routine; it never moves game items.
  */
-public final class InfusionParticle extends SingleQuadParticle {
+public final class InfusionParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() {
+        return switch (kind) {
+            case FRAGMENT, BURST -> -1; // Oracle ClientProxy:1064-1077,768-770: vanilla engine.
+            case ESSENTIA -> 1;
+            default -> 0;
+        };
+    }
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     private static final Tesselator BUFFER = new Tesselator(4096);
     private enum Kind { ESSENTIA, SPARKLE, FRAGMENT, RUNE, BURST }
@@ -275,7 +282,7 @@ public final class InfusionParticle extends SingleQuadParticle {
             RenderSystem.setShaderTexture(0, sprite == null ? TEXTURE : sprite.atlasLocation());
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,
-                    kind == Kind.FRAGMENT ? GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA : GlStateManager.DestFactor.ONE);
+                    kind == Kind.FRAGMENT || kind == Kind.ESSENTIA ? GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA : GlStateManager.DestFactor.ONE);
             RenderSystem.disableCull();
             RenderSystem.depthMask(false);
             if (kind == Kind.BURST && (age <= 1 || age >= lifetime - 1)) alpha /= 2;

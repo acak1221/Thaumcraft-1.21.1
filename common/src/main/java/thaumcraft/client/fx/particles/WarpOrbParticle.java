@@ -17,7 +17,8 @@ import net.minecraft.resources.ResourceLocation;
 import thaumcraft.common.entities.projectile.EntityEldritchOrb;
 
 /** TC4 orb's thirty shrinking type5 wisps, original atlas cell, target-based velocity, .02 gravity and smoke blend. */
-public final class WarpOrbParticle extends SingleQuadParticle {
+public final class WarpOrbParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 1; }
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     private static final Tesselator BUFFER = new Tesselator(256);
     private WarpOrbParticle(ClientLevel level, double x, double y, double z, double dx, double dy, double dz) {

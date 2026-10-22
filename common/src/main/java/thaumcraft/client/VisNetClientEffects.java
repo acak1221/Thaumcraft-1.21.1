@@ -58,7 +58,7 @@ public final class VisNetClientEffects {
     }
     /** Original FXVisSparkle: 1000 limit, .985 drag, .1 steering/per-axis cap,
      * age/45..59 growth, near-target shrink, particles row8/16 and alpha.5. */
-    private static final class DrainSparkle extends NativeEffect {
+    private static final class DrainSparkle extends NativeEffect implements thaumcraft.client.fx.Tc4Particle {
         final Vec3 target;final int colour;final float sizeMod;float scale;
         DrainSparkle(ClientLevel level,Vec3 start,Vec3 target,int colour){super(level,start.x,start.y,start.z);this.target=target;this.colour=colour;lifetime=1000;xd=random.nextGaussian()*.01;yd=random.nextGaussian()*.01;zd=random.nextGaussian()*.01;sizeMod=45+random.nextInt(15);}
         @Override public void tick(){xo=x;yo=y;zo=z;if(expired())return;move(xd,yd,zd);xd*=.985;yd*=.985;zd*=.985;Vec3 delta=target.subtract(x,y,z);double distance=delta.length();if(distance<2)scale*=.95F;if(distance<.2){lifetime=age;return;}if(age<10)scale=age/sizeMod;Vec3 direction=delta.scale(.1F/distance);xd=Mth.clamp((float)(xd+direction.x),-.1F,.1F);yd=Mth.clamp((float)(yd+direction.y),-.1F,.1F);zd=Mth.clamp((float)(zd+direction.z),-.1F,.1F);}

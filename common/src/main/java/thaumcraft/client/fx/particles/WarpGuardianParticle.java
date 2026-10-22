@@ -18,7 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import thaumcraft.common.entities.monster.EntityEldritchGuardian;
 
 /** Original FXWispEG body haze: thirteen frames, downward drift, horizontal source following, age/distance fade and particle setting count. */
-public final class WarpGuardianParticle extends SingleQuadParticle {
+public final class WarpGuardianParticle extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
+    @Override public int tc4Layer() { return 1; }
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     /**
      * Original FXWispEG:25 and :53 - the particle scale is the fixed 0.4f and the half size of the quad is

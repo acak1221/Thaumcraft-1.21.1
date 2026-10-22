@@ -75,9 +75,18 @@ class CosmeticStairsTextureParityTest {
         }
     }
 
+    /**
+     * The hash of a position gives four textures, so two neighbours may collide. The oracle
+     * itself collides at (10,64,10) and (11,64,10) - both draw index 2 - so the pair below is the
+     * one measured to differ with the formula of the oracle, not a pair chosen by eye.
+     */
     @Test void theTextureIndexDependsOnThePositionAndIsStable() {
-        assertNotEquals(BlockCosmeticStairs.textureIndex(10, 64, 10), BlockCosmeticStairs.textureIndex(11, 64, 10),
+        assertNotEquals(BlockCosmeticStairs.textureIndex(-20, 64, -5), BlockCosmeticStairs.textureIndex(-19, 64, -5),
                 "two stairs of the same kind look different");
+        assertEquals(oracleIndex(-20, 64, -5, 1), BlockCosmeticStairs.textureIndex(-20, 64, -5),
+                "the texture of the left stair is the draw of the original");
+        assertEquals(oracleIndex(-19, 64, -5, 1), BlockCosmeticStairs.textureIndex(-19, 64, -5),
+                "the texture of the right stair is the draw of the original");
         assertEquals(BlockCosmeticStairs.textureIndex(10, 64, 10), BlockCosmeticStairs.textureIndex(10, 64, 10),
                 "the texture of a stair is stable");
     }

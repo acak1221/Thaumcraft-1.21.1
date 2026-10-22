@@ -285,10 +285,25 @@ public final class InfusionComponentPredicateGameTests {
                 saved = matrix.saveWithFullMetadata(f.level.registryAccess());
                 saved.getList("recipein", Tag.TAG_COMPOUND).getCompound(2).putString("damage", "not-an-integer");
                 int stock = scene.stock();
-                matrix = scene.reload(saved); ticks(matrix, 10);
-                test.assertTrue(!matrix.isActive() && matrix.isCrafting() && matrix.getRemainingIngredientCount() == 4
-                                && scene.stock() == stock && scene.center().getItem(0).is(Items.PISTON)
-                                && scene.component(2).getItem(0).is(Items.DIAMOND_PICKAXE),
+                ItemStack centralBefore = scene.center().getItem(0).copy();
+                List<ItemStack> componentsBefore = new ArrayList<>();
+                for (int index = 0; index < 4; index++) componentsBefore.add(scene.component(index).getItem(0).copy());
+                matrix = scene.reload(saved);
+                // An unread session is retained whole, not decoded into a partly
+                // live session with an empty-ingredient sentinel. Inspect custody
+                // and every payment/consume/output boundary, not sentinel fields.
+                test.assertTrue(matrix.isDataRejected() && saved.equals(matrix.saveWithFullMetadata(f.level.registryAccess())),
+                        "malformed selected session is visibly rejected and preserved verbatim, including explicit damage");
+                matrix.setActive(true);
+                test.assertTrue(!matrix.startCrafting(f.player)
+                                && matrix.getPendingEssentia(Aspect.AIR) == 0 && matrix.getPendingEssentia(Aspect.ORDER) == 0,
+                        "rejected selected session cannot activate, restart/rematch or request payment");
+                ticks(matrix, 120);
+                test.assertTrue(matrix.isDataRejected() && !matrix.isActive()
+                                && saved.equals(matrix.saveWithFullMetadata(f.level.registryAccess()))
+                                && scene.stock() == stock && ItemStack.matches(scene.center().getItem(0), centralBefore)
+                                && java.util.stream.IntStream.range(0, 4).allMatch(index ->
+                                        ItemStack.matches(scene.component(index).getItem(0), componentsBefore.get(index))),
                         "malformed explicit selected requirement fails CLOSED before payment/consume/output, never downgraded to plain ingredient");
             }
         } finally { manager.replaceRecipes(originalRecipes); }

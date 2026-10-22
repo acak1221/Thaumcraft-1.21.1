@@ -278,7 +278,7 @@ public final class InfusionParticle extends SingleQuadParticle implements thaumc
         int texture = RenderSystem.getShaderTexture(0);
         float opacity = alpha;
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShader(() -> tc4Layer() < 0 ? GameRenderer.getParticleShader() : MonsterSpriteParticle.litShader());
             RenderSystem.setShaderTexture(0, sprite == null ? TEXTURE : sprite.atlasLocation());
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,

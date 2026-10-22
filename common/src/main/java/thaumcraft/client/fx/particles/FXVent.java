@@ -16,7 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
-/** Native ParticleEngine adaptation of TC4 FXVent; no second particle manager. */
+/** Native geometry of TC4 FXVent, owned by TC4's layer-one queue. */
 public final class FXVent extends SingleQuadParticle implements thaumcraft.client.fx.Tc4Particle {
     @Override public int tc4Layer() { return 1; }
     private static final Tesselator BUFFER = new Tesselator(256);
@@ -89,7 +89,7 @@ public final class FXVent extends SingleQuadParticle implements thaumcraft.clien
         var shader = RenderSystem.getShader();
         int texture = RenderSystem.getShaderTexture(0);
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader);
             RenderSystem.setShaderTexture(0, ResourceParticle.TEXTURE);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();

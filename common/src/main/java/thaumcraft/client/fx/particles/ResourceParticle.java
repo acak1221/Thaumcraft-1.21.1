@@ -176,7 +176,7 @@ public final class ResourceParticle extends SingleQuadParticle implements thaumc
         var shader = RenderSystem.getShader();
         int texture = RenderSystem.getShaderTexture(0);
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader);
             RenderSystem.setShaderTexture(0, TEXTURE);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,

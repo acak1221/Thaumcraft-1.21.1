@@ -47,7 +47,7 @@ public final class SlurryBubbleParticle extends SingleQuadParticle implements th
         float[] color=RenderSystem.getShaderColor().clone(); boolean blend=GL11.glIsEnabled(GL11.GL_BLEND),depth=GL11.glIsEnabled(GL11.GL_DEPTH_TEST),write=GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK),cull=GL11.glIsEnabled(GL11.GL_CULL_FACE);
         int depthFunc=GL11.glGetInteger(GL11.GL_DEPTH_FUNC),src=GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB),dst=GL11.glGetInteger(GL14.GL_BLEND_DST_RGB),srcAlpha=GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA),dstAlpha=GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA);
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader); RenderSystem.setShaderTexture(0,TEXTURE); RenderSystem.setShaderColor(1,1,1,1);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader); RenderSystem.setShaderTexture(0,TEXTURE); RenderSystem.setShaderColor(1,1,1,1);
             RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc(); RenderSystem.enableDepthTest(); RenderSystem.depthFunc(GL11.GL_LEQUAL); RenderSystem.depthMask(false); RenderSystem.disableCull();
             var buffer=MESH.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.PARTICLE); super.render(buffer,camera,partial); BufferUploader.drawWithShader(buffer.buildOrThrow());
         } finally {

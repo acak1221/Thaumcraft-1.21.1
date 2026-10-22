@@ -33,6 +33,8 @@ import thaumcraft.client.renderers.VisNetRender;
  * call.</p>
  */
 public final class TypeSparkleParticle extends Particle implements thaumcraft.client.fx.Tc4Particle {
+    private final boolean smoke;
+    @Override public int tc4Layer() { return smoke ? 1 : 0; }
     /** The first frame of the sheet of the original. */
     public static final int FIRST_FRAME = 16;
     /** The quarter of the particle of the original. */
@@ -58,6 +60,7 @@ public final class TypeSparkleParticle extends Particle implements thaumcraft.cl
     public TypeSparkleParticle(ClientLevel level, double x, double y, double z, float size, int type, int multiplier, float gravity) {
         super(level, x, y, z);
         this.multiplier = multiplier;
+        smoke = type == 5;
         this.gravity = gravity;
         lifetime = 3 * multiplier;
         hasPhysics = false;
@@ -125,7 +128,7 @@ public final class TypeSparkleParticle extends Particle implements thaumcraft.cl
         int rgb = (int) (rCol * 255) << 16 | (int) (gCol * 255) << 8 | (int) (bCol * 255);
         // The original shrinks the quad over the life of the particle.
         float quad = size * (lifetime - age + 1) / lifetime;
-        VisNetRender.draw(VisNetRender.PARTICLES, GL11.GL_ONE, false, out ->
+        VisNetRender.draw(VisNetRender.PARTICLES, smoke ? GL11.GL_ONE_MINUS_SRC_ALPHA : GL11.GL_ONE, false, out ->
                 VisNetRender.quad(out, pose, quad, ALPHA, rgb, u, u + .0624375F, .25F, .3124375F));
     }
 }

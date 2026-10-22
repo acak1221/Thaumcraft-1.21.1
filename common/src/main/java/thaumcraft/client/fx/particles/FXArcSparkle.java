@@ -72,7 +72,7 @@ public final class FXArcSparkle extends SingleQuadParticle implements thaumcraft
         var shader = RenderSystem.getShader();
         int texture = RenderSystem.getShaderTexture(0);
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader);
             RenderSystem.setShaderTexture(0, ResourceParticle.TEXTURE);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);

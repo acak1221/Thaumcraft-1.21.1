@@ -14,7 +14,8 @@ public final class ParticleEngine {
 
     public static boolean add(ClientLevel level, Particle particle) {
         if (level == null || !(particle instanceof Tc4Particle effect) || effect.tc4Layer() < 0) return false;
-        PARTICLES.add(level.dimension(), effect.tc4Layer(), particle);
+        ClientLevel source = ((thaumcraft.common.mixin.client.ParticleLevelAccess) particle).thaumcraft$level();
+        PARTICLES.add(source.dimension(), effect.tc4Layer(), particle);
         return true;
     }
 

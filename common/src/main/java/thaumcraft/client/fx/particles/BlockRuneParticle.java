@@ -116,7 +116,7 @@ public final class BlockRuneParticle extends SingleQuadParticle implements thaum
         int texture = RenderSystem.getShaderTexture(0);
         float opacity = alpha;
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader);
             RenderSystem.setShaderTexture(0, TEXTURE);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);

@@ -43,6 +43,8 @@ public final class ClientSetup {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        dev.architectury.event.events.client.ClientTickEvent.CLIENT_PRE.register(client ->
+                thaumcraft.client.fx.ParticleEngine.tick(client.level));
         dev.architectury.event.events.client.ClientTickEvent.CLIENT_POST.register(thaumcraft.client.lib.UtilsFX::tick);
         // Every entity type of the port needs a client renderer: 1.21.1 looks the renderer up
         // by entity type and has no fallback, so an unregistered type crashes the client with

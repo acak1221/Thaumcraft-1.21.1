@@ -79,6 +79,8 @@
   ],
   "client": [
     "client.Tc4ParticleEngineMixin",
+    "client.ParticleLevelAccess",
+    "client.Tc4ParticleWorldRenderMixin",
     "client.PositionBlockModelMixin",
     "client.WandRenderContextMixin",
     "client.BoneBowHeldPoseMixin",

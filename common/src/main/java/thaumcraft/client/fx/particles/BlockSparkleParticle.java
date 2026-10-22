@@ -132,10 +132,10 @@ public class BlockSparkleParticle extends SingleQuadParticle implements thaumcra
         int texture = RenderSystem.getShaderTexture(0);
         float savedAlpha = alpha;
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader);
             RenderSystem.setShaderTexture(0, TEXTURE);
             RenderSystem.enableBlend();
-            // The original layer two of the particle engine: the additive blend.
+            // Oracle ClientProxy:1102-1110: FXGeneric uses the default layer zero.
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
             RenderSystem.disableCull();
             RenderSystem.depthMask(false);

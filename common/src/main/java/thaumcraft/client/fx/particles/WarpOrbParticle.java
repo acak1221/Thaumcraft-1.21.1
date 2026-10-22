@@ -59,7 +59,7 @@ public final class WarpOrbParticle extends SingleQuadParticle implements thaumcr
     @Override public void render(VertexConsumer unused, Camera camera, float partial) {
         var shader = RenderSystem.getShader(); int texture = RenderSystem.getShaderTexture(0);
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader); RenderSystem.setShaderTexture(0, TEXTURE);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader); RenderSystem.setShaderTexture(0, TEXTURE);
             RenderSystem.enableBlend(); RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.depthMask(false);
             var buffer = BUFFER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);

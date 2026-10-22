@@ -48,7 +48,7 @@ public final class CrystalSparkParticle extends SingleQuadParticle implements th
     @Override public void render(VertexConsumer unused, Camera camera, float partialTick) {
         var shader = RenderSystem.getShader(); int texture = RenderSystem.getShaderTexture(0);
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader); RenderSystem.setShaderTexture(0, TEXTURE);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader); RenderSystem.setShaderTexture(0, TEXTURE);
             RenderSystem.enableBlend(); RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE); RenderSystem.depthMask(false);
             var buffer = BUFFER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE); super.render(buffer, camera, partialTick); BufferUploader.drawWithShader(buffer.buildOrThrow());
         } finally { RenderSystem.setShader(() -> shader); RenderSystem.setShaderTexture(0, texture); RenderSystem.defaultBlendFunc(); RenderSystem.disableBlend(); RenderSystem.depthMask(true); }

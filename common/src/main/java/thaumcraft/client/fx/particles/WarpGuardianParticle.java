@@ -66,7 +66,7 @@ public final class WarpGuardianParticle extends SingleQuadParticle implements th
         alpha = .2F * (1 - age / (float)lifetime) * (float)(1 - Math.min(1024, distance) / 1024);
         var shader = RenderSystem.getShader(); int texture = RenderSystem.getShaderTexture(0);
         try {
-            RenderSystem.setShader(GameRenderer::getParticleShader); RenderSystem.setShaderTexture(0, TEXTURE);
+            RenderSystem.setShader(MonsterSpriteParticle::litShader); RenderSystem.setShaderTexture(0, TEXTURE);
             RenderSystem.enableBlend(); RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.depthMask(false);
             var buffer = BUFFER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);

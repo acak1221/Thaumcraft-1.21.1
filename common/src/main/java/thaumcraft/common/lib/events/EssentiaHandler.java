@@ -133,6 +133,16 @@ public final class EssentiaHandler {
         if (cache != null) cache.sources.remove(matrix.getBlockPos());
     }
 
+    /** Endpoint retirement/unload, not a refresh: dead mirrors own no search or retry history. */
+    public static void forgetMirror(TileMirrorEssentia mirror) {
+        if (!(mirror.getLevel() instanceof ServerLevel level)) return;
+        requireThread(level);
+        LevelSources cache = LEVELS.get(level);
+        if (cache == null) return;
+        cache.mirrorSources.remove(mirror.getBlockPos());
+        cache.mirrorRetryAfter.remove(mirror.getBlockPos());
+    }
+
     /** Root lifecycle hook: forget a closed world, including its backoff timestamps. */
     public static void clear(ServerLevel level) { LEVELS.remove(level); }
     public static void clear() { LEVELS.clear(); }

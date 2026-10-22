@@ -77,10 +77,18 @@ public final class SurfaceStructurePlacementRuntimeChecks {
         test.assertTrue(bankerConfigured.feature() == featureType.get(bankerKey),
                 "the configured feature is the registered feature instance");
 
+        int before = level.getChunkSource().getLoadedChunksCount();
+        int forcedBefore = level.getForcedChunks().size();
         eldritchRing(test, level, seed);
+        int ring = level.getChunkSource().getLoadedChunksCount();
         hilltopStones(test, level, seed);
+        int stones = level.getChunkSource().getLoadedChunksCount();
         mound(test, level, seed);
+        int mound = level.getChunkSource().getLoadedChunksCount();
         totem(test, level, seed);
+        int after = level.getChunkSource().getLoadedChunksCount();
+        thaumcraft.common.Thaumcraft.LOG.info("PERF surfaceStructures holdersBefore={} ring={} stones={} mound={} after={} delta={} forcedBefore={} forcedAfter={}",
+                before, ring, stones, mound, after, after - before, forcedBefore, level.getForcedChunks().size());
         test.succeed();
     }
 

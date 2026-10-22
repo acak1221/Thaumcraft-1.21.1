@@ -86,6 +86,21 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1200, batch = "g7_save_chunks")
+    public void saveCycleChunkDiskReload(GameTestHelper test) {
+        thaumcraft.common.testing.SaveCycleRuntimeChecks.chunks(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g7_save_player")
+    public void saveCyclePlayerDiskRelogin(GameTestHelper test) {
+        thaumcraft.common.testing.SaveCycleRuntimeChecks.player(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g7_save_world")
+    public void saveCycleWorldDiskReload(GameTestHelper test) {
+        thaumcraft.common.testing.SaveCycleRuntimeChecks.savedData(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void interactionPickaxeConsumesPaidScan(GameTestHelper test) {
         thaumcraft.common.testing.InteractionResultRuntimeChecks.pickaxeConsumesPaidScan(test);

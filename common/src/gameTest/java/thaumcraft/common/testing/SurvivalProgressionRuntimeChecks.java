@@ -1,7 +1,5 @@
 package thaumcraft.common.testing;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -9,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -19,31 +16,17 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.block.Block;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.common.config.ThaumcraftContent;
-import thaumcraft.common.crafting.ArcaneRecipeInput;
-import thaumcraft.common.crafting.ArcaneShapedRecipe;
-import thaumcraft.common.crafting.ArcaneShapelessRecipe;
-import thaumcraft.common.crafting.CrucibleRecipe;
-import thaumcraft.common.crafting.CrucibleRecipeInput;
-import thaumcraft.common.crafting.InfusionRecipeInput;
-import thaumcraft.common.crafting.InfusionStackRecipe;
-import thaumcraft.common.crafting.NativeArcaneRecipe;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.research.ResearchCatalog;
 import thaumcraft.common.lib.research.ResearchDefinition;
 import thaumcraft.common.lib.research.ResearchPurchase;
-import thaumcraft.common.lib.research.ScanManager;
 
 /**
  * The survival-progression acceptance of the port: the chain a player walks in

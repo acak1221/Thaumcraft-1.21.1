@@ -233,18 +233,57 @@ guessed.
 * **The client presentation** of the oculus, the gate and the boss loot.
 * **The multiplayer and the NeoForge run** of the new scenarios. The scenarios are
   registered in both loader wrappers; only the Fabric run was executed here.
+* **The two red cases of the suite** (`originalbiometreesanddungeonsuserealworldgen`,
+  `magicalflowersgrowharvestandrefine`) are pre-existing on the base commit and
+  belong to the worldgen and the plant domains; this wave did not touch them.
 
-## 6. How it was run
+## 6. How it was run and what it said
 
 ```
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export GRADLE_USER_HOME=/home/cyberfox-kali/wt/survival/.gradle-survival
 cd /home/cyberfox-kali/wt/survival
+./gradlew --console=plain :common:test
 ./gradlew --console=plain :fabric:runGameTest
 ```
 
 The dedicated server is the crash surface that matters: the scenarios run inside a
 real dedicated server with the real world, not in a mock harness.
+
+**JUnit** — `:common:test`: **2208 tests, 0 failures, 0 errors, 0 skipped**.
+
+**GameTest** — `:fabric:runGameTest`: **324 scenarios, 322 passed**. The two red
+cases are `originalbiometreesanddungeonsuserealworldgen` and
+`magicalflowersgrowharvestandrefine`; **both fail identically on the leader's base
+commit `708fe82c` without a single line of this branch** (checked by running the
+two cases on the detached base commit), so they are pre-existing and not a
+regression of this wave. All six new scenarios pass.
+
+**The server log of a real survival world.** A fresh dedicated server was started
+on a new survival world (`fabric/run/survival-smoke`, `server-port=25599`,
+`Default game type: SURVIVAL`), the spawn area was generated, and chunks far away
+from the spawn were generated with the console command
+`forceload add 4000 4000` and `forceload add -6000 8000` (the region files
+`r.-12.15`, `r.-12.16`, `r.-13.15`, `r.-13.16`, `r.-6.-10`, `r.-6.-11`, `r.-7.-10`
+and `r.-7.-11` of the world are the proof that the far chunks were really
+written). The server was stopped with the console command `stop`; every dimension
+was saved, the Outer Lands included.
+
+`fabric/run/logs/latest.log` — 162 lines, **no exception, no error, no ticking
+crash**. The only entries are:
+
+* 55 vanilla notices `No data fixer registered for thaumcraft:<entity>` (the
+  vanilla data-fixer notice for every modded entity type; present in every run of
+  the port, GameTest and server alike);
+* the offline-mode notice of my own `server.properties`;
+* the Fabric `Untranslated Item Tags` convention warning (every run);
+* three `Can't keep up!` warnings, which are the memory pressure of the five
+  other Gradle daemons on this machine, not a defect of the mod.
+
+**The NeoForge run of the six new scenarios was not executed** (the Fabric
+workloads and the NeoForge build share the machine; the wave runs Fabric first
+per `AGENTS.md`). The scenarios themselves are loader independent: they live in
+`common/src/gameTest` and only the wrapper differs.
 
 ## 7. Files
 

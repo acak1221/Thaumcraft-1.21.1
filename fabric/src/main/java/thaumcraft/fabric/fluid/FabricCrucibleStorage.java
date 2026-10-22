@@ -6,8 +6,12 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -32,6 +36,9 @@ public final class FabricCrucibleStorage {
     /** The original tank of the crucible holds one thousand millibuckets. */
     private static final long MILLIBUCKETS_PER_BUCKET = 1000L;
     private static boolean initialized;
+    // One snapshot participant per real tank, including lookups on different faces.
+    // Weak values avoid retaining the tile through the weak map's value.
+    private static final Map<TileCrucible, WeakReference<Tank>> TANKS = new WeakHashMap<>();
     private FabricCrucibleStorage() {}
 
     public static void init() {
@@ -39,7 +46,10 @@ public final class FabricCrucibleStorage {
         initialized = true;
         FluidStorage.SIDED.registerForBlockEntity((tile, side) -> {
             if (!(tile instanceof TileCrucible crucible)) return null;
-            return new Tank(crucible);
+            var reference = TANKS.get(crucible);
+            Tank tank = reference == null ? null : reference.get();
+            if (tank == null) { tank = new Tank(crucible); TANKS.put(crucible, new WeakReference<>(tank)); }
+            return tank;
         }, ThaumcraftAlchemy.CRUCIBLE_BLOCK_ENTITY.get());
     }
 
@@ -53,36 +63,52 @@ public final class FabricCrucibleStorage {
         return droplets * MILLIBUCKETS_PER_BUCKET / DROPLETS_PER_BUCKET;
     }
 
-    private static final class Tank implements Storage<FluidVariant>, StorageView<FluidVariant> {
+    private static final class Tank extends SnapshotParticipant<Integer> implements Storage<FluidVariant>, StorageView<FluidVariant> {
         private final TileCrucible crucible;
         private Tank(TileCrucible crucible) { this.crucible = crucible; }
 
+        private boolean current() {
+            var level = crucible.getLevel();
+            return level != null && !crucible.isRemoved() && level.hasChunkAt(crucible.getBlockPos())
+                    && level.getBlockEntity(crucible.getBlockPos()) == crucible;
+        }
+        @Override protected Integer createSnapshot() { return crucible.getWaterAmount(); }
+        @Override protected void readSnapshot(Integer amount) {
+            // Retired capabilities must never resurrect stock into a replacement owner.
+            if (!current()) return;
+            int difference = amount - crucible.getWaterAmount();
+            if (difference > 0) crucible.fillWater(Fluids.WATER, difference, true);
+            else if (difference < 0) crucible.drainWater(-difference, true);
+        }
+
         @Override public long insert(FluidVariant resource, long maximum, TransactionContext transaction) {
-            if (resource == null || maximum <= 0) return 0;
+            if (resource == null || maximum <= 0 || !current()) return 0;
             Fluid fluid = resource.getFluid();
             if (fluid != Fluids.WATER) return 0;
             long millibuckets = Math.min(toMillibuckets(maximum), crucible.getWaterCapacity() - crucible.getWaterAmount());
             if (millibuckets <= 0) return 0;
+            updateSnapshots(transaction);
             int accepted = crucible.fillWater(fluid, (int) millibuckets, true);
             return toDroplets(accepted);
         }
 
         @Override public long extract(FluidVariant resource, long maximum, TransactionContext transaction) {
-            if (resource == null || maximum <= 0) return 0;
+            if (resource == null || maximum <= 0 || !current()) return 0;
             if (resource.getFluid() != Fluids.WATER) return 0;
             long millibuckets = Math.min(toMillibuckets(maximum), crucible.getWaterAmount());
             if (millibuckets <= 0) return 0;
+            updateSnapshots(transaction);
             int drained = crucible.drainWater((int) millibuckets, true);
             return toDroplets(drained);
         }
 
-        @Override public boolean supportsInsertion() { return true; }
-        @Override public boolean supportsExtraction() { return true; }
+        @Override public boolean supportsInsertion() { return current(); }
+        @Override public boolean supportsExtraction() { return current(); }
         @Override public boolean isResourceBlank() { return getAmount() <= 0; }
         @Override public FluidVariant getResource() {
-            return crucible.getWaterAmount() > 0 ? FluidVariant.of(Fluids.WATER) : FluidVariant.blank();
+            return current() && crucible.getWaterAmount() > 0 ? FluidVariant.of(Fluids.WATER) : FluidVariant.blank();
         }
-        @Override public long getAmount() { return toDroplets(crucible.getWaterAmount()); }
+        @Override public long getAmount() { return current() ? toDroplets(crucible.getWaterAmount()) : 0; }
         @Override public long getCapacity() { return toDroplets(crucible.getWaterCapacity()); }
         @Override public long getVersion() { return crucible.getWaterAmount(); }
         @Override public Iterator<StorageView<FluidVariant>> iterator() { return List.<StorageView<FluidVariant>>of(this).iterator(); }

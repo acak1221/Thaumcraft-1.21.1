@@ -49,6 +49,20 @@ public final class FluidConservationRuntimeChecks {
             try(var tx=Transaction.openOuter()) {test.assertTrue((fill?storage.insert(water,81000,tx):storage.extract(water,81000,tx))==81000,"stage finite1000mB");}
             int expected=fill?0:1000;
             test.assertTrue(tile.getWaterAmount()==expected,"aborted Fabric "+(fill?"fill":"drain")+" must leave"+expected+"mB, actual="+tile.getWaterAmount());
+            if(fill) {
+                var other=FluidStorage.SIDED.find(level,pos,Direction.NORTH);
+                test.assertTrue(storage==other,"all real crucible faces share one snapshot participant");
+                try(var outer=Transaction.openOuter()) {
+                    test.assertTrue(storage.insert(water,81000,outer)==81000,"outer stages1000mB");
+                    try(var nested=outer.openNested()) {test.assertTrue(other.extract(water,81,nested)==81,"nested stages1mB drain");}
+                    test.assertTrue(tile.getWaterAmount()==1000,"nested abort restores1000mB across faces");
+                    try(var nested=outer.openNested()) {test.assertTrue(other.extract(water,162,nested)==162,"nested stages2mB drain");nested.commit();}
+                    test.assertTrue(tile.getWaterAmount()==998,"nested commit joins outer at998mB");
+                }
+                test.assertTrue(tile.getWaterAmount()==0,"outer abort after nested commit restores0mB");
+                try(var outer=Transaction.openOuter()) {test.assertTrue(storage.insert(water,81,outer)==81,"stage1mB commit");outer.commit();}
+                test.assertTrue(tile.getWaterAmount()==1,"final commit retains precisely1mB");
+            }
         } finally {level.setBlock(pos,before,Block.UPDATE_CLIENTS);}
         test.succeed();
     }

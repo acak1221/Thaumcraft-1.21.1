@@ -6,7 +6,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -27,13 +30,20 @@ import thaumcraft.common.lib.items.EquipmentRules;
 public final class EquipmentItemRuntimeChecks {
     private EquipmentItemRuntimeChecks() {}
 
-    /** The original bone bow keeps its durability, its draw curve and its arrow damage. */
+    /**
+     * The original bone bow keeps its durability, its draw curve and its arrow damage.
+     *
+     * <p>The constants are only half of the behaviour: the scenario therefore also <b>fires the
+     * bow</b> and observes the projectile, the durability and the ammo. An earlier version checked
+     * the numbers of {@code EquipmentRules} and never used the item, so making
+     * {@code ItemBowBone.releaseUsing} a no-op left the scenario green.</p>
+     */
     public static void boneBowKeepsItsOriginalDrawAndDamage(GameTestHelper test) {
         var lane = new WaveLane(test, 3, 2, 3);
         try {
             ServerLevel level = lane.level;
             ServerPlayer player = test.makeMockServerPlayerInLevel();
-            player.setGameMode(GameType.CREATIVE);
+            player.setGameMode(GameType.SURVIVAL);
             lane.floor(3);
             var bow = new ItemStack(ThaumcraftLegacyItems.BONE_BOW.get());
             test.assertTrue(bow.getMaxDamage() == EquipmentRules.BONE_BOW_DURABILITY,
@@ -56,6 +66,51 @@ public final class EquipmentItemRuntimeChecks {
                             + EquipmentRules.boneBowArrowDamage(2));
             test.assertTrue(Math.abs(EquipmentRules.boneBowArrowSpeed(1F) - 2.5F) < 1e-6F,
                     "the arrow of the bone bow leaves with the original speed of 2.5: " + EquipmentRules.boneBowArrowSpeed(1F));
+
+            // ---- the shot itself -------------------------------------------------------------
+            // A real survival player, a real arrow and the real item: the projectile that leaves
+            // must be the bone bow's own, so a releaseUsing that returns without shooting fails.
+            player.getInventory().clearContent();
+            player.getInventory().setItem(player.getInventory().selected, bow);
+            player.getInventory().add(new ItemStack(Items.ARROW, 16));
+            player.setPos(lane.origin.getX() + 1.5, lane.origin.getY() + 2.0, lane.origin.getZ() + 1.5);
+            int arrowsBefore = player.getInventory().countItem(Items.ARROW);
+            int usesBefore = bow.getDamageValue();
+
+            // The use is started the way the item asks for it, then released at full charge.
+            player.setItemInHand(InteractionHand.MAIN_HAND, bow);
+            var used = player.gameMode.useItem(player, level, bow, InteractionHand.MAIN_HAND);
+            test.assertTrue(used.consumesAction(), "the bone bow starts a draw with an arrow in the inventory");
+            // Full charge: the original maximum is eighteen ticks, and the power is capped at one.
+            player.stopUsingItem();
+            bow.getItem().releaseUsing(bow, level, player, 0);
+
+            var box = new net.minecraft.world.phys.AABB(
+                    lane.origin.getX() - 8, lane.origin.getY() - 4, lane.origin.getZ() - 8,
+                    lane.origin.getX() + 8, lane.origin.getY() + 12, lane.origin.getZ() + 8);
+            List<AbstractArrow> arrows = level.getEntitiesOfClass(AbstractArrow.class, box,
+                    arrow -> arrow.getOwner() == player);
+            test.assertTrue(arrows.size() == 1,
+                    "the bone bow fires exactly one arrow when it is released at full charge: " + arrows.size());
+            AbstractArrow arrow = arrows.getFirst();
+            test.assertTrue(arrow.getDeltaMovement().length() > 1.5D,
+                    "the arrow leaves the bow with a real speed, not a zero delta: " + arrow.getDeltaMovement());
+            test.assertTrue(Math.abs(arrow.getBaseDamage() - EquipmentRules.boneBowArrowBaseDamage(0)) < 1e-6D,
+                    "the arrow carries the original two and a half base damage: " + arrow.getBaseDamage());
+            test.assertTrue(bow.getDamageValue() == usesBefore + 1,
+                    "the shot costs one use of the original durability: " + bow.getDamageValue());
+            test.assertTrue(player.getInventory().countItem(Items.ARROW) == arrowsBefore - 1
+                            || player.hasInfiniteMaterials(),
+                    "the shot consumes one arrow: " + player.getInventory().countItem(Items.ARROW));
+            arrow.discard();
+
+            // A draw that is too short never fires: the original refuses below the power of 0.1.
+            // The use duration of the bone bow is the vanilla 72000 ticks, so "no draw at all" is
+            // releasing with the full remaining duration, and "fully drawn" is releasing with zero.
+            int before = bow.getDamageValue();
+            player.setItemInHand(InteractionHand.MAIN_HAND, bow);
+            bow.getItem().releaseUsing(bow, level, player, bow.getItem().getUseDuration(bow, player));
+            test.assertTrue(bow.getDamageValue() == before, "an uncharged draw never spends a use");
         } catch (RuntimeException | Error failure) {
             lane.clean();
             throw failure;

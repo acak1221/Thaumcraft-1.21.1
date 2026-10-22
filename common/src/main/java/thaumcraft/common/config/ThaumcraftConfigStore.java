@@ -71,7 +71,7 @@ public final class ThaumcraftConfigStore {
             new Entry(Category.GENERAL, "allow_cheat_sheet", true, false, 0, 0, 0),
             new Entry(Category.GENERAL, "allow_warded_stone", true, true, 0, 0, 0),
             new Entry(Category.GENERAL, "blue_magical_forest", true, false, 0, 0, 0),
-            new Entry(Category.GENERAL, "glowing_taint", true, false, 0, 0, 0),
+            new Entry(Category.GENERAL, "glowing_taint", true, true, 0, 0, 0),
             new Entry(Category.GENERAL, "shaders", true, true, 0, 0, 0),
             new Entry(Category.GENERAL, "biome_taint_spread", false, false, 200, 0, 1000),
             // Original Monster_Spawning category.

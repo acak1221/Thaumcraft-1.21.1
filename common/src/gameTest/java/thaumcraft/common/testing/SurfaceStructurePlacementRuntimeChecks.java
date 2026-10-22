@@ -15,14 +15,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
+import thaumcraft.common.config.ThaumcraftBiomeSettings;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 import thaumcraft.common.config.ThaumcraftNodes;
 import thaumcraft.common.config.ThaumcraftOuterLands;
 import thaumcraft.common.config.ThaumcraftVillages;
+import thaumcraft.common.lib.world.AuraGenRules;
 import thaumcraft.common.lib.world.StructurePlacementRules;
 import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
+import thaumcraft.common.lib.world.ThaumcraftTotemFeature;
 import thaumcraft.common.lib.world.VillageWorldGenRules;
 import thaumcraft.common.tiles.TileNode;
 
@@ -272,7 +276,7 @@ public final class SurfaceStructurePlacementRuntimeChecks {
      * of the overworld type, the native form of the overworld of the original.
      */
     private static void totem(GameTestHelper test, ServerLevel level, long seed) {
-        List<int[]> candidates = totemChunks(seed, 8);
+        List<int[]> candidates = totemChunks(level, seed, 8);
         test.assertTrue(!candidates.isEmpty(), "the roll of the totem gives chunks to the totem");
         for (int[] candidate : candidates) {
             level.getChunk(candidate[0], candidate[1]);
@@ -297,19 +301,32 @@ public final class SurfaceStructurePlacementRuntimeChecks {
     /**
      * The chunks the roll of the totem gives to the totem, with the column of the totem.
      *
-     * <p>The roll is the same one the feature draws: the rarity roll of the wild node pass
-     * first (the totem yields to a wild aura node of the chunk, oracle
-     * {@code ThaumcraftWorldGenerator:419} and {@code :455}), then the chain of the original,
-     * then the one in 360 of the totem, then the position inside the chunk.
+     * <p>The draws are the draws of {@link ThaumcraftTotemFeature#placePass}, in the same order,
+     * because a random stream is only reproducible when it is consumed identically: the scattered
+     * temple of the chunk (no draw of its own, it asks the structure starts), the rarity roll of
+     * the wild node pass (oracle {@code ThaumcraftWorldGenerator:419}), the draws of the exclusive
+     * structure chain ({@code :429-436}), the {@code !auraGen} short circuit ({@code :149}), then
+     * the one in {@code 360} of the totem and the position inside the chunk.</p>
      */
-    private static List<int[]> totemChunks(long seed, int limit) {
+    private static List<int[]> totemChunks(ServerLevel level, long seed, int limit) {
         List<int[]> chunks = new ArrayList<>();
         for (int chunkX = 0; chunkX < 2048 && chunks.size() < limit; ++chunkX) {
             for (int chunkZ = 0; chunkZ < 64 && chunks.size() < limit; ++chunkZ) {
                 var random = RandomSource.create(StructurePlacementRules.chunkSeed(seed, chunkX, chunkZ));
-                if (random.nextInt(ThaumcraftNormalNodeFeature.NODE_RARITY) == 0) continue;
-                var draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
-                if (draw.kind() != StructurePlacementRules.Kind.NONE) continue;
+                // The two gates ahead of every draw of the totem (oracle :420-421): a world
+                // without structures, or a flat world, never reaches the pass at all.
+                if (!ThaumcraftBiomeSettings.worldgen().structures()) continue;
+                if (level.getChunkSource().getGenerator() instanceof FlatLevelSource) continue;
+                // The same order as ThaumcraftTotemFeature.placePass.
+                boolean auraGen = false;
+                boolean wildNode = false;
+                if (ThaumcraftBiomeSettings.worldgen().auraNodes()) {
+                    auraGen = AuraGenRules.scatteredTemple(level, chunkX, chunkZ) != null;
+                    wildNode = ThaumcraftNormalNodeFeature.wildNodeDecision(level, random, chunkX, chunkZ, auraGen);
+                }
+                StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+                if (AuraGenRules.finalAuraGen(auraGen, wildNode,
+                        AuraGenRules.structureBuilt(level, chunkX, chunkZ, draw.kind()))) continue;
                 if (random.nextInt(StructurePlacementRules.TOTEM_CHANCE) != 0) continue;
                 chunks.add(new int[] {chunkX, chunkZ, chunkX * 16 + random.nextInt(16), chunkZ * 16 + random.nextInt(16)});
             }

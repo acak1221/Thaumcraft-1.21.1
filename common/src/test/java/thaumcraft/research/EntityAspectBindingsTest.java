@@ -7,6 +7,23 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 
 class EntityAspectBindingsTest {
+    @Test void nativeMobNamesReachOriginalAspectRows() {
+        // Original ConfigAspects:87,96-101,105-106. Test the same name translation used by describe.
+        var expected = Map.of(
+                "thaum_slime", Map.of(Aspect.SLIME, 2, Aspect.MAGIC, 1, Aspect.WATER, 1),
+                "tainted_pig", Map.of(Aspect.TAINT, 2, Aspect.EARTH, 2),
+                "tainted_sheep", Map.of(Aspect.TAINT, 2, Aspect.EARTH, 2),
+                "tainted_cow", Map.of(Aspect.TAINT, 3, Aspect.EARTH, 3),
+                "tainted_chicken", Map.of(Aspect.TAINT, 2, Aspect.FLIGHT, 2, Aspect.AIR, 1),
+                "tainted_villager", Map.of(Aspect.TAINT, 3, Aspect.AIR, 2),
+                "taint_creeper", Map.of(Aspect.TAINT, 2, Aspect.FIRE, 2),
+                "cultist_knight", Map.of(Aspect.ELDRITCH, 1, Aspect.MAN, 2, Aspect.ENTROPY, 1),
+                "cultist_cleric", Map.of(Aspect.ELDRITCH, 1, Aspect.MAN, 2, Aspect.ENTROPY, 1));
+        expected.forEach((id, aspects) -> assertEquals(aspects,
+                values(EntityAspectBindings.originalName("thaumcraft:" + id), Map.of()), id));
+        assertEquals("example:unknown", EntityAspectBindings.originalName("example:unknown"));
+    }
+
     @Test void originalMobQuantitiesAndConditionalRowsReplaceTheirGenericBase() {
         assertEquals(Map.of(Aspect.UNDEAD, 3, Aspect.MAN, 1, Aspect.EARTH, 1), values("Skeleton", Map.of()));
         assertEquals(Map.of(Aspect.UNDEAD, 4, Aspect.MAN, 1, Aspect.FIRE, 2), values("Skeleton", Map.of("SkeletonType", 1)));

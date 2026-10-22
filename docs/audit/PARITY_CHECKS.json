@@ -1,0 +1,539 @@
+{
+  "aspect_declarations": 48,
+  "compound_recipes": 42,
+  "primal_aspects": 6,
+  "entity_declarations": [
+    {
+      "name": "Zombie",
+      "oracle_line": 40
+    },
+    {
+      "name": "Giant",
+      "oracle_line": 41
+    },
+    {
+      "name": "Skeleton",
+      "oracle_line": 42
+    },
+    {
+      "name": "Skeleton",
+      "oracle_line": 43
+    },
+    {
+      "name": "Creeper",
+      "oracle_line": 44
+    },
+    {
+      "name": "Creeper",
+      "oracle_line": 45
+    },
+    {
+      "name": "EntityHorse",
+      "oracle_line": 46
+    },
+    {
+      "name": "Pig",
+      "oracle_line": 47
+    },
+    {
+      "name": "XPOrb",
+      "oracle_line": 48
+    },
+    {
+      "name": "Sheep",
+      "oracle_line": 49
+    },
+    {
+      "name": "Cow",
+      "oracle_line": 50
+    },
+    {
+      "name": "MushroomCow",
+      "oracle_line": 51
+    },
+    {
+      "name": "SnowMan",
+      "oracle_line": 52
+    },
+    {
+      "name": "Ozelot",
+      "oracle_line": 53
+    },
+    {
+      "name": "Chicken",
+      "oracle_line": 54
+    },
+    {
+      "name": "Squid",
+      "oracle_line": 55
+    },
+    {
+      "name": "Wolf",
+      "oracle_line": 56
+    },
+    {
+      "name": "Bat",
+      "oracle_line": 57
+    },
+    {
+      "name": "Boat",
+      "oracle_line": 58
+    },
+    {
+      "name": "Spider",
+      "oracle_line": 59
+    },
+    {
+      "name": "Slime",
+      "oracle_line": 60
+    },
+    {
+      "name": "Ghast",
+      "oracle_line": 61
+    },
+    {
+      "name": "PigZombie",
+      "oracle_line": 62
+    },
+    {
+      "name": "Enderman",
+      "oracle_line": 63
+    },
+    {
+      "name": "CaveSpider",
+      "oracle_line": 64
+    },
+    {
+      "name": "Silverfish",
+      "oracle_line": 65
+    },
+    {
+      "name": "Blaze",
+      "oracle_line": 66
+    },
+    {
+      "name": "LavaSlime",
+      "oracle_line": 67
+    },
+    {
+      "name": "EnderDragon",
+      "oracle_line": 68
+    },
+    {
+      "name": "WitherBoss",
+      "oracle_line": 69
+    },
+    {
+      "name": "Witch",
+      "oracle_line": 70
+    },
+    {
+      "name": "Villager",
+      "oracle_line": 71
+    },
+    {
+      "name": "VillagerGolem",
+      "oracle_line": 72
+    },
+    {
+      "name": "MinecartRideable",
+      "oracle_line": 73
+    },
+    {
+      "name": "MinecartChest",
+      "oracle_line": 74
+    },
+    {
+      "name": "MinecartFurnace",
+      "oracle_line": 75
+    },
+    {
+      "name": "MinecartTNT",
+      "oracle_line": 76
+    },
+    {
+      "name": "MinecartHopper",
+      "oracle_line": 77
+    },
+    {
+      "name": "MinecartSpawner",
+      "oracle_line": 78
+    },
+    {
+      "name": "EnderCrystal",
+      "oracle_line": 79
+    },
+    {
+      "name": "ItemFrame",
+      "oracle_line": 80
+    },
+    {
+      "name": "Painting",
+      "oracle_line": 81
+    },
+    {
+      "name": "Thaumcraft.PrimalOrb",
+      "oracle_line": 82
+    },
+    {
+      "name": "Thaumcraft.Firebat",
+      "oracle_line": 83
+    },
+    {
+      "name": "Thaumcraft.Pech",
+      "oracle_line": 84
+    },
+    {
+      "name": "Thaumcraft.Pech",
+      "oracle_line": 85
+    },
+    {
+      "name": "Thaumcraft.Pech",
+      "oracle_line": 86
+    },
+    {
+      "name": "Thaumcraft.ThaumSlime",
+      "oracle_line": 87
+    },
+    {
+      "name": "Thaumcraft.BrainyZombie",
+      "oracle_line": 88
+    },
+    {
+      "name": "Thaumcraft.GiantBrainyZombie",
+      "oracle_line": 89
+    },
+    {
+      "name": "Thaumcraft.Taintacle",
+      "oracle_line": 90
+    },
+    {
+      "name": "Thaumcraft.TaintacleTiny",
+      "oracle_line": 91
+    },
+    {
+      "name": "Thaumcraft.TaintSpider",
+      "oracle_line": 92
+    },
+    {
+      "name": "Thaumcraft.TaintSpore",
+      "oracle_line": 93
+    },
+    {
+      "name": "Thaumcraft.TaintSwarmer",
+      "oracle_line": 94
+    },
+    {
+      "name": "Thaumcraft.TaintSwarm",
+      "oracle_line": 95
+    },
+    {
+      "name": "Thaumcraft.TaintedPig",
+      "oracle_line": 96
+    },
+    {
+      "name": "Thaumcraft.TaintedSheep",
+      "oracle_line": 97
+    },
+    {
+      "name": "Thaumcraft.TaintedCow",
+      "oracle_line": 98
+    },
+    {
+      "name": "Thaumcraft.TaintedChicken",
+      "oracle_line": 99
+    },
+    {
+      "name": "Thaumcraft.TaintedVillager",
+      "oracle_line": 100
+    },
+    {
+      "name": "Thaumcraft.TaintedCreeper",
+      "oracle_line": 101
+    },
+    {
+      "name": "Thaumcraft.MindSpider",
+      "oracle_line": 102
+    },
+    {
+      "name": "Thaumcraft.EldritchGuardian",
+      "oracle_line": 103
+    },
+    {
+      "name": "Thaumcraft.EldritchOrb",
+      "oracle_line": 104
+    },
+    {
+      "name": "Thaumcraft.CultistKnight",
+      "oracle_line": 105
+    },
+    {
+      "name": "Thaumcraft.CultistCleric",
+      "oracle_line": 106
+    },
+    {
+      "name": "Thaumcraft.Wisp",
+      "oracle_line": 108
+    },
+    {
+      "name": "Thaumcraft.Golem",
+      "oracle_line": 110
+    }
+  ],
+  "crucible_recipe_field_checks": [
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_bonemeal.json",
+      "oracle_line": 130,
+      "key": "AltBonemeal"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_clay.json",
+      "oracle_line": 123,
+      "key": "AltClay"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_cracked_brick.json",
+      "oracle_line": 129,
+      "key": "AltCrackedBrick"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_glowstone.json",
+      "oracle_line": 124,
+      "key": "AltGlowstone"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_gunpowder.json",
+      "oracle_line": 121,
+      "key": "AltGunpowder"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_ice.json",
+      "oracle_line": 128,
+      "key": "AltIce"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_ink.json",
+      "oracle_line": 125,
+      "key": "AltInk"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_mossy_cobble.json",
+      "oracle_line": 127,
+      "key": "AltMossyCobble"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_slime.json",
+      "oracle_line": 122,
+      "key": "AltSlime"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alt_web.json",
+      "oracle_line": 126,
+      "key": "AltWeb"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/alumentum.json",
+      "oracle_line": 115,
+      "key": "Alumentum"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/balanced_shard_air.json",
+      "oracle_line": 113,
+      "key": "BalancedShard_0"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/balanced_shard_earth.json",
+      "oracle_line": 113,
+      "key": "BalancedShard_3"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/balanced_shard_entropy.json",
+      "oracle_line": 113,
+      "key": "BalancedShard_5"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/balanced_shard_fire.json",
+      "oracle_line": 113,
+      "key": "BalancedShard_1"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/balanced_shard_order.json",
+      "oracle_line": 113,
+      "key": "BalancedShard_4"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/balanced_shard_water.json",
+      "oracle_line": 113,
+      "key": "BalancedShard_2"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/bath_salts.json",
+      "oracle_line": 179,
+      "key": "BathSalts"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/bottle_taint.json",
+      "oracle_line": 163,
+      "key": "BottleTaint"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/bucket_of_death.json",
+      "oracle_line": 160,
+      "key": "LiquidDeath"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/ethereal_bloom.json",
+      "oracle_line": 159,
+      "key": "EtherealBloom"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_clay.json",
+      "oracle_line": 167,
+      "key": "GolemClay"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_core_butcher.json",
+      "oracle_line": 177,
+      "key": "CoreButcher"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_core_empty.json",
+      "oracle_line": 174,
+      "key": "CoreEmpty"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_core_fill.json",
+      "oracle_line": 173,
+      "key": "CoreFill"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_core_gather.json",
+      "oracle_line": 172,
+      "key": "CoreGather"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_core_guard.json",
+      "oracle_line": 176,
+      "key": "CoreGuard"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_core_harvest.json",
+      "oracle_line": 175,
+      "key": "CoreHarvest"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_core_liquid.json",
+      "oracle_line": 178,
+      "key": "CoreLiquid"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_flesh.json",
+      "oracle_line": 168,
+      "key": "GolemFlesh"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_iron.json",
+      "oracle_line": 170,
+      "key": "GolemIron"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_stone.json",
+      "oracle_line": 169,
+      "key": "GolemStone"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_straw.json",
+      "oracle_line": 164,
+      "key": "GolemStraw"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_tallow.json",
+      "oracle_line": 166,
+      "key": "GolemTallow"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_thaumium.json",
+      "oracle_line": 171,
+      "key": "GolemThaumium"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/golem_wood.json",
+      "oracle_line": 165,
+      "key": "GolemWood"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/nitor.json",
+      "oracle_line": 116,
+      "key": "Nitor"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_copper.json",
+      "oracle_line": 134,
+      "key": "PureCopper"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_gold.json",
+      "oracle_line": 132,
+      "key": "PureGold"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/pure_iron.json",
+      "oracle_line": 131,
+      "key": "PureIron"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/sanity_soap.json",
+      "oracle_line": 180,
+      "key": "SaneSoap"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/tallow.json",
+      "oracle_line": 120,
+      "key": "Tallow"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/thaumium.json",
+      "oracle_line": 117,
+      "key": "Thaumium"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/trans_copper.json",
+      "oracle_line": 148,
+      "key": "TransCopper"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/trans_gold.json",
+      "oracle_line": 146,
+      "key": "TransGold"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/trans_iron.json",
+      "oracle_line": 145,
+      "key": "TransIron"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/void_ingot.json",
+      "oracle_line": 118,
+      "key": "VoidMetal"
+    },
+    {
+      "native": "common/src/main/resources/data/thaumcraft/recipe/crucible/void_seed.json",
+      "oracle_line": 119,
+      "key": "VoidSeed"
+    }
+  ],
+  "golem_numeric_values": 56,
+  "golem_boolean_values": 8,
+  "native_entity_names_regression": {
+    "thaum_slime": "ThaumSlime",
+    "tainted_pig": "TaintedPig",
+    "tainted_sheep": "TaintedSheep",
+    "tainted_cow": "TaintedCow",
+    "tainted_chicken": "TaintedChicken",
+    "tainted_villager": "TaintedVillager",
+    "taint_creeper": "TaintedCreeper",
+    "cultist_knight": "CultistKnight",
+    "cultist_cleric": "CultistCleric"
+  },
+  "limits": "Static comparisons only. Recipe ingredient identities, research page text, and runtime scans are not certified."
+}

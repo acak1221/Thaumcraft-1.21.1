@@ -35,6 +35,7 @@ public final class AccessoriesRuntimeChecks {
         var f=new TubeVariantsRuntimeChecks.Fixture(test);ServerPlayer current=f.player;
         boolean keep=f.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
         try {
+            focusCentivis(test);
             f.open();var inventory=PlayerAccessories.get(f.player);
             ItemStack ring=RunicArmor.augment(RunicArmor.augment(RunicArmor.augment(new ItemStack(ThaumcraftBaubles.RUNIC_RING_LESSER.get()))));
             ring.set(DataComponents.CUSTOM_NAME,Component.literal("declared native ring"));
@@ -97,6 +98,33 @@ public final class AccessoriesRuntimeChecks {
             f.close();
         }
         test.succeed();
+    }
+
+    /** Original ItemWandCasting:247-259, consumeAllVis per-aspect truncation and actual component debit. */
+    private static void focusCentivis(GameTestHelper test) {
+        var focus = new ItemStack(thaumcraft.common.config.ThaumcraftFoci.FIRE_FOCUS.get());
+        focus.set(thaumcraft.common.config.ThaumcraftFoci.FOCUS_UPGRADES.get(),
+                new thaumcraft.common.items.wands.foci.FocusUpgradeData(java.util.List.of((short)1, (short)1, (short)1, (short)1, (short)1)));
+        var wand = new ItemStack(ThaumcraftContent.WAND.get());
+        wand.set(ThaumcraftContent.WAND_DATA.get(), new WandData("greatwood", "thaumium", Map.of("aer", 100, "terra", 100, "ignis", 100)));
+        wand.set(thaumcraft.common.config.ThaumcraftFoci.WAND_FOCUS.get(), new thaumcraft.common.items.wands.foci.FocusData(focus));
+        var costs = thaumcraft.common.items.wands.FocusVis.price(new AspectList().add(Aspect.AIR, 5)
+                .add(Aspect.EARTH, 2).add(Aspect.FIRE, 15), wand, null);
+        test.assertTrue(costs.equals(Map.of("aer", 1, "terra", 0, "ignis", 5)),
+                "five Frugal: original .39999998 float truncates 5/2/15 centivis to 1/0/5");
+        test.assertTrue(thaumcraft.common.items.wands.FocusVis.debit(wand, costs), "actual casting debit succeeds");
+        test.assertTrue(ItemWandCasting.getVis(wand, "aer") == 99 && ItemWandCasting.getVis(wand, "terra") == 100
+                && ItemWandCasting.getVis(wand, "ignis") == 95, "actual component loses 1/0/5, not rounded prices or whole vis");
+        var before = ItemWandCasting.data(wand);
+        test.assertTrue(!thaumcraft.common.items.wands.FocusVis.debit(wand, Map.of("aer", 100, "ignis", 1))
+                && before.equals(ItemWandCasting.data(wand)), "insufficient multi-aspect price cannot partially debit");
+        focus.set(thaumcraft.common.config.ThaumcraftFoci.FOCUS_UPGRADES.get(),
+                new thaumcraft.common.items.wands.foci.FocusUpgradeData(java.util.List.of((short)1, (short)-1, (short)-1, (short)-1, (short)-1)));
+        wand.set(ThaumcraftContent.WAND_DATA.get(), new WandData("greatwood", "gold", Map.of("ignis", 100)));
+        wand.set(thaumcraft.common.config.ThaumcraftFoci.WAND_FOCUS.get(), new thaumcraft.common.items.wands.foci.FocusData(focus));
+        var thirteen = thaumcraft.common.items.wands.FocusVis.price(new AspectList().add(Aspect.FIRE, 15), wand, null);
+        test.assertTrue(thirteen.equals(Map.of("ignis", 13)) && thaumcraft.common.items.wands.FocusVis.debit(wand, thirteen)
+                && ItemWandCasting.getVis(wand, "ignis") == 87, "one Frugal truncates 13.5 to 13 and debits it");
     }
     private static void click(ServerPlayer player,int slot,ClickType type){
         var menu=player.containerMenu;

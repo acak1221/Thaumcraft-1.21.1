@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -350,13 +351,39 @@ public final class ThaumcraftOuterLands {
         for (DungeonRooms.Spawn spawn : builder.spawns) {
             BlockPos pos = new BlockPos(spawn.x(), spawn.y(), spawn.z());
             switch (spawn.kind()) {
-                case ELDRITCH_GUARDIAN -> spawnEntity(level, pos, "eldritch_guardian");
+                case ELDRITCH_GUARDIAN -> spawnGuardian(level, pos, spawn);
                 case PERMANENT_ITEM -> spawnPermanentItem(level, pos, spawn.variant());
                 case MIND_SPIDER -> spawnMindSpider(level, pos);
                 default -> {
                 }
             }
         }
+    }
+
+    /**
+     * The guardian of a key room.
+     *
+     * <p>Oracle {@code GenKeyRoom:103-115} - the guardian of the key room keeps the centre of its
+     * room as its home with a radius of sixteen, and the first guardian of a hard key room is a
+     * champion.</p>
+     */
+    private static void spawnGuardian(WorldGenLevel level, BlockPos pos, DungeonRooms.Spawn spawn) {
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id("eldritch_guardian"));
+        if (type == null) return;
+        Entity entity = type.create(level.getLevel());
+        if (entity == null) return;
+        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, level.getLevel().getRandom().nextFloat() * 360.0F, 0.0F);
+        // Oracle GenKeyRoom:110 - the guardian keeps the room as its home.
+        DungeonRooms.Home home = spawn.home();
+        if (home != null && entity instanceof Mob mob) {
+            mob.restrictTo(new BlockPos(home.x(), home.y(), home.z()), home.radius());
+        }
+        // Oracle GenKeyRoom:111-113 - the first guardian of a hard key room is a champion.
+        if (spawn.champion() && entity instanceof Mob mob) {
+            int modifier = thaumcraft.common.lib.mods.ChampionRules.Adapter.makeChampion(mob, level.getLevel().getRandom(), false);
+            thaumcraft.common.lib.mods.ChampionHooks.setChampionModifier(mob, modifier);
+        }
+        level.addFreshEntity(entity);
     }
 
     private static void spawnEntity(WorldGenLevel level, BlockPos pos, String entityId) {

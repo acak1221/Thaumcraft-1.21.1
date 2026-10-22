@@ -184,6 +184,8 @@ public final class Thaumcraft {
         // The original block sparkle packet: the flux scrubber, the eldritch lock, the warding focus,
         // the wand, the eldritch warden and the server tick swap.
         thaumcraft.common.lib.network.BlockSparkleFxNetworking.initServer();
+        // The rune particles of the original thaumometer scan (oracle ItemThaumometer:92,103,128).
+        thaumcraft.common.lib.network.ScanRuneFxNetworking.initServer();
         VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.

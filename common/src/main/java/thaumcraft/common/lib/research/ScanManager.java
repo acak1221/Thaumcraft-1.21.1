@@ -80,6 +80,18 @@ public final class ScanManager {
     }
 
     /**
+     * Oracle ScanManager.isValidScanTarget:277-315 - a target that was already scanned is not a
+     * valid scan target, so the original never draws the rune of the scan and never completes it.
+     *
+     * <p>The native scan draws its rune through the same predicate, so the rune of an already
+     * scanned target stays missing, exactly as in the original.</p>
+     */
+    public static boolean alreadyScanned(ServerPlayer player, String signature, ScanKind kind) {
+        if (player == null || signature == null || signature.isEmpty() || kind == null) return false;
+        return wasScanned(KnowledgeAccess.get(player), signature, kind);
+    }
+
+    /**
      * Pure with respect to Minecraft world/network state. Mutates only the
      * supplied player knowledge after the entire scan passes its preflight.
      * Native signatures replace TC4 numeric item/metadata hashes for fresh worlds.

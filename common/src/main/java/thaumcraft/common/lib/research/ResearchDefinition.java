@@ -32,6 +32,7 @@ public record ResearchDefinition(
     public boolean isVirtual() { return this.flags.contains("Virtual"); }
     public boolean isHidden() { return this.flags.contains("Hidden"); }
     public boolean isLost() { return this.flags.contains("Lost"); }
+    public boolean isConcealed() { return this.flags.contains("Concealed"); }
     public boolean isSecondary() { return this.flags.contains("Secondary"); }
     public boolean isEnabled() { return ResearchConditions.available(conditions); }
 

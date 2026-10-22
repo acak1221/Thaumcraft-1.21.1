@@ -1,7 +1,6 @@
 package thaumcraft.common.items.relics;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -27,6 +26,8 @@ import thaumcraft.common.lib.research.EntityAspectBindings;
 import thaumcraft.common.lib.research.ResearchClues;
 import thaumcraft.common.lib.research.ScanManager;
 import thaumcraft.common.lib.research.ScanCallbacks;
+import thaumcraft.common.lib.research.ScanRunes;
+import thaumcraft.common.lib.network.ScanRuneFxNetworking;
 import thaumcraft.common.tiles.TileNode;
 
 /** TC4's 25-tick use, completing after 20 stable ticks, on the server. */
@@ -49,13 +50,22 @@ public final class ItemThaumometer extends Item {
 
     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide) {
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
             Target target = findTarget(player, stack);
-            if (target == null || target.aspects().size() == 0) {
-                player.displayClientMessage(Component.translatable("tc.port.scan.unknown"), true);
-                return InteractionResultHolder.fail(stack);
+            // Original ItemThaumometer.func_77659_a:144-148 calls doScan, which returns
+            // null when the target was already scanned (oracle
+            // thaumcraft/common/lib/research/ScanManager.java:277-315 refuses a target
+            // whose "@" or "#" hash is already in the scanned list). The original still
+            // raises the instrument, but the scan never starts: no rune, no camera tick
+            // and no completion. A target with no aspects IS a valid target of the
+            // original: the scan runs and the message of the original
+            // ScanManager.validScan:443-464 arrives at its end.
+            if (target != null && !ScanManager.alreadyScanned(serverPlayer, target.signature(), target.kind())) {
+                stack.set(ThaumcraftContent.SCAN_SESSION.get(), new ScanSession(target.sessionKey(), level.getGameTime()));
+                // Original ItemThaumometer.func_77659_a:144-148 calls doScan, which draws the
+                // rune of the target (oracle ItemThaumometer:92,103,128) before the use begins.
+                drawRune(serverPlayer, target);
             }
-            stack.set(ThaumcraftContent.SCAN_SESSION.get(), new ScanSession(target.sessionKey(), level.getGameTime()));
         }
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);
@@ -64,12 +74,20 @@ public final class ItemThaumometer extends Item {
     @Override public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remaining) {
         if (!(entity instanceof ServerPlayer player) || level.isClientSide) return;
         ScanSession session = stack.get(ThaumcraftContent.SCAN_SESSION.get());
+        // Original ItemThaumometer.onUsingTick:152-168: a use that never started a scan
+        // (no target at all, or a target that was already scanned) does nothing, and the
+        // instrument stays raised until its twenty five ticks are over.
+        if (session == null) return;
         Target target = findTarget(player, stack);
-        if (session == null || target == null || !session.signature().equals(target.sessionKey())) {
+        if (target == null || !session.signature().equals(target.sessionKey())) {
+            // The original clears its startScan (oracle ItemThaumometer:165-167) and keeps
+            // the instrument raised.
             stack.remove(ThaumcraftContent.SCAN_SESSION.get());
-            player.stopUsingItem();
             return;
         }
+        // Original ItemThaumometer.onUsingTick:153 calls doScan on every tick of the use,
+        // and doScan draws the rune of the target (oracle ItemThaumometer:92,103,128).
+        drawRune(player, target);
         // Original ItemThaumometer.onUsingTick:160-162 plays "thaumcraft:cameraticks"
         // every second tick of a stable scan, at the scanner, with volume .2 and a
         // pitch of .45 + worldRand.nextFloat()*.1. The original played it on the
@@ -82,6 +100,20 @@ public final class ItemThaumometer extends Item {
             stack.remove(ThaumcraftContent.SCAN_SESSION.get());
             player.stopUsingItem();
         }
+    }
+
+    /**
+     * The rune of the original scan, drawn over the target of the scan.
+     *
+     * <p>Oracle {@code thaumcraft/common/items/relics/ItemThaumometer.java:92,103,128} draws the
+     * rune only when {@code ScanManager.isValidScanTarget(player, scan, "@")} accepts the target,
+     * and that predicate refuses a target that was already scanned (oracle
+     * {@code thaumcraft/common/lib/research/ScanManager.java:277-315}).</p>
+     */
+    private static void drawRune(ServerPlayer player, Target target) {
+        if (target.rune() == null) return;
+        if (ScanManager.alreadyScanned(player, target.signature(), target.kind())) return;
+        ScanRuneFxNetworking.send(player, target.rune());
     }
 
     /** The original every-second-tick cadence of the camera tick sound. */
@@ -113,22 +145,27 @@ public final class ItemThaumometer extends Item {
             ItemStack item = itemEntity.getItem();
             if (item.isEmpty()) return null;
             var id = BuiltInRegistries.ITEM.getKey(item.getItem());
-            return new Target("@" + id, "entity:" + entity.getId(), ObjectAspectResolver.scanTags(item, level), ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item));
+            return new Target("@" + id, "entity:" + entity.getId(), ObjectAspectResolver.scanTags(item, level),
+                    ScanManager.ScanKind.ITEM, ResearchClues.Context.item(item), entityRune(entity));
         }
         if (entity != null) {
             var scanned = EntityAspectBindings.describe(entity);
             // An unsupported entity occludes the block behind it; its aspects never come from a different target.
-            return scanned == null ? null : new Target(scanned.signature(), "entity:" + entity.getId(), scanned.aspects(), ScanManager.ScanKind.ENTITY,
-                    scanned.clue());
+            return scanned == null ? null : new Target(scanned.signature(), "entity:" + entity.getId(), scanned.aspects(),
+                    ScanManager.ScanKind.ENTITY, scanned.clue(), entityRune(entity));
         }
         if (block.getType() != HitResult.Type.BLOCK) {
             var callback = ScanCallbacks.first(instrument, level, player);
-            return callback == null ? null : new Target(callback.signature(), callback.sessionKey(), callback.aspects(), callback.kind(), callback.clue());
+            // Original ItemThaumometer:134-138 asks the scan event handlers, and the original
+            // draws no rune for a phenomena target.
+            return callback == null ? null : new Target(callback.signature(), callback.sessionKey(), callback.aspects(),
+                    callback.kind(), callback.clue(), null);
         }
         if (!level.hasChunkAt(block.getBlockPos())) return null;
         if (level.getBlockEntity(block.getBlockPos()) instanceof TileNode node) {
             return new Target("@NODE" + node.getScanId(), "node:NODE" + node.getScanId(), node.getScanAspects(),
-                    ScanManager.ScanKind.PHENOMENA, null);
+                    ScanManager.ScanKind.PHENOMENA, null, ScanRunes.block(block.getBlockPos().getX(),
+                            block.getBlockPos().getY(), block.getBlockPos().getZ()));
         }
         var state = level.getBlockState(block.getBlockPos());
         // TC4 scans the stack returned by getPickBlock, not the block registry
@@ -138,7 +175,14 @@ public final class ItemThaumometer extends Item {
         if (picked.isEmpty()) return null;
         var grouped = ObjectAspectResolver.groupedScanWitness(picked);
         var id = BuiltInRegistries.ITEM.getKey(picked.getItem());
-        return new Target("@" + id, "item:" + id + ":" + grouped.metadata(), ObjectAspectResolver.scanTags(picked, level), ScanManager.ScanKind.ITEM, ResearchClues.Context.item(grouped.stack()));
+        return new Target("@" + id, "item:" + id + ":" + grouped.metadata(), ObjectAspectResolver.scanTags(picked, level),
+                ScanManager.ScanKind.ITEM, ResearchClues.Context.item(grouped.stack()),
+                ScanRunes.block(block.getBlockPos().getX(), block.getBlockPos().getY(), block.getBlockPos().getZ()));
+    }
+
+    /** Original ItemThaumometer:92 - the rune over the pointed entity. */
+    private static ScanRunes.Rune entityRune(Entity entity) {
+        return ScanRunes.entity(entity.getX(), entity.getY(), entity.getZ(), entity.getEyeHeight(), entity.getBbHeight());
     }
 
     /** Original EntityUtils.getPointedEntity(.5,10,0,true): all entities, minimum distance, eye LOS and at least .8 pick padding. */
@@ -162,5 +206,6 @@ public final class ItemThaumometer extends Item {
         return closest;
     }
 
-    private record Target(String signature, String sessionKey, AspectList aspects, ScanManager.ScanKind kind, ResearchClues.Context clue) {}
+    private record Target(String signature, String sessionKey, AspectList aspects, ScanManager.ScanKind kind,
+                          ResearchClues.Context clue, ScanRunes.Rune rune) {}
 }

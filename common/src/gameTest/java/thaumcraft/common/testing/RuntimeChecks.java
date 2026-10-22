@@ -296,9 +296,11 @@ public final class RuntimeChecks {
             player.lookAt(EntityAnchorArgument.Anchor.EYES, dropped.position().add(0, dropped.getBbHeight() / 2.0, 0));
             item.use(test.getLevel(), player, InteractionHand.MAIN_HAND);
             var droppedSession = thaumometer.get(ThaumcraftContent.SCAN_SESSION.get());
-            test.assertTrue(droppedSession != null && droppedSession.signature().equals("entity:" + dropped.getId())
-                            && !droppedSession.signature().equals(session.signature()) && knowledge.hasScannedItem("@minecraft:redstone"),
-                    "dropped redstone retains its type2 entity-instance use session while sharing the placed wire's persistent item marker");
+            // Original ScanManager.isValidScanTarget:277-315 refuses a target that was
+            // already scanned, so the dropped duplicate never starts a session: the
+            // instrument is raised, but no rune, no camera tick and no reward follow.
+            test.assertTrue(droppedSession == null && knowledge.hasScannedItem("@minecraft:redstone"),
+                    "the dropped duplicate never starts a session, exactly as the original refuses an already scanned target");
             test.runAfterDelay(21, () -> {
                 item.onUseTick(test.getLevel(), player, thaumometer, 4);
                 test.assertValueEqual(knowledge.getAspectPoolFor("potentia"), 2, "dropped duplicate cannot award again");

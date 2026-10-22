@@ -35,6 +35,20 @@ public final class ResearchBrowserData {
                 .toList();
     }
 
+    /**
+     * Every research of the category, visible or not.
+     *
+     * <p>Original {@code thaumcraft/client/gui/GuiResearchBrowser.java:132-134} fills its research
+     * list with every entry of the selected category, and the connector loop of {@code :299-348}
+     * walks that list: the line of a hidden research is drawn as well, even when its cell is
+     * never drawn.</p>
+     */
+    public static List<ResearchDefinition> categoryEntries(String category) {
+        return ResearchCatalog.all().stream()
+                .filter(research -> research.category().equals(category))
+                .toList();
+    }
+
     public static List<String> categories(Set<String> completed) {
         return CATEGORY_ORDER.stream().filter(category -> isCategoryVisible(category, completed)).toList();
     }

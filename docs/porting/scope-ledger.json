@@ -8842,7 +8842,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/block/BlockCandleRenderer.java:20-31 the inventory candle: wax cube W6..W10 x 0..0.5 plus the stub 0.475..0.525 x 0.5..W10",
@@ -8851,7 +8851,8 @@
           "native common/src/main/resources/assets/thaumcraft/models/block/colored_tallow_candle.json the same geometry with tintindex 0 on the wax faces",
           "oracle thaumcraft/client/renderers/block/BlockCandleRenderer.java:33-58 the world candle with one to five deterministic random wax drips per block",
           "native common/src/main/resources/assets/thaumcraft/models/block/tallow_candle.json the wax element 6,0,6 to 10,8,10 and the wick element 7.6,8,7.6 to 8.4,10,8.4",
-          "native common/src/main/resources/assets/thaumcraft/models/block/colored_tallow_candle.json the same geometry with the tintindex 0 on the wax faces"
+          "native common/src/main/resources/assets/thaumcraft/models/block/colored_tallow_candle.json the same geometry with the tintindex 0 on the wax faces",
+          "2026-10-23 (w7blocks): Oracle BlockCandleRenderer:43-66 deterministic x+y*z wax drips are now used by PositionBlockModels:38-48 (body, drips from y=0, then white stub). FabricPositionBlockModels wraps plain and *_tallow_candle blockstate models; shared vanilla and explicit NeoForge ModelData tessellator adapters select the same geometry. Origin drip is 3/16 high, not 1/16. Six pure rule tests authored, NOT executed; whole-common javac proof and deferred frame criteria: docs/analysis/2026-10-23-agent-w7blocks.md. Supersedes the static-JSON-only blocker; code parity, not a claim of visual acceptance."
         ],
         "notes": [
           "The candle geometry matches the original exactly (W6=0.375 -> 6/16, W10=0.625 -> 10/16, height 0.5 -> 8/16, stub 0.475/0.5/0.525 -> 7.6/8/8.4).",
@@ -9020,7 +9021,8 @@
           "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:18-38 the inventory ore: the ore face plus an inset 0.005..0.995 coloured overlay",
           "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore: the coloured overlay is drawn with a minimum brightness of 160 and, in fast graphics, a second pass with the stone texture",
           "native common/src/main/resources/assets/thaumcraft/models/item/cinnabar_ore.json the native ore model",
-          "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore, the coloured overlay with the minimum brightness 160 and the second pass with the stone texture in fast graphics"
+          "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore, the coloured overlay with the minimum brightness 160 and the second pass with the stone texture in fast graphics",
+          "2026-10-23 (w7blocks): REMAINING GAP confirmed against oracle BlockCustomOreRenderer:54-69: OreOverlayRules has no production caller. World coloured overlay still lacks packed Math.max(bb,160), and conditional inset stone pass is absent. Important correction: field_151443_J is PARTICLE SETTING >1 (Minimal), NOT fast graphics. Preserve existing .005 item inset (oracle :47-49). Rule tests authored/compile-checked, NOT executed; do not mistake them for a rendered overlay. See docs/analysis/2026-10-23-agent-w7blocks.md."
         ],
         "notes": [
           "The ore colour overlay is reproduced through the 1.21.1 tintindex mechanism instead of the manual GL colour.",
@@ -9153,7 +9155,8 @@
           "oracle thaumcraft/client/renderers/block/BlockGasRenderer.java:38-48 getFluidHeightForRender, the per-corner height of the flux gas surface",
           "native common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java:9-13 the flux gas and goo are registered as a plain translucent render type",
           "oracle thaumcraft/client/renderers/block/BlockGasRenderer.java:38-48 the per corner height of the flux gas surface",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java:9-13 the flux gas and the flux goo are registered as a plain translucent render type"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java:9-13 the flux gas and the flux goo are registered as a plain translucent render type",
+          "2026-10-23 (w7blocks): REMAINING GAP confirmed against oracle BlockGasRenderer:87-123,135-267: GasSurfaceRules.corners still has no production caller; flux models remain static. Must wire nine world samples, supported-face/full-cube fallback, corner geometry, density inversion, .001 offset, flow UVs and per-face brightness/.5,1,.8,.6 shading. Rules correctly retain foreign sample -.109375 and all-negative NaN (:50-52); tests authored/compile-checked, NOT executed. No claim that a modern hook cannot implement this. See docs/analysis/2026-10-23-agent-w7blocks.md."
         ],
         "notes": [
           "The flux gas/goo are now plain translucent blocks.",
@@ -9580,7 +9583,8 @@
           "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:19-63 the world render draws the crust, soil and flesh as cubes and adds the transparent fibre overlay pass to the crust and the soil",
           "native fabric/src/main/java/thaumcraft/fabric/client/FabricTaintFibresModel.java:52-80 the native fibre planes, the crossed stalks and the sparse type zero overlay",
           "native common/src/main/java/thaumcraft/common/lib/world/TaintSpreadRules.java:28-31 the ninety five percent overlay rule of the original",
-          "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:19-63 the world render draws the transparent fibre overlay pass on the taint crust and soil"
+          "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:19-63 the world render draws the transparent fibre overlay pass on the taint crust and soil",
+          "2026-10-23 (w7blocks): REMAINING GAP confirmed against oracle BlockTaintRenderer:35-65: white brightness-200 transparent overlay belongs on crust/soil metadata0/1, but FabricTaintFibresModel:43-67 selects fibres and emits glow on fibre type0. NeoForge still lacks neighbour-aware fibres; soil metadata texture choice also remains. New candle/crust adapters do not implement taint. This is missing implementation, NOT an impossible 1.21.1 API migration. See docs/analysis/2026-10-23-agent-w7blocks.md for exact real-frame criteria."
         ],
         "notes": [
           "REMAINING GAP (client, outside this wave): the 1.7.10 ISBRH has no 1.21.1 equivalent, and the original draws the transparent fibre overlay pass on the taint CRUST and SOIL blocks (metadata zero and one) while the native port draws the overlay on the taint FIBRES block; the cube and the overlay rule itself are reproduced.",
@@ -9747,7 +9751,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "partial",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:1-80 1.12 baked model of the glowing crust",
@@ -9759,7 +9763,8 @@
           "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:35-63 the crust, the glyphed stone and the decorated stone are drawn with a box that is inset by two sixteenths on every side whose neighbour is not a solid material",
           "oracle thaumcraft/client/renderers/block/BlockEldritchRenderer.java:22-33 the inventory of the crust is the same box of two to fourteen sixteenths",
           "native common/src/main/resources/assets/thaumcraft/models/block/eldritch_crust.json:1-30 the crust is the fixed box of two to fourteen sixteenths",
-          "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:18-61 the helper computes the bounds of the joined crust, but no model of the port uses it"
+          "native common/src/main/java/thaumcraft/client/renderers/block/EldritchCrustBakedModel.java:18-61 the helper computes the bounds of the joined crust, but no model of the port uses it",
+          "2026-10-23 (w7blocks): Oracle BlockEldritchRenderer:35-66 applies neighbour-dependent 2/16 bounds to metadata 4,5,6. Fixed BlockEldritch constructor-order error (this.group was zero during super), added mask to decorated group too, and used existing legacySolid material compatibility instead of isSolidRender. PositionBlockModels:33-37 supplies the sampled mask to EldritchCrustBakedModel.worldQuads:120-124; shared vanilla/Fabric/NeoForge ModelData adapters now emit the joined bounds. Placement/updateShape maintain it; render-region sampling also covers worldgen. All 64 pure masks guarded by authored, unexecuted JUnit. Whole-common javac proof and pending real-frame criteria in docs/analysis/2026-10-23-agent-w7blocks.md. Supersedes the unwired-joined-bounds blocker."
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native keeps a 1.21 baked model that reproduces the original inset cube of the glowing crust.",

@@ -116,6 +116,13 @@ public final class EldritchCrustBakedModel implements BakedModel {
         return new float[]{minX(mask), minY(mask), minZ(mask), maxX(mask), maxY(mask), maxZ(mask)};
     }
 
+    /** World adapter entry: consume the maintained state and preserve world-aligned texture UVs. */
+    public static List<BakedQuad> worldQuads(BlockState state, TextureAtlasSprite sprite) {
+        List<BakedQuad> result = new ArrayList<>(6);
+        PositionBlockModels.box(result,bounds(state.getValue(BlockEldritch.CRUST_NEIGHBOR_MASK)),sprite,-1,false);
+        return result;
+    }
+
     @Override
     public List<BakedQuad> getQuads(BlockState state, Direction face, RandomSource random) {
         if (state == null || !state.hasProperty(BlockEldritch.CRUST_NEIGHBOR_MASK)) {

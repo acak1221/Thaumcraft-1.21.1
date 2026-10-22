@@ -79,3 +79,4 @@ neoforge/run/
 
 # javac argument files of the type check of the port
 javac.*.args
+.gradle-iso/

@@ -235,6 +235,12 @@ if (clientSmokeScope != 'full') {
 }
 def clientTestModRoots = files(sourceSets.clientTest.output)
 def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
+// The heap of the GameTest server. The default stays the 2 GB of the CI
+// runner; a lane that runs the whole suite on a machine with more memory can
+// raise it with -PgameTestHeap=3G (the suite of 325 scenarios needs 3 GB:
+// see docs/analysis/2026-10-23-agent-memory.md, the chunk save path of the
+// final save holds the NBT of every generated chunk at once).
+def gameTestHeap = providers.gradleProperty('gameTestHeap').getOrElse('2G')
 // The multiplayer acceptance talks to an EXTERNAL dedicated server process.
 def multiplayerAddress = providers.gradleProperty('multiplayerAddress').getOrElse('127.0.0.1:25565')
 def multiplayerPlayer = providers.gradleProperty('multiplayerPlayer').getOrElse('MPProbe')
@@ -254,14 +260,13 @@ loom.runs {
   // the machine's RAM, which is about 1.75 GB on the 7 GB CI runner and made
   // the suite die with OutOfMemoryError while saving a chunk. The suite needs
   // a fixed heap, not one that depends on the size of the machine.
-  vmArg '-Xmx2G'
+  vmArg "-Xmx${gameTestHeap}"
   source sourceSets.gameTest
   name 'Thaumcraft 1.21.1 GameTests'
   vmArg "-Dfabric.classPathGroups=${gameTestModRoots.asPath}"
   vmArg '-Dfabric-api.gametest'
   if (!gameTestFilter.isBlank()) vmArg "-Dthaumcraft.gameTestFilter=${gameTestFilter}"
   vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file(gameTestFilter.isBlank() ? 'gametest-results.xml' : 'gametest-focused-results.xml').get().asFile.absolutePath}"
-  vmArg '-Xmx2G'
   runDir 'run-gametest'
  }
  clientSmoke {

@@ -190,6 +190,21 @@ public final class ResearchNoteIssuanceRuntimeChecks {
             test.assertTrue(mainNotes(player).isEmpty() && droppedNotes(test, player).isEmpty()
                     && player.getInventory().getItem(4).getCount() == 1 && player.getInventory().getItem(7).getDamageValue() == 98,
                     "creative overflow spends one paper, keeps the ink and creates no note entity");
+
+            // The original spends the paper BEFORE it adds the note (oracle
+            // ResearchManager.createResearchNoteForPlayer:126-131), so a single paper
+            // frees its slot and the note goes there, in creative as well: the
+            // creative discard branch of addItemStackToInventory is never reached.
+            fillMain(player); paper(player, 4, 1); ink(player, 7, 98);
+            var creativeFreed = ResearchNoteIssuance.issue(player, "NITOR", new Random(42));
+            test.assertTrue(creativeFreed.success() && !creativeFreed.dropped() && !creativeFreed.discarded(),
+                    "the spent paper frees the destination of the note in creative as well");
+            test.assertTrue(player.getInventory().getItem(4).is(ThaumcraftContent.RESEARCH_NOTE.get())
+                            && player.getInventory().getItem(4).getCount() == 1,
+                    "the freed paper slot receives the note in creative");
+            test.assertTrue(mainNotes(player).size() == 1 && droppedNotes(test, player).isEmpty()
+                            && player.getInventory().getItem(7).getDamageValue() == 98,
+                    "the creative note is delivered into the freed slot and the ink stays untouched");
         });
     }
 

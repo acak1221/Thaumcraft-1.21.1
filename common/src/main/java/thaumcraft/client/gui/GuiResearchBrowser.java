@@ -106,11 +106,16 @@ public final class GuiResearchBrowser extends Screen {
             }
             if (thaumcraft.client.lib.ResearchNotifications.highlighted(node.research.key())) highlight(graphics, node.x - 5, node.y - 5);
             if (!ResearchIconDisplay.render(graphics, font, node.research.iconExpression(), node.x + 3, node.y + 3)) {
+                // Original GuiResearchBrowser:404-412 draws the icon of the research only
+                // when its expression is a texture of the mod. An expression that names
+                // nothing draws NOTHING, it never falls back to another icon.
                 var expression = TEXTURE.matcher(node.research.iconExpression() == null ? "" : node.research.iconExpression());
-                ResourceLocation icon = expression.matches() ? texture(expression.group(1).toLowerCase(java.util.Locale.ROOT))
-                        : texture("textures/items/thaumonomicon.png");
-                if (minecraft.getResourceManager().getResource(icon).isEmpty()) icon = texture("textures/items/thaumonomicon.png");
-                graphics.blit(icon, node.x + 3, node.y + 3, 16, 16, 0, 0, 256, 256, 256, 256);
+                if (expression.matches()) {
+                    ResourceLocation icon = texture(expression.group(1).toLowerCase(java.util.Locale.ROOT));
+                    if (!minecraft.getResourceManager().getResource(icon).isEmpty()) {
+                        graphics.blit(icon, node.x + 3, node.y + 3, 16, 16, 0, 0, 256, 256, 256, 256);
+                    }
+                }
             }
             if (!available && !unlocked) graphics.fill(node.x, node.y, node.x + 22, node.y + 22, 0x99000000);
             if (unlocked) graphics.fill(node.x + 17, node.y + 17, node.x + 22, node.y + 22, 0xFF75AD45);

@@ -1,7 +1,6 @@
 package thaumcraft.common.items.relics;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -53,14 +52,20 @@ public final class ItemThaumometer extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
             Target target = findTarget(player, stack);
-            if (target == null || target.aspects().size() == 0) {
-                player.displayClientMessage(Component.translatable("tc.port.scan.unknown"), true);
-                return InteractionResultHolder.fail(stack);
+            // Original ItemThaumometer.func_77659_a:144-148 calls doScan, which returns
+            // null when the target was already scanned (oracle
+            // thaumcraft/common/lib/research/ScanManager.java:277-315 refuses a target
+            // whose "@" or "#" hash is already in the scanned list). The original still
+            // raises the instrument, but the scan never starts: no rune, no camera tick
+            // and no completion. A target with no aspects IS a valid target of the
+            // original: the scan runs and the message of the original
+            // ScanManager.validScan:443-464 arrives at its end.
+            if (target != null && !ScanManager.alreadyScanned(serverPlayer, target.signature(), target.kind())) {
+                stack.set(ThaumcraftContent.SCAN_SESSION.get(), new ScanSession(target.sessionKey(), level.getGameTime()));
+                // Original ItemThaumometer.func_77659_a:144-148 calls doScan, which draws the
+                // rune of the target (oracle ItemThaumometer:92,103,128) before the use begins.
+                drawRune(serverPlayer, target);
             }
-            stack.set(ThaumcraftContent.SCAN_SESSION.get(), new ScanSession(target.sessionKey(), level.getGameTime()));
-            // Original ItemThaumometer.func_77659_a:144-148 calls doScan, which draws the
-            // rune of the target (oracle ItemThaumometer:92,103,128) before the use begins.
-            drawRune(serverPlayer, target);
         }
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);
@@ -69,10 +74,15 @@ public final class ItemThaumometer extends Item {
     @Override public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remaining) {
         if (!(entity instanceof ServerPlayer player) || level.isClientSide) return;
         ScanSession session = stack.get(ThaumcraftContent.SCAN_SESSION.get());
+        // Original ItemThaumometer.onUsingTick:152-168: a use that never started a scan
+        // (no target at all, or a target that was already scanned) does nothing, and the
+        // instrument stays raised until its twenty five ticks are over.
+        if (session == null) return;
         Target target = findTarget(player, stack);
-        if (session == null || target == null || !session.signature().equals(target.sessionKey())) {
+        if (target == null || !session.signature().equals(target.sessionKey())) {
+            // The original clears its startScan (oracle ItemThaumometer:165-167) and keeps
+            // the instrument raised.
             stack.remove(ThaumcraftContent.SCAN_SESSION.get());
-            player.stopUsingItem();
             return;
         }
         // Original ItemThaumometer.onUsingTick:153 calls doScan on every tick of the use,

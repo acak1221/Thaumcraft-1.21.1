@@ -167,6 +167,14 @@ from `exclude` to `port`, so the tool regenerated the counts — it was not hand
   block model. The renderer is registered on both loaders:
   `fabric/…/ThaumcraftFabricClient.java` (`BuiltinItemRendererRegistry`) and
   `neoforge/…/ThaumcraftNeoForgeClient.java` (`RegisterClientItemRenderersEvent`).
+* **One number of the item form is not the number of the world form** (oracle
+  `ItemNodeRenderer.java:117` against `TileNodeRenderer.java:103`): the item divides the alpha of the
+  aspects by the **whole** count of the aspects, the node of the world divides it by the **half**
+  count. The native keeps the two rules apart (`drawNodeBody(..., itemForm)`).
+* **The node modifier of the item** is written as the minus one of the original tile
+  (`ItemJarNode.java:188-190` against `TileJarNode.java:74-78`): the original item writes the modifier
+  only when it is not null, but the tile of the original reads a *missing* modifier as **none**, so the
+  native item writes the minus one and the placed jar has no modifier at all.
 
 ### 2.8 The crucible had no fluid tank and no player crafting event
 

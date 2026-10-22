@@ -19,7 +19,7 @@ build, the JUnit suite and the client.
 | `thaumcraft/common/lib/events/EventHandlerWorld.java` | partial | partial (the chunk marker; the maze is closed) |
 | `thaumcraft/common/lib/events/ServerTickEventsFML.java` | partial | partial (the chunk regeneration queue) |
 | `thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java` | partial | partial (the scattered feature node, the `auraGen` flag) |
-| `thaumcraft/client/fx/particles/FXSparkle.java` | partial | partial (the hole, the shock focus, the leaves, the lifter) |
+| `thaumcraft/client/fx/particles/FXSparkle.java` | partial | partial (the leaves and the lifter only; the hole and the shock focus are closed) |
 | `thaumcraft/client/renderers/tile/TileMirrorRenderer.java` | partial | partial (the fixed function `glTexGen`) |
 | `thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java` | partial | partial (the OBJ, the cycling preview) |
 | `thaumcraft/common/blocks/BlockCosmeticStairs.java` | partial | partial (the position hash of the texture) |
@@ -183,8 +183,11 @@ items that did not exist. The six items of the tin, the silver and the lead were
 * the creative tab keeps the gate of the original: the six items of the tin, the silver and the
   lead are not listed (the 1.21.1 tree has no tin, no silver and no lead ore), the vanilla
   iron nugget is listed (the original always listed the iron nugget);
-* the two ore dictionary recipes of the original that the port missed are added
-  (`iron_ingot_from_nuggets.json`, `quick_silver_from_drops.json`).
+* the ore dictionary recipe of the original that the port missed is added
+  (`iron_ingot_from_nuggets.json`: nine iron nuggets into an iron ingot,
+  `oracle ConfigRecipes:402`) and the recipe of the nine quicksilver drops now asks the ore
+  dictionary tag of the original (`quick_silver_from_drops.json`, `oracle ConfigRecipes:404`)
+  instead of the concrete item, like the recipe of the iron nuggets.
 
 ### 3.4 `WorldgenLootHelper` — the chests of the structures carried the wrong loot
 
@@ -215,7 +218,59 @@ the count of the category, the weighted draw, the amount and the random slot. Th
 generated again for every roll, exactly as the original does (the enchanted book is rolled
 again).
 
-### 3.5 `EventHandlerWorld` — the second gap of the row was wrong: the maze **is** ported
+### 3.5 `FXSparkle` — the portable hole had **no** sparkles at all
+
+**Original.** `oracle thaumcraft/common/tiles/TileHole.java:51-56` — the update tick of the
+hole runs on the client as well, and `:127-211` (`surroundwithsparkles`) draws **twenty four**
+sparkles of the type two around the hole: one for every edge of the hole block where a
+neighbour is an opaque cube and the neighbour on the other side of the edge is not the hole
+block. The sparkle itself is the configurable `FXSparkle` of the original
+(`oracle thaumcraft/client/fx/particles/FXSparkle.java:22-110`): the life of `3 * multiplier`
+ticks, the frames `16 + age / multiplier` of the sheet `textures/misc/particles.png`, the shrink
+over the life, the alpha `0.75f` and the colour of the type — the type two is the blue
+`0.2f, 0.2f, 0.7f + rand * 0.3f`. The proxy of the original draws it with the size `1.5f` and
+with the roll `rand.nextInt(6) < particleCount(2)`
+(`oracle thaumcraft/client/ClientProxy.java:658-664`).
+
+**Port before.** The native tree had **no** configurable sparkle particle and the native hole
+block had **no** client ticker, so the twenty four sparkles of the original had no call site at
+all.
+
+**Fix.**
+* `common/src/main/java/thaumcraft/client/fx/particles/TypeSparkleParticle.java` — the
+  configurable sparkle of the original: the life, the frames, the shrink, the alpha, the size
+  (`0.1f * field_70544_f` with the random one to two of the 1.7.10 `EntityFX`) and the colours
+  of the eight types as a pure function.
+* `common/src/main/java/thaumcraft/common/lib/world/HoleSparkleRules.java` — the twenty four
+  calls of the original as a pure function of the six neighbours.
+* `common/src/main/java/thaumcraft/client/ThaumcraftHolesClient.java` — the client effect: the
+  opaque test of the original (`isSolidRender && canOcclude`, the 1.21.1 counterpart of the
+  1.7.10 `isOpaqueCube`, the glass and the leaves are not opaque in either), the hole test, the
+  random fraction on the axis of the edge and the roll of the particle count.
+* `common/src/main/java/thaumcraft/common/blocks/BlockHole.java` and `TileHole.java` — the
+  client ticker of the hole.
+
+### 3.6 `FXSparkle` — the shock focus had **no** sparkles at the hit point
+
+**Original.** `oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:157-175`: the
+client draws **five** sparkles at the point where the ray hit a block (the position jittered by
+`±0.15` on the three axes) and **five** at the centre of the pointed entity (jittered by `±0.3`),
+with the size `2.0f + rand.nextFloat()`, the type two and the gravity
+`0.05f + rand.nextFloat() * 0.05f`.
+
+**Port before.** The native shock focus payload carried **one** endpoint (the entity midpoint
+*or* the block hit point), so the ten sparkles of the original had no call site.
+
+**Fix.**
+* `common/src/main/java/thaumcraft/common/lib/network/ShockFxPayload.java` carries the two hit
+  points of the original (the chain lightning keeps none),
+* `common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java` sends the point
+  of the block and the centre of the entity,
+* `common/src/main/java/thaumcraft/client/ThaumcraftShockClient.java` draws the ten sparkles
+  with the original jitter, size, type, gravity and the roll of the particle count,
+* `TypeSparkleParticle` gained the gravity of the original (`0.04 * gravity` per tick).
+
+### 3.7 `EventHandlerWorld` — the second gap of the row was wrong: the maze **is** ported
 
 The row said that the maze load and save of the original has no native counterpart. It has
 one: `common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:67-140` keeps
@@ -234,7 +289,7 @@ marker is left.
 | `EventHandlerWorld` | the chunk save and chunk load marker of the original (`oracle EventHandlerWorld:114-137`, the `Thaumcraft` compound with the key of `Config.regenKey`) | the vanilla 1.21.1 writes the chunk NBT as a fixed set of keys (`net/minecraft/world/level/chunk/storage/ChunkSerializer.write`, the remapped jar) and the Fabric API has no chunk data event, so the marker cannot be written or read on both loaders |
 | `ServerTickEventsFML` | the chunk regeneration queue of the original (`oracle ServerTickEventsFML:83-104`), ten chunks per world tick, with the TC4 world generation | the marker of the queue does not exist (see above) and the generation of the port runs through the datapack feature pipeline, which cannot be re-run for an existing chunk without regenerating its terrain. The options of the original (`Config.regenAura` and the five next) keep their default of `false` |
 | `ThaumcraftWorldGenerator` | the node of the vanilla scattered features (`oracle ThaumcraftWorldGenerator:413-419`) and the `auraGen` flag that makes the wild aura node and the aura totem of a chunk exclusive (`:419` and `:455`) | the vanilla scattered feature subsystem does not exist in 1.21.1, and the two native features (the placed feature of the node and the totem feature) do not share the per chunk flag of the original. **The note of the row was wrong**: the wild node pass does *not* delegate into the TC4 API jar, the whole plan is in the oracle (`ThaumcraftWorldGenerator.createRandomNodeAt:218-399`) and the native `NodeGeneration.plan` reproduces it line by line |
-| `FXSparkle` | the twenty four sparkles around the portable hole (`oracle TileHole:127-211`, the type two) and the sparkles of the shock focus (`oracle ItemFocusShock:166,174`) | the port has no type sparkle particle (the type colours of the original are the type two = `0.2, 0.2, 0.7+random*0.3`), the native hole has no client ticker and the native shock focus payload does not carry the hit point and the pointed entity. The magical leaves and the lifter have no native block at all: a content gap of the block lane |
+| `FXSparkle` | the sparkles of the magical leaves and of the lifter | the native tree has neither a `BlockMagicalLeaves` nor a `BlockLifter` block, so the call sites of their sparkles cannot exist; the particle and every call site of a block that exists in the port (the portable hole and the shock focus) are the original ones |
 | `TileMirrorRenderer` | the view dependent texture generation of the linked view (`oracle TileMirrorRenderer:52-554`, the fixed function `GL11.glTexGen` and the hand written projection matrix) and the additive blend of the inner layers | the 1.21.1 renderer draws every quad with a shader of the render pipeline; the fixed function texture coordinate generation has no counterpart. Everything else of the renderer is the original (the pane, the offset of the unstable mirror, the brightness, the six turns, the sixteen layers, the rotation `(i*i*4321+i*9)*2`, the fade `1/(16-i+1)`, the two textures and the `Random(31100L)` colour sequence) |
 | `TileThaumatoriumRenderer` | the retained OBJ is still not rendered and the cycling output preview cannot be reproduced | the native draws the plain orientable block model and the OBJ loader (`ModelThaumatorium:23`) stays unreferenced. The exact pose is derived and unchanged: `pose.translate(0.5,0,0.5)`, `Axis.XP.rotationDegrees(-90)` and the facing rotation around Z (NORTH 270, SOUTH 90, EAST 180, WEST 0); the two machine blocks would have to become `RenderShape.INVISIBLE`. The cycling preview needs the set of the possible recipes of the machine, and the native machine is programmed with a job list (`TileThaumatorium:322`) |
 | `BlockCosmeticStairs` | the texture of the eldritch stairs is the one of the position hash of the original (`oracle BlockCosmeticSolid:141-162`) | a 1.21.1 stair model is baked per block state and cannot randomise per position. The port **can** reproduce it with a block state property that holds the index of the texture (four models per stair shape) and a position hash in `onPlace`; that is an asset and model change of the eldritch stairs that this wave could neither compile nor run |
@@ -248,6 +303,8 @@ marker is left.
 | `common/src/test/java/thaumcraft/common/entities/EntityItemGrateParityTest.java` | 3 | the cell of the item is the cell of the middle of its bounding box, the item does not clip while it is inside the grate, the vanilla push out never runs for it |
 | `common/src/test/java/thaumcraft/common/blocks/PlantSoilRuleParityTest.java` | 4 | the inherited soil is the grass, the dirt and the farmland, the Cave case is the solid top side with its special cases, the table of every plant type |
 | `common/src/test/java/thaumcraft/common/lib/world/DungeonChestLootParityTest.java` | 2 | the fifteen entries of the vanilla dungeon chest with their amounts and their weights, the count of the category is eight |
+| `common/src/test/java/thaumcraft/common/lib/world/HoleSparkleRulesParityTest.java` | 3 | the eight edges of the hole in the ground, the hole without a solid neighbour, the suppression of the sparkles by a hole neighbour |
+| `common/src/test/java/thaumcraft/client/fx/particles/TypeSparkleParticleParityTest.java` | 4 | the colours of the types of the original, the blue of the type two, the white of the type six, the green and the orange and the dark grey |
 | `common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java` (extended) | 1 | the ids of the fourteen items of the catalogue of the nuggets and of the clusters |
 
 **No test constructs a `Block`.** Every rule under test is a pure function
@@ -259,8 +316,8 @@ marker is left.
 
 ## 6. The `javac` proof
 
-No Gradle was run. The whole `common` main tree (1375 files) and the whole `common` test tree
-(353 files) were type-checked with `javac` against
+No Gradle was run. The whole `common` main tree (1378 files), the whole `common` game test source set
+(204 files) and the whole `common` test tree (355 files) were type-checked with `javac` against
 
 * the remapped 1.21.1 jar of the Loom cache
   (`~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged/1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2/minecraft-merged-1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2.jar`),
@@ -273,9 +330,12 @@ No Gradle was run. The whole `common` main tree (1375 files) and the whole `comm
   annotation jars of the module cache.
 
 ```
-sources: 1375  classpath entries: 57
+sources: 1378  classpath entries: 57
+gameTest sources: 204
 javac exit: 0
-test sources: 353
+gameTest sources: 204
+javac(gameTest) exit: 0
+test sources: 355
 javac(test) exit: 0
 ```
 
@@ -289,15 +349,21 @@ javac(test) exit: 0
 * `common/src/main/java/thaumcraft/common/config/ThaumcraftPlants.java`, `ThaumcraftBiomes.java` — the plant type of the items.
 * `common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java` — the catalogue of the nuggets and of the clusters, the gate of the creative tab.
 * `common/src/main/java/thaumcraft/common/config/ThaumcraftLoot.java` — the vanilla dungeon list as a pure function.
+* `common/src/main/java/thaumcraft/common/lib/world/HoleSparkleRules.java` — **new**, the twenty four sparkles of the hole.
+* `common/src/main/java/thaumcraft/client/fx/particles/TypeSparkleParticle.java` — **new**, the configurable sparkle of the original.
+* `common/src/main/java/thaumcraft/client/ThaumcraftHolesClient.java` — **new**, the client effect of the hole.
+* `common/src/main/java/thaumcraft/common/blocks/BlockHole.java`, `common/src/main/java/thaumcraft/common/tiles/TileHole.java`, `common/src/main/java/thaumcraft/client/ClientSetup.java` — the client tick of the hole.
 * `common/src/main/java/thaumcraft/common/lib/world/WorldgenLootHelper.java` — **new**, the chest of the original.
 * `common/src/main/java/thaumcraft/common/lib/world/WorldGenMound.java`, `WorldGenHilltopStones.java` — the chest of the original.
 * `common/src/main/resources/assets/thaumcraft/models/item/{tin,silver,lead}_nugget.json`, `cluster_{tin,silver,lead}.json` — **new**.
 * `common/src/main/resources/assets/thaumcraft/lang/{en_us,ru_ru}.json` — the names of the six new items.
 * `common/src/main/resources/data/thaumcraft/tags/item/original_ore/{nugget,cluster}_{tin,silver,lead}.json` — the items of the port.
-* `common/src/main/resources/data/thaumcraft/recipe/iron_ingot_from_nuggets.json`, `quick_silver_from_drops.json` — **new**.
+* `common/src/main/resources/data/thaumcraft/recipe/iron_ingot_from_nuggets.json` — **new**; `quick_silver_from_drops.json` — the ingredient is now the ore dictionary tag of the original.
 * `common/src/test/java/thaumcraft/common/entities/EntityItemGrateParityTest.java` — **new**.
 * `common/src/test/java/thaumcraft/common/blocks/PlantSoilRuleParityTest.java` — **new**.
 * `common/src/test/java/thaumcraft/common/lib/world/DungeonChestLootParityTest.java` — **new**.
+* `common/src/test/java/thaumcraft/common/lib/world/HoleSparkleRulesParityTest.java` — **new**.
+* `common/src/test/java/thaumcraft/client/fx/particles/TypeSparkleParticleParityTest.java` — **new**.
 * `common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java` — the catalogue.
 * `docs/porting/scope-ledger.json` — the verdicts and the evidence of the eleven units.
 * `docs/analysis/2026-10-23-agent-w4devices.md` — this report.
@@ -328,7 +394,15 @@ javac(test) exit: 0
    found). Nine iron nuggets must craft an iron ingot and nine quicksilver drops a quicksilver
    ingot; nine thaumium nuggets must craft a thaumium ingot and nine void metal nuggets a void
    ingot.
-4. **The tags.** The tag `thaumcraft:original_ore/nugget_thaumium` and the tag
+4. **The portable hole.** Open a portable hole next to a solid block: the hole must be
+   surrounded by **blue** sparkles on the edges where it touches the solid block, they must
+   shrink over their life and they must not fall down. The sparkles must not appear on an edge
+   where the neighbour is another hole block.
+5. **The shock focus.** Fire the shock focus at a block and at a mob: **five blue sparkles
+   must appear at the point where the ray hit the block and five at the centre of the mob**, they
+   must be bigger than the sparkles of the hole (the size `2.0+rand`) and they must sink
+   slowly (the gravity `0.05+rand*0.05`).
+6. **The tags.** The tag `thaumcraft:original_ore/nugget_thaumium` and the tag
    `thaumcraft:original_ore/nugget_void` must resolve (they pointed at nothing before this
    wave), and so must the four recipes of the thaumium and the void nuggets.
 

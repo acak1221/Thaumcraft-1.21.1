@@ -148,7 +148,11 @@ public final class ItemFocusShock extends ItemFocusBasic {
         if (player.level() != castLevel || !player.isAlive() || !player.isUsingItem()
                 || player.getUseItem() != wand || player.getItemInHand(hand) != wand || !ItemStack.matches(wand, committed)) return;
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SHOCK, SoundSource.PLAYERS, .25F, 1F);
-        ShockFxNetworking.send(player, origin, endpoint, target != null || block.getType() == HitResult.Type.BLOCK);
+        ShockFxNetworking.send(player, origin, endpoint, target != null || block.getType() == HitResult.Type.BLOCK,
+                // Oracle ItemFocusShock:157-175 - the client draws five sparkles at the point
+                // where the ray hit a block and five at the centre of the pointed entity.
+                block.getType() == HitResult.Type.BLOCK ? block.getLocation() : null,
+                target != null ? target.position().add(0, target.getBbHeight() / 2, 0) : null);
 
         if (player.level() == castLevel && player.isAlive() && player.isUsingItem()
                 && player.getUseItem() == wand && player.getItemInHand(hand) == wand && ItemStack.matches(wand, committed)

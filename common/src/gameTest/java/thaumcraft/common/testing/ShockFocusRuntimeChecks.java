@@ -242,12 +242,13 @@ public final class ShockFocusRuntimeChecks {
             try {
                 ItemStack.STREAM_CODEC.encode(buffer, wand);
                 test.assertTrue(ItemStack.matches(wand, ItemStack.STREAM_CODEC.decode(buffer)), "native stream component codec round-trips Shock without disguising it as Fire");
-                var payload = new ShockFxPayload(level.dimension().location(), player.getId(), player.getEyePosition(), player.getEyePosition().add(0, 19, 0), 17, true);
+                var payload = new ShockFxPayload(level.dimension().location(), player.getId(), player.getEyePosition(), player.getEyePosition().add(0, 19, 0), 17, true,
+                        player.getEyePosition().add(0, 9, 0), null);
                 ShockFxPayload.STREAM_CODEC.encode(buffer, payload);
-                test.assertTrue(payload.equals(ShockFxPayload.STREAM_CODEC.decode(buffer)), "small S2C codec carries only dimension, caster, finite geometry, seed and impact");
+                test.assertTrue(payload.equals(ShockFxPayload.STREAM_CODEC.decode(buffer)), "small S2C codec carries only dimension, caster, finite geometry, seed, impact and the two hit points of the original sparkles");
             } finally { buffer.release(); }
             boolean rejected = false;
-            try { new ShockFxPayload(level.dimension().location(), player.getId(), new Vec3(Double.NaN, 0, 0), Vec3.ZERO, 0, false); }
+            try { new ShockFxPayload(level.dimension().location(), player.getId(), new Vec3(Double.NaN, 0, 0), Vec3.ZERO, 0, false, null, null); }
             catch (IllegalArgumentException expected) { rejected = true; }
             test.assertTrue(rejected, "nonfinite bolt geometry is rejected before rendering");
             KnowledgeAccess.get(player).removeResearch("FOCUSSHOCK"); // USE remains legal without craft research.

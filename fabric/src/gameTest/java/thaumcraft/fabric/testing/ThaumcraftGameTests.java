@@ -1568,6 +1568,26 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.NodeBiomeStorageRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "g13_spawn_pools")
+    public void spawnAuditNativeBiomePools(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.pools(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "g13_spawn_guardian")
+    public void spawnAuditGuardianIsolation(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.guardianIsolation(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "g13_spawn_special")
+    public void spawnAuditSpecialPaths(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.specialPaths(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "g13_spawn_champion")
+    public void spawnAuditChampionNaturalLifecycle(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnAuditRuntimeChecks.championNaturalLifecycle(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "r14_biome_source")
     public void originalBiomesUseActualRegistrySourcesAndSpawnRows(GameTestHelper test) {
         thaumcraft.common.testing.BiomeRuntimeChecks.source(test);

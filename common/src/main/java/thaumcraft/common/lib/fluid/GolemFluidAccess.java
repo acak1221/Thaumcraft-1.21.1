@@ -97,12 +97,18 @@ public final class GolemFluidAccess {
      */
     public static net.minecraft.resources.ResourceLocation bucketFluid(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return null;
+        net.minecraft.resources.ResourceLocation falling = null;
         for (Fluid fluid : BuiltInRegistries.FLUID) {
             Item bucket = fluid.getBucket();
             if (bucket == null || bucket == Items.BUCKET) continue; // The empty bucket is no filled container.
-            if (bucket == stack.getItem()) return BuiltInRegistries.FLUID.getKey(fluid);
+            if (bucket != stack.getItem()) continue;
+            net.minecraft.resources.ResourceLocation id = BuiltInRegistries.FLUID.getKey(fluid);
+            // Oracle GolemHelper.getReggedLiquids:331-339 knows the still liquid only: the
+            // water bucket must answer water, never the flowing variant that shares the bucket.
+            if (GolemFluidRules.registrable(fluid)) return id;
+            if (falling == null) falling = id;
         }
-        return null;
+        return falling;
     }
 
     /** The port's own containers, without any loader. */

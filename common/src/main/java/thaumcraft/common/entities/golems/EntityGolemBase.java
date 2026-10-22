@@ -1993,6 +1993,7 @@ public class EntityGolemBase extends AbstractGolem {
         return before - fluidMb;
     }
     private void finishFluidWork(ServerLevel server, int before) {
+        int soundMode = fluidSoundMode;
         fluidWorkLevel = null;
         fluidSourceIntent = fluidHomePosition = fluidAnchorIntent = null;
         fluidSourceState = null;
@@ -2010,11 +2011,11 @@ public class EntityGolemBase extends AbstractGolem {
                 int accepted = Math.abs(fluidMb - before);
                 int limit = GolemFluidCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH));
                 float volume = .2F;
-                boolean play = fluidSoundMode == 2;
-                if (fluidSoundMode == 1) { // AILiquidEmpty:77-79.
+                boolean play = soundMode == 2;
+                if (soundMode == 1) { // AILiquidEmpty:77-79.
                     play = accepted > 200;
                     volume = Math.min(.2F, .2F * accepted / Math.max(1, limit));
-                } else if (fluidSoundMode == 3) { // AILiquidGather:152-154.
+                } else if (soundMode == 3) { // AILiquidGather:152-154.
                     play = accepted > 200;
                     volume = .2F * accepted / Math.max(1, limit);
                 }

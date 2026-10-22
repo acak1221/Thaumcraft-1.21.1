@@ -106,6 +106,26 @@ public final class TileCrucible extends BlockEntity {
     }
 
     /**
+     * The original's named drain of the tank.
+     *
+     * <p>Oracle {@code TileCrucible:384-393} refuses a resource that is not
+     * {@code isFluidEqual(tank.getFluid())}. The Forge comparison of 1.7.10 compares the
+     * <b>fluid identity and its tag</b>, never the amount, and an empty tank equals nothing.</p>
+     *
+     * @param requested the fluid of the caller
+     * @param content the fluid of the tank
+     * @param current the content of the tank in millibuckets
+     * @param maxDrain the requested amount in millibuckets
+     * @return the drained amount in millibuckets
+     */
+    public static int drainedOf(net.minecraft.world.level.material.Fluid requested,
+                                net.minecraft.world.level.material.Fluid content,
+                                int current, int maxDrain) {
+        if (requested == null || content == null || requested != content || current <= 0) return 0;
+        return drained(current, maxDrain);
+    }
+
+    /**
      * The original fluid handler of the crucible.
      *
      * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:373-382}: the crucible is a Forge
@@ -119,9 +139,10 @@ public final class TileCrucible extends BlockEntity {
      * @return the accepted amount in millibuckets
      */
     public int fillWater(net.minecraft.world.level.material.Fluid fluid, int millibuckets, boolean doFill) {
-        // Oracle TileCrucible:374-376 - only the water of the original registry is accepted.
+        // Oracle TileCrucible:374-376 - only the water of the original registry is accepted. The
+        // null resource of the original passes that guard but the Forge tank then accepts nothing.
         if (fluid != null && fluid != net.minecraft.world.level.material.Fluids.WATER) return 0;
-        int accepted = acceptedFill(water, millibuckets);
+        int accepted = fluid == null ? 0 : acceptedFill(water, millibuckets);
         if (doFill) {
             if (accepted > 0) water += accepted;
             // The original marks the tile dirty even when the tank refuses the fill.
@@ -134,22 +155,32 @@ public final class TileCrucible extends BlockEntity {
      * The original drain of a named fluid.
      *
      * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:384-393}: the original refuses a
-     * resource that is not the content of the tank, and the Forge comparison of 1.7.10 also compares
-     * the amounts, so only a stack that is exactly the content of the tank is drained.</p>
+     * resource that is not the content of the tank. The Forge comparison of 1.7.10
+     * ({@code FluidStack.isFluidEqual}) compares the <b>fluid and its tag only</b>, never the
+     * amount, so a request of one millibucket drains one millibucket of a full tank. The original
+     * then drains {@code min(content, requested)}.</p>
      *
      * @return the drained amount in millibuckets
      */
     public int drainWater(net.minecraft.world.level.material.Fluid fluid, int millibuckets, boolean doDrain) {
-        if (fluid != null && fluid != net.minecraft.world.level.material.Fluids.WATER) return 0;
-        if (millibuckets != water) return 0;
-        return drainWater(water, doDrain);
+        // The tank of the original is empty without a fluid, so isFluidEqual answers false.
+        boolean matches = fluid == net.minecraft.world.level.material.Fluids.WATER && water > 0;
+        int amount = drainedOf(fluid, getWaterFluid(), water, millibuckets);
+        if (doDrain && matches) {
+            if (amount > 0) water -= amount;
+            // The original marks the tile dirty before the tank answers.
+            changed();
+        }
+        return amount;
     }
 
     /**
      * The original drain of the tank.
      *
      * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:395-397}: the tank gives away at most
-     * the requested amount and the original marks the tile dirty before the tank answers.</p>
+     * the requested amount ({@code FluidTank.drain}). The original's unnamed drain does not touch the
+     * tile flags; the native {@code changed()} is the sync that keeps an in-world tank visible and
+     * the saved water durable.</p>
      *
      * @return the drained amount in millibuckets
      */
@@ -157,7 +188,6 @@ public final class TileCrucible extends BlockEntity {
         int drained = drained(water, maxDrain);
         if (doDrain) {
             if (drained > 0) water -= drained;
-            // The original marks the tile dirty even when the tank is empty.
             changed();
         }
         return drained;

@@ -105,6 +105,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         }
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "g12_gui")
+    public void guiMagicBoxRejectedShiftConservesItems(GameTestHelper test) {
+        thaumcraft.common.testing.GuiRejectionRuntimeChecks.magicBox(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 1200, batch = "g7_save_chunks")
     public void saveCycleChunkDiskReload(GameTestHelper test) {
         thaumcraft.common.testing.SaveCycleRuntimeChecks.chunks(test);

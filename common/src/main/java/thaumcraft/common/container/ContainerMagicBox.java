@@ -8,6 +8,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -57,7 +58,10 @@ public final class ContainerMagicBox extends AbstractContainerMenu {
         for (int line = 0; line < DeviceContainerRules.MAGIC_BOX_ROWS; line++) {
             for (int column = 0; column < DeviceContainerRules.MAGIC_BOX_COLUMNS; column++) {
                 addSlot(new Slot(box, column + (line + row) * DeviceContainerRules.MAGIC_BOX_COLUMNS,
-                        DeviceContainerRules.magicBoxSlotX(column), DeviceContainerRules.magicBoxSlotY(line)));
+                        DeviceContainerRules.magicBoxSlotX(column), DeviceContainerRules.magicBoxSlotY(line)) {
+                    @Override public boolean mayPlace(ItemStack stack) { return box.canPlaceItem(getContainerSlot(), stack); }
+                    @Override public boolean mayPickup(Player player) { return ContainerMagicBox.this.stillValid(player); }
+                });
             }
         }
     }
@@ -87,12 +91,19 @@ public final class ContainerMagicBox extends AbstractContainerMenu {
 
     @Override public boolean stillValid(Player player) {
         if (player != viewer || !player.isAlive() || player.isSpectator()) return false;
+        // The BE helper only checks identity/proximity, not the backend's
+        // rejected-data gate. A refused setter cannot safely accept a transfer.
+        if (!box.stillValid(player)) return false;
         if (box instanceof BlockEntity blockEntity) return Container.stillValidBlockEntity(blockEntity, player);
-        return box.stillValid(player);
+        return true;
     }
 
     private boolean active(Player player) {
         return player == viewer && player instanceof ServerPlayer server && server.server.isSameThread() && viewer.containerMenu == this && stillValid(player);
+    }
+
+    @Override public void clicked(int index, int button, ClickType type, Player player) {
+        if (viewer.level().isClientSide ? stillValid(player) : active(player)) super.clicked(index, button, type, player);
     }
 
     /** Original ContainerMagicBox:44-56 - the linked size decides the boundary. */

@@ -36,6 +36,10 @@ public final class BlockHole extends BaseEntityBlock {
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return Shapes.empty(); }
     @Override protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) { return true; }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ThaumcraftHoles.HOLE_BLOCK_ENTITY.get(), TileHole::serverTick);
+        // Oracle TileHole.java:51-56 - the update tick of the original runs on both sides and the
+        // client side draws the sparkles around the hole.
+        return level.isClientSide
+                ? createTickerHelper(type, ThaumcraftHoles.HOLE_BLOCK_ENTITY.get(), TileHole::clientTick)
+                : createTickerHelper(type, ThaumcraftHoles.HOLE_BLOCK_ENTITY.get(), TileHole::serverTick);
     }
 }

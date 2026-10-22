@@ -38,10 +38,22 @@ public final class ShockFxNetworking {
 
     /** Called ONLY after the real hand's vis component has been debited. */
     public static void send(ServerPlayer caster, Vec3 origin, Vec3 target, boolean impact) {
+        send(caster, origin, target, impact, null, null);
+    }
+
+    /**
+     * The pulse of the shock focus.
+     *
+     * <p>Original {@code ItemFocusShock:155-175}: the client draws five sparkles at the point
+     * where the ray hit a block and five at the centre of the pointed entity, so the payload
+     * carries both points.</p>
+     */
+    public static void send(ServerPlayer caster, Vec3 origin, Vec3 target, boolean impact, Vec3 blockHit, Vec3 entityHit) {
         if (!caster.server.isSameThread()) throw new IllegalStateException("Shock effects require the server thread");
         if (caster.isRemoved() || !ShockFxPayload.validGeometry(origin, target) || caster.getEyePosition().distanceToSqr(origin) > 4) return;
         var level = caster.serverLevel();
-        var payload = new ShockFxPayload(level.dimension().location(), caster.getId(), origin, target, level.random.nextLong(), impact);
+        var payload = new ShockFxPayload(level.dimension().location(), caster.getId(), origin, target, level.random.nextLong(), impact,
+                blockHit, entityHit);
         for (ServerPlayer observer : level.players()) if (observer.distanceToSqr(origin) <= 64 * 64) NetworkManager.sendToPlayer(observer, payload);
     }
 
@@ -54,7 +66,7 @@ public final class ShockFxNetworking {
         Vec3 end = target.position().add(0, target.getBbHeight() / 2, 0);
         if (!ShockFxPayload.validGeometry(origin, end)) return;
         var level = caster.serverLevel();
-        var payload = new ShockFxPayload(level.dimension().location(), source.getId(), origin, end, level.random.nextLong(), false);
+        var payload = ShockFxPayload.chain(level.dimension().location(), source.getId(), origin, end, level.random.nextLong());
         for (ServerPlayer observer : level.players()) if (observer.distanceToSqr(source) <= 64 * 64) NetworkManager.sendToPlayer(observer, payload);
     }
 }

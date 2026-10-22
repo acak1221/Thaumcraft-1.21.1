@@ -125,6 +125,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
             ThaumcraftGogglesClient.render(context.matrixStack(), buffers, partialTick, context.camera());
             ThaumcraftShockClient.render(context.matrixStack(), buffers, partialTick, context.camera());
             ThaumcraftExcavationClient.render(context.matrixStack(), buffers, partialTick, context.camera());
+            thaumcraft.client.ThaumcraftArchitectClient.render(context.matrixStack(), buffers, partialTick, context.camera());
             thaumcraft.client.ThaumcraftGolemClient.renderMarkers(context.matrixStack(), buffers, partialTick, context.camera());
             buffers.endBatch(net.minecraft.client.renderer.RenderType.lines());
         });

@@ -225,6 +225,7 @@ public final class ThaumcraftNeoForgeClient {
         ThaumcraftGogglesClient.render(pose, buffers, partialTick, event.getCamera());
         ThaumcraftShockClient.render(pose, buffers, partialTick, event.getCamera());
         ThaumcraftExcavationClient.render(pose, buffers, partialTick, event.getCamera());
+        ThaumcraftArchitectClient.render(pose, buffers, partialTick, event.getCamera());
         ThaumcraftGolemClient.renderMarkers(pose, buffers, partialTick, event.getCamera());
         buffers.endBatch(RenderType.lines());
     }

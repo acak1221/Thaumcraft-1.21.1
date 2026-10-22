@@ -5041,18 +5041,28 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w3clientfx",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/fx/beams/FXBeamWand.java the wand beam effect",
           "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java, ShockSparkParticle.java, FrostSparkleParticle.java the native focus beams",
           "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:149 the native fire beam damage formula",
-          "REMAINING DIFFERENCE: the original beam starts at the wand tip (oracle FXBeamWand.java) and the native focus particles start at the player; the wand tip origin belongs to the wand renderer lane (ledger units ItemWandRenderer, WandPerspectiveModel, FirstPersonWandTipOrigin)"
+          "REMAINING DIFFERENCE: the original beam starts at the wand tip (oracle FXBeamWand.java) and the native focus particles start at the player; the wand tip origin belongs to the wand renderer lane (ledger units ItemWandRenderer, WandPerspectiveModel, FirstPersonWandTipOrigin)",
+          "oracle thaumcraft/client/fx/beams/FXBeamWand.java:37-297 the beam of the original: the fan of three planes that turns around the axis of the beam (:229-255), the rotation of the fan that follows the time of the world (:171), the slide of the texture (:201-206), the width of a plane (:235-238), the opacity of four tenths and its fade to a tenth in the last four ticks (:177-180), the lifetime of eight and the refresh at four (:84,95-101) and the impact of the beam (:261-263,269-297)",
+          "oracle thaumcraft/client/fx/beams/FXBeamWand.java:209-228 the origin of the original is the eye of the player, moved by the yaw and the pitch and by the look vector times 0.3 - it is NOT the tip of the wand",
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusExcavation.java:161-163 the native origin of the beam is the very same one (the eye, the yaw, the pitch and the look times 0.3)",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftExcavationClient.java:106-260 the native beam is now the fan of three planes of the original with the impact of the original",
+          "native common/src/main/resources/assets/thaumcraft/textures/misc/particles.png the particle atlas of the original (256x256), the sheet of the impact of the original",
+          "test common/src/test/java/thaumcraft/wands/ExcavationBeamRulesTest.java the fan, the rotation, the slide and the frame of the original"
         ],
         "notes": [
           "Not a class-for-class port: the original single beam effect class became per-focus particle systems in 1.21.1.",
           "DEVIATION: the original FXBeamWand drawing routine has no single native counterpart, so an exact visual comparison is not possible from the source alone.",
-          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either."
+          "REMAINING GAP (client lane): the original beam starts at the wand tip; the native focus particles start at the player. The origin helper of the 1.12 tree (WandEffectOrigin) has no native counterpart either.",
+          "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was stated wrongly. The original beam does NOT start at the wand tip: its origin is the eye of the player, moved by the yaw and the pitch and by the look vector times 0.3 (oracle FXBeamWand:209-228), and the native already used exactly that origin (ItemFocusExcavation:161-163).",
+          "The real difference was the drawing routine: the original draws a fan of three planes that turns around the axis of the beam, with a width that pulses over four ticks and an opacity of four tenths that fades to a tenth, while the native drew two camera facing ribbons whose opacity ramped up and faded to zero.",
+          "The native now draws the fan of the original with the numbers of the original, and the impact is the camera facing quad of the particle atlas of the original with the frame of the age over sixteen and the size endMod / 2 / (6 - impact).",
+          "Forced 1.21.1 change: the fan of the original is drawn with the depth test of the native late world pass, the original drew it in the particle pass."
         ],
         "reviewed_sha256": {
           "original": "4559e4022f06675edec351ba7719325e313414498c15dd37a44fdaff279c957c",
@@ -8364,7 +8374,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w3clientfx",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java:79 ArrayList<BlockCoordinates> architectBlocks",
@@ -8379,13 +8389,28 @@
           "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:228-233 centered() draws the line once, at centredOffset(centerX, font.width(label)) = centre - font.width(text) / 2, the expression the original uses",
           "test common/src/test/java/thaumcraft/client/gui/FocusRadialLabelTest.java the centre line rule: it names the focused focus, it has no hover-dependent placeholder, it is centred with the original's expression and it is drawn once",
           "REMAINING DIFFERENCE: the architect preview of the original (oracle REHWandHandler.java:79,311,319, the list of the architect blocks) is not drawn as a world overlay by the native radial screen",
-          "the radial itself is reproduced: the centre line names the focused focus only and is drawn once at centre - font.width(text) / 2 (native GuiFocusSelect.java:201-233), the expression the original uses (oracle GuiResearchRecipe.java:452-453)"
+          "the radial itself is reproduced: the centre line names the focused focus only and is drawn once at centre - font.width(text) / 2 (native GuiFocusSelect.java:201-233), the expression the original uses (oracle GuiResearchRecipe.java:452-453)",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:79,311-313,319 the list of the architect blocks and the hidden inner faces",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:185-295 the radial focus menu; the only text of it is the tooltip of the hovered focus at the mouse, the original draws no centre label",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:297-316 the architect overlay: the anchor is the block under the crosshair, the area comes from the focus and the axes come from the focus",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:323-368 the rune texture of a face is the original lookup table of the eight neighbour flags",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:370-372 a face that touches another block of the area is not drawn",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:391-394 the colour of a block and the alpha of a fifth",
+          "oracle thaumcraft/client/lib/REHWandHandler.java:429-479 the arrows of the axes with the colour of the player age and the alpha of a third",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java the native world overlay of the Architect focus",
+          "native common/src/main/java/thaumcraft/common/lib/world/WardingOverlay.java:12-47 the original lookup table of the rune textures and the eight neighbours of a face",
+          "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:201-233 the radial of the original, the centre line names the focused focus only and is drawn once",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java and native neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java the late world render of both loaders",
+          "test common/src/test/java/thaumcraft/wands/ArchitectOverlayTest.java the mask of a face, the hidden inner faces and the alphas of the original"
         ],
         "notes": [
           "The held-F radial focus selection is ported as GuiFocusSelect, and the Architect block list became a server-side BlockPos list computed by WandArchitect.",
           "DEVIATION: the original REHWandHandler was a client-side handler that held the whole architect block list in the client and drew the selection overlays; the native moves the area to the server and to a bounded Area record.",
           "REMAINING GAP (client lane): the selection overlay of the original is drawn by the client handler; the native computes the same area on the server and draws it in the client gui.",
-          "FIXED (client lane, 2026-10-23): the centre label of the radial was two overlapping text runs in the client smoke frame 43. The radial is rendered twice into the same frame (the game with the real cursor, the client smoke with a scripted hover point), and the centre line carried a hover-dependent placeholder next to the name of the focused focus. The centre line now names the focused focus only and is drawn once, at centre - font.width(text) / 2."
+          "FIXED (client lane, 2026-10-23): the centre label of the radial was two overlapping text runs in the client smoke frame 43. The radial is rendered twice into the same frame (the game with the real cursor, the client smoke with a scripted hover point), and the centre line carried a hover-dependent placeholder next to the name of the focused focus. The centre line now names the focused focus only and is drawn once, at centre - font.width(text) / 2.",
+          "CLOSED 2026-10-23 (w4wands): the world overlay of the Architect focus was missing. The native now draws the area of the focus as translucent blocks whose face carries the rune texture of the eight neighbours of the face, with the colours, the alpha of a fifth and the hidden inner faces of the original, and the arrows of the axes at the anchor with the alpha of a third.",
+          "The radial focus menu of the original was already reproduced by the native GuiFocusSelect (the centre line names the focused focus only and is drawn once at centre - font.width(text) / 2, the expression the original uses).",
+          "Forced 1.21.1 change: the original drew the silhouette of the jar block with the rune texture of the warded glass; the native draws the cube of the block, because the 1.7.10 block renderer cannot draw one model with the texture of another."
         ],
         "reviewed_sha256": {
           "original": "c6a51c95a42eedf9d6ef600e763bee7cabfd31229fbe6a63034fe5d9c31a2342",

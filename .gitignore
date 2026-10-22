@@ -65,6 +65,9 @@ fabric/run/
 neoforge/run/
 **/run-gametest/
 **/run-clienttest/
+**/run-multiplayer/
+**/run-multiplayer-server/
+.gradle-mp/
 %SystemDrive%/
 
 # javac argument files of the type check of the port

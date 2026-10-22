@@ -6,7 +6,10 @@
   "environment": "client",
   "mixins": ["thaumcraft-client-smoke.mixins.json"],
   "entrypoints": {
-    "client": ["thaumcraft.fabric.clienttest.BookClientSmoke"]
+    "client": [
+      "thaumcraft.fabric.clienttest.BookClientSmoke",
+      "thaumcraft.fabric.clienttest.MultiplayerClientProbe"
+    ]
   },
   "depends": {
     "thaumcraft": "*",

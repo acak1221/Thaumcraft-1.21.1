@@ -235,6 +235,9 @@ if (clientSmokeScope != 'full') {
 }
 def clientTestModRoots = files(sourceSets.clientTest.output)
 def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
+// The multiplayer acceptance talks to an EXTERNAL dedicated server process.
+def multiplayerAddress = providers.gradleProperty('multiplayerAddress').getOrElse('127.0.0.1:25565')
+def multiplayerPlayer = providers.gradleProperty('multiplayerPlayer').getOrElse('MPProbe')
 loom.runs {
  gameTest {
   server()
@@ -266,6 +269,34 @@ loom.runs {
    if (clientSmokeScope == 'bore') {
     programArgs '--username', 'Player653', '--uuid', '13848433-7be7-350d-8b4a-c038819c2260'
    }
+ }
+ // Real dedicated-server multiplayer acceptance. The client joins an EXTERNAL
+ // server process over the loopback socket; nothing of the client smoke is
+ // reused and the harness never ships in a production archive.
+ multiplayerClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft dedicated-server multiplayer client'
+  runDir 'run-multiplayer'
+  vmArg '-Xmx768M'
+  vmArg '-Xms192M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.multiplayerClient=true'
+  vmArg "-Dthaumcraft.multiplayerRunDir=${file('run-multiplayer').toPath().toAbsolutePath().normalize()}"
+  vmArg "-Dthaumcraft.multiplayerReport=multiplayer-client-report.json"
+  vmArg "-Dthaumcraft.multiplayerPlayer=$multiplayerPlayer"
+  vmArg "-Dthaumcraft.multiplayerAddress=$multiplayerAddress"
+  programArgs '--username', multiplayerPlayer, '--quickPlayMultiplayer', multiplayerAddress, '--width', '854', '--height', '480'
+ }
+ // The dedicated server the multiplayer acceptance talks to. A small heap
+ // keeps the two acceptance processes inside the host memory budget.
+ multiplayerServer {
+  server()
+  name 'Thaumcraft dedicated-server multiplayer target'
+  runDir 'run-multiplayer-server'
+  vmArg '-Xmx768M'
+  vmArg '-Xms192M'
+  programArgs '--nogui'
  }
 }
 tasks.named('runGameTest') {
@@ -445,4 +476,32 @@ tasks.named('runClientSmoke') {
      logger.lifecycle("Client $clientSmokeScope check passed: $expectedCaptures screenshots; visual inspection is still required.")
  }
 }
-project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest'])
+// The multiplayer acceptance needs an EXTERNAL dedicated server; this task
+// only owns the client side and its own evidence file.
+tasks.register('prepareMultiplayerRun') {
+ group = 'verification'
+ description = 'Prepare the isolated dedicated-server multiplayer client run directory.'
+ doLast {
+  def isolatedRoot = file('run-multiplayer').toPath().toAbsolutePath().normalize()
+  java.nio.file.Files.createDirectories(isolatedRoot)
+  def report = isolatedRoot.resolve('multiplayer-client-report.json')
+  if (java.nio.file.Files.exists(report)) java.nio.file.Files.delete(report)
+  def optionsFile = isolatedRoot.resolve('options.txt').toFile()
+  optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\nrenderDistance:4\nsimulationDistance:4\nmaxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
+ }
+}
+tasks.named('runMultiplayerClient') {
+ dependsOn tasks.named('prepareMultiplayerRun'), tasks.named('clientTestClasses')
+ doLast {
+  def reportFile = file('run-multiplayer/multiplayer-client-report.json')
+  if (!reportFile.isFile()) {
+   throw new GradleException("The multiplayer client produced no report; inspect ${file('run-multiplayer/logs/latest.log')}")
+  }
+  def report = new groovy.json.JsonSlurper().parse(reportFile, 'UTF-8')
+  if (report.status != 'SCRIPT_PASSED') {
+   throw new GradleException("The multiplayer acceptance failed: ${report.steps}; ${report.failures}")
+  }
+  logger.lifecycle("Multiplayer acceptance passed against ${report.address} as ${report.player}: ${report.steps}")
+ }
+}
+project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest'])

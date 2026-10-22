@@ -1,5 +1,6 @@
 package thaumcraft.api;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -116,5 +117,60 @@ class NodeAdapterContractTest {
         assertEquals(30, view.getAspects().getAmount(Aspect.AIR), "the current essence never exceeds the base");
         assertTrue(view.takeFromContainer(Aspect.AIR, 4), "the current essence can be taken");
         assertEquals(26, view.getAspects().getAmount(Aspect.AIR));
+    }
+
+    /**
+     * The published contract carries every member of the original.
+     *
+     * <p>Oracle {@code thaumcraft/api/nodes/INode.java:12-29} publishes eight members of its own
+     * and inherits the nine of {@code thaumcraft/api/aspects/IAspectContainer.java:9-29}. The test
+     * asserts the names and the signatures of all of them, so an add-on that implements the original
+     * contract still compiles against the native one.</p>
+     */
+    @Test void thePublishedContractCarriesEveryMemberOfTheOriginal() throws Exception {
+        assertEquals("String", INode.class.getMethod("getId").getReturnType().getSimpleName(),
+                "oracle INode:14 getId");
+        assertEquals("AspectList", INode.class.getMethod("getAspectsBase").getReturnType().getSimpleName(),
+                "oracle INode:16 getAspectsBase");
+        assertEquals("NodeType", INode.class.getMethod("getNodeType").getReturnType().getSimpleName(),
+                "oracle INode:18 getNodeType");
+        assertEquals("void", INode.class.getMethod("setNodeType", NodeType.class).getReturnType().getSimpleName(),
+                "oracle INode:20 setNodeType");
+        assertEquals("void", INode.class.getMethod("setNodeModifier", NodeModifier.class).getReturnType().getSimpleName(),
+                "oracle INode:22 setNodeModifier");
+        assertEquals("NodeModifier", INode.class.getMethod("getNodeModifier").getReturnType().getSimpleName(),
+                "oracle INode:24 getNodeModifier");
+        assertEquals("int", INode.class.getMethod("getNodeVisBase", Aspect.class).getReturnType().getSimpleName(),
+                "oracle INode:26 getNodeVisBase");
+        assertEquals("void", INode.class.getMethod("setNodeVisBase", Aspect.class, short.class).getReturnType().getSimpleName(),
+                "oracle INode:28 setNodeVisBase, with the original's short");
+        // The nine members the original inherits from IAspectContainer.
+        assertEquals("AspectList", INode.class.getMethod("getAspects").getReturnType().getSimpleName());
+        assertEquals("void", INode.class.getMethod("setAspects", thaumcraft.api.aspects.AspectList.class).getReturnType().getSimpleName());
+        assertEquals("boolean", INode.class.getMethod("doesContainerAccept", Aspect.class).getReturnType().getSimpleName());
+        assertEquals("int", INode.class.getMethod("addToContainer", Aspect.class, int.class).getReturnType().getSimpleName());
+        assertEquals("boolean", INode.class.getMethod("takeFromContainer", Aspect.class, int.class).getReturnType().getSimpleName());
+        assertEquals("boolean", INode.class.getMethod("takeFromContainer", thaumcraft.api.aspects.AspectList.class).getReturnType().getSimpleName());
+        assertEquals("boolean", INode.class.getMethod("doesContainerContainAmount", Aspect.class, int.class).getReturnType().getSimpleName());
+        assertEquals("boolean", INode.class.getMethod("doesContainerContain", thaumcraft.api.aspects.AspectList.class).getReturnType().getSimpleName());
+        assertEquals("int", INode.class.getMethod("containerContains", Aspect.class).getReturnType().getSimpleName());
+    }
+
+    /**
+     * The identity of the native node is the persisted UUID.
+     *
+     * <p>The original derived the identity from the position of the node ({@code dim:x:y:z}, oracle
+     * {@code TileNode:98-115}); the native keeps a persisted random identity, because the accepted
+     * client evidence parses it with {@code UUID.fromString}
+     * ({@code fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509})
+     * and the accepted saved worlds carry the UUIDs in their node NBT.</p>
+     */
+    @Test void theIdentityOfTheNodeIsThePersistedUuid() {
+        TileNode node = nativeNode();
+        String identity = node.getId();
+        assertEquals(node.getScanId(), identity, "the identity of the node is its persisted identity");
+        assertDoesNotThrow(() -> java.util.UUID.fromString(identity),
+                "the identity of the native node is a UUID, the format the accepted client evidence parses");
+        assertEquals(identity, NodeAdapter.of(node).getId(), "the published view carries the same identity");
     }
 }

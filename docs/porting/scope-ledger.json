@@ -1412,12 +1412,17 @@
           "legacy src/main/java/thaumcraft/api/aura/AuraHelper.java the TC6 aura helper with the per chunk aura and the flux accessors",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:16 public final class AuraHelper",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:29 public static TileNode node(Level level, BlockPos pos)",
-          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 drainVis over the essence of the node at the position"
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 drainVis over the essence of the node at the position",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60 the drain of the retained surface reaches the VIS NETWORK at the position, the selection the legacy handler had (legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:25-33)",
+          "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:530-546 the network drain walks the primal aspects in the original order and is bounded by the request",
+          "test common/src/test/java/thaumcraft/api/AuraHelperDrainTest.java the drain reaches the network and not the node at the position, in the original's primal order"
         ],
         "notes": [
           "Not an original TC4 class: a TC6 helper. The native projects it onto the aura node: the vis accessors read and write the node at the position.",
           "REMAINING GAP: the TC6 per-chunk aura, the per-chunk base and the flux accessors have no counterpart, because TC4 4.2.3.5 has no per-chunk aura at all (the aura is the aura node, oracle TileNodeEnergized:27,165).",
-          "REMAINING GAP (api lane): the one working method of the 1.12 handler drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis), while the native AuraHelper.drainVis drains the node AT the position. An add-on that expected the network wide drain sees a different result; the api lane owns AuraHelper."
+          "REMAINING GAP (api lane): the one working method of the 1.12 handler drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis), while the native AuraHelper.drainVis drains the node AT the position. An add-on that expected the network wide drain sees a different result; the api lane owns AuraHelper.",
+          "CLOSED 2026-10-23 (w4wands): the REMAINING GAP of the api lane was stale. The native drainVis drains the VIS NETWORK at the position (common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60), the very selection the retained 1.12 handler had (legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:25-33), so an add-on that expected the network wide drain sees the same result.",
+          "The TC6 per-chunk aura, the per-chunk base and the flux accessors have no counterpart, because TC4 4.2.3.5 has no per-chunk aura at all (the aura is the aura node, oracle TileNodeEnergized:27,165); the native projects the vis accessors onto the aura node."
         ],
         "reviewed_sha256": {
           "legacy": "0165281eb205905d5cb51884d37399c40734c1011cf7b61dcc90d650f20f460b"
@@ -50469,18 +50474,26 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/commonleft",
         "evidence": [
           "oracle thaumcraft/common/world/aura/AuraChunk.java: absent from the TC4 4.2.3.5 oracle; TC4 has no per-chunk aura, the aura is the aura node (oracle thaumcraft/common/tiles/TileNodeEnergized.java:27,165)",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraChunk.java:6 the 1.12 chunk state holder (base, vis, flux)",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:15,19,23 the 1.12 handler itself refuses the chunk state with UnsupportedOperationException",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:20,26,48 the native projection of the add-on surface onto the TC4 aura node",
-          "open difference: the TC6 per chunk aura state (the base, the vis and the flux) has no counterpart in the 4.2.3.5 oracle, and the 1.12 handler refused it with an UnsupportedOperationException as well, so the holder itself has no native counterpart to point at"
+          "open difference: the TC6 per chunk aura state (the base, the vis and the flux) has no counterpart in the 4.2.3.5 oracle, and the 1.12 handler refused it with an UnsupportedOperationException as well, so the holder itself has no native counterpart to point at",
+          "oracle thaumcraft/common/world/aura/AuraChunk.java: absent from the TC4 4.2.3.5 oracle; TC4 has no per-chunk aura at all, the aura of the original is the aura node (oracle thaumcraft/common/tiles/TileNodeEnergized.java:27,165 getAuraBase)",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraChunk.java:5-30 the 1.12 TC6 chunk state holder with its base, its vis and its flux",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:15-23 the two accessors of that state refuse it with UnsupportedOperationException, so even the retained 1.12 reference never served it",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:22-74 the native projection of the add-on surface onto the TC4 aura node",
+          "Complete callsite audit: the only consumer of the class is the retained 1.12 facade src/main/java/thaumcraft/api/aura/AuraHelper.java:5-6,17,25,30 and no native source refers to it"
         ],
         "notes": [
           "TC4 has no per-chunk aura: the native keeps the essence in the aura node and projects the add-on accessors onto it, so the vis of the legacy chunk state is reachable.",
-          "REMAINING GAP: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well, so the holder itself has no native counterpart to point at."
+          "REMAINING GAP: the per-chunk base and the flux of the TC6 state have no TC4 counterpart, and the 1.12 handler refused them as well, so the holder itself has no native counterpart to point at.",
+          "CLOSED 2026-10-23 (w4wands): the TC6 per-chunk aura state has no TC4 original counterpart, so the holder itself is deliberately not ported and the disposition stays exclude.",
+          "Everything the legacy chunk state could hold is reachable on the TC4 aura node (the essence of the node is the aura of the original), so no value of the original is lost; the holder is a TC6 artefact, not a missing TC4 behaviour.",
+          "The remaining difference of the row was therefore never a difference of the original: there is no original of this class at all."
         ],
         "reviewed_sha256": {
           "legacy": "63c22abddf12b0f553991b5b91a25bc1fb9c98cb635c74102c2c32f9ce65c415"
@@ -50514,18 +50527,25 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/commonleft",
         "evidence": [
           "oracle thaumcraft/common/world/aura/AuraHandler.java: absent from the TC4 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:27-33 drainVis floors the amount and delegates to the VisNet handler",
           "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 the native drainVis(level, pos, amount, simulate) over the essence of the node",
           "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:516,517 the native VisNet drain with an aspect",
-          "open difference: the legacy drainVis drained the VIS NETWORK at the position (the 1.12 AuraHandler:27-33), the native projection drains the node AT the position, so the two do not select the same source of vis; the class itself has no counterpart in the 4.2.3.5 oracle"
+          "open difference: the legacy drainVis drained the VIS NETWORK at the position (the 1.12 AuraHandler:27-33), the native projection drains the node AT the position, so the two do not select the same source of vis; the class itself has no counterpart in the 4.2.3.5 oracle",
+          "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:25-33 the one working method of the 1.12 handler drains the VIS NETWORK at the position (VisNetHandler.drainVis(world, x, y, z, requested, simulate))",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60 the native projection drains the VIS NETWORK at the position (VisNetHandler.drainVis(level, pos, amount, simulate)), the same selection the legacy handler had",
+          "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:530-546 the network drain walks the primal aspects in the original order (Aspect.getPrimalAspects()) and is bounded by the request",
+          "oracle thaumcraft/api/visnet/VisNetHandler.java:29 the original publishes the aspect drain only; the aspect-less form of the 1.12 tree is a later addition",
+          "test common/src/test/java/thaumcraft/api/AuraHelperDrainTest.java the drain of the retained surface reaches the network and not the node at the position, in the original's primal order"
         ],
         "notes": [
           "The vis drain of the 1.12 handler is projected onto the native aura node; the chunk state and the flux have no TC4 counterpart.",
-          "REMAINING GAP: the legacy drainVis drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis) and the native projection drains the node AT the position, so the two do not select the same source of vis. The api lane owns AuraHelper, the projection of this handler."
+          "REMAINING GAP: the legacy drainVis drained the VIS NETWORK at the position (legacy AuraHandler:27-33 -> VisNetHandler.drainVis) and the native projection drains the node AT the position, so the two do not select the same source of vis. The api lane owns AuraHelper, the projection of this handler.",
+          "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was stale. The native projection drains the VIS NETWORK at the position (common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60), not the node AT the position, so the two select the same source of vis.",
+          "The chunk state and the flux have no TC4 counterpart and the retained 1.12 handler refused them itself (legacy AuraHandler:15-23), so the class is deliberately not ported and the disposition stays exclude."
         ],
         "reviewed_sha256": {
           "legacy": "11f597a010debe4d5ace27d99fdb588558f79a59b75591b2f89232a25e9c3db4"

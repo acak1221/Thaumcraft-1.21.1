@@ -23,13 +23,14 @@ public abstract class PlayerKnowledgeMixin implements PlayerKnowledgeHolder {
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
     private void thaumcraft$saveKnowledge(CompoundTag tag, CallbackInfo callback) {
-        tag.put(thaumcraft$KNOWLEDGE_KEY, thaumcraft$knowledge.save());
+        tag.put(thaumcraft$KNOWLEDGE_KEY, thaumcraft$knowledge.saveAttachment());
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
     private void thaumcraft$loadKnowledge(CompoundTag tag, CallbackInfo callback) {
-        if (tag.contains(thaumcraft$KNOWLEDGE_KEY, Tag.TAG_COMPOUND)) {
-            thaumcraft$knowledge.load(tag.getCompound(thaumcraft$KNOWLEDGE_KEY));
+        if (tag.contains(thaumcraft$KNOWLEDGE_KEY)) {
+            Player player = (Player)(Object)this;
+            thaumcraft$knowledge.loadAttachment(tag.get(thaumcraft$KNOWLEDGE_KEY), player.getUUID()+" at "+player.blockPosition());
         }
     }
 }

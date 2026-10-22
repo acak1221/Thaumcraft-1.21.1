@@ -32,7 +32,7 @@ public final class PlayerAccessories {
         PlayerEvent.PLAYER_CLONE.register((oldPlayer,newPlayer,wonGame) -> {
             // Native deaths have already emptied non-kept slots. Move remaining ownership, never alias/copy live stacks.
             PlayerAccessoryInventory old=get(oldPlayer), next=get(newPlayer);
-            next.load(old.save(oldPlayer.registryAccess()),newPlayer.registryAccess());
+            next.loadAttachment(old.saveAttachment(oldPlayer.registryAccess()),newPlayer.registryAccess());
             old.load(empty(),oldPlayer.registryAccess());
         });
         PlayerEvent.PLAYER_RESPAWN.register((player,wonGame,reason) -> AccessoryNetworking.sync(player));
@@ -51,9 +51,9 @@ public final class PlayerAccessories {
         } finally { WORN.remove(); }
         if(player instanceof ServerPlayer server) AccessoryNetworking.syncChanged(server);
     }
-    public static void save(Player player,CompoundTag tag) { tag.put("thaumcraft:accessories",get(player).save(player.registryAccess())); }
+    public static void save(Player player,CompoundTag tag) { tag.put("thaumcraft:accessories",get(player).saveAttachment(player.registryAccess())); }
     public static void load(Player player,CompoundTag tag) {
-        if(tag.contains("thaumcraft:accessories",net.minecraft.nbt.Tag.TAG_COMPOUND))get(player).load(tag.getCompound("thaumcraft:accessories"),player.registryAccess());
+        if(tag.contains("thaumcraft:accessories"))get(player).loadAttachment(tag.get("thaumcraft:accessories"),player.registryAccess());
     }
     public static void dropOnDeath(Player player) {
         if(player.level().isClientSide || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY))return;

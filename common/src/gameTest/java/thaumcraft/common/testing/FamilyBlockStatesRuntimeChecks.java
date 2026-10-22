@@ -83,11 +83,23 @@ public final class FamilyBlockStatesRuntimeChecks {
             if (hosted == null) continue;
             groups++;
             var properties = block.getStateDefinition().getProperties();
+            // A group block may carry a second property: the eldritch crust carries the six
+            // neighbour flags of its baked geometry (CRUST_NEIGHBOR_MASK). The metadata property
+            // is the one named "variant", so the state space is read through it by name instead of
+            // taking whichever property the definition happens to list first.
+            Property<?> variant = null;
+            for (Property<?> candidate : properties) {
+                if (thaumcraft.common.lib.world.FamilyVariant.NAME.equals(candidate.getName())) {
+                    variant = candidate;
+                    break;
+                }
+            }
             if (hosted.size() < 2) {
-                test.assertTrue(properties.isEmpty(), id + " hosts one value and has no property");
+                test.assertTrue(variant == null, id + " hosts one value and has no variant property");
                 continue;
             }
-            Property<?> property = properties.iterator().next();
+            test.assertTrue(variant != null, id + " hosts several values and must carry a variant property");
+            final Property<?> property = variant;
             test.assertTrue(values(block, property).equals(new TreeSet<>(hosted)),
                     id + " owns exactly its metadata " + hosted + ", not " + values(block, property));
             JsonObject file = blockstate(id.getPath());

@@ -35,8 +35,10 @@ import net.minecraft.resources.ResourceLocation;
  *
  * <p>This is an approximation of the original effect, not a pixel exact copy:
  * the view dependent texture generation of the original cannot be reproduced
- * without the fixed function pipeline, and the additive blend of the original
- * inner layers is replaced by the translucent pass with the original colours.
+ * without the fixed function pipeline. The additive blend of the original inner
+ * layers is the vanilla {@code RenderType.eyes}, whose transparency is
+ * {@code RenderStateShard.ADDITIVE_TRANSPARENCY}, i.e. the very
+ * {@code glBlendFunc(GL_ONE, GL_ONE)} of the original.</p>
  */
 public final class ModelTunnelField {
     /** The original outer layer texture. */
@@ -65,11 +67,16 @@ public final class ModelTunnelField {
      * @param overlay the packed overlay of the block
      */
     public void renderFace(PoseStack pose, MultiBufferSource buffers, Direction face, float fade, int light, int overlay) {
-        // The original inner layers used the additive blend (GL_ONE, GL_ONE). The
-        // modern pipeline has no per buffer additive blend, so the particle field
-        // uses the standard translucent pass with the original bright colours.
+        // Original TileMirrorRenderer:70-71 draws the outer layer with the ordinary
+        // alpha blend (glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)) and
+        // TileMirrorRenderer:74-77 draws the second layer with the additive blend
+        // glBlendFunc(GL_ONE, GL_ONE); every deeper layer keeps that blend.
+        // The 1.21.1 RenderType.eyes uses the vanilla
+        // RenderStateShard.ADDITIVE_TRANSPARENCY, whose blend is exactly
+        // RenderSystem.blendFunc(ONE, ONE), and its shader ignores the lightmap
+        // like the original, which draws the tunnel with GL_TEXTURE_2D disabled.
         VertexConsumer tunnel = buffers.getBuffer(RenderType.entityTranslucent(TUNNEL));
-        VertexConsumer field = buffers.getBuffer(RenderType.entityTranslucent(FIELD));
+        VertexConsumer field = buffers.getBuffer(RenderType.eyes(FIELD));
         for (int layer = 0; layer < LAYERS; layer++) {
             float distance = LAYERS - layer;
             float scale = 1.0F / (distance + 1.0F);

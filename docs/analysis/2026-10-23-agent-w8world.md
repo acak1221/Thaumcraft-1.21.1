@@ -106,13 +106,56 @@ No vanilla third glint, missing base bow, buffer exception or leaked depth state
 Tests authored, NOT executed: `BoneBowGlintParityTest` (three pure tint, period and
 matrix-order tests). No GL context or Blocks constructed.
 
-## Verification (in progress)
+## Final native evidence anchors
 
-Whole `common/src/main/java` javac passed once (1,426 files before final helper
-extraction). Final recheck will be recorded below. Uses Java 21, remapped cached
+All paths below are relative to this worktree. Oracle paths above are relative to
+the byte-exact oracle root (client renderers under `thaumcraft/client/renderers/`,
+world generator under `thaumcraft/common/lib/world/`).
+
+| Unit | Native implementation | Verdict |
+| --- | --- | --- |
+| `TileMirrorRenderer` | `common/src/main/java/thaumcraft/client/renderers/tile/TileMirrorRenderer.java:55`; `LinkedMirrorField.java:24-75`; `MirrorProjection.java:9-23`; `common/src/main/resources/assets/thaumcraft/shaders/core/linked_mirror.vsh:12-15`, `.fsh:7`; Fabric registration `fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java:28-30`; NeoForge `neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java:81-84` | partial -> parity_verified **in code**, frame acceptance pending |
+| `ItemBowBoneRenderer` | `common/src/main/java/thaumcraft/client/renderers/item/BoneBowGlint.java:23-88`; `BoneBowGlintRules.java:5-15`; `common/src/main/java/thaumcraft/common/mixin/client/BoneBowHeldPoseMixin.java:31-35` | partial -> parity_verified **in code**, frame acceptance pending |
+| `ServerTickEventsFML` | `common/src/main/java/thaumcraft/common/lib/events/ChunkRegeneration.java:131-154,189-195,236-243`; `common/src/main/java/thaumcraft/common/lib/world/WorldGenMound.java:90`, `WorldGenHilltopStones.java:59`, `EldritchRingFeature.java:62` | partial -> parity_verified **in code**, world acceptance pending |
+| `ThaumcraftWorldGenerator` | `common/src/main/java/thaumcraft/common/lib/world/ThaumcraftNormalNodeFeature.java:33-50,64-78,126-138,160-165`; `AuraGenRules.java:61-115,130-144`; `ThaumcraftTotemFeature.java:77-94`; biome tag `common/src/main/resources/data/thaumcraft/tags/worldgen/biome/normal_aura_node_biomes.json:5` | partial -> parity_verified **in code**, world acceptance pending |
+
+The mirror's shared draw helper is
+`common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:47-49,66-77`.
+Every face uses the oracle's winding/culling; the internal homogeneous rescaling
+also avoids the oracle's infinite Q at exactly one layer distance. This is a
+numerically stable form of the same projective function, not a different effect.
+
+## Final verification
+
+Whole `common/src/main/java` javac **passed: 1,428 files**, Java 21, no errors.
+Command: `javac @.tmp/w8world-final-javac.args` (all common/main sources, `-proc:none
+--release 21 -sourcepath ''`). Uses the remapped cached
 1.21.1 merged jar, locally remapped Architectury API, modules-2 binaries, and exactly
 the project AW + Fabric transitive BlockEntitySupplier widening (no stubs). The
-worktree starts without `common/build`; full sources are compiled, not borrowed
-classes. Local logs/argfiles/tools stay ignored under `.tmp`.
+worktree started without `common/build`; full sources were compiled into its own
+`common/build/classes/java/main`, also present on the classpath. The named base
+Minecraft jar is `~/.gradle-leader/caches/fabric-loom/minecraftMaven/net/minecraft/
+minecraft-merged/1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2/
+minecraft-merged-1.21.1-loom.mappings.1_21_1.layered+hash.40545-v2.jar`.
+No source/body changes were made to that cache jar: a local copy applies the exact
+access wideners normally applied by Loom. Architectury was remapped locally with
+cached Tiny Remapper and the same named mappings. Local logs/argfiles/tools stay
+ignored under `.tmp` (`w8world-final-javac.log`, `w8world-test-javac.log`).
+
+All three new JUnit classes and the modified `SurfaceStructurePlacementAssetsTest`
+(one additional Nether scheduling assertion) **javac-compiled**, NOT executed.
+There are **10 new @Test methods**, all pure rules/matrices/resources; no Block
+construction. No Gradle invocation, game run, shader-driver compilation or test
+execution is claimed. Loader registration code follows the existing callbacks but
+was not separately loader-compiled; NeoForge runtime remains deferred.
 
 `convert_assets.py --verify`: **missing_references: 0**.
+
+`update_scope_ledger.py --check --original-root /home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle`:
+**stale_review_fingerprints: 0**. Only the four assigned unit reviews changed;
+ledger `counts` are untouched. Historical incorrect impossibility/remaining notes
+are explicitly superseded by current evidence, not silently presented as true.
+
+Remaining blockers: none identified in the four requested code gaps. Actual frame
+and real-world acceptance above is still unperformed. The fresh-generation stream
+and biome distribution are a 1.21.1 adaptation, not seed-identical 1.7.10 terrain.

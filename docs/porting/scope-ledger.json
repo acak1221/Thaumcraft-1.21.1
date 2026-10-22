@@ -12236,9 +12236,10 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-      "owner": "agent-w7items",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8world",
         "evidence": [
+          "CLOSED IN CODE 2026-10-23 (w8world): oracle ItemBowBoneRenderer.java:91-118 reproduced by common/src/main/java/thaumcraft/client/renderers/item/BoneBowGlint.java:23-88 and BoneBowGlintRules.java:5-15, wired only into the original held pose by common/src/main/java/thaumcraft/common/mixin/client/BoneBowHeldPoseMixin.java:31-35. Two independently buffered EQUAL-depth passes replace native foil, use the byte-exact official 1.7.10 glint texture, float RGB .38/.19/.608, SRC_COLOR/ONE, .125 texture scale, -50/+10 rotations and 3000/4873-ms opposite scrolls. Whole common/main javac proof and authored NOT executed pure tests; actual held-bow frames remain leader acceptance in docs/analysis/2026-10-23-agent-w8world.md. Supersedes all historical remaining-difference notes below.",
           "oracle thaumcraft/client/renderers/item/ItemBowBoneRenderer.java:22-44 the held-bow transform: scale 2.6666667, rotations -20/90/-60 and the 0.625 inner scale",
           "oracle thaumcraft/client/renderers/item/ItemBowBoneRenderer.java:71-84 the item quad at scale 1.5 with the 50/335 degree rotation and the enchanted glint",
           "native common/src/main/resources/assets/thaumcraft/models/item/bone_bow.json 'parent': 'minecraft:item/bow' with the layer0 thaumcraft:items/bonebow texture",
@@ -12248,6 +12249,7 @@
           "native common/src/main/resources/assets/thaumcraft/models/item/bone_bow.json the vanilla bow item model with the TC4 texture"
         ],
         "notes": [
+          "CURRENT 2026-10-23 (w8world): closed in code, pending leader frames, not claimed visually verified. Original held pose plus two-pass original glint are now implemented. Older deviation/remaining notes below are historical and superseded by the first evidence entry and the w8world report.",
           "The bone bow now uses the vanilla bow item model with the TC4 texture and the three pulling overrides.",
           "Deviation: the original's bespoke held-bow transform (2.6666667 scale and the -20/90/-60 rotations) and the original glint draw are replaced by the vanilla bow pose.",
           "Complete callsite audit: ItemBowBoneRenderer is registered only in ClientProxy.setupItemRenderers.",
@@ -17963,15 +17965,17 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-      "owner": "agent-w7items",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8world",
         "evidence": [
+          "CLOSED IN CODE 2026-10-23 (w8world): oracle TileMirrorRenderer.java:52-554 is reconstructed by common/src/main/java/thaumcraft/client/renderers/tile/LinkedMirrorField.java:24-75, MirrorProjection.java:9-23 and assets/thaumcraft/shaders/core/linked_mirror.vsh:12-15, linked_mirror.fsh:7. The actual constants in oracle :85-92 are object-linear S/T/R (9217) and eye-linear Q (9216), correcting the prior note's reversed description. Actual-matrix near-plane unprojection, homogeneous textureProj, six original inset planes, reset Random(31100), original RGB fade and ONE/ONE inner layers replace shrinking quads. Registered through both loader core-shader callbacks. Whole common/main javac proof; pure tests authored NOT executed. Six-orientation/moving-camera/resource-reload acceptance is in docs/analysis/2026-10-23-agent-w8world.md; no inspected-frame claim. Supersedes historical impossible/remaining claims below.",
           "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:52-554 the linked view of the original is drawn with the fixed function GL11.glTexGen texture coordinate generation and a hand written projection matrix",
           "1.21.1 vanilla the render pipeline of the 1.21.1 (net/minecraft/client/renderer/GameRenderer and the RenderType of the renderer) is shader based, the fixed function texture coordinate generation of the 1.7.10 has no counterpart",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelTunnelField.java:24,36 the native tunnel keeps the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence, but it is an approximation",
           "REMAINING DIFFERENCE: the view dependent texture generation of the original linked view (the fixed function GL11.glTexGen texture coordinate generation and the hand written projection matrix) has no equivalent in the 1.21.1 shader pipeline, and the additive blend of the inner layers is the translucent pass of the native"
         ],
         "notes": [
+          "CURRENT 2026-10-23 (w8world): closed in code with a registered projective core shader and original additive inner passes, pending six-orientation moving-camera leader frames. Older impossibility/remaining notes below are historical and superseded by the first evidence entry and the w8world report.",
           "The 1.7 renderer became a 1.21.1 block entity renderer for the two mirror kinds; the pane, the offset of the unstable mirror, the brightness and the turns are the original ones.",
           "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror.",
         "w7items: fixed-function API absence is real, but does NOT prove shader reproduction impossible. Vanilla assets/minecraft/shaders/core/rendertype_entity_translucent.vsh:8,29-36 copies explicit UV0; there is no glTexGen state. Vanilla rendertype_end_portal.vsh:13-15 and rendertype_end_portal.fsh:39-60 demonstrate view-dependent projected texture coordinates in a shader. Native TileMirrorRenderer.java:57-68 and ModelTunnelField.java:78-122 remain a shrinking/depth-offset quad approximation. REMAINING DIFFERENCE: original eye-linear S/T/R/object-linear Q planes and projection/texture matrices (oracle TileMirrorRenderer.java:85-114 and facing variants) are not reconstructed; Random(31100L) also is not reset on each native face. Existing additive RenderType.eyes is already ONE/ONE, so that old blend blocker is obsolete. Closest-possible reproduction is NOT proven; keep partial."
@@ -41277,9 +41281,10 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w4devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8world",
         "evidence": [
+          "CLOSED IN CODE 2026-10-23 (w8world): oracle ServerTickEventsFML.java:83-104 and ThaumcraftWorldGenerator.java:130-136,548-555 now replay Nether wild aura directly in common/src/main/java/thaumcraft/common/lib/events/ChunkRegeneration.java:189-195, before all surface random draws; End is skipped. Native node factory accepts Nether. Existing :131-154 ten-chunk drain/original seed and :236-243 SAME-random placeSelected structure calls were inspected and retained. No new structure reseeding; no totem on replay (oracle :149 requires newGen and rejects Nether). Whole common/main javac proof; NetherAuraParityTest and biome-wiring assertion authored NOT executed. Real-world marker/11-chunk/Nether acceptance in docs/analysis/2026-10-23-agent-w8world.md. Supersedes historical impossible/remaining notes below.",
           "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java:83-104 the chunk regeneration queue: the chunks whose saved data carries no Thaumcraft marker and whose regeneration options are enabled are regenerated with the TC4 world generation, ten chunks per world tick",
           "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:114-137 the marker of the queue is written on every chunk save and read on every chunk load",
           "1.21.1 vanilla net.minecraft.world.level.chunk.storage.ChunkSerializer.write and .read (the remapped 1.21.1 jar): the chunk NBT is a fixed set of keys and the vanilla has no extension point for a mod, so the marker of the original cannot be written or read",
@@ -41288,6 +41293,7 @@
           "REMAINING GAP 2026-10-23 (w7world): the prior assertion that chunk replay is impossible is false. ChunkRegeneration.java:130-141 drains ten chunks per tick; :149-153 preserves oracle ServerTickEventsFML.java:91-96 seed; common Thaumcraft.java:215 wires the tick. Direct feature bodies replay vegetation/ores/aura/structures without regenerating terrain. Fixed structure reseeding: ChunkRegeneration.java:205-235 now continues the SAME regeneration random via WorldGenMound.java:90, WorldGenHilltopStones.java:59, EldritchRingFeature.java:62; fresh generation and the totem stream remain unchanged. Added Overworld/nonflat/dimension-blacklist structure gates. Exact remaining difference: oracle worldGeneration:130-132 dispatches Nether replay to generateNether:548-555, including wild nodes for regenAura, but native placeWildNode/createRandomNodeAt refuse non-Overworld dimensions (ThaumcraftNormalNodeFeature.java:127,160). The queue is implemented but cannot reproduce that Nether aura pass yet. Whole common/main javac passed; pure stream test authored/compiled, NOT executed."
         ],
         "notes": [
+          "CURRENT 2026-10-23 (w8world): closed in code: Nether aura-only regeneration dispatch is implemented; original ten-chunk drain, seed and same-random structure replay retained. Actual marker/replay world acceptance remains for the leader. Older impossible/remaining notes below are historical and superseded.",
           "The 1.7 tick handler became the Architectury tick events plus the native excavation code; the excavation block swap and the note block clearing are implemented in the native excavation and arcane ear code.",
           "REMAINING GAP: the chunk regeneration queue of the original regenerates the chunks whose saved data carries no Thaumcraft marker, ten chunks per world tick, with the TC4 world generation of the original (oracle ServerTickEventsFML:83-104 and oracle EventHandlerWorld:114-137). 1.21.1 has no chunk data event and no per chunk NBT extension point for the marker, and the TC4 generation of the port runs through the datapack feature pipeline, which cannot be re-run for an existing chunk without regenerating its terrain. The options of the original (Config.regenAura and the five next) keep their default of false.",
           "REMAINING GAP 2026-10-23 (w7world): the prior assertion that chunk replay is impossible is false. ChunkRegeneration.java:130-141 drains ten chunks per tick; :149-153 preserves oracle ServerTickEventsFML.java:91-96 seed; common Thaumcraft.java:215 wires the tick. Direct feature bodies replay vegetation/ores/aura/structures without regenerating terrain. Fixed structure reseeding: ChunkRegeneration.java:205-235 now continues the SAME regeneration random via WorldGenMound.java:90, WorldGenHilltopStones.java:59, EldritchRingFeature.java:62; fresh generation and the totem stream remain unchanged. Added Overworld/nonflat/dimension-blacklist structure gates. Exact remaining difference: oracle worldGeneration:130-132 dispatches Nether replay to generateNether:548-555, including wild nodes for regenAura, but native placeWildNode/createRandomNodeAt refuse non-Overworld dimensions (ThaumcraftNormalNodeFeature.java:127,160). The queue is implemented but cannot reproduce that Nether aura pass yet. Whole common/main javac passed; pure stream test authored/compiled, NOT executed."
@@ -44674,9 +44680,10 @@
         "disposition": "replace",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w4devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8world",
         "evidence": [
+          "CLOSED IN CODE 2026-10-23 (w8world): oracle ThaumcraftWorldGenerator.java:130-132,548-555 Nether branch restored in common/src/main/java/thaumcraft/common/lib/world/ThaumcraftNormalNodeFeature.java:33-50,126-138,160-165 and AuraDimensionRules.java:9-14; data/thaumcraft/tags/worldgen/biome/normal_aura_node_biomes.json:5 schedules it in Nether on both loaders. Nether invokes only wild nodes, never the surface temple branch. Rechecked AuraGenRules.java:61-115,130-144 and ThaumcraftNormalNodeFeature.java:64-78 against oracle :413-419: one native temple centre, surface+3, scattered flag overwritten by wild pass and wild/totem exclusivity remain implemented. Whole common/main javac proof; pure gates/biome wiring tests authored NOT executed; real-world acceptance in docs/analysis/2026-10-23-agent-w8world.md. Supersedes historical remaining claims below.",
           "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:189-215 the wild node pass of the original: the rarity of Config.nodeRarity, the place of the node inside the chunk, the height of Utils.getFirstUncoveredY and the call of createRandomNodeAt",
           "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:218-399 the whole node plan of the original, the type of the node, its modifier, the aura of the biome and the aspects: the pass does NOT delegate into the TC4 API jar, the whole plan is in the oracle",
           "oracle thaumcraft/common/lib/utils/Utils.java:116-122 getFirstUncoveredY of the original starts at the height five and scans up while the block above is not air",
@@ -44688,6 +44695,7 @@
           "REMAINING GAP 2026-10-23 (w7world): the supplied scattered-feature/auraGen gap is already implemented: common/src/main/java/thaumcraft/common/lib/world/AuraGenRules.java:61-115 maps native desert_pyramid/jungle_pyramid/swamp_hut starts to one centre per temple; ThaumcraftNormalNodeFeature.java:63-77 places surface+3 and overwrites the scattered flag as oracle ThaumcraftWorldGenerator.java:413-419 does; AuraGenRules.java:130-144 and ThaumcraftTotemFeature.placePass preserve the wild/totem exclusivity and overwrite quirk. No fresh-generation stream changed. However full-unit parity is still blocked by a newly confirmed real difference: oracle ThaumcraftWorldGenerator.java:130-132,548-555 generates wild Nether nodes, whereas native ThaumcraftNormalNodeFeature.java:38,127,160 hard-restricts the node feature and node factory to Overworld. This also blocks Nether regenAura. This is missing code, NOT a vanilla limitation. Retain partial rather than falsely close the full generator unit. Existing pure auraGen tests reviewed, not rerun."
         ],
         "notes": [
+          "CURRENT 2026-10-23 (w8world): closed in code: Nether wild nodes are scheduled by the biome tag, accepted by feature/factory and replayed by regeneration. Prior temple/auraGen fixes were rechecked. Actual fresh-Nether world acceptance remains for the leader. Older remaining notes below are historical and superseded.",
           "The 1.7 world generator was replaced by a set of 1.21 features (ore, tree, node, decoration, ring and village features); the surface chain, the vegetation pass, the ore pass and the totem were compared draw by draw against the oracle.",
           "CORRECTED 2026-10-23 (w4devices): the note of the row was wrong. The wild node pass of the original does NOT delegate into the TC4 API jar: the oracle holds the whole plan in ThaumcraftWorldGenerator.createRandomNodeAt:218-399 and there is no reference to NodeGenerationManager anywhere in the oracle. The native plan (NodeGeneration.plan) reproduces that plan line by line, the type of the node with the rarity of Config.specialNodeRarity, the modifier with the half of it, the aura of the biome with the taint doubling, the aspects of the node and the spread, and the place of the node inside the chunk is the InSquarePlacement of the 1.21.1, whose arithmetic is the arithmetic of the original.",
           "REMAINING GAP: the node of the vanilla scattered features of the original (oracle ThaumcraftWorldGenerator:413-419) cannot be reproduced, because the vanilla scattered feature subsystem does not exist in 1.21.1, and the auraGen flag of the original, that makes the wild aura node and the aura totem of a chunk exclusive, is not shared by the two native features.",

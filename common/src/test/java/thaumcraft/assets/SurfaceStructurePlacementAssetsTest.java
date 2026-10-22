@@ -80,6 +80,16 @@ class SurfaceStructurePlacementAssetsTest {
         assertEquals(List.of(), empty, "a placed feature without a placement is never placed");
     }
 
+    @Test void originalNetherWildAuraIsActuallyScheduledByTheSharedBiomeTag() throws Exception {
+        // Oracle ThaumcraftWorldGenerator:130-132,548-555. Both loader adapters
+        // select this tag; allowing Nether only in the Feature body places nothing.
+        List<String> values = new ArrayList<>();
+        for (JsonElement entry : ResourceTree.object("data/thaumcraft/tags/worldgen/biome/normal_aura_node_biomes.json")
+                .getAsJsonArray("values")) values.add(entry.getAsString());
+        assertTrue(values.contains("#minecraft:is_nether"));
+        assertFalse(values.contains("#minecraft:is_end"));
+    }
+
     @Test void everyPlacedFeatureHasItsConfiguredFeature() throws Exception {
         List<String> missing = new ArrayList<>();
         for (String file : ResourceTree.files("data/thaumcraft/worldgen/placed_feature")) {

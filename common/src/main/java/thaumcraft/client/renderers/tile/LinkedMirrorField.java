@@ -59,9 +59,12 @@ public final class LinkedMirrorField {
             // Alpha is ONE in the original; the fade multiplies RGB, not alpha.
             VisNetRender.drawWithBlend(layer == 0 ? ModelTunnelField.TUNNEL : ModelTunnelField.FIELD,
                     layer == 0 ? GL11.GL_SRC_ALPHA : GL11.GL_ONE,
-                    layer == 0 ? GL11.GL_ONE_MINUS_SRC_ALPHA : GL11.GL_ONE, true, selected, out -> {
+                    layer == 0 ? GL11.GL_ONE_MINUS_SRC_ALPHA : GL11.GL_ONE, true, true, selected, out -> {
                         float[][] corners = {{.1875F,.1875F},{.1875F,.8125F},{.8125F,.8125F},{.8125F,.1875F}};
-                        for (float[] corner : corners) {
+                        // Oracle :120-123,204-207,288-291,372-375,456-459,540-543.
+                        boolean reverse = axis == 2 ? !positive : positive;
+                        for (int index = 0; index < 4; ++index) {
+                            float[] corner = corners[reverse ? 3-index : index];
                             float[] v = new float[3]; v[axis] = offset; v[s] = corner[0]; v[t] = corner[1];
                             out.addVertex(pose.last(), v[0], v[1], v[2])
                                     .setUv((relative[s] + v[s]) * homogeneousScale, (relative[t] + v[t]) * homogeneousScale)

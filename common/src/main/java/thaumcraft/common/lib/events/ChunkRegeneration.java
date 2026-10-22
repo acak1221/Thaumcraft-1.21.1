@@ -24,6 +24,7 @@ import thaumcraft.common.lib.world.WorldGenMound;
 import thaumcraft.common.lib.world.WorldGenHilltopStones;
 import thaumcraft.common.lib.world.EldritchRingFeature;
 import thaumcraft.common.lib.world.NodeEcologyPolicy;
+import thaumcraft.common.lib.world.AuraDimensionRules;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 
 /**
@@ -188,33 +189,32 @@ public final class ChunkRegeneration {
             // Oracle :130-136,548-555: Nether replay is wild aura ONLY; its totem
             // gate (:149) rejects dimension -1 before consuming any random draws.
             if (level.dimension().equals(Level.NETHER)) {
-                if (thaumcraft.common.lib.world.AuraDimensionRules.netherReplayAura(worldgen.auraNodes(), settings.auraNodes())) {
+                if (AuraDimensionRules.netherReplayAura(worldgen.auraNodes(), settings.auraNodes())) {
                     ThaumcraftNormalNodeFeature.placeWildNode(level, random, chunkX, chunkZ, false);
                 }
             } else if (!level.dimension().equals(Level.END)) {
-            // Oracle ThaumcraftWorldGenerator:421 - the vegetation pass.
-            if (ThaumcraftBiomeSettings.current().generateTrees() && settings.trees()) {
-                ThaumcraftTreeFeature.placePass(level, random, chunkX, chunkZ);
-            }
-            // Oracle ThaumcraftWorldGenerator:422-423 and :481-546 - the ore pass. The pass
-            // itself runs unconditionally and gates each type with genX && regenX.
-            ThaumcraftOreFeature.placePass(level, random, chunkX, chunkZ,
-                    worldgen.cinnabarOre() && settings.cinnibarOre(),
-                    worldgen.amberOre() && settings.amberOre(),
-                    worldgen.infusedStone() && settings.infusedStone());
-            // Oracle ThaumcraftWorldGenerator:414-420 - the scattered feature node and the wild
-            // node pass, with the overwriting assignment of line 419.
-            if (worldgen.auraNodes() && settings.auraNodes()) {
-                ThaumcraftNormalNodeFeature.placeAuraPass(level, random, chunkX, chunkZ);
-            }
-            // Oracle ThaumcraftWorldGenerator:429-453 - the exclusive structure chain. The
-            // totem that follows it in the fresh generation is not replayed (see the class note).
-            if (worldgen.structures() && settings.structures()
-                    && level.dimension().equals(Level.OVERWORLD)
-                    && NodeEcologyPolicy.dimensionLevel(level.dimension()) == -1
-                    && !(level.getChunkSource().getGenerator() instanceof FlatLevelSource)) {
-                placeStructure(level, random, chunkX, chunkZ);
-            }
+                // Oracle ThaumcraftWorldGenerator:406-410 - vegetation and ores.
+                if (ThaumcraftBiomeSettings.current().generateTrees() && settings.trees()) {
+                    ThaumcraftTreeFeature.placePass(level, random, chunkX, chunkZ);
+                }
+                // Each ore type has its own genX && regenX gate.
+                ThaumcraftOreFeature.placePass(level, random, chunkX, chunkZ,
+                        worldgen.cinnabarOre() && settings.cinnibarOre(),
+                        worldgen.amberOre() && settings.amberOre(),
+                        worldgen.infusedStone() && settings.infusedStone());
+                // Oracle :414-420 - the scattered feature node and wild node pass,
+                // with the overwriting assignment of line 419.
+                if (worldgen.auraNodes() && settings.auraNodes()) {
+                    ThaumcraftNormalNodeFeature.placeAuraPass(level, random, chunkX, chunkZ);
+                }
+                // Oracle :429-453 - exclusive structures. The fresh-generation
+                // totem is not replayed (see the class note).
+                if (worldgen.structures() && settings.structures()
+                        && level.dimension().equals(Level.OVERWORLD)
+                        && NodeEcologyPolicy.dimensionLevel(level.dimension()) == -1
+                        && !(level.getChunkSource().getGenerator() instanceof FlatLevelSource)) {
+                    placeStructure(level, random, chunkX, chunkZ);
+                }
             }
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.error("[Thaumcraft] Chunk regeneration failed for chunk at {}; the chunk keeps its terrain",

@@ -45,8 +45,8 @@ public final class VisNetRender {
         drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.QUADS,vertices);
     }
     /** Mirror inner layers use ONE/ONE even where the texture has translucent alpha. */
-    public static void drawWithBlend(ResourceLocation texture,int source,int destination,boolean depthWrite,ShaderInstance selected,Consumer<VertexConsumer> vertices){
-        drawFormat(texture,source,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.QUADS,false,true,vertices);
+    public static void drawWithBlend(ResourceLocation texture,int source,int destination,boolean depthWrite,boolean cull,ShaderInstance selected,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,source,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.QUADS,cull,true,vertices);
     }
     /** Same owned state transaction, native lightmap particle format and the original low-alpha threshold. */
     public static void drawParticle(ResourceLocation texture,ShaderInstance selected,Consumer<VertexConsumer> vertices){

@@ -55,16 +55,16 @@ public final class BoneBowGlint extends RenderType {
             fixed.put(FIRST, new com.mojang.blaze3d.vertex.ByteBufferBuilder(4096));
             fixed.put(SECOND, new com.mojang.blaze3d.vertex.ByteBufferBuilder(4096));
             original = MultiBufferSource.immediateWithBuffers(fixed, base);
-        // ItemRenderer translates generated geometry by -.5 after this entry point.
-        Matrix4f inverse = new Matrix4f(pose.last().pose()).invert();
-        long time = net.minecraft.Util.getMillis();
-        source = type -> {
-            if (type != RenderType.glint()
-                    && type != RenderType.entityGlint() && type != RenderType.entityGlintDirect()
-                    && type != RenderType.glintTranslucent()) return original.getBuffer(type);
-            return VertexMultiConsumer.create(new GlintVertex(original.getBuffer(FIRST), inverse, time, 0),
-                    new GlintVertex(original.getBuffer(SECOND), inverse, time, 1));
-        };
+            // ItemRenderer translates generated geometry by -.5 after this entry point.
+            Matrix4f inverse = new Matrix4f(pose.last().pose()).invert();
+            long time = net.minecraft.Util.getMillis();
+            source = type -> {
+                if (type != RenderType.glint()
+                        && type != RenderType.entityGlint() && type != RenderType.entityGlintDirect()
+                        && type != RenderType.glintTranslucent()) return original.getBuffer(type);
+                return VertexMultiConsumer.create(new GlintVertex(original.getBuffer(FIRST), inverse, time, 0),
+                        new GlintVertex(original.getBuffer(SECOND), inverse, time, 1));
+            };
         }
         public MultiBufferSource source() { return source; }
         @Override public void close() {

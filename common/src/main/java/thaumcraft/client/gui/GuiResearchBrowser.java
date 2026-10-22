@@ -88,7 +88,7 @@ public final class GuiResearchBrowser extends Screen {
         graphics.enableScissor(graphLeft, graphTop, graphLeft + graphWidth, graphTop + graphHeight);
         graphics.blit(texture("textures/gui/" + (category.equals("ELDRITCH") ? "gui_researchbackeldritch.png" : "gui_researchback.png")),
                 graphLeft, graphTop, 0, 0, graphWidth, graphHeight, 512, 512);
-        drawConnectors(graphics, completed, originX, originY);
+        drawConnectors(graphics, completed, originX, originY, delta);
         for (Node node : nodes) {
             boolean unlocked = completed.contains(node.research.key());
             boolean available = node.research.hasPrerequisites(completed);
@@ -183,7 +183,7 @@ public final class GuiResearchBrowser extends Screen {
      * to black along the line, the alpha grows from zero to 0.6 and the whole line wobbles with
      * the sine of the ticks of the player.</p>
      */
-    private void drawConnectors(GuiGraphics graphics, Set<String> completed, int originX, int originY) {
+    private void drawConnectors(GuiGraphics graphics, Set<String> completed, int originX, int originY, float partialTick) {
         Map<String, int[]> positions = new LinkedHashMap<>();
         for (var research : ResearchBrowserData.categoryEntries(category)) {
             positions.put(research.key(), new int[] {originX + research.column() * 24, originY + research.row() * 24});
@@ -193,7 +193,7 @@ public final class GuiResearchBrowser extends Screen {
             int[] from = positions.get(connector.from());
             int[] to = positions.get(connector.to());
             if (from == null || to == null) continue;
-            connectorLine(graphics, from[0] + 11, from[1] + 11, to[0] + 11, to[1] + 11, connector);
+            connectorLine(graphics, from[0] + 11, from[1] + 11, to[0] + 11, to[1] + 11, connector, partialTick);
         }
     }
 
@@ -203,11 +203,13 @@ public final class GuiResearchBrowser extends Screen {
      * vertices wobble with the ticks of the player.
      */
     private void connectorLine(GuiGraphics graphics, float x, float y, float x2, float y2,
-                                ResearchBrowserConnectors.Connector connector) {
+                                ResearchBrowserConnectors.Connector connector, float partialTick) {
         float dx = x - x2, dy = y - y2;
         int segments = ResearchBrowserConnectors.segments(dx, dy);
         if (segments <= 0) return;
-        float count = minecraft.player == null ? 0 : minecraft.player.tickCount;
+        // Oracle GuiResearchBrowser:733 - the phase of the wobble is the age of the
+        // player in ticks plus the partial tick of the frame.
+        float count = (minecraft.player == null ? 0 : minecraft.player.tickCount) + partialTick;
         float stepX = dx / segments, stepY = dy / segments;
         boolean horizontal = Math.abs(dx) > Math.abs(dy);
         if (horizontal) stepX *= 2.0F; else stepY *= 2.0F;

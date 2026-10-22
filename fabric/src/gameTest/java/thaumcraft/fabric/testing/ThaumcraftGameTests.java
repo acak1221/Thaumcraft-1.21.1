@@ -758,6 +758,21 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         ArcaneWorkbenchRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "crafting_audit_grid")
+    public void craftingAuditGridBoundaries(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingAuditRuntimeChecks.gridBoundaries(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "crafting_audit_shaped")
+    public void craftingAuditShapedDamage(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingAuditRuntimeChecks.damagedIngredient(test, false);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "crafting_audit_shapeless")
+    public void craftingAuditShapelessDamage(GameTestHelper test) {
+        thaumcraft.common.testing.CraftingAuditRuntimeChecks.damagedIngredient(test, true);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void naturalNodesDrainAndRegenerate(GameTestHelper test) {
         NaturalNodeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());

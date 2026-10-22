@@ -134,6 +134,14 @@ public final class CrucibleRuntimeChecks {
             KnowledgeAccess.get(player).addResearch("NITOR");
             AspectList beforeCraft = tile.getAspects();
             ItemEntity catalyst = drop(level, pos, Items.GLOWSTONE_DUST, 1, player);
+            for (Aspect aspect : new Aspect[] {Aspect.ENERGY, Aspect.FIRE, Aspect.LIGHT}) {
+                AspectList shortPool = tile.getAspects();
+                shortPool.remove(aspect, shortPool.getAmount(aspect) - 2);
+                var snapshot = shortPool.copy();
+                test.assertTrue(CrucibleCrafting.find(level, catalyst, shortPool) == null && same(shortPool, snapshot)
+                        && catalyst.getItem().getCount() == 1 && !catalyst.isRemoved(),
+                        "Nitor below threshold refuses selection without consuming catalyst or aspect pool: " + aspect.getTag());
+            }
             collide(level, pos, catalyst);
             test.assertTrue(catalyst.isRemoved() && tile.getWaterAmount() == 950
                     && same(tile.getAspects(), beforeCraft.remove(Aspect.ENERGY, 3).remove(Aspect.FIRE, 3).remove(Aspect.LIGHT, 3))

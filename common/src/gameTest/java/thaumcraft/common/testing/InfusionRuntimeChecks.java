@@ -153,6 +153,23 @@ public final class InfusionRuntimeChecks {
             input.set(DataComponents.CUSTOM_DATA, CustomData.of(extra));
             center.setItem(0, input.copy());
             supplyComponents(level, recipe, peripheral);
+            KnowledgeAccess.get(player).removeResearch("ROD_silverwood");
+            var refusalInputs = peripheral.stream().map(pos -> ((TilePedestal) level.getBlockEntity(pos)).getItem(0).copy()).toList();
+            test.assertTrue(!matrix.startCrafting(player) && !matrix.isCrafting() && stock(sources) == 192
+                    && ItemStack.matches(input, center.getItem(0)) && ItemStack.matches(paidWand, player.getMainHandItem()),
+                    "missing infusion research refuses before central/component/essentia/vis debit");
+            for (int i = 0; i < peripheral.size(); i++) test.assertTrue(ItemStack.matches(refusalInputs.get(i),
+                    ((TilePedestal) level.getBlockEntity(peripheral.get(i))).getItem(0)), "research refusal preserves pedestal " + i);
+            KnowledgeAccess.get(player).addResearch("ROD_silverwood");
+            var extraPedestal = (TilePedestal) level.getBlockEntity(peripheral.getLast());
+            test.assertTrue(extraPedestal.isEmpty(), "eighth pedestal is outside the seven required components");
+            extraPedestal.setItem(0, new ItemStack(Items.DIRT));
+            test.assertTrue(!matrix.startCrafting(player) && !matrix.isCrafting() && stock(sources) == 192
+                    && ItemStack.matches(input, center.getItem(0)) && extraPedestal.getItem(0).is(Items.DIRT),
+                    "extra occupied pedestal refuses recipe admission with no input/essentia debit");
+            for (int i = 0; i < peripheral.size() - 1; i++) test.assertTrue(ItemStack.matches(refusalInputs.get(i),
+                    ((TilePedestal) level.getBlockEntity(peripheral.get(i))).getItem(0)), "extra-input refusal preserves pedestal " + i);
+            extraPedestal.setItem(0, ItemStack.EMPTY);
             test.assertTrue(recipe.matches(new InfusionRecipeInput(input, recipe.components().stream().map(ingredient -> ingredient.getItems()[0]).toList()), level), "untagged original input accepts additional components/NBT");
             test.assertTrue(use(player, matrixPos, Direction.UP).consumesAction() && matrix.isCrafting()
                     && matrix.getDemand().visSize() == 63 && matrix.getInstability() == matrix.getSymmetry() + 5

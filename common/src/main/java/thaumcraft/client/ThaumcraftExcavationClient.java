@@ -94,7 +94,10 @@ public final class ThaumcraftExcavationClient {
     private static void tick(Minecraft client) {
         if (client.level == null || client.player == null) { clear(); return; }
         BEAMS.entrySet().removeIf(entry -> {
-            Beam beam = entry.getValue(); ++beam.age; if (beam.impact > 0) --beam.impact;
+            Beam beam = entry.getValue();
+            beam.previousSize = Math.min(beam.age / 4.0F, 1.0F);
+            ++beam.age;
+            if (beam.impact > 0) --beam.impact;
             var caster = client.level.getEntity(entry.getKey());
             return --beam.remaining <= 0 || !client.level.dimension().location().equals(beam.dimension)
                     || caster == null || caster.isRemoved() || client.player.distanceToSqr(beam.origin) > 64 * 64;

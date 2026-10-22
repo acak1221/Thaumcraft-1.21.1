@@ -2128,7 +2128,7 @@ public class EntityGolemBase extends AbstractGolem {
         return distanceToSqr(marker.pos().getX() + .5, marker.pos().getY() + .5, marker.pos().getZ() + .5);
     }
 
-    private GolemMarker firstAdjacentWorldThrowMarker() {
+    GolemMarker firstAdjacentWorldThrowMarker() {
         for (GolemMarker marker : markers) {
             // Original AIEmptyDrop:49 — the golem's own home is never a drop target.
             if (marker.pos().equals(getHomePosition())) continue;

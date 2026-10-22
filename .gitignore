@@ -87,3 +87,4 @@ neoforge/run/
 javac.*.args
 .gradle-iso/
 .gradle-g2c/
+.gradle-g7/

@@ -8326,14 +8326,20 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java:79 ArrayList<BlockCoordinates> architectBlocks",
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java:311 for (BlockCoordinates cc : this.architectBlocks) and :319 contains(new BlockCoordinates(x,y,z))",
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java the radial focus selection menu",
+          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java:185-295 renderFocusRadialHUD draws the whole radial and :287-289 the only text of it, the tooltip of the hovered focus at the mouse; the original draws no centre label",
+          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/gui/GuiResearchRecipe.java:452-453 the original's own centred text rule: int offset = this.fr.getStringWidth(text) / 2; this.fr.drawString(text, x + start + 16 - offset, ...), one draw of one string at (centre - width / 2)",
           "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:30 // Native non-pausing version of TC4 REHWandHandler's held-F radial.",
           "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:28 public record Area(int x, int y, int z, int axis)",
-          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:82 public static List<BlockPos> planarBlocks(...)"
+          "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:82 public static List<BlockPos> planarBlocks(...)",
+          "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:201-212 the centre line names the focused focus and nothing else, so a second render pass of the screen (the client smoke renders the radial again with a scripted hover point) cannot leave a second string behind it",
+          "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:228-233 centered() draws the line once, at centredOffset(centerX, font.width(label)) = centre - font.width(text) / 2, the expression the original uses",
+          "test common/src/test/java/thaumcraft/client/gui/FocusRadialLabelTest.java the centre line rule: it names the focused focus, it has no hover-dependent placeholder, it is centred with the original's expression and it is drawn once"
         ],
         "notes": [
           "The held-F radial focus selection is ported as GuiFocusSelect, and the Architect block list became a server-side BlockPos list computed by WandArchitect.",
           "DEVIATION: the original REHWandHandler was a client-side handler that held the whole architect block list in the client and drew the selection overlays; the native moves the area to the server and to a bounded Area record.",
-          "REMAINING GAP (client lane): the selection overlay of the original is drawn by the client handler; the native computes the same area on the server and draws it in the client gui."
+          "REMAINING GAP (client lane): the selection overlay of the original is drawn by the client handler; the native computes the same area on the server and draws it in the client gui.",
+          "FIXED (client lane, 2026-10-23): the centre label of the radial was two overlapping text runs in the client smoke frame 43. The radial is rendered twice into the same frame (the game with the real cursor, the client smoke with a scripted hover point), and the centre line carried a hover-dependent placeholder next to the name of the focused focus. The centre line now names the focused focus only and is drawn once, at centre - font.width(text) / 2."
         ],
         "reviewed_sha256": {
           "original": "c6a51c95a42eedf9d6ef600e763bee7cabfd31229fbe6a63034fe5d9c31a2342",

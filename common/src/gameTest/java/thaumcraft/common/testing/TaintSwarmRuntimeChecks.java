@@ -151,13 +151,10 @@ public final class TaintSwarmRuntimeChecks {
             long time=f.level.getDayTime();
             try {
                 f.level.setDayTime(6000);f.level.updateSkyBrightness();var actual=RandomSource.create(1710);var expected=RandomSource.create(1710);int roll=expected.nextInt(7);
-                // Oracle EntityTaintSwarm:226-233 - the class gate of the swarm reads the BLOCK
-                // light of the cell against a nextInt(7) roll, so open air passes it under the
-                // open sky of the day as well. The original overrides isValidLightLevel with a
-                // plain TRUE, so the inherited 32/8 mob rolls are never drawn.
-                int block=f.level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK,origin);
+                // Original class gate uses combined light against7, without inherited32/8 rolls.
+                int block=f.level.getMaxLocalRawBrightness(origin);
                 f.check(SpawnPlacements.checkSpawnRules(ThaumcraftTaint.TAINT_SWARM.get(),f.level,MobSpawnType.NATURAL,origin,actual)==(block<=roll)&&actual.nextLong()==expected.nextLong(),
-                        "registered actual bright-day swarm spawn follows the original BLOCK-light nextInt7 class gate without inherited32/8 draws");
+                        "registered bright-day swarm spawn follows combined-light nextInt7 without inherited32/8 draws");
                 f.level.setDayTime(18000);f.level.updateSkyBrightness();boolean admitted=false;
                 for(long seed=0;seed<1000;seed++)admitted|=SpawnPlacements.checkSpawnRules(ThaumcraftTaint.TAINT_SWARM.get(),f.level,MobSpawnType.NATURAL,origin,RandomSource.create(seed));
                 EntityTaintSwarm swarm=swarm();f.check(admitted&&f.level.isEmptyBlock(origin.below())&&swarm.checkSpawnObstruction(f.level),

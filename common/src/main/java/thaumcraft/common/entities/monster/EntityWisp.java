@@ -145,7 +145,7 @@ public final class EntityWisp extends FlyingMob implements Enemy {
         AABB candidate=type.getDimensions().makeBoundingBox(pos.getX()+.5,pos.getY(),pos.getZ()+.5);
         if(level.getLevel().getEntitiesOfClass(EntityWisp.class,candidate.inflate(16)).size()>=8)return false;
         if(level.getDifficulty()==Difficulty.PEACEFUL) return false;
-        // Original EntityWisp.isValidLightLevel: the darkened sky light and the block light.
+        // Original EntityWisp.isValidLightLevel: saved SKY, then combined light.
         return OriginalLightRules.validWispLightLevel(level,pos,random);
     }
     @Override public boolean checkSpawnObstruction(LevelReader level) { return this.level().getEntitiesOfClass(EntityWisp.class,getBoundingBox().inflate(16)).size()<8 && super.checkSpawnObstruction(level); }

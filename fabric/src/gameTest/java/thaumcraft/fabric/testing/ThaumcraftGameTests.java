@@ -1588,6 +1588,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.SpawnAuditRuntimeChecks.championNaturalLifecycle(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "g13_spawn_light")
+    public void spawnAuditOriginalCombinedDaylight(GameTestHelper test) {
+        thaumcraft.common.testing.SpawnLightAuditRuntimeChecks.daylight(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "r14_biome_source")
     public void originalBiomesUseActualRegistrySourcesAndSpawnRows(GameTestHelper test) {
         thaumcraft.common.testing.BiomeRuntimeChecks.source(test);

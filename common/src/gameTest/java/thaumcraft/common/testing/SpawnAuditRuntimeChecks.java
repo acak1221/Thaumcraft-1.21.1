@@ -20,8 +20,8 @@ public final class SpawnAuditRuntimeChecks {
         var expected = java.util.Map.of(
                 ThaumcraftBiomes.MAGICAL_FOREST, java.util.List.of("pech:10:1:1", "wisp:10:1:2"),
                 Biomes.PLAINS, java.util.List.of("brainy_zombie:10:1:1"),
-                ThaumcraftBiomes.EERIE, java.util.List.of("giant_brainy_zombie:8:1:1", "eldritch_guardian:1:1:1", "wisp:3:1:1"),
-                ThaumcraftBiomes.TAINT, java.util.List.of("taintacle:1:1:1"),
+                ThaumcraftBiomes.EERIE, java.util.List.of("brainy_zombie:32:1:1", "giant_brainy_zombie:8:1:1", "eldritch_guardian:1:1:1", "wisp:3:1:1", "pech:10:1:1"),
+                ThaumcraftBiomes.TAINT, java.util.List.of("taintacle:1:1:1", "pech:10:1:1"),
                 ChampionHooks.ELDRITCH_LANDS, java.util.List.of("inhabited_zombie:1:1:1", "eldritch_guardian:1:1:1"),
                 Biomes.NETHER_WASTES, java.util.List.of("firebat:10:1:2", "wisp:5:1:1"));
         expected.forEach((key, rows) -> {

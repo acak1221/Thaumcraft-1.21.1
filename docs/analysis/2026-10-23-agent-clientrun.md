@@ -219,6 +219,7 @@ run itself is the proof that the port opens its world without the question.
 | 2 | 22:05 (previous session) | `ClassCastException: ItemEntity cannot be cast to EntitySpecialItem` in `RenderSpecialItem.render`, reached through `ItemPickupParticle.render` → `EntityRenderDispatcher.render` | **port defect.** 1.21.1 renders the item pickup animation with a *copy* of the picked entity, and `ItemEntity.copy()` keeps the entity **type** but not the entity **class** (`ItemEntity(ItemEntity)` calls `super(itemEntity.getType(), …)`), so the copy of a special item is a plain item entity that still carries `thaumcraft:special_item`. A renderer typed to `EntitySpecialItem` throws in its bridge method. The client died as soon as the player picked up the crucible output | `RenderSpecialItem` and `RenderFollowingItem` now accept any `ItemEntity` (`common/src/main/java/thaumcraft/client/renderers/entity/RenderSpecialItem.java:33`, `…/RenderFollowingItem.java:23`) |
 | 3 | 23:36 | `NoSuchElementException` in `DistillationClientSequence.clickButton` | **harness defect.** The research browser has no category buttons: the categories are drawn icons in the margin and picked by their own hit test (`GuiResearchBrowser.mouseClicked` → `tabAt`, oracle `GuiResearchBrowser:668-687`). The distillation and focus sequences looked for a vanilla `Button` labelled `tc.research_category.THAUMATURGY`, which can never exist. The distillation story had therefore never run in a client | both sequences now use the real tab hit test (`BookClientSmoke.clickCategoryTab`) |
 | 4 | — | eight entity types of the port have **no** client renderer registration | 1.21.1 looks the renderer up by entity type and has no fallback (`EntityRenderDispatcher.getRenderer` → `renderers.get(entity.getType())`), so those entities would crash the client with a `NullPointerException` as soon as they are drawn | the three item entities are registered now (`permanent_item` → `RenderSpecialItem`, `follow_item` → `RenderFollowingItem`, `item_grate` → the vanilla item renderer, `common/src/main/java/thaumcraft/client/ClientSetup.java:169-175`); the remaining five are reported in §5 |
+| 5 | 05:14 | `Focus client step timed out: CANCEL_PRESS` and then `IllegalStateException: isolated native input fixture tests the actual default F/offhand conflict` | **port defect.** The three TC4 keys were unbound by default: `ThaumcraftFocusClient.CHANGE_FOCUS` used `GLFW.GLFW_KEY_UNKNOWN`. The comment and the ledger row of the key handler cited `oracle thaumcraft/api/Keys.java:7-9`, a file that **does not exist** in the oracle and in the jar (`unzip -l Thaumcraft-1.7.10-4.2.3.5.jar` lists only `thaumcraft/common/lib/events/KeyHandler.class`). The original binds all three keys by default: `javap -c thaumcraft/common/lib/events/KeyHandler.class` shows `bipush 33` → `keyF "Change Wand Focus"`, `bipush 35` → `keyH "Activate Hover Harness"`, `bipush 34` → `keyG "Misc Wand Toggle"`. The 1.7.10 key codes 33/35/34 are LWJGL2 `Keyboard.KEY_F`/`KEY_H`/`KEY_G`, and the original's own field names agree. The player therefore never got the focus radial, the hover harness or the misc wand toggle out of the box | the three mappings bind `GLFW_KEY_F`/`GLFW_KEY_H`/`GLFW_KEY_G` again (commit `b17fa3ff`); the ledger row of the key handler now carries the jar evidence |
 
 ### The exact stack of the crash that killed the 22:05 run
 
@@ -345,6 +346,31 @@ that is meant to close the scope is the leader's run in this worktree; the frame
 runs of this session were deleted together with the run directory when that run started
 (`rm -rf fabric/run-clienttest`), so only the frames listed above could be inspected here.
 
+### 4.2 The frames of the sibling run of the same branch family (55 frames)
+
+The `agent/clientrun2` worktree of the same wave ran the same harness with the same
+port code (including the port fix of §1.5 and the key fix of §2/5) and produced 55
+frames before the sandbox killed it in the `INFUSION` stage. The frames were copied into
+this worktree (`.tmp/shots-a01468a7/`) and inspected here. The frames that add something
+to the table above:
+
+| frame | what it shows | verdict |
+|-------|---------------|---------|
+| `27/28/29-crucible-…` | the TC4 crucible with the dissolved coal and torches, the **boiling water with the bubble animation**, and the crafted nitor floating above it with the **original additive three ray star** and the aspect orbs around it | **pass.** The star is the original `RenderSpecialItem` geometry, and this is the frame whose pickup animation used to crash the client (§2, row 2) |
+| `34-distilled-alembics-burning-furnace-and-bellows-world-en.png` | the alembic row on the burning arcane furnace with the bellows, in the real world | **pass.** |
+| `36-distillation-native-furnace-recipe-book-en.png` / `41-native-fire-focus-recipe-book-en.png` | the distillation and focus recipe pages of the book | **pass.** The original book texture and the original text |
+| `38-native-greatwood-gold-wand-assembly-menu-en.png` / `42-native-fire-focus-arcane-assembly-menu-en.png` | the arcane assembly menu of the greatwood/gold wand and of the fire focus | **pass.** |
+| `43-native-held-F-focus-selection-radial-en.png` | the focus radial **opened with F** — the original's key — with the header "Change Wand Focus" / "Equipped: None", the focus description "Wand Focus: Fire", "Vis per tick: Ignis × 0.1", the original hint "Release F / click · Arrows / wheel · Esc", the "Remove (Left Shift+F)" and "Cancel" buttons and the wand name | **pass with one defect.** The radial opens with the original key (the key fix of §2/5), but the native hover tooltip of the focused slot is drawn over the radial's own "Wand Focus: Fire" label: the two texts overlap in the middle of the screen and neither is readable. The tooltip itself is correct ("Hand Focus: Fire", "Vis per tick:", "Ignis × 0.1", "Primal and Potency are implemented; …", "Inventory slot: 9"), so the defect is the **layering** of the tooltip against the radial's own label, not the content |
+| `44-native-fire-focus-live-embers-damage-and-ignition-world-en.png` | the fire focus burning in the world | **pass** |
+| `45-native-Shift-F-removal-returned-focus-inventory-en.png` | the focus removed with Shift+F and the slot empty | **pass** |
+| `46-native-shimmerleaf-cinderpearl-models-and-particles-world-en.png` | the shimmerleaf plant and the burning cinderpearl with its fire particle, on the real world ground | **pass.** The models and the particles are the original assets |
+| `47/48/53-…-recipe-book/arcane-assembly-menu` | the essentia tube and the silverwood infusion pages and menus | **pass.** |
+| `49-native-two-crafted-tubes-floating-dry-network-world-en.png` | two crafted essentia tubes floating as the dry network of the tube system | **pass.** |
+| `50/51/52-native-…-alembics-world-en.png` | the wand-indexed arm, the typed tube pulling into the labelled jar, the transport jar broken and picked up again | **pass.** |
+| `54-native-infusion-matrix40ordo-arcane-menu-en.png` | the infusion matrix with 40 ordo in the arcane menu | **pass.** |
+| `55-native-crafted-altar-wand-formation-and72candles-world-en.png` | the crafted altar with the wand formation and the 72 candles | **pass.** |
+
+
 ---
 
 ## 5. Still unverified / open
@@ -353,22 +379,75 @@ runs of this session were deleted together with the run directory when that run 
    remaining blocker is in the harness, not in the port: the focus sequence needs the X
    focus of the client window and another agent's focus loop steals it from one of the
    two open Minecraft windows.
-2. **The eight entity types without a client renderer** (found statically, §2/4):
-   `thaumcraft:bottle_taint` (`EntityBottleTaint extends ThrowableProjectile`),
-   `thaumcraft:golem_orb` (`EntityGolemOrb extends ThrowableProjectile`),
-   `thaumcraft:primal_arrow` (`EntityPrimalArrow extends AbstractArrow`; the port even has
-   the original `RenderPrimalArrow`, but it is not registered),
-   `thaumcraft:taint_crawler`, `thaumcraft:taint_seed`, `thaumcraft:taint_seed_prime`
-   (monsters) and `thaumcraft:taintacle_giant` (the port has the original `RenderTaintacle`,
-   but it is not registered). 1.21.1 looks the renderer up by entity type and has no
-   fallback, so every one of them is a `NullPointerException` in
-   `EntityRenderDispatcher.render` as soon as the entity is drawn. The three item entity
-   types of the port are registered now; the remaining five still need a renderer
-   registration (the original TC4 used the vanilla renderers for them, the port has the
-   original renderer classes for the primal arrow and the taintacle).
-3. **Multiplayer, survival progression, the NeoForge client and the audio** are not
+
+   **What this session added.** The focus stealing is avoidable and was avoided: the
+   X11 window of a GLFW client carries the `_NET_WM_PID` property of its own process, so
+   `XSetInputFocus` can be directed at exactly one client instead of at every window named
+   "Minecraft". `.tmp/xfocus.py` in this worktree does that (`xprop -id <win>
+   _NET_WM_PID` → `XSetInputFocus`), and with it the focus sequence of this agent's run
+   passed the `CANCEL_PRESS`/`FOCUS_PRESS` steps and the run reached the `FOCUS` stage.
+   The remaining blocker is therefore no longer the focus but the **memory of the
+   sandbox**: 15.7 GB shared by three or four simultaneous Minecraft clients and several
+   Gradle daemons; the OOM killer ended several runs with exit 137 (`dmesg`: *Killed
+   process … anon-rss:1.6 GB*) and one Gradle invocation was stopped by an external
+   `gradle --stop`.
+
+2. **The entity types without a client renderer** (found statically and verified
+   against the 1.21.1 sources, §2/4). 1.21.1 has **no fallback**:
+   `EntityRenderDispatcher.getRenderer` is `this.renderers.get(entity.getType())` and
+   `EntityRenderDispatcher.render` dereferences it without a null check
+   (`entityRenderer.getRenderOffset(entity, h)`), so an unregistered type is a
+   `NullPointerException` in `net.minecraft.client.renderer.entity.EntityRenderDispatcher.render`
+   as soon as the entity is drawn. The port registers 105 entity types and 50 renderer
+   constants; the types that are neither block entities (they use
+   `BlockEntityRendererRegistry`) nor registered are:
+
+   | entity type | port class | original renderer |
+   |-------------|------------|-------------------|
+   | `thaumcraft:primal_arrow` | `EntityPrimalArrow` | `RenderPrimalArrow` (oracle `ClientProxy.java:488`), the port has the class, it is only not registered |
+   | `thaumcraft:golem_orb` | `EntityGolemOrb` | `RenderElectricOrb` (oracle `ClientProxy.java:476`), the port has the class, it is only not registered |
+   | `thaumcraft:taintacle_giant` | `EntityTaintacleGiant` | `RenderTaintacle(1.0F, 14)` (oracle `ClientProxy.java:494`), the port has the class, it is only not registered |
+   | `thaumcraft:bottle_taint` | `EntityBottleTaint` | `RenderSnowball(itemBottleTaint, 0)` (oracle `ClientProxy.java:513`) — 1.21.1 has no snowball renderer, a native item projectile renderer is needed |
+   | `thaumcraft:taint_crawler`, `thaumcraft:taint_seed`, `thaumcraft:taint_seed_prime` | `EntityTaintCrawler`, `EntityTaintSeed`, `EntityTaintSeedPrime` | **not in TC4 4.2.3.5 at all** — these are 1.12-era entities that the port still registers (they have spawn eggs); the port even has the unused `RenderNoop` for a body-less entity |
+
+   The first three only need the registration that the original had; the fourth needs a
+   native renderer; the last three are port-only entities and their parity is a ledger
+   question, not a crash question (nothing in the port spawns them). They were **not**
+   fixed in this session because each of them needs a parity decision that belongs to the
+   entity owner of the wave, and a wrong renderer would be a worse defect than a missing
+   one.
+
+2a. **One visual defect was found in the frames** (the only one of the 55 inspected
+    frames): in the focus radial (`43-native-held-F-focus-selection-radial-en.png`) the
+    native hover tooltip of the focused slot is drawn over the radial's own
+    "Wand Focus: Fire" label, so the two texts overlap and neither is readable. The
+    content of both texts is the original's; the defect is the layering, in
+    `common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java` (the label is drawn
+    at the vertical centre of the screen, which is exactly where the vanilla tooltip of
+    the hovered widget is drawn). Not fixed in this session: the fix needs the decision
+    where the original placed the focus label, and the radial itself is a 1.21.1
+    adaptation (the original 4.2.3.5 has no radial, only `GuiFocusPouch`).
+
+
+3. **`ALCHEMY` is flaky in this sandbox.** The step `OUTPUT` waits 600 client ticks for
+   the crucible to craft the nitor from the dropped catalyst; in one run the catalyst
+   item lay next to the crucible without being consumed
+   (*`Alchemy client step timed out: OUTPUT; water=1000; slot4=0 minecraft:air;
+   nearby=[1 minecraft:glowstone_dust@…]`*) while an earlier run of the same build
+   produced `29-crucible-physical-floating-nitor-en.png` with the item floating above
+   the crucible. The crucible consumes an item in `BlockCrucible.entityInside` →
+   `TileCrucible.attemptSmelt` (`common/src/main/java/thaumcraft/common/tiles/TileCrucible.java:183`),
+   which needs `heat > 150 && water > 0`; the server of that run was 43 s behind
+   (*"Can't keep up! … Running 43340ms or 866 ticks behind"*), so the heat of the
+   arcane furnace below the crucible can drop below 150 before the catalyst is consumed.
+   Not fixed here: the harness needs the crucible to stay hot, and that is a fixture
+   question of the harness, not a port defect.
+
+4. **Multiplayer, survival progression, the NeoForge client and the audio** are not
    verified by this agent.
-4. The `docs/porting/*-client.json` accepted evidence was not modified by this agent.
+
+5. The `docs/porting/*-client.json` accepted evidence was not modified by this agent.
+
 5. **The sandbox itself was the limiting factor of the last hour**: three Minecraft
    clients (this agent, the leader and the `multiplayer` agent), Gradle daemons and two
    `xfocus.py` loops shared 15 GB of RAM and one X display, so runs were killed with exit

@@ -144,10 +144,8 @@ final class InventoryGolemGoals {
     private GolemMarker nearestSupply(ItemStack exemplar) {
         GolemMarker result = null;
         double nearest = Double.MAX_VALUE;
-        for (GolemMarker marker : golem.getMarkers()) {
-            if (!golem.markerAccepts(marker, exemplar)) continue;
-            GolemHomeInventory.Destination source = golem.markedInventory(marker);
-            if (source == null || source.firstExtractable(exemplar, marker.face(), golem.itemMatchFlags()) < 0) continue;
+        // The single entry point of the original's helper keeps the order of the markers.
+        for (GolemMarker marker : GolemHelper.getMarkedContainersWithGoods(golem, exemplar)) {
             double distance = golem.distanceToMarkerSqr(marker);
             if (distance < nearest) { nearest = distance; result = marker; }
         }
@@ -158,6 +156,20 @@ final class InventoryGolemGoals {
         return golem.getGolemCore() == GolemData.SORTING && !cargo.isEmpty() && !canDeliver(cargo);
     }
 
+    // ---- the single entry point of the original's helper --------------------------------------------------------
+
+    /** Original {@code GolemHelper.isOnTimeOut}:568-579 — the ten second ignore of an item. */
+    boolean isItemOnTimeout(ItemStack stack) { return onTimeout(stack); }
+
+    /** Original {@code GolemHelper.findSomethingEmptyCore}:515-543 — a destination for the item. */
+    boolean hasEmptyCoreDestination(ItemStack stack) { return destinationExists(stack); }
+
+    /** Original {@code GolemHelper.findSomethingSortCore}:545-566 — a destination for the item. */
+    boolean hasSortingCoreDestination(ItemStack stack) { return destinationExists(stack); }
+
+    /** Original {@code GolemHelper.validTargetForItem}:581-611 — the item may be delivered. */
+    boolean hasValidTargetForItem(ItemStack stack) { return canDeliver(stack); }
+
     boolean canDeliver(ItemStack exemplar) {
         if (exemplar.isEmpty() || onTimeout(exemplar)) return false;
         if (findDestination(exemplar) != null) return true;
@@ -165,14 +177,27 @@ final class InventoryGolemGoals {
         return false;
     }
 
+    /** The original's search of a destination, with its timeout side effect. */
+    private boolean destinationExists(ItemStack stack) {
+        if (stack == null || stack.isEmpty() || onTimeout(stack)) return false;
+        if (findDestination(stack) != null) return true;
+        fail(stack);
+        return false;
+    }
+
     private boolean inventoryAccepts(GolemMarker marker, ItemStack stack) {
         if (!golem.markerAccepts(marker, stack)) return false; // Order: the stack's slot colour must accept the marker's colour.
-        GolemHomeInventory.Destination destination = golem.markedInventory(marker);
+        GolemHomeInventory.Destination destination = GolemHelper.markedContainer(golem, marker);
         return destination != null && destination.current() && destination.roomFor(stack, marker.face()) > 0;
     }
 
+    /** The markers whose container would take the stack, in the order of the markers. */
+    private List<GolemMarker> containersWithRoom(ItemStack stack) {
+        return GolemHelper.getMarkedContainersWithRoom(golem, stack);
+    }
+
     private boolean sortingInventoryAccepts(GolemMarker marker, ItemStack stack) {
-        GolemHomeInventory.Destination destination = golem.markedSortingInventory(marker);
+        GolemHomeInventory.Destination destination = GolemHelper.markedSortingContainer(golem, marker);
         return destination != null && destination.hasSeedAndRoom(stack, marker.face(), golem.itemMatchFlags());
     }
 
@@ -392,7 +417,7 @@ final class InventoryGolemGoals {
             for (GolemMarker marker : golem.getMarkers()) {
                 if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker))) continue;
                 if (!golem.markerAccepts(marker, exemplar)) continue;
-                GolemHomeInventory.Destination source = golem.markedInventory(marker);
+                GolemHomeInventory.Destination source = GolemHelper.markedContainer(golem, marker);
                 if (source != null && source.firstExtractable(exemplar, marker.face(), golem.itemMatchFlags()) >= 0) return marker;
             }
             return null;
@@ -410,18 +435,17 @@ final class InventoryGolemGoals {
             // Original AIEmptyPlace.func_75250_a:41-77 — no delay gate, the navigator must be idle.
             if (!golem.hasCargo() || !golem.getNavigation().isDone()) return false;
             ItemStack cargo = golem.getCarriedItem();
-            for (GolemMarker marker : golem.getMarkers()) {
+            for (GolemMarker marker : containersWithRoom(cargo)) {
                 if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker))) continue;
-                if (inventoryAccepts(marker, cargo)) return true;
+                return true;
             }
             return false;
         }
 
         @Override void ladderStart() {
             ItemStack cargo = golem.getCarriedItem();
-            for (GolemMarker marker : golem.getMarkers()) {
+            for (GolemMarker marker : containersWithRoom(cargo)) {
                 if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker))) continue;
-                if (!inventoryAccepts(marker, cargo)) continue;
                 if (golem.placeCarriedAtMarker(marker) <= 0) continue;
                 // Original AIEmptyPlace.func_75249_e:114 — the counters of the transfer.
                 count = GolemLadderRules.PARTIAL_HOLD;

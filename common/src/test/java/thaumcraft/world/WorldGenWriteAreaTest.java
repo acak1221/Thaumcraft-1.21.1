@@ -55,4 +55,18 @@ class WorldGenWriteAreaTest {
         for (int origin = 8; origin < 24; origin++) if (!inside(origin + GREATWOOD_REACH, 0)) refused++;
         assertEquals(8, refused, "origins 16..23 plus a canopy of " + GREATWOOD_REACH + " end past block 31");
     }
+
+    @Test void nineteenBlockMoundsCanReachTwoChunksAwayDespiteAnInChunkOrigin() {
+        for (ChunkPos center : new ChunkPos[] {CENTER, new ChunkPos(-24, -13), new ChunkPos(24, 13)}) {
+            int refused = 0;
+            for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+                BlockPos farCorner = new BlockPos(center.getMinBlockX() + x + 18, 64,
+                        center.getMinBlockZ() + z + 18);
+                boolean fits = WorldGenWriteArea.inside(center, 1, farCorner);
+                assertEquals(x <= 13 && z <= 13, fits);
+                if (!fits) refused++;
+            }
+            assertEquals(60, refused, "60/256 mound origins overrun native FEATURES writes");
+        }
+    }
 }

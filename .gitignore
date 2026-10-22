@@ -88,3 +88,4 @@ javac.*.args
 .gradle-iso/
 .gradle-g2c/
 .gradle-g6/
+.gradle-g10/

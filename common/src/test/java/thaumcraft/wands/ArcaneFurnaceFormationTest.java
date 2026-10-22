@@ -27,20 +27,21 @@ class ArcaneFurnaceFormationTest {
     }
 
     @Test void theShellOfTheOriginalIsNetherBricksObsidianLavaAndAir() {
-        // Oracle WandManager.java:351-356.
+        // Oracle WandManager.java:351-356: the blueprint of the original shell is
+        // {{{nether bricks, obsidian, nether bricks}, {obsidian, air, obsidian}, {nether bricks,
+        // obsidian, nether bricks}} for the top layer, the same with lava in the middle for the
+        // middle layer and the same with obsidian in the middle for the bottom layer.
+        assertSame(Blocks.AIR, ArcaneFurnaceFormation.expected(0, 1, 1),
+                "the middle of the top layer of the original shell is empty");
+        assertSame(Blocks.LAVA, ArcaneFurnaceFormation.expected(1, 1, 1),
+                "the middle of the middle layer of the original shell is lava");
+        assertSame(Blocks.OBSIDIAN, ArcaneFurnaceFormation.expected(2, 1, 1),
+                "the middle of the bottom layer of the original shell is obsidian");
         for (int layer = 0; layer < 3; layer++) {
             for (int dx = 0; dx < 3; dx++) {
                 for (int dz = 0; dz < 3; dz++) {
+                    if (dx == 1 && dz == 1) continue;
                     boolean corner = (dx == 0 || dx == 2) && (dz == 0 || dz == 2);
-                    if (dx == 1 && dz == 1) {
-                        assertSame(Blocks.AIR, ArcaneFurnaceFormation.expected(layer, dx, dz),
-                                "the middle of the top layer of the original shell is empty");
-                        assertSame(Blocks.LAVA, ArcaneFurnaceFormation.expected(1, dx, dz),
-                                "the middle of the middle layer of the original shell is lava");
-                        assertSame(Blocks.OBSIDIAN, ArcaneFurnaceFormation.expected(2, dx, dz),
-                                "the middle of the bottom layer of the original shell is obsidian");
-                        continue;
-                    }
                     assertSame(corner ? Blocks.NETHER_BRICKS : Blocks.OBSIDIAN,
                             ArcaneFurnaceFormation.expected(layer, dx, dz),
                             "the corners of the original shell are nether bricks and the edges are obsidian");

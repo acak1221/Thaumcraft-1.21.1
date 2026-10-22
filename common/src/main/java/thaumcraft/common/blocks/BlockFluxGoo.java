@@ -104,35 +104,40 @@ public final class BlockFluxGoo extends FluxFiniteBlock {
         BlockPos above = pos.above();
         BlockState overhead = step.observe(above);
         boolean airAbove = overhead != null && overhead.isAir();
-        // Original outer condition includes the roll: a failed lower-density25
-        // falls THROUGH to30, unlike the formerly nested native condition.
+        // Original BlockFluxGoo:106-135 is ONE if/else-if chain. A failed
+        // lower-density25 falls THROUGH to the30 decay, and a thick cell never
+        // reaches the30 at all.
         if (metadata >= SLIME_METADATA_MIN && metadata < SLIME_METADATA_MAX && airAbove) {
             int spawn = random.nextInt(BREED_ROLL);
-            if (!step.coherent()) return;
             if (spawn == 0) {
-                // Original BlockFluxGoo:106-112: the cell is emptied and a size one slime is born.
+                // Original BlockFluxGoo:91-97: the cell is emptied and a size one slime is born.
                 if (!step.commit(step.change(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL))) return;
                 spawnSlime(step, SLIME_SIZE_THIN);
                 return;
             }
-            // Original BlockFluxGoo:103-135 is ONE else-if chain: a failed breed roll falls
-            // THROUGH to the thirty roll of the decay branch, it does not end the tick.
+            // A failed roll leaves the first branch of the original chain and
+            // reaches its 30 decay; the cell keeps every unit but one. An
+            // external replacement of the cell ends the tail of the port, as
+            // every other owned write of the flux does.
+            if (!step.coherent()) return;
         } else if (metadata >= TAINT_METADATA && airAbove) {
             int spawn = random.nextInt(BREED_ROLL);
-            if (!step.coherent() || spawn == 0) {
+            if (spawn == 0) {
                 // Original BlockFluxGoo:98-105: a size two slime is born instead.
                 if (!step.commit(step.change(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL))) return;
                 spawnSlime(step, SLIME_SIZE_THICK);
                 return;
             }
             // Original BlockFluxGoo:106-110: the taint takes the cell and its column.
-            if (random.nextInt(TAINT_ROLL) != 0) return;
-            if (!step.coherent()) return;
-            BiomeColumns.set(step.level, pos.getX(), pos.getZ(), ThaumcraftBiomes.TAINT);
-            if (!step.coherent()) return;
-            BlockState fibres = ThaumcraftTaint.FIBRES.get().defaultBlockState();
-            if (!step.commit(step.change(pos, fibres, Block.UPDATE_ALL))) return;
-            step.level.blockEvent(pos, ThaumcraftTaint.FIBRES.get(), 1, 0);
+            if (random.nextInt(TAINT_ROLL) == 0) {
+                if (!step.coherent()) return;
+                BiomeColumns.set(step.level, pos.getX(), pos.getZ(), ThaumcraftBiomes.TAINT);
+                if (!step.coherent()) return;
+                BlockState fibres = ThaumcraftTaint.FIBRES.get().defaultBlockState();
+                if (!step.commit(step.change(pos, fibres, Block.UPDATE_ALL))) return;
+                step.level.blockEvent(pos, ThaumcraftTaint.FIBRES.get(), 1, 0);
+            }
+            // A thick cell of the original never reaches its 30 decay.
             return;
         }
         int decay = random.nextInt(DECAY_ROLL);

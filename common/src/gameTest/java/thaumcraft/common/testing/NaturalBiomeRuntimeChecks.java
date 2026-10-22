@@ -69,6 +69,12 @@ public final class NaturalBiomeRuntimeChecks {
         int minX=(centre.getX()>>4)-2,minZ=(centre.getZ()>>4)-2;
         for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++)
             test.assertTrue(level.getChunkSource().getChunkNow(cx,cz)==null,"all25 requested forest chunks are fresh before native generation");
+        // The generation of a ManaPod (the age three to seven and the aspect of
+        // the original) can only be observed in a region that THIS run generates.
+        // A world that already carries the region from an earlier run would
+        // answer with the pods of that run, so the test-only dimension of the
+        // harness loses the chunk data of the region it is about to generate.
+        forgetRegion(level,minX,minZ);
         // Finish the whole declared region before observing it: a later
         // neighbor's genuine feature pass may write into an earlier chunk.
         for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++)level.getChunk(cx,cz);
@@ -114,6 +120,21 @@ public final class NaturalBiomeRuntimeChecks {
             }
         }
         test.succeed();
+    }
+    /**
+     * Removes the chunk data of the region the scenario is about to generate in
+     * the test-only natural dimension of the harness. The world of a repeated
+     * local run otherwise answers with the region of the earlier run, and the
+     * generation of the ManaPod could not be observed at all.
+     */
+    private static void forgetRegion(ServerLevel level,int minX,int minZ) {
+        java.nio.file.Path region=level.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
+                .resolve("dimensions").resolve("thaumcraft_gametest").resolve("natural").resolve("region");
+        for(int cx=minX;cx<minX+5;cx++)for(int cz=minZ;cz<minZ+5;cz++) {
+            java.nio.file.Path file=region.resolve("r."+(cx>>5)+"."+(cz>>5)+".mca");
+            try { java.nio.file.Files.deleteIfExists(file); }
+            catch(java.io.IOException failure) { throw new IllegalStateException("Cannot remove the stale chunk data of the natural test dimension",failure); }
+        }
     }
     private static void harvestAndReplant(GameTestHelper test,ServerLevel level,FocusUpgradeRuntimeChecks.Actor actor,BlockPos podPos) {
         Aspect expected=((TileManaPod)level.getBlockEntity(podPos)).getAspect();

@@ -36,10 +36,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.entities.ITaintedMob;
 import thaumcraft.common.blocks.FluxFiniteBlock;
+import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftFlux;
 import thaumcraft.common.config.ThaumcraftTaint;
 import thaumcraft.common.entities.monster.EntityThaumicSlime;
 import thaumcraft.common.lib.potions.FluxEffects;
+import thaumcraft.common.lib.world.BiomeColumns;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 
 /** M09b explicit SERVER INPUTS: registered phase states/quantities, eligible
@@ -325,30 +327,29 @@ public final class FluxOverfullRuntimeChecks {
                             && amount(f, f.base.above()) == 1 && mass(f) == metadata + 1,
                     "actual production lower-density missed-spawn branch converts ONE goo unit into gas, not a nested early return");
         }
-        // Oracle BlockFluxGoo:113-125 - the metadata six and above breeds a size two
-        // slime on the twenty five roll and turns into the taint on the fifty roll. The
-        // champion hook of the original draws from the world random when the mob is born
-        // (oracle EventHandlerEntity.entitySpawns:391), so the birth case declares it.
+        // Oracle BlockFluxGoo:113-125: a thick cell (the metadata six and above) breeds a
+        // size two slime on its one-in-twenty-five roll and turns into the taint on the
+        // one-in-fifty roll; it never reaches the thirty roll of a thin cell.
+        var originalBiome = BiomeColumns.surfaceHolder(f.level, f.base.getX(), f.base.getZ());
         seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
-        try (var random = new Script(f, i(25, 0), i(100, 50))) { tick(f, f.base, random.random); random.done("high9 breed roll births the slime and the champion hook draws"); }
-        f.check(f.level.getBlockState(f.base).isAir() && mass(f) == 0 && slimes(f, 2) == 1,
-                "the original high goo breeds a real size two Thaumic Slime and empties the cell");
-        discardSlimes(f);
+        // The born slime enters the world, so the native champion join roll of
+        // the port asks the level for its one-in-hundred roll as well.
+        try (var random = new Script(f, i(25, 0), i(100, 1))) { tick(f, f.base, random.random); random.done("thick cell original25 roll, NOT30"); }
+        var born = f.level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(f.base).inflate(2));
+        f.check(f.level.isEmptyBlock(f.base) && born.size() == 1 && born.getFirst().getSlimeSize() == 2,
+                "the original one-in-twenty-five roll of a thick cell empties the cell and breeds the real size two thaumic slime");
+        born.forEach(Entity::discard);
         seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
-        var taintBiome = thaumcraft.common.lib.world.BiomeColumns.surfaceHolder(f.level, f.base.getX(), f.base.getZ());
-        try (var random = new Script(f, i(25, 1), i(50, 0))) { tick(f, f.base, random.random); random.done("high9 original25/conditional50 RNG, NOT30"); }
-        f.check(f.level.getBlockState(f.base).is(ThaumcraftTaint.FIBRES.get()) && mass(f) == 0,
-                "the original high goo turns into the taint fibres on the fifty roll");
-        // The taint fibres of the original spread over the level (oracle BlockTaintFibres),
-        // so the cell and its biome are restored before the next case of the level runs.
-        put(f, f.base, goo, 9);
-        if (taintBiome != null && taintBiome.unwrapKey().isPresent()) {
-            thaumcraft.common.lib.world.BiomeColumns.set(f.level, f.base.getX(), f.base.getZ(), taintBiome.unwrapKey().get());
-        }
+        try (var random = new Script(f, i(25, 1), i(50, 0))) { tick(f, f.base, random.random); random.done("thick cell original25 miss and50 hit, NOT30"); }
+        f.check(f.level.getBlockState(f.base).is(ThaumcraftTaint.FIBRES.get())
+                        && BiomeColumns.surfaceHolder(f.level, f.base.getX(), f.base.getZ()).is(ThaumcraftBiomes.TAINT),
+                "the original one-in-fifty roll of a thick cell turns the cell into the taint fibres and its column into the taint biome");
         seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
-        try (var random = new Script(f, i(25, 1), i(50, 1))) { tick(f, f.base, random.random); random.done("high9 original25/conditional50 RNG, NOT30"); }
-        f.check(amount(f, f.base) == 9 && f.level.getBlockState(f.base.above()).isAir() && mass(f) == 9,
-                "a missed breed roll and a missed taint roll leave the high goo untouched");
+        try (var random = new Script(f, i(25, 1), i(50, 1))) { tick(f, f.base, random.random); random.done("thick cell original25 and50 miss, NOT30"); }
+        f.check(amount(f, f.base) == 9 && f.level.getBlockState(f.base.above()).isAir() && mass(f) == 9
+                        && f.level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(f.base).inflate(2)).isEmpty(),
+                "a thick cell that missed both rolls of the original keeps every unit and breeds nothing");
+        if (originalBiome != null && originalBiome.unwrapKey().isPresent()) BiomeColumns.set(f.level, f.base.getX(), f.base.getZ(), originalBiome.unwrapKey().get());
         seal(f); put(f, f.base, goo, 9);
         try (var random = new Script(f, i(30, 0), b(true))) { tick(f, f.base, random.random); random.done("closed ceiling decay still draws boolean BEFORE failed air test"); }
         f.check(amount(f, f.base) == 8 && f.level.getBlockState(f.base.above()).is(Blocks.STONE) && mass(f) == 8,
@@ -467,18 +468,6 @@ public final class FluxOverfullRuntimeChecks {
     private static Draw[] tail(FluxFiniteBlock fluid, Draw draw) { return fluid == ThaumcraftFlux.FLUX_GOO.get() ? new Draw[] {draw} : new Draw[0]; }
     private static void seal(Fixture f) { f.reset(); f.player.removeAllEffects(); for (BlockPos pos : BlockPos.betweenClosed(f.base.offset(-2, -2, -2), f.base.offset(2, 2, 2))) f.put(pos.immutable(), Blocks.STONE); }
     private static void put(Fixture f, BlockPos pos, FluxFiniteBlock fluid, int amount) { f.check(FluxFiniteBlock.loaded(f.level, pos), "direct quantity INPUT cell is already loaded/in-height"); var state = fluid.defaultBlockState().setValue(FluxFiniteBlock.LEVEL, amount - 1); f.level.setBlock(pos, fluid.withGeometry(state, f.level, pos), TubeVariantsRuntimeChecks.QUIET); }
-    /** The real Thaumic Slimes of the fixture cell, by their original slime size. */
-    private static int slimes(Fixture f, int size) {
-        int count = 0;
-        for (EntityThaumicSlime slime : f.level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(f.base).inflate(2))) {
-            if (slime.getSlimeSize() == size) ++count;
-        }
-        return count;
-    }
-    /** The born slimes leave the fixture cell, so the next case starts clean. */
-    private static void discardSlimes(Fixture f) {
-        for (EntityThaumicSlime slime : f.level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(f.base).inflate(2))) slime.discard();
-    }
     private static int amount(Fixture f, BlockPos pos) { return FluxFiniteBlock.quanta(f.level.getBlockState(pos)); }
     private static int mass(Fixture f) { int total = 0; for (BlockPos pos : BlockPos.betweenClosed(f.base.offset(-2, -2, -2), f.base.offset(2, 2, 2))) total += amount(f, pos); return total; }
     private static void tick(Fixture f, BlockPos pos, RandomSource random) { f.level.getBlockState(pos).tick(f.level, pos, random); }

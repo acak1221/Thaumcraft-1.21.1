@@ -55,6 +55,7 @@ public class ItemElementalShovel extends ShovelItem implements IRepairable {
         if (level.getBlockEntity(clicked) != null) return InteractionResult.PASS;
         ItemStack shovel = context.getItemInHand();
         Direction face = context.getClickedFace();
+        boolean acted = false;
         for (BlockPos cell : ElementalShovelGeometry.layout(clicked, face, orientation(shovel), player.getYRot())) {
             if (shovel.isEmpty()) break;
             BlockState there = level.getBlockState(cell);
@@ -64,12 +65,15 @@ public class ItemElementalShovel extends ShovelItem implements IRepairable {
             if (state.getBlock().asItem() != Items.AIR && (player.getAbilities().instabuild || consume(player, state.getBlock().asItem()))) laid = state;
             else if (state.is(Blocks.GRASS_BLOCK) && (player.getAbilities().instabuild || consume(player, Items.DIRT))) laid = Blocks.DIRT.defaultBlockState();
             if (laid == null) continue;
+            // Stock has already been paid (or creative placement accepted).
+            // Even a rejected world write must not fall through to another use.
+            acted = true;
             level.setBlock(cell, laid, 3);
             level.playSound(null, cell, laid.getSoundType().getPlaceSound(), net.minecraft.sounds.SoundSource.BLOCKS, 0.6F, 0.9F + level.random.nextFloat() * 0.2F);
             shovel.hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
             player.swing(context.getHand(), true);
         }
-        return InteractionResult.PASS;
+        return acted ? InteractionResult.CONSUME : InteractionResult.PASS;
     }
 
     /** Original {@code InventoryUtils.consumeInventoryItem}: one item from the first matching stack of the main inventory. */

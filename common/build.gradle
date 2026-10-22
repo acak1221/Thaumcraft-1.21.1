@@ -22,6 +22,16 @@ dependencies {
  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Audit the actual production archive and resolved runtime artifacts, not a class's package name.
+tasks.named('test') {
+ dependsOn tasks.named('jar')
+ doFirst {
+  systemProperty 'thaumcraft.audit.productionJar', tasks.named('jar').get().archiveFile.get().asFile.absolutePath
+  systemProperty 'thaumcraft.audit.runtimeJars', configurations.runtimeClasspath.files
+    .findAll { it.name.endsWith('.jar') }.collect { it.absolutePath }.join(File.pathSeparator)
+ }
+}
+
 // Keep the attribution referenced by both loader metadata files in every output.
 processResources {
  filteringCharset = 'UTF-8'

@@ -75,12 +75,29 @@ class CustomStepSoundParityTest {
      * the port and their samples are in the sound folder of the port.
      */
     @Test void theSoundEventsOfTheCustomSoundsExist() throws Exception {
-        for (String event : new String[] {"jar", "urnbreak", "gore", "crystal"}) {
-            assertNotNull(sounds().get(event), "the sound event " + event + " is missing");
-        }
-        for (String sample : new String[] {"jar1.ogg", "urnbreak.ogg", "gore1.ogg", "gore2.ogg", "crystal.ogg"}) {
-            assertNotNull(CustomStepSoundParityTest.class.getClassLoader()
-                    .getResourceAsStream("assets/thaumcraft/sounds/" + sample), "the sample " + sample + " is missing");
+        var expected = java.util.Map.of("jar", java.util.List.of("thaumcraft:jar1", "thaumcraft:jar2", "thaumcraft:jar3", "thaumcraft:jar4"),
+                "urnbreak", java.util.List.of("thaumcraft:urnbreak"), "gore", java.util.List.of("thaumcraft:gore1", "thaumcraft:gore2"),
+                "crystal", java.util.List.of("thaumcraft:crystal"));
+        JsonObject document = sounds();
+        for (var entry : expected.entrySet()) {
+            assertNotNull(document.get(entry.getKey()), entry.getKey());
+            var actual = new java.util.ArrayList<String>();
+            for (var sample : document.getAsJsonObject(entry.getKey()).getAsJsonArray("sounds")) {
+                String name = sample.isJsonPrimitive() ? sample.getAsString() : sample.getAsJsonObject().get("name").getAsString();
+                actual.add(name);
+                if (sample.isJsonObject()) assertEquals(false, sample.getAsJsonObject().get("stream").getAsBoolean());
+                try (var stream = getClass().getClassLoader().getResourceAsStream("assets/thaumcraft/sounds/"
+                        + name.substring(name.indexOf(':') + 1) + ".ogg")) {
+                    assertNotNull(stream, name);
+                    byte[] bytes = stream.readAllBytes();
+                    assertTrue(bytes.length > 100, name + " is truncated");
+                    assertEquals("OggS", new String(bytes, 0, 4, StandardCharsets.US_ASCII), name);
+                    String binary = new String(bytes, StandardCharsets.ISO_8859_1);
+                    assertTrue(binary.contains("\u0001vorbis"), name + " lacks Vorbis identification");
+                    assertTrue(binary.contains("\u0003vorbis") && binary.contains("\u0005vorbis"), name + " lacks comment/setup packets");
+                }
+            }
+            assertEquals(entry.getValue(), actual, entry.getKey() + " sample binding/order");
         }
     }
 

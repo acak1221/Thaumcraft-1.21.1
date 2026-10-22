@@ -321,17 +321,33 @@ class ResearchRecipeCoverageTest {
     }
 
     @Test
-    void onlyOrdinaryCraftingRecipesStayWithoutAResearchGate() {
+    void onlyOrdinaryCraftingRecipesStayWithoutAResearchGate() throws Exception {
+        Map<String, String> expected = new java.util.TreeMap<>();
+        try (var stream = getClass().getResourceAsStream("/thaumcraft/audit/recipe-gates.txt")) {
+            assertNotNull(stream);
+            for (String line : new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).lines().toList()) {
+                if (line.startsWith("#") || line.isBlank()) continue;
+                String[] fields = line.split("=", 2);
+                for (String key : fields[1].split(",")) assertNull(expected.put(key, fields[0]), "duplicate fixture " + key);
+            }
+        }
+        assertEquals(244, expected.size(), "nonempty, frozen original gate corpus");
         Set<String> gatedTypes = Set.of("thaumcraft:arcane_shaped", "thaumcraft:arcane_shapeless",
                 "thaumcraft:crucible", "thaumcraft:infusion_stack", "thaumcraft:infusion_enchantment",
                 "thaumcraft:infusion_runic_augment");
+        Set<String> actualGated = new TreeSet<>();
         for (Map.Entry<String, String> entry : ResearchRecipeCoverage.nativeRecipeIds().entrySet()) {
             String type = recipeType(entry.getValue());
             String gate = ResearchRecipeCoverage.nativeResearchGate(entry.getKey());
             if (gatedTypes.contains(type)) {
-                assertNotNull(gate, entry.getKey() + " -> " + type + " must keep the original research gate");
+                actualGated.add(entry.getKey());
+                assertTrue(expected.containsKey(entry.getKey()), "unreviewed gated recipe " + entry.getKey());
+                assertEquals(expected.get(entry.getKey()), gate, entry.getKey());
+            } else {
+                assertNull(gate, "ordinary recipe " + entry.getKey());
             }
         }
+        assertEquals(expected.keySet(), actualGated, "removing mappings must not make this pass vacuously");
     }
 
     private static String recipeType(String recipeId) {

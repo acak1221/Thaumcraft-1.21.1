@@ -391,11 +391,32 @@ class CodeChickenGeometryParityTest {
                 "the native clip ignores a part beyond the end of the ray");
     }
 
-    @Test void theNativeGeometryHasNoCodeChickenLeft() {
-        // The port must not carry the vendored library: the geometry is native AABB only.
-        assertTrue(TubeGeometry.class.getName().startsWith("thaumcraft.common.lib.essentia."),
-                "the tube geometry is a native class of the port");
-        assertTrue(TubeGeometry.class.getPackage().getName().indexOf("codechicken") < 0,
-                "the port ships no CodeChicken package");
+    @Test void theNativeGeometryHasNoCodeChickenLeft() throws Exception {
+        String production = System.getProperty("thaumcraft.audit.productionJar");
+        assertNotNull(production, "Gradle must supply the built production archive");
+        var jars = new java.util.LinkedHashSet<String>();
+        jars.add(production);
+        String runtime = System.getProperty("thaumcraft.audit.runtimeJars");
+        assertNotNull(runtime, "Gradle must supply resolved runtime artifacts");
+        jars.addAll(java.util.List.of(runtime.split(java.util.regex.Pattern.quote(java.io.File.pathSeparator))));
+        int productionClasses = 0;
+        for (String path : jars) {
+            try (var jar = new java.util.zip.ZipFile(path)) {
+                for (var entries = jar.entries(); entries.hasMoreElements();) {
+                    var entry = entries.nextElement();
+                    assertFalse(entry.getName().toLowerCase(java.util.Locale.ROOT).contains("codechicken"),
+                            path + " ships " + entry.getName());
+                    if (path.equals(production) && entry.getName().endsWith(".class")) {
+                        productionClasses++;
+                        try (var stream = jar.getInputStream(entry)) {
+                            String bytecode = new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.ISO_8859_1);
+                            assertFalse(bytecode.toLowerCase(java.util.Locale.ROOT).contains("codechicken"),
+                                    entry.getName() + " references the removed dependency");
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue(productionClasses > 100, "do not accept an empty/stub archive");
     }
 }

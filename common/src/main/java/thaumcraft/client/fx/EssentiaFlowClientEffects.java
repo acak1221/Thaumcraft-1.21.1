@@ -48,6 +48,8 @@ public final class EssentiaFlowClientEffects {
     public static void init() {
         if (initialized) return;
         initialized = true;
+        dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(level -> clear());
+        dev.architectury.event.events.client.ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> clear());
         ClientTickEvent.CLIENT_POST.register(EssentiaFlowClientEffects::tick);
     }
 

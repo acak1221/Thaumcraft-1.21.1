@@ -12,6 +12,7 @@ logs
 .gradle-fix4b/
 .gradle-neoforge/
 .gradle-client/
+.gradle-client2/
 .gradle-mp/
 build/
 out/

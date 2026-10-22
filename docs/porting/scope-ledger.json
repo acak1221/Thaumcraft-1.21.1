@@ -4600,10 +4600,11 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w3clientfx",
-        "evidence": [
-          "oracle thaumcraft/client/fx/ParticleEngine.java:57 four per-layer HashMap<Integer,ArrayList<EntityFX>> particle buckets keyed by dimension",
+      "native_coverage": "parity_verified",
+      "owner": "agent-w8fx",
+      "evidence": [
+        "2026-10-23 w8fx: implemented oracle ParticleEngine:57,138-147,152-196 in common/src/main/java/thaumcraft/client/fx/ParticleLayers.java:11-46 (four dimension maps, FIFO eviction before append at 2000, active-dimension-only ticking), ParticleEngine.java:15-31 and Tc4ParticleEngineMixin.java:17-30. Tc4Particle opt-in preserves original vanilla-owned variants; both atlases remain in native effect renderers. ClientSetup.java:46 ticks at CLIENT_PRE; Tc4ParticleWorldRenderMixin.java:19-42 renders at world tail after transparency/weather, before hand, restoring the camera view. Native managed renderers now use the registered 1/255-alpha shader; FXEssentiaTrail layer1 uses standard alpha, as oracle FXEssentiaTrail:98-99 and ParticleEngine:82-91 require. ParticleLayersTest has four pure JUnit tests, authored/not executed. Whole-common javac proof and real-frame acceptance criteria are in docs/analysis/2026-10-23-agent-w8fx.md; injection/client frames remain unverified. Earlier remaining-gap evidence below describes the superseded w7fx baseline, not current code.",
+        "oracle thaumcraft/client/fx/ParticleEngine.java:57 four per-layer HashMap<Integer,ArrayList<EntityFX>> particle buckets keyed by dimension",
           "oracle thaumcraft/client/fx/ParticleEngine.java:74-80 layer>=2 rebinds textures/misc/particles2.png, layers 0/2 blend (770,1), layers 1/3 blend (770,771)",
           "oracle thaumcraft/client/fx/ParticleEngine.java:143 addEffect caps every layer/dimension bucket at 2000 particles",
           "native common/src/main/java/thaumcraft/client/fx/particles/CrystalSparkParticle.java:16 uses textures/misc/particles2.png with blendFunc(SRC_ALPHA, ONE) (original layer 2)",
@@ -4617,11 +4618,9 @@
       "REMAINING DIFFERENCE, NOT a proven platform limitation: vanilla 1.21.1 net/minecraft/client/particle/ParticleEngine.java:306,539-570 uses a 16384 EvictingQueue per ParticleRenderType; setLevel:635-638 calls clearParticles:712-716. The port's CUSTOM effects therefore share a larger budget and lose dormant-dimension buckets. Vanilla does NOT make the original 2000 FIFO moot. No counting wrapper was implemented in w7fx; retain partial. Vanilla line citations refer to CFR0.152 output of the named Loom 1.21.1 jar, recorded in docs/analysis/2026-10-23-agent-w7fx.md."
         ],
         "notes": [
-          "The original standalone manager (4 layers x dimension, 2000-particle cap, glAlphaFunc 0.003921569) is replaced by the vanilla 1.21.1 particle engine plus per-effect native Particle subclasses.",
-          "Preserved: both TC4 atlases (particles.png / particles2.png), the additive vs standard-alpha blend split per effect, the 1/255 alpha threshold (VisNetRender.drawParticle) and the original per-effect cell maths.",
-      "Not preserved: explicit four-layer grouping, 2000-per-layer/dimension oldest-first eviction, or inactive-dimension retention. These are remaining implementation work, not an established 1.21.1 impossibility.",
-          "Documented in the native source comments of CrystalSparkParticle, FXVent, InfusionParticle and VisNetRender.",
-      "w7fx established the exact rule and disproved the prior limitation claim; no parity promotion for this unit. See vanilla ParticleEngine:569,635-638,712-716 and oracle ParticleEngine:57,138-147,152-196."
+        "w8fx restores the standalone four-layer/dimension manager, 2000 FIFO cap, active-only tick and inactive-dimension queue retention; native per-effect renderers retain the two atlases and geometry.",
+        "Explicitly opted-in TC4 effects bypass vanilla's 16384 queue; original vanilla-owned effects remain vanilla-owned. Disconnect/close release retained queues rather than leaking worlds across sessions.",
+        "Code parity closed; real client injection, light/depth state, dimension-return frames and frame ordering require leader acceptance. Source-scoped effects retain their existing cancellation checks. JUnit tests authored, not executed."
         ],
         "reviewed_sha256": {
           "original": "10669be64370a97c30cda85d4de8cf1c412856052cf2783678236887c668e985",
@@ -8543,10 +8542,11 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w3clientfx",
-        "evidence": [
-          "oracle thaumcraft/client/lib/RenderEventHandler.java:138-157 renderOverlay (notifications + wand radial), 199-248 blockHighlight (aspect tags, note text, architect overlay), 252-268 renderLast (tag scale, golem markers, scanned blocks), 778-812 renderVignette",
+      "native_coverage": "parity_verified",
+      "owner": "agent-w8fx",
+      "evidence": [
+        "2026-10-23 w8fx: closes radial animation against oracle REHWandHandler.java:151-178,212-259. common/src/main/java/thaumcraft/client/gui/FocusRadialAnimation.java:11-25 implements strict time>lastTime, next=time+5, open/close .05, hover .025 with original unclamped float overshoot; GuiFocusSelect.java:70-105 restores sorting-key deduplication and one unpaged radius16+count*2.5, :171-217 renders closing on HUD after cursor re-grab and rotates positions by -90*scale, :234-276 renders before stepping; :426-452 scales icons by HUD scale times per-focus hover scale. ThaumcraftFocusClient.java:44 wires closing HUD rendering on the common Architectury hook. FocusRadialAnimationTest has four pure JUnit tests, authored/not executed. Whole-common javac proof and visual criteria are recorded in docs/analysis/2026-10-23-agent-w8fx.md. Earlier remaining-gap evidence below is superseded; no visual or NeoForge scan acceptance claimed.",
+        "oracle thaumcraft/client/lib/RenderEventHandler.java:138-157 renderOverlay (notifications + wand radial), 199-248 blockHighlight (aspect tags, note text, architect overlay), 252-268 renderLast (tag scale, golem markers, scanned blocks), 778-812 renderVignette",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41-42 'World optics only: original RenderEventHandler:215-239,250-255,287-363.'",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java:48 renderMarkers draws the golem-bell marker boxes",
           "native common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java:26 'Original heartbeat/vignette100, mist2400/200, and the four effect post chains'",
@@ -8564,7 +8564,7 @@
       "Scanned-block overlay is implemented and wired on Fabric; the four native PostChains are already driven. No OptiFine API is required by the original shader driver.",
           "The original's truetyper font load in renderOverlay is dead code (the field is never used) and was not ported.",
           "Complete callsite audit: RenderEventHandler is registered on the Forge event bus by ClientProxy.registerHandlers and referenced from ClientTickEventsFML and the misc network packet.",
-      "REMAINING GAP: radial overlay's 5ms open/close and hover animation versus fixed-radius paged GuiFocusSelect screen. Original REHWandHandler:151-178; native GuiFocusSelect:78-108. Scan frames, shader frames and GUI layering are not visually verified by w7fx."
+        "w8fx closes the 5ms radial open/close/hover animation gap and removes paging in favor of the original sorting-key TreeMap choices. Native non-pausing input screen and existing accessibility/help text remain adaptations; the closing animation runs on the HUD with mouse control restored immediately. Scan/shader/radial frames and GUI layering are not visually verified. NeoForge scan callback remains deferred under Fabric-first instructions, not claimed as accepted."
         ],
         "reviewed_sha256": {
           "original": "2569d70d80a43817ee019baf270258ce04057f0f3620709df66db52f7a948959",

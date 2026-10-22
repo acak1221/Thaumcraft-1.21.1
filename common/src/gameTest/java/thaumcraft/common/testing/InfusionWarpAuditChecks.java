@@ -21,6 +21,22 @@ import thaumcraft.common.tiles.TilePedestal;
 public final class InfusionWarpAuditChecks {
     private InfusionWarpAuditChecks() {}
 
+    public static void publicWarpApiPreservesOriginalGuards(GameTestHelper test) {
+        var player = test.makeMockServerPlayerInLevel();
+        var knowledge = KnowledgeAccess.get(player);
+        knowledge.setWarpPerm(0); knowledge.setWarpSticky(0); knowledge.setWarpTemp(0);
+        thaumcraft.api.ThaumcraftApiHelper.addWarpToPlayer(player, 3, false);
+        test.assertTrue(knowledge.getWarpPerm() == 3, "public warp API awards permanent amount exactly once");
+        thaumcraft.api.ThaumcraftApiHelper.addWarpToPlayer(player, -1, false);
+        test.assertTrue(knowledge.getWarpPerm() == 3, "original public API refuses negative permanent warp; actual=" + knowledge.getWarpPerm());
+        thaumcraft.api.ThaumcraftApiHelper.addWarpToPlayer(player, 2, true);
+        thaumcraft.api.ThaumcraftApiHelper.addStickyWarpToPlayer(player, 1);
+        test.assertTrue(knowledge.getWarpTemp() == 2 && knowledge.getWarpSticky() == 1 && knowledge.getWarpPerm() == 3,
+                "temporary and sticky API awards affect only the requested pool once");
+        test.assertTrue(knowledge.getWarpCounter() == knowledge.getTotalWarp(), "API counter follows committed total");
+        test.succeed();
+    }
+
     public static void jarBrainAwardsWarpOnce(GameTestHelper test) {
         craftAwardsWarpOnce(test, "JARBRAIN", "jar_brain");
     }

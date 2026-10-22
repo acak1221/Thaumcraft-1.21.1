@@ -115,17 +115,13 @@ public final class ThaumcraftInternalMethods implements IInternalMethodHandler {
     }
 
     @Override public void addWarpToPlayer(Player player, int amount, boolean temporary) {
-        PlayerKnowledge knowledge = knowledge(player);
-        if (knowledge == null) return;
-        if (temporary) knowledge.addWarpTemp(amount); else knowledge.addWarpPerm(amount);
-        knowledge.setWarpCounter(knowledge.getTotalWarp());
+        // The public API must use the original authority/negative guards and
+        // committed sync/message path, not mutate client or permanent warp directly.
+        thaumcraft.common.lib.InternalMethodHandler.INSTANCE.addWarpToPlayer(player, amount, temporary);
     }
 
     @Override public void addStickyWarpToPlayer(Player player, int amount) {
-        PlayerKnowledge knowledge = knowledge(player);
-        if (knowledge == null) return;
-        knowledge.addWarpSticky(amount);
-        knowledge.setWarpCounter(knowledge.getTotalWarp());
+        thaumcraft.common.lib.InternalMethodHandler.INSTANCE.addStickyWarpToPlayer(player, amount);
     }
 
     private static boolean consume(ItemStack wand, AspectList cost, boolean doit) {

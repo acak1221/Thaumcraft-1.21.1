@@ -1719,6 +1719,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
+    public void public_warp_api_preserves_original_guards(GameTestHelper test) {
+        thaumcraft.common.testing.InfusionWarpAuditChecks.publicWarpApiPreservesOriginalGuards(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300)
     public void champion_whitelist_covers_the_cave_spider(GameTestHelper test) {
         thaumcraft.common.testing.ChampionRuntimeChecks.caveSpiderIsAChampionCandidate(test);
     }

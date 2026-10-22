@@ -27,7 +27,7 @@ class FocusVisArithmeticTest {
      * The centivis arithmetic of a cast: the modifier is applied to the raw centivis cost and the
      * result is truncated, never rounded; individual aspect prices may reach zero.
      *
-     * <p>Oracle {@code WandManager:104-120}: the raw cost of an aspect is multiplied by the
+     * <p>Oracle {@code ItemWandCasting:297-336}: the raw cost of an aspect is multiplied by the
      * modifier of the wand and the payer, and the amount actually debited is the truncation of that
      * product. This test calls the actual casting price API with its default cap. The registered
      * Frugal-wand price/debit cases run in {@code AccessoriesRuntimeChecks.focusCentivis}, where

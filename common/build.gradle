@@ -25,6 +25,7 @@ dependencies {
 // Audit the actual production archive and resolved runtime artifacts, not a class's package name.
 tasks.named('test') {
  dependsOn tasks.named('jar')
+ inputs.file(tasks.named('jar').flatMap { it.archiveFile }).withPropertyName('productionArchiveAudit')
  doFirst {
   systemProperty 'thaumcraft.audit.productionJar', tasks.named('jar').get().archiveFile.get().asFile.absolutePath
   systemProperty 'thaumcraft.audit.runtimeJars', configurations.runtimeClasspath.files

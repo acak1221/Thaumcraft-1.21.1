@@ -78,6 +78,16 @@ class CustomStepSoundParityTest {
         var expected = java.util.Map.of("jar", java.util.List.of("thaumcraft:jar1", "thaumcraft:jar2", "thaumcraft:jar3", "thaumcraft:jar4"),
                 "urnbreak", java.util.List.of("thaumcraft:urnbreak"), "gore", java.util.List.of("thaumcraft:gore1", "thaumcraft:gore2"),
                 "crystal", java.util.List.of("thaumcraft:crystal"));
+        // Original 4.2.3.5 JAR, assets/thaumcraft/sounds/*.ogg; not hashes of the native output.
+        var hashes = java.util.Map.of(
+                "thaumcraft:jar1", "3d2a75e5dfa5e1afd963692c9d31b89faea48e26df6d55578a52728cfcf3e9e4",
+                "thaumcraft:jar2", "b62c39158f4f01cc8d85d642a25401f2c8ce1af645b8fdffe9708535b03037ee",
+                "thaumcraft:jar3", "2d776e3469d34e26777d12f1166a4bf22bda8f6dd83d3bc10aec43f4d5247585",
+                "thaumcraft:jar4", "c8484342dd475bdff8ffb5b27619fffe82b024a7bcc1aa99624d8d73968fdaf5",
+                "thaumcraft:urnbreak", "fffd4297fca2d6b6646e55093858fb2d9d80969c323e940553f6fce2d884f0e9",
+                "thaumcraft:gore1", "0c1f6a94bdd10b373740447fa153cfdcfdf4768bb052ea59e3fa707789145fc3",
+                "thaumcraft:gore2", "d2053692c388553b83e00a85fb9489319abe09fea761a627b35945e28b8685b3",
+                "thaumcraft:crystal", "2737cd4dcda0d15e79c99a15b134e81f643cfff9235ff1277bc51651263fd0d7");
         JsonObject document = sounds();
         for (var entry : expected.entrySet()) {
             assertNotNull(document.get(entry.getKey()), entry.getKey());
@@ -90,6 +100,8 @@ class CustomStepSoundParityTest {
                         + name.substring(name.indexOf(':') + 1) + ".ogg")) {
                     assertNotNull(stream, name);
                     byte[] bytes = stream.readAllBytes();
+                    assertEquals(hashes.get(name), java.util.HexFormat.of().formatHex(
+                            java.security.MessageDigest.getInstance("SHA-256").digest(bytes)), name + " original sample bytes");
                     assertTrue(bytes.length > 100, name + " is truncated");
                     assertEquals("OggS", new String(bytes, 0, 4, StandardCharsets.US_ASCII), name);
                     String binary = new String(bytes, StandardCharsets.ISO_8859_1);

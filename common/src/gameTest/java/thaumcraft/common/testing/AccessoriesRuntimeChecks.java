@@ -35,8 +35,9 @@ public final class AccessoriesRuntimeChecks {
         var f=new TubeVariantsRuntimeChecks.Fixture(test);ServerPlayer current=f.player;
         boolean keep=f.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
         try {
+            f.open();
             focusCentivis(test);
-            f.open();var inventory=PlayerAccessories.get(f.player);
+            var inventory=PlayerAccessories.get(f.player);
             ItemStack ring=RunicArmor.augment(RunicArmor.augment(RunicArmor.augment(new ItemStack(ThaumcraftBaubles.RUNIC_RING_LESSER.get()))));
             ring.set(DataComponents.CUSTOM_NAME,Component.literal("declared native ring"));
             f.player.getInventory().setItem(9,ring.copy());

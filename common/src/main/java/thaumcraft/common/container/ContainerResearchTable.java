@@ -146,7 +146,7 @@ public final class ContainerResearchTable extends AbstractContainerMenu {
         ItemStack stack = getSlot(1).getItem();
         return stack.is(ThaumcraftContent.DISCOVERY.get()) && ResearchNoteCopying.canPay(KnowledgeAccess.get(viewer), ItemResearchNotes.data(stack), stack.getCount())
                 && ResearchTableCopyNetworking.findSupply(viewer.getInventory(), net.minecraft.world.item.Items.PAPER) >= 0
-                && ResearchTableCopyNetworking.findSupply(viewer.getInventory(), net.minecraft.world.item.Items.INK_SAC) >= 0;
+                && ResearchTableCopyNetworking.findSupply(viewer.getInventory(), net.minecraft.world.item.Items.BLACK_DYE) >= 0;
     }
     public boolean requestCopy() {
         if (!canCopy()) return false;

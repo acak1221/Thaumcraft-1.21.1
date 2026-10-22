@@ -101,8 +101,8 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
             lines.add(Component.translatable("tc.research.copy"));
             lines.add(Component.translatable(Items.PAPER.getDescriptionId()).append(" × 1").withStyle(
                     ResearchTableCopyNetworking.findSupply(minecraft.player.getInventory(), Items.PAPER) >= 0 ? ChatFormatting.GRAY : ChatFormatting.RED));
-            lines.add(Component.translatable(Items.INK_SAC.getDescriptionId()).append(" × 1").withStyle(
-                    ResearchTableCopyNetworking.findSupply(minecraft.player.getInventory(), Items.INK_SAC) >= 0 ? ChatFormatting.GRAY : ChatFormatting.RED));
+            lines.add(Component.translatable(Items.BLACK_DYE.getDescriptionId()).append(" × 1").withStyle(
+                    ResearchTableCopyNetworking.findSupply(minecraft.player.getInventory(), Items.BLACK_DYE) >= 0 ? ChatFormatting.GRAY : ChatFormatting.RED));
             var definition = ResearchCatalog.get(note.key());
             if (definition != null) {
                 for (var entry : definition.aspectCost().entrySet().stream().sorted(java.util.Comparator.comparing(

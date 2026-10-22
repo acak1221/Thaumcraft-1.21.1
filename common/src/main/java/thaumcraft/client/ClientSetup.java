@@ -225,6 +225,13 @@ public final class ClientSetup {
             ColorHandlerRegistry.registerBlockColors((state, level, pos, tint) -> color, crystal);
             RenderTypeRegistry.register(RenderType.cutout(), crystal.get());
         }
+        // Original BlockLifterRenderer:28-50 - the two emissive inner slabs of the inventory
+        // render, 0.01..0.99 by 0.9..0.99 and 0.01..0.99 by 0.1..0.9, with the animated glow
+        // texture. The first slab carries BlockCustomOreItem.colors[4] (0x00A000), the second
+        // BlockCustomOreItem.colors[5] (0xEECCFF) (oracle
+        // thaumcraft/common/blocks/BlockCustomOreItem.java:17).
+        ColorHandlerRegistry.registerItemColors((stack, tint) -> tint == 0 ? opaque(0x00A000) : tint == 1 ? opaque(0xEECCFF) : -1,
+                thaumcraft.common.config.ThaumcraftLevitator.LEVITATOR_ITEM);
         for (var ore : ThaumcraftOres.INFUSED.values()) {
             var block = ore.get();
             ColorHandlerRegistry.registerBlockColors((state, level, pos, tint) -> tint == 0 ? block.tintColor() : -1, ore);

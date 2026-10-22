@@ -1,4 +1,21 @@
 {
-  "parent": "minecraft:block/cube_all",
-  "textures": {"all": "thaumcraft:blocks/essentiareservoir"}
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "thaumcraft:blocks/essentiareservoir",
+    "all": "thaumcraft:blocks/essentiareservoir"
+  },
+  "elements": [
+    {
+      "from": [2, 2, 2],
+      "to": [14, 14, 14],
+      "faces": {
+        "down": {"texture": "#all"},
+        "up": {"texture": "#all"},
+        "north": {"texture": "#all"},
+        "south": {"texture": "#all"},
+        "west": {"texture": "#all"},
+        "east": {"texture": "#all"}
+      }
+    }
+  ]
 }

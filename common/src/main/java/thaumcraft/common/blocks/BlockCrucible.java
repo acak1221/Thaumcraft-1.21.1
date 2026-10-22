@@ -90,14 +90,16 @@ public final class BlockCrucible extends BaseEntityBlock {
 
     @Override protected ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos,
                                                        Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!level.hasChunkAt(pos)) return ItemInteractionResult.FAIL;
         if (!(level.getBlockEntity(pos) instanceof TileCrucible tile)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        int amount = waterIn(held);
+        if (amount == 0 && !(held.getItem() instanceof ItemWandCasting)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (player.getItemInHand(hand) != held || !hit.getBlockPos().equals(pos)
+                || !mayUse(new UseOnContext(player, hand, hit))) return ItemInteractionResult.FAIL;
         if (held.getItem() instanceof ItemWandCasting) {
             if (!level.isClientSide && player.isShiftKeyDown()) tile.spillRemnants();
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
-        int amount = waterIn(held);
-        if (amount == 0 || player.isSpectator()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if (!level.mayInteract(player, pos) || !player.mayUseItemAt(pos, hit.getDirection(), held)) return ItemInteractionResult.FAIL;
         if (level.isClientSide) return ItemInteractionResult.SUCCESS;
         if (tile.fillWater(amount, false) == 0) return ItemInteractionResult.CONSUME;
         ItemStack empty = new ItemStack(held.is(Items.WATER_BUCKET) ? Items.BUCKET : Items.GLASS_BOTTLE);
@@ -125,6 +127,15 @@ public final class BlockCrucible extends BaseEntityBlock {
         return held.is(Items.POTION) && potion != null && potion.is(Potions.WATER) && !potion.hasEffects() ? 250 : 0;
     }
 
+    private static boolean mayUse(UseOnContext context) {
+        Player player = context.getPlayer();
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        return player != null && player.level() == level && player.isAlive() && !player.isSpectator()
+                && level.hasChunkAt(pos) && player.canInteractWithBlock(pos, 0) && level.mayInteract(player, pos)
+                && player.mayUseItemAt(pos, context.getClickedFace(), context.getItemInHand());
+    }
+
     @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!replacement.is(this) && level.getBlockEntity(pos) instanceof TileCrucible tile) tile.onReplaced();
         // Never place flux or spawn output from inside LevelChunk's BE removal.
@@ -143,7 +154,7 @@ public final class BlockCrucible extends BaseEntityBlock {
         // Original cauldron metadata was unrestricted. Both modern empty and
         // water cauldrons map to it; their previous water is NOT transferred.
         if (!crucible && !before.is(Blocks.CAULDRON) && !before.is(Blocks.WATER_CAULDRON)) return InteractionResult.PASS;
-        if (!level.mayInteract(player, pos) || !player.mayUseItemAt(pos, context.getClickedFace(), held)) return InteractionResult.FAIL;
+        if (!mayUse(context)) return InteractionResult.FAIL;
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (!(level instanceof ServerLevel server) || !server.getServer().isSameThread()) throw new IllegalStateException("Crucible conversion requires the server thread");
         if (crucible) {

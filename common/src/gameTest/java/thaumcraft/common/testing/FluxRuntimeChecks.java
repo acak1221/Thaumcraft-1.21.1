@@ -229,10 +229,17 @@ public final class FluxRuntimeChecks {
         seal(level, pos);
         put(level, pos, goo, 8);
         air(level, pos.above());
+        var taintBiome = thaumcraft.common.lib.world.BiomeColumns.surfaceHolder(level, pos.getX(), pos.getZ());
         tick(level, pos, RandomSource.create(seed(random -> random.nextInt(25) != 0 && random.nextInt(50) == 0)));
         // Oracle BlockFluxGoo:121-124 - the taint roll takes the cell and its column.
         test.assertTrue(level.getBlockState(pos).is(ThaumcraftTaint.FIBRES.get()),
                 "the taint roll turns the cell of the original into the taint fibres");
+        // The taint fibres of the original spread over the level (oracle BlockTaintFibres),
+        // so the cell and its biome are restored before the next case of the level runs.
+        put(level, pos, goo, 8);
+        if (taintBiome != null && taintBiome.unwrapKey().isPresent()) {
+            thaumcraft.common.lib.world.BiomeColumns.set(level, pos.getX(), pos.getZ(), taintBiome.unwrapKey().get());
+        }
     }
 
     private static void exposureChecks(GameTestHelper test, ServerLevel level, BlockPos pos, ServerPlayer player) {

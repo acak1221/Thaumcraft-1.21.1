@@ -335,9 +335,16 @@ public final class FluxOverfullRuntimeChecks {
                 "the original high goo breeds a real size two Thaumic Slime and empties the cell");
         discardSlimes(f);
         seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
+        var taintBiome = thaumcraft.common.lib.world.BiomeColumns.surfaceHolder(f.level, f.base.getX(), f.base.getZ());
         try (var random = new Script(f, i(25, 1), i(50, 0))) { tick(f, f.base, random.random); random.done("high9 original25/conditional50 RNG, NOT30"); }
         f.check(f.level.getBlockState(f.base).is(ThaumcraftTaint.FIBRES.get()) && mass(f) == 0,
                 "the original high goo turns into the taint fibres on the fifty roll");
+        // The taint fibres of the original spread over the level (oracle BlockTaintFibres),
+        // so the cell and its biome are restored before the next case of the level runs.
+        put(f, f.base, goo, 9);
+        if (taintBiome != null && taintBiome.unwrapKey().isPresent()) {
+            thaumcraft.common.lib.world.BiomeColumns.set(f.level, f.base.getX(), f.base.getZ(), taintBiome.unwrapKey().get());
+        }
         seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
         try (var random = new Script(f, i(25, 1), i(50, 1))) { tick(f, f.base, random.random); random.done("high9 original25/conditional50 RNG, NOT30"); }
         f.check(amount(f, f.base) == 9 && f.level.getBlockState(f.base.above()).isAir() && mass(f) == 9,

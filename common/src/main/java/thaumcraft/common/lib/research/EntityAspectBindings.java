@@ -46,6 +46,15 @@ public final class EntityAspectBindings {
             Map.entry("thaumcraft:giant_brainy_zombie", "Thaumcraft.GiantBrainyZombie"), Map.entry("thaumcraft:firebat", "Thaumcraft.Firebat"),
             Map.entry("thaumcraft:wisp", "Thaumcraft.Wisp"), Map.entry("thaumcraft:pech", "Thaumcraft.Pech"),
             Map.entry("thaumcraft:mind_spider", "Thaumcraft.MindSpider"),
+            Map.entry("thaumcraft:thaum_slime", "Thaumcraft.ThaumSlime"),
+            Map.entry("thaumcraft:tainted_pig", "Thaumcraft.TaintedPig"),
+            Map.entry("thaumcraft:tainted_sheep", "Thaumcraft.TaintedSheep"),
+            Map.entry("thaumcraft:tainted_cow", "Thaumcraft.TaintedCow"),
+            Map.entry("thaumcraft:tainted_chicken", "Thaumcraft.TaintedChicken"),
+            Map.entry("thaumcraft:tainted_villager", "Thaumcraft.TaintedVillager"),
+            Map.entry("thaumcraft:taint_creeper", "Thaumcraft.TaintedCreeper"),
+            Map.entry("thaumcraft:cultist_knight", "Thaumcraft.CultistKnight"),
+            Map.entry("thaumcraft:cultist_cleric", "Thaumcraft.CultistCleric"),
             Map.entry("thaumcraft:taint_spider", "Thaumcraft.TaintSpider"),
             Map.entry("thaumcraft:taint_spore", "Thaumcraft.TaintSpore"),
             Map.entry("thaumcraft:taint_swarmer", "Thaumcraft.TaintSwarmer"),
@@ -62,7 +71,7 @@ public final class EntityAspectBindings {
     public static Target describe(Entity entity) {
         String registryName = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
         String name = entity instanceof Player player ? "player_" + player.getGameProfile().getName()
-                : NAMES.getOrDefault(registryName, registryName);
+                : originalName(registryName);
         var registered = new ArrayList<>(ThaumcraftApi.scanEntities);
         var nbt = new CompoundTag();
         if (registered.stream().anyMatch(row -> matchesName(row.entityName, name, registryName) && row.nbts != null && row.nbts.length > 0))
@@ -90,6 +99,10 @@ public final class EntityAspectBindings {
         // Fresh native signatures retain the original variant string without its collision-prone 32-bit hash.
         // Original EntityList had no player entry: its generated player aspect/hash name was not a clue witness.
         return new Target(name, "@entity:" + hash, aspects, entity instanceof Player ? null : ResearchClues.Context.entity(name));
+    }
+
+    static String originalName(String registryName) {
+        return NAMES.getOrDefault(registryName, registryName);
     }
 
     /** Original row order: a conditional match replaces the generic aspects instead of adding a second reward. */

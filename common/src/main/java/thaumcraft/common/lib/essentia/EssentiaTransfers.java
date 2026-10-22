@@ -358,6 +358,49 @@ public final class EssentiaTransfers {
         } finally { finishTubeFilterMutation(mutation); }
     }
 
+    /** Original AIEssentiaEmpty:104-112 — the generic marked essentia transport branch.
+     *
+     * <p>The original hands its whole cargo to {@code IEssentiaTransport.addEssentia}
+     * on the first marked side that accepts the aspect and keeps what the transport
+     * took. The native profile is that one call, paired with the cargo debit in the
+     * same native commit. The port's own closed profiles (the jar, the reservoir)
+     * keep their own rules; this one exists for the <b>other</b> marked transports.</p>
+     */
+    public static Attempt deliverTransport(EntityGolemBase golem, IEssentiaTransport sink, Direction face,
+                                            Aspect aspect, int limit) {
+        if (golem == null || sink == null || face == null || limit <= 0 || !EssentiaAtomicEndpoint.validAspect(aspect)
+                || !(sink instanceof BlockEntity owner) || !(golem.level() instanceof ServerLevel level)) return new Attempt(false, 0, null);
+        if (!level.getServer().isSameThread()) throw new IllegalStateException("Golem essentia delivery requires the server thread");
+        if (MUTATION.get() != null || !currentGolem(golem, level) || !current(owner, level)) return new Attempt(false, 0, null);
+        Mutation mutation = new Mutation(owner, owner);
+        mutation.golem = golem;
+        MUTATION.set(mutation);
+        boolean selected = false;
+        try {
+            GolemAspectCargo beforeCargo = golem.getAspectCargo();
+            int capacity = golem.getCarryLimit();
+            if (!matchesGolemCargo(golem, level, beforeCargo, capacity) || beforeCargo.aspect() != aspect
+                    || !sink.canInputFrom(face) || sink.getSuctionAmount(face) <= 0
+                    || sink.getSuctionType(face) != null && sink.getSuctionType(face) != aspect) return new Attempt(false, 0, null);
+            int units = Math.min(limit, beforeCargo.amount());
+            if (units <= 0 || !golem.canDeliverEssentia(owner, aspect, units)) return new Attempt(false, 0, null);
+            selected = true;
+            if (!matchesGolemCargo(golem, level, beforeCargo, capacity) || !current(owner, level)
+                    || !sink.canInputFrom(face) || !golem.canDeliverEssentia(owner, aspect, units)) return new Attempt(true, 0, null);
+            // The original's order: the transport is paid FIRST, the cargo is debited after.
+            int added = sink.addEssentia(aspect, units, face);
+            if (added <= 0) return new Attempt(true, 0, null);
+            GolemAspectCargo afterCargo = new GolemAspectCargo(aspect, beforeCargo.amount() - added);
+            mutation.beforeCargo = beforeCargo;
+            mutation.afterCargo = afterCargo;
+            RuntimeException failure = commitPrepared(mutation, owner, null, null, null, null, null);
+            return new Attempt(true, added, failure);
+        } catch (RuntimeException failure) {
+            if (mutation.raw) throw failure;
+            return new Attempt(selected, 0, failure);
+        } finally { finishTubeFilterMutation(mutation); }
+    }
+
     /** Original reservoir branches: first-aspect collection and partial delivery, paired with actual cargo in one native commit. */
     public static Attempt collectReservoir(EntityGolemBase golem, TileEssentiaReservoir reservoir, Aspect aspect, int limit) {
         return transferGolemReservoir(golem, reservoir, aspect, limit, true);

@@ -86,10 +86,9 @@ final class UseGolemGoals {
         if (!adjacent.isAir()) return false;
         // The port never opens a menu with a borrowed actor: a block entity is not a target.
         if (target.hasBlockEntity() || level.getBlockEntity(marker.pos()) != null) return false;
-        if (golem.getUseOptions().emptySpace() != target.isAir()) return false;
+        if (!golem.getUseOptions().acceptsTarget(target.isAir())) return false;
         return true;
-    }
-    /**
+    }    /**
      * The cell the original clicks.
      *
      * <p>Oracle {@code AIUseItem:142-146}: when the marked cell is an empty
@@ -97,7 +96,7 @@ final class UseGolemGoals {
      * opposite the marked side.</p>
      */
     static BlockPos clickPos(GolemMarker marker, boolean emptySpace) {
-        return emptySpace ? marker.pos().relative(marker.face().getOpposite()) : marker.pos();
+        return marker.clickPos(emptySpace);
     }
     private boolean markerLoaded(ServerLevel level, GolemMarker marker) {
         // Reject dimensions BEFORE ANY block/BE reads. Original unused ceil(range/3) was NOT a bound.

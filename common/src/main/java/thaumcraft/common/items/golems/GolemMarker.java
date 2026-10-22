@@ -92,6 +92,16 @@ public record GolemMarker(ResourceLocation dimension, BlockPos pos, Direction fa
 
     public GolemMarker withColor(int color) { return new GolemMarker(dimension, pos, face, color); }
 
+    /**
+     * The cell the original clicks (oracle {@code AIUseItem:142-146}).
+     *
+     * <p>When the marked cell is an empty space the click lands on the cell
+     * <b>behind</b> it, that is on the cell opposite the marked side.</p>
+     */
+    public BlockPos clickPos(boolean emptySpace) {
+        return emptySpace ? pos.relative(face.getOpposite()) : pos;
+    }
+
     /** Same dimension, block and face, whatever the colour (the bell edits one marker per spot). */
     public boolean sameSpot(GolemMarker other) {
         return other != null && dimension.equals(other.dimension) && pos.equals(other.pos) && face == other.face;

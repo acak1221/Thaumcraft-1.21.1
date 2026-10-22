@@ -102,4 +102,15 @@ public record GolemUseOptions(boolean emptySpace, boolean leftClick, boolean sne
      * "default baseline" gate; the record itself carries no other state.</p>
      */
     public boolean isSupported() { return true; }
+
+    /**
+     * The original's rule of the marked cell (oracle {@code AIUseItem:190}).
+     *
+     * <p>{@code getToggles()[0]} is the "Block or Empty space" switch: when it is
+     * off the marked cell must hold a block, when it is on the marked cell must be
+     * an empty space.</p>
+     *
+     * @param air whether the marked cell is empty
+     */
+    public boolean acceptsTarget(boolean air) { return emptySpace == air; }
 }

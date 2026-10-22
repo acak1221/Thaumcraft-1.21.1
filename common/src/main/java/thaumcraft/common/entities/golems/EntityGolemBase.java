@@ -72,6 +72,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.IEssentiaTransport;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.container.ContainerGolem;
@@ -2050,7 +2051,7 @@ public class EntityGolemBase extends AbstractGolem {
         } finally { finishAspectWork(server, before, .05F); }
         return qualifying; // Even a qualifying zero-return attempt uses the original short delay mapping.
     }
-    int deliverAlchemyEssentia(BlockEntity sink, Aspect aspect, int requested) {
+    int deliverAlchemyEssentia(BlockEntity sink, Direction face, Aspect aspect, int requested) {
         if (busy || essentiaMutationActive() || !alchemyReady() || !alchemy.ownsDeliveryAttempt(sink, aspect)
                 || requested <= 0 || !(level() instanceof ServerLevel server)) return 0;
         GolemAspectCargo before = aspectCargo;
@@ -2067,7 +2068,10 @@ public class EntityGolemBase extends AbstractGolem {
             if (!canDeliverEssentia(sink, aspect, limit)) return 0;
             EssentiaTransfers.Attempt attempt = sink instanceof TileJar jar
                     ? EssentiaTransfers.deliverNormalJar(this, jar, aspect, limit)
-                    : EssentiaTransfers.deliverReservoir(this, (TileEssentiaReservoir) sink, aspect, limit);
+                    : sink instanceof TileEssentiaReservoir reservoir ? EssentiaTransfers.deliverReservoir(this, reservoir, aspect, limit)
+                    : sink instanceof IEssentiaTransport transport && face != null
+                    ? EssentiaTransfers.deliverTransport(this, transport, face, aspect, limit)
+                    : new EssentiaTransfers.Attempt(false, 0, null);
             if (attempt.failure() != null) Thaumcraft.LOG.warn("Golem jar transfer reported {} committed units; never refunding", attempt.committedUnits(), attempt.failure());
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.warn("Golem jar transfer failed; preserving exact actual remainder", failure);

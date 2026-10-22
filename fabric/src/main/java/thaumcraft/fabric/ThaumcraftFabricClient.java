@@ -39,6 +39,9 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         // vanilla baked item and armour models.
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftContent.WAND.get(),
                 thaumcraft.client.ThaumcraftGearModelsClient::renderWand);
+        // Original ItemNodeRenderer: the item of the aura node is drawn as the node itself.
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftContent.AURA_NODE.get().asItem(),
+                thaumcraft.client.renderers.tile.ItemNodeRenderer::render);
         net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer.register(
                 thaumcraft.client.ThaumcraftGearModelsClient::renderRobe,
                 thaumcraft.common.config.ThaumcraftEquipment.VOID_ROBE_HELMET.get(),

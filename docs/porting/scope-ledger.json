@@ -2638,9 +2638,9 @@
       },
       "review": {
         "disposition": "port",
-        "source_semantics": "equivalent",
+        "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/api/nodes/INode.java:12-29 the nine members of the contract",
@@ -2648,13 +2648,26 @@
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:60 the node itself implements the published contract now and the published enums are the canonical ones, the nested NodeType and NodeModifier enums are gone (oracle TileNode:75-77)",
           "native common/src/main/java/thaumcraft/api/nodes/NodeAdapter.java:42-71 the published view shares the state, the write path and the identity with the node",
           "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so the port cannot change it without invalidating the accepted client run",
-          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java the node itself implements the published contract and shares it with the view"
+          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java the node itself implements the published contract and shares it with the view",
+          "oracle thaumcraft/api/nodes/INode.java:12-29 the published contract with its eight own members and the nine it inherits from IAspectContainer",
+          "oracle thaumcraft/api/aspects/IAspectContainer.java:9-29 the nine inherited members",
+          "oracle thaumcraft/common/tiles/TileNode.java:75-77 the original node itself implements the published contract",
+          "oracle thaumcraft/common/tiles/TileNode.java:240-271 the type, the modifier and the base are written through that contract",
+          "oracle thaumcraft/common/tiles/TileNode.java:98-115 the identity of the original is derived from the position of the node (dim:x:y:z)",
+          "native common/src/main/java/thaumcraft/api/nodes/INode.java:1-60 the published contract with every member of the original and the identity difference documented in the contract itself",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:60,128-160 the node itself implements the published contract with the published enums",
+          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java every member of the original contract is present with its original signature, and the identity of the node is the persisted UUID",
+          "fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 the accepted client evidence parses the identity with UUID.fromString",
+          "fabric/src/clientTest/java/thaumcraft/fabric/clienttest/BoreClientSequence.java:870-871 the accepted scan records carry the phenomena string @NODE1b1965a9-747f-4d43-82ff-91e1f0ab443b"
         ],
         "notes": [
           "The interface itself is ported member for member (oracle INode:12-29, the nine members of the contract; native INode:13-29).",
           "CLOSED 2026-10-23 (w3rest): the published enums are the canonical ones and the node itself implements the published contract (native TileNode:60, the implementation of oracle TileNode:75-77), so the two node type enums of the port are one type, and the node and the published view share their state, their write path and their identity (native NodeAdapter:42-71, the view over the node; the write path of the type and of the modifier is the contract of oracle TileNode:240-271). The nested TileNode.NodeType and TileNode.NodeModifier are gone.",
           "REMAINING GAP: the identity of the native node is a random UUID that is persisted with the node (native TileNode:63,136,206-210,862-863,881), the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave: fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT, so the port cannot change it without invalidating the accepted client run.",
-          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass."
+          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass.",
+          "CLOSED 2026-10-23 (w4wands): the published contract is complete - every member the original published is present with the original's semantics, and the test asserts the names and the signatures of all seventeen of them.",
+          "The identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave (the client test parses it with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so the port cannot change it without invalidating the accepted client run.",
+          "The aspect lists of the native node are copies, so an add-on can never mutate the state of a node through the published view; the values are the original's."
         ],
         "reviewed_sha256": {
           "original": "d47513d9a62b10a6117236d2a353ebf43e838f05f6c0a82ba729ee75a22798f9",
@@ -16008,17 +16021,27 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/tile/ItemNodeRenderer.java:172 the item form of the node (the block that drops a node item)",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java the native node renderer",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java: the node has no item form in the native port",
-          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279"
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279",
+          "oracle thaumcraft/client/renderers/tile/ItemNodeRenderer.java:37-170 the item renderer of the original: the fixture node with the four primal aspects at forty each (:39), the two crossed quads of the node atlas (:60-68), the alpha of one half (:75), the atlas of thirty two frames (:100), the pulse of a strip (:115), the size of a strip (:116), the alpha of a strip (:117) and the core strip of the type (:127)",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/ItemNodeRenderer.java the native item renderer of the node, with the numbers of the original as pure static functions",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java:38,197-206 the shared node atlas and the quad of the node strips",
+          "native fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java the Fabric registration of the item renderer of the aura node item",
+          "native neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java the NeoForge registration of the same renderer",
+          "test common/src/test/java/thaumcraft/client/renderers/tile/ItemNodeRendererTest.java the fixture node, the alpha, the scale, the atlas, the frame, the pulse, the size and the core of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279, the gameplay drop of the original"
         ],
         "notes": [
           "The original drew the aura node as a dropped item; the native node is a permanent block with no item form, so this renderer has no counterpart.",
-          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer."
+          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer.",
+          "CLOSED 2026-10-23 (w4wands): the native node item was a static shard texture, while the original draws the item of the invisible aura node as the node itself, in two crossed quads of the 32 frame node atlas. The native now draws it that way and both loaders register the renderer.",
+          "The gameplay drop of the original is the wisp essence of BlockAiry:265-279 (NodeHarvest) and never a node item, so that half of the unit was already at parity.",
+          "Forced 1.21.1 change: the 1.7.10 item space is a sixteenth of a block and the native item space is not, so the placement of the node inside the item is the native one; every number of the strips is the original's."
         ],
         "reviewed_sha256": {
           "original": "a32db5242f6251429d3382b2cacb099fe43d0ec8301344e6764f346cdea0b5fb"
@@ -36520,7 +36543,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the void thaumaturge hood, robe and leggings",
@@ -36530,13 +36553,24 @@
           "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes keep the discount, the warp and the durability factor",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:181 renderGearItem draws the original void robe model; both loaders call it",
           "native neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgeGearArmorMixin.java:48 the NeoForge armour layer mixin that draws it",
-          "open difference: the worn look is the client side of the original ModelRobe, which 1.21.1 can only draw with the layer renderer of the client lane; the protection 3/7/6, the durability factor 10 and the enchantability 10 are the original ones"
+          "open difference: the worn look is the client side of the original ModelRobe, which 1.21.1 can only draw with the layer renderer of the client lane; the protection 3/7/6, the durability factor 10 and the enchantability 10 are the original ones",
+          "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java:98-100 the worn look of the void thaumaturge is two sheets, the _overlay sheet and the plain sheet",
+          "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java:187-189 the piece always has the overlay layer of the original",
+          "official 1.7.10 client.jar net.minecraft.client.renderer.entity.RenderPlayer (notch bop):52-100 the first layer binds getArmorTexture(stack, entity, slot, null) and tints it with the colour of the stack, the second layer binds getArmorTexture(stack, entity, slot, \"overlay\") and stays untinted",
+          "official 1.7.10 client.jar net.minecraft.client.renderer.entity.RenderLivingBase (notch boh):113-121 the second layer is drawn after the first one",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:219-239 the native void thaumaturge draws the dyed cloth first and the untinted trim after it",
+          "native common/src/main/java/thaumcraft/common/items/armor/VoidRobeLayers.java the pure rule of the two worn layers",
+          "test common/src/test/java/thaumcraft/gear/VoidRobeLayersTest.java the two layers, their sheets and the default dye of the original",
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java:39-74 the discount of five, the warp of two, the durability factor of ten, the epic rarity, the self repair and the wash of the original"
         ],
         "notes": [
           "The worn look is an explicit interim: the native uses the void armour layers, the original ModelRobe is not ported (declared in ThaumcraftEquipment).",
           "The 1.7 ItemArmor material became the native ArmorMaterial; the protection 3/7/6, the durability factor 10 and the enchantability 10 are preserved.",
           "REMAINING GAP (unchanged): the worn look is an explicit interim - the native uses the void armour layers, the original ModelRobe is not ported. The protection 3/7/6, the durability factor 10 and the enchantability 10 are the original ones.",
-          "The gap lies in the client layer, which this wave does not own."
+          "The gap lies in the client layer, which this wave does not own.",
+          "CLOSED 2026-10-23 (w4wands): the worn look was an explicit interim. The native drew the plain trim sheet alone and tinted it with the dye, so the dyed cloth of the robe was never drawn at all; the two sheets of the original are disjoint (of the 32768 pixels of the 256x128 sheet the plain one owns 6224 and the overlay one 5652, and only 21 pixels belong to both).",
+          "The native now draws the dyed cloth sheet first and the untinted trim sheet after it, exactly as the 1.7.10 renderer does, and both loaders draw it (the Fabric armour renderer and the NeoForge armour layer mixin).",
+          "The protection 3/7/6, the durability factor 10, the enchantability 10, the five percent vis discount, the two warp, the epic rarity, the self repair and the wash in a water cauldron are the original ones."
         ],
         "reviewed_sha256": {
           "original": "a8f6a6817993c759a90e9f04cb5aad79ddd946aeadb35f0e825318e35b1b46f6",
@@ -49215,7 +49249,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileNode.java:606-630 the regeneration interval 600 (400 BRIGHT, 900 PALE, 0 FADING) and the lock multipliers x2 (lock 1) and x20 (lock 2)",
@@ -49238,7 +49272,13 @@
           "oracle thaumcraft/common/tiles/TileNode.java:240-271 the type, the modifier and the base are written through that contract",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:60,136,206-210 the node implements the published contract with the published enums, so the two types of the port are one type and the node writes its type and its modifier through the contract of the original",
           "deviation: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself, and the behaviour is the same; the native adds a server thread guard, a current state guard and a prepared orb emission frame that the original did not have",
-          "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT)"
+          "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT)",
+          "oracle thaumcraft/common/tiles/TileNode.java:98-115 the identity of the original is derived from the position of the node",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:128-146 the identity of the native node and the reason why the format is kept",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeStabilizerRules.java:24,51 the regeneration ladder 600 (400 BRIGHT, 900 PALE, 0 FADING) and the lock multipliers x2 (lock 1) and x20 (lock 2)",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeDischargeRules.java the conditions of the discharge of the original",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:408-435 the wand tap of the original, one unit plus one per NODETAPPER research",
+          "test common/src/test/java/thaumcraft/api/NodeAdapterContractTest.java the node itself implements the published contract with the published enums"
         ],
         "notes": [
           "The 600/400/900/0 regeneration ladder, the x2 lock multiplier, the 2/1/3 discharge interval, the 1+(base/1.5) roll for a bright node, the 1200 tick pruning, the 100/42 and 100/69 stability rolls and the fifth-tick wand tap are all ported with the original numbers (oracle TileNode:606-630, :547-604, :726-748, :649 and :398-427).",
@@ -49247,7 +49287,10 @@
           "CLOSED 2026-10-23 (w3rest): the node implements the published thaumcraft.api.nodes.INode itself (native TileNode:60, the implementation of oracle TileNode:75-77) and the published enums are the canonical ones, so the two node type enums of the port are one type and the node writes its type and its modifier through the contract of the original (oracle TileNode:240-271). The nested TileNode.NodeType and TileNode.NodeModifier are gone.",
           "REMAINING GAP: the identity of the native node is a random UUID that is persisted with the node (native TileNode:63,136,206-210,862-863,881), the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave: fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT, so the port cannot change it without invalidating the accepted client run.",
           "DEVIATION: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself; the behaviour is the same.",
-          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have."
+          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have.",
+          "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was the identity format. The identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (the client test parses it with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so it cannot change.",
+          "The deviation of the original's handleDarkNode and handlePureNode biome effects, which live in the shared NodeEcology of the port, and the server thread guard, the current state guard and the prepared orb emission frame of the native, are the documented deviations of this row.",
+          "The regeneration ladder, the two locks, the discharge, the stabiliser repair and the wand tap of the original are the native ones."
         ],
         "reviewed_sha256": {
           "original": "b672c7d42f8c9f2af611c6576235dbafa6a6ae4e96adf0b67809318e1a782348",

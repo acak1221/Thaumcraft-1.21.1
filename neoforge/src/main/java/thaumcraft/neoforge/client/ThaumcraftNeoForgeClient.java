@@ -100,6 +100,9 @@ public final class ThaumcraftNeoForgeClient {
         NeoForgeRobeDye.register(event);
         // The original wand uses the TC4 model, not the vanilla baked item model.
         event.registerItem(renderer(thaumcraft.client.ThaumcraftGearModelsClient::renderWand), ThaumcraftContent.WAND.get());
+        // Original ItemNodeRenderer: the item of the aura node is drawn as the node itself.
+        event.registerItem(renderer(thaumcraft.client.renderers.tile.ItemNodeRenderer::render),
+                ThaumcraftContent.AURA_NODE.get().asItem());
         // Original ItemThaumometerRenderer: the thaumometer is the three dimensional
         // scanner of the original, not a flat sprite.
         event.registerItem(renderer(thaumcraft.client.renderers.item.ItemThaumometerRenderer::render),

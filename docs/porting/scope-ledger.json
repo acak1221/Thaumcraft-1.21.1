@@ -7267,8 +7267,8 @@
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:84-92 only parent connectors are drawn",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java:25-42 the six original category icons and backgrounds (BASICS uses textures/items/thaumonomiconcheat.png, ELDRITCH uses gui_researchbackeldritch.png) are published again",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:21-29 the visibility rule of the original icon loop (completion and the @ clue bypass Hidden/Lost/Concealed, Virtual never draws)",
-          "REMAINING DIFFERENCE: the forbidden marker of a research with warp above zero (oracle GuiResearchBrowser.java:366,789-802, the animated quad strip of the node sheet with the colour 0x440055) and the sibling connectors (oracle GuiResearchBrowser.java:327-348) are not drawn by the native node loop",
-          "the category icons are drawn: the native renders the icon of every visible category as a tab (native GuiResearchBrowser.java:137-151) from the six original icons of ThaumcraftResearchCategories"
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java the forbidden marker of a research with warp above zero is drawn again: the animated tainted strip of the node sheet, eighty pixels wide, in the original dark violet 0x440055 with the alpha 0.66 (oracle GuiResearchBrowser.java:366,789-802)",
+          "REMAINING DIFFERENCE: the sibling connectors (oracle GuiResearchBrowser.java:327-348) are not drawn, and the connector line of the original is a three pixel wide gradient strip with a sine wobble (oracle GuiResearchBrowser.java:732-787) while the native draws a one pixel line in its own colours"
         ],
         "notes": [
           "The map, the clue/parent/category visibility rules and the authoritative purchase/note actions are reproduced (native ResearchBrowserData.isVisible:21-29 mirrors oracle GuiResearchBrowser:318/371).",

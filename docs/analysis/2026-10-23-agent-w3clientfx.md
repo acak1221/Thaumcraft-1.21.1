@@ -176,9 +176,24 @@ call site). The native `TileJarRenderer` already relies on that (its liquid is d
 coordinates). The brain jar therefore translates by `0.5, 0.01, 0.5` and not by a half block
 offset.
 
----
+### 2.5 The forbidden marker of a warped research was not drawn
 
-## 3. The known structural gaps and how each was settled
+**Original.** `oracle thaumcraft/client/gui/GuiResearchBrowser.java:366` draws `drawForbidden(x+11, y+11)`
+for every research whose warp is above zero, and `drawForbidden` (`:789-802`) is the animated
+quad strip of the **tainted** strip of the node sheet: thirty two frames, the strip 5, the frame
+`31 - (player.tickCount % 32)`, the size eighty pixels, the colour `0x440055` with the alpha
+`0.66`.
+
+**Port before.** The native node loop had no forbidden marker at all.
+
+**Fix.** `common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java` — a new `forbidden(...)`
+draws the marker from `textures/misc/nodes.png` (2048×2048, so the cell is 64×64) with the original
+colour and the original alpha, before the frame of the cell, exactly as the original does.
+
+**Still open in that unit:** the sibling connectors (`oracle GuiResearchBrowser.java:327-348`) and the
+three pixel wide gradient connector line with the sine wobble of the original
+(`:732-787`), which the native approximates with a one pixel line in its own colours.
+
 
 ### 3.1 `PacketFXBlockSparkle` — **settled**, see §2.1.
 
@@ -279,7 +294,7 @@ the block, `oracle ItemThaumometer`) is still missing and belongs to the researc
 | `FXBeamWand` | the beam starts at the wand tip, the native focus particles start at the player | the wand renderer lane (`ItemWandRenderer`, `WandPerspectiveModel`, `FirstPersonWandTipOrigin`) |
 | `FXSparkle` | the portable hole sparkles (oracle `TileHole.java:142-211`, 24 calls) need a client tick of the native `TileHole`; the shock focus sparkles (oracle `ItemFocusShock.java:166,174`) need the five sparkles at the hit point and at the pointed entity, which the native `ShockFxPayload` does not carry; the magical leaves and the lifter have no native block | the tiles and the wands lanes |
 | `GuiGolem` | the three switches of the Use core; `EntityGolemBase.setUseOptions` accepts only the default baseline (native `EntityGolemBase.java:657-662`) and the original consumes the toggles in `AIUseItem.java:135,155,190` and `AIFillTake.java:55` | the golems lane (`w3golems`) |
-| `GuiResearchBrowser` | the forbidden marker of a research with warp (oracle `GuiResearchBrowser.java:366,789-802`) and the sibling connectors (`:327-348`) | this lane, not started |
+| `GuiResearchBrowser` | the sibling connectors (oracle `GuiResearchBrowser.java:327-348`) and the three pixel gradient connector line of the original (`:732-787`) | this lane, not started |
 | `GuiResearchRecipe` | the JARLABEL, ORE, PRIMALARROW, SCEPTRE and CRUCIBLE smelting pages (oracle `GuiResearchRecipe.java:25-1313`) | this lane, not started |
 | `GuiResearchTable` | the original rune and line drawing and the six parchment sheets | this lane, not started |
 | `ClientTickEventsFML` | `renderAspectsInGui`, the aspect row on the hovered container slot (oracle `ClientTickEventsFML.java:660-729`); the OptiFine shader group has no 1.21.1 counterpart | this lane, not started |
@@ -343,6 +358,11 @@ No test constructs a `Block`: every rule under test is a pure static function
     shell writes its depth and the content is hidden** — that is the one open risk of this wave
     (the 1.7.10 alpha test of the original discards the fully transparent pixels, the 1.21.1
     translucent pass does not). In that case the jar shell needs a no-depth-write render type.
+13. **The forbidden marker** — open the research browser and look at a research with warp (the
+    original marks `FOCUSHELLBAT`, `SINSTONE`, `INFERNALFURNACE`, `JARBRAIN`, `LIQUIDDEATH`, … with
+    a warp of one to three). The cell must carry an **eighty pixel wide dark violet** (`0x440055`)
+    animated square with the alpha 0.66, and it must animate backwards over the thirty two frames
+    of the tainted strip of the node sheet.
 
 ---
 
@@ -362,6 +382,8 @@ No test constructs a `Block`: every rule under test is a pure static function
   `drawNode(...)` and the two depth-keeping render types.
 * `common/src/main/java/thaumcraft/client/ClientSetup.java` — the two new renderers, the two jar
   block render types, the block sparkle client receiver.
+* `common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java` — the forbidden marker of a
+  warped research.
 * `common/src/main/java/thaumcraft/common/Thaumcraft.java` — the block sparkle server payload.
 * `common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java` — the `0xDD00FF` sender.
 * `common/src/main/java/thaumcraft/common/lib/world/OuterLandsBossRooms.java` — the `0x400040`

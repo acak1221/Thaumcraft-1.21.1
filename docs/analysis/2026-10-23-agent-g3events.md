@@ -28,4 +28,13 @@ Java 21, isolated `GRADLE_USER_HOME=/home/cyberfox-kali/wt/g3events/.gradle-g3`:
 ./gradlew :common:test --tests thaumcraft.common.lib.events.ChunkRegenerationParityTest :fabric:runGameTest -PgameTestFilter=regenerationQueueLifecycle --no-daemon
 ```
 
-Run launched; result pending at initial draft. Local log `.tmp-g3-gradle.log` is ignored and not committed. `git diff --check` passed after source edits. Final run outcome will replace this pending paragraph before handoff.
+**PASS — BUILD SUCCESSFUL in 13m 37s.**
+
+- Common production and GameTest Java compiled; Fabric production and GameTest Java compiled.
+- `ChunkRegenerationParityTest`: **8 tests, zero skipped/failures/errors**, report `common/build/test-results/test/TEST-thaumcraft.common.lib.events.ChunkRegenerationParityTest.xml`.
+- Focused dedicated-server test `thaumcraftgametests.regenerationqueuelifecycle`: **one required test passed**, report `fabric/build/gametest-focused-results.xml`; queue cardinality 21 → 11 → 1 → 0, registered unload cleanup, instance-key invariant, and direct shutdown fallback all passed.
+- Root Gradle configuration also prepared the NeoForge dependency/MCP cache automatically; no NeoForge compile/build/test/run task was requested or executed.
+- Existing mixin mapping/deprecation warnings were emitted; they did not fail the build. No client launch/observation was performed.
+- Report timestamps are UTC 2026-10-22T20:00:58 and 20:02:12; audit naming follows the session's 2026-10-23 date.
+
+Local log `.tmp-g3-gradle.log` and generated reports are ignored and not committed. `git diff --check` passed after source edits. Fix commit: `6c291014` (`fix(events): isolate regeneration queues by world lifetime`); validation documentation follows in a separate commit.

@@ -91,4 +91,4 @@ Fix: queue by the actual `ServerLevel` instance, clear that key on SERVER_LEVEL_
 
 ## Validation
 
-Pending focused Java 21 Gradle run; exact result is recorded in `docs/analysis/2026-10-23-agent-g3events.md` before handoff.
+Java 21 isolated-home Gradle run **passed**: `:common:test --tests thaumcraft.common.lib.events.ChunkRegenerationParityTest` (8 tests, zero failures/errors) and `:fabric:runGameTest -PgameTestFilter=regenerationQueueLifecycle` (one required dedicated-server test passed). The real world-post queue drained 21 → 11 → 1 → 0; registered unload cleanup and direct shutdown fallback assertions passed. Build completed successfully in 13m 37s. Reports: `common/build/test-results/test/TEST-thaumcraft.common.lib.events.ChunkRegenerationParityTest.xml`, `fabric/build/gametest-focused-results.xml`. No other runtime behavior is certified by this focused run.

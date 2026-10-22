@@ -27,30 +27,41 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
     public ThaumcraftTreeFeature() { super(NoneFeatureConfiguration.CODEC); }
 
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
-        WorldGenLevel level = context.level();
-        if (!surfaceDimension(level)||!ThaumcraftBiomeSettings.current().generateTrees()
-                || NodeEcologyPolicy.dimensionLevel(level.getLevel().dimension())!=-1
+        if (!ThaumcraftBiomeSettings.current().generateTrees()) return false;
+        return placePass(context.level(), context.random(),
+                context.origin().getX() >> 4, context.origin().getZ() >> 4);
+    }
+
+    /**
+     * Oracle ThaumcraftWorldGenerator:459-479 - one chunk's complete vegetation pass.
+     *
+     * <p>The original runs the pass behind {@code Config.genTrees && (newGen ||
+     * Config.regenTrees)}. The fresh generation passes the {@code Config.genTrees} gate, the
+     * regeneration queue passes {@code Config.genTrees && Config.regenTrees}, and both replay
+     * exactly the same draws.</p>
+     */
+    public static boolean placePass(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ) {
+        if (!surfaceDimension(level)||NodeEcologyPolicy.dimensionLevel(level.getLevel().dimension())!=-1
                 || level.getLevel().getChunkSource().getGenerator() instanceof FlatLevelSource) return false;
-        int chunkX = context.origin().getX() & ~15;
-        int chunkZ = context.origin().getZ() & ~15;
-        if (!level.hasChunkAt(new BlockPos(chunkX + 8, level.getMinBuildHeight(), chunkZ + 8))) return false;
-        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, chunkX + 8, chunkZ + 8);
-        if (biome(level, chunkX + 8, top, chunkZ + 8).is(BLACKLIST)) return false;
-        RandomSource random = context.random();
+        int originX = chunkX << 4;
+        int originZ = chunkZ << 4;
+        if (!level.hasChunkAt(new BlockPos(originX + 8, level.getMinBuildHeight(), originZ + 8))) return false;
+        int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, originX + 8, originZ + 8);
+        if (biome(level, originX + 8, top, originZ + 8).is(BLACKLIST)) return false;
         boolean placed = false;
         // Not two independent placed features: silverwood generation consumes
         // this stream BEFORE the greatwood rarity draw, exactly as in TC4.
         if (random.nextInt(60) == 3) {
-            int x = chunkX + random.nextInt(16);
-            int z = chunkZ + random.nextInt(16);
+            int x = originX + random.nextInt(16);
+            int z = originZ + random.nextInt(16);
             int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             if (MagicalTreeBiomeAdapter.silverwood(biome(level, x, y, z))) {
                 placed = new WorldGenSilverwoodTrees(false, 7, 4).generate(level, random, new BlockPos(x, y, z));
             }
         }
         if (random.nextInt(25) == 7) {
-            int x = chunkX + random.nextInt(16);
-            int z = chunkZ + random.nextInt(16);
+            int x = originX + random.nextInt(16);
+            int z = originZ + random.nextInt(16);
             int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             if (MagicalTreeBiomeAdapter.greatwoodChance(biome(level, x, y, z)) > random.nextFloat()) {
                 placed |= new WorldGenGreatwoodTrees(false).generate(level, random, new BlockPos(x, y, z), random.nextInt(8) == 0);
@@ -59,7 +70,7 @@ public final class ThaumcraftTreeFeature extends Feature<NoneFeatureConfiguratio
         // Original vegetation pass:473-477 samples x/z even outside deserts;
         // only hot sand-top biomes consume the one-in30 flower draw. The native
         // tag explicitly maps vanilla desert and permits a declared addon mapping.
-        int flowerX = chunkX + random.nextInt(16), flowerZ = chunkZ + random.nextInt(16);
+        int flowerX = originX + random.nextInt(16), flowerZ = originZ + random.nextInt(16);
         int flowerY = level.getHeight(Heightmap.Types.WORLD_SURFACE, flowerX, flowerZ);
         var flowerBiome = biome(level, flowerX, flowerY, flowerZ);
         if (flowerY < level.getMaxBuildHeight() && flowerBiome.is(CINDERPEARL) && flowerBiome.value().getBaseTemperature() > 1 && random.nextInt(30) == 0) {

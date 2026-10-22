@@ -62,16 +62,42 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
         // builds, so the base of the cluster is the first air above the terrain, the
         // height of the original getHeightValuePos.
         int base = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-        if (base - 9 < level.getSeaLevel()) return false;
-        // Oracle WorldGenHilltopStones:63-67 - the five ground samples.
-        for (int[] offset : VillageWorldGenRules.HILLTOP_SAMPLE_OFFSETS) {
-            if (!locationIsValidSpawn(level, x + offset[0], base, z + offset[1])) return false;
-        }
+        if (!samplesPass(level, x, base, z)) return false;
         boolean built = build(level, random, x, base, z);
         // Oracle ThaumcraftWorldGenerator:452 - the cluster carries a dark aura node
         // above its chest, five blocks above the base of the cluster.
         NodeGeneration.createRandomNodeAt(level, new BlockPos(x, base + 5, z), random, false, true, false);
         return built;
+    }
+
+    /**
+     * Oracle ThaumcraftWorldGenerator:424-425 and WorldGenHilltopStones:63-67 - the sea level
+     * test and the five ground samples, without side effects.
+     */
+    static boolean samplesPass(WorldGenLevel level, int x, int base, int z) {
+        if (base - 9 < level.getSeaLevel()) return false;
+        for (int[] offset : VillageWorldGenRules.HILLTOP_SAMPLE_OFFSETS) {
+            if (!locationIsValidSpawn(level, x + offset[0], base, z + offset[1])) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Whether {@link #place} of this chunk would build the cluster, without building it.
+     *
+     * <p>The aura totem of the chunk asks this after it drew the same exclusive chain from the
+     * chunk seed: the original suppresses the totem only in a chunk whose cluster was actually
+     * built (oracle ThaumcraftWorldGenerator:451).</p>
+     */
+    public static boolean preflight(WorldGenLevel level, int chunkX, int chunkZ) {
+        if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
+        StructurePlacementRules.Draw draw = StructurePlacementRules.draw(
+                RandomSource.create(StructurePlacementRules.chunkSeed(
+                        level.getLevel().getSeed(), chunkX, chunkZ)), chunkX, chunkZ);
+        if (draw.kind() != StructurePlacementRules.Kind.HILLTOP_STONES) return false;
+        int x = inside(draw.x(), chunkX);
+        int z = inside(draw.z(), chunkZ);
+        return samplesPass(level, x, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z), z);
     }
 
     /**

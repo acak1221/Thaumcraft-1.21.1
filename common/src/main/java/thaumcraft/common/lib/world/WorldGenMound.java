@@ -86,22 +86,48 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
         if (draw.kind() != StructurePlacementRules.Kind.MOUND) return false;
         int i = draw.x();
         int k = draw.z();
-        // Oracle ThaumcraftWorldGenerator:424 - the mound grows nine blocks below the surface.
+        // Oracle ThaumcraftWorldGenerator:424-427 - the mound grows nine blocks below the
+        // surface, below the sea level, and on five valid ground samples.
+        if (!samplesPass(level, i, k)) return false;
         int j = level.getHeight(Heightmap.Types.WORLD_SURFACE, i, k) - DEPTH;
-        // Oracle ThaumcraftWorldGenerator:425 - the surface structures only grow below the sea level.
-        if (j >= level.getSeaLevel()) return false;
-        // Oracle WorldGenMound:64 - the five ground samples of the mound.
-        if (!locationIsValidSpawn(level, i + 9, j + 9, k + 9)) return false;
-        if (!locationIsValidSpawn(level, i, j + 9, k)) return false;
-        if (!locationIsValidSpawn(level, i + 18, j + 9, k)) return false;
-        if (!locationIsValidSpawn(level, i + 18, j + 9, k + 18)) return false;
-        if (!locationIsValidSpawn(level, i, j + 9, k + 18)) return false;
         build(level, random, i, j, k);
         // Oracle ThaumcraftWorldGenerator:432 - the original draws a value it drops and then
         // hangs a dark aura node over the centre of the mound.
         random.nextInt(200);
         NodeGeneration.createRandomNodeAt(level, new BlockPos(i + 9, j + 8, k + 9), random, false, true, false);
         return true;
+    }
+
+    /**
+     * Oracle ThaumcraftWorldGenerator:424-427 - the sea level test and the five ground samples
+     * of the mound, without side effects.
+     */
+    static boolean samplesPass(WorldGenLevel level, int i, int k) {
+        // Oracle ThaumcraftWorldGenerator:424 - the mound grows nine blocks below the surface.
+        int j = level.getHeight(Heightmap.Types.WORLD_SURFACE, i, k) - DEPTH;
+        // Oracle ThaumcraftWorldGenerator:425 - the surface structures only grow below the sea level.
+        if (j >= level.getSeaLevel()) return false;
+        // Oracle WorldGenMound:64 - the five ground samples of the mound.
+        return locationIsValidSpawn(level, i + 9, j + 9, k + 9)
+                && locationIsValidSpawn(level, i, j + 9, k)
+                && locationIsValidSpawn(level, i + 18, j + 9, k)
+                && locationIsValidSpawn(level, i + 18, j + 9, k + 18)
+                && locationIsValidSpawn(level, i, j + 9, k + 18);
+    }
+
+    /**
+     * Whether {@link #place} of this chunk would build the mound, without building it.
+     *
+     * <p>The aura totem of the chunk asks this after it drew the same exclusive chain from the
+     * chunk seed: the original suppresses the totem only in a chunk whose mound was actually
+     * built (oracle ThaumcraftWorldGenerator:434).</p>
+     */
+    public static boolean preflight(WorldGenLevel level, int chunkX, int chunkZ) {
+        if (!ThaumcraftOreFeature.isSurfaceDimension(level)) return false;
+        StructurePlacementRules.Draw draw = StructurePlacementRules.draw(
+                RandomSource.create(StructurePlacementRules.chunkSeed(
+                        level.getLevel().getSeed(), chunkX, chunkZ)), chunkX, chunkZ);
+        return draw.kind() == StructurePlacementRules.Kind.MOUND && samplesPass(level, draw.x(), draw.z());
     }
 
     /**

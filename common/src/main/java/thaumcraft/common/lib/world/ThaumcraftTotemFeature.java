@@ -9,9 +9,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import thaumcraft.common.config.ThaumcraftBiomeSettings;
 import thaumcraft.common.config.ThaumcraftVillages;
 
 /**
@@ -50,22 +52,48 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
         // of the overworld type, the way the 1.7.10 world generation mod changed the
         // overworld of a world without changing its dimension id.
         if (!isOverworld(level.getLevel())) return false;
+        // Oracle ThaumcraftWorldGenerator:420-421 - the totem lives inside the structure branch
+        // of the original, so Config.genStructure and the flat exclusion gate it too.
+        if (!ThaumcraftBiomeSettings.worldgen().structures()) return false;
+        if (level.getLevel().getChunkSource().getGenerator() instanceof FlatLevelSource) return false;
         int chunkX = context.origin().getX() >> 4;
         int chunkZ = context.origin().getZ() >> 4;
         RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
                 level.getLevel().getSeed(), chunkX, chunkZ));
-        // Oracle ThaumcraftWorldGenerator:190 - the wild node pass of the original draws its
-        // rarity roll first, from the random of the chunk. The totem of the original is drawn
-        // after the wild node pass and after the exclusive chain of the structures
-        // (oracle :419 and :455) and it yields to a chunk that already carries an aura node,
-        // which is what the auraGen flag of the original stands for.
-        boolean wildNode = random.nextInt(ThaumcraftNormalNodeFeature.NODE_RARITY) == 0;
-        // The exclusive structure chain comes first: the original draws the totem after the
-        // chain and refuses the chunk that already received a structure with an aura node.
+        return placePass(level, random, chunkX, chunkZ);
+    }
+
+    /**
+     * Oracle ThaumcraftWorldGenerator:148-187 - the totem pass, shared by the fresh generation
+     * of the chunk.
+     *
+     * <p>The original calls {@code generateTotem} from the structure branch of
+     * {@code generateSurface}, after the scattered feature and after the wild node pass; the
+     * second argument is the {@code auraGen} flag those two passes produced, and the third is
+     * {@code newGen}, which is required to be true inside the method. The regeneration queue of
+     * the original therefore never grows a totem, and neither does the regeneration of the
+     * port.</p>
+     */
+    public static boolean placePass(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ) {
+        // Oracle ThaumcraftWorldGenerator:414-419 - the scattered node first, then the wild node
+        // pass, whose return value overwrites the scattered flag. A scattered temple therefore
+        // does not suppress the totem (:455 tests the overwritten value). Both live behind
+        // Config.genAura, so a world without aura nodes consumes neither draw.
+        boolean auraGen = false;
+        boolean wildNode = false;
+        if (ThaumcraftBiomeSettings.worldgen().auraNodes()) {
+            auraGen = AuraGenRules.scatteredTemple(level, chunkX, chunkZ) != null;
+            wildNode = ThaumcraftNormalNodeFeature.wildNodeDecision(level, random, chunkX, chunkZ, auraGen);
+        }
+        // Oracle ThaumcraftWorldGenerator:429-436 - the exclusive chain draws the position and
+        // the rolls before the totem is asked. Only a structure the chain actually builds
+        // suppresses the totem (:434, :441, :451), not a roll that failed its ground test.
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
-        if (draw.kind() != StructurePlacementRules.Kind.NONE) return false;
-        // Oracle ThaumcraftWorldGenerator:455 - the totem needs a chunk without an aura node.
-        if (wildNode) return false;
+        if (AuraGenRules.finalAuraGen(auraGen, wildNode,
+                AuraGenRules.structureBuilt(level, chunkX, chunkZ, draw.kind()))) auraGen = true;
+        // Oracle ThaumcraftWorldGenerator:149 - `!auraGen` comes before the rarity draw, so a
+        // suppressed chunk does not consume it.
+        if (auraGen) return false;
         // Oracle ThaumcraftWorldGenerator:149 - the rarity of the totem.
         if (random.nextInt(TOTEM_CHANCE) != 0) return false;
         // Oracle ThaumcraftWorldGenerator:151-152 - the position inside the chunk.
@@ -77,7 +105,7 @@ public final class ThaumcraftTotemFeature extends Feature<NoneFeatureConfigurati
     /**
      * Oracle ThaumcraftWorldGenerator:153-186 - the totem itself.
      */
-    private boolean build(WorldGenLevel level, RandomSource random, int x, int z) {
+    private static boolean build(WorldGenLevel level, RandomSource random, int x, int z) {
         // Oracle ThaumcraftWorldGenerator:153 - the block below the first free block.
         int topy = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
         if (topy < level.getMinBuildHeight() || topy >= level.getMaxBuildHeight()) return false;

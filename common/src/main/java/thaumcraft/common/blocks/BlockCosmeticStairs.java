@@ -138,6 +138,9 @@ public final class BlockCosmeticStairs extends StairBlock {
      */
     @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);
+        // StairBlock#getStateForPlacement returns null when the context refuses the placement;
+        // dereferencing it would turn a refused placement into a crash.
+        if (state == null) return null;
         BlockPos pos = context.getClickedPos();
         return state.setValue(TEXTURE, textureIndex(pos.getX(), pos.getY(), pos.getZ()));
     }

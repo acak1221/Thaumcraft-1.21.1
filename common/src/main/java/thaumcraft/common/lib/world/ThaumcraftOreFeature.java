@@ -48,15 +48,28 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
 
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
-        if (!isSurfaceDimension(level) || !NodeEcologyPolicy.permitsLevel(NodeEcologyPolicy.dimensionLevel(level.getLevel().dimension()))) return false;
-        int chunkX = context.origin().getX() & ~15;
-        int chunkZ = context.origin().getZ() & ~15;
-        if (!level.hasChunk(chunkX >> 4, chunkZ >> 4)) return false;
-        int centerSurface = surface(level, chunkX + 8, chunkZ + 8);
-        var centreBiome = surfaceBiome(level, chunkX + 8, centerSurface, chunkZ + 8);
-        if (centreBiome.is(BIOME_BLACKLIST) || !NodeEcologyPolicy.permitsLevel(NodeEcologyPolicy.biomeLevel(centreBiome))) return false;
         var options = ThaumcraftBiomeSettings.worldgen();
-        RandomSource random = context.random();
+        return placePass(level, context.random(), context.origin().getX() >> 4, context.origin().getZ() >> 4,
+                options.cinnabarOre(), options.amberOre(), options.infusedStone());
+    }
+
+    /**
+     * Oracle ThaumcraftWorldGenerator:481-546 - one chunk's complete ore pass.
+     *
+     * <p>The original runs the pass unconditionally from {@code generateSurface:421-423} and
+     * gates each ore type inside it with {@code Config.genX && (newGen || Config.regenX)}. The
+     * fresh generation passes the {@code Config.genX} values, the regeneration queue passes
+     * {@code Config.genX && Config.regenX}, and both replay exactly the same draws.</p>
+     */
+    public static boolean placePass(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ,
+                                    boolean cinnabar, boolean amber, boolean infused) {
+        if (!isSurfaceDimension(level) || !NodeEcologyPolicy.permitsLevel(NodeEcologyPolicy.dimensionLevel(level.getLevel().dimension()))) return false;
+        if (!level.hasChunk(chunkX, chunkZ)) return false;
+        int originX = chunkX << 4;
+        int originZ = chunkZ << 4;
+        int centerSurface = surface(level, originX + 8, originZ + 8);
+        var centreBiome = surfaceBiome(level, originX + 8, centerSurface, originZ + 8);
+        if (centreBiome.is(BIOME_BLACKLIST) || !NodeEcologyPolicy.permitsLevel(NodeEcologyPolicy.biomeLevel(centreBiome))) return false;
         boolean placed = false;
 
         /* Native-height adaptation is deliberately ZERO-ANCHORED, as in TC4:
@@ -69,21 +82,21 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
          * No extra deepslate pass, attempt scaling, retrogen or old-seed identity.
          */
         int cinnabarBound = Math.max(1, level.getHeight() / 5);
-        if (options.cinnabarOre()) for (int attempt = 0; attempt < 18; attempt++) {
-            int x = chunkX + random.nextInt(16);
+        if (cinnabar) for (int attempt = 0; attempt < 18; attempt++) {
+            int x = originX + random.nextInt(16);
             int y = random.nextInt(cinnabarBound);
-            int z = chunkZ + random.nextInt(16);
+            int z = originZ + random.nextInt(16);
             placed |= single(level, random, new BlockPos(x, y, z), ThaumcraftOres.CINNABAR.get().defaultBlockState());
         }
-        if (options.amberOre()) for (int attempt = 0; attempt < 20; attempt++) {
-            int x = chunkX + random.nextInt(16);
-            int z = chunkZ + random.nextInt(16);
+        if (amber) for (int attempt = 0; attempt < 20; attempt++) {
+            int x = originX + random.nextInt(16);
+            int z = originZ + random.nextInt(16);
             int y = surface(level, x, z) - random.nextInt(25);
             placed |= single(level, random, new BlockPos(x, y, z), ThaumcraftOres.AMBER.get().defaultBlockState());
         }
-        if (options.infusedStone()) for (int attempt = 0; attempt < 8; attempt++) {
-            int x = chunkX + random.nextInt(16);
-            int z = chunkZ + random.nextInt(16);
+        if (infused) for (int attempt = 0; attempt < 8; attempt++) {
+            int x = originX + random.nextInt(16);
+            int z = originZ + random.nextInt(16);
             int top = surface(level, x, z);
             int y = random.nextInt(Math.max(5, top - 5));
             int variant = random.nextInt(6) + 1;
@@ -95,7 +108,7 @@ public final class ThaumcraftOreFeature extends Feature<NoneFeatureConfiguration
             if (level.isOutsideBuildHeight(pos) || !level.hasChunksAt(pos.offset(-3, 0, -3), pos.offset(3, 0, 3))) continue;
             var state = ThaumcraftOres.INFUSED.get(PRIMALS.get(variant - 1)).get().defaultBlockState();
             placed |= Feature.ORE.place(new OreConfiguration(new TagMatchTest(REPLACEABLE), state, 6),
-                    level, context.chunkGenerator(), random, pos);
+                    level, level.getLevel().getChunkSource().getGenerator(), random, pos);
         }
         return placed;
     }

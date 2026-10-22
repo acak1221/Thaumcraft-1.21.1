@@ -86,6 +86,39 @@ public final class EldritchRingFeature extends Feature<NoneFeatureConfiguration>
     }
 
     /**
+     * Whether {@link #place} of this chunk would build the ring, without building it.
+     *
+     * <p>The aura totem of the chunk asks this after it drew the same exclusive chain from the
+     * chunk seed: the original suppresses the totem only in a chunk whose ring was actually
+     * built (oracle ThaumcraftWorldGenerator:441).</p>
+     */
+    public static boolean preflight(WorldGenLevel level, int chunkX, int chunkZ) {
+        if (!(level.getLevel() instanceof ServerLevel server)) return false;
+        if (OuterLandsProvider.isOuterLands(level.getLevel())) return false;
+        RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
+                level.getLevel().getSeed(), chunkX, chunkZ));
+        StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        if (draw.kind() != StructurePlacementRules.Kind.ELDRITCH_RING) return false;
+        int centreX = inside(draw.x(), chunkX);
+        int centreZ = inside(draw.z(), chunkZ);
+        int randPosY = level.getHeight(Heightmap.Types.WORLD_SURFACE, centreX, centreZ) - 9;
+        if (randPosY >= level.getSeaLevel()) return false;
+        int[] size = StructurePlacementRules.ringSize(random);
+        int j = randPosY + 8;
+        for (int[] sample : StructurePlacementRules.RING_SAMPLES) {
+            if (!validSpawn(level, centreX + sample[0], j, centreZ + sample[1])) return false;
+        }
+        try {
+            return !OuterLandsProvider.maze(server).mazesInRange(chunkX, chunkZ, size[0], size[1]);
+        } catch (RuntimeException unreadable) {
+            // The original reads the same labyrinth here; a labyrinth that cannot be read must
+            // not turn the decoration of a chunk into a server crash. The ring pass of the
+            // chunk reports the failure itself.
+            return false;
+        }
+    }
+
+    /**
      * The centre of the ring inside its chunk.
      *
      * <p>The 1.21.1 generation writes into the chunk that is generated, so the seven by seven

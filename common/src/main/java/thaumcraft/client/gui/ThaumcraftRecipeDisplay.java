@@ -292,6 +292,12 @@ public final class ThaumcraftRecipeDisplay {
     private final boolean infusionAltar;
     private final boolean thaumatorium;
     private final boolean advancedFurnace;
+    /** The three sceptre variants of the SCEPTRE page, null for every other page. */
+    private final SceptreVariant[] sceptreVariants;
+    /** The synthetic result of a page whose recipe has no native counterpart, null otherwise. */
+    private final ItemStack syntheticResult;
+    /** The synthetic inputs of such a page, in the order of the original recipe. */
+    private final List<ItemStack> syntheticInputs;
 
     private ThaumcraftRecipeDisplay(RecipeHolder<?> recipe, List<Ingredient> ingredients, int gridWidth, boolean shapeless) {
         this.recipe = recipe;
@@ -302,6 +308,9 @@ public final class ThaumcraftRecipeDisplay {
         infusionAltar = false;
         thaumatorium = false;
         advancedFurnace = false;
+        sceptreVariants = null;
+        syntheticResult = ItemStack.EMPTY;
+        syntheticInputs = List.of();
     }
 
     private ThaumcraftRecipeDisplay(List<ThaumcraftRecipeDisplay> alternatives) {
@@ -314,6 +323,9 @@ public final class ThaumcraftRecipeDisplay {
         infusionAltar = false;
         thaumatorium = false;
         advancedFurnace = false;
+        sceptreVariants = null;
+        syntheticResult = ItemStack.EMPTY;
+        syntheticInputs = List.of();
     }
 
     private ThaumcraftRecipeDisplay(RecipeHolder<?> matrixRecipe, boolean thaumatorium) {
@@ -329,6 +341,51 @@ public final class ThaumcraftRecipeDisplay {
         infusionAltar = !thaumatorium && !advancedFurnace;
         this.advancedFurnace = advancedFurnace;
         this.thaumatorium = thaumatorium;
+        sceptreVariants = null;
+        syntheticResult = ItemStack.EMPTY;
+        syntheticInputs = List.of();
+    }
+
+    /**
+     * The SCEPTRE page of the original.
+     *
+     * <p>Original {@code thaumcraft/common/config/ConfigResearch.java:110-144}: the page holds the
+     * three sceptre recipes as an array of arcane recipes, and every one of them is the grid
+     * {@code " TF"}, {@code " RT"}, {@code "T  "} of two wand caps, one wand rod and the primal
+     * charm. The native recipe {@code thaumcraft:arcane/wand_sceptre} is a <em>special</em>
+     * recipe whose ingredients are empty, so the diagram of the page is built from the display
+     * fixture of that very recipe.</p>
+     */
+    private ThaumcraftRecipeDisplay(RecipeHolder<?> sceptreRecipe, SceptreVariant[] variants) {
+        recipe = sceptreRecipe;
+        ingredients = List.of();
+        gridWidth = 3;
+        shapeless = false;
+        alternatives = List.of();
+        infusionAltar = false;
+        thaumatorium = false;
+        advancedFurnace = false;
+        sceptreVariants = variants;
+        syntheticResult = ItemStack.EMPTY;
+        syntheticInputs = List.of();
+    }
+
+    /**
+     * A page whose original recipe has no native counterpart, drawn from the declared inputs
+     * and the declared result of the original.
+     */
+    private ThaumcraftRecipeDisplay(ItemStack result, List<ItemStack> inputs) {
+        recipe = null;
+        ingredients = List.of();
+        gridWidth = 3;
+        shapeless = true;
+        alternatives = List.of();
+        infusionAltar = false;
+        thaumatorium = false;
+        advancedFurnace = false;
+        sceptreVariants = null;
+        syntheticResult = result;
+        syntheticInputs = List.copyOf(inputs);
     }
 
     private static Map.Entry<String, ResourceLocation> alias(String original, String nativeId) {
@@ -341,6 +398,21 @@ public final class ThaumcraftRecipeDisplay {
      * research pages that had no recipe at all before the catalogue was closed.
      */
     private static final Map<String, ResourceLocation> RESOLVED = resolveAliases();
+
+    /**
+     * One variant of the SCEPTRE page: the rod and the cap of the sceptre.
+     *
+     * <p>Original {@code thaumcraft/common/config/ConfigResearch.java:110-144}: the three sceptre
+     * recipes of the page are the iron cap with the wood rod, the gold cap with the greatwood
+     * rod and the thaumium cap with the silverwood rod.</p>
+     */
+    public record SceptreVariant(String rod, String cap) {}
+
+    /** The three variants of the SCEPTRE page, in the order of the original. */
+    public static final List<SceptreVariant> SCEPTRE_VARIANTS = List.of(
+            new SceptreVariant("wood", "iron"),
+            new SceptreVariant("greatwood", "gold"),
+            new SceptreVariant("silverwood", "thaumium"));
 
     private static Map<String, ResourceLocation> resolveAliases() {
         var merged = new java.util.LinkedHashMap<String, ResourceLocation>(ALIASES);
@@ -355,6 +427,10 @@ public final class ThaumcraftRecipeDisplay {
     public RecipeHolder<?> recipe() { return recipe; }
     public boolean sameRecipes(ThaumcraftRecipeDisplay other) {
         if (recipe != other.recipe || infusionAltar != other.infusionAltar || thaumatorium != other.thaumatorium || alternatives.size() != other.alternatives.size()) return false;
+        if (!ItemStack.matches(syntheticResult, other.syntheticResult)) return false;
+        if (syntheticInputs.size() != other.syntheticInputs.size()) return false;
+        for (int i = 0; i < syntheticInputs.size(); i++) if (!ItemStack.matches(syntheticInputs.get(i), other.syntheticInputs.get(i))) return false;
+        if (sceptreVariants == null ? other.sceptreVariants != null : !java.util.Arrays.equals(sceptreVariants, other.sceptreVariants)) return false;
         for (int i = 0; i < alternatives.size(); i++) if (!alternatives.get(i).sameRecipes(other.alternatives.get(i))) return false;
         return true;
     }
@@ -378,6 +454,59 @@ public final class ThaumcraftRecipeDisplay {
             if (holder == null) continue;
             var choice = resolve(holder, level);
             if (choice != null) choices.add(choice);
+        }
+        return choices.isEmpty() ? null : new ThaumcraftRecipeDisplay(choices);
+    }
+
+    /**
+     * The SCEPTRE page of the original.
+     *
+     * <p>Original {@code thaumcraft/common/config/ConfigResearch.java:110-144} and
+     * {@code thaumcraft/client/gui/GuiResearchRecipe.java:647-655}: the page holds the three
+     * sceptre recipes as an array and the book shows one of them per second. The native recipe
+     * {@code thaumcraft:arcane/wand_sceptre} is a special recipe with empty ingredients, so the
+     * diagram of the page is built from the display fixture of that very recipe, which carries
+     * the three variants of the original.</p>
+     */
+    public static ThaumcraftRecipeDisplay sceptre(Level level) {
+        var holder = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "arcane/wand_sceptre")).orElse(null);
+        if (holder == null || !(holder.value() instanceof thaumcraft.common.lib.crafting.ArcaneSceptreRecipe)) return null;
+        return new ThaumcraftRecipeDisplay(holder, SCEPTRE_VARIANTS.toArray(SceptreVariant[]::new));
+    }
+
+    /**
+     * The JARLABEL page of the original.
+     *
+     * <p>Original {@code thaumcraft/common/config/ConfigRecipes.java:417-425}: for every aspect of
+     * the original the book holds a recipe that binds a blank jar label to a phial of eight units
+     * of that aspect. The page of {@code ConfigResearch.java:302-305} shows those recipes as an
+     * array, one per second. The native recipe {@code thaumcraft:jar_label_bind} accepts any
+     * filled phial, so the page needs the synthetic inputs of the original: the blank label and
+     * the phial of the aspect of the entry.</p>
+     *
+     * <p>The number of the entries is the number of the aspects of the original, which is
+     * <b>forty eight</b> in 4.2.3.5 and not sixteen.</p>
+     */
+    /**
+     * The aspects of the jar label recipes of the original, in the order of the original.
+     *
+     * <p>Original {@code thaumcraft/common/config/ConfigRecipes.java:417-425} builds one jar label
+     * recipe for every registered aspect, so the page of the original holds one entry per aspect
+     * of the 4.2.3.5 tree, which is <b>forty eight</b> and not sixteen.</p>
+     */
+    public static List<String> jarLabelAspects() {
+        return Aspect.aspects.values().stream().map(Aspect::getTag).toList();
+    }
+
+    public static ThaumcraftRecipeDisplay jarLabels(Level level) {
+        if (level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "jar_label_bind")).isEmpty()) return null;
+        List<ThaumcraftRecipeDisplay> choices = new ArrayList<>();
+        for (String tag : jarLabelAspects()) {
+            var label = thaumcraft.common.items.ItemJarLabel.blank();
+            var phial = thaumcraft.common.items.ItemEssence.filled(tag);
+            var result = thaumcraft.common.items.ItemJarLabel.bound(tag);
+            if (label.isEmpty() || phial.isEmpty() || result.isEmpty()) continue;
+            choices.add(new ThaumcraftRecipeDisplay(result, List.of(label, phial)));
         }
         return choices.isEmpty() ? null : new ThaumcraftRecipeDisplay(choices);
     }
@@ -426,6 +555,16 @@ public final class ThaumcraftRecipeDisplay {
                 && "ORE".equals(researchKey)) {
             return alternatives(level, List.of("clusters/air", "clusters/fire", "clusters/water", "clusters/earth",
                     "clusters/order", "clusters/entropy", "clusters/mixed"));
+        }
+        // Original ConfigResearch:110-144: the SCEPTRE page shows the three sceptre recipes.
+        if ("legacy_expression".equals(page.kind()) && "scer.toArray(new IArcaneRecipe[0])".equals(page.javaExpression())) {
+            return sceptre(level);
+        }
+        // Original ConfigResearch:302-305: the JARLABEL page shows one jar label recipe per
+        // aspect of the original.
+        if ("legacy_expression".equals(page.kind()) && "rc.toArray(new IRecipe[0])".equals(page.javaExpression())
+                && "JARLABEL".equals(researchKey)) {
+            return jarLabels(level);
         }
         if ("legacy_expression".equals(page.kind()) && "raug.toArray(new InfusionRecipe[0])".equals(page.javaExpression())) {
             var holder = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "infusion_runic_augment/runic_augmentation")).orElse(null);
@@ -540,6 +679,10 @@ public final class ThaumcraftRecipeDisplay {
                          int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
         if (!alternatives.isEmpty()) return alternatives.get((int) Math.floorMod(cycle, (long) alternatives.size()))
                 .render(graphics, font, level, player, x, y, width, height, mouseX, mouseY, cycle);
+        if (sceptreVariants != null) return renderSceptre(graphics, font, level, player,
+                x, y, width, height, mouseX, mouseY, cycle);
+        if (!syntheticResult.isEmpty()) return renderSynthetic(graphics, font, level, player,
+                x, y, width, height, mouseX, mouseY, cycle);
         if (advancedFurnace) return AdvancedFurnaceBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
         if (thaumatorium) return ThaumatoriumBookDiagram.render(graphics, font, x, y, width, height, mouseX, mouseY);
         if (infusionAltar) return renderInfusionAltar(graphics, font, x, y, width, height, mouseX, mouseY);
@@ -605,6 +748,98 @@ public final class ThaumcraftRecipeDisplay {
                 if (inside(mx, my, sx, 174, 16, 25)) hover = visHover(nativeRecipe, tag, player);
             }
             RenderSystem.disableBlend();
+        }
+        graphics.pose().popPose();
+        return hover;
+    }
+
+    /**
+     * The SCEPTRE page of the original: the arcane diagram of one of the three sceptre recipes.
+     *
+     * <p>Original {@code thaumcraft/client/gui/GuiResearchRecipe.java:503-639} draws the arcane
+     * page: the header of the arcane workbench, the result of the recipe at the top right, the
+     * inputs of the shaped arcane grid and the row of the aspects with their vis cost. The grid
+     * of the sceptre is the one of the original, " TF", " RT", "T  ".</p>
+     */
+    private Hover renderSceptre(GuiGraphics graphics, Font font, Level level, Player player,
+                                int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
+        if (!(recipe.value() instanceof thaumcraft.common.lib.crafting.ArcaneSceptreRecipe sceptre)) return null;
+        SceptreVariant variant = SCEPTRE_VARIANTS.get((int) Math.floorMod(cycle, (long) SCEPTRE_VARIANTS.size()));
+        var input = thaumcraft.common.lib.crafting.ArcaneSceptreRecipe.displayInput(variant.rod(), variant.cap());
+        ItemStack result = sceptre.assemble(input, level.registryAccess());
+        Map<String, Integer> vis = sceptre.vis(input);
+        float scale = Math.min(width / 112F, height / 200F);
+        if (scale <= 0) return null;
+        float originX = x + (width - 112 * scale) / 2, originY = y + (height - 200 * scale) / 2;
+        float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
+        Hover hover = null;
+        graphics.pose().pushPose();
+        graphics.pose().translate(originX, originY, 0);
+        graphics.pose().scale(scale, scale, 1);
+        RenderSystem.enableBlend();
+        graphics.blit(OVERLAY, 4, 54, 104, 104, 224, 30, 104, 104, 512, 512);
+        graphics.blit(OVERLAY, 40, 14, 32, 32, 40, 6, 32, 32, 512, 512);
+        RenderSystem.disableBlend();
+        drawCenteredFit(graphics, font, Component.translatable("recipe.type.arcane"), 56, 0, 112, 0xFF505050);
+        drawItem(graphics, font, result, 48, 22);
+        if (inside(mx, my, 48, 22, 16, 16)) hover = new Hover(result, List.of());
+        for (int slot = 0; slot < 9; slot++) {
+            ItemStack stack = input.getItem(slot);
+            if (stack.isEmpty()) continue;
+            int sx = 16 + slot % 3 * 32, sy = 66 + slot / 3 * 32;
+            drawItem(graphics, font, stack, sx, sy);
+            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
+        }
+        List<String> tags = WandData.PRIMALS.stream().filter(tag -> vis.getOrDefault(tag, 0) > 0)
+                .sorted(Comparator.<String>comparingInt(vis::get).reversed()).toList();
+        drawCenteredFit(graphics, font, Component.translatable("tc.port.book_recipe.base_vis"), 56, 162, 112, 0xFF505050);
+        RenderSystem.enableBlend();
+        for (int i = 0; i < tags.size(); i++) {
+            String tag = tags.get(i);
+            Aspect aspect = Aspect.getAspect(tag);
+            int sx = (112 - (tags.size() * 18 - 2)) / 2 + i * 18;
+            int color = aspect.getColor();
+            graphics.setColor((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, 1);
+            graphics.blit(aspect.getImage(), sx, 174, 0, 0, 16, 16, 16, 16);
+            graphics.setColor(1, 1, 1, 1);
+            drawCenteredFit(graphics, font, Component.literal(Integer.toString(vis.get(tag))), sx + 8, 190, 18, 0xFF43301F);
+            if (inside(mx, my, sx, 174, 16, 25)) hover = visHover(vis, tag, player);
+        }
+        RenderSystem.disableBlend();
+        graphics.pose().popPose();
+        return hover;
+    }
+
+    /**
+     * A page whose original recipe has no native counterpart.
+     *
+     * <p>Original {@code thaumcraft/client/gui/GuiResearchRecipe.java:642-773} draws the
+     * workbench page: the header, the result of the recipe and the inputs of a shapeless recipe
+     * in the row major order.</p>
+     */
+    private Hover renderSynthetic(GuiGraphics graphics, Font font, Level level, Player player,
+                                  int x, int y, int width, int height, int mouseX, int mouseY, long cycle) {
+        float scale = Math.min(width / 112F, height / 174F);
+        if (scale <= 0) return null;
+        float originX = x + (width - 112 * scale) / 2, originY = y + (height - 174 * scale) / 2;
+        float mx = (mouseX - originX) / scale, my = (mouseY - originY) / scale;
+        Hover hover = null;
+        graphics.pose().pushPose();
+        graphics.pose().translate(originX, originY, 0);
+        graphics.pose().scale(scale, scale, 1);
+        RenderSystem.enableBlend();
+        graphics.blit(OVERLAY, 4, 64, 104, 104, 120, 30, 104, 104, 512, 512);
+        graphics.blit(OVERLAY, 40, 24, 32, 32, 40, 6, 32, 32, 512, 512);
+        RenderSystem.disableBlend();
+        drawCenteredFit(graphics, font, Component.translatable("recipe.type.workbenchshapeless"), 56, 0, 112, 0xFF505050);
+        drawItem(graphics, font, syntheticResult, 48, 32);
+        if (inside(mx, my, 48, 32, 16, 16)) hover = new Hover(syntheticResult, List.of());
+        for (int i = 0; i < syntheticInputs.size() && i < 9; i++) {
+            ItemStack stack = syntheticInputs.get(i);
+            if (stack.isEmpty()) continue;
+            int sx = 16 + i % 3 * 32, sy = 76 + i / 3 * 32;
+            drawItem(graphics, font, stack, sx, sy);
+            if (inside(mx, my, sx, sy, 16, 16)) hover = new Hover(stack, List.of());
         }
         graphics.pose().popPose();
         return hover;
@@ -863,9 +1098,14 @@ public final class ThaumcraftRecipeDisplay {
     }
 
     private static Hover visHover(NativeArcaneRecipe recipe, String tag, Player player) {
+        return visHover(recipe.vis(), tag, player);
+    }
+
+    /** The hover of an aspect of an arcane recipe, with the declared base cost of the page. */
+    private static Hover visHover(Map<String, Integer> vis, String tag, Player player) {
         var lines = new ArrayList<Component>();
         lines.add(Component.translatable("tc.aspect." + tag));
-        lines.add(Component.translatable("tc.port.book_recipe.base_cost", recipe.vis().get(tag)).withStyle(ChatFormatting.GRAY));
+        lines.add(Component.translatable("tc.port.book_recipe.base_cost", vis.get(tag)).withStyle(ChatFormatting.GRAY));
         ItemStack wand = ItemStack.EMPTY;
         if (player != null) {
             if (ArcaneVis.isCraftingWand(player.getMainHandItem())) wand = player.getMainHandItem();
@@ -874,7 +1114,7 @@ public final class ThaumcraftRecipeDisplay {
         if (!wand.isEmpty()) {
             // Exactly the native crafting price (currently wood/iron's penalty),
             // not hypothetical armour/bauble/other-wand discount arithmetic.
-            int cost = ArcaneVis.price(recipe.vis(), wand, player).get(tag);
+            int cost = ArcaneVis.price(vis, wand, player).get(tag);
             lines.add(Component.translatable("tc.port.book_recipe.held_wand", wand.getHoverName()).withStyle(ChatFormatting.GRAY));
             lines.add(Component.translatable("tc.port.book_recipe.wand_cost", BigDecimal.valueOf(cost, 2).stripTrailingZeros().toPlainString()));
         } else lines.add(Component.translatable("tc.port.book_recipe.no_wand_context").withStyle(ChatFormatting.GRAY));

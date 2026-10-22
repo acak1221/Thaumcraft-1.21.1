@@ -129,19 +129,7 @@ public final class FabricGolemFluidAccess {
             if (variant == null) return 0;
             long maximum = FabricCrucibleStorage.toDroplets(amountMb);
             try {
-                if (commit) {
-                    try (Transaction outer = Transaction.openOuter()) {
-                        long extracted = storage.extract(FluidVariant.of(variant), maximum, outer);
-                        outer.commit();
-                        return (int) FabricCrucibleStorage.toMillibuckets(extracted);
-                    }
-                }
-                try (Transaction outer = Transaction.openOuter()) {
-                    try (Transaction nested = outer.openNested()) {
-                        long extracted = storage.extract(FluidVariant.of(variant), maximum, nested);
-                        return (int) FabricCrucibleStorage.toMillibuckets(extracted);
-                    }
-                }
+                return transferWholeMillibuckets(storage, FluidVariant.of(variant), maximum, commit, false);
             } catch (RuntimeException failure) {
                 return 0;
             }
@@ -154,21 +142,29 @@ public final class FabricGolemFluidAccess {
             if (variant == null) return 0;
             long maximum = FabricCrucibleStorage.toDroplets(amountMb);
             try {
-                if (commit) {
-                    try (Transaction outer = Transaction.openOuter()) {
-                        long inserted = storage.insert(FluidVariant.of(variant), maximum, outer);
-                        outer.commit();
-                        return (int) FabricCrucibleStorage.toMillibuckets(inserted);
-                    }
-                }
-                try (Transaction outer = Transaction.openOuter()) {
-                    try (Transaction nested = outer.openNested()) {
-                        long inserted = storage.insert(FluidVariant.of(variant), maximum, nested);
-                        return (int) FabricCrucibleStorage.toMillibuckets(inserted);
-                    }
-                }
+                return transferWholeMillibuckets(storage, FluidVariant.of(variant), maximum, commit, true);
             } catch (RuntimeException failure) {
                 return 0;
+            }
+        }
+
+        /** Cargo can represent only whole mB. Probe and abort before rounding, then transfer
+         * exactly that amount; fractional native stock stays with its existing owner. */
+        private static int transferWholeMillibuckets(Storage<FluidVariant> storage, FluidVariant fluid,
+                                                     long maximum, boolean commit, boolean insert) {
+            try (Transaction outer = Transaction.openOuter()) {
+                long available;
+                try (Transaction probe = outer.openNested()) {
+                    available = insert ? storage.insert(fluid, maximum, probe) : storage.extract(fluid, maximum, probe);
+                }
+                int millibuckets = (int) FabricCrucibleStorage.toMillibuckets(available);
+                if (!commit || millibuckets <= 0) return millibuckets;
+                long exact = FabricCrucibleStorage.toDroplets(millibuckets);
+                long transferred = insert ? storage.insert(fluid, exact, outer) : storage.extract(fluid, exact, outer);
+                // A handler may have a minimum transfer size. Never commit an unreportable amount.
+                if (transferred != exact) return 0;
+                outer.commit();
+                return millibuckets;
             }
         }
     }

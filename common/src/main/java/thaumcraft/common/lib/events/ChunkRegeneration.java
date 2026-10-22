@@ -60,7 +60,7 @@ import thaumcraft.common.lib.world.ThaumcraftTreeFeature;
  *
  * <p>Minecraft 1.21.1 has no chunk data event, but the vanilla chunk NBT is written and read in
  * exactly one place each ({@code net.minecraft.world.level.chunk.storage.ChunkSerializer.write}
- * and {@@code .read}), so the marker of the original rides on the chunk NBT of the port through
+ * and {@code .read}), so the marker of the original rides on the chunk NBT of the port through
  * the mixin {@code Tc4ChunkRegenerationMarkerMixin}.</p>
  */
 public final class ChunkRegeneration {
@@ -96,8 +96,7 @@ public final class ChunkRegeneration {
     public static void readMarker(ServerLevel level, ChunkPos pos, CompoundTag chunkTag) {
         OriginalRegenSettings settings = ThaumcraftBiomeSettings.regen();
         if (!settings.anyRegeneration()) return;
-        CompoundTag marker = chunkTag.getCompound(COMPOUND);
-        if (marker.getBoolean(regenKey())) return;
+        if (hasMarker(chunkTag, regenKey())) return;
         Thaumcraft.LOG.warn("[Thaumcraft] World gen was never run for chunk at {}. Adding to queue for regeneration.", pos);
         queue(level).add(new ChunkLoc(pos.x, pos.z));
     }
@@ -105,6 +104,11 @@ public final class ChunkRegeneration {
     /** The key of the marker of the original (oracle Config:378-380). */
     public static String regenKey() {
         return ThaumcraftBiomeSettings.regen().regenKey();
+    }
+
+    /** Oracle EventHandlerWorld:125 tests key presence, not the stored boolean value. */
+    public static boolean hasMarker(CompoundTag chunkTag, String key) {
+        return chunkTag.getCompound(COMPOUND).contains(key);
     }
 
     /** The chunks of the dimension that wait for their regeneration. */

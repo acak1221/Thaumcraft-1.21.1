@@ -22,6 +22,19 @@ import thaumcraft.common.config.OriginalRegenSettings;
  * not a transcription of the port.</p>
  */
 class ChunkRegenerationParityTest {
+    @Test void markerPresenceNotTruthControlsRegeneration() {
+        // Oracle EventHandlerWorld:125 calls hasKey, NOT getBoolean.
+        CompoundTag chunk = new CompoundTag();
+        CompoundTag marker = new CompoundTag();
+        marker.putBoolean("DEFAULT", false);
+        chunk.put("Thaumcraft", marker);
+        assertTrue(ChunkRegeneration.hasMarker(chunk, "DEFAULT"));
+        assertFalse(ChunkRegeneration.hasMarker(chunk, "CHANGED"));
+        assertFalse(ChunkRegeneration.hasMarker(new CompoundTag(), "DEFAULT"));
+        marker.putString("CHANGED", "a present key still counts");
+        assertTrue(ChunkRegeneration.hasMarker(chunk, "CHANGED"));
+    }
+
     @Test void theMarkerIsTheCompoundOfTheOriginal() {
         CompoundTag tag = new CompoundTag();
         ChunkRegeneration.writeMarker(tag);

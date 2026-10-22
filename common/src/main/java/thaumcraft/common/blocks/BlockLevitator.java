@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.config.ThaumcraftLevitator;
 import thaumcraft.common.tiles.TileLevitator;
+import net.minecraft.util.RandomSource;
+import thaumcraft.common.lib.fx.SparkleCallRules;
 
 /**
  * Original BlockLifter (the Arcane Levitator): wood, hardness 2.5, resistance 15 (stored x3, exposed /5: 9). Placing, removing or
@@ -25,6 +27,16 @@ public final class BlockLevitator extends BaseEntityBlock {
     @Override protected MapCodec<? extends BaseEntityBlock> codec() { return CODEC; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new TileLevitator(pos, state); }
     @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+
+    @Override public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        // Oracle BlockLifter:78-82: only an unpowered, unobstructed lifter sparkles.
+        if (level.getBlockEntity(pos) instanceof TileLevitator tile
+                && SparkleCallRules.lifterSparkle(tile.gettingPower(), tile.getRange())) {
+            SparkleCallRules.sparkle(level,
+                    SparkleCallRules.lifterPosition(pos.getX(), pos.getY(), pos.getZ(), random),
+                    SparkleCallRules.LIFTER_SIZE, SparkleCallRules.LIFTER_TYPE, SparkleCallRules.LIFTER_GRAVITY);
+        }
+    }
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return createTickerHelper(type, ThaumcraftLevitator.LEVITATOR_BLOCK_ENTITY.get(), TileLevitator::tick);
     }

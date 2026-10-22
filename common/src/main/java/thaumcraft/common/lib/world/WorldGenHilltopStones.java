@@ -2,26 +2,18 @@ package thaumcraft.common.lib.world;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftMonsters;
 import thaumcraft.common.config.ThaumcraftVillages;
 import thaumcraft.common.lib.world.biomes.BiomeTopBlocks;
@@ -255,24 +247,9 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
      * loot, rolled twice.
      */
     private static void fillDungeonChest(WorldGenLevel level, BlockPos pos, RandomSource random) {
-        if (!(level.getBlockEntity(pos) instanceof ChestBlockEntity chest)) return;
-        ServerLevel server = level.getLevel();
-        LootTable table = server.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.SIMPLE_DUNGEON);
-        if (table == LootTable.EMPTY) return;
-        // The native chest rolls its loot with the chest parameter set, the one that
-        // allows the origin the vanilla chest tables need.
-        LootParams params = new LootParams.Builder(server)
-                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
-                .withLuck(0.0F)
-                .create(LootContextParamSets.CHEST);
-        int slot = 0;
-        RandomSource source = RandomSource.create(random.nextLong());
-        for (int pass = 0; pass < 2; pass++) {
-            for (var stack : table.getRandomItems(params, source)) {
-                if (slot >= chest.getContainerSize()) return;
-                chest.setItem(slot++, stack);
-            }
-        }
+        // The chest carries the Forge category "dungeonChest" of the 1.7.10, the list of the
+        // vanilla dungeon chest plus the additions of Forge, and it is rolled twice.
+        WorldgenLootHelper.fillDungeonChest(level, pos, random, 2);
     }
 
     /** Oracle WorldGenHilltopStones:98 - the spawner holds wisps. */

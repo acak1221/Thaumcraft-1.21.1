@@ -17,7 +17,13 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.HopperBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -82,14 +88,23 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
     }
 
     /**
-     * The soil rule of the plant type.
+     * The soil of the inherited 1.7.10 {@code BlockBush}.
+     *
+     * <p>Original: the 1.7.10 {@code BlockBush.func_149854_a} - the MCP name of the method is
+     * {@code canPlaceBlockOn} and the MCP mapping describes it as "is the block grass, dirt or
+     * farmland". The three blocks are the whole table of the method.</p>
+     */
+    public static boolean bushSoil(BlockState soil) {
+        return soil.is(Blocks.GRASS_BLOCK) || soil.is(Blocks.DIRT) || soil.is(Blocks.FARMLAND);
+    }
+
+    /**
+     * The soil rule of the plant type, the part that needs no world.
      *
      * <p>The Plains type is the soil of the inherited {@code BlockBush} (grass, dirt and the
-     * farmland), the Desert type adds the sand. The Cave type has no counterpart that the oracle
-     * can prove: the Forge 1.7.10 table of the Cave soils is not part of the decompiled original,
-     * so the port keeps the Plains soil of the original's own block rule for the two Cave plants,
-     * which is the soil the original's world generator puts them on
-     * (oracle BiomeGenMagicalForest:147).</p>
+     * farmland), the Desert type adds the sand. The Cave type has no soil of its own in the
+     * pure part: the Forge 1.7.10 table asks the world for it, see
+     * {@link #soilSupports(PlantType, BlockState, BlockGetter, BlockPos)}.</p>
      *
      * <p>The inherited soil is asked FIRST and for EVERY plant type, exactly as the Forge 1.7.10
      * table of {@code Block.canSustainPlant} does: the check of the inherited {@code BlockBush}
@@ -102,28 +117,90 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
      *   if (plantable instanceof BlockBush &amp;&amp; ((BlockBush) plantable).func_149854_a(this)) return true;
      *   switch (plantType) {
      *     case Desert: return this == Blocks.sand;
+     *     case Cave:   return isSideSolid(world, x, y, z, UP);
      *     case Plains: return this == Blocks.grass || this == Blocks.dirt || this == Blocks.farmland;
      *   }
      * </pre>
      *
      * <p>The oracle's own block carries no soil rule of its own
      * (oracle {@code BlockCustomPlant.java:130-132} answers {@code canPlaceBlockAt} with a plain
-     * {@code true}), so the whole rule is the Forge table above.</p>
+     * {@code true}), so the whole rule of the item is the Forge table above.</p>
      */
     public static boolean soilSupports(PlantType type, BlockState soil) {
         // The inherited BlockBush soil is asked first, for every plant type.
-        if (soil.is(Blocks.GRASS_BLOCK) || soil.is(Blocks.DIRT) || soil.is(Blocks.COARSE_DIRT)
-                || soil.is(Blocks.PODZOL) || soil.is(Blocks.FARMLAND)) return true;
-        // The Desert type adds the sand of the original (both old metadata variants).
-        if (type == PlantType.DESERT) return soil.is(Blocks.SAND) || soil.is(Blocks.RED_SAND);
+        if (bushSoil(soil)) return true;
+        // The Desert type adds the sand of the original.
+        if (type == PlantType.DESERT) return soil.is(Blocks.SAND);
         return false;
     }
 
-    @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {
-        return soilSupports(cinderpearl, soil);
+    /**
+     * The whole soil rule of the plant type, the Cave case included.
+     *
+     * <p>The Cave case of the Forge 1.7.10 table is
+     * {@code isSideSolid(world, x, y, z, UP)}: the soil must present a solid face on its top
+     * side. The 1.21.1 counterpart of that test is
+     * {@link #isSideSolidUp(BlockState, BlockGetter, BlockPos)}.</p>
+     */
+    public static boolean soilSupports(PlantType type, BlockState soil, BlockGetter level, BlockPos soilPos) {
+        if (soilSupports(type, soil)) return true;
+        if (type == PlantType.CAVE) return isSideSolidUp(soil, level, soilPos);
+        return false;
     }
+
+    /**
+     * The 1.7.10 {@code Block.isSideSolid(world, x, y, z, UP)} of the Forge patch.
+     *
+     * <p>Original: {@code patches/minecraft/net/minecraft/block/Block.java.patch} of the Forge
+     * 1.7.10 branch, the added method:</p>
+     *
+     * <pre>
+     *   if (this instanceof BlockSlab)  return (((meta &amp; 8) == 8 &amp;&amp; (side == UP)) || func_149730_j());
+     *   else if (this instanceof BlockFarmland) return (side != DOWN &amp;&amp; side != UP);
+     *   else if (this instanceof BlockStairs) { boolean flipped = ((meta &amp; 4) != 0);
+     *                                          return ((meta &amp; 3) + side.ordinal() == 5) || (side == UP &amp;&amp; flipped); }
+     *   else if (this instanceof BlockSnow) return (meta &amp; 7) == 7;
+     *   else if (this instanceof BlockHopper &amp;&amp; side == UP) return true;
+     *   else if (this instanceof BlockCompressedPowered) return true;
+     *   return isNormalCube(world, x, y, z);
+     * </pre>
+     *
+     * <p>and {@code isNormalCube} is {@code getMaterial().isOpaque() &amp;&amp; renderAsNormalBlock()},
+     * a full opaque cube. The 1.21.1 counterpart of a full opaque cube is a full collision
+     * shape ({@code isCollisionShapeFullBlock}) that occludes the face behind it
+     * ({@code canOcclude}): the glass and the leaves of 1.21.1 carry {@code noOcclusion}, so
+     * they are not solid on the top side, exactly as the translucent material of the 1.7.10
+     * glass and the leaves of the original were not.</p>
+     */
+    public static boolean isSideSolidUp(BlockState soil, BlockGetter level, BlockPos pos) {
+        // The slab: only the upper half is solid on its top side.
+        if (soil.getBlock() instanceof SlabBlock) return soil.getValue(SlabBlock.TYPE) == SlabType.TOP;
+        // The hopper is solid on its top side.
+        if (soil.getBlock() instanceof HopperBlock) return true;
+        // The stairs: only the flipped ones (the upper half) are solid on their top side.
+        if (soil.getBlock() instanceof StairBlock) return soil.getValue(StairBlock.HALF) == Half.TOP;
+        // The snow layer: only the full layer of eight is solid.
+        if (soil.getBlock() instanceof SnowLayerBlock) return soil.getValue(SnowLayerBlock.LAYERS) == 8;
+        // The default of the original: a full opaque cube.
+        return soil.isCollisionShapeFullBlock(level, pos) && soil.canOcclude();
+    }
+
+    /** The plant type the original <em>item</em> of this plant asks the soil for. */
+    public PlantType itemPlantType() {
+        return cinderpearl ? PlantType.DESERT : PlantType.PLAINS;
+    }
+
+    @Override protected boolean mayPlaceOn(BlockState soil, BlockGetter level, BlockPos pos) {
+        return soilSupports(itemPlantType(), soil, level, pos);
+    }
+
+    /**
+     * Original BlockCustomPlant:130-132 - the original plant answers {@code canPlaceBlockAt}
+     * with a plain {@code true}, so it can be placed on every soil and it never dies when the
+     * block below it changes. 1.21.1 asks the same question in {@code canSurvive}.
+     */
     @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return mayPlaceOn(level.getBlockState(pos.below()), level, pos.below());
+        return true;
     }
 
     /**
@@ -162,7 +239,21 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
      * <p>Oracle: {@code thaumcraft/common/blocks/BlockCustomPlantItem.java}, lines 50-65.</p>
      */
     public static final class PlantItem extends BlockItem {
-        public PlantItem(Block block, Item.Properties properties) { super(block, properties); }
+        private final PlantType plantType;
+        public PlantItem(Block block, Item.Properties properties) { this(block, properties, PlantType.PLAINS); }
+        /**
+         * The item of a plant of a plant type.
+         *
+         * @param plantType the plant type the original <em>item</em> of the metadata asks the
+         *                  soil for (oracle BlockCustomPlantItem:85-101)
+         */
+        public PlantItem(Block block, Item.Properties properties, PlantType plantType) {
+            super(block, properties);
+            this.plantType = plantType;
+        }
+
+        /** The plant type this item asks the soil for. */
+        public PlantType plantType() { return plantType; }
 
         /** Original BlockCustomPlantItem:51 - only the top face of a block carries a plant. */
         @Override protected BlockState getPlacementState(BlockPlaceContext context) {
@@ -172,6 +263,23 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
 
         /** Original BlockCustomPlantItem:54 - the soil below has to support the plant. */
         @Override protected boolean mustSurvive() { return true; }
+
+        /**
+         * Original BlockCustomPlantItem:54 - the item asks the soil for its own plant type with
+         * the Forge 1.7.10 table of {@code Block.canSustainPlant}.
+         *
+         * <p>Forced 1.21.1 change: the 1.21.1 {@code BlockItem.canPlace} asks the block whether
+         * it can survive, and the original block of the plant answers {@code canPlaceBlockAt}
+         * with a plain {@code true} (oracle BlockCustomPlant:130-132), so the soil rule of the
+         * original item has to be asked here, where the plant type of the original item is
+         * known.</p>
+         */
+        @Override protected boolean canPlace(BlockPlaceContext context, BlockState state) {
+            BlockPos pos = context.getClickedPos();
+            if (!soilSupports(plantType, context.getLevel().getBlockState(pos.below()),
+                    context.getLevel(), pos.below())) return false;
+            return super.canPlace(context, state);
+        }
 
         /**
          * Original BlockCustomPlantItem:56 - the plant announces itself with the <b>break</b>

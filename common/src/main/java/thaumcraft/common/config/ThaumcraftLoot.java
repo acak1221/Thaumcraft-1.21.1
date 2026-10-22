@@ -58,21 +58,18 @@ public final class ThaumcraftLoot {
     }
 
     /**
-     * Forge1.7 ChestGenHooks.getItems("dungeonChest", world.rand), consumed by original Pech trades.
-     * This is an ENTRY list, never a modern weighted dungeon-table roll. The enchanted-book
-     * entry is regenerated on EVERY invocation before the Pech's uniform entry selection.
+     * The vanilla 1.7.10 list of the dungeon chest.
+     *
+     * <p>Original: the static array of {@code net.minecraft.world.gen.feature.WorldGenDungeons}
+     * (the 1.7.10 client jar, {@code asd.class}), the list the Forge 1.7.10 chest category
+     * {@code "dungeonChest"} is built from
+     * ({@code net/minecraftforge/common/ChestGenHooks.java}: {@code addInfo(DUNGEON_CHEST,
+     * WorldGenDungeons.field_111189_a, 8, 8)}).</p>
+     *
+     * <p>The enchanted book of Forge and the TC4 additions are not part of this list: they need
+     * the world of the roll.</p>
      */
-    public static List<DungeonEntry> dungeonEntries(ServerLevel level) {
-        if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
-            throw new IllegalStateException("Dungeon loot descriptors require the canonical server level/thread");
-        return dungeonEntries(level,level.random);
-    }
-
-    /** Original Greatwood uses a private tree RNG. Region generation must not touch
-     * ServerLevel.random or require its owner thread just to create loot descriptors. */
-    public static List<DungeonEntry> dungeonEntries(net.minecraft.world.level.WorldGenLevel level,net.minecraft.util.RandomSource random) {
-        java.util.Objects.requireNonNull(level);java.util.Objects.requireNonNull(random);
-        List<DungeonEntry> entries = new ArrayList<>();
+    public static void addVanillaDungeonEntries(List<DungeonEntry> entries) {
         entry(entries, Items.SADDLE, 1, 1, 10);
         entry(entries, Items.IRON_INGOT, 1, 4, 10);
         entry(entries, Items.BREAD, 1, 1, 10);
@@ -88,6 +85,25 @@ public final class ThaumcraftLoot {
         entry(entries, Items.GOLDEN_HORSE_ARMOR, 1, 1, 2);
         entry(entries, Items.IRON_HORSE_ARMOR, 1, 1, 5);
         entry(entries, Items.DIAMOND_HORSE_ARMOR, 1, 1, 1);
+    }
+
+    /**
+     * Forge1.7 ChestGenHooks.getItems("dungeonChest", world.rand), consumed by original Pech trades.
+     * This is an ENTRY list, never a modern weighted dungeon-table roll. The enchanted-book
+     * entry is regenerated on EVERY invocation before the Pech's uniform entry selection.
+     */
+    public static List<DungeonEntry> dungeonEntries(ServerLevel level) {
+        if (!level.getServer().isSameThread() || level.getServer().getLevel(level.dimension()) != level)
+            throw new IllegalStateException("Dungeon loot descriptors require the canonical server level/thread");
+        return dungeonEntries(level,level.random);
+    }
+
+    /** Original Greatwood uses a private tree RNG. Region generation must not touch
+     * ServerLevel.random or require its owner thread just to create loot descriptors. */
+    public static List<DungeonEntry> dungeonEntries(net.minecraft.world.level.WorldGenLevel level,net.minecraft.util.RandomSource random) {
+        java.util.Objects.requireNonNull(level);java.util.Objects.requireNonNull(random);
+        List<DungeonEntry> entries = new ArrayList<>();
+        addVanillaDungeonEntries(entries);
         entries.add(new DungeonEntry(OriginalLootEnchantments.enchant(level.registryAccess(), new ItemStack(Items.BOOK), random, 30), 1, 1, 1));
         entries.addAll(chestAdditions("dungeonChest"));
         return entries;

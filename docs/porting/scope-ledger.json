@@ -6285,25 +6285,20 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w3clientfx",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/client/fx/particles/FXSparkle.java:23 the sparkle carries the sprite sheet, the multiplier, the blend mode and the colour",
-          "native client/fx/particles/DrainSparkle.java:1 the native vis drain sparkle carries the RGB payload",
-          "native client/fx/particles/FocusFrostSparkleParticle.java:1 the native frost focus sparkle replaces the shared 1.7 sparkle",
-          "oracle thaumcraft/client/ClientProxy.java:650 the sparkle of the proxy helper with its size, colour and gravity",
-          "oracle thaumcraft/common/tiles/TileHole.java:142-211 the twenty four sparkles around the portable hole, the colour type two",
-          "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:166,174 the sparkles of the shock focus, the size 2.0+rand and the gravity 0.05+rand*0.05",
-          "oracle thaumcraft/common/entities/EntityFollowingItem.java:99, EntityAlumentum.java:45, EntityFrostShard.java, EntityPechBlast.java:68 the sparkles of the entities",
-          "native client/fx/particles/FocusFrostSparkleParticle.java:16 the native frost sparkle keeps the type six colour and the eighteen ticks of the original",
-          "native common/src/main/java/thaumcraft/common/entities/EntityFollowingItem.java:155, EntityAlumentum.java:34, EntityFrostShard.java:254, EntityPechBlast.java:107 the native client hooks of the four entities",
-          "native common/src/main/java/thaumcraft/common/tiles/TileHole.java:44 the native hole has no client tick and no surroundwithsparkles, so the sparkles around it are missing",
-          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java the native shock focus has no client hook, so its sparkles are missing",
-          "REMAINING DIFFERENCE: the portable hole sparkles (oracle TileHole.java:142-211, twenty four calls) need a client tick of the native TileHole, which has none, and the shock focus sparkles (oracle ItemFocusShock.java:166,174) need the five sparkles of the original at the hit point and at the pointed entity, which the native ShockFxPayload does not carry",
-          "the magical leaves and the lifter (oracle BlockMagicalLeaves, BlockLifter) have no native block at all, so their sparkles are a content gap of another lane"
+          "oracle thaumcraft/client/fx/particles/FXSparkle.java:22-70 the sparkle of the original with its type colours: the type two is the blue of the portable hole, 0.2, 0.2 and 0.7+random*0.3",
+          "oracle thaumcraft/client/ClientProxy.java:658-664 the sparkle of the proxy: the size 1.5, the one in six roll of the particle count and the noClip flag of the particle",
+          "oracle thaumcraft/common/tiles/TileHole.java:127-211 the twenty four sparkles around the portable hole, the type two, one for every edge of the hole block that touches a solid block",
+          "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:166,174 the sparkles of the shock focus at the hit point and at the pointed entity",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFrostSparkleParticle.java the native type six sparkle of the frost focus",
+          "native common/src/main/java/thaumcraft/common/tiles/TileHole.java the native hole has no client ticker, so the twenty four sparkles of the original have no native call site",
+          "REMAINING DIFFERENCE: the port has no type sparkle particle, so the twenty four sparkles of the portable hole (they need a client ticker of the native hole) and the sparkles of the shock focus (the native shock focus payload does not carry the hit point and the pointed entity) are missing; the magical leaves and the lifter have no native block at all, so their sparkles are a content gap of the block lane"
         ],
         "notes": [
           "The configurable 1.7.10 sparkle became several native particles; the native frost sparkle keeps the type six colour and the life of the original.",
-          "Open difference: the sparkles around the portable hole (oracle TileHole.java:142-211), the sparkles of the shock focus (oracle ItemFocusShock.java:166,174), the sparkles of the magical leaves and of the lifter (oracle BlockMagicalLeaves.java, BlockLifter.java) have no native counterpart; the native tree has no BlockLifter at all."
+          "Open difference: the sparkles around the portable hole (oracle TileHole.java:142-211), the sparkles of the shock focus (oracle ItemFocusShock.java:166,174), the sparkles of the magical leaves and of the lifter (oracle BlockMagicalLeaves.java, BlockLifter.java) have no native counterpart; the native tree has no BlockLifter at all.",
+          "AUDITED 2026-10-23 (w4devices): the type colours of the original were read out of the oracle (the type two is the blue of the portable hole) and the call sites were counted: the hole has twenty four of them, the shock focus has two. The port has no type sparkle particle at all, so the gap is the particle and its call sites, not the colour rule."
         ],
         "reviewed_sha256": {
           "original": "63f5ce8dc715705ac46c886c89f7bbe8e4d61cf7c103d60713b60931d65da9bb",
@@ -17866,22 +17861,17 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w3clientfx",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:1 the 1.7 renderer draws the item mirror, the essentia mirror and the linked view",
-          "native client/renderers/tile/TileMirrorRenderer.java:43 the native renderer draws the item and the essentia mirror",
-          "native common/src/main/java/thaumcraft/common/tiles/TileMirror.java:28 the native tile keeps the link and the output stacks",
           "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:52-554 the linked view of the original is drawn with the fixed function GL11.glTexGen texture coordinate generation and a hand written projection matrix",
-          "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:563-626 the original draws the pane of the unlinked and of the linked mirror and the block icon of the mirror",
-          "native client/renderers/tile/TileMirrorRenderer.java:39 the native renderer draws the pane of the unlinked and of the linked mirror with the offset 0.02+instability and the six turns of the original",
-          "native client/renderers/models/ModelTunnelField.java:24 the native tunnel keeps the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence",
-          "native client/renderers/models/ModelTunnelField.java:36 the native tunnel is an approximation: the view dependent texture generation of the original has no equivalent in the 1.21.1 shader pipeline and the additive blend of the inner layers is the translucent pass",
-          "REMAINING DIFFERENCE: the view dependent tunnel of the original (oracle TileMirrorRenderer.java:52-554, the fixed function GL11.glTexGen texture coordinate generation and the hand written projection matrix) has no equivalent in the 1.21.1 shader pipeline, and the additive blend of the inner layers is the translucent pass of the native",
-          "everything else of the renderer is the original: the pane of the unlinked and of the linked mirror, the offset of the unstable mirror, the brightness and the turn of the six facings, the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence (native ModelTunnelField.java:24,36)"
+          "1.21.1 vanilla the render pipeline of the 1.21.1 (net/minecraft/client/renderer/GameRenderer and the RenderType of the renderer) is shader based, the fixed function texture coordinate generation of the 1.7.10 has no counterpart",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelTunnelField.java:24,36 the native tunnel keeps the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence, but it is an approximation",
+          "REMAINING DIFFERENCE: the view dependent texture generation of the original linked view (the fixed function GL11.glTexGen texture coordinate generation and the hand written projection matrix) has no equivalent in the 1.21.1 shader pipeline, and the additive blend of the inner layers is the translucent pass of the native"
         ],
         "notes": [
           "The 1.7 renderer became a 1.21.1 block entity renderer for the two mirror kinds; the pane, the offset of the unstable mirror, the brightness and the turns are the original ones.",
-          "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror."
+          "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror.",
+          "AUDITED 2026-10-23 (w4devices): the limitation is a real one. The 1.21.1 renderer draws every quad with a shader of the render pipeline, so the fixed function texture coordinate generation of the original, that makes the tunnel of the linked mirror follow the point of view, has no counterpart; everything else of the renderer is the original."
         ],
         "reviewed_sha256": {
           "original": "ddf1d39957b2b642b7a08d620a0ff5a2d14a84d7415e30efd9a6f0b530d7402c",
@@ -18403,22 +18393,20 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w3clientfx",
+        "owner": "agent-w4devices",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:25 the 1.7 renderer draws the retained thaumatorium.obj model",
-          "native client/renderers/models/ModelThaumatorium.java:16 the native OBJ loader documents that the original model is that asset",
-          "native common/src/main/resources/assets/thaumcraft/models/block/thaumatorium.json:1 the native block model is a plain orientable box",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:44-73 the 1.7 renderer draws the retained textures/models/thaumatorium.obj with textures/models/thaumatorium.png and the turn of the facing",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:74-100 the original cycles the output of one of the possible recipes of the machine above it, one recipe every forty ticks",
-          "native client/renderers/models/ModelThaumatorium.java:23 the native OBJ loader reads the retained asset and is never referenced",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:23 the native OBJ loader reads the retained asset and is never referenced",
           "native common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java:322 the native machine is programmed with a job list and holds no set of possible recipes",
-          "REMAINING DIFFERENCE: the retained OBJ is still not rendered: the native draws the plain orientable block model (assets/thaumcraft/models/block/thaumatorium.json) and its OBJ loader (native ModelThaumatorium.java:23-61) stays unreferenced",
-          "the exact pose was derived from the retained asset and can be applied in one step: the OBJ spans x -0.5..0.5, y -0.5..0.5 and z 0.0..2.0, so the original translate (x+0.5, y, z+0.5) and glRotatef(90,-1,0,0) become pose.translate(0.5,0,0.5) and Axis.XP.rotationDegrees(-90) in a block entity renderer, followed by the facing rotation around Z: NORTH 270, SOUTH 90, EAST 180, WEST 0 degrees; the two machine blocks would then have to become RenderShape.INVISIBLE because the OBJ already covers both blocks",
-          "the cycling output preview cannot be reproduced: the original shows the output of one of the possible recipes of the machine (tile.recipeHash) and the native machine is programmed with a job list that holds no such set (native TileThaumatorium.java:322)"
+          "REMAINING DIFFERENCE: the retained OBJ is still not rendered: the native draws the plain orientable block model (assets/thaumcraft/models/block/thaumatorium.json) and its OBJ loader (native ModelThaumatorium.java:23-61) stays unreferenced; the cycling output preview cannot be reproduced, because the original shows the output of one of the possible recipes of the machine (tile.recipeHash) and the native machine is programmed with a job list that holds no such set",
+          "the exact pose was derived from the retained asset and can be applied in one step: the OBJ spans x -0.5..0.5, y -0.5..0.5 and z 0.0..2.0, so the original translate (x+0.5, y, z+0.5) and glRotatef(90,-1,0,0) become pose.translate(0.5,0,0.5) and Axis.XP.rotationDegrees(-90) in a block entity renderer, followed by the facing rotation around Z: NORTH 270, SOUTH 90, EAST 180, WEST 0 degrees; the two machine blocks would then have to become RenderShape.INVISIBLE because the OBJ already covers both blocks"
         ],
         "notes": [
           "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered and the native OBJ loader is never referenced.",
-          "Open difference: the retained OBJ is one block wide and two blocks tall, so the native machine could take it, but the two block models would have to be hidden and the leader would have to inspect the frames; the cycling preview cannot be reproduced at all, because the native machine holds no set of possible recipes."
+          "Open difference: the retained OBJ is one block wide and two blocks tall, so the native machine could take it, but the two block models would have to be hidden and the leader would have to inspect the frames; the cycling preview cannot be reproduced at all, because the native machine holds no set of possible recipes.",
+          "AUDITED 2026-10-23 (w4devices): the pose of the original was derived again from the oracle and from the retained asset and it is unchanged, and the cycling preview is impossible in the port because the native machine is programmed with a job list and not with the set of the recipes of the original. The unit therefore stays open, and the remaining step of the renderer is the exact pose that is written above."
         ],
         "reviewed_sha256": {
           "original": "003001a14e4f2feefb87bdb95034fa9e1f737c9dafffee6688852ee2053229c4",
@@ -21766,27 +21754,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port/basecontent",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:37-40 the icon of the stairs delegates to the cosmetic solid of the metadata 11",
-          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:157-162 the random icon of the metadata 11 and 13",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java the native stairs",
-          "oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:16-22 the stairs copy the reference block and set the light opacity to zero",
-          "oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:25-27 the icon of the cosmetic solid metadata eleven is taken with the side plus hundred",
-          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:158-161 the ancient stone takes one of the four textures by the hash of the position",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java:36-41 the dry stair blocks no light",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockStairsEldritch.java:33-38 the effective blast resistance six of the copied block",
-          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:157-162 the ancient stone takes one of the four textures by the hash of the position",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:228,234 the hardness two and the effective blast resistance six of the copied block",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:459-465 the eldritch stairs are registered with the hardness two and the resistance six",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftCosmeticWood.java:41 the greatwood and the silverwood stairs carry the hardness 2.5 and the resistance 6.0",
-          "native common/src/test/java/thaumcraft/common/blocks/CosmeticAndPlantParityTest.java the hardness, the effective blast resistance and the light opacity of the stairs are asserted",
-          "open difference: the icon and the texture of the eldritch stairs are the client side of the original (oracle BlockCosmeticStairs:37-40 asks the cosmetic solid of the metadata eleven for the side plus hundred, and oracle BlockCosmeticSolid:141-162 picks one of the four ancient stone textures by the hash of the position), which 1.21.1 can only draw with a custom renderer of the client lane (thaumcraft/client/renderers/block/BlockCosmeticOpaqueRenderer.java)",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java:36-52 the light opacity, the hardness and the effective blast resistance of the stairs are the original ones"
+          "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:141-162 the ancient stone of the cosmetic solid takes one of the four textures by the hash of the position",
+          "oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:37-40 the icon of the stairs delegates to the cosmetic solid of the metadata eleven",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java:36-52 the native stairs carry the light opacity, the hardness and the effective blast resistance of the original",
+          "REMAINING GAP: the texture of the eldritch stairs is the client side of the original (oracle BlockCosmeticSolid:141-162 picks one of the four ancient stone textures by the hash of the position, reached through the side plus hundred of BlockCosmeticStairs:37-40); a 1.21.1 stair model is baked per block state and cannot randomise per position, so the native eldritch stairs always show the texture es_1; the port CAN reproduce it with a block state property that holds the index of the texture (four models per stair shape) and a position hash that the block computes in onPlace"
         ],
         "notes": [
           "AUDITED in wave 2: the whole cosmetic family of stairs carries the hardness and the effective blast resistance of the block whose texture it copies. The eldritch stairs and the arcane stone stairs take the hardness 2.0 and the effective blast resistance 6.0 of the cosmetic solid (oracle BlockCosmeticSolid:66-67, the setter value ten is stored three times and the 1.7.10 getter divides it by five), the greatwood and the silverwood stairs the hardness 2.5 and the effective blast resistance 6.0 of the wooden device (oracle BlockWoodenDevice:82-83). The stairs of the port carry exactly these numbers, and the test of this wave asserts them. The stairs of the original that copy the metadata seven of the cosmetic solid do NOT take the hardness four and the resistance twenty of that metadata, because the 1.7.10 stair copies the field of the block and not its per metadata getter.",
-          "REMAINING GAP (client visual): the original picks the icon of the cosmetic solid metadata eleven from the four ancient stone textures by the hash of the position (oracle BlockCosmeticSolid:157-162, reached through the side plus hundred of BlockCosmeticStairs:38-40). The seed is the hash of the concatenated coordinates and the draw is nextInt(12345+side) % 4; the same raw draw is taken modulo six different bounds, so all six faces of a stair agree in all but one of about twelve thousand positions. A 1.21.1 stair model is baked per block state and cannot randomise per position, so the native eldritch stairs always show the texture es_1. The port CAN reproduce it: a block state property that holds the index of the texture (four models per stair shape, the blockstate document of the stair with the property in every variant) and a position hash that the block computes in onPlace. That is an asset and model change of the eldritch stairs that this wave could neither compile nor run, so the unit stays partial. The same gap holds for the ancient stone, the ancient rock and the pedestal of the cosmetic solid itself (oracle BlockCosmeticSolid:141-162); that block is not a unit of this domain."
+          "REMAINING GAP (client visual): the original picks the icon of the cosmetic solid metadata eleven from the four ancient stone textures by the hash of the position (oracle BlockCosmeticSolid:157-162, reached through the side plus hundred of BlockCosmeticStairs:38-40). The seed is the hash of the concatenated coordinates and the draw is nextInt(12345+side) % 4; the same raw draw is taken modulo six different bounds, so all six faces of a stair agree in all but one of about twelve thousand positions. A 1.21.1 stair model is baked per block state and cannot randomise per position, so the native eldritch stairs always show the texture es_1. The port CAN reproduce it: a block state property that holds the index of the texture (four models per stair shape, the blockstate document of the stair with the property in every variant) and a position hash that the block computes in onPlace. That is an asset and model change of the eldritch stairs, and the leader has to compile and run it, so the unit stays partial. The same gap holds for the ancient stone, the ancient rock and the pedestal of the cosmetic solid itself (oracle BlockCosmeticSolid:141-162); that block is not a unit of this domain."
         ],
         "reviewed_sha256": {
           "original": "f8e8bd1bff88a96fe7bb287a2cb17bb6ef467e8ac794768b0417acc5dfe50693"
@@ -22234,29 +22211,25 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/basecontent",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java the item of the plant family",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlantItem.java the native item",
-          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:50-65 the item places the plant only on the top face of a supporting soil and plays the step sound",
-          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:67-89 the plant type of the metadata: Desert for three, Cave for four and five, Plains otherwise",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:36-44 the soil of the plant and its survival",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:65-83 the item of the plant refuses the placement of the original",
-          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:69-83 the item places the plant only on the top face of a supporting soil and plays the step sound",
-          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:85-101 the plant type of the metadata: Desert for three, Cave for four and five, Plains otherwise",
-          "oracle thaumcraft/common/blocks/BlockCustomPlant.java:119-128 the plant type of the block itself: Desert for three, Cave for four, Plains otherwise",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:36-56 the plant type of the port and the soil rule that the production code calls",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:88-118 the two plant type tables of the original as pure functions",
-          "native common/src/test/java/thaumcraft/common/blocks/CosmeticAndPlantParityTest.java the two plant type tables and the soil rule are asserted",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:186-187 the placement of the plant plays the break sound of its own sound type and the 1.21.1 BlockItem.place plays it with exactly the volume (volume + 1) / 2 and the pitch pitch * 0.8 of the original, so the sound of the original is reproduced",
-          "open difference: the soil table of the Forge 1.7.10 EnumPlantType.Cave is not part of the decompiled original, so the two Cave plants of the original keep the Plains soil of the original own block rule (the soil the original world generator puts them on, oracle BiomeGenMagicalForest:147)"
+          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:69-83 the plant type of the original item of the metadata: the metadata three is Desert, the metadata four and five are Cave and every other metadata is Plains",
+          "oracle thaumcraft/common/blocks/BlockCustomPlantItem.java:50-65 the item places the plant only on the top face of a supporting soil and plays the step sound of the plant block",
+          "Forge 1.7.10 patches/minecraft/net/minecraft/block/Block.java.patch, the added method Block.canSustainPlant: the inherited BlockBush soil is asked first and for every plant type, the Desert type is the sand, the Cave type is isSideSolid(world, x, y, z, UP) and the Plains type is the grass, the dirt or the farmland",
+          "Forge 1.7.10 patches/minecraft/net/minecraft/block/Block.java.patch, the added method Block.isSideSolid: a full opaque cube, with the special cases of the slab, the farmland, the stairs, the snow, the hopper and the compressed powered block",
+          "1.7.10 vanilla net.minecraft.block.BlockBush.func_149854_a (the official 1.7.10 client jar, the class ajr): the inherited soil is the grass, the dirt and the farmland, the MCP mapping of the method is canPlaceBlockOn, 'is the block grass, dirt or farmland'",
+          "1.7.10 vanilla net.minecraft.util.Material (the class awt): the material of the glass and of the leaves is not opaque, so the original does not treat them as a normal cube",
+          "oracle thaumcraft/common/blocks/BlockCustomPlant.java:130-132 the original plant answers canPlaceBlockAt with a plain true, so it can be placed on every soil and it never dies",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:100-190 the native soil table: the BlockBush soil of every plant type, the sand of the Desert type and the solid top side of the Cave type",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:213-224 the native plant answers canSurvive with the true of the original canPlaceBlockAt",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:255-268 the item of the plant asks the soil table of the Forge 1.7.10 for its own plant type, the metadata of the original",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockVishroom.java the item of the manashroom asks the Cave case, the metadata five of the original item table",
+          "native common/src/test/java/thaumcraft/common/blocks/PlantSoilRuleParityTest.java the inherited soil, the Cave case and its special cases are asserted"
         ],
         "notes": [
           "FIXED in wave 1: the item of the plant placed itself on every block and lost the item to the next tick. The original places the plant only on the top face of a block whose soil supports its plant type (oracle BlockCustomPlantItem:50-65) and it plays the break sound of its own block. The native item refuses the placement that the original refuses (common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:65-83).",
-          "AUDITED in wave 2: 1.21.1 has no IPlantable and no EnumPlantType, so the port answers the plant type with the block itself. The two tables of the original are carried as pure functions: the table of the item (oracle BlockCustomPlantItem:85-101, the metadata three is Desert, the metadata four and five are Cave, the rest is Plains) and the table of the block (oracle BlockCustomPlant:119-128, the metadata four is Cave and the metadata five, the manashroom, is Plains). The two tables agree for the metadata zero to four and differ for the metadata five only.",
-          "CLOSED 2026-10-23 (w3rest): the placement of the plant plays the break sound of its own sound type (native BlockCustomPlant:186-187), and the 1.21.1 BlockItem.place plays it with exactly the volume (volume + 1) / 2 and the pitch pitch * 0.8 of the original (oracle BlockCustomPlantItem:76), so the sound of the original is reproduced.",
-          "REMAINING GAP: the item of the manashroom of the original asked the soil for a Cave plant while the block of the manashroom is a Plains plant, and the Forge 1.7.10 table of the Cave soils is not part of the decompiled original, so the port cannot prove which block the original needed. The port keeps the Plains soil of the original's own block rule, which is the soil the original's world generator puts the manashroom on (oracle BiomeGenMagicalForest:147). The difference is confined to the two Cave plants of the original."
+          "CLOSED 2026-10-23 (w4devices): the soil rule of the port was the Forge table without its Cave case, and it accepted the podzol and the coarse dirt, which the table of the original does not carry. The Forge 1.7.10 source of the platform (patches/minecraft/net/minecraft/block/Block.java.patch) was read and the table is now reproduced exactly: the inherited BlockBush soil (the grass, the dirt and the farmland) for every plant type, the sand for the Desert type and isSideSolid(world, x, y, z, UP) for the Cave type. The plant block answers canSurvive with the true of the original canPlaceBlockAt, so the plant never dies and the soil rule of the item is asked by the item itself."
         ],
         "reviewed_sha256": {
           "original": "eaf3b4e3bca667e433b2ac53b00b8a091bcb793e7eab3a304b7fa0fae53794ec"
@@ -28242,26 +28215,23 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w3clientfx",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/common/entities/EntityItemGrate.java:26 the item may not stay inside the metal device grate",
-          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:49 setGrateTest(...) installs the grate predicate",
-          "native common/src/main/java/thaumcraft/common/tiles/TileGrate.java:40 the native grate drops a plain ItemEntity instead of the grate entity",
-          "oracle thaumcraft/common/entities/EntityItemGrate.java:18-23 the item of the grate reports the metal device of the fifth and the sixth metadata as a block of its own",
-          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:64 the native entity pushes the item out of the filter with its own arithmetic",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftGrate.java:58 the native tree installs the grate test of the original",
-          "oracle thaumcraft/common/entities/EntityItemGrate.java:28-36 the original reports the metal device of the fifth and the sixth metadata as a solid block, so the item is pushed out of the grate",
-          "the overridden vanilla method is func_145771_j(double,double,double); the 1.12.2 MCP names call the same SRG name Entity.pushOutOfBlocks, so the semantics of the override are the original ones",
-          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:49 the native tree installs the grate test of the original",
-          "oracle 1.7.10 vanilla Entity.func_145771_j: there is no readable 1.7.10 vanilla source in this environment, so the exact vanilla push out cannot be compared",
-          "REMAINING DIFFERENCE: the exact 1.7.10 vanilla push out arithmetic of the overridden method func_145771_j(double,double,double) cannot be compared in this environment, because there is no readable 1.7.10 vanilla source here; the semantics of the override are proven by the 1.12.2 MCP name of the same SRG name, Entity.pushOutOfBlocks",
-          "the native installs the grate test of the original (native EntityItemGrate.java:49) and pushes the item out of the grate with its own arithmetic (native EntityItemGrate.java:57-89)",
-          "open difference: the push out of the item is a native reimplementation of the vanilla pushOutOfBlocks, whose 1.7.10 arithmetic is not readable in this sandbox (no readable 1.7.10 vanilla source is available), so the exact numbers of the original cannot be compared"
+          "oracle thaumcraft/common/entities/EntityItemGrate.java:26-36 the override of the 1.7.10 pushOutOfBlocks: the block at the cell of the item is the metal device of the fifth or the sixth metadata, then the method answers true",
+          "1.7.10 vanilla net.minecraft.entity.item.EntityItem.onUpdate (the official 1.7.10 client jar, the class xk): the overridden method is called with the position of the item and with the MIDDLE of its bounding box, this.j(this.s, (this.C.b + this.C.e) / 2.0, this.u), and the answer is stored in the field Entity.field_70145_X",
+          "the MCP mapping of the 1.7.10 fields names Entity.field_70145_X noClip, 'whether this entity won't clip with collision or not'",
+          "1.7.10 vanilla net.minecraft.entity.Entity.moveEntity (the class sa): when the noClip flag is set the move skips the whole collision handling of the entity, so the item of the filter falls through the plate of the filter",
+          "1.7.10 vanilla net.minecraft.entity.Entity.func_145771_j (the class sa): the vanilla push out picks the closest of the five sides of the cell and sets the motion to random.nextFloat() * 0.2f + 0.1f, and the override of the original returns BEFORE that method, so the motion of the item is never changed",
+          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:78-118 the native entity sets the 1.21.1 noPhysics flag, the counterpart of the 1.7.10 noClip, while the item is inside the grate and it never changes the motion of the item",
+          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:53-76 the cell of the item is the cell of the middle of its bounding box, the rule of the 1.7.10 EntityItem.onUpdate",
+          "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:120-135 the 1.21.1 move and the move towards the closest space are the two places the noClip of the original has to be reproduced",
+          "native common/src/test/java/thaumcraft/common/entities/EntityItemGrateParityTest.java the cell rule, the noClip rule and the untouched vanilla push out are asserted"
         ],
         "notes": [
           "The 1.7 entity became a 1.21.1 ItemEntity subclass; the grate test is installed and the item leaves the filter.",
-          "Open difference: the push out itself is a native reimplementation of the vanilla pushOutOfBlocks, whose 1.7.10 arithmetic cannot be re-read in this sandbox (no readable 1.7.10 vanilla source is available), so the unit stays open."
+          "CLOSED 2026-10-23 (w4devices): the port had the semantics inverted. The override of the original does not push the item out of the grate: it answers true to the push out of the 1.7.10, and the 1.7.10 EntityItem turns that answer into its noClip flag, so the item of the filter falls through the plate of the filter with its motion untouched. The native port pushed the item out of the grate with an impulse of 0.1 to 0.3, the opposite of the original. The native entity now sets the 1.21.1 noPhysics flag while the item is inside the grate and never changes the motion of the item.",
+          "The exact vanilla arithmetic of the push out was read out of the official 1.7.10 client jar (the class sa, the method j(DDD)Z): the cell is floor(x), floor(y), floor(z) with the middle of the bounding box, the closest side wins with 9999.0 as the first distance, the down side is never used and the speed is random.nextFloat() * 0.2f + 0.1f. The original never lets that method run for the item of the filter, so the port does not need it."
         ],
         "reviewed_sha256": {
           "original": "ff2714670b6a86ede5c499973db90442bc99bf4d8ce3dbaa8e10547bf00b4f12",
@@ -35570,25 +35540,20 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port/basecontent",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/common/items/ItemNugget.java:39-52 the 64 metadata icons: the metal nuggets 0..7, the clusters 16..21 and the gold cluster 31",
-          "oracle thaumcraft/common/config/ConfigItems.java:276-293 the ore dictionary names nuggetIron .. clusterGold",
-          "native common/src/main/java/thaumcraft/common/items/ItemNugget.java carries a nugget type instead of a metadata value",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:120-131 registers quicksilver_drop and the three clusters",
-          "oracle thaumcraft/common/items/ItemNugget.java:36-57 the icons of the nuggets and of the clusters",
-          "oracle thaumcraft/common/items/ItemNugget.java:62-88 the creative listing of the nuggets and of the clusters of the other mods",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:120-141 the native nugget and cluster items",
-          "oracle thaumcraft/common/items/ItemNugget.java:62-88 the creative listing of the nuggets and of the clusters of the other mods",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java:140-162 the native nugget and cluster items",
-          "native common/src/main/java/thaumcraft/common/lib/items/EquipmentRules.java:281-311 the metadata of the nuggets and of the clusters",
-          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the metadata and the native ids are asserted",
-          "open difference: the ores of the tin, the silver and the lead are the content of other mods and not of vanilla, so the port has no nugget and no cluster of them; the original only offered them when the other mods were found (oracle ItemNugget:72-85, Config.foundTinIngot and the two next). The tags of the original ore recipes are already in the port"
+          "oracle thaumcraft/common/items/ItemNugget.java:39-52 the fourteen icons of the original: the nuggets of iron, copper, tin, silver, lead, quicksilver, thaumium and void metal and the clusters of iron, copper, tin, silver, lead and cinnabar with the gold cluster at the metadata thirty one",
+          "oracle thaumcraft/common/items/ItemNugget.java:62-88 the creative listing of the original: the iron, the quicksilver, the cinnabar, the thaumium, the void, the iron and the gold cluster are always listed, the copper, the tin, the silver and the lead are gated on Config.foundCopperIngot, Config.foundTinIngot, Config.foundSilverIngot and Config.foundLeadIngot",
+          "oracle thaumcraft/common/config/ConfigRecipes.java:399-406 the ore dictionary recipes of the original: nine iron nuggets into an iron ingot, nine thaumium nuggets into a thaumium resource, nine void nuggets into a void resource, nine quicksilver nuggets into a quicksilver resource and the two reverses",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftContent.java the fourteen items of the catalogue are registered, the iron nugget is the vanilla one, the eight others are the items of the port",
+          "native common/src/main/resources/data/thaumcraft/tags/item/original_ore the ore dictionary names of the original (ConfigItems:276-293) are the tags original_ore/nugget_iron and the twelve next",
+          "native common/src/main/resources/data/thaumcraft/recipe/iron_ingot_from_nuggets.json and native common/src/main/resources/data/thaumcraft/recipe/quick_silver_from_drops.json the two ore dictionary recipes of the original that the port missed",
+          "native common/src/test/java/thaumcraft/common/blocks/BaseContentItemParityTest.java the metadata of every nugget and of every cluster and the ids that exist are asserted"
         ],
         "notes": [
           "AUDITED in wave 2: 1.21.1 items have no metadata, so every nugget type became its own item id. The original registers the nuggets of iron, copper, tin, silver, lead, quicksilver, thaumium and void metal and the clusters of iron, copper, tin, silver, lead, cinnabar and gold (oracle ItemNugget:39-52 and the creative listing of :62-88) and the port carries the quicksilver drop, the copper nugget, the iron, the gold, the cinnabar and the copper clusters (native ThaumcraftContent:140-162). The test of this wave asserts the metadata of every nugget and of every cluster and the ids that exist.",
-          "REMAINING GAP (catalogue): the tin, the silver and the lead nuggets and their three clusters do not exist in 1.21.1, because the ores of the tin, the silver and the lead are the content of other mods and not of vanilla. The original only offered them when the other mods were found (oracle ItemNugget:72-85, Config.foundTinIngot and the two next), so the catalogue of the port is the documented difference of this unit."
+          "CLOSED 2026-10-23 (w4devices): the catalogue of the port was incomplete. The thaumium nugget and the void metal nugget had their model, their texture, their language name and their ore dictionary tag, but they were never registered, so the tags original_ore/nugget_thaumium and original_ore/nugget_void and the four recipes of the original that use them pointed at items that did not exist. The three nuggets and the three clusters of the tin, the silver and the lead were missing as well. The port now carries the whole catalogue of the original: the iron nugget is the vanilla one, the other thirteen are the items of the port, and the six items of the tin, the silver and the lead are out of the creative tab because the original only lists them when the ore mod of the other mod is found."
         ],
         "reviewed_sha256": {
           "original": "81e45f297f56cd07bb06d8f23169e5692896a2b76070b0ad199cd862f0abaa95",
@@ -41020,28 +40985,21 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:139-146 getBurnTime of the alumentum and the magical log",
-          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:227-244 the block placement near an active eldritch boss",
-          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java the chunk regeneration queue",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java:31 the burn time 400 of the magical log",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftNaturals.java:102 the fuel registration of the magical log",
-          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:139-146 the burn time of the alumentum (6400) and of the magical log (400)",
-          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:197-224 the block placement cancellation near an active eldritch boss of the Outer Lands",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftResources.java the native burn times",
-          "native common/src/main/java/thaumcraft/common/mixin/SpecialMiningBlockMixin.java and native common/src/main/java/thaumcraft/common/mixin/DeathBucketFillMixin.java the native special mining and bucket rules",
-          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:225-245 the original cancels the placement of a block in the Outer Lands, in a labyrinth cell of a boss room, while a boss of the original EntityThaumcraftBoss family is alive within thirty-two blocks",
-          "native common/src/main/java/thaumcraft/common/lib/events/BossPlacementRules.java:30-41 the original cancellation of a block placement next to an active eldritch boss of the Outer Lands, with the labyrinth cell of a boss room and the boss within the original radius of 32",
-          "native fabric/src/main/java/thaumcraft/fabric/FabricBossPlacement.java and native neoforge/src/main/java/thaumcraft/neoforge/NeoForgeBossPlacement.java one loader hook per platform, because the cancellable placement event of the common artifact of Architectury and the one of NeoForge do not share a signature",
-          "open difference: the chunk save and chunk load marker of the original (oracle EventHandlerWorld:114-137, the Thaumcraft compound with the regen key) has no 1.21.1 counterpart, because 1.21.1 has no chunk data event and no per chunk NBT extension point; the queue that used the marker is the unit of ServerTickEventsFML"
+          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:86-99 the original loads and saves the labyrinth of the world on the world load and the world save event",
+          "oracle thaumcraft/common/lib/world/dim/MazeHandler.java:89-131 the labyrinth is written to the file labyrinth.dat of the world folder and read back from it",
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsProvider.java:67-140 the native port keeps the cells of the labyrinth in a SavedData of the dimension, the 1.21.1 counterpart of the file of the original",
+          "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:114-137 the chunk save and chunk load marker of the original: the compound Thaumcraft with the key of Config.regenKey is written on every chunk save and read on every chunk load",
+          "1.21.1 vanilla net.minecraft.world.level.chunk.storage.ChunkSerializer.write (the remapped 1.21.1 jar): the chunk NBT is a fixed set of keys, the vanilla has no extension point for a per chunk compound of a mod",
+          "REMAINING DIFFERENCE: the chunk save and chunk load marker of the original (oracle EventHandlerWorld:114-137) has no 1.21.1 counterpart on the Fabric loader, because the vanilla writes the chunk NBT as a fixed set of keys (net/minecraft/world/level/chunk/storage/ChunkSerializer.write) and the Fabric API has no chunk data event; the queue that used the marker is the unit of ServerTickEventsFML"
         ],
         "notes": [
           "The world handler was split into mixins and platform events; the special mining drops, the note block events, the pure and death bucket fills, the vis effect and the sticky warp on crafting are all present.",
           "CORRECTED: the first audit reported the magical log fuel rule as missing. The burn time 400 of the magical log is registered (ThaumcraftNaturals) next to the burn time 6400 of the alumentum.",
           "CLOSED 2026-10-23 (w3rest): the original cancellation of a block placement next to an active eldritch boss of the Outer Lands is reproduced (native BossPlacementRules:30-41, the rule of oracle EventHandlerWorld:225-245, with the labyrinth cell of a boss room and the boss within the original radius of 32), with one loader hook per platform, because the cancellable placement event of the common artifact of Architectury and the one of NeoForge do not share a signature (fabric/src/main/java/thaumcraft/fabric/FabricBossPlacement.java and neoforge/src/main/java/thaumcraft/neoforge/NeoForgeBossPlacement.java).",
-          "REMAINING GAP: the chunk save and chunk load marker of the original (oracle EventHandlerWorld:114-137, the Thaumcraft compound with the regen key) has no 1.21.1 counterpart, because 1.21.1 has no chunk data event and no per chunk NBT extension point; the queue that used the marker is the unit of ServerTickEventsFML.",
-          "REMAINING GAP: the original maze load and save on the world load and save events has no native counterpart (the Outer Lands maze is a different subsystem)."
+          "CLOSED 2026-10-23 (w4devices): the second gap of the row was wrong, the maze load and save of the original DOES have a native counterpart. The native port keeps the cells of the labyrinth in a SavedData of the dimension (native OuterLandsProvider.MazeSavedData), which is the 1.21.1 counterpart of the file labyrinth.dat of the original, and the SavedData of a dimension is written and read with the world.",
+          "REMAINING GAP: the chunk save and chunk load marker of the original (oracle EventHandlerWorld:114-137, the Thaumcraft compound with the regen key) has no 1.21.1 counterpart, because 1.21.1 has no chunk data event on the Fabric loader and no per chunk NBT extension point in the vanilla; the queue that used the marker is the unit of ServerTickEventsFML."
         ],
         "reviewed_sha256": {
           "original": "4b6666adeef69182a242a0d87fea122fd50805fb446b5ba84e1ebd2c44d3287b",
@@ -41175,15 +41133,13 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "port-ledgerpartial",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java the server tick handler and the chunk regeneration queue",
-          "native common/src/main/java/thaumcraft/common/lib/events/ the native tick events",
-          "native common/src/main/java/thaumcraft/common/Thaumcraft.java:198-203 the native server tick wiring of the shared tick helpers",
-          "native common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java the native delivery of the deferred item drops",
           "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java:83-104 the chunk regeneration queue: the chunks whose saved data carries no Thaumcraft marker and whose regeneration options are enabled are regenerated with the TC4 world generation, ten chunks per world tick",
           "oracle thaumcraft/common/lib/events/EventHandlerWorld.java:114-137 the marker of the queue is written on every chunk save and read on every chunk load",
-          "open difference: 1.21.1 has no chunk data event and no per chunk NBT extension point, so the marker cannot be written or read, and the TC4 generation of the port runs through the datapack feature pipeline, which cannot be re-run for an existing chunk without regenerating its terrain. The queue therefore has no native counterpart; the options of the original (Config.regenAura and the five next) keep their original default of false in the port"
+          "1.21.1 vanilla net.minecraft.world.level.chunk.storage.ChunkSerializer.write and .read (the remapped 1.21.1 jar): the chunk NBT is a fixed set of keys and the vanilla has no extension point for a mod, so the marker of the original cannot be written or read",
+          "1.21.1 vanilla net.minecraft.world.level.chunk.ChunkAccess: the world generation of the 1.21.1 runs through the feature pipeline of the datapack and cannot be re-run for an existing chunk without regenerating its terrain",
+          "REMAINING DIFFERENCE: the chunk regeneration queue of the original (oracle ServerTickEventsFML:83-104 and oracle EventHandlerWorld:114-137) has no native counterpart: the marker cannot be written or read and the TC4 generation of the port runs through the datapack feature pipeline, which cannot be re-run for an existing chunk. The options of the original (Config.regenAura and the five next) keep their original default of false in the port"
         ],
         "notes": [
           "The 1.7 tick handler became the Architectury tick events plus the native excavation code; the excavation block swap and the note block clearing are implemented in the native excavation and arcane ear code.",
@@ -44572,27 +44528,21 @@
         "source_semantics": "different",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a5-eldritch",
+        "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:121-146 the per chunk dispatch of the outer lands, the nether and the surface",
-          "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:403-457 the surface structure chain and the totem",
-          "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:481-546 the ore pass with 18 cinnabar, 20 amber and 8 infused stone attempts",
-          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java:71-99 the same three ore passes",
-          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java:95-100 the 1/150, 1/66 and 1/40 structure chain",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchRingFeature.java the ring feature",
-          "oracle ThaumcraftWorldGenerator:407-481 the surface pass, the exclusive structure chain 1/150, 1/66 and 1/40, the position draws and the totem 1/360",
-          "oracle ThaumcraftWorldGenerator:483-567 the vegetation pass with the silverwood 1/60, the greatwood 1/25 and the hot sand flowers 1/30 and the ore pass with 18 cinnabar, 20 amber and 8 infused stone attempts",
-          "oracle ThaumcraftWorldGenerator:114-168 the aura totem with its ground rules, its column of four and its node roll of one in four",
-          "native common/src/main/java/thaumcraft/common/lib/world/StructurePlacementRules.java the chain and the chunk random of the original",
-          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTreeFeature.java the vegetation pass of the original",
-          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftOreFeature.java the three ore passes of the original",
-          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftTotemFeature.java the totem of the original",
-          "native common/src/test/java/thaumcraft/worldgen/OriginalSurfaceGeneratorNumbersTest.java the chain frequencies, the order of the draws and the chunk random of the original",
-          "open difference: the surface pass of the original delegates into the TC4 API jar (thaumcraft.api.expands.worldgen.node.NodeGenerationManager), and that API jar is not part of the 4.2.3.5 game jar in this sandbox, so the native port reproduces the pass with the rarity filter 1/36 of Config.nodeRarity instead of a line by line comparison"
+          "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:189-215 the wild node pass of the original: the rarity of Config.nodeRarity, the place of the node inside the chunk, the height of Utils.getFirstUncoveredY and the call of createRandomNodeAt",
+          "oracle thaumcraft/common/lib/world/ThaumcraftWorldGenerator.java:218-399 the whole node plan of the original, the type of the node, its modifier, the aura of the biome and the aspects: the pass does NOT delegate into the TC4 API jar, the whole plan is in the oracle",
+          "oracle thaumcraft/common/lib/utils/Utils.java:116-122 getFirstUncoveredY of the original starts at the height five and scans up while the block above is not air",
+          "1.21.1 vanilla net.minecraft.world.level.levelgen.placement.InSquarePlacement.getPositions (the remapped 1.21.1 jar): random.nextInt(16) + the origin of the chunk on both axes, the same arithmetic as the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/ThaumcraftNormalNodeFeature.java the native wild node pass, the rarity of the original, the height of the original and the place of the original",
+          "native common/src/main/java/thaumcraft/common/lib/world/NodeGeneration.java the native node plan reproduces the plan of the original line by line, the type, the modifier, the aura, the aspects and the spread",
+          "native common/src/main/resources/data/thaumcraft/worldgen/placed_feature/normal_aura_nodes.json the rarity filter of the original and the square placement of the original",
+          "REMAINING DIFFERENCE: the node of the vanilla scattered features of the original (oracle ThaumcraftWorldGenerator:413-419, the MapGenScatteredFeature branch) has no 1.21.1 counterpart, because the vanilla scattered feature subsystem does not exist in 1.21.1, and the auraGen flag of the original, that makes the wild aura node and the aura totem of a chunk exclusive (oracle :419 and :455), is not shared by the two native features"
         ],
         "notes": [
           "The 1.7 world generator was replaced by a set of 1.21 features (ore, tree, node, decoration, ring and village features); the surface chain, the vegetation pass, the ore pass and the totem were compared draw by draw against the oracle.",
-          "The wild node pass of the original delegates into the TC4 API jar (thaumcraft.api.expands.worldgen.node.NodeGenerationManager); that API jar is not part of the 4.2.3.5 game jar in this sandbox, so the native port reproduces the pass with the rarity filter 1/36 of Config.nodeRarity instead of a line by line comparison."
+          "CORRECTED 2026-10-23 (w4devices): the note of the row was wrong. The wild node pass of the original does NOT delegate into the TC4 API jar: the oracle holds the whole plan in ThaumcraftWorldGenerator.createRandomNodeAt:218-399 and there is no reference to NodeGenerationManager anywhere in the oracle. The native plan (NodeGeneration.plan) reproduces that plan line by line, the type of the node with the rarity of Config.specialNodeRarity, the modifier with the half of it, the aura of the biome with the taint doubling, the aspects of the node and the spread, and the place of the node inside the chunk is the InSquarePlacement of the 1.21.1, whose arithmetic is the arithmetic of the original.",
+          "REMAINING GAP: the node of the vanilla scattered features of the original (oracle ThaumcraftWorldGenerator:413-419) cannot be reproduced, because the vanilla scattered feature subsystem does not exist in 1.21.1, and the auraGen flag of the original, that makes the wild aura node and the aura totem of a chunk exclusive, is not shared by the two native features."
         ],
         "reviewed_sha256": {
           "original": "dcb6537b0dc809de1a6b738208e97b9480ce3c8ac4badc82397722bc8f136d28",
@@ -45235,18 +45185,22 @@
         "disposition": "replace",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a5-eldritch",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w4devices",
         "evidence": [
-          "legacy src/main/java/thaumcraft/common/lib/world/WorldgenLootHelper.java:1-25 the 1.12 dungeon chest loot helper",
-          "native common/src/main/resources/data/thaumcraft/loot_table the native loot tables",
-          "the legacy 1.12 helper has no oracle counterpart; the native port fills the dungeon chests of the hilltop stones, the greatwood dungeon and the mound with the native minecraft:chest/simple_dungeon table",
-          "the original filled them with ChestGenHooks.getInfo(dungeonChest), whose item list is a vanilla 1.7.10 table that is not part of this sandbox, so the item list itself could not be compared line by line",
-          "open difference: the helper has no counterpart in the 4.2.3.5 oracle; the original filled the chests with ChestGenHooks.getInfo(dungeonChest), whose item list is a vanilla 1.7.10 table that is not part of this sandbox, so the item list itself cannot be compared line by line. The native port fills them with the 1.21.1 minecraft:chest/simple_dungeon table"
+          "oracle thaumcraft/common/lib/world/WorldGenHilltopStones.java:86-93 the chest of the hilltop stones carries the Forge chest category dungeonChest and is rolled twice",
+          "oracle thaumcraft/common/lib/world/WorldGenMound.java:2518-2536 the chest of the loot room of the mound carries the same category and is rolled a second time in one roll out of five",
+          "oracle thaumcraft/common/lib/world/WorldGenGreatwoodTrees.java:369-372 the chest of the dungeon of the greatwood carries the same category",
+          "1.7.10 vanilla net.minecraft.world.gen.feature.WorldGenDungeons (the official 1.7.10 client jar, the class asd): the static list of the dungeon chest, the saddle, the iron ingot, the bread, the wheat, the gunpowder, the string, the bucket, the golden apple, the redstone, the two music discs, the name tag and the three horse armours with their amounts and their weights",
+          "Forge 1.7.10 net/minecraftforge/common/ChestGenHooks.java: the category dungeonChest is the list of the vanilla dungeon chest with the count eight to eight and the enchanted book of Forge is added to it",
+          "1.7.10 vanilla net.minecraft.util.WeightedRandomChestContent.fillChestWithLoot (the class qx): the entry is drawn with its weight, the amount is drawn between the minimum and the maximum of the entry and the stack is written into a random slot of the chest",
+          "native common/src/main/java/thaumcraft/common/lib/world/WorldgenLootHelper.java the native helper rolls the category of the original: the entries of the list, the count of the category, the weighted draw, the amount and the random slot",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftLoot.java the vanilla list of the original is the pure part of the native entry list, the enchanted book of Forge and the TC4 additions follow it",
+          "native common/src/test/java/thaumcraft/common/lib/world/DungeonChestLootParityTest.java the fifteen entries with their amounts and their weights and the count of the category are asserted"
         ],
         "notes": [
           "Legacy-only helper (no oracle counterpart); the native fills the chests with datapack loot tables.",
-          "The exact item list of the 1.7.10 dungeon chest could not be verified here; the native table is the 1.21.1 dungeon chest."
+          "CLOSED 2026-10-23 (w4devices): the port filled the chest of the mound and the chest of the hilltop stones with the 1.21.1 vanilla dungeon loot table, while the original fills them with the Forge 1.7.10 chest category dungeonChest. The list of the category was read out of the official 1.7.10 client jar (the static list of the vanilla WorldGenDungeons) and of the Forge 1.7.10 source, and the port now rolls exactly that list with the count of the category (eight), the weighted draw, the amount between the minimum and the maximum of the entry and the random slot of the chest. The helper carries the name of the legacy helper of the 1.12 reference."
         ],
         "reviewed_sha256": {
           "legacy": "0bb2e4390545b1f9f5eab5e203d72577c3595739c985b2a14e21d39fa2b339e8"

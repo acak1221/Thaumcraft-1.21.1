@@ -285,13 +285,13 @@ public final class ThaumcraftEldritchBlocks {
             // Original BlockJar:87-90 - the jar block sets hardness 0.3, no blast resistance and
             // the light level 0.66; the 1.7.10 setter stores (int)(15*0.66) = 9. Every metadata
             // value of the original jar block, the brain jar and the node jar included, emits 9.
-            () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
+            () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(thaumcraft.common.config.ThaumcraftContent.JAR_SOUND).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
 
     public static final RegistrySupplier<JarBlock> JAR_NODE = BLOCKS.register("jar_node",
             // Original BlockJar:87-90 and :314-320 - the jar block sets the light value
             // 0.66, which the 1.7.10 setter stores as (int)(15*0.66) = 9, but the node
             // jar overrides it with eleven.
-            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 11)));
+            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(thaumcraft.common.config.ThaumcraftContent.JAR_SOUND).noOcclusion().lightLevel(state -> 11)));
 
     public static final RegistrySupplier<EtherealBloomBlock> ETHEREAL_BLOOM = BLOCKS.register("ethereal_bloom",
             () -> new EtherealBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)

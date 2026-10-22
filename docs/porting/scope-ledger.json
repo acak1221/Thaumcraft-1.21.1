@@ -2676,7 +2676,8 @@
           "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass.",
           "CLOSED 2026-10-23 (w4wands): the published contract is complete - every member the original published is present with the original's semantics, and the test asserts the names and the signatures of all seventeen of them.",
           "The identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave (the client test parses it with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so the port cannot change it without invalidating the accepted client run.",
-          "The aspect lists of the native node are copies, so an add-on can never mutate the state of a node through the published view; the values are the original's."
+          "The aspect lists of the native node are copies, so an add-on can never mutate the state of a node through the published view; the values are the original's.",
+          "ACCEPTED DEVIATION 2026-10-23 (audit a1ledger): the node identity is the one observable difference of this unit and it is ACCEPTED, not closed. Oracle TileNode.generateId() derives the identity from the position as 'dimension:x:y:z' (oracle TileNode:103-114, still 'dimension:x:y:z' in the 1.21.1 world coordinates). The native keeps a persisted random UUID (TileNode:63, saved at :869-888). The UUID is BOUND INTO ACCEPTED EVIDENCE: the client acceptance parses it with UUID.fromString (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509) and saved worlds carry it, so changing the format would invalidate the accepted client and multiplayer runs and every saved world. The observable consequences of the difference are therefore limited to two: a node that is moved keeps its identity in the native but changes it in the original, and the scan signature string differs in form while remaining stable per node. This is recorded as an accepted deviation rather than silently reported as parity."
         ],
         "reviewed_sha256": {
           "original": "d47513d9a62b10a6117236d2a353ebf43e838f05f6c0a82ba729ee75a22798f9",
@@ -4600,27 +4601,27 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-      "native_coverage": "parity_verified",
-      "owner": "agent-w8fx",
-      "evidence": [
-        "2026-10-23 w8fx: implemented oracle ParticleEngine:57,138-147,152-196 in common/src/main/java/thaumcraft/client/fx/ParticleLayers.java:11-46 (four dimension maps, FIFO eviction before append at 2000, active-dimension-only ticking), ParticleEngine.java:15-31 and Tc4ParticleEngineMixin.java:17-30. Tc4Particle opt-in preserves original vanilla-owned variants; both atlases remain in native effect renderers. ClientSetup.java:46 ticks at CLIENT_PRE; Tc4ParticleWorldRenderMixin.java:19-42 renders at world tail after transparency/weather, before hand, restoring the camera view. Native managed renderers now use the registered 1/255-alpha shader; FXEssentiaTrail layer1 uses standard alpha, as oracle FXEssentiaTrail:98-99 and ParticleEngine:82-91 require. ParticleLayersTest has four pure JUnit tests, authored/not executed. Whole-common javac proof and real-frame acceptance criteria are in docs/analysis/2026-10-23-agent-w8fx.md; injection/client frames remain unverified. Earlier remaining-gap evidence below describes the superseded w7fx baseline, not current code.",
-        "oracle thaumcraft/client/fx/ParticleEngine.java:57 four per-layer HashMap<Integer,ArrayList<EntityFX>> particle buckets keyed by dimension",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8fx",
+        "evidence": [
+          "2026-10-23 w8fx: implemented oracle ParticleEngine:57,138-147,152-196 in common/src/main/java/thaumcraft/client/fx/ParticleLayers.java:11-46 (four dimension maps, FIFO eviction before append at 2000, active-dimension-only ticking), ParticleEngine.java:15-31 and Tc4ParticleEngineMixin.java:17-30. Tc4Particle opt-in preserves original vanilla-owned variants; both atlases remain in native effect renderers. ClientSetup.java:46 ticks at CLIENT_PRE; Tc4ParticleWorldRenderMixin.java:19-42 renders at world tail after transparency/weather, before hand, restoring the camera view. Native managed renderers now use the registered 1/255-alpha shader; FXEssentiaTrail layer1 uses standard alpha, as oracle FXEssentiaTrail:98-99 and ParticleEngine:82-91 require. ParticleLayersTest has four pure JUnit tests, authored/not executed. Whole-common javac proof and real-frame acceptance criteria are in docs/analysis/2026-10-23-agent-w8fx.md; injection/client frames remain unverified. Earlier remaining-gap evidence below describes the superseded w7fx baseline, not current code.",
+          "oracle thaumcraft/client/fx/ParticleEngine.java:57 four per-layer HashMap<Integer,ArrayList<EntityFX>> particle buckets keyed by dimension",
           "oracle thaumcraft/client/fx/ParticleEngine.java:74-80 layer>=2 rebinds textures/misc/particles2.png, layers 0/2 blend (770,1), layers 1/3 blend (770,771)",
           "oracle thaumcraft/client/fx/ParticleEngine.java:143 addEffect caps every layer/dimension bucket at 2000 particles",
           "native common/src/main/java/thaumcraft/client/fx/particles/CrystalSparkParticle.java:16 uses textures/misc/particles2.png with blendFunc(SRC_ALPHA, ONE) (original layer 2)",
           "native common/src/main/java/thaumcraft/client/fx/particles/SlurryBubbleParticle.java:11 uses textures/misc/particles.png (original layer 0/1 atlas)",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXVent.java:4 'Native ParticleEngine adaptation of TC4 FXVent; no second particle manager.'",
           "oracle thaumcraft/client/fx/ParticleEngine.java:143 addEffect caps every layer and dimension bucket at 2000 particles",
-      "oracle thaumcraft/client/fx/ParticleEngine.java:74-80 layers 2 and 3 bind particles2.png; layers 0 and 1 bind particles.png",
+          "oracle thaumcraft/client/fx/ParticleEngine.java:74-80 layers 2 and 3 bind particles2.png; layers 0 and 1 bind particles.png",
           "native common/src/main/java/thaumcraft/client/fx/particles/CrystalSparkParticle.java:16 the particles2 atlas with the additive blend of the original layer two",
           "native common/src/main/java/thaumcraft/client/fx/particles/SlurryBubbleParticle.java:11 the particles atlas of the original layer zero",
-      "2026-10-23 w7fx: oracle ParticleEngine.java:138-147 checks size >= 2000 BEFORE append and removes index zero exactly once; the bucket key is (fx layer, world dimension), not render type or effect class. Dead entries are removed only during the active-dimension START tick (152-196).",
-      "REMAINING DIFFERENCE, NOT a proven platform limitation: vanilla 1.21.1 net/minecraft/client/particle/ParticleEngine.java:306,539-570 uses a 16384 EvictingQueue per ParticleRenderType; setLevel:635-638 calls clearParticles:712-716. The port's CUSTOM effects therefore share a larger budget and lose dormant-dimension buckets. Vanilla does NOT make the original 2000 FIFO moot. No counting wrapper was implemented in w7fx; retain partial. Vanilla line citations refer to CFR0.152 output of the named Loom 1.21.1 jar, recorded in docs/analysis/2026-10-23-agent-w7fx.md."
+          "2026-10-23 w7fx: oracle ParticleEngine.java:138-147 checks size >= 2000 BEFORE append and removes index zero exactly once; the bucket key is (fx layer, world dimension), not render type or effect class. Dead entries are removed only during the active-dimension START tick (152-196).",
+          "REMAINING DIFFERENCE, NOT a proven platform limitation: vanilla 1.21.1 net/minecraft/client/particle/ParticleEngine.java:306,539-570 uses a 16384 EvictingQueue per ParticleRenderType; setLevel:635-638 calls clearParticles:712-716. The port's CUSTOM effects therefore share a larger budget and lose dormant-dimension buckets. Vanilla does NOT make the original 2000 FIFO moot. No counting wrapper was implemented in w7fx; retain partial. Vanilla line citations refer to CFR0.152 output of the named Loom 1.21.1 jar, recorded in docs/analysis/2026-10-23-agent-w7fx.md."
         ],
         "notes": [
-        "w8fx restores the standalone four-layer/dimension manager, 2000 FIFO cap, active-only tick and inactive-dimension queue retention; native per-effect renderers retain the two atlases and geometry.",
-        "Explicitly opted-in TC4 effects bypass vanilla's 16384 queue; original vanilla-owned effects remain vanilla-owned. Disconnect/close release retained queues rather than leaking worlds across sessions.",
-        "Code parity closed; real client injection, light/depth state, dimension-return frames and frame ordering require leader acceptance. Source-scoped effects retain their existing cancellation checks. JUnit tests authored, not executed."
+          "w8fx restores the standalone four-layer/dimension manager, 2000 FIFO cap, active-only tick and inactive-dimension queue retention; native per-effect renderers retain the two atlases and geometry.",
+          "Explicitly opted-in TC4 effects bypass vanilla's 16384 queue; original vanilla-owned effects remain vanilla-owned. Disconnect/close release retained queues rather than leaking worlds across sessions.",
+          "Code parity closed; real client injection, light/depth state, dimension-return frames and frame ordering require leader acceptance. Source-scoped effects retain their existing cancellation checks. JUnit tests authored, not executed."
         ],
         "reviewed_sha256": {
           "original": "10669be64370a97c30cda85d4de8cf1c412856052cf2783678236887c668e985",
@@ -7437,8 +7438,8 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-      "native_coverage": "parity_verified",
-      "owner": "agent-w7items",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchRecipe.java:25-1313 the research book with all PageType renderers",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:31-129 the native book renders text pages and resolved native recipe pages",
@@ -7461,7 +7462,7 @@
         "notes": [
           "The book renders the original text pages and every recipe page whose original recipe key resolves to a native recipe file (250 mapped keys, verified against the packaged data/thaumcraft/recipe tree).",
           "CLOSED in this wave: four of the eight array/smelting pages are rendered again: the BANNERS page (the sixteen banner recipes), the PRIMALARROW page (the six primal arrow recipes), the ORE page (the seven crystal cluster recipes) and the CRUCIBLE smelting page (the six balanced shards). The page cycles through its array once per second, exactly as the original (oracle GuiResearchRecipe:647-655).",
-        "CLOSED w7items source audit: oracle ConfigResearch.java:110-144,302-305 and ConfigRecipes.java:417-425; native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:471-511,559-567,764-850 already renders the three sceptre grids and the synthetic blank-label/filled-phial recipes. The oracle iterates ALL 48 aspects, not sixteen; sceptres use THREE caps. Code parity reviewed; real frames and JUnit execution remain leader acceptance duties (docs/analysis/2026-10-23-agent-w7items.md).",
+          "CLOSED w7items source audit: oracle ConfigResearch.java:110-144,302-305 and ConfigRecipes.java:417-425; native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:471-511,559-567,764-850 already renders the three sceptre grids and the synthetic blank-label/filled-phial recipes. The oracle iterates ALL 48 aspects, not sixteen; sceptres use THREE caps. Code parity reviewed; real frames and JUnit execution remain leader acceptance duties (docs/analysis/2026-10-23-agent-w7items.md).",
           "Deviation: the original's per-PageType renderers (aspect page, image page, infusion-enchantment page, the original's own recipe renderers) are replaced by one native recipe renderer."
         ],
         "reviewed_sha256": {
@@ -8112,26 +8113,26 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-    "native_coverage": "parity_verified",
-    "owner": "agent-w7fx",
-    "evidence": [
-      "oracle thaumcraft/client/lib/ClientTickEventsFML.java:124-166 playerTick, 242-281 clientWorldTick, 282-331 renderTick and the HUD helpers 332-735",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w7fx",
+        "evidence": [
+          "oracle thaumcraft/client/lib/ClientTickEventsFML.java:124-166 playerTick, 242-281 clientWorldTick, 282-331 renderTick and the HUD helpers 332-735",
           "oracle thaumcraft/client/lib/ClientTickEventsFML.java:660-729 renderAspectsInGui draws the aspect row on the hovered container slot",
           "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87-120 renderHud reproduces the original notification HUD numbers (delay/4 alpha ramp, 8px rows, half scale, the 16*((tickCount+entry*3)%16) particle cell)",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41 'World optics only: original RenderEventHandler:215-239,250-255,287-363.'",
           "oracle thaumcraft/client/lib/ClientTickEventsFML.java:283-331 the render tick of the original",
           "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87-120 the notification HUD numbers of the original",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41 the world optics of the original RenderEventHandler",
-      "2026-10-23 w7fx supersedes the missing-row/shader claim: HoveredSlotAspectRow.java:82-135 draws the scanned-item aspect row, including both @ and # scan prefixes, original XOR visibility, amount sorting, 18px spacing and unknown icons. ContainerScreenAspectRowMixin.java:32-40 injects after Screen.renderWithTooltip for ALL container screens; native Screen.java:180-185 confirms that hook is after the tooltip.",
-      "oracle ClientTickEventsFML.java:168-237 uses VANILLA ShaderGroup, not OptiFine. Native ThaumcraftWarpClient.java:126-163 plus WarpPostEffectsMixin.java:9-12 drives the four PostChains, effect removal, resize and shaders switch. Missing programs now retry next tick instead of remaining failed for the session. The weighted 1.7.10 blur is retained in assets/minecraft/shaders/program/thaumcraft_blur.fsh:13-22, Radius10 horizontal/vertical passes; source official client SHA1 e80d9b3bf5085002218d4be59e668bac718abbc6. No platform limitation claimed. Whole common javac passed; seven tests authored, NOT executed; visual acceptance remains with leader.",
+          "2026-10-23 w7fx supersedes the missing-row/shader claim: HoveredSlotAspectRow.java:82-135 draws the scanned-item aspect row, including both @ and # scan prefixes, original XOR visibility, amount sorting, 18px spacing and unknown icons. ContainerScreenAspectRowMixin.java:32-40 injects after Screen.renderWithTooltip for ALL container screens; native Screen.java:180-185 confirms that hook is after the tooltip.",
+          "oracle ClientTickEventsFML.java:168-237 uses VANILLA ShaderGroup, not OptiFine. Native ThaumcraftWarpClient.java:126-163 plus WarpPostEffectsMixin.java:9-12 drives the four PostChains, effect removal, resize and shaders switch. Missing programs now retry next tick instead of remaining failed for the session. The weighted 1.7.10 blur is retained in assets/minecraft/shaders/program/thaumcraft_blur.fsh:13-22, Radius10 horizontal/vertical passes; source official client SHA1 e80d9b3bf5085002218d4be59e668bac718abbc6. No platform limitation claimed. Whole common javac passed; seven tests authored, NOT executed; visual acceptance remains with leader.",
           "the notification HUD of the original is reproduced: the delay, the alpha ramp, the eight pixel rows, the half scale and the particle cell of native PlayerNotifications.java:87-120"
         ],
         "notes": [
           "The original monolithic FML tick/render handler was split into purpose-specific native clients (PlayerNotifications, ThaumcraftGogglesClient, ThaumcraftRunicClient, ThaumcraftGolemClient, ThaumcraftWarpClient, ThaumcraftFocusClient) plus the native HUD/event bus.",
-      "Hovered-slot row is implemented after every container screen's tooltip with original layout, colours, amounts, discovery gates and Shift/config XOR. Inherited #@ scan-key typo and tooltip depth ordering were corrected.",
-      "Shader driver is native PostChain, already wired by WarpPostEffectsMixin; the original was vanilla ShaderGroup, not OptiFine/Iris. Replaced modern box_blur with original Mojang 1.7.10 weighted blur and restored next-tick retry after missing-program failure.",
+          "Hovered-slot row is implemented after every container screen's tooltip with original layout, colours, amounts, discovery gates and Shift/config XOR. Inherited #@ scan-key typo and tooltip depth ordering were corrected.",
+          "Shader driver is native PostChain, already wired by WarpPostEffectsMixin; the original was vanilla ShaderGroup, not OptiFine/Iris. Replaced modern box_blur with original Mojang 1.7.10 weighted blur and restored next-tick retry after missing-program failure.",
           "The native is not a 1:1 port: the original class does not exist and several of its HUD effects (sanity bar, wand trade HUD, hover HUD, casting wand HUD) were re-derived in the split clients.",
-      "Code parity of the listed remaining gaps reviewed against oracle; whole-common javac checked, JUnit authored but not executed, no frames inspected by w7fx. Leader acceptance criteria are in docs/analysis/2026-10-23-agent-w7fx.md."
+          "Code parity of the listed remaining gaps reviewed against oracle; whole-common javac checked, JUnit authored but not executed, no frames inspected by w7fx. Leader acceptance criteria are in docs/analysis/2026-10-23-agent-w7fx.md."
         ],
         "reviewed_sha256": {
           "original": "34921dd61d869c88d503d4ebe3dee850d475e1f2157f7e1c8fcbab1c02f0bcfb",
@@ -8542,11 +8543,11 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-      "native_coverage": "parity_verified",
-      "owner": "agent-w8fx",
-      "evidence": [
-        "2026-10-23 w8fx: closes radial animation against oracle REHWandHandler.java:151-178,212-259. common/src/main/java/thaumcraft/client/gui/FocusRadialAnimation.java:11-25 implements strict time>lastTime, next=time+5, open/close .05, hover .025 with original unclamped float overshoot; GuiFocusSelect.java:70-105 restores sorting-key deduplication and one unpaged radius16+count*2.5, :171-217 renders closing on HUD after cursor re-grab and rotates positions by -90*scale, :234-276 renders before stepping; :426-452 scales icons by HUD scale times per-focus hover scale. ThaumcraftFocusClient.java:44 wires closing HUD rendering on the common Architectury hook. FocusRadialAnimationTest has four pure JUnit tests, authored/not executed. Whole-common javac proof and visual criteria are recorded in docs/analysis/2026-10-23-agent-w8fx.md. Earlier remaining-gap evidence below is superseded; no visual or NeoForge scan acceptance claimed.",
-        "oracle thaumcraft/client/lib/RenderEventHandler.java:138-157 renderOverlay (notifications + wand radial), 199-248 blockHighlight (aspect tags, note text, architect overlay), 252-268 renderLast (tag scale, golem markers, scanned blocks), 778-812 renderVignette",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8fx",
+        "evidence": [
+          "2026-10-23 w8fx: closes radial animation against oracle REHWandHandler.java:151-178,212-259. common/src/main/java/thaumcraft/client/gui/FocusRadialAnimation.java:11-25 implements strict time>lastTime, next=time+5, open/close .05, hover .025 with original unclamped float overshoot; GuiFocusSelect.java:70-105 restores sorting-key deduplication and one unpaged radius16+count*2.5, :171-217 renders closing on HUD after cursor re-grab and rotates positions by -90*scale, :234-276 renders before stepping; :426-452 scales icons by HUD scale times per-focus hover scale. ThaumcraftFocusClient.java:44 wires closing HUD rendering on the common Architectury hook. FocusRadialAnimationTest has four pure JUnit tests, authored/not executed. Whole-common javac proof and visual criteria are recorded in docs/analysis/2026-10-23-agent-w8fx.md. Earlier remaining-gap evidence below is superseded; no visual or NeoForge scan acceptance claimed.",
+          "oracle thaumcraft/client/lib/RenderEventHandler.java:138-157 renderOverlay (notifications + wand radial), 199-248 blockHighlight (aspect tags, note text, architect overlay), 252-268 renderLast (tag scale, golem markers, scanned blocks), 778-812 renderVignette",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41-42 'World optics only: original RenderEventHandler:215-239,250-255,287-363.'",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java:48 renderMarkers draws the golem-bell marker boxes",
           "native common/src/main/java/thaumcraft/client/ThaumcraftWarpClient.java:26 'Original heartbeat/vignette100, mist2400/200, and the four effect post chains'",
@@ -8554,17 +8555,17 @@
           "oracle thaumcraft/client/lib/RenderEventHandler.java:778-812 the vignette of the original",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41-42 the world optics of the original",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java:48 the golem bell markers",
-      "2026-10-23 w7fx: ScanOverlay.java:47-169 implements oracle RenderEventHandler.java:366-501: 17 cubed samples, water3986684/lava16734721, original negative first-250ms fade and 1-distanceSquared/64 factor, inner/outer .2/.5 times vis/7, nodes32 frames/50ms, additive blend and disabled depth. VisNetRender.java:62-78 uses native packed light220/200, not the inherited WIP's unjustified fullbright substitution. ItemElementalPickaxe.java:59-63 starts the scan and FabricClient.java:135 renders it after markers.",
-      "Shader driver already exists at ThaumcraftWarpClient.java:126-163 and WarpPostEffectsMixin.java:9-12; original RenderEventHandler.java:161-194 is vanilla ShaderGroup processing, not an OptiFine-only API.",
-      "REMAINING DIFFERENCE: oracle REHWandHandler.java:151-178 animates radial scale by .05 and hover scale by .025 every 5ms, without a container Screen; native GuiFocusSelect.java:78-108 uses fixed radius, paging at12 and screen widgets. This is a deliberate replacement, not a proven platform limitation, and remains partial. NeoForge scan callback is not wired by w7fx (Fabric-first scope).",
+          "2026-10-23 w7fx: ScanOverlay.java:47-169 implements oracle RenderEventHandler.java:366-501: 17 cubed samples, water3986684/lava16734721, original negative first-250ms fade and 1-distanceSquared/64 factor, inner/outer .2/.5 times vis/7, nodes32 frames/50ms, additive blend and disabled depth. VisNetRender.java:62-78 uses native packed light220/200, not the inherited WIP's unjustified fullbright substitution. ItemElementalPickaxe.java:59-63 starts the scan and FabricClient.java:135 renders it after markers.",
+          "Shader driver already exists at ThaumcraftWarpClient.java:126-163 and WarpPostEffectsMixin.java:9-12; original RenderEventHandler.java:161-194 is vanilla ShaderGroup processing, not an OptiFine-only API.",
+          "REMAINING DIFFERENCE: oracle REHWandHandler.java:151-178 animates radial scale by .05 and hover scale by .025 every 5ms, without a container Screen; native GuiFocusSelect.java:78-108 uses fixed radius, paging at12 and screen widgets. This is a deliberate replacement, not a proven platform limitation, and remains partial. NeoForge scan callback is not wired by w7fx (Fabric-first scope).",
           "the truetyper font load of the original renderOverlay is dead code, because the field is never used"
         ],
         "notes": [
           "Split into purpose-specific native clients; the aspect-tag world overlay, the note text, the golem-bell markers and the warp vignette are ported.",
-      "Scanned-block overlay is implemented and wired on Fabric; the four native PostChains are already driven. No OptiFine API is required by the original shader driver.",
+          "Scanned-block overlay is implemented and wired on Fabric; the four native PostChains are already driven. No OptiFine API is required by the original shader driver.",
           "The original's truetyper font load in renderOverlay is dead code (the field is never used) and was not ported.",
           "Complete callsite audit: RenderEventHandler is registered on the Forge event bus by ClientProxy.registerHandlers and referenced from ClientTickEventsFML and the misc network packet.",
-        "w8fx closes the 5ms radial open/close/hover animation gap and removes paging in favor of the original sorting-key TreeMap choices. Native non-pausing input screen and existing accessibility/help text remain adaptations; the closing animation runs on the HUD with mouse control restored immediately. Scan/shader/radial frames and GUI layering are not visually verified. NeoForge scan callback remains deferred under Fabric-first instructions, not claimed as accepted."
+          "w8fx closes the 5ms radial open/close/hover animation gap and removes paging in favor of the original sorting-key TreeMap choices. Native non-pausing input screen and existing accessibility/help text remain adaptations; the closing animation runs on the HUD with mouse control restored immediately. Scan/shader/radial frames and GUI layering are not visually verified. NeoForge scan callback remains deferred under Fabric-first instructions, not claimed as accepted."
         ],
         "reviewed_sha256": {
           "original": "2569d70d80a43817ee019baf270258ce04057f0f3620709df66db52f7a948959",
@@ -8661,10 +8662,10 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-    "native_coverage": "parity_verified",
-    "owner": "agent-w7fx",
-    "evidence": [
-      "oracle thaumcraft/client/lib/UtilsFX.java:1-924 the static client drawing helper library (drawTag, drawTexturedQuad, renderFacingQuad/Strip, renderQuad*, drawCustomTooltip, drawFloatyLine, getGuiX/Y/ZLevel, getParticleTexture ...)",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w7fx",
+        "evidence": [
+          "oracle thaumcraft/client/lib/UtilsFX.java:1-924 the static client drawing helper library (drawTag, drawTexturedQuad, renderFacingQuad/Strip, renderQuad*, drawCustomTooltip, drawFloatyLine, getGuiX/Y/ZLevel, getParticleTexture ...)",
           "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:62-80 the native owner of the facing quad/strip, the billboard and the beam draws, with 'Distinct original UtilsFX153-191 facing-QUAD UV order'",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileBannerRenderer.java:80 the native drawTag",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:57 'Native approximation of the original drawFloatyLine: the same endpoints and the ...'",
@@ -8677,16 +8678,16 @@
           "oracle thaumcraft/client/renderers/entity/RenderCultist.java:83-163 the cultist has its own copy of the body: the ordinary alpha blend (770, 771), the depth write and the constant alpha 0.8f",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:71-95 the cultist link line through the shared helper, with the original colour 0x110011, the original speed -0.03 and the original width 0.25",
           "native common/src/main/java/thaumcraft/client/fx/FloatyLine.java:49-60 the two original bodies of the line, the library one and the cultist one",
-      "2026-10-23 w7fx: oracle UtilsFX.java:469-507 texture helpers use image width/height and width/divisor; native UtilsFX.java:73-136 now parses the PNG IHDR AFTER its signature (prior implementation read signature bytes as dimensions), preserving original fallback16. RenderWisp.java:28-30, RenderPrimalArrow.java:86-88 and TileNodeEnergizedRenderer.java:31-32 now consume the helpers rather than frozen asset dimensions.",
-      "oracle UtilsFX.java:861-887 reads vanilla equip fields/timer; native UtilsFX.java:158-190 runs original official1.7.10 ItemRenderer.updateEquippedItem (bly.a:518-544) every client tick via ClientSetup.java:46: identity/selected-slot match, .4 tick clamp, .1 stack-swap threshold, partial interpolation. The oracle is NOT an extra eased curve. Native1.21.1 ItemInHandRenderer.java:549-574 DOES have equip-height fields but adds attack-strength-cubed; the tracker deliberately omits that later addition. getTimer at UtilsFX.java:211-213 returns native DeltaTracker. Seven JUnit tests authored, not executed; whole-common javac passed.",
+          "2026-10-23 w7fx: oracle UtilsFX.java:469-507 texture helpers use image width/height and width/divisor; native UtilsFX.java:73-136 now parses the PNG IHDR AFTER its signature (prior implementation read signature bytes as dimensions), preserving original fallback16. RenderWisp.java:28-30, RenderPrimalArrow.java:86-88 and TileNodeEnergizedRenderer.java:31-32 now consume the helpers rather than frozen asset dimensions.",
+          "oracle UtilsFX.java:861-887 reads vanilla equip fields/timer; native UtilsFX.java:158-190 runs original official1.7.10 ItemRenderer.updateEquippedItem (bly.a:518-544) every client tick via ClientSetup.java:46: identity/selected-slot match, .4 tick clamp, .1 stack-swap threshold, partial interpolation. The oracle is NOT an extra eased curve. Native1.21.1 ItemInHandRenderer.java:549-574 DOES have equip-height fields but adds attack-strength-cubed; the tracker deliberately omits that later addition. getTimer at UtilsFX.java:211-213 returns native DeltaTracker. Seven JUnit tests authored, not executed; whole-common javac passed.",
           "the original shootFire is the only user of FXScorch and the oracle tree has no caller of it, so the helper is dead code in the original"
         ],
         "notes": [
           "The helper library was replaced by VisNetRender plus per-renderer implementations of drawTag, drawFloatyLine and the aspect icons.",
-      "UtilsFX.shootFire/FXScorch is unreachable in the oracle; texture dimensions/frame counts, timer and tick-driven held-item progress have native counterparts.",
+          "UtilsFX.shootFire/FXScorch is unreachable in the oracle; texture dimensions/frame counts, timer and tick-driven held-item progress have native counterparts.",
           "Complete callsite audit: UtilsFX has 485 references across the oracle client tree; every reachable effect was mapped to a native owner during the port.",
-      "w7fx corrected broken PNG offsets and render-driven equip updates; original equip progression is a .4-per-tick clamp with interpolation, not an additional easing function. Native callers use dynamic texture helpers and the tracked progress.",
-      "No remaining difference in the specified helper gaps after source review and whole-common javac. Visual acceptance and authored JUnit execution remain with leader.",
+          "w7fx corrected broken PNG offsets and render-driven equip updates; original equip progression is a .4-per-tick clamp with interpolation, not an additional easing function. Native callers use dynamic texture helpers and the tracked progress.",
+          "No remaining difference in the specified helper gaps after source review and whole-common javac. Visual acceptance and authored JUnit execution remain with leader.",
           "The floaty line helper is now reproduced with the original ribbons: the library body is additive and fades every step, the body of the cultist is the ordinary alpha blend with the constant alpha 0.8f."
         ],
         "reviewed_sha256": {
@@ -11995,16 +11996,16 @@
         "evidence": [
           "oracle thaumcraft/client/renderers/entity/RenderWatcher.java:1-153 the watcher body plus its target beam (watcher.png / watcher_beam.png)",
           "oracle tree-wide reference scan: RenderWatcher has ZERO references outside its own file, i.e. the original never registers it",
-      "native common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java:295 registers the native no-op watcher renderer",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java:295 registers the native no-op watcher renderer",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderWatcher.java:19 'Original TC4 RenderWatcher: the guardian-like watcher mesh plus its target beam.'",
           "oracle tree wide reference scan: RenderWatcher and ModelWatcher have no reference outside their own files, the original never registers the watcher renderer",
-      "2026-10-23 w7fx: native RenderWatcher.java:44-64 keeps the no-op render body and now rejects shouldRender and sets shadow radius0, preventing vanilla dispatcher shadow/fire after the no-op call (native EntityRenderDispatcher.java:220-226). Oracle ClientProxy.java:464-517 never registers RenderWatcher; ConfigEntities.java:206 only mentions EntityWatcher in champion whitelist. No reachable original body/beam is suppressed. JUnit invisibility-policy test authored, not executed; whole-common javac passed."
+          "2026-10-23 w7fx: native RenderWatcher.java:44-64 keeps the no-op render body and now rejects shouldRender and sets shadow radius0, preventing vanilla dispatcher shadow/fire after the no-op call (native EntityRenderDispatcher.java:220-226). Oracle ClientProxy.java:464-517 never registers RenderWatcher; ConfigEntities.java:206 only mentions EntityWatcher in champion whitelist. No reachable original body/beam is suppressed. JUnit invisibility-policy test authored, not executed; whole-common javac passed."
         ],
         "notes": [
-      "The native port registers a no-op renderer because native entity rendering requires a registered renderer. It does not display the oracle's unreachable body or beam.",
-      "w7fx additionally rejects shouldRender and sets shadow radius0 so vanilla does not add shadow/fire after the no-op body.",
+          "The native port registers a no-op renderer because native entity rendering requires a registered renderer. It does not display the oracle's unreachable body or beam.",
+          "w7fx additionally rejects shouldRender and sets shadow radius0 so vanilla does not add shadow/fire after the no-op body.",
           "Complete callsite audit: RenderWatcher has zero external references in the oracle tree.",
-      "No remaining visual addition in the native renderer policy. Acceptance requires no watcher body, beam, shadow, name or fire; no client frame was inspected by w7fx."
+          "No remaining visual addition in the native renderer policy. Acceptance requires no watcher body, beam, shadow, name or fire; no client frame was inspected by w7fx."
         ],
         "reviewed_sha256": {
           "original": "2dd5e510cd58451fbad15a19aa21ebf105df185508af8deb59b57073a66c5230",
@@ -12256,7 +12257,7 @@
           "The bone bow now uses the vanilla bow item model with the TC4 texture and the three pulling overrides.",
           "Deviation: the original's bespoke held-bow transform (2.6666667 scale and the -20/90/-60 rotations) and the original glint draw are replaced by the vanilla bow pose.",
           "Complete callsite audit: ItemBowBoneRenderer is registered only in ClientProxy.setupItemRenderers.",
-        "w7items restores oracle ItemBowBoneRenderer.java:48-64,82-88 through common/src/main/java/thaumcraft/client/renderers/item/BoneBowPose.java:11-29 and common/src/main/java/thaumcraft/common/mixin/client/BoneBowHeldPoseMixin.java:21-34, before the native equip matrix. REMAINING DIFFERENCE: oracle :89-119 glint still uses native glint instead of the original texture, RGB .38/.19/.608, SRC_COLOR/ONE blend, .125 texture scale, -50/10 degree rotations and 3000/4873 ms scroll periods. No claim that this is impossible in shaders; stays partial. Held pose needs a leader frame."
+          "w7items restores oracle ItemBowBoneRenderer.java:48-64,82-88 through common/src/main/java/thaumcraft/client/renderers/item/BoneBowPose.java:11-29 and common/src/main/java/thaumcraft/common/mixin/client/BoneBowHeldPoseMixin.java:21-34, before the native equip matrix. REMAINING DIFFERENCE: oracle :89-119 glint still uses native glint instead of the original texture, RGB .38/.19/.608, SRC_COLOR/ONE blend, .125 texture scale, -50/10 degree rotations and 3000/4873 ms scroll periods. No claim that this is impossible in shaders; stays partial. Held pose needs a leader frame."
         ],
         "reviewed_sha256": {
           "original": "3b30c460fb15da5de8aea555d0fd215c2f7a88489ad4d2aafadbe476aa7f04d6",
@@ -12713,8 +12714,8 @@
         "disposition": "exclude",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-      "native_coverage": "parity_verified",
-      "owner": "agent-w7items",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:72-75 public class ItemThaumometerRenderer implements IItemRenderer with the scanner.obj model",
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:98-135 the first-person view model with the player arm",
@@ -12738,7 +12739,7 @@
         "notes": [
           "Excluded as a contract: 1.21.1 removed IItemRenderer/IModelCustom, so the original's public item renderer contract has no target API. The port renders the thaumometer through the 1.21.1 builtin item hook instead.",
           "The native renderer is NOT a plain item model: it draws the three dimensional scanner of the original (the scanner OBJ and the glowing scan screen) and the first person view model with the arm of the player.",
-        "CLOSED w7items: oracle ItemThaumometerRenderer.java:101-104 arm lag restored in common/src/main/java/thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:115-119 and ThaumometerArmPose.java:7-8. Vanilla net/minecraft/client/player/LocalPlayer.java:136-139,622-625 exposes xBob/xBobO/yBob/yBobO with the same half-difference update. The existing world-space readout (:87-90,166-190; ThaumometerReadout.java:102-140) supersedes the old readout blocker. Leader screen scale 2.5, YN 248 and corrected lightmap are unchanged. JUnit authored, compile checked, not executed; frames pending."
+          "CLOSED w7items: oracle ItemThaumometerRenderer.java:101-104 arm lag restored in common/src/main/java/thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:115-119 and ThaumometerArmPose.java:7-8. Vanilla net/minecraft/client/player/LocalPlayer.java:136-139,622-625 exposes xBob/xBobO/yBob/yBobO with the same half-difference update. The existing world-space readout (:87-90,166-190; ThaumometerReadout.java:102-140) supersedes the old readout blocker. Leader screen scale 2.5, YN 248 and corrected lightmap are unchanged. JUnit authored, compile checked, not executed; frames pending."
         ],
         "reviewed_sha256": {
           "original": "9d5454e08e83d70d4f7d287f4aa101aeb6315077a3b262d4ad35bdb3d9756a5e",
@@ -12876,8 +12877,8 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-      "native_coverage": "parity_verified",
-      "owner": "agent-w7items",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w7items",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/item/ItemWandRenderer.java: the wand item renderer that draws the rod, the cap and the focus",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java the only native wand item renderer",
@@ -12896,8 +12897,8 @@
           "REMAINING GAP (restated 2026-10-23 (w4wands)): the native wand renderer draws the model without the original's model basis correction (a hundred and eighty degrees about X, oracle ItemWandRenderer:87) and without the original's use pose (:88-113 - the raise of the wand over three ticks, the thirty three degrees of the third person, the ten plus ten degrees of the first person, the sixty degrees of the startup and the WAVE and CHARGE waves of the focus).",
           "The two belong together: the use pose of the original is expressed in the basis that the correction establishes, so it can only be ported once the correction is confirmed by a client frame. The 1.7.10 model space has its Y axis downwards while the 1.21.1 model space has it upwards, so the correction decides which end of the wand is up.",
           "The exact change: apply the correction of a hundred and eighty degrees about X to the native wand renderer and then the original's use pose around the pivot one block above the model, with the numbers of the oracle ItemWandRenderer:88-113 and the elapsed time of the use, which the 1.21.1 LivingEntity.getTicksUsingItem() counts up like the 1.7.10 EntityPlayer.getItemInUseDuration() (MCP stable 12-1.7.10: field_71057_bx).",
-        "Everything else of the unit is at parity: the geometry of the model is the original's, the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus are drawn, and the two loaders call the same renderer.",
-        "CLOSED w7items source audit: oracle ItemWandRenderer.java:51-56,87-113; native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:160-164,241-300 already applies corrected basis and original use rule from WandUsePose.java:48-96. Added common/src/main/java/thaumcraft/common/mixin/client/WandRenderContextMixin.java:20-31 and WandRenderContext.java:11-20 so third-person poses follow the actual wielder rather than Minecraft.player. Three-tick raise, one-block pivot and WAVE/CHARGE constants retained. Runtime mixin application and frames remain leader acceptance, not claimed executed here."
+          "Everything else of the unit is at parity: the geometry of the model is the original's, the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus are drawn, and the two loaders call the same renderer.",
+          "CLOSED w7items source audit: oracle ItemWandRenderer.java:51-56,87-113; native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:160-164,241-300 already applies corrected basis and original use rule from WandUsePose.java:48-96. Added common/src/main/java/thaumcraft/common/mixin/client/WandRenderContextMixin.java:20-31 and WandRenderContext.java:11-20 so third-person poses follow the actual wielder rather than Minecraft.player. Three-tick raise, one-block pivot and WAVE/CHARGE constants retained. Runtime mixin application and frames remain leader acceptance, not claimed executed here."
         ],
         "reviewed_sha256": {
           "original": "f2840cfa86a637fdce94f4e9181c9c35b4c47fd565775fdd39fb2d7700264c31",
@@ -17981,7 +17982,7 @@
           "CURRENT 2026-10-23 (w8world): closed in code with a registered projective core shader and original additive inner passes, pending six-orientation moving-camera leader frames. Older impossibility/remaining notes below are historical and superseded by the first evidence entry and the w8world report.",
           "The 1.7 renderer became a 1.21.1 block entity renderer for the two mirror kinds; the pane, the offset of the unstable mirror, the brightness and the turns are the original ones.",
           "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror.",
-        "w7items: fixed-function API absence is real, but does NOT prove shader reproduction impossible. Vanilla assets/minecraft/shaders/core/rendertype_entity_translucent.vsh:8,29-36 copies explicit UV0; there is no glTexGen state. Vanilla rendertype_end_portal.vsh:13-15 and rendertype_end_portal.fsh:39-60 demonstrate view-dependent projected texture coordinates in a shader. Native TileMirrorRenderer.java:57-68 and ModelTunnelField.java:78-122 remain a shrinking/depth-offset quad approximation. REMAINING DIFFERENCE: original eye-linear S/T/R/object-linear Q planes and projection/texture matrices (oracle TileMirrorRenderer.java:85-114 and facing variants) are not reconstructed; Random(31100L) also is not reset on each native face. Existing additive RenderType.eyes is already ONE/ONE, so that old blend blocker is obsolete. Closest-possible reproduction is NOT proven; keep partial."
+          "w7items: fixed-function API absence is real, but does NOT prove shader reproduction impossible. Vanilla assets/minecraft/shaders/core/rendertype_entity_translucent.vsh:8,29-36 copies explicit UV0; there is no glTexGen state. Vanilla rendertype_end_portal.vsh:13-15 and rendertype_end_portal.fsh:39-60 demonstrate view-dependent projected texture coordinates in a shader. Native TileMirrorRenderer.java:57-68 and ModelTunnelField.java:78-122 remain a shrinking/depth-offset quad approximation. REMAINING DIFFERENCE: original eye-linear S/T/R/object-linear Q planes and projection/texture matrices (oracle TileMirrorRenderer.java:85-114 and facing variants) are not reconstructed; Random(31100L) also is not reset on each native face. Existing additive RenderType.eyes is already ONE/ONE, so that old blend blocker is obsolete. Closest-possible reproduction is NOT proven; keep partial."
         ],
         "reviewed_sha256": {
           "original": "ddf1d39957b2b642b7a08d620a0ff5a2d14a84d7415e30efd9a6f0b530d7402c",
@@ -18502,8 +18503,8 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-      "native_coverage": "parity_verified",
-      "owner": "agent-w7items",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:45,72 the 1.7 renderer draws the retained thaumatorium.obj model",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:44-73 the 1.7 renderer draws the retained textures/models/thaumatorium.obj with textures/models/thaumatorium.png and the turn of the facing",
@@ -18516,7 +18517,7 @@
         "notes": [
           "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered and the native OBJ loader is never referenced.",
           "Open difference: the retained OBJ is one block wide and two blocks tall, so the native machine could take it, but the two block models would have to be hidden and the leader would have to inspect the frames; the cycling preview cannot be reproduced at all, because the native machine holds no set of possible recipes.",
-        "CLOSED w7items: oracle TileThaumatoriumRenderer.java:53-73,78-99; native common/src/main/java/thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:21-62 renders retained OBJ at (.5,0,.5), XP -90, facing Z 270/90/180/0 and output at facing/1.99, Y 1.325, scale .75, cycling player.tickCount/40. TileThaumatorium.java:88-93 exposes ordered selected-job outputs independently of the catalyst; its existing Recipes update tag already syncs that list. BlockThaumatorium.java:39 hides both block shells and ThaumcraftAlchemyClient.java:22-23 registers the BER. The previous claim that the job list prevents a preview was incorrect. Native item geometry is used with the old RenderItem frame-size/origin adaptation. Whole-main javac passed; original-value JUnit authored but not executed; two-block OBJ and preview real-frame acceptance remains pending."
+          "CLOSED w7items: oracle TileThaumatoriumRenderer.java:53-73,78-99; native common/src/main/java/thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:21-62 renders retained OBJ at (.5,0,.5), XP -90, facing Z 270/90/180/0 and output at facing/1.99, Y 1.325, scale .75, cycling player.tickCount/40. TileThaumatorium.java:88-93 exposes ordered selected-job outputs independently of the catalyst; its existing Recipes update tag already syncs that list. BlockThaumatorium.java:39 hides both block shells and ThaumcraftAlchemyClient.java:22-23 registers the BER. The previous claim that the job list prevents a preview was incorrect. Native item geometry is used with the old RenderItem frame-size/origin adaptation. Whole-main javac passed; original-value JUnit authored but not executed; two-block OBJ and preview real-frame acceptance remains pending."
         ],
         "reviewed_sha256": {
           "original": "003001a14e4f2feefb87bdb95034fa9e1f737c9dafffee6688852ee2053229c4",
@@ -49551,7 +49552,8 @@
           "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have.",
           "CLOSED 2026-10-23 (w4wands): the remaining difference of the row was the identity format. The identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z); the format is bound into the accepted evidence of the wave (the client test parses it with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so it cannot change.",
           "The deviation of the original's handleDarkNode and handlePureNode biome effects, which live in the shared NodeEcology of the port, and the server thread guard, the current state guard and the prepared orb emission frame of the native, are the documented deviations of this row.",
-          "The regeneration ladder, the two locks, the discharge, the stabiliser repair and the wand tap of the original are the native ones."
+          "The regeneration ladder, the two locks, the discharge, the stabiliser repair and the wand tap of the original are the native ones.",
+          "ACCEPTED DEVIATION 2026-10-23 (audit a1ledger): the node identity is the one observable difference of this unit and it is ACCEPTED, not closed. Oracle TileNode.generateId() derives the identity from the position as 'dimension:x:y:z' (oracle TileNode:103-114, still 'dimension:x:y:z' in the 1.21.1 world coordinates). The native keeps a persisted random UUID (TileNode:63, saved at :869-888). The UUID is BOUND INTO ACCEPTED EVIDENCE: the client acceptance parses it with UUID.fromString (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509) and saved worlds carry it, so changing the format would invalidate the accepted client and multiplayer runs and every saved world. The observable consequences of the difference are therefore limited to two: a node that is moved keeps its identity in the native but changes it in the original, and the scan signature string differs in form while remaining stable per node. This is recorded as an accepted deviation rather than silently reported as parity."
         ],
         "reviewed_sha256": {
           "original": "b672c7d42f8c9f2af611c6576235dbafa6a6ae4e96adf0b67809318e1a782348",

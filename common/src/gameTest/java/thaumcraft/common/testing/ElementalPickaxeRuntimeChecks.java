@@ -137,7 +137,7 @@ public final class ElementalPickaxeRuntimeChecks {
         player.setItemInHand(InteractionHand.MAIN_HAND, pick);
         var hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
         InteractionResult result = pick.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
-        test.assertTrue(result == InteractionResult.PASS && pick.getDamageValue() == 5, "a right click costs five uses and consumes nothing: " + result + " " + pick.getDamageValue());
+        test.assertTrue(result == InteractionResult.CONSUME && pick.getDamageValue() == 5, "a right click costs five uses and consumes its native interaction: " + result + " " + pick.getDamageValue());
         player.setGameMode(GameType.CREATIVE);
         ItemStack creative = pickaxe();
         player.setItemInHand(InteractionHand.MAIN_HAND, creative);

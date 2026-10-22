@@ -277,7 +277,7 @@ public final class ElementalShovelRuntimeChecks {
         var result = click(player, shovel, floor, Direction.UP);
         int laid = 0;
         for (BlockPos cell : ElementalShovelGeometry.layout(floor, Direction.UP, 0, 0)) if (level.getBlockState(cell).is(Blocks.DIRT)) ++laid;
-        test.assertTrue(laid == 9 && player.getInventory().countItem(Items.DIRT) == 0 && shovel.getDamageValue() == 9 && result == net.minecraft.world.InteractionResult.PASS,
+        test.assertTrue(laid == 9 && player.getInventory().countItem(Items.DIRT) == 0 && shovel.getDamageValue() == 9 && result == net.minecraft.world.InteractionResult.CONSUME,
                 "a click lays the 3 x 3 square above the clicked face from nine dirt, nine uses: " + laid + " laid, " + player.getInventory().countItem(Items.DIRT) + " left, " + shovel.getDamageValue() + " uses");
         // Not enough in the inventory: as many as there are.
         flat(level, origin, saved, Blocks.DIRT);

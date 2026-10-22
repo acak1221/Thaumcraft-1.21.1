@@ -26,7 +26,6 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.MobSpawnType;
@@ -221,7 +220,7 @@ public final class EntityFireBat extends Monster {
     /**
      * The original class gate of the fire bat, without the world.
      *
-     * <p>Oracle {@code EntityFireBat.getCanSpawnHere:333-340}: the BLOCK light of the cell is
+     * <p>Oracle {@code EntityFireBat.getCanSpawnHere:333-340}: the combined light of the cell is
      * rolled against {@code nextInt(7)} and the inherited spawn gate has to accept the cell.</p>
      */
     public static boolean originalSpawnGate(int blockLight,int roll,boolean peaceful) {
@@ -229,7 +228,7 @@ public final class EntityFireBat extends Monster {
     }
 
     /**
-     * Oracle EntityFireBat:333-340 - the original class gate of the fire bat reads the BLOCK
+     * Oracle EntityFireBat:333-340 - the original class gate of the fire bat reads combined
      * light of the cell and rolls it against {@code nextInt(7)}.
      *
      * <p>The original overrides {@code isValidLightLevel} with a plain TRUE
@@ -240,6 +239,6 @@ public final class EntityFireBat extends Monster {
     public static boolean checkFireBatSpawnRules(EntityType<? extends EntityFireBat> type,ServerLevelAccessor level,MobSpawnType reason,BlockPos pos,RandomSource random) {
         // The original draws its class roll before the inherited spawn gate.
         int roll=random.nextInt(OriginalLightRules.CLASS_LIGHT_ROLL_BOUND);
-        return originalSpawnGate(level.getBrightness(LightLayer.BLOCK,pos),roll,level.getDifficulty()==Difficulty.PEACEFUL);
+        return originalSpawnGate(level.getMaxLocalRawBrightness(pos),roll,level.getDifficulty()==Difficulty.PEACEFUL);
     }
 }

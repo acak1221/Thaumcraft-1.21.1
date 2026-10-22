@@ -41,10 +41,10 @@ class EntityParityRulesTest {
     // The light level gate of the original mobs
     // ------------------------------------------------------------------
 
-    @Test void theMobGateReadsTheBlockLightAndNotTheMaximumRawBrightness() {
-        // Original EntityMob.isValidLightLevel - the block light of the cell against the
-        // nextInt(8) roll. A cell that is dark under the open sky still spawns the mob.
-        assertTrue(OriginalLightRules.validMobLightLevel(15, 0, 31, 7));
+    @Test void theMobGateReadsCombinedLightAfterTheSavedSkyRoll() {
+        // First input is saved sky; second is max(block, sky - subtraction).
+        assertFalse(OriginalLightRules.validMobLightLevel(15, 15, 31, 7));
+        assertTrue(OriginalLightRules.validMobLightLevel(15, 4, 31, 7));
         assertFalse(OriginalLightRules.validMobLightLevel(15, 9, 31, 7));
         assertFalse(OriginalLightRules.validMobLightLevel(15, 0, 10, 7));
     }
@@ -55,12 +55,10 @@ class EntityParityRulesTest {
         assertFalse(OriginalLightRules.validMobLightLevel(15, 0, 14, 7));
     }
 
-    @Test void theWispGateReadsTheDarkenedSkyLight() {
-        // Original EntityWisp.isValidLightLevel - the wisp reads getLightValue(Sky), the
-        // darkened sky light, and then the block light.
-        assertTrue(OriginalLightRules.validWispLightLevel(4, 0, 31, 7));
-        assertFalse(OriginalLightRules.validWispLightLevel(4, 9, 31, 7));
-        assertFalse(OriginalLightRules.validWispLightLevel(4, 0, 3, 7));
+    @Test void theWispGateReadsSavedSkyThenCombinedLight() {
+        assertTrue(OriginalLightRules.validWispLightLevel(15, 4, 31, 7));
+        assertFalse(OriginalLightRules.validWispLightLevel(15, 9, 31, 7));
+        assertFalse(OriginalLightRules.validWispLightLevel(15, 4, 14, 7));
     }
 
     @Test void theLightRollBoundsAreTheOriginalOnes() {

@@ -230,25 +230,20 @@ public final class BrainyZombieRuntimeChecks {
             long oldTime = level.getDayTime();
             try {
                 level.setDayTime(6000); level.updateSkyBrightness();
-                // The original EntityMob.isValidLightLevel is a ROLL, not a daylight switch: the
-                // saved sky light of the cell against nextInt(32) and the block light against
-                // nextInt(8). A bright cell is therefore refused by some seeds and admitted by
-                // the others, exactly as the original does.
-                // The original EntityMob.isValidLightLevel is a ROLL, not a daylight switch: the
-                // saved sky light of the cell against nextInt(32) and the block light against
-                // nextInt(8). The placement must follow those two rolls exactly.
+                // Original EntityMob: saved sky against32, then combined light against8.
+                // getBlockLightValue includes darkened skylight, not just the BLOCK channel.
                 boolean consistent = true;
                 for (long seed = 0; seed < 32; ++seed) {
                     var expected = RandomSource.create(seed);
                     int skyRoll = expected.nextInt(32);
                     int skyLight = level.getBrightness(net.minecraft.world.level.LightLayer.SKY, origin);
                     boolean expectedResult = skyLight > skyRoll ? false
-                            : level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, origin) <= expected.nextInt(8);
+                            : level.getMaxLocalRawBrightness(origin, level.isThundering() ? 10 : level.getSkyDarken()) <= expected.nextInt(8);
                     boolean actual = SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), level, MobSpawnType.NATURAL, origin, RandomSource.create(seed));
                     if (actual != expectedResult) { consistent = false;
                         System.out.println("LIGHTDIAG seed=" + seed + " sky=" + skyLight + " skyRoll=" + skyRoll + " block=" + level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, origin) + " expected=" + expectedResult + " actual=" + actual); }
                 }
-                test.assertTrue(consistent, "the placement follows the original32 sky roll and the8 block light roll of the saved light");
+                test.assertTrue(consistent, "placement follows original saved-sky32 and combined-light8 rolls");
                 level.setDayTime(18000); level.updateSkyBrightness(); boolean allowed = false;
                 for (long seed = 0; seed < 500 && !allowed; seed++) allowed = SpawnPlacements.checkSpawnRules(ThaumcraftMonsters.BRAINY_ZOMBIE.get(), level, MobSpawnType.NATURAL, origin, RandomSource.create(seed));
                 test.assertTrue(allowed, "registered native placement admits a supported dark night cell through the original32/8 light rolls");

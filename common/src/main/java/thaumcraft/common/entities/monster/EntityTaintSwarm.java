@@ -30,7 +30,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -226,7 +225,7 @@ public class EntityTaintSwarm extends Monster implements ITaintedMob {
     /**
      * The original class gate of the taint swarm, without the world.
      *
-     * <p>Oracle {@code EntityTaintSwarm.getCanSpawnHere:226-233}: the BLOCK light of the cell is
+     * <p>Oracle {@code EntityTaintSwarm.getCanSpawnHere:226-233}: the combined light of the cell is
      * rolled against {@code nextInt(7)}, the mob is not a peaceful one and the walk target value
      * of the cell has to be at least zero.</p>
      */
@@ -236,19 +235,17 @@ public class EntityTaintSwarm extends Monster implements ITaintedMob {
 
     /**
      * Oracle EntityTaintSwarm:226-233 - the original class gate of the taint swarm reads the
-     * BLOCK light of the cell and rolls it against {@code nextInt(7)}.
+     * combined light of the cell and rolls it against {@code nextInt(7)}.
      *
      * <p>The original overrides {@code isValidLightLevel} with a plain TRUE
      * (oracle EntityTaintSwarm:235-237), so the generic mob darkness gate does not apply to the
-     * swarm and the port must not inherit the sky and block rolls of that gate. The port used the
-     * maximum raw brightness of the cell instead of the block light, so the swarm refused to
-     * spawn under the open sky of the day, and it added the sky roll of the mob gate that the
-     * original never draws for the swarm.</p>
+     * swarm and the port must not inherit the separate32/8 rolls of that gate. The class's
+     * getBlockLightValue call already includes darkened skylight.</p>
      */
     public static boolean checkTaintSwarmSpawnRules(EntityType<? extends EntityTaintSwarm> type,ServerLevelAccessor level,MobSpawnType reason,BlockPos pos,RandomSource random) {
         // The original draws its class roll before the inherited spawn gate.
         int roll=random.nextInt(OriginalLightRules.CLASS_LIGHT_ROLL_BOUND);
-        return originalSpawnGate(level.getBrightness(LightLayer.BLOCK,pos),roll,level.getDifficulty()==Difficulty.PEACEFUL,
+        return originalSpawnGate(level.getMaxLocalRawBrightness(pos),roll,level.getDifficulty()==Difficulty.PEACEFUL,
                 level.getPathfindingCostFromLightLevels(pos));
     }
     @Override public boolean checkSpawnObstruction(LevelReader world) {

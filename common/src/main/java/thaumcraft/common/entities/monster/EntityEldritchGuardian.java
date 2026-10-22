@@ -70,6 +70,13 @@ public final class EntityEldritchGuardian extends Monster implements RangedAttac
     @Override public boolean canAttack(LivingEntity target) { return !(target instanceof IEldritchMob) && super.canAttack(target); }
     @Override public boolean isAlliedTo(Entity entity) { return entity instanceof IEldritchMob; }
     @Override public boolean isInvertedHealAndHarm() { return true; }
+    /** Oracle getCanSpawnHere: one guardian per original 32x16x32 expanded unit box. */
+    @Override public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level, net.minecraft.world.entity.MobSpawnType reason) {
+        var box = new net.minecraft.world.phys.AABB(getX(), getY(), getZ(), getX() + 1, getY() + 1, getZ() + 1).inflate(32, 16, 32);
+        if (level instanceof net.minecraft.world.level.ServerLevelAccessor server
+                && !server.getLevel().getEntitiesOfClass(EntityEldritchGuardian.class, box).isEmpty()) return false;
+        return super.checkSpawnRules(level, reason);
+    }
     @Override public boolean hurt(DamageSource source, float damage) { return super.hurt(source, source.is(MagicWard.MAGIC_DAMAGE) ? damage / 2 : damage); }
     @Override public void tick() {
         super.tick();

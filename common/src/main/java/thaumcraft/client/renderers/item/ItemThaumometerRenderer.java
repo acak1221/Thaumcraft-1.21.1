@@ -48,12 +48,7 @@ import thaumcraft.common.items.relics.ItemThaumometer;
 public final class ItemThaumometerRenderer {
     /** Original ItemThaumometerRenderer:95 - the size factor of the first person view. */
     private static final float FIRST_PERSON_SCALE = 0.8F;
-    /** Original ItemRenderer.updateEquippedItem:547-573 - the progress moves at most 0.4 per tick. */
-    private static final float EQUIP_STEP = 0.4F;
     private static final ModelThaumometer MODEL = new ModelThaumometer();
-
-    private static ItemStack equippedStack;
-    private static float equippedProgress;
 
     private ItemThaumometerRenderer() {}
 
@@ -113,8 +108,11 @@ public final class ItemThaumometerRenderer {
         // between the rotation of the player and the swing of its arm. The arm
         // angles of 1.7.10 have no public equivalent in 1.21.1, so the two
         // rotations of the original are left out.
-        // Original ItemThaumometerRenderer:107.
-        float progress = equipProgress(mc, player.getMainHandItem());
+        // Original ItemThaumometerRenderer:107, the equip progress of the item in the hand.
+        // The 1.7.10 client read the private fields of its ItemRenderer; the native port
+        // reproduces the original curve, see thaumcraft.client.lib.UtilsFX.
+        float progress = thaumcraft.client.lib.UtilsFX.getEquippedProgress(player.getMainHandItem(),
+                net.minecraft.world.InteractionHand.MAIN_HAND, player.tickCount, partial);
         pose.translate(-0.7F * FIRST_PERSON_SCALE,
                 -(-0.65F * FIRST_PERSON_SCALE) + (1.0F - progress) * 1.5F,
                 0.9F * FIRST_PERSON_SCALE);
@@ -190,14 +188,7 @@ public final class ItemThaumometerRenderer {
      *
      * <p>Original ItemRenderer.updateEquippedItem:547-573: the progress of the
      * held item is one while the same item stays in the hand and moves at most
-     * 0.4 per tick in both directions.
+     * 0.4 per tick in both directions. The native port owns that curve in
+     * {@code thaumcraft.client.lib.UtilsFX#getEquippedProgress}.
      */
-    private static float equipProgress(Minecraft mc, ItemStack held) {
-        boolean same = equippedStack != null && ItemStack.matches(equippedStack, held);
-        equippedStack = held;
-        float target = same ? 1.0F : 0.0F;
-        float step = Math.max(-EQUIP_STEP, Math.min(EQUIP_STEP, target - equippedProgress));
-        equippedProgress += step;
-        return equippedProgress;
-    }
 }

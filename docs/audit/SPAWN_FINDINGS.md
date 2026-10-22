@@ -2,6 +2,8 @@
 
 Scope: Fabric 1.21.1, default configuration, fresh world. **36 registered mob types** inspected, including player-built mobs and five extra/legacy types. Projectiles, dropped items and falling blocks are not mobs. A missing biome row is not a defect for a special-path mob. NeoForge runtime parity is deferred by AGENTS.md.
 
+**Follow-up (g15client):** the five NO PATH rows below are resolved as deliberately unreachable in TC4 survival, not missing gameplay. See [ORPHAN_MOB_FINDINGS.md](ORPHAN_MOB_FINDINGS.md) for exact original-JAR/caller evidence and five JUnit contracts. The original audit's execution record below is retained unchanged; it is not evidence that the follow-up tests ran.
+
 ## Evidence levels
 
 - **PROVEN** means exercised by this audit's actual server GameTests; final run details below.

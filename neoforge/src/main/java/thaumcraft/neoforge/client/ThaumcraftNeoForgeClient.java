@@ -237,6 +237,7 @@ public final class ThaumcraftNeoForgeClient {
         ThaumcraftArchitectClient.render(pose, buffers, partialTick, event.getCamera());
         ThaumcraftGolemClient.renderMarkers(pose, buffers, partialTick, event.getCamera());
         buffers.endBatch(RenderType.lines());
+        thaumcraft.client.lib.ScanOverlay.render(pose, partialTick);
     }
 
     /** The disconnect reset of the Fabric ClientPlayConnectionEvents.DISCONNECT. */

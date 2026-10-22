@@ -89,3 +89,4 @@ javac.*.args
 .gradle-g2c/
 .gradle-g6/
 .gradle-g10/
+.gradle-g12/

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -30,6 +31,19 @@ import thaumcraft.common.lib.mods.ChampionWiringRules;
 
 /** Original 1.7 champion selection: the spawn roll, the whitelist levels and the modifier roll. */
 class ChampionRulesTest {
+    /**
+     * The native registries must exist before an attribute instance can be created.
+     *
+     * <p>The attribute registry is a dynamic one, so without this bootstrap the
+     * {@code generic.max_health} holder is unbound and the test fails with
+     * "Trying to access unbound value" — and it only passed by accident when
+     * another test class of the suite had bootstrapped the registries first.
+     * The suite must not depend on the order of its classes.</p>
+     */
+    @BeforeAll static void bootstrap() {
+        net.minecraft.SharedConstants.tryDetectVersion();
+        net.minecraft.server.Bootstrap.bootStrap();
+    }
     /** Random that answers with fixed values so the original chances can be checked exactly. */
     private static final class ScriptedRandom extends Random {
         private final float floatValue;

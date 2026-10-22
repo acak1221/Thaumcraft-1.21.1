@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -52,6 +53,7 @@ import thaumcraft.common.config.ThaumcraftHungryChest;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.config.ThaumcraftTubes;
 import thaumcraft.common.config.ThaumcraftVisCharging;
+import thaumcraft.common.items.armor.ItemRobeArmor;
 
 /**
  * NeoForge half of the client bootstrap of the Fabric loader.
@@ -95,6 +97,19 @@ public final class ThaumcraftNeoForgeClient {
 
     /** The builtin item renderers of the Fabric BuiltinItemRendererRegistry. */
     private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        // The original robe dye in the native armour layer. NeoForge 21.1 replaces
+        // the DYEABLE check of HumanoidArmorLayer with its own client item
+        // extension, so the robe colour is published here instead of through a
+        // redirect that has no target in the NeoForge patched class.
+        for (var item : BuiltInRegistries.ITEM) {
+            if (item instanceof ItemRobeArmor) {
+                event.registerItem(new IClientItemExtensions() {
+                    @Override public int getDefaultDyeColor(net.minecraft.world.item.ItemStack stack) {
+                        return ItemRobeArmor.armorTint(stack);
+                    }
+                }, item);
+            }
+        }
         // The original wand uses the TC4 model, not the vanilla baked item model.
         event.registerItem(renderer(thaumcraft.client.ThaumcraftGearModelsClient::renderWand), ThaumcraftContent.WAND.get());
         // Original ItemThaumometerRenderer: the thaumometer is the three dimensional

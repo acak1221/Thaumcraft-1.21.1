@@ -34,6 +34,10 @@ public final class ThaumcraftNeoForge {
         NeoForgeBorePlatform.init();
         NeoForgeGolemHarvestPlatform.init();
         NeoForgeGolemUsePlatform.init();
+        // The shared Architectury break event must reach the shared protection for
+        // every break attempt, also for the three refusals NeoForge posts its
+        // native break event already cancelled for.
+        NeoForgeSharedBreakEvent.init();
         NeoForgeSpaStorage.init(bus);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
                 net.neoforged.bus.api.EventPriority.HIGHEST,

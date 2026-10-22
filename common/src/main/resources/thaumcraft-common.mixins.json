@@ -81,7 +81,6 @@
     "client.TableOutlineMixin",
     "client.WandFocusKeyMixin",
     "client.MinecraftItemColorsAccess",
-    "client.RobeArmorLayerMixin",
     "client.WarpFogMixin",
     "client.WarpPostEffectsMixin",
     "client.WardedHitParticleMixin",

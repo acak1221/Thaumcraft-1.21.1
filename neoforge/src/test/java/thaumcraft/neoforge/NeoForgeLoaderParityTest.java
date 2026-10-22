@@ -444,17 +444,82 @@ class NeoForgeLoaderParityTest {
     @Test void theKnownNeoForgeClientGapsAreTheDocumentedOnes() {
         String neoforge = read("neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java");
         List<String> gaps = List.of(
-                "the clean water render of the purifying fluid (the Fabric FluidRenderHandlerRegistry)",
-                "the taint fibres model (the Fabric renderer API)",
-                "the armour renderer of the void robe, the void armour and the fortress armour (the Fabric ArmorRenderer)");
+                "the taint fibres model (the Fabric renderer API)");
         for (String gap : gaps) {
             assertTrue(!gap.isEmpty(), "the gap list names its gap");
         }
-        // None of the three has a NeoForge counterpart yet.
-        assertTrue(!neoforge.contains("FluidRenderHandler"), "the clean water render is still a gap");
+        // The clean water render and the armour renderer are closed: the NeoForge
+        // client owns them through their own client mixins now.
+        assertTrue(!neoforge.contains("FluidRenderHandler"), "the clean water render is not a gap any more");
         assertTrue(!neoforge.contains("taint_fibres"), "the taint fibres model is still a gap");
-        assertTrue(!neoforge.contains("renderRobe"), "the void robe renderer is still a gap");
-        assertTrue(!neoforge.contains("renderFortressArmor"), "the fortress armour renderer is still a gap");
+        assertTrue(!neoforge.contains("renderRobe"), "the void robe renderer is not a gap any more");
+        assertTrue(!neoforge.contains("renderFortressArmor"), "the fortress armour renderer is not a gap any more");
+    }
+
+    /**
+     * The clean water render of the purifying fluid.
+     *
+     * <p>Both loaders must draw the very same original geometry: the shared module owns it, the
+     * Fabric loader reaches it through the Fabric {@code FluidRenderHandler} and the NeoForge
+     * loader through its own client mixin of the native fluid draw path.</p>
+     */
+    @Test void theCleanWaterRenderIsTheSameGeometryOnBothLoaders() {
+        String shared = read("common/src/main/java/thaumcraft/client/renderers/fluid/PureFluidRender.java");
+        assertTrue(shared.contains("public static boolean render("), "the shared module owns the original fluid geometry");
+        assertTrue(shared.contains("PureFlowRules.renderAverage"), "the shared geometry uses the original corner rule");
+        String fabric = read("fabric/src/main/java/thaumcraft/fabric/client/FabricFluidPureRenderHandler.java");
+        assertTrue(fabric.contains("PureFluidRender.render("), "the Fabric adapter draws the shared geometry");
+        String mixin = read("neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgePureFluidMixin.java");
+        assertTrue(mixin.contains("PureFluidRender.render("), "the NeoForge mixin draws the shared geometry");
+        assertTrue(mixin.contains("renderLiquid("), "the NeoForge mixin intercepts the native fluid draw path");
+        assertTrue(mixin.contains("require = 1"), "the NeoForge mixin fails closed");
+        String config = read("neoforge/src/main/resources/thaumcraft-neoforge-client.mixins.json");
+        assertTrue(config.contains("NeoForgePureFluidMixin"), "the NeoForge client mixin is registered");
+    }
+
+    /**
+     * The original TC4 gear models.
+     *
+     * <p>The Fabric loader registers the renderers of the Fabric {@code ArmorRenderer} API and the
+     * NeoForge loader draws the pieces from its own armour layer. Both must reach the very same
+     * shared renderers, so the two loaders cannot draw the void robe, the fortress armour and the
+     * hover harness differently.</p>
+     */
+    @Test void theOriginalGearModelsAreTheSameOnBothLoaders() {
+        String shared = read("common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java");
+        assertTrue(shared.contains("public static boolean renderGearItem("), "the shared module owns the gear dispatch");
+        for (String piece : List.of("ItemVoidRobeArmor", "ItemFortressArmor", "HarnessData.isHarness")) {
+            assertTrue(shared.contains(piece), "the shared dispatch draws " + piece);
+        }
+        String fabric = read("fabric/src/main/java/thaumcraft/fabric/ThaumcraftFabricClient.java");
+        assertTrue(fabric.contains("ArmorRenderer.register("), "the Fabric loader registers the gear renderers");
+        String mixin = read("neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgeGearArmorMixin.java");
+        assertTrue(mixin.contains("renderGearItem("), "the NeoForge mixin draws the shared gear");
+        assertTrue(mixin.contains("renderArmorPiece("), "the NeoForge mixin intercepts the native armour layer");
+        assertTrue(mixin.contains("require = 1"), "the NeoForge mixin fails closed");
+        String config = read("neoforge/src/main/resources/thaumcraft-neoforge-client.mixins.json");
+        assertTrue(config.contains("NeoForgeGearArmorMixin"), "the NeoForge client mixin is registered");
+    }
+
+    /**
+     * The original robe dye of the native armour layer.
+     *
+     * <p>The Fabric loader redirects the DYEABLE check of the native armour layer, the NeoForge
+     * loader publishes the same colour through the native client item extension, because the
+     * NeoForge patch of the armour layer has no DYEABLE check at all. The redirect must not stay
+     * in the shared module: it would fail to apply on NeoForge and break the client at startup.</p>
+     */
+    @Test void theRobeDyeIsLoaderSpecificOnBothLoaders() {
+        String sharedConfig = read("common/src/main/resources/thaumcraft-common.mixins.json");
+        assertTrue(!sharedConfig.contains("RobeArmorLayerMixin"),
+                "the robe dye redirect is not shared any more: it has no target in the NeoForge patched class");
+        String fabricConfig = read("fabric/src/main/resources/thaumcraft-fabric-client.mixins.json");
+        assertTrue(fabricConfig.contains("FabricRobeArmorLayerMixin"), "the Fabric loader keeps the robe dye redirect");
+        String fabric = read("fabric/src/main/java/thaumcraft/fabric/mixin/client/FabricRobeArmorLayerMixin.java");
+        assertTrue(fabric.contains("ItemRobeArmor"), "the Fabric redirect opts the robes into the native check");
+        String neoforge = read("neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java");
+        assertTrue(neoforge.contains("getDefaultDyeColor"), "the NeoForge loader publishes the robe colour natively");
+        assertTrue(neoforge.contains("ItemRobeArmor.armorTint"), "the NeoForge loader uses the shared robe colour");
     }
 
     // ------------------------------------------------------------------ the shared constants

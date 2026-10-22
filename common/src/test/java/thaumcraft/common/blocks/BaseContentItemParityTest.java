@@ -150,15 +150,24 @@ class BaseContentItemParityTest {
     }
 
     /**
-     * The native ids of the nuggets and the clusters that exist in 1.21.1. The tin, the silver
-     * and the lead nuggets and their clusters need the ores of the other mods and are the
-     * documented catalogue gap of the port.
+     * The native ids of the nuggets and of the clusters of the original. The original registers
+     * the item with all sixty four metadata values and the fourteen icons of the nuggets and the
+     * clusters (oracle ItemNugget:39-52), so every one of them exists in the port; the creative
+     * listing of the tin, the silver and the lead is the only gated part (oracle ItemNugget:72-85).
      */
     @Test void theNativeNuggetAndClusterItemsAreRegistered() {
         assertEquals("thaumcraft:quicksilver_drop", ThaumcraftContent.MATERIALS.get("quicksilver_drop").getId().toString());
         assertEquals("thaumcraft:copper_nugget", ThaumcraftContent.MATERIALS.get("copper_nugget").getId().toString());
+        assertEquals("thaumcraft:tin_nugget", ThaumcraftContent.MATERIALS.get("tin_nugget").getId().toString());
+        assertEquals("thaumcraft:silver_nugget", ThaumcraftContent.MATERIALS.get("silver_nugget").getId().toString());
+        assertEquals("thaumcraft:lead_nugget", ThaumcraftContent.MATERIALS.get("lead_nugget").getId().toString());
+        assertEquals("thaumcraft:thaumium_nugget", ThaumcraftContent.MATERIALS.get("thaumium_nugget").getId().toString());
+        assertEquals("thaumcraft:void_nugget", ThaumcraftContent.MATERIALS.get("void_nugget").getId().toString());
         assertEquals("thaumcraft:cluster_iron", ThaumcraftContent.MATERIALS.get("cluster_iron").getId().toString());
         assertEquals("thaumcraft:cluster_copper", ThaumcraftContent.MATERIALS.get("cluster_copper").getId().toString());
+        assertEquals("thaumcraft:cluster_tin", ThaumcraftContent.MATERIALS.get("cluster_tin").getId().toString());
+        assertEquals("thaumcraft:cluster_silver", ThaumcraftContent.MATERIALS.get("cluster_silver").getId().toString());
+        assertEquals("thaumcraft:cluster_lead", ThaumcraftContent.MATERIALS.get("cluster_lead").getId().toString());
         assertEquals("thaumcraft:cluster_cinnabar", ThaumcraftContent.MATERIALS.get("cluster_cinnabar").getId().toString());
         assertEquals("thaumcraft:cluster_gold", ThaumcraftContent.MATERIALS.get("cluster_gold").getId().toString());
     }

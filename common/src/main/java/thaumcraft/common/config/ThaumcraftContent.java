@@ -132,6 +132,12 @@ public final class ThaumcraftContent {
     public static final RegistrySupplier<BlockEntityType<TileJar>> JAR_BLOCK_ENTITY = BLOCK_ENTITIES.register("jar", () -> BlockEntityType.Builder.of((pos, state) -> new TileJar(ThaumcraftContent.JAR_BLOCK_ENTITY.get(), pos, state), JAR.get(), VOID_JAR.get()).build(null));
     public static final RegistrySupplier<BlockEntityType<TileNode>> NODE_BLOCK_ENTITY = BLOCK_ENTITIES.register("aura_node", () -> BlockEntityType.Builder.of((pos, state) -> new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(), pos, state), AURA_NODE.get(), SILVERWOOD_KNOT.get()).build(null));
     public static final Map<String, RegistrySupplier<Item>> MATERIALS = new LinkedHashMap<>();
+    /**
+     * The nuggets and the clusters whose creative listing the original gates on the ore mod of
+     * another mod (oracle ItemNugget:72-85, Config.foundTinIngot and the two next).
+     */
+    private static final java.util.Set<String> ORE_MOD_GATED = java.util.Set.of(
+            "tin_nugget", "silver_nugget", "lead_nugget", "cluster_tin", "cluster_silver", "cluster_lead");
     public static final Map<String, RegistrySupplier<Item>> SHARDS = new LinkedHashMap<>();
     public static final Map<String, RegistrySupplier<Block>> CRYSTALS = new LinkedHashMap<>();
     public static final RegistrySupplier<CreativeModeTab> TAB = TABS.register("thaumcraft", () -> CreativeTabRegistry.create(Component.translatable("itemGroup.thaumcraft"), () -> new ItemStack(THAUMOMETER.get())));
@@ -147,14 +153,42 @@ public final class ThaumcraftContent {
         // its ore dictionary name "nuggetCopper" (ConfigItems:277) are carried by this port.
         MATERIALS.put("copper_nugget", ITEMS.register("copper_nugget",
                 () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_COPPER)));
+        // Original ItemNugget metadata 6 (the thaumium nugget) and metadata 7 (the void metal
+        // nugget): the original registers both icons unconditionally (ItemNugget:50-51) and lists
+        // both in the creative tab (ItemNugget:66-67), so the two items are not gated on another
+        // mod. The port had the model, the texture, the language name and the ore dictionary tag
+        // of the two but never registered the items, so the tags original_ore/nugget_thaumium
+        // and original_ore/nugget_void pointed at items that did not exist.
+        MATERIALS.put("thaumium_nugget", ITEMS.register("thaumium_nugget",
+                () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_THAUMIUM)));
+        MATERIALS.put("void_nugget", ITEMS.register("void_nugget",
+                () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_VOID)));
+        // Original ItemNugget metadata 2 (the tin nugget), 3 (the silver nugget) and 4 (the lead
+        // nugget) with their clusters 18, 19 and 20: the original registers the icons of all of
+        // them unconditionally (ItemNugget:47-49) and only gates the creative listing and the
+        // crucible recipes on Config.foundTinIngot, Config.foundSilverIngot and
+        // Config.foundLeadIngot (ItemNugget:72-85). The 1.21.1 tree has no tin, no silver and no
+        // lead ore, so the items exist exactly as in the original and the creative tab does not
+        // list them; the ore dictionary tags of the original (ConfigItems:277-293) are carried by
+        // the tags original_ore/nugget_tin, nugget_silver, nugget_lead and their clusters.
+        MATERIALS.put("tin_nugget", ITEMS.register("tin_nugget",
+                () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_TIN)));
+        MATERIALS.put("silver_nugget", ITEMS.register("silver_nugget",
+                () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_SILVER)));
+        MATERIALS.put("lead_nugget", ITEMS.register("lead_nugget",
+                () -> new thaumcraft.common.items.ItemNugget(new Item.Properties(), thaumcraft.common.lib.items.EquipmentRules.NUGGET_LEAD)));
         // Original ItemNugget metadata 16 (iron), 17 (copper), 31 (gold) and 21 (cinnabar): the "Native
         // Clusters" that purified ore becomes (ConfigRecipes:131-134) and that a furnace melts into two
         // ingots (ConfigRecipes:488-490). Copper is vanilla in 1.21.1, so its cluster is carried too.
-        String[] clusterIds = {"cluster_iron", "cluster_gold", "cluster_cinnabar", "cluster_copper"};
+        String[] clusterIds = {"cluster_iron", "cluster_gold", "cluster_cinnabar", "cluster_copper",
+                "cluster_tin", "cluster_silver", "cluster_lead"};
         int[] clusterTypes = {thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_IRON,
                 thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_GOLD,
                 thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_CINNABAR,
-                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_COPPER};
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_COPPER,
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_TIN,
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_SILVER,
+                thaumcraft.common.lib.items.EquipmentRules.NUGGET_CLUSTER_LEAD};
         for (int cluster = 0; cluster < clusterIds.length; cluster++) {
             String id = clusterIds[cluster];
             int type = clusterTypes[cluster];
@@ -221,7 +255,16 @@ public final class ThaumcraftContent {
         for (Map.Entry<String, RegistrySupplier<Item>> material : MATERIALS.entrySet())
             // Original ItemResource:132-137 - the creative listing of the resources skips the
             // metadata five, the zombie brain; the brain is not in the tab of the original.
-            if (!"zombie_brain".equals(material.getKey())) CreativeTabRegistry.append(TAB, material.getValue());
+            // Original ItemNugget:62-88 - the creative listing of the nuggets and of the
+            // clusters of the tin, the silver and the lead is gated on the ore mod of the
+            // other mod (Config.foundTinIngot and the two next); the 1.21.1 tree has no tin,
+            // no silver and no lead ore, so those six items are not in the tab.
+            if (!"zombie_brain".equals(material.getKey()) && !ORE_MOD_GATED.contains(material.getKey()))
+                CreativeTabRegistry.append(TAB, material.getValue());
+        // Original ItemNugget:66 - the creative listing of the original always carries the iron
+        // nugget (the metadata zero). The 1.21.1 tree has no own iron nugget: the vanilla one
+        // carries the ore dictionary name "nuggetIron" of the original (ConfigItems:277).
+        CreativeTabRegistry.appendStack(TAB, () -> new ItemStack(net.minecraft.world.item.Items.IRON_NUGGET));
         for (RegistrySupplier<Item> item : SHARDS.values()) CreativeTabRegistry.append(TAB, item);
         for (RegistrySupplier<Block> block : CRYSTALS.values()) CreativeTabRegistry.appendStack(TAB, () -> new ItemStack(block.get()));
     }

@@ -2,6 +2,6 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": ["###", "###", "###"],
-  "key": {"#": {"item": "thaumcraft:quicksilver_drop"}},
+  "key": {"#": {"tag": "thaumcraft:original_ore/nugget_quicksilver"}},
   "result": {"id": "thaumcraft:quick_silver", "count": 1}
 }

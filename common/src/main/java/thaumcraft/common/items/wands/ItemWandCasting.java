@@ -207,6 +207,12 @@ public final class ItemWandCasting extends Item {
         // through the wand trigger registry, which 1.21.1 has no metadata for.
         InteractionResult oculus = thaumcraft.common.lib.eldritch.OculusFormation.tryWandInteraction(context);
         if (oculus != InteractionResult.PASS) return oculus;
+        // Original WandManager:332-407 - the wand trigger of the event two, the
+        // three by three by three shell that becomes the arcane furnace. The
+        // original answered it through the wand trigger registry, which 1.21.1
+        // has no metadata for.
+        InteractionResult arcaneFurnace = thaumcraft.common.lib.ArcaneFurnaceFormation.tryForm(context);
+        if (arcaneFurnace != InteractionResult.PASS) return arcaneFurnace;
         InteractionResult charger = thaumcraft.common.blocks.BlockMagicWorkbenchCharger.tryWandInteraction(context);
         if (charger != InteractionResult.PASS) return charger;
         InteractionResult thaumatorium = thaumcraft.common.lib.ThaumatoriumFormation.tryForm(context);

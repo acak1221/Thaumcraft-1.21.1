@@ -19,6 +19,10 @@ options of `thaumcraft.common.config.Config` carried only the runtime values, so
 declared defaults of the original (its static block) were destroyed as soon as any
 settings were applied.
 
+**The suite:** `:common:test` runs **2172 tests, 1 failure** — the only failure is
+`thaumcraft.common.blocks.BaseContentItemParityTest.theSanitySoapKeepsTheOriginalDurationAndChances`,
+which belongs to another agent. Every one of the eight failures of this wave is green.
+
 | # | failure | verdict |
 |---|---------|---------|
 | 1 | `DeathAspectOrbRulesTest.aRefusedRollDropsNoOrbAndDrawsNoValue` | test |
@@ -309,6 +313,37 @@ published) and the test read a runtime value where it claimed to check a default
   the settings) and restores the previous values.
 
 ---
+
+## The GameTests
+
+`:fabric:runGameTest` was run in this worktree with the own Gradle home
+(`.gradle-fix9`): **318 GameTest cases, 6 failures**
+(`fabric/build/gametest-results.xml`). The six failures are the pre-existing ones of the
+merged waves and belong to other lanes, not to this one:
+
+* `magicalbiomesgeneratenaturallyandspawnactualpech` - "region generation admits actual
+  typed BE with original generation-plus-growth age3..7"
+* `fluxoriginalexposureandgootail` - "original lower25 MISS falls through30 HIT then
+  boolean; exact observed calls=[nextInt(25)]"
+* `originalbiometreesanddungeonsuserealworldgen` - "original Forge BlockBush soil rule
+  admits each actual plant in unmodified native darkness"
+* `fluxmovesandexhaustswithoriginalrules` - "pending real Thaumic Slime branch does not
+  silently consume goo (M11 not complete)"
+* `fullinventoryreusesfreedpaperslotordrops` - "creative overflow spends one paper and
+  the ink, and creates no note entity"
+* `magicalflowersgrowharvestandrefine` - "original Forge Bush/Plains/Desert soil rule:
+  cinderpearl=true; soil=Block{minecraft:dirt}"
+
+The same six failures with the same 318 cases are in the last full report of the leader
+(`Thaumcraft-1.21.1/fabric/build/gametest-results.xml`, 2026-10-22), so they predate
+this wave. **None of the changes of this agent touches the gameplay** - the only
+production change is the publication of the declared defaults of the configuration
+options, which keeps the values of the options unchanged - so no GameTest can be
+affected by it, and none of the six failures is in a lane of this agent.
+
+(The first two attempts of the run were killed by the OOM killer of the machine - exit
+137 - while the other agents ran their own game servers in parallel; the third attempt
+completed.)
 
 ## Observations that are **not** part of the eight failures
 

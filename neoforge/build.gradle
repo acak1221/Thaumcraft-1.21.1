@@ -37,6 +37,9 @@ sourceSets {
 loom.runs {
  gameTest {
   server()
+  // A fixed heap, for the same reason as the Fabric run: the suite generates
+  // real chunks and must not depend on the size of the machine.
+  vmArg '-Xmx2G'
   source sourceSets.gameTest
   // Common main is supplied by Architectury's transformed dependency JAR.
   // Registering its raw output here would duplicate that generated JPMS module.

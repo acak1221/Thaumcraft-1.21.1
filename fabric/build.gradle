@@ -238,6 +238,12 @@ def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
 loom.runs {
  gameTest {
   server()
+  // The GameTest server generates real chunks for the world generation and
+  // structure scenarios. Without an explicit heap the JVM takes a quarter of
+  // the machine's RAM, which is about 1.75 GB on the 7 GB CI runner and made
+  // the suite die with OutOfMemoryError while saving a chunk. The suite needs
+  // a fixed heap, not one that depends on the size of the machine.
+  vmArg '-Xmx2G'
   source sourceSets.gameTest
   name 'Thaumcraft 1.21.1 GameTests'
   vmArg "-Dfabric.classPathGroups=${gameTestModRoots.asPath}"

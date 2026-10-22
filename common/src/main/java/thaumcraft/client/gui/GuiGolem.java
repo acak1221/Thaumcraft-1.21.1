@@ -78,6 +78,16 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
             // Original190–202: checked means precise (any-amount is false).
             if (!menu.isFillAnyAmount()) graphics.blit(BACKGROUND, leftPos + 62, topPos + 54, 8, 176, 8, 8, 256, 256);
         }
+        if (menu.canSwitchUseOptions()) {
+            // Original GuiGolem:206-227 — the three switches of the Use core at the
+            // original positions (42, 40), (42, 50) and (42, 60). The box is lit
+            // when the toggle is off, exactly like the Fill mode of the original.
+            boolean[] switches = {menu.useEmptySpace(), menu.useLeftClick(), menu.useSneaking()};
+            for (int i = 0; i < switches.length; i++) {
+                graphics.blit(BACKGROUND, leftPos + 42, topPos + 40 + 10 * i, 8, 168, 8, 8, 256, 256);
+                if (!switches[i]) graphics.blit(BACKGROUND, leftPos + 42, topPos + 40 + 10 * i, 8, 176, 8, 8, 256, 256);
+            }
+        }
         if (menu.pageCount() > 1) {
             // Original GuiGolem:154-165: the page arrows are texture arrows, the dimmed one is the disabled end.
             boolean first = menu.page() == 0, last = menu.page() >= menu.pageCount() - 1;
@@ -204,15 +214,20 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
                         Component.translatable("tooltip.thaumcraft.golem.water_cargo", golem.getWaterAmountMb()), 0, 54, 0xffdddddd, false);
             } finally { graphics.pose().popPose(); }
         }
-        if (core == 8) {
-            // The first native unit supports DEFAULT only. These ordinary modes
-            // are pending, not upgrade-gated; no working-looking fake toggle.
-            graphics.pose().pushPose();
-            try {
-                graphics.pose().translate(42, 44, 0);
-                graphics.pose().scale(.5F, .5F, 1);
-                graphics.drawWordWrap(font, Component.translatable("tc.port.golem.use_default"), 0, 0, 106, 0xffdddddd);
-            } finally { graphics.pose().popPose(); }
+        if (menu.canSwitchUseOptions()) {
+            // Original GuiGolem:228-235 — the three captions at (53, 42), (53, 62)
+            // and (53, 82), half sized, each naming the mode the golem is in now.
+            String[] keys = {menu.useEmptySpace() ? "tc.port.golem.use.empty" : "tc.port.golem.use.block",
+                    menu.useLeftClick() ? "tc.port.golem.use.left" : "tc.port.golem.use.right",
+                    menu.useSneaking() ? "tc.port.golem.use.sneak" : "tc.port.golem.use.not_sneak"};
+            for (int i = 0; i < keys.length; i++) {
+                graphics.pose().pushPose();
+                try {
+                    graphics.pose().translate(53, 42 + 20 * i, 0);
+                    graphics.pose().scale(.5F, .5F, 1);
+                    graphics.drawString(font, Component.translatable(keys[i]), 0, 0, 0xfffdfdfd, false);
+                } finally { graphics.pose().popPose(); }
+            }
         }
     }
 
@@ -230,6 +245,16 @@ public final class GuiGolem extends AbstractContainerScreen<ContainerGolem> {
     }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && menu.canSwitchUseOptions() && minecraft != null && minecraft.gameMode != null) {
+            // The three switches of the Use core are server state (the original's
+            // ContainerGolem:92-94); wait for the synced menu data.
+            for (int i = 0; i < 3; i++) {
+                if (isHovering(42, 40 + 10 * i, 8, 8, mouseX, mouseY)) {
+                    minecraft.gameMode.handleInventoryButtonClick(menu.containerId, ContainerGolem.USE_OPTION_BUTTON + i);
+                    return true;
+                }
+            }
+        }
         if (button == 0 && menu.canSwitchGuardTargets() && minecraft != null && minecraft.gameMode != null) {
             // The switch is server state; wait for the synced menu data, never flip it locally.
             for (int i = 0; i < GolemGuardTargets.BUTTON_COUNT; i++) {

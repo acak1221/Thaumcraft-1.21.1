@@ -14,8 +14,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.IEssentiaTransport;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
+import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileAlembic;
@@ -126,17 +128,54 @@ final class AlchemyGolemGoals {
     }
     static int space(BlockEntity tile) {
         return tile instanceof TileJar jar ? jar.getMaxAmount() - jar.getAmount()
-                : tile instanceof TileEssentiaReservoir reservoir ? reservoir.getSpace() : 0;
+                : tile instanceof TileEssentiaReservoir reservoir ? reservoir.getSpace()
+                // The original hands the whole cargo to a generic transport and keeps
+                // what it took (AIEssentiaEmpty:110); the transport decides the amount.
+                : tile instanceof IEssentiaTransport ? GolemAspectCargo.MAX_AMOUNT : 0;
+    }
+    /**
+     * The marked side the original's payment would use.
+     *
+     * <p>Oracle {@code AIEssentiaEmpty:104-112}: the payment walks the marked
+     * sides of the destination and uses the first one the transport accepts
+     * ({@code canInputFrom}, a suction above zero and a suction type that is the
+     * golem's aspect or none).</p>
+     */
+    private Direction deliveryFace(BlockEntity tile, IEssentiaTransport transport, Aspect aspect) {
+        if (tile == null || transport == null || aspect == null) return null;
+        for (GolemMarker marker : golem.getMarkers()) {
+            if (!marker.pos().equals(tile.getBlockPos())) continue;
+            Direction face = marker.face();
+            if (!transport.canInputFrom(face) || transport.getSuctionAmount(face) <= 0) continue;
+            Aspect suction = transport.getSuctionType(face);
+            if (suction != null && suction != aspect) continue;
+            return face;
+        }
+        return null;
+    }
+    /** The original's third kind of destination: any other marked essentia transport. */
+    private int transportStage(BlockEntity tile, IEssentiaTransport transport, Aspect aspect) {
+        if (!canonical(aspect) || !(golem.level() instanceof ServerLevel server) || !current(server, tile)) return -1;
+        if (homeDistance(tile.getBlockPos()) > golem.getRange() * golem.getRange()) return -1;
+        // The original's "others" are always candidates, like the reservoir.
+        return deliveryFace(tile, transport, aspect) == null ? -1 : 0;
     }
     private int destinationStage(BlockEntity tile, Aspect aspect) {
         if (tile instanceof TileJar jar) return jarStage(jar, aspect);
-        if (!(golem.level() instanceof ServerLevel server) || !(tile instanceof TileEssentiaReservoir reservoir)
-                || !canonical(aspect) || !current(server, tile) || reservoir.isQuarantined()
-                || homeDistance(tile.getBlockPos()) > golem.getRange() * golem.getRange()
-                || !reservoir.canInputFrom(reservoir.getFacing()) || reservoir.getSuctionAmount(reservoir.getFacing()) <= 0
-                || reservoir.getSuctionType(reservoir.getFacing()) != null && reservoir.getSuctionType(reservoir.getFacing()) != aspect
-                || reservoir.getSpace() <= 0) return -1;
-        return 0; // Original GolemHelper: reservoirs share the first tier with nonempty labelled jars.
+        if (tile instanceof TileEssentiaReservoir reservoir) {
+            if (!(golem.level() instanceof ServerLevel server) || !canonical(aspect) || !current(server, tile) || reservoir.isQuarantined()
+                    || homeDistance(tile.getBlockPos()) > golem.getRange() * golem.getRange()
+                    || !reservoir.canInputFrom(reservoir.getFacing()) || reservoir.getSuctionAmount(reservoir.getFacing()) <= 0
+                    || reservoir.getSuctionType(reservoir.getFacing()) != null && reservoir.getSuctionType(reservoir.getFacing()) != aspect
+                    || reservoir.getSpace() <= 0) return -1;
+            return 0; // Original GolemHelper: reservoirs share the first tier with nonempty labelled jars.
+        }
+        if (tile instanceof IEssentiaTransport transport) return transportStage(tile, transport, aspect);
+        return -1;
+    }
+    /** The marked side of a generic transport destination, or null for the jar and the reservoir. */
+    Direction deliveryFaceFor(BlockEntity tile, Aspect aspect) {
+        return tile instanceof IEssentiaTransport transport ? deliveryFace(tile, transport, aspect) : null;
     }
     boolean currentDestination(BlockEntity jar, Aspect aspect, int units) {
         if (!golem.alchemyReady() || units <= 0 || destinationStage(jar, aspect) < 0 || units > space(jar)) return false;
@@ -158,7 +197,8 @@ final class AlchemyGolemGoals {
                 continue;
             }
             BlockEntity tile = server.getBlockEntity(marker.pos());
-            if (tile instanceof TileJar jar && jar.getClass() == TileJar.class || tile instanceof TileEssentiaReservoir) allowed.add(tile);
+            if (tile instanceof TileJar jar && jar.getClass() == TileJar.class || tile instanceof TileEssentiaReservoir
+                    || tile instanceof IEssentiaTransport) allowed.add(tile);
         }
         if (golem.level() != server || !golem.alchemyReady() || golem.getEssentiaAspect() != aspect) return null;
         BlockEntity best = null;
@@ -254,7 +294,8 @@ final class AlchemyGolemGoals {
                 if (fresh == null || !emptying || !golem.getNavigation().isDone() || !near(fresh)) return;
                 delivering = fresh;
                 attemptedAspect = golem.getEssentiaAspect();
-                golem.deliverAlchemyEssentia(fresh, attemptedAspect, golem.getEssentiaAmount());
+                Direction face = deliveryFaceFor(fresh, attemptedAspect);
+                golem.deliverAlchemyEssentia(fresh, face, attemptedAspect, golem.getEssentiaAmount());
             } catch (RuntimeException failure) {
                 Thaumcraft.LOG.warn("Golem Alchemy deposit failed; retaining exact actual remainder", failure);
             } finally { delivering = target = null; attemptedAspect = null; gotoReady = false; }

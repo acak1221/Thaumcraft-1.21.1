@@ -20,7 +20,8 @@ class GolemUseOptionsTest {
             var nbt = GolemUseOptions.CODEC.encodeStart(NbtOps.INSTANCE, options).getOrThrow();
             assertEquals(options, GolemUseOptions.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
             assertEquals(options, GolemUseOptions.CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow());
-            assertEquals(bits == 0, options.supportsDefaultBaseline());
+            assertEquals(bits == 0, options.isDefault());
+            assertTrue(options.isSupported(), "every combination of the three switches is an ordinary Use mode");
         }
     }
 

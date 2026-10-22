@@ -42,6 +42,7 @@ public final class TileAlchemyFurnaceAdvanced extends TileAlchemyFurnaceAdvanced
         PowerDraw(Aspect aspect,int before) { this.aspect=aspect; this.before=before; }
     }
     public TileAlchemyFurnaceAdvanced(BlockPos pos, BlockState state) { super(ThaumcraftAdvancedFurnace.TILE.get(),pos,state); }
+    TileAlchemyFurnaceAdvanced(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type,pos,state); }
     public AspectList getAspects() { var copy=new AspectList(); stock.forEach(copy::add); return copy; }
     public int getVis() { return level!=null && level.isClientSide?clientVis:total(stock); }
     public int getMaxVis() { return AdvancedFurnaceRules.MAX_VIS; }
@@ -182,11 +183,17 @@ public final class TileAlchemyFurnaceAdvanced extends TileAlchemyFurnaceAdvanced
         if(level!=null && level.isClientSide) { clientVis=tag.getShort("vis"); heat=tag.getShort("heat"); return; }
         super.loadAdditional(tag,registries);
         rejected=null; stock=Map.of(); heat=power1=power2=count=processed=0; destroy=false; draw=null;
-        if(tag.contains("RejectedAdvancedFurnace")) { rejected=tag.getCompound("RejectedAdvancedFurnace").copy(); return; }
+        if(tag.contains("RejectedAdvancedFurnace")) {
+            rejected=tag.get("RejectedAdvancedFurnace") instanceof CompoundTag payload ? payload.copy() : tag.copy();
+            com.mojang.logging.LogUtils.getLogger().warn("Retaining rejected advanced furnace at {}: unread saved envelope", worldPosition);
+            return;
+        }
         try {
             for(String key:new String[]{"vis","heat","power1","power2"}) if(tag.contains(key) && !tag.contains(key,Tag.TAG_SHORT)) throw new IllegalArgumentException(key);
             var values=new LinkedHashMap<Aspect,Integer>(); long total=0;
             if(tag.contains("Aspects") && !tag.contains("Aspects",Tag.TAG_LIST)) throw new IllegalArgumentException("Aspects");
+            if(tag.get("Aspects") instanceof net.minecraft.nbt.ListTag raw && !raw.isEmpty() && raw.getElementType()!=Tag.TAG_COMPOUND)
+                throw new IllegalArgumentException("Aspects must contain compounds");
             for(Tag value:tag.getList("Aspects",Tag.TAG_COMPOUND)) {
                 var row=(CompoundTag)value; Aspect aspect=Aspect.getAspect(row.getString("key")); int units=row.getInt("amount");
                 if(!EssentiaAtomicEndpoint.validAspect(aspect) || !row.contains("amount",Tag.TAG_INT) || units<0 || values.put(aspect,units)!=null) throw new IllegalArgumentException("stock"); total+=units;
@@ -195,7 +202,10 @@ public final class TileAlchemyFurnaceAdvanced extends TileAlchemyFurnaceAdvanced
             heat=tag.getShort("heat"); power1=tag.getShort("power1"); power2=tag.getShort("power2");
             if(power1<0 || power1>550 || power2<0 || power2>550) throw new IllegalArgumentException("power");
             stock=Collections.unmodifiableMap(values);
-        } catch(RuntimeException malformed) { rejected=tag.copy(); stock=Map.of(); heat=power1=power2=0; }
+        } catch(RuntimeException malformed) {
+            rejected=tag.copy(); stock=Map.of(); heat=power1=power2=0;
+            com.mojang.logging.LogUtils.getLogger().warn("Retaining malformed advanced furnace at {}: {}", worldPosition, malformed.toString());
+        }
     }
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag=new CompoundTag(); tag.putShort("vis",(short)getVis()); tag.putShort("heat",(short)heat); return tag;

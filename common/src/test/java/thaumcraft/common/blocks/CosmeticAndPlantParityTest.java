@@ -120,12 +120,21 @@ class CosmeticAndPlantParityTest {
         assertFalse(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.PLAINS, sand),
                 "the sand carries the Desert plant type only");
         assertFalse(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.PLAINS, stone));
-        // The Desert type: the sand of the cinderpearl.
+        // The Desert type: the inherited BlockBush soil PLUS the sand of the cinderpearl.
+        // Forge 1.7.10 Block.canSustainPlant asks the inherited BlockBush soil first and
+        // for every plant type, and only then the switch of the plant type.
         assertTrue(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.DESERT, sand));
-        assertFalse(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.DESERT, grass));
+        assertTrue(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.DESERT, grass),
+                "the inherited BlockBush soil is asked before the plant type, so the cinderpearl also stands on it");
+        assertTrue(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.DESERT, dirt));
+        assertTrue(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.DESERT, farmland));
+        assertFalse(BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.DESERT, stone),
+                "the stone carries no plant of the original");
         // The convenience rule of the port that the production code calls.
         assertTrue(BlockCustomPlant.soilSupports(false, grass));
         assertFalse(BlockCustomPlant.soilSupports(false, sand));
         assertTrue(BlockCustomPlant.soilSupports(true, sand));
+        assertTrue(BlockCustomPlant.soilSupports(true, grass),
+                "the Desert plant type of the original keeps the inherited BlockBush soil");
     }
 }

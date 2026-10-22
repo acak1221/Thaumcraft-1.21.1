@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.Block;
  * RegistrySupplier<...>>} fields. Both shapes are read here, so a new registration is covered
  * without touching this file.</p>
  */
-final class RegistryInventory {
+public final class RegistryInventory {
     /** The package that holds every registration class of the port. */
     private static final String CONFIG_PACKAGE = "thaumcraft.common.config";
 
@@ -37,13 +37,13 @@ final class RegistryInventory {
     private RegistryInventory() { }
 
     /** Every registered item id, sorted. */
-    static List<String> itemIds() { return ids(Item.class); }
+    public static List<String> itemIds() { return ids(Item.class); }
 
     /** Every registered block id, sorted. */
-    static List<String> blockIds() { return ids(Block.class); }
+    public static List<String> blockIds() { return ids(Block.class); }
 
     /** Every registered entity type id, sorted. */
-    static List<String> entityIds() { return ids(EntityType.class); }
+    public static List<String> entityIds() { return ids(EntityType.class); }
 
     private static List<String> ids(Class<?> wanted) {
         TreeSet<String> found = new TreeSet<>();

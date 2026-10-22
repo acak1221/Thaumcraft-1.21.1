@@ -1,6 +1,5 @@
 package thaumcraft.client;
 
-import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
@@ -8,9 +7,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import thaumcraft.client.fx.particles.MonsterSpriteParticle;
 import thaumcraft.client.fx.particles.ShockSparkParticle;
-import thaumcraft.client.renderers.entity.RenderFocusOrb;
 import thaumcraft.common.blocks.BlockShockTrap;
-import thaumcraft.common.config.ThaumcraftShockOrbs;
 import thaumcraft.common.entities.projectile.EntityShockOrb;
 
 public final class ThaumcraftShockOrbsClient {
@@ -18,7 +15,6 @@ public final class ThaumcraftShockOrbsClient {
     private ThaumcraftShockOrbsClient() {}
     public static void init() {
         if(initialized)return;initialized=true;
-        EntityRendererRegistry.register(ThaumcraftShockOrbs.SHOCK_ORB,ctx->new RenderFocusOrb<EntityShockOrb>(ctx,false));
         EntityShockOrb.setClientImpact(orb->{if(orb.level() instanceof ClientLevel level)MonsterSpriteParticle.burst(level,orb.getX(),orb.getY(),orb.getZ(),3);});
         BlockShockTrap.setClientEffect((world,pos)-> {
             if(!(world instanceof ClientLevel level))return;

@@ -20,7 +20,7 @@ import net.minecraft.world.entity.Entity;
  * The native RenderFocusOrb already draws the same billboard for the shock orb; this
  * renderer keeps the original entity tilt that the native helper drops.
  */
-public final class RenderElectricOrb<T extends Entity> extends EntityRenderer<T> {
+public class RenderElectricOrb<T extends Entity> extends EntityRenderer<T> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/particles.png");
     private static final RenderType ADDITIVE = new OrbType();
 

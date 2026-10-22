@@ -20,6 +20,7 @@ logs
 .gradle-arb/
 # private Gradle home of the golemfix lane (its own Loom cache).
 .gradle-gfix/
+.gradle-fix3/
 build/
 out/
 run/

@@ -26,7 +26,10 @@ public final class ThaumcraftPlants {
     private static RegistrySupplier<BlockCustomPlant> plant(String id, boolean cinderpearl) {
         var block = BLOCKS.register(id, () -> new BlockCustomPlant(cinderpearl, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
                 .noCollission().noOcclusion().instabreak().sound(SoundType.GRASS).randomTicks().replaceable().lightLevel(state -> 8)));
-        ITEMS.register(id, () -> new BlockCustomPlant.PlantItem(block.get(), new Item.Properties()));
+        // Oracle BlockCustomPlantItem:85-101 - the item of the metadata three (the cinderpearl)
+        // asks the soil for a Desert plant, every other plant of the port asks for a Plains one.
+        ITEMS.register(id, () -> new BlockCustomPlant.PlantItem(block.get(), new Item.Properties(),
+                cinderpearl ? BlockCustomPlant.PlantType.DESERT : BlockCustomPlant.PlantType.PLAINS));
         return block;
     }
     public static void register() {

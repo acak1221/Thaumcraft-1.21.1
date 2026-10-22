@@ -13,7 +13,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -29,10 +28,17 @@ public final class BlockVishroom extends BushBlock {
     @Override protected MapCodec<BlockVishroom> codec() { return CODEC; }
     @Override protected VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context) { return SHAPE; }
     @Override protected boolean mayPlaceOn(BlockState soil,BlockGetter level,BlockPos pos) {
-        return soil.is(Blocks.GRASS_BLOCK)||soil.is(Blocks.DIRT)||soil.is(Blocks.COARSE_DIRT)||soil.is(Blocks.PODZOL)||soil.is(Blocks.FARMLAND);
+        // Oracle BlockCustomPlantItem:85-101 - the item of the manashroom (the metadata five)
+        // asks the soil for a Cave plant, and the Cave case of the Forge 1.7.10 table of
+        // Block.canSustainPlant is isSideSolid(world, x, y, z, UP).
+        return BlockCustomPlant.soilSupports(BlockCustomPlant.PlantType.CAVE,soil,level,pos);
     }
+    /**
+     * Oracle BlockCustomPlant:130-132 - the original plant answers {@code canPlaceBlockAt} with
+     * a plain {@code true}, so it stands on every soil and it never dies.
+     */
     @Override protected boolean canSurvive(BlockState state,LevelReader level,BlockPos pos) {
-        return mayPlaceOn(level.getBlockState(pos.below()),level,pos.below());
+        return true;
     }
     @Override protected void randomTick(BlockState state,ServerLevel level,BlockPos pos,RandomSource random) {
         if(!state.canSurvive(level,pos))level.destroyBlock(pos,true);

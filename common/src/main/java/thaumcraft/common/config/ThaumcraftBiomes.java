@@ -36,7 +36,9 @@ public final class ThaumcraftBiomes {
     private static final DeferredRegister<Feature<?>> FEATURES=DeferredRegister.create(Thaumcraft.MODID,Registries.FEATURE);
     public static final RegistrySupplier<BlockVishroom> VISHROOM=BLOCKS.register("vishroom",()->new BlockVishroom(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
         .noCollission().noOcclusion().instabreak().sound(SoundType.GRASS).randomTicks().replaceable().lightLevel(state->8)));
-    public static final RegistrySupplier<Item> VISHROOM_ITEM=ITEMS.register("vishroom",()->new BlockCustomPlant.PlantItem(VISHROOM.get(),new Item.Properties()));
+    // Oracle BlockCustomPlantItem:85-101 - the item of the metadata five (the manashroom) asks
+    // the soil for a Cave plant.
+    public static final RegistrySupplier<Item> VISHROOM_ITEM=ITEMS.register("vishroom",()->new BlockCustomPlant.PlantItem(VISHROOM.get(),new Item.Properties(),BlockCustomPlant.PlantType.CAVE));
     public static final RegistrySupplier<ThaumcraftBiomeDecorationFeature> DECORATION=FEATURES.register("tc4_biome_decoration",ThaumcraftBiomeDecorationFeature::new);
     public static final ResourceKey<PlacedFeature> DECORATION_KEY=ResourceKey.create(Registries.PLACED_FEATURE,id("tc4_biome_decoration"));
     private ThaumcraftBiomes() {}

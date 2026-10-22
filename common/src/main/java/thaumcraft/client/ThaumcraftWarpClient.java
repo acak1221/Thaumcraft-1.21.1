@@ -19,18 +19,18 @@ import thaumcraft.common.lib.network.WarpEventNetworking;
 
 /** Original heartbeat/vignette100, mist2400/200, and the four effect post chains; no server-only class reaches client rendering.
  *
- * <p>Original shader driver: the 1.7 TC4 built its four full screen effects with OptiFine's
+ * <p>Original shader driver: the 1.7 TC4 built its four full screen effects with vanilla's
  * {@code ShaderGroup} (oracle {@code thaumcraft/client/lib/ClientTickEventsFML.java:118,168-231},
  * rendered by {@code thaumcraft/client/lib/RenderEventHandler.java:161-197}). The groups read
  * {@code assets/minecraft/shaders/post/{desaturatetc,blurtc,hunger,sunscorned}.json} and their
- * programs from {@code assets/minecraft/shaders/program/}. Minecraft 1.21.1 has no OptiFine or
- * Iris driver, so the native driver is the vanilla {@code PostChain}, and the shader inventory of
+ * programs from {@code assets/minecraft/shaders/program/}. The native successor to that
+ * driver is vanilla {@code PostChain}, and the shader inventory of
  * this port is:
  * <ul>
  * <li>{@code assets/thaumcraft/shaders/core/} - native 1.21.1 core shaders, registered by the
  * loader client bootstrap ({@code monster_lit_particle}, {@code node_stabilizer_bubble}).</li>
  * <li>{@code assets/thaumcraft/shaders/post/} - the four vanilla post chains of this class, the
- * native equivalent of the original's four OptiFine groups.</li>
+ * native equivalent of the original's four vanilla groups.</li>
  * <li>{@code assets/minecraft/shaders/program/} - the three original TC4 post programs
  * ({@code thaumcraft_color_convolve2}, {@code thaumcraft_bloom_color}, {@code thaumcraft_bloom2}
  * and their shared vertex program {@code thaumcraft_bloom_vertex_base}), ported to the GLSL 150
@@ -43,15 +43,14 @@ import thaumcraft.common.lib.network.WarpEventNetworking;
  * extension. A pass named {@code minecraft:box_blur} or {@code thaumcraft:bloom2} would be looked
  * up as {@code minecraft:shaders/program/minecraft:box_blur.json} and could never be found; the
  * chains therefore name the vanilla programs ({@code color_convolve}, {@code blit},
- * {@code box_blur}) and the three ported TC4 programs by their plain names. The two chains that
+ * {@code thaumcraft_blur}) and the three ported TC4 programs by their plain names. The two chains that
  * need no TC4 program are the original {@code desaturatetc} and {@code blurtc} ones: the original
  * {@code hunger} chain used TC4's own {@code color_convolve2} and the original
  * {@code sunscorned} chain used TC4's own {@code bloomColor} and {@code bloom2}.
  *
- * <p>The one deviation inside a chain: the original {@code blurtc} chain named OptiFine's
- * {@code blur} program, which 1.21.1 does not have. The nearest vanilla program is
- * {@code box_blur}; the original Radius of {@code 10.0} and the original two axis pass order
- * ({@code BlurDir} {@code 1,0} and then {@code 0,1}) are kept unchanged.
+ * <p>The original {@code blurtc} chain uses Mojang's 1.7.10 {@code blur} program. Its
+ * asymmetric squared weights are NOT the modern {@code box_blur}; {@code thaumcraft_blur}
+ * retains the original program with GLSL150 syntax, Radius10 and horizontal/vertical pass order.
  *
  * <p>The original switch {@code Config.shaders} (oracle
  * {@code thaumcraft/common/config/Config.java:410-412}) gates the whole chain and is read from
@@ -59,7 +58,7 @@ import thaumcraft.common.lib.network.WarpEventNetworking;
 public final class ThaumcraftWarpClient {
     private static final ResourceLocation VIGNETTE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/misc/vignette.png");
     private static final Map<String, PostChain> CHAINS = new LinkedHashMap<>();
-    private static final java.util.Set<String> FAILED = new java.util.HashSet<>();
+    private static final Map<String, Integer> FAILED = new LinkedHashMap<>();
     private static int vignette, fogDuration, width, height;
     private static float fogDensity, vignetteBrightness;
     private static Object lastLevel;
@@ -143,7 +142,7 @@ public final class ThaumcraftWarpClient {
         if (client.player.hasEffect(ThaumcraftWarp.effect(ThaumcraftWarp.SUN_SCORNED))) active.add("warp_sun_scorned");
         for (String old : new ArrayList<>(CHAINS.keySet())) if (!active.contains(old)) CHAINS.remove(old).close();
         for (String name : active) {
-            if (FAILED.contains(name)) continue;
+            if (java.util.Objects.equals(FAILED.get(name), client.player.tickCount)) continue;
             PostChain chain = CHAINS.get(name);
             try {
                 if (chain == null) {
@@ -152,11 +151,11 @@ public final class ThaumcraftWarpClient {
                     chain.resize(width, height); CHAINS.put(name, chain);
                 } else if (resized) chain.resize(width, height);
                 chain.process(partialTick);
+                FAILED.remove(name);
             } catch (Exception failure) {
-                // A chain whose post program cannot be resolved is dropped once, exactly as the
-                // original dropped a missing OptiFine shader group (oracle
-                // ClientTickEventsFML.java:170-171 catches the JsonException of a missing group).
-                if (chain != null) chain.close(); CHAINS.remove(name); FAILED.add(name);
+                // Original checkShaders:168-209 retries missing groups on the next player tick.
+                // Do not turn a transient/resource-pack failure into a permanent session latch.
+                if (chain != null) chain.close(); CHAINS.remove(name); FAILED.put(name, client.player.tickCount);
                 Thaumcraft.LOG.error("Unable to render warp post chain {}", name, failure);
             }
         }

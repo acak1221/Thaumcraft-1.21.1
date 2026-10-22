@@ -4,7 +4,7 @@
   ],
   "passes": [
     {
-      "name": "box_blur",
+      "name": "thaumcraft_blur",
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "uniforms": [
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "name": "box_blur",
+      "name": "thaumcraft_blur",
       "intarget": "swap",
       "outtarget": "minecraft:main",
       "uniforms": [

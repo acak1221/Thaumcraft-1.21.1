@@ -105,4 +105,31 @@ class Wave7FxParityTest {
         // No RenderWatcher registration in oracle ClientProxy:464-517.
         assertFalse(RenderWatcher.drawsWatcher());
     }
+
+    @Test void blurredVisionUsesTheOriginalWeightedProgramNotModernBoxBlur() throws IOException {
+        // Oracle ClientTickEventsFML:118,181-183 -> original blurtc.json, official 1.7.10 blur.fsh.
+        String base = "/assets/minecraft/shaders/program/";
+        try (var program = getClass().getResourceAsStream(base + "thaumcraft_blur.fsh");
+             var chain = getClass().getResourceAsStream("/assets/thaumcraft/shaders/post/warp_blurred.json")) {
+            assertNotNull(program);
+            assertNotNull(chain);
+            String source = new String(program.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            assertTrue(source.contains("abs(1.0 - r / Radius)"));
+            assertTrue(source.contains("strength = strength * strength"));
+            assertTrue(source.contains("r <= Radius; r += 1.0"));
+            assertTrue(source.contains("texture(DiffuseSampler, texCoord).a"));
+            var passes = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(chain,
+                    java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject().getAsJsonArray("passes");
+            assertEquals(2, passes.size());
+            for (int i = 0; i < 2; i++) {
+                var pass = passes.get(i).getAsJsonObject();
+                assertEquals("thaumcraft_blur", pass.get("name").getAsString());
+                var uniforms = pass.getAsJsonArray("uniforms");
+                var direction = uniforms.get(0).getAsJsonObject().getAsJsonArray("values");
+                assertEquals(i == 0 ? 1 : 0, direction.get(0).getAsInt());
+                assertEquals(i == 0 ? 0 : 1, direction.get(1).getAsInt());
+                assertEquals(10F, uniforms.get(1).getAsJsonObject().getAsJsonArray("values").get(0).getAsFloat());
+            }
+        }
+    }
 }

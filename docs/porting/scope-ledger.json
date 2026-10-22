@@ -122,9 +122,9 @@
           "native common/src/main/java/thaumcraft/api/BlockCoordinates.java the published type is back with the original comparison, the original hash and the original NBT keys"
         ],
         "notes": [
-          "Every live consumer of the original class is an Architect-area consumer, and all of them were re-architected onto net.minecraft.core.BlockPos plus the bounded WandArchitect.Area record, so the original mutable triple has no consumer left.",
-          "The readNBT/writeNBT helpers of the class were never called in the 4.2.3.5 tree, so dropping the class loses no behaviour.",
-          "Partial, not verified: the published add-on type is gone, so an add-on written against thaumcraft.api.BlockCoordinates does not compile against the native. This is the same public-API regression that the thaumcraft.api.IArchitect row records.",
+          "Historical removal claims withdrawn: common/src/main/java/thaumcraft/api/IArchitect.java:51 publishes BlockCoordinates lists and common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java:86 consumes them.",
+          "The old claim that the whole class could be dropped confused unused NBT helpers with the published architect value type; the type is retained natively.",
+          "Historical missing-type gap superseded: common/src/main/java/thaumcraft/api/BlockCoordinates.java is present again, as recorded by the later closure note.",
           "CLOSED in this wave: the published type of the original exists again, so an add-on that keeps its own architect preview compiles against the native API.",
           "Forced 1.21.1 change: TileEntity became BlockEntity and NBTTagCompound became CompoundTag; the coordinates, the comparison, the hash and the NBT keys are the original ones.",
           "The native gameplay of the architect works on BlockPos and on the bounded WandArchitect.Area, so this class carries no native state: it is the published type of the original, nothing more."
@@ -190,7 +190,7 @@
         "notes": [
           "The gameplay of the Architect focus is at parity: the bounded area, the number of the selectable axes and the connected traversal live in WandArchitect and are driven by the native block states.",
           "CLOSED 2026-10-23 (w3rest): the published interface carries the two original members and the original EnumAxis again (oracle IArchitect:17-28, getArchitectBlocks, showAxis and its own EnumAxis of the three axes), the published BlockCoordinates is the type of the block list, and the two native foci implement the original rules of the axis and of the area (WandArchitect:98-149, the axis rules of oracle ItemFocusTrade:301-319 and of oracle ItemFocusWarding:288-309, and the face of the original direction ordinal). An add-on that implements the original contract compiles against the native interface again.",
-          "REMAINING GAP: the native architect is a server-authoritative re-implementation, so the native path does not consult an add-on override of the original contract. An add-on that implements the original IArchitect therefore still cannot drive the native architect; an add-on that only reads the area still works."
+          "The old blanket claim that native code never consults an add-on override was false: common/src/main/java/thaumcraft/client/ThaumcraftArchitectClient.java:86 invokes IArchitect.getArchitectBlocks for the preview. Server-authoritative casting is separate; this observation alone does not certify arbitrary add-on cast behavior."
         ],
         "reviewed_sha256": {
           "original": "97ed9a213b2c52c8f20ad5bfdc1690c37fe8936dc3c5d400059fd86cb35c67b3",
@@ -4459,7 +4459,7 @@
           "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 the native bootstrap that registers the entity renderers, block entity renderers, screens, render types and item colours",
           "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87 renderHud, common/src/main/java/thaumcraft/client/fx/particles/ResourceParticle.java:79 the particle-count gate",
           "native common/src/main/java/thaumcraft/client/ClientSetup.java:45-201 replaces the single FML proxy with the native bootstrap and the purpose specific Thaumcraft*Client classes",
-          "the two facade effects that the earlier audit named as missing are in the native tree: the smoke spiral (ClientSetup.java:86/93), the arc lightning (ThaumcraftEldritchClient.java:51), the beam of the excavation focus (ThaumcraftExcavationClient.java:35), the beam of the arcane bore (TileArcaneBoreRenderer.java:31) and the beam of the relay (TileVisRelayRenderer.java:39)",
+          "the earlier missing-facade claims are superseded: native common/src/main/java/thaumcraft/client/ClientSetup.java:98,105 calls the smoke spirals, common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:25 installs the golem arc hook, and common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:42 draws the relay beam",
           "the three facade effects that the earlier audit named as missing are dead in the original: the generic beam (oracle thaumcraft/client/ClientProxy.java:696-698 has no caller), the soul trail (ClientProxy.java:773, no caller) and the fire scorch (thaumcraft/client/lib/UtilsFX.java:110, no caller)",
           "oracle thaumcraft/client/ClientProxy.java:464-517 setupEntityRenderers registers a renderer for every entity the original adds; the native mirror is common/src/main/java/thaumcraft/client/renderers/entity/ThaumcraftEntityRenderers.java with the 56 entity types of the port and the 56 (entity type, renderer) bindings, registered by ClientSetup.init()",
           "the seven entity types the client smoke found without a renderer (bottle_taint, golem_orb, primal_arrow, taint_crawler, taint_seed, taint_seed_prime, taintacle_giant) now have one: the native table binds them to the vanilla ThrownItemRenderer, to RenderGolemOrb, to RenderPrimalArrowEntity, to RenderTaintCrawler, to RenderTaintSeed and to RenderTaintacle(1.0F,14) (oracle ClientProxy.java:476,488,494,513 and the 1.12.2 backport ProxyEntities.java:199-201)",
@@ -4513,7 +4513,7 @@
         ],
         "notes": [
           "Not ported: 1.21.1/Architectury has no FML mod-gui factory entry point, so the class has no counterpart.",
-          "The configuration it exposed is still readable/editable through the native properties file (ThaumcraftSettings), but there is no in-game configuration screen.",
+          "Historical no-screen claim superseded: common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java:36 opens ThaumcraftConfigScreen.",
           "Complete callsite audit: ThaumcraftGuiFactory is referenced only from Thaumcraft.java.",
           "1.21.1 has no FML mod gui factory, so the entry point has no counterpart, but the configuration screen it opened does exist in the port."
         ],
@@ -4778,16 +4778,16 @@
           "oracle thaumcraft/client/ClientProxy.java:1152-1159 arcLightning() creates the FXArc and adds it to the effect list",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302 calls Thaumcraft.proxy.arcLightning(...) during the arcing phase",
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:64 calls Thaumcraft.proxy.arcLightning(...)",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:231-234 stores arcX/arcY/arcZ but no native code ever reads them",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:25 installs the golem arc hook; the old no-reader claim was superseded by the client FX port",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:40-42 keeps the half width 0.25 and the alpha 0.8 of the original FXArc:87/95",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:63 keeps the arc points of the original FXArc:41-61 (gravity 0.115, noise 0.25, at most fifty steps)",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:106 keeps the original UV quirk of FXArc:113 (the index of the point over the length of the arc)",
-          "native common/src/main/java/thaumcraft/client/fx/BlockFxClientEffects.java:62 and common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:51 call the arc, the two callers of the original (oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:302 and thaumcraft/common/lib/network/fx/PacketFXBlockArc.java:64)"
+          "native common/src/main/java/thaumcraft/client/fx/BlockFxClientEffects.java:63 calls FXArc.arc and common/src/main/java/thaumcraft/client/ThaumcraftEldritchClient.java:25 installs the golem arc hook; these serve the original block-arc and golem effects"
         ],
         "notes": [
-          "Deliberately not ported: there is no native equivalent of the 1.7 FXArc ribbon.",
-          "The only native arc (InfusionArcParticle) serves a different original call site (nodeBolt type 0), not arcLightning.",
-          "Consequence: the eldritch golem's arcing lightning and PacketFXBlockArc show no arc in 1.21.1; the golem's arcX/arcY/arcZ fields are written but never consumed.",
+          "Historical no-ribbon claim withdrawn: common/src/main/java/thaumcraft/client/fx/particles/FXArc.java:86 creates the native FXArc.",
+          "InfusionArcParticle serves a different effect; it is not the only arc now that the native FXArc exists.",
+          "Historical invisible-arc claim superseded by the native callers cited below (ThaumcraftEldritchClient and BlockFxClientEffects).",
           "Complete callsite audit: FXArc is instantiated only in ClientProxy.arcLightning, which has exactly two callers (EntityEldritchGolem:302 and PacketFXBlockArc:64).",
           "The earlier audit of this row was stale: the arc of the eldritch golem and the arc of the block arc packet were ported by the later client fx wave and the native code is in the tree."
         ],
@@ -5006,8 +5006,8 @@
           "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:88-95 is the additive flare of the original FXBeamPower:186-218 (the half size 0.66 of the opacity and the cell of the sheet that walks with the age)"
         ],
         "notes": [
-          "The visnet relay beam is ported, but with a different construction: two crossed planes at half width .105 instead of the original's two quads at half width 0.15*0.7=0.105 plus the original's separate additive flare quad on textures/misc/particles.png.",
-          "The original opacity ramp (0.3 floor, 0.8 on pulse, -0.025/tick decay) and the IRevealer x10 opacity boost are not reproduced by VisNetRender.beam.",
+          "The relay beam and flare are both drawn at common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:42; the old beam-without-flare comparison was obsolete.",
+          "The previous missing-opacity-ramp claim was superseded: common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:32-42 updates opacity, applies the revealer factors and draws beam plus flare.",
           "Complete callsite audit: FXBeamPower is constructed only in ClientProxy.beamPower, whose only caller is TileVisRelay:124.",
           "The earlier audit of this row was stale: the opacity ramp and the flare of the original are in the native tree."
         ],
@@ -6128,13 +6128,13 @@
           "oracle thaumcraft/client/fx/particles/FXSmokeSpiral.java:1-153 the rising smoke spiral",
           "oracle thaumcraft/client/ClientProxy.java:677-682 smokeSpiral() is the only instantiation",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:191 and thaumcraft/common/items/equipment/ItemElementalSword.java:133 are the only callers",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java and common/src/main/java/thaumcraft/common/items/equipment/ItemElementalSword.java contain no smoke spiral effect",
+          "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:79 creates the smoke spiral; the client callers are cited below, not in the server entity/item classes",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:103-118 keeps the turn of 720 degrees, the polar angle of 90 to -90 degrees and the radius of the original FXSmokeSpiral:46-53",
           "native common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:39/59 keeps the alpha of 0.66 and the half size of 0.15 of the original FXSmokeSpiral:44/58",
-          "native common/src/main/java/thaumcraft/client/ClientSetup.java:86/93 calls the spiral, the two callers of the original (oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:191 and thaumcraft/common/items/equipment/ItemElementalSword.java:133)"
+          "native common/src/main/java/thaumcraft/client/ClientSetup.java:98,105 calls the elemental-sword and warden smoke spirals"
         ],
         "notes": [
-          "Not ported: neither the eldritch warden smoke spiral nor the elemental sword smoke spiral exists in the native port.",
+          "Historical missing-spiral claim withdrawn: common/src/main/java/thaumcraft/client/fx/particles/FXSmokeSpiral.java:79 creates the native effect, with the client callers cited below.",
           "Complete callsite audit: FXSmokeSpiral is instantiated only in ClientProxy.smokeSpiral, whose only callers are EntityEldritchWarden:191 and ItemElementalSword:133.",
           "The earlier audit of this row was stale: the spiral of the warden and of the elemental sword is in the native tree."
         ],
@@ -7765,13 +7765,13 @@
           "oracle thaumcraft/client/gui/ThaumcraftGuiConfig.java:10-34 the FML config screen exposing the general, Monster_Spawning, World_Generation, World_Regeneration and Research categories",
           "oracle thaumcraft/client/ThaumcraftGuiFactory.java:24-25 the only reference to ThaumcraftGuiConfig",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftSettings.java:37 the native port reads the same configuration from a properties file at startup",
-          "native common/src/main/java/thaumcraft/client/ has no config screen",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java:36 opens ThaumcraftConfigScreen; the earlier no-screen assertion was obsolete",
           "native common/src/main/java/thaumcraft/client/gui/ThaumcraftConfigScreen.java shows the five original categories and the original keys and defaults of oracle thaumcraft/common/config/Config.java:104-111 and :369-500",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftConfigStore.java writes the same config/thaumcraft.properties file that the port reads"
         ],
         "notes": [
-          "Not ported: 1.21.1/Architectury has no FML mod-config GUI hook, so the in-game configuration screen does not exist.",
-          "The configuration values themselves are still settable, but only by editing the properties file, not from the options menu.",
+          "The FML hook itself is not retained, but common/src/main/java/thaumcraft/client/ThaumcraftConfigClient.java:36 opens the native configuration screen.",
+          "The earlier properties-file-only claim was superseded by the native screen and config store cited in this row.",
           "Complete callsite audit: ThaumcraftGuiConfig is referenced only by ThaumcraftGuiFactory, which is itself only referenced from Thaumcraft.java.",
           "The earlier audit of this row was stale: 1.21.1 has no Forge config screen, so the port has its own, and the values it edits are the original ones.",
           "The category World_Regeneration is empty in the port, because the port has nothing to regenerate."
@@ -12578,8 +12578,8 @@
           "native common/src/main/resources/assets/thaumcraft/models/item/airy_node.json the native item model of the nodes"
         ],
         "notes": [
-          "Not an original TC4 class: a 1.12 item renderer, not needed by the native.",
-          "The node items are drawn by their block models in the native port, which is the original art of the node family."
+          "This legacy package path is a relocation: the oracle counterpart is thaumcraft/client/renderers/tile/ItemNodeRenderer.java:49-72, tracked by its own ledger row, not an absent original feature.",
+          "The native item renderer is common/src/main/java/thaumcraft/client/renderers/tile/ItemNodeRenderer.java; the old block-model-only claim was superseded by that port."
         ],
         "reviewed_sha256": {
           "legacy": "00f782e34380ef14b9190a798d32b7d18d5f7ad997fd4a28dc97b65a13b7f6e8"
@@ -13705,14 +13705,14 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/client/renderers/models/ModelBoreEmit.java:1 the class does not exist in the 4.2.3.5 oracle",
-          "legacy src/main/java/thaumcraft/client/renderers/models/ModelBoreEmit.java:1 the 1.12 FOREA helper only",
-          "native client/BoreClientEffects.java:54 the native vortex effect replaced the separate emitter model",
-          "native common/src/main/java/thaumcraft/client/BoreClientEffects.java:1 the native vortex of the bore replaces the separate emitter model"
+          "oracle thaumcraft/client/renderers/models/ModelBoreEmit.java:13-64 the real original model with Knob, three Cross parts and Rod; the prior absence claim was false",
+          "oracle thaumcraft/client/renderers/tile/TileArcaneBoreRenderer.java:26,52 constructs ModelBoreEmit and renders it with bore.hasFocus",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelArcaneBore.java:27-31 reproduces the five emitter boxes and pivots",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelArcaneBore.java:53-58 renders the knob conditionally and the four remaining parts unconditionally"
         ],
         "notes": [
-          "Legacy only class: the 4.2.3.5 oracle has no emitter model, the native port draws the vortex in the bore effect class.",
-          "The native bore client effects own the vortex and the beam of the original, so the legacy emitter model has no counterpart."
+          "AUDIT CORRECTION: this is an original, live model, not a legacy-only helper. Its geometry is folded into ModelArcaneBore, not replaced by a vortex. The exclude disposition is left unchanged for the leader to reclassify.",
+          "The native call is common/src/main/java/thaumcraft/client/renderers/tile/TileArcaneBoreRenderer.java:61; source geometry matches the five original parts. This is not runtime visual acceptance."
         ],
         "reviewed_sha256": {
           "original": "7102d668d2378d4ada954955326b7f203ed3c1ed9191895a70698a62f47abcde",
@@ -14821,9 +14821,9 @@
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:16 the native class documents that the 1.7 model is the retained thaumatorium.obj asset"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart. The native class of the same name is an unused OBJ loader; the thaumatorium is drawn by the block model assets/thaumcraft/models/block/thaumatorium.json.",
+          "The oracle has no class at this model path, but TileThaumatoriumRenderer.java:45,72 loads and draws the OBJ inline; native common/src/main/java/thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:18 constructs ModelThaumatorium, so the old unused-loader claim was false.",
           "Legacy only class: no oracle counterpart. The native class of the same name is the OBJ loader of the retained thaumatorium.obj asset.",
-          "The renderer unit thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java carries the open client visual of the original geometry and stays partial."
+          "The renderer unit owns the native visual port. The old stays-partial statement predates its closure; this audit does not provide runtime visual acceptance."
         ],
         "reviewed_sha256": {
           "legacy": "2fd942defaa7c6ead419acce2eec6a0e0ee9fc546d8deda46644113deac5ae44"
@@ -16227,8 +16227,8 @@
           "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279, the gameplay drop of the original"
         ],
         "notes": [
-          "The original drew the aura node as a dropped item; the native node is a permanent block with no item form, so this renderer has no counterpart.",
-          "The harvest of the native node drops the wisp essence of the original BlockAiry:265-279 (NodeHarvest), not a node item, so the gameplay drop of the original is covered even though the dropped item has no renderer.",
+          "Historical no-item-form claim withdrawn: common/src/main/java/thaumcraft/client/renderers/tile/ItemNodeRenderer.java implements the native aura-node item renderer, as recorded by the later closure note.",
+          "NodeHarvest handles the wisp essence gameplay drop; the existence of an aura-node item renderer is a separate contract and does not imply a node-item gameplay drop.",
           "CLOSED 2026-10-23 (w4wands): the native node item was a static shard texture, while the original draws the item of the invisible aura node as the node itself, in two crossed quads of the 32 frame node atlas. The native now draws it that way and both loaders register the renderer.",
           "The gameplay drop of the original is the wisp essence of BlockAiry:265-279 (NodeHarvest) and never a node item, so that half of the unit was already at parity.",
           "Forced 1.21.1 change: the 1.7.10 item space is a sixteenth of a block and the native item space is not, so the placement of the node inside the item is the native one; every number of the strips is the original's."
@@ -17466,7 +17466,7 @@
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileEssentiaReservoirRenderer.java:40-46 the fill of units/256, the alpha 0.9 and the lightmap 200"
         ],
         "notes": [
-          "DEVIATION: the native port registers no renderer for the reservoir, so the stored essentia is invisible in the world. The tile still keeps the display aspect and the colour interpolation state, but nothing draws it.",
+          "Historical no-renderer claim withdrawn: common/src/main/java/thaumcraft/client/ThaumcraftReservoirClient.java:15 registers TileEssentiaReservoirRenderer, which draws stored essentia.",
           "The native renderer keeps the three sixteenths to thirteen sixteenths box, the fill of units/256, the alpha 0.9 and the fixed lightmap coordinate 200.",
           "Callsite audit: the class is registered in oracle thaumcraft/client/ClientProxy.java only."
         ],
@@ -25288,9 +25288,9 @@
           "native common/src/main/java/thaumcraft/common/blocks/BlockMirror.java:142 the native mirror drops a plain BlockItem and keeps the link of a linked mirror in the CustomData component"
         ],
         "notes": [
-          "Legacy only class: no oracle counterpart.",
-          "Legacy only class: no oracle counterpart, so it is outside the port obligation.",
-          "The link of a linked mirror is a data component in the native tree, so the 1.12 item class of the legacy tree has no behaviour to carry over."
+          "The legacy ItemBlocks package is a relocation, not proof of no original behavior: the counterpart is oracle thaumcraft/common/blocks/BlockMirrorItem.java:51-59, tracked by its own canonical ledger row.",
+          "This duplicate legacy path is excluded only as a duplicate; the original mirror item remains in scope under thaumcraft/common/blocks/BlockMirrorItem.java.",
+          "Native mirror links use a data component; this does not erase the original item behavior obligation."
         ],
         "reviewed_sha256": {
           "legacy": "d3bb2410a91f77f27c3c6cdd5aaa06dc5b6e4657446c55bab862e3b46304eb23"
@@ -25618,14 +25618,14 @@
         "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
-          "oracle thaumcraft/common/blocks/JarStepSound.java the sound type of the jar",
-          "oracle thaumcraft/common/blocks/BlockJar.java:88 the jar uses that sound type",
+          "oracle thaumcraft/common/blocks/JarStepSound.java:11-22 an unreferenced duplicate custom sound type; whole-oracle identifier search has zero external references",
+          "oracle thaumcraft/common/blocks/BlockJar.java:88 actually constructs CustomStepSound, not JarStepSound; oracle CustomStepSound.java:17-22 supplies the thaumcraft-prefixed sound names",
           "native common/src/main/resources/assets/thaumcraft/sounds.json the jar sound event",
           "native common/src/main/java/thaumcraft/common/blocks/BlockJar.java the jar uses the vanilla glass step sound"
         ],
         "notes": [
-          "1.21.1 block step sounds come from the block SoundType, so the per-block sound class was dropped.",
-          "REMAINING GAP (audio): the original jar step sound (thaumcraft:jar) is therefore replaced by the vanilla glass step sound. The original sound event is in the port and is played when the jar is emptied."
+          "JarStepSound itself has zero external references in the oracle; BlockJar.java:88 instead constructs the equivalent CustomStepSound. Its exclusion can rest on that dead-class evidence, not the old false direct-call claim.",
+          "REMAINING GAP (audio), owned by BlockJar: oracle BlockJar.java:88 uses CustomStepSound for thaumcraft:jar, while common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:288,294 uses SoundType.GLASS. Playing the jar event when emptying does not restore step/break audio."
         ],
         "reviewed_sha256": {
           "original": "689cf855ec2814b2d55809b3f70e10f30296c59e6192d1d1be9fe9ae8f9665c4"
@@ -26158,7 +26158,7 @@
           "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:76-88 the native per-metadata shape of the airy family",
           "native common/src/main/java/thaumcraft/common/blocks/BlockEldritchPortal.java:47-55 the native portal has neither a selection nor a collision box",
           "oracle thaumcraft/common/config/MaterialAiry.java:11-13 the constructor calls this.setRequiresTool() and this.setNoPushMobility()",
-          "oracle thaumcraft/common/config/MaterialAiry.java:31-33 the class OVERRIDES setRequiresTool() with an empty body, so the virtual call of the constructor never sets the flag: the airy material does NOT require a tool",
+          "oracle thaumcraft/common/config/MaterialAiry.java:39-41 overrides func_76221_f by returning this without setting any flag; the old :31-33 citation pointed to a different boolean override",
           "oracle thaumcraft/common/config/MaterialAiry.java:15-21 isSolid false, isReplaceable false and getCanBlockGrass false",
           "oracle thaumcraft/common/config/MaterialAiry.java:35-39 the mobility flag 1 of setNoPushMobility",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:252-264 the four airy blocks and common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:303-308 their noOcclusion/noCollission properties: no requiresCorrectToolForDrops, which is exactly the original behaviour because the original's own setRequiresTool() override is a no-op",
@@ -26166,8 +26166,8 @@
         ],
         "notes": [
           "1.21.1 has no Block.Material class, so the material flags became modern block properties and the class itself has no counterpart.",
-          "Partial: the light, collision and replaceable rules of the two consumers are reproduced, but the requires-a-tool flag of the original material has no native counterpart - the airy blocks declare no requiresCorrectToolForDrops.",
-          "CORRECTED: the previous review recorded the requires-a-tool flag as a remaining gap. The original class overrides setRequiresTool() with an empty body (oracle MaterialAiry.java:31-33), so the constructor call never sets the flag and the airy material never required a tool. The native airy blocks declare no requiresCorrectToolForDrops, which is therefore the original behaviour and not a deviation.",
+          "Historical requires-tool gap withdrawn: oracle MaterialAiry.java:39-41 returns this without setting the flag; :31-33 is a different boolean override.",
+          "CORRECTED: the original func_76221_f override (oracle MaterialAiry.java:39-41) does not set the flag. Its body returns this rather than being empty. The native airy blocks declare no requiresCorrectToolForDrops.",
           "The light, the collision, the replaceability and the grass rules of the original material are reproduced by the native block properties; 1.21.1 has no Block.Material, so the class itself has no counterpart."
         ],
         "reviewed_sha256": {
@@ -26210,9 +26210,9 @@
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:53-56 the flux gas and the flux goo with the same push reaction"
         ],
         "notes": [
-          "1.21.1 has no net.minecraft.block.material.Material, so the class itself is deliberately not carried over; its observable traits (solid, not replaceable, not liquid, grass map colour) are expressed with the 1.21.1 block properties of the taint block family.",
-          "REMAINING GAP: the mobility flag of MaterialTaint (func_76227_m == 1, set by setNoPushMobility) has no direct 1.21.1 counterpart. The closest native property is the push reaction of the block (BlockBehaviour.Properties.pushReaction), which belongs to the blocks layer and was not changed in this wave.",
-          "The common/blocks package is outside the editable scope of this wave, so the unit stays partial.",
+          "The Material class is replaced by native block properties; the old solid description contradicted the original false-returning override (oracle MaterialTaint.java:23-24) and the later correction below.",
+          "Historical mobility gap superseded: common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java:76-77 sets and applies PushReaction.BLOCK.",
+          "The old stays-partial statement is historical and superseded by the later closure; it is not the current ledger verdict.",
           "1.21.1 has no net.minecraft.block.material.Material, so the class itself is not carried over. Its observable traits are now all expressed with the 1.21.1 block properties: not solid, not replaceable, grass map colour and, since this wave, the push reaction BLOCK, which is the counterpart of the mobility flag one. The old DESTROY reaction destroyed the block, which the original never does."
         ],
         "reviewed_sha256": {
@@ -40046,7 +40046,7 @@
           "native common/src/main/resources/assets/thaumcraft/sounds.json the native sound event table"
         ],
         "notes": [
-          "1.21.1 has no SoundEvent registry, so a sound is a resource location: the alias holder has no counterpart and the same sound id is used directly.",
+          "The legacy alias holder is omitted; native callers construct SoundEvent values from resource locations (for example common/src/main/java/thaumcraft/common/blocks/BlockJar.java:53). This does not imply that 1.21.1 lacks a SoundEvent registry.",
           "The sound id set itself is complete; see the thaumcraft/common/lib/TCSounds.java row."
         ],
         "reviewed_sha256": {
@@ -49467,7 +49467,7 @@
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity.",
-          "The native nitor registers only a client ticker, so the server side production of the nitor was not confirmed in this audit.",
+          "Historical production concern withdrawn: oracle TileNitor.java:18-27 only emits client particles and has no server production contract.",
           "CLOSED in this wave: the open question of the audit is answered from the oracle. The update of the original TileNitor lies completely inside the isRemote branch, and the random tick of the original BlockAiry only draws the client particles, so the original nitor has no server side production; the native nitor tile matches it."
         ],
         "reviewed_sha256": {
@@ -50892,9 +50892,9 @@
           "oracle tree-wide reference scan: the TC4 4.2.3.5 oracle has no thaumcraft/truetyper package"
         ],
         "notes": [
-          "Legacy-only (1.12) CodeChicken TrueType font helper; the TC4 jar has no such package.",
+          "Only the thaumcraft/truetyper package path is legacy-only: the oracle contains truetyper/FontHelper.java:22, tracked by its own ledger row.",
           "1.21.1 renders the screens with the vanilla font, so the embedded font library is not needed.",
-          "The package is a 1.12 only addition of the legacy reference; the 1.7.10 original has no such package and the native port does not need one."
+          "The original root-level truetyper helper must not be confused with this relocated legacy path; its separate ledger row owns the dead-code audit."
         ],
         "reviewed_sha256": {
           "legacy": "954159c5bd79b26b76e6b63bcb841eab8421ec46684b5c6931dbc95cfb0d7ea6"
@@ -50936,8 +50936,8 @@
           "oracle tree-wide reference scan: the TC4 4.2.3.5 oracle has no thaumcraft/truetyper package"
         ],
         "notes": [
-          "Legacy-only (1.12) CodeChicken TrueType font loader; not part of the TC4 jar and not needed by the native screens.",
-          "The package is a 1.12 only addition of the legacy reference; the 1.7.10 original has no such package and the native port does not need one."
+          "Only this package path is legacy-only: oracle truetyper/FontLoader.java:15 contains the original loader, tracked by its own ledger row.",
+          "The old not-part-of-TC4 assertion was false for the class; the separate original row owns the unused-font audit."
         ],
         "reviewed_sha256": {
           "legacy": "1efb475e062100d54e83b38838eb8dce84795dc89985165cf71195772ae69a18"
@@ -50979,8 +50979,8 @@
           "oracle tree-wide reference scan: the TC4 4.2.3.5 oracle has no thaumcraft/truetyper package"
         ],
         "notes": [
-          "Legacy-only (1.12) CodeChicken TrueType formatter; not part of the TC4 jar and not needed by the native screens.",
-          "The package is a 1.12 only addition of the legacy reference; the 1.7.10 original has no such package and the native port does not need one."
+          "Only this package path is legacy-only: oracle truetyper/Formatter.java:6 contains the original formatter, tracked by its own ledger row.",
+          "The old not-part-of-TC4 assertion was false for the class; the separate original row owns the transitive dead-code audit."
         ],
         "reviewed_sha256": {
           "legacy": "09cfe1825099396ad9737af516e2e246050948c57e95ff18955c9aca4a2a8937"
@@ -51022,8 +51022,8 @@
           "oracle tree-wide reference scan: the TC4 4.2.3.5 oracle has no thaumcraft/truetyper package"
         ],
         "notes": [
-          "Legacy-only (1.12) CodeChicken TrueType renderer; not part of the TC4 jar and not needed by the native screens.",
-          "The package is a 1.12 only addition of the legacy reference; the 1.7.10 original has no such package and the native port does not need one."
+          "Only this package path is legacy-only: oracle truetyper/TrueTypeFont.java contains the original renderer, tracked by its own ledger row.",
+          "The old not-part-of-TC4 assertion was false for the class; the separate original row owns the unused-font audit."
         ],
         "reviewed_sha256": {
           "legacy": "bde9e73fdff44cd1b3b994025fef208b2e85d5a647bdb7a9a97e36d73d74d635"

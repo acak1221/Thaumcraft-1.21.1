@@ -7277,10 +7277,10 @@
           "REMAINING DIFFERENCE: the sibling connectors (oracle GuiResearchBrowser.java:327-348) are not drawn, and the connector line of the original is a three pixel wide gradient strip with a sine wobble (oracle GuiResearchBrowser.java:732-787) while the native draws a one pixel line in its own colours",
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:327-348 the sibling connectors of the map",
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:732-787 the three pixel wide gradient connector line with the sine wobble",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserConnectors.java:56-146 the parent and the sibling connectors with the original colours, the original gates and the original geometry",
-          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:112-208 the connector line of the original, drawn over every research of the category",
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserConnectors.java:58-165 the parent and the sibling connectors with the original colours, the original gates and the original geometry",
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:186-262 the connector line of the original, drawn over every research of the category",
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:404-412 an icon expression that names nothing draws nothing",
-          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:196-207 the icon of a cell is drawn only when its expression resolves"
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:108-118 the icon of a cell is drawn only when its expression resolves"
         ],
         "notes": [
           "The map, the clue/parent/category visibility rules and the authoritative purchase/note actions are reproduced (native ResearchBrowserData.isVisible:21-29 mirrors oracle GuiResearchBrowser:318/371).",
@@ -7400,7 +7400,7 @@
           "oracle thaumcraft/common/config/ConfigResearch.java:110-144 the SCEPTRE page holds the three sceptre recipes as an array",
           "oracle thaumcraft/common/config/ConfigResearch.java:302-305 the JARLABEL page holds the sixteen jar label recipes as an array",
           "oracle thaumcraft/client/gui/GuiResearchRecipe.java:647-655 the array page shows one of its recipes per second",
-          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:363-430 the BANNERS, the PRIMALARROW and the ORE arrays are resolved and cycle once per second, like the original",
+          "native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:374-460 the BANNERS, the PRIMALARROW and the ORE arrays are resolved and cycle once per second, like the original",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:51 the page resolver knows the key of its research, so the two original arrays that share one Java expression stay apart"
         ],
         "notes": [
@@ -7462,11 +7462,11 @@
           "REMAINING DIFFERENCE: the original rune and line drawing of the table and the six parchment sheet looks are replaced by the native sheet; the puzzle state, the researcher rolls and the funding order of the original are reproduced in the common layer",
           "oracle thaumcraft/client/gui/GuiResearchTable.java:408-441 the runes of the sheet: one rune every 250 ms on a free hex, one of the sixteen cells of the script sheet, fading over fifteen to twenty five seconds",
           "oracle thaumcraft/client/gui/GuiResearchTable.java:517-540 the rune is a black quad of ten pixels of textures/misc/script.png, turned by ninety degrees in the plane",
-          "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:520-575 the runes of the sheet",
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:517-570 the runes of the sheet",
           "oracle thaumcraft/client/gui/GuiResearchTable.java:385-405 the three pixel wide additive line with the colour 0.0/0.6/0.8 and the pulsing alpha 0.3..0.9",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java the line of the original, with the additive blend and the pulsing alpha",
           "oracle thaumcraft/client/gui/GuiResearchTable.java:411 the sheet is the single parchment textures/misc/parchment3.png",
-          "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:156 the same single parchment"
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:168 the same single parchment"
         ],
         "notes": [
           "The palette, the hex grid, drag and drop placement, erasing, the researcher bonus rolls, the aspect combination and the paid copy are implemented and the original RNG order and thresholds are preserved.",
@@ -38146,7 +38146,7 @@
           "native common/src/main/java/thaumcraft/common/lib/research/ScanRunes.java the position, the duration, the gravity and the colour of the rune of the original",
           "native common/src/main/java/thaumcraft/common/lib/network/ScanRuneFxPayload.java the S2C rune of the scan",
           "native common/src/main/java/thaumcraft/client/fx/ScanRuneClientEffects.java the client half of the rune: one particle, the colour drawn from the client random",
-          "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:63-72 alreadyScanned, the original gate of a valid scan target",
+          "native common/src/main/java/thaumcraft/common/lib/research/ScanManager.java:89-93 alreadyScanned, the original gate of a valid scan target",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java the session of the scan starts only for a valid target and the rune follows the original gate"
         ],
         "notes": [

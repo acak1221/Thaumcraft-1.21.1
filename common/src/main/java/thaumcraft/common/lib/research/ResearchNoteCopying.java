@@ -23,7 +23,7 @@ public final class ResearchNoteCopying {
         }
         return true;
     }
-    /** Stages private next-state only. The caller separately admits and pays paper+ink_sac from main inventory. */
+    /** Stages private next-state only. The caller separately admits and pays paper+black dye from main inventory. */
     public static Plan plan(PlayerKnowledge actor, ResearchNoteData note, int count) {
         if (!canPay(actor, note, count)) return null;
         var staged = actor.copy();

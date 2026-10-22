@@ -102,8 +102,8 @@ public final class KnowledgeNotificationRuntimeChecks {
         f.check(knowledge.getAspectPoolFor("lux")==20&&feedback(f).equals(List.of(new AspectPoolPayload("lux",(short)0,(short)20))),"real refund+1 still sends original delta0, retaining server-owned refund sound without an extra reward flight");
         knowledge.addResearch("RESEARCHDUPE");knowledge.setAspectPool("lux",100);knowledge.setAspectPool("ignis",100);
         table.setItem(1,ItemResearchNotes.create(ResearchNoteRuntimeChecks.solvedNitor(),true)); // Explicit solved-note INPUT; puzzle solving is separately covered.
-        f.player.getInventory().setItem(3,new ItemStack(Items.PAPER));f.player.getInventory().setItem(4,new ItemStack(Items.INK_SAC));feedback(f);
-        f.check(ResearchTableCopyNetworking.handle(f.player,new ResearchTableCopyPayload(menu.containerId,menu.sessionToken(),table.tableRevision())),"actual paid copy consumes physical paper/ink and canonical RP costs");
+        f.player.getInventory().setItem(3,new ItemStack(Items.PAPER));f.player.getInventory().setItem(4,new ItemStack(Items.BLACK_DYE));feedback(f);
+        f.check(ResearchTableCopyNetworking.handle(f.player,new ResearchTableCopyPayload(menu.containerId,menu.sessionToken(),table.tableRevision())),"actual paid copy consumes physical paper/black dye and canonical RP costs");
         f.check(feedback(f).equals(List.of(new AspectPoolPayload("lux",(short)0,(short)97),new AspectPoolPayload("ignis",(short)0,(short)99)))&&table.getItem(1).getCount()==2,
                 "actual copied note sends two original silent corrections, not gained-RP/discovery/research notices");
         f.player.closeContainer();

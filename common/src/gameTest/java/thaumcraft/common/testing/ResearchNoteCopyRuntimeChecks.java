@@ -46,14 +46,14 @@ public final class ResearchNoteCopyRuntimeChecks {
             ItemStack tool = new ItemStack(ThaumcraftContent.INKWELL.get()); tool.setDamageValue(100); table.setItem(0, tool);
             ItemStack note = discovery(1, 0, true); table.setItem(1, note);
             ItemStack paper = new ItemStack(Items.PAPER, 2); paper.set(DataComponents.CUSTOM_NAME, Component.literal("named paper is legal"));
-            ItemStack ink = new ItemStack(Items.INK_SAC, 2); ink.set(DataComponents.CUSTOM_NAME, Component.literal("named ink is legal"));
+            ItemStack ink = new ItemStack(Items.BLACK_DYE, 2); ink.set(DataComponents.CUSTOM_NAME, Component.literal("named black dye is legal"));
             player.getInventory().setItem(0, paper); player.getInventory().setItem(1, ink); player.getInventory().setItem(2, new ItemStack(Items.FEATHER, 9));
             var stale = intent(menu);
             test.assertTrue(ResearchTableCopyNetworking.handle(player, stale), "real server receiver performs the first paid copy");
             test.assertTrue(table.getItem(1) == note && note.getCount() == 2 && ItemResearchNotes.data(note).copies() == 1,
                     "the SAME physical stack grows by one and shares one updated counter");
             test.assertTrue(knowledge.getAspectPoolFor("lux") == 997 && knowledge.getAspectPoolFor("ignis") == 999 && paper.getCount() == 1 && ink.getCount() == 1,
-                    "first cost is original NITOR lux3/fire1 plus one paper and ink_sac, even in creative");
+                    "first cost is original NITOR lux3/fire1 plus one paper and one BLACK DYE, even in creative");
             var beforeReplay = knowledge.save();
             test.assertTrue(!ResearchTableCopyNetworking.handle(player, stale) && beforeReplay.equals(knowledge.save()) && note.getCount() == 2 && paper.getCount() == 1,
                     "stale replay cannot copy or spend a second time");
@@ -124,7 +124,7 @@ public final class ResearchNoteCopyRuntimeChecks {
         return new ResearchTableCopyPayload(menu.containerId, menu.sessionToken(), menu.tableRevision());
     }
     private static void supplies(ServerPlayer player) {
-        player.getInventory().setItem(0, new ItemStack(Items.PAPER)); player.getInventory().setItem(1, new ItemStack(Items.INK_SAC));
+        player.getInventory().setItem(0, new ItemStack(Items.PAPER)); player.getInventory().setItem(1, new ItemStack(Items.BLACK_DYE));
     }
     private static void refuse(GameTestHelper test, ServerPlayer player, ContainerResearchTable menu, TileResearchTable table, String reason) {
         var knowledge = KnowledgeAccess.get(player); var before = knowledge.save();

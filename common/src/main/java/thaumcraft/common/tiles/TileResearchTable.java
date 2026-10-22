@@ -333,19 +333,21 @@ public final class TileResearchTable extends BlockEntity implements Container, M
      * Physical copied-note counts are preserved without changing other slot limits.
      */
     public void commitCopy(long expectedRevision, ItemStack note, ResearchNoteCopying.Plan plan,
-                           PlayerKnowledge actor, ItemStack paper, ItemStack inkSac) {
+                           PlayerKnowledge actor, ItemStack paper, ItemStack blackDye) {
         if (!(level instanceof ServerLevel serverLevel) || !serverLevel.getServer().isSameThread()) throw new IllegalStateException("Research copy requires the server thread");
         if (tableRevision() != expectedRevision || expectedRevision == Long.MAX_VALUE || note != items.get(1)
                 || note.getCount() == Integer.MAX_VALUE || plan.count() != note.getCount() + 1
                 || !note.is(ThaumcraftContent.DISCOVERY.get()) || !ResearchNoteCopying.canPay(actor, ItemResearchNotes.data(note), note.getCount())
                 || !paper.is(net.minecraft.world.item.Items.PAPER) || paper.isEmpty() || paper.getDamageValue() != 0
-                || !inkSac.is(net.minecraft.world.item.Items.INK_SAC) || inkSac.isEmpty() || inkSac.getDamageValue() != 0) {
+                // Original TileResearchTable:407-441 (oracle) - the copy costs ONE PAPER and the
+                // BLACK DYE (the original Items.dye of the metadata zero), not an ink sac.
+                || !blackDye.is(net.minecraft.world.item.Items.BLACK_DYE) || blackDye.isEmpty() || blackDye.getDamageValue() != 0) {
             throw new IllegalStateException("Admitted research copy changed before commit");
         }
         var component = ThaumcraftContent.RESEARCH_NOTE_DATA.get();
         ItemStack snapshot = note.copy(); snapshot.set(component, plan.note()); snapshot.setCount(plan.count());
         // The same actual stack is updated. All allocations/validation precede these callback-free owner writes.
-        actor.copyFrom(plan.knowledge()); paper.shrink(1); inkSac.shrink(1);
+        actor.copyFrom(plan.knowledge()); paper.shrink(1); blackDye.shrink(1);
         note.set(component, plan.note()); note.setCount(plan.count());
         editRevision++;
         observedReferences[1] = note; observedStacks[1] = snapshot;

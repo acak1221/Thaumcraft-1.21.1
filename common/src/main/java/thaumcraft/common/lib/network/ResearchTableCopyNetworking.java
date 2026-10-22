@@ -44,12 +44,14 @@ public final class ResearchTableCopyNetworking {
         ItemStack discovery = table.getItem(1);
         var data = ItemResearchNotes.data(discovery);
         if (!discovery.is(ThaumcraftContent.DISCOVERY.get()) || data == null || !data.complete()) return correct(player, menu);
-        int paperSlot = findSupply(player.getInventory(), Items.PAPER), inkSlot = findSupply(player.getInventory(), Items.INK_SAC);
-        if (paperSlot < 0 || inkSlot < 0) return correct(player, menu);
+        // Original TileResearchTable:407-441 (oracle) - the copy costs ONE PAPER and the BLACK DYE
+        // (the original Items.dye of the metadata zero), not an ink sac.
+        int paperSlot = findSupply(player.getInventory(), Items.PAPER), dyeSlot = findSupply(player.getInventory(), Items.BLACK_DYE);
+        if (paperSlot < 0 || dyeSlot < 0) return correct(player, menu);
         var knowledge = KnowledgeAccess.get(player);
         var plan = ResearchNoteCopying.plan(knowledge, data, discovery.getCount());
         if (plan == null) return correct(player, menu);
-        table.commitCopy(revision, discovery, plan, knowledge, player.getInventory().getItem(paperSlot), player.getInventory().getItem(inkSlot));
+        table.commitCopy(revision, discovery, plan, knowledge, player.getInventory().getItem(paperSlot), player.getInventory().getItem(dyeSlot));
         player.getInventory().setChanged(); table.setChanged();
         KnowledgeEvents.sync(player);
         for (String tag : plan.costs().keySet()) KnowledgeNotificationNetworking.pool(player, tag, 0);

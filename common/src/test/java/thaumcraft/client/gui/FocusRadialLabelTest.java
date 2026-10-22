@@ -50,9 +50,9 @@ class FocusRadialLabelTest {
 
     @Test void theCentreLineNamesTheFocusedFocus() {
         Component focused = Component.literal(NAME_LINE);
-        assertSame(focused, GuiFocusSelect.centreLine(focused, 0, 1),
+        assertSame(focused, GuiFocusSelect.centreLine(focused, 1),
                 "the centre line is the name of the focused focus");
-        assertSame(focused, GuiFocusSelect.centreLine(focused, 3, 4),
+        assertSame(focused, GuiFocusSelect.centreLine(focused, 4),
                 "the focused focus may be any of the eligible foci");
     }
 
@@ -60,14 +60,14 @@ class FocusRadialLabelTest {
         // Nothing focused but eligible foci present: the line is empty. A placeholder here
         // would be drawn by the render pass without a hover and would stay on screen when
         // the second pass (the scripted hover of the client smoke) draws the name.
-        assertNull(GuiFocusSelect.centreLine(null, -1, 1),
+        assertNull(GuiFocusSelect.centreLine(null, 1),
                 "no hover may not leave a placeholder behind, it would overlap the name line");
-        assertNull(GuiFocusSelect.centreLine(null, -1, 12),
+        assertNull(GuiFocusSelect.centreLine(null, 12),
                 "the same holds for a full page of eligible foci");
     }
 
     @Test void theEmptyInventoryStillSaysSo() {
-        Component empty = GuiFocusSelect.centreLine(null, -1, 0);
+        Component empty = GuiFocusSelect.centreLine(null, 0);
         assertNotNull(empty, "an empty inventory still has to say that it has no foci");
         assertTrue(empty.getContents() instanceof TranslatableContents,
                 "the empty message is a translated message");

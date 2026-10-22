@@ -847,6 +847,21 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.CraftingAuditRuntimeChecks.damagedIngredient(test, true);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "node_time_audit_curves")
+    public void nodeTimeAuditCurves(GameTestHelper test) {
+        thaumcraft.common.testing.NodeTimeAuditRuntimeChecks.curves(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "node_time_audit_zero")
+    public void nodeTimeAuditZeroCapacityDecay(GameTestHelper test) {
+        thaumcraft.common.testing.NodeTimeAuditRuntimeChecks.zeroCapacityDecay(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "node_time_audit_growth")
+    public void nodeTimeAuditGrowth(GameTestHelper test) {
+        thaumcraft.common.testing.NodeTimeAuditRuntimeChecks.growth(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void naturalNodesDrainAndRegenerate(GameTestHelper test) {
         NaturalNodeRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());

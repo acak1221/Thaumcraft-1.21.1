@@ -77,7 +77,7 @@ public final class ItemGolemPlacer extends Item {
             golem.setGolemMaterial(material);
             golem.applyConfiguration(data);
             if (data.core() == GolemData.ALCHEMY) golem.applyAspectCargo(GolemAspectCargo.readPlacer(before));
-            else golem.applyWaterCargo(GolemWaterCargo.readPlacer(before));
+            else golem.applyFluidCargo(GolemFluidCargo.readPlacer(before));
             Component name = before.get(DataComponents.CUSTOM_NAME);
             golem.setCustomName(name == null ? null : name.copy());
             golem.setOwnerName(player.getGameProfile().getName());
@@ -198,9 +198,9 @@ public final class ItemGolemPlacer extends Item {
                 GolemAspectCargo stock = GolemAspectCargo.readPlacer(stack);
                 stock.validate(material, earth);
             } else {
-                GolemWaterCargo water = GolemWaterCargo.readPlacer(stack);
-                water.validate(material, earth);
-                if (water.amountMb() > 0 && data.core() != GolemData.LIQUID) return null;
+                GolemFluidCargo fluid = GolemFluidCargo.readPlacer(stack);
+                fluid.validate(material, earth);
+                if (fluid.amountMb() > 0 && data.core() != GolemData.LIQUID) return null;
             }
             return data;
         } catch (IllegalArgumentException invalid) { return null; }
@@ -267,8 +267,8 @@ public final class ItemGolemPlacer extends Item {
                 if (stock.amount() > 0) tooltip.add(Component.translatable("tooltip.thaumcraft.golem.aspect_cargo",
                         stock.aspect().getName(), stock.amount()).withStyle(ChatFormatting.GRAY));
             } else {
-                int water = GolemWaterCargo.readPlacer(stack).amountMb();
-                if (water > 0) tooltip.add(Component.translatable("tooltip.thaumcraft.golem.water_cargo", water).withStyle(ChatFormatting.GRAY));
+                GolemFluidCargo fluid = GolemFluidCargo.readPlacer(stack);
+                if (fluid.amountMb() > 0) tooltip.add(Component.translatable("tooltip.thaumcraft.golem.fluid_cargo", fluid.amountMb()).withStyle(ChatFormatting.GRAY));
             }
         }
     }

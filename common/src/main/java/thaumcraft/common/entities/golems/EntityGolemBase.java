@@ -91,7 +91,9 @@ import thaumcraft.common.items.golems.GolemOwnership;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUpgrades;
 import thaumcraft.common.items.golems.GolemUseOptions;
-import thaumcraft.common.items.golems.GolemWaterCargo;
+import thaumcraft.common.items.golems.GolemFluidCargo;
+import thaumcraft.common.lib.fluid.GolemFluidAccess;
+import thaumcraft.common.lib.fluid.GolemFluidHandler;
 import thaumcraft.common.items.golems.ItemGolemPlacer;
 import thaumcraft.common.items.golems.ItemGolemBell;
 import thaumcraft.common.items.golems.ItemGolemCore;
@@ -115,7 +117,8 @@ public class EntityGolemBase extends AbstractGolem {
     private static final EntityDataAccessor<BlockPos> HOME = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.BLOCK_POS);
     private static final EntityDataAccessor<Integer> HOME_FACE = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<ItemStack> CARRIED = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.ITEM_STACK);
-    private static final EntityDataAccessor<Integer> WATER_MB = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CARGO_MB = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<String> CARGO_FLUID = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<String> ESSENTIA_TAG = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> ESSENTIA_AMOUNT = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> BOOTUP = SynchedEntityData.defineId(EntityGolemBase.class, EntityDataSerializers.FLOAT);
@@ -153,8 +156,9 @@ public class EntityGolemBase extends AbstractGolem {
     // This is the ONE real ITEM cargo owner. Synched data and public getters are
     // copied displays, never equipment, filters, another inventory or output.
     private ItemStack carried = ItemStack.EMPTY;
-    private int waterMb; // Separate actual water stock, never an item/container/filter.
-    private Tag unreadWater;
+    private ResourceLocation fluidId; // The fluid of the separate actual stock, never an item/container/filter.
+    private int fluidMb;
+    private Tag unreadFluidCargo;
     private GolemAspectCargo aspectCargo = GolemAspectCargo.EMPTY; // One actual immutable owner, NOT a display jar.
     private Tag unreadAspect;
     private final Set<Player> configurationOpeners = new HashSet<>();
@@ -197,14 +201,18 @@ public class EntityGolemBase extends AbstractGolem {
     private boolean busy;
     private boolean checkingButcherPosition, checkingButcherPopulation;
     private BlockPos throwTarget; // Non-null only during the private worker's queue publication.
-    private ServerLevel waterWorkLevel;
-    private BlockPos waterSourceIntent, waterHomePosition, waterAnchorIntent;
-    private BlockState waterSourceState;
-    private Direction waterHomeFace;
-    private TileCrucible waterHomeIntent;
-    private int waterStockBefore;
-    private boolean waterPermissionReady;
-    private Entity.RemovalReason deferredWaterRemoval;
+    private ServerLevel fluidWorkLevel;
+    private BlockPos fluidSourceIntent, fluidHomePosition, fluidAnchorIntent;
+    private BlockState fluidSourceState;
+    private Direction fluidHomeFace;
+    private BlockPos fluidHomeIntent;
+    private BlockPos fluidHandlerIntent;
+    private Direction fluidHandlerFace;
+    private ResourceLocation fluidHandlerFluid, fluidAnchorFluid;
+    private int fluidStockBefore;
+    private int fluidSoundMode;
+    private boolean fluidPermissionReady;
+    private Entity.RemovalReason deferredFluidRemoval;
     private boolean aspectWorkScope, aspectPermissionReady;
     private ServerLevel aspectWorkLevel;
     private BlockPos aspectHomePosition;
@@ -251,7 +259,8 @@ public class EntityGolemBase extends AbstractGolem {
         builder.define(HOME, BlockPos.ZERO);
         builder.define(HOME_FACE, Direction.DOWN.get3DDataValue());
         builder.define(CARRIED, ItemStack.EMPTY);
-        builder.define(WATER_MB, 0);
+        builder.define(CARGO_MB, 0);
+        builder.define(CARGO_FLUID, "");
         builder.define(ESSENTIA_TAG, "");
         builder.define(ESSENTIA_AMOUNT, 0);
         builder.define(BOOTUP, 0F);
@@ -286,7 +295,7 @@ public class EntityGolemBase extends AbstractGolem {
         if (!EnumGolemType.isSupported(value)) throw new IllegalArgumentException("Unsupported golem material: " + value);
         if (!(level() instanceof ServerLevel server) || tickCount != 0 || current() || isRemoved()
                 || server.getEntity(getId()) == this || server.getEntity(getUUID()) == this
-                || !carried.isEmpty() || unreadCarried != null || waterMb != 0 || unreadWater != null
+                || !carried.isEmpty() || unreadCarried != null || fluidMb != 0 || unreadFluidCargo != null
                 || aspectCargo.amount() != 0 || unreadAspect != null || essentiaMutationActive()
                 || fishing.hasPending() || hasUseRemainders() || useCustodyActive() || unsupported || retiring || busy) {
             throw new IllegalStateException("Material can only be selected on a fresh, unadmitted golem");
@@ -342,7 +351,7 @@ public class EntityGolemBase extends AbstractGolem {
     public boolean hasSupportedCore() { return activeCore(getGolemCore()); }
     public boolean hasConfigurationMenu() {
         return (inventoryCore(getGolemCore()) || getGolemCore() == GolemData.GUARD || getGolemCore() == GolemData.LIQUID || getGolemCore() == GolemData.USE)
-                && !unsupported && !retiring && unreadCarried == null && unreadWater == null && unreadAspect == null
+                && !unsupported && !retiring && unreadCarried == null && unreadFluidCargo == null && unreadAspect == null
                 && !hasUseRemainders() && !useCustodyActive()
                 && EnumGolemType.isSupported(getGolemMaterial()) && isAlive() && current();
     }
@@ -593,7 +602,7 @@ public class EntityGolemBase extends AbstractGolem {
         if (level().isClientSide || unsupported || retiring || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive() || requiresEmptyControls(getGolemCore())
                 || slot < 0 || slot >= getSlotCount() || exemplar == null) return;
         if (core == GolemData.LIQUID) {
-            if (slot != 0 || !GolemData.isSupportedWaterFilter(exemplar)) return;
+            if (slot != 0 || !GolemData.isSupportedFluidFilter(exemplar)) return;
             busy = true;
             try {
                 liquid.reset();
@@ -663,7 +672,7 @@ public class EntityGolemBase extends AbstractGolem {
         return true;
     }
     private boolean liquidControls() {
-        if (isFillAnyAmount() || !GolemData.isSupportedWaterFilter(entityData.get(FILTERS.get(0)))) return false;
+        if (isFillAnyAmount() || !GolemData.isSupportedFluidFilter(entityData.get(FILTERS.get(0)))) return false;
         for (int slot = 0; slot < FILTERS.size(); slot++) {
             if (entityData.get(WANTED.get(slot)) != 0 || slot > 0 && !entityData.get(FILTERS.get(slot)).isEmpty()) return false;
         }
@@ -690,11 +699,11 @@ public class EntityGolemBase extends AbstractGolem {
     }
     public GolemData configuredData() {
         if (!EnumGolemType.isSupported(getGolemMaterial()) || getGolemCore() != GolemData.NO_CORE && !hasSupportedCore()
-                || unsupported || unreadCarried != null || unreadWater != null || unreadAspect != null || fishing.hasUnreadPending()
+                || unsupported || unreadCarried != null || unreadFluidCargo != null || unreadAspect != null || fishing.hasUnreadPending()
                 || hasUseRemainders() || useCustodyActive() || getGolemCore() == GolemData.USE && !useControls()
                 || getGolemCore() != GolemData.USE && !useOptions.isDefault()
                 || requiresEmptyControls(getGolemCore()) && !baselineEmptyControls()
-                || getGolemCore() == GolemData.LIQUID && !liquidControls() || waterMb > 0 && getGolemCore() != GolemData.LIQUID
+                || getGolemCore() == GolemData.LIQUID && !liquidControls() || fluidMb > 0 && getGolemCore() != GolemData.LIQUID
                 || aspectCargo.amount() > 0 && getGolemCore() != GolemData.ALCHEMY) {
             throw new IllegalStateException("Unsupported golem configuration cannot be flattened into a material placer");
         }
@@ -710,7 +719,7 @@ public class EntityGolemBase extends AbstractGolem {
                 || data.core() != GolemData.NO_CORE && !activeCore(data.core())) {
             throw new IllegalArgumentException("Unsupported ordinary golem material/core");
         }
-        if (tickCount != 0 || current() || isRemoved() || busy || essentiaMutationActive() || !carried.isEmpty() || waterMb != 0 || unreadWater != null
+        if (tickCount != 0 || current() || isRemoved() || busy || essentiaMutationActive() || !carried.isEmpty() || fluidMb != 0 || unreadFluidCargo != null
                 || aspectCargo.amount() != 0 || unreadAspect != null
                 || fishing.hasPending() || hasUseRemainders() || useCustodyActive() || retiring || unsupported) {
             throw new IllegalStateException("Configuration can only be applied to a fresh golem");
@@ -725,7 +734,7 @@ public class EntityGolemBase extends AbstractGolem {
         for (int slot = 0; slot < slots; slot++) {
             if (wanted.get(slot) == null || (filters.get(slot).isEmpty() || data.core() == GolemData.LIQUID ? wanted.get(slot) != 0
                     : wanted.get(slot) < 1 || wanted.get(slot) > 256)) throw new IllegalArgumentException("Invalid ghost wanted quantity");
-            if (data.core() == GolemData.LIQUID && (slot == 0 ? !GolemData.isSupportedWaterFilter(filters.get(slot)) : !filters.get(slot).isEmpty())) {
+            if (data.core() == GolemData.LIQUID && (slot == 0 ? !GolemData.isSupportedFluidFilter(filters.get(slot)) : !filters.get(slot).isEmpty())) {
                 throw new IllegalArgumentException("Decanting permits only one pristine water-bucket exemplar");
             }
             if (requiresEmptyControls(data.core()) && (!filters.get(slot).isEmpty() || wanted.get(slot) != 0)) {
@@ -786,7 +795,7 @@ public class EntityGolemBase extends AbstractGolem {
      * invalid/retiring state is still refused, without imposing a second entity ray. */
     public boolean canEditLinks(Player player) {
         return player != null && !ItemGolemPlacer.isPlacementInProgress()
-                && !unsupported && !retiring && unreadCarried == null && unreadWater == null && unreadAspect == null && !fishing.hasUnreadPending()
+                && !unsupported && !retiring && unreadCarried == null && unreadFluidCargo == null && unreadAspect == null && !fishing.hasUnreadPending()
                 && unreadUseRemainders == null && deferredUseRemoval == null && !useCustodyActive()
                 && (!(player instanceof ServerPlayer actor) || !GolemUsePlatform.isActorBorrowed(actor))
                 && EnumGolemType.isSupported(getGolemMaterial()) && isAlive() && current()
@@ -813,7 +822,7 @@ public class EntityGolemBase extends AbstractGolem {
     public boolean canWork() {
         return !level().isClientSide && !ItemGolemPlacer.isPlacementInProgress()
                 && isAlive() && current() && hasHome && !fettered && EnumGolemType.isSupported(material) && !unsupported && !retiring
-                && unreadCarried == null && unreadWater == null && unreadAspect == null
+                && unreadCarried == null && unreadFluidCargo == null && unreadAspect == null
                 && !hasUseRemainders()
                 && (!useWorkScope || useInvoking)
                 && !fishing.hasPending() && hasSupportedCore() && configurationOpeners.isEmpty()
@@ -1147,10 +1156,10 @@ public class EntityGolemBase extends AbstractGolem {
             deferredAspectRemoval = reason;
             return; // Exactly one native removal is finished after paired changes AND notifications.
         }
-        if (!level().isClientSide && (waterSourceIntent != null || waterHomeIntent != null)) {
+        if (!level().isClientSide && (fluidSourceIntent != null || fluidHomeIntent != null)) {
             // Finish this exact raw handoff, then honor native terminal/unload
             // handling once. Refusing it forever would strand the actual owner.
-            deferredWaterRemoval = reason;
+            deferredFluidRemoval = reason;
             return;
         }
         boolean saving = reason.shouldSave() || reason == Entity.RemovalReason.CHANGED_DIMENSION
@@ -1161,7 +1170,7 @@ public class EntityGolemBase extends AbstractGolem {
             rememberUseRemoval(reason);
             return;
         }
-        if (!level().isClientSide && !saving && (unreadWater != null || unsupported && waterMb > 0)) return;
+        if (!level().isClientSide && !saving && (unreadFluidCargo != null || unsupported && fluidMb > 0)) return;
         if (!level().isClientSide && !saving && (unreadAspect != null || unsupported && aspectCargo.amount() > 0)) return;
         if (alchemy != null) alchemy.reset();
         if (use != null) use.reset();
@@ -1722,195 +1731,308 @@ public class EntityGolemBase extends AbstractGolem {
         tag.put("UseRemainders", list);
     }
 
-    public int getWaterAmountMb() { return level().isClientSide ? entityData.get(WATER_MB) : waterMb; }
-    public GolemWaterCargo getWaterCargo() {
-        if (unreadWater != null) throw new IllegalStateException("Unread water cargo cannot be flattened");
-        return new GolemWaterCargo(getWaterAmountMb());
+    public int getFluidAmountMb() { return level().isClientSide ? entityData.get(CARGO_MB) : fluidMb; }
+    /**
+     * The fluid of the cargo of the golem, or {@code null} when it carries none.
+     *
+     * <p>Oracle {@code EntityGolemBase:877-883}: the original shows the bucket of the fluid of the
+     * {@code FluidStack} that it carries.</p>
+     */
+    public ResourceLocation getFluidId() {
+        if (!level().isClientSide) return fluidId;
+        String tag = entityData.get(CARGO_FLUID);
+        return tag.isEmpty() ? null : ResourceLocation.tryParse(tag);
     }
-    public void applyWaterCargo(GolemWaterCargo water) {
+    public GolemFluidCargo getFluidCargo() {
+        if (unreadFluidCargo != null) throw new IllegalStateException("Unread fluid cargo cannot be flattened");
+        int amount = getFluidAmountMb();
+        if (amount <= 0) return GolemFluidCargo.EMPTY;
+        return new GolemFluidCargo(getFluidId(), amount);
+    }
+    public void applyFluidCargo(GolemFluidCargo cargo) {
         requireServerThread();
-        if (water == null || !(level() instanceof ServerLevel server) || tickCount != 0 || current() || isRemoved()
+        if (cargo == null || !(level() instanceof ServerLevel server) || tickCount != 0 || current() || isRemoved()
                 || server.getEntity(getId()) != null || server.getEntity(getUUID()) != null || busy || retiring || unsupported
-                || unreadWater != null || waterMb != 0 || unreadCarried != null || !carried.isEmpty() || fishing.hasPending()
+                || unreadFluidCargo != null || fluidMb != 0 || unreadCarried != null || !carried.isEmpty() || fishing.hasPending()
                 || aspectCargo.amount() != 0 || unreadAspect != null || hasUseRemainders() || useCustodyActive() || essentiaMutationActive()) {
-            throw new IllegalStateException("Water cargo can only be applied to a fresh unadmitted golem");
+            throw new IllegalStateException("Fluid cargo can only be applied to a fresh unadmitted golem");
         }
-        water.validate(material, getUpgradeAmount(GolemUpgrade.EARTH));
-        if (water.amountMb() == 0) return; // Legitimate empty non-liquid placement is a no-op.
-        if (core != GolemData.LIQUID || !liquidControls()) throw new IllegalArgumentException("Positive water requires valid Decanting controls");
-        waterMb = water.amountMb();
-        syncWater();
+        cargo.validate(material, getUpgradeAmount(GolemUpgrade.EARTH));
+        if (cargo.amountMb() == 0) return; // Legitimate empty non-liquid placement is a no-op.
+        if (core != GolemData.LIQUID || !liquidControls()) throw new IllegalArgumentException("Positive fluid requires valid Decanting controls");
+        fluidId = cargo.fluid();
+        fluidMb = cargo.amountMb();
+        syncFluidCargo();
     }
-    private void syncWater() { entityData.set(WATER_MB, waterMb); }
-    int waterSpace() { return GolemWaterCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH)) - waterMb; }
+    private void syncFluidCargo() {
+        entityData.set(CARGO_FLUID, fluidId == null ? "" : fluidId.toString());
+        entityData.set(CARGO_MB, fluidMb);
+    }
+    int fluidSpace() { return GolemFluidCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH)) - fluidMb; }
     boolean liquidReady() {
         return level() instanceof ServerLevel server && server.getServer().isSameThread() && core == GolemData.LIQUID
-                && canWork() && server.getEntity(getUUID()) == this && waterMb >= 0
-                && waterMb <= GolemWaterCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH));
+                && canWork() && server.getEntity(getUUID()) == this && fluidMb >= 0
+                && fluidMb <= GolemFluidCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH))
+                && (fluidMb == 0 || fluidId != null);
     }
-    boolean currentWaterHome(TileCrucible home) {
-        if (!liquidReady() || home == null || !(level() instanceof ServerLevel server)) return false;
+    /**
+     * The fluid handler of the home cell of the golem, or {@code null}.
+     *
+     * <p>Oracle {@code GolemHelper.getMissingLiquids}:341-369 asks the {@code IFluidHandler} of the
+     * home for the fluids it can take. The home of the port is therefore any fluid handler and not
+     * only the crucible of the port.</p>
+     */
+    GolemFluidHandler fluidHome() {
+        if (!liquidReady() || !(level() instanceof ServerLevel server)) return null;
         BlockPos pos = homeInventoryPosition();
-        return LiquidGolemGoals.loaded(server, pos) && home.getLevel() == server && !home.isRemoved()
-                && pos.equals(home.getBlockPos()) && server.getBlockEntity(pos) == home
-                && home.getType().isValid(server.getBlockState(pos))
-                && home.getWaterAmount() >= 0 && home.getWaterAmount() <= TileCrucible.CAPACITY;
+        if (!LiquidGolemGoals.loaded(server, pos)) return null;
+        return GolemFluidAccess.of(server, pos);
     }
-    private TileCrucible findWaterHome() {
-        if (!liquidReady() || !(level() instanceof ServerLevel server) || !LiquidGolemGoals.loaded(server, homeInventoryPosition())) return null;
-        return server.getBlockEntity(homeInventoryPosition()) instanceof TileCrucible home && currentWaterHome(home) ? home : null;
+    /** Whether the home cell still holds the fluid handler that the golem claimed. */
+    boolean currentFluidHome(BlockPos home) {
+        if (!liquidReady() || home == null || !(level() instanceof ServerLevel server)) return false;
+        if (!home.equals(homeInventoryPosition())) return false;
+        if (!LiquidGolemGoals.loaded(server, home)) return false;
+        BlockEntity tile = server.getBlockEntity(home);
+        if (tile instanceof TileCrucible crucible) {
+            return !crucible.isRemoved() && tile.getType().isValid(server.getBlockState(home))
+                    && crucible.getWaterAmount() >= 0 && crucible.getWaterAmount() <= TileCrucible.CAPACITY;
+        }
+        return GolemFluidAccess.of(server, home) != null;
     }
     /** Finite non-breaking home preflight; a full known crucible is still supported. */
-    TileCrucible permittedWaterHome() {
+    BlockPos permittedFluidHome() {
         if (busy || !liquidReady()) return null;
         busy = true;
         try {
-            TileCrucible home = findWaterHome();
-            return home != null && GolemHarvestPlatform.mayInteract(this, home.getBlockPos()) && currentWaterHome(home) ? home : null;
+            BlockPos home = homeInventoryPosition();
+            if (!(level() instanceof ServerLevel server) || !LiquidGolemGoals.loaded(server, home)) return null;
+            if (!currentFluidHome(home) || !GolemHarvestPlatform.mayInteract(this, home)) return null;
+            return currentFluidHome(home) ? home : null;
         } finally { busy = false; }
     }
-    private void bindWaterWork(ServerLevel server, TileCrucible home, BlockPos source, BlockState state) {
-        waterWorkLevel = server;
-        waterHomeIntent = home;
-        waterHomePosition = getHomePosition();
-        waterHomeFace = getHomeFacing();
-        waterSourceIntent = source == null ? null : source.immutable();
-        waterSourceState = state;
-        waterStockBefore = waterMb;
-        waterPermissionReady = false;
+    private void bindFluidWork(ServerLevel server, BlockPos home, BlockPos source, BlockState state) {
+        fluidWorkLevel = server;
+        fluidHomeIntent = home == null ? null : home.immutable();
+        fluidHomePosition = getHomePosition();
+        fluidHomeFace = getHomeFacing();
+        fluidSourceIntent = source == null ? null : source.immutable();
+        fluidSourceState = state;
+        fluidStockBefore = fluidMb;
+        fluidPermissionReady = false;
     }
-    private boolean rawWaterOwner() {
-        return busy && waterWorkLevel != null && level() == waterWorkLevel && waterWorkLevel.getServer().isSameThread()
-                && !isRemoved() && !retiring && !unsupported && unreadWater == null && core == GolemData.LIQUID
-                && EnumGolemType.isSupported(material) && waterWorkLevel.getEntity(getId()) == this
-                && waterWorkLevel.getEntity(getUUID()) == this;
+    private boolean rawFluidOwner() {
+        return busy && fluidWorkLevel != null && level() == fluidWorkLevel && fluidWorkLevel.getServer().isSameThread()
+                && !isRemoved() && !retiring && !unsupported && unreadFluidCargo == null && core == GolemData.LIQUID
+                && EnumGolemType.isSupported(material) && fluidWorkLevel.getEntity(getId()) == this
+                && fluidWorkLevel.getEntity(getUUID()) == this;
     }
-    private boolean waterBindingCurrent() {
-        return rawWaterOwner() && liquidReady() && waterPermissionReady && waterMb == waterStockBefore
-                && waterHomePosition.equals(getHomePosition()) && waterHomeFace == getHomeFacing()
-                && currentWaterHome(waterHomeIntent);
+    private boolean fluidBindingCurrent() {
+        return rawFluidOwner() && liquidReady() && fluidPermissionReady && fluidMb == fluidStockBefore
+                && fluidHomePosition.equals(getHomePosition()) && fluidHomeFace == getHomeFacing()
+                && currentFluidHome(fluidHomeIntent);
     }
     /**
-     * The source is either a marked block itself or, with Entropy, ordinary source water within the golem's range of a marked block
-     * that is itself still ordinary source water (the anchor the queue grows from, original AILiquidGather:225-262).
+     * The source is either a marked block itself or, with Entropy, ordinary source fluid within the golem's range of a marked block
+     * that is itself still ordinary source fluid (the anchor the queue grows from, original AILiquidGather:225-262).
      */
     private boolean markedSourceState(BlockPos source, BlockState expected) {
-        if (waterWorkLevel == null || source == null || expected == null || waterAnchorIntent == null
-                || !LiquidGolemGoals.loaded(waterWorkLevel, source) || !LiquidGolemGoals.loaded(waterWorkLevel, waterAnchorIntent)) return false;
+        if (fluidWorkLevel == null || source == null || expected == null || fluidAnchorIntent == null
+                || !LiquidGolemGoals.loaded(fluidWorkLevel, source) || !LiquidGolemGoals.loaded(fluidWorkLevel, fluidAnchorIntent)) return false;
         for (GolemMarker marker : markers) {
-            if (!marker.dimension().equals(waterWorkLevel.dimension().location()) || !marker.pos().equals(waterAnchorIntent)) continue;
-            if (!waterAnchorIntent.equals(source)) {
-                BlockState anchorState = waterWorkLevel.getBlockState(waterAnchorIntent);
-                if (getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0 || !GolemLiquidQueue.inRange(waterAnchorIntent, source, getRange())
-                        || !LiquidGolemGoals.sourceWater(waterWorkLevel, waterAnchorIntent, anchorState)) return false;
+            if (!marker.dimension().equals(fluidWorkLevel.dimension().location()) || !marker.pos().equals(fluidAnchorIntent)) continue;
+            if (!fluidAnchorIntent.equals(source)) {
+                BlockState anchorState = fluidWorkLevel.getBlockState(fluidAnchorIntent);
+                if (getUpgradeAmount(GolemUpgrade.ENTROPY) <= 0 || !GolemLiquidQueue.inRange(fluidAnchorIntent, source, getRange())
+                        || !LiquidGolemGoals.sourceFluid(fluidWorkLevel, fluidAnchorIntent, anchorState, fluidAnchorFluid)) return false;
             }
-            return waterWorkLevel.getBlockState(source) == expected && LiquidGolemGoals.sourceWater(waterWorkLevel, source, expected);
+            return fluidWorkLevel.getBlockState(source) == expected
+                    && LiquidGolemGoals.sourceFluid(fluidWorkLevel, source, expected, fluidAnchorFluid);
         }
         return false;
     }
     /** Root's BEFORE-removal query: only the current private gather attempt grants authority. */
-    public boolean canCollectSourceWater(BlockPos source, BlockState expected) {
-        return waterSourceIntent != null && waterSourceIntent.equals(source) && waterSourceState == expected
-                && waterBindingCurrent() && liquid.ownsCollectionAttempt(source, expected)
-                && getNavigation().isDone() && waterAnchorIntent != null
-                && distanceToSqr(waterAnchorIntent.getX() + .5, waterAnchorIntent.getY() + .5, waterAnchorIntent.getZ() + .5) < 4
-                && waterSpace() >= GolemWaterCargo.BUCKET && markedSourceState(source, expected);
+    public boolean canCollectSourceFluid(BlockPos source, BlockState expected) {
+        return fluidSourceIntent != null && fluidSourceIntent.equals(source) && fluidSourceState == expected
+                && fluidBindingCurrent() && liquid.ownsCollectionAttempt(source, expected)
+                && getNavigation().isDone() && fluidAnchorIntent != null
+                && distanceToSqr(fluidAnchorIntent.getX() + .5, fluidAnchorIntent.getY() + .5, fluidAnchorIntent.getZ() + .5) < 4
+                && fluidSpace() >= GolemFluidCargo.BUCKET && markedSourceState(source, expected);
     }
     /** AFTER root's confirmed removal: do NOT require the old source/home to remain present. */
-    public boolean creditCollectedSourceWater(BlockPos source, int expectedAmountMb) {
-        if (!rawWaterOwner() || !waterPermissionReady || waterSourceIntent == null || !waterSourceIntent.equals(source)
-                || expectedAmountMb != waterStockBefore || waterMb != expectedAmountMb || waterMb < 0
-                || waterSpace() < GolemWaterCargo.BUCKET) return false;
-        waterMb = expectedAmountMb + GolemWaterCargo.BUCKET;
+    public boolean creditCollectedSourceFluid(BlockPos source, int expectedAmountMb) {
+        if (!rawFluidOwner() || !fluidPermissionReady || fluidSourceIntent == null || !fluidSourceIntent.equals(source)
+                || expectedAmountMb != fluidStockBefore || fluidMb != expectedAmountMb || fluidMb < 0
+                || fluidSpace() < GolemFluidCargo.BUCKET) return false;
+        fluidId = fluidAnchorFluid;
+        fluidMb = expectedAmountMb + GolemFluidCargo.BUCKET;
         return true; // No sync, notification, setter, lookup or callback after the raw credit.
     }
-    public boolean canTransferWaterTo(TileCrucible actualHome) {
-        return waterSourceIntent == null && waterHomeIntent != null && waterHomeIntent == actualHome
-                && waterBindingCurrent() && liquid.ownsDeliveryAttempt(actualHome) && waterMb > 0
+    /**
+     * The marked fluid handler that the current private gather attempt drains.
+     *
+     * <p>Oracle {@code AILiquidGather}:142-160: a marked {@code IFluidHandler} of the wanted fluid is
+     * drained on the marked side and the cargo grows by the amount that the handler gave.</p>
+     */
+    public boolean canCollectHandlerFluid(BlockPos pos, Direction face, ResourceLocation fluid, int wantedMb) {
+        if (!fluidBindingCurrent() || fluidHandlerIntent == null || !fluidHandlerIntent.equals(pos)
+                || fluidHandlerFace != face || fluidHandlerFluid == null || !fluidHandlerFluid.equals(fluid)
+                || !liquid.ownsCollectionAttempt(pos, face) || wantedMb <= 0 || fluidMb != fluidStockBefore
+                || fluidMb > 0 && fluidId != null && !fluidId.equals(fluid)) return false;
+        return fluidSpace() >= Math.min(wantedMb, GolemFluidCargo.BUCKET);
+    }
+    /** AFTER the handler gave the fluid: the cargo grows by exactly that amount. */
+    public boolean creditCollectedHandlerFluid(BlockPos pos, int drainedMb, int expectedAmountMb) {
+        if (!rawFluidOwner() || !fluidPermissionReady || fluidHandlerIntent == null || !fluidHandlerIntent.equals(pos)
+                || expectedAmountMb != fluidStockBefore || fluidMb != expectedAmountMb || drainedMb <= 0
+                || drainedMb > fluidStockBefore + fluidSpace()) return false;
+        fluidId = fluidHandlerFluid;
+        fluidMb = expectedAmountMb + drainedMb;
+        return true;
+    }
+    public boolean canTransferFluidTo(BlockPos actualHome) {
+        return fluidSourceIntent == null && fluidHandlerIntent == null && fluidHomeIntent != null && fluidHomeIntent.equals(actualHome)
+                && fluidBindingCurrent() && liquid.ownsDeliveryAttempt(actualHome) && fluidMb > 0
                 && getNavigation().isDone() && GolemRouteRules.atHome(distanceToHomeSqr());
     }
-    public boolean detachWaterToCrucible(TileCrucible actualHome, int accepted, int expectedAmountMb) {
-        if (!canTransferWaterTo(actualHome) || expectedAmountMb != waterStockBefore || waterMb != expectedAmountMb
-                || accepted <= 0 || accepted > waterMb || accepted > TileCrucible.CAPACITY - actualHome.getWaterAmount()) return false;
-        waterMb = expectedAmountMb - accepted;
-        return true; // Root raw-adds to this exact crucible NEXT, before any feedback callback.
+    /** The home took the fluid; the cargo is debited by exactly that amount. */
+    public boolean detachFluidToHome(BlockPos actualHome, int accepted, int expectedAmountMb) {
+        if (actualHome == null || fluidHomeIntent == null || !fluidHomeIntent.equals(actualHome)
+                || !fluidPermissionReady || !rawFluidOwner()
+                || expectedAmountMb != fluidStockBefore || fluidMb != expectedAmountMb
+                || accepted <= 0 || accepted > fluidMb) return false;
+        fluidMb = expectedAmountMb - accepted;
+        if (fluidMb <= 0) fluidId = null;
+        return true; // The home was credited already; the cargo follows, before any feedback callback.
     }
-    boolean collectMarkedSourceWater(BlockPos source, BlockState state) { return collectMarkedSourceWater(source, source, state); }
+    boolean collectMarkedSourceFluid(BlockPos source, BlockState state) { return collectMarkedSourceFluid(source, source, state); }
     /** {@code anchor} is the marked block next to the golem; {@code source} is the block drained, the anchor itself unless Entropy queued another. */
-    boolean collectMarkedSourceWater(BlockPos anchor, BlockPos source, BlockState state) {
+    boolean collectMarkedSourceFluid(BlockPos anchor, BlockPos source, BlockState state) {
         if (busy || !liquidReady() || !liquid.ownsCollectionAttempt(anchor, source, state) || !(level() instanceof ServerLevel server)) return false;
-        int before = waterMb;
+        int before = fluidMb;
         busy = true;
         try {
-            TileCrucible home = findWaterHome();
+            BlockPos home = permittedFluidHome();
             if (home == null) { liquid.reset(); return false; }
-            bindWaterWork(server, home, source, state);
-            waterAnchorIntent = anchor.immutable();
-            if (!GolemHarvestPlatform.mayInteract(this, home.getBlockPos()) || !currentWaterHome(home)) { liquid.reset(); return false; }
+            bindFluidWork(server, home, source, state);
+            fluidAnchorIntent = anchor.immutable();
+            fluidAnchorFluid = liquid.anchorFluid();
+            if (!GolemHarvestPlatform.mayInteract(this, home) || !currentFluidHome(home)) { liquid.reset(); return false; }
             if (!GolemHarvestPlatform.mayInteract(this, source)) return false;
-            waterPermissionReady = true;
-            if (!canCollectSourceWater(source, state)) return false;
-            GolemHarvestPlatform.collectSourceWater(this, source, state);
+            fluidPermissionReady = true;
+            if (!canCollectSourceFluid(source, state)) return false;
+            fluidSoundMode = 2; // AILiquidGather:195 - the block drain always sounds.
+            GolemHarvestPlatform.collectSourceFluid(this, source, state, fluidAnchorFluid);
         } catch (RuntimeException failure) {
-            Thaumcraft.LOG.warn("Golem source-water operation failed at {}; keeping actual paid stock", source, failure);
-        } finally { finishWaterWork(server, before); }
-        return waterMb == before + GolemWaterCargo.BUCKET;
+            Thaumcraft.LOG.warn("Golem source-fluid operation failed at {}; keeping actual paid stock", source, failure);
+        } finally { finishFluidWork(server, before); }
+        return fluidMb == before + GolemFluidCargo.BUCKET;
     }
-    int deliverWaterToHome(TileCrucible home) {
-        if (busy || !liquidReady() || !liquid.ownsDeliveryAttempt(home) || !(level() instanceof ServerLevel server)) return 0;
-        int before = waterMb;
+    /** The marked fluid handler of the wanted fluid, drained on its marked side. */
+    boolean collectMarkedHandlerFluid(BlockPos pos, Direction face, ResourceLocation fluid, int wantedMb) {
+        if (busy || !liquidReady() || !liquid.ownsCollectionAttempt(pos, face) || !(level() instanceof ServerLevel server)) return false;
+        int before = fluidMb;
         busy = true;
         try {
-            if (!currentWaterHome(home)) { liquid.reset(); return 0; }
-            bindWaterWork(server, home, null, null);
-            if (!GolemHarvestPlatform.mayInteract(this, home.getBlockPos())) { liquid.reset(); return 0; }
-            waterPermissionReady = true;
-            if (!canTransferWaterTo(home)) return 0;
-            int accepted = home.fillWaterFromGolem(this, before);
-            if (accepted != before - waterMb) Thaumcraft.LOG.warn("Crucible water handoff return disagreed with actual golem debit at {}", home.getBlockPos());
+            BlockPos home = permittedFluidHome();
+            if (home == null) { liquid.reset(); return false; }
+            bindFluidWork(server, home, null, null);
+            fluidHandlerIntent = pos.immutable();
+            fluidHandlerFace = face;
+            fluidHandlerFluid = fluid;
+            if (!GolemHarvestPlatform.mayInteract(this, home) || !currentFluidHome(home)) { liquid.reset(); return false; }
+            if (!GolemHarvestPlatform.mayInteract(this, pos)) return false;
+            fluidPermissionReady = true;
+            if (!canCollectHandlerFluid(pos, face, fluid, wantedMb)) return false;
+            GolemFluidHandler handler = GolemFluidAccess.of(server, pos);
+            if (handler == null) return false;
+            int drained = handler.drain(face, fluid, wantedMb, true);
+            fluidSoundMode = 3; // AILiquidGather:152-154 - the sound only above 200 millibuckets.
+            if (drained > 0) creditCollectedHandlerFluid(pos, drained, before);
         } catch (RuntimeException failure) {
-            Thaumcraft.LOG.warn("Golem crucible delivery failed; never refunding already accepted water", failure);
-        } finally { finishWaterWork(server, before); }
-        return before - waterMb;
+            Thaumcraft.LOG.warn("Golem marked fluid handler operation failed at {}; keeping actual paid stock", pos, failure);
+        } finally { finishFluidWork(server, before); }
+        return fluidMb > before;
     }
-    private void finishWaterWork(ServerLevel server, int before) {
-        waterWorkLevel = null;
-        waterSourceIntent = waterHomePosition = waterAnchorIntent = null;
-        waterSourceState = null;
-        waterHomeFace = null;
-        waterHomeIntent = null;
-        waterPermissionReady = false;
+    int deliverFluidToHome(BlockPos home) {
+        if (busy || !liquidReady() || !liquid.ownsDeliveryAttempt(home) || !(level() instanceof ServerLevel server)) return 0;
+        int before = fluidMb;
+        busy = true;
         try {
-            if (waterMb != before) {
-                syncWater();
-                if (level() == server && isAlive() && current()) {
+            if (!currentFluidHome(home)) { liquid.reset(); return 0; }
+            bindFluidWork(server, home, null, null);
+            if (!GolemHarvestPlatform.mayInteract(this, home)) { liquid.reset(); return 0; }
+            fluidPermissionReady = true;
+            if (!canTransferFluidTo(home)) return 0;
+            GolemFluidHandler handler = GolemFluidAccess.of(server, home);
+            if (handler == null || fluidId == null) return 0;
+            // The original's order: the home takes the fluid FIRST, the cargo is debited after.
+            int accepted = handler.fill(getHomeFacing(), fluidId, before, true);
+            fluidSoundMode = 1; // AILiquidEmpty:77-79 - the sound only above 200 millibuckets.
+            if (accepted > 0 && !detachFluidToHome(home, accepted, before)) {
+                Thaumcraft.LOG.warn("Golem fluid handoff at {} was accepted but the cargo debit failed; never refunding", home);
+            }
+        } catch (RuntimeException failure) {
+            Thaumcraft.LOG.warn("Golem fluid delivery failed; never refunding already accepted fluid", failure);
+        } finally { finishFluidWork(server, before); }
+        return before - fluidMb;
+    }
+    private void finishFluidWork(ServerLevel server, int before) {
+        fluidWorkLevel = null;
+        fluidSourceIntent = fluidHomePosition = fluidAnchorIntent = null;
+        fluidSourceState = null;
+        fluidHomeFace = null;
+        fluidHomeIntent = null;
+        fluidHandlerIntent = null;
+        fluidHandlerFace = null;
+        fluidHandlerFluid = null;
+        fluidAnchorFluid = null;
+        fluidSoundMode = 0;
+        fluidPermissionReady = false;
+        try {
+            if (fluidMb != before) {
+                syncFluidCargo();
+                int accepted = Math.abs(fluidMb - before);
+                int limit = GolemFluidCargo.capacity(material, getUpgradeAmount(GolemUpgrade.EARTH));
+                float volume = .2F;
+                boolean play = fluidSoundMode == 2;
+                if (fluidSoundMode == 1) { // AILiquidEmpty:77-79.
+                    play = accepted > 200;
+                    volume = Math.min(.2F, .2F * accepted / Math.max(1, limit));
+                } else if (fluidSoundMode == 3) { // AILiquidGather:152-154.
+                    play = accepted > 200;
+                    volume = .2F * accepted / Math.max(1, limit);
+                }
+                if (play && level() == server && isAlive() && current()) {
                     startActionTimer();
                     server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_SWIM, SoundSource.NEUTRAL,
-                            .2F, 1 + (server.random.nextFloat() - server.random.nextFloat()) * .3F);
+                            volume, 1 + (server.random.nextFloat() - server.random.nextFloat()) * .3F);
                 }
             }
         } catch (RuntimeException feedback) {
-            Thaumcraft.LOG.warn("Golem water feedback failed after payment; stock is unchanged", feedback);
+            Thaumcraft.LOG.warn("Golem fluid feedback failed after payment; stock is unchanged", feedback);
         } finally {
             busy = false;
-            Entity.RemovalReason deferred = deferredWaterRemoval;
-            deferredWaterRemoval = null;
+            Entity.RemovalReason deferred = deferredFluidRemoval;
+            deferredFluidRemoval = null;
             if (deferred != null) remove(deferred);
         }
     }
-    private void readWaterCargo(CompoundTag tag) {
-        waterMb = 0;
-        unreadWater = null;
-        if (!tag.contains("WaterCargo")) return; // Older supported entities owned no water.
-        Tag raw = tag.get("WaterCargo");
+    private void readFluidCargo(CompoundTag tag) {
+        fluidId = null;
+        fluidMb = 0;
+        unreadFluidCargo = null;
+        if (!tag.contains("FluidCargo")) return; // Older supported entities owned no fluid.
+        Tag raw = tag.get("FluidCargo");
         try {
-            if (!(raw instanceof CompoundTag compound)) throw new IllegalArgumentException("WaterCargo must be a compound");
-            GolemWaterCargo water = GolemWaterCargo.parse(compound);
-            water.validate(material, getUpgradeAmount(GolemUpgrade.EARTH));
-            if (water.amountMb() > 0 && core != GolemData.LIQUID) throw new IllegalArgumentException("Non-Decanting water stock");
-            waterMb = water.amountMb();
+            if (!(raw instanceof CompoundTag compound)) throw new IllegalArgumentException("FluidCargo must be a compound");
+            GolemFluidCargo cargo = GolemFluidCargo.parse(compound);
+            cargo.validate(material, getUpgradeAmount(GolemUpgrade.EARTH));
+            if (cargo.amountMb() > 0 && core != GolemData.LIQUID) throw new IllegalArgumentException("Non-Decanting fluid stock");
+            fluidId = cargo.fluid();
+            fluidMb = cargo.amountMb();
         } catch (RuntimeException invalid) {
-            unreadWater = raw.copy();
+            unreadFluidCargo = raw.copy();
             unsupported = true;
         }
     }
@@ -1932,7 +2054,7 @@ public class EntityGolemBase extends AbstractGolem {
         requireServerThread();
         if (stock == null || !(level() instanceof ServerLevel server) || tickCount != 0 || current() || isRemoved()
                 || server.getEntity(getId()) != null || server.getEntity(getUUID()) != null || busy || essentiaMutationActive()
-                || retiring || unsupported || unreadAspect != null || aspectCargo.amount() != 0 || waterMb != 0 || unreadWater != null
+                || retiring || unsupported || unreadAspect != null || aspectCargo.amount() != 0 || fluidMb != 0 || unreadFluidCargo != null
                 || !carried.isEmpty() || unreadCarried != null || fishing.hasPending() || hasUseRemainders() || useCustodyActive()) {
             throw new IllegalStateException("Aspect cargo requires a fresh, unadmitted, stock-free golem");
         }
@@ -2044,7 +2166,12 @@ public class EntityGolemBase extends AbstractGolem {
             qualifying = true;
             EssentiaTransfers.Attempt attempt = source instanceof TileAlembic alembic
                     ? EssentiaTransfers.collectAlembic(this, alembic, Direction.UP, aspect, limit)
-                    : EssentiaTransfers.collectReservoir(this, (TileEssentiaReservoir) source, aspect, limit);
+                    : source instanceof TileEssentiaReservoir reservoir
+                    ? EssentiaTransfers.collectReservoir(this, reservoir, aspect, limit)
+                    // Original AIEssentiaGather:114 - every other marked essentia transport.
+                    : source instanceof IEssentiaTransport transport
+                    ? EssentiaTransfers.collectTransport(this, transport, binding.face(), aspect, limit)
+                    : new EssentiaTransfers.Attempt(false, 0, null);
             if (attempt.failure() != null) Thaumcraft.LOG.warn("Golem alembic transfer reported {} committed units; never refunding", attempt.committedUnits(), attempt.failure());
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.warn("Golem alembic transfer failed; retaining actual cargo, never replaying a debit", failure);
@@ -2406,7 +2533,7 @@ public class EntityGolemBase extends AbstractGolem {
         busy = true;
         try {
             if (core != GolemData.NO_CORE || !activeCore(installedCore) || player.getItemInHand(hand) != held
-                    || waterMb != 0 || unreadWater != null || aspectCargo.amount() != 0 || unreadAspect != null || essentiaMutationActive()
+                    || fluidMb != 0 || unreadFluidCargo != null || aspectCargo.amount() != 0 || unreadAspect != null || essentiaMutationActive()
                     || !(held.getItem() instanceof ItemGolemCore item) || item.getCore() != installedCore || !canInteract(player, held)
                     || (requiresEmptyControls(installedCore) || installedCore == GolemData.LIQUID) && !baselineEmptyControls()
                     || installedCore == GolemData.USE && !useWhitelistControls()) return;
@@ -2529,8 +2656,8 @@ public class EntityGolemBase extends AbstractGolem {
     }
     public boolean recall(Player player, boolean dismantle) {
         if (player == null || !(level() instanceof ServerLevel server) || busy || essentiaMutationActive() || retiring || !EnumGolemType.isSupported(material) || unsupported
-                || unreadCarried != null || unreadWater != null || unreadAspect != null || unreadUseRemainders != null || useCustodyActive()
-                || dismantle && (waterMb > 0 || aspectCargo.amount() > 0)
+                || unreadCarried != null || unreadFluidCargo != null || unreadAspect != null || unreadUseRemainders != null || useCustodyActive()
+                || dismantle && (fluidMb > 0 || aspectCargo.amount() > 0)
                 || !canInteract(player, player.getMainHandItem()) || !player.getMainHandItem().is(ThaumcraftGolems.GOLEM_BELL.get())) return false;
         requireServerThread();
         // Configured placer data has no equipment storage. These workers must not
@@ -2547,7 +2674,7 @@ public class EntityGolemBase extends AbstractGolem {
             fishing.cancelCast();
             if (!canInteract(player, player.getMainHandItem()) || !player.getMainHandItem().is(ThaumcraftGolems.GOLEM_BELL.get())
                     || level() != server || server.getEntity(getId()) != this || server.getEntity(getUUID()) != this
-                    || !isAlive() || retiring || unsupported || unreadCarried != null || unreadWater != null || unreadAspect != null) return false;
+                    || !isAlive() || retiring || unsupported || unreadCarried != null || unreadFluidCargo != null || unreadAspect != null) return false;
             if ((core == GolemData.GUARD || core == GolemData.FISHING || core == GolemData.LIQUID
                     || core == GolemData.ALCHEMY || core == GolemData.USE || core == GolemData.BUTCHER) && hasGuardEquipment()) return false;
             Item placerItem = ThaumcraftGolems.placerForMaterial(material);
@@ -2572,7 +2699,7 @@ public class EntityGolemBase extends AbstractGolem {
             } else {
                 placer.set(ThaumcraftGolems.GOLEM_DATA.get(), configuredData());
                 if (hasCustomName()) placer.set(DataComponents.CUSTOM_NAME, getCustomName().copy());
-                getWaterCargo().writeToPlacer(placer);
+                getFluidCargo().writeToPlacer(placer);
                 if (aspectCargo.amount() > 0) getAspectCargo().writeToPlacer(placer);
             }
             if (!carried.isEmpty()) outputs.add(carried); // Separate real stock, never in placer data.
@@ -2580,7 +2707,7 @@ public class EntityGolemBase extends AbstractGolem {
             // the entity is discarded; no addFreshEntity(false)-and-delete path.
             DeferredItemDrops.enqueue(server, blockPosition(), outputs);
             carried = ItemStack.EMPTY;
-            waterMb = 0; // Raw stock transfer beside item cargo, BEFORE any removal/display callbacks.
+            fluidMb = 0; // Raw stock transfer beside item cargo, BEFORE any removal/display callbacks.
             aspectCargo = GolemAspectCargo.EMPTY;
             retiring = true;
             configurationOpeners.clear();
@@ -2624,7 +2751,7 @@ public class EntityGolemBase extends AbstractGolem {
         // A failed enqueue is retried while the dead entity still owns its cargo,
         // rather than allowing vanilla's 20-tick removal to silently delete it.
         if (level() instanceof ServerLevel server && !queueDeathCargo(server)) return;
-        if (unreadWater != null || unsupported && waterMb > 0) return;
+        if (unreadFluidCargo != null || unsupported && fluidMb > 0) return;
         if (unreadAspect != null || unsupported && aspectCargo.amount() > 0) return;
         // Known water/essentia follow original death loss; no buckets/jars/placers.
         super.tickDeath();
@@ -2638,7 +2765,7 @@ public class EntityGolemBase extends AbstractGolem {
         super.addAdditionalSaveData(tag);
         fishing.savePending(tag);
         saveUseRemainders(tag);
-        tag.put("WaterCargo", unreadWater == null ? new GolemWaterCargo(waterMb).save() : unreadWater.copy());
+        tag.put("FluidCargo", unreadFluidCargo == null ? getFluidCargo().save() : unreadFluidCargo.copy());
         tag.put("AspectCargo", unreadAspect == null ? aspectCargo.save() : unreadAspect.copy());
         BlockPos home = getHomePosition();
         tag.putBoolean("HomeSet", hasHome);
@@ -2687,7 +2814,7 @@ public class EntityGolemBase extends AbstractGolem {
         requireServerThread();
         // A native load must not overwrite an unpublished paid row, or publish it
         // and then import a second copy of that same serialized row.
-        if (busy || essentiaMutationActive() || fishing.hasPending() || waterMb != 0 || unreadWater != null
+        if (busy || essentiaMutationActive() || fishing.hasPending() || fluidMb != 0 || unreadFluidCargo != null
                 || aspectCargo.amount() != 0 || unreadAspect != null || !carried.isEmpty() || unreadCarried != null
                 || hasUseRemainders() || useCustodyActive() || deferredUseRemoval != null) {
             throw new IllegalStateException("Cannot reload a busy golem or overwrite owned cargo/pending stock");
@@ -2733,7 +2860,7 @@ public class EntityGolemBase extends AbstractGolem {
         if (core != GolemData.USE && !useOptions.isDefault()) unsupported = true;
         if (!fishing.loadPending(tag)) unsupported = true;
         readUseRemainders(tag);
-        readWaterCargo(tag);
+        readFluidCargo(tag);
         readAspectCargo(tag);
         unreadCarried = null;
         carried = ItemStack.EMPTY;
@@ -2864,7 +2991,7 @@ public class EntityGolemBase extends AbstractGolem {
         configurationOpeners.clear();
         retiring = false;
         syncCarried();
-        syncWater();
+        syncFluidCargo();
         syncAspectCargo();
         rebuildGoals();
     }

@@ -22,6 +22,8 @@ public final class ThaumcraftFabric implements ModInitializer {
     @Override public void onInitialize() {
         Thaumcraft.init();
         thaumcraft.fabric.fluid.FabricSpaStorage.init();
+        // The loader independent fluid handler API of the golem (oracle GolemHelper:341-446).
+        thaumcraft.fabric.fluid.FabricGolemFluidAccess.init();
         // Original TileCrucible:373-410 - the water tank of the crucible that other mods may read and fill.
         thaumcraft.fabric.fluid.FabricCrucibleStorage.init();
         thaumcraft.fabric.loot.FabricThaumcraftLoot.init();

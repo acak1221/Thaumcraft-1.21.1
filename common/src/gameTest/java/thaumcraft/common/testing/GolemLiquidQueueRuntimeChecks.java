@@ -34,7 +34,7 @@ import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUseOptions;
-import thaumcraft.common.items.golems.GolemWaterCargo;
+import thaumcraft.common.items.golems.GolemFluidCargo;
 import thaumcraft.common.tiles.TileCrucible;
 
 /**
@@ -191,7 +191,7 @@ public final class GolemLiquidQueueRuntimeChecks {
 
         private void armShafts() {
             // Capacity of the long-shaft golem: Thaumium with one Earth upgrade; the crucible takes one bucket, the golem the rest.
-            int longBuckets = GolemWaterCargo.capacity(THAUMIUM, 1) / GolemWaterCargo.BUCKET + 1;
+            int longBuckets = GolemFluidCargo.capacity(THAUMIUM, 1) / GolemFluidCargo.BUCKET + 1;
             // Range 16 from the marked top cell (index 18) reaches index 2: the farthest in-range sources go first, bottom up.
             shaft("long shaft, Entropy", 0, 19, 1, true, sequence(2, 2 + longBuckets - 1));
             // Five cells, all in range: bottom up, the marked top cell (index 4) last; five buckets fit (crucible + 4000).
@@ -212,8 +212,8 @@ public final class GolemLiquidQueueRuntimeChecks {
                 List<Integer> prefix = shaft.expectedOrder.subList(0, Math.min(shaft.removed.size(), shaft.expectedPickups));
                 test.assertTrue(shaft.removed.size() <= shaft.expectedPickups && shaft.removed.equals(prefix),
                         shaft.name + " drains " + shaft.expectedOrder + " in that order, not " + shaft.removed);
-                int water = shaft.golem.getWaterAmountMb() + shaft.crucible.getWaterAmount();
-                test.assertTrue(water == GolemWaterCargo.BUCKET * shaft.removed.size(),
+                int water = shaft.golem.getFluidAmountMb() + shaft.crucible.getWaterAmount();
+                test.assertTrue(water == GolemFluidCargo.BUCKET * shaft.removed.size(),
                         shaft.name + ": every drained bucket is in the golem or the crucible, none conjured: " + water + " mB for " + shaft.removed.size());
             }
             if (settleUntil == 0) {
@@ -223,8 +223,8 @@ public final class GolemLiquidQueueRuntimeChecks {
             if (test.getTick() < settleUntil) return false;
             for (Shaft shaft : shafts) {
                 test.assertTrue(shaft.removed.equals(shaft.expectedOrder), shaft.name + " drained exactly " + shaft.expectedOrder + ": " + shaft.removed);
-                test.assertTrue(shaft.golem.getWaterAmountMb() + shaft.crucible.getWaterAmount() == GolemWaterCargo.BUCKET * shaft.expectedPickups,
-                        shaft.name + ": all water accounted for after the golem went idle: golem " + shaft.golem.getWaterAmountMb() + ", crucible " + shaft.crucible.getWaterAmount());
+                test.assertTrue(shaft.golem.getFluidAmountMb() + shaft.crucible.getWaterAmount() == GolemFluidCargo.BUCKET * shaft.expectedPickups,
+                        shaft.name + ": all water accounted for after the golem went idle: golem " + shaft.golem.getFluidAmountMb() + ", crucible " + shaft.crucible.getWaterAmount());
                 test.assertTrue(shaft.crucible.getWaterAmount() == TileCrucible.CAPACITY, shaft.name + ": the golem filled the crucible first");
                 for (int index = 0; index < shaft.cells; index++) {
                     boolean drained = shaft.expectedOrder.contains(index);
@@ -238,7 +238,7 @@ public final class GolemLiquidQueueRuntimeChecks {
             var text = new StringBuilder();
             for (Shaft shaft : shafts) {
                 text.append(shaft.name).append(" removed ").append(shaft.removed).append(" of ").append(shaft.expectedOrder)
-                        .append(", golem ").append(shaft.golem.getWaterAmountMb()).append(" mB at ").append(shaft.golem.blockPosition().toShortString())
+                        .append(", golem ").append(shaft.golem.getFluidAmountMb()).append(" mB at ").append(shaft.golem.blockPosition().toShortString())
                         .append(", crucible ").append(shaft.crucible.getWaterAmount()).append(" mB; ");
             }
             return text.toString();

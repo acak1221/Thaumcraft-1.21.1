@@ -53,7 +53,7 @@ import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUseOptions;
-import thaumcraft.common.items.golems.GolemWaterCargo;
+import thaumcraft.common.items.golems.GolemFluidCargo;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /**
@@ -506,16 +506,16 @@ public final class GolemUpgradeRuntimeChecks {
                 @SuppressWarnings("unchecked") List<Integer> upgrades = (List<Integer>) row[0];
                 int amount = (Integer) row[1];
                 var placer = placerStack(thaumium, GolemData.LIQUID, upgrades);
-                new GolemWaterCargo(amount).writeToPlacer(placer);
+                new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), amount).writeToPlacer(placer);
                 var result = place(placer);
                 test.assertTrue(result == row[2], amount + " mB with " + upgrades.size() + " Earth: placement " + result + ", expected " + row[2]);
                 if (result == InteractionResult.CONSUME) {
                     var golem = placedGolem();
-                    test.assertTrue(player.getMainHandItem().isEmpty() && golem.getWaterAmountMb() == amount && golem.getGolemCore() == GolemData.LIQUID
+                    test.assertTrue(player.getMainHandItem().isEmpty() && golem.getFluidAmountMb() == amount && golem.getGolemCore() == GolemData.LIQUID
                             && golem.getFluidCarryLimit() >= amount, amount + " mB reaches the placed golem and the placer is paid");
                 } else {
                     test.assertTrue(!player.getMainHandItem().isEmpty() && golemsNear().isEmpty()
-                                    && GolemWaterCargo.readPlacer(player.getMainHandItem()).amountMb() == amount,
+                                    && GolemFluidCargo.readPlacer(player.getMainHandItem()).amountMb() == amount,
                             "a refused placer is kept untouched with its water and nothing is placed");
                 }
                 clearGolems();
@@ -523,10 +523,10 @@ public final class GolemUpgradeRuntimeChecks {
 
             // Full round trip of the maximum: placer -> golem -> NBT -> bell -> placer -> golem.
             var maximum = placerStack(thaumium, GolemData.LIQUID, List.of(EARTH, EARTH));
-            new GolemWaterCargo(8000).writeToPlacer(maximum);
+            new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000).writeToPlacer(maximum);
             test.assertTrue(place(maximum) == InteractionResult.CONSUME, "a Thaumium Decanting placer with two Earth places 8000 mB");
             var golem = placedGolem();
-            test.assertTrue(golem.getWaterAmountMb() == 8000 && golem.getWaterCargo().equals(new GolemWaterCargo(8000))
+            test.assertTrue(golem.getFluidAmountMb() == 8000 && golem.getFluidCargo().equals(new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000))
                             && golem.getUpgradeAmount(GolemUpgrade.EARTH) == 2 && golem.getFluidCarryLimit() == 8000,
                     "the golem holds 8000 of its 8000 mB");
 
@@ -534,13 +534,13 @@ public final class GolemUpgradeRuntimeChecks {
             player.setShiftKeyDown(true);
             boolean dismantled = golem.recall(player, true);
             player.setShiftKeyDown(false);
-            test.assertTrue(!dismantled && golem.isAlive() && !golem.isRemoved() && golem.getWaterAmountMb() == 8000
+            test.assertTrue(!dismantled && golem.isAlive() && !golem.isRemoved() && golem.getFluidAmountMb() == 8000
                             && golem.getUpgradeAmount(GolemUpgrade.EARTH) == 2 && items(thaumium).isEmpty(),
                     "dismantling is refused while water is held, so the Earth upgrades that pay for it cannot be lost with the water");
 
             var tag = save(golem);
             var reloaded = load(tag);
-            test.assertTrue(reloaded.getWaterAmountMb() == 8000 && reloaded.getUpgradeAmount(GolemUpgrade.EARTH) == 2,
+            test.assertTrue(reloaded.getFluidAmountMb() == 8000 && reloaded.getUpgradeAmount(GolemUpgrade.EARTH) == 2,
                     "save/load keeps 8000 mB with its two Earth upgrades");
             reloaded.discard();
             var tampered = tag.copy();
@@ -557,10 +557,10 @@ public final class GolemUpgradeRuntimeChecks {
             DeferredItemDrops.tick(level);
             var returned = items(thaumium);
             test.assertTrue(returned.size() == 1 && returned.getFirst().get(ThaumcraftGolems.GOLEM_DATA.get()).upgrades().equals(List.of(EARTH, EARTH))
-                            && GolemWaterCargo.readPlacer(returned.getFirst()).amountMb() == 8000,
+                            && GolemFluidCargo.readPlacer(returned.getFirst()).amountMb() == 8000,
                     "the returned placer holds both Earth upgrades and all 8000 mB");
             clearGolems();
-            test.assertTrue(place(returned.getFirst()) == InteractionResult.CONSUME && placedGolem().getWaterAmountMb() == 8000,
+            test.assertTrue(place(returned.getFirst()) == InteractionResult.CONSUME && placedGolem().getFluidAmountMb() == 8000,
                     "and it places again with the whole stock");
             clearGolems();
 

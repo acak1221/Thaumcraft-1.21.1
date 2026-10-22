@@ -11,7 +11,7 @@ import thaumcraft.common.entities.golems.LumberGeometry;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemUpgrade;
 import thaumcraft.common.items.golems.GolemUpgrades;
-import thaumcraft.common.items.golems.GolemWaterCargo;
+import thaumcraft.common.items.golems.GolemFluidCargo;
 
 /** Pure slot rules and effect arithmetic of the golem upgrades (original EntityGolemBase / ItemGolemBell); no world or registry. */
 class GolemUpgradesTest {
@@ -175,15 +175,15 @@ class GolemUpgradesTest {
     @Test void waterCapacityIsFloorSqrtOfTheCarryLimitInBuckets() {
         int[][] table = {{1, 1000}, {4, 2000}, {5, 2000}, {8, 2000}, {9, 3000}, {12, 3000}, {16, 4000}, {24, 4000}, {32, 5000}, {48, 6000}, {64, 8000}};
         for (int[] row : table) assertEquals(row[1], GolemUpgrades.fluidLimitMb(row[0]), "carry " + row[0]);
-        assertEquals(8000, GolemWaterCargo.capacity(7, 2), "Thaumium with two Earth: 64 -> 8000 mB");
-        assertEquals(6000, GolemWaterCargo.capacity(7, 1));
-        assertEquals(5000, GolemWaterCargo.capacity(7, 0), "the pre-Earth Thaumium and Iron limit is unchanged");
-        assertEquals(5000, GolemWaterCargo.capacity(6, 0));
-        assertEquals(4000, GolemWaterCargo.capacity(5, 0), "Stone: floor(sqrt(16)) = 4");
-        assertEquals(5000, GolemWaterCargo.capacity(5, 1), "Stone with Earth: 32 -> 5000 mB");
-        assertEquals(6000, GolemWaterCargo.capacity(6, 1), "Iron with Earth: 48 -> 6000 mB");
-        assertEquals(2000, GolemWaterCargo.capacity(2, 0), "Tallow without Earth: floor(sqrt(8)) = 2");
-        assertEquals(4000, GolemWaterCargo.capacity(2, 2), "Tallow with two Earth: floor(sqrt(24)) = 4");
+        assertEquals(8000, GolemFluidCargo.capacity(7, 2), "Thaumium with two Earth: 64 -> 8000 mB");
+        assertEquals(6000, GolemFluidCargo.capacity(7, 1));
+        assertEquals(5000, GolemFluidCargo.capacity(7, 0), "the pre-Earth Thaumium and Iron limit is unchanged");
+        assertEquals(5000, GolemFluidCargo.capacity(6, 0));
+        assertEquals(4000, GolemFluidCargo.capacity(5, 0), "Stone: floor(sqrt(16)) = 4");
+        assertEquals(5000, GolemFluidCargo.capacity(5, 1), "Stone with Earth: 32 -> 5000 mB");
+        assertEquals(6000, GolemFluidCargo.capacity(6, 1), "Iron with Earth: 48 -> 6000 mB");
+        assertEquals(2000, GolemFluidCargo.capacity(2, 0), "Tallow without Earth: floor(sqrt(8)) = 2");
+        assertEquals(4000, GolemFluidCargo.capacity(2, 2), "Tallow with two Earth: floor(sqrt(24)) = 4");
     }
 
     @Test void aspectCapacityIsTheCarryLimit() {
@@ -193,17 +193,17 @@ class GolemUpgradesTest {
         assertEquals(24, GolemAspectCargo.capacity(2, 2));
         assertEquals(8, GolemAspectCargo.capacity(2, 0));
         assertThrows(IllegalArgumentException.class, () -> GolemAspectCargo.capacity(8, 0));
-        assertThrows(IllegalArgumentException.class, () -> GolemWaterCargo.capacity(-1, 0));
+        assertThrows(IllegalArgumentException.class, () -> GolemFluidCargo.capacity(-1, 0));
     }
 
     @Test void cargoValidationFollowsTheEarthCountNotJustTheMaterial() {
-        new GolemWaterCargo(8000).validate(7, 2);
-        assertThrows(IllegalArgumentException.class, () -> new GolemWaterCargo(8000).validate(7, 1), "8000 mB needs both Earth upgrades");
-        assertThrows(IllegalArgumentException.class, () -> new GolemWaterCargo(6000).validate(7, 0));
-        new GolemWaterCargo(6000).validate(7, 1);
-        new GolemWaterCargo(5000).validate(7, 0);
-        assertThrows(IllegalArgumentException.class, () -> new GolemWaterCargo(3000).validate(2, 0), "Tallow without Earth holds two buckets");
-        new GolemWaterCargo(4000).validate(2, 1);
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000).validate(7, 2);
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8000).validate(7, 1), "8000 mB needs both Earth upgrades");
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 6000).validate(7, 0));
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 6000).validate(7, 1);
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 5000).validate(7, 0);
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 3000).validate(2, 0), "Tallow without Earth holds two buckets");
+        new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 4000).validate(2, 1);
         new GolemAspectCargo(Aspect.AIR, 64).validate(7, 2);
         assertThrows(IllegalArgumentException.class, () -> new GolemAspectCargo(Aspect.AIR, 64).validate(7, 1));
         assertThrows(IllegalArgumentException.class, () -> new GolemAspectCargo(Aspect.AIR, 33).validate(7, 0));
@@ -216,14 +216,14 @@ class GolemUpgradesTest {
         EnumGolemType[] types = EnumGolemType.values();
         for (int type = 0; type < types.length; type++) {
             int earthMax = Math.min(types[type].upgrades, GolemUpgrades.MAX_SAME_KIND);
-            water = Math.max(water, GolemWaterCargo.capacity(type, earthMax));
+            water = Math.max(water, GolemFluidCargo.capacity(type, earthMax));
             aspect = Math.max(aspect, GolemAspectCargo.capacity(type, earthMax));
         }
-        assertEquals(water, GolemWaterCargo.MAX_AMOUNT_MB);
+        assertEquals(water, GolemFluidCargo.MAX_AMOUNT_MB);
         assertEquals(aspect, GolemAspectCargo.MAX_AMOUNT);
         assertEquals(8000, water);
         assertEquals(64, aspect);
-        assertThrows(IllegalArgumentException.class, () -> new GolemWaterCargo(8001));
+        assertThrows(IllegalArgumentException.class, () -> new GolemFluidCargo(net.minecraft.resources.ResourceLocation.withDefaultNamespace("minecraft:water"), 8001));
         assertThrows(IllegalArgumentException.class, () -> new GolemAspectCargo(Aspect.AIR, 65));
     }
 

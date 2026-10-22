@@ -244,12 +244,22 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
         }
     }
 
-    /** Native display-only bucket adaptation; real water is a separate mB field,
-     * never an equipped/returned bucket or a second transferable stack. */
+    /** Native display-only bucket adaptation; real fluid is a separate mB field,
+     * never an equipped/returned bucket or a second transferable stack. The bucket
+     * is the one of the fluid of the cargo, exactly like the original's
+     * {@code new ItemStack(Item.getItemById(fluidID), 1, amount)}
+     * (oracle {@code EntityGolemBase:877-883}). */
     private static final class WaterBucketLayer extends RenderLayer<EntityGolemBase, ModelGolem<EntityGolemBase>> {
         private final ItemRenderer items;
-        private final ItemStack empty = new ItemStack(Items.BUCKET), filled = new ItemStack(Items.WATER_BUCKET);
+        private final ItemStack empty = new ItemStack(Items.BUCKET);
         private WaterBucketLayer(RenderGolemBase renderer, ItemRenderer items) { super(renderer); this.items = items; }
+        private static ItemStack cargoBucket(EntityGolemBase entity) {
+            var id = entity.getFluidId();
+            if (id == null) return new ItemStack(Items.BUCKET);
+            var fluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.get(id);
+            if (fluid == null) return new ItemStack(Items.BUCKET);
+            return new ItemStack(fluid.getBucket());
+        }
         @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, EntityGolemBase entity,
                                      float walkPhase, float walkSpeed, float partialTick, float age, float headYaw, float headPitch) {
             if (entity.isInvisible() || entity.getGolemCore() != 5) return;
@@ -258,7 +268,7 @@ public final class RenderGolemBase extends MobRenderer<EntityGolemBase, ModelGol
                 pose.scale(.4F, .4F, .4F);
                 pose.translate(0, 2.5, -1.1);
                 pose.mulPose(Axis.XP.rotationDegrees(180));
-                renderItem(items, entity.getWaterAmountMb() > 0 ? filled : empty, entity, pose, buffers, light);
+                renderItem(items, entity.getFluidAmountMb() > 0 ? cargoBucket(entity) : empty, entity, pose, buffers, light);
             } finally { pose.popPose(); }
         }
     }

@@ -25,6 +25,20 @@ import net.minecraft.world.phys.AABB;
  * entity that the real tick machinery drives.
  */
 final class WaveLane {
+    /**
+     * The radius of the clean up sweep of the lane, in blocks.
+     *
+     * <p>The vanilla GameTest grid packs the scenarios of a batch eight blocks apart and five
+     * blocks of margin, so the next scenario's structure is THIRTEEN blocks away and its own
+     * fixture starts nine blocks away (its base is three blocks into its structure and its floor
+     * reaches four blocks further). A wider sweep reached into the neighbouring scenario and
+     * discarded ITS mobs - and a golem of a neighbouring scenario is a Mob - which stopped that
+     * scenario's golem for good. The lane's own footprint is a floor and a roof of four blocks
+     * around its origin, so five blocks catch everything the content spawns inside the lane and
+     * stop eight blocks short of the neighbour's fixture.</p>
+     */
+    static final int CLEAN_RADIUS = 5;
+
     final GameTestHelper test;
     final ServerLevel level;
     final BlockPos origin;
@@ -107,7 +121,11 @@ final class WaveLane {
         forced.clear();
         // The lane also owns whatever the content itself spawned inside it: the champion spiderlings,
         // the cultist minions of the portal and the real drops of the dead mobs.
-        level.getEntities((Entity)null, area(16), entity -> entity instanceof Mob || entity instanceof ItemEntity
+        //
+        // The sweep stays inside the lane (see CLEAN_RADIUS): a wider sweep reached into the
+        // neighbouring scenario and discarded its mobs, and a golem of a neighbouring scenario is
+        // a Mob - that stopped the golem of the neighbour for good.
+        level.getEntities((Entity)null, area(CLEAN_RADIUS), entity -> entity instanceof Mob || entity instanceof ItemEntity
                         || entity instanceof Projectile).forEach(Entity::discard);
         for (BlockPos pos : placed) if (level.isLoaded(pos)) level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
         placed.clear();

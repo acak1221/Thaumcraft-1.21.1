@@ -1673,6 +1673,21 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         SpaFluidStorageRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g18_fluid_fill")
+    public void fluidGolemFractionalFillConserves(GameTestHelper test) { FluidConservationRuntimeChecks.golemFractionalFill(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g18_fluid_drain")
+    public void fluidGolemFractionalDrainConserves(GameTestHelper test) { FluidConservationRuntimeChecks.golemFractionalDrain(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g18_fluid_abort")
+    public void fluidCrucibleAbortConserves(GameTestHelper test) { FluidConservationRuntimeChecks.crucibleAbort(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g18_fluid_drain_abort")
+    public void fluidCrucibleDrainAbortConserves(GameTestHelper test) { FluidConservationRuntimeChecks.crucibleDrainAbort(test); }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "g18_fluid_bounds")
+    public void fluidBoundaryAmountsConserve(GameTestHelper test) { FluidConservationRuntimeChecks.boundaryAmounts(test); }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 240, batch = "m14_spa_menu")
     public void spaMenuPreservesNativeOwnershipAndOriginalQuickMove(GameTestHelper test) {
         thaumcraft.common.testing.SpaMenuRuntimeChecks.run(test);

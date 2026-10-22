@@ -27,13 +27,15 @@ import thaumcraft.common.items.golems.GolemMarker;
 /** Item cores show six ghosts per page (every Fire upgrade adds a page), Decanting one, Sorting/Guard none. Ghosts own no stock.
  * Paging is a server menu button (66 previous, 67 next); the page and slot count reach the client as menu data. */
 public final class ContainerGolem extends AbstractContainerMenu {
-    public static final int IMAGE_WIDTH = 176, IMAGE_HEIGHT = 166, GHOSTS = 6, DATA = 21;
+    public static final int IMAGE_WIDTH = 176, IMAGE_HEIGHT = 166, GHOSTS = 6, DATA = 24;
     /** Original ContainerGolem:84-90: the page arrows are the menu buttons 66 (previous) and 67 (next). */
     public static final int PREVIOUS_PAGE = 66, NEXT_PAGE = 67;
     /** Order Guard target switches keep the original ids 51 (Monsters), 52 (Animals), 53 (Players), 54 (Creepers); see GolemGuardTargets. */
     public static final int GUARD_BUTTON = GolemGuardTargets.FIRST_BUTTON;
     /** Entropy's item-comparison switches keep the original ids 55 (tags), 56 (damage), 57 (components); see GolemItemMatch. */
     public static final int ITEM_MATCH_BUTTON = GolemItemMatch.FIRST_BUTTON;
+    /** The Use core's three switches keep the original ids 50, 51 and 52 (the toggles 0, 1 and 2). */
+    public static final int USE_OPTION_BUTTON = 50;
     private final EntityGolemBase serverGolem;
     private final int entityId;
     private final UUID entityUuid;
@@ -85,7 +87,10 @@ public final class ContainerGolem extends AbstractContainerMenu {
                         : index >= 10 && index < 10 + GHOSTS ? golem.getSlotColor(page[0] * GHOSTS + index - 10)
                         : index == 16 ? (golem.canColorSlots() ? 1 : 0)
                         : index == 17 ? golem.getGuardTargets() : index == 18 ? (golem.canSwitchGuardTargets() ? 1 : 0)
-                        : index == 19 ? golem.getItemMatch() : index == 20 ? (golem.canSwitchItemMatch() ? 1 : 0) : 0;
+                        : index == 19 ? golem.getItemMatch() : index == 20 ? (golem.canSwitchItemMatch() ? 1 : 0)
+                        : index == 21 ? (golem.getUseOptions().emptySpace() ? 1 : 0)
+                        : index == 22 ? (golem.getUseOptions().leftClick() ? 1 : 0)
+                        : index == 23 ? (golem.getUseOptions().sneaking() ? 1 : 0) : 0;
             }
             @Override public void set(int index, int value) {} // Display sync, never a C2S configuration setter.
             @Override public int getCount() { return DATA; }
@@ -106,6 +111,14 @@ public final class ContainerGolem extends AbstractContainerMenu {
     /** Entropy's switches (GolemItemMatch bits) as the server last synced them, and whether the golem has them at all. */
     public int itemMatch() { return configuration.get(19); }
     public boolean canSwitchItemMatch() { return GolemItemMatch.appliesTo(openingCore) && configuration.get(20) != 0; }
+    /**
+     * The three switches of the Use core (the original's toggles 0, 1 and 2) as the
+     * server last synced them, and whether the golem has them at all.
+     */
+    public boolean useEmptySpace() { return configuration.get(21) != 0; }
+    public boolean useLeftClick() { return configuration.get(22) != 0; }
+    public boolean useSneaking() { return configuration.get(23) != 0; }
+    public boolean canSwitchUseOptions() { return openingCore == GolemData.USE; }
     public int pageCount() { return openingCore == GolemData.LIQUID || ghostSlots == 0 ? 1 : Math.max(1, (configuration.get(9) + GHOSTS - 1) / GHOSTS); }
     private int base() { return serverPage == null ? 0 : serverPage[0] * GHOSTS; }
     public boolean isFillAnyAmount() { return configuration.get(6) != 0; }
@@ -221,6 +234,14 @@ public final class ContainerGolem extends AbstractContainerMenu {
             return true;
         }
         if (adjustColor(button)) return true;
+        if (openingCore == GolemData.USE && serverGolem.getGolemCore() == GolemData.USE
+                && button >= USE_OPTION_BUTTON && button < USE_OPTION_BUTTON + 3) {
+            // Original ContainerGolem:92-94 — the buttons 50, 51 and 52 flip the
+            // toggles 0, 1 and 2, which the Use core owns.
+            if (!serverGolem.toggleUseOption(button - USE_OPTION_BUTTON)) return false;
+            broadcastChanges();
+            return true;
+        }
         int category = GolemGuardTargets.categoryOfButton(button);
         if (category != 0) {
             // Server-side gate: only a Guard that carries Order has switches, whatever a client sends.

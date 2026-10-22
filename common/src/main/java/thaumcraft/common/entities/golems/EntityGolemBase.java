@@ -521,6 +521,30 @@ public class EntityGolemBase extends AbstractGolem {
         int next = GolemGuardTargets.toggle(guardTargets, category);
         return next != guardTargets && setGuardTargets(next);
     }
+    /**
+     * Flips one of the three switches of the Use core.
+     *
+     * <p>Original {@code ContainerGolem:92-94}: the button {@code 50 + index}
+     * flips the toggle {@code index}, and the Use core owns the toggles
+     * <b>0, 1 and 2</b> — "Block or Empty space", "Right click or Left click"
+     * and "Not sneaking or Sneaking" (oracle {@code GuiGolem:206-236}).</p>
+     *
+     * @param index 0 the block/empty space switch, 1 the click switch, 2 the sneaking switch
+     */
+    public boolean toggleUseOption(int index) {
+        requireServerThread();
+        if (level().isClientSide || core != GolemData.USE || index < 0 || index > 2 || busy || useCustodyActive()
+                || hasUseRemainders() || essentiaMutationActive() || !hasConfigurationMenu()) return false;
+        GolemUseOptions current = useOptions;
+        GolemUseOptions next = switch (index) {
+            case 0 -> new GolemUseOptions(!current.emptySpace(), current.leftClick(), current.sneaking());
+            case 1 -> new GolemUseOptions(current.emptySpace(), !current.leftClick(), current.sneaking());
+            default -> new GolemUseOptions(current.emptySpace(), current.leftClick(), !current.sneaking());
+        };
+        if (!setUseOptions(next)) return false;
+        inventories.configurationChanged();
+        return true;
+    }
     /** Order slot colours exist only on Fill, Empty and Use golems that carry an Order upgrade. */
     public boolean canColorSlots() { return GolemData.hasSlotColors(getGolemCore()) && getUpgradeAmount(GolemUpgrade.ORDER) > 0; }
     public int getSlotColor(int slot) { return slot >= 0 && slot < getSlotCount() ? entityData.get(COLORS.get(slot)) : GolemData.NO_COLOR; }
@@ -653,11 +677,11 @@ public class EntityGolemBase extends AbstractGolem {
         }
         return true;
     }
-    private boolean useControls() { return useWhitelistControls() && useOptions.supportsDefaultBaseline(); }
+    private boolean useControls() { return useWhitelistControls(); }
     public GolemUseOptions getUseOptions() { return useOptions; }
     public boolean setUseOptions(GolemUseOptions options) {
         requireServerThread();
-        if (!(level() instanceof ServerLevel) || core != GolemData.USE || options == null || !options.supportsDefaultBaseline()
+        if (!(level() instanceof ServerLevel) || core != GolemData.USE || options == null || !options.isSupported()
                 || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive() || !hasConfigurationMenu()) return false;
         use.reset();
         useOptions = options;
@@ -711,8 +735,9 @@ public class EntityGolemBase extends AbstractGolem {
         }
         if (requiresEmptyControls(data.core()) && data.fillAnyAmount()) throw new IllegalArgumentException("Ordinary Harvest/Guard/Alchemy/Butcher/Sorting/Fishing have no Fill mode");
         if (data.core() == GolemData.LIQUID && data.fillAnyAmount()) throw new IllegalArgumentException("Decanting has no Fill mode");
-        if (data.core() == GolemData.USE ? data.fillAnyAmount() || !data.useOptions().supportsDefaultBaseline()
-                : !data.useOptions().isDefault()) throw new IllegalArgumentException("Unsupported Use options/baseline");
+        if (data.core() == GolemData.USE ? data.fillAnyAmount() : !data.useOptions().isDefault()) {
+            throw new IllegalArgumentException("Unsupported Use options/baseline");
+        }
         // Never truncated like the original placer path: more upgrades than slots is refused outright.
         int[] fittedUpgrades = GolemUpgrades.fit(data.upgrades(), GolemUpgrades.slotCount(EnumGolemType.getType(material).upgrades, data.advanced()));
         if (fittedUpgrades == null) throw new IllegalArgumentException("More golem upgrades than this material has slots, or an unsupported upgrade");
@@ -1488,7 +1513,9 @@ public class EntityGolemBase extends AbstractGolem {
     boolean useItemAllowed(ItemStack actual) {
         if (actual == null || !useControls()) return false;
         if (actual.isEmpty()) return baselineEmptyControls();
-        if (!UseGolemGoals.seed(actual)) return false;
+        // Original AIUseItem:135-158 — the goal uses whatever the golem carries; the
+        // whitelist ghosts only decide WHICH item may leave the home.
+        if (!UseGolemGoals.usable(actual)) return false;
         boolean filtered = false;
         for (int slot = 0; slot < FILTERS.size(); slot++) {
             ItemStack ghost = entityData.get(FILTERS.get(slot));
@@ -1525,9 +1552,11 @@ public class EntityGolemBase extends AbstractGolem {
         return hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(marker.pos());
     }
     /** Root's native BEFORE hook may ask again while the real hand is DETACHED, never outside this exact goal. */
-    public boolean canUseMarkedBlock(GolemMarker marker, BlockState expectedTarget, BlockState expectedAdjacent) {
+    public boolean canUseMarkedBlock(GolemMarker marker, BlockState expectedTarget, BlockState expectedAdjacent,
+                                     BlockState expectedClick) {
         return useFrameCurrent() && usePermissionReady && useIntent.marker().equals(marker)
-                && useIntent.target() == expectedTarget && useIntent.adjacent() == expectedAdjacent && useCargoPhaseCurrent()
+                && useIntent.target() == expectedTarget && useIntent.adjacent() == expectedAdjacent
+                && useIntent.click() == expectedClick && useCargoPhaseCurrent()
                 && distanceToMarkerSqr(marker) <= 4 && useEyesOn(marker)
                 && useFrameCurrent() && useCargoPhaseCurrent() && distanceToMarkerSqr(marker) <= 4;
     }
@@ -1538,7 +1567,8 @@ public class EntityGolemBase extends AbstractGolem {
         }
         detachingUseCargo = true;
         try {
-            if (!canUseMarkedBlock(useIntent.marker(), useIntent.target(), useIntent.adjacent()) || useCargoDetached || useCargoReturned
+            if (!canUseMarkedBlock(useIntent.marker(), useIntent.target(), useIntent.adjacent(), useIntent.click())
+                    || useCargoDetached || useCargoReturned
                     || carried != useBeforeCarried || !ItemStack.matches(carried, useItemIdentity)) {
                 throw new IllegalStateException("Use hand/job changed during detaching preflight");
             }
@@ -1597,8 +1627,8 @@ public class EntityGolemBase extends AbstractGolem {
             if (!GolemHarvestPlatform.mayInteract(this, job.marker().pos()) || !useFrameCurrent()) return false;
             if (!GolemHarvestPlatform.mayInteract(this, job.marker().pos().relative(job.marker().face())) || !useFrameCurrent()) return false;
             usePermissionReady = true;
-            if (!canUseMarkedBlock(job.marker(), job.target(), job.adjacent())) return false;
-            useSucceeded = GolemUsePlatform.useBlock(this, job.marker(), job.target(), job.adjacent()); // Exactly ONE native call.
+            if (!canUseMarkedBlock(job.marker(), job.target(), job.adjacent(), job.click())) return false;
+            useSucceeded = GolemUsePlatform.useBlock(this, job.marker(), job.target(), job.adjacent(), job.click()); // Exactly ONE native call.
             return useSucceeded;
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.warn("Golem Use attempt failed; keeping actual post-call ownership, never refunding/replaying", failure);
@@ -2218,7 +2248,7 @@ public class EntityGolemBase extends AbstractGolem {
                     || actual.getCount() != before || !source.extracts(slot, actual, face)
                     || !GolemItemMatch.matches(actual, exemplar, match)
                     || (core == GolemData.EMPTY_CORE || core == GolemData.SORTING) && !inventories.canDeliver(actual)) return 0;
-            if (useTransfer && (!useReady() || !use.ownsTake(source, exemplar) || !UseGolemGoals.seed(actual)
+            if (useTransfer && (!useReady() || !use.ownsTake(source, exemplar) || !UseGolemGoals.usable(actual)
                     || !use.current(useTarget, actual) || !source.pos().equals(homeInventoryPosition()) || face != getHomeFacing())) return 0;
             // Actual slot debit and actual cargo assignment BOTH precede native
             // setters/dirty notices. A callback can never spend the old slot too.
@@ -2335,7 +2365,7 @@ public class EntityGolemBase extends AbstractGolem {
         if (held.is(ThaumcraftGolems.GOLEM_BELL.get())) return ItemGolemBell.select(held, player, this);
         if (held.getItem() instanceof ItemGolemCore coreItem && activeCore(coreItem.getCore()) && getGolemCore() == GolemData.NO_CORE) {
             if ((requiresEmptyControls(coreItem.getCore()) || coreItem.getCore() == GolemData.LIQUID) && !baselineEmptyControls()) return InteractionResult.PASS;
-            if (coreItem.getCore() == GolemData.USE && (!useWhitelistControls() || !useOptions.supportsDefaultBaseline())) return InteractionResult.PASS;
+            if (coreItem.getCore() == GolemData.USE && !useWhitelistControls()) return InteractionResult.PASS;
             if (level().isClientSide) return InteractionResult.SUCCESS;
             installCore(player, hand, held, coreItem.getCore());
             return InteractionResult.CONSUME;
@@ -2375,7 +2405,7 @@ public class EntityGolemBase extends AbstractGolem {
                     || waterMb != 0 || unreadWater != null || aspectCargo.amount() != 0 || unreadAspect != null || essentiaMutationActive()
                     || !(held.getItem() instanceof ItemGolemCore item) || item.getCore() != installedCore || !canInteract(player, held)
                     || (requiresEmptyControls(installedCore) || installedCore == GolemData.LIQUID) && !baselineEmptyControls()
-                    || installedCore == GolemData.USE && (!useWhitelistControls() || !useOptions.supportsDefaultBaseline())) return;
+                    || installedCore == GolemData.USE && !useWhitelistControls()) return;
             core = installedCore; // Actual installation precedes its one-item payment.
             if (!player.getAbilities().instabuild) {
                 held.shrink(1);
@@ -2696,7 +2726,7 @@ public class EntityGolemBase extends AbstractGolem {
             try { useOptions = GolemUseOptions.CODEC.parse(NbtOps.INSTANCE, tag.get("UseOptions")).getOrThrow(); }
             catch (RuntimeException invalid) { unsupported = true; } // Raw dedicated options retained with configuration below.
         }
-        if (core == GolemData.USE ? !useOptions.supportsDefaultBaseline() : !useOptions.isDefault()) unsupported = true;
+        if (core != GolemData.USE && !useOptions.isDefault()) unsupported = true;
         if (!fishing.loadPending(tag)) unsupported = true;
         readUseRemainders(tag);
         readWaterCargo(tag);

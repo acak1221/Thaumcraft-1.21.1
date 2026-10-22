@@ -187,7 +187,7 @@ public final class ItemGolemPlacer extends Item {
             if (stack.has(ThaumcraftGolems.GOLEM_DATA.get())) return null;
             data = GolemData.EMPTY;
         }
-        if (data.core() == GolemData.USE && !data.useOptions().supportsDefaultBaseline()) return null;
+        // Every combination of the three ordinary Use switches is supported (AIUseItem:135,155,190).
         // Never the original's silent truncation: more upgrades than this material has slots is invalid.
         int[] fitted = GolemUpgrades.fit(data.upgrades(), GolemUpgrades.slotCount(EnumGolemType.getType(material).upgrades, data.advanced()));
         if (fitted == null) return null;

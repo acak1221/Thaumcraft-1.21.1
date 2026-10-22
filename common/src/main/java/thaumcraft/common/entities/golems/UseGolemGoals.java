@@ -5,24 +5,17 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemMarker;
 
-/** Ordinary DEFAULT Use8 only: supplied wheat planting or genuinely bare-hand redstone. */
+/** The original's Use8: any carried item on any marked block, with the three switches of the core. */
 final class UseGolemGoals {
-    record Target(GolemMarker marker, BlockState target, BlockState adjacent, BlockPos home, Direction facing) {}
+    record Target(GolemMarker marker, BlockState target, BlockState adjacent, BlockState click, BlockPos home, Direction facing) {}
     private record HomeSeed(GolemHomeInventory.Destination source, ItemStack actual) {}
     private record Timeout(ItemStack identity, long until) {}
 
@@ -61,25 +54,50 @@ final class UseGolemGoals {
     static boolean loaded(ServerLevel level, BlockPos pos) {
         return pos != null && !level.isOutsideBuildHeight(pos) && level.getWorldBorder().isWithinBounds(pos) && level.hasChunkAt(pos);
     }
-    static boolean seed(ItemStack actual) {
-        return actual != null && !actual.isEmpty() && actual.is(Items.WHEAT_SEEDS)
-                && actual.getCount() > 0 && actual.getCount() <= actual.getMaxStackSize()
-                && ItemStack.isSameItemSameComponents(actual, new ItemStack(Items.WHEAT_SEEDS));
+    /**
+     * The original's Use core carries <b>any</b> item.
+     *
+     * <p>Oracle {@code AIUseItem:135-158}: the carried stack is handed to the fake
+     * player and the click uses it; nothing in the goal narrows the item. The
+     * whitelist ghosts of the port still decide <em>which</em> item may be used
+     * ({@code EntityGolemBase.useItemAllowed}); this rule only refuses an empty
+     * or oversized stack.</p>
+     */
+    static boolean usable(ItemStack actual) {
+        return actual != null && !actual.isEmpty() && actual.getCount() > 0 && actual.getCount() <= actual.getMaxStackSize();
     }
     private boolean homePermits(ItemStack actual) {
         if (!(golem.level() instanceof ServerLevel level) || !loaded(level, golem.getHomePosition())
                 || !loaded(level, golem.homeInventoryPosition())) return false;
         if (actual.isEmpty()) return golem.hasHomeWorldThrowTarget(); // Positive known non-BE/provider classification.
         GolemHomeInventory.Destination home = golem.homeInventory();
-        return seed(actual) && home != null && home.current(); // An EMPTY inventory is still an inventory.
+        return usable(actual) && home != null && home.current(); // An EMPTY inventory is still an inventory.
     }
-    private static boolean applicable(ServerLevel level, GolemMarker marker, BlockState target, BlockState adjacent, ItemStack actual) {
-        if (target.isAir() || !adjacent.isAir() || target.hasBlockEntity() || level.getBlockEntity(marker.pos()) != null) return false;
-        if (!actual.isEmpty()) return seed(actual) && target.is(Blocks.FARMLAND) && marker.face() == Direction.UP;
-        Block block = target.getBlock();
-        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(block);
-        return id != null && id.getNamespace().equals("minecraft")
-                && (block.getClass() == LeverBlock.class || block.getClass() == ButtonBlock.class);
+    /**
+     * The original's rule of the marked cell (oracle {@code AIUseItem:190}).
+     *
+     * <p>{@code getToggles()[0]} is the "Block or Empty space" switch of the Use
+     * core: when it is off the marked cell must hold a block, when it is on the
+     * marked cell must be an empty space. The cell on the marked side must be
+     * air in both cases (oracle {@code AIUseItem:192}: the neighbour of the
+     * marked side).</p>
+     */
+    private boolean applicable(ServerLevel level, GolemMarker marker, BlockState target, BlockState adjacent, ItemStack actual) {
+        if (!adjacent.isAir()) return false;
+        // The port never opens a menu with a borrowed actor: a block entity is not a target.
+        if (target.hasBlockEntity() || level.getBlockEntity(marker.pos()) != null) return false;
+        if (golem.getUseOptions().emptySpace() != target.isAir()) return false;
+        return true;
+    }
+    /**
+     * The cell the original clicks.
+     *
+     * <p>Oracle {@code AIUseItem:142-146}: when the marked cell is an empty
+     * space the click lands on the cell <b>behind</b> it, that is on the cell
+     * opposite the marked side.</p>
+     */
+    static BlockPos clickPos(GolemMarker marker, boolean emptySpace) {
+        return emptySpace ? marker.pos().relative(marker.face().getOpposite()) : marker.pos();
     }
     private boolean markerLoaded(ServerLevel level, GolemMarker marker) {
         // Reject dimensions BEFORE ANY block/BE reads. Original unused ceil(range/3) was NOT a bound.
@@ -96,7 +114,8 @@ final class UseGolemGoals {
             if (!markerLoaded(level, marker) || !golem.markerAccepts(marker, actual)) continue;
             BlockState target = level.getBlockState(marker.pos()), adjacent = level.getBlockState(marker.pos().relative(marker.face()));
             if (applicable(level, marker, target, adjacent, actual)) {
-                return new Target(marker, target, adjacent, golem.getHomePosition().immutable(), golem.getHomeFacing());
+                BlockState click = level.getBlockState(clickPos(marker, golem.getUseOptions().emptySpace()));
+                return new Target(marker, target, adjacent, click, golem.getHomePosition().immutable(), golem.getHomeFacing());
             }
         }
         return null; // First applicable marker in stored order, never nearest or a world scan.
@@ -108,6 +127,7 @@ final class UseGolemGoals {
                 || !golem.markerAccepts(job.marker(), actual) || !golem.getMarkers().contains(job.marker())) return false;
         return level.getBlockState(job.marker().pos()) == job.target()
                 && level.getBlockState(job.marker().pos().relative(job.marker().face())) == job.adjacent()
+                && level.getBlockState(clickPos(job.marker(), golem.getUseOptions().emptySpace())) == job.click()
                 && applicable(level, job.marker(), job.target(), job.adjacent(), actual);
     }
     private boolean timedOut(ItemStack actual) {
@@ -139,7 +159,7 @@ final class UseGolemGoals {
             if (!working() || !home.current()) return null;
             if (slot < 0 || slot >= home.container().getContainerSize()) continue;
             ItemStack actual = home.container().getItem(slot);
-            if (!seed(actual) || !golem.useItemAllowed(actual) || !home.extracts(slot, actual, golem.getHomeFacing()) || timedOut(actual)) continue;
+            if (!usable(actual) || !golem.useItemAllowed(actual) || !home.extracts(slot, actual, golem.getHomeFacing()) || timedOut(actual)) continue;
             if (findTarget(actual) != null) return new HomeSeed(home, actual);
             timeout(actual);
         }

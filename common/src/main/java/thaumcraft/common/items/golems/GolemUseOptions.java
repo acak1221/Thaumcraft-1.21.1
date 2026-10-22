@@ -89,6 +89,17 @@ public record GolemUseOptions(boolean emptySpace, boolean leftClick, boolean sne
 
     public boolean isDefault() { return !emptySpace && !leftClick && !sneaking; }
 
-    /** Optional future bounded-runtime gate, not an upgrade requirement. */
-    public boolean supportsDefaultBaseline() { return isDefault(); }
+    /**
+     * Every combination of the three ordinary switches is a supported Use mode
+     * of the original.
+     *
+     * <p>The original reads all three: {@code AIUseItem:190} (a block or an
+     * empty space), {@code :155} (the left or the right click) and {@code :135}
+     * (the sneaking flag of the fake player), and {@code GuiGolem:206-236}
+     * draws all three for the Use core.</p>
+     *
+     * <p>The method exists so that the callers read as a rule and not as a
+     * "default baseline" gate; the record itself carries no other state.</p>
+     */
+    public boolean isSupported() { return true; }
 }

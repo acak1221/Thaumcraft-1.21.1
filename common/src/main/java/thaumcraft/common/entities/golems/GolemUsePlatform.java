@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -19,17 +16,10 @@ import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.FarmBlock;
-import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
@@ -38,14 +28,11 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.items.golems.GolemData;
 import thaumcraft.common.items.golems.GolemMarker;
+import thaumcraft.common.items.golems.GolemUseOptions;
 
-/** One default Use job, one borrowed native actor, and one actual item owner.
+/** One Use job, one borrowed native actor, and one actual item owner.
  * Not a general item-use engine, permission query, inventory adapter or refund API. */
 public final class GolemUsePlatform {
-    private static final Set<Block> BUTTONS = Set.of(Blocks.STONE_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON,
-            Blocks.OAK_BUTTON, Blocks.SPRUCE_BUTTON, Blocks.BIRCH_BUTTON, Blocks.JUNGLE_BUTTON,
-            Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.MANGROVE_BUTTON, Blocks.CHERRY_BUTTON,
-            Blocks.BAMBOO_BUTTON, Blocks.CRIMSON_BUTTON, Blocks.WARPED_BUTTON);
     private static final ThreadLocal<Context> BORROW = new ThreadLocal<>();
     private static Bridge bridge;
 
@@ -90,25 +77,26 @@ public final class GolemUsePlatform {
 
     /** Only the worker's private busy/exact-marker intent admits this call. */
     public static boolean useBlock(EntityGolemBase worker, GolemMarker marker,
-                                   BlockState expectedTarget, BlockState expectedAdjacent) {
-        if (worker == null || marker == null || expectedTarget == null || expectedAdjacent == null
+                                   BlockState expectedTarget, BlockState expectedAdjacent, BlockState expectedClick) {
+        if (worker == null || marker == null || expectedTarget == null || expectedAdjacent == null || expectedClick == null
                 || bridge == null || BORROW.get() != null || !(worker.level() instanceof ServerLevel level)) return false;
         if (!canonical(level) || !EnumGolemType.isSupported(worker.getGolemMaterial())) return false;
         Context context = null;
         try {
             Bridge platform = bridge;
             int material = worker.getGolemMaterial();
-            if (!workerReady(worker, level, marker, expectedTarget, expectedAdjacent, material)) return false;
+            if (!workerReady(worker, level, marker, expectedTarget, expectedAdjacent, expectedClick, material)) return false;
             ServerPlayer actor = platform.actor(level);
             if (!nativeActor(platform, level, actor) || !emptyActor(actor)) return false;
-            context = new Context(worker, actor, platform, level, marker, expectedTarget, expectedAdjacent,
+            context = new Context(worker, actor, platform, level, marker, expectedTarget, expectedAdjacent, expectedClick,
                     material, worker.getCarryLimit());
             BORROW.set(context); // Every other borrower must refuse BEFORE pose or hand changes.
             actor.setPos(worker.getX(), worker.getY(), worker.getZ());
             actor.setYRot(worker.getYRot());
             actor.setXRot(worker.getXRot());
             actor.setPose(Pose.STANDING);
-            actor.setShiftKeyDown(false);
+            // Original AIUseItem:135 — the fake player takes the sneaking flag of the core.
+            actor.setShiftKeyDown(context.sneaking);
             if (!prepared(context) || !emptyActor(actor) || !permissions(context, ItemStack.EMPTY)
                     || !sight(context) || !prepared(context) || !emptyActor(actor)) return false;
 
@@ -125,6 +113,13 @@ public final class GolemUsePlatform {
             context.inputCount = context.hand.getCount();
             context.phase = Phase.READY;
             if (!validUse(context)) return false;
+            if (context.leftClick) {
+                // Original AIUseItem:155-157 — the left click breaks the block. The
+                // 1.7.10 onLeftClickBlock has no sneaking gate, so the flag does not
+                // stop the break; the native destroyBlock is the same action.
+                context.phase = Phase.NATIVE_BODY;
+                return actor.gameMode.destroyBlock(context.clickPos);
+            }
             context.phase = Phase.NATIVE_PENDING;
             // Fabric's actual HEAD injection dispatches UseBlockCallback ONCE.
             // Its PASS path then reaches our scoped, fresh native fence.
@@ -150,8 +145,8 @@ public final class GolemUsePlatform {
         context.phase = Phase.NATIVE_VALIDATING; // A preflight cannot recursively admit a second native body.
         try {
             if (hit.getType() != HitResult.Type.BLOCK || hit.isInside() || hit.getDirection() != context.marker.face()
-                    || !hit.getBlockPos().equals(context.marker.pos())
-                    || !hit.getLocation().equals(Vec3.atCenterOf(context.marker.pos())) || !validUse(context)) {
+                    || !hit.getBlockPos().equals(context.clickPos)
+                    || !hit.getLocation().equals(Vec3.atCenterOf(context.clickPos)) || !validUse(context)) {
                 context.phase = Phase.NATIVE_REJECTED;
                 return false;
             }
@@ -223,54 +218,44 @@ public final class GolemUsePlatform {
                 && chunk.getBlockState(pos) == expected;
     }
 
-    private static boolean nativeSwitch(BlockState state) {
-        Block block = state.getBlock();
-        return block == Blocks.LEVER && block.getClass() == LeverBlock.class
-                || block.getClass() == ButtonBlock.class && BUTTONS.contains(block);
-    }
-
-    private static boolean nativeTarget(GolemMarker marker, BlockState target, BlockState adjacent) {
-        return adjacent.isAir() && (nativeSwitch(target)
-                || marker.face() == Direction.UP && target.is(Blocks.FARMLAND) && target.getBlock().getClass() == FarmBlock.class);
+    private static boolean nativeTarget(GolemMarker marker, BlockState target, BlockState adjacent, boolean emptySpace) {
+        // Original AIUseItem:190 — the "Block or Empty space" switch decides what
+        // the marked cell must hold; the cell on the marked side must be air.
+        return adjacent.isAir() && (emptySpace ? target.isAir() : !target.isAir());
     }
 
     private static boolean workerReady(EntityGolemBase worker, ServerLevel level, GolemMarker marker,
-                                       BlockState target, BlockState adjacent, int material) {
+                                       BlockState target, BlockState adjacent, BlockState click, int material) {
         // Reject foreign dimensions BEFORE block access. Home/ghost/busy/current
         // marker authority remains the actual private Entity intent, not this API.
+        GolemUseOptions options = worker.getUseOptions();
+        if (options == null || !options.isSupported()) return false;
+        boolean emptySpace = options.emptySpace();
+        BlockPos clickPos = UseGolemGoals.clickPos(marker, emptySpace);
         return canonical(level) && marker.dimension().equals(level.dimension().location())
                 && worker.getClass() == EntityGolemBase.class && worker.level() == level
                 && level.getEntity(worker.getUUID()) == worker && level.getEntity(worker.getId()) == worker
                 && worker.isAlive() && !worker.isRemoved() && worker.getGolemCore() == GolemData.USE
                 && worker.getGolemMaterial() == material && EnumGolemType.isSupported(material)
-                && worker.getUseOptions() != null && worker.getUseOptions().supportsDefaultBaseline()
-                && nativeTarget(marker, target, adjacent) && cell(level, marker.pos(), target)
+                && nativeTarget(marker, target, adjacent, emptySpace) && cell(level, marker.pos(), target)
                 && cell(level, marker.pos().relative(marker.face()), adjacent)
+                && cell(level, clickPos, click)
                 && worker.distanceToSqr(Vec3.atCenterOf(marker.pos())) <= 4
-                && worker.canUseMarkedBlock(marker, target, adjacent);
+                && worker.canUseMarkedBlock(marker, target, adjacent, click);
     }
 
     private static boolean prepared(Context context) {
         ServerPlayer actor = context.actor;
-        return workerReady(context.worker, context.level, context.marker, context.target, context.adjacent, context.material)
+        return workerReady(context.worker, context.level, context.marker, context.target, context.adjacent, context.click, context.material)
                 && nativeActor(context.platform, context.level, actor) && actor.getId() == context.saved.id
                 && actor.connection == context.saved.connection && actor.getInventory() == context.inventory
                 && inventoryShape(context.inventory) && context.inventory.selected == context.saved.selected
                 && actor.inventoryMenu == context.saved.menu && actor.containerMenu == context.saved.menu
                 && actor.gameMode.getPreviousGameModeForPlayer() == context.saved.previousMode
                 && context.saved.abilities.matches(actor.getAbilities()) && !actor.isUsingItem()
-                && actor.getPose() == Pose.STANDING && !actor.isShiftKeyDown()
+                && actor.getPose() == Pose.STANDING && actor.isShiftKeyDown() == context.sneaking
                 && actor.getX() == context.worker.getX() && actor.getY() == context.worker.getY() && actor.getZ() == context.worker.getZ()
                 && actor.getYRot() == context.worker.getYRot() && actor.getXRot() == context.worker.getXRot();
-    }
-
-    private static boolean pristineSeeds(ItemStack stack) {
-        return !stack.isEmpty() && stack.is(Items.WHEAT_SEEDS) && stack.getItem().getClass() == ItemNameBlockItem.class
-                && ((ItemNameBlockItem) stack.getItem()).getBlock() == Blocks.WHEAT && stack.getComponentsPatch().isEmpty()
-                && !stack.has(DataComponents.FOOD) && !stack.has(DataComponents.BLOCK_STATE)
-                && !stack.has(DataComponents.BLOCK_ENTITY_DATA) && !stack.has(DataComponents.ENTITY_DATA)
-                && !stack.has(DataComponents.BUCKET_ENTITY_DATA) && !stack.has(DataComponents.CONTAINER)
-                && !stack.has(DataComponents.BUNDLE_CONTENTS) && !stack.has(DataComponents.CUSTOM_DATA);
     }
 
     private static boolean actualHand(Context context) {
@@ -282,20 +267,24 @@ public final class GolemUsePlatform {
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             if (slot != inventory.selected && !inventory.getItem(slot).isEmpty()) return false;
         }
-        return context.hand.isEmpty() ? nativeSwitch(context.target)
-                : context.marker.face() == Direction.UP && context.target.is(Blocks.FARMLAND)
-                    && pristineSeeds(context.hand) && context.hand.getCount() <= context.capacity
-                    && context.hand.getCount() <= context.hand.getMaxStackSize();
+        // Original AIUseItem:135-158 — the carried stack is the hand, whatever it is.
+        // The port only refuses an oversized stack and a stock above the carry limit.
+        return context.hand.isEmpty() || context.hand.getCount() <= context.capacity
+                && context.hand.getCount() <= context.hand.getMaxStackSize();
     }
 
     private static boolean permissions(Context context, ItemStack hand) {
         BlockPos target = context.marker.pos();
         BlockPos affected = target.relative(context.marker.face());
+        BlockPos clicked = context.clickPos;
         ServerPlayer actor = context.actor;
         return context.level.mayInteract(actor, target) && context.level.mayInteract(actor, affected)
+                && context.level.mayInteract(actor, clicked)
                 && actor.canInteractWithBlock(target, 0) && actor.canInteractWithBlock(affected, 0)
+                && actor.canInteractWithBlock(clicked, 0)
                 && actor.mayUseItemAt(target, context.marker.face(), hand)
-                && actor.mayUseItemAt(affected, context.marker.face(), hand);
+                && actor.mayUseItemAt(affected, context.marker.face(), hand)
+                && actor.mayUseItemAt(clicked, context.marker.face(), hand);
     }
 
     private static boolean sight(Context context) {
@@ -324,7 +313,8 @@ public final class GolemUsePlatform {
         return prepared(context) && actualHand(context) && permissions(context, context.hand)
                 && prepared(context) && actualHand(context)
                 && cell(context.level, context.marker.pos(), context.target)
-                && cell(context.level, context.marker.pos().relative(context.marker.face()), context.adjacent);
+                && cell(context.level, context.marker.pos().relative(context.marker.face()), context.adjacent)
+                && cell(context.level, context.clickPos, context.click);
     }
 
     private static void finish(Context context) {
@@ -497,11 +487,13 @@ public final class GolemUsePlatform {
         final Bridge platform;
         final ServerLevel level;
         final GolemMarker marker;
-        final BlockState target, adjacent;
+        final BlockState target, adjacent, click;
         final int material, capacity;
         final Inventory inventory;
         final Saved saved;
         final BlockHitResult hit;
+        final BlockPos clickPos;
+        final boolean sneaking, leftClick;
         Phase phase = Phase.PREPARING;
         boolean workerActive = true, detachStarted, detached, handInstalled, returned, stockSettled, contaminated;
         ItemStack hand;
@@ -510,12 +502,16 @@ public final class GolemUsePlatform {
         AbstractContainerMenu foreignMenu;
 
         Context(EntityGolemBase worker, ServerPlayer actor, Bridge platform, ServerLevel level, GolemMarker marker,
-                BlockState target, BlockState adjacent, int material, int capacity) {
+                BlockState target, BlockState adjacent, BlockState click, int material, int capacity) {
             this.worker = worker; this.actor = actor; this.platform = platform; this.level = level;
-            this.marker = marker; this.target = target; this.adjacent = adjacent;
+            this.marker = marker; this.target = target; this.adjacent = adjacent; this.click = click;
             this.material = material; this.capacity = capacity; this.inventory = actor.getInventory();
             this.saved = new Saved(actor);
-            this.hit = new BlockHitResult(Vec3.atCenterOf(marker.pos()), marker.face(), marker.pos(), false);
+            GolemUseOptions options = worker.getUseOptions();
+            this.sneaking = options != null && options.sneaking();
+            this.leftClick = options != null && options.leftClick();
+            this.clickPos = UseGolemGoals.clickPos(marker, options != null && options.emptySpace());
+            this.hit = new BlockHitResult(Vec3.atCenterOf(clickPos), marker.face(), clickPos, false);
         }
     }
 }

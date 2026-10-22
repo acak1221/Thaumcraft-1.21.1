@@ -91,6 +91,8 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
     private static final String EDIT_ASPECT = "terra";
     /** The research the SECOND physical client owns; the lead must never receive it. */
     private static final String PEER_RESEARCH = "BOTTLETAINT";
+    /** The original's vis amulet may only be worn with this research. */
+    private static final String AMULET_RESEARCH = "VISAMULET";
     /** The two aspects the lead combines in the research table over the real channel. */
     private static final String COMBINE_LEFT = "aer";
     private static final String COMBINE_RIGHT = "aqua";
@@ -1254,6 +1256,23 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
 
     /** The accessory snapshot of one player must never reach the other player. */
     private boolean stagePairAccessoryIsolation(Minecraft client) throws Exception {
+        // The original's vis amulet may only be worn with the VISAMULET
+        // research (ItemAmuletVis.canEquip), so the SECOND client is granted
+        // it before it equips the amulet.
+        if (stageData.get("research") == null) {
+            client.getConnection().sendCommand("thaumcraft research " + peerName + " " + AMULET_RESEARCH);
+            stageData.put("research", true);
+            return false;
+        }
+        if (stageData.get("research_ask") == null) {
+            pairCommand("HAS_RESEARCH", AMULET_RESEARCH);
+            stageData.put("research_ask", true);
+            return false;
+        }
+        if (!pairReplied()) return false;
+        if (!pairAnswer.endsWith(" 1")) {
+            throw new IllegalStateException("The second client never received the " + AMULET_RESEARCH + " research");
+        }
         if (stageData.get("give") == null) {
             if (!giveToPeer(client, "thaumcraft:vis_amulet 1")) return false;
             stageData.put("give", true);

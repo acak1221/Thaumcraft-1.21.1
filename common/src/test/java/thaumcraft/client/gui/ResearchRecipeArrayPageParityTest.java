@@ -15,7 +15,7 @@ import thaumcraft.common.lib.enchantment.WandEnchantmentRules;
  * <p>Original {@code thaumcraft/common/config/ConfigResearch.java:110-144}: the SCEPTRE page holds
  * the three sceptre recipes as an array of arcane recipes. The first is the iron cap with the wood
  * rod, the second the gold cap with the greatwood rod and the third the thaumium cap with the
- * silverwood rod. Every one of them is the grid {@code " TF"}, {@code " RT"}, {@code "T  "} of two
+ * silverwood rod. Every one of them is the grid {@code " TF"}, {@code " RT"}, {@code "T  "} of three
  * wand caps, one wand rod and the primal charm, and every one of them costs
  * {@code (int)(capCraftCost * rodCraftCost * 1.5f)} of every primal aspect.</p>
  *

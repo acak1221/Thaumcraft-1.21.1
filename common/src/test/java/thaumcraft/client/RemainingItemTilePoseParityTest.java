@@ -4,11 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
 import thaumcraft.client.renderers.item.ThaumometerArmPose;
+import thaumcraft.client.renderers.item.BoneBowPose;
 import thaumcraft.client.renderers.item.WandUsePose;
 import thaumcraft.client.renderers.tile.ThaumatoriumPose;
 
 /** Pure original-value rules; never initializes a block, world or renderer. */
 class RemainingItemTilePoseParityTest {
+    @Test void boneBowUsesTheOriginalOuterAndInnerScalesAndTurns() {
+        // Oracle ItemBowBoneRenderer:50-64,84.
+        assertEquals(2.6666667F, BoneBowPose.OUTER_SCALE);
+        assertEquals(.625F, BoneBowPose.INNER_SCALE);
+        assertEquals(1.5F, BoneBowPose.ICON_SCALE);
+        assertEquals(-20, BoneBowPose.OUTER_ROLL);
+        assertEquals(90, BoneBowPose.OUTER_PITCH);
+        assertEquals(-60, BoneBowPose.SECOND_ROLL);
+    }
     @Test void scannerInterpolatesArmThenTakesOneTenthOfViewDifference() {
         // Oracle ItemThaumometerRenderer:101-104, not interpolated player view.
         assertEquals(2, ThaumometerArmPose.lagDegrees(40, 10, 30, .5F));

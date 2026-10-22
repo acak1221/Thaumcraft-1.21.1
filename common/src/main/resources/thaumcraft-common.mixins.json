@@ -79,6 +79,7 @@
   ],
   "client": [
     "client.WandRenderContextMixin",
+    "client.BoneBowHeldPoseMixin",
     "client.OuterLandsDimensionEffectsMixin",
     "client.TableOutlineMixin",
     "client.WandFocusKeyMixin",

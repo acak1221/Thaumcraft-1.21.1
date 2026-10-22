@@ -39,7 +39,7 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
  * <p>
  * Oracle: {@code thaumcraft/common/tiles/TileArcaneFurnace.java}, lines 38-305.
  */
-public class TileArcaneFurnace extends BlockEntity {
+public class TileArcaneFurnace extends RetainedDataBlockEntity {
     /** The addon hook of the original {@code ThaumcraftApi.getSmeltingBonus}. */
     public interface SmeltingBonus { ItemStack bonusFor(ItemStack input); }
     private static SmeltingBonus bonusProvider = input -> null;
@@ -64,14 +64,18 @@ public class TileArcaneFurnace extends BlockEntity {
         super(ThaumcraftLegacyTiles.ARCANE_FURNACE_BLOCK_ENTITY.get(), pos, state);
         for (int slot = 0; slot < furnaceItemStacks.length; slot++) furnaceItemStacks[slot] = ItemStack.EMPTY;
     }
+    TileArcaneFurnace(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type,pos,state); java.util.Arrays.fill(furnaceItemStacks,ItemStack.EMPTY);
+    }
 
     /** TileArcaneFurnace:47-49 - the furnace has thirty two slots. */
     public int getSizeInventory() { return furnaceItemStacks.length; }
     /** TileArcaneFurnace:51-53 - the stack in one slot. */
-    public ItemStack getStackInSlot(int slot) { return slot >= 0 && slot < furnaceItemStacks.length ? furnaceItemStacks[slot] : ItemStack.EMPTY; }
+    public ItemStack getStackInSlot(int slot) { return !isDataRejected() && slot >= 0 && slot < furnaceItemStacks.length ? furnaceItemStacks[slot] : ItemStack.EMPTY; }
 
     /** TileArcaneFurnace:55-71 - take some items out of a slot. */
     public ItemStack decrStackSize(int slot, int amount) {
+        if (isDataRejected()) return ItemStack.EMPTY;
         if (slot < 0 || slot >= furnaceItemStacks.length || furnaceItemStacks[slot].isEmpty() || amount <= 0) return ItemStack.EMPTY;
         ItemStack stack = furnaceItemStacks[slot];
         if (stack.getCount() <= amount) {
@@ -87,6 +91,7 @@ public class TileArcaneFurnace extends BlockEntity {
 
     /** TileArcaneFurnace:73-79 - put a stack into a slot; a slot holds sixty four items. */
     public void setInventorySlotContents(int slot, ItemStack stack) {
+        if (isDataRejected()) return;
         if (slot < 0 || slot >= furnaceItemStacks.length) return;
         if (!stack.isEmpty() && stack.getCount() > LegacyTileRules.FURNACE_STACK_LIMIT) stack.setCount(LegacyTileRules.FURNACE_STACK_LIMIT);
         furnaceItemStacks[slot] = stack;
@@ -94,7 +99,7 @@ public class TileArcaneFurnace extends BlockEntity {
     }
 
     /** The whole inventory, for the menus and for the drops. */
-    public ItemStack[] contents() { return furnaceItemStacks; }
+    public ItemStack[] contents() { return isDataRejected()?new ItemStack[0]:furnaceItemStacks; }
 
     /** Whether the blaze of the collapsed furnace was already released. */
     public boolean blazeReleased() { return blazeReleased; }
@@ -104,6 +109,7 @@ public class TileArcaneFurnace extends BlockEntity {
 
     /** BlockContainer:breakBlock - the contents of the furnace are dropped when it breaks. */
     public void dropContents(ServerLevel level) {
+        if (isDataRejected()) return;
         List<ItemStack> drops = new ArrayList<>();
         for (int slot = 0; slot < furnaceItemStacks.length; slot++) {
             if (furnaceItemStacks[slot].isEmpty()) continue;
@@ -116,10 +122,12 @@ public class TileArcaneFurnace extends BlockEntity {
 
     /** TileArcaneFurnace:131-133 - the furnace drains five fire vis a tick from the vis network. */
     public int drainVis(Level level) {
+        if (isDataRejected()) return 0;
         return VisNetHandler.drainVis(level, worldPosition, Aspect.FIRE, LegacyTileRules.FURNACE_VIS_DRAIN);
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, TileArcaneFurnace tile) {
+        if (tile.isDataRejected()) return;
         if (tile.level != level || !pos.equals(tile.worldPosition) || tile.isRemoved() || tile.getBlockState() != state) return;
         if (tile.facingX == -5) tile.getFacing(level);
         if (level.isClientSide || !(level instanceof ServerLevel server)) return;
@@ -184,6 +192,7 @@ public class TileArcaneFurnace extends BlockEntity {
      * smelted is burnt away with a fizz.
      */
     public boolean addItemsToInventory(ItemStack items) {
+        if (isDataRejected()) return false;
         if (items == null || items.isEmpty()) return false;
         for (int slot = 0; slot < getSizeInventory(); slot++) {
             ItemStack stack = furnaceItemStacks[slot];
@@ -237,6 +246,7 @@ public class TileArcaneFurnace extends BlockEntity {
      * and the experience of the recipe.
      */
     public void ejectItem(Level level, ItemStack items, ItemStack furnaceItemStack) {
+        if (isDataRejected()) return;
         if (items == null || items.isEmpty()) return;
         ItemStack bit = items.copy();
         int bellows = getBellows(level);
@@ -304,6 +314,7 @@ public class TileArcaneFurnace extends BlockEntity {
 
     /** TileArcaneFurnace:285-291 - a stack can be smelted when the recipe book knows a recipe for it. */
     public boolean canSmelt(Level level, int slot) {
+        if (isDataRejected()) return false;
         ItemStack stack = furnaceItemStacks[slot];
         if (stack == null || stack.isEmpty()) return false;
         return !smeltResult(level, stack).isEmpty();
@@ -324,6 +335,7 @@ public class TileArcaneFurnace extends BlockEntity {
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         tag.putShort("CookTime", (short) furnaceCookTime);
         tag.putShort("SpeedyTime", (short) speedyTime);
@@ -331,6 +343,7 @@ public class TileArcaneFurnace extends BlockEntity {
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (retainMalformed(tag, () -> validateSlots(tag,"Items",furnaceItemStacks.length,registries))) return;
         super.loadAdditional(tag, registries);
         furnaceCookTime = tag.getShort("CookTime");
         speedyTime = tag.getShort("SpeedyTime");
@@ -340,7 +353,7 @@ public class TileArcaneFurnace extends BlockEntity {
             CompoundTag entry = list.getCompound(index);
             int slot = entry.getByte("Slot") & 0xFF;
             if (slot < 0 || slot >= furnaceItemStacks.length) continue;
-            furnaceItemStacks[slot] = ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
+            furnaceItemStacks[slot] = requiredStack(registries, entry.get("Stack"));
         }
     }
 

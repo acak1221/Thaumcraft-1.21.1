@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>
  * Oracle: {@code thaumcraft/common/tiles/TileThaumcraftInventory.java}, lines 22-179.
  */
-public class TileThaumcraftInventory extends BlockEntity implements WorldlyContainer, Nameable {
+public class TileThaumcraftInventory extends RetainedDataBlockEntity implements WorldlyContainer, Nameable {
     /** TileThaumcraftInventory:27-29 - one slot, no synced slot and no custom name by default. */
     public static final int DEFAULT_SIZE = 1;
     /** TileThaumcraftInventory:150-152 - a slot holds sixty four items. */
@@ -59,8 +59,9 @@ public class TileThaumcraftInventory extends BlockEntity implements WorldlyConta
 
     @Override public int getContainerSize() { return itemStacks.size(); }
     @Override public boolean isEmpty() { return itemStacks.stream().allMatch(ItemStack::isEmpty); }
-    @Override public ItemStack getItem(int slot) { return slot >= 0 && slot < itemStacks.size() ? itemStacks.get(slot) : ItemStack.EMPTY; }
+    @Override public ItemStack getItem(int slot) { return !isDataRejected() && slot >= 0 && slot < itemStacks.size() ? itemStacks.get(slot) : ItemStack.EMPTY; }
     @Override public ItemStack removeItem(int slot, int amount) {
+        if (isDataRejected()) return ItemStack.EMPTY;
         if (slot < 0 || slot >= itemStacks.size() || amount <= 0) return ItemStack.EMPTY;
         ItemStack removed = itemStacks.get(slot).split(amount);
         if (itemStacks.get(slot).isEmpty()) itemStacks.set(slot, ItemStack.EMPTY);
@@ -68,23 +69,26 @@ public class TileThaumcraftInventory extends BlockEntity implements WorldlyConta
         return removed;
     }
     @Override public ItemStack removeItemNoUpdate(int slot) {
+        if (isDataRejected()) return ItemStack.EMPTY;
         if (slot < 0 || slot >= itemStacks.size()) return ItemStack.EMPTY;
         ItemStack removed = itemStacks.get(slot);
         itemStacks.set(slot, ItemStack.EMPTY);
         return removed;
     }
     @Override public void setItem(int slot, ItemStack stack) {
+        if (isDataRejected()) return;
         if (slot < 0 || slot >= itemStacks.size()) return;
         // TileThaumcraftInventory:65-71 clamps the ordinary setter.
         if (!stack.isEmpty() && stack.getCount() > getMaxStackSize()) stack.setCount(getMaxStackSize());
         itemStacks.set(slot, stack);
         setChanged();
     }
-    @Override public void clearContent() { for (int slot = 0; slot < itemStacks.size(); slot++) itemStacks.set(slot, ItemStack.EMPTY); setChanged(); }
+    @Override public void clearContent() { if (isDataRejected()) return; for (int slot = 0; slot < itemStacks.size(); slot++) itemStacks.set(slot, ItemStack.EMPTY); setChanged(); }
+    @Override public boolean canPlaceItem(int slot, ItemStack stack) { return !isDataRejected(); }
     @Override public int getMaxStackSize() { return STACK_LIMIT; }
 
     @Override public boolean stillValid(Player player) {
-        return level != null && !isRemoved() && player.level() == level && level.hasChunkAt(worldPosition)
+        return !isDataRejected() && level != null && !isRemoved() && player.level() == level && level.hasChunkAt(worldPosition)
                 && level.getBlockEntity(worldPosition) == this
                 && player.distanceToSqr(worldPosition.getX() + .5, worldPosition.getY() + .5, worldPosition.getZ() + .5) <= USE_RANGE;
     }
@@ -92,7 +96,7 @@ public class TileThaumcraftInventory extends BlockEntity implements WorldlyConta
     /** TileThaumcraftInventory:168-170 - only the first slot is reachable from a side. */
     @Override public int[] getSlotsForFace(Direction side) { return new int[]{0}; }
     @Override public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) { return canPlaceItem(slot, stack); }
-    @Override public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) { return true; }
+    @Override public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) { return !isDataRejected(); }
 
     @Override public Component getDisplayName() { return customName == null ? Component.translatable("container.thaumcraft") : customName; }
     @Override public Component getName() { return getDisplayName(); }
@@ -103,6 +107,7 @@ public class TileThaumcraftInventory extends BlockEntity implements WorldlyConta
     public boolean hasCustomName() { return customName != null && !customName.getString().isEmpty(); }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         if (customName != null) tag.putString("CustomName", Component.Serializer.toJson(customName, registries));
         tag.put("Items", writeSlots(registries, false));
@@ -110,6 +115,14 @@ public class TileThaumcraftInventory extends BlockEntity implements WorldlyConta
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (retainMalformed(tag, () -> {
+            validateSlots(tag,"Items",itemStacks.size(),registries);
+            validateSlots(tag,"ItemsSynced",itemStacks.size(),registries);
+            for (String key:java.util.List.of("Items","ItemsSynced")) for (Tag value:compoundList(tag,key)) {
+                int slot=((CompoundTag)value).getByte("Slot") & 255;
+                if (isSyncedSlot(slot)!=key.equals("ItemsSynced")) throw new IllegalArgumentException(key+": wrong slot group "+slot);
+            }
+        })) return;
         super.loadAdditional(tag, registries);
         customName = tag.contains("CustomName") ? Component.Serializer.fromJson(tag.getString("CustomName"), registries) : null;
         // Lists are complete snapshots, not patches. In particular, the empty
@@ -148,7 +161,7 @@ public class TileThaumcraftInventory extends BlockEntity implements WorldlyConta
             int slot = entry.getByte("Slot") & 0xFF;
             if (slot < 0 || slot >= itemStacks.size()) continue;
             if (isSyncedSlot(slot) != synced) continue;
-            itemStacks.set(slot, ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY));
+            itemStacks.set(slot, requiredStack(registries, entry.get("Stack")));
         }
     }
 }

@@ -76,22 +76,33 @@ public final class OuterLandsProvider {
         private static final SavedData.Factory<MazeSavedData> FACTORY = new SavedData.Factory<>(
                 MazeSavedData::new, MazeSavedData::load, DataFixTypes.LEVEL);
         private final Map<Long, Short> cells = new java.util.concurrent.ConcurrentHashMap<>();
+        private CompoundTag rejected;
 
         public MazeSavedData() {
         }
 
         public static MazeSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
             MazeSavedData data = new MazeSavedData();
-            ListTag list = tag.getList("cells", Tag.TAG_COMPOUND);
-            for (int i = 0; i < list.size(); ++i) {
-                CompoundTag entry = list.getCompound(i);
-                data.cells.put(StructurePlacementRules.key(entry.getInt("x"), entry.getInt("z")),
-                        entry.getShort("cell"));
+            try {
+                if (!(tag.get("cells") instanceof ListTag list) || (!list.isEmpty() && list.getElementType()!=Tag.TAG_COMPOUND))
+                    throw new IllegalArgumentException("cells must be a compound list");
+                for (int i = 0; i < list.size(); ++i) {
+                    CompoundTag entry = list.getCompound(i);
+                    if (!entry.contains("x",Tag.TAG_INT) || !entry.contains("z",Tag.TAG_INT) || !entry.contains("cell",Tag.TAG_SHORT))
+                        throw new IllegalArgumentException("cells["+i+"]: expected int x/z and short cell");
+                    long key = StructurePlacementRules.key(entry.getInt("x"), entry.getInt("z"));
+                    if (data.cells.putIfAbsent(key, entry.getShort("cell"))!=null)
+                        throw new IllegalArgumentException("duplicate cell at "+entry.getInt("x")+","+entry.getInt("z"));
+                }
+            } catch (RuntimeException malformed) {
+                data.rejected=tag.copy(); data.cells.clear();
+                com.mojang.logging.LogUtils.getLogger().error("Retaining unread {} world map; room/generation operations disabled: {}", ID, malformed.toString());
             }
             return data;
         }
 
         @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+            if (rejected!=null) return rejected.copy();
             ListTag list = new ListTag();
             for (Map.Entry<Long, Short> entry : cells.entrySet()) {
                 CompoundTag cell = new CompoundTag();
@@ -106,12 +117,14 @@ public final class OuterLandsProvider {
 
         /** The packed cell of a chunk, 0 when the chunk carries no labyrinth. */
         public short cell(int chunkX, int chunkZ) {
+            requireReadable();
             Short value = cells.get(StructurePlacementRules.key(chunkX, chunkZ));
             return value == null ? 0 : value;
         }
 
         /** True when a labyrinth already covers the given area. */
         public boolean mazesInRange(int chunkX, int chunkZ, int width, int height) {
+            requireReadable();
             return StructurePlacementRules.mazesInRange(cells, chunkX, chunkZ, width, height);
         }
 
@@ -120,6 +133,7 @@ public final class OuterLandsProvider {
          * grid into the map and removes the five empty corner markers.
          */
         public void storeLabyrinth(MazeGenerator generator, int ringChunkX, int ringChunkZ) {
+            requireReadable();
             int column = StructurePlacementRules.mazeOriginChunk(ringChunkX, generator.width());
             int row = StructurePlacementRules.mazeOriginChunk(ringChunkZ, generator.height());
             for (int a = 0; a < generator.width(); ++a) {
@@ -129,6 +143,10 @@ public final class OuterLandsProvider {
                 }
             }
             setDirty();
+        }
+
+        private void requireReadable() {
+            if (rejected!=null) throw new IllegalStateException("Unread "+ID+" map: back up and repair cells offline before room/generation operations");
         }
     }
 

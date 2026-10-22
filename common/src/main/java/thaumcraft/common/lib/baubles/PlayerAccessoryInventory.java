@@ -15,7 +15,8 @@ public final class PlayerAccessoryInventory extends SimpleContainer {
     private static final BaubleType[] TYPES = {BaubleType.AMULET, BaubleType.RING, BaubleType.RING, BaubleType.BELT};
     private final Player owner;
     private boolean silent, mutating;
-    private CompoundTag rejected;
+    private Tag rejected;
+    private static final String REJECTED = "RejectedAccessoryAttachment";
     public PlayerAccessoryInventory(Player owner) { super(4); this.owner = owner; }
     public Player owner() { return owner; }
     public static BaubleType slotType(int slot) { return TYPES[slot]; }
@@ -49,7 +50,8 @@ public final class PlayerAccessoryInventory extends SimpleContainer {
     }
     @Override public ItemStack removeItemNoUpdate(int slot) { return removeItem(slot, 1); }
     public CompoundTag save(HolderLookup.Provider registries) {
-        if (rejected != null) return rejected.copy();
+        if (rejected instanceof CompoundTag original) return original.copy();
+        if (rejected != null) { CompoundTag envelope = new CompoundTag(); envelope.put(REJECTED, rejected.copy()); return envelope; }
         CompoundTag out = new CompoundTag(); ListTag list = new ListTag();
         for (int slot = 0; slot < 4; slot++) if (!getItem(slot).isEmpty()) {
             CompoundTag entry = new CompoundTag(); entry.putByte("Slot", (byte)slot); entry.put("Item", getItem(slot).save(registries)); list.add(entry);
@@ -58,6 +60,7 @@ public final class PlayerAccessoryInventory extends SimpleContainer {
     }
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
         if (mutating) throw new IllegalStateException("Accessory reload during mutation");
+        if (tag.contains(REJECTED)) { rejectAttachment(tag.get(REJECTED)); return; }
         ItemStack[] parsed = {ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY};
         // getList(key, COMPOUND) returns an empty list for a list of another
         // element type. Do not mistake malformed saved contents for four empty slots.
@@ -77,7 +80,18 @@ public final class PlayerAccessoryInventory extends SimpleContainer {
         try { rejected=null; for(int slot=0;slot<4;slot++) super.setItem(slot, valid ? parsed[slot] : ItemStack.EMPTY); }
         finally { silent=false; }
         rejected=valid ? null : tag.copy();
+        if (!valid) com.mojang.logging.LogUtils.getLogger().error("Retaining unread accessory inventory for {} at {}: invalid Items slot/stack/list", owner==null?"test owner":owner.getUUID(), owner==null?"no position":owner.blockPosition());
         thaumcraft.common.lib.runic.RunicShield.markDirty(owner);
+    }
+    public Tag saveAttachment(HolderLookup.Provider registries) { return rejected==null ? save(registries) : rejected.copy(); }
+    public void loadAttachment(Tag value, HolderLookup.Provider registries) {
+        if (value instanceof CompoundTag compound) load(compound,registries);
+        else rejectAttachment(value);
+    }
+    private void rejectAttachment(Tag value) {
+        if (mutating) throw new IllegalStateException("Accessory reload during mutation");
+        rejected=value.copy();
+        com.mojang.logging.LogUtils.getLogger().error("Retaining unread accessory attachment for {} at {}: expected compound, got {}", owner==null?"test owner":owner.getUUID(), owner==null?"no position":owner.blockPosition(),value.getType());
     }
     public void receive(java.util.List<ItemStack> stacks) {
         if (!owner.level().isClientSide || stacks.size()!=4) return;

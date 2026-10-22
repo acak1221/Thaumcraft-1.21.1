@@ -46,7 +46,7 @@ import thaumcraft.common.lib.infusion.InfusionStructure;
 import thaumcraft.common.lib.network.InfusionFxNetworking;
 
 /** Original TC4 matrix session/cycle for stack and enchantment outputs. */
-public final class TileInfusionMatrix extends BlockEntity implements InfusionDemandEndpoint {
+public final class TileInfusionMatrix extends RetainedDataBlockEntity implements InfusionDemandEndpoint {
     private boolean active;
     private boolean crafting;
     private int instability;
@@ -77,6 +77,7 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     public TileInfusionMatrix(BlockPos pos, BlockState state) {
         super(ThaumcraftInfusion.MATRIX_BLOCK_ENTITY.get(), pos, state);
     }
+    TileInfusionMatrix(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type,pos,state); }
 
     public boolean isActive() { return active; }
     public boolean isCrafting() { return crafting; }
@@ -441,7 +442,7 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     }
 
     private boolean current() {
-        return level instanceof ServerLevel && !isRemoved() && level.hasChunkAt(worldPosition)
+        return !isDataRejected() && level instanceof ServerLevel && !isRemoved() && level.hasChunkAt(worldPosition)
                 && level.getBlockState(worldPosition).is(ThaumcraftInfusion.MATRIX.get())
                 && level.getBlockEntity(worldPosition) == this;
     }
@@ -458,6 +459,7 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         tag.putBoolean("active", active);
         tag.putBoolean("crafting", crafting);
@@ -488,6 +490,7 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
         // Loading into a live object is not a way to rewind a transfer/cycle
         // from one of its synchronous notifications.
         if (inCycle || EssentiaTransfers.isLocked(this)) return;
+        if (retainMalformed(tag, () -> validateSession(tag,registries))) return;
         super.loadAdditional(tag, registries);
         active = tag.getBoolean("active");
         crafting = tag.getBoolean("crafting");
@@ -500,10 +503,9 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
         var ops = registries.createSerializationContext(NbtOps.INSTANCE);
         ListTag ingredients = tag.getList("recipein", Tag.TAG_COMPOUND);
         for (int index = 0; index < ingredients.size(); index++) {
-            // An explicit malformed requirement must never become a plain
-            // ingredient on reload. Keep an invalid sentinel that pauses safely.
+            // Validated before touching any live session field; no destructive sentinel.
             recipeIngredients.add(InfusionComponentPredicate.CODEC.parse(ops, ingredients.getCompound(index))
-                    .result().orElseGet(() -> new InfusionComponentPredicate(Ingredient.EMPTY)));
+                    .getOrThrow());
         }
         recipeInput = loadStack(tag.getCompound("recipeinput"), registries);
         recipeOutput = tag.getString("rotype").equals("@") ? loadStack(tag.getCompound("recipeout"), registries) : ItemStack.EMPTY;
@@ -543,11 +545,41 @@ public final class TileInfusionMatrix extends BlockEntity implements InfusionDem
     }
 
     private static ItemStack loadStack(CompoundTag tag, HolderLookup.Provider registries) {
+        if (tag.isEmpty()) return ItemStack.EMPTY;
         int amount = tag.getInt("StoredCount");
-        if (amount <= 0) return ItemStack.EMPTY;
-        ItemStack stack = ItemStack.parse(registries, tag.getCompound("Stack")).orElse(ItemStack.EMPTY);
-        if (!stack.isEmpty()) stack.setCount(amount);
+        if (!tag.contains("StoredCount",Tag.TAG_INT) || amount<=0) throw new IllegalArgumentException("Invalid session StoredCount");
+        ItemStack stack = requiredStack(registries, tag.get("Stack"));
+        stack.setCount(amount);
         return stack;
+    }
+
+    private static void validateSession(CompoundTag tag, HolderLookup.Provider registries) {
+        for (String key:List.of("active","crafting","InfusionRenderState"))
+            if (tag.contains(key) && !tag.contains(key,Tag.TAG_BYTE)) throw new IllegalArgumentException(key+" must be byte");
+        for (String key:List.of("instability","recipeinst","recipetype","recipexp"))
+            if (tag.contains(key) && !tag.contains(key,Tag.TAG_INT)) throw new IllegalArgumentException(key+" must be int");
+        for (String key:List.of("rotype","recipeOutputLabel","recipeplayer","RecipeEnchantment"))
+            if (tag.contains(key) && !tag.contains(key,Tag.TAG_STRING)) throw new IllegalArgumentException(key+" must be string");
+        if (tag.contains("RecipePlayerId") && !tag.hasUUID("RecipePlayerId")) throw new IllegalArgumentException("Invalid RecipePlayerId");
+        if (tag.contains("RecipeEnchantment") && ResourceLocation.tryParse(tag.getString("RecipeEnchantment"))==null)
+            throw new IllegalArgumentException("Invalid RecipeEnchantment");
+        ListTag requirements=compoundList(tag,"recipein");
+        var ops=registries.createSerializationContext(NbtOps.INSTANCE);
+        for (Tag requirement:requirements) InfusionComponentPredicate.CODEC.parse(ops,requirement).getOrThrow();
+        for (String key:List.of("recipeinput","recipeout")) {
+            if (tag.contains(key)) {
+                if (!(tag.get(key) instanceof CompoundTag saved)) throw new IllegalArgumentException(key+" must be compound");
+                loadStack(saved,registries);
+            }
+        }
+        for (String key:List.of("Aspects","RecipeCost")) {
+            java.util.Set<String> seen=new java.util.HashSet<>();
+            for (Tag value:compoundList(tag,key)) {
+                CompoundTag row=(CompoundTag)value;
+                if (!row.contains("key",Tag.TAG_STRING) || Aspect.getAspect(row.getString("key"))==null || !seen.add(row.getString("key"))
+                        || !row.contains("amount",Tag.TAG_INT) || row.getInt("amount")<0) throw new IllegalArgumentException(key+": invalid/duplicate aspect debt: "+row);
+            }
+        }
     }
 
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) {

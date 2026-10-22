@@ -28,12 +28,32 @@ public final class PlayerKnowledge {
     private int warpSticky;
     private int warpTemp;
     private int warpCounter;
+    private Tag rejected;
+    private static final String REJECTED = "RejectedPlayerKnowledge";
+
+    public boolean isRejected() { return rejected != null; }
+
+    /** Disk attachment retains even a non-compound outer tag. Sync uses save()'s envelope. */
+    public Tag saveAttachment() { return rejected == null ? save() : rejected.copy(); }
+
+    public void loadAttachment(Tag value, String location) {
+        try {
+            if (!(value instanceof CompoundTag tag)) throw new IllegalArgumentException("attachment must be a compound");
+            validate(tag);
+            rejected = null;
+            load(tag);
+        } catch (RuntimeException malformed) {
+            rejected = value.copy();
+            com.mojang.logging.LogUtils.getLogger().error("Retaining unread player knowledge at {}: {}", location, malformed.toString());
+        }
+    }
 
     public PlayerKnowledge() {
         addDiscoveredPrimalAspects();
     }
 
     public void initializePrimalAspects(RandomSource random) {
+        if (isRejected()) return;
         if (initializedAspects) return;
         for (String tag : PRIMAL_TAGS) {
             discoveredAspects.put(tag, 15 + random.nextInt(5));
@@ -42,9 +62,10 @@ public final class PlayerKnowledge {
     }
 
     public boolean hasInitializedAspects() { return initializedAspects; }
-    public void setInitializedAspects(boolean initialized) { initializedAspects = initialized; }
+    public void setInitializedAspects(boolean initialized) { if (!isRejected()) initializedAspects = initialized; }
 
     public void addDiscoveredPrimalAspects() {
+        if (isRejected()) return;
         for (String tag : PRIMAL_TAGS) discoveredAspects.putIfAbsent(tag, 0);
     }
 
@@ -53,6 +74,7 @@ public final class PlayerKnowledge {
     }
 
     public boolean addDiscoveredAspect(String tag) {
+        if (isRejected()) return false;
         if (tag == null || tag.isEmpty() || discoveredAspects.containsKey(tag)) return false;
         discoveredAspects.put(tag, 0);
         return true;
@@ -67,12 +89,14 @@ public final class PlayerKnowledge {
     }
 
     public boolean setAspectPool(String tag, int amount) {
+        if (isRejected()) return false;
         if (tag == null || tag.isEmpty()) return false;
         discoveredAspects.put(tag, amount);
         return true;
     }
 
     public boolean addAspectPool(String tag, int amount) {
+        if (isRejected()) return false;
         if (tag == null || tag.isEmpty() || amount == 0) return false;
         int current = getAspectPoolFor(tag);
         if (amount > 0) {
@@ -88,27 +112,27 @@ public final class PlayerKnowledge {
 
     public Set<String> getResearchComplete() { return snapshot(completedResearch); }
     public boolean isResearchComplete(String key) { return completedResearch.contains(key); }
-    public boolean addResearch(String key) { return addKey(completedResearch, key); }
-    public boolean removeResearch(String key) { return completedResearch.remove(key); }
+    public boolean addResearch(String key) { return !isRejected() && addKey(completedResearch, key); }
+    public boolean removeResearch(String key) { return !isRejected() && completedResearch.remove(key); }
     public Set<String> getScannedItems() { return snapshot(scannedItems); }
     public Set<String> getScannedEntities() { return snapshot(scannedEntities); }
     public Set<String> getScannedPhenomena() { return snapshot(scannedPhenomena); }
     public boolean hasScannedItem(String key) { return scannedItems.contains(key); }
     public boolean hasScannedEntity(String key) { return scannedEntities.contains(key); }
     public boolean hasScannedPhenomena(String key) { return scannedPhenomena.contains(key); }
-    public boolean scanItem(String key) { return addScanKey(scannedItems, key); }
-    public boolean scanEntity(String key) { return addScanKey(scannedEntities, key); }
-    public boolean scanPhenomena(String key) { return addScanKey(scannedPhenomena, key); }
+    public boolean scanItem(String key) { return !isRejected() && addScanKey(scannedItems, key); }
+    public boolean scanEntity(String key) { return !isRejected() && addScanKey(scannedEntities, key); }
+    public boolean scanPhenomena(String key) { return !isRejected() && addScanKey(scannedPhenomena, key); }
 
     public int getWarpPerm() { return warpPerm; }
     public int getWarpSticky() { return warpSticky; }
     public int getWarpTemp() { return warpTemp; }
     public int getWarpCounter() { return warpCounter; }
     public int getTotalWarp() { return warpPerm + warpSticky + warpTemp; }
-    public void setWarpPerm(int value) { warpPerm = Math.max(0, value); }
-    public void setWarpSticky(int value) { warpSticky = Math.max(0, value); }
-    public void setWarpTemp(int value) { warpTemp = Math.max(0, value); }
-    public void setWarpCounter(int value) { warpCounter = value; }
+    public void setWarpPerm(int value) { if (!isRejected()) warpPerm = Math.max(0, value); }
+    public void setWarpSticky(int value) { if (!isRejected()) warpSticky = Math.max(0, value); }
+    public void setWarpTemp(int value) { if (!isRejected()) warpTemp = Math.max(0, value); }
+    public void setWarpCounter(int value) { if (!isRejected()) warpCounter = value; }
     public void addWarpPerm(int value) { setWarpPerm(warpPerm + value); }
     public void addWarpSticky(int value) { setWarpSticky(warpSticky + value); }
     public void addWarpTemp(int value) { setWarpTemp(warpTemp + value); }
@@ -119,6 +143,7 @@ public final class PlayerKnowledge {
      * keeps the warp counter of the player.
      */
     public void reset() {
+        if (isRejected()) return;
         discoveredAspects.clear();
         completedResearch.clear();
         scannedItems.clear();
@@ -138,6 +163,8 @@ public final class PlayerKnowledge {
 
     public void copyFrom(PlayerKnowledge source) {
         if (source == this) return;
+        if (isRejected() && !source.isRejected()) throw new IllegalStateException("Unread player knowledge cannot accept a gameplay snapshot; repair offline");
+        rejected = source.rejected == null ? null : source.rejected.copy();
         discoveredAspects.clear();
         discoveredAspects.putAll(source.discoveredAspects);
         replace(completedResearch, source.completedResearch);
@@ -153,6 +180,8 @@ public final class PlayerKnowledge {
 
     /** Native 1.21.1 data only. This is not a reader for legacy .thaum files. */
     public CompoundTag save() {
+        if (rejected instanceof CompoundTag original) return original.copy();
+        if (rejected != null) { CompoundTag envelope = new CompoundTag(); envelope.put(REJECTED, rejected.copy()); return envelope; }
         CompoundTag tag = new CompoundTag();
         tag.putInt("dataVersion", DATA_VERSION);
         tag.putBoolean("initializedAspects", initializedAspects);
@@ -176,6 +205,14 @@ public final class PlayerKnowledge {
     }
 
     public void load(CompoundTag tag) {
+        if (tag.contains(REJECTED)) { rejected = tag.get(REJECTED).copy(); return; }
+        try { validate(tag); }
+        catch (RuntimeException malformed) {
+            rejected = tag.copy();
+            com.mojang.logging.LogUtils.getLogger().error("Retaining unread player knowledge (owner load/sync): {}", malformed.toString());
+            return;
+        }
+        rejected = null;
         reset();
         initializedAspects = tag.getBoolean("initializedAspects");
         setWarpPerm(tag.getInt("warpPerm"));
@@ -191,6 +228,34 @@ public final class PlayerKnowledge {
         readSet(tag, "scannedItems", scannedItems);
         readSet(tag, "scannedEntities", scannedEntities);
         readSet(tag, "scannedPhenomena", scannedPhenomena);
+    }
+
+    private static void validate(CompoundTag tag) {
+        if (tag.contains(REJECTED)) throw new IllegalArgumentException("retained rejection envelope");
+        if (tag.contains("dataVersion") && (!tag.contains("dataVersion", Tag.TAG_INT) || tag.getInt("dataVersion") != DATA_VERSION))
+            throw new IllegalArgumentException("unsupported dataVersion");
+        for (String key : List.of("warpPerm", "warpSticky", "warpTemp", "warpCounter"))
+            if (tag.contains(key) && !tag.contains(key, Tag.TAG_INT)) throw new IllegalArgumentException(key+" must be int");
+        if (tag.contains("initializedAspects") && !tag.contains("initializedAspects", Tag.TAG_BYTE))
+            throw new IllegalArgumentException("initializedAspects must be byte");
+        validateList(tag, "discoveredAspects", Tag.TAG_COMPOUND);
+        Set<String> keys = new LinkedHashSet<>();
+        for (Tag value : tag.getList("discoveredAspects", Tag.TAG_COMPOUND)) {
+            CompoundTag row = (CompoundTag)value;
+            if (!row.contains("key",Tag.TAG_STRING) || row.getString("key").isEmpty() || !row.contains("amount",Tag.TAG_INT) || !keys.add(row.getString("key")))
+                throw new IllegalArgumentException("invalid/duplicate discoveredAspects row: "+row);
+        }
+        for (String key : List.of("researchComplete", "scannedItems", "scannedEntities", "scannedPhenomena")) {
+            validateList(tag,key,Tag.TAG_STRING);
+            Set<String> seen = new LinkedHashSet<>();
+            for (Tag value : tag.getList(key,Tag.TAG_STRING))
+                if (value.getAsString().isEmpty() || !seen.add(value.getAsString())) throw new IllegalArgumentException("empty/duplicate "+key);
+        }
+    }
+
+    private static void validateList(CompoundTag tag, String key, int elementType) {
+        if (tag.contains(key) && (!(tag.get(key) instanceof ListTag list) || (!list.isEmpty() && list.getElementType()!=elementType)))
+            throw new IllegalArgumentException(key+" has wrong list/element type");
     }
 
     private static void writeSet(CompoundTag tag, String key, Set<String> values) {

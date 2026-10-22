@@ -64,7 +64,7 @@ import thaumcraft.common.lib.research.TableTopology;
 import thaumcraft.common.lib.utils.DeferredItemDrops;
 
 /** Physical shared inventory, authoritative revision and original shared-bonus ecology. */
-public final class TileResearchTable extends BlockEntity implements Container, MenuProvider {
+public final class TileResearchTable extends RetainedDataBlockEntity implements Container, MenuProvider {
     public static final int SIZE = 2;
     public static final int MAX_BONUS_ASPECTS = 256;
     private static final Map<String, Aspect> INFUSED_ORES = Map.of(
@@ -94,6 +94,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     public TileResearchTable(BlockPos pos, BlockState state) {
         super(ThaumcraftContent.RESEARCH_TABLE_BLOCK_ENTITY.get(), pos, state);
     }
+    TileResearchTable(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type,pos,state); }
 
     @Override public void clearRemoved() {
         super.clearRemoved();
@@ -101,6 +102,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     }
 
     public static void tickTopologyOnLoad(Level level, BlockPos pos, BlockState state, TileResearchTable table) {
+        if (table.isDataRejected()) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
         if (!serverLevel.getServer().isSameThread()) throw new IllegalStateException("Research table ticking requires the server thread");
         if (table.topologyCheckPending) {
@@ -120,27 +122,31 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     }
 
     @Override public boolean isValidBlockState(BlockState state) {
+        if (!ThaumcraftContent.TABLE.isPresent()) return super.isValidBlockState(state);
         return state.is(ThaumcraftContent.TABLE.get()) && TableTopology.isMain(state.getValue(BlockTable.VARIANT));
     }
 
     @Override public int getContainerSize() { return SIZE; }
     @Override public boolean isEmpty() { return items.stream().allMatch(ItemStack::isEmpty); }
-    @Override public ItemStack getItem(int slot) { return items.get(slot); }
+    @Override public ItemStack getItem(int slot) { return isDataRejected()?ItemStack.EMPTY:items.get(slot); }
     @Override public int getMaxStackSize() { return 64; }
 
     @Override public ItemStack removeItem(int slot, int amount) {
+        if (isDataRejected()) return ItemStack.EMPTY;
         ItemStack removed = ContainerHelper.removeItem(items, slot, amount);
         if (!removed.isEmpty()) setChanged();
         return removed;
     }
 
     @Override public ItemStack removeItemNoUpdate(int slot) {
+        if (isDataRejected()) return ItemStack.EMPTY;
         ItemStack removed = ContainerHelper.takeItem(items, slot);
         refreshRevision();
         return removed;
     }
 
     @Override public void setItem(int slot, ItemStack stack) {
+        if (isDataRejected()) return;
         items.set(slot, Objects.requireNonNull(stack, "stack"));
         // R10's original whole-stack transfers can return a copied note above64.
         // Preserve that owned stock; ordinary tools/items retain the original64 setter limit.
@@ -148,9 +154,10 @@ public final class TileResearchTable extends BlockEntity implements Container, M
         setChanged();
     }
 
-    @Override public void clearContent() { items.clear(); setChanged(); }
+    @Override public void clearContent() { if (isDataRejected()) return; items.clear(); setChanged(); }
 
     @Override public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (isDataRejected()) return false;
         if (stack.isEmpty()) return false;
         return switch (slot) {
             case 0 -> stack.getItem() instanceof IScribeTools;
@@ -162,7 +169,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     }
 
     @Override public boolean stillValid(Player player) {
-        return level != null && !isRemoved() && player.level() == level
+        return !isDataRejected() && level != null && !isRemoved() && player.level() == level
                 && level.hasChunkAt(worldPosition)
                 && level.getBlockEntity(worldPosition) == this
                 && isValidBlockState(level.getBlockState(worldPosition))
@@ -176,6 +183,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
 
     /** Shared table material, not a player's personal RP or a discovery grant. */
     public void setBonusPools(Map<String, Integer> pools) {
+        if (isDataRejected()) return;
         bonusPools = canonicalBonusPools(pools);
         setChanged();
     }
@@ -312,6 +320,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     /** Combine-only material commit: inventory references/counts/components are untouched. */
     public void commitKnowledgeBonus(long expectedRevision, Map<String, Integer> bonus,
                                      PlayerKnowledge actor, PlayerKnowledge stagedKnowledge) {
+        if (isDataRejected()) throw new IllegalStateException("Unread research table cannot commit");
         if (!(level instanceof ServerLevel serverLevel) || !serverLevel.getServer().isSameThread()) {
             throw new IllegalStateException("Research table combination requires the server thread");
         }
@@ -334,6 +343,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
      */
     public void commitCopy(long expectedRevision, ItemStack note, ResearchNoteCopying.Plan plan,
                            PlayerKnowledge actor, ItemStack paper, ItemStack blackDye) {
+        if (isDataRejected()) throw new IllegalStateException("Unread research table cannot commit");
         if (!(level instanceof ServerLevel serverLevel) || !serverLevel.getServer().isSameThread()) throw new IllegalStateException("Research copy requires the server thread");
         if (tableRevision() != expectedRevision || expectedRevision == Long.MAX_VALUE || note != items.get(1)
                 || note.getCount() == Integer.MAX_VALUE || plan.count() != note.getCount() + 1
@@ -356,6 +366,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     /** Material-only R08 edit commit; no setters/notifications between the prepared owner changes. */
     public void commitEdit(long expectedRevision, ItemStack tool, ItemStack note, Map<String, Integer> bonus,
                            PlayerKnowledge actor, PlayerKnowledge stagedKnowledge) {
+        if (isDataRejected()) throw new IllegalStateException("Unread research table cannot commit");
         if (!(level instanceof ServerLevel serverLevel) || !serverLevel.getServer().isSameThread()) {
             throw new IllegalStateException("Research table edits require the server thread");
         }
@@ -418,6 +429,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
 
     /** Transfer physical contents once; the safe level-post tick delivers the queued outputs. */
     public void evacuate() {
+        if (isDataRejected()) return;
         if (!(level instanceof ServerLevel serverLevel) || evacuating || isEmpty()) return;
         evacuating = true;
         try {
@@ -436,6 +448,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         refreshRevision();
         ListTag inventory = new ListTag();
@@ -465,6 +478,21 @@ public final class TileResearchTable extends BlockEntity implements Container, M
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (retainMalformed(tag, () -> {
+            validateSlots(tag,"Inventory",SIZE,registries);
+            for (Tag value:compoundList(tag,"Inventory")) {
+                CompoundTag row=(CompoundTag)value;
+                if (!row.contains("StoredCount",Tag.TAG_INT) || row.getInt("StoredCount")<=0) throw new IllegalArgumentException("Inventory: invalid StoredCount");
+            }
+            ListTag bonus=compoundList(tag,"BonusAspects");
+            if (bonus.size()>MAX_BONUS_ASPECTS) throw new IllegalArgumentException("Too many BonusAspects");
+            java.util.Set<String> seen=new java.util.HashSet<>();
+            for (Tag value:bonus) {
+                CompoundTag row=(CompoundTag)value;
+                if (!row.contains("tag",Tag.TAG_STRING) || !isCanonicalBonusTag(row.getString("tag")) || !row.contains("amount",Tag.TAG_INT)
+                        || row.getInt("amount")<=0 || !seen.add(row.getString("tag"))) throw new IllegalArgumentException("Invalid/duplicate BonusAspects row: "+row);
+            }
+        })) return;
         super.loadAdditional(tag, registries);
         nextBonusRecalc = Math.clamp(tag.getInt("NextBonusRecalc"), 0, 601);
         items.clear();
@@ -474,7 +502,7 @@ public final class TileResearchTable extends BlockEntity implements Container, M
             int slot = entry.getByte("Slot") & 255;
             int count = entry.getInt("StoredCount");
             if (slot >= SIZE || count <= 0) continue;
-            ItemStack stack = ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
+            ItemStack stack = requiredStack(registries, entry.get("Stack"));
             if (stack.isEmpty()) continue;
             stack.setCount(count);
             items.set(slot, stack);

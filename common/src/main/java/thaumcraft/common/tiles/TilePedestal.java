@@ -27,22 +27,24 @@ import thaumcraft.common.lib.utils.DeferredItemDrops;
 import thaumcraft.common.lib.utils.RejectedEntitySpawn;
 
 /** TilePedestal: one public, all-sided slot; an infusion result is NOT limited to one item. */
-public final class TilePedestal extends BlockEntity implements WorldlyContainer, Nameable {
+public final class TilePedestal extends RetainedDataBlockEntity implements WorldlyContainer, Nameable {
     private ItemStack stack = ItemStack.EMPTY;
     private Component customName;
 
     public TilePedestal(BlockPos pos, BlockState state) {
         super(ThaumcraftInfusion.PEDESTAL_BLOCK_ENTITY.get(), pos, state);
     }
+    TilePedestal(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type,pos,state); }
 
     @Override public int getContainerSize() { return 1; }
     @Override public int getMaxStackSize() { return 1; }
     @Override public boolean isEmpty() { return stack.isEmpty(); }
-    @Override public ItemStack getItem(int slot) { return slot == 0 ? stack : ItemStack.EMPTY; }
+    @Override public ItemStack getItem(int slot) { return !isDataRejected() && slot == 0 ? stack : ItemStack.EMPTY; }
     /** The actual physical slot, not a copied preview. */
     public ItemStack getStack() { return getItem(0); }
 
     @Override public ItemStack removeItem(int slot, int amount) {
+        if (isDataRejected()) return ItemStack.EMPTY;
         if (slot != 0 || amount <= 0 || stack.isEmpty()) return ItemStack.EMPTY;
         ItemStack removed = stack.split(amount);
         if (stack.isEmpty()) stack = ItemStack.EMPTY;
@@ -51,6 +53,7 @@ public final class TilePedestal extends BlockEntity implements WorldlyContainer,
     }
 
     @Override public ItemStack removeItemNoUpdate(int slot) {
+        if (isDataRejected()) return ItemStack.EMPTY;
         if (slot != 0) return ItemStack.EMPTY;
         ItemStack removed = stack;
         stack = ItemStack.EMPTY;
@@ -58,6 +61,7 @@ public final class TilePedestal extends BlockEntity implements WorldlyContainer,
     }
 
     @Override public void setItem(int slot, ItemStack value) {
+        if (isDataRejected()) return;
         if (slot != 0) return;
         // TilePedestal:83-91 clamps the ordinary setter, including automation.
         if (!value.isEmpty() && value.getCount() > 1) value.setCount(1);
@@ -67,18 +71,19 @@ public final class TilePedestal extends BlockEntity implements WorldlyContainer,
 
     /** TilePedestal:94-100: full output count and all native components survive. */
     public void setInfusionStack(ItemStack value) {
+        if (isDataRejected()) return;
         stack = value;
         setChanged();
     }
 
-    @Override public void clearContent() { stack = ItemStack.EMPTY; setChanged(); }
-    @Override public boolean canPlaceItem(int slot, ItemStack value) { return slot == 0; }
+    @Override public void clearContent() { if (isDataRejected()) return; stack = ItemStack.EMPTY; setChanged(); }
+    @Override public boolean canPlaceItem(int slot, ItemStack value) { return !isDataRejected() && slot == 0; }
     @Override public int[] getSlotsForFace(Direction side) { return new int[] {0}; }
-    @Override public boolean canPlaceItemThroughFace(int slot, ItemStack value, Direction side) { return slot == 0 && stack.isEmpty(); }
-    @Override public boolean canTakeItemThroughFace(int slot, ItemStack value, Direction side) { return slot == 0; }
+    @Override public boolean canPlaceItemThroughFace(int slot, ItemStack value, Direction side) { return !isDataRejected() && slot == 0 && stack.isEmpty(); }
+    @Override public boolean canTakeItemThroughFace(int slot, ItemStack value, Direction side) { return !isDataRejected() && slot == 0; }
 
     @Override public boolean stillValid(Player player) {
-        return level != null && !isRemoved() && player.level() == level && level.hasChunkAt(worldPosition)
+        return !isDataRejected() && level != null && !isRemoved() && player.level() == level && level.hasChunkAt(worldPosition)
                 && level.getBlockEntity(worldPosition) == this
                 && level.getBlockState(worldPosition).is(ThaumcraftInfusion.PEDESTAL.get())
                 && player.distanceToSqr(worldPosition.getX() + .5, worldPosition.getY() + .5, worldPosition.getZ() + .5) <= 64;
@@ -86,6 +91,7 @@ public final class TilePedestal extends BlockEntity implements WorldlyContainer,
 
     /** Original InventoryUtils:354-377; never spawn from inside block replacement. */
     public void evacuate() {
+        if (isDataRejected()) return;
         if (!(level instanceof ServerLevel server) || stack.isEmpty()) return;
         DeferredItemDrops.enqueue(server, worldPosition, List.of(stack));
         stack = ItemStack.EMPTY;
@@ -94,12 +100,14 @@ public final class TilePedestal extends BlockEntity implements WorldlyContainer,
 
     /** InventoryUtils:381-395 places the whole stack AT the player, not in a locked inventory. */
     public void ejectTo(Player player) {
+        if (isDataRejected()) return;
         if (!(level instanceof ServerLevel server) || player.level() != server || stack.isEmpty()) return;
         dropAt(server, new Vec3(player.getX(), player.getY() + player.getEyeHeight() / 2.0, player.getZ()), null, player.blockPosition());
     }
 
     /** Hazards run outside block replacement: the real drop must exist BEFORE a type5 explosion. */
     public void dropContents() {
+        if (isDataRejected()) return;
         if (!(level instanceof ServerLevel server) || stack.isEmpty()) return;
         Random random = new Random(); // InventoryUtils:355, independent of world RNG.
         float x = random.nextFloat() * .8F + .1F, y = random.nextFloat() * .8F + .1F, z = random.nextFloat() * .8F + .1F;
@@ -161,6 +169,7 @@ public final class TilePedestal extends BlockEntity implements WorldlyContainer,
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         if (!stack.isEmpty()) {
             // The 1.21 stack codec rejects count >99. Keep one physical stack,
@@ -174,8 +183,14 @@ public final class TilePedestal extends BlockEntity implements WorldlyContainer,
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (retainMalformed(tag, () -> {
+            if (tag.contains("Stack")) {
+                requiredStack(registries,tag.get("Stack"));
+                if (!tag.contains("Count",Tag.TAG_INT) || tag.getInt("Count")<=0) throw new IllegalArgumentException("Count must be positive int");
+            } else if (tag.getInt("Count")!=0) throw new IllegalArgumentException("Count without Stack");
+        })) return;
         super.loadAdditional(tag, registries);
-        stack = tag.contains("Stack", Tag.TAG_COMPOUND) ? ItemStack.parse(registries, tag.getCompound("Stack")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+        stack = tag.contains("Stack") ? requiredStack(registries, tag.get("Stack")) : ItemStack.EMPTY;
         int count = tag.getInt("Count");
         if (!stack.isEmpty() && count > 0) stack.setCount(count);
         else stack = ItemStack.EMPTY;

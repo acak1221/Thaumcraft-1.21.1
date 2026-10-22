@@ -35,7 +35,7 @@ import thaumcraft.common.lib.world.EldritchBlockRules;
  * empty; an item that a hopper pushes into the slot is handed to the linked mirror, and the
  * mirror without a twin ejects it.
  */
-public final class TileMirror extends BlockEntity implements WorldlyContainer {
+public final class TileMirror extends RetainedDataBlockEntity implements WorldlyContainer {
     /** The single slot of the original mirror. */
     private static final int[] SLOTS = {0};
     public boolean linked = false;
@@ -51,10 +51,11 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
     public TileMirror(BlockPos pos, BlockState state) {
         super(ThaumcraftEldritchBlocks.MIRROR_TILE.get(), pos, state);
     }
+    TileMirror(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) { super(type,pos,state); }
 
     public boolean isLinked() { return linked; }
     public Direction getFacing() { return level == null ? Direction.NORTH : level.getBlockState(worldPosition).getValue(thaumcraft.common.blocks.BlockMirror.FACING); }
-    public List<ItemStack> getOutputStacks() { return outputStacks; }
+    public List<ItemStack> getOutputStacks() { return isDataRejected()?List.of():outputStacks; }
 
     /** The link data of the mirror, used by the dropped item. */
     public CompoundTag linkData() {
@@ -68,10 +69,12 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:71-92 - the link is restored when the other mirror is free. */
     public void restoreLink() {
+        if (isDataRejected()) return;
         if (!isDestinationValid()) return;
         ServerLevel target = targetWorld();
         if (target == null) return;
         if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror)) return;
+        if (mirror.isDataRejected()) return;
         mirror.linked = true;
         mirror.linkX = worldPosition.getX();
         mirror.linkY = worldPosition.getY();
@@ -86,6 +89,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:94-110 - the link is dropped when the other mirror is gone. */
     public void invalidateLink() {
+        if (isDataRejected()) return;
         ServerLevel target = targetWorld();
         if (target == null) return;
         if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror)) return;
@@ -96,6 +100,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:112-141 - the link is only valid when both mirrors agree. */
     public boolean isLinkValid() {
+        if (isDataRejected()) return false;
         if (!linked) return false;
         ServerLevel target = targetWorld();
         if (target == null) return false;
@@ -104,6 +109,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
             changed();
             return false;
         }
+        if (mirror.isDataRejected()) return false;
         if (!mirror.linked) {
             linked = false;
             changed();
@@ -120,17 +126,19 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:143-166 - the cheap link check without the side effects. */
     public boolean isLinkValidSimple() {
+        if (isDataRejected()) return false;
         if (!linked) return false;
         ServerLevel target = targetWorld();
         if (target == null) return false;
         if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror)) return false;
-        if (!mirror.linked) return false;
+        if (mirror.isDataRejected() || !mirror.linked) return false;
         return mirror.linkX == worldPosition.getX() && mirror.linkY == worldPosition.getY()
                 && mirror.linkZ == worldPosition.getZ() && mirror.linkDim.equals(linkDim);
     }
 
     /** Original TileMirror:186-196 - the destination must not be linked itself. */
     public boolean isDestinationValid() {
+        if (isDataRejected()) return false;
         ServerLevel target = targetWorld();
         if (target == null) return false;
         if (!(target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror)) {
@@ -138,11 +146,12 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
             changed();
             return false;
         }
-        return !mirror.isLinkValid();
+        return !mirror.isDataRejected() && !mirror.isLinkValid();
     }
 
     /** Original TileMirror:198-216 - the item is moved to the linked mirror. */
     public boolean transport(ItemEntity item) {
+        if (isDataRejected()) return false;
         if (!linked || !isLinkValid()) return false;
         ServerLevel target = targetWorld();
         if (target == null) return false;
@@ -158,6 +167,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:218-232 - the output of the mirror is ejected. */
     public void eject() {
+        if (isDataRejected()) return;
         if (outputStacks.isEmpty() || count <= EldritchBlockRules.MIRROR_EJECT_DELAY) return;
         int index = level.getRandom().nextInt(outputStacks.size());
         ItemStack stack = outputStacks.get(index);
@@ -172,6 +182,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:234-247 - the item leaves the mirror in front of it. */
     public boolean spawnItem(ItemStack stack) {
+        if (isDataRejected()) return false;
         if (level == null) return false;
         Direction face = getFacing();
         ItemEntity item = new ItemEntity(level, worldPosition.getX() + .5D - face.getStepX() * .3D,
@@ -186,8 +197,10 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:249-261 - the instability grows on both mirrors. */
     protected void addInstability(Level targetLevel, int amount) {
+        if (isDataRejected()) return;
         instability += amount;
         if (targetLevel != null && targetLevel.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror) {
+            if (mirror.isDataRejected()) return;
             mirror.instability += amount;
             if (mirror.instability < 0) mirror.instability = 0;
             mirror.setChanged();
@@ -196,6 +209,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:287-306 - the mirror ejects, decays and repairs its link. */
     public static void tick(Level level, BlockPos pos, BlockState state, TileMirror mirror) {
+        if (mirror.isDataRejected()) return;
         if (level.isClientSide) return;
         // Original TileMirror:295 - the counter is READ before it is raised, so
         // the ejection, the decay and the link repair all run on the tick the
@@ -218,6 +232,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:289-300 - the instability decays and can be paid with vis. */
     public void checkInstability(Level level) {
+        if (isDataRejected()) return;
         if (instability > 0 && count % EldritchBlockRules.MIRROR_INSTABILITY_DECAY_PERIOD == 0) {
             instability--;
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
@@ -234,6 +249,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:349-356 - the output stacks of the mirror. */
     public void addStack(ItemStack stack) {
+        if (isDataRejected()) throw new IllegalStateException("Unread mirror at "+worldPosition+" cannot accept stock");
         outputStacks.add(stack);
         setChanged();
     }
@@ -277,10 +293,11 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** The counterpart of {@link #saveOutputStack}: the entry of the original is the stack. */
     public static ItemStack loadOutputStack(CompoundTag entry, HolderLookup.Provider registries) {
-        return ItemStack.parse(registries, entry).orElse(ItemStack.EMPTY);
+        return requiredStack(registries, entry);
     }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (retainMalformed(tag, () -> { for (Tag value:compoundList(tag,"Items")) requiredStack(registries,value); })) return;
         super.loadAdditional(tag, registries);
         linked = tag.getBoolean("linked");
         linkX = tag.getInt("linkX");
@@ -297,6 +314,7 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
     }
 
     @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        if (saveRejected(tag)) return;
         super.saveAdditional(tag, registries);
         tag.putBoolean("linked", linked);
         tag.putInt("linkX", linkX);
@@ -338,10 +356,12 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
      * in front of itself. The slot itself stays empty.
      */
     @Override public void setItem(int slot, ItemStack stack) {
+        if (isDataRejected()) return;
         if (slot != 0 || stack == null || stack.isEmpty() || level == null || level.isClientSide) return;
         ServerLevel target = targetWorld();
         TileMirror twin = target == null ? null
                 : target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror mirror ? mirror : null;
+        if (twin!=null && twin.isDataRejected()) return;
         if (twin != null) {
             twin.addStack(stack.copy());
             addInstability(null, stack.getCount());
@@ -362,9 +382,10 @@ public final class TileMirror extends BlockEntity implements WorldlyContainer {
 
     /** Original TileMirror:406-411 - the twin mirror has to exist. */
     public boolean isItemValidForSlot(int slot, ItemStack stack) {
+        if (isDataRejected()) return false;
         if (slot != 0 || stack == null || stack.isEmpty()) return false;
         ServerLevel target = targetWorld();
-        return target != null && target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror;
+        return target != null && target.getBlockEntity(new BlockPos(linkX, linkY, linkZ)) instanceof TileMirror twin && !twin.isDataRejected();
     }
 
     /** The mirror takes the item from every side, as the original IInventory did. */

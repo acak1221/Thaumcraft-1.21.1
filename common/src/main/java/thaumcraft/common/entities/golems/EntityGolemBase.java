@@ -616,6 +616,8 @@ public class EntityGolemBase extends AbstractGolem {
         return List.copyOf(result);
     }
     public List<GolemMarker> getMarkers() { return copyMarkers(markers); }
+    /** The live marker list of the golem, for the searches of {@link GolemHelper} only. */
+    List<GolemMarker> liveMarkers() { return markers; }
     public void setMarkers(List<GolemMarker> value) {
         requireServerThread();
         if (level().isClientSide || unsupported || retiring || busy || useCustodyActive() || hasUseRemainders() || essentiaMutationActive()) return;
@@ -934,10 +936,10 @@ public class EntityGolemBase extends AbstractGolem {
      * and carries the original 1.7 number (see {@link #nativeGoalPriority(int)}). Per core:</p>
      *
      * <ul>
-     * <li>Fill (0): HomeReplace0/HomePlace1/HomeDrop2/FillTake3/FillGoto4 -> the inventory route at 4 with the
-     * take, the place and the drop in its own server tick.</li>
-     * <li>Empty (1): HomeReplace0/EmptyPlace1/EmptyDrop2/EmptyGoto3/HomeTake4 -> the inventory route at 3 with
-     * the same transfers.</li>
+     * <li>Fill (0): HomeReplace0/HomePlace1/HomeDrop2/FillTake3/FillGoto4 -> FIVE selector entries,
+     * exactly as the original, each of them with the two exclusive flags that are the mutex bits
+     * three of the original.</li>
+     * <li>Empty (1): HomeReplace0/EmptyPlace1/EmptyDrop2/EmptyGoto3/HomeTake4 -> the same five entries.</li>
      * <li>Gather (2): HomeReplace0/HomePlace1/ItemPickup2 -> the pickup goal at 2 and the home place.</li>
      * <li>Harvest (3): HarvestCrops2 -> the harvest goal at 2.</li>
      * <li>Guard (4): Dart2 (with the launcher), AttackOnCollide3, HurtByTarget1 and NearestAttackableTarget2 ->
@@ -948,8 +950,8 @@ public class EntityGolemBase extends AbstractGolem {
      * <li>Use (8): HomeReplace0/UseItem0/HomeTake4 -> the replace, the click and the take goals.</li>
      * <li>Butcher (9): Dart2, AttackOnCollide3 and NearestButcherTarget1 -> the dart, the melee and the oldest
      * target goal.</li>
-     * <li>Sorting (10): HomeReplace0/SortingPlace1/SortingGoto3/HomeTakeSorting4 -> the inventory route at 3
-     * with the same transfers.</li>
+     * <li>Sorting (10): HomeReplace0/SortingPlace1/SortingGoto3/HomeTakeSorting4 -> the same entries
+     * without the drop.</li>
      * <li>Fishing (11): Fish2 -> the fishing goal at 2.</li>
      * <li>Every core: AvoidCreeperSwell0, OpenDoor5, ReturnHome6, WatchClosest7 and LookIdle8 -> the creeper
      * flight, the door, the return home, the watch and the idle look. There is no swimming goal: the original
@@ -2102,37 +2104,28 @@ public class EntityGolemBase extends AbstractGolem {
                 && GolemHomeInventory.isWorldThrowTarget(server, marker.pos());
     }
     public GolemHomeInventory.Destination markedInventory(GolemMarker marker) {
-        if (!(level() instanceof ServerLevel server) || marker == null || !markers.contains(marker)
-                || !marker.dimension().equals(level().dimension().location()) || marker.pos().equals(homeInventoryPosition())) return null;
-        double range = rangeSqr();
-        // Original GolemHelper.getMarkedContainers:54-64 has NO range at all; the range of the
-        // original is the golem's own (AIFillGoto:100-104, AIEmptyGoto:56; the adjacent goals
-        // are bound by the squared distance of four instead). The distance of the HOME is not a
-        // bound of the original, so it is not one here.
-        if (distanceToSqr(marker.pos().getX() + .5, marker.pos().getY() + .5, marker.pos().getZ() + .5) > range) return null;
-        GolemHomeInventory.Destination result = GolemHomeInventory.find(server, marker.pos());
-        // A native double chest is one storage owner, not a remote source just
-        // because the marker happens to name its other physical half.
-        return result == null || result.sharesStorage(homeInventory()) ? null : result;
+        return GolemHelper.markedContainer(this, marker);
     }
     public GolemHomeInventory.Destination markedSortingInventory(GolemMarker marker) {
-        if (core != GolemData.SORTING || !(level() instanceof ServerLevel server) || marker == null || !markers.contains(marker)
-                || !marker.dimension().equals(server.dimension().location()) || marker.pos().equals(homeInventoryPosition())
-                || distanceToMarkerSqr(marker) > rangeSqr()) return null;
-        // Sorting's original bound is relative to the GOLEM (AISortingGoto:58-59), like Fill's
-        // and Empty's now.
-        GolemHomeInventory.Destination result = GolemHomeInventory.find(server, marker.pos());
-        return result == null || result.sharesStorage(homeInventory()) ? null : result;
+        return GolemHelper.markedSortingContainer(this, marker);
     }
+    /** The original's {@code GolemHelper.isOnTimeOut}:568-579, the ten second ignore of an item. */
+    boolean isItemOnTimeout(ItemStack stack) { return inventories.isItemOnTimeout(stack); }
+    /** The original's {@code GolemHelper.findSomethingEmptyCore}:515-543. */
+    boolean hasEmptyCoreDestination(ItemStack stack) { return inventories.hasEmptyCoreDestination(stack); }
+    /** The original's {@code GolemHelper.findSomethingSortCore}:545-566. */
+    boolean hasSortingCoreDestination(ItemStack stack) { return inventories.hasSortingCoreDestination(stack); }
+    /** The original's {@code GolemHelper.validTargetForItem}:581-611. */
+    boolean hasValidTargetForItem(ItemStack stack) { return inventories.hasValidTargetForItem(stack); }
     public double distanceToMarkerSqr(GolemMarker marker) {
         return distanceToSqr(marker.pos().getX() + .5, marker.pos().getY() + .5, marker.pos().getZ() + .5);
     }
 
-    private GolemMarker firstAdjacentWorldThrowMarker() {
+    GolemMarker firstAdjacentWorldThrowMarker() {
         for (GolemMarker marker : markers) {
             // Original AIEmptyDrop:49 — the golem's own home is never a drop target.
             if (marker.pos().equals(getHomePosition())) continue;
-            if (distanceToMarkerSqr(marker) < 4 && markedWorldThrowTarget(marker)) return marker;
+            if (GolemHelper.adjacent(this, marker.pos()) && markedWorldThrowTarget(marker)) return marker;
         }
         return null;
     }

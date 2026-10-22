@@ -29525,7 +29525,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:20-34 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
@@ -29576,7 +29576,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java:39-83 the goal needs the cargo and the five tick cadence, then the nearest container with room inside the range of the golem and outside the home, and the first marked block that is not an inventory as the fallback",
@@ -29625,7 +29625,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:31-33 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
@@ -29675,7 +29675,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:52-90 the goal needs no cargo, the five tick cadence, a wanted item and a container with the goods",
@@ -29726,7 +29726,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:38-41 the goal needs no cargo, a watched item, an idle navigator and a wanted item, and it has NO five tick cadence",
@@ -29775,7 +29775,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:37-47 the goal needs the cargo, an idle navigator and the squared distance of five to the home, and it has NO five tick cadence",
@@ -29824,7 +29824,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:35-39 the goal needs the cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
@@ -29874,7 +29874,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original registers five goals per core with the numbers 0 to 4, all with the mutex bits 3",
@@ -29926,7 +29926,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:27-31 the goal needs no cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
@@ -29975,7 +29975,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomeTakeSorting.java the take of the Sorting golem out of the home, with the face visible order of the slots",
@@ -30083,7 +30083,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java:39-77 the goal needs the cargo and the five tick cadence, then the nearest marked container that holds the item and has room, inside the range of the golem and outside the home",
@@ -30132,7 +30132,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-w2golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:31-33 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",

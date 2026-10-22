@@ -1,61 +1,136 @@
 package thaumcraft.client.renderers.block;
 
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockElementFace;
+import net.minecraft.client.renderer.block.model.BlockFaceUV;
+import net.minecraft.client.renderer.block.model.FaceBakery;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3f;
+import thaumcraft.common.blocks.BlockEldritch;
 
 /**
- * The geometry of the eldritch crust block.
+ * The baked geometry of the eldritch crust, the glyphed stone and the decorated stone.
  *
- * <p>Original {@code BlockEldritchRenderer} (oracle
- * {@code thaumcraft/client/renderers/block/BlockEldritchRenderer.java}) draws the
- * metadata four, five and six of the eldritch stone with a box that is inset by
- * two sixteenths on every side that has no eldritch neighbour. The native
- * Minecraft 1.21.1 block state has no neighbour mask, so the bounds are computed
- * here from the six neighbour flags.
+ * <p>Oracle {@code thaumcraft/client/renderers/block/BlockEldritchRenderer.java:35-63}.
+ * The original draws the metadata four, five and six with a box that is inset by two
+ * sixteenths on every side whose neighbour is not a solid material
+ * ({@code Block.isBlockSolid}, material solidity) and by zero on the sides that touch
+ * one, so a field of crust joins without a groove while an exposed face keeps the
+ * original inset. The six flags are carried by the
+ * {@link BlockEldritch#CRUST_NEIGHBOR_MASK} block state property, which the block
+ * recomputes on placement and on every neighbour change, because a Minecraft 1.21.1
+ * {@code BakedModel#getQuads} has neither the position nor the level.
  *
- * <p>The class is a pure geometry helper: it has no world and no renderer, so
- * the bounds can be checked in a unit test.
+ * <p>The inventory is the isolated {@code 2..14} cube of
+ * {@code BlockEldritchRenderer.java:22-33}: the item asks with a null state and the
+ * quad of the wrapper delegates to the fixed cube of the block model.
+ *
+ * <p>The class is the model and the pure rule at once: {@link #minX(int)} and its five
+ * siblings are static, so the bounds of every one of the sixty four masks can be
+ * checked in a unit test without a world.
  */
-public final class EldritchCrustBakedModel {
-    /** The original inset of the crust, in sixteenths of a block. */
+public final class EldritchCrustBakedModel implements BakedModel {
+    /** The original inset {@code W2}, in sixteenths of a block. */
     public static final float INSET = 2.0F;
     /** The original full size of a block, in sixteenths of a block. */
     public static final float FULL = 16.0F;
+    /** The number of neighbour masks, {@code 1 << 6}. */
+    public static final int MASKS = 64;
+    /** The six faces in the order of {@link Direction#get3DDataValue()}. */
+    private static final Direction[] FACES = Direction.values();
+    private static final FaceBakery FACE_BAKERY = new FaceBakery();
+    /** The unrotated model state of the original block model. */
+    private static final ModelState IDENTITY = new ModelState() {};
+    private static final BlockFaceUV FULL_UV = new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0);
 
-    /** The six bounds of the crust box, in the order of {@link Direction}. */
-    private final float[] bounds = new float[6];
+    private final BakedModel delegate;
+    /** One quad per mask and face, indexed {@code mask * 6 + face.get3DDataValue()}. */
+    private final List<BakedQuad> quads;
+    /** The unculled list of every mask: the inset faces of that mask. */
+    private final List<List<BakedQuad>> unculled;
 
     /**
-     * Computes the bounds of the crust.
+     * Bakes the sixty four shapes from the sprite of the delegated model.
      *
-     * @param west  true when the block to the west is eldritch crust
-     * @param down  true when the block below is eldritch crust
-     * @param north true when the block to the north is eldritch crust
-     * @param east  true when the block to the east is eldritch crust
-     * @param up    true when the block above is eldritch crust
-     * @param south true when the block to the south is eldritch crust
+     * @param delegate the fixed {@code 2..14} cube of the block model, whose particle
+     *                 icon is the crust texture of that variant
      */
-    public EldritchCrustBakedModel(boolean west, boolean down, boolean north, boolean east, boolean up, boolean south) {
-        bounds[0] = west ? 0.0F : INSET;
-        bounds[1] = down ? 0.0F : INSET;
-        bounds[2] = north ? 0.0F : INSET;
-        bounds[3] = east ? FULL : FULL - INSET;
-        bounds[4] = up ? FULL : FULL - INSET;
-        bounds[5] = south ? FULL : FULL - INSET;
+    public EldritchCrustBakedModel(BakedModel delegate) {
+        this.delegate = delegate;
+        TextureAtlasSprite sprite = delegate.getParticleIcon();
+        List<BakedQuad> baked = new ArrayList<>(MASKS * FACES.length);
+        List<List<BakedQuad>> exposed = new ArrayList<>(MASKS);
+        for (int mask = 0; mask < MASKS; ++mask) {
+            List<BakedQuad> exposedFaces = new ArrayList<>(FACES.length);
+            for (Direction face : FACES) {
+                BakedQuad quad = bake(mask, face, sprite);
+                baked.add(quad);
+                if (!joined(mask, face)) exposedFaces.add(quad);
+            }
+            exposed.add(List.copyOf(exposedFaces));
+        }
+        this.quads = List.copyOf(baked);
+        this.unculled = List.copyOf(exposed);
     }
 
-    /** The minimum x of the crust box. */
-    public float minX() { return bounds[0]; }
-    /** The minimum y of the crust box. */
-    public float minY() { return bounds[1]; }
-    /** The minimum z of the crust box. */
-    public float minZ() { return bounds[2]; }
-    /** The maximum x of the crust box. */
-    public float maxX() { return bounds[3]; }
-    /** The maximum y of the crust box. */
-    public float maxY() { return bounds[4]; }
-    /** The maximum z of the crust box. */
-    public float maxZ() { return bounds[5]; }
+    private static BakedQuad bake(int mask, Direction face, TextureAtlasSprite sprite) {
+        Vector3f from = new Vector3f(minX(mask), minY(mask), minZ(mask));
+        Vector3f to = new Vector3f(maxX(mask), maxY(mask), maxZ(mask));
+        // A joined face is coplanar with the neighbour and is culled by the requested
+        // direction; an exposed face must never be culled. The block model renderer asks
+        // for the joined quads by direction and for the exposed ones with a null direction.
+        Direction cull = joined(mask, face) ? face : null;
+        BlockElementFace element = new BlockElementFace(cull, -1, "", FULL_UV);
+        return FACE_BAKERY.bakeQuad(from, to, element, sprite, face, IDENTITY, null, true);
+    }
 
-    /** The six bounds of the crust box, in the order of {@link Direction}. */
-    public float[] bounds() { return bounds.clone(); }
+    /** True when the original does not inset the given side, that is when its neighbour is solid. */
+    public static boolean joined(int mask, Direction face) {
+        return (mask & (1 << face.get3DDataValue())) != 0;
+    }
+
+    /** The original minimum x of the box, in sixteenths. */
+    public static float minX(int mask) { return joined(mask, Direction.WEST) ? 0.0F : INSET; }
+    /** The original minimum y of the box, in sixteenths. */
+    public static float minY(int mask) { return joined(mask, Direction.DOWN) ? 0.0F : INSET; }
+    /** The original minimum z of the box, in sixteenths. */
+    public static float minZ(int mask) { return joined(mask, Direction.NORTH) ? 0.0F : INSET; }
+    /** The original maximum x of the box, in sixteenths. */
+    public static float maxX(int mask) { return joined(mask, Direction.EAST) ? FULL : FULL - INSET; }
+    /** The original maximum y of the box, in sixteenths. */
+    public static float maxY(int mask) { return joined(mask, Direction.UP) ? FULL : FULL - INSET; }
+    /** The original maximum z of the box, in sixteenths. */
+    public static float maxZ(int mask) { return joined(mask, Direction.SOUTH) ? FULL : FULL - INSET; }
+
+    /** The six original bounds in the order west, down, north, east, up, south, in sixteenths. */
+    public static float[] bounds(int mask) {
+        return new float[]{minX(mask), minY(mask), minZ(mask), maxX(mask), maxY(mask), maxZ(mask)};
+    }
+
+    @Override
+    public List<BakedQuad> getQuads(BlockState state, Direction face, RandomSource random) {
+        if (state == null || !state.hasProperty(BlockEldritch.CRUST_NEIGHBOR_MASK)) {
+            return delegate.getQuads(state, face, random);
+        }
+        int mask = state.getValue(BlockEldritch.CRUST_NEIGHBOR_MASK);
+        if (face == null) return unculled.get(mask);
+        return joined(mask, face) ? List.of(quads.get(mask * FACES.length + face.get3DDataValue())) : List.of();
+    }
+
+    @Override public boolean useAmbientOcclusion() { return delegate.useAmbientOcclusion(); }
+    @Override public boolean isGui3d() { return delegate.isGui3d(); }
+    @Override public boolean usesBlockLight() { return delegate.usesBlockLight(); }
+    @Override public boolean isCustomRenderer() { return false; }
+    @Override public TextureAtlasSprite getParticleIcon() { return delegate.getParticleIcon(); }
+    @Override public ItemTransforms getTransforms() { return delegate.getTransforms(); }
+    @Override public ItemOverrides getOverrides() { return delegate.getOverrides(); }
 }

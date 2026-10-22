@@ -20,29 +20,38 @@ class EldritchBlockModelTest {
 
     @Test void eldritchCrustInsetsOnlyTheExposedSides() {
         // The original BlockEldritchRenderer insets the crust by two sixteenths
-        // on every side without an eldritch neighbour.
-        EldritchCrustBakedModel bare = new EldritchCrustBakedModel(false, false, false, false, false, false);
-        assertEquals(2.0F, bare.minX(), EPS, "west");
-        assertEquals(2.0F, bare.minY(), EPS, "down");
-        assertEquals(2.0F, bare.minZ(), EPS, "north");
-        assertEquals(14.0F, bare.maxX(), EPS, "east");
-        assertEquals(14.0F, bare.maxY(), EPS, "up");
-        assertEquals(14.0F, bare.maxZ(), EPS, "south");
-        EldritchCrustBakedModel joined = new EldritchCrustBakedModel(true, true, true, true, true, true);
-        assertEquals(0.0F, joined.minX(), EPS, "west");
-        assertEquals(0.0F, joined.minY(), EPS, "down");
-        assertEquals(0.0F, joined.minZ(), EPS, "north");
-        assertEquals(16.0F, joined.maxX(), EPS, "east");
-        assertEquals(16.0F, joined.maxY(), EPS, "up");
-        assertEquals(16.0F, joined.maxZ(), EPS, "south");
-        EldritchCrustBakedModel half = new EldritchCrustBakedModel(true, false, true, false, true, false);
-        assertEquals(0.0F, half.minX(), EPS, "west");
-        assertEquals(2.0F, half.minY(), EPS, "down");
-        assertEquals(0.0F, half.minZ(), EPS, "north");
-        assertEquals(14.0F, half.maxX(), EPS, "east");
-        assertEquals(16.0F, half.maxY(), EPS, "up");
-        assertEquals(14.0F, half.maxZ(), EPS, "south");
+        // on every side without a solid neighbour (Block.isBlockSolid, material
+        // solidity). The mask bit of a face is 1 << Direction.get3DDataValue().
+        int bare = 0;
+        assertEquals(2.0F, EldritchCrustBakedModel.minX(bare), EPS, "west");
+        assertEquals(2.0F, EldritchCrustBakedModel.minY(bare), EPS, "down");
+        assertEquals(2.0F, EldritchCrustBakedModel.minZ(bare), EPS, "north");
+        assertEquals(14.0F, EldritchCrustBakedModel.maxX(bare), EPS, "east");
+        assertEquals(14.0F, EldritchCrustBakedModel.maxY(bare), EPS, "up");
+        assertEquals(14.0F, EldritchCrustBakedModel.maxZ(bare), EPS, "south");
+        int joined = west | down | north | east | up | south;
+        assertEquals(0.0F, EldritchCrustBakedModel.minX(joined), EPS, "west");
+        assertEquals(0.0F, EldritchCrustBakedModel.minY(joined), EPS, "down");
+        assertEquals(0.0F, EldritchCrustBakedModel.minZ(joined), EPS, "north");
+        assertEquals(16.0F, EldritchCrustBakedModel.maxX(joined), EPS, "east");
+        assertEquals(16.0F, EldritchCrustBakedModel.maxY(joined), EPS, "up");
+        assertEquals(16.0F, EldritchCrustBakedModel.maxZ(joined), EPS, "south");
+        int half = west | north | up;
+        assertEquals(0.0F, EldritchCrustBakedModel.minX(half), EPS, "west");
+        assertEquals(2.0F, EldritchCrustBakedModel.minY(half), EPS, "down");
+        assertEquals(0.0F, EldritchCrustBakedModel.minZ(half), EPS, "north");
+        assertEquals(14.0F, EldritchCrustBakedModel.maxX(half), EPS, "east");
+        assertEquals(16.0F, EldritchCrustBakedModel.maxY(half), EPS, "up");
+        assertEquals(14.0F, EldritchCrustBakedModel.maxZ(half), EPS, "south");
     }
+
+    /** The mask bit of one face, 1 << Direction.get3DDataValue(). */
+    private static final int down = 1 << Direction.DOWN.get3DDataValue();
+    private static final int up = 1 << Direction.UP.get3DDataValue();
+    private static final int north = 1 << Direction.NORTH.get3DDataValue();
+    private static final int south = 1 << Direction.SOUTH.get3DDataValue();
+    private static final int west = 1 << Direction.WEST.get3DDataValue();
+    private static final int east = 1 << Direction.EAST.get3DDataValue();
 
     @Test void arcaneFurnaceKeepsTheOriginalShellTextures() {
         // The original texture selection of the shell blocks.

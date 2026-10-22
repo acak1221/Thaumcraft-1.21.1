@@ -54,6 +54,16 @@ public final class CraftingAuditRuntimeChecks {
                 table.setItem(10, wand());
                 menu.broadcastChanges();
                 f.check(menu.craftable(), "undamaged ingredient establishes positive recipe control");
+                f.check(menu.requiredVis("perditio") == 2200, "original20 whole-vis times iron-cap1.1 is2200 centivis");
+                KnowledgeAccess.get(f.player).removeResearch("DECONSTRUCTOR");
+                menu.broadcastChanges();
+                refuseUnchanged(f, table, menu, "missing research preserves every input and vis");
+                KnowledgeAccess.get(f.player).addResearch("DECONSTRUCTOR");
+                var shortWand = wand();
+                shortWand.set(ThaumcraftContent.WAND_DATA.get(), ItemWandCasting.data(shortWand).withAmount("perditio", 2199));
+                table.setItem(10, shortWand); menu.broadcastChanges();
+                refuseUnchanged(f, table, menu, "one-centivis shortage preserves every input and vis");
+                table.setItem(10, wand()); menu.broadcastChanges();
                 table.getItem(toolSlot).setDamageValue(1);
                 menu.broadcastChanges();
                 var before = table.saveWithoutMetadata(f.level.registryAccess());
@@ -135,5 +145,13 @@ public final class CraftingAuditRuntimeChecks {
         for (String tag : thaumcraft.common.items.wands.WandData.PRIMALS) vis.put(tag, 5000);
         stack.set(ThaumcraftContent.WAND_DATA.get(), new thaumcraft.common.items.wands.WandData("greatwood", "iron", vis));
         return stack;
+    }
+
+    private static void refuseUnchanged(TubeVariantsRuntimeChecks.Fixture f, TileArcaneWorkbench table,
+                                        ContainerArcaneWorkbench menu, String why) {
+        var before = table.saveWithoutMetadata(f.level.registryAccess());
+        menu.clicked(0, 0, ClickType.PICKUP, f.player);
+        f.check(menu.getCarried().isEmpty() && !menu.craftable()
+                && before.equals(table.saveWithoutMetadata(f.level.registryAccess())), why);
     }
 }

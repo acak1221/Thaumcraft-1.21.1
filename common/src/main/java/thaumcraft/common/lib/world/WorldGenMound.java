@@ -83,6 +83,11 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
         RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
                 level.getLevel().getSeed(), chunkX, chunkZ));
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        return placeSelected(level, random, draw);
+    }
+
+    /** Regeneration continues its caller's stream; fresh generation keeps its original stream above. */
+    public boolean placeSelected(WorldGenLevel level, RandomSource random, StructurePlacementRules.Draw draw) {
         if (draw.kind() != StructurePlacementRules.Kind.MOUND) return false;
         int i = draw.x();
         int k = draw.z();

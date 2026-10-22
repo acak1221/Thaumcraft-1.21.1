@@ -23,6 +23,21 @@ import net.minecraft.util.RandomSource;
  * block, a client or a particle.</p>
  */
 public final class SparkleCallRules {
+    @FunctionalInterface
+    public interface ClientEffects {
+        void sparkle(net.minecraft.world.level.Level level, double[] position, float size, int type, float gravity);
+    }
+
+    private static ClientEffects clientEffects = (level, position, size, type, gravity) -> {};
+
+    public static void setClientEffects(ClientEffects effects) {
+        clientEffects = java.util.Objects.requireNonNull(effects);
+    }
+
+    public static void sparkle(net.minecraft.world.level.Level level, double[] position, float size, int type, float gravity) {
+        if (level.isClientSide) clientEffects.sparkle(level, position, size, type, gravity);
+    }
+
     /** Oracle ClientProxy.java:649 - the roll of the proxy is one in six. */
     public static final int SPARKLE_ROLL = 6;
     /** Oracle ClientProxy.java:651 - the multiplier of the sparkle of the proxy, the life is 3 * 6. */

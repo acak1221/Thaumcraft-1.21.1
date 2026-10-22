@@ -29,6 +29,14 @@ import org.junit.jupiter.api.Test;
  * <p>No test of this file constructs a block: the rule under test is a pure static function.</p>
  */
 class CosmeticStairsTextureParityTest {
+    @Test void originalFacesAlreadyDifferAtTheOrigin() {
+        // This is not a one-in-12000 discrepancy: nextInt's bound changes the modulus.
+        int[] expected = {3, 0, 1, 2, 3, 0};
+        for (int side = 0; side < expected.length; side++) {
+            assertEquals(expected[side], BlockCosmeticStairs.textureIndex(0, 0, 0, side));
+        }
+    }
+
     /** The oracle rule of BlockCosmeticSolid:157-162 as it is reached by the stairs. */
     private static int oracleIndex(int x, int y, int z, int side) {
         String key = x + "" + y + "" + z;

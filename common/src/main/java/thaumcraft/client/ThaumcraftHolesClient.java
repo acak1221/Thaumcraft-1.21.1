@@ -9,6 +9,7 @@ import thaumcraft.client.fx.particles.TypeSparkleParticle;
 import thaumcraft.common.config.ThaumcraftHoles;
 import thaumcraft.common.lib.world.HoleSparkleRules;
 import thaumcraft.common.tiles.TileHole;
+import thaumcraft.common.lib.fx.SparkleCallRules;
 
 /**
  * The sparkles around the portable hole of the original.
@@ -24,6 +25,14 @@ public final class ThaumcraftHolesClient {
 
     public static void init() {
         TileHole.setClientEffects(ThaumcraftHolesClient::sparkle);
+        SparkleCallRules.setClientEffects((level, position, size, type, gravity) -> {
+            if (level instanceof ClientLevel client
+                    && client.random.nextInt(SparkleCallRules.SPARKLE_ROLL) < TypeSparkleParticle.particleCount()) {
+                Minecraft.getInstance().particleEngine.add(new TypeSparkleParticle(client,
+                        position[0], position[1], position[2], size, type,
+                        SparkleCallRules.SPARKLE_MULTIPLIER, gravity));
+            }
+        });
     }
 
     private static void sparkle(Level level, BlockPos pos) {

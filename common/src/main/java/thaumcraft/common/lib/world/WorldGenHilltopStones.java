@@ -52,6 +52,12 @@ public final class WorldGenHilltopStones extends Feature<NoneFeatureConfiguratio
         RandomSource random = RandomSource.create(StructurePlacementRules.chunkSeed(
                 level.getLevel().getSeed(), chunkX, chunkZ));
         StructurePlacementRules.Draw draw = StructurePlacementRules.draw(random, chunkX, chunkZ);
+        return placeSelected(level, random, draw, chunkX, chunkZ);
+    }
+
+    /** Regeneration continues its caller's stream; fresh generation keeps its original stream above. */
+    public boolean placeSelected(WorldGenLevel level, RandomSource random, StructurePlacementRules.Draw draw,
+                                 int chunkX, int chunkZ) {
         if (draw.kind() != StructurePlacementRules.Kind.HILLTOP_STONES) return false;
         // The 1.21.1 generation writes into the chunk that is generated, so the seven by seven
         // footprint of the cluster has to stay inside it.

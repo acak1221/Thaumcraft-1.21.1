@@ -26,6 +26,7 @@ import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunct
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import thaumcraft.common.config.ThaumcraftNaturals;
+import thaumcraft.common.lib.fx.SparkleCallRules;
 
 /** TC4 BlockMagicalLeaves:144-200,224-230,258-265, with native distance/waterlogging. */
 public final class BlockMagicalLeaves extends LeavesBlock {
@@ -49,6 +50,17 @@ public final class BlockMagicalLeaves extends LeavesBlock {
 
     @Override public MapCodec<BlockMagicalLeaves> codec() { return CODEC; }
     public boolean isSilverwood() { return silverwood; }
+
+    @Override public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        super.animateTick(state, level, pos, random);
+        // Oracle BlockMagicalLeaves:214-215: greatwood does not consume the rarity roll;
+        // the position draws use the world random, not the display-tick random.
+        if (silverwood && SparkleCallRules.leavesSparkle(true, random.nextInt(SparkleCallRules.LEAVES_ROLL))) {
+            SparkleCallRules.sparkle(level,
+                    SparkleCallRules.leavesPosition(pos.getX(), pos.getY(), pos.getZ(), level.random),
+                    SparkleCallRules.LEAVES_SIZE, SparkleCallRules.LEAVES_TYPE, SparkleCallRules.LEAVES_GRAVITY);
+        }
+    }
 
     @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         // SaplingChance deliberately sets count=0 on a failed original roll.

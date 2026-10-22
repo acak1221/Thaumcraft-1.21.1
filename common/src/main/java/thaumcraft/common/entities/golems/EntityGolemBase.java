@@ -936,10 +936,10 @@ public class EntityGolemBase extends AbstractGolem {
      * and carries the original 1.7 number (see {@link #nativeGoalPriority(int)}). Per core:</p>
      *
      * <ul>
-     * <li>Fill (0): HomeReplace0/HomePlace1/HomeDrop2/FillTake3/FillGoto4 -> the inventory route at 4 with the
-     * take, the place and the drop in its own server tick.</li>
-     * <li>Empty (1): HomeReplace0/EmptyPlace1/EmptyDrop2/EmptyGoto3/HomeTake4 -> the inventory route at 3 with
-     * the same transfers.</li>
+     * <li>Fill (0): HomeReplace0/HomePlace1/HomeDrop2/FillTake3/FillGoto4 -> FIVE selector entries,
+     * exactly as the original, each of them with the two exclusive flags that are the mutex bits
+     * three of the original.</li>
+     * <li>Empty (1): HomeReplace0/EmptyPlace1/EmptyDrop2/EmptyGoto3/HomeTake4 -> the same five entries.</li>
      * <li>Gather (2): HomeReplace0/HomePlace1/ItemPickup2 -> the pickup goal at 2 and the home place.</li>
      * <li>Harvest (3): HarvestCrops2 -> the harvest goal at 2.</li>
      * <li>Guard (4): Dart2 (with the launcher), AttackOnCollide3, HurtByTarget1 and NearestAttackableTarget2 ->
@@ -950,8 +950,8 @@ public class EntityGolemBase extends AbstractGolem {
      * <li>Use (8): HomeReplace0/UseItem0/HomeTake4 -> the replace, the click and the take goals.</li>
      * <li>Butcher (9): Dart2, AttackOnCollide3 and NearestButcherTarget1 -> the dart, the melee and the oldest
      * target goal.</li>
-     * <li>Sorting (10): HomeReplace0/SortingPlace1/SortingGoto3/HomeTakeSorting4 -> the inventory route at 3
-     * with the same transfers.</li>
+     * <li>Sorting (10): HomeReplace0/SortingPlace1/SortingGoto3/HomeTakeSorting4 -> the same entries
+     * without the drop.</li>
      * <li>Fishing (11): Fish2 -> the fishing goal at 2.</li>
      * <li>Every core: AvoidCreeperSwell0, OpenDoor5, ReturnHome6, WatchClosest7 and LookIdle8 -> the creeper
      * flight, the door, the return home, the watch and the idle look. There is no swimming goal: the original

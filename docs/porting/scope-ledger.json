@@ -6993,22 +6993,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/client/gui/GuiGolem.java:72-78 an advanced golem shows a random threat line in one case of four",
-          "oracle thaumcraft/client/gui/GuiGolem.java:80-92 the blurb or the threat line, half sized at (80, 22) with a width of 110",
-          "oracle thaumcraft/client/gui/GuiGolem.java:206-236 the Use core has three switches (Block or Empty space, Right click or Left click, Not sneaking or Sneaking) with the buttons 50, 51 and 52",
-          "oracle thaumcraft/client/gui/GuiGolem.java:267-317 the preview is drawn in the 320x240 viewport of the screen centre",
-          "oracle thaumcraft/client/gui/GuiGolem.java:289-303 the preview is drawn with the body yaw of -20 and the head pitch of -5, the rotations are set for the frame and restored afterwards, and the preview does NOT follow the mouse",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:21-45 the threat line of an advanced golem is drawn once, when the menu opens",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:128-140 the blurb of the core or the threat line",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:77-100 the preview is drawn with the body yaw of -20 and the head pitch of -5, the mouse is pinned to the centre of the box and the rotations are restored afterwards"
+          "oracle thaumcraft/client/gui/GuiGolem.java the menu of the golem",
+          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:135,155,190 the three switches of the Use core: Not sneaking or Sneaking, Right click or Left click and Block or Empty space",
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java the native draws the preview, the blurb of the core and the threat line, but not the three switches of the Use core"
         ],
         "notes": [
-          "Fixed in this wave: the native never showed the threat line of an advanced golem and only drew the blurb of seven of the twelve cores; the original draws the blurb of every core (the harvest, the alchemy and the lumber core have the text '??') and replaces it in one case of four by a threat line.",
-          "Fixed in this wave: the preview of the golem followed the mouse; the original draws it with a fixed pose (the body yaw of -20, the head pitch of -5) and restores the rotations of the entity afterwards.",
-          "REMAINING DIFFERENCE: the camera of the preview. The original uses a 320x240 viewport with a perspective of 90 degrees and a scale of 5; the native uses the vanilla inventory preview, a box of 50x62 pixels with a scale of 42. The pose and the place of the preview are the original's.",
-          "REMAINING DIFFERENCE: the three switches of the Use core (Block or Empty space, Right click or Left click, Not sneaking or Sneaking) are not drawn, because the native Use core performs the default use only; a switch that changes nothing would be a working-looking fake."
+          "REMAINING DIFFERENCE: the camera of the preview (the original uses a fixed 320x240 viewport with a perspective of 90 degrees; the pose and the place are the original's) and the three switches of the Use core. A switch that changes nothing would be a working-looking fake, so the switches are drawn only when the Use core really honours them, which is the same change as the widening of AIUseItem."
         ],
         "reviewed_sha256": {
           "original": "2854729ebda478e3c9c23ff5637ddd586f289db0e7d8349932c45f9be25e6480",
@@ -10759,16 +10751,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:21-35 the quad is the region (1,2) of the 1.7.10 texture atlas textures/particle/particles.png, scaled by 0.5",
-          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:39-49 the camera orientation and the two rotations of the quad",
-          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:50-86 the rope of sixteen segments from the body yaw and the eye height of the fisher",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java:19-37 the native quad with the fishing hook texture",
-          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java:39-61 the native rope of sixteen segments"
+          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:28 the texture of the original: the 8x8 region (1,2) of the 1.7.10 textures/particle/particles.png",
+          "oracle thaumcraft/client/renderers/entity/RenderGolemBobber.java:36-46 the quad, the scale of 0.5 and the two rotations of the camera orientation",
+          "native common/src/main/java/thaumcraft/client/renderers/entity/RenderGolemBobber.java:18-37 the native draws the same quad with the vanilla fishing hook texture"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the texture of the quad. The original draws the 8x8 region (1,2) of the 1.7.10 textures/particle/particles.png; 1.21.1 has no such atlas (every particle has its own file), so the native uses the vanilla fishing hook texture. The quad's size, the 0.5 scale, the camera orientation and the rope's curve are reproduced."
+          "REMAINING DIFFERENCE: the texture of the quad. The 1.7.10 texture is a VANILLA asset (net.minecraft:textures/particle/particles.png), not a Thaumcraft one, and it is not in the original jar: the 8x8 region (1,2) can only come from the Mojang asset store, whose host does not resolve in this environment. 1.21.1 has no such atlas (every particle has its own file). The size of the quad, the scale of 0.5, the camera orientation and the rope's curve are reproduced."
         ],
         "reviewed_sha256": {
           "original": "7b6812b673c3ffb027c0d4f8efce8faf7a95c4be98322a4f90b2c43748b59ace",
@@ -28991,15 +28981,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaEmpty.java:42-58 the goal needs the essentia, an idle navigator and a jar with room within the squared distance of four",
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaEmpty.java:64-112 the emptying into a jar, a reservoir or ANY other marked essentia transport",
-          "oracle thaumcraft/common/entities/golems/GolemHelper.java:245-248 the marked essentia transports are the third kind of destination",
-          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java the native goals of the Alchemy golem"
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaEmpty.java the emptying of the Alchemy golem into a marked destination",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:225-315 findJarWithRoom accepts a marked jar, a marked reservoir AND any other marked IEssentiaTransport",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:245-248 the marked essentia transport of the dimension that can take the aspect of the golem",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:131-140 the native destination is a marked jar or a marked reservoir only",
+          "native common/src/main/java/thaumcraft/api/aspects/IEssentiaTransport.java the native tree HAS the interface of the original, with the native directions"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the destination set. The original may empty itself into ANY marked essentia transport of the dimension (oracle GolemHelper:245-248); the native accepts a marked jar or a marked reservoir. The 1.21.1 common module has no loader independent essentia transport API, so the widening would be a content change over the whole tree of the transport blocks."
+          "REMAINING DIFFERENCE: the destination set. The original empties into any marked IEssentiaTransport of the dimension (a marked jar, a marked reservoir and every other marked transport that can take the aspect); the native accepts a marked jar or a marked reservoir. The native has the interface (thaumcraft.api.aspects.IEssentiaTransport) and six tiles implement it, but the payment path (EssentiaTransfers, the hardened per profile transfer) has no generic transport profile, so widening the set needs a new profile and a new payment rule that this wave could not verify."
         ],
         "reviewed_sha256": {
           "original": "452f503598ec5f52aaa370b7fd038aae69da6fb039bb77d0f58cd5ff48420969",
@@ -29040,14 +29031,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:51-67 the scan of the column of the alchemy furnace, a gap does not stop it",
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java the gathering out of the alembic of the greatest amount",
-          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:98 the native skips a level and continues the scan"
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:43-83 the source is the home: the tile of the home when it is an IEssentiaTransport that can output to the facing, otherwise the alembic of the column cY+5..cY+0",
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:60 a jar and a reservoir of the home are sources as well",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:64-107 the native source is a reservoir or an alembic of the column"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the source set. The original may gather out of any alembic of the column; the native accepts a marked jar or a marked reservoir as the source, like the destination set of the empty goal."
+          "REMAINING DIFFERENCE: the source set. The original gathers out of the home when the home is ANY IEssentiaTransport (a jar, a reservoir or a transport that can output to the facing); the native accepts a reservoir or an alembic only. The payment path (EssentiaTransfers.collectAlembic/collectReservoir) has no generic transport profile, so the widening needs a new profile that this wave could not verify."
         ],
         "reviewed_sha256": {
           "original": "d6947b7c497d5f5a961a7cfade327aecb65d8a50160c2530ef5b99553a9d3d27",
@@ -29088,14 +29079,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGoto.java:44-56 the goal needs the essentia and the five tick cadence and a jar with room",
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGoto.java:58-82 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java the native route of the Alchemy golem"
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGoto.java the route of the Alchemy golem to a marked destination",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:225-315 findJarWithRoom, the destination set of the route",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:148-177 the native route looks for a marked jar or a marked reservoir"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the destination set of the route (a marked jar or a marked reservoir, not any marked essentia transport). The numbers of the route, the five tick cadence, the budget of 200 and the detour of 2 and 1, are the original's."
+          "REMAINING DIFFERENCE: the destination set of the route, the same narrowing as AIEssentiaEmpty. The numbers of the route (the five tick cadence, the budget of 200 and the detour of 2 and 1) are the original's."
         ],
         "reviewed_sha256": {
           "original": "2144f1ea59a8ddc7a18a6f008a5ade226738f8a3280bb927fea18e8b512e059d",
@@ -29136,14 +29127,15 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java:43-57 the goal needs the fluid, an idle navigator and the squared distance of five to the home",
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java:63-84 the fill of the home with the fluid of the golem and the sound above 200 millibuckets",
-          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:212-227 the native empty goal of the Decanting golem"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java the emptying of the Decanting golem into the fluid handler of its home",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:341-369 getMissingLiquids looks for ANY registered fluid that the home can take",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:225-266 the marked fluid handler of the dimension",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:185-188 the native empties into the attached crucible and only water"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the fluid set. The original fills any fluid handler that is the home of the golem; the native empties into the attached crucible and its cargo is a single water volume in millibuckets (GolemWaterCargo). The 1.21.1 common module has no loader independent fluid handler API, so the widening is a content change over the whole Decanting subsystem."
+          "REMAINING DIFFERENCE: the fluid set. The original empties any registered fluid into the fluid handler of its home; the native empties water into the attached crucible. The cargo of the native is a single water volume in millibuckets, so the widening is a content change over the whole Decanting subsystem (the cargo record, the entity data, the menu ghost, the bucket rendering and the filter), not a defect of one goal."
         ],
         "reviewed_sha256": {
           "original": "beacdb3fcc2ad25f371e92cb0b0903d0575d779562e87804db066757783c1b81",
@@ -29184,14 +29176,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:59-83 the marked fluid handler of ANY fluid and the marked fluid block of any fluid, with a water and lava fall back",
-          "oracle thaumcraft/common/entities/golems/GolemHelper.java:371-446 the possible liquid of the golem",
-          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:74-103 the native source water only"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:63-102 the original gathers out of any marked fluid handler of any fluid and out of any marked fluid block of any fluid",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:409-446 the marked fluid handlers and the marked fluid blocks",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:331-339 getReggedLiquids, every registered fluid of the game",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:65-68 the native gathers source water only",
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemData.java the filter of the Decanting golem accepts a pristine water bucket alone"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the fluid set. The original carries any registered fluid (lava included); the native gathers source water only, and its filter accepts a pristine water bucket alone (GolemData.isSupportedWaterFilter)."
+          "REMAINING DIFFERENCE: the fluid set. The original carries any registered fluid (lava included) and gathers it out of any marked fluid handler; the native gathers source water only and its filter accepts a pristine water bucket alone. The cargo of the native is a single water volume in millibuckets, so the widening is a content change over the whole Decanting subsystem and needs the loader independent fluid handler API that the 1.21.1 common module does not have."
         ],
         "reviewed_sha256": {
           "original": "aa9921f7a9bbf80d27147b97d2d9e0553acdce388b587f1a20adc7968cc627ec",
@@ -29232,14 +29226,14 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:49-74 the goal needs the five tick cadence and a fluid below the carry limit, the target of the fluid and the search of the ground around it",
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:76-100 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:259-298 the native route of the Decanting golem"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java the route of the Decanting golem to a marked fluid source of any fluid",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:371-407 findPossibleLiquid looks for a marked fluid handler of any fluid and for a marked fluid block of any fluid",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:91-103 the native route looks for a marked source water block"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the route of the native is a water route; the original routes to any fluid that the world offers. The numbers of the route, the five tick cadence, the budget of 200 and the detour of 2 and 1, are the original's."
+          "REMAINING DIFFERENCE: the route of the native is a water route; the original routes to any fluid that the world offers. The numbers of the route (the five tick cadence, the budget of 200 and the detour of 2 and 1) are the original's."
         ],
         "reviewed_sha256": {
           "original": "fe5ba292a21a208694387d00523e04eff52e48b2802c818bde3ce6c9e5ea2729",
@@ -29433,16 +29427,16 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:39-196 the goal may use ANY item on ANY marked block",
-          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:52,70-84 the distance of ceil(range/3) and the click delay of ticksExisted + (5 - ticksExisted) * 3",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GolemUsePlatform.java the native use frame platform with the original's numbers",
-          "native common/src/main/java/thaumcraft/common/entities/golems/UseGolemGoals.java the native goal of the Use golem"
+          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:78-98 the goal of the Use core: the cargo, the idle navigator and the five tick cadence",
+          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:122-183 the click: any item on any marked block, with the three switches of the core",
+          "oracle thaumcraft/common/entities/ai/interact/AIUseItem.java:185-203 findSomething: the marked block and the marked side",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemUsePlatform.java:226-289 the native performs the DEFAULT use only: a lever or a button, or wheat seeds on farmland",
+          "native common/src/main/java/thaumcraft/common/entities/golems/UseGolemGoals.java the three entries of the Use core: the home replacement, the click and the take"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the content of the use. The native performs the original's default use (wheat seeds on farmland, a bare hand on a lever or a button) and reproduces the original's numbers (the click delay, the squared distance of four, the budget of 200 ticks and the 10000 ms timeout), but it does not use an arbitrary item on an arbitrary block.",
-          "The three switches of the Use core of the original menu (Block or Empty space, Right click or Left click, Not sneaking or Sneaking) belong to this content and are not drawn either."
+          "REMAINING DIFFERENCE: the goal uses an arbitrary item on an arbitrary block; the native performs the default use only (all of its numbers are reproduced: the click delay, the squared distance of four, the budget of 200 ticks and the 10000 ms timeout). The native platform is a deliberately closed unit: the target is a lever, a button or farmland and the hand is empty or pristine wheat seeds. Widening it to any item on any marked block means removing that closure, and the three switches of the Use core (Block or Empty space, Right click or Left click, Not sneaking or Sneaking) belong to the same content, so they are not drawn either."
         ],
         "reviewed_sha256": {
           "original": "64e08836ba26f783ba70713cdd5e7a91b8ea3b61e1ab8c081767e451fe29881b",
@@ -30994,15 +30988,26 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/golems/GolemHelper.java:1-721 the helper of the original: the marked containers, the marked blocks, the marked sides, the missing items, the missing liquids, the jar with room and the searches of the cores",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GolemHomeInventory.java the native home and marker inventories",
-          "native common/src/main/java/thaumcraft/common/items/golems/GolemMarker.java the native marker",
-          "native common/src/main/java/thaumcraft/common/lib/golems/GolemRouteRules.java the pure rules of the routes"
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:48-721 the original had ONE helper class with the searches of every core",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:49 the adjacent range of the original: the squared distance of four",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:54-64 getMarkedContainers has no range at all; the range of the original is the golem's own",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:66-76 getMarkedContainersAdjacentToGolem is bound by the squared distance of four",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:78-86 getMarkedBlocksAdjacentToGolem returns the marked blocks that are no inventory",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:88-120 getContainersWithRoom and its per colour variant",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:122-138 getMarkedSides numbers the sides with the ordinal of the 1.7.10 ForgeDirection",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:148-164 getContainersWithGoods",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:568-579 isOnTimeOut, the ten second ignore of an item",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:515-543 and :545-566 findSomethingEmptyCore and findSomethingSortCore",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:581-611 validTargetForItem",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:658-686 getItemsInHomeContainer reads the goods of the home in the face visible order",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemHelper.java the single entry point of the searches of the golem, with the names and the rules of the original",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2104-2126 the per marker searches now live in the entry point and the entity delegates to it",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java the goals of the ladder call the entry point for the marked containers with goods and with room"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the structure. The original has ONE helper class with the searches of every core; the native splits them into pure rule classes (GolemHomeInventory, GolemMarker, GolemRouteRules, GolemItemMatch, GolemGuardTargets). The rules themselves are reproduced."
+          "REMAINING DIFFERENCE: the FLUID half of the original's helper (findJarWithRoom:225-315, getMarkedFluidHandlers:409-429, getMarkedFluidBlocks:431-446, getMissingLiquids:341-369, findPossibleLiquid:371-407 and getReggedLiquids:331-339) is still owned by the Decanting and the Alchemy goals of the native tree, because the 1.21.1 common module has no loader independent fluid handler API: the cargo of the Decanting golem is a single water volume in millibuckets (GolemWaterCargo, the payload's fluid key is fixed to minecraft:water), the entity's waterMb is an int, the destination is the attached crucible and the filter is a pristine water bucket."
         ],
         "reviewed_sha256": {
           "original": "0c40d3001f240c8fa46db123d795664dc1808393e11230d7e11eda423d4047dc",

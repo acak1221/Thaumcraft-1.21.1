@@ -258,12 +258,193 @@ sources and the whole test tree compile with **zero errors**. No Gradle daemon w
   core, the mutex bits three of every entry, the bitwise exclusion (`3` excludes `3`, `1` and `2`,
   and not `0`), the two native flags, the 200-tick hold and the five-tick chest window, and the
   equality of the installed numbers with the table of the original.
+* **new** `common/src/test/java/thaumcraft/golems/GolemHelperStructureTest.java` — three tests: the
+  adjacent range of the original (4.0), the direction order that `getMarkedSides` numbers the sides
+  with, and the colour rule of the original's `Marker.equalsFuzzy`.
 
-**No test constructs a `Block`.** The only Minecraft type the new test touches is the
-`net.minecraft.world.entity.ai.goal.Goal.Flag` enum.
+**No test constructs a `Block`.** The only Minecraft types the new tests touch are the
+`net.minecraft.world.entity.ai.goal.Goal.Flag` enum, the `net.minecraft.core.Direction` enum and the
+`GolemMarker` record. `GolemHelper.ADJACENT_RANGE` is a compile-time constant, so the test does not
+even load the helper class.
 
 ---
 
-## 5. What is still open
+## 5. The units that were closed and the units that are still open
 
-See the last section of this file (it is written when the wave ends).
+| unit | before | after | why |
+|---|---|---|---|
+| `ai/inventory/AIHomePlace.java` | partial | **parity_verified** | five selector entries, the counter of 200, the chest window of 5, the chest sound |
+| `ai/inventory/AIHomeDrop.java` | partial | **parity_verified** | the entry with the number 2, the drop, the counter of 200 |
+| `ai/inventory/AIHomeReplace.java` | partial | **parity_verified** | the entry with the number 0, the core switch, the chest window |
+| `ai/inventory/AIHomeTake.java` | partial | **parity_verified** | the entry with the number 4, the first extractable slot, the chest window |
+| `ai/inventory/AIHomeTakeSorting.java` | partial | **parity_verified** | the entry with the number 4, the face visible order of the home |
+| `ai/inventory/AIFillGoto.java` | partial | **parity_verified** | the entry with the number 4, the budget of 200, the detour of 2 and 1 |
+| `ai/inventory/AIFillTake.java` | partial | **parity_verified** | the entry with the number 3, the counters of 200 and 5, the cleared watch |
+| `ai/inventory/AIEmptyGoto.java` | partial | **parity_verified** | the entry with the number 3, the budget of 200, the detour |
+| `ai/inventory/AIEmptyPlace.java` | partial | **parity_verified** | the entry with the number 1, the counter of 200, the chest window |
+| `ai/inventory/AIEmptyDrop.java` | partial | **parity_verified** | the entry with the number 2, the drop, the counter of 200 |
+| `ai/inventory/AISortingGoto.java` | partial | **parity_verified** | the entry with the number 3, the seeded destination, the budget of 200 |
+| `ai/inventory/AISortingPlace.java` | partial | **parity_verified** | the entry with the number 1, the seed rule, the counter of 200 |
+| `golems/GolemHelper.java` | partial | partial | the item and container half is one entry point again; the fluid half is still missing (see 5.1) |
+| `golems/EntityGolemBase.java` | partial | partial | the ladder is reproduced; the fluid set of the Decanting and the Alchemy golem is not (see 5.1) |
+| `ai/fluid/AIEssentiaEmpty.java` | partial | partial | the destination set of the marked essentia transports (see 5.2) |
+| `ai/fluid/AIEssentiaGather.java` | partial | partial | the source set of the marked essentia transports (see 5.2) |
+| `ai/fluid/AIEssentiaGoto.java` | partial | partial | the destination set of the route (see 5.2) |
+| `ai/fluid/AILiquidEmpty.java` | partial | partial | the fluid set (see 5.1) |
+| `ai/fluid/AILiquidGather.java` | partial | partial | the fluid set (see 5.1) |
+| `ai/fluid/AILiquidGoto.java` | partial | partial | the fluid set (see 5.1) |
+| `ai/interact/AIUseItem.java` | partial | partial | the arbitrary item on the arbitrary block (see 5.3) |
+| `client/gui/GuiGolem.java` | partial | partial | the three switches of the Use core (see 5.3) |
+| `client/renderers/entity/RenderGolemBobber.java` | partial | partial | the texture of the quad (see 5.4) |
+
+**Twelve of the twenty-three units moved from `partial` to `parity_verified`.** The eleven that stay
+`partial` carry the exact remaining difference in their ledger note.
+
+### 5.1 The fluid set — the blocker and the design of the missing abstraction
+
+**The blocker.** The original's Decanting golem carries **any registered fluid**
+(`oracle GolemHelper.getReggedLiquids`:331-339 walks `FluidRegistry.getRegisteredFluidIDs()`, and
+`getMissingLiquids`:341-369 accepts every fluid the fluid handler of the home can take, with the
+water and the lava fall back of `AILiquidGather`:97-98 and :203-205). The native's cargo is
+**a single water volume in millibuckets**:
+
+* `thaumcraft/common/items/golems/GolemWaterCargo.java` — a record of one `int` (the amount in
+  millibuckets) whose serialised payload has a **fixed** fluid key (`minecraft:water`, the constant
+  `FLUID` of the record) and a `MAX_AMOUNT_MB` of 8000;
+* `EntityGolemBase.waterMb` — an `int`, synchronised to the client through the entity data key
+  `WATER_MB`, with `waterSpace()`, `liquidReady()`, `currentWaterHome()`, `permittedWaterHome()`,
+  `collectMarkedSourceWater()` and `deliverWaterToHome()` all bound to it;
+* `GolemData.isSupportedWaterFilter` — the filter of the Decanting golem accepts a **pristine water
+  bucket** alone;
+* the destination of the emptying is the **attached crucible** (`TileCrucible`), and the source is a
+  marked **source water block** (`LiquidGolemGoals.sourceWater`:65-68).
+
+So the widening is not one goal: it is the cargo record, the entity data, the menu ghost, the bucket
+rendering and the filter of the whole Decanting subsystem, plus a loader independent fluid handler
+API that the 1.21.1 **common** module does not have. This wave could not do that **and** verify it
+(no Gradle, no GameTest, no client), and a half-widened Decanting golem that can gather lava into a
+water-only cargo would be worse than the honest `partial`.
+
+**The design of the missing abstraction** (for the next wave, in `common/src/main/java/thaumcraft/common/lib/fluid/`):
+
+```java
+/** A loader independent view of a block that holds a fluid. */
+public interface GolemFluidAccess {
+    /** The fluid the container offers, or null when it is empty. */
+    ResourceLocation fluid();
+    /** The amount in millibuckets the container offers on the given face. */
+    int amount(Direction face);
+    /** Whether the container would take the given fluid on the given face. */
+    boolean accepts(Direction face, ResourceLocation fluid);
+    /** Takes at most {@code amount} millibuckets; returns the amount actually taken. */
+    int drain(Direction face, ResourceLocation fluid, int amount);
+}
+
+/** The registry of the views, filled by the common bootstrap and by the two loaders. */
+public final class GolemFluidAccesses {
+    public static void register(Predicate<Block> block, Function<BlockEntity, GolemFluidAccess> factory);
+    public static GolemFluidAccess of(Level level, BlockPos pos, BlockState state, BlockEntity tile);
+}
+```
+
+The **common** side registers the port's own containers (the crucible, the alembic, the jar); the
+**Fabric** side registers the views of the Fabric `ItemStorage`/`FluidStorage` equivalents and the
+**NeoForge** side the `IFluidHandler` capability. The goals then ask the registry instead of asking
+for a `TileCrucible`, exactly as the original asked for an `IFluidHandler`
+(`oracle GolemHelper.getMarkedFluidHandlers`:420-429). The cargo of the golem then has to become a
+`(fluid, amount)` pair instead of an `int`, which is the second half of the change.
+
+### 5.2 The marked essentia transports
+
+The original's Alchemy golem uses **any marked `IEssentiaTransport`**:
+`GolemHelper.findJarWithRoom`:225-315 accepts a marked `TileJarFillable`, a marked
+`TileEssentiaReservoir` **and** any other marked `IEssentiaTransport` whose suction matches the
+aspect of the golem (`:245-248`), and `AIEssentiaGather`:58-60 accepts a home that is **any**
+`IEssentiaTransport` that can output to the facing.
+
+The native tree **has** the interface (`thaumcraft.common.aspects.IEssentiaTransport`, with the
+native directions) and six tiles implement it (`TileJar`, `TileTube`, `TileTubeBuffer`,
+`TileArcaneBoreBase`, `TileArcaneFurnaceNozzle`, `TileThaumatorium`), but:
+
+* the **selection** of the native accepts a marked jar or a marked reservoir only
+  (`AlchemyGolemGoals.findJar`:161) and a home that is a reservoir or an alembic only
+  (`AlchemyGolemGoals.findSource`:79-105);
+* the **payment** of the native is a deliberately closed unit: `EssentiaTransfers` has one
+  `Profile` per kind of container (`COMPAT, TUBE, JAR, BUFFER, CENTRIFUGE, CRYSTALLIZER, RESERVOIR,
+  LAMP`) and states in its own javadoc that "no general transport callback or arbitrary subclass can
+  acquire this profile". A generic `IEssentiaTransport` profile would weaken that closure.
+
+Widening the set therefore needs a new `EssentiaTransfers` profile and a new payment rule for an
+arbitrary transport, and the selection may only be widened together with it — a selection that
+admits a tube and a payment that cannot fill it would be a defect. This wave did not do it, because
+the payment path is the guarded core of the Alchemy golem and no test could be run here.
+
+### 5.3 The Use core
+
+`AIUseItem` uses **any item on any marked block** (oracle `AIUseItem.click`:122-183) and honours the
+three switches of the core:
+
+* `getToggles()[0]` — **Block or Empty space**: the marked block must be a block (true) or must be
+  air (false) (`AIUseItem.findSomething`:190);
+* `getToggles()[1]` — **Right click or Left click**: `im.func_73078_a` (use the item on the block) or
+  `im.func_73074_a` (destroy the block) (`AIUseItem.click`:155-157);
+* `getToggles()[2]` — **Not sneaking or Sneaking**: the fake player of the goal
+  (`AIUseItem`:135).
+
+The native's `GolemUsePlatform` is a **deliberately closed unit**: the target is a lever, a button
+or farmland, the hand is empty or pristine wheat seeds, the adjacent block must be air, and every
+actor, permission and stock invariant is checked twice
+(`GolemUsePlatform.workerReady`:237-251 and `validUse`:320-328). Its numbers are the original's
+(the click delay `ticksExisted + (5 - ticksExisted) * 3`, the squared distance of four, the budget of
+200 ticks, the 10000 ms timeout).
+
+Widening it to "any item on any marked block" means **removing that closure**, and the three
+switches of the golem menu belong to the same content: a switch that changes nothing would be a
+working-looking fake, so the menu does not draw them
+(`common/src/main/java/thaumcraft/client/gui/GuiGolem.java`). The two units therefore stay together:
+either the Use core really honours the three switches and the menu draws them, or neither changes.
+
+### 5.4 The bobber texture
+
+The original draws the 8x8 region **(1,2)** of the **vanilla** 1.7.10
+`textures/particle/particles.png` (`oracle RenderGolemBobber.java:28` and :36-46). That file is a
+Mojang asset and it is **not** in the original jar: the region can only come from the Mojang asset
+store, and `launcherresources.mojang.com` does not resolve in this environment (the version manifest
+and the client jar itself do resolve, so the network is only partly blocked). 1.21.1 has no such
+atlas — every particle has its own file. The native therefore uses the vanilla fishing hook texture;
+the size of the quad, the scale of 0.5, the camera orientation and the curve of the rope are the
+original's.
+
+---
+
+## 6. What could not be verified in this environment
+
+* **No build, no test run, no GameTest, no client.** The wave was told not to run Gradle.
+* **The type check is not a build.** The changed files were compiled with `javac` against the
+  access-widened 1.21.1 jar of the leader's Gradle cache, but the resources, the mixins and the
+  runtime behaviour were not checked at all. The leader has to run `:common:test`,
+  `:fabric:runGameTest` and the dedicated server.
+* **The 1.7.10 vanilla classes.** The oracle holds TC4's own sources only. The mutex bits and the
+  chest interaction therefore rest on the **official Mojang 1.7.10 `client.jar`**, downloaded for
+  this wave and decompiled with CFR 0.152; the class names were found through the leader's 1.7.10
+  SRG mapping (`uj` = `EntityAITasks`, `aow` = `TileEntityChest`).
+* **The 1.21.1 selector.** `GoalSelector`, `WrappedGoal`, `Goal`, `Mob` and `ChestBlockEntity` were
+  decompiled from the leader's access-widened 1.21.1 jar with CFR 0.152 into `/tmp`; nothing of that
+  decompilation was committed.
+* **The client frames.** Nothing of this wave is visible in the client, so no acceptance criterion
+  is claimed.
+
+## 7. The files changed by this wave
+
+```
+common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java              (new)
+common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java     (new)
+common/src/main/java/thaumcraft/common/entities/golems/GolemHelper.java               (new)
+common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java       (rewritten)
+common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java            (the ladder, the searches)
+common/src/test/java/thaumcraft/golems/GolemLadderRulesTest.java                      (new, authored)
+common/src/test/java/thaumcraft/golems/GolemHelperStructureTest.java                  (new, authored)
+docs/porting/scope-ledger.json                                                         (23 rows)
+docs/analysis/2026-10-23-agent-w3golems.md                                             (this report)
+```
+

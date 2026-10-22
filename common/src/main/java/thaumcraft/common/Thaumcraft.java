@@ -184,6 +184,9 @@ public final class Thaumcraft {
         // The original block sparkle packet: the flux scrubber, the eldritch lock, the warding focus,
         // the wand, the eldritch warden and the server tick swap.
         thaumcraft.common.lib.network.BlockSparkleFxNetworking.initServer();
+        // The original essence flow packet of the public essentia source API
+        // (oracle EssentiaHandler:54 / PacketFXEssentiaSource:20-78).
+        thaumcraft.common.lib.network.EssentiaFlowFxNetworking.initServer();
         VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.

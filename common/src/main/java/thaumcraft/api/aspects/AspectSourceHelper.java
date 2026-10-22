@@ -28,8 +28,8 @@ public class AspectSourceHelper {
      * search that holds it.
      *
      * <p>The original sent its essence flow packet to the players around the tile
-     * (oracle {@code EssentiaHandler:54}). The native port has no packet for an arbitrary consumer, the
-     * infusion matrix keeps its own effect for its own drain.</p>
+     * (oracle {@code EssentiaHandler:54}); the native sends the same packet through
+     * {@link thaumcraft.common.lib.network.EssentiaFlowFxNetworking}.</p>
      */
     public static boolean drainEssentia(BlockEntity tile, Aspect aspect, Direction direction, int range) {
         if (tile == null || aspect == null) return false;
@@ -41,6 +41,12 @@ public class AspectSourceHelper {
             if (!(source instanceof IAspectSource aspectSource)) break;
             // Oracle EssentiaHandler:53 - one unit out of the source, the next one is tried when it refuses.
             if (!aspectSource.takeFromContainer(aspect, 1)) continue;
+            // Oracle EssentiaHandler:54 - the flow packet of the original, sent to the
+            // players within the thirty two blocks of the consumer.
+            if (level instanceof net.minecraft.server.level.ServerLevel server) {
+                thaumcraft.common.lib.network.EssentiaFlowFxNetworking.sendEssentiaFlow(
+                        server, tile.getBlockPos(), pos, aspect.getColor());
+            }
             return true;
         }
         return false;

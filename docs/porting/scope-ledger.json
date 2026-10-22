@@ -17508,12 +17508,17 @@
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 animates the node jar for one second after a wand hit",
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 the node jar grows to three times its size for one second after a wand hit",
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:76-90 the crooked label rotation of the original",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:36-44 the crooked label of the original"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:36-44 the crooked label of the original",
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:157 the brain bobs with MathHelper.func_76126_a(ticksExisted / 14.0f) * 0.03f + 0.03f, the float division and the float arithmetic of the original",
+          "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:160-166 the difference of rota and rotb is wrapped into one circle with 3.141593f and 6.283185f and the drawn angle is rotb + difference * partialTick, the absolute angle of the brain",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarBrainRenderer.java:77-90 the native bob and turn are the original: Mth.sin is the 65536 entry lookup table of the 1.7.10 MathHelper.func_76126_a, so the native bob is the exact float of the original (0.03 at tick 0, 0.029962609 at tick 44, 5.029142E-8 at tick 66) and the native turn is the absolute angle",
+          "native common/src/test/java/thaumcraft/client/renderers/tile/JarRendererParityTest.java the bob of the original runs from zero to 0.06 and the turn of the original is the absolute angle (2026-10-23)"
         ],
         "notes": [
           "the native has no node-jar sparkle animation because the native node jar never receives the wand hit (see the report)",
           "the crooked-label rotation of the original is not reproduced",
-          "REMAINING GAP: the native node jar is a block model and has no block entity renderer, so the one second growth of the original after a wand hit is not reproduced. The crooked label of the essence jar is reproduced with the original seed and the original rotation."
+          "REMAINING GAP: the native node jar is a block model and has no block entity renderer, so the one second growth of the original after a wand hit is not reproduced. The crooked label of the essence jar is reproduced with the original seed and the original rotation.",
+          "SETTLED 2026-10-23: the brain bob and the brain turn of the original are ported and asserted against the oracle. The bob is not bounded below by 0.03 - the 1.7.10 sine table is negative in the second half of every period, so the original brain sinks to zero (5.029142E-8 at tick 66) and rises to 0.06."
         ],
         "reviewed_sha256": {
           "original": "f8d9986d32a0cf7eafe3024eaa774b833a7a377b06ed5db80408d69044a7aae7",
@@ -38403,7 +38408,10 @@
           "oracle thaumcraft/common/config/ConfigRecipes.java:90-92 the original registers the nether brick, the obsidian and the iron bars as the trigger blocks of the event two, and the original dispatch of WandManager.performTrigger:718-720 asks for the complete INFERNALFURNACE research first",
           "native common/src/main/java/thaumcraft/common/lib/ArcaneFurnaceFormation.java the native arcane furnace construct with the original blueprint, the original iron bar rule, the original candidate search and the original vis price (2026-10-23)",
           "native common/src/main/java/thaumcraft/common/items/wands/ItemWandCasting.java the dispatch of the arcane furnace construct (2026-10-23)",
-          "native common/src/gameTest/java/thaumcraft/common/testing/SurvivalProgressionRuntimeChecks.java the survival acceptance of the arcane furnace construct and of the four meat nuggets it pays (2026-10-23)"
+          "native common/src/gameTest/java/thaumcraft/common/testing/SurvivalProgressionRuntimeChecks.java the survival acceptance of the arcane furnace construct and of the four meat nuggets it pays (2026-10-23)",
+          "oracle thaumcraft/common/items/wands/WandManager.java:350-354 the blueprint of the original shell: nether bricks in the corners, obsidian on the edges, air in the middle of the top layer, lava in the middle of the middle layer and obsidian in the middle of the bottom layer, read from the top layer down at y - yy + 2",
+          "oracle thaumcraft/common/config/ConfigRecipes.java:89 the research page of the original construct lists the same twenty seven cells",
+          "native common/src/test/java/thaumcraft/wands/ArcaneFurnaceFormationTest.java the shell of the original is asserted cell by cell (2026-10-23)"
         ],
         "notes": [
           "The 806 line manager was split into WandManager, WandVisDiscount, WandArchitect, FocusSelectionSources, FocusData, FocusUpgradeData and WandMaterials, each with the original arithmetic; the architect area of the original toggleMisc is the WandArchitect.Area record.",

@@ -44,6 +44,8 @@ import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
 import thaumcraft.common.testing.NodeTransductionRuntimeChecks.InputRandom;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Native actors/items/blocks; branch inputs declare RNG choices, never inject a node reward. */
 public final class HungryNodeRuntimeChecks {
@@ -81,7 +83,7 @@ public final class HungryNodeRuntimeChecks {
         AspectList stock(int amount) { var result=new AspectList();for(Aspect aspect:Aspect.getPrimalAspects())result.add(aspect,amount);return result; }
         TileNode fresh(AspectList stock) {
             put(pos,ThaumcraftContent.AURA_NODE.get());node=(TileNode)world.getBlockEntity(pos);
-            node.initializeNatural(stock,TileNode.NodeType.HUNGRY,TileNode.NodeModifier.FADING);return node;
+            node.initializeNatural(stock,NodeType.HUNGRY,NodeModifier.FADING);return node;
         }
         void tick() { TileNode.serverTick(world,pos,world.getBlockState(pos),node); }
         void ticks(int count) { for(int n=0;n<count;n++)tick(); }
@@ -96,7 +98,7 @@ public final class HungryNodeRuntimeChecks {
             fresh(stock(3));var iron=named(Items.IRON_INGOT,13,"hungry-whole-stack-input");
             AspectList primals=DeconstructionRules.primals(ObjectAspectResolver.get(iron.copyWithCount(1),world));
             f.check(primals.size()>0,"actual one-iron scan has edible primal aspects");Aspect chosen=primals.getAspects()[0];node.takeVis(chosen.getTag(),1);
-            put(pos.east(),ThaumcraftContent.AURA_NODE.get());var peer=(TileNode)world.getBlockEntity(pos.east());peer.initializeNatural(stock(3),TileNode.NodeType.HUNGRY,TileNode.NodeModifier.FADING);peer.takeVis(chosen.getTag(),1);
+            put(pos.east(),ThaumcraftContent.AURA_NODE.get());var peer=(TileNode)world.getBlockEntity(pos.east());peer.initializeNatural(stock(3),NodeType.HUNGRY,NodeModifier.FADING);peer.takeVis(chosen.getTag(),1);
             var witness=new WitnessItem(world,Vec3.atCenterOf(pos),iron,node,peer);admit(witness);
             ticks(4);f.check(!witness.isRemoved() && witness.getItem()==iron && iron.getCount()==13 && node.getAspects().getAmount(chosen)==2,"four native drowning hits preserve every one of the thirteen named physical inputs and grant no aura");
             try(var rng=new InputRandom(f,bound->0,true)) { tick();f.check(rng.bounds.equals(List.of(primals.size())),"depleted current uses only one unweighted distinct-primal draw, with no BASE chance"); }
@@ -124,7 +126,7 @@ public final class HungryNodeRuntimeChecks {
             try(var rng=new InputRandom(f,bound->bound==7?1:0,true)) { tick(); }
             f.check(won.isRemoved() && node.getNodeVisBase(Aspect.EARTH)==4 && node.getAspects().getAmount(Aspect.EARTH)==3,"winning draw1 raises only BASE byONE; nine physical items do not refill current or multiply the reward");
             var saved=node.saveWithoutMetadata(world.registryAccess());var detached=new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(),pos,node.getBlockState());detached.loadWithComponents(saved,world.registryAccess());
-            f.check(detached.getNodeType()==TileNode.NodeType.HUNGRY && detached.getNodeVisBase(Aspect.EARTH)==4 && detached.getAspects().getAmount(Aspect.EARTH)==3,"actual current/base/type ownership survives native NBT independently");
+            f.check(detached.getNodeType()==NodeType.HUNGRY && detached.getNodeVisBase(Aspect.EARTH)==4 && detached.getAspects().getAmount(Aspect.EARTH)==3,"actual current/base/type ownership survives native NBT independently");
             nativeBlockItemDeath();
             var oldTags=ThaumcraftApi.objectTags;var oldGroups=ThaumcraftApi.groupedObjectTags;
             try {
@@ -260,13 +262,13 @@ public final class HungryNodeRuntimeChecks {
                             && f.player.getInventory().countItem(ThaumcraftContent.PRIMORDIAL_PEARL.get())==0 && pearl.getCount()==1,
                     "one physical Pearl is spent; creative wrapper restores only its detached argument; hand="+f.player.getMainHandItem()
                             +", aliasCount="+pearl.getCount()+", inventory="+f.player.getInventory().countItem(ThaumcraftContent.PRIMORDIAL_PEARL.get()));
-            f.check(world.getBlockEntity(pos)==node && node.getNodeType()==TileNode.NodeType.HUNGRY
+            f.check(world.getBlockEntity(pos)==node && node.getNodeType()==NodeType.HUNGRY
                             && node.getScanId().equals(identity) && node.getTickCount()==count && node.getLock()==lock && node.getRegenerationTicks()==regeneration,
                     "paid Pearl preserves HUNGRY type/identity/phase/lock/regeneration through real blast; sameBE="+(world.getBlockEntity(pos)==node)
                             +", type="+node.getNodeType()+", scan="+node.getScanId()+"/"+identity+", tick="+node.getTickCount()+"/"+count
                             +", lock="+node.getLock()+"/"+lock+", regeneration="+node.getRegenerationTicks()+"/"+regeneration);clearDrops();
-            for(TileNode.NodeType type:List.of(TileNode.NodeType.UNSTABLE,TileNode.NodeType.HUNGRY)) {
-                put(pos,ThaumcraftContent.AURA_NODE.get());node=(TileNode)world.getBlockEntity(pos);node.initializeNatural(new AspectList().add(Aspect.AIR,25),type,TileNode.NodeModifier.FADING);
+            for(NodeType type:List.of(NodeType.UNSTABLE,NodeType.HUNGRY)) {
+                put(pos,ThaumcraftContent.AURA_NODE.get());node=(TileNode)world.getBlockEntity(pos);node.initializeNatural(new AspectList().add(Aspect.AIR,25),type,NodeModifier.FADING);
                 f.aim(Vec3.atCenterOf(pos));f.check(f.player.gameMode.destroyBlock(pos),"actual native creative block break succeeds for supported "+type);DeferredItemDrops.tick(world);
                 var physical=nearDrops();int countEssence=physical.stream().filter(e->e.getItem().is(ThaumcraftEssences.WISP_ESSENCE.get())).mapToInt(e->e.getItem().getCount()).sum();
                 f.check(world.getBlockState(pos).isAir() && countEssence==3 && physical.stream().filter(e->e.getItem().is(ThaumcraftEssences.WISP_ESSENCE.get()))
@@ -279,7 +281,7 @@ public final class HungryNodeRuntimeChecks {
             BlockPos natural=pos.above(22);put(natural,Blocks.AIR);
             f.check(ThaumcraftNormalNodeFeature.createRandomNodeAt(world,natural,RandomSource.create(466)),"one real original HUNGRY roll is admitted only now that its ecology exists");
             TileNode actual=(TileNode)world.getBlockEntity(natural);
-            f.check(actual.isNatural() && actual.getNodeType()==TileNode.NodeType.HUNGRY && actual.getAspects().getAmount(Aspect.HUNGER)>=2
+            f.check(actual.isNatural() && actual.getNodeType()==NodeType.HUNGRY && actual.getAspects().getAmount(Aspect.HUNGER)>=2
                             && actual.getAspects().aspects.equals(actual.getAspectsBase().aspects),"natural HUNGER2/minimum tag and independently initialized actual current/BASE are present");
             put(pos.below(),Blocks.AIR);fresh(stock(3));node.takeVis("terra",1);hard(true);f.mode(GameType.CREATIVE);f.aim(Vec3.atCenterOf(pos));
             var paid=item(named(Items.DIRT,5,"ordinary-hungry-native-input"),Vec3.atCenterOf(pos),0);

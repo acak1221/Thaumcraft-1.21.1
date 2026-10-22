@@ -32,6 +32,7 @@ import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.baubles.PlayerAccessories;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileVisRelay;
+import thaumcraft.api.nodes.NodeType;
 
 /** Declared synthetic native entity/game-listener cycles drive genuine player
  * living ticks; earned source, original relay cache and paid-before-pulse
@@ -61,7 +62,7 @@ public final class VisAmuletRuntimeChecks {
         try {
             f.open();
             test.assertTrue(probeBlock!=null&&probeType!=null,"test mod registered the native amulet pulse probe before registry freeze");
-            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(64),null,TileNode.NodeType.NORMAL);
+            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(64),null,NodeType.NORMAL);
             NodeTransductionRuntimeChecks.sourceTick(f,source);
             f.put(f.base.below(),Blocks.STONE);
             f.level.setBlock(f.base,probeBlock.defaultBlockState(),TubeVariantsRuntimeChecks.QUIET);

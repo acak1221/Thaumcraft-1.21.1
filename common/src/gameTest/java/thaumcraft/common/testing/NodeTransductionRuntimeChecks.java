@@ -36,6 +36,8 @@ import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNodeConverter;
 import thaumcraft.common.tiles.TileNodeEnergized;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Original converter33-157 / BlockAiry350-381. Explicit SERVER INPUTS: native
  * empty devices, named raw ordinary-node bases and scoped branch RNG. Calling
@@ -64,7 +66,7 @@ public final class NodeTransductionRuntimeChecks {
     public static void conversionPersistenceAndCooldown(GameTestHelper test) {
         try (var f = fixture(test, false)) {
             f.open();
-            var tower = tower(f, f.base, primals(80), TileNode.NodeModifier.PALE, TileNode.NodeType.NORMAL);
+            var tower = tower(f, f.base, primals(80), NodeModifier.PALE, NodeType.NORMAL);
             f.check(tower.converter.getCount() == 0 && tower.converter.getStatus() == 1 && tower.converter.hasStabilizer(),
                     "fresh actual neighbor action initializes0/status1 with unpowered lower BASIC BE");
             try (var rng = new InputRandom(f, bound -> 0)) {
@@ -97,7 +99,7 @@ public final class NodeTransductionRuntimeChecks {
             }
             var source = (TileNodeEnergized) existing(f, f.base);
             f.check(source != null && source.getAuraBase().aspects.equals(primals(80).aspects)
-                            && source.getNodeType() == TileNode.NodeType.NORMAL && source.getNodeModifier() == TileNode.NodeModifier.PALE
+                            && source.getNodeType() == NodeType.NORMAL && source.getNodeModifier() == NodeModifier.PALE
                             && source.getNodeId().equals("blank") && source.getVisBase().aspects.values().stream().allMatch(value -> value == 8)
                             && source.getAvailableVis().visSize() == 0 && source.getRefillEpoch() == 0
                             && existing(f, f.base.below()) == tower.support && tower.node.isRemoved() && f.drops().isEmpty(),
@@ -138,7 +140,7 @@ public final class NodeTransductionRuntimeChecks {
             converterTick(f, converter);
             var reverted = (TileNode) existing(f, f.base);
             f.check(reverted != null && reverted != tower.node && reverted.getAspectsBase().aspects.equals(primals(80).aspects)
-                            && reverted.getNodeModifier() == TileNode.NodeModifier.PALE && reverted.getNodeType() == TileNode.NodeType.NORMAL
+                            && reverted.getNodeModifier() == NodeModifier.PALE && reverted.getNodeType() == NodeType.NORMAL
                             && reverted.getAspects().visSize() == 0 && reverted.getAspects().getAspects().length == 6
                             && converter.getCount() == 49 && converter.getStatus() == 0 && f.drops().isEmpty(),
                     "951st actual update replaces ONE source with same BASE/type/mod CURRENT0; original same-tick decrement50->49, no free full node/drop");
@@ -155,7 +157,7 @@ public final class NodeTransductionRuntimeChecks {
 
     private static void interruptionsAndQuarantine(Fixture f) {
         f.reset();
-        var t = tower(f, f.base, new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var t = tower(f, f.base, new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         try (var rng = new InputRandom(f, bound -> 0)) { converterTicks(f, t.converter, 17); rng.onlyInts(17, 1, "short warm branch"); }
         powerUpper(f, t.converter, false, true);
         converterTicks(f, t.converter, 4);
@@ -195,7 +197,7 @@ public final class NodeTransductionRuntimeChecks {
 
     private static void conversionCallbackReplacement(Fixture f) {
         f.reset();
-        var tower = tower(f, f.base, new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var tower = tower(f, f.base, new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         try (var rng = new InputRandom(f, bound -> 0)) { converterTicks(f, tower.converter, 1000); rng.onlyInts(1000, 1, "actual warm-up before conversion callback"); }
         var notice = probe(conversionProbe);
         try {
@@ -207,7 +209,7 @@ public final class NodeTransductionRuntimeChecks {
                         "FIRST conversion neighbor callback sees fully prepared captured BASE/capacity and ZERO pulse, never default free20x6");
                 f.put(f.base, Blocks.STONE); f.put(f.base, ThaumcraftContent.AURA_NODE.get());
                 replacement[0] = (TileNode) existing(f, f.base);
-                replacement[0].initializeNatural(new AspectList().add(Aspect.FIRE, 7), TileNode.NodeModifier.BRIGHT);
+                replacement[0].initializeNatural(new AspectList().add(Aspect.FIRE, 7), NodeModifier.BRIGHT);
             };
             converterTick(f, tower.converter);
             if (notice.failure != null) throw new AssertionError("Conversion notification assertion failed", notice.failure);
@@ -215,7 +217,7 @@ public final class NodeTransductionRuntimeChecks {
                             && replacement[0].getAspects().getAmount(Aspect.FIRE) == 7
                             && replacement[0].getAspectsBase().getAmount(Aspect.FIRE) == 7
                             && replacement[0].getAspectsBase().getAmount(Aspect.EARTH) == 0
-                            && replacement[0].getNodeModifier() == TileNode.NodeModifier.BRIGHT && f.pendingRows().isEmpty() && f.drops().isEmpty(),
+                            && replacement[0].getNodeModifier() == NodeModifier.BRIGHT && f.pendingRows().isEmpty() && f.drops().isEmpty(),
                     "actual synchronous conversion replacement is NEVER overwritten/initialized from stale captured node; no essence harvest/second owner");
         } finally {
             try { f.put(f.base.north(), Blocks.AIR); }
@@ -224,7 +226,7 @@ public final class NodeTransductionRuntimeChecks {
     }
 
     private static void energizedHasNoOrdinaryHarvest(Fixture f) {
-        f.reset(); var source = energize(f, f.base, new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        f.reset(); var source = energize(f, f.base, new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         f.aim(net.minecraft.world.phys.Vec3.atCenterOf(f.base));
         f.check(f.player.gameMode.destroyBlock(f.base) && source.isRemoved()
                         && !f.level.getBlockState(f.base).is(ThaumcraftNodeDevices.ENERGIZED_NODE.get())
@@ -245,7 +247,7 @@ public final class NodeTransductionRuntimeChecks {
                     "FULL native trial offset cube remains inside retained fixture item/escrow cleanup bounds");
             for (int cause = 0; cause < 3; cause++) {
                 f.reset();
-                var source = energize(f, origin, new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+                var source = energize(f, origin, new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
                 sourceTick(f, source);
                 var upper = (TileNodeConverter) existing(f, origin.above());
                 f.put(origin.below(2), Blocks.AIR);
@@ -315,13 +317,13 @@ public final class NodeTransductionRuntimeChecks {
 
     record Tower(TileNode node, TileNodeConverter converter, BlockEntity support) {}
 
-    static Tower tower(Fixture f, BlockPos pos, AspectList base, TileNode.NodeModifier modifier, TileNode.NodeType type) {
+    static Tower tower(Fixture f, BlockPos pos, AspectList base, NodeModifier modifier, NodeType type) {
         f.put(pos.below(), ThaumcraftNodeDevices.NODE_STABILIZER.get());
         f.put(pos, ThaumcraftContent.AURA_NODE.get());
         var node = (TileNode) existing(f, pos);
         f.check(node != null, "actual native ordinary-node factory creates this owned SERVER INPUT");
         node.initializeNatural(base, modifier);
-        if (type != TileNode.NodeType.NORMAL) {
+        if (type != NodeType.NORMAL) {
             var tag = node.saveWithFullMetadata(f.level.registryAccess()); tag.putByte("type", (byte) type.ordinal());
             node = reload(f, node, tag, TileNode.class); // declared RAW special-TYPE storage input, not its ecology
         }
@@ -331,9 +333,9 @@ public final class NodeTransductionRuntimeChecks {
         return new Tower(node, converter, existing(f, pos.below()));
     }
 
-    static TileNodeEnergized energize(Fixture f, BlockPos pos, AspectList base, TileNode.NodeModifier modifier, TileNode.NodeType type) {
+    static TileNodeEnergized energize(Fixture f, BlockPos pos, AspectList base, NodeModifier modifier, NodeType type) {
         var tower = tower(f, pos, base, modifier, type);
-        try (var rng = new InputRandom(f, bound -> type == TileNode.NodeType.UNSTABLE && bound == 5 ? 2 : 0)) {
+        try (var rng = new InputRandom(f, bound -> type == NodeType.UNSTABLE && bound == 5 ? 2 : 0)) {
             converterTicks(f, tower.converter, 1001);
             f.check(rng.bounds.stream().filter(bound -> bound == base.size()).count() >= 1000,
                     "fixture source is EARNED by1001 actual converter updates from its declared RAW node, never given energized stock");

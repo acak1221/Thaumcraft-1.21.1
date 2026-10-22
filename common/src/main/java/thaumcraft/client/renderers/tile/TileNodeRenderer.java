@@ -21,7 +21,8 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.nodes.IRevealer;
 import thaumcraft.common.items.relics.ItemThaumometer;
 import thaumcraft.common.tiles.TileNode;
-import thaumcraft.common.tiles.TileNode.NodeModifier;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 /**
  * Native billboards using TC4's ORIGINAL 32x32 node-strip atlas, not a block
@@ -140,9 +141,9 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
             case HUNGRY -> 3;
         };
         float coreSize = .1f + total / aspects.size() / 150;
-        if (node.getNodeType() == TileNode.NodeType.HUNGRY) coreSize *= .75f;
-        if (node.getNodeType() != TileNode.NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
-        boolean dark = node.getNodeType() == TileNode.NodeType.DARK || node.getNodeType() == TileNode.NodeType.TAINTED;
+        if (node.getNodeType() == NodeType.HUNGRY) coreSize *= .75f;
+        if (node.getNodeType() != NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
+        boolean dark = node.getNodeType() == NodeType.DARK || node.getNodeType() == NodeType.TAINTED;
         quad(pose, buffers.getBuffer(dark ? TRANSLUCENT : ADDITIVE), coreSize, alpha, 0xffffff, frame, strip);
         pose.popPose();
     }

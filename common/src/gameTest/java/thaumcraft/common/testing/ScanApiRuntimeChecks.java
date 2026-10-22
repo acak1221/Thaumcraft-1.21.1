@@ -32,6 +32,7 @@ import thaumcraft.common.lib.research.ResearchTriggerBindings;
 import thaumcraft.common.lib.research.ScanCallbacks;
 import thaumcraft.common.lib.research.ScanManager;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
 
 /** Actual native entity NBT, node locators and held-tool callback/session behavior. No client rendering claim. */
 public final class ScanApiRuntimeChecks {
@@ -75,7 +76,7 @@ public final class ScanApiRuntimeChecks {
             level.setBlock(position, ThaumcraftContent.AURA_NODE.get().defaultBlockState(), 3);
             var node = (TileNode) level.getBlockEntity(position); test.assertTrue(node != null, "real aura-node block entity exists");
             node.setAspects(new AspectList().add(Aspect.ORDER, 50));
-            var nodeNbt = node.saveWithoutMetadata(level.registryAccess()); nodeNbt.putByte("type", (byte) TileNode.NodeType.PURE.ordinal());
+            var nodeNbt = node.saveWithoutMetadata(level.registryAccess()); nodeNbt.putByte("type", (byte) NodeType.PURE.ordinal());
             node.loadWithComponents(nodeNbt, level.registryAccess()); // Explicit saved-node fixture; no natural PURE ecology claim.
             var locator = ScanResult.node(node); var nodeResult = ScanCallbacks.resolve(level, locator);
             test.assertTrue(nodeResult != null && nodeResult.aspects().getAmount(Aspect.ORDER) == 7 && nodeResult.aspects().getAmount(Aspect.HEAL) == 2

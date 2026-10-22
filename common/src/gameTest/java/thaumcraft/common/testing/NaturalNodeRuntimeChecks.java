@@ -17,6 +17,8 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** One native runtime check; loader registration and execution belong to the root session. */
 public final class NaturalNodeRuntimeChecks {
@@ -35,7 +37,7 @@ public final class NaturalNodeRuntimeChecks {
         test.assertTrue(ThaumcraftNormalNodeFeature.createRandomNodeAt(level, pos, RandomSource.create(0)),
                 "fixed naturally rolled NORMAL node places in an Overworld biome");
         TileNode node = test.getBlockEntity(relative);
-        test.assertTrue(node.isNatural() && node.getNodeType() == TileNode.NodeType.NORMAL
+        test.assertTrue(node.isNatural() && node.getNodeType() == NodeType.NORMAL
                         && node.getNodeModifier() == null, "natural normal state replaces creative fixture");
         AspectList initial = node.getAspects();
         test.assertTrue(initial.getPrimalAspects().length > 0, "generated seed has wand-compatible vis");
@@ -86,9 +88,9 @@ public final class NaturalNodeRuntimeChecks {
         test.assertTrue(restored.getAspects().aspects.containsKey(Aspect.AIR), "zero entry remains until original prune");
         test.assertValueEqual(restored.takeVis("herba", 1), 0, "wand API does not consume compound aspects");
         var depleted = restored.saveWithId(registries);
-        depleted.putByte("modifier", (byte)TileNode.NodeModifier.FADING.ordinal());
+        depleted.putByte("modifier", (byte)NodeModifier.FADING.ordinal());
         restored.loadWithComponents(depleted, registries);
-        test.assertTrue(restored.getNodeModifier() == TileNode.NodeModifier.FADING, "modifier survives persistence");
+        test.assertTrue(restored.getNodeModifier() == NodeModifier.FADING, "modifier survives persistence");
         test.assertValueEqual(restored.getAspects().getAmount(Aspect.PLANT), 7, "compound is not discarded on load");
         test.assertValueEqual(restored.getNodeVisBase(Aspect.PLANT), 7, "compound base is not discarded");
         tick(restored, 1199);

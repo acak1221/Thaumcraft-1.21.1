@@ -53,6 +53,7 @@ import thaumcraft.api.IVisDiscountGear;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.nodes.IRevealer;
+import thaumcraft.api.nodes.NodeType;
 import thaumcraft.client.ThaumcraftGogglesClient;
 import thaumcraft.client.gui.GuiArcaneWorkbench;
 import thaumcraft.client.gui.GuiResearchBrowser;
@@ -732,7 +733,7 @@ public final class GogglesClientSequence {
         require(level.isEmptyBlock(at) && level.getBlockEntity(at) == null, "new declared node cell genuinely empty");
         for (BlockPos nearby : BlockPos.betweenClosed(at.offset(-4, -4, -4), at.offset(4, 4, 4))) require(!level.hasChunkAt(nearby) || !(level.getBlockEntity(nearby) instanceof TileNode), "finite node INPUT isolated from native bullying; no deletion of old nodes");
         level.setBlockAndUpdate(at, ThaumcraftContent.AURA_NODE.get().defaultBlockState()); node(level, at).setAspects(values); // Explicit finite NODE INPUT, never an earned resource/output/expense write.
-        require(node(level, at).getNodeType() == TileNode.NodeType.NORMAL, "fresh NORMAL fixture, not a special-node gameplay claim");
+        require(node(level, at).getNodeType() == NodeType.NORMAL, "fresh NORMAL fixture, not a special-node gameplay claim");
         inputs.add(Map.of("fixture", "finite NORMAL node current+base INPUT", "position", at.toShortString(), "aspects", aspects(values), "naturally_found_claimed", false, "unknown_aspect_discovered_by_fixture", false));
     }
 

@@ -14,6 +14,7 @@ import thaumcraft.common.lib.enchantment.EquipmentEnchantments;
 import thaumcraft.common.lib.research.ObjectAspectResolver;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNodeEnergized;
+import thaumcraft.api.nodes.NodeType;
 
 /** Declared raw node16x6, damaged/enchanted pick and installed Bore are inputs.
  * Existing converter helper EARNS the source with1001 production updates; after
@@ -49,7 +50,7 @@ public final class BoreRepairRuntimeChecks {
         void prepare() {
             network.open();
             source = NodeTransductionRuntimeChecks.energize(network, network.base.east(6),
-                    NodeTransductionRuntimeChecks.primals(16), null, TileNode.NodeType.NORMAL);
+                    NodeTransductionRuntimeChecks.primals(16), null, NodeType.NORMAL);
             bore = new BoreWorkRuntimeChecks.Fixture(test);
             ItemStack pick = new ItemStack(ThaumcraftEquipment.THAUMIUM_PICKAXE.get());
             pick.enchant(network.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(EquipmentEnchantments.REPAIR), 2);

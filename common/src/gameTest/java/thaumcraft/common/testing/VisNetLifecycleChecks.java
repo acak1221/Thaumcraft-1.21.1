@@ -22,6 +22,7 @@ import thaumcraft.common.tiles.TileEssentiaCrystalizer;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNodeEnergized;
 import thaumcraft.common.tiles.TileVisRelay;
+import thaumcraft.api.nodes.NodeType;
 
 /** Native current-owner/callback tests plus the real EARTH consumer integration.
  * Probe subclasses are SERVER-only installed registered-type API adversaries,
@@ -392,7 +393,7 @@ public final class VisNetLifecycleChecks {
     }
 
     private static TileNodeEnergized source(Fixture f, BlockPos pos) {
-        var source = NodeTransductionRuntimeChecks.energize(f, pos, new AspectList().add(Aspect.EARTH, 64), null, TileNode.NodeType.NORMAL);
+        var source = NodeTransductionRuntimeChecks.energize(f, pos, new AspectList().add(Aspect.EARTH, 64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source); return source;
     }
     private static void driver(Fixture f, TileNodeEnergized source, TileVisRelay relay, TileEssentiaCrystalizer machine, int ticks) {

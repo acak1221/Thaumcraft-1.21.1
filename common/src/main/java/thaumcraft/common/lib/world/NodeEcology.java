@@ -13,7 +13,7 @@ import thaumcraft.common.config.ThaumcraftMonsters;
 import thaumcraft.common.config.ThaumcraftSettings;
 import thaumcraft.common.entities.monster.EntityGiantBrainyZombie;
 import thaumcraft.common.tiles.TileNode;
-import thaumcraft.common.tiles.TileNode.NodeType;
+import thaumcraft.api.nodes.NodeType;
 
 /** Original TileNode703..798 handlers, called in their original order by the sole native node ticker. */
 public final class NodeEcology {

@@ -37,6 +37,8 @@ import thaumcraft.common.lib.utils.AspectOrbQueue;
 import thaumcraft.common.lib.utils.RejectedEntitySpawn;
 import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Actual natural roll/scan, one paid source unit, canceled spawn and saved custody, wand pickup and native expiry. */
 public final class UnstableNodeRuntimeChecks {
@@ -66,7 +68,7 @@ public final class UnstableNodeRuntimeChecks {
             // literal seed rolls UNSTABLE and a single AIR tag, not creative25x6.
             test.assertTrue(ThaumcraftNormalNodeFeature.createRandomNodeAt(level, base, RandomSource.create(88)), "a genuinely rolled UNSTABLE node now reaches the native world instead of being skipped");
             natural = (TileNode) level.getBlockEntity(base);
-            test.assertTrue(natural.isNatural() && natural.getNodeType() == TileNode.NodeType.UNSTABLE && natural.getAspects().getAmount(Aspect.ENTROPY) == 0
+            test.assertTrue(natural.isNatural() && natural.getNodeType() == NodeType.UNSTABLE && natural.getAspects().getAmount(Aspect.ENTROPY) == 0
                             && natural.getAspects().aspects.equals(natural.getAspectsBase().aspects), "actual generated current/base/type replace the creative fixture; Entropy scan bonus is not already in stock");
             for (Aspect aspect : Aspect.aspects.values()) { KnowledgeAccess.get(player).addDiscoveredAspect(aspect.getTag()); KnowledgeAccess.get(player).setAspectPool(aspect.getTag(), 0); }
             player.setPos(base.getX()+.5,base.getY(),base.getZ()-1.5); player.lookAt(EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(base));
@@ -90,7 +92,7 @@ public final class UnstableNodeRuntimeChecks {
         }
         void emissionAndCancellation() {
             set(controlled,ThaumcraftContent.AURA_NODE.get().defaultBlockState()); node=(TileNode)level.getBlockEntity(controlled);
-            node.initializeNatural(new AspectList().add(Aspect.AIR,3).add(Aspect.FIRE,0).add(Aspect.METAL,7),TileNode.NodeType.UNSTABLE,TileNode.NodeModifier.FADING);
+            node.initializeNatural(new AspectList().add(Aspect.AIR,3).add(Aspect.FIRE,0).add(Aspect.METAL,7),NodeType.UNSTABLE,NodeModifier.FADING);
             boundary(); var before=node.getAspects().copy(); level.random.setSeed(emissionSeed(1)); nodeTicks(1);
             test.assertTrue(node.getAspects().aspects.equals(before.aspects) && node.getTickCount()==100, "selecting a retained zero primal spends nothing; compounds do not replace that failed draw");
             boundary(); level.random.setSeed(emissionSeed(0)); nodeTicks(1);
@@ -99,7 +101,7 @@ public final class UnstableNodeRuntimeChecks {
             var external=AspectOrbQueue.prepare(level,controlled,Aspect.AIR);
             test.assertTrue(external!=null && !external.commit(node), "a public prepared queue entry has no unpaid node-debit authority");
             var saved=node.saveWithoutMetadata(level.registryAccess()); var detached=new TileNode(ThaumcraftContent.NODE_BLOCK_ENTITY.get(),controlled,node.getBlockState()); detached.loadWithComponents(saved,level.registryAccess());
-            test.assertTrue(detached.getNodeType()==TileNode.NodeType.UNSTABLE && detached.getAspects().getAmount(Aspect.AIR)==2 && detached.getNodeVisBase(Aspect.AIR)==3, "actual unstable type, current debit and separate capacity survive NBT");
+            test.assertTrue(detached.getNodeType()==NodeType.UNSTABLE && detached.getAspects().getAmount(Aspect.AIR)==2 && detached.getNodeVisBase(Aspect.AIR)==3, "actual unstable type, current debit and separate capacity survive NBT");
             CompoundTag snapshot=AspectOrbQueue.snapshot(level);
             for(Tag value:snapshot.getList("Pending",Tag.TAG_COMPOUND)) {
                 CompoundTag row=(CompoundTag)value;
@@ -174,12 +176,12 @@ public final class UnstableNodeRuntimeChecks {
         EntityAspectOrb fixtureOrb(Vec3 where,Aspect aspect) { var orb=EntityAspectOrb.unspawned(level,where,Vec3.ZERO,0,aspect,1); test.assertTrue(level.addFreshEntity(orb),"declared one-unit physical orb fixture is admitted natively"); fixtures.add(orb); return orb; }
         void stabilization() {
             set(controlled.below(),ThaumcraftNodeDevices.NODE_STABILIZER.get().defaultBlockState()); set(controlled,ThaumcraftContent.AURA_NODE.get().defaultBlockState()); node=(TileNode)level.getBlockEntity(controlled);
-            node.initializeNatural(new AspectList().add(Aspect.AIR,3),TileNode.NodeType.UNSTABLE,TileNode.NodeModifier.FADING); boundary();
+            node.initializeNatural(new AspectList().add(Aspect.AIR,3),NodeType.UNSTABLE,NodeModifier.FADING); boundary();
             long seed=0; boolean found=false;
             for(;seed<1000000;seed++) { var random=RandomSource.create(seed); if(random.nextBoolean() && random.nextInt(10000)==42 && random.nextInt(12500)!=69) { found=true; break; } }
             test.assertTrue(found && node.getLock()==1,"a real basic stabilizer supplies the original lock1"); level.random.setSeed(seed); nodeTicks(1);
-            test.assertTrue(node.getNodeType()==TileNode.NodeType.NORMAL && node.getAspects().getAmount(Aspect.AIR)==3 && node.getNodeVisBase(Aspect.AIR)==3
-                            && node.getNodeModifier()==TileNode.NodeModifier.FADING && node.getRegenerationTicks()==0,"the actual locked nextInt10000==42 changes UNSTABLE→NORMAL without an orb, free vis or regeneration-cache reset");
+            test.assertTrue(node.getNodeType()==NodeType.NORMAL && node.getAspects().getAmount(Aspect.AIR)==3 && node.getNodeVisBase(Aspect.AIR)==3
+                            && node.getNodeModifier()==NodeModifier.FADING && node.getRegenerationTicks()==0,"the actual locked nextInt10000==42 changes UNSTABLE→NORMAL without an orb, free vis or regeneration-cache reset");
         }
         void lifetime() {
             // Native entity selection + force, not only the shared vector helper.

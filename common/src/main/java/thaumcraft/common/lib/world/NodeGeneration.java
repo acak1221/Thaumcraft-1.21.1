@@ -19,8 +19,8 @@ import thaumcraft.common.blocks.BlockShockTrap;
 import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.tiles.TileNode;
-import thaumcraft.common.tiles.TileNode.NodeModifier;
-import thaumcraft.common.tiles.TileNode.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 /** Original createRandomNodeAt's shared all-type plan, used by natural nodes, transactional Silverwood and primal impacts. */
 public final class NodeGeneration {

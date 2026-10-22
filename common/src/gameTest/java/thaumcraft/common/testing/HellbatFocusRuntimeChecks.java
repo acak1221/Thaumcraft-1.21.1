@@ -43,6 +43,7 @@ import thaumcraft.common.items.wands.foci.WandFocusActions;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.tiles.TileFocalManipulator;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
 
 /** Native input fixtures, not natural acquisition/client acceptance. Root owns
  * wrapper/Gradle; actual actor/RMB, target ray, ADD and paid focal flow are used. */
@@ -177,7 +178,7 @@ public final class HellbatFocusRuntimeChecks {
             f.check(!menu.requestStart(f.player,menu.sessionId(),menu.selectionRevision(),FocusUpgradeType.vampirebats.id)
                             &&f.player.experienceLevel==40&&tile.getSize()==0&&ItemStack.matches(tile.getItem(0),focus),"actual focal admission refuses missing VAMPBAT before XP/vis/item mutation");
             var base=new AspectList();for(Aspect primal:List.of(Aspect.AIR,Aspect.EARTH,Aspect.FIRE,Aspect.WATER,Aspect.ORDER,Aspect.ENTROPY))base.add(primal,10000);
-            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(4),base,null,TileNode.NodeType.NORMAL);
+            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(4),base,null,NodeType.NORMAL);
             KnowledgeAccess.get(f.player).addResearch("VAMPBAT");
             f.check(menu.requestStart(f.player,menu.sessionId(),menu.selectionRevision(),FocusUpgradeType.vampirebats.id)
                             &&f.player.experienceLevel==0&&tile.getRank()==5&&tile.getSize()>0,"actual researched rank5 start pays exactly40 native levels and records real primal debt");

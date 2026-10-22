@@ -39,6 +39,7 @@ import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileFocalManipulator;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNodeEnergized;
+import thaumcraft.api.nodes.NodeType;
 
 /** New bounded native checks, registered only by root wrappers. Each fixture owns
  * its connected real actor. Direct ticker advancement is declared SERVER state
@@ -337,7 +338,7 @@ public final class FocalManipulatorRuntimeChecks {
     private static TileNodeEnergized source(Fixture f, BlockPos pos) {
         var base = new AspectList();
         for (Aspect aspect : List.of(Aspect.AIR, Aspect.EARTH, Aspect.WATER, Aspect.ENTROPY)) base.add(aspect, 10000);
-        return NodeTransductionRuntimeChecks.energize(f, pos, base, null, TileNode.NodeType.NORMAL);
+        return NodeTransductionRuntimeChecks.energize(f, pos, base, null, NodeType.NORMAL);
     }
     private static PulseRelay pulseRelay(Fixture f, BlockPos pos) {
         f.put(pos.below(), Blocks.STONE); f.put(pos, Blocks.AIR);

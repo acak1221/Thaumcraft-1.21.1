@@ -20,6 +20,7 @@ import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileAlchemyFurnaceAdvanced;
 import thaumcraft.common.tiles.TileAlchemyFurnaceAdvancedNozzle;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
 
 /** Actual native comparator notification reentry and actual relay pulse destruction; no final production class is subclassed. */
 public final class AdvancedFurnaceCallbackRuntimeChecks {
@@ -30,7 +31,7 @@ public final class AdvancedFurnaceCallbackRuntimeChecks {
         try {
             f.open(); AdvancedFurnaceRuntimeChecks.rememberBox(f,f.base.offset(-12,-3,-3),f.base.offset(4,3,3));
             var core=AdvancedFurnaceRuntimeChecks.form(f,f.base,false);
-            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,TileNode.NodeType.NORMAL);
+            var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(6),NodeTransductionRuntimeChecks.primals(2500),null,NodeType.NORMAL);
             AdvancedFurnaceRuntimeChecks.warm(f,core,source,50);
             var input=AdvancedFurnaceRuntimeChecks.physical(f,f.base,new ItemStack(Items.COAL)); f.level.getBlockState(f.base).entityInside(f.level,f.base,input);
             f.check(input.isRemoved() && core.getVis()>1,"callback case owns actual paid native slurry");
@@ -62,7 +63,7 @@ public final class AdvancedFurnaceCallbackRuntimeChecks {
     }
     private static void pulseRemoval(Fixture f) {
         var core=AdvancedFurnaceRuntimeChecks.form(f,f.base,false);
-        var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(9),NodeTransductionRuntimeChecks.primals(2500),null,TileNode.NodeType.NORMAL);
+        var source=NodeTransductionRuntimeChecks.energize(f,f.base.west(9),NodeTransductionRuntimeChecks.primals(2500),null,NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f,source);
         BlockPos relayPos=f.base.west(3); f.put(relayPos.below(),Blocks.STONE);
         f.level.setBlock(relayPos,ThaumcraftNodeDevices.VIS_RELAY.get().defaultBlockState().setValue(BlockVisRelay.FACING,Direction.UP),TubeVariantsRuntimeChecks.QUIET);

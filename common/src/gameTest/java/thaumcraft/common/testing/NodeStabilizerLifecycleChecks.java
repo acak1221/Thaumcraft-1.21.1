@@ -28,6 +28,8 @@ import thaumcraft.common.items.wands.WandData;
 import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 import thaumcraft.common.tiles.TileNode;
+import thaumcraft.api.nodes.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
 
 /** Native NORMAL-node M09a checks. Lists/modifiers, research, funded wands and the
  * explicitly scoped deterministic RandomSource are SERVER INPUT fixtures, not
@@ -57,8 +59,8 @@ public final class NodeStabilizerLifecycleChecks {
         try (var f = new Fixture(test)) {
             f.open();
             regenerationPair(f, null, 600);
-            regenerationPair(f, TileNode.NodeModifier.BRIGHT, 400);
-            regenerationPair(f, TileNode.NodeModifier.PALE, 900);
+            regenerationPair(f, NodeModifier.BRIGHT, 400);
+            regenerationPair(f, NodeModifier.PALE, 900);
             lockChangeBeforeRecharge(f);
             fadingRepair(f);
             historicalCatchUp(f);
@@ -316,7 +318,7 @@ public final class NodeStabilizerLifecycleChecks {
         }
     }
 
-    private static void regenerationPair(Fixture f, TileNode.NodeModifier modifier, int interval) {
+    private static void regenerationPair(Fixture f, NodeModifier modifier, int interval) {
         f.reset();
         var free = depleted(f, f.base, modifier);
         var locked = depleted(f, f.base.east(2), modifier);
@@ -344,14 +346,14 @@ public final class NodeStabilizerLifecycleChecks {
             tick(f, locked);
             f.check(deficit(free) == start - 2 && deficit(locked) == start - 1,
                     "real doubled-boundary restores free SECOND1 vs locked FIRST1; no RNG drain loss");
-            int dischargeInterval = modifier == TileNode.NodeModifier.BRIGHT ? 1 : modifier == TileNode.NodeModifier.PALE ? 3 : 2;
+            int dischargeInterval = modifier == NodeModifier.BRIGHT ? 1 : modifier == NodeModifier.PALE ? 3 : 2;
             int samplingTicks = interval * 2 / dischargeInterval;
-            random.expectCounts(Map.of(5, samplingTicks * 6, 3, 3), modifier == TileNode.NodeModifier.PALE ? samplingTicks : 0,
+            random.expectCounts(Map.of(5, samplingTicks * 6, 3, 3), modifier == NodeModifier.PALE ? samplingTicks : 0,
                     "six actual unlocked offset draws/eligible tick, PALE boolean only there, exactly THREE recharge choices among three deficits; locked outgoing0");
         }
         f.check(free.getScanId().equals(freeId) && locked.getScanId().equals(lockedId), "actual regeneration never replaces either scan UUID");
         for (var node : List.of(free, locked)) {
-            f.check(node.getNodeModifier() == modifier && node.getNodeType() == TileNode.NodeType.NORMAL && node.isNatural()
+            f.check(node.getNodeModifier() == modifier && node.getNodeType() == NodeType.NORMAL && node.isNatural()
                             && node.getAspects().size() == 3 && node.getAspectsBase().aspects.equals(base)
                             && node.getAspects().aspects.values().stream().allMatch(value -> value > 0),
                     "bounded production ticks preserve every positive base/current key, NORMAL type and declared modifier");
@@ -382,7 +384,7 @@ public final class NodeStabilizerLifecycleChecks {
 
     private static void fadingRepair(Fixture f) {
         f.reset();
-        var node = node(f, f.base, new AspectList().add(Aspect.AIR, 10), TileNode.NodeModifier.FADING);
+        var node = node(f, f.base, new AspectList().add(Aspect.AIR, 10), NodeModifier.FADING);
         node.takeVis("aer", 1);
         basic(f, f.base.below());
         try (var random = InputRandom.script(f, 12500, 49)) {
@@ -391,7 +393,7 @@ public final class NodeStabilizerLifecycleChecks {
                     "locked FADING interval0 and no repair RNG before original100 boundary");
             tick(f, node);
             random.finished("negative INPUT outcome49 at EXACT nextInt(12500), not success69 or an invented guaranteed repair");
-            f.check(node.getNodeModifier() == TileNode.NodeModifier.FADING && node.getRegenerationTicks() == 0 && deficit(node) == 1,
+            f.check(node.getNodeModifier() == NodeModifier.FADING && node.getRegenerationTicks() == 0 && deficit(node) == 1,
                     "count100 negative outcome leaves FADING/current/base/cache unchanged");
         }
         var chunk = f.level.getChunkAt(f.base);
@@ -404,13 +406,13 @@ public final class NodeStabilizerLifecycleChecks {
             chunk.setUnsaved(false);
             tick(f, node);
             random.finished("success INPUT outcome69 at exact bound12500, one draw at real200");
-            f.check(node.getNodeModifier() == TileNode.NodeModifier.PALE && node.getRegenerationTicks() == 0
+            f.check(node.getNodeModifier() == NodeModifier.PALE && node.getRegenerationTicks() == 0
                             && deficit(node) == 1 && chunk.isUnsaved(),
                     "original FADING->PALE assigns/syncs PALE but DOES NOT invalidate cached FADING0; original setter250-252, not nodeChange");
             var update = node.getUpdatePacket();
             f.check(update != null && update.getTag() != null
-                            && update.getTag().getByte("modifier") == (byte) TileNode.NodeModifier.PALE.ordinal()
-                            && node.getUpdateTag(f.level.registryAccess()).getByte("modifier") == (byte) TileNode.NodeModifier.PALE.ordinal(),
+                            && update.getTag().getByte("modifier") == (byte) NodeModifier.PALE.ordinal()
+                            && node.getUpdateTag(f.level.registryAccess()).getByte("modifier") == (byte) NodeModifier.PALE.ordinal(),
                     "actual native custom-update packet/tag exposes PALE and real stock; not remote-client receive evidence");
         } finally {
             chunk.setUnsaved(alreadyDirty || chunk.isUnsaved());
@@ -448,12 +450,12 @@ public final class NodeStabilizerLifecycleChecks {
                     "unlocked PALE1851..1899 performs17 exact offset/boolean branches, re-locked node draws only ONE recharge choice at3600");
         }
         f.reset();
-        var free = node(f, f.base, new AspectList().add(Aspect.AIR, 10), TileNode.NodeModifier.FADING);
+        var free = node(f, f.base, new AspectList().add(Aspect.AIR, 10), NodeModifier.FADING);
         free.takeVis("aer", 1);
         basic(f, f.base.east());
         try (var random = InputRandom.zeroes(f)) {
             ticks(f, free, 1200);
-            f.check(free.getLock() == 0 && free.getRegenerationTicks() == 0 && free.getNodeModifier() == TileNode.NodeModifier.FADING && deficit(free) == 1,
+            f.check(free.getLock() == 0 && free.getRegenerationTicks() == 0 && free.getNodeModifier() == NodeModifier.FADING && deficit(free) == 1,
                     "unlocked FADING remains0/no repair even beside a non-supporting basic device, including prune boundary with positive keys");
             random.expectOnlyInts(0, 12500, "unlocked FADING NEVER rolls repair or discharge/recharge RNG");
         }
@@ -495,7 +497,7 @@ public final class NodeStabilizerLifecycleChecks {
 
     private static void persistenceAndStaleOwners(Fixture f) {
         f.reset();
-        var node = node(f, f.base, new AspectList().add(Aspect.AIR, 10).add(Aspect.PLANT, 7), TileNode.NodeModifier.PALE);
+        var node = node(f, f.base, new AspectList().add(Aspect.AIR, 10).add(Aspect.PLANT, 7), NodeModifier.PALE);
         node.takeVis("aer", 3);
         basic(f, f.base.below());
         try (var random = InputRandom.zeroes(f)) { ticks(f, node, 49); random.expectOnlyInts(0, 5, "saved locked phase49 is reached through real production ticks"); }
@@ -541,8 +543,8 @@ public final class NodeStabilizerLifecycleChecks {
         var payload = node.getUpdatePacket();
         f.check(payload != null && payload.getTag() != null
                         && payload.getTag().getString("scanId").equals(node.getScanId())
-                        && payload.getTag().getByte("type") == (byte) TileNode.NodeType.NORMAL.ordinal()
-                        && payload.getTag().getByte("modifier") == (byte) TileNode.NodeModifier.PALE.ordinal(),
+                        && payload.getTag().getByte("type") == (byte) NodeType.NORMAL.ordinal()
+                        && payload.getTag().getByte("modifier") == (byte) NodeModifier.PALE.ordinal(),
                 "native update snapshot retains UUID/type/modifier without authoritative cached lock or phase");
         var staleState = node.getBlockState();
         var last = node;
@@ -558,7 +560,7 @@ public final class NodeStabilizerLifecycleChecks {
         } finally { last.setRemoved(); }
     }
 
-    private static TileNode node(Fixture f, BlockPos pos, AspectList aspects, TileNode.NodeModifier modifier) {
+    private static TileNode node(Fixture f, BlockPos pos, AspectList aspects, NodeModifier modifier) {
         f.check(!f.level.isOutsideBuildHeight(pos) && f.level.hasChunkAt(pos), "node fixture uses only already-loaded in-height cells");
         // setBlock on an unchanged state need not recreate a removed BE.
         f.put(pos, Blocks.AIR);
@@ -569,7 +571,7 @@ public final class NodeStabilizerLifecycleChecks {
         return node;
     }
 
-    private static TileNode depleted(Fixture f, BlockPos pos, TileNode.NodeModifier modifier) {
+    private static TileNode depleted(Fixture f, BlockPos pos, NodeModifier modifier) {
         var node = node(f, pos, new AspectList().add(Aspect.AIR, 10).add(Aspect.FIRE, 10).add(Aspect.PLANT, 10), modifier);
         for (Aspect aspect : node.getAspects().getAspects()) f.check(node.takeFromContainer(aspect, 3), "explicit positive direct deficit INPUT: " + aspect.getTag());
         return node;

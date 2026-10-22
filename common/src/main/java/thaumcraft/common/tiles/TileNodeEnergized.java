@@ -19,8 +19,8 @@ import thaumcraft.api.visnet.TileVisNode;
 import thaumcraft.common.config.ThaumcraftNodeDevices;
 import thaumcraft.common.lib.visnet.EnergizedNodeReducer;
 import thaumcraft.common.lib.visnet.VisNodeFailures;
-import thaumcraft.common.tiles.TileNode.NodeModifier;
-import thaumcraft.common.tiles.TileNode.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 /** Original TileNodeEnergized35-175: renewable per-ACTUAL-source-tick throughput,
  * not finite fuel, wand whole-vis or typed essentia. Pulse stock is NEVER saved. */

@@ -32,6 +32,7 @@ import thaumcraft.common.tiles.TileArcaneWorkbench;
 import thaumcraft.common.tiles.TileMagicWorkbenchCharger;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNodeEnergized;
+import thaumcraft.api.nodes.NodeType;
 
 /** Declared raw-node/workbench/wand inputs; real conversion, renewable source,
  * graph, registered charger ticker and durable physical workbench evacuation.
@@ -57,7 +58,7 @@ public final class VisChargeRelayRuntimeChecks {
     private record Network(TileNodeEnergized source, PulseRelay middle, TileMagicWorkbenchCharger charger, TileArcaneWorkbench table) {}
     private static Network network(Fixture f) {
         f.reset();
-        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(6), NodeTransductionRuntimeChecks.primals(64), null, TileNode.NodeType.NORMAL);
+        var source = NodeTransductionRuntimeChecks.energize(f, f.base.west(6), NodeTransductionRuntimeChecks.primals(64), null, NodeType.NORMAL);
         NodeTransductionRuntimeChecks.sourceTick(f, source);
         f.put(f.base.below(), Blocks.STONE);
         f.level.setBlock(f.base, ThaumcraftNodeDevices.VIS_RELAY.get().defaultBlockState().setValue(BlockVisRelay.FACING, Direction.UP), TubeVariantsRuntimeChecks.QUIET);

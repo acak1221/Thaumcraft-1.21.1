@@ -19,8 +19,8 @@ import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
 import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.lib.tiles.TileParityRules;
-import thaumcraft.common.tiles.TileNode.NodeModifier;
-import thaumcraft.common.tiles.TileNode.NodeType;
+import thaumcraft.api.nodes.NodeModifier;
+import thaumcraft.api.nodes.NodeType;
 
 /**
  * Original TileJarNode: the node jar. It keeps the aspects and the identity

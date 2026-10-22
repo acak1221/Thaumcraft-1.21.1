@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
@@ -70,8 +70,8 @@ public final class ChunkRegeneration {
     /** Oracle ServerTickEventsFML:88 - the number of the chunks that one world tick regenerates. */
     public static final int CHUNKS_PER_TICK = 10;
 
-    /** The chunks of every dimension that wait for their regeneration. */
-    private static final Map<ResourceKey<Level>, Queue<ChunkLoc>> QUEUE = new ConcurrentHashMap<>();
+    /** World-instance keys prevent pending work from crossing saves with the same dimension. */
+    private static final Map<ServerLevel, Queue<ChunkLoc>> QUEUE = new ConcurrentHashMap<>();
 
     private ChunkRegeneration() {}
 
@@ -113,12 +113,12 @@ public final class ChunkRegeneration {
 
     /** The chunks of the dimension that wait for their regeneration. */
     private static Queue<ChunkLoc> queue(ServerLevel level) {
-        return QUEUE.computeIfAbsent(level.dimension(), key -> new ConcurrentLinkedQueue<>());
+        return QUEUE.computeIfAbsent(level, key -> new ConcurrentLinkedQueue<>());
     }
 
     /** The number of the chunks of the dimension that wait for their regeneration. */
     public static int queued(ServerLevel level) {
-        Queue<ChunkLoc> chunks = QUEUE.get(level.dimension());
+        Queue<ChunkLoc> chunks = QUEUE.get(level);
         return chunks == null ? 0 : chunks.size();
     }
 
@@ -129,7 +129,7 @@ public final class ChunkRegeneration {
      * the original and the log line of the original.</p>
      */
     public static void tick(ServerLevel level) {
-        Queue<ChunkLoc> chunks = QUEUE.get(level.dimension());
+        Queue<ChunkLoc> chunks = QUEUE.get(level);
         if (chunks == null || chunks.isEmpty()) return;
         int count = 0;
         while (count < CHUNKS_PER_TICK) {
@@ -139,6 +139,14 @@ public final class ChunkRegeneration {
             regenerate(level, loc.chunkXPos, loc.chunkZPos, chunkSeed(level.getSeed(), loc.chunkXPos, loc.chunkZPos));
         }
         Thaumcraft.LOG.debug("[Thaumcraft] Regenerated {} chunks. {} chunks left", count, Math.max(0, chunks.size()));
+    }
+
+    /** Discard work owned by a closed world, not a future world with the same dimension. */
+    public static void clearLevel(ServerLevel level) { QUEUE.remove(level); }
+
+    /** Shutdown fallback releases any world not delivered through the unload hook. */
+    public static void clearServer(MinecraftServer server) {
+        QUEUE.keySet().removeIf(level -> level.getServer() == server);
     }
 
     /**

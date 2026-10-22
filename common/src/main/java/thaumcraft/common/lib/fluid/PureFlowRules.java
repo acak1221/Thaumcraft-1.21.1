@@ -2,6 +2,8 @@ package thaumcraft.common.lib.fluid;
 
 /** Finite original Forge1.7 BlockFluidClassic rules, scoped to the purifying fluid. */
 public final class PureFlowRules {
+    /** Original BlockGasRenderer.java:43; the same Forge fluid corner override. */
+    public static final float RENDER_AVERAGE_OVERRIDE = .875F;
     public static final int QUANTA=8,TICK_DELAY=5,DENSITY=1000,NO_ROUTE=1000;
     private static final int[] DX={-1,1,0,0},DZ={0,0,-1,1};
     private PureFlowRules(){}
@@ -54,7 +56,7 @@ public final class PureFlowRules {
     /** Forge's renderer selects an actual full/source corner instead of vanilla's weighted average. */
     public static float renderAverage(float... heights){
         float sum=0,full=0;int count=0;
-        for(float height:heights){if(height>=.875F&&full!=1F)full=height;if(height>=0){sum+=height;count++;}}
+        for(float height:heights){if(height>=RENDER_AVERAGE_OVERRIDE&&full!=1F)full=height;if(height>=0){sum+=height;count++;}}
         return full==0?sum/count:full;
     }
     /** Forge Entity.isInsideOfMaterial uses IFluidBlock.getFilledPercentage. */

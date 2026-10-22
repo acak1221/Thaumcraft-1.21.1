@@ -9,14 +9,14 @@ import net.minecraft.world.item.ItemDisplayContext;
  *
  * <p>Original {@code thaumcraft/client/renderers/item/ItemWandRenderer.java:59-86}: the renderer
  * places the wand differently for every one of the four 1.7.10 item render types. A staff is
- * lifted by half a block first ({@code :59-61}); a dropped item (the original {@code ENTITY}
+ * lifted by half a block first ({@code :60-62}); a dropped item (the original {@code ENTITY}
  * type, which covers both the dropped item and the item frame of the port) is lifted by one
  * block, or by one and a half blocks and shrunk to nine tenths in the case of a staff
- * ({@code :64-71}); an item in a hand is moved to half a block to the side, one and a half
+ * ({@code :64-70}); an item in a hand is moved to half a block to the side, one and a half
  * blocks up and half a block forward, and the first person view stretches it vertically by a
- * tenth ({@code :72-79}); an item in the inventory is shrunk to eight tenths for a staff, rolled
+ * tenth ({@code :72-75}); an item in the inventory is shrunk to eight tenths for a staff, rolled
  * by sixty six degrees about Z, lifted by six tenths and, for a staff, shifted by minus seven
- * tenths in X and another six tenths in Y ({@code :80-86}).</p>
+ * tenths in X and another six tenths in Y ({@code :77-85}).</p>
  *
  * <p>The basis of the chain is the basis that the 1.21.1 {@code ItemRenderer} hands to a builtin
  * item renderer: the display transform of the model has been applied and the model has been
@@ -31,25 +31,25 @@ import net.minecraft.world.item.ItemDisplayContext;
  * a running client.</p>
  */
 public final class WandContextPose {
-    /** Original ItemWandRenderer:60: the staff lift that applies to every context. */
+    /** Original ItemWandRenderer:61: the staff lift that applies to every context. */
     public static final float STAFF_LIFT_Y = 0.5F;
-    /** Original ItemWandRenderer:67-70: the lift and the scale of a dropped staff. */
+    /** Original ItemWandRenderer:66: the lift of a dropped staff. */
     public static final float ENTITY_STAFF_LIFT_Y = 1.5F;
-    /** Original ItemWandRenderer:69: the uniform scale of a dropped staff. */
+    /** Original ItemWandRenderer:67: the uniform scale of a dropped staff. */
     public static final float ENTITY_STAFF_SCALE = 0.9F;
-    /** Original ItemWandRenderer:71: the lift of a dropped wand. */
+    /** Original ItemWandRenderer:69: the lift of a dropped wand. */
     public static final float ENTITY_LIFT_Y = 1.0F;
-    /** Original ItemWandRenderer:74-76: the offset of the wand in a hand. */
+    /** Original ItemWandRenderer:72: the offset of the wand in a hand. */
     public static final float HAND_X = 0.5F, HAND_Y = 1.5F, HAND_Z = 0.5F;
-    /** Original ItemWandRenderer:77-78: the vertical stretch of the first person view. */
+    /** Original ItemWandRenderer:74: the vertical stretch of the first person view. */
     public static final float FIRST_PERSON_SCALE_Y = 1.1F;
-    /** Original ItemWandRenderer:82: the uniform scale of a staff in the inventory. */
+    /** Original ItemWandRenderer:79: the uniform scale of a staff in the inventory. */
     public static final float INVENTORY_STAFF_SCALE = 0.8F;
-    /** Original ItemWandRenderer:84: the roll of the inventory view around Z. */
+    /** Original ItemWandRenderer:81: the roll of the inventory view around Z. */
     public static final float INVENTORY_ROLL = 66.0F;
-    /** Original ItemWandRenderer:85: the lift of the inventory view. */
+    /** Original ItemWandRenderer:82: the lift of the inventory view. */
     public static final float INVENTORY_LIFT_Y = 0.6F;
-    /** Original ItemWandRenderer:86: the shift of a staff in the inventory. */
+    /** Original ItemWandRenderer:84: the shift of a staff in the inventory. */
     public static final float INVENTORY_STAFF_X = -0.7F, INVENTORY_STAFF_Y = 0.6F;
 
     /** The four item render types of the original, plus the contexts it never saw. */

@@ -32,7 +32,7 @@ public final class GolemFluidRules {
     }
 
     /**
-     * Original {@code getMissingLiquids}:348 — a loaded cargo accepts only its own fluid.
+     * Original {@code GolemHelper.getMissingLiquids}:352 — a loaded cargo accepts only its own fluid.
      *
      * <p>{@code golem.fluidCarried != null && golem.fluidCarried.amount > 0 && fluidID != id} skips
      * every other fluid. An empty cargo accepts everything.</p>

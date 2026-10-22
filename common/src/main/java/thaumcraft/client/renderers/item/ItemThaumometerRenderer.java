@@ -208,7 +208,7 @@ public final class ItemThaumometerRenderer {
         var player = mc.player;
         int ticks = player == null ? 0 : player.tickCount;
         int jitter = player == null || player.level() == null ? 0 : player.level().getRandom().nextInt(2);
-        int brightness = (int) (190.0F + (float) Math.sin(ticks - jitter) * 10.0F + 10.0F);
+        int brightness = ThaumometerReadout.brightness(ticks, jitter);
         int light = ThaumometerReadout.lightmap(brightness);
         // Original ItemThaumometerRenderer:154 renders the screen through
         // UtilsFX.renderQuadCenteredFromTexture(..., 2.5f, ...), which does a glScalef(2.5)

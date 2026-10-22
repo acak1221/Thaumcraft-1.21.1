@@ -57,9 +57,9 @@ public final class HoveredSlotAspectRow {
      * it. The native port runs without either, so the faithful value is {@code false}.
      */
     public static final boolean ASPECT_SHIFT = false;
-    /** Original UtilsFX.drawTag:544-546 - the row uses the six-argument overload, blend 771. */
+    /** Original UtilsFX.drawTag:540-542 - the row uses the six-argument overload, blend 771. */
     public static final int ROW_BLEND = 771;
-    /** Original UtilsFX.drawTag:544-546 - the row uses the six-argument overload, alpha 1. */
+    /** Original UtilsFX.drawTag:540-542 - the row uses the six-argument overload, alpha 1. */
     public static final float ROW_ALPHA = 1.0F;
 
     private static final ResourceLocation ASPECT_BACK = texture("aspects/_back.png");
@@ -112,12 +112,12 @@ public final class HoveredSlotAspectRow {
             int y = iconY(mouseY);
             background(graphics, x, y);
             if (KnowledgeAccess.get(player).hasDiscoveredAspect(aspect.getTag())) {
-                // Original ClientTickEventsFML:702 -> UtilsFX.drawTag(..., 771, 1.0f, false):
+                // Original ClientTickEventsFML:710 -> UtilsFX.drawTag(..., 771, 1.0f, false):
                 // the coloured icon of the aspect and its amount, NOT a silhouette.
                 icon(graphics, aspect.getImage(), x, y, aspect.getColor(), ROW_ALPHA);
                 amount(graphics, tags.getAmount(aspect), x, y);
             } else {
-                // Original ClientTickEventsFML:703-707: the _unknown.png sheet at alpha 1,
+                // Original ClientTickEventsFML:712-719: the _unknown.png sheet at alpha 1,
                 // with the colour left at white by the drawTag of the previous icon.
                 icon(graphics, UNKNOWN, x, y, 0xFFFFFF, ROW_ALPHA);
             }

@@ -28,11 +28,9 @@ import thaumcraft.common.lib.world.biomes.OriginalSpawnRules.Row;
  * {@code thaumcraft:eldritch_lands}, but no biome document and no registry key existed.
  * This unit adds the key and the document.
  *
- * <p>The original inhabited zombie row cannot be encoded into the native document yet:
- * a 1.21.1 biome spawner entry resolves its entity type from the entity type registry and
- * the native {@code thaumcraft:inhabitedzombie} entity does not exist yet. Encoding it
- * would make the whole biome document fail to load, so the document carries the guardian
- * row and {@link #spawnRows()} keeps the original row for the entity unit that owns it.
+ * <p>The native biome document encodes both original monster rows (oracle
+ * {@code BiomeGenEldritch.java:31-32}); their registered native IDs are
+ * {@code thaumcraft:inhabited_zombie} and {@code thaumcraft:eldritch_guardian}.
  */
 public final class BiomeGenEldritch {
     /** The original 1.7.10 biome name, {@code BiomeGenBase.func_76735_a}. */

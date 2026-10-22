@@ -138,7 +138,7 @@ public final class ChunkRegeneration {
             ++count;
             regenerate(level, loc.chunkXPos, loc.chunkZPos, chunkSeed(level.getSeed(), loc.chunkXPos, loc.chunkZPos));
         }
-        Thaumcraft.LOG.info("[Thaumcraft] Regenerated {} chunks. {} chunks left", count, Math.max(0, chunks.size()));
+        Thaumcraft.LOG.debug("[Thaumcraft] Regenerated {} chunks. {} chunks left", count, Math.max(0, chunks.size()));
     }
 
     /**

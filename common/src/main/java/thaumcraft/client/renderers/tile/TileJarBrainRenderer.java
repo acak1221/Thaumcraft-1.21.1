@@ -75,12 +75,22 @@ public final class TileJarBrainRenderer implements BlockEntityRenderer<TileJarBr
 
     /** The original bob of the brain: {@code sin(ticksSinceLevel / 14) * 0.03 + 0.03}. */
     public static float bob(int ticksSinceLevel) {
+        // The original 1.7.10 MathHelper.func_76126_a is the 65536 entry lookup table
+        // SIN[(int)(f * 10430.378f) & 0xFFFF] with SIN[i] = (float)Math.sin(i * PI * 2 / 65536)
+        // and the native Mth.sin is that same table, so this is the exact float of the
+        // original. It must NOT become a Math.sin: the table is negative in the second half
+        // of every period, so the original brain sinks to zero and rises to 0.06.
         return Mth.sin(ticksSinceLevel / BOB_PERIOD) * BOB_AMPLITUDE + BOB_AMPLITUDE;
     }
 
     /**
      * The original turn of the brain: the difference of the two angles, wrapped into
      * {@code [-pi, pi]}, interpolated with the frame.
+     *
+     * <p>Original {@code TileJarRenderer.java:160-166}: the drawn angle is
+     * {@code rotb + difference * partialTick}, so this is the absolute angle of the brain
+     * and not the difference of the two angles. The constants of the original are
+     * {@code 3.141593f} and {@code 6.283185f}, not {@code (float) Math.PI}.</p>
      */
     public static float turn(float rota, float rotb, float partialTick) {
         float difference = rota - rotb;

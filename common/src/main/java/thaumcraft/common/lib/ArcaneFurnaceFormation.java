@@ -37,7 +37,7 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
  *   <li>the original shell is a three by three by three cube: the four corners
  *       of every layer are nether bricks, the edges are obsidian, the middle of
  *       the bottom layer is obsidian, the middle of the middle layer is lava and
- *       the middle of the top layer is air ({@code WandManager.java:351-356});</li>
+ *       the middle of the top layer is air ({@code WandManager.java:350-354});</li>
  *   <li>exactly one cell of the middle layer is iron bars, and it has to sit on
  *       one of the four cross slots of that layer ({@code WandManager.java:357-372});
  *       the original returns false when no iron bar was found, so the furnace
@@ -86,8 +86,20 @@ public final class ArcaneFurnaceFormation {
     }
 
     /**
-     * Original WandManager.java:351-356 - the block the original expects in one
+     * Original WandManager.java:350-354 - the block the original expects in one
      * cell of the shell.
+     *
+     * <p>The blueprint of the original is read from the top layer down, because the
+     * original reads the cell of the layer {@code yy} at {@code y - yy + 2}
+     * ({@code WandManager.java:359}):</p>
+     * <ul>
+     *   <li>layer 0, the top layer: nether bricks in the corners, obsidian on the edges
+     *       and air in the middle;</li>
+     *   <li>layer 1, the middle layer: nether bricks in the corners, obsidian on the
+     *       edges and lava in the middle;</li>
+     *   <li>layer 2, the bottom layer: nether bricks in the corners and obsidian
+     *       everywhere else.</li>
+     * </ul>
      *
      * @param layer zero is the top layer, one the middle layer and two the bottom layer
      * @param dx the offset of the cell in the layer, zero to two

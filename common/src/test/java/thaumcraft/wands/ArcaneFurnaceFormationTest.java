@@ -27,26 +27,32 @@ class ArcaneFurnaceFormationTest {
     }
 
     @Test void theShellOfTheOriginalIsNetherBricksObsidianLavaAndAir() {
-        // Oracle WandManager.java:351-356.
+        // Oracle WandManager.java:350-354 - the blueprint of the original shell:
+        //   bo = Blocks.field_150343_Z (obsidian), bn = Blocks.field_150385_bj (nether bricks),
+        //   bl = Blocks.field_150353_l (lava) and Blocks.field_150350_a (air) in the middle of
+        //   the top layer. The blueprint is read from the top layer down, because the original
+        //   reads the cell of the layer yy at y - yy + 2 (WandManager.java:359).
+        //   layer 0 (top):    {{nb, ob, nb}, {ob, air,  ob}, {nb, ob, nb}}
+        //   layer 1 (middle): {{nb, ob, nb}, {ob, lava, ob}, {nb, ob, nb}}
+        //   layer 2 (bottom): {{nb, ob, nb}, {ob, ob,   ob}, {nb, ob, nb}}
         for (int layer = 0; layer < 3; layer++) {
             for (int dx = 0; dx < 3; dx++) {
                 for (int dz = 0; dz < 3; dz++) {
+                    // The middle of every layer has its own block, it is not an edge.
+                    if (dx == 1 && dz == 1) continue;
                     boolean corner = (dx == 0 || dx == 2) && (dz == 0 || dz == 2);
-                    if (dx == 1 && dz == 1) {
-                        assertSame(Blocks.AIR, ArcaneFurnaceFormation.expected(layer, dx, dz),
-                                "the middle of the top layer of the original shell is empty");
-                        assertSame(Blocks.LAVA, ArcaneFurnaceFormation.expected(1, dx, dz),
-                                "the middle of the middle layer of the original shell is lava");
-                        assertSame(Blocks.OBSIDIAN, ArcaneFurnaceFormation.expected(2, dx, dz),
-                                "the middle of the bottom layer of the original shell is obsidian");
-                        continue;
-                    }
                     assertSame(corner ? Blocks.NETHER_BRICKS : Blocks.OBSIDIAN,
                             ArcaneFurnaceFormation.expected(layer, dx, dz),
                             "the corners of the original shell are nether bricks and the edges are obsidian");
                 }
             }
         }
+        assertSame(Blocks.AIR, ArcaneFurnaceFormation.expected(0, 1, 1),
+                "the middle of the top layer of the original shell is empty");
+        assertSame(Blocks.LAVA, ArcaneFurnaceFormation.expected(1, 1, 1),
+                "the middle of the middle layer of the original shell is lava");
+        assertSame(Blocks.OBSIDIAN, ArcaneFurnaceFormation.expected(2, 1, 1),
+                "the middle of the bottom layer of the original shell is obsidian");
     }
 
     @Test void theThreeTriggerBlocksOfTheEventTwoAreTheOriginalOnes() {

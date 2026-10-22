@@ -58,7 +58,10 @@ public final class PlayerAccessoryInventory extends SimpleContainer {
     }
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
         if (mutating) throw new IllegalStateException("Accessory reload during mutation");
-        ItemStack[] parsed = {ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY}; boolean valid = tag.contains("Items",Tag.TAG_LIST);
+        ItemStack[] parsed = {ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY};
+        // getList(key, COMPOUND) returns an empty list for a list of another
+        // element type. Do not mistake malformed saved contents for four empty slots.
+        boolean valid = tag.get("Items") instanceof ListTag raw && (raw.isEmpty() || raw.getElementType() == Tag.TAG_COMPOUND);
         if (valid) {
             ListTag list = tag.getList("Items",Tag.TAG_COMPOUND); valid = list.size() <= 4;
             boolean[] occupied = new boolean[4];

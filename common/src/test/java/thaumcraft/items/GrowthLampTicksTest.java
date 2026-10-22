@@ -57,6 +57,24 @@ class GrowthLampTicksTest {
         assertFalse(out.contains("Rejected"));
     }
 
+    @Test void malformedCollectionsRemainRecoverableAcrossRepeatedSaves() {
+        for (String field : new String[]{"Pending", "Rejected"}) {
+            CompoundTag malformed = tag(row(POS, "minecraft:wheat", 5L));
+            ListTag strings = new ListTag();
+            strings.add(net.minecraft.nbt.StringTag.valueOf("unreadable scheduled update"));
+            malformed.put(field, strings);
+            CompoundTag out = roundTrip(malformed);
+            assertTrue(list(out, "Pending").isEmpty());
+            assertEquals(malformed, list(out, "Rejected").getCompound(0));
+            assertEquals(out, roundTrip(out));
+            malformed = tag(row(POS, "minecraft:wheat", 5L));
+            malformed.putInt(field, 99);
+            out = roundTrip(malformed);
+            assertEquals(malformed, list(out, "Rejected").getCompound(0));
+            assertEquals(out, roundTrip(out));
+        }
+    }
+
     @Test void rowsNamingNoKnownBlockAreSetAside() {
         CompoundTag out = roundTrip(tag(
                 row(POS, "thaumcraft:no_such_crop", 5L),   // unknown block

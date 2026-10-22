@@ -61,6 +61,15 @@ public final class GrowthLampTicks extends SavedData {
     }
     public static GrowthLampTicks load(CompoundTag tag, HolderLookup.Provider registries) {
         var queue = new GrowthLampTicks();
+        for (String name : new String[]{"Pending", "Rejected"}) {
+            if (tag.contains(name) && (!(tag.get(name) instanceof ListTag rows)
+                    || !rows.isEmpty() && rows.getElementType() != Tag.TAG_COMPOUND)) {
+                // A typed getList would hide the malformed collection as empty.
+                // Retain the entire owner, including any previously rejected data.
+                queue.rejected.add(tag.copy());
+                return queue;
+            }
+        }
         for (Tag raw : tag.getList("Rejected", Tag.TAG_COMPOUND)) queue.rejected.add(raw.copy());
         for (Tag raw : tag.getList("Pending", Tag.TAG_COMPOUND)) {
             var row = (CompoundTag) raw;

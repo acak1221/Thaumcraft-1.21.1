@@ -27,7 +27,9 @@ public record FabricPositionBlockModels(BakedModel base) implements BakedModel, 
                     || context.topLevelId().variant().equals("inventory")) return model;
             String path = context.topLevelId().id().getPath();
             if (path.equals("tallow_candle") || path.endsWith("_tallow_candle")
-                    || path.equals("eldritch_crust") || path.equals("eldritch_deco")) {
+                    || path.equals("eldritch_crust") || path.equals("eldritch_deco") || path.equals("eldritch_stairs")
+                    || path.equals("taint_crust") || path.equals("taint_soil") || path.equals("taint_fibres")
+                    || path.equals("flux_gas") || path.equals("flux_goo") || path.endsWith("_infused_stone")) {
                 return new FabricPositionBlockModels(model);
             }
             return model;
@@ -42,7 +44,10 @@ public record FabricPositionBlockModels(BakedModel base) implements BakedModel, 
         var shaded = renderer.materialFinder().ambientOcclusion(net.fabricmc.fabric.api.util.TriState.FALSE).find();
         var flat = renderer.materialFinder().ambientOcclusion(net.fabricmc.fabric.api.util.TriState.FALSE).disableDiffuse(true).find();
         for (BakedQuad quad : model.getQuads(state,null,random.get())) {
-            emitter.fromVanilla(quad,quad.isShade() ? shaded : flat,null).emit();
+            emitter.fromVanilla(quad,quad.isShade() ? shaded : flat,null);
+            if (quad instanceof thaumcraft.client.renderers.block.LegacyBlockQuads.LitQuad lit)
+                emitter.lightmap(lit.light(),lit.light(),lit.light(),lit.light());
+            emitter.emit();
         }
     }
     @Override public List<BakedQuad> getQuads(BlockState state,Direction face,RandomSource random) { return base.getQuads(state,face,random); }

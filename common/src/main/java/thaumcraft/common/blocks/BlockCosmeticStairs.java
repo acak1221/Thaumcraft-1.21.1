@@ -124,9 +124,9 @@ public final class BlockCosmeticStairs extends StairBlock {
      * The texture index of the stair at the position.
      *
      * <p>The 1.7.10 renderer asked the icon of every face separately, so the original stair
-     * could show up to four different ancient stone textures at once. A 1.21.1 stair model is
-     * baked per block state and has one texture for the four vertical faces, so the port holds
-     * the index of the top face of the original and paints the whole stair with it.</p>
+     * could show up to four different ancient stone textures at once. This state value is the
+     * top-face fallback for inventory/data models; PositionBlockModels remaps each world quad
+     * independently using its final world-facing direction and the actual position.</p>
      */
     public static int textureIndex(int x, int y, int z) {
         return textureIndex(x, y, z, SIDE_UP);

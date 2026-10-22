@@ -13,7 +13,7 @@ import thaumcraft.common.entities.EntityFallingTaint;
 public final class ThaumcraftTaintBlocksClient {
     private ThaumcraftTaintBlocksClient(){}
     public static void init(){
-        RenderTypeRegistry.register(RenderType.translucent(),ThaumcraftTaint.FIBRES.get());
+        RenderTypeRegistry.register(RenderType.translucent(),ThaumcraftTaint.FIBRES.get(),ThaumcraftTaint.CRUST.get(),ThaumcraftTaint.SOIL.get());
         ColorHandlerRegistry.registerBlockColors((state,world,pos,tint)->world!=null&&pos!=null?BiomeColors.getAverageGrassColor(world,pos):7160201,ThaumcraftTaint.SOIL.get(),ThaumcraftTaint.FIBRES.get());
         ColorHandlerRegistry.registerItemColors((stack,tint)->0xff6d4189,ThaumcraftTaint.SOIL.get().asItem(),ThaumcraftTaint.fibreItem(0),ThaumcraftTaint.fibreItem(1),ThaumcraftTaint.fibreItem(2),ThaumcraftTaint.fibreItem(3),ThaumcraftTaint.fibreItem(4));
         BlockTaint.setClientEffects(TaintDropParticle::add);EntityFallingTaint.setClientEffects(TaintLandParticle::add);

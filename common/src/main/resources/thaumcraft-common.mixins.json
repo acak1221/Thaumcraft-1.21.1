@@ -78,6 +78,7 @@
     "Tc4ChunkRegenerationMarkerMixin"
   ],
   "client": [
+    "client.OreAnisotropyMixin",
     "client.PositionBlockModelMixin",
     "client.WandRenderContextMixin",
     "client.BoneBowHeldPoseMixin",

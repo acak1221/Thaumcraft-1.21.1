@@ -81,3 +81,14 @@ collision-free program names. The squared asymmetric sample weights are retained
 Source official client JAR SHA1: `e80d9b3bf5085002218d4be59e668bac718abbc6`.
 Minecraft and these assets are owned by Mojang/Microsoft; this repository's
 source license does not relicense them. No external distribution is authorized.
+
+### Original ore inset stone
+
+`common/src/main/resources/assets/thaumcraft/textures/blocks/legacy_stone.png` is
+the byte-exact `assets/minecraft/textures/blocks/stone.png` from Mojang's official
+Minecraft 1.7.10 client JAR, SHA1 `e80d9b3bf5085002218d4be59e668bac718abbc6`.
+PNG SHA256: `489928bc2549424b7f8d979b7983e4398789dbff80b8c61f68368a02235d6927`.
+It is used only for the original ore renderer's anisotropic-filtering inset pass;
+Minecraft 1.21.1's retextured stone is not the original image. Mojang/Microsoft own
+this asset; this repository's source licence does not relicense it. The original
+JAR is not bundled and no external distribution is authorized.

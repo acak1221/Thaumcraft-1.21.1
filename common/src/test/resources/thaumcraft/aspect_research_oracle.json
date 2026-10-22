@@ -1,0 +1,1780 @@
+{
+  "source": "TC4 4.2.3.5 private oracle; explicit native identifier flattening only",
+  "config_aspects_sha256": "2cd727a11cd9f54a2c45cfca2cb6b3dee9e4069379d25aef1b17e009088a8b87",
+  "tags": {
+    "minecraft:stone": {
+      "aspects": {
+        "terra": 2
+      },
+      "source_line": 114
+    },
+    "minecraft:cobblestone": {
+      "aspects": {
+        "terra": 1,
+        "perditio": 1
+      },
+      "source_line": 115
+    },
+    "minecraft:oak_log": {
+      "aspects": {
+        "arbor": 4
+      },
+      "source_line": 116
+    },
+    "minecraft:spruce_log": {
+      "aspects": {
+        "arbor": 4
+      },
+      "source_line": 116
+    },
+    "minecraft:birch_log": {
+      "aspects": {
+        "arbor": 4
+      },
+      "source_line": 116
+    },
+    "minecraft:jungle_log": {
+      "aspects": {
+        "arbor": 4
+      },
+      "source_line": 116
+    },
+    "minecraft:acacia_log": {
+      "aspects": {
+        "arbor": 4
+      },
+      "source_line": 116
+    },
+    "minecraft:dark_oak_log": {
+      "aspects": {
+        "arbor": 4
+      },
+      "source_line": 116
+    },
+    "minecraft:oak_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "minecraft:spruce_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "minecraft:birch_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "minecraft:jungle_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "minecraft:acacia_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "minecraft:dark_oak_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "thaumcraft:greatwood_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "thaumcraft:silverwood_planks": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 117
+    },
+    "minecraft:stick": {
+      "aspects": {
+        "arbor": 1
+      },
+      "source_line": 120
+    },
+    "minecraft:lapis_lazuli": {
+      "aspects": {
+        "sensus": 1
+      },
+      "source_line": 124
+    },
+    "minecraft:lapis_ore": {
+      "aspects": {
+        "terra": 1,
+        "sensus": 3
+      },
+      "source_line": 126
+    },
+    "minecraft:diamond_ore": {
+      "aspects": {
+        "terra": 1,
+        "lucrum": 3,
+        "vitreus": 3
+      },
+      "source_line": 127
+    },
+    "minecraft:diamond": {
+      "aspects": {
+        "vitreus": 4,
+        "lucrum": 4
+      },
+      "source_line": 128
+    },
+    "minecraft:redstone_ore": {
+      "aspects": {
+        "terra": 1,
+        "potentia": 2,
+        "machina": 2
+      },
+      "source_line": 129
+    },
+    "minecraft:emerald_ore": {
+      "aspects": {
+        "terra": 1,
+        "lucrum": 4,
+        "vitreus": 3
+      },
+      "source_line": 131
+    },
+    "minecraft:emerald": {
+      "aspects": {
+        "vitreus": 4,
+        "lucrum": 5
+      },
+      "source_line": 132
+    },
+    "minecraft:nether_quartz_ore": {
+      "aspects": {
+        "terra": 1,
+        "vitreus": 3
+      },
+      "source_line": 133
+    },
+    "minecraft:quartz": {
+      "aspects": {
+        "vitreus": 1,
+        "potentia": 1
+      },
+      "source_line": 134
+    },
+    "minecraft:gold_nugget": {
+      "aspects": {
+        "metallum": 1
+      },
+      "source_line": 135
+    },
+    "minecraft:iron_nugget": {
+      "aspects": {
+        "metallum": 1
+      },
+      "source_line": 136
+    },
+    "minecraft:iron_ore": {
+      "aspects": {
+        "terra": 1,
+        "metallum": 3
+      },
+      "source_line": 137
+    },
+    "minecraft:iron_ingot": {
+      "aspects": {
+        "metallum": 4
+      },
+      "source_line": 139
+    },
+    "minecraft:gold_ore": {
+      "aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "lucrum": 1
+      },
+      "source_line": 140
+    },
+    "minecraft:gold_ingot": {
+      "aspects": {
+        "metallum": 3,
+        "lucrum": 2
+      },
+      "source_line": 142
+    },
+    "minecraft:coal_ore": {
+      "aspects": {
+        "terra": 1,
+        "potentia": 2,
+        "ignis": 1
+      },
+      "source_line": 143
+    },
+    "minecraft:coal": {
+      "aspects": {
+        "potentia": 2,
+        "ignis": 2
+      },
+      "source_line": 144
+    },
+    "minecraft:charcoal": {
+      "aspects": {
+        "potentia": 2,
+        "ignis": 2
+      },
+      "source_line": 144
+    },
+    "minecraft:redstone": {
+      "aspects": {
+        "potentia": 2,
+        "machina": 1
+      },
+      "source_line": 145
+    },
+    "minecraft:glowstone_dust": {
+      "aspects": {
+        "sensus": 1,
+        "lux": 2
+      },
+      "source_line": 146
+    },
+    "minecraft:glowstone": {
+      "aspects": {
+        "sensus": 3,
+        "lux": 10
+      },
+      "source_line": 147
+    },
+    "thaumcraft:copper_nugget": {
+      "aspects": {
+        "metallum": 1
+      },
+      "source_line": 149
+    },
+    "thaumcraft:cluster_copper": {
+      "aspects": {
+        "ordo": 1,
+        "metallum": 5,
+        "terra": 1,
+        "permutatio": 2
+      },
+      "source_line": 153
+    },
+    "minecraft:bedrock": {
+      "aspects": {
+        "vacuos": 16,
+        "perditio": 16,
+        "terra": 16,
+        "tenebrae": 16
+      },
+      "source_line": 176
+    },
+    "minecraft:farmland": {
+      "aspects": {
+        "terra": 1,
+        "meto": 2
+      },
+      "source_line": 179
+    },
+    "minecraft:sand": {
+      "aspects": {
+        "terra": 1,
+        "perditio": 1
+      },
+      "source_line": 180
+    },
+    "minecraft:red_sand": {
+      "aspects": {
+        "terra": 1,
+        "perditio": 1
+      },
+      "source_line": 180
+    },
+    "minecraft:clay_ball": {
+      "aspects": {
+        "aqua": 1,
+        "terra": 1
+      },
+      "source_line": 182
+    },
+    "minecraft:end_stone": {
+      "aspects": {
+        "terra": 1,
+        "tenebrae": 1
+      },
+      "source_line": 183
+    },
+    "minecraft:gravel": {
+      "aspects": {
+        "terra": 2
+      },
+      "source_line": 184
+    },
+    "minecraft:terracotta": {
+      "aspects": {
+        "terra": 4,
+        "ignis": 1
+      },
+      "source_line": 187
+    },
+    "minecraft:white_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:orange_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:magenta_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:light_blue_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:yellow_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:lime_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:pink_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:gray_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:light_gray_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:cyan_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:purple_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:blue_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:brown_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:green_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:red_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:black_terracotta": {
+      "aspects": {
+        "terra": 3,
+        "ignis": 1,
+        "sensus": 1
+      },
+      "source_line": 188
+    },
+    "minecraft:brick": {
+      "aspects": {
+        "terra": 1,
+        "ignis": 1
+      },
+      "source_line": 189
+    },
+    "minecraft:nether_brick": {
+      "aspects": {
+        "ignis": 1
+      },
+      "source_line": 190
+    },
+    "minecraft:soul_sand": {
+      "aspects": {
+        "terra": 1,
+        "vinculum": 1,
+        "spiritus": 1
+      },
+      "source_line": 191
+    },
+    "minecraft:netherrack": {
+      "aspects": {
+        "terra": 2,
+        "ignis": 1
+      },
+      "source_line": 192
+    },
+    "minecraft:nether_bricks": {
+      "aspects": {
+        "terra": 2,
+        "ignis": 1
+      },
+      "source_line": 193
+    },
+    "minecraft:glass": {
+      "aspects": {
+        "vitreus": 1
+      },
+      "source_line": 194
+    },
+    "minecraft:mossy_cobblestone": {
+      "aspects": {
+        "terra": 1,
+        "herba": 1,
+        "praecantatio": 1
+      },
+      "source_line": 196
+    },
+    "minecraft:infested_stone": {
+      "aspects": {
+        "terra": 2,
+        "bestia": 1,
+        "vinculum": 1
+      },
+      "source_line": 198
+    },
+    "minecraft:stone_bricks": {
+      "aspects": {
+        "terra": 2
+      },
+      "source_line": 199
+    },
+    "minecraft:wheat_seeds": {
+      "aspects": {
+        "herba": 1
+      },
+      "source_line": 211
+    },
+    "minecraft:melon_seeds": {
+      "aspects": {
+        "herba": 1
+      },
+      "source_line": 212
+    },
+    "minecraft:pumpkin_seeds": {
+      "aspects": {
+        "herba": 1
+      },
+      "source_line": 213
+    },
+    "minecraft:nether_wart": {
+      "aspects": {
+        "herba": 1,
+        "praecantatio": 1
+      },
+      "source_line": 215
+    },
+    "minecraft:sugar_cane": {
+      "aspects": {
+        "herba": 1,
+        "aqua": 1,
+        "aer": 1
+      },
+      "source_line": 223
+    },
+    "minecraft:wheat": {
+      "aspects": {
+        "messis": 2,
+        "fames": 1
+      },
+      "source_line": 224
+    },
+    "minecraft:carrot": {
+      "aspects": {
+        "messis": 1,
+        "fames": 1,
+        "sensus": 1
+      },
+      "source_line": 226
+    },
+    "minecraft:potato": {
+      "aspects": {
+        "messis": 1,
+        "fames": 1,
+        "terra": 1
+      },
+      "source_line": 227
+    },
+    "minecraft:baked_potato": {
+      "aspects": {
+        "messis": 1,
+        "fames": 2
+      },
+      "source_line": 228
+    },
+    "minecraft:poisonous_potato": {
+      "aspects": {
+        "messis": 1,
+        "venenum": 2
+      },
+      "source_line": 229
+    },
+    "minecraft:name_tag": {
+      "aspects": {
+        "cognitio": 2,
+        "bestia": 2
+      },
+      "source_line": 232
+    },
+    "minecraft:iron_horse_armor": {
+      "aspects": {
+        "tutamen": 2,
+        "bestia": 2
+      },
+      "source_line": 233
+    },
+    "minecraft:golden_horse_armor": {
+      "aspects": {
+        "tutamen": 4,
+        "bestia": 2
+      },
+      "source_line": 234
+    },
+    "minecraft:diamond_horse_armor": {
+      "aspects": {
+        "tutamen": 6,
+        "bestia": 2
+      },
+      "source_line": 235
+    },
+    "minecraft:packed_ice": {
+      "aspects": {
+        "gelum": 3,
+        "terra": 1
+      },
+      "source_line": 240
+    },
+    "minecraft:snowball": {
+      "aspects": {
+        "gelum": 1
+      },
+      "source_line": 241
+    },
+    "minecraft:cookie": {
+      "aspects": {
+        "fames": 1
+      },
+      "source_line": 242
+    },
+    "minecraft:torch": {
+      "aspects": {
+        "lux": 1
+      },
+      "source_line": 244
+    },
+    "minecraft:cobweb": {
+      "aspects": {
+        "vinculum": 2,
+        "pannus": 1
+      },
+      "source_line": 245
+    },
+    "minecraft:flint": {
+      "aspects": {
+        "terra": 1,
+        "instrumentum": 1
+      },
+      "source_line": 246
+    },
+    "minecraft:string": {
+      "aspects": {
+        "bestia": 1,
+        "pannus": 1
+      },
+      "source_line": 247
+    },
+    "minecraft:slime_ball": {
+      "aspects": {
+        "limus": 2
+      },
+      "source_line": 248
+    },
+    "minecraft:leather": {
+      "aspects": {
+        "pannus": 2,
+        "bestia": 1,
+        "tutamen": 1
+      },
+      "source_line": 249
+    },
+    "minecraft:rotten_flesh": {
+      "aspects": {
+        "humanus": 1,
+        "corpus": 2
+      },
+      "source_line": 250
+    },
+    "minecraft:feather": {
+      "aspects": {
+        "volatus": 2,
+        "aer": 1
+      },
+      "source_line": 251
+    },
+    "minecraft:bone": {
+      "aspects": {
+        "mortuus": 2,
+        "corpus": 1
+      },
+      "source_line": 252
+    },
+    "minecraft:egg": {
+      "aspects": {
+        "limus": 1,
+        "victus": 1,
+        "bestia": 1
+      },
+      "source_line": 253
+    },
+    "minecraft:spider_eye": {
+      "aspects": {
+        "sensus": 2,
+        "bestia": 2,
+        "venenum": 2
+      },
+      "source_line": 254
+    },
+    "minecraft:gunpowder": {
+      "aspects": {
+        "ignis": 4,
+        "perditio": 4
+      },
+      "source_line": 255
+    },
+    "minecraft:white_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:orange_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:magenta_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:light_blue_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:yellow_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:lime_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:pink_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:gray_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:light_gray_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:cyan_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:purple_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:blue_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:brown_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:green_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:red_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:black_wool": {
+      "aspects": {
+        "pannus": 4,
+        "fabrico": 1
+      },
+      "source_line": 256
+    },
+    "minecraft:cod": {
+      "aspects": {
+        "corpus": 3,
+        "victus": 1,
+        "aqua": 1
+      },
+      "source_line": 257
+    },
+    "minecraft:chicken": {
+      "aspects": {
+        "corpus": 3,
+        "victus": 2,
+        "bestia": 1
+      },
+      "source_line": 259
+    },
+    "minecraft:porkchop": {
+      "aspects": {
+        "corpus": 3,
+        "victus": 1,
+        "bestia": 1
+      },
+      "source_line": 261
+    },
+    "minecraft:beef": {
+      "aspects": {
+        "corpus": 4,
+        "victus": 2,
+        "bestia": 1
+      },
+      "source_line": 263
+    },
+    "minecraft:blaze_rod": {
+      "aspects": {
+        "ignis": 4,
+        "praecantatio": 2
+      },
+      "source_line": 265
+    },
+    "minecraft:saddle": {
+      "aspects": {
+        "bestia": 2,
+        "pannus": 3,
+        "iter": 3
+      },
+      "source_line": 266
+    },
+    "minecraft:ender_pearl": {
+      "aspects": {
+        "alienis": 4,
+        "praecantatio": 2,
+        "iter": 4
+      },
+      "source_line": 267
+    },
+    "minecraft:ghast_tear": {
+      "aspects": {
+        "aqua": 1,
+        "exanimis": 4,
+        "spiritus": 4
+      },
+      "source_line": 268
+    },
+    "minecraft:skeleton_skull": {
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "exanimis": 4
+      },
+      "source_line": 269
+    },
+    "minecraft:wither_skeleton_skull": {
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "exanimis": 4,
+        "venenum": 4
+      },
+      "source_line": 270
+    },
+    "minecraft:zombie_head": {
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "corpus": 4
+      },
+      "source_line": 271
+    },
+    "minecraft:player_head": {
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "humanus": 4
+      },
+      "source_line": 272
+    },
+    "minecraft:creeper_head": {
+      "aspects": {
+        "mortuus": 4,
+        "spiritus": 4,
+        "perditio": 2,
+        "ignis": 2
+      },
+      "source_line": 273
+    },
+    "minecraft:music_disc_11": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "lucrum": 4
+      },
+      "source_line": 274
+    },
+    "minecraft:music_disc_13": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "aqua": 4,
+        "lucrum": 4
+      },
+      "source_line": 275
+    },
+    "minecraft:music_disc_cat": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "bestia": 4,
+        "lucrum": 4
+      },
+      "source_line": 276
+    },
+    "minecraft:music_disc_chirp": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "terra": 4,
+        "lucrum": 4
+      },
+      "source_line": 277
+    },
+    "minecraft:music_disc_mall": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "humanus": 4,
+        "lucrum": 4
+      },
+      "source_line": 279
+    },
+    "minecraft:music_disc_mellohi": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "fabrico": 4,
+        "lucrum": 4
+      },
+      "source_line": 280
+    },
+    "minecraft:music_disc_stal": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "tenebrae": 4,
+        "lucrum": 4
+      },
+      "source_line": 281
+    },
+    "minecraft:music_disc_strad": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "machina": 4,
+        "lucrum": 4
+      },
+      "source_line": 282
+    },
+    "minecraft:music_disc_ward": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "praecantatio": 4,
+        "lucrum": 4
+      },
+      "source_line": 283
+    },
+    "minecraft:music_disc_blocks": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "instrumentum": 4,
+        "lucrum": 4
+      },
+      "source_line": 284
+    },
+    "minecraft:music_disc_wait": {
+      "aspects": {
+        "sensus": 4,
+        "aer": 4,
+        "vinculum": 4,
+        "lucrum": 4
+      },
+      "source_line": 285
+    },
+    "minecraft:chainmail_helmet": {
+      "aspects": {
+        "metallum": 8
+      },
+      "source_line": 287
+    },
+    "minecraft:chainmail_chestplate": {
+      "aspects": {
+        "metallum": 12
+      },
+      "source_line": 288
+    },
+    "minecraft:chainmail_leggings": {
+      "aspects": {
+        "metallum": 11
+      },
+      "source_line": 289
+    },
+    "minecraft:chainmail_boots": {
+      "aspects": {
+        "metallum": 7
+      },
+      "source_line": 290
+    },
+    "minecraft:spawner": {
+      "aspects": {
+        "bestia": 4,
+        "iter": 4,
+        "exanimis": 4,
+        "praecantatio": 4
+      },
+      "source_line": 299
+    },
+    "minecraft:crafting_table": {
+      "aspects": {
+        "fabrico": 4
+      },
+      "source_line": 340
+    },
+    "thaumcraft:cluster_iron": {
+      "aspects": {
+        "ordo": 1,
+        "metallum": 6,
+        "terra": 1
+      },
+      "source_line": 368
+    },
+    "thaumcraft:cluster_gold": {
+      "aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "lucrum": 2
+      },
+      "source_line": 369
+    },
+    "thaumcraft:cluster_cinnabar": {
+      "aspects": {
+        "ordo": 1,
+        "metallum": 4,
+        "terra": 1,
+        "permutatio": 4,
+        "venenum": 2
+      },
+      "source_line": 370
+    },
+    "thaumcraft:quicksilver_drop": {
+      "aspects": {
+        "metallum": 1
+      },
+      "source_line": 371
+    },
+    "thaumcraft:thaumium_nugget": {
+      "aspects": {
+        "metallum": 1
+      },
+      "source_line": 372
+    },
+    "thaumcraft:cinnabar_ore": {
+      "aspects": {
+        "terra": 1,
+        "metallum": 2,
+        "permutatio": 2,
+        "venenum": 1
+      },
+      "source_line": 373
+    },
+    "thaumcraft:amber_ore": {
+      "aspects": {
+        "terra": 1,
+        "vinculum": 3,
+        "vitreus": 2
+      },
+      "source_line": 374
+    },
+    "thaumcraft:air_infused_stone": {
+      "aspects": {
+        "terra": 1,
+        "aer": 3,
+        "vitreus": 2
+      },
+      "source_line": 375
+    },
+    "thaumcraft:fire_infused_stone": {
+      "aspects": {
+        "terra": 1,
+        "ignis": 3,
+        "vitreus": 2
+      },
+      "source_line": 376
+    },
+    "thaumcraft:water_infused_stone": {
+      "aspects": {
+        "terra": 1,
+        "aqua": 3,
+        "vitreus": 2
+      },
+      "source_line": 377
+    },
+    "thaumcraft:earth_infused_stone": {
+      "aspects": {
+        "terra": 4,
+        "vitreus": 2
+      },
+      "source_line": 378
+    },
+    "thaumcraft:order_infused_stone": {
+      "aspects": {
+        "terra": 1,
+        "ordo": 3,
+        "vitreus": 2
+      },
+      "source_line": 379
+    },
+    "thaumcraft:entropy_infused_stone": {
+      "aspects": {
+        "terra": 1,
+        "perditio": 3,
+        "vitreus": 2
+      },
+      "source_line": 380
+    },
+    "thaumcraft:taint_crust": {
+      "aspects": {
+        "arbor": 1,
+        "vitium": 3
+      },
+      "source_line": 381
+    },
+    "thaumcraft:taint_soil": {
+      "aspects": {
+        "terra": 1,
+        "vitium": 3
+      },
+      "source_line": 382
+    },
+    "thaumcraft:taint_fibres": {
+      "aspects": {
+        "victus": 1,
+        "vitium": 2
+      },
+      "source_line": 383
+    },
+    "thaumcraft:taint_grass": {
+      "aspects": {
+        "herba": 1,
+        "vitium": 1
+      },
+      "source_line": 384
+    },
+    "thaumcraft:taint_plant": {
+      "aspects": {
+        "herba": 1,
+        "vitium": 1
+      },
+      "source_line": 385
+    },
+    "thaumcraft:taint_spore_stalk": {
+      "aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      },
+      "source_line": 386
+    },
+    "thaumcraft:taint_spore_stalk_mature": {
+      "aspects": {
+        "bestia": 1,
+        "herba": 1,
+        "vitium": 2
+      },
+      "source_line": 387
+    },
+    "thaumcraft:greatwood_log": {
+      "aspects": {
+        "arbor": 3,
+        "praecantatio": 1
+      },
+      "source_line": 389
+    },
+    "thaumcraft:silverwood_log": {
+      "aspects": {
+        "arbor": 3,
+        "praecantatio": 1,
+        "ordo": 1
+      },
+      "source_line": 390
+    },
+    "thaumcraft:greatwood_leaves": {
+      "aspects": {
+        "herba": 1
+      },
+      "source_line": 391
+    },
+    "thaumcraft:silverwood_leaves": {
+      "aspects": {
+        "herba": 1
+      },
+      "source_line": 392
+    },
+    "thaumcraft:greatwood_sapling": {
+      "aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      },
+      "source_line": 393
+    },
+    "thaumcraft:silverwood_sapling": {
+      "aspects": {
+        "herba": 2,
+        "arbor": 1,
+        "praecantatio": 1
+      },
+      "source_line": 394
+    },
+    "thaumcraft:shimmerleaf": {
+      "aspects": {
+        "herba": 2,
+        "permutatio": 2,
+        "praecantatio": 2
+      },
+      "source_line": 395
+    },
+    "thaumcraft:cinderpearl": {
+      "aspects": {
+        "herba": 2,
+        "ignis": 2,
+        "praecantatio": 2
+      },
+      "source_line": 396
+    },
+    "thaumcraft:vishroom": {
+      "aspects": {
+        "herba": 2,
+        "venenum": 1,
+        "praecantatio": 2
+      },
+      "source_line": 397
+    },
+    "thaumcraft:arcane_stone": {
+      "aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      },
+      "source_line": 398
+    },
+    "thaumcraft:arcane_stone_bricks": {
+      "aspects": {
+        "terra": 1,
+        "praecantatio": 1
+      },
+      "source_line": 399
+    },
+    "thaumcraft:quick_silver": {
+      "aspects": {
+        "metallum": 3,
+        "venenum": 1,
+        "permutatio": 2
+      },
+      "source_line": 400
+    },
+    "thaumcraft:zombie_brain": {
+      "aspects": {
+        "corpus": 2,
+        "cognitio": 4,
+        "exanimis": 2
+      },
+      "source_line": 401
+    },
+    "thaumcraft:amber_gem": {
+      "aspects": {
+        "vinculum": 2,
+        "vitreus": 2
+      },
+      "source_line": 402
+    },
+    "thaumcraft:knowledge_fragment": {
+      "aspects": {
+        "cognitio": 8
+      },
+      "source_line": 403
+    },
+    "thaumcraft:tainted_goo": {
+      "aspects": {
+        "vitium": 3,
+        "limus": 1
+      },
+      "source_line": 404
+    },
+    "thaumcraft:taint_tendril": {
+      "aspects": {
+        "vitium": 2,
+        "lucrum": 1,
+        "fames": 1
+      },
+      "source_line": 405
+    },
+    "thaumcraft:gold_coin": {
+      "aspects": {
+        "lucrum": 1
+      },
+      "source_line": 406
+    },
+    "thaumcraft:loot_bag_common": {
+      "aspects": {
+        "lucrum": 8
+      },
+      "source_line": 407
+    },
+    "thaumcraft:loot_bag_uncommon": {
+      "aspects": {
+        "lucrum": 16
+      },
+      "source_line": 408
+    },
+    "thaumcraft:loot_bag_rare": {
+      "aspects": {
+        "lucrum": 32
+      },
+      "source_line": 409
+    },
+    "thaumcraft:nugget_beef": {
+      "aspects": {
+        "fames": 1
+      },
+      "source_line": 410
+    },
+    "thaumcraft:nugget_chicken": {
+      "aspects": {
+        "fames": 1
+      },
+      "source_line": 411
+    },
+    "thaumcraft:nugget_pork": {
+      "aspects": {
+        "fames": 1
+      },
+      "source_line": 412
+    },
+    "thaumcraft:nugget_fish": {
+      "aspects": {
+        "fames": 1
+      },
+      "source_line": 413
+    },
+    "thaumcraft:air_shard": {
+      "aspects": {
+        "praecantatio": 1,
+        "aer": 2,
+        "vitreus": 1
+      },
+      "source_line": 415
+    },
+    "thaumcraft:fire_shard": {
+      "aspects": {
+        "praecantatio": 1,
+        "ignis": 2,
+        "vitreus": 1
+      },
+      "source_line": 416
+    },
+    "thaumcraft:water_shard": {
+      "aspects": {
+        "praecantatio": 1,
+        "aqua": 2,
+        "vitreus": 1
+      },
+      "source_line": 417
+    },
+    "thaumcraft:earth_shard": {
+      "aspects": {
+        "praecantatio": 1,
+        "terra": 2,
+        "vitreus": 1
+      },
+      "source_line": 418
+    },
+    "thaumcraft:order_shard": {
+      "aspects": {
+        "praecantatio": 1,
+        "ordo": 2,
+        "vitreus": 1
+      },
+      "source_line": 419
+    },
+    "thaumcraft:entropy_shard": {
+      "aspects": {
+        "praecantatio": 1,
+        "perditio": 2,
+        "vitreus": 1
+      },
+      "source_line": 420
+    },
+    "thaumcraft:tallow_candle": {
+      "aspects": {
+        "lux": 2,
+        "corpus": 1,
+        "praecantatio": 1
+      },
+      "source_line": 423
+    },
+    "thaumcraft:alchemy_furnace": {
+      "aspects": {
+        "praecantatio": 8,
+        "aqua": 8,
+        "fabrico": 8
+      },
+      "source_line": 427
+    },
+    "thaumcraft:phial_empty": {
+      "aspects": {
+        "vacuos": 1
+      },
+      "source_line": 428
+    },
+    "thaumcraft:phial_filled": {
+      "aspects": {},
+      "source_line": 429
+    },
+    "thaumcraft:wisp_essence": {
+      "aspects": {
+        "auram": 2
+      },
+      "source_line": 430
+    },
+    "thaumcraft:discount_ring_aer": {
+      "aspects": {
+        "praecantatio": 5
+      },
+      "source_line": 435
+    },
+    "thaumcraft:focus_pech": {
+      "aspects": {
+        "praecantatio": 5,
+        "venenum": 5,
+        "perditio": 5,
+        "alienis": 5,
+        "telum": 5
+      },
+      "source_line": 436
+    },
+    "thaumcraft:cultist_plate": {
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "source_line": 437
+    },
+    "thaumcraft:cultist_robe": {
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "source_line": 438
+    },
+    "thaumcraft:cultist_leader": {
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "source_line": 439
+    },
+    "thaumcraft:cultist_plate_legs": {
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "source_line": 440
+    },
+    "thaumcraft:cultist_leader_legs": {
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "source_line": 441
+    },
+    "thaumcraft:cultist_robe_legs": {
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "source_line": 442
+    },
+    "thaumcraft:cultist_plate_helm": {
+      "aspects": {
+        "metallum": 5,
+        "alienis": 1
+      },
+      "source_line": 443
+    },
+    "thaumcraft:cultist_leader_helm": {
+      "aspects": {
+        "metallum": 5,
+        "alienis": 2
+      },
+      "source_line": 444
+    },
+    "thaumcraft:cultist_robe_hood": {
+      "aspects": {
+        "metallum": 3,
+        "pannus": 2,
+        "alienis": 1
+      },
+      "source_line": 445
+    },
+    "thaumcraft:cultist_boots": {
+      "aspects": {
+        "metallum": 4,
+        "alienis": 1
+      },
+      "source_line": 446
+    },
+    "thaumcraft:eldritch_eye": {
+      "aspects": {
+        "alienis": 5,
+        "auram": 3,
+        "praecantatio": 3,
+        "sensus": 3,
+        "spiritus": 3
+      },
+      "source_line": 448
+    },
+    "thaumcraft:crimson_rites": {
+      "aspects": {
+        "cognitio": 5,
+        "praecantatio": 3,
+        "alienis": 3,
+        "spiritus": 3
+      },
+      "source_line": 449
+    },
+    "thaumcraft:eldritch_tablet": {
+      "aspects": {
+        "vinculum": 4,
+        "cognitio": 4,
+        "machina": 4
+      },
+      "source_line": 450
+    },
+    "thaumcraft:primordial_pearl": {
+      "aspects": {
+        "aer": 16,
+        "terra": 16,
+        "ignis": 16,
+        "aqua": 16,
+        "ordo": 16,
+        "perditio": 16
+      },
+      "source_line": 451
+    }
+  },
+  "combinations": {
+    "vacuos": [
+      "aer",
+      "perditio"
+    ],
+    "lux": [
+      "aer",
+      "ignis"
+    ],
+    "tempestas": [
+      "aer",
+      "aqua"
+    ],
+    "motus": [
+      "aer",
+      "ordo"
+    ],
+    "gelum": [
+      "ignis",
+      "perditio"
+    ],
+    "vitreus": [
+      "terra",
+      "ordo"
+    ],
+    "victus": [
+      "aqua",
+      "terra"
+    ],
+    "venenum": [
+      "aqua",
+      "perditio"
+    ],
+    "potentia": [
+      "ordo",
+      "ignis"
+    ],
+    "permutatio": [
+      "perditio",
+      "ordo"
+    ],
+    "metallum": [
+      "terra",
+      "vitreus"
+    ],
+    "mortuus": [
+      "victus",
+      "perditio"
+    ],
+    "volatus": [
+      "aer",
+      "motus"
+    ],
+    "tenebrae": [
+      "vacuos",
+      "lux"
+    ],
+    "spiritus": [
+      "victus",
+      "mortuus"
+    ],
+    "sano": [
+      "victus",
+      "ordo"
+    ],
+    "iter": [
+      "motus",
+      "terra"
+    ],
+    "alienis": [
+      "vacuos",
+      "tenebrae"
+    ],
+    "praecantatio": [
+      "vacuos",
+      "potentia"
+    ],
+    "auram": [
+      "praecantatio",
+      "aer"
+    ],
+    "vitium": [
+      "praecantatio",
+      "perditio"
+    ],
+    "limus": [
+      "victus",
+      "aqua"
+    ],
+    "herba": [
+      "victus",
+      "terra"
+    ],
+    "arbor": [
+      "aer",
+      "herba"
+    ],
+    "bestia": [
+      "motus",
+      "victus"
+    ],
+    "corpus": [
+      "mortuus",
+      "bestia"
+    ],
+    "exanimis": [
+      "motus",
+      "mortuus"
+    ],
+    "cognitio": [
+      "ignis",
+      "spiritus"
+    ],
+    "sensus": [
+      "aer",
+      "spiritus"
+    ],
+    "humanus": [
+      "bestia",
+      "cognitio"
+    ],
+    "messis": [
+      "herba",
+      "humanus"
+    ],
+    "perfodio": [
+      "humanus",
+      "terra"
+    ],
+    "instrumentum": [
+      "humanus",
+      "ordo"
+    ],
+    "meto": [
+      "messis",
+      "instrumentum"
+    ],
+    "telum": [
+      "instrumentum",
+      "ignis"
+    ],
+    "tutamen": [
+      "instrumentum",
+      "terra"
+    ],
+    "fames": [
+      "victus",
+      "vacuos"
+    ],
+    "lucrum": [
+      "humanus",
+      "fames"
+    ],
+    "fabrico": [
+      "humanus",
+      "instrumentum"
+    ],
+    "pannus": [
+      "instrumentum",
+      "bestia"
+    ],
+    "machina": [
+      "motus",
+      "instrumentum"
+    ],
+    "vinculum": [
+      "motus",
+      "perditio"
+    ]
+  }
+}

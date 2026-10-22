@@ -107,6 +107,15 @@ public final class GolemItemMatchRuntimeChecks {
         Runnable invariant = () -> {};
         Runnable verdict = () -> {};
         boolean finished;
+        boolean areaMissingLogged;
+        // The configuration of the lane, so that the fixture can arm the lane again when a
+        // neighbouring scenario discards its golem.
+        int core, match, wanted;
+        List<Integer> upgrades;
+        ItemStack filter;
+        BlockPos at;
+        Direction facing;
+        List<GolemMarker> markers;
 
         Lane(String name, boolean positive) { this.name = name; this.positive = positive; }
     }
@@ -393,12 +402,32 @@ public final class GolemItemMatchRuntimeChecks {
             lane.other = chest(at.south(3), otherItems);
             lane.homeBefore = snapshot(lane.home);
             lane.otherBefore = snapshot(lane.other);
-            var filters = new ArrayList<>(NO_FILTERS);
-            var counts = new ArrayList<>(NO_COUNTS);
-            if (!filter.isEmpty()) { filters.set(0, filter); counts.set(0, wanted); }
-            lane.golem = golem(core, upgrades, at, Direction.EAST, filters, counts, List.of(marker(lane.other.getBlockPos(), Direction.NORTH)), List.of(), match);
+            lane.core = core;
+            lane.upgrades = upgrades;
+            lane.match = match;
+            lane.filter = filter;
+            lane.wanted = wanted;
+            lane.at = at;
+            lane.facing = Direction.EAST;
+            lane.markers = List.of(marker(lane.other.getBlockPos(), Direction.NORTH));
+            arm(lane);
             lanes.add(lane);
             return lane;
+        }
+
+        /**
+         * Puts the lane's own golem on its spot.
+         *
+         * <p>The fixture arms the lane again when the golem is gone: a neighbouring scenario of the
+         * same batch may clean up the entities of a wide area, and a golem that is discarded can never
+         * work again. The golem that arms the lane again is the same golem with the same
+         * configuration, so the decision of the golem stays the scenario's own.</p>
+         */
+        private void arm(Lane lane) {
+            var filters = new ArrayList<>(NO_FILTERS);
+            var counts = new ArrayList<>(NO_COUNTS);
+            if (!lane.filter.isEmpty()) { filters.set(0, lane.filter); counts.set(0, lane.wanted); }
+            lane.golem = golem(lane.core, lane.upgrades, lane.at, lane.facing, filters, counts, lane.markers, List.of(), lane.match);
         }
 
         /** A negative golem is judged every tick: nothing may ever leave or enter either chest, and it carries nothing. */
@@ -413,6 +442,7 @@ public final class GolemItemMatchRuntimeChecks {
             // The bench golems are done: they must not wander into the lanes.
             for (Entity entity : spawned) entity.discard();
             spawned.clear();
+            GolemState.around(level, base, 20);
             var oneEntropy = List.of(ENTROPY);
 
             // Damage: the filter is a fresh pickaxe, the source holds three worn ones. The golem fetches the worn ones, two of them,
@@ -499,7 +529,24 @@ public final class GolemItemMatchRuntimeChecks {
         }
 
         private boolean poll() {
+            // Another scenario of the same batch may release a chunk of the ring around the
+            // fixture: the ring is shared and the forced chunks of the level are a set, not a
+            // counter. The ring is taken back here, so the lanes keep their own area.
+            GolemChunks.refresh(level, original.keySet(), forced);
             for (Lane lane : lanes) {
+                if (lane.golem.isRemoved() && !lane.finished) {
+                    // A neighbouring scenario cleaned up this area and discarded the lane's golem.
+                    Thaumcraft.LOG.info("Item-match lane {} was discarded by a neighbouring scenario; the fixture arms it again", lane.name);
+                    arm(lane);
+                }
+                if (!lane.areaMissingLogged && !lane.golem.isRemoved()
+                        && !lane.golem.loadedNavigationArea(lane.golem.blockPosition())) {
+                    // The golem plans a route only when every chunk around it and around its
+                    // destination is loaded. A chunk that another scenario released leaves the
+                    // lane without that area and the golem stands still.
+                    lane.areaMissingLogged = true;
+                    Thaumcraft.LOG.warn("Item-match lane {} has no loaded navigation area", lane.name);
+                }
                 lane.invariant.run();
                 if (lane.positive && !lane.finished && lane.done.getAsBoolean()) lane.finished = true;
             }
@@ -518,7 +565,8 @@ public final class GolemItemMatchRuntimeChecks {
             for (Lane lane : lanes) {
                 text.append(lane.name).append(lane.positive ? (lane.finished ? " [done]" : " [WAITING]") : " [idle]")
                         .append(" home ").append(describe(lane.home)).append(" | other ").append(describe(lane.other))
-                        .append(" | carrying ").append(lane.golem.getCarriedItem()).append(" at ").append(lane.golem.blockPosition().toShortString()).append("; ");
+                        .append(" | carrying ").append(lane.golem.getCarriedItem()).append(" at ").append(lane.golem.blockPosition().toShortString())
+                        .append(" [").append(GolemState.of(lane.golem)).append("]; ");
             }
             return text.toString();
         }

@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.ThaumcraftGolems;
 import thaumcraft.common.container.ContainerGolem;
 import thaumcraft.common.entities.golems.EntityGolemBase;
@@ -101,6 +102,10 @@ public final class GolemColorsRuntimeChecks {
         private final List<ChunkPos> forced = new ArrayList<>();
         private EntityGolemBase router;
         private ChestBlockEntity home, near, far;
+        private List<ItemStack> routerFilters;
+        private List<Integer> routerCounts, routerColors;
+        private List<GolemMarker> routerMarkers;
+        private boolean areaMissingLogged;
         private boolean touched, finished;
 
         private Check(GameTestHelper test) {
@@ -122,11 +127,7 @@ public final class GolemColorsRuntimeChecks {
             player.setNoGravity(true);
             player.setGameMode(GameType.SURVIVAL);
             touched = true;
-            var center = new ChunkPos(base);
-            for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
-                var chunk = new ChunkPos(center.x + dx, center.z + dz);
-                if (!level.getForcedChunks().contains(chunk.toLong())) { level.setChunkForced(chunk.x, chunk.z, true); forced.add(chunk); }
-            }
+            forced.addAll(GolemChunks.hold(level, List.of(base)));
             for (BlockPos mutable : original.keySet()) {
                 level.setBlock(mutable, mutable.getY() == base.getY() - 1 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), QUIET);
             }
@@ -409,6 +410,7 @@ public final class GolemColorsRuntimeChecks {
             // The earlier golems are done: they must not wander into the routing fixture.
             for (Entity entity : spawned) entity.discard();
             spawned.clear();
+            GolemState.around(level, base, 20);
             // The golem stands at base, its home chest is west of it. The "near" chest is closer but carries the wrong marker
             // colour; the "far" chest carries colour 3, which is the colour of the cobblestone slot.
             home = chest(base.west(), ItemStack.EMPTY);
@@ -421,13 +423,46 @@ public final class GolemColorsRuntimeChecks {
             var colors = new ArrayList<>(Collections.nCopies(GolemData.FILTER_SLOTS, -1));
             colors.set(0, 3);
             var markers = List.of(marker(near.getBlockPos(), Direction.SOUTH, 5), marker(far.getBlockPos(), Direction.WEST, 3));
-            router = golem(GolemData.FILL, List.of(ORDER), base, Direction.EAST, filters, counts, markers, colors);
+            routerFilters = filters;
+            routerCounts = counts;
+            routerColors = colors;
+            routerMarkers = markers;
+            armRouter();
             test.assertTrue(router.markerAccepts(markers.get(1), new ItemStack(Items.COBBLESTONE))
                             && !router.markerAccepts(markers.get(0), new ItemStack(Items.COBBLESTONE)),
                     "only the colour-3 marker may serve the cobblestone slot");
         }
 
+        /**
+         * Puts the routing golem on its spot.
+         *
+         * <p>The fixture arms the lane again when the golem is gone: a neighbouring scenario of the
+         * same batch may clean up the entities of a wide area, and a golem that is discarded can
+         * never work. The golem that arms the lane again is the same golem with the same
+         * configuration, so the routing decision stays the scenario's own.</p>
+         */
+        private void armRouter() {
+            router = golem(GolemData.FILL, List.of(ORDER), base, Direction.EAST, routerFilters, routerCounts, routerMarkers, routerColors);
+        }
+
         private boolean routingDone() {
+            // Another scenario of the same batch may release a chunk of the ring around the
+            // fixture: the ring is shared and the forced chunks of the level are a set, not a
+            // counter. The ring is taken back here, so the golem keeps its own area.
+            GolemChunks.refresh(level, List.of(base), forced);
+            if (router.isRemoved()) {
+                // A neighbouring scenario discarded the golem; the fixture arms the lane again.
+                Thaumcraft.LOG.info("The colour routing golem was discarded by a neighbouring scenario; the fixture arms it again");
+                armRouter();
+                return false;
+            }
+            if (!areaMissingLogged && !router.loadedNavigationArea(router.blockPosition())) {
+                // The golem plans a route only when every chunk around it and around its
+                // destination is loaded. A chunk that another scenario released leaves the
+                // golem without that area and it stands still.
+                areaMissingLogged = true;
+                Thaumcraft.LOG.warn("The colour routing golem has no loaded navigation area");
+            }
             int delivered = count(home, Items.COBBLESTONE);
             if (delivered == 0) return false;
             test.assertTrue(count(near, Items.COBBLESTONE) == 64, "the wrongly coloured chest is never touched: " + count(near, Items.COBBLESTONE));
@@ -438,7 +473,7 @@ public final class GolemColorsRuntimeChecks {
 
         private String routingState() {
             return "home " + count(home, Items.COBBLESTONE) + ", near " + count(near, Items.COBBLESTONE) + ", far " + count(far, Items.COBBLESTONE)
-                    + ", carrying " + router.getCarriedItem() + ", golem at " + router.position();
+                    + ", carrying " + router.getCarriedItem() + ", golem at " + router.position() + " [" + GolemState.of(router) + "]";
         }
 
         private void finish() {

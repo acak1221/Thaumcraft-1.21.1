@@ -88,6 +88,7 @@ public final class GolemFetterRuntimeChecks {
         BlockPos standing;
         Vec3 start;
         boolean done;
+        boolean areaMissingLogged;
 
         Lane(String name, boolean fettered) { this.name = name; this.fettered = fettered; }
     }
@@ -254,6 +255,7 @@ public final class GolemFetterRuntimeChecks {
         }
 
         private void armLanes() {
+            GolemState.around(level, base, 20);
             lane("held golem (active fetter)", true);
             lane("free golem (inactive fetter)", false);
             lane("walking golem (fetter switched on under it)", false);
@@ -294,6 +296,10 @@ public final class GolemFetterRuntimeChecks {
 
         private boolean poll() {
             long tick = test.getTick();
+            // Another scenario of the same batch may release a chunk of the ring around the
+            // fixture: the ring is shared and the forced chunks of the level are a set, not a
+            // counter. The ring is taken back here, so the lanes keep their own area.
+            GolemChunks.refresh(level, original.keySet(), forced);
             for (Lane lane : lanes) {
                 if (lane.golem.isRemoved()) {
                     // A neighbouring scenario cleaned up this area and discarded the lane's golem.
@@ -307,11 +313,20 @@ public final class GolemFetterRuntimeChecks {
                             midFloor = null;
                         }
                     }
+                } else if (!lane.areaMissingLogged && !lane.golem.loadedNavigationArea(lane.golem.blockPosition())) {
+                    // The golem plans a route only when every chunk around it and around its
+                    // destination is loaded. A chunk that another scenario released leaves the
+                    // lane without that area and the golem stands still.
+                    lane.areaMissingLogged = true;
+                    Thaumcraft.LOG.warn("Fetter lane {} has no loaded navigation area", lane.name);
                 }
             }
             walkingGolem(tick);
             for (Lane lane : lanes) {
-                if (lane != walking() && tick >= 2 && (!released || tick > releasedAt + 2)) {
+                // A golem that the fixture armed again has not read the block under its feet yet:
+                // the original reads it on every living update, so the rule is only decided after
+                // the fresh golem has ticked once.
+                if (lane != walking() && tick >= 2 && (!released || tick > releasedAt + 2) && lane.golem.tickCount > 0) {
                     test.assertTrue(lane.golem.isFettered() == (lane.fettered && !released), lane.name + ": isFettered follows the block under it");
                 }
                 if (!lane.done && count(lane.home) > 0) lane.done = true;
@@ -339,7 +354,8 @@ public final class GolemFetterRuntimeChecks {
             for (Lane lane : lanes) {
                 text.append("walking phase ").append(midPhase).append(' ').append(lane.name).append(" fettered=").append(lane.golem.isFettered()).append(" home ").append(count(lane.home))
                         .append(" source ").append(count(lane.source)).append(" carrying ").append(lane.golem.getCarriedItem())
-                        .append(" at ").append(lane.golem.position()).append(" ticks ").append(lane.golem.tickCount).append("; ");
+                        .append(" at ").append(lane.golem.position()).append(" ticks ").append(lane.golem.tickCount)
+                        .append(" [").append(GolemState.of(lane.golem)).append("]; ");
             }
             return text.toString();
         }

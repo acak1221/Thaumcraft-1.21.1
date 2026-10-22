@@ -29,13 +29,16 @@ import net.minecraft.resources.ResourceLocation;
  *       {@code textures/misc/particlefield.png};</li>
  *   <li>instead of the removed projection matrix every layer is drawn smaller and
  *       pushed into the block, which produces the same receding tunnel;</li>
- *   <li>the original colour of a layer is reproduced with the original
- *       {@code new Random(31100L)} sequence.</li>
+ *   <li>colours use a stream seeded with {@code 31100L}, but this implementation
+ *       retains that stream between calls; the original resets it per face
+ *       ({@code TileHoleRenderer.java:43,141}, {@code TileMirrorRenderer.java:57,141}).</li>
  * </ul>
  *
  * <p>This is an approximation of the original effect, not a pixel exact copy:
- * the view dependent texture generation of the original cannot be reproduced
- * without the fixed function pipeline. The additive blend of the original inner
+ * this implementation does not reconstruct the original view-dependent texture
+ * generation. That is an implementation gap, not a modern-pipeline limitation:
+ * {@code LinkedMirrorField} reconstructs the mirror projection with a shader.
+ * The additive blend of the original inner
  * layers is the vanilla {@code RenderType.eyes}, whose transparency is
  * {@code RenderStateShard.ADDITIVE_TRANSPARENCY}, i.e. the very
  * {@code glBlendFunc(GL_ONE, GL_ONE)} of the original.</p>

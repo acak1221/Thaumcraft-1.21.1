@@ -36,8 +36,6 @@ public final class GasSurfaceRules {
     public static final int QUANTA_PER_BLOCK = 8;
     /** Oracle the {@code 0.875} factor of the render height. */
     public static final float RENDER_HEIGHT_FACTOR = 0.875F;
-    /** Oracle the {@code 0.875} threshold of {@code getFluidHeightAverage}. */
-    public static final float AVERAGE_OVERRIDE = 0.875F;
 
     private GasSurfaceRules() {}
 
@@ -73,17 +71,7 @@ public final class GasSurfaceRules {
      * @return the height of the corner
      */
     public static float heightAverage(float[] flow) {
-        float total = 0.0F;
-        int count = 0;
-        float end = 0.0F;
-        for (float sample : flow) {
-            if (sample >= AVERAGE_OVERRIDE && end != 1.0F) end = sample;
-            if (!(sample >= 0.0F)) continue;
-            total += sample;
-            ++count;
-        }
-        if (end == 0.0F) end = total / (float) count;
-        return end;
+        return thaumcraft.common.lib.fluid.PureFlowRules.renderAverage(flow);
     }
 
     /** The four surface corners of one cell, in the order of the original. */

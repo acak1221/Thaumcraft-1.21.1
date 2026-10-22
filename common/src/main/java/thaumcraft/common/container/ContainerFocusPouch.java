@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.config.ThaumcraftFocusPouches;
 import thaumcraft.common.items.wands.ItemFocusPouch;
+import thaumcraft.common.lib.crafting.DeviceContainerRules;
 
 /** Original18+36 slots and reverse return order, with actual hand/stack authority
  * and a locked source slot. Stale close can never copy a physical pouch. */
@@ -34,13 +35,13 @@ public final class ContainerFocusPouch extends AbstractContainerMenu {
         ItemStack[] contents=new ItemStack[ItemFocusPouch.SIZE];Arrays.fill(contents,ItemStack.EMPTY);
         if(server)contents=((ItemFocusPouch)pouch.getItem()).getInventory(pouch);
         input=new InventoryFocusPouch(contents,()->!server||viewer.containerMenu==this&&bound(),this::persist);
-        for(int slot=0;slot<18;slot++)addSlot(new Slot(input,slot,37+slot%6*18,51+slot/6*18){
+        for(int slot=0;slot<18;slot++)addSlot(new Slot(input,slot,DeviceContainerRules.focusPouchSlotX(slot),DeviceContainerRules.focusPouchSlotY(slot)){
             @Override public boolean mayPlace(ItemStack stack){return stack.getItem() instanceof ItemFocusBasic;}
         });
-        for(int row=0;row<3;row++)for(int column=0;column<9;column++)addSlot(new Slot(inventory,column+row*9+9,8+column*18,151+row*18));
+        for(int row=0;row<3;row++)for(int column=0;column<9;column++)addSlot(new Slot(inventory,column+row*9+9,8+column*18,DeviceContainerRules.focusPouchPlayerY(row)));
         for(int column=0;column<9;column++) {
             final boolean locked=hand==InteractionHand.MAIN_HAND&&column==hotbar;
-            addSlot(new Slot(inventory,column,8+column*18,209){
+            addSlot(new Slot(inventory,column,8+column*18,DeviceContainerRules.focusPouchHotbarY()){
                 @Override public boolean mayPlace(ItemStack stack){return !locked&&super.mayPlace(stack);}
                 @Override public boolean mayPickup(Player player){return !locked&&super.mayPickup(player);}
             });

@@ -79,7 +79,7 @@ public final class UtilsFX {
             TEXTURE_SIZE_CACHE.put(path, frames);
             return frames;
         } catch (Exception e) {
-            e.printStackTrace();
+            thaumcraft.common.Thaumcraft.LOG.warn("Cannot read texture animation size for {}", path, e);
             return TEXTURE_SIZE_FALLBACK;
         }
     }
@@ -101,7 +101,7 @@ public final class UtilsFX {
             TEXTURE_SIZE_CACHE.put(key, tiles);
             return tiles;
         } catch (Exception e) {
-            e.printStackTrace();
+            thaumcraft.common.Thaumcraft.LOG.warn("Cannot read texture size for {} (divisor {})", path, divisor, e);
             return TEXTURE_SIZE_FALLBACK;
         }
     }

@@ -38,9 +38,9 @@ public final class SparkleCallRules {
         if (level.isClientSide) clientEffects.sparkle(level, position, size, type, gravity);
     }
 
-    /** Oracle ClientProxy.java:649 - the roll of the proxy is one in six. */
+    /** Oracle ClientProxy.java:649,899-903 - six outcomes, accepted below particleCount(2). */
     public static final int SPARKLE_ROLL = 6;
-    /** Oracle ClientProxy.java:651 - the multiplier of the sparkle of the proxy, the life is 3 * 6. */
+    /** Oracle ClientProxy.java:650 and FXSparkle.java:47 - multiplier six, life 3 * 6. */
     public static final int SPARKLE_MULTIPLIER = 6;
 
     /** Oracle BlockMagicalLeaves.java:214 - one of the leaves in five hundred sparkles. */
@@ -84,7 +84,8 @@ public final class SparkleCallRules {
      * The position of the sparkle of the magical leaves.
      *
      * <p>Oracle {@code BlockMagicalLeaves.java:215}: the block centre plus a random fraction of
-     * the world random on each of the three axes, so the sparkle wanders inside the block.</p>
+     * the difference of two world-random fractions on each axis: offsets range from
+     * just above -0.5 to just below 1.5, so the sparkle can lie outside the block.</p>
      *
      * @param x      the x of the block
      * @param y      the y of the block
@@ -117,7 +118,7 @@ public final class SparkleCallRules {
      * The position of the sparkle of the lifter.
      *
      * <p>Oracle {@code BlockLifter.java:81}: the sparkle is one block above the levitator and
-     * wanders over the last twenty and the first eighty per cent of the block.</p>
+     * wanders between twenty and eighty per cent of the block on each horizontal axis.</p>
      *
      * @param x      the x of the block
      * @param y      the y of the block

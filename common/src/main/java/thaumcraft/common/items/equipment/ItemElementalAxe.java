@@ -21,7 +21,8 @@ import thaumcraft.common.lib.world.StreamAxeItemMotion;
  * Axe of the Stream (original ItemElementalAxe, Api THAUMIUM_ELEMENTAL). A real axe:
  * tier 3, 1500 uses, speed 10, enchantability 18. Chopping is handled where the
  * real player's break completes (StreamAxeHarvest); this class owns the held
- * right-click vacuum. Optional Repair-enchantment self repair is NOT implemented.
+ * right-click vacuum. Repair-enchantment self repair is handled by the shared
+ * {@code EquipmentEnchantments.tick} / {@code EnchantmentRepair.tick} path.
  */
 public class ItemElementalAxe extends AxeItem implements IRepairable {
     public static final int USE_DURATION = 72000;

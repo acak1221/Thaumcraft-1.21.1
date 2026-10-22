@@ -41,7 +41,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
  *       {@code generateWildNodes} refuses the chunk while that flag is set (line 190,
  *       {@code !auraGen}). A placed scattered node therefore disables the wild node pass and
  *       still allows the totem.</li>
- *   <li>the totem is suppressed only by a structure the chain actually <em>built</em> (line 434:
+ *   <li>the totem is suppressed only by a structure the chain actually <em>built</em> (line 430:
  *       {@code if (mound.func_76484_a(...))}), not by a chain roll that selected a structure and
  *       then failed its ground test.</li>
  * </ol>
@@ -104,8 +104,8 @@ public final class AuraGenRules {
         Registry<Structure> structures = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
         ChunkPos pos = new ChunkPos(chunkX, chunkZ);
         for (ResourceKey<Structure> key : SCATTERED_TEMPLES) {
-            // Registry#get is nullable: a datapack may remove a vanilla structure, and the
-            // original tolerated a structure table that no longer lists one.
+            // Native datapack adaptation: Registry#get is nullable when a datapack removes
+            // a vanilla structure. The original's fresh MapGenScatteredFeature has no registry lookup.
             Structure structure = structures.get(key);
             if (structure == null) continue;
             StructureStart start = chunk.getStartForStructure(structure);
@@ -133,7 +133,7 @@ public final class AuraGenRules {
 
     /**
      * The {@code auraGen} the totem of the chunk finally sees: oracle
-     * ThaumcraftWorldGenerator:419 (the overwrite) and :434, :441, :451 (the structure that was
+     * ThaumcraftWorldGenerator:419 (the overwrite) and :430-431, :444-445, :450-451 (the structure that was
      * actually built).
      *
      * <p>Expanded: {@code structureBuilt || (!scatteredPlaced &amp;&amp; wildNodePass)}. A

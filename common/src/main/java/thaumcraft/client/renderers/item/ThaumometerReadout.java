@@ -24,8 +24,9 @@ import thaumcraft.common.items.relics.ItemThaumometer;
  * <ul>
  *   <li>the readout is pushed in front of the scan screen by {@code -0.01} (oracle
  *       {@code ItemThaumometerRenderer.java:164});</li>
- *   <li>the aspect icons are drawn with the scale {@code 0.0075}, five of them per row, the
- *       first row starts at {@code -min(5, count) * 8} and every row is eight pixels lower
+ *   <li>the aspect icons are drawn with the scale {@code 0.0075}, initially five per row
+ *       with the row width decreasing by one each time; the first row starts at
+ *       {@code -min(5, count) * 8} and every row is sixteen pixels lower
  *       (oracle {@code ItemThaumometerRenderer.java:222-238});</li>
  *   <li>the name is drawn with the scale {@code 0.005}, which shrinks by {@code 2.5e-5} for
  *       every pixel of the name that is wider than ninety, below the icons at
@@ -35,7 +36,7 @@ import thaumcraft.common.items.relics.ItemThaumometer;
  * </ul>
  */
 public final class ThaumometerReadout {
-    /** Original ItemThaumometerRenderer:235: five aspect icons per row. */
+    /** Original ItemThaumometerRenderer:235: the first row holds up to five aspect icons. */
     public static final int ICONS_PER_ROW = 5;
     /** Original ItemThaumometerRenderer:228: the scale of the aspect icons. */
     public static final float ICON_SCALE = 0.0075F;
@@ -146,7 +147,7 @@ public final class ThaumometerReadout {
      *
      * <p>Original {@code ItemThaumometerRenderer.java:221-239}: the icons are the glyph of the
      * aspect with the colour of the aspect, the additive blend and the amount of the aspect
-     * below, five of them per row.</p>
+     * below, initially five per row and then one fewer in each successive row.</p>
      */
     private static void icons(PoseStack pose, MultiBufferSource buffers, Font font, AspectList aspects, int light) {
         int count = aspects.size();

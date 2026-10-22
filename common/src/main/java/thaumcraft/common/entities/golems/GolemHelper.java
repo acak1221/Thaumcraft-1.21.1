@@ -8,7 +8,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import thaumcraft.common.items.golems.GolemData;
@@ -16,6 +15,7 @@ import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.lib.fluid.GolemFluidAccess;
 import thaumcraft.common.lib.fluid.GolemFluidBlocks;
 import thaumcraft.common.lib.fluid.GolemFluidHandler;
+import thaumcraft.common.lib.fluid.GolemFluidRules;
 
 /**
  * The one entry point of the searches of the golem.
@@ -292,7 +292,7 @@ public final class GolemHelper {
     public static List<ResourceLocation> getReggedLiquids() {
         List<ResourceLocation> results = new ArrayList<>();
         for (Fluid fluid : BuiltInRegistries.FLUID) {
-            if (fluid.getBucket() == Items.BUCKET) continue; // The empty fluid and the flowing variants.
+            if (!GolemFluidRules.registrable(fluid)) continue; // The empty fluid and the flowing variants.
             ResourceLocation id = BuiltInRegistries.FLUID.getKey(fluid);
             if (id != null) results.add(id);
         }
@@ -304,7 +304,8 @@ public final class GolemHelper {
      *
      * <p>The home is any fluid handler (oracle {@code GolemHelper}:348-352). The cargo of the golem
      * decides the fluid: a loaded cargo accepts only its own fluid. The filter of the golem must
-     * be a filled container when it holds one (oracle {@code GolemHelper}:354-363).</p>
+     * hold a filled container of the same fluid when it holds one (oracle
+     * {@code GolemHelper}:354-363 compares {@code fis.isFluidEqual(fs)}).</p>
      */
     public static List<ResourceLocation> getMissingLiquids(EntityGolemBase golem) {
         List<ResourceLocation> results = new ArrayList<>();
@@ -314,10 +315,13 @@ public final class GolemHelper {
         Direction facing = golem.getHomeFacing();
         ItemStack filter = golem.getFilter(0);
         boolean filtered = filter != null && !filter.isEmpty();
+        ResourceLocation filterFluid = filtered ? GolemFluidAccess.fluidOfFilledContainer(filter) : null;
+        ResourceLocation carried = golem.getFluidId();
+        int carriedAmount = golem.getFluidAmountMb();
         for (ResourceLocation id : getReggedLiquids()) {
-            if (golem.getFluidAmountMb() > 0 && !id.equals(golem.getFluidId())) continue;
+            if (!GolemFluidRules.carriedAccepts(id, carried, carriedAmount)) continue;
             if (!home.canFill(facing, id)) continue;
-            if (filtered && GolemFluidAccess.fluidOfFilledContainer(filter) == null) continue;
+            if (!GolemFluidRules.filterAccepts(id, filtered, filterFluid)) continue;
             results.add(id);
         }
         return results;

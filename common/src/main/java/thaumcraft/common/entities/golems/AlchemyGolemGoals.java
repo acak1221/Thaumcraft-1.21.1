@@ -20,7 +20,6 @@ import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemMarker;
 import thaumcraft.common.lib.essentia.EssentiaSourceRules;
-import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileEssentiaReservoir;
@@ -123,7 +122,8 @@ final class AlchemyGolemGoals {
         if (base instanceof IEssentiaTransport transport) {
             return transportSource(base, transport);
         }
-        if (base.getClass() != TileAlchemyFurnace.class) return null;
+        // Original AIEssentiaGather:58-82 - when the home cell is no essentia transport, the
+        // original scans the whole column for an alembic; the furnace class itself is no bound.
         Source best = null;
         int largest = 0;
         for (int height = 1; height <= 5; height++) {

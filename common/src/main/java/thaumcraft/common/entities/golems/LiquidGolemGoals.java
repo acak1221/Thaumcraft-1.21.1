@@ -54,7 +54,7 @@ final class LiquidGolemGoals {
     private ServerLevel routeLevel;
     private Path ownedPath;
     private boolean watched, moving, gathering, emptying;
-    private boolean gotoReady, gatherReady, emptyReady, nudged;
+    private boolean gotoReady, gatherReady, emptyReady;
     private int pathCount, gatherCount;
     private BlockPos attemptSource, attemptAnchor;
     private BlockState attemptState;
@@ -132,18 +132,15 @@ final class LiquidGolemGoals {
         for (GolemMarker marker : GolemHelper.getMarkedFluidHandlersAdjacentToGolem(golem, fluid)) result.add(marker);
         return result;
     }
-    private Source nearestSource(ServerLevel server, ResourceLocation fluid) {
-        Source best = null;
-        double nearest = Double.MAX_VALUE, range = golem.getRange() * golem.getRange();
-        Set<BlockPos> seen = new HashSet<>();
-        for (GolemMarker marker : golem.getMarkers()) {
-            if (!marker.dimension().equals(server.dimension().location()) || !seen.add(marker.pos())) continue;
-            double distance = distance(marker.pos());
-            if (distance > range || distance >= nearest) continue;
-            Source candidate = sourceAt(server, marker, fluid);
-            if (candidate != null) { best = candidate; nearest = distance; }
-        }
-        return best; // Inclusive actor range, strict-nearer tie; no home radius or unmarked search.
+    /**
+     * Whether the golem stands next to a source of the fluid.
+     *
+     * <p>Oracle {@code AILiquidGather.func_75250_a}:59-83 asks the marked fluid handlers first and
+     * the marked fluid blocks second, so a marked handler alone admits the gather. The original
+     * admits the goal when either kind of source is next to the golem.</p>
+     */
+    private boolean hasAdjacentSource(ResourceLocation fluid) {
+        return fluid != null && (!nearbyHandlers(fluid).isEmpty() || !nearbySources(fluid).isEmpty());
     }
     /**
      * What the next pulse drains for a marked block that is next to the golem: the marked block itself, or with Entropy the head of its
@@ -232,16 +229,20 @@ final class LiquidGolemGoals {
             ResourceLocation candidate = firstWantedWithSource(server);
             if (candidate == null) { clearSource(); return; }
             wanted = candidate;
-            if (watched && golem.getNavigation().isDone() && !nearbySources(candidate).isEmpty()) {
+            // Oracle AILiquidGather:142-161 gathers from the marked handlers and the marked
+            // blocks next to the golem, so either kind of source ends the walk.
+            if (watched && golem.getNavigation().isDone() && hasAdjacentSource(candidate)) {
                 gatherReady = true;
                 gotoReady = false;
                 return;
             }
-            Source selected = nearestSource(server, candidate);
+            // Oracle AILiquidGoto:53-56 routes through GolemHelper.findPossibleLiquid, which
+            // searches the marked handlers first and the marked blocks second (GolemHelper:371-407).
+            BlockPos selected = GolemHelper.findPossibleLiquid(golem, candidate);
             if (selected == null) { clearSource(); return; }
-            source = selected.pos();
+            source = selected;
             watched = true;
-            if (golem.getNavigation().isDone() && !nearbySources(candidate).isEmpty()) {
+            if (golem.getNavigation().isDone() && hasAdjacentSource(candidate)) {
                 gatherReady = true;
                 gotoReady = false;
                 route = null;
@@ -323,7 +324,7 @@ final class LiquidGolemGoals {
     private final class Gather extends LiquidGoal {
         @Override public boolean canUse() {
             return gatherReady && watched && ready() && room() && golem.getNavigation().isDone()
-                    && wanted != null && !nearbySources(wanted).isEmpty();
+                    && wanted != null && hasAdjacentSource(wanted);
         }
         @Override public boolean canContinueToUse() {
             return gathering && watched && gatherCount < 20 && ready() && room() && golem.getNavigation().isDone();
@@ -334,9 +335,13 @@ final class LiquidGolemGoals {
             if (!gathering || !watched || !ready() || !room() || !golem.getNavigation().isDone() || wanted == null) { clearSource(); return; }
             if (gatherCount >= 20) { clearSource(); return; }
             if (++gatherCount < 10) return;
-            // Oracle AILiquidGather:141-160 - the marked fluid handlers come first, then the marked fluid blocks.
-            for (GolemMarker marker : nearbyHandlers(wanted)) {
-                if (!gathering || !watched || !ready() || !room()) return;
+            boolean collected = false;
+            // Oracle AILiquidGather:141-160 - every marked fluid handler next to the golem is
+            // drained, then every marked fluid block next to it (AILiquidGather:161-219). The
+            // original resets its count on each paid source instead of ending the sweep.
+            List<GolemMarker> handlers = nearbyHandlers(wanted);
+            for (GolemMarker marker : handlers) {
+                if (!gathering || !watched || !ready() || !room()) break;
                 int before = golem.getFluidAmountMb();
                 attemptHandler = marker.pos();
                 attemptHandlerFace = marker.face();
@@ -344,27 +349,29 @@ final class LiquidGolemGoals {
                 try { golem.collectMarkedHandlerFluid(marker.pos(), marker.face(), wanted, golem.fluidSpace()); }
                 finally { attemptHandler = null; attemptHandlerFace = null; attemptFluid = null; }
                 if (golem.getFluidAmountMb() != before) {
+                    collected = true;
                     gatherCount = 0;
-                    if (!room()) clearSource();
-                    return; // At most ONE source, including a paid operation whose feedback threw.
                 }
             }
-            for (Source candidate : nearbySources(wanted)) {
-                if (!gathering || !watched || !ready() || !room()) return;
-                int before = golem.getFluidAmountMb();
-                Source target = nextTarget((ServerLevel) golem.level(), candidate, wanted);
-                attemptAnchor = candidate.pos();
-                attemptSource = target.pos();
-                attemptState = target.state();
-                attemptFluid = wanted;
-                try { golem.collectMarkedSourceFluid(candidate.pos(), target.pos(), target.state()); }
-                finally { attemptSource = attemptAnchor = null; attemptState = null; attemptFluid = null; }
-                if (golem.getFluidAmountMb() != before) {
-                    gatherCount = 0;
-                    if (!room()) clearSource();
-                    return; // At most ONE source, including a paid operation whose feedback threw.
+            if (gathering && watched && ready() && room()) {
+                List<Source> sources = nearbySources(wanted);
+                for (Source candidate : sources) {
+                    if (!gathering || !watched || !ready() || !room()) break;
+                    int before = golem.getFluidAmountMb();
+                    Source target = nextTarget((ServerLevel) golem.level(), candidate, wanted);
+                    attemptAnchor = candidate.pos();
+                    attemptSource = target.pos();
+                    attemptState = target.state();
+                    attemptFluid = wanted;
+                    try { golem.collectMarkedSourceFluid(candidate.pos(), target.pos(), target.state()); }
+                    finally { attemptSource = attemptAnchor = null; attemptState = null; attemptFluid = null; }
+                    if (golem.getFluidAmountMb() != before) {
+                        collected = true;
+                        gatherCount = 0;
+                    }
                 }
             }
+            if (collected && !room()) clearSource(); // Oracle AILiquidGather:156-158/197-199 drops the watched item when the cargo is full.
         }
         @Override public void stop() { clearSource(); }
     }
@@ -377,7 +384,6 @@ final class LiquidGolemGoals {
             gotoReady = false;
             moving = true;
             origin = golem.blockPosition();
-            nudged = false;
             pathCount = 200;
             if (!move(route)) clearSource();
         }
@@ -393,8 +399,9 @@ final class LiquidGolemGoals {
         @Override public void tick() {
             if (!moving || !ready() || !room()) { clearSource(); return; }
             if (--pathCount > 0) return;
-            if (!nudged && origin != null && origin.equals(golem.blockPosition()) && golem.loadedNavigationArea(golem.blockPosition())) {
-                nudged = true;
+            // Oracle AILiquidGoto:84-92 - the random detour of 2 and 1 is retried every 20
+            // ticks while the golem still stands in the block it started the route in.
+            if (origin != null && origin.equals(golem.blockPosition()) && golem.loadedNavigationArea(golem.blockPosition())) {
                 Vec3 nudge = DefaultRandomPos.getPos(golem, 2, 1);
                 if (nudge != null && move(BlockPos.containing(nudge))) { pathCount = 20; return; }
             }
@@ -405,7 +412,7 @@ final class LiquidGolemGoals {
             moving = gotoReady = false;
             route = null;
             pathCount = 0;
-            if (!ready() || !room() || !golem.getNavigation().isDone() || nearbySources(wanted).isEmpty()) watched = false;
+            if (!ready() || !room() || !golem.getNavigation().isDone() || !hasAdjacentSource(wanted)) watched = false;
         }
     }
 }

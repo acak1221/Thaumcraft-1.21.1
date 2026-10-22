@@ -15,8 +15,9 @@ import thaumcraft.common.tiles.TileCrucible;
  * {@code IFluidHandler} with a tank of one thousand millibuckets. It accepts water only, it never takes
  * more than the free space of the tank and it never gives away more than it holds. The fill answers
  * with the amount the tank accepted, so an overflow is partly taken and partly refused. The drain of a
- * named fluid refuses a stack that is not exactly the content of the tank, because the Forge
- * comparison of 1.7.10 compares the amounts as well.</p>
+ * named fluid refuses a resource that is not the content of the tank; the Forge comparison of 1.7.10
+ * ({@code FluidStack.isFluidEqual}) compares the fluid and its tag only, never the amounts, so a
+ * one-millibucket request drains one millibucket of a full tank.</p>
  */
 class CrucibleFluidTankParityTest {
     @Test void theTankHoldsOneThousandMillibuckets() {
@@ -44,6 +45,20 @@ class CrucibleFluidTankParityTest {
         assertEquals(1000, TileCrucible.drained(1000, 1000));
         assertEquals(0, TileCrucible.drained(0, 1000));
         assertEquals(0, TileCrucible.drained(500, -5));
+    }
+
+    @Test void aNamedDrainIgnoresTheRequestedAmount() {
+        // Oracle TileCrucible:384-393 - drain(resource) only asks isFluidEqual(tank.getFluid());
+        // the 1.7.10 comparison is the fluid identity and its tag, never the amount. The
+        // Decanting golem probes with one millibucket, so a full tank must answer one.
+        assertEquals(1, TileCrucible.drainedOf(Fluids.WATER, Fluids.WATER, 1000, 1));
+        assertEquals(1000, TileCrucible.drainedOf(Fluids.WATER, Fluids.WATER, 1000, 1000));
+        assertEquals(1000, TileCrucible.drainedOf(Fluids.WATER, Fluids.WATER, 1000, 5000));
+        assertEquals(250, TileCrucible.drainedOf(Fluids.WATER, Fluids.WATER, 250, 1000));
+        // A different fluid, the empty request and an empty tank all refuse the drain.
+        assertEquals(0, TileCrucible.drainedOf(Fluids.LAVA, Fluids.WATER, 1000, 1));
+        assertEquals(0, TileCrucible.drainedOf(null, Fluids.WATER, 1000, 1));
+        assertEquals(0, TileCrucible.drainedOf(Fluids.WATER, Fluids.WATER, 0, 1));
     }
 
     @Test void onlyWaterFillsTheTank() {

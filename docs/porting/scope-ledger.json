@@ -29304,18 +29304,20 @@
       },
       "review": {
         "disposition": "replace",
-        "source_semantics": "adapted",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w6fluids",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:51-67 the scan of the column of the alchemy furnace, a gap does not stop it",
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java the gathering out of the alembic of the greatest amount",
-          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:98 the native skips a level and continues the scan",
-          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:68-77 the home itself may be ANY marked essentia transport with stock"
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:56-67 the source branch: the home cell as ANY IEssentiaTransport, otherwise the alembic column cY+5..cY+0 with no break for a gap",
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:60 the jar and the reservoir need no canOutputTo side test; every other transport must output to the home facing",
+          "oracle thaumcraft/common/entities/ai/fluid/AIEssentiaGather.java:94-118 the payment face (UP for the alembic, the reservoir's own facing, the home facing otherwise), the aspect fallback to the UNKNOWN query and min(stock, carry limit - carried)",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:84-101 transportSource with EssentiaSourceRules, the closed takeEssentia payment profile",
+          "native common/src/main/java/thaumcraft/common/entities/golems/AlchemyGolemGoals.java:103-141 findSource: the reservoir, the alembic home cell, any other IEssentiaTransport, then the column scan of ANY non-transport home tile (the former TileAlchemyFurnace class gate is gone)"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the source set. The original accepts ANY IEssentiaTransport at the home (oracle AIEssentiaGather:68-77: a jar, a reservoir or any other transport that can output to the home facing and holds the aspect), while the native still gathers out of a marked jar, a marked reservoir or an alembic of the column. The destination set of the empty goal was widened in this wave, the source set was not: it needs a matching closed payment profile for takeEssentia on a generic transport, in the same shape as EssentiaTransfers.deliverTransport."
+          "The source set is the original's: the home cell as any IEssentiaTransport (jar and reservoir without a side test, every other transport through canOutputTo) or an alembic of the cY+0..cY+5 column of a home that is no transport. The native adds the mayUseAlchemyPosition/alchemyReady permission guards; a refused level stops the ascending scan, while the original's descending scan only skips it.",
+          "The original sets essentia = null when takeEssentia pays nothing (AIEssentiaGather:118-121), which can corrupt a loaded cargo. The native keeps the cargo: a zero payment never mutates it."
         ],
         "reviewed_sha256": {
           "original": "d6947b7c497d5f5a961a7cfade327aecb65d8a50160c2530ef5b99553a9d3d27",
@@ -29403,17 +29405,22 @@
       },
       "review": {
         "disposition": "replace",
-        "source_semantics": "adapted",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w6fluids",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java:43-57 the goal needs the fluid, an idle navigator and the squared distance of five to the home",
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java:63-84 the fill of the home with the fluid of the golem and the sound above 200 millibuckets",
-          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:212-227 the native empty goal of the Decanting golem"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java:43-57 a cargo, an idle navigator, the squared distance of five to the home and the carried fluid in getMissingLiquids",
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidEmpty.java:63-84 fill the home with the carried fluid, debit exactly what it accepted and sound only above 200 mB with volume min(0.2, 0.2*amount/limit)",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:341-369 the home is any IFluidHandler and the missing set is what that handler can fill",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:259-281 canEmpty and the non-committing homeHasRoom probe",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:1972-1994 deliverFluidToHome fills first and debits the cargo after, with the original's 200 mB sound gate",
+          "native common/src/main/java/thaumcraft/common/lib/fluid/GolemFluidAccess.java:55-112 the home is any registered fluid handler; the Fabric (FluidStorage.SIDED) and NeoForge (Capabilities.FluidHandler.BLOCK) modules register the views"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the fluid set. The original fills ANY fluid handler that is the home of the golem (oracle GolemHelper:341-369 asks the home's IFluidHandler for the fluids it can take) and the cargo is a FluidStack, while the native cargo is a single water volume in millibuckets (GolemWaterCargo) and the home is the attached crucible. The blocker is unchanged: the 1.21.1 common module has no loader independent fluid handler API. NOTE the original's own crucible is water only (oracle TileCrucible:fill refuses every fluid but water and canFill answers only for water), so the observable fluid set of a crucible home is {water} in both."
+          "The cargo is a ResourceLocation plus millibuckets (EntityGolemBase CARGO_FLUID/CARGO_MB), the 1.21.1 equivalent of the original FluidStack. A crucible home is water only in both, because TileCrucible.fillWater refuses every fluid but water.",
+          "Deviation: homeHasRoom probes a non-committing fill of one millibucket. The original only enters the empty goal when getMissingLiquids is non-empty, so a full cargo and a full home would never re-enter the gather driver and the Decanting core would stall; the probe is the same question the original asks a handler.",
+          "Deviation: mayInteract/mayUseAlchemyPosition guards the original expresses only through the home distance and the navigator."
         ],
         "reviewed_sha256": {
           "original": "beacdb3fcc2ad25f371e92cb0b0903d0575d779562e87804db066757783c1b81",
@@ -29451,17 +29458,23 @@
       },
       "review": {
         "disposition": "replace",
-        "source_semantics": "adapted",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w6fluids",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:59-83 the marked fluid handler of ANY fluid and the marked fluid block of any fluid, with a water and lava fall back",
-          "oracle thaumcraft/common/entities/golems/GolemHelper.java:371-446 the possible liquid of the golem",
-          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:74-103 the native source water only"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:59-83 the admission: every wanted fluid, the marked handlers adjacent to the golem first and the marked blocks second",
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:141-160 every adjacent marked handler of the fluid is drained in one pulse and the count is reset by each paid source",
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:161-219 every adjacent marked block anchor is drained in the same pulse, with the Entropy queue head as the target and the 1000 mB water/lava fallback",
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGather.java:223-243 the Entropy queue is rebuilt from the anchor, sorted by decreasing distance",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:112-170 hasAdjacentSource, the marked sources and the Entropy queue",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:324-377 the sweep of every adjacent handler and then every adjacent block anchor, count reset per paid source",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemHelper.java:336-366 the marked handler and marked block searches of the original"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the fluid set. The original gathers out of a marked IFluidHandler of the wanted fluid (oracle GolemHelper:420-429) or a marked fluid block of it; the native gathers out of a marked source water block alone and its filter accepts a pristine water bucket alone (GolemData.isSupportedWaterFilter). The blocker is the missing loader independent fluid handler API in the common module: the source set, the wanted fluid and the cargo would all have to become fluid generic at once."
+          "The native sweep collects the single wanted fluid, which is the fluid of a loaded cargo (GolemFluidRules.carriedAccepts); the original iterates every missing fluid and can mix two fluids into one FluidStack when the cargo starts empty. The native never mixes fluids and never drops a paid amount.",
+          "Deviation: room() >= 1000 bounds every drain. The original measures camt once per pulse, so a handler may overfill past getFluidCarryLimit(); the native keeps the same limit but never crosses it.",
+          "Marked cells whose tile is an IInventory are skipped by the original's getMarkedBlocksAdjacentToGolem; a 1.21.1 fluid source state that the native accepts as a block is air/water and holds no inventory, so the sets coincide."
         ],
         "reviewed_sha256": {
           "original": "aa9921f7a9bbf80d27147b97d2d9e0553acdce388b587f1a20adc7968cc627ec",
@@ -29499,17 +29512,22 @@
       },
       "review": {
         "disposition": "replace",
-        "source_semantics": "adapted",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w6fluids",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:49-74 the goal needs the five tick cadence and a fluid below the carry limit, the target of the fluid and the search of the ground around it",
-          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:76-100 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:259-298 the native route of the Decanting golem"
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:49-74 the five tick cadence, the off-by-one carry gate (amount > limit - 1000), the first wanted fluid that findPossibleLiquid finds and the solid approach cell at the same Y",
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:84-92 the random detour of 2 and 1 with a budget of 20, retried while the golem stands in the block it started in",
+          "oracle thaumcraft/common/entities/ai/fluid/AILiquidGoto.java:94-100 the budget of 200 ticks",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:371-407 findPossibleLiquid: marked handlers first over the whole golem range, marked blocks only when no handler is found",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:205-210 the first wanted fluid with a source",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:239-253 the route target is GolemHelper.findPossibleLiquid, not a water block",
+          "native common/src/main/java/thaumcraft/common/entities/golems/LiquidGolemGoals.java:399-408 the detour is retried every 20 ticks while the origin block is unchanged"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the route of the native is a water route; the original routes to any fluid that the world offers (the wanted fluids are the fluids the home accepts). The numbers of the route, the five tick cadence, the budget of 200 and the detour of 2 and 1, are the original's. The blocker is the same missing loader independent fluid handler API."
+          "The route target can now be a marked fluid handler at any distance inside the golem range, exactly as the original's handler-first search; the native's former block-only search could not route to a distant handler.",
+          "The 1.21.1 common module has no Forge FluidStack: the wanted liquid is a ResourceLocation and the cargo a fluid id plus millibuckets. The loader views convert at the border (Fabric FluidStorage counts 81000 droplets per bucket), so the original's integer millibucket arithmetic is preserved in the shared code."
         ],
         "reviewed_sha256": {
           "original": "fe5ba292a21a208694387d00523e04eff52e48b2802c818bde3ce6c9e5ea2729",
@@ -30972,22 +30990,27 @@
       },
       "review": {
         "disposition": "replace",
-        "source_semantics": "adapted",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w6fluids",
         "evidence": [
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:265-351 the goal list of the original with its numbers",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:246-264 the health and the damage of the golem",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:355-384 the carry limit, the fluid limit and the speed",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:1088-1100 the armour with the cap of 20",
           "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:801-900 the original goal numbers in one place",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:1737-2009 the fluid cargo (fluid id + millibuckets), the home preflight, the marked handler/source collects and the home delivery",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:1995-2025 the fluid feedback keeps the sound mode before the reset; the original's 200 mB gate and volume of AILiquidEmpty:77-79 and AILiquidGather:152-154 are applied to the accepted amount",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:1892-1970 the marked handler collect with the original's 200 mB sound gate and the source collect that adds exactly 1000 mB",
           "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2103-2125 the marked containers of the original, the range of the golem and not of the home",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java toggleUseOption the three switches of the Use core (the original's toggles 0, 1 and 2)"
+          "native common/src/main/java/thaumcraft/common/lib/fluid/GolemFluidRules.java:28-54 the registered-liquid, carried-fluid and filter rules of GolemHelper:331-363"
         ],
         "notes": [
           "Fixed in this wave: the native added the distance of the home to the bound of a marked container, which is no bound of the original (oracle GolemHelper.getMarkedContainers:54-64 has no range at all; the range of the original is the golem's own).",
-          "REMAINING DIFFERENCE: the fluid set of the Decanting golem and the Use core's own rules. The Use core now uses any item on any marked cell with its three switches (see the AIUseItem row). The fluid set still needs the loader independent fluid handler API and the fluid generic cargo of the whole Decanting subsystem."
+          "Fixed in this wave: the fluid searches and the fluid-generic cargo. getReggedLiquids drops the empty and flowing registry entries, getMissingLiquids compares the fluid of the filter container (a water bucket no longer admits lava) and the marked handler collect uses the same closed payment profile as the loader views.",
+          "Deviations: the cargo never mixes fluids or drops an aspect on a zero take; room() >= 1000 bounds a drain; mayInteract/mayUseAlchemyPosition guard the home and the source. The original's fluid overflow and its cargo-corrupting zero take are defects, not behaviour to reproduce.",
+          "Fixed in this wave: finishFluidWork zeroed fluidSoundMode before reading it, so no Decanting sound ever played. The mode is now captured first, and the original's gates play the neutral swim sound for a block drain (volume .2), for a handler drain above 200 mB (volume .2*amount/limit) and for a home delivery above 200 mB (volume min(.2, .2*amount/limit))."
         ],
         "reviewed_sha256": {
           "original": "0446c56bc884499b9663bb6cf579abfd8d5be0c9f6277323215cd29b255c5d4b",
@@ -31186,18 +31209,24 @@
       },
       "review": {
         "disposition": "replace",
-        "source_semantics": "adapted",
+        "source_semantics": "equivalent",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w6fluids",
         "evidence": [
-          "oracle thaumcraft/common/entities/golems/GolemHelper.java:1-721 the helper of the original: the marked containers, the marked blocks, the marked sides, the missing items, the missing liquids, the jar with room and the searches of the cores",
-          "native common/src/main/java/thaumcraft/common/entities/golems/GolemHomeInventory.java the native home and marker inventories",
-          "native common/src/main/java/thaumcraft/common/items/golems/GolemMarker.java the native marker",
-          "native common/src/main/java/thaumcraft/common/lib/golems/GolemRouteRules.java the pure rules of the routes"
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:331-339 getReggedLiquids over FluidRegistry.getRegisteredFluidIDs()",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:341-369 getMissingLiquids: any IFluidHandler home, the carried-fluid filter and the isFluidEqual filter-container test",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:371-407 findPossibleLiquid: handlers first, blocks second, the golem range and the nearer tie",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:409-429 the adjacent and whole-range marked fluid handler searches, each a non-committing drain of one millibucket",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:431-446 the marked fluid block search: a source fluid block of the wanted fluid",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemHelper.java:286-400 the six fluid searches with the original names",
+          "native common/src/main/java/thaumcraft/common/lib/fluid/GolemFluidRules.java:28-54 registrable (still fluid only), carriedAccepts and filterAccepts",
+          "native common/src/main/java/thaumcraft/common/lib/fluid/GolemFluidAccess.java:55-112 the loader-independent handler and the crucible view; both loaders register a provider",
+          "1.21.1 net.minecraft.world.level.material.EmptyFluid:18,38 and WaterFluid:42 with WaterFluid$Flowing:139 the registry holds the empty and flowing entries and both water entries share minecraft:water_bucket; Fluid#defaultFluidState().isSource() is the still-fluid discriminator that 1.7.10 did not need"
         ],
         "notes": [
-          "REMAINING DIFFERENCE: the fluid half. The searches of the item and container half are one entry point again and the essentia half of the jar search now admits every marked essentia transport (see the AIEssentiaEmpty row). The missing liquids, the possible liquid and the marked fluid handlers (oracle :331-446) still have no native counterpart, because the common module has no loader independent fluid handler API."
+          "The whole fluid half of the original now has a native counterpart with the original's names: getReggedLiquids, getMissingLiquids, getMarkedFluidHandlers, getMarkedFluidHandlersAdjacentToGolem, getMarkedFluidBlocks and findPossibleLiquid. The searches ask the loader-independent GolemFluidAccess, which Fabric and NeoForge answer with their own transfer API.",
+          "Fixed in this wave: getReggedLiquids no longer returns minecraft:empty, minecraft:flowing_water or minecraft:flowing_lava; getMissingLiquids compares the fluid of the filter container instead of only asking whether the filter is filled; a water bucket now answers minecraft:water and not minecraft:flowing_water."
         ],
         "reviewed_sha256": {
           "original": "0c40d3001f240c8fa46db123d795664dc1808393e11230d7e11eda423d4047dc",

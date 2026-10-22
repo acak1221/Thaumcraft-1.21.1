@@ -189,7 +189,11 @@ public final class ContainerResearchTable extends AbstractContainerMenu {
         sentRevision = revision;
     }
 
-    @Override public boolean stillValid(Player player) { return tile == null || tile.stillValid(player); }
+    @Override public boolean stillValid(Player player) {
+        // Custom edit/combine intents bypass vanilla's spectator click rejection.
+        return player == viewer && player.isAlive() && !player.isSpectator()
+                && (tile == null || tile.stillValid(player));
+    }
 
     @Override public boolean clickMenuButton(Player player, int button) {
         // Original button1 is a no-op; button5 belongs to R10 validation/copy.

@@ -28,8 +28,10 @@ public abstract class BoneBowHeldPoseMixin {
             // Old renderItemIn2D occupies x/y 0..1 and z -1/16..0. Native generated
             // quads are centred by ItemRenderer, so restore the old icon origin.
             pose.translate(.5F, .5F, -.03125F);
+            try (var glint = thaumcraft.client.renderers.item.BoneBowGlint.buffers(pose)) {
             Minecraft.getInstance().getItemRenderer().renderStatic(entity, stack, ItemDisplayContext.NONE,
-                    false, pose, buffers, entity.level(), light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, entity.getId());
+                    false, pose, glint.source(), entity.level(), light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, entity.getId());
+            }
         } finally { pose.popPose(); }
         ci.cancel();
     }

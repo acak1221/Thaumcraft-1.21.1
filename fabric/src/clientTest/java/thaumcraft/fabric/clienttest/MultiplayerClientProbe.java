@@ -1152,9 +1152,9 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         }
         if (stageData.get("summoned") == null) {
             // The original wisp only looks for a player once in a thousand
-            // ticks, so three of them make the zap reachable.
+            // ticks, so eight of them make the zap reachable.
             BlockPos pos = client.player.blockPosition().offset(2, 1, 0);
-            for (int index = 0; index < 3; index++) {
+            for (int index = 0; index < 8; index++) {
                 client.getConnection().sendCommand("summon thaumcraft:wisp " + (pos.getX() + index) + " " + pos.getY()
                         + " " + pos.getZ());
             }
@@ -1265,18 +1265,22 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         // The original's vis amulet may only be worn with the VISAMULET
         // research (ItemAmuletVis.canEquip), so the SECOND client is granted
         // it before it equips the amulet.
-        if (stageTicks % 20 == 0) {
-            client.getConnection().sendCommand("thaumcraft research " + peerName + " " + AMULET_RESEARCH);
-            pairCommand("HAS_RESEARCH", AMULET_RESEARCH);
-        }
-        if (!pairReplied()) return false;
-        if (!pairAnswer.endsWith(" 1")) {
-            if (stageTicks > 600) {
-                throw new IllegalStateException("The second client never received the " + AMULET_RESEARCH + " research");
+        if (!Boolean.TRUE.equals(stageData.get("research_done"))) {
+            if (stageTicks % 20 == 0) {
+                client.getConnection().sendCommand("thaumcraft research " + peerName + " " + AMULET_RESEARCH);
+                pairCommand("HAS_RESEARCH", AMULET_RESEARCH);
             }
+            if (!pairReplied()) return false;
+            if (!pairAnswer.endsWith(" 1")) {
+                if (stageTicks > 600) {
+                    throw new IllegalStateException("The second client never received the " + AMULET_RESEARCH + " research");
+                }
+                return false;
+            }
+            evidence.put("pair_peer_amulet_research_answer", pairAnswer);
+            stageData.put("research_done", true);
             return false;
         }
-        evidence.put("pair_peer_amulet_research_answer", pairAnswer);
         if (stageData.get("give") == null) {
             if (!giveToPeer(client, "thaumcraft:vis_amulet 1")) return false;
             stageData.put("give", true);

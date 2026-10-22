@@ -154,7 +154,42 @@ The port already had that art, it was only the **expectation of the test** that 
   counters are the ones of the file;
 * `python3 scripts/porting/check_scope_ledger_reviews.py` → `invalid_reviews: 0`,
   `stale_review_fingerprints: 0`, `counts_match: true`;
-* `./gradlew :common:test` → see the final message of this lane (the whole suite, 0 failures).
+* `./gradlew :common:test` → **2237 tests, 0 failures, 0 errors, 0 skipped** (337 test classes),
+  run with the private Gradle home `.gradle-lev` of this lane and a 1 GB daemon.
+
+## Three failures of the base that were in the way of a green suite
+
+The base commit of this lane (`5c596570`) was **not** green: three tests of two other lanes
+failed. All three were **wrong expectations of the tests**, the port already matched the
+original in all three cases; I corrected the tests (the port code is untouched).
+
+1. `JarRendererParityTest.theBrainBobsWithTheOriginalSine` — the test demanded that the bob of
+   the brain stays between 0.03 and 0.06. The original computes
+   `MathHelper.sin(ticks / 14) * 0.03 + 0.03` (oracle
+   `thaumcraft/client/renderers/tile/TileJarRenderer.java:157`) and the sine of the tick divided
+   by fourteen is **negative** between the ticks 44 and 88, so the bob of the original leaves 0.03
+   and is 0 at the tick 66. The port uses `Mth.sin`, and the sine of 1.7.10 is the *same* table:
+   the bytecode of the 1.7.10 client (`net/minecraft/util/MathHelper`, the method that reads
+   `SIN[(int)(value * 10430.378F) & 65535]`) is the table of 65536 values of the 1.21.1
+   `Mth.sin`. The test now pins the formula of the original and the interval the original can
+   really reach.
+2. `JarRendererParityTest.theBrainTurnWrapsTheDifferenceIntoOneCircle` — the test demanded
+   `turn(1, 1, 0.5) == 0`. The original wraps the *difference* of the two angles and adds it to
+   the second angle (oracle `TileJarRenderer.java:160-165`), so two equal angles turn to the
+   angle itself: `1.0`. The port computes exactly that; the test now expects 1.0.
+3. `ArcaneFurnaceFormationTest.theShellOfTheOriginalIsNetherBricksObsidianLavaAndAir` — the
+   test asserted the empty middle of the top layer for **every** layer of the shell and, in the
+   same loop, the lava of the middle layer and the obsidian of the bottom layer: it contradicted
+   itself. The blueprint of the original (oracle
+   `thaumcraft/common/items/wands/WandManager.java:351-356`) has the air in the middle of the top
+   layer, the lava in the middle of the middle layer and the obsidian in the middle of the bottom
+   layer; the port keeps that blueprint
+   (`common/src/main/java/thaumcraft/common/lib/ArcaneFurnaceFormation.java:99-108`). The test
+   now says the three middles one by one and keeps the corners and the edges of every layer.
+
+The ledger needed no change for these three: the behaviour of the port did not move, only the
+wrong expectations of the tests did.
+
 
 ## What I could not settle
 

@@ -3,6 +3,7 @@ package thaumcraft.fabric.client;
 import java.util.List;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -25,7 +26,7 @@ public record FabricPositionBlockModels(BakedModel base) implements BakedModel, 
                     || !context.topLevelId().id().getNamespace().equals("thaumcraft")
                     || context.topLevelId().variant().equals("inventory")) return model;
             String path = context.topLevelId().id().getPath();
-            if (path.equals("tallow_candle") || path.startsWith("tallow_candle_")
+            if (path.equals("tallow_candle") || path.endsWith("_tallow_candle")
                     || path.equals("eldritch_crust") || path.equals("eldritch_deco")) {
                 return new FabricPositionBlockModels(model);
             }
@@ -37,8 +38,11 @@ public record FabricPositionBlockModels(BakedModel base) implements BakedModel, 
             Supplier<RandomSource> random, RenderContext context) {
         var model = PositionBlockModels.worldModel(world,pos,state,base);
         var emitter = context.getEmitter();
+        var renderer = java.util.Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer());
+        var shaded = renderer.materialFinder().ambientOcclusion(net.fabricmc.fabric.api.util.TriState.FALSE).find();
+        var flat = renderer.materialFinder().ambientOcclusion(net.fabricmc.fabric.api.util.TriState.FALSE).disableDiffuse(true).find();
         for (BakedQuad quad : model.getQuads(state,null,random.get())) {
-            emitter.fromVanilla(quad,null).cullFace(null).emit();
+            emitter.fromVanilla(quad,quad.isShade() ? shaded : flat,null).emit();
         }
     }
     @Override public List<BakedQuad> getQuads(BlockState state,Direction face,RandomSource random) { return base.getQuads(state,face,random); }

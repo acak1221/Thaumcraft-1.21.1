@@ -145,12 +145,12 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         Property<?> pending = thaumcraft.common.lib.world.FamilyVariant.pending().get();
         if (pending != null) builder.add(pending);
-        // Only the crust group carries the six neighbour flags; the classifier decides by group.
+        // State definitions run during super(), before this.group has been assigned.
         Integer pendingGroup = PENDING_GROUP.get();
         if (pendingGroup != null && hostsCrustMask(pendingGroup)) builder.add(CRUST_NEIGHBOR_MASK);
     }
 
-    /** Whether this group is the eldritch crust, the only group the neighbour mask is baked for. */
+    /** Original metadata 4, 5 AND 6 all share the neighbour-dependent inset. */
     private static boolean hostsCrustMask(int group) {
         return EldritchBlockRules.eldritchGroupVariants(group).stream().anyMatch(v -> v == 4 || v == 5 || v == 6);
     }
@@ -168,7 +168,7 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
             BlockPos neighbour = pos.relative(face);
             // Block.isBlockSolid: the neighbour counts when its material is solid, which is what
             // the original passed to the renderer.
-            if (level.getBlockState(neighbour).isSolid()) {
+            if (BlockFluidPure.legacySolid(level.getBlockState(neighbour))) {
                 mask |= 1 << face.get3DDataValue();
             }
         }

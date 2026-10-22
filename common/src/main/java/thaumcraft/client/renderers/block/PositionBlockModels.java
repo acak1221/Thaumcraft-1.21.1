@@ -33,11 +33,11 @@ public final class PositionBlockModels {
         if (state.hasProperty(BlockEldritch.CRUST_NEIGHBOR_MASK)) {
             // Also sample here: worldgen/setBlock placement does not call getStateForPlacement.
             int mask = BlockEldritch.crustMask(world, pos);
-            float[] b = EldritchCrustBakedModel.bounds(mask);
-            box(quads, b, base.getParticleIcon(), -1, false);
+            quads.addAll(EldritchCrustBakedModel.worldQuads(
+                    state.setValue(BlockEldritch.CRUST_NEIGHBOR_MASK,mask),base.getParticleIcon()));
         } else {
             var candle = CandleDripRules.candle(pos.getX(), pos.getY(), pos.getZ());
-            int tint = state.getBlock() instanceof BlockColoredTallowCandle ? 0 : -1;
+            int tint = 0;
             var sprite = base.getParticleIcon();
             box(quads, candle.body(), sprite, tint);
             for (var drip : candle.drips()) box(quads, drip, sprite, tint);
@@ -55,7 +55,7 @@ public final class PositionBlockModels {
                 b.maxX()*16, b.maxY()*16, b.maxZ()*16}, sprite, tint, true);
     }
 
-    private static void box(List<BakedQuad> out, float[] b, TextureAtlasSprite sprite, int tint, boolean shade) {
+    static void box(List<BakedQuad> out, float[] b, TextureAtlasSprite sprite, int tint, boolean shade) {
         Vector3f from = new Vector3f(b[0], b[1], b[2]), to = new Vector3f(b[3], b[4], b[5]);
         for (Direction face : Direction.values()) {
             // RenderBlocks' world-aligned UVs, not a full texture stretched over every drip.

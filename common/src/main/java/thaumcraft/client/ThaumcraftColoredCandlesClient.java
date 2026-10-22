@@ -10,6 +10,8 @@ public final class ThaumcraftColoredCandlesClient {
     private ThaumcraftColoredCandlesClient() {}
     public static void init() {
         if(initialized)return;initialized=true;
+        ColorHandlerRegistry.registerBlockColors((state,world,pos,tint)->tint==0?ThaumcraftColoredCandles.color(0):-1,
+                thaumcraft.common.config.ThaumcraftInfusion.TALLOW_CANDLE);
         for(int i=0;i<ThaumcraftColoredCandles.COLORED_ITEMS.size();i++) {
             int color=ThaumcraftColoredCandles.color(i+1);var block=ThaumcraftColoredCandles.COLORED_BLOCKS.get(i);var item=ThaumcraftColoredCandles.COLORED_ITEMS.get(i);
             RenderTypeRegistry.register(RenderType.cutout(),block.get());

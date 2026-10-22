@@ -43,6 +43,11 @@ class ConfigDeclarationAuditTest {
                 parsers.append(Files.readString(file).replaceAll("(?s)/\\*.*?\\*/|//[^\\n]*", ""));
             }
         }
+        parsers.append(Files.readString(Path.of("src/main/java/thaumcraft/common/lib/runic/RunicSettings.java")));
+        parsers.append(Files.readString(Path.of("src/main/java/thaumcraft/client/lib/PlayerNotifications.java")));
+        for (String key : DEFAULTS.keySet()) {
+            assertTrue(parsers.toString().contains("\"" + key + "\""), "no runtime reader: " + key);
+        }
         Set<String> keys = new HashSet<>();
         for (var entry : ThaumcraftConfigStore.ENTRIES) {
             assertTrue(keys.add(entry.key()), "duplicate key " + entry.key());

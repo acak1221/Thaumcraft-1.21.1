@@ -58,6 +58,11 @@ public final class ClientSetup {
         thaumcraft.common.lib.network.BlockSparkleFxNetworking.initClient(thaumcraft.client.fx.BlockSparkleClientEffects::accept);
         // The rune particles of the original thaumometer scan (oracle ItemThaumometer:92,103,128).
         thaumcraft.common.lib.network.ScanRuneFxNetworking.initClient(thaumcraft.client.fx.ScanRuneClientEffects::accept);
+        // The original essence flow packet of the public essentia source API: the trail
+        // between the source and the consumer (oracle PacketFXEssentiaSource:64-78 and
+        // ClientTickEventsFML:249-269).
+        thaumcraft.common.lib.network.EssentiaFlowFxNetworking.initClient(thaumcraft.client.fx.EssentiaFlowClientEffects::accept);
+        thaumcraft.client.fx.EssentiaFlowClientEffects.init();
         // The original EventHandlerNetwork.clientLogsOut restores the client's own state when the connection
         // ends (oracle thaumcraft/common/lib/network/EventHandlerNetwork.java:69-81). The common layer owns
         // that restore, so every loader behaves like the original.
@@ -137,6 +142,9 @@ public final class ClientSetup {
         ThaumcraftWarpClient.init();
         ItemWispEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         ItemJar.setTooltipViewer(() -> Minecraft.getInstance().player);
+        // Original ItemJarNode:81-98 - the tooltip of the node jar names the node
+        // type, the node modifier and the aspects of the stored node.
+        thaumcraft.common.blocks.ItemJarNode.setTooltipViewer(() -> Minecraft.getInstance().player);
         thaumcraft.common.items.ItemCrystalEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftInfusion.TALLOW_CANDLE.get());
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftGrate.ITEM_GRATE.get());

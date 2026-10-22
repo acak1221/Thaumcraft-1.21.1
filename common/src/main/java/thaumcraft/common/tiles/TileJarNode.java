@@ -30,6 +30,28 @@ import thaumcraft.api.nodes.NodeType;
  * aspects may never grow past the stored base of the node.
  */
 public final class TileJarNode extends BlockEntity implements IWandable, IAspectContainer {
+    /**
+     * The client event of the original that starts the one second animation of a node jar.
+     *
+     * <p>Oracle {@code thaumcraft/common/tiles/TileJarNode.java:204-219}: the event nine is the client
+     * half of the block event that the original wand ritual sends when it traps a node in a jar. The
+     * client answers it with a burst of block sparkles over the whole jar and with the one second
+     * animation timer.</p>
+     */
+    public static final int ANIMATE_EVENT = 9;
+    /** The particle count of one block sparkle of the original burst. */
+    public static final int SPARKLE_COUNT = 5;
+    /**
+     * The volume of the original burst of block sparkles.
+     *
+     * <p>Oracle {@code thaumcraft/common/tiles/TileJarNode.java:206-213}: the burst runs over three
+     * blocks in X, four in Y and three in Z around the jar, so thirty six sparkles.</p>
+     */
+    public static final int SPARKLE_X = 3, SPARKLE_Y = 4, SPARKLE_Z = 3;
+    /** The number of block sparkles of the original burst. */
+    public static int sparkleCount() { return SPARKLE_X * SPARKLE_Y * SPARKLE_Z; }
+    /** The lifetime of the animation of the original, in milliseconds. */
+    public static final long ANIMATE_MILLIS = 1000L;
     private final AspectList aspects = new AspectList();
     private final AspectList aspectsBase = new AspectList();
     private NodeType nodeType = NodeType.NORMAL;
@@ -37,6 +59,13 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
     private String id = "";
     public long animate = 0L;
     public boolean drop = true;
+
+    /** The client only effects of the node jar, installed by the client of the port. */
+    public interface ClientEffects {
+        void nodeJarEvent(Level level, BlockPos pos, int event, int data);
+    }
+    private static ClientEffects clientEffects;
+    public static void setClientEffects(ClientEffects effects) { clientEffects = effects; }
 
     public TileJarNode(BlockPos pos, BlockState state) {
         super(ThaumcraftEldritchBlocks.JAR_NODE_TILE.get(), pos, state);
@@ -151,6 +180,27 @@ public final class TileJarNode extends BlockEntity implements IWandable, IAspect
 
     /** Original TileJarNode:251-253 - the jar does not react to a stopped wand. */
     @Override public void onWandStoppedUsing(ItemStack stack, Level level, Player player, int ticks) {}
+
+    /**
+     * Original TileJarNode:204-219 - the client event nine of the original: the burst of block
+     * sparkles over the jar and the one second animation timer.
+     *
+     * <p>The original growth itself is dead code: oracle
+     * {@code thaumcraft/client/renderers/tile/TileJarRenderer.java:107-115} applies
+     * {@code GL11.glScalef(size, size, size)} <em>after</em> every draw call of that renderer and pops
+     * the matrix immediately, so the scale never reaches a single vertex. The native tree therefore
+     * keeps the timer of the original and does not grow the node.</p>
+     */
+    @Override public boolean triggerEvent(int id, int data) {
+        if (id == ANIMATE_EVENT) {
+            if (level != null && level.isClientSide) {
+                animate = System.currentTimeMillis() + ANIMATE_MILLIS;
+                if (clientEffects != null) clientEffects.nodeJarEvent(level, worldPosition, id, data);
+            }
+            return true;
+        }
+        return super.triggerEvent(id, data);
+    }
 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);

@@ -42,6 +42,8 @@ public final class ThaumcraftNeoForge {
         // native break event already cancelled for.
         NeoForgeSharedBreakEvent.init();
         NeoForgeSpaStorage.init(bus);
+        // Original TileCrucible:373-410 - the water tank of the crucible that other mods may read and fill.
+        NeoForgeCrucibleFluidHandler.init(bus);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
                 net.neoforged.bus.api.EventPriority.HIGHEST,
                 net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent.class,

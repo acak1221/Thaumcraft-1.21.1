@@ -20,9 +20,9 @@ import thaumcraft.common.tiles.TileJarBrain;
  *
  * <p>Oracle {@code thaumcraft/client/renderers/tile/TileJarRenderer.java:155-175} ({@code renderBrain}):
  * the brain bobs with {@code sin(ticksSinceLevel / 14) * 0.03 + 0.03}, it is turned by the
- * interpolated {@code rota}/{@code rotb} of the jar around the Z axis, then by minus ninety degrees
- * around the Y axis, and it is drawn with the scale {@code 0.4} on the {@code brain2.png} sheet. The
- * brine of the jar is the {@code jarbrine.png} volume of the original {@code ModelJar}.</p>
+ * interpolated {@code rota}/{@code rotb} of the jar around the Y axis and then by minus ninety degrees
+ * around the Y axis as well, and it is drawn with the scale {@code 0.4} on the {@code brain2.png} sheet.
+ * The brine of the jar is the {@code jarbrine.png} volume of the original {@code ModelJar}.</p>
  *
  * <p>Oracle {@code thaumcraft/client/renderers/tile/TileJarRenderer.java:60-64}: the whole jar
  * content is drawn at the block centre, one hundredth of a block above the block floor, turned by
@@ -65,12 +65,23 @@ public final class TileJarBrainRenderer implements BlockEntityRenderer<TileJarBr
         float bob = bob(Minecraft.getInstance().player == null ? 0 : Minecraft.getInstance().player.tickCount);
         pose.pushPose();
         pose.translate(0, BRAIN_HEIGHT + bob, 0);
-        float turn = turn(tile.rota, tile.rotb, partialTick);
-        pose.mulPose(Axis.ZP.rotationDegrees(turn * 180.0F / 3.141593F));
-        pose.mulPose(Axis.YP.rotationDegrees(-90));
+        applyTurn(pose, turn(tile.rota, tile.rotb, partialTick));
         pose.scale(BRAIN_SCALE, BRAIN_SCALE, BRAIN_SCALE);
         brain.render(pose, buffers.getBuffer(RenderType.entityTranslucent(BRAIN)), LightTexture.FULL_BRIGHT, overlay);
         pose.popPose();
+    }
+
+    /**
+     * The two rotations of the original brain.
+     *
+     * <p>Oracle {@code TileJarRenderer.java:166-167}:
+     * {@code glRotatef(f3 * 180 / pi, 0, 1, 0)} and {@code glRotatef(-90, 0, 1, 0)}. The third
+     * argument of {@code glRotatef} is the Y component of the rotation axis, so BOTH rotations are
+     * around the Y axis: the brain turns around the vertical axis and is then laid on its side.</p>
+     */
+    public static void applyTurn(PoseStack pose, float turn) {
+        pose.mulPose(Axis.YP.rotationDegrees(turn * 180.0F / 3.141593F));
+        pose.mulPose(Axis.YP.rotationDegrees(-90));
     }
 
     /** The original bob of the brain: {@code sin(ticksSinceLevel / 14) * 0.03 + 0.03}. */

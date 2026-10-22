@@ -288,9 +288,10 @@ public final class ThaumcraftEldritchBlocks {
             () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
 
     public static final RegistrySupplier<JarBlock> JAR_NODE = BLOCKS.register("jar_node",
-            // Original BlockJar:87-90 - the node jar is the same block as the ordinary jar and
-            // emits the same light level 9. The original has no per metadata light override.
-            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
+            // Original BlockJar:87-90 and :314-320 - the jar block sets the light value
+            // 0.66, which the 1.7.10 setter stores as (int)(15*0.66) = 9, but the node
+            // jar overrides it with eleven.
+            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 11)));
 
     public static final RegistrySupplier<EtherealBloomBlock> ETHEREAL_BLOOM = BLOCKS.register("ethereal_bloom",
             () -> new EtherealBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
@@ -400,7 +401,15 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> AIRY_NODE_ITEM = ITEMS.register("airy_node", () -> new BlockItem(AIRY_NODE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> AIRY_HOLE_ITEM = ITEMS.register("airy_hole", () -> new BlockItem(AIRY_HOLE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> JAR_BRAIN_ITEM = ITEMS.register("jar_brain", () -> new BlockItem(JAR_BRAIN.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> JAR_NODE_ITEM = ITEMS.register("jar_node", () -> new BlockItem(JAR_NODE.get(), new Item.Properties()));
+    /**
+     * The item form of the node jar.
+     *
+     * <p>Original {@code ItemJarNode.java:56-214}: the item carries the aspects, the node type, the node
+     * modifier and the identity of the stored node and publishes them with the original method names.
+     * The original limits the stack of the item to one (oracle {@code :63-64}).</p>
+     */
+    public static final RegistrySupplier<Item> JAR_NODE_ITEM = ITEMS.register("jar_node",
+            () -> new thaumcraft.common.blocks.ItemJarNode(JAR_NODE.get(), new Item.Properties().stacksTo(1)));
     public static final RegistrySupplier<Item> ETHEREAL_BLOOM_ITEM = ITEMS.register("ethereal_bloom", () -> new BlockItem(ETHEREAL_BLOOM.get(), new Item.Properties()));
 
     // ---------------------------------------------------------- block entities
@@ -562,19 +571,52 @@ public final class ThaumcraftEldritchBlocks {
         }
 
         /**
-         * Original BlockJar:184-193 - the node jar drops the node it holds: the aspects, the node
+         * Original BlockJar:340-351 - the comparator output of the brain jar: the share of the
+         * stored experience, plus one when the jar holds anything at all.
+         */
+        @Override protected boolean hasAnalogOutputSignal(BlockState state) { return kind == 0; }
+
+        @Override protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+            if (kind != 0 || !(level.getBlockEntity(pos) instanceof TileJarBrain jar)) return 0;
+            float ratio = jar.getXp() / (float) jar.getXpMax();
+            return net.minecraft.util.Mth.floor(ratio * 14.0F) + (jar.getXp() > 0 ? 1 : 0);
+        }
+
+        /**
+         * Original BlockJar:322-334 - the green spell particle of a full brain jar.
+         */
+        @Override public void animateTick(BlockState state, Level level, BlockPos pos,
+                                          net.minecraft.util.RandomSource random) {
+            super.animateTick(state, level, pos, random);
+            if (kind != 0) return;
+            if (!(level.getBlockEntity(pos) instanceof TileJarBrain jar) || jar.getXp() < jar.getXpMax()) return;
+            double xx = pos.getX() + 0.3D + random.nextFloat() * 0.4D;
+            double yy = pos.getY() + 0.9D;
+            double zz = pos.getZ() + 0.3D + random.nextFloat() * 0.4D;
+            int argb = (int) (0.5F * 255) << 24
+                    | (int) (0.0F * 255) << 16
+                    | (int) ((0.4F + random.nextFloat() * 0.1F) * 255) << 8
+                    | (int) ((0.3F + random.nextFloat() * 0.2F) * 255);
+            level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(
+                    net.minecraft.core.particles.ParticleTypes.ENTITY_EFFECT, argb), xx, yy, zz, 0, 0, 0);
+        }
+
+        /** Original BlockJar:184-193 - the node jar drops the node it holds: the aspects, the node
          * type, the node modifier and the identity of the node travel with the dropped item.
          *
          * <p>The original dropped the {@code itemJarNode} item with its NBT; the native node jar
-         * is a block, so the dropped block item carries the block entity data of the tile. The
-         * vanilla {@code applyComponentsFromItemStack} reads it back when the item is placed.</p>
+         * is a block, so the dropped block item of the native carries the same data with the
+         * published API of the original item.</p>
          */
         @Override protected java.util.List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
             if (kind != 1) return super.getDrops(state, params);
-            ItemStack drop = new ItemStack(state.getBlock());
+            ItemStack drop = new ItemStack(JAR_NODE_ITEM.get());
             BlockEntity tile = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
             if (tile instanceof TileJarNode node && node.drop) {
-                node.saveToItem(drop, params.getLevel().registryAccess());
+                if (drop.getItem() instanceof thaumcraft.common.blocks.ItemJarNode item) {
+                    item.setAspects(drop, node.getAspects());
+                    item.setNodeAttributes(drop, node.getNodeType(), node.getNodeModifier(), node.getId());
+                }
             }
             return java.util.List.of(drop);
         }

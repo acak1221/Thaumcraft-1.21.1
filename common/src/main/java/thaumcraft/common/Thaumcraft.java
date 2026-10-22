@@ -186,6 +186,9 @@ public final class Thaumcraft {
         thaumcraft.common.lib.network.BlockSparkleFxNetworking.initServer();
         // The rune particles of the original thaumometer scan (oracle ItemThaumometer:92,103,128).
         thaumcraft.common.lib.network.ScanRuneFxNetworking.initServer();
+        // The original essence flow packet of the public essentia source API
+        // (oracle EssentiaHandler:54 / PacketFXEssentiaSource:20-78).
+        thaumcraft.common.lib.network.EssentiaFlowFxNetworking.initServer();
         VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.

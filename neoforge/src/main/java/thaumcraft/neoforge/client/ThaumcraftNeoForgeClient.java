@@ -118,6 +118,10 @@ public final class ThaumcraftNeoForgeClient {
         // The retained shell is shared with blocks, but actual item contents
         // and labels must come from this stack, never a synthetic world tile.
         event.registerItem(renderer(JarItemRenderer::render), ThaumcraftContent.JAR.get().asItem(), ThaumcraftContent.VOID_JAR.get().asItem());
+        // Original ItemJarNodeRenderer: the node of the jar in three crossed planes
+        // inside the glass shell of the item.
+        event.registerItem(renderer(thaumcraft.client.renderers.tile.ItemJarNodeRenderer::render),
+                thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_NODE_ITEM.get());
         event.registerItem(renderer(TileTubeRenderer::renderValveItem), ThaumcraftTubes.ESSENTIA_VALVE.get().asItem());
         event.registerItem(renderer(TileTubeRenderer::renderAdvancedItem), ThaumcraftTubes.ESSENTIA_FILTER.get().asItem(),
                 ThaumcraftTubes.ESSENTIA_RESTRICT.get().asItem(), ThaumcraftTubes.ESSENTIA_ONEWAY.get().asItem());

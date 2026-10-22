@@ -226,7 +226,7 @@ class EarlyObjectAspectBindingsTest {
                             .add(Aspect.MAGIC, 3).add(Aspect.ELDRITCH, 3).add(Aspect.SOUL, 3));
                     continue;
                 }
-                if (sourceLine == 454) {
+                if (sourceLine == 451) {
                     assertEquals("ConfigItems.itemEldritchObject", row.get("original_target").getAsString());
                     assertEquals(3, row.get("original_metadata").getAsInt());
                     assertEquals(JsonParser.parseString("[\"thaumcraft:primordial_pearl\"]"), row.get("modern_ids"));
@@ -234,8 +234,8 @@ class EarlyObjectAspectBindingsTest {
                             .add(Aspect.EARTH, 16).add(Aspect.FIRE, 16).add(Aspect.WATER, 16).add(Aspect.ORDER, 16).add(Aspect.ENTROPY, 16));
                     continue;
                 }
-                if (sourceLine >= 360 && sourceLine <= 362) {
-                    // Native iron, gold and cinnabar clusters (ConfigAspects:360-362), added after the ALL90 snapshot; checked on their own below.
+                if (sourceLine >= 368 && sourceLine <= 370) {
+                    // Native iron, gold and cinnabar clusters (original ConfigAspects:368-370), added after the ALL90 snapshot; checked on their own below.
                     clusters.put(sourceLine, row);
                     continue;
                 }
@@ -294,9 +294,9 @@ class EarlyObjectAspectBindingsTest {
             assertEquals(8, taintAndVishroom);
             assertEquals(88 + 10, restoredOriginalRows);
             assertEquals(3, clusters.size());
-            assertCluster(clusters.get(360), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
-            assertCluster(clusters.get(361), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");
-            assertCluster(clusters.get(362), 21, "thaumcraft:cluster_cinnabar", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"permutatio\":4,\"venenum\":2}");
+            assertCluster(clusters.get(368), 16, "thaumcraft:cluster_iron", "{\"ordo\":1,\"metallum\":6,\"terra\":1}");
+            assertCluster(clusters.get(369), 31, "thaumcraft:cluster_gold", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"lucrum\":2}");
+            assertCluster(clusters.get(370), 21, "thaumcraft:cluster_cinnabar", "{\"ordo\":1,\"metallum\":4,\"terra\":1,\"permutatio\":4,\"venenum\":2}");
             // The copper nugget and the native copper cluster: copper is vanilla in 1.21.1, so the original
             // conditional branch ConfigAspects148-153 is carried (ConfigItems:277 and ConfigAspects:149).
             assertEquals(2, copper.size());

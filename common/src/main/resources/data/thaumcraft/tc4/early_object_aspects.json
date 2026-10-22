@@ -2108,7 +2108,7 @@
       }
     },
     {
-      "original_source_line": 360,
+      "original_source_line": 368,
       "registration": "direct",
       "original_target": "ConfigItems.itemNugget",
       "original_metadata": 16,
@@ -2123,7 +2123,7 @@
       }
     },
     {
-      "original_source_line": 361,
+      "original_source_line": 369,
       "registration": "direct",
       "original_target": "ConfigItems.itemNugget",
       "original_metadata": 31,
@@ -2139,7 +2139,7 @@
       }
     },
     {
-      "original_source_line": 362,
+      "original_source_line": 370,
       "registration": "direct",
       "original_target": "ConfigItems.itemNugget",
       "original_metadata": 21,
@@ -3180,7 +3180,7 @@
       }
     },
     {
-      "original_source_line": 454,
+      "original_source_line": 451,
       "registration": "direct",
       "original_target": "ConfigItems.itemEldritchObject",
       "original_metadata": 3,

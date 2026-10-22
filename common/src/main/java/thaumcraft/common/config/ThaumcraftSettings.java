@@ -36,7 +36,7 @@ public final class ThaumcraftSettings {
     }
     public static void initializeClient() {
         if (clientThread != null && clientThread != Thread.currentThread()) throw new IllegalStateException("Client settings thread changed");
-        clientThread = Thread.currentThread(); remote = ResearchSettings.DEFAULTS;
+        clientThread = Thread.currentThread(); remote = server;
     }
     public static void receive(ResearchSettings settings) {
         requireClientThread(); remote = java.util.Objects.requireNonNull(settings);
@@ -48,7 +48,10 @@ public final class ThaumcraftSettings {
      */
     public static void resetClient() {
         if (clientThread != null) requireClientThread();
-        remote = ResearchSettings.DEFAULTS;
+        // PacketConfig only overrides the connected-client view. Oracle
+        // EventHandlerNetwork:71-77 restores the local, configured values,
+        // not the field initializer defaults, when that connection ends.
+        remote = server;
     }
     private static void requireClientThread() {
         if (Thread.currentThread() != clientThread) throw new IllegalStateException("Remote settings require the client thread");

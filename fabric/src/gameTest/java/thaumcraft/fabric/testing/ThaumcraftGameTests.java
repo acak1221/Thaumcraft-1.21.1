@@ -87,6 +87,16 @@ import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void interactionPickaxeConsumesPaidScan(GameTestHelper test) {
+        thaumcraft.common.testing.InteractionResultRuntimeChecks.pickaxeConsumesPaidScan(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void interactionShovelConsumesOnlyPaidPlacement(GameTestHelper test) {
+        thaumcraft.common.testing.InteractionResultRuntimeChecks.shovelConsumesOnlyPaidPlacement(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void blockDropAspectJar(GameTestHelper test) {
         thaumcraft.common.testing.BlockDropRuntimeChecks.jarRemoval(test, false);
     }

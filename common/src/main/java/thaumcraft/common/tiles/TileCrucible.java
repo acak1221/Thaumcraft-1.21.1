@@ -2,6 +2,7 @@ package thaumcraft.common.tiles;
 
 import java.util.ArrayDeque;
 import java.util.UUID;
+import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -12,11 +13,13 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -73,13 +76,107 @@ public final class TileCrucible extends BlockEntity {
     public int tagAmount() { return aspects.visSize(); }
 
     public int fillWater(int amount, boolean doFill) {
-        int accepted = Math.min(Math.max(0, amount), CAPACITY - water);
+        int accepted = acceptedFill(water, amount);
         if (doFill && accepted > 0) {
             if (!(level instanceof ServerLevel server) || !isCurrent() || !server.getServer().isSameThread()) return 0;
             water += accepted;
             changed();
         }
         return accepted;
+    }
+
+    /**
+     * The accepted amount of a fill of the tank of the original.
+     *
+     * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:71}: the tank holds one thousand
+     * millibuckets and the original {@code FluidTank} never takes more than the free space.</p>
+     */
+    public static int acceptedFill(int current, int millibuckets) {
+        return Math.min(Math.max(0, millibuckets), CAPACITY - current);
+    }
+
+    /**
+     * The drained amount of the tank of the original.
+     *
+     * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:395-397}: the tank never gives away
+     * more than it holds.</p>
+     */
+    public static int drained(int current, int maxDrain) {
+        return Math.min(Math.max(0, maxDrain), current);
+    }
+
+    /**
+     * The original fluid handler of the crucible.
+     *
+     * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:373-382}: the crucible is a Forge
+     * {@code IFluidHandler} with a tank of one thousand millibuckets that accepts <strong>water
+     * only</strong>. The original marks the tile dirty and sends the block update before the tank
+     * answers, so a refused fill still refreshes the tile.</p>
+     *
+     * @param fluid the fluid of the caller, {@code null} is the empty fluid of the original
+     * @param millibuckets the amount of the caller
+     * @param doFill false asks the original what it would do
+     * @return the accepted amount in millibuckets
+     */
+    public int fillWater(net.minecraft.world.level.material.Fluid fluid, int millibuckets, boolean doFill) {
+        // Oracle TileCrucible:374-376 - only the water of the original registry is accepted.
+        if (fluid != null && fluid != net.minecraft.world.level.material.Fluids.WATER) return 0;
+        int accepted = acceptedFill(water, millibuckets);
+        if (doFill) {
+            if (accepted > 0) water += accepted;
+            // The original marks the tile dirty even when the tank refuses the fill.
+            changed();
+        }
+        return accepted;
+    }
+
+    /**
+     * The original drain of a named fluid.
+     *
+     * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:384-393}: the original refuses a
+     * resource that is not the content of the tank, and the Forge comparison of 1.7.10 also compares
+     * the amounts, so only a stack that is exactly the content of the tank is drained.</p>
+     *
+     * @return the drained amount in millibuckets
+     */
+    public int drainWater(net.minecraft.world.level.material.Fluid fluid, int millibuckets, boolean doDrain) {
+        if (fluid != null && fluid != net.minecraft.world.level.material.Fluids.WATER) return 0;
+        if (millibuckets != water) return 0;
+        return drainWater(water, doDrain);
+    }
+
+    /**
+     * The original drain of the tank.
+     *
+     * <p>Oracle {@code thaumcraft/common/tiles/TileCrucible.java:395-397}: the tank gives away at most
+     * the requested amount and the original marks the tile dirty before the tank answers.</p>
+     *
+     * @return the drained amount in millibuckets
+     */
+    public int drainWater(int maxDrain, boolean doDrain) {
+        int drained = drained(water, maxDrain);
+        if (doDrain) {
+            if (drained > 0) water -= drained;
+            // The original marks the tile dirty even when the tank is empty.
+            changed();
+        }
+        return drained;
+    }
+
+    /** Oracle TileCrucible:399-401 - the crucible can be filled with water only. */
+    public static boolean canFillWater(net.minecraft.world.level.material.Fluid fluid) {
+        return fluid != null && fluid == net.minecraft.world.level.material.Fluids.WATER;
+    }
+
+    /** Oracle TileCrucible:403-405 - the crucible can be drained with any fluid. */
+    public static boolean canDrainWater(net.minecraft.world.level.material.Fluid fluid) { return true; }
+
+    /** Oracle TileCrucible:71 - the tank of the original holds one thousand millibuckets. */
+    public int getWaterCapacity() { return CAPACITY; }
+
+    /** The fluid of the tank of the original. */
+    public net.minecraft.world.level.material.Fluid getWaterFluid() {
+        return net.minecraft.world.level.material.Fluids.WATER;
     }
 
     /** Finite Decanting transfer. Both raw owners change before any sync hook:
@@ -203,6 +300,16 @@ public final class TileCrucible extends BlockEntity {
                 if (holder != null && water > 0) {
                     var recipe = holder.value();
                     ItemStack output = recipe.assemble(new CrucibleRecipeInput(entity.getItem(), aspects), server.registryAccess());
+                    // Original TileCrucible:253-259 - the craft fires the player crafting
+                    // event of the original for the player who threw the item, with the
+                    // fake inventory of the input item as the matrix. The sticky warp of
+                    // the output reaches that player through the event.
+                    ServerPlayer thrower = CrucibleCrafting.thrower(server, entity);
+                    if (thrower != null) {
+                        SimpleContainer matrix = new SimpleContainer(1);
+                        matrix.setItem(0, entity.getItem().copy());
+                        PlayerEvent.CRAFT_ITEM.invoker().craft(thrower, output, matrix);
+                    }
                     aspects = recipe.removeMatching(aspects);
                     // Original accepts ANY positive water, even the last <50mB.
                     water = Math.max(0, water - 50);

@@ -22,6 +22,8 @@ public final class ThaumcraftFabric implements ModInitializer {
     @Override public void onInitialize() {
         Thaumcraft.init();
         thaumcraft.fabric.fluid.FabricSpaStorage.init();
+        // Original TileCrucible:373-410 - the water tank of the crucible that other mods may read and fill.
+        thaumcraft.fabric.fluid.FabricCrucibleStorage.init();
         thaumcraft.fabric.loot.FabricThaumcraftLoot.init();
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftPech.PECH.get(), thaumcraft.common.entities.monster.EntityPech.createAttributes());

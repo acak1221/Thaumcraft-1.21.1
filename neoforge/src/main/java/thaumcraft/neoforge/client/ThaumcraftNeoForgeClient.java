@@ -78,6 +78,10 @@ public final class ThaumcraftNeoForgeClient {
     /** The two core shaders of the Fabric CoreShaderRegistrationCallback. */
     private static void onRegisterShaders(RegisterShadersEvent event) {
         try {
+            var mirror = new ShaderInstance(event.getResourceProvider(),
+                    ResourceLocation.fromNamespaceAndPath("thaumcraft", "linked_mirror"),
+                    DefaultVertexFormat.POSITION_TEX_COLOR);
+            event.registerShader(mirror, thaumcraft.client.renderers.tile.LinkedMirrorField::setShader);
             var monster = new ShaderInstance(event.getResourceProvider(),
                     ResourceLocation.fromNamespaceAndPath("thaumcraft", "monster_lit_particle"),
                     DefaultVertexFormat.PARTICLE);

@@ -81,3 +81,14 @@ collision-free program names. The squared asymmetric sample weights are retained
 Source official client JAR SHA1: `e80d9b3bf5085002218d4be59e668bac718abbc6`.
 Minecraft and these assets are owned by Mojang/Microsoft; this repository's
 source license does not relicense them. No external distribution is authorized.
+
+### Bone-bow glint texture
+
+`assets/thaumcraft/textures/misc/bone_bow_glint.png` under `common/src/main/resources`
+is the byte-exact Minecraft 1.7.10 `assets/minecraft/textures/misc/enchanted_item_glint.png`
+used by the original TC4 equipped bone-bow renderer. Official client JAR SHA1:
+`e80d9b3bf5085002218d4be59e668bac718abbc6`; PNG SHA256:
+`134be4ee82e2c9e505064a65abc01af098a8173f3f4234802ea186c61120c7bf`.
+Minecraft and this texture are owned by Mojang/Microsoft; the source licence does
+not relicense this asset. No original JAR is included and no external distribution
+is authorized.

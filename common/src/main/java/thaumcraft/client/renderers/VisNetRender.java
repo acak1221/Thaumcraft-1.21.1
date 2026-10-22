@@ -44,6 +44,10 @@ public final class VisNetRender {
     public static void draw(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,Consumer<VertexConsumer> vertices){
         drawFormat(texture,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.QUADS,vertices);
     }
+    /** Mirror inner layers use ONE/ONE even where the texture has translucent alpha. */
+    public static void drawWithBlend(ResourceLocation texture,int source,int destination,boolean depthWrite,boolean cull,ShaderInstance selected,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,source,destination,depthWrite,selected,DefaultVertexFormat.POSITION_TEX_COLOR,VertexFormat.Mode.QUADS,cull,true,vertices);
+    }
     /** Same owned state transaction, native lightmap particle format and the original low-alpha threshold. */
     public static void drawParticle(ResourceLocation texture,ShaderInstance selected,Consumer<VertexConsumer> vertices){
         drawParticle(texture,GL11.GL_ONE,selected,vertices);
@@ -60,9 +64,12 @@ public final class VisNetRender {
         drawFormat(texture,destination,depthWrite,selected,format,mode,false,true,vertices);
     }
     private static void drawFormat(ResourceLocation texture,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,VertexFormat.Mode mode,boolean cull,boolean depthTest,Consumer<VertexConsumer> vertices){
+        drawFormat(texture,GL11.GL_SRC_ALPHA,destination,depthWrite,selected,format,mode,cull,depthTest,vertices);
+    }
+    private static void drawFormat(ResourceLocation texture,int source,int destination,boolean depthWrite,ShaderInstance selected,VertexFormat format,VertexFormat.Mode mode,boolean cull,boolean depthTest,Consumer<VertexConsumer> vertices){
         Objects.requireNonNull(selected,"Native effect shader must be registered before drawing");
         try(NativeState ignored=new NativeState()){
-            RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(GL11.GL_SRC_ALPHA,destination);if(depthTest)RenderSystem.enableDepthTest();else RenderSystem.disableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);if(cull)RenderSystem.enableCull();else RenderSystem.disableCull();
+            RenderSystem.setShader(()->selected);RenderSystem.setShaderTexture(0,texture);RenderSystem.setShaderColor(1,1,1,1);RenderSystem.enableBlend();RenderSystem.blendFunc(source,destination);if(depthTest)RenderSystem.enableDepthTest();else RenderSystem.disableDepthTest();RenderSystem.depthFunc(GL11.GL_LEQUAL);RenderSystem.depthMask(depthWrite);if(cull)RenderSystem.enableCull();else RenderSystem.disableCull();
             var mesh=MESH.begin(mode,format);vertices.accept(mesh);BufferUploader.drawWithShader(mesh.buildOrThrow());
         }
     }

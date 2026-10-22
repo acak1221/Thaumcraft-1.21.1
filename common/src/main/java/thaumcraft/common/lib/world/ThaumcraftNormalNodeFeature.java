@@ -33,9 +33,7 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         if (!ThaumcraftBiomeSettings.worldgen().auraNodes()) return false;
         WorldGenLevel level = context.level();
-        // This minimum unit intentionally registers only ordinary Overworld
-        // nodes; Nether, End and custom-dimension ecology remain pending.
-        if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
+        if (!AuraDimensionRules.supportsWildNodes(level.getLevel().dimension())) return false;
         // Oracle ThaumcraftWorldGenerator:189-215 - the whole wild node pass of the original
         // draws from the random of the chunk (the random of the chunk provider of 1.7.10),
         // so the port draws it from the random of the chunk seed. The rarity roll of the
@@ -46,7 +44,10 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         int chunkZ = context.origin().getZ() >> 4;
         RandomSource random = RandomSource.create(
                 StructurePlacementRules.chunkSeed(level.getLevel().getSeed(), chunkX, chunkZ));
-        return placeAuraPass(level, random, chunkX, chunkZ);
+        // Oracle :130-132,548-555: Nether has only the wild pass, no scattered temples.
+        return level.getLevel().dimension().equals(Level.NETHER)
+                ? placeWildNode(level, random, chunkX, chunkZ, false)
+                : placeAuraPass(level, random, chunkX, chunkZ);
     }
 
     /**
@@ -124,7 +125,7 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
      */
     public static boolean placeWildNode(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ,
                                         boolean auraGen) {
-        if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
+        if (!AuraDimensionRules.supportsWildNodes(level.getLevel().dimension())) return false;
         // Oracle ThaumcraftWorldGenerator:190 - the rarity roll of the original.
         if (random.nextInt(NODE_RARITY) != 0) return false;
         if (auraGen) return false;
@@ -157,10 +158,11 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
 
     /** Actual ordinary-wild invocation of the shared original all-type factory. */
     public static boolean createRandomNodeAt(WorldGenLevel level, BlockPos pos, RandomSource random) {
-        if (!level.getLevel().dimension().equals(Level.OVERWORLD)
+        if (!AuraDimensionRules.supportsWildNodes(level.getLevel().dimension())
                 || level.isOutsideBuildHeight(pos) || !level.hasChunkAt(pos) || !WorldGenWriteArea.canWrite(level, pos)) return false;
         Holder<Biome> biome = BiomeColumns.surfaceHolder(level, pos.getX(), pos.getZ());
         if (biome == null || !biome.is(ThaumcraftNodes.NODE_BIOMES)) return false;
         return NodeGeneration.createRandomNodeAt(level, pos, random, false, false, false);
     }
+
 }

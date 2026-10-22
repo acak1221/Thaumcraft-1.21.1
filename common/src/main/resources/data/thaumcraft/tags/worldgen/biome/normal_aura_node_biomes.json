@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "#minecraft:is_overworld",
+    "#minecraft:is_nether",
     "thaumcraft:magical_forest",
     "thaumcraft:eerie",
     "thaumcraft:taint"

@@ -1,5 +1,9 @@
 # Test-suite adversarial audit — a3tests
 
+Follow-up: [`TEST_FIXES.md`](TEST_FIXES.md) records f3tests' repairs and executed
+mutation checks for the 27 method findings below. This audit's original counts and
+infrastructure dispositions are retained as historical evidence.
+
 ## Scope and limits
 
 Baseline: `c6feeda7`. **All line citations below refer to that baseline**, before these edits.

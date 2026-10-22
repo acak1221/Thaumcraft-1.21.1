@@ -14,6 +14,7 @@ logs
 .gradle-*/
 .gradle-surv/
 .gradle-float/
+.gradle-f3/
 .gradle-fix9/
 .gradle-fix4b/
 .gradle-fix5b/

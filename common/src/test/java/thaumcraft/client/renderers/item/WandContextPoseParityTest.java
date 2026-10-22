@@ -18,8 +18,7 @@ import org.junit.jupiter.api.Test;
  * stretches it by a tenth in Y), and an item in the inventory is rolled by sixty six degrees
  * about Z, lifted by six tenths and shifted for a staff.</p>
  *
- * <p>The expected matrix of every case is composed again from the oracle rows - a translation,
- * the rotation and a scale, in the order of the original - and compared with the matrix that
+ * <p>The expected matrices are frozen column-major fixtures from the oracle rows, compared with the matrix that
  * {@link WandContextPose#apply} produces, so the order of the original is asserted and not only
  * its numbers.</p>
  *
@@ -33,34 +32,24 @@ class WandContextPoseParityTest {
         return new Matrix4f(pose.last().pose());
     }
 
-    private static final float DEG = (float) Math.PI / 180.0F;
-
-    /** Original ItemWandRenderer:59-86, row by row, for a staff and for a wand. */
+    /** Original ItemWandRenderer:59-86, evaluated offline; no production branch selector. */
     private static Matrix4f expected(ItemDisplayContext context, boolean staff) {
-        Matrix4f matrix = new Matrix4f();
-        WandContextPose.Kind kind = WandContextPose.kindOf(context);
-        if (kind == WandContextPose.Kind.NONE) return matrix;
-        if (staff) matrix.translate(0.0F, 0.5F, 0.0F);                 // :59-61
-        switch (kind) {
-            case INVENTORY -> {                                          // :80-86
-                if (staff) matrix.scale(0.8F, 0.8F, 0.8F);               // :82
-                matrix.rotateZ(66.0F * DEG);                             // :84
-                matrix.translate(0.0F, 0.6F, 0.0F);                      // :85
-                if (staff) matrix.translate(-0.7F, 0.6F, 0.0F);          // :86
-            }
-            case ENTITY -> {                                             // :64-71
-                if (staff) {
-                    matrix.translate(0.0F, 1.5F, 0.0F);                  // :68
-                    matrix.scale(0.9F, 0.9F, 0.9F);                      // :69
-                } else matrix.translate(0.0F, 1.0F, 0.0F);               // :71
-            }
-            case EQUIPPED, EQUIPPED_FIRST_PERSON -> {                    // :72-79
-                matrix.translate(0.5F, 1.5F, 0.5F);                      // :74-76
-                if (kind == WandContextPose.Kind.EQUIPPED_FIRST_PERSON) matrix.scale(1.0F, 1.1F, 1.0F); // :77-78
-            }
-            case NONE -> { }
-        }
-        return matrix;
+        float[] values = switch (context) {
+            case GUI -> staff
+                    ? new float[]{.32538932F,.7308364F,0,0, -.7308364F,.32538932F,0,0, 0,0,.8F,0, -1.1047761F,.37888172F,0,1}
+                    : new float[]{.40673664F,.9135455F,0,0, -.9135455F,.40673664F,0,0, 0,0,1,0, -.5481273F,.24404198F,0,1};
+            case GROUND, FIXED, HEAD -> staff
+                    ? new float[]{.9F,0,0,0, 0,.9F,0,0, 0,0,.9F,0, 0,2,0,1}
+                    : new float[]{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,1,0,1};
+            case THIRD_PERSON_RIGHT_HAND, THIRD_PERSON_LEFT_HAND -> staff
+                    ? new float[]{1,0,0,0, 0,1,0,0, 0,0,1,0, .5F,2,.5F,1}
+                    : new float[]{1,0,0,0, 0,1,0,0, 0,0,1,0, .5F,1.5F,.5F,1};
+            case FIRST_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND -> staff
+                    ? new float[]{1,0,0,0, 0,1.1F,0,0, 0,0,1,0, .5F,2,.5F,1}
+                    : new float[]{1,0,0,0, 0,1.1F,0,0, 0,0,1,0, .5F,1.5F,.5F,1};
+            case NONE -> new float[]{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+        };
+        return new Matrix4f().set(values);
     }
 
     private static void assertMatrix(Matrix4f expected, Matrix4f actual, String message) {
@@ -95,11 +84,11 @@ class WandContextPoseParityTest {
         // reads back as -66 through atan2(m10, m00). The original's glRotatef(66, 0, 0, 1) and the
         // port's Axis.ZP.rotationDegrees(66) are the same matrix; only the sign convention of the
         // read-back differs. Assert the matrix pair, not a mis-signed angle.
-        assertEquals(-66.0F * DEG, (float) Math.atan2(wand.m10(), wand.m00()), 1.0E-6F,
+        assertEquals(-1.1519173F, (float) Math.atan2(wand.m10(), wand.m00()), 1.0E-6F,
                 "the inventory rolls the wand by sixty six degrees about Z (JOML right-handed read-back)");
-        assertEquals(-0.6F * (float) Math.sin(66.0F * DEG), wand.m30(), 1.0E-6F,
+        assertEquals(-.5481273F, wand.m30(), 1.0E-6F,
                 "the inventory lift is rotated by the roll, so it is applied after it (JOML right-handed X)");
-        assertEquals(0.6F * (float) Math.cos(66.0F * DEG), wand.m31(), 1.0E-6F);
+        assertEquals(.24404198F, wand.m31(), 1.0E-6F);
     }
 
     @Test void theDroppedItemIsLiftedByOneBlockAndTheStaffByOneAndAHalf() {
@@ -112,7 +101,7 @@ class WandContextPoseParityTest {
             assertEquals(1.0F, wand.m00(), 1.0E-6F);
             Matrix4f staff = applied(context, true);
             assertMatrix(expected(context, true), staff, "dropped staff " + context);
-            assertEquals(0.5F + 1.5F, staff.m31(), 1.0E-6F, "the staff lift adds up to two blocks");
+            assertEquals(2F, staff.m31(), 1.0E-6F, "the staff lift adds up to two blocks");
             assertEquals(0.9F, staff.m00(), 1.0E-6F, "a dropped staff is nine tenths of its size");
         }
     }

@@ -46,13 +46,13 @@ public final class EquipmentItemRuntimeChecks {
             player.setGameMode(GameType.SURVIVAL);
             lane.floor(3);
             var bow = new ItemStack(ThaumcraftLegacyItems.BONE_BOW.get());
-            test.assertTrue(bow.getMaxDamage() == EquipmentRules.BONE_BOW_DURABILITY,
+            test.assertTrue(bow.getMaxDamage() == 512,
                     "the bone bow keeps the original five hundred and twelve uses: " + bow.getMaxDamage());
-            test.assertTrue(bow.getItem().getEnchantmentValue() == EquipmentRules.BONE_BOW_ENCHANTABILITY,
+            test.assertTrue(bow.getItem().getEnchantmentValue() == 3,
                     "the bone bow keeps the original enchantment value of three: " + bow.getItem().getEnchantmentValue());
-            test.assertTrue(bow.getMaxStackSize() == EquipmentRules.BONE_BOW_MAX_STACK_SIZE,
+            test.assertTrue(bow.getMaxStackSize() == 1,
                     "the bone bow never stacks: " + bow.getMaxStackSize());
-            test.assertTrue(Math.abs(EquipmentRules.boneBowPower(10) - (1F * 1F + 1F * 2F) / 3F) < 1e-6F,
+            test.assertTrue(Math.abs(EquipmentRules.boneBowPower(10) - 1F) < 1e-6F,
                     "the bone bow draws at half the vanilla speed: " + EquipmentRules.boneBowPower(10));
             test.assertTrue(EquipmentRules.boneBowPower(100) == 1F && !EquipmentRules.boneBowFires(0)
                             && EquipmentRules.boneBowFires(2),
@@ -74,6 +74,7 @@ public final class EquipmentItemRuntimeChecks {
             player.getInventory().setItem(player.getInventory().selected, bow);
             player.getInventory().add(new ItemStack(Items.ARROW, 16));
             player.setPos(lane.origin.getX() + 1.5, lane.origin.getY() + 2.0, lane.origin.getZ() + 1.5);
+            player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
             int arrowsBefore = player.getInventory().countItem(Items.ARROW);
             int usesBefore = bow.getDamageValue();
 
@@ -90,17 +91,19 @@ public final class EquipmentItemRuntimeChecks {
                     lane.origin.getX() + 8, lane.origin.getY() + 12, lane.origin.getZ() + 8);
             List<AbstractArrow> arrows = level.getEntitiesOfClass(AbstractArrow.class, box,
                     arrow -> arrow.getOwner() == player);
+            arrows.forEach(lane::add);
             test.assertTrue(arrows.size() == 1,
                     "the bone bow fires exactly one arrow when it is released at full charge: " + arrows.size());
             AbstractArrow arrow = arrows.getFirst();
-            test.assertTrue(arrow.getDeltaMovement().length() > 1.5D,
-                    "the arrow leaves the bow with a real speed, not a zero delta: " + arrow.getDeltaMovement());
-            test.assertTrue(Math.abs(arrow.getBaseDamage() - EquipmentRules.boneBowArrowBaseDamage(0)) < 1e-6D,
+            // Vanilla's bounded triangular spread perturbs the 2.5 speed, but cannot reach 2.35/2.65.
+            test.assertTrue(arrow.getDeltaMovement().length() > 2.35D && arrow.getDeltaMovement().length() < 2.65D,
+                    "the arrow leaves at the original 2.5 speed with vanilla spread: " + arrow.getDeltaMovement());
+            test.assertTrue(Math.abs(arrow.getBaseDamage() - 2.5D) < 1e-6D,
                     "the arrow carries the original two and a half base damage: " + arrow.getBaseDamage());
             test.assertTrue(bow.getDamageValue() == usesBefore + 1,
                     "the shot costs one use of the original durability: " + bow.getDamageValue());
-            test.assertTrue(player.getInventory().countItem(Items.ARROW) == arrowsBefore - 1
-                            || player.hasInfiniteMaterials(),
+            test.assertTrue(!arrow.isCritArrow(), "the original bone bow never produces critical arrows");
+            test.assertTrue(player.getInventory().countItem(Items.ARROW) == arrowsBefore - 1,
                     "the shot consumes one arrow: " + player.getInventory().countItem(Items.ARROW));
             arrow.discard();
 
@@ -108,9 +111,15 @@ public final class EquipmentItemRuntimeChecks {
             // The use duration of the bone bow is the vanilla 72000 ticks, so "no draw at all" is
             // releasing with the full remaining duration, and "fully drawn" is releasing with zero.
             int before = bow.getDamageValue();
+            int ammoBeforeShortDraw = player.getInventory().countItem(Items.ARROW);
             player.setItemInHand(InteractionHand.MAIN_HAND, bow);
             bow.getItem().releaseUsing(bow, level, player, bow.getItem().getUseDuration(bow, player));
             test.assertTrue(bow.getDamageValue() == before, "an uncharged draw never spends a use");
+            test.assertTrue(player.getInventory().countItem(Items.ARROW) == ammoBeforeShortDraw, "an uncharged draw never spends ammo");
+            var shortDrawArrows = level.getEntitiesOfClass(AbstractArrow.class, box, shot -> shot.getOwner() == player);
+            shortDrawArrows.forEach(lane::add);
+            test.assertTrue(shortDrawArrows.isEmpty(),
+                    "an uncharged draw never spawns a projectile");
         } catch (RuntimeException | Error failure) {
             lane.clean();
             throw failure;

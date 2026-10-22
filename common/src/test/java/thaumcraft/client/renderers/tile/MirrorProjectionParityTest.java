@@ -19,12 +19,12 @@ class MirrorProjectionParityTest {
     }
     @Test void outerLayerPreservesOriginalTimeAndMatrixOrder() {
         // Oracle :101-107, layer zero: rotation=0, S=.125*(2-10*q+1*65/2*q).
-        float q = MirrorProjection.q(2, 0);
+        assertEquals(-.029850746F, MirrorProjection.q(2, 0), 1e-8F);
         Vector4f uv = MirrorProjection.texture(0, 250000, 10, 20, 1, 3, 2)
-                .transform(new Vector4f(2, 3, 1, q));
-        assertEquals(.125F * (2 + 22.5F*q), uv.x, 1e-6F);
-        assertEquals(.125F * (3 + 77.5F*q) + q, uv.y, 1e-6F);
-        assertEquals(q, uv.w);
+                .transform(new Vector4f(2, 3, 1, -.029850746F));
+        assertEquals(.16604477F, uv.x, 1e-6F);
+        assertEquals(.055970162F, uv.y, 1e-6F);
+        assertEquals(-.029850746F, uv.w);
     }
     /**
      * The projected texture coordinates of the outer layer, pinned as LITERAL values.
@@ -64,6 +64,10 @@ class MirrorProjectionParityTest {
         var matrix = MirrorProjection.texture(3, 123456, 10, 20, .1F, .2F, d);
         var old = matrix.transform(new Vector4f(2, 3, 1, q));
         var stable = matrix.transform(new Vector4f(2*multiplier, 3*multiplier, multiplier, -d));
+        // Oracle TileMirrorRenderer:101-107, layer 3; also rejects identity and zero matrices.
+        assertEquals(.3F, q, 0F);
+        assertEquals(.6244919F, old.x/old.w, 1e-4F);
+        assertEquals(.0519281F, old.y/old.w, 1e-4F);
         assertEquals(old.x/old.w, stable.x/stable.w, 1e-5F);
         assertEquals(old.y/old.w, stable.y/stable.w, 1e-5F);
     }

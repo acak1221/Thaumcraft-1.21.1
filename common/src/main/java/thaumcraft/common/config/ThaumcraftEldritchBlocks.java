@@ -570,7 +570,37 @@ public final class ThaumcraftEldritchBlocks {
         }
 
         /**
-         * Original BlockJar:184-193 - the node jar drops the node it holds: the aspects, the node
+         * Original BlockJar:340-351 - the comparator output of the brain jar: the share of the
+         * stored experience, plus one when the jar holds anything at all.
+         */
+        @Override protected boolean hasAnalogOutputSignal(BlockState state) { return kind == 0; }
+
+        @Override protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+            if (kind != 0 || !(level.getBlockEntity(pos) instanceof TileJarBrain jar)) return 0;
+            float ratio = jar.getXp() / (float) jar.getXpMax();
+            return net.minecraft.util.Mth.floor(ratio * 14.0F) + (jar.getXp() > 0 ? 1 : 0);
+        }
+
+        /**
+         * Original BlockJar:322-334 - the green spell particle of a full brain jar.
+         */
+        @Override public void animateTick(BlockState state, Level level, BlockPos pos,
+                                          net.minecraft.util.RandomSource random) {
+            super.animateTick(state, level, pos, random);
+            if (kind != 0) return;
+            if (!(level.getBlockEntity(pos) instanceof TileJarBrain jar) || jar.getXp() < jar.getXpMax()) return;
+            double xx = pos.getX() + 0.3D + random.nextFloat() * 0.4D;
+            double yy = pos.getY() + 0.9D;
+            double zz = pos.getZ() + 0.3D + random.nextFloat() * 0.4D;
+            int argb = (int) (0.5F * 255) << 24
+                    | (int) (0.0F * 255) << 16
+                    | (int) ((0.4F + random.nextFloat() * 0.1F) * 255) << 8
+                    | (int) ((0.3F + random.nextFloat() * 0.2F) * 255);
+            level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(
+                    net.minecraft.core.particles.ParticleTypes.ENTITY_EFFECT, argb), xx, yy, zz, 0, 0, 0);
+        }
+
+        /** Original BlockJar:184-193 - the node jar drops the node it holds: the aspects, the node
          * type, the node modifier and the identity of the node travel with the dropped item.
          *
          * <p>The original dropped the {@code itemJarNode} item with its NBT; the native node jar

@@ -73,14 +73,19 @@ public final class RenderEldritchWarden extends EntityRenderer<EntityEldritchWar
             VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(SKIN));
             root.render(pose, out, light, OverlayTexture.NO_OVERLAY, 0xffffffff);
             // Original ModelEldritchGuardian:467-479 - the warden alone draws its hood eye
-            // a hundredth larger than the hood and with the pulsing light of the original.
+            // a hundredth larger than the hood, with the additive blend of the original
+            // (glEnable(GL_BLEND) + glBlendFunc(GL_SRC_ALPHA, GL_ONE)) and with the pulsing
+            // light of the original. The 1.7.10 light call is OpenGlHelper.func_77475_a with
+            // the texture unit 1002, which the original passes to glLight and the driver
+            // rejects, so the original eye is drawn full bright; RenderType.eyes is the
+            // additive and emissive render type of 1.21.1.
             ModelPart eye = root.getChild("HoodEye");
             if (eye != null) {
                 pose.pushPose();
                 eye.visible = true;
                 try {
                     pose.scale(1.01F, 1.01F, 1.01F);
-                    eye.render(pose, out, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xffffffff);
+                    eye.render(pose, buffers.getBuffer(RenderType.eyes(SKIN)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xffffffff);
                 } finally {
                     eye.visible = false;
                     pose.popPose();

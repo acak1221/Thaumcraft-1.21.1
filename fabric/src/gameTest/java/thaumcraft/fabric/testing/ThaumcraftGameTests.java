@@ -197,6 +197,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void rejectedPedestalSurvivesPhysicalBlockRemoval(GameTestHelper test) {
         thaumcraft.common.testing.RejectedOwnerRuntimeChecks.pedestal(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 20, batch = "event_lifecycle")
+    public void regenerationQueueLifecycle(GameTestHelper test) {
+        thaumcraft.common.testing.EventLifecycleRuntimeChecks.regenerationQueueLifecycle(test);
+    }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "mound_rng_isolation")
     public void moundGenerationRandomIsIsolated(GameTestHelper test) {
         thaumcraft.common.lib.world.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);

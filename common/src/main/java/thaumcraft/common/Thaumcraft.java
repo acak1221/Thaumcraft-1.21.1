@@ -215,12 +215,14 @@ public final class Thaumcraft {
             thaumcraft.common.lib.events.ChunkRegeneration.tick(level);
         });
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register(level -> {
+            thaumcraft.common.lib.events.ChunkRegeneration.clearLevel(level);
             thaumcraft.common.lib.world.WardingCasts.clear(level);
             thaumcraft.common.lib.bore.BoreNativeContext.clearLevel(level);
             VisNetHandler.clearLevel(level);
             VisNetFxNetworking.clearLevel(level);
         });
         LifecycleEvent.SERVER_STOPPED.register(server -> {
+            thaumcraft.common.lib.events.ChunkRegeneration.clearServer(server);
             thaumcraft.common.lib.research.ObjectAspectRegistry.serverStopped(server);
             thaumcraft.common.lib.bore.BoreNativeContext.clearServer(server);
             VisNetHandler.clearServer(server);

@@ -35,7 +35,7 @@ public final class ScanOverlay {
     public static final int ORE_LIGHT = 220, FLUID_LIGHT = 200;
     private static final TagKey<Item> ORES = TagKey.create(Registries.ITEM,
             ResourceLocation.fromNamespaceAndPath("c", "ores"));
-    private static final ResourceLocation GLASS = VisNetRender.texture("blocks/wardedglass");
+    private static final ResourceLocation GLASS = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/blocks/wardedglass.png");
     private static final int[] VALUES = new int[SIZE * SIZE * SIZE];
     private static ClientLevel scanLevel;
     private static long deadline;

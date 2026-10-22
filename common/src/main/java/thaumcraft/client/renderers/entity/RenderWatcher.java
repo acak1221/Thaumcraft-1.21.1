@@ -39,7 +39,7 @@ import thaumcraft.common.entities.monster.EntityWatcher;
 public final class RenderWatcher extends MobRenderer<EntityWatcher, ModelWatcher> {
     private static final ResourceLocation SKIN = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/watcher.png");
     private static final ResourceLocation BEAM = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/models/watcher_beam.png");
-    private static final RenderType BEAM_TYPE = new BeamType();
+    private static final class BeamResources { private static final RenderType TYPE = new BeamType(); }
 
     public RenderWatcher(EntityRendererProvider.Context context) {
         super(context, new ModelWatcher(ModelWatcher.createBodyLayer().bakeRoot()), 0);
@@ -100,7 +100,7 @@ public final class RenderWatcher extends MobRenderer<EntityWatcher, ModelWatcher
             int red = (int) (64.0F + chargeSquared * 240.0F);
             int green = (int) (32.0F + chargeSquared * 192.0F);
             int blue = (int) (128.0F - chargeSquared * 64.0F);
-            VertexConsumer out = buffers.getBuffer(BEAM_TYPE);
+            VertexConsumer out = buffers.getBuffer(BeamResources.TYPE);
             // The two side quads of the original square tube.
             quad(out, pose, -radius, 0, beamLength, .4999F, v, vEnd, red, green, blue);
             quad(out, pose, 0, radius, beamLength, .4999F, v, vEnd, red, green, blue);

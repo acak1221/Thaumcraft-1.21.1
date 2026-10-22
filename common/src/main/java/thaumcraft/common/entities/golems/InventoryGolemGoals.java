@@ -64,28 +64,33 @@ final class InventoryGolemGoals {
      * goal's flags only to a goal with a <b>lower</b> number, so the registration order and the
      * numbers together reproduce the original's ladder: the lowest entry that wants to run wins and
      * the other four are blocked by its exclusive flags.</p>
+     *
+     * <p>Every entry publishes <b>its own</b> number — the number the original registered it with
+     * (oracle {@code EntityGolemBase.java:270-277,278-285,335-341}) — and the installation uses
+     * that number, so the number of an entry and the number it is installed with cannot drift
+     * apart.</p>
      */
     void install() {
         switch (golem.getGolemCore()) {
             case GolemData.FILL -> {
-                golem.addWorkGoal(GoalPriority.HOME_REPLACE, new HomeReplace());
-                golem.addWorkGoal(GoalPriority.HOME_PLACE, new HomePlace());
-                golem.addWorkGoal(GoalPriority.HOME_DROP, new HomeDrop());
-                golem.addWorkGoal(GoalPriority.FILL_TAKE, new FillTake());
-                golem.addWorkGoal(GoalPriority.FILL_GOTO, new Route());
+                golem.addWorkGoal(HomeReplace.number(), new HomeReplace());
+                golem.addWorkGoal(HomePlace.number(), new HomePlace());
+                golem.addWorkGoal(HomeDrop.number(), new HomeDrop());
+                golem.addWorkGoal(FillTake.number(), new FillTake());
+                golem.addWorkGoal(Route.number(GolemData.FILL), new Route());
             }
             case GolemData.EMPTY_CORE -> {
-                golem.addWorkGoal(GoalPriority.HOME_REPLACE, new HomeReplace());
-                golem.addWorkGoal(GoalPriority.EMPTY_PLACE, new EmptyPlace());
-                golem.addWorkGoal(GoalPriority.EMPTY_DROP, new EmptyDrop());
-                golem.addWorkGoal(GoalPriority.EMPTY_GOTO, new Route());
-                golem.addWorkGoal(GoalPriority.HOME_TAKE, new HomeTake());
+                golem.addWorkGoal(HomeReplace.number(), new HomeReplace());
+                golem.addWorkGoal(EmptyPlace.number(), new EmptyPlace());
+                golem.addWorkGoal(EmptyDrop.number(), new EmptyDrop());
+                golem.addWorkGoal(Route.number(GolemData.EMPTY_CORE), new Route());
+                golem.addWorkGoal(HomeTake.number(), new HomeTake());
             }
             case GolemData.SORTING -> {
-                golem.addWorkGoal(GoalPriority.HOME_REPLACE, new HomeReplace());
-                golem.addWorkGoal(GoalPriority.SORTING_PLACE, new SortingPlace());
-                golem.addWorkGoal(GoalPriority.SORTING_GOTO, new Route());
-                golem.addWorkGoal(GoalPriority.HOME_TAKE_SORTING, new HomeTakeSorting());
+                golem.addWorkGoal(HomeReplace.number(), new HomeReplace());
+                golem.addWorkGoal(SortingPlace.number(), new SortingPlace());
+                golem.addWorkGoal(Route.number(GolemData.SORTING), new Route());
+                golem.addWorkGoal(HomeTakeSorting.number(), new HomeTakeSorting());
             }
             default -> { }
         }
@@ -273,8 +278,19 @@ final class InventoryGolemGoals {
         /** The original's {@code shouldExecute}. */
         abstract boolean ladderCanUse();
 
-        /** The original's {@code startExecuting}. */
-        abstract void ladderStart();
+        /**
+         * The original's {@code startExecuting} — the action of the entry.
+         *
+         * <p>The 1.7.10 selector calls {@code EntityAIBase.startExecuting} (the oracle's
+         * {@code func_75249_e}) when the entry takes the ladder; the 1.21.1 selector calls
+         * {@link Goal#start()} in the same place ({@code GoalSelector.tick}, the "goalUpdate" pass:
+         * {@code wrappedGoal.start()}). The action of an entry is therefore the 1.21.1
+         * {@code start()} itself, and this declaration is <b>abstract</b> so that the compiler
+         * refuses an entry without an action: an entry that only overrides {@code canUse()} would
+         * take the two exclusive flags of the ladder and never do anything, and the golem would
+         * stand still for ever.</p>
+         */
+        @Override public abstract void start();
 
         void openChest(BlockPos pos) {
             chest = pos;
@@ -298,6 +314,9 @@ final class InventoryGolemGoals {
      * never fires and the Fill never replaces its cargo.</p>
      */
     private final class HomeReplace extends LadderGoal {
+        /** The number the original registered the home replacement with (oracle EntityGolemBase:271,279,287,322,336). */
+        static int number() { return GoalPriority.HOME_REPLACE; }
+
         @Override boolean ladderCanUse() {
             // Original AIHomeReplace.func_75250_a:37-45.
             if (!golem.hasCargo() || !GolemRouteRules.decisionTick(golem.tickCount)) return false;
@@ -312,7 +331,7 @@ final class InventoryGolemGoals {
             };
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIHomeReplace.func_75249_e:99-119 — the cargo goes into the home inventory.
             if (golem.placeCarriedAtHome() <= 0) return;
             countChest = GolemRouteRules.CHEST_WINDOW;
@@ -331,6 +350,9 @@ final class InventoryGolemGoals {
      * The original {@code AIHomePlace}: the cargo of the Fill golem goes into the home inventory.
      */
     private final class HomePlace extends LadderGoal {
+        /** The number the original registered the home place with (oracle EntityGolemBase:272). */
+        static int number() { return GoalPriority.HOME_PLACE; }
+
         @Override boolean ladderCanUse() {
             // Original AIHomePlace.func_75250_a:35-63.
             if (!golem.hasCargo() || !GolemRouteRules.decisionTick(golem.tickCount)) return false;
@@ -340,7 +362,7 @@ final class InventoryGolemGoals {
             return home.roomFor(golem.getCarriedItem(), golem.getHomeFacing()) > 0;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             if (golem.placeCarriedAtHome() <= 0) return;
             // Original AIHomePlace.func_75249_e:109 — only the chest window; the goal of the
             // original has NO counter of two hundred (oracle AIHomePlace.java:27-28).
@@ -361,6 +383,9 @@ final class InventoryGolemGoals {
      * the home is no inventory.
      */
     private final class HomeDrop extends LadderGoal {
+        /** The number the original registered the home drop with (oracle EntityGolemBase:273). */
+        static int number() { return GoalPriority.HOME_DROP; }
+
         @Override boolean ladderCanUse() {
             // Original AIHomeDrop.func_75250_a:37-48 — no delay gate, and the home is no inventory.
             if (!golem.hasCargo() || !golem.getNavigation().isDone()) return false;
@@ -368,7 +393,7 @@ final class InventoryGolemGoals {
             return golem.hasHomeWorldThrowTarget();
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIHomeDrop.func_75249_e:72 — the counter of the ladder.
             if (golem.throwCarriedAtHome()) count = GolemLadderRules.PARTIAL_HOLD;
         }
@@ -385,6 +410,9 @@ final class InventoryGolemGoals {
      * that stands next to it.
      */
     private final class FillTake extends LadderGoal {
+        /** The number the original registered the fill take with (oracle EntityGolemBase:274). */
+        static int number() { return GoalPriority.FILL_TAKE; }
+
         @Override boolean ladderCanUse() {
             // Original AIFillTake.func_75250_a:38-41 — no delay gate, the navigator must be idle.
             if (golem.hasCargo() || watched.isEmpty() || !golem.getNavigation().isDone()) return false;
@@ -393,7 +421,7 @@ final class InventoryGolemGoals {
             return takeSource(watched, wanted) != null;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             int wanted = fillRequest(watched);
             if (wanted <= 0) return;
             GolemMarker marker = takeSource(watched, wanted);
@@ -431,6 +459,9 @@ final class InventoryGolemGoals {
      * that stands next to it.
      */
     private final class EmptyPlace extends LadderGoal {
+        /** The number the original registered the empty place with (oracle EntityGolemBase:280). */
+        static int number() { return GoalPriority.EMPTY_PLACE; }
+
         @Override boolean ladderCanUse() {
             // Original AIEmptyPlace.func_75250_a:41-77 — no delay gate, the navigator must be idle.
             if (!golem.hasCargo() || !golem.getNavigation().isDone()) return false;
@@ -442,7 +473,7 @@ final class InventoryGolemGoals {
             return false;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             ItemStack cargo = golem.getCarriedItem();
             for (GolemMarker marker : containersWithRoom(cargo)) {
                 if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker))) continue;
@@ -468,13 +499,16 @@ final class InventoryGolemGoals {
      * that stands next to it.
      */
     private final class EmptyDrop extends LadderGoal {
+        /** The number the original registered the empty drop with (oracle EntityGolemBase:281). */
+        static int number() { return GoalPriority.EMPTY_DROP; }
+
         @Override boolean ladderCanUse() {
             // Original AIEmptyDrop.func_75250_a:30-44 — no delay gate, the navigator must be idle.
             if (!golem.hasCargo() || !golem.getNavigation().isDone()) return false;
             return golem.firstAdjacentWorldThrowMarker() != null;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIEmptyDrop.func_75249_e:60 — the counter of the ladder.
             if (golem.throwCarriedAtMarker()) count = GolemLadderRules.PARTIAL_HOLD;
         }
@@ -492,9 +526,12 @@ final class InventoryGolemGoals {
      * The original {@code AIHomeTake}: the Empty golem takes goods out of its home.
      */
     private final class HomeTake extends LadderGoal {
+        /** The number the original registered the home take with (oracle EntityGolemBase:283). */
+        static int number() { return GoalPriority.HOME_TAKE; }
+
         @Override boolean ladderCanUse() { return candidate() != null; }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             Take take = candidate();
             if (take == null) return;
             GolemHomeInventory.Destination home = golem.homeInventory();
@@ -545,6 +582,9 @@ final class InventoryGolemGoals {
      * container that already holds it.
      */
     private final class SortingPlace extends LadderGoal {
+        /** The number the original registered the sorting place with (oracle EntityGolemBase:337). */
+        static int number() { return GoalPriority.SORTING_PLACE; }
+
         @Override boolean ladderCanUse() {
             // Original AISortingPlace.func_75250_a:41-74 — no delay gate, the navigator must be idle.
             if (!golem.hasCargo() || !golem.getNavigation().isDone()) return false;
@@ -556,7 +596,7 @@ final class InventoryGolemGoals {
             return false;
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             ItemStack cargo = golem.getCarriedItem();
             for (GolemMarker marker : golem.getMarkers()) {
                 if (!GolemRouteRules.adjacent(golem.distanceToMarkerSqr(marker))) continue;
@@ -582,9 +622,12 @@ final class InventoryGolemGoals {
      * The original {@code AIHomeTakeSorting}: the Sorting golem takes goods out of its home.
      */
     private final class HomeTakeSorting extends LadderGoal {
+        /** The number the original registered the sorting take with (oracle EntityGolemBase:339). */
+        static int number() { return GoalPriority.HOME_TAKE_SORTING; }
+
         @Override boolean ladderCanUse() { return candidate() != null; }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             Take take = candidate();
             if (take == null) return;
             GolemHomeInventory.Destination home = golem.homeInventory();
@@ -638,6 +681,21 @@ final class InventoryGolemGoals {
         private GolemMarker pursued;
         private BlockPos previous;
 
+        /**
+         * The number the original registered the route of the core with.
+         *
+         * <p>The Fill route is the number four (oracle {@code EntityGolemBase.java:275}), the Empty
+         * and the Sorting route the number three ({@code :282} and {@code :338}).</p>
+         */
+        static int number(int core) {
+            return switch (core) {
+                case GolemData.FILL -> GoalPriority.FILL_GOTO;
+                case GolemData.EMPTY_CORE -> GoalPriority.EMPTY_GOTO;
+                case GolemData.SORTING -> GoalPriority.SORTING_GOTO;
+                default -> GoalPriority.FILL_GOTO;
+            };
+        }
+
         @Override boolean ladderCanUse() {
             if (interactionReady) return false;
             return switch (golem.getGolemCore()) {
@@ -648,7 +706,7 @@ final class InventoryGolemGoals {
             };
         }
 
-        @Override void ladderStart() {
+        @Override public void start() {
             // Original AIFillGoto.func_75249_e:139-144 and AIEmptyGoto.func_75249_e:114-120.
             count = GolemLadderRules.PARTIAL_HOLD;
             travelStarted = true;

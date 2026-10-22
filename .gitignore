@@ -18,6 +18,8 @@ logs
 .gradle-lev/
 .gradle-neo/
 .gradle-arb/
+# private Gradle home of the golemfix lane (its own Loom cache).
+.gradle-gfix/
 build/
 out/
 run/

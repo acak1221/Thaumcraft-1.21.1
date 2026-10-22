@@ -81,6 +81,8 @@
     "client.Tc4ParticleEngineMixin",
     "client.ParticleLevelAccess",
     "client.Tc4ParticleWorldRenderMixin",
+    "client.TaintOverlayChunkLayerMixin",
+    "client.OreAnisotropyMixin",
     "client.PositionBlockModelMixin",
     "client.WandRenderContextMixin",
     "client.BoneBowHeldPoseMixin",

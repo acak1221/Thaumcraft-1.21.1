@@ -15,6 +15,7 @@ import org.joml.Vector3f;
 import thaumcraft.common.blocks.BlockColoredTallowCandle;
 import thaumcraft.common.blocks.BlockEldritch;
 import thaumcraft.common.blocks.BlockTallowCandle;
+import thaumcraft.common.blocks.BlockCosmeticStairs;
 
 /** Position-aware world geometry, shared by the vanilla and Fabric terrain adapters. */
 public final class PositionBlockModels {
@@ -25,12 +26,27 @@ public final class PositionBlockModels {
     public static boolean handles(BlockState state) {
         return state.getBlock() instanceof BlockTallowCandle
                 || state.getBlock() instanceof BlockColoredTallowCandle
-                || state.hasProperty(BlockEldritch.CRUST_NEIGHBOR_MASK);
+                || state.hasProperty(BlockEldritch.CRUST_NEIGHBOR_MASK)
+                || state.getBlock() instanceof BlockCosmeticStairs || LegacyBlockQuads.handles(state);
     }
 
     public static BakedModel worldModel(BlockAndTintGetter world, BlockPos pos, BlockState state, BakedModel base) {
+        return worldModel(world,pos,state,base,false);
+    }
+
+    /** Platform adapters able to route individual quad materials request both passes. */
+    public static BakedModel worldModel(BlockAndTintGetter world, BlockPos pos, BlockState state, BakedModel base, boolean layered) {
         List<BakedQuad> quads = new ArrayList<>();
-        if (state.hasProperty(BlockEldritch.CRUST_NEIGHBOR_MASK)) {
+        if (LegacyBlockQuads.handles(state)) {
+            quads.addAll(LegacyBlockQuads.quads(world,pos,state,base,layered));
+        } else if (state.getBlock() instanceof BlockCosmeticStairs) {
+            RandomSource random = RandomSource.create(state.getSeed(pos));
+            for (Direction face : Direction.values()) {
+                if (net.minecraft.world.level.block.Block.shouldRenderFace(state,world,pos,face,pos.relative(face)))
+                    for (BakedQuad quad : base.getQuads(state,face,random)) quads.add(stairQuad(quad,pos));
+            }
+            for (BakedQuad quad : base.getQuads(state,null,random)) quads.add(stairQuad(quad,pos));
+        } else if (state.hasProperty(BlockEldritch.CRUST_NEIGHBOR_MASK)) {
             // Also sample here: worldgen/setBlock placement does not call getStateForPlacement.
             int mask = BlockEldritch.crustMask(world, pos);
             quads.addAll(EldritchCrustBakedModel.worldQuads(
@@ -48,6 +64,51 @@ public final class PositionBlockModels {
             }
         }
         return new Geometry(base, List.copyOf(quads));
+    }
+
+    /** Marks an adapter which already routes both cube and overlay to their chunk layers. */
+    public interface LayeredModel {}
+
+    public static BakedModel geometry(BakedModel base,List<BakedQuad> quads) {return new Geometry(base,quads);}
+
+    /** One shared light/pass implementation for vanilla and NeoForge's ModelData overload. */
+    public static boolean tesselate(net.minecraft.client.renderer.block.ModelBlockRenderer renderer,
+            BlockAndTintGetter world,BakedModel base,BlockState state,BlockPos pos,
+            com.mojang.blaze3d.vertex.PoseStack poses,com.mojang.blaze3d.vertex.VertexConsumer vertices,
+            boolean checkSides,RandomSource random,long seed,int overlay) {
+        if(!handles(state)||state.getBlock() instanceof thaumcraft.common.blocks.BlockTaint)return false;
+        var model=worldModel(world,pos,state,base);
+        boolean ao=net.minecraft.client.Minecraft.useAmbientOcclusion()&&state.getLightEmission()==0&&base.useAmbientOcclusion();
+        if(LegacyBlockQuads.handles(state)) {
+            var quads=model.getQuads(state,null,random);
+            if(state.getBlock() instanceof thaumcraft.common.blocks.BlockCustomOre) {
+                var solid=geometry(base,quads.stream().filter(q->!(q instanceof LegacyBlockQuads.LitQuad)).toList());
+                if(ao)renderer.tesselateWithAO(world,solid,state,pos,poses,vertices,checkSides,random,seed,overlay);
+                else renderer.tesselateWithoutAO(world,solid,state,pos,poses,vertices,checkSides,random,seed,overlay);
+                quads=quads.stream().filter(q->q instanceof LegacyBlockQuads.LitQuad).toList();
+            }
+            LegacyBlockQuads.render(world,pos,state,poses,vertices,quads,overlay);
+        } else if(state.getBlock() instanceof BlockCosmeticStairs && ao) {
+            renderer.tesselateWithAO(world,model,state,pos,poses,vertices,checkSides,random,seed,overlay);
+        } else renderer.tesselateWithoutAO(world,model,state,pos,poses,vertices,checkSides,random,seed,overlay);
+        return true;
+    }
+
+    private static BakedQuad stairQuad(BakedQuad quad, BlockPos pos) {
+        int index = BlockCosmeticStairs.textureIndex(pos.getX(),pos.getY(),pos.getZ(),quad.getDirection().get3DDataValue());
+        var sprite = net.minecraft.client.Minecraft.getInstance().getTextureAtlas(
+                net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS).apply(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft","blocks/es_"+(index+1)));
+        int[] data = quad.getVertices().clone();
+        int stride = data.length / 4;
+        var old = quad.getSprite();
+        for (int v=0;v<4;v++) {
+            float u = Float.intBitsToFloat(data[v*stride+4]);
+            float w = Float.intBitsToFloat(data[v*stride+5]);
+            data[v*stride+4] = Float.floatToRawIntBits(sprite.getU((u-old.getU0())/(old.getU1()-old.getU0())));
+            data[v*stride+5] = Float.floatToRawIntBits(sprite.getV((w-old.getV0())/(old.getV1()-old.getV0())));
+        }
+        return new BakedQuad(data,quad.getTintIndex(),quad.getDirection(),sprite,quad.isShade());
     }
 
     private static void box(List<BakedQuad> out, CandleDripRules.Box b, TextureAtlasSprite sprite, int tint) {

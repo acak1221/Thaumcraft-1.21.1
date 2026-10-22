@@ -23,10 +23,7 @@ public abstract class NeoForgePositionBlockModelMixin {
     private void thaumcraft$positionGeometry(BlockAndTintGetter world, BakedModel model, BlockState state,
             BlockPos pos, PoseStack poses, VertexConsumer vertices, boolean checkSides, RandomSource random,
             long seed, int overlay, ModelData data, RenderType layer, CallbackInfo ci) {
-        if (!PositionBlockModels.handles(state)) return;
-        var geometry = PositionBlockModels.worldModel(world,pos,state,model);
-        ((ModelBlockRenderer)(Object)this).tesselateWithoutAO(world,geometry,state,pos,poses,vertices,
-                checkSides,random,seed,overlay);
-        ci.cancel();
+        if(PositionBlockModels.tesselate((ModelBlockRenderer)(Object)this,world,model,state,pos,poses,vertices,
+                checkSides,random,seed,overlay))ci.cancel();
     }
 }

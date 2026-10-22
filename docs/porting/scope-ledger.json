@@ -116,7 +116,7 @@
           "oracle thaumcraft/client/lib/REHWandHandler.java:79,311,319,371 the client architect preview list",
           "oracle thaumcraft/common/items/wands/foci/ItemFocusWarding.java:60,121,143,196 and oracle thaumcraft/common/items/equipment/ItemElementalShovel.java:228-281 the warding and shovel architect areas",
           "oracle grep b_x: no class of the 4.2.3.5 tree calls BlockCoordinates.readNBT or writeNBT, so the NBT helpers are dead code in the original",
-          "native common/src/main/java/thaumcraft/api/IArchitect.java:7,9 the native focus surface (max area size and axis modes) instead of a block list",
+          "native common/src/main/java/thaumcraft/api/IArchitect.java:51,63,71,74 publishes the original block-list/axis methods and the native area-size/axis-mode helpers",
           "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:28,63 the bounded Area record (x, y, z, axis) and its selection",
           "native common/src/main/java/thaumcraft/common/lib/world/WardingCasts.java:37 the native warding cast works on net.minecraft.core.BlockPos",
           "native common/src/main/java/thaumcraft/api/BlockCoordinates.java the published type is back with the original comparison, the original hash and the original NBT keys"
@@ -523,7 +523,7 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a2-warp",
         "evidence": [
-          "oracle thaumcraft/api/IWarpingGear.java:13 public int getWarp(ItemStack var1, EntityPlayer var2);",
+          "oracle thaumcraft/api/IWarpingGear.java:14 public int getWarp(ItemStack var1, EntityPlayer var2);",
           "native common/src/main/java/thaumcraft/api/IWarpingGear.java:11 int getWarp(ItemStack stack, Player player);",
           "native common/src/main/java/thaumcraft/common/lib/WarpGear.java:16-19 WarpGear.of() reads the interface, WarpGear.fromGear() sums hand + 4 armor"
         ],
@@ -735,7 +735,7 @@
         "owner": "audit-a9-core",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/api/ThaumcraftApiHelper.java:40 cullTags / :83 areItemsEqual / :90 isResearchComplete / :94 hasDiscoveredAspect / :98 getDiscoveredAspects / :102 getStackInRowAndColumn / :106 getObjectAspects / :110 getBonusObjectTags / :114 generateTags / :118 containsMatch / :128 areItemStackTagsEqualForCrafting / :148 itemMatches / :155,:163 getConnectableTile / :171 getAllAspects / :182 getAllCompoundAspects / :193,:197,:201 consumeVis* / :205,:209 addWarp* / :213 rayTraceIgnoringSource (24 methods)",
-          "native common/src/main/java/thaumcraft/api/ThaumcraftApiHelper.java:39 cullTags / :75 areItemsEqual / :81,:86 isResearchComplete / :91 hasDiscoveredAspect / :95 getDiscoveredAspects / :100 getStackInRowAndColumn / :104,:110 getObjectAspects / :115 getBonusObjectTags / :120 generateTags / :125 containsMatch / :136 areItemStackTagsEqualForCrafting / :148 itemMatches / :156,:160 getConnectableTile / :167 getAllAspects / :176 getAllCompoundAspects / :185,:189,:193 consumeVis* / :197,:201 addWarp* / :211 rayTraceIgnoringSource"
+          "native common/src/main/java/thaumcraft/api/ThaumcraftApiHelper.java:49,99,106,111,116,120,133,137,143,148,153,158,169,181,189,193,200,209,218,222,226,230,234,244 the published helper declarations, from cullTags to rayTraceIgnoringSource"
         ],
         "notes": [
           "All 24 original public static methods are present with the same names and the same order of meaning; the native adds two 1.21.1 overloads (isResearchComplete(Player,...), getObjectAspects(ItemStack, Level)).",
@@ -1171,7 +1171,7 @@
           "oracle thaumcraft/api/aspects/AspectSourceHelper.java:35 findEssentia(TileEntity, Aspect, ForgeDirection, int)",
           "oracle thaumcraft/common/lib/events/EssentiaHandler.java:39 the handler searches any IAspectSource in the range",
           "oracle thaumcraft/common/lib/events/EssentiaHandler.java:54 the original sends the essence flow packet to the players around the tile",
-          "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:19 drainEssentia(BlockEntity, Aspect, Direction, int)",
+          "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:34 drainEssentia(BlockEntity, Aspect, Direction, int)",
           "native common/src/main/java/thaumcraft/api/aspects/AspectSourceHelper.java:38 findEssentia(BlockEntity, Aspect, Direction, int)",
           "native common/src/main/java/thaumcraft/common/lib/essentia/EssentiaSourceSearch.java the original half box search",
           "oracle thaumcraft/api/aspects/AspectSourceHelper.java:21-39 the two helpers reached EssentiaHandler by reflection",
@@ -1558,7 +1558,7 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
-          "oracle thaumcraft/api/crafting/CrucibleRecipe.java:31-47 matches(): catalyst test first, then per-aspect cost >= recipe cost",
+          "oracle thaumcraft/api/crafting/CrucibleRecipe.java:46-61 matches(): catalyst test first, then per-aspect cost >= recipe cost",
           "oracle thaumcraft/api/crafting/CrucibleRecipe.java:57-65 removeMatching(): copies the crucible list and subtracts the recipe cost",
           "native common/src/main/java/thaumcraft/common/crafting/CrucibleRecipe.java:48-59 matches()/removeMatching() implement the same two rules",
           "native common/src/main/java/thaumcraft/api/crafting/CrucibleRecipe.java:51-74 is a thin facade that keeps the original argument shape"
@@ -1756,7 +1756,7 @@
         "owner": "audit-a4-foci",
         "evidence": [
           "oracle thaumcraft/api/crafting/InfusionRecipe.java:37 matches(ArrayList, ItemStack, World, EntityPlayer)",
-          "native common/src/main/java/thaumcraft/api/crafting/InfusionRecipe.java:54 matches delegates to InfusionStackRecipe",
+          "native common/src/main/java/thaumcraft/api/crafting/InfusionRecipe.java:73-77 matches delegates to InfusionStackRecipe",
           "native common/src/main/java/thaumcraft/common/crafting/InfusionStackRecipe.java:104 removes the first matching component, not a sorted list"
         ],
         "notes": [
@@ -1963,7 +1963,7 @@
           "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:19 the taint source, bypasses armour and magic damage",
           "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:20 tentacle, :21 swarm, :22 dissolve",
           "oracle thaumcraft/api/damagesource/DamageSourceThaumcraft.java:36 causeSwarmDamage, :40 causeTentacleDamage",
-          "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java:22-25 the four damage type keys",
+          "native common/src/main/java/thaumcraft/api/damagesource/DamageSourceThaumcraft.java:27-33 the four damage type keys",
           "native common/src/main/resources/data/thaumcraft/damage_type/taint.json the taint damage type",
           "oracle bytecode thaumcraft/api/damagesource/DamageSourceThaumcraft.<clinit>: taint is setDamageBypassesArmor().setMagicDamage(), dissolve is setDamageBypassesArmor(), tentacle and swarm are plain",
           "native common/src/main/resources/data/minecraft/tags/damage_type/bypasses_armor.json the taint and the dissolve bypass the armour",
@@ -2066,7 +2066,7 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
-          "oracle thaumcraft/api/entities/IEldritchMob.java:8-9 empty marker interface",
+          "oracle thaumcraft/api/entities/IEldritchMob.java:6-7 empty marker interface",
           "native common/src/main/java/thaumcraft/api/entities/IEldritchMob.java:3 empty marker interface",
           "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchCrab.java implements IEldritchMob"
         ],
@@ -2653,7 +2653,7 @@
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/api/nodes/INode.java:12-29 the nine members of the contract",
-          "native common/src/main/java/thaumcraft/api/nodes/INode.java:13-29 the nine members of the contract",
+          "native common/src/main/java/thaumcraft/api/nodes/INode.java:30-59 the contract declarations; its UUID identity format is a deviation from oracle TileNode.java:98-115",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java:60 the node itself implements the published contract now and the published enums are the canonical ones, the nested NodeType and NodeModifier enums are gone (oracle TileNode:75-77)",
           "native common/src/main/java/thaumcraft/api/nodes/NodeAdapter.java:42-71 the published view shares the state, the write path and the identity with the node",
           "open difference: the identity of the native node is a random UUID that is persisted with the node, the original derived it from the position of the node (oracle TileNode:98-115, dim:x:y:z). The format is bound into the accepted evidence of the wave (fabric/src/clientTest/java/thaumcraft/fabric/clienttest/FocalManipulatorClientSequence.java:509 parses the identity with UUID.fromString and the accepted saved worlds carry the UUIDs in their node NBT), so the port cannot change it without invalidating the accepted client run",
@@ -5556,7 +5556,7 @@
           "native client/BoreClientEffects.java:54 the native bore only has the vortex and the beam, there is no flying dig sparkle",
           "native client/fx/particles/BoreDigSparkleParticle.java:1 the native particle reproduces the original FXBoreSparkle: the colour red 0.2 green 0.6+rand*0.3 blue 0.2, the scale rand*0.5+0.5, the life base/2+rand(base) with base=max(1,(int)(distance*3)), the velocity gauss*0.01, the steering 0.3 and 0.6 below four blocks, the drag 0.985, the clamp +-0.35, the size 0.1*scale*(sin(age/3)*0.5+1), the cell age%4 of the second row of the sixteen cell sheet and the full bright light",
           "native client/BoreClientEffects.java:119 the native bore draws the dig of the original: the break sound of the dug block with the volume (pitch+1)/2 and the pitch volume*0.8, then particleCount(10) dig effects, the flying dig sparkle in one case out of ten",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:673 the native client tick calls the dig effect when the dig target of the server arrives with the block entity update"
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:678-689 the native client tick calls the dig effect when the dig target of the server arrives with the block entity update"
         ],
         "notes": [
           "The 1.7.10 class became the native particle BoreDigSparkleParticle and the native dig effect of the bore; every number of the original is kept.",
@@ -5764,7 +5764,7 @@
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXBurst.java:32-34,44-45 the size scaling, the 31 tick lifetime, the node strip texture and glColor4f alpha 0.75",
           "oracle thaumcraft/client/ClientProxy.java:768-771 burst() adds the FXBurst straight to the effect list",
-          "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:39-40 'Exact FXBurst constructor entry, shared by the original Wisp/ShockOrb clients.'",
+          "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:46-47 'Exact FXBurst constructor entry, shared by the original Wisp/ShockOrb clients.'",
           "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:88 u0=(age%32)/32, v0=.96875 (the same node strip)",
           "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:33 renders the burst with the alpha 0.75, the glColor4f(1,1,1,0.75) of the original FXBurst:45",
           "native common/src/main/java/thaumcraft/client/fx/particles/MonsterSpriteParticle.java:31 keeps the life of 31 ticks and :89-90 the strip of the node sheet (u = age % 32 / 32, v = 0.96875)"
@@ -7319,7 +7319,7 @@
         "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:75-76 protected int paneWidth = 256; protected int paneHeight = 230",
-          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:51 panelWidth = Math.min(510, width-16); panelHeight = Math.min(300, height-16)",
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:64 panelWidth = Math.min(510, width-16); panelHeight = Math.min(300, height-16)",
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:387-399 the research frame u-coordinate: Round 54, Hidden 230 (easy/-1) or 86, other 110 (easy/secondary) or 0",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:96 int frameX = ... isHidden() ? 86 : purchases(research) ? 110 : 0",
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:366 drawForbidden(var42+11, var41+11) for a research with warp > 0",
@@ -8323,10 +8323,10 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a1-client",
         "evidence": [
-          "oracle thaumcraft/client/lib/PlayerNotifications.java:24-31 addNotification stores (text,image,expire=now+delay+bonus,created=now+delay/4,color)",
+          "oracle thaumcraft/client/lib/PlayerNotifications.java:39-42 addNotification stores (text,image,expire=now+delay+bonus,created=now+delay/4,color)",
           "oracle thaumcraft/client/lib/PlayerNotifications.java:40-58 getListAndUpdate keeps only unexpired entries and refreshes their expire",
           "oracle thaumcraft/client/lib/PlayerNotifications.java:17-22 addAspectNotification creates the aspect flight with time+1500 expiry and a 0.4+rand*.2 start position",
-          "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:20-24 the same delay/2 first-entry bonus and the same queue",
+          "native common/src/main/java/thaumcraft/client/lib/NotificationQueue.java:17-19 the delay/2 first-entry bonus and notification timestamps",
           "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:76-84 receivePool reproduces the aspect flight start position and the 1500 ms expiry"
         ],
         "notes": [
@@ -14076,7 +14076,7 @@
         "evidence": [
           "legacy src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 1.12 model of the eldritch crystal",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java:1-60 the native model of the eldritch crystal",
-          "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:27 and :37 the crystal is the Crystal and the Base group of the wavefront file thaumcraft/textures/models/vcrystal.obj",
+          "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:39,46,54 loads vcrystal.obj and renders the Base and Crystal groups",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchCrystal.java the one hundred and four vertices, the twenty texture coordinates, the one hundred and eighty normals and the one hundred and eighty triangles of the two groups of the original file, read from the same file",
           "oracle thaumcraft/client/renderers/tile/TileEldritchCrystalRenderer.java:31 the crystal is loaded from the wavefront file vcrystal.obj",
           "native common/src/main/resources/assets/thaumcraft/textures/models/vcrystal.obj the wavefront file of the original",
@@ -16214,7 +16214,7 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a9-core",
         "evidence": [
-          "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/tile/ItemNodeRenderer.java:172 the item form of the node (the block that drops a node item)",
+          "oracle thaumcraft/client/renderers/tile/ItemNodeRenderer.java:49-72 renders the aura-node item; this does not establish a gameplay node-item drop",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileNodeRenderer.java the native node renderer",
           "native common/src/main/java/thaumcraft/common/tiles/TileNode.java: the node has no item form in the native port",
           "native common/src/main/java/thaumcraft/common/lib/world/NodeHarvest.java the wisp essence drop of the original BlockAiry:265-279",
@@ -18505,10 +18505,10 @@
       "native_coverage": "parity_verified",
       "owner": "agent-w7items",
         "evidence": [
-          "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:25 the 1.7 renderer draws the retained thaumatorium.obj model",
+          "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:45,72 the 1.7 renderer draws the retained thaumatorium.obj model",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:44-73 the 1.7 renderer draws the retained textures/models/thaumatorium.obj with textures/models/thaumatorium.png and the turn of the facing",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:74-100 the original cycles the output of one of the possible recipes of the machine above it, one recipe every forty ticks",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:23 the native OBJ loader reads the retained asset and is never referenced",
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelThaumatorium.java:26-35 loads the retained OBJ; common/src/main/java/thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:18 constructs it, so the old unused-loader assertion was false",
           "native common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java:322 the native machine is programmed with a job list and holds no set of possible recipes",
           "REMAINING DIFFERENCE: the retained OBJ is still not rendered: the native draws the plain orientable block model (assets/thaumcraft/models/block/thaumatorium.json) and its OBJ loader (native ModelThaumatorium.java:23-61) stays unreferenced; the cycling output preview cannot be reproduced, because the original shows the output of one of the possible recipes of the machine (tile.recipeHash) and the native machine is programmed with a job list that holds no such set",
           "the exact pose was derived from the retained asset and can be applied in one step: the OBJ spans x -0.5..0.5, y -0.5..0.5 and z 0.0..2.0, so the original translate (x+0.5, y, z+0.5) and glRotatef(90,-1,0,0) become pose.translate(0.5,0,0.5) and Axis.XP.rotationDegrees(-90) in a block entity renderer, followed by the facing rotation around Z: NORTH 270, SOUTH 90, EAST 180, WEST 0 degrees; the two machine blocks would then have to become RenderShape.INVISIBLE because the OBJ already covers both blocks"
@@ -18844,7 +18844,7 @@
         "owner": "agent-clientrender",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:1-98 the relay with the RingBase/RingFloat/Crystal OBJ parts and the power beam",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39 the beam, and common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java the bounded OBJ adapter",
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:42 the beam, and common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java the bounded OBJ adapter",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:26 the vertex-count guard RingBase 96 / RingFloat 96 / Crystal 48 / Support 108",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileVisRelayRenderer.java:39-42 draws the beam and the flare with the original opacity ramp and the original tenfold boost of the revealer",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelVisRelay.java:26 keeps the vertex guard of the original model (RingBase 96, RingFloat 96, Crystal 48, Support 108)"
@@ -19550,7 +19550,7 @@
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileTube.java:372-393 six per-direction IndexedCuboid6 arms plus the 0.34375..0.65625 core",
-          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:12-19 the same six ARMS boxes and the CORE box",
+          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32 the same six ARMS boxes and the CORE box",
           "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:88-100 indexedShape() builds the same union shape"
         ],
         "notes": [
@@ -19600,7 +19600,7 @@
         "evidence": [
           "oracle thaumcraft/common/tiles/TileTube.java:316 RayTracer.retraceBlock(world, player, x, y, z) and :372-393 addTraceableCuboids",
           "oracle thaumcraft/common/items/relics/ItemResonator.java:90 the same retrace call",
-          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:38-58 trace()/retrace() reimplement the indexed cuboid ray trace with native AABB.clip",
+          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:48-81 trace()/retrace() reimplement the indexed cuboid ray trace with native AABB.clip",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemResonator.java:70 TubeGeometry.retrace(player, tube)"
         ],
         "notes": [
@@ -20387,7 +20387,7 @@
         "evidence": [
           "oracle thaumcraft/common/tiles/TileTube.java:35 and :376-393 the Cuboid6 arm/core boxes",
           "oracle thaumcraft/common/tiles/TileTubeBuffer.java:32-34 the same cuboid use",
-          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:12-19 the same boxes as native AABBs"
+          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:23-32 the same boxes as native AABBs"
         ],
         "notes": [
           "The bundled cuboid type was replaced by native AABBs with the same bounds.",
@@ -21124,7 +21124,7 @@
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockTube.java:65,370 new Vector3(start)/new Vector3(end) are the ray trace endpoints",
-          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:59 the native Vec3 start/end"
+          "native common/src/main/java/thaumcraft/common/lib/essentia/TubeGeometry.java:48 the native Vec3 start/end"
         ],
         "notes": [
           "The bundled vector type was replaced by the native Vec3.",
@@ -21289,7 +21289,7 @@
         "owner": "audit-a6-content",
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockAiry.java:115-155 the per metadata hardness (2, 100, -1), explosion resistance (200, 50, MAX_VALUE) and light (15, 0, 8)",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:405-416 AIRY_GROUP_HARDNESS {0,2,100,-1} and AIRY_GROUP_RESISTANCE {0,200,50,MAX}",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:490-491 AIRY_GROUP_HARDNESS {0,2,100,-1} and AIRY_GROUP_RESISTANCE {0,200,50,MAX}",
           "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java:63-66 lightOf() uses the same per variant light table",
           "oracle thaumcraft/common/blocks/BlockAiry.java:167-187 the replaceable and leaves metadata sets",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:385-402 airyReplaceable/airyIsLeaves reproduce them",
@@ -22389,7 +22389,7 @@
           "oracle thaumcraft/common/blocks/BlockEldritch.java:248-260 the per metadata blast resistance 30/100/MAX/20000",
           "oracle thaumcraft/common/blocks/BlockEldritch.java:151-153 the metadata that carries a tile 0/1/3/8/9/10",
           "oracle thaumcraft/common/blocks/BlockEldritch.java:78-94 the icon table obsidiantile/es_i_1/es_i_2/deco_1/deco_2/deco_3/es_5..es_8",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:43-100 the same light, hardness and resistance tables",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:68-120 the same light, hardness and resistance tables",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:104 the metadata to hardness group map {0,0,0,0,1,1,2,3,3,4,4,5}",
           "native common/src/main/resources/assets/thaumcraft/blockstates/eldritch.json:2-17 variants 0..3 and the crust, deco, doorway, spawner and crystal block states",
           "oracle thaumcraft/common/blocks/BlockEldritch.java:70 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockEldritchRenderer.java:86",
@@ -22611,7 +22611,7 @@
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/blocks/BlockEssentiaReservoir.java:95 getComparatorOutputOverride floor(visSize/maxAmount*14) + (visSize>0?1:0)",
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/common/blocks/BlockEssentiaReservoir.java:104 onBlockDestroyed sprays visSize/16 flux blocks",
           "native common/src/main/java/thaumcraft/common/blocks/BlockEssentiaReservoir.java present",
-          "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:23 public static int comparator(int units) {{ return (int) Math.floor(ratio * 14.0F) + (units > 0 ? 1 : 0); }}",
+          "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:28-30 public static int comparator(int units) {{ return (int) Math.floor(ratio * 14.0F) + (units > 0 ? 1 : 0); }}",
           "native common/src/main/java/thaumcraft/common/lib/essentia/ReservoirRules.java:29 public static int sprays(int units) { return units / BURST_UNIT; } (BURST_UNIT 16)"
         ],
         "notes": [
@@ -22871,8 +22871,8 @@
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockFluxGasItem.java the item of the gas fluid",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:30 the native gas block",
-          "oracle thaumcraft/common/config/ConfigBlocks.java:296 the flux gas is registered with the item class BlockFluxGasItem",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:43,52-53 the native gas block",
+          "oracle thaumcraft/common/config/ConfigBlocks.java:308 the flux gas is registered with the item class BlockFluxGasItem",
           "oracle thaumcraft/common/blocks/BlockFluxGasItem.java:9,13-19 the stack limit of sixty four, the full cube and the metadata eight of the placement",
           "native common/src/main/java/thaumcraft/common/blocks/BlockFluxGasItem.java:22-30 the item places the cell with the original metadata eight",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftFlux.java:38-46 the registration of the item and of its creative tab entry"
@@ -23625,7 +23625,7 @@
         "evidence": [
           "oracle thaumcraft/common/blocks/BlockMetalDevice.java:101 setHardness(3.0f)",
           "oracle thaumcraft/common/blocks/BlockMetalDevice.java:102 setResistance(17.0f)",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:572 the hardness 3.0",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:588 the hardness 3.0",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:573 the effective blast resistance 10.2",
           "oracle thaumcraft/common/blocks/BlockMetalDevice.java:145-146 the 1.7.10 block answers the render id of the family and the client draws it with client/renderers/block/BlockMetalDeviceRenderer.java:182",
           "native common/src/main/java/thaumcraft/common/blocks/BlockMetalDevice.java:62 the render shape is RenderShape.MODEL again"
@@ -25571,7 +25571,7 @@
           "oracle thaumcraft/common/blocks/BlockJar.java:184-193 the drop of the node jar carries them",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java the drop of the node jar",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java the stored aspects, the type, the modifier and the identity",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:525-538 the drop of the node jar carries the block entity data of the tile",
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEldritchBlocks.java:611-621 the node-jar drop copies aspects, type, modifier and id through ItemJarNode, not a raw block-entity-data copy",
           "open difference: the native node jar is a block and not an item, so the item form of the original ItemJarNode does not exist; the aspects, the node type, the node modifier and the identity survive the break and the placement in the block entity data of the drop",
           "oracle thaumcraft/common/blocks/ItemJarNode.java:56-214 the item of the original with setAspects, setNodeAttributes, getNodeType, getNodeModifier and getNodeId",
           "oracle thaumcraft/common/blocks/ItemJarNode.java:63-64 the stack limit of the item of the original is one",
@@ -26202,7 +26202,7 @@
         "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
-          "oracle thaumcraft/common/config/MaterialTaint.java:9-42 the taint material is not solid, not replaceable, does not block grass and carries the mobility flag one",
+          "oracle thaumcraft/common/config/MaterialTaint.java:23-36,43-49 the material boolean overrides and mobilityFlag = 1; the assignment is outside the old cited range",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftTaint.java the taint block family with its 1.21.1 block properties",
           "oracle thaumcraft/common/config/MaterialTaint.java:24-38 the taint material is not solid, is not replaceable, does not block the grass and carries the mobility flag one",
           "oracle thaumcraft/common/config/Config.java:917-918 the flux goo and the taint material are both MaterialTaint instances",
@@ -27048,8 +27048,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/common/container/ContainerDeconstructionTable.java:82 the quick move ranges of the table",
-          "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:177 deconstructionQuickMove(...) keeps the original ranges",
+          "oracle thaumcraft/common/container/ContainerDeconstructionTable.java:95-107 the quick move ranges of the table",
+          "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:261-265 deconstructionQuickMove(...) keeps the original ranges",
           "native common/src/main/java/thaumcraft/common/container/ContainerDeconstructionTable.java:1 the native menu"
         ],
         "notes": [
@@ -27546,8 +27546,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/common/container/ContainerThaumatorium.java:96 the quick move of the catalyst slot",
-          "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:199 thaumatoriumQuickMove(...) keeps the original range",
+          "oracle thaumcraft/common/container/ContainerThaumatorium.java:108-129 the quick move of the catalyst slot",
+          "native common/src/main/java/thaumcraft/common/lib/crafting/DeviceContainerRules.java:283 thaumatoriumQuickMove(...) keeps the original range",
           "native common/src/main/java/thaumcraft/common/container/ContainerThaumatorium.java:1 the native menu"
         ],
         "notes": [
@@ -27860,7 +27860,7 @@
           "oracle thaumcraft/common/container/SlotGhostFluid.java:30 isItemValid asks the Forge FluidContainerRegistry",
           "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java the native slot accepts a bucket",
           "oracle thaumcraft/common/container/SlotGhostFluid.java:24-37 the slot accepts what the Forge FluidContainerRegistry calls a container, its limit is one item and it never gives the container back",
-          "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java:33-40 the slot accepts every native fluid container, a bucket of the vanilla or the item of an add-on that carries the bucket entity data, and never gives the container back",
+          "native common/src/main/java/thaumcraft/common/container/SlotGhostFluid.java:34-38 accepts BucketItem or BUCKET_ENTITY_DATA; this predicate alone does not establish compatibility with every fluid-container API",
           "forced 1.21.1 change: 1.21.1 has no Forge fluid container registry, so the registry of the original is the native bucket of 1.21.1"
         ],
         "notes": [
@@ -28829,7 +28829,7 @@
           "oracle thaumcraft/common/entities/ai/combat/AIDartAttack.java:25-27 interval 30 - 8*Air, first delay half, distance 9.0",
           "oracle thaumcraft/common/entities/ai/combat/AIDartAttack.java:62-68 range*0.8 squared test, one dart per interval",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:298 registered at priority 2 (with the R decoration)",
-          "native common/src/main/java/thaumcraft/items/golems/GolemDartRules.java:24-46 interval 30-8*air, firstDelay interval/2, MIN_DISTANCE_SQ 9.0, REACH_FACTOR 0.8",
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemDartRules.java:14-16,24-43 interval 30-8*air, firstDelay interval/2, MIN_DISTANCE_SQ 9.0, REACH_FACTOR 0.8",
           "native common/src/main/java/thaumcraft/entities/golems/GuardGolemGoals.java:36 dart goal at GoalPriority.DART_ATTACK = 2",
           "native common/src/main/java/thaumcraft/entities/golems/GuardGolemGoals.java:158-205 Dart goal body"
         ],
@@ -29595,7 +29595,7 @@
           "oracle thaumcraft/common/entities/ai/interact/AIFish.java:71 work radius ceil(range/2), :118-120 one catch plus one for every Air upgrade",
           "oracle thaumcraft/common/entities/ai/interact/AIFish.java:183-193 junk 0.1-0.025n, treasure 0.05+0.0125n, single uniform roll",
           "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:343 registered at priority 2",
-          "native common/src/main/java/thaumcraft/items/golems/GolemUpgrades.java:211-231 fishJunkBase/fishTreasureBase/fishCategory/fishCatches",
+          "native common/src/main/java/thaumcraft/common/items/golems/GolemUpgrades.java:211-231 fishJunkBase/fishTreasureBase/fishCategory/fishCatches",
           "native common/src/main/java/thaumcraft/entities/golems/FishingGolemGoals.java:1-396 GoalPriority.FISH = 2"
         ],
         "notes": [
@@ -33558,7 +33558,7 @@
         "owner": "audit-a2-warp",
         "evidence": [
           "oracle thaumcraft/common/entities/monster/mods/ChampionModGrim.java:26-30 nextFloat() < 0.4 -> Potion.field_82731_v (wither) for 200 ticks",
-          "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModGrim.java:11 Status.WEAKNESS for 200 ticks",
+          "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModGrim.java:11-13 Status.WITHER for 200 ticks with probability 0.4; the old WEAKNESS assertion was obsolete",
           "native common/src/main/java/thaumcraft/common/lib/WarpEvents.java:177 the same original potion field is mapped to MobEffects.WITHER in the death gaze"
         ],
         "notes": [
@@ -35527,7 +35527,7 @@
         "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
-          "oracle thaumcraft/common/items/ItemKey.java:62-72 the iron and the gold key with the metadata suffix name and the uncommon rarity",
+          "oracle thaumcraft/common/items/ItemKey.java:70-72,86-95 the iron and the gold key with the metadata suffix name and the uncommon rarity",
           "oracle thaumcraft/common/items/ItemKey.java:103-144 the key creates and grants the access of a TileOwned block and plays \"thaumcraft:key\"",
           "native common/src/main/java/thaumcraft/common/items/ItemKey.java:30-95 keeps the two key types, the KEY_LINK component and the access grant",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftLegacyItems.java registers key_iron and key_gold",
@@ -38314,7 +38314,7 @@
           "oracle thaumcraft/common/items/relics/ItemSanityChecker.java the sanity checker only opens the screen of the original",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java the native relic",
           "oracle thaumcraft/common/items/relics/ItemSanityChecker.java:16-40 the stack limit 1, the uncommon rarity and no use behaviour at all",
-          "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java:21-40 the native relic and the reading of the warp",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java:19-24 the inert relic with stack limit one and uncommon rarity; no warp-reading behavior",
           "oracle thaumcraft/common/items/relics/ItemSanityChecker.java:27-55 the item of the 4.2.3.5 carries its stack limit of one, its uncommon rarity and no use behaviour at all",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemSanityChecker.java:19-23 the relic has the stack limit of one, the uncommon rarity and no use behaviour, the warp reading of the later 1.12 reference was removed"
         ],
@@ -38365,7 +38365,7 @@
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/items/relics/ItemThaumometer.java:79-81 getMaxItemUseDuration returns 25",
-          "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:31 getUseDuration returns 25",
+          "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:37,50 getUseDuration returns 25",
           "oracle thaumcraft/common/items/relics/ItemThaumometer.java:155-158 the scan completes when count <= 5, i.e. after 20 of the 25 ticks",
           "native common/src/main/java/thaumcraft/common/items/relics/ItemThaumometer.java:56 level.getGameTime() - session.startTick() >= 20",
           "oracle thaumcraft/common/items/relics/ItemThaumometer.java:87-140 the client picks the entity, the node, the block or a scan callback",
@@ -41554,7 +41554,7 @@
           "oracle grep PacketFXBeamPulseGolemBoss: the 4.2.3.5 tree only declares and registers the message, no class of the original ever sends it",
           "oracle /home/Acak/work/opentc4/src/main/java/thaumcraft/common/lib/network/fx/PacketFXBeamPulseGolemBoss.java:16-57 the readable 1.7.10 source has the same class and the same registration and no sender",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchGolem.java:227-241 the original shot: beamCharge -= 15 + rand.nextInt(5), the EntityGolemOrb with the speed 0.66 and the inaccuracy 5.0 and the sound thaumcraft:egattack",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:247-260 the native shot with the same numbers and the same order",
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java:263-274 the native ranged shot; the old citation pointed to melee rather than packet visual handling",
           "native common/src/main/java/thaumcraft/common/lib/world/EldritchMobRules.java:142-146 the native GOLEM_BEAM_MAX_CHARGE=150, the drain 15+0..4, the speed 0.66 and the inaccuracy 5.0"
         ],
         "notes": [
@@ -41947,7 +41947,7 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a4-foci",
         "evidence": [
-          "oracle thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java:33 the matrix, the offset and the colour",
+          "oracle thaumcraft/common/lib/network/fx/PacketFXInfusionSource.java:28-34 the matrix, the offset and the colour",
           "native common/src/main/java/thaumcraft/common/lib/network/InfusionFxPayload.java:11 the native payload (dimension, matrix, event, target, data)",
           "native common/src/main/java/thaumcraft/common/tiles/TileInfusionMatrix.java sendEffect() is the only sender"
         ],
@@ -42049,7 +42049,7 @@
           "oracle thaumcraft/common/lib/network/fx/PacketFXSonic.java:9-31 the sonic effect of one entity id",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:312 and oracle thaumcraft/common/entities/monster/boss/EntityEldritchGuardian.java:282 the two original senders",
           "native common/src/main/java/thaumcraft/common/lib/network/GuardianSonicPayload.java the native sonic payload of one entity id",
-          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java:496 the native sender"
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java:497-502 the native sender"
         ],
         "notes": [
           "The 1.7 IMessage became an Architectury payload.",
@@ -43239,7 +43239,7 @@
         "owner": "audit-a8-research",
         "evidence": [
           "oracle thaumcraft/common/lib/network/playerdata/PacketSyncScannedItems.java:37-39 the scanned object list of the player",
-          "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:167 writeSet(tag, \"scannedItems\", scannedItems)",
+          "native common/src/main/java/thaumcraft/common/lib/research/PlayerKnowledge.java:172 writeSet(tag, \"scannedItems\", scannedItems)",
           "native common/src/main/java/thaumcraft/common/lib/network/KnowledgeSyncPayload.java:11-31 the single snapshot payload"
         ],
         "notes": [
@@ -44445,7 +44445,7 @@
         "evidence": [
           "oracle thaumcraft/common/lib/utils/Utils.java the helpers of the original",
           "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java the native helpers",
-          "oracle thaumcraft/common/lib/utils/Utils.java:65-86 the original useBonemealAtLoc refuses a crop that cannot grow any further with its IGrowable.canGrow test",
+          "oracle thaumcraft/common/lib/utils/Utils.java:89-104 the original useBonemealAtLoc refuses a crop that cannot grow any further with its IGrowable.canGrow test",
           "native common/src/main/java/thaumcraft/common/lib/utils/Utils.java:281-303 the native useBonemealAtLoc keeps the canGrow refusal"
         ],
         "notes": [
@@ -46973,8 +46973,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileArcaneBoreBase.java:1 the 1.7 stockless Perditio suction endpoint of the bore base",
-          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBoreBase.java:11 the native base is a stockless suction endpoint",
+          "oracle thaumcraft/common/tiles/TileArcaneBoreBase.java:102-128 the 1.7 stockless Perditio suction endpoint of the bore base",
+          "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBoreBase.java:84-89 the native base is a stockless suction endpoint",
           "native common/src/main/java/thaumcraft/common/tiles/TileArcaneBore.java:1 the native bore binds the base"
         ],
         "notes": [
@@ -47526,8 +47526,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileBrainbox.java:1 the 1.7 brainbox that points at the machine half it serves",
-          "native common/src/main/java/thaumcraft/common/tiles/TileBrainbox.java:1 the native brainbox keeps the face of the machine half"
+          "oracle thaumcraft/common/tiles/TileBrainbox.java:16,20,25 the 1.7 brainbox that points at the machine half it serves",
+          "native common/src/main/java/thaumcraft/common/tiles/TileBrainbox.java:18-27 the native brainbox keeps the face of the machine half"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity with the same single face contract."
@@ -48602,8 +48602,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileHole.java:1 the 1.7 hole that replaces a block and restores it later",
-          "native common/src/main/java/thaumcraft/common/tiles/TileHole.java:1 the native hole keeps the replaced block, the lifetime and the chain"
+          "oracle thaumcraft/common/tiles/TileHole.java:115-123 the 1.7 hole that replaces a block and restores it later",
+          "native common/src/main/java/thaumcraft/common/tiles/TileHole.java:27-43,61-78 the native hole keeps the replaced block, the lifetime and the chain"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity; the native block registers the hole ticker."
@@ -48807,9 +48807,9 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileJarBrain.java:13-14 xp and xpMax 2000",
+          "oracle thaumcraft/common/tiles/TileJarBrain.java:27-28 xp and xpMax 2000",
           "oracle thaumcraft/common/tiles/TileJarBrain.java:45-50 the experience orb is pulled from a radius of 7 with the 0.15/0.33/0.15 factors",
-          "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:38-66 keeps the radius 7, the pull factors and the 2000 cap",
+          "native common/src/main/java/thaumcraft/common/tiles/TileJarBrain.java:30-32,60-76 keeps the radius 7, the pull factors and the 2000 cap",
           "oracle thaumcraft/common/tiles/TileJarBrain.java:104-125 getClosestXPOrb() searches the block box expanded by 6",
           "oracle thaumcraft/common/tiles/TileJarBrain.java:64-97 the client side head turn and the periodic sigh of the brain jar",
           "oracle thaumcraft/common/tiles/TileJarBrain.java:107-113 the jar swallows every orb inside its own block",
@@ -48978,8 +48978,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a6-content",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileJarNode.java:99-144 the node jar keeps the aspects, the base aspects, the node type, the modifier and the node id",
-          "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:110-133 stores the same five pieces of data",
+          "oracle thaumcraft/common/tiles/TileJarNode.java:39-43,53-95 the node jar keeps the aspects, the base aspects, the node type, the modifier and the node id",
+          "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:205-262 stores the same five pieces of data",
           "oracle thaumcraft/common/tiles/TileJarNode.java:207-225 the wand turns the jar back into a node and copies the aspects and the node attributes",
           "oracle thaumcraft/common/tiles/TileJarNode.java:222-241 the wand turns the jar back into a node and copies the aspects and the node attributes",
           "native common/src/main/java/thaumcraft/common/tiles/TileJarNode.java:128-146 the same conversion, without shrinking the wand",
@@ -49089,7 +49089,7 @@
         "owner": "audit-a3-devices",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileMagicBox.java:45 the size of the box is 27 * (linkedBoxes + 1)",
-          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:669 magicBoxSize(...) keeps the 27 per box rule",
+          "native common/src/main/java/thaumcraft/common/lib/world/EldritchBlockRules.java:833-835 magicBoxSize(...) keeps the 27 per box rule",
           "oracle thaumcraft/common/tiles/TileMagicBox.java:165 the update refreshes the links when linkedBoxes is negative",
           "native common/src/main/java/thaumcraft/common/tiles/TileMagicBox.java:121 the native tick would refresh the links",
           "native common/src/main/java/thaumcraft/common/blocks/BlockMagicBox.java:1 the native block registers no ticker",
@@ -49458,8 +49458,8 @@
         "native_coverage": "parity_verified",
         "owner": "agent-coremisc",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileNitor.java:18 the 1.7 nitor draws fire essentia from the vis network",
-          "native common/src/main/java/thaumcraft/common/tiles/TileNitor.java:1 the native nitor exists as a source",
+          "oracle thaumcraft/common/tiles/TileNitor.java:18-27 only emits client particles; it neither produces nor drains vis or essentia",
+          "native common/src/main/java/thaumcraft/common/tiles/TileNitor.java:17-21 delegates client particles and has no vis/essentia production or drain",
           "native common/src/main/java/thaumcraft/common/blocks/BlockNitor.java:42 the native nitor registers a client ticker only",
           "oracle bytecode thaumcraft/common/tiles/TileNitor.updateEntity the whole body of the update is inside the isRemote branch, so the original nitor tile has no server side behaviour at all",
           "oracle bytecode thaumcraft/common/blocks/BlockAiry.randomTick the random tick of the original block only draws the client particles of the nitor",
@@ -50591,7 +50591,7 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a4-foci",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileWandPedestal.java:194-211 the draw every fifth tick and the one vis reserve",
+          "oracle thaumcraft/common/tiles/TileWandPedestal.java:193-214 draws every fifth tick, with a one-vis reserve except for iron caps or wood rods",
           "native common/src/main/java/thaumcraft/common/tiles/TileWandPedestal.java:94-97 and :103-127 the same draw",
           "oracle thaumcraft/common/tiles/TileWandPedestal.java:201-203 the iron cap and the wooden rod keep no reserve",
           "native common/src/main/java/thaumcraft/common/lib/tiles/LegacyTileRules.java:263 the same rule",
@@ -50643,8 +50643,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileWarded.java:1 the 1.7 warded tile that keeps the remembered block and owner",
-          "native common/src/main/java/thaumcraft/common/tiles/TileWarded.java:1 the native tile keeps the block state and the owner"
+          "oracle thaumcraft/common/tiles/TileWarded.java:18-20 the 1.7 warded tile that keeps the remembered block and owner",
+          "native common/src/main/java/thaumcraft/common/tiles/TileWarded.java:17-24 the native tile keeps the block state and the owner"
         ],
         "notes": [
           "The 1.7 TileEntity became a 1.21.1 block entity; the class has no timer in either version."
@@ -50738,8 +50738,8 @@
         "native_coverage": "parity_verified",
         "owner": "audit-a3-devices",
         "evidence": [
-          "oracle thaumcraft/common/tiles/TileWardingStoneFence.java:18 the fence needs a warding stone below it",
-          "native common/src/main/java/thaumcraft/common/tiles/TileWardingStoneFence.java:1 the native fence keeps that rule",
+          "oracle thaumcraft/common/tiles/TileWardingStoneFence.java:20-26 the fence survives if a warding stone is one or two blocks below it",
+          "native common/src/main/java/thaumcraft/common/tiles/TileWardingStoneFence.java:25-32 checks for a warding stone one and two blocks below",
           "native common/src/main/java/thaumcraft/common/blocks/BlockWardingStoneFence.java:1 the native fence registers its ticker"
         ],
         "notes": [
@@ -50836,7 +50836,7 @@
         "evidence": [
           "oracle thaumcraft/common/world/aura/AuraHandler.java: absent from the TC4 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:27-33 drainVis floors the amount and delegates to the VisNet handler",
-          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:48-60 the native drainVis(level, pos, amount, simulate) over the essence of the node",
+          "native common/src/main/java/thaumcraft/api/aura/AuraHelper.java:57-60 drainVis delegates to VisNetHandler, selecting the vis network rather than only the node at that position",
           "native common/src/main/java/thaumcraft/api/visnet/VisNetHandler.java:516,517 the native VisNet drain with an aspect",
           "open difference: the legacy drainVis drained the VIS NETWORK at the position (the 1.12 AuraHandler:27-33), the native projection drains the node AT the position, so the two do not select the same source of vis; the class itself has no counterpart in the 4.2.3.5 oracle",
           "legacy src/main/java/thaumcraft/common/world/aura/AuraHandler.java:25-33 the one working method of the 1.12 handler drains the VIS NETWORK at the position (VisNetHandler.drainVis(world, x, y, z, requested, simulate))",

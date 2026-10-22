@@ -2,9 +2,6 @@ package thaumcraft.common.testing;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.BlockEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
@@ -13,12 +10,15 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.ReportedException;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.api.wands.FocusUpgradeType;
 import thaumcraft.common.config.ThaumcraftContent;
 import thaumcraft.common.config.ThaumcraftFoci;
@@ -189,30 +189,19 @@ public final class ExcavationUpgradeRuntimeChecks {
         a.require(observed[0] == 1 && removed(a) == 2 && a.vis("terra") == 0, "post-success drain cannot erase billing, cause second debit, mint refund or authorize another extra");
     }
 
-    /** Decorates the actual loader AFTER invoker, then restores EXACT identity.
-     * Existing listeners run first; no permanent Fabric listener or fake dispatch. */
+    /** The loader's own AFTER phase. The loader owns the mechanism: Fabric decorates its own
+     * AFTER event, NeoForge observes its real native removal. No loader class is named here. */
     private static final class AfterProbe implements AutoCloseable {
-        private final Object event, previous;
-        private final Field invoker;
+        private final NativeBreakPhases probe;
         AfterProbe(FocusUpgradeRuntimeChecks.Actor actor, Consumer<BlockPos> action) {
-            try {
-                Class<?> owner = Class.forName("net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents");
-                event = owner.getField("AFTER").get(null);
-                invoker = event.getClass().getSuperclass().getDeclaredField("invoker"); invoker.setAccessible(true);
-                previous = invoker.get(event);
-                Class<?> callback = Class.forName(owner.getName() + "$After");
-                invoker.set(event, Proxy.newProxyInstance(callback.getClassLoader(), new Class<?>[]{callback}, (proxy, method, args) -> {
-                    Object result;
-                    try { result = method.invoke(previous, args); }
-                    catch (InvocationTargetException failure) { throw failure.getCause(); }
-                    if (args != null && args.length == 5 && args[0] == actor.level && args[1] == actor.player) action.accept((BlockPos)args[2]);
-                    return result;
-                }));
-            } catch (ReflectiveOperationException failure) { throw new IllegalStateException("Actual native AFTER probe unavailable", failure); }
+            probe = NativeBreakPhases.Holder.factory().install(actor.level, actor.player,
+                    NativeBreakPhases.Phase.AFTER, new NativeBreakPhases.Listener() {
+                        @Override public void after(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
+                            if (level != actor.level || player != actor.player) return;
+                            action.accept(pos);
+                        }
+                    });
         }
-        @Override public void close() {
-            try { invoker.set(event, previous); }
-            catch (IllegalAccessException failure) { throw new IllegalStateException("Cannot restore actual native AFTER invoker", failure); }
-        }
+        @Override public void close() { probe.close(); }
     }
 }

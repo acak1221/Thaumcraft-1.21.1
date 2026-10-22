@@ -188,7 +188,8 @@
           "An add-on that implements the original contract therefore still cannot compile against the native interface, and the native has no BlockCoordinates type (that unit is excluded for the same reason).",
           "REMAINING GAP (unchanged and now exactly named): the native architect is a server-authoritative re-implementation, so the original's published entry points - the list of the blocks to highlight and the axis to draw - have no native counterpart; the native interface publishes the size of the area and the number of the selectable axes.",
           "The native path does not consult an add-on override of the original contract, so an add-on that implements the original IArchitect still cannot drive the native architect; an add-on that only reads the area still works.",
-          "CLOSED in this wave: the published value type thaumcraft.api.BlockCoordinates exists again, so an add-on that keeps its own architect preview compiles against the native API."
+          "CLOSED in this wave: the published value type thaumcraft.api.BlockCoordinates exists again, so an add-on that keeps its own architect preview compiles against the native API.",
+          "CLOSED 2026-10-23 (w3rest): the published interface carries the two original members and the original EnumAxis again, the published BlockCoordinates is the type of the block list, and the two native foci implement the original rules of the axis and of the area. The add-on that implements the original contract compiles against the native interface again; the native architect still does not consult an add-on override of it, because the area is server authoritative."
         ],
         "reviewed_sha256": {
           "original": "97ed9a213b2c52c8f20ad5bfdc1690c37fe8936dc3c5d400059fd86cb35c67b3",
@@ -1180,7 +1181,8 @@
           "CLOSED since the first audit: the helper accepts any block entity again and honours the direction and the range, the drain takes one unit out of the first source that holds it and the search asks every source whether it holds the aspect.",
           "REMAINING GAP: the original sent its essence flow packet to the players around the tile; the native has no flow effect for an arbitrary consumer, only the infusion matrix keeps its own effect.",
           "REMAINING GAP (unchanged): the original sent its essence flow packet to the players around the tile (oracle EssentiaHandler:54); the native port has no flow effect for an arbitrary consumer, only the infusion matrix keeps its own effect.",
-          "The drain, the search, the direction and the range of the native helpers are the original ones; the search order and the half box of the original are kept in EssentiaSourceSearch."
+          "The drain, the search, the direction and the range of the native helpers are the original ones; the search order and the half box of the original are kept in EssentiaSourceSearch.",
+          "OPEN 2026-10-23 (w3rest): the drain, the search, the direction and the range of the helpers are the original ones, but the essence flow packet of the original and its client drawing are missing, because the drawing needs the client particle effect FXEssentiaTrail of the client lane."
         ],
         "reviewed_sha256": {
           "original": "4ddfc456b156311238526bca66a0e83f23f926dded3b37a203e57580d96e0305",
@@ -1900,7 +1902,8 @@
           "Forced 1.21.1 change: 1.21.1 has no EntityDamageSourceIndirect, so the class became a factory over the registered damage type; the source names the direct attacker and the real cause exactly as the original did.",
           "REMAINING GAP: the fluent setFireDamage()/setUnblockable() modifiers are gone; the caller has to select a damage type that already carries the property, and the class is no longer constructible with the original signature.",
           "REMAINING GAP (unchanged, forced): 1.21.1 has no EntityDamageSourceIndirect and no mutable damage source, so the fluent setFireDamage() and setUnblockable() modifiers have no counterpart; the caller selects a registered damage type that already carries the property.",
-          "Forced 1.21.1 change: the class became a factory over the registered damage type; the source names the direct attacker and the real cause exactly as the original did."
+          "Forced 1.21.1 change: the class became a factory over the registered damage type; the source names the direct attacker and the real cause exactly as the original did.",
+          "CLOSED 2026-10-23 (w3rest): the two modifiers of the original are published with their original names, setFireDamage and setUnblockable, and they select a registered damage type that carries the property and refuse one that does not, so a modifier is never lost silently."
         ],
         "reviewed_sha256": {
           "original": "aa6e63ab9580d2115bf9beec7e9c16ccc17aa79c5465c877674136aeebbf5694",
@@ -2643,7 +2646,8 @@
         "notes": [
           "The interface itself is ported member for member.",
           "REMAINING GAP (cross lane): the native game node does not implement INode; it is reachable only through the NodeAdapter view, and that view throws UnsupportedOperationException for setNodeType and setNodeModifier, because the native node fixes them when it is created. The native node also carries a UUID identity instead of the original dim:x:y:z string. The node (common/tiles/TileNode) and the adapter (api) must agree on the write path and on the identity, so the api lane owns the decision.",
-          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass."
+          "The native also adds NodeBase, a self-contained INode implementation an add-on can subclass.",
+          "PARTIALLY CLOSED 2026-10-23 (w3rest): the published enums are the canonical ones and the node itself implements the published contract, so the two node type enums of the port are one type and the node and the published view share their state, their write path and their identity. The identity itself stays a random UUID where the original derived it from the position of the node, because the format is bound into the accepted client evidence of the wave."
         ],
         "reviewed_sha256": {
           "original": "d47513d9a62b10a6117236d2a353ebf43e838f05f6c0a82ba729ee75a22798f9",
@@ -20958,7 +20962,8 @@
         "notes": [
           "The 1.7 CommonProxy is replaced by the Architectury layout: a common bootstrap plus one platform bootstrap per loader.",
           "REMAINING GAP: the proxy accessors (getResearchManager, getPlayerKnowledge, getClientWorld) became direct static calls in the common code, so an add-on that used the proxy has to use the new call sites.",
-          "REMAINING GAP: the original proxy carried about forty client effect entry points (the beams, the essentia trail, the infusion particles, the ward, the soul trail, the bottle of taint and others). The native port splits them over the dedicated client effect classes, and the client was never launched in this environment, so the visual parity of those entry points is NOT claimed here."
+          "REMAINING GAP: the original proxy carried about forty client effect entry points (the beams, the essentia trail, the infusion particles, the ward, the soul trail, the bottle of taint and others). The native port splits them over the dedicated client effect classes, and the client was never launched in this environment, so the visual parity of those entry points is NOT claimed here.",
+          "CLOSED 2026-10-23 (w3rest): the server side of the original proxy is published again, the knowledge of a player, the research manager and the five maps of the knowledge. The knowledge is asked for per player, because the native port has no global knowledge registry. The forty client effect entry points belong to the client proxy of the native port and stay with the client lane."
         ],
         "reviewed_sha256": {
           "original": "0e2f04c9a47b0341eb38676ad821017457c26994ba083798265b5a5bc0efd549",
@@ -22120,7 +22125,8 @@
         "notes": [
           "FIXED in wave 1: the item of the plant placed itself on every block and lost the item to the next tick. The original places the plant only on the top face of a block whose soil supports its plant type and it plays the step sound of its own block (oracle BlockCustomPlantItem:50-65). The native item refuses the placement that the original refuses (common/src/main/java/thaumcraft/common/blocks/BlockCustomPlant.java:65-83).",
           "AUDITED in wave 2: 1.21.1 has no IPlantable and no EnumPlantType, so the port answers the plant type with the block itself. The two tables of the original are now carried as pure functions: the table of the item (oracle BlockCustomPlantItem:85-101, the metadata three is Desert, the metadata four and five are Cave, the rest is Plains) and the table of the block (oracle BlockCustomPlant:119-128, the metadata four is Cave and the metadata five, the manashroom, is Plains). The two tables agree for the metadata zero to four and differ for the metadata five only. The soil rule of the port is the Plains soil of the inherited BlockBush plus the sand of the Desert type, and the test of this wave asserts both tables and the soil rule.",
-          "REMAINING GAP: the item of the manashroom of the original asked the soil for a Cave plant while the block of the manashroom is a Plains plant, and the Forge 1.7.10 table of the Cave soils is not part of the decompiled original, so the port cannot prove which block the original needed. The port keeps the Plains soil of the original's own block rule, which is the soil the original's world generator puts the manashroom on (oracle BiomeGenMagicalForest:147). The difference is confined to the two Cave plants of the original. The pitch of the placement sound of the original (the break sound of the plant with the pitch of the sound type times 0.8, oracle BlockCustomPlantItem:76) has no 1.21.1 counterpart, because 1.21.1 has no per block sound pitch."
+          "REMAINING GAP: the item of the manashroom of the original asked the soil for a Cave plant while the block of the manashroom is a Plains plant, and the Forge 1.7.10 table of the Cave soils is not part of the decompiled original, so the port cannot prove which block the original needed. The port keeps the Plains soil of the original's own block rule, which is the soil the original's world generator puts the manashroom on (oracle BiomeGenMagicalForest:147). The difference is confined to the two Cave plants of the original. The pitch of the placement sound of the original (the break sound of the plant with the pitch of the sound type times 0.8, oracle BlockCustomPlantItem:76) has no 1.21.1 counterpart, because 1.21.1 has no per block sound pitch.",
+          "PARTIALLY CLOSED 2026-10-23 (w3rest): the placement of the plant plays the break sound of its own sound type, and the 1.21.1 BlockItem.place plays it with exactly the volume (volume + 1) / 2 and the pitch pitch * 0.8 of the original, so the sound of the original is reproduced. The soil table of the Forge EnumPlantType.Cave is not part of the decompiled original, so the two Cave plants keep the Plains soil of the original own block rule."
         ],
         "reviewed_sha256": {
           "original": "eaf3b4e3bca667e433b2ac53b00b8a091bcb793e7eab3a304b7fa0fae53794ec"
@@ -27634,7 +27640,8 @@
           "The 1.7 slot became a 1.21.1 slot with the same limit of one.",
           "REMAINING GAP: the original accepts any item registered in the Forge FluidContainerRegistry; the native accepts only a BucketItem, which is the only fluid container vanilla 1.21.1 has. A fluid container of an add-on is therefore refused.",
           "REMAINING GAP (unchanged, forced): 1.21.1 has no Forge fluid container registry, so the native slot accepts the only fluid container vanilla 1.21.1 has, a bucket; a fluid container of an add-on is refused.",
-          "The limit of one item per slot and the rule that the slot never gives the container back are the original ones."
+          "The limit of one item per slot and the rule that the slot never gives the container back are the original ones.",
+          "CLOSED 2026-10-23 (w3rest): the slot accepts every native fluid container, a bucket of the vanilla or the item of an add-on that carries the bucket entity data, so an add-on is no longer refused."
         ],
         "reviewed_sha256": {
           "original": "60246eaf76f23f93800b504e112fbbc44ffadb00192a94b5e27e8ebabee555ee",
@@ -38030,7 +38037,8 @@
         ],
         "notes": [
           "AUDITED in wave 2: the identity of the relic agrees with the original: the stack limit of one and the uncommon rarity (oracle ItemSanityChecker:24-30, native ItemSanityChecker:23). The 4.2.3.5 original has no use behaviour at all for the sanity checker, the reading of the warp was added to the item in a later version of Thaumcraft, and the native item keeps that later reading because the relic is pointless without it (the deviation is written down in the javadoc of the native class).",
-          "REMAINING GAP: the native checker reads the warp on use, the original of the 4.2.3.5 does nothing when it is used. The reading itself belongs to the warp domain; the identity of the relic is reproduced."
+          "REMAINING GAP: the native checker reads the warp on use, the original of the 4.2.3.5 does nothing when it is used. The reading itself belongs to the warp domain; the identity of the relic is reproduced.",
+          "CLOSED 2026-10-23 (w3rest): the warp reading of the later 1.12 reference was removed, because the 4.2.3.5 original has no use behaviour at all. The relic of the native port is as pointless as the relic of the original."
         ],
         "reviewed_sha256": {
           "original": "3f7a196d734b3b46ac983d9585f38f3e73fe305e1bcbd04f68639513b8598c34",
@@ -40857,7 +40865,8 @@
           "REMAINING GAP: the block placement is still not cancelled near an active eldritch boss in the Outer Lands.",
           "REMAINING GAP: the original maze load and save on the world load and save events has no native counterpart (the Outer Lands maze is a different subsystem).",
           "REMAINING GAP: the original cancelled the placement of a block near an active eldritch boss in the Outer Lands (oracle EventHandlerWorld.java:197-224); the native port has no such rule.",
-          "REMAINING GAP: the chunk regeneration queue of the original has no counterpart, because 1.21.1 has no equivalent chunk data event."
+          "REMAINING GAP: the chunk regeneration queue of the original has no counterpart, because 1.21.1 has no equivalent chunk data event.",
+          "PARTIALLY CLOSED 2026-10-23 (w3rest): the original cancellation of a block placement next to an active eldritch boss of the Outer Lands is reproduced, with one loader hook per platform, because the cancellable placement event of the common artifact of Architectury and the one of NeoForge do not share a signature. The chunk save and chunk load marker of the original has no 1.21.1 counterpart, because 1.21.1 has no chunk data event."
         ],
         "reviewed_sha256": {
           "original": "4b6666adeef69182a242a0d87fea122fd50805fb446b5ba84e1ebd2c44d3287b",
@@ -41002,7 +41011,8 @@
           "The 1.7 tick handler became the Architectury tick events plus the native excavation code.",
           "The excavation block swap and the note block clearing are implemented in the native excavation and arcane ear code.",
           "REMAINING GAP: the chunk regeneration queue is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row).",
-          "REMAINING GAP: the chunk regeneration queue of the original is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row)."
+          "REMAINING GAP: the chunk regeneration queue of the original is not reproduced, because 1.21.1 has no equivalent chunk data event (see the EventHandlerWorld row).",
+          "OPEN 2026-10-23 (w3rest): the chunk regeneration queue of the original regenerates the chunks whose saved data carries no Thaumcraft marker, ten chunks per world tick, with the TC4 world generation of the original. 1.21.1 has no chunk data event and no per chunk NBT extension point for the marker, and the TC4 generation of the port runs through the datapack feature pipeline, which cannot be re-run for an existing chunk without regenerating its terrain. The options of the original keep their default of false."
         ],
         "reviewed_sha256": {
           "original": "e85740a36e29e290ec08158e3c2e2f71a11af1f299a0baa0f04330dc777999a2",
@@ -41496,7 +41506,8 @@
         ],
         "notes": [
           "The 1.7 simple impl message became 1.21.1 custom payloads; the client half of the block sparkle exists twice (the growth lamp and the infusion).",
-          "Open difference: the server half of the block sparkle is missing for the flux scrubber, the eldritch lock, the warding focus, the wand, the eldritch warden and the server tick; the transport needs a new payload in common/src/main/java/thaumcraft/common/lib/network/**, which belongs to the wave one crashhunt agent; the exact change is written in docs/analysis/2026-10-23-agent-w2devices.md section 6."
+          "Open difference: the server half of the block sparkle is missing for the flux scrubber, the eldritch lock, the warding focus, the wand, the eldritch warden and the server tick; the transport needs a new payload in common/src/main/java/thaumcraft/common/lib/network/**, which belongs to the wave one crashhunt agent; the exact change is written in docs/analysis/2026-10-23-agent-w2devices.md section 6.",
+          "CLOSED 2026-10-23 (w3rest): the server half of the block sparkle exists again, the sparkle is a kind of the block effect payload with its colour, it travels to the players of the original radius of thirty two blocks and the flux scrubber sends it with the original colour 0xDD00FF. The client draws the seven sparkles of the original with the colour of the packet and with the random grey of the wand colour -9999."
         ],
         "reviewed_sha256": {
           "original": "cacd12ecb6a7f5209ecafe5affd92037f0bdae62e3244915266bfe36557e43f9",
@@ -45794,7 +45805,8 @@
           "The guardian count per difficulty and the champion rule are kept.",
           "The guardian offset of the native is (1..3) times (-1..1), the same as the original: MathHelper.getRandomIntegerInRange of 1.7.10 is nextInt(3) + 1 and nextInt(3) - 1.",
           "The permanent item of the key room is spawned with the metadata two of the eldritch object, like the original.",
-          "Blocker: the original anchors the guardian of the key room at the centre of the room with a radius of sixteen (oracle GenKeyRoom:110) and the native spawn record of the world package carries no home, so the guardian of the port has no home. The fix needs a home field in DungeonRooms.Spawn and a restrictTo call in ThaumcraftOuterLands.spawnRoomEntities, and DungeonRooms is the file of the worldgen agent."
+          "Blocker: the original anchors the guardian of the key room at the centre of the room with a radius of sixteen (oracle GenKeyRoom:110) and the native spawn record of the world package carries no home, so the guardian of the port has no home. The fix needs a home field in DungeonRooms.Spawn and a restrictTo call in ThaumcraftOuterLands.spawnRoomEntities, and DungeonRooms is the file of the worldgen agent.",
+          "CLOSED 2026-10-23 (w3rest): the spawn record of the world package carries the home of the guardian now, the centre of the room with the radius of sixteen of the original, and the first guardian of a hard key room is the champion of the original."
         ],
         "reviewed_sha256": {
           "original": "ee88eb80d4c28a4303718a417e8fdf54199096e2146b79a83cc2a7868c6d164b",
@@ -49195,7 +49207,9 @@
           "CLOSED 2026-10-23: the discharge runs only in the invisible aura node block and drains only an unlocked invisible aura node, as TileNode:559-560,577-579 do. The silverwood knot and the totem host of the original never discharge; the native node discharged from and into every node host.",
           "REMAINING GAP (cross lane): the native node does not implement the public thaumcraft.api.nodes.INode and it keeps its own nested NodeType/NodeModifier enums. The public view is the api layer's NodeAdapter, whose setNodeType and setNodeModifier throw, and the node identity of the native node is a UUID instead of the original dim:x:y:z string. Closing the contract needs the api lane (coremisc), because the adapter and the node must agree on the write path and on the identity.",
           "DEVIATION: the original handleDarkNode and handlePureNode biome effects live in the shared NodeEcology of the port, not in the node itself; the behaviour is the same.",
-          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have."
+          "The native adds a server-thread guard, a current-state guard and a prepared-orb emission frame that the original did not have.",
+          "CLOSED 2026-10-23 (w3rest): the node implements the published thaumcraft.api.nodes.INode itself and the published enums are the canonical ones, so the two node type enums of the port are one type and the node writes its type and its modifier through the contract of the original. The identity of the node stays a random UUID, the format is bound into the accepted evidence of the wave.",
+          "OPEN 2026-10-23 (w3rest): everything but the identity is at parity now - the node implements the published contract with the published enums, so the two node type enums of the port are one type, and the write path of the type and of the modifier is the contract of the original. The identity of the node is still a random UUID where the original derived it from the position of the node."
         ],
         "reviewed_sha256": {
           "original": "b672c7d42f8c9f2af611c6576235dbafa6a6ae4e96adf0b67809318e1a782348",
@@ -49523,7 +49537,8 @@
           "Deviation: the original's Material-based block classification is replaced by an explicit 1.21.1 block list plus tags (native TileResearchTable.java:285-301); the bonus pool is a bounded map instead of an AspectList with merge(max) semantics.",
           "Deviation: the original's client-side placeAspect packet became a server-authoritative, revision-checked edit request; the original's overwrite/hole/free-funding exploits are closed (documented in ResearchNoteEditing).",
           "Not reproduced: the original's replace-the-table-on-copy side effect (oracle TileResearchTable:415) - the native keeps the table and the copied note.",
-          "OPEN DEFECT (proved, blocked): the copy of a solved note costs an ink sac in the port, but the original costs one black dye (Items.dye metadata 0 in 1.7.10, minecraft:black_dye in 1.21.1). The fix is two lines - ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC - but common/src/main/java/thaumcraft/common/tiles/** belongs to the block entity wave, so the change was not made in this wave."
+          "OPEN DEFECT (proved, blocked): the copy of a solved note costs an ink sac in the port, but the original costs one black dye (Items.dye metadata 0 in 1.7.10, minecraft:black_dye in 1.21.1). The fix is two lines - ResearchTableCopyNetworking.findSupply must look for Items.BLACK_DYE and TileResearchTable.commitCopy must accept Items.BLACK_DYE instead of Items.INK_SAC - but common/src/main/java/thaumcraft/common/tiles/** belongs to the block entity wave, so the change was not made in this wave.",
+          "CLOSED 2026-10-23 (w3rest): the copy of a solved note costs one paper and one black dye, the original Items.dye of the metadata zero (minecraft:black_dye of 1.21.1), and never an ink sac. The network receiver, the commit of the table, the admission of the menu, the tooltip of the client and the two probes of the game test harness were changed together."
         ],
         "reviewed_sha256": {
           "original": "cfa85e36602963466912ff91217764ef5e8c0cd673b71ef521d04124012b3f37",

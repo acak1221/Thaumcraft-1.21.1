@@ -253,12 +253,13 @@ area, instead of only in a debugger.
 ```
 $ rm -rf fabric/run-gametest/world
 $ ./gradlew --console=plain :fabric:runGameTest -PgameTestHeap=3G
-[13:48:46] [Server thread/INFO] (Minecraft) ========= 325 GAME TESTS COMPLETE IN 1.472 min ======================
-[13:48:46] [Server thread/INFO] (Minecraft) All 325 required tests passed :)
+[14:03:42] [Server thread/INFO] (Minecraft) ========= 325 GAME TESTS COMPLETE IN 1.377 min ======================
+[14:03:42] [Server thread/INFO] (Minecraft) All 325 required tests passed :)
 ```
 
-The whole suite was run **twice on a clean world** after the fix, and the log of neither run holds
-a "discarded by a neighbouring scenario" or a "no loaded navigation area" line.
+The whole suite was run **three times on a clean world** after the fix (13:48, 13:58, 14:03), and the
+log of none of them holds a "discarded by a neighbouring scenario" or a "no loaded navigation area"
+line.
 
 ### 5.3 The unit tests
 
@@ -329,8 +330,7 @@ $ python3 scripts/porting/update_scope_ledger.py --check --original-root /home/c
 
 | commit | what |
 |---|---|
-| `fix(gametest): the clean up of the shared lane stays inside the lane` | the sweep of the lane is five blocks, not sixteen |
-| `fix(gametest): the golem scenarios take their ring of chunks back` | `GolemChunks.refresh` and its three callers |
-| `fix(gametest): the golem scenarios arm their golem again` | the re-arm of the item-match, the colours and the fetter scenario, and the first living update of the fresh golem |
-| `test(gametest): the isolation rules of the golem scenarios` | the JUnit guard and the heap property of the GameTest server |
-| `docs(isolate): the bisect, the mechanism and the fix` | this report |
+| `45d80bea fix(gametest): the clean up of the shared lane stays inside the lane` | the sweep of the lane is five blocks, not sixteen |
+| `cd3ced92 fix(gametest): the golem scenarios survive their neighbours` | `GolemChunks.refresh`, the re-arm of the three scenarios, the state of the golem in the failure message |
+| `79518e71 test(gametest): the isolation rules of the golem scenarios` | the JUnit guard, the heap property of the GameTest server |
+| `036c1ded docs(isolate): the bisect, the mechanism and the fix` | this report |

@@ -42,15 +42,82 @@ def stage(ref: str, path: Path) -> dict | None:
         return None
 
 
-def merge_ledger(ours: dict, theirs: dict) -> dict:
-    """Union the review verdicts of two ledgers, unit by unit."""
+def merge_base_ledger(branch: str) -> dict | None:
+    """The ledger at the merge base of the branch and the current head.
+
+    It tells which side of a conflict carries the newer text of a row: the side
+    that changed the row against the base is the newer one.
+    """
+    base = subprocess.run(["git", "merge-base", "HEAD", branch],
+                          capture_output=True, text=True).stdout.strip()
+    if not base:
+        return None
+    return stage(f"{base}:{LEDGER}", LEDGER)
+
+
+def _union(ours: list | None, theirs: list | None) -> list:
+    """The union of two lists, ours first, without duplicates."""
+    merged = list(ours or [])
+    for item in theirs or []:
+        if item not in merged:
+            merged.append(item)
+    return merged
+
+
+def _newest(ours: list | None, theirs: list | None, base: list | None) -> list:
+    """The newer text of a row, with nothing lost.
+
+    Only the branch changed the row against the merge base: the branch's text is
+    the newer one.  Only the merged-in side changed it: that text is newer.  Both
+    sides changed it: the two texts are unioned, so that neither the branch's
+    new paragraphs nor the merged-in side's are lost.
+    """
+    ours = list(ours or [])
+    theirs = list(theirs or [])
+    base = list(base or [])
+    if not theirs:
+        return ours
+    if not ours:
+        return theirs
+    if theirs == base:
+        return ours
+    if ours == base:
+        return theirs
+    return _union(ours, theirs)
+
+
+def merge_ledger(ours: dict, theirs: dict, base: dict | None = None) -> dict:
+    """Union the review verdicts of two ledgers, unit by unit.
+
+    The notes and the evidence of a unit are the audit trail of that unit, and
+    they are written by the lane that touched it.  A plain "the other side only
+    wins when this side has nothing" rule silently DROPPED the notes and the
+    evidence of every row a wave branch had touched, because the audit usually
+    already had a note from an earlier wave.  The evidence is therefore unioned,
+    and the note of a row is taken from the side that actually CHANGED the row:
+    the merge base tells which side is the newer text.
+    """
     units = {unit["canonical_path"]: unit for unit in theirs.get("units", [])}
+    base_units = {unit["canonical_path"]: unit for unit in (base or {}).get("units", [])}
     for unit in ours.get("units", []):
-        other = units.get(unit["canonical_path"])
+        path = unit["canonical_path"]
+        other = units.get(path)
         if other is None:
             continue
         base = unit.setdefault("review", {})
-        for key, value in other.get("review", {}).items():
+        other_review = other.get("review", {})
+        # The row of the merge base: the text the branch started from.
+        base_review = (base_units.get(path) or {}).get("review", {})
+        for key, value in other_review.items():
+            if key == "evidence":
+                # A list: union, never replace, so nothing is lost.
+                base[key] = _union(base.get(key), value)
+                continue
+            if key == "notes":
+                # A list of paragraphs: the side that changed the row against the
+                # merge base carries the newer text.
+                base[key] = _newest(base.get(key), value, base_review.get(key))
+                continue
             if key not in base:
                 base[key] = value
             elif base[key] != value and key == "native_coverage":
@@ -64,6 +131,14 @@ def merge_ledger(ours: dict, theirs: dict) -> dict:
     for key, value in theirs.items():
         if key != "units" and key not in ours:
             ours[key] = value
+    # A unit that only the branch knows is a unit the branch ADDED, so it must
+    # survive the merge; the old loop only walked the units of the merged-in
+    # side and dropped every new one.
+    known = {unit["canonical_path"] for unit in ours.get("units", [])}
+    for unit in theirs.get("units", []):
+        if unit["canonical_path"] not in known:
+            ours.setdefault("units", []).append(unit)
+            known.add(unit["canonical_path"])
     return ours
 
 
@@ -98,7 +173,7 @@ def resolve_json_conflict(path: Path, branch: str) -> bool:
     if ours is None or theirs is None:
         return False
     if path == LEDGER:
-        merged = merge_ledger(ours, theirs)
+        merged = merge_ledger(ours, theirs, merge_base_ledger(branch))
     elif path == INVENTORY:
         merged = merge_inventory(ours, theirs)
     else:

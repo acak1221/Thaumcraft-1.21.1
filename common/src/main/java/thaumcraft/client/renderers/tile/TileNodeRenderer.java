@@ -149,10 +149,36 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
                                  int blockX, thaumcraft.api.aspects.AspectList aspects, NodeType type,
                                  NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age) {
         long now = System.nanoTime();
-        int frame = (int)Math.floorMod(now / 40000000L + blockX, 32L);
+        int frame = (int) Math.floorMod(now / 40000000L + blockX, 32L);
         pose.pushPose();
         pose.translate(.5, .5, .5);
         pose.mulPose(minecraft.gameRenderer.getMainCamera().rotation());
+        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, depthIgnore, age, now);
+        pose.popPose();
+    }
+
+    /**
+     * The original {@code ItemNodeRenderer.renderItemNode}: the node of the item form.
+     *
+     * <p>Oracle {@code thaumcraft/client/renderers/tile/ItemNodeRenderer.java:72-170}: the node of the
+     * item is drawn in the plane of the item and not facing the camera, it ignores the depth test and it
+     * uses the frame {@code (nanoTime / 40000000 + 1) % 32}. The caller draws it three times, so the
+     * item shows the three crossed planes of the original.</p>
+     */
+    public static void drawItemNode(PoseStack pose, MultiBufferSource buffers,
+                                    thaumcraft.api.aspects.AspectList aspects, NodeType type,
+                                    NodeModifier modifier, float alpha, float size, float age) {
+        long now = System.nanoTime();
+        int frame = (int) Math.floorMod(now / 40000000L + 1L, 32L);
+        drawNodeBody(pose, buffers, frame, aspects, type, modifier, alpha, size, true, age, now);
+    }
+
+    /** The body of the node, without the camera rotation of the world. */
+    private static void drawNodeBody(PoseStack pose, MultiBufferSource buffers, int frame,
+                                     thaumcraft.api.aspects.AspectList aspects, NodeType type,
+                                     NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age,
+                                     long now) {
+        pose.pushPose();
         if (modifier == NodeModifier.BRIGHT) alpha *= 1.5f;
         else if (modifier == NodeModifier.PALE) alpha *= .66f;
         else if (modifier == NodeModifier.FADING) alpha *= Mth.sin(age / 3) * .25f + .33f;

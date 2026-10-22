@@ -74,6 +74,20 @@ final class ResearchIconDisplay {
         if (expression.equals("new ItemStack(ConfigBlocks.blockCustomOre, 1, Short.MAX_VALUE)")) {
             return registered(ORES.get((int) (System.currentTimeMillis() / 1000L % ORES.size())), 1);
         }
+        // ConfigResearch:379-382: the icon of the NODEJAR research is the itemJarNode
+        // item with the four primal aspects of forty units and a normal node type.
+        if (expression.equals("jarIs")) {
+            ItemStack stack = new ItemStack(thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_NODE_ITEM.get());
+            if (stack.getItem() instanceof thaumcraft.common.blocks.ItemJarNode item) {
+                item.setAspects(stack, new thaumcraft.api.aspects.AspectList()
+                        .add(thaumcraft.api.aspects.Aspect.AIR, 40)
+                        .add(thaumcraft.api.aspects.Aspect.FIRE, 40)
+                        .add(thaumcraft.api.aspects.Aspect.WATER, 40)
+                        .add(thaumcraft.api.aspects.Aspect.EARTH, 40));
+                item.setNodeAttributes(stack, thaumcraft.api.nodes.NodeType.NORMAL, null, "");
+            }
+            return stack;
+        }
         var match = STACK.matcher(expression);
         if (!match.matches()) return ItemStack.EMPTY;
         int count = match.group(2) == null ? 1 : Integer.parseInt(match.group(2));

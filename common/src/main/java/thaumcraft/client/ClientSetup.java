@@ -140,6 +140,9 @@ public final class ClientSetup {
         ThaumcraftWarpClient.init();
         ItemWispEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         ItemJar.setTooltipViewer(() -> Minecraft.getInstance().player);
+        // Original ItemJarNode:81-98 - the tooltip of the node jar names the node
+        // type, the node modifier and the aspects of the stored node.
+        thaumcraft.common.blocks.ItemJarNode.setTooltipViewer(() -> Minecraft.getInstance().player);
         thaumcraft.common.items.ItemCrystalEssence.setTooltipViewer(() -> Minecraft.getInstance().player);
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftInfusion.TALLOW_CANDLE.get());
         RenderTypeRegistry.register(RenderType.cutout(), thaumcraft.common.config.ThaumcraftGrate.ITEM_GRATE.get());

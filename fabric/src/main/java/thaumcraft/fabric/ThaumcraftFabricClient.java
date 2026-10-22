@@ -85,6 +85,10 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
         // and labels must come from this stack, never a synthetic world tile.
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftContent.JAR.get(), JarItemRenderer::render);
         BuiltinItemRendererRegistry.INSTANCE.register(ThaumcraftContent.VOID_JAR.get(), JarItemRenderer::render);
+        // Original ItemJarNodeRenderer: the node of the jar in three crossed planes
+        // inside the glass shell of the item.
+        BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftEldritchBlocks.JAR_NODE_ITEM.get(),
+                thaumcraft.client.renderers.tile.ItemJarNodeRenderer::render);
         // Original ItemThaumometerRenderer: the thaumometer is the three
         // dimensional scanner of the original, not a flat sprite.
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftContent.THAUMOMETER.get(),

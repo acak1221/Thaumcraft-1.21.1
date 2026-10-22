@@ -400,7 +400,15 @@ public final class ThaumcraftEldritchBlocks {
     public static final RegistrySupplier<Item> AIRY_NODE_ITEM = ITEMS.register("airy_node", () -> new BlockItem(AIRY_NODE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> AIRY_HOLE_ITEM = ITEMS.register("airy_hole", () -> new BlockItem(AIRY_HOLE.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> JAR_BRAIN_ITEM = ITEMS.register("jar_brain", () -> new BlockItem(JAR_BRAIN.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> JAR_NODE_ITEM = ITEMS.register("jar_node", () -> new BlockItem(JAR_NODE.get(), new Item.Properties()));
+    /**
+     * The item form of the node jar.
+     *
+     * <p>Original {@code ItemJarNode.java:56-214}: the item carries the aspects, the node type, the node
+     * modifier and the identity of the stored node and publishes them with the original method names.
+     * The original limits the stack of the item to one (oracle {@code :63-64}).</p>
+     */
+    public static final RegistrySupplier<Item> JAR_NODE_ITEM = ITEMS.register("jar_node",
+            () -> new thaumcraft.common.blocks.ItemJarNode(JAR_NODE.get(), new Item.Properties().stacksTo(1)));
     public static final RegistrySupplier<Item> ETHEREAL_BLOOM_ITEM = ITEMS.register("ethereal_bloom", () -> new BlockItem(ETHEREAL_BLOOM.get(), new Item.Properties()));
 
     // ---------------------------------------------------------- block entities
@@ -566,15 +574,18 @@ public final class ThaumcraftEldritchBlocks {
          * type, the node modifier and the identity of the node travel with the dropped item.
          *
          * <p>The original dropped the {@code itemJarNode} item with its NBT; the native node jar
-         * is a block, so the dropped block item carries the block entity data of the tile. The
-         * vanilla {@code applyComponentsFromItemStack} reads it back when the item is placed.</p>
+         * is a block, so the dropped block item of the native carries the same data with the
+         * published API of the original item.</p>
          */
         @Override protected java.util.List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
             if (kind != 1) return super.getDrops(state, params);
-            ItemStack drop = new ItemStack(state.getBlock());
+            ItemStack drop = new ItemStack(JAR_NODE_ITEM.get());
             BlockEntity tile = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
             if (tile instanceof TileJarNode node && node.drop) {
-                node.saveToItem(drop, params.getLevel().registryAccess());
+                if (drop.getItem() instanceof thaumcraft.common.blocks.ItemJarNode item) {
+                    item.setAspects(drop, node.getAspects());
+                    item.setNodeAttributes(drop, node.getNodeType(), node.getNodeModifier(), node.getId());
+                }
             }
             return java.util.List.of(drop);
         }

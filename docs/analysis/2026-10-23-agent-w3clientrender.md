@@ -121,6 +121,44 @@ and the port. The proof is the new test
 which renders a plain and a mirrored box with the real 1.21.1 classes and compares the
 positions, the texture region and the normals.
 
+### 0.3 The one real difference next to the warden's eye: the blend state
+
+* original oracle `ModelEldritchGuardian.java:467-479`: `glEnable(GL_BLEND)` +
+  `glBlendFunc(GL_SRC_ALPHA, GL_ONE)` (additive) for the eye pass, then `glDisable`.
+* port `RenderEldritchWarden.java:80-86`: the eye was drawn into the same
+  `RenderType.entityTranslucent(SKIN)` buffer, i.e. `SRC_ALPHA, ONE_MINUS_SRC_ALPHA`.
+
+The original adds the eye colour to the hood, the port replaced it. Fixed in this wave
+with `RenderType.eyes(SKIN)`, the additive and emissive render type of 1.21.1
+(`RenderStateShard.ADDITIVE_TRANSPARENCY` is `SRC_ALPHA, ONE`, and the emissive shader
+ignores the lightmap, which is what the original's broken
+`OpenGlHelper.func_77475_a(1002, ...)` call - a `glLight` with a texture unit as the
+light index, which the driver rejects - left behind).
+
+### 0.4 Why the "final full cube" of the 1.7.10 renderers is not a draw
+
+Every TC4 `ISimpleBlockRenderingHandler` ends its world render with
+
+```java
+renderer.func_147771_a();                                  // endBlockDrawing
+block.func_149676_a(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);  // Block.setBlockBounds
+renderer.func_147775_a(block);                            // RenderBlocks
+```
+
+and the inventory render draws its faces with `BlockRenderer.drawFaces` and **not** with
+`RenderBlocks`. `RenderBlocks.func_147775_a(Block)` is the one argument variant that
+synchronises the block's bounds into the render bounds (the 1.8 equivalent is
+`RenderBlocks.func_83018_a(Block)`, which reads `func_83009_v()`..`func_83006_A()` of the
+block into the six render bounds), and `func_147784_q(block, x, y, z)` is the draw
+(`renderStandardBlock`). The final pair is therefore a **bounds reset**, not a draw.
+
+That is what makes the following decisions of this wave provable:
+
+* the arcane ear of the original is the ten boxes of `BlockWoodenDeviceRenderer:44-83`, not
+  a full cube - the port's model was a full cube and is now the ten boxes;
+* the alembic of the original is the object of `ModelAlembic` and not a full metal block,
+  so the port's empty `alembic.json` is right.
+
 ## 1. The 25 units
 
 ### closed in this wave (`partial` -> `parity_verified`)

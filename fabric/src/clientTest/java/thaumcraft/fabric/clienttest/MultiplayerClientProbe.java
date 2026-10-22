@@ -1220,13 +1220,17 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         if (!bringPeerNextToLead(client)) return false;
-        // The grant and the question are repeated until the second client
-        // really reports the research: the client tick and the server tick are
-        // independent, so the server may not have processed the grant when the
-        // question is asked for the first time.
+        // The grant is repeated, but the QUESTION is only asked again after the
+        // answer of the previous question arrived: a new question would
+        // invalidate an answer that is still on its way, and the second client
+        // of an oversubscribed host can need more than a second to answer.
         if (stageTicks % 20 == 0) {
             client.getConnection().sendCommand("thaumcraft research " + peerName + " " + PEER_RESEARCH);
+        }
+        if (stageData.get("ask") == null) {
             pairCommand("HAS_RESEARCH", PEER_RESEARCH);
+            stageData.put("ask", true);
+            return false;
         }
         if (!pairReplied()) return false;
         evidence.put("pair_peer_research_answer", pairAnswer);
@@ -1235,9 +1239,10 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         evidence.put("pair_lead_has_peer_research", leadHas);
         evidence.put("pair_peer_has_own_research", peerHas);
         if (!peerHas) {
-            if (stageTicks > 600) {
+            if (stageTicks > 1200) {
                 throw new IllegalStateException("The second client never received its own research grant: " + pairAnswer);
             }
+            pairCommand("HAS_RESEARCH", PEER_RESEARCH);
             return false;
         }
         if (leadHas) throw new IllegalStateException("The lead client received the second client's research grant");
@@ -1268,13 +1273,18 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         if (!Boolean.TRUE.equals(stageData.get("research_done"))) {
             if (stageTicks % 20 == 0) {
                 client.getConnection().sendCommand("thaumcraft research " + peerName + " " + AMULET_RESEARCH);
+            }
+            if (stageData.get("research_ask") == null) {
                 pairCommand("HAS_RESEARCH", AMULET_RESEARCH);
+                stageData.put("research_ask", true);
+                return false;
             }
             if (!pairReplied()) return false;
             if (!pairAnswer.endsWith(" 1")) {
-                if (stageTicks > 600) {
+                if (stageTicks > 1200) {
                     throw new IllegalStateException("The second client never received the " + AMULET_RESEARCH + " research");
                 }
+                pairCommand("HAS_RESEARCH", AMULET_RESEARCH);
                 return false;
             }
             evidence.put("pair_peer_amulet_research_answer", pairAnswer);

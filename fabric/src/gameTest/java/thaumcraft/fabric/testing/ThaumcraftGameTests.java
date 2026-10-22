@@ -1537,6 +1537,11 @@ public final class ThaumcraftGameTests implements FabricGameTest {
         thaumcraft.common.testing.TaintBlockRuntimeChecks.run(test);
     }
 
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 120, batch = "g22_taint_distribution")
+    public void taintSpreadMeasuresOracleDistributionAndTargets(GameTestHelper test) {
+        thaumcraft.common.testing.TaintBlockRuntimeChecks.audit(test);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "m08_taint_spore_growth")
     public void taintSporesGrowOnRealFibresAndBurstIntoActualSpiders(GameTestHelper test) {
         thaumcraft.common.testing.TaintSporeRuntimeChecks.growthAndBurst(test);

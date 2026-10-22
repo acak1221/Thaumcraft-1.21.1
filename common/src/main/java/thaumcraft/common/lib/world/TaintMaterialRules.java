@@ -18,9 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
  *       {@code Material.field_151578_c} = ground (dirt and farmland), {@code Material.field_151577_b} = grass
  *       (the grass block) and {@code Material.field_151571_B} = clay (the clay block).</li>
  * </ul>
- * <p>The native sets are exactly these blocks. The 1.21.1 blocks that have no 1.7.10 counterpart
- * (mycelium, soul sand, coarse dirt, rooted dirt and red sand) are not converted, because the
- * original never converted them either.</p>
+ * <p>Material checks did not filter metadata: red sand (sand1), coarse dirt (dirt1) and
+ * podzol (dirt2) are eligible too. Mycelium used grass material and soul sand used sand
+ * material. Rooted dirt has no 1.7.10 counterpart and is not added to this compatibility set.</p>
  */
 public final class TaintMaterialRules {
     private TaintMaterialRules() {}
@@ -30,9 +30,10 @@ public final class TaintMaterialRules {
     public static boolean crust(BlockState state) {
         return log(state)||state.is(Blocks.CACTUS)||state.is(Blocks.PUMPKIN)||state.is(Blocks.CARVED_PUMPKIN)||state.is(Blocks.JACK_O_LANTERN)||state.is(Blocks.MELON);
     }
-    /** Original BlockTaintFibres:177 - sand, gravel, dirt, farmland, grass or clay becomes taint soil. */
+    /** Original BlockTaintFibres:177 - every mapped sand/ground/grass/clay subtype becomes soil. */
     public static boolean soil(BlockState state) {
         return state.is(Blocks.SAND)||state.is(Blocks.GRAVEL)||state.is(Blocks.DIRT)||state.is(Blocks.FARMLAND)
-                ||state.is(Blocks.GRASS_BLOCK)||state.is(Blocks.CLAY);
+                ||state.is(Blocks.GRASS_BLOCK)||state.is(Blocks.CLAY)||state.is(Blocks.RED_SAND)
+                ||state.is(Blocks.COARSE_DIRT)||state.is(Blocks.PODZOL)||state.is(Blocks.MYCELIUM)||state.is(Blocks.SOUL_SAND);
     }
 }

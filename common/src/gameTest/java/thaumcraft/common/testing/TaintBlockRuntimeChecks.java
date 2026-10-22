@@ -62,6 +62,11 @@ import thaumcraft.common.lib.world.BiomeColumns;
 public final class TaintBlockRuntimeChecks {
     private static final int QUIET=Block.UPDATE_CLIENTS|Block.UPDATE_KNOWN_SHAPE;
     private TaintBlockRuntimeChecks(){}
+    public static void audit(GameTestHelper test){
+        var check=new Check(test);
+        try{check.prepare();check.measureSpread();check.finish();test.succeed();}
+        catch(RuntimeException|Error failure){check.finish();throw failure;}
+    }
     public static void run(GameTestHelper test){
         var check=new Check(test);try{check.prepare();check.blocks();check.spread();check.ecology();check.gooAndRestoration();check.poison();check.falling();}
         catch(RuntimeException|Error failure){check.finish();throw failure;}
@@ -114,6 +119,38 @@ public final class TaintBlockRuntimeChecks {
             var ordinary=Block.getDrops(soil,level,base,null,null,ItemStack.EMPTY);var silken=Block.getDrops(soil,level,base,null,null,silk);
             test.assertTrue(ordinary.size()==1&&ordinary.getFirst().is(Items.DIRT)&&ordinary.getFirst().getCount()==1&&silken.size()==1&&silken.getFirst().is(ThaumcraftTaint.SOIL.get().asItem()),"actual soil loot returns dirt normally and exact flattened soil with silk");
             test.assertTrue(Block.getDrops(fibres,level,base,null,null,silk).isEmpty(),"fibre loot remains empty even with silk");
+        }
+        void measureSpread(){
+            var source=ThaumcraftTaint.FIBRES.get().defaultBlockState().setValue(BlockTaintFibres.TYPE,1);
+            BlockPos target=base.east();
+            // One eligible coordinate of the original 3*5*3 lottery. All other cells are inert.
+            for(BlockPos p:BlockPos.betweenClosed(base.offset(-1,-3,-1),base.offset(1,1,1)))set(p.immutable(),Blocks.STONE.defaultBlockState());
+            set(base,source);set(target.above(),ThaumcraftTaint.FLESH.get().defaultBlockState());set(target.north(),ThaumcraftTaint.FLESH.get().defaultBlockState());
+            int n=45000,converted=0,maxPerTick=0;
+            var random=RandomSource.create(22023L);
+            for(int i=0;i<n;i++){
+                set(target,Blocks.DIRT.defaultBlockState());source.randomTick(level,base,random);
+                int changes=0;
+                for(BlockPos p:BlockPos.betweenClosed(base.offset(-1,-3,-1),base.offset(1,1,1)))if(!p.equals(base)&&!p.equals(target.above())&&!p.equals(target.north())&&BlockTaintFibres.family(level.getBlockState(p)))changes++;
+                if(level.getBlockState(target).is(ThaumcraftTaint.SOIL.get()))converted++;
+                maxPerTick=Math.max(maxPerTick,changes);
+            }
+            System.out.println("G22_TAINT distribution ticks="+n+" converted="+converted+" expected=1000 p=1/45 maxConversionsPerTick="+maxPerTick);
+            test.assertTrue(Math.abs(converted-1000)<160&&maxPerTick<=1,"seeded real block random-tick distribution and no neighbour cascade");
+            Block[] positive={Blocks.SAND,Blocks.GRAVEL,Blocks.DIRT,Blocks.FARMLAND,Blocks.GRASS_BLOCK,Blocks.CLAY,Blocks.RED_SAND,Blocks.COARSE_DIRT,Blocks.PODZOL,Blocks.MYCELIUM,Blocks.SOUL_SAND};
+            int accepted=0;
+            for(Block block:positive){
+                set(target,block.defaultBlockState());
+                try(var input=new Input(level,2,3,1)){source.randomTick(level,base,input.input);}
+                boolean changed=level.getBlockState(target).is(ThaumcraftTaint.SOIL.get());if(changed)accepted++;
+                System.out.println("G22_TAINT target="+BuiltInRegistries.BLOCK.getKey(block)+" converted="+changed+" expected=true");
+            }
+            for(Block block:new Block[]{Blocks.BEDROCK,Blocks.OBSIDIAN,Blocks.STONE,Blocks.CHEST,Blocks.ROOTED_DIRT}){
+                set(target,block.defaultBlockState());try(var input=new Input(level,2,3,1)){source.randomTick(level,base,input.input);}
+                test.assertTrue(level.getBlockState(target).is(block),"ineligible target retained: "+block);
+            }
+            System.out.println("G22_TAINT targets accepted="+accepted+"/11 protected=5/5");
+            test.assertTrue(accepted==positive.length,"all original material counterparts convert, accepted="+accepted+"/11");
         }
         void spread(){
             int[][] values={{1},{0,8},{0,9,9},{0,9,10}};List<List<Integer>> expected=List.of(List.of(10),List.of(10,10),List.of(10,10,12),List.of(10,10,12));

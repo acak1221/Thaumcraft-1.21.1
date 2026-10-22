@@ -6250,18 +6250,21 @@
         "native_coverage": "partial",
         "owner": "agent-w4devices",
         "evidence": [
-          "oracle thaumcraft/client/fx/particles/FXSparkle.java:22-70 the sparkle of the original with its type colours: the type two is the blue of the portable hole, 0.2, 0.2 and 0.7+random*0.3",
-          "oracle thaumcraft/client/ClientProxy.java:658-664 the sparkle of the proxy: the size 1.5, the one in six roll of the particle count and the noClip flag of the particle",
+          "oracle thaumcraft/client/fx/particles/FXSparkle.java:22-110 the configurable sparkle of the original: the life 3*multiplier, the frames 16+age/multiplier of the sheet textures/misc/particles.png, the shrink over the life, the alpha 0.75 and the colour of the type",
+          "oracle thaumcraft/client/ClientProxy.java:658-664 the sparkle of the proxy: the size 1.5, the one in six roll of the particle count of the client and the noClip flag of the particle",
+          "oracle thaumcraft/common/tiles/TileHole.java:51-56 the update tick of the hole runs on the client as well",
           "oracle thaumcraft/common/tiles/TileHole.java:127-211 the twenty four sparkles around the portable hole, the type two, one for every edge of the hole block that touches a solid block",
-          "oracle thaumcraft/common/items/wands/foci/ItemFocusShock.java:166,174 the sparkles of the shock focus at the hit point and at the pointed entity",
-          "native common/src/main/java/thaumcraft/client/fx/particles/FocusFrostSparkleParticle.java the native type six sparkle of the frost focus",
-          "native common/src/main/java/thaumcraft/common/tiles/TileHole.java the native hole has no client ticker, so the twenty four sparkles of the original have no native call site",
-          "REMAINING DIFFERENCE: the port has no type sparkle particle, so the twenty four sparkles of the portable hole (they need a client ticker of the native hole) and the sparkles of the shock focus (the native shock focus payload does not carry the hit point and the pointed entity) are missing; the magical leaves and the lifter have no native block at all, so their sparkles are a content gap of the block lane"
+          "native common/src/main/java/thaumcraft/client/fx/particles/TypeSparkleParticle.java the native configurable sparkle with the type colours of the original, its life, its frames, its shrink and its alpha",
+          "native common/src/main/java/thaumcraft/common/lib/world/HoleSparkleRules.java the twenty four calls of the original as a pure function of the six neighbours",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftHolesClient.java the native client effect of the hole, the opaque test of the original and the roll of the particle count",
+          "native common/src/main/java/thaumcraft/common/tiles/TileHole.java the native hole has a client tick and the native hole block ticks on the client",
+          "native common/src/test/java/thaumcraft/common/lib/world/HoleSparkleRulesParityTest.java the edges of the original and the suppression of the hole neighbour are asserted",
+          "REMAINING DIFFERENCE: the sparkles of the shock focus (oracle ItemFocusShock:166,174, five at the hit point and five at the pointed entity, the size 2.0+rand, the type two and the gravity 0.05+rand*0.05) are missing, because the native shock focus payload carries one endpoint and not the hit point and the pointed entity; the magical leaves and the lifter have no native block at all, so their sparkles are a content gap of the block lane"
         ],
         "notes": [
           "The configurable 1.7.10 sparkle became several native particles; the native frost sparkle keeps the type six colour and the life of the original.",
           "Open difference: the sparkles around the portable hole (oracle TileHole.java:142-211), the sparkles of the shock focus (oracle ItemFocusShock.java:166,174), the sparkles of the magical leaves and of the lifter (oracle BlockMagicalLeaves.java, BlockLifter.java) have no native counterpart; the native tree has no BlockLifter at all.",
-          "AUDITED 2026-10-23 (w4devices): the type colours of the original were read out of the oracle (the type two is the blue of the portable hole) and the call sites were counted: the hole has twenty four of them, the shock focus has two. The port has no type sparkle particle at all, so the gap is the particle and its call sites, not the colour rule."
+          "CLOSED 2026-10-23 (w4devices): the sparkles around the portable hole are the original ones. The port had no type sparkle particle at all and no client tick for the hole; the new TypeSparkleParticle is the configurable sparkle of the original with its type colours (the type two is the blue 0.2, 0.2, 0.7+rand*0.3), its life of 3*multiplier ticks, its frames 16+age/multiplier, its shrink and its alpha of 0.75, the HoleSparkleRules carries the twenty four calls of the original as a pure function of the six neighbours, and the hole block now ticks on the client. What is left of the unit is the sparkles of the shock focus, which need the hit point and the pointed entity in the payload, and the sparkles of the magical leaves and of the lifter, whose blocks do not exist in the port."
         ],
         "reviewed_sha256": {
           "original": "63f5ce8dc715705ac46c886c89f7bbe8e4d61cf7c103d60713b60931d65da9bb",

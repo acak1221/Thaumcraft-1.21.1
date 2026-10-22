@@ -52,6 +52,15 @@ three processes ran **at the same time** (the server and the two clients), each
 with its own `-Xmx1024M` (the server `-Xmx640M`) — the two clients share the
 one X display of the host and open one window each.
 
+**The heap of the clients cannot be smaller than 1024 MB.** A first attempt
+with `-Xmx640M` died with `OutOfMemoryError: Java heap space` in the
+`Worker-Main` thread of the resource reload, before the game even started. The
+wave 2 acceptance used 768 MB for its single client; the second client adds
+another JVM, so the acceptance needed 1024 MB each and the server 640 MB. The
+peak of the three processes was about 2.4 GB of heap on a host that shares
+15 GB with the other wave agents; the OOM killer did not touch any of the
+three processes during the accepted run.
+
 The server runs `online-mode=false` (the acceptance needs an unauthenticated
 login), `level-type=minecraft:flat`, `difficulty=peaceful` and
 `max-tick-time=-1`; `ops.json` lists `MPProbe` and `MPProbe2` at permission

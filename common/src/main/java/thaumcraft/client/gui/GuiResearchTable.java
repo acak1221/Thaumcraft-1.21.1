@@ -27,7 +27,9 @@ import thaumcraft.common.lib.utils.HexUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /** Original-sized palette, combination circles and hex editing; server snapshots own materials. */
@@ -37,6 +39,8 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
     private static final ResourceLocation HEX = texture("gui/hex1.png"), UNKNOWN = texture("aspects/_unknown.png");
     private static final ResourceLocation PARTICLES = texture("misc/particles.png");
     private static final ResourceLocation ASPECT_BACK = texture("aspects/_back.png");
+    /** The original rune sheet of the research table (oracle GuiResearchTable:517-518). */
+    private static final ResourceLocation SCRIPT = texture("misc/script.png");
     private int page;
     private int handledButton = -1;
     private String draggedAspect;
@@ -44,6 +48,12 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
     private ItemStack dragNote = ItemStack.EMPTY;
     private String selectedLeft, selectedRight;
     private long selectionSession, combinePressedUntil;
+    /** The runes of the sheet of the original (oracle GuiResearchTable:83,408-441). */
+    private final Map<String, Rune> runes = new LinkedHashMap<>();
+    private long lastRuneCheck;
+
+    /** One rune of the original sheet: its hex, its sprite and the moment it fades away. */
+    private record Rune(int q, int r, long start, long decay, int sprite) {}
 
     public GuiResearchTable(ContainerResearchTable menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -150,6 +160,8 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
                     1, 1, 1, menu.canCopy() ? 1 : .4F);
         }
         if (note == null) {
+            // Original GuiResearchTable:406-409 - the runes of the sheet die with the note.
+            runes.clear();
             graphics.drawWordWrap(font, Component.translatable("tc.port.table.empty"), leftPos + 105, topPos + 72, 130, 0xCEB995);
             return;
         }
@@ -456,6 +468,7 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
 
     private void drawNote(GuiGraphics graphics, ResearchNoteData note) {
         if (minecraft.player == null) return;
+        drawRunes(graphics, note);
         Set<String> known = KnowledgeAccess.get(minecraft.player).getAspectsDiscovered().keySet();
         Set<String> connected = new HashSet<>();
         for (Cell cell : note.cells()) if (cell.type() == 1 && known.contains(cell.aspect())) visit(note, cell, known, connected);
@@ -494,6 +507,56 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
         }
     }
 
+    /**
+     * The runes of the sheet of the original (oracle {@code GuiResearchTable.java:408-441}).
+     *
+     * <p>Every 250 milliseconds the original puts one rune on a free hex of the sheet: the hex is
+     * drawn at random around the centre of the sheet, the sprite is one of the sixteen cells of
+     * the script sheet and the rune fades in and out over fifteen to twenty five seconds.</p>
+     */
+    private void drawRunes(GuiGraphics graphics, ResearchNoteData note) {
+        long time = System.currentTimeMillis();
+        if (lastRuneCheck < time) {
+            lastRuneCheck = time + 250L;
+            var random = minecraft.level == null ? null : minecraft.level.getRandom();
+            if (random != null) {
+                int offsetX = random.nextInt(120) - 60;
+                int offsetY = random.nextInt(120) - 60;
+                var hex = new HexUtils.Pixel(offsetX, offsetY).toHex(9);
+                String key = hex.q + ":" + hex.r;
+                if (!runes.containsKey(key) && note.cellAt(hex.q, hex.r) == null) {
+                    runes.put(key, new Rune(hex.q, hex.r, time,
+                            lastRuneCheck + 15000L + random.nextInt(10000), random.nextInt(16)));
+                }
+            }
+        }
+        if (runes.isEmpty()) return;
+        var stale = new ArrayList<String>();
+        for (var entry : runes.entrySet()) {
+            Rune rune = entry.getValue();
+            if (rune.decay < time) { stale.add(entry.getKey()); continue; }
+            var point = new HexUtils.Hex(rune.q, rune.r).toPixel(9);
+            float progress = (float) (time - rune.start) / (float) (rune.decay - rune.start);
+            float alpha = 0.5F;
+            if (progress < 0.25F) alpha = progress * 2.0F;
+            else if (progress > 0.5F) alpha = 1.0F - progress;
+            drawRune(graphics, leftPos + 169 + point.x, topPos + 83 + point.y, rune.sprite, alpha * 0.66F);
+        }
+        for (String key : stale) runes.remove(key);
+    }
+
+    /**
+     * One rune of the original sheet (oracle {@code GuiResearchTable.java:517-540}): the cell of
+     * the script sheet, ten pixels wide, black, turned by ninety degrees in the plane.
+     */
+    private void drawRune(GuiGraphics graphics, double x, double y, int sprite, float alpha) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0);
+        graphics.pose().mulPose(Axis.ZP.rotationDegrees(90));
+        blitAlpha(graphics, SCRIPT, -5, -5, sprite * 16, 0, 10, 10, 256, 16, 0, 0, 0, alpha);
+        graphics.pose().popPose();
+    }
+
     private static void visit(ResearchNoteData note, Cell source, Set<String> known, Set<String> connected) {
         if (!connected.add(source.coordinate())) return;
         var hex = new HexUtils.Hex(source.q(), source.r());
@@ -505,12 +568,28 @@ public final class GuiResearchTable extends AbstractContainerScreen<ContainerRes
         }
     }
 
-    private static void line(GuiGraphics graphics, double x, double y, double endX, double endY) {
+    /**
+     * The line of the original sheet (oracle {@code GuiResearchTable.java:385-405}).
+     *
+     * <p>Three pixels wide, the colour {@code 0.0, 0.6, 0.8}, the additive blend
+     * {@code (770, 1)} and an alpha that pulses between 0.3 and 0.9 with the ticks of the
+     * player.</p>
+     */
+    private void line(GuiGraphics graphics, double x, double y, double endX, double endY) {
+        int count = minecraft.player == null ? 0 : minecraft.player.tickCount;
+        float alpha = 0.3F + (float) Math.sin(count + x) * 0.3F + 0.3F;
         var pose = graphics.pose();
         pose.pushPose();
         pose.translate(x, y, 0);
         pose.mulPose(Axis.ZP.rotation((float) Math.atan2(endY - y, endX - x)));
-        graphics.fill(0, -1, (int) Math.round(Math.hypot(endX - x, endY - y)), 2, 0x990099CC);
+        graphics.flush();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+        int color = ((int) Math.round(Math.max(0F, Math.min(1F, alpha)) * 255F) << 24) | 0x0099CC;
+        graphics.fill(0, -1, (int) Math.round(Math.hypot(endX - x, endY - y)), 2, color);
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableBlend();
         pose.popPose();
     }
 

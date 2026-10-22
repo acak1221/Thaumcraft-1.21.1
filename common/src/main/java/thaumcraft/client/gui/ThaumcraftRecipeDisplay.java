@@ -361,6 +361,37 @@ public final class ThaumcraftRecipeDisplay {
 
     /** Null means unavailable/unsupported, never an empty crafting page. No extra research gates are added here. */
     public static ThaumcraftRecipeDisplay resolve(ResearchDefinition.Page page, Level level) {
+        return resolve(page, null, level);
+    }
+
+    /**
+     * The alternatives of an original array page.
+     *
+     * <p>Original {@code thaumcraft/client/gui/GuiResearchRecipe.java:647-655} reads one entry of
+     * the array per second and draws it as the page of that recipe, so the native page cycles
+     * through its alternatives once per second as well.</p>
+     */
+    private static ThaumcraftRecipeDisplay alternatives(Level level, List<String> nativeIds) {
+        List<ThaumcraftRecipeDisplay> choices = new ArrayList<>();
+        for (String id : nativeIds) {
+            var holder = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", id)).orElse(null);
+            if (holder == null) continue;
+            var choice = resolve(holder, level);
+            if (choice != null) choices.add(choice);
+        }
+        return choices.isEmpty() ? null : new ThaumcraftRecipeDisplay(choices);
+    }
+
+    /**
+     * The page resolver with the key of its research.
+     *
+     * <p>The original builds two different arrays with the same Java expression
+     * ({@code rc.toArray(new IRecipe[0])}): the seven crystal cluster recipes of the ORE page
+     * (oracle {@code thaumcraft/common/config/ConfigResearch.java:370-374}) and the sixteen jar
+     * label recipes of the JARLABEL page (oracle {@code :302-305}). The key of the research
+     * tells the two apart.</p>
+     */
+    public static ThaumcraftRecipeDisplay resolve(ResearchDefinition.Page page, String researchKey, Level level) {
         if (level == null) return null;
         // ConfigResearch:250-254 explicitly constructs this six-recipe array.
         // This is a literal whitelist entry, NOT evaluation of extracted Java.
@@ -374,6 +405,27 @@ public final class ThaumcraftRecipeDisplay {
                 }
             }
             return choices.isEmpty() ? null : new ThaumcraftRecipeDisplay(choices);
+        }
+        // Original ConfigResearch:193-199: the BANNERS page shows the sixteen banner recipes
+        // as an array of arcane recipes.
+        if ("legacy_expression".equals(page.kind()) && "banners.toArray(new IArcaneRecipe[0])".equals(page.javaExpression())) {
+            return alternatives(level, List.of("arcane/banner_white", "arcane/banner_orange", "arcane/banner_magenta",
+                    "arcane/banner_light_blue", "arcane/banner_yellow", "arcane/banner_lime", "arcane/banner_pink",
+                    "arcane/banner_gray", "arcane/banner_light_gray", "arcane/banner_cyan", "arcane/banner_purple",
+                    "arcane/banner_blue", "arcane/banner_brown", "arcane/banner_green", "arcane/banner_red",
+                    "arcane/banner_black"));
+        }
+        // Original ConfigResearch:221-226: the PRIMALARROW page shows the six primal arrow recipes.
+        if ("legacy_expression".equals(page.kind()) && "rcbb.toArray(new IArcaneRecipe[0])".equals(page.javaExpression())) {
+            return alternatives(level, List.of("arcane/primal_arrow_air", "arcane/primal_arrow_fire",
+                    "arcane/primal_arrow_water", "arcane/primal_arrow_earth", "arcane/primal_arrow_order",
+                    "arcane/primal_arrow_entropy"));
+        }
+        // Original ConfigResearch:370-374: the ORE page shows the seven crystal cluster recipes.
+        if ("legacy_expression".equals(page.kind()) && "rc.toArray(new IRecipe[0])".equals(page.javaExpression())
+                && "ORE".equals(researchKey)) {
+            return alternatives(level, List.of("clusters/air", "clusters/fire", "clusters/water", "clusters/earth",
+                    "clusters/order", "clusters/entropy", "clusters/mixed"));
         }
         if ("legacy_expression".equals(page.kind()) && "raug.toArray(new InfusionRecipe[0])".equals(page.javaExpression())) {
             var holder = level.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath("thaumcraft", "infusion_runic_augment/runic_augmentation")).orElse(null);

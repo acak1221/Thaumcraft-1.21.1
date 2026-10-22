@@ -15,10 +15,12 @@ import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 import thaumcraft.common.lib.network.ResearchPurchasePayload;
 import thaumcraft.common.lib.network.ResearchNoteRequestPayload;
 import thaumcraft.common.lib.research.ResearchBrowserData;
+import thaumcraft.common.lib.research.ResearchBrowserConnectors;
 import thaumcraft.common.lib.research.ResearchDefinition;
 import thaumcraft.common.lib.research.ResearchPurchase;
 import thaumcraft.common.lib.research.ResearchNoteIssuance;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,15 +88,7 @@ public final class GuiResearchBrowser extends Screen {
         graphics.enableScissor(graphLeft, graphTop, graphLeft + graphWidth, graphTop + graphHeight);
         graphics.blit(texture("textures/gui/" + (category.equals("ELDRITCH") ? "gui_researchbackeldritch.png" : "gui_researchback.png")),
                 graphLeft, graphTop, 0, 0, graphWidth, graphHeight, 512, 512);
-        for (Node node : nodes) {
-            for (String parent : node.research.parents()) {
-                for (Node target : nodes) if (target.research.key().equals(parent)) {
-                    int color = completed.contains(parent) ? 0xFFAA8A48 : 0xFF55504A;
-                    graphics.hLine(Math.min(node.x, target.x) + 11, Math.max(node.x, target.x) + 11, node.y + 11, color);
-                    graphics.vLine(target.x + 11, Math.min(node.y, target.y) + 11, Math.max(node.y, target.y) + 11, color);
-                }
-            }
-        }
+        drawConnectors(graphics, completed, originX, originY);
         for (Node node : nodes) {
             boolean unlocked = completed.contains(node.research.key());
             boolean available = node.research.hasPrerequisites(completed);
@@ -173,6 +167,96 @@ public final class GuiResearchBrowser extends Screen {
         graphics.blit(NODES, centreX - size / 2, centreY - size / 2,
                 frame * NODE_CELL, strip * NODE_CELL, size, size, 2048, 2048);
         graphics.setColor(1, 1, 1, 1);
+    }
+
+    /**
+     * Original GuiResearchBrowser:299-348 - the parent and the sibling connectors of the map.
+     *
+     * <p>The original draws them over <em>every</em> research of the selected category, not only
+     * over the visible cells, so the line of a hidden research is drawn as well. The line itself
+     * is the three pixel wide gradient polyline of {@code :732-787}: the colour of a vertex fades
+     * to black along the line, the alpha grows from zero to 0.6 and the whole line wobbles with
+     * the sine of the ticks of the player.</p>
+     */
+    private void drawConnectors(GuiGraphics graphics, Set<String> completed, int originX, int originY) {
+        Map<String, int[]> positions = new LinkedHashMap<>();
+        for (var research : ResearchBrowserData.categoryEntries(category)) {
+            positions.put(research.key(), new int[] {originX + research.column() * 24, originY + research.row() * 24});
+        }
+        blend();
+        for (var connector : ResearchBrowserConnectors.connectors(category, completed)) {
+            int[] from = positions.get(connector.from());
+            int[] to = positions.get(connector.to());
+            if (from == null || to == null) continue;
+            connectorLine(graphics, from[0] + 11, from[1] + 11, to[0] + 11, to[1] + 11, connector);
+        }
+    }
+
+    /**
+     * Original GuiResearchBrowser:732-787 ({@code drawLine}): a polyline of {@code dist / 2}
+     * segments whose width is three pixels, whose colour fades to black along the line and whose
+     * vertices wobble with the ticks of the player.
+     */
+    private void connectorLine(GuiGraphics graphics, float x, float y, float x2, float y2,
+                                ResearchBrowserConnectors.Connector connector) {
+        float dx = x - x2, dy = y - y2;
+        int segments = ResearchBrowserConnectors.segments(dx, dy);
+        if (segments <= 0) return;
+        float count = minecraft.player == null ? 0 : minecraft.player.tickCount;
+        float stepX = dx / segments, stepY = dy / segments;
+        boolean horizontal = Math.abs(dx) > Math.abs(dy);
+        if (horizontal) stepX *= 2.0F; else stepY *= 2.0F;
+        float previousX = x, previousY = y;
+        float previousRed = connector.red(), previousGreen = connector.green(), previousBlue = connector.blue();
+        float previousAlpha = ResearchBrowserConnectors.VERTEX_ALPHA;
+        for (int step = 0; step <= segments; step++) {
+            float phase = ResearchBrowserConnectors.phase(step, segments);
+            float red = connector.red(), green = connector.green(), blue = connector.blue();
+            float alpha = ResearchBrowserConnectors.VERTEX_ALPHA;
+            float vertexX = x, vertexY = y;
+            if (connector.wiggle()) {
+                float wobbleX = ResearchBrowserConnectors.wobbleX(count, step, segments);
+                float wobbleY = ResearchBrowserConnectors.wobbleY(count, step, segments);
+                float fade = ResearchBrowserConnectors.fade(step, segments);
+                red *= fade; green *= fade; blue *= fade;
+                alpha *= phase;
+                vertexX = x - stepX * step + wobbleX;
+                vertexY = y - stepY * step + wobbleY;
+            } else {
+                vertexX = x - stepX * step;
+                vertexY = y - stepY * step;
+            }
+            if (step > 0) {
+                int color = argb((previousRed + red) / 2.0F, (previousGreen + green) / 2.0F,
+                        (previousBlue + blue) / 2.0F, (previousAlpha + alpha) / 2.0F);
+                segment(graphics, previousX, previousY, vertexX, vertexY, color);
+            }
+            previousX = vertexX; previousY = vertexY;
+            previousRed = red; previousGreen = green; previousBlue = blue; previousAlpha = alpha;
+            if (horizontal) stepX *= 1.0F - 1.0F / (segments * 3.0F / 2.0F);
+            else stepY *= 1.0F - 1.0F / (segments * 3.0F / 2.0F);
+        }
+    }
+
+    /**
+     * One segment of the original line. The 1.21.1 GUI cannot draw a three pixel wide diagonal
+     * line, so the segment is drawn as the staircase of the original polyline: a horizontal bar
+     * at the height of its first vertex and a vertical bar at the x of its second one.
+     */
+    private static void segment(GuiGraphics graphics, float x1, float y1, float x2, float y2, int color) {
+        int half = (int) Math.ceil(ResearchBrowserConnectors.WIDTH / 2.0F);
+        graphics.fill((int) Math.floor(Math.min(x1, x2)) - half, (int) Math.floor(y1) - half,
+                (int) Math.ceil(Math.max(x1, x2)) + half, (int) Math.ceil(y1) + half, color);
+        graphics.fill((int) Math.floor(x2) - half, (int) Math.floor(Math.min(y1, y2)) - half,
+                (int) Math.ceil(x2) + half, (int) Math.ceil(Math.max(y1, y2)) + half, color);
+    }
+
+    private static int argb(float red, float green, float blue, float alpha) {
+        int a = Math.max(0, Math.min(255, Math.round(alpha * 255.0F)));
+        int r = Math.max(0, Math.min(255, Math.round(red * 255.0F)));
+        int g = Math.max(0, Math.min(255, Math.round(green * 255.0F)));
+        int b = Math.max(0, Math.min(255, Math.round(blue * 255.0F)));
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     /**

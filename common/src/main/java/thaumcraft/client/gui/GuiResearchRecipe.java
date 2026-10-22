@@ -48,7 +48,7 @@ public final class GuiResearchRecipe extends Screen {
         var complete = minecraft.player == null ? Set.<String>of() : KnowledgeAccess.get(minecraft.player).getResearchComplete();
         Map<ResearchDefinition.Page, ThaumcraftRecipeDisplay> resolved = new LinkedHashMap<>();
         var visible = ResearchBrowserData.displayablePages(research, complete, descriptor -> {
-            var recipe = ThaumcraftRecipeDisplay.resolve(descriptor, minecraft.level);
+            var recipe = ThaumcraftRecipeDisplay.resolve(descriptor, research.key(), minecraft.level);
             if (recipe == null) return false;
             resolved.put(descriptor, recipe);
             return true;

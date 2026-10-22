@@ -108,9 +108,10 @@ public record GolemUseOptions(boolean emptySpace, boolean leftClick, boolean sne
      *
      * <p>{@code getToggles()[0]} is the "Block or Empty space" switch: when it is
      * off the marked cell must hold a block, when it is on the marked cell must be
-     * an empty space.</p>
+     * an empty space. The default of the original is the byte zero of the toggles
+     * (oracle {@code EntityGolemBase:396}), so the default is the block mode.</p>
      *
-     * @param air whether the marked cell is empty
+     * @param markedCellIsAir whether the marked cell is empty
      */
-    public boolean acceptsTarget(boolean air) { return emptySpace == air; }
+    public boolean acceptsTarget(boolean markedCellIsAir) { return emptySpace == markedCellIsAir; }
 }

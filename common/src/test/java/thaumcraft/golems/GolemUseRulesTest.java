@@ -24,10 +24,14 @@ import thaumcraft.common.items.golems.GolemUseOptions;
  */
 class GolemUseRulesTest {
     @Test void theBlockSwitchAcceptsOnlyTheCellItNames() {
-        // The default: a block.
+        // Oracle AIUseItem:190 - the first toggle of the golem decides whether the
+        // marked cell must hold a block or must be an empty space; acceptsTarget
+        // takes whether the marked cell is empty.
+        // The default: a block. The default of the original is the byte zero of the
+        // toggles (oracle EntityGolemBase:396), so the first switch is off.
         GolemUseOptions block = new GolemUseOptions(false, false, false);
-        assertFalse(block.acceptsTarget(false), "the default rejects an empty space");
-        assertTrue(block.acceptsTarget(true), "the default accepts a block");
+        assertFalse(block.acceptsTarget(true), "the default rejects an empty space");
+        assertTrue(block.acceptsTarget(false), "the default accepts a block");
         // The switch: an empty space.
         GolemUseOptions space = new GolemUseOptions(true, false, false);
         assertTrue(space.acceptsTarget(true), "the empty space mode accepts an empty space");

@@ -238,6 +238,14 @@ def gameTestFilter = providers.gradleProperty('gameTestFilter').getOrElse('')
 // The multiplayer acceptance talks to an EXTERNAL dedicated server process.
 def multiplayerAddress = providers.gradleProperty('multiplayerAddress').getOrElse('127.0.0.1:25565')
 def multiplayerPlayer = providers.gradleProperty('multiplayerPlayer').getOrElse('MPProbe')
+// The SECOND physical client of the two-player acceptance.
+def multiplayerPeerPlayer = providers.gradleProperty('multiplayerPeerPlayer').getOrElse('MPProbe2')
+def multiplayerPairDir = file('run-multiplayer/pair').toPath().toAbsolutePath().normalize()
+// A partial run still produces its evidence; the acceptance report is the record.
+def multiplayerAllowPartial = providers.gradleProperty('multiplayerAllowPartial').isPresent()
+// The host shares 15 GB with the other wave agents; the heap of the three
+// acceptance processes has to stay small enough to survive the OOM killer.
+def multiplayerHeap = providers.gradleProperty('multiplayerHeap').getOrElse('768M')
 loom.runs {
  gameTest {
   server()
@@ -279,7 +287,7 @@ loom.runs {
   source sourceSets.clientTest
   name 'Thaumcraft dedicated-server multiplayer client'
   runDir 'run-multiplayer'
-  vmArg '-Xmx768M'
+  vmArg "-Xmx$multiplayerHeap"
   vmArg '-Xms192M'
   vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
   vmArg '-Dthaumcraft.multiplayerClient=true'
@@ -287,7 +295,27 @@ loom.runs {
   vmArg "-Dthaumcraft.multiplayerReport=multiplayer-client-report.json"
   vmArg "-Dthaumcraft.multiplayerPlayer=$multiplayerPlayer"
   vmArg "-Dthaumcraft.multiplayerAddress=$multiplayerAddress"
+  vmArg "-Dthaumcraft.multiplayerPairDir=${multiplayerPairDir}"
+  vmArg "-Dthaumcraft.multiplayerPeer=$multiplayerPeerPlayer"
   programArgs '--username', multiplayerPlayer, '--quickPlayMultiplayer', multiplayerAddress, '--width', '854', '--height', '480'
+ }
+ // The SECOND physical client of the two-player acceptance. It is a real
+ // client in its own JVM with its own payload registry and its own GL context.
+ multiplayerPeerClient {
+  client()
+  source sourceSets.clientTest
+  name 'Thaumcraft dedicated-server multiplayer peer client'
+  runDir 'run-multiplayer-peer'
+  vmArg "-Xmx$multiplayerHeap"
+  vmArg '-Xms192M'
+  vmArg "-Dfabric.classPathGroups=${clientTestModRoots.asPath}"
+  vmArg '-Dthaumcraft.multiplayerPeer=true'
+  vmArg "-Dthaumcraft.multiplayerRunDir=${file('run-multiplayer-peer').toPath().toAbsolutePath().normalize()}"
+  vmArg "-Dthaumcraft.multiplayerReport=multiplayer-peer-report.json"
+  vmArg "-Dthaumcraft.multiplayerPlayer=$multiplayerPeerPlayer"
+  vmArg "-Dthaumcraft.multiplayerAddress=$multiplayerAddress"
+  vmArg "-Dthaumcraft.multiplayerPairDir=${multiplayerPairDir}"
+  programArgs '--username', multiplayerPeerPlayer, '--quickPlayMultiplayer', multiplayerAddress, '--width', '854', '--height', '480'
  }
  // The dedicated server the multiplayer acceptance talks to. A small heap
  // keeps the two acceptance processes inside the host memory budget.
@@ -295,7 +323,7 @@ loom.runs {
   server()
   name 'Thaumcraft dedicated-server multiplayer target'
   runDir 'run-multiplayer-server'
-  vmArg '-Xmx768M'
+  vmArg "-Xmx$multiplayerHeap"
   vmArg '-Xms192M'
   programArgs '--nogui'
  }
@@ -491,6 +519,23 @@ tasks.register('prepareMultiplayerRun') {
   optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\nrenderDistance:4\nsimulationDistance:4\nmaxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
  }
 }
+tasks.register('prepareMultiplayerPeerRun') {
+ group = 'verification'
+ description = 'Prepare the isolated SECOND multiplayer client run directory and the shared pair directory.'
+ doLast {
+  def isolatedRoot = file('run-multiplayer-peer').toPath().toAbsolutePath().normalize()
+  java.nio.file.Files.createDirectories(isolatedRoot)
+  def report = isolatedRoot.resolve('multiplayer-peer-report.json')
+  if (java.nio.file.Files.exists(report)) java.nio.file.Files.delete(report)
+  def optionsFile = isolatedRoot.resolve('options.txt').toFile()
+  optionsFile.setText('onboardAccessibility:false\nlang:en_us\nguiScale:2\npauseOnLostFocus:false\nrenderDistance:4\nsimulationDistance:4\nmaxFps:60\ntutorialStep:none\nnarrator:0\n', 'UTF-8')
+  java.nio.file.Files.createDirectories(multiplayerPairDir)
+  ['lead.cmd', 'peer.result', 'peer.status'].each { name ->
+   def stale = multiplayerPairDir.resolve(name)
+   if (java.nio.file.Files.exists(stale)) java.nio.file.Files.delete(stale)
+  }
+ }
+}
 tasks.named('runMultiplayerClient') {
  dependsOn tasks.named('prepareMultiplayerRun'), tasks.named('clientTestClasses')
  doLast {
@@ -499,10 +544,24 @@ tasks.named('runMultiplayerClient') {
    throw new GradleException("The multiplayer client produced no report; inspect ${file('run-multiplayer/logs/latest.log')}")
   }
   def report = new groovy.json.JsonSlurper().parse(reportFile, 'UTF-8')
-  if (report.status != 'SCRIPT_PASSED') {
+  if (report.status != 'SCRIPT_PASSED' && !multiplayerAllowPartial) {
    throw new GradleException("The multiplayer acceptance failed: ${report.steps}; ${report.failures}")
   }
   logger.lifecycle("Multiplayer acceptance passed against ${report.address} as ${report.player}: ${report.steps}")
+ }
+}
+tasks.named('runMultiplayerPeerClient') {
+ dependsOn tasks.named('prepareMultiplayerPeerRun'), tasks.named('clientTestClasses')
+ doLast {
+  def reportFile = file('run-multiplayer-peer/multiplayer-peer-report.json')
+  if (!reportFile.isFile()) {
+   throw new GradleException("The second multiplayer client produced no report; inspect ${file('run-multiplayer-peer/logs/latest.log')}")
+  }
+  def report = new groovy.json.JsonSlurper().parse(reportFile, 'UTF-8')
+  if (report.status != 'SCRIPT_PASSED' && !multiplayerAllowPartial) {
+   throw new GradleException("The second multiplayer client failed: ${report.steps}; ${report.failures}")
+  }
+  logger.lifecycle("The second multiplayer client finished as ${report.player}: ${report.steps}")
  }
 }
 project(':common').configureTestIsolation(project, [gameTest: 'gameTest', clientSmoke: 'clientTest', multiplayerClient: 'clientTest'])

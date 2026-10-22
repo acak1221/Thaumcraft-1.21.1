@@ -8,7 +8,8 @@
   "entrypoints": {
     "client": [
       "thaumcraft.fabric.clienttest.BookClientSmoke",
-      "thaumcraft.fabric.clienttest.MultiplayerClientProbe"
+      "thaumcraft.fabric.clienttest.MultiplayerClientProbe",
+      "thaumcraft.fabric.clienttest.MultiplayerPeerProbe"
     ]
   },
   "depends": {

@@ -67,6 +67,7 @@ neoforge/run/
 **/run-clienttest/
 **/run-multiplayer/
 **/run-multiplayer-server/
+**/run-multiplayer-peer/
 .gradle-mp/
 %SystemDrive%/
 

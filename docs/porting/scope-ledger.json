@@ -9098,7 +9098,11 @@
           "native common/src/main/resources/assets/thaumcraft/models/item/levitator.json the inventory model of the original: the cube plus the two emissive slabs of the bounds 0.16..15.84 by 14.4..15.84 (tint 0) and 0.16..15.84 by 1.6..14.4 (tint 1) of the animatedglow sheet",
           "native common/src/main/java/thaumcraft/client/ClientSetup.java:233-234 the item colour of the two slabs: the tint 0 is colors[4] = 0x00A000 and the tint 1 is colors[5] = 0xEECCFF",
           "native common/src/main/resources/assets/thaumcraft/models/block/levitator.json the plain cube_bottom_top model of the world block (liftertop / lifterside / arcaneearbottom)",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java:80-109 the glow faces of the original in the world, the lightmap coordinate 180 and the colours 0x00A000 and 0xDD11FF"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileLevitatorRenderer.java:80-109 the glow faces of the original in the world, the lightmap coordinate 180 and the colours 0x00A000 and 0xDD11FF",
+          "official 1.7.10 client.jar net.minecraft.client.renderer.item.RenderItem: the item of a block is drawn by RenderBlocks.renderBlockAsItem, the MCP name of func_147800_a is 'Is called to render the image of a block on an inventory, as a held item, or as a item on the ground', and the check before it is RenderBlocks.renderItemIn3d, the MCP name of func_147739_a",
+          "official 1.7.10 client.jar net.minecraft.client.renderer.RenderBlocks.renderBlockAsItem: the render type of the block is dispatched with an if chain of the vanilla render types, a custom render id draws nothing without the forge patch, so the inventory art of the lifter is the renderInventoryBlock of its own handler",
+          "legacy src/main/resources/assets/thaumcraft/models/item/blocklifter.json the 1.12 successor of the same method: the cube plus the two emissive slabs of the same bounds with the tint indices 0 and 1 and no ambient occlusion",
+          "legacy src/main/java/thaumcraft/client/renderers/item/LifterItemColor.java:9-17 the 1.12 item colour of the two slabs: the tint 0 is colors[4] and the tint 1 is colors[5]"
         ],
         "notes": [
           "The levitator block itself is ported (BlockLevitator/TileLevitator/LevitatorRules) and its base cube model matches the original's bottom/top/side icons.",
@@ -14940,7 +14944,10 @@
           "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:220-222 the mirror flag of the left shoulder plate comes before its box, so the original really mirrors that box",
           "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchGuardian.java:99 the same mirror, checked by the test theGuardianMirrorsOnlyTheLeftShoulderPlate",
           "oracle thaumcraft/client/renderers/models/entities/ModelEldritchGuardian.java:484-510 the hood, the arms, the leg panels, the cloak and the side panels of the guardian move with the original sine",
-          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchGuardian.java:132-147 the same sine with the same periods of ten, eight and seven ticks"
+          "native common/src/main/java/thaumcraft/client/renderers/models/ModelEldritchGuardian.java:132-147 the same sine with the same periods of ten, eight and seven ticks",
+          "official 1.7.10 client.jar net.minecraft.client.model.ModelBox the mirror flag field_78809_i swaps the minimum and the maximum X of the box and flips every quad, the texture region of the quad is the region of the plain quad",
+          "1.21.1 net.minecraft.client.model.geom.ModelPart.Cube:236-240 and ModelPart.Polygon:328-343 the same three steps with the same numbers, the normal of the mirrored face keeps its Y and its Z and loses its X",
+          "test common/src/test/java/thaumcraft/eldritch/EldritchWardenEyeAndMirrorParityTest.theMirroredBoxIsTheMirrorImageAndKeepsTheTextureRegion the mirror of the 1.21.1 cube is about the width of the box in world units, the model units are divided by sixteen when the cube is compiled"
         ],
         "notes": [
           "1.21.1 model system change; the model was not compared part by part in this audit."
@@ -15534,7 +15541,10 @@
         "owner": "audit-a1-client",
         "evidence": [
           "oracle thaumcraft/client/renderers/models/gear/ModelFortressArmor.java:1-646 the fortress armour model",
-          "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelFortressArmor.java the native ModelPart port used by ThaumcraftGearModelsClient"
+          "native common/src/main/java/thaumcraft/client/renderers/models/gear/ModelFortressArmor.java the native ModelPart port used by ThaumcraftGearModelsClient",
+          "official 1.7.10 client.jar net.minecraft.client.model.ModelBox: the mirror flag field_78809_i of the renderer swaps the minimum and the maximum X and flips every quad of the box, net.minecraft.client.model.TexturedQuad remaps the texture region of the four vertices and flips the winding",
+          "1.21.1 net.minecraft.client.model.geom.ModelPart.Cube:236-240 and ModelPart.Polygon:328-343 the same three steps and the normal of the face with its X negated, the same numbers as the 1.7.10 jar for the box of two model units",
+          "test common/src/test/java/thaumcraft/eldritch/EldritchWardenEyeAndMirrorParityTest.theMirroredBoxIsTheMirrorImageAndKeepsTheTextureRegion the mirror is about the width of the box in world units, the 1.21.1 cube divides the model units by sixteen"
         ],
         "notes": [
           "Same armour parts and UVs as a native ModelPart tree; the native gear client keeps the original's dye-colour handling.",

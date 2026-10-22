@@ -26,6 +26,7 @@ import thaumcraft.common.tiles.TileTube;
 import thaumcraft.common.tiles.TileTubeBuffer;
 import thaumcraft.common.tiles.TileJar;
 import thaumcraft.common.tiles.TileAlembic;
+import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileCentrifuge;
 import thaumcraft.common.tiles.TileEssentiaCrystalizer;
 import thaumcraft.common.tiles.TileEssentiaReservoir;
@@ -252,6 +253,35 @@ public final class EssentiaTransfers {
     }
 
     public record Attempt(boolean selected, int committedUnits, RuntimeException failure) {}
+
+    /** Original furnace230-231/244-249 pays its source before crediting the alembic.
+     * Never infer whether to pay from destination state AFTER its comparator callbacks. */
+    public static Attempt pushFurnaceOne(TileAlchemyFurnace furnace, TileAlembic alembic, Aspect aspect) {
+        if (MUTATION.get() != null || !EssentiaAtomicEndpoint.validAspect(aspect)
+                || !furnace.hasPreparedAlembicTransfer(alembic, aspect)
+                || !(furnace.getLevel() instanceof ServerLevel level)) return new Attempt(false, 0, null);
+        if (!level.getServer().isSameThread()) throw new IllegalStateException("Furnace transfer requires the server thread");
+        Mutation mutation = new Mutation(alembic, furnace);
+        MUTATION.set(mutation);
+        try {
+            if (!current(furnace, level) || !current(alembic, level)) return new Attempt(false, 0, null);
+            var before = alembic.snapshotAtomicState();
+            var credit = alembic.prepareInsert(before, aspect, 1);
+            if (!prepared(credit, alembic, before, 1)) return new Attempt(true, 0, null);
+            mutation.receiverChange = credit;
+            mutation.raw = true;
+            furnace.debitAlembicTransferRaw(alembic, aspect);
+            alembic.applyAtomicRaw(credit);
+            mutation.raw = false;
+            RuntimeException failure = null;
+            try { furnace.setChanged(); }
+            catch (RuntimeException exception) { failure = exception; }
+            try { alembic.notifyEssentiaStorageChanged(); }
+            catch (RuntimeException exception) { failure = combine(failure, exception); }
+            return new Attempt(true, 1, failure);
+        } finally { finishTubeFilterMutation(mutation); }
+    }
+
     private enum Profile { COMPAT, TUBE, JAR, BUFFER, CENTRIFUGE, CRYSTALLIZER, RESERVOIR, LAMP }
 
     public static Attempt pullTubeOne(TileTube tube, Direction inputFace) { return transport(tube, inputFace, Profile.TUBE, null); }

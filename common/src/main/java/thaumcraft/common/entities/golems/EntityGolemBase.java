@@ -2044,7 +2044,12 @@ public class EntityGolemBase extends AbstractGolem {
             qualifying = true;
             EssentiaTransfers.Attempt attempt = source instanceof TileAlembic alembic
                     ? EssentiaTransfers.collectAlembic(this, alembic, Direction.UP, aspect, limit)
-                    : EssentiaTransfers.collectReservoir(this, (TileEssentiaReservoir) source, aspect, limit);
+                    : source instanceof TileEssentiaReservoir reservoir
+                    ? EssentiaTransfers.collectReservoir(this, reservoir, aspect, limit)
+                    // Original AIEssentiaGather:114 - every other marked essentia transport.
+                    : source instanceof IEssentiaTransport transport
+                    ? EssentiaTransfers.collectTransport(this, transport, binding.face(), aspect, limit)
+                    : new EssentiaTransfers.Attempt(false, 0, null);
             if (attempt.failure() != null) Thaumcraft.LOG.warn("Golem alembic transfer reported {} committed units; never refunding", attempt.committedUnits(), attempt.failure());
         } catch (RuntimeException failure) {
             Thaumcraft.LOG.warn("Golem alembic transfer failed; retaining actual cargo, never replaying a debit", failure);

@@ -19,6 +19,7 @@ import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.entities.golems.EntityGolemBase.GoalPriority;
 import thaumcraft.common.items.golems.GolemAspectCargo;
 import thaumcraft.common.items.golems.GolemMarker;
+import thaumcraft.common.lib.essentia.EssentiaSourceRules;
 import thaumcraft.common.tiles.TileAlchemyFurnace;
 import thaumcraft.common.tiles.TileAlembic;
 import thaumcraft.common.tiles.TileJar;
@@ -26,7 +27,8 @@ import thaumcraft.common.tiles.TileEssentiaReservoir;
 
 /** Finite alembic/reservoir -> actual entity cargo -> directly marked normal jar/reservoir. */
 final class AlchemyGolemGoals {
-    record Source(BlockEntity base, BlockEntity endpoint, Aspect aspect, int limit) {}
+    /** The endpoint of a gather, with the side the original's payment uses. */
+    record Source(BlockEntity base, BlockEntity endpoint, Aspect aspect, int limit, Direction face) {}
     private final EntityGolemBase golem;
     private BlockEntity target;
     private Path ownedPath;
@@ -68,7 +70,34 @@ final class AlchemyGolemGoals {
         int amount = alembic.getAmount(), carried = golem.getEssentiaAmount();
         if (!canonical(aspect) || amount <= 0 || amount > 32 || !alembic.canOutputTo(Direction.UP)
                 || carried > 0 && golem.getEssentiaAspect() != aspect || carried >= golem.getCarryLimit()) return null;
-        return new Source(base, alembic, aspect, Math.min(amount, golem.getCarryLimit() - carried));
+        return new Source(base, alembic, aspect, Math.min(amount, golem.getCarryLimit() - carried), Direction.UP);
+    }
+    /**
+     * The source set of the original's gather.
+     *
+     * <p>Oracle {@code AIEssentiaGather:56-82}: the home cell itself may be <b>any</b> essentia
+     * transport. The jar and the reservoir are accepted without a side test, every other transport
+     * must be able to output to the home facing. The side of the payment is the original's:
+     * {@code UP} for the jar, the reservoir's own facing for the reservoir and the home facing
+     * for every other transport ({@code AIEssentiaGather:94-99}).</p>
+     */
+    private Source transportSource(BlockEntity base, IEssentiaTransport transport) {
+        boolean jar = transport instanceof TileJar;
+        boolean reservoir = transport instanceof TileEssentiaReservoir;
+        EssentiaSourceRules.Kind kind = EssentiaSourceRules.kindOf(jar, reservoir);
+        Direction face = EssentiaSourceRules.paymentFace(kind, golem.getHomeFacing(),
+                reservoir ? ((TileEssentiaReservoir) transport).getFacing() : null);
+        if (face == null) return null;
+        Aspect offered = transport.getEssentiaType(face);
+        Aspect unknown = transport.getEssentiaType(null); // The original's UNKNOWN query.
+        int amount = transport.getEssentiaAmount(face), carried = golem.getEssentiaAmount();
+        if (!EssentiaSourceRules.eligible(kind, transport.canOutputTo(face), golem.getEssentiaAspect(), offered, unknown,
+                amount, carried, golem.getCarryLimit())) return null;
+        Aspect aspect = EssentiaSourceRules.takenAspect(offered, unknown);
+        if (!canonical(aspect)) return null;
+        int limit = EssentiaSourceRules.takenAmount(amount, carried, golem.getCarryLimit());
+        if (limit <= 0) return null;
+        return new Source(base, (BlockEntity) transport, aspect, limit, face);
     }
     /** False is read-only eligibility/precommit validation, never payment authority. */
     Source findSource(boolean query) {
@@ -84,11 +113,15 @@ final class AlchemyGolemGoals {
             int carried = golem.getEssentiaAmount(), amount = reservoir.containerContains(aspect);
             if (!canonical(aspect) || amount <= 0 || !reservoir.canOutputTo(reservoir.getFacing())
                     || carried >= golem.getCarryLimit() || carried > 0 && golem.getEssentiaAspect() != aspect) return null;
-            return new Source(base, reservoir, aspect, Math.min(amount, golem.getCarryLimit() - carried));
+            return new Source(base, reservoir, aspect, Math.min(amount, golem.getCarryLimit() - carried), reservoir.getFacing());
         }
         if (base.getClass() == TileAlembic.class) {
             TileAlembic alembic = (TileAlembic) base;
             return alembic.canOutputTo(golem.getHomeFacing()) ? candidate(base, alembic) : null;
+        }
+        // Original AIEssentiaGather:58-64 - the home cell itself may be ANY essentia transport.
+        if (base instanceof IEssentiaTransport transport) {
+            return transportSource(base, transport);
         }
         if (base.getClass() != TileAlchemyFurnace.class) return null;
         Source best = null;

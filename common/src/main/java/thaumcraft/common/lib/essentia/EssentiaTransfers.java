@@ -401,6 +401,52 @@ public final class EssentiaTransfers {
         } finally { finishTubeFilterMutation(mutation); }
     }
 
+    /** Original AIEssentiaGather:100-122 — the generic marked essentia transport branch of the SOURCE.
+     *
+     * <p>The original asks the transport for the aspect it holds on the home facing, takes that
+     * aspect with ONE {@code takeEssentia} call on the very same side and keeps what the transport
+     * gave. The native profile is that one call, paired with the cargo credit in the same native
+     * commit. It is the mirror of {@link #deliverTransport}, which pays a generic transport.</p>
+     *
+     * <p>The closed profiles of the port's own containers (the alembic, the reservoir) keep their own
+     * rules; this one exists for the <b>other</b> marked transports and for the jar at the home.</p>
+     */
+    public static Attempt collectTransport(EntityGolemBase golem, IEssentiaTransport source, Direction face,
+                                            Aspect aspect, int limit) {
+        if (golem == null || source == null || face == null || limit <= 0 || !EssentiaAtomicEndpoint.validAspect(aspect)
+                || !(source instanceof BlockEntity owner) || !(golem.level() instanceof ServerLevel level)) return new Attempt(false, 0, null);
+        if (!level.getServer().isSameThread()) throw new IllegalStateException("Golem essentia collection requires the server thread");
+        if (MUTATION.get() != null || !currentGolem(golem, level) || !current(owner, level)) return new Attempt(false, 0, null);
+        Mutation mutation = new Mutation(owner, owner);
+        mutation.golem = golem;
+        MUTATION.set(mutation);
+        boolean selected = false;
+        try {
+            GolemAspectCargo beforeCargo = golem.getAspectCargo();
+            int capacity = golem.getCarryLimit();
+            if (!matchesGolemCargo(golem, level, beforeCargo, capacity) || beforeCargo.amount() > 0 && beforeCargo.aspect() != aspect
+                    || !source.canOutputTo(face) || source.getEssentiaAmount(face) <= 0) return new Attempt(false, 0, null);
+            Aspect offered = source.getEssentiaType(face);
+            if (offered != null && offered != aspect) return new Attempt(false, 0, null);
+            int units = Math.min(limit, Math.min(source.getEssentiaAmount(face), capacity - beforeCargo.amount()));
+            if (units <= 0 || !golem.canCollectEssentia(owner, aspect, units)) return new Attempt(false, 0, null);
+            selected = true;
+            if (!matchesGolemCargo(golem, level, beforeCargo, capacity) || !current(owner, level)
+                    || !source.canOutputTo(face) || !golem.canCollectEssentia(owner, aspect, units)) return new Attempt(true, 0, null);
+            // The original's order: the transport is paid FIRST, the cargo is credited after.
+            int taken = source.takeEssentia(aspect, units, face);
+            if (taken <= 0) return new Attempt(true, 0, null);
+            GolemAspectCargo afterCargo = new GolemAspectCargo(aspect, beforeCargo.amount() + taken);
+            mutation.beforeCargo = beforeCargo;
+            mutation.afterCargo = afterCargo;
+            RuntimeException failure = commitPrepared(mutation, owner, null, null, null, null, null);
+            return new Attempt(true, taken, failure);
+        } catch (RuntimeException failure) {
+            if (mutation.raw) throw failure;
+            return new Attempt(selected, 0, failure);
+        } finally { finishTubeFilterMutation(mutation); }
+    }
+
     /** Original reservoir branches: first-aspect collection and partial delivery, paired with actual cargo in one native commit. */
     public static Attempt collectReservoir(EntityGolemBase golem, TileEssentiaReservoir reservoir, Aspect aspect, int limit) {
         return transferGolemReservoir(golem, reservoir, aspect, limit, true);

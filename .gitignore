@@ -7,7 +7,11 @@ logs
 .gradle_home/
 .gradle-fix4/
 # private Gradle homes of the parallel agents
-.gradle-h5/
+# Private Gradle homes of the porting lanes. Each agent runs with its own
+# GRADLE_USER_HOME so the shared Loom cache cannot be corrupted by concurrent builds.
+# They belong to nobody but their lane and must never be committed: an earlier wave
+# committed a 1.1 GB one and it had to be filter-repo'd out of history.
+.gradle-*/
 .gradle-surv/
 .gradle-float/
 .gradle-fix9/

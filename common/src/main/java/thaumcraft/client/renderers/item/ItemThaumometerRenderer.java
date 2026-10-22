@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.client.renderers.models.ModelThaumometer;
 import thaumcraft.common.items.relics.ItemThaumometer;
+import thaumcraft.common.lib.capabilities.KnowledgeAccess;
 
 /**
  * Original ItemThaumometerRenderer:72-312: the thaumometer of the player.
@@ -81,6 +82,11 @@ public final class ItemThaumometerRenderer {
                 pose.mulPose(Axis.XP.rotationDegrees(90.0F));
                 pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
                 screen(pose, buffers, overlay);
+                // Original ItemThaumometerRenderer:155-259 - the scan readout, drawn in the
+                // world space of the screen of the scanner.
+                if (context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND) {
+                    readout(pose, buffers);
+                }
             } finally {
                 pose.popPose();
             }
@@ -144,6 +150,36 @@ public final class ItemThaumometerRenderer {
         pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
         pose.translate(0.4F, -0.4F, 0.0F);
         pose.scale(2.0F, 2.0F, 2.0F);
+    }
+
+    /**
+     * The scan readout of the original.
+     *
+     * <p>Original {@code thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:155-259}:
+     * the readout is drawn in the first person view of the local player, on the screen of the
+     * scanner. It shows the name of the target, the aspect icons of a target that was already
+     * scanned and the type of a node.</p>
+     */
+    private static void readout(PoseStack pose, MultiBufferSource buffers) {
+        var mc = Minecraft.getInstance();
+        var player = mc.player;
+        if (player == null) return;
+        // Original ItemThaumometerRenderer:98 - the readout belongs to the first person view.
+        if (!mc.options.getCameraType().isFirstPerson()) return;
+        // Original ItemThaumometerRenderer:161 - the target of the scan.
+        var target = ItemThaumometer.readout(player, player.getMainHandItem());
+        if (target == null) return;
+        // Original ItemThaumometerRenderer:169,179,183 - the icons are only drawn for a target
+        // that was already scanned.
+        var knowledge = KnowledgeAccess.get(player);
+        boolean scanned = switch (target.kind()) {
+            case ITEM -> knowledge.hasScannedItem(target.signature());
+            case ENTITY -> knowledge.hasScannedEntity(target.signature());
+            case PHENOMENA -> knowledge.hasScannedPhenomena(target.signature());
+        };
+        int ticks = player.tickCount;
+        int jitter = player.level() == null ? 0 : player.level().getRandom().nextInt(2);
+        ThaumometerReadout.render(pose, buffers, target, scanned, ThaumometerReadout.packedLight(ticks, jitter));
     }
 
     /** The arm of the player, as the original RenderPlayer.renderFirstPersonArm:318-324 draws it. */

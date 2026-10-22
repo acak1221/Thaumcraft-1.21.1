@@ -42,6 +42,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import thaumcraft.common.Thaumcraft;
+import thaumcraft.api.entities.IThaumcraftBoss;
 import thaumcraft.common.config.ThaumcraftLoot;
 import thaumcraft.common.lib.WarpEvents;
 import thaumcraft.common.lib.cult.CultistEquipmentRules;
@@ -57,7 +58,7 @@ import thaumcraft.common.lib.ward.WardRules;
  * common base class is not part of the native tree yet: the aggro table, the enrage, the
  * player scaled health and damage buffs and the home anchor keep their original values.
  */
-public class EntityCultistLeader extends Monster implements RangedAttackMob {
+public class EntityCultistLeader extends Monster implements RangedAttackMob, IThaumcraftBoss {
     private static final EntityDataAccessor<Integer> TITLE = SynchedEntityData.defineId(EntityCultistLeader.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> CHAMPION = SynchedEntityData.defineId(EntityCultistLeader.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> ANGER = SynchedEntityData.defineId(EntityCultistLeader.class, EntityDataSerializers.INT);
@@ -167,6 +168,18 @@ public class EntityCultistLeader extends Monster implements RangedAttackMob {
         int modifier = getChampionModifier();
         if (modifier < 0) return Component.literal(CultistRules.CHAMPION_MOD_DISPLAY_NAMES[CultistRules.CHAMPION_BOLD]);
         return Component.translatable("champion.mod." + CultistRules.CHAMPION_MOD_NAMES[modifier]);
+    }
+
+    /**
+     * Original {@code EntityCultistLeader.generateName:105-110} - the praetor of the crimson cult
+     * names itself after its champion modifier, and stays unnamed without one.
+     *
+     * <p>The original praetor was an {@code EntityThaumcraftBoss}, so the native praetor carries
+     * the same boss marker; the name of the boss is the one of the original.</p>
+     */
+    @Override public void generateName() {
+        if (getChampionModifier() < 0) return;
+        setCustomName(Component.translatable("entity.thaumcraft.cultistleader.name", getTitle(), championName()));
     }
 
     // ---------------------------------------------------------------- spawn

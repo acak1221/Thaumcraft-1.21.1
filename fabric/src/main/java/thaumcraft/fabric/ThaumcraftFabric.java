@@ -78,6 +78,9 @@ public final class ThaumcraftFabric implements ModInitializer {
         thaumcraft.fabric.bore.FabricBorePlatform.init();
         thaumcraft.fabric.golems.FabricGolemHarvestPlatform.init();
         thaumcraft.fabric.golems.FabricGolemUsePlatform.init();
+        // Oracle EventHandlerWorld:225-245 - the original cancelled a block placement next to an
+        // active eldritch boss of the Outer Lands.
+        FabricBossPlacement.register();
         net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
                 thaumcraft.common.config.ThaumcraftWarp.MIND_SPIDER.get(),
                 thaumcraft.common.entities.monster.EntityMindSpider.createAttributes());

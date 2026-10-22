@@ -1,21 +1,31 @@
 package thaumcraft.common.lib.events;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import thaumcraft.common.Thaumcraft;
 import thaumcraft.common.config.OriginalRegenSettings;
 import thaumcraft.common.config.ThaumcraftBiomeSettings;
+import thaumcraft.common.config.ThaumcraftOuterLands;
+import thaumcraft.common.config.ThaumcraftVillages;
+import thaumcraft.common.lib.world.AuraGenRules;
 import thaumcraft.common.lib.world.ChunkLoc;
+import thaumcraft.common.lib.world.StructurePlacementRules;
 import thaumcraft.common.lib.world.ThaumcraftNormalNodeFeature;
+import thaumcraft.common.lib.world.ThaumcraftOreFeature;
+import thaumcraft.common.lib.world.ThaumcraftTreeFeature;
 
 /**
  * The chunk save and chunk load marker of the original and the chunk regeneration queue.
@@ -142,28 +152,86 @@ public final class ChunkRegeneration {
 
     /**
      * The regeneration of a chunk: oracle ThaumcraftWorldGenerator.worldGeneration:125-146 with
-     * {@code newGen = false}.
+     * {@code newGen = false}, i.e. {@code generateSurface:420-456}.
      *
      * <p>Every pass of the original is behind its own regeneration option, and every option is
      * off by default, so the regeneration of the original does nothing until a player switches
-     * one of them on. The port keeps that gate.</p>
+     * one of them on. The port keeps that gate, and it keeps the second gate of every pass: the
+     * generation option of the same pass ({@code Config.genX && (newGen || Config.regenX)}).</p>
+     *
+     * <p>The original replays its own generator into an existing chunk with
+     * {@code World#setBlock}. The port's features are plain {@code Feature} bodies, so the same
+     * replay is possible here: each body is invoked directly on the live level, with the random
+     * of the original regeneration ({@link #chunkSeed}). This is not the datapack feature
+     * pipeline and does not regenerate terrain.</p>
+     *
+     * <p>The aura totem is deliberately absent: {@code generateTotem:149} requires
+     * {@code newGen}, and the regeneration queue calls {@code worldGeneration(..., false)}
+     * (oracle ServerTickEventsFML:96), so the original never grows a totem during a
+     * regeneration either.</p>
      */
     public static void regenerate(ServerLevel level, int chunkX, int chunkZ, long seed) {
         OriginalRegenSettings settings = ThaumcraftBiomeSettings.regen();
         if (!settings.anyRegeneration()) return;
-        // Oracle ThaumcraftWorldGenerator:143 - the original loads the chunk of the
-        // regeneration before it writes into it.
-        var chunk = level.getChunk(chunkX, chunkZ);
         RandomSource random = RandomSource.create(seed);
-        // Oracle ThaumcraftWorldGenerator:412-419 - the aura node pass.
-        if (settings.auraNodes()) ThaumcraftNormalNodeFeature.placeWildNode(level, random, chunkX, chunkZ);
-        // The ore pass (:495-509), the vegetation pass (:459-479) and the structure chain
-        // (:421-456) of the original run through the feature pipeline of the datapack of
-        // 1.21.1, and the vanilla only runs that pipeline while it generates a chunk
-        // (net.minecraft.world.level.levelgen.ChunkGenerator.applyBiomeDecoration). They
-        // cannot be replayed for a chunk that exists, so they are not replayed here.
+        var worldgen = ThaumcraftBiomeSettings.worldgen();
+        net.minecraft.world.level.chunk.ChunkAccess chunk = null;
+        // A world generation failure must not take the server down: the original had no such
+        // guard, but a throwing feature in a regeneration tick would stop the whole server.
+        try {
+            // Oracle ThaumcraftWorldGenerator:143 - the original loads the chunk of the
+            // regeneration before it writes into it.
+            chunk = level.getChunk(chunkX, chunkZ);
+            // Oracle ThaumcraftWorldGenerator:421 - the vegetation pass.
+            if (ThaumcraftBiomeSettings.current().generateTrees() && settings.trees()) {
+                ThaumcraftTreeFeature.placePass(level, random, chunkX, chunkZ);
+            }
+            // Oracle ThaumcraftWorldGenerator:422-423 and :481-546 - the ore pass. The pass
+            // itself runs unconditionally and gates each type with genX && regenX.
+            ThaumcraftOreFeature.placePass(level, random, chunkX, chunkZ,
+                    worldgen.cinnabarOre() && settings.cinnibarOre(),
+                    worldgen.amberOre() && settings.amberOre(),
+                    worldgen.infusedStone() && settings.infusedStone());
+            // Oracle ThaumcraftWorldGenerator:414-420 - the scattered feature node and the wild
+            // node pass, with the overwriting assignment of line 419.
+            if (worldgen.auraNodes() && settings.auraNodes()) {
+                ThaumcraftNormalNodeFeature.placeAuraPass(level, random, chunkX, chunkZ);
+            }
+            // Oracle ThaumcraftWorldGenerator:429-453 - the exclusive structure chain. The
+            // totem that follows it in the fresh generation is not replayed (see the class note).
+            if (worldgen.structures() && settings.structures()) {
+                placeStructure(level, chunkX, chunkZ);
+            }
+        } catch (RuntimeException failure) {
+            Thaumcraft.LOG.error("[Thaumcraft] Chunk regeneration failed for chunk at {}; the chunk keeps its terrain",
+                    new ChunkPos(chunkX, chunkZ), failure);
+        }
         // Oracle Chunk.func_76630_e - the original marks the chunk as modified after the
         // regeneration, so the chunk is written again and carries the marker.
-        chunk.setUnsaved(true);
+        if (chunk != null) chunk.setUnsaved(true);
+    }
+
+    /**
+     * The structure chain of the regeneration: oracle ThaumcraftWorldGenerator:429-453.
+     *
+     * <p>The chain draws the position and its three rolls from the chunk random, and only the
+     * selected structure is built. Each native structure feature owns the same draw, so the
+     * selected one is invoked with a context whose origin is the chunk; the feature re-derives
+     * the chain from the chunk seed exactly as it does during a fresh generation.</p>
+     */
+    private static boolean placeStructure(ServerLevel level, int chunkX, int chunkZ) {
+        StructurePlacementRules.Kind kind = AuraGenRules.chainKind(level.getSeed(), chunkX, chunkZ);
+        if (kind == StructurePlacementRules.Kind.NONE) return false;
+        FeaturePlaceContext<NoneFeatureConfiguration> context = new FeaturePlaceContext<>(
+                Optional.empty(), level, level.getChunkSource().getGenerator(),
+                RandomSource.create(StructurePlacementRules.chunkSeed(level.getSeed(), chunkX, chunkZ)),
+                new BlockPos(chunkX << 4, level.getMinBuildHeight(), chunkZ << 4),
+                NoneFeatureConfiguration.INSTANCE);
+        return switch (kind) {
+            case MOUND -> ThaumcraftVillages.MOUND.get().place(context);
+            case ELDRITCH_RING -> ThaumcraftOuterLands.RING.get().place(context);
+            case HILLTOP_STONES -> ThaumcraftVillages.HILLTOP_STONES.get().place(context);
+            case NONE -> false;
+        };
     }
 }

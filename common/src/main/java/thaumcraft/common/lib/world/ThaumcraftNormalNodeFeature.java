@@ -6,6 +6,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -45,7 +46,35 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
         int chunkZ = context.origin().getZ() >> 4;
         RandomSource random = RandomSource.create(
                 StructurePlacementRules.chunkSeed(level.getLevel().getSeed(), chunkX, chunkZ));
-        return placeWildNode(level, random, chunkX, chunkZ);
+        return placeAuraPass(level, random, chunkX, chunkZ);
+    }
+
+    /**
+     * Oracle ThaumcraftWorldGenerator:411-420 - the whole aura branch of the original: the node
+     * of the scattered feature first, then the wild node pass, whose return value overwrites the
+     * scattered flag.
+     *
+     * <p>The original runs this branch behind {@code Config.genAura && (newGen ||
+     * Config.regenAura)}; the caller owns that gate, so the fresh-generation feature and the
+     * regeneration queue replay exactly the same body.</p>
+     *
+     * @return the {@code auraGen} value of the original, the return of the wild node pass
+     */
+    public static boolean placeAuraPass(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ) {
+        boolean scatteredPlaced = false;
+        // Oracle ThaumcraftWorldGenerator:413-418 - the node of a vanilla scattered feature sits
+        // three blocks above the surface of its centre.
+        AuraGenRules.Temple temple = AuraGenRules.scatteredTemple(level, chunkX, chunkZ);
+        if (temple != null) {
+            scatteredPlaced = true;
+            int x = temple.centre().getX();
+            int z = temple.centre().getZ();
+            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 3;
+            createRandomNodeAt(level, new BlockPos(x, y, z), random);
+        }
+        // Oracle ThaumcraftWorldGenerator:419 - the wild node pass overwrites the flag.
+        return AuraGenRules.auraGenAfterWildPass(scatteredPlaced,
+                placeWildNode(level, random, chunkX, chunkZ, scatteredPlaced));
     }
 
     /**
@@ -83,17 +112,47 @@ public final class ThaumcraftNormalNodeFeature extends Feature<NoneFeatureConfig
      * ({@code Config.nodeRarity}), the place of the node inside the chunk and then the node
      * itself. The regeneration of the original calls the same pass with {@code newGen = false}
      * (oracle ServerTickEventsFML:96).</p>
+     *
+     * <p>The rarity draw happens before the {@code !auraGen} test of the original, so a chunk
+     * that already carries a scattered node still consumes the draw. The returned flag is the
+     * flag of the original: it is true when the roll hit and the height was valid, even if the
+     * biome of the node refused it afterwards ({@code createRandomNodeAt} is {@code void} in
+     * the original).</p>
+     *
+     * @param auraGen the flag the scattered branch left behind
+     * @return the value the original returns from {@code generateWildNodes}
      */
-    public static boolean placeWildNode(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ) {
+    public static boolean placeWildNode(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ,
+                                        boolean auraGen) {
         if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
         // Oracle ThaumcraftWorldGenerator:190 - the rarity roll of the original.
         if (random.nextInt(NODE_RARITY) != 0) return false;
+        if (auraGen) return false;
         // Oracle ThaumcraftWorldGenerator:193-194 - the place of the node inside the chunk.
         int x = chunkX * 16 + random.nextInt(16);
         int z = chunkZ * 16 + random.nextInt(16);
         int y = wildNodeY(level, random, x, z);
         if (y < 0) return false;
-        return createRandomNodeAt(level, new BlockPos(x, y, z), random);
+        createRandomNodeAt(level, new BlockPos(x, y, z), random);
+        return true;
+    }
+
+    /**
+     * The decision of {@link #placeWildNode} without placing the node, for the aura totem of the
+     * same chunk.
+     *
+     * <p>The totem runs as a separate placed feature, so it replays the draws of the wild pass
+     * from the same chunk seed and only needs the resulting flag. The draws are identical to the
+     * ones of the real pass: the rarity, the place inside the chunk and the height draw.</p>
+     */
+    public static boolean wildNodeDecision(WorldGenLevel level, RandomSource random, int chunkX, int chunkZ,
+                                           boolean auraGen) {
+        if (!level.getLevel().dimension().equals(Level.OVERWORLD)) return false;
+        if (random.nextInt(NODE_RARITY) != 0) return false;
+        if (auraGen) return false;
+        int x = chunkX * 16 + random.nextInt(16);
+        int z = chunkZ * 16 + random.nextInt(16);
+        return wildNodeY(level, random, x, z) >= 0;
     }
 
     /** Actual ordinary-wild invocation of the shared original all-type factory. */

@@ -95,3 +95,4 @@ javac.*.args
 .gradle-g11/
 .gradle-g16/
 .gradle-g18/
+.gradle-g22/

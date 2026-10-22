@@ -40,16 +40,17 @@ class TaintMaterialRulesTest {
         assertTrue(TaintMaterialRules.soil(Blocks.FARMLAND.defaultBlockState()));
         assertTrue(TaintMaterialRules.soil(Blocks.GRASS_BLOCK.defaultBlockState()));
         assertTrue(TaintMaterialRules.soil(Blocks.CLAY.defaultBlockState()));
+        assertTrue(TaintMaterialRules.soil(Blocks.RED_SAND.defaultBlockState()));
+        assertTrue(TaintMaterialRules.soil(Blocks.COARSE_DIRT.defaultBlockState()));
+        assertTrue(TaintMaterialRules.soil(Blocks.PODZOL.defaultBlockState()));
+        assertTrue(TaintMaterialRules.soil(Blocks.MYCELIUM.defaultBlockState()));
+        assertTrue(TaintMaterialRules.soil(Blocks.SOUL_SAND.defaultBlockState()));
     }
 
     @Test void theBlocksThatTheOriginalNeverHadAreNotConverted() {
-        // Mycelium, soul sand, coarse dirt, rooted dirt and red sand have no 1.7.10 material,
-        // so the original never converted them into taint soil.
-        assertFalse(TaintMaterialRules.soil(Blocks.MYCELIUM.defaultBlockState()));
-        assertFalse(TaintMaterialRules.soil(Blocks.SOUL_SAND.defaultBlockState()));
-        assertFalse(TaintMaterialRules.soil(Blocks.COARSE_DIRT.defaultBlockState()));
+        // Do not widen the material compatibility mapping to all modern dirt-tag blocks.
         assertFalse(TaintMaterialRules.soil(Blocks.ROOTED_DIRT.defaultBlockState()));
-        assertFalse(TaintMaterialRules.soil(Blocks.RED_SAND.defaultBlockState()));
+        assertFalse(TaintMaterialRules.soil(Blocks.MUD.defaultBlockState()));
     }
 
     @Test void theHoleKeepsTheEffectiveBlastResistanceOfTheOriginal() {

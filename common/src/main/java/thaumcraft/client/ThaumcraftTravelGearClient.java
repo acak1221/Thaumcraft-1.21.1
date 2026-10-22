@@ -45,10 +45,12 @@ import thaumcraft.common.lib.network.HoverNetworking;
 /** Native H input sends intent only. Audio, client damping, animated rings and
  * grounded visual sparks derive from the actual worn server-synced harness. */
 public final class ThaumcraftTravelGearClient {
-    // Original Keys.keyH (oracle thaumcraft/api/Keys.java:8) is bound to
-    // Keyboard.KEY_NONE, so the key of the original is NOT bound by default.
-    // The port keeps that: the player assigns the key in the vanilla controls.
-    public static final KeyMapping HOVER=new KeyMapping("key.thaumcraft.hover",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_UNKNOWN,KeyMapping.CATEGORY_MISC);
+    // Original KeyHandler.keyH (oracle thaumcraft/common/lib/events/KeyHandler.java:37)
+    // is `new KeyBinding("Activate Hover Harness", 35, "key.categories.misc")`:
+    // LWJGL2 Keyboard.KEY_H is 35, so the original binds the hover harness to H
+    // BY DEFAULT. The oracle has no thaumcraft/api/Keys.java; the KEY_NONE claim
+    // came from the later 1.7.10/1.12 copies, not from the 4.2.3.5 jar.
+    public static final KeyMapping HOVER=new KeyMapping("key.thaumcraft.hover",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_H,KeyMapping.CATEGORY_MISC);
     private static final ResourceLocation RING=ResourceLocation.fromNamespaceAndPath("thaumcraft","items/lightningring");
     private static final RenderType RING_TYPE=new RingRenderType();
     private static final Map<Player,Boolean> LAST=Collections.synchronizedMap(new WeakHashMap<>());

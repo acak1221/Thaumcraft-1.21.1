@@ -8016,18 +8016,19 @@
         "evidence": [
           "legacy src/main/java/thaumcraft/client/lib/KeyHandler.java:1-157 the 1.12 copy of the TC4 key handler (focus G, hover H, misc unbound)",
           "oracle thaumcraft/common/lib/events/KeyHandler.java:8-11 the TC4 original: keyF 'Change Wand Focus' default 33, keyH 'Activate Hover Harness' default 35, keyG 'Misc Wand Toggle' default 34",
+          "jar Thaumcraft-1.7.10-4.2.3.5.jar!thaumcraft/common/lib/events/KeyHandler.class the constructor of the original itself: bipush 33 -> keyF 'Change Wand Focus', bipush 35 -> keyH 'Activate Hover Harness', bipush 34 -> keyG 'Misc Wand Toggle', and the jar has NO thaumcraft/api/Keys.class at all",
+          "the 1.7.10 key codes 33/35/34 are LWJGL2 Keyboard.KEY_F/KEY_H/KEY_G, and the original's own field names (keyF, keyH, keyG) and binding names ('Change Wand Focus', 'Activate Hover Harness', 'Misc Wand Toggle') agree with them",
           "native common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java:23-24 CHANGE_FOCUS defaults to GLFW_KEY_F",
           "native common/src/main/java/thaumcraft/client/ThaumcraftTravelGearClient.java:48 HOVER defaults to GLFW_KEY_H",
           "native common/src/main/java/thaumcraft/client/ThaumcraftMiscKeyClient.java:17 MISC_TOGGLE defaults to GLFW_KEY_G",
-          "oracle thaumcraft/api/Keys.java:7-9 binds keyF, keyH and keyG of the original to Keyboard.KEY_NONE, so no key of the original is bound by default",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java:25, ThaumcraftTravelGearClient.java:49 and ThaumcraftMiscKeyClient.java:26 now bind the three keys to GLFW_KEY_UNKNOWN, the 1.21.1 value of an unbound key"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftFocusClient.java:30, ThaumcraftTravelGearClient.java:53 and ThaumcraftMiscKeyClient.java:30 bind the three keys to GLFW_KEY_F/GLFW_KEY_H/GLFW_KEY_G again, the default keys of the original 4.2.3.5 jar"
         ],
         "notes": [
           "Legacy-only class path; the TC4 original key handler lives in thaumcraft/common/lib/events/KeyHandler.java, which is outside this family.",
-          "The native key bindings exist but use different default keys than the original: F/H/G instead of the original ';' (33), '[' (35) and ''' (34).",
+          "The native key bindings now use the original default keys again: F, H and G.",
           "The native documents that the original's 'Misc Wand Toggle' action (PacketItemKeyToServer id 1) is not ported: ThaumcraftMiscKeyClient only drives the Earthmover shovel orientation and the wand architect toggle.",
           "Complete callsite audit: the legacy class exists only in the retained 1.12 reference tree; the native key handling lives in ThaumcraftFocusClient / ThaumcraftTravelGearClient / ThaumcraftMiscKeyClient.",
-          "The earlier audit of this row repeated the wrong defaults of the retained 1.12 reference; the original of TC4 4.2.3.5 binds none of the three keys, and the port now does the same.",
+          "The earlier audit of this row repeated the wrong defaults of the retained 1.12 reference and cited an oracle file that does not exist; the 4.2.3.5 jar binds the three keys to F, H and G by default, and the port binds them the same way again.",
           "The three keys stay assignable in the vanilla controls screen, exactly as the original key bindings were assignable in its own options screen."
         ],
         "reviewed_sha256": {

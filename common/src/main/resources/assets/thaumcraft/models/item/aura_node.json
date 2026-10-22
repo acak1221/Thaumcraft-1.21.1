@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "minecraft:builtin/entity",
   "textures": {
-    "layer0": "thaumcraft:items/shard"
+    "particle": "thaumcraft:items/shard"
   }
 }

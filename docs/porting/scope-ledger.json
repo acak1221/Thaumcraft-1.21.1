@@ -4568,7 +4568,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/fx/ParticleEngine.java:57 four per-layer HashMap<Integer,ArrayList<EntityFX>> particle buckets keyed by dimension",
           "oracle thaumcraft/client/fx/ParticleEngine.java:74-80 layer>=2 rebinds textures/misc/particles2.png, layers 0/2 blend (770,1), layers 1/3 blend (770,771)",
@@ -4579,7 +4579,9 @@
           "oracle thaumcraft/client/fx/ParticleEngine.java:143 addEffect caps every layer and dimension bucket at 2000 particles",
           "oracle thaumcraft/client/fx/ParticleEngine.java:74-80 layer two binds textures/misc/particles2.png and the layers 0,1,3 bind textures/misc/particles.png",
           "native common/src/main/java/thaumcraft/client/fx/particles/CrystalSparkParticle.java:16 the particles2 atlas with the additive blend of the original layer two",
-          "native common/src/main/java/thaumcraft/client/fx/particles/SlurryBubbleParticle.java:11 the particles atlas of the original layer zero"
+          "native common/src/main/java/thaumcraft/client/fx/particles/SlurryBubbleParticle.java:11 the particles atlas of the original layer zero",
+          "REMAINING DIFFERENCE: the original standalone manager kept four layers times the dimension buckets and evicted at 2000 particles per bucket (oracle ParticleEngine.java:57,143); the vanilla 1.21.1 particle engine owns that budget now, so the exact eviction is not reproduced",
+          "the visible part of the original is reproduced: layer two binds particles2.png with the additive blend (770,1) and the layers zero, one and three bind particles.png (oracle ParticleEngine.java:74-80), which the native particles set per particle"
         ],
         "notes": [
           "The original standalone manager (4 layers x dimension, 2000-particle cap, glAlphaFunc 0.003921569) is replaced by the vanilla 1.21.1 particle engine plus per-effect native Particle subclasses.",
@@ -5016,11 +5018,12 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a9-core",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/fx/beams/FXBeamWand.java the wand beam effect",
           "native common/src/main/java/thaumcraft/client/fx/particles/FocusFireballParticle.java, ShockSparkParticle.java, FrostSparkleParticle.java the native focus beams",
-          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:149 the native fire beam damage formula"
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusFire.java:149 the native fire beam damage formula",
+          "REMAINING DIFFERENCE: the original beam starts at the wand tip (oracle FXBeamWand.java) and the native focus particles start at the player; the wand tip origin belongs to the wand renderer lane (ledger units ItemWandRenderer, WandPerspectiveModel, FirstPersonWandTipOrigin)"
         ],
         "notes": [
           "Not a class-for-class port: the original single beam effect class became per-focus particle systems in 1.21.1.",
@@ -6174,8 +6177,8 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSpark.java:22 the spark lives 5 + rand(5) ticks, picks one of three sprite sheets and has no gravity",
           "native client/fx/particles/CrystalSparkParticle.java:1 the native crystal spark replaces the shared 1.7 spark",
@@ -6187,7 +6190,14 @@
           "native client/fx/particles/CrystalSparkParticle.java:22 the native crystal spark keeps the 5..9 ticks, the 8x8 sheet, the alpha .8, the flip and the no movement of the original",
           "native client/ThaumcraftShockOrbsClient.java:24 the native shock trap keeps the size 0.33+h and the colour 0.65+rand*0.1/1/1 of the original metadata ten",
           "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java:52 the native eldritch block has no display tick, so the spark of the eldritch lock is missing",
-          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java the native tree has no second variant of the shock focus, so the blue spark of the original metadata eleven is missing"
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java the native tree has no second variant of the shock focus, so the blue spark of the original metadata eleven is missing",
+          "native common/src/main/java/thaumcraft/client/fx/particles/ShockSparkParticle.java the native spark reproduces the original sheet of three eight by eight cells, the five to nine ticks, the optional flip and the no movement",
+          "native common/src/main/java/thaumcraft/client/fx/particles/CrystalSparkParticle.java the spark of the original crystal cluster (oracle BlockCrystal.java:86)",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockShockTrap.java the shock focus of the original keeps the size 0.33+h and the colour 0.65+random*0.1/1/1 (oracle BlockAiry.java:299-304)",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockAiry.java the client tick of the airy family adds the second original spark of the metadata eleven with the colour 0.3-random*0.1/0/0.5+random*0.2 (oracle BlockAiry.java:299-311)",
+          "native common/src/main/java/thaumcraft/common/blocks/BlockEldritch.java the counting eldritch lock throws the original spark of the size 0.5 with the colour 0.65+random*0.1/1/1 and the alpha 0.8 (oracle BlockEldritch.java:289-302)",
+          "native common/src/main/java/thaumcraft/common/lib/mods/ChampionModBold.java the original bold champion spark of the size 0.2 with the colour 0.3-random*0.1/0/0.8+random*0.2 (oracle ChampionModBold.java:30-40)",
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchGolem.java the headless golem throws the original spark of the size 0.3 in the direction of its head once in twenty ticks (oracle EntityEldritchGolem.java:288-300)"
         ],
         "notes": [
           "The 1.7.10 spark was split into the native crystal spark and the native shock spark; both keep the numbers of the original.",
@@ -6232,7 +6242,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2devices",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/fx/particles/FXSparkle.java:23 the sparkle carries the sprite sheet, the multiplier, the blend mode and the colour",
           "native client/fx/particles/DrainSparkle.java:1 the native vis drain sparkle carries the RGB payload",
@@ -6244,7 +6254,9 @@
           "native client/fx/particles/FocusFrostSparkleParticle.java:16 the native frost sparkle keeps the type six colour and the eighteen ticks of the original",
           "native common/src/main/java/thaumcraft/common/entities/EntityFollowingItem.java:155, EntityAlumentum.java:34, EntityFrostShard.java:254, EntityPechBlast.java:107 the native client hooks of the four entities",
           "native common/src/main/java/thaumcraft/common/tiles/TileHole.java:44 the native hole has no client tick and no surroundwithsparkles, so the sparkles around it are missing",
-          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java the native shock focus has no client hook, so its sparkles are missing"
+          "native common/src/main/java/thaumcraft/common/items/wands/foci/ItemFocusShock.java the native shock focus has no client hook, so its sparkles are missing",
+          "REMAINING DIFFERENCE: the portable hole sparkles (oracle TileHole.java:142-211, twenty four calls) need a client tick of the native TileHole, which has none, and the shock focus sparkles (oracle ItemFocusShock.java:166,174) need the five sparkles of the original at the hit point and at the pointed entity, which the native ShockFxPayload does not carry",
+          "the magical leaves and the lifter (oracle BlockMagicalLeaves, BlockLifter) have no native block at all, so their sparkles are a content gap of another lane"
         ],
         "notes": [
           "The configurable 1.7.10 sparkle became several native particles; the native frost sparkle keeps the type six colour and the life of the original.",
@@ -6993,7 +7005,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiGolem.java:72-78 an advanced golem shows a random threat line in one case of four",
           "oracle thaumcraft/client/gui/GuiGolem.java:80-92 the blurb or the threat line, half sized at (80, 22) with a width of 110",
@@ -7002,7 +7014,9 @@
           "oracle thaumcraft/client/gui/GuiGolem.java:289-303 the preview is drawn with the body yaw of -20 and the head pitch of -5, the rotations are set for the frame and restored afterwards, and the preview does NOT follow the mouse",
           "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:21-45 the threat line of an advanced golem is drawn once, when the menu opens",
           "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:128-140 the blurb of the core or the threat line",
-          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:77-100 the preview is drawn with the body yaw of -20 and the head pitch of -5, the mouse is pinned to the centre of the box and the rotations are restored afterwards"
+          "native common/src/main/java/thaumcraft/client/gui/GuiGolem.java:77-100 the preview is drawn with the body yaw of -20 and the head pitch of -5, the mouse is pinned to the centre of the box and the rotations are restored afterwards",
+          "REMAINING DIFFERENCE: the three switches of the Use core (Block or Empty space, Right click or Left click, Not sneaking or Sneaking) are not drawn, because the native Use core performs the default use only: EntityGolemBase.setUseOptions accepts only the default baseline (native EntityGolemBase.java:657-662) and the original consumes the three toggles in AIUseItem.java:135,155,190 and AIFillTake.java:55, which is the golems lane",
+          "a switch that changes nothing would be a working looking fake, so no switch is drawn until the golems lane owns the server state"
         ],
         "notes": [
           "Fixed in this wave: the native never showed the threat line of an advanced golem and only drew the blurb of seven of the twelve cores; the original draws the blurb of every core (the harvest, the alchemy and the lumber core have the text '??') and replaces it in one case of four by a threat line.",
@@ -7241,7 +7255,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-research",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:75-76 protected int paneWidth = 256; protected int paneHeight = 230",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:51 panelWidth = Math.min(510, width-16); panelHeight = Math.min(300, height-16)",
@@ -7252,7 +7266,9 @@
           "oracle thaumcraft/client/gui/GuiResearchBrowser.java:327-348 sibling connectors",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java:84-92 only parent connectors are drawn",
           "native common/src/main/java/thaumcraft/common/config/ThaumcraftResearchCategories.java:25-42 the six original category icons and backgrounds (BASICS uses textures/items/thaumonomiconcheat.png, ELDRITCH uses gui_researchbackeldritch.png) are published again",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:21-29 the visibility rule of the original icon loop (completion and the @ clue bypass Hidden/Lost/Concealed, Virtual never draws)"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:21-29 the visibility rule of the original icon loop (completion and the @ clue bypass Hidden/Lost/Concealed, Virtual never draws)",
+          "native common/src/main/java/thaumcraft/client/gui/GuiResearchBrowser.java the forbidden marker of a research with warp above zero is drawn again: the animated tainted strip of the node sheet, eighty pixels wide, in the original dark violet 0x440055 with the alpha 0.66 (oracle GuiResearchBrowser.java:366,789-802)",
+          "REMAINING DIFFERENCE: the sibling connectors (oracle GuiResearchBrowser.java:327-348) are not drawn, and the connector line of the original is a three pixel wide gradient strip with a sine wobble (oracle GuiResearchBrowser.java:732-787) while the native draws a one pixel line in its own colours"
         ],
         "notes": [
           "The map, the clue/parent/category visibility rules and the authoritative purchase/note actions are reproduced (native ResearchBrowserData.isVisible:21-29 mirrors oracle GuiResearchBrowser:318/371).",
@@ -7355,7 +7371,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-research",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchRecipe.java:25-1313 the research book with all PageType renderers",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:31-129 the native book renders text pages and resolved native recipe pages",
@@ -7364,7 +7380,8 @@
           "oracle thaumcraft/common/config/ConfigResearch.java:199 BANNERS page new ResearchPage(banners.toArray(new IArcaneRecipe[0]))",
           "oracle thaumcraft/common/config/ConfigResearch.java:374 ORE page new ResearchPage(rc.toArray(new IRecipe[0]))",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchBrowserData.java:56-65 the page order and the completion/concealed text gates of the original",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the 272 original recipe keys with their native or deferred coverage"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchRecipeCoverage.java the 272 original recipe keys with their native or deferred coverage",
+          "REMAINING DIFFERENCE: the JARLABEL, ORE, PRIMALARROW, SCEPTRE and the CRUCIBLE smelting pages of the original book (oracle GuiResearchRecipe.java:25-1313) have no native page renderer; the page data and the recipe coverage are complete in the common layer"
         ],
         "notes": [
           "The book renders the original text pages and every recipe page whose original recipe key resolves to a native recipe file (250 mapped keys, verified against the packaged data/thaumcraft/recipe tree).",
@@ -7413,7 +7430,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-research",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchTable.java:68 private final int HEX_SIZE = 9",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:37 HEX and UNKNOWN textures, native hex grid",
@@ -7421,7 +7438,8 @@
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchTable.java:178 KnowledgeAccess.get(minecraft.player).isResearchComplete(\"RESEARCHDUPE\")",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:108-142 the original 0.1/0.25/0.5 researcher rolls and the pool/table-bonus funding order",
           "native common/src/main/java/thaumcraft/common/lib/research/ResearchNoteEditing.java:101-155 the original 0.1/0.25/0.5 researcher rolls, the funding order and the short pool query of the table",
-          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNotePuzzle.java:21-49 the original connectivity and pruning of a solved grid"
+          "native common/src/main/java/thaumcraft/common/lib/research/ResearchNotePuzzle.java:21-49 the original connectivity and pruning of a solved grid",
+          "REMAINING DIFFERENCE: the original rune and line drawing of the table and the six parchment sheet looks are replaced by the native sheet; the puzzle state, the researcher rolls and the funding order of the original are reproduced in the common layer"
         ],
         "notes": [
           "The palette, the hex grid, drag and drop placement, erasing, the researcher bonus rolls, the aspect combination and the paid copy are implemented and the original RNG order and thresholds are preserved.",
@@ -7978,7 +7996,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/lib/ClientTickEventsFML.java:124-166 playerTick, 242-281 clientWorldTick, 282-331 renderTick and the HUD helpers 332-735",
           "oracle thaumcraft/client/lib/ClientTickEventsFML.java:660-729 renderAspectsInGui draws the aspect row on the hovered container slot",
@@ -7986,7 +8004,9 @@
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41 'World optics only: original RenderEventHandler:215-239,250-255,287-363.'",
           "oracle thaumcraft/client/lib/ClientTickEventsFML.java:283-331 the render tick of the original",
           "native common/src/main/java/thaumcraft/client/lib/PlayerNotifications.java:87-120 the notification HUD numbers of the original",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41 the world optics of the original RenderEventHandler"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41 the world optics of the original RenderEventHandler",
+          "REMAINING DIFFERENCE: renderAspectsInGui, the aspect row on the hovered container slot (oracle ClientTickEventsFML.java:660-729), has no native equivalent, and the OptiFine shader group switching has no 1.21.1 counterpart at all",
+          "the notification HUD of the original is reproduced: the delay, the alpha ramp, the eight pixel rows, the half scale and the particle cell of native PlayerNotifications.java:87-120"
         ],
         "notes": [
           "The original monolithic FML tick/render handler was split into purpose-specific native clients (PlayerNotifications, ThaumcraftGogglesClient, ThaumcraftRunicClient, ThaumcraftGolemClient, ThaumcraftWarpClient, ThaumcraftFocusClient) plus the native HUD/event bus.",
@@ -8321,7 +8341,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a9-core",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java:79 ArrayList<BlockCoordinates> architectBlocks",
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/lib/REHWandHandler.java:311 for (BlockCoordinates cc : this.architectBlocks) and :319 contains(new BlockCoordinates(x,y,z))",
@@ -8333,7 +8353,9 @@
           "native common/src/main/java/thaumcraft/common/items/wands/WandArchitect.java:82 public static List<BlockPos> planarBlocks(...)",
           "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:201-212 the centre line names the focused focus and nothing else, so a second render pass of the screen (the client smoke renders the radial again with a scripted hover point) cannot leave a second string behind it",
           "native common/src/main/java/thaumcraft/client/gui/GuiFocusSelect.java:228-233 centered() draws the line once, at centredOffset(centerX, font.width(label)) = centre - font.width(text) / 2, the expression the original uses",
-          "test common/src/test/java/thaumcraft/client/gui/FocusRadialLabelTest.java the centre line rule: it names the focused focus, it has no hover-dependent placeholder, it is centred with the original's expression and it is drawn once"
+          "test common/src/test/java/thaumcraft/client/gui/FocusRadialLabelTest.java the centre line rule: it names the focused focus, it has no hover-dependent placeholder, it is centred with the original's expression and it is drawn once",
+          "REMAINING DIFFERENCE: the architect preview of the original (oracle REHWandHandler.java:79,311,319, the list of the architect blocks) is not drawn as a world overlay by the native radial screen",
+          "the radial itself is reproduced: the centre line names the focused focus only and is drawn once at centre - font.width(text) / 2 (native GuiFocusSelect.java:201-233), the expression the original uses (oracle GuiResearchRecipe.java:452-453)"
         ],
         "notes": [
           "The held-F radial focus selection is ported as GuiFocusSelect, and the Architect block list became a server-side BlockPos list computed by WandArchitect.",
@@ -8380,7 +8402,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/lib/RenderEventHandler.java:138-157 renderOverlay (notifications + wand radial), 199-248 blockHighlight (aspect tags, note text, architect overlay), 252-268 renderLast (tag scale, golem markers, scanned blocks), 778-812 renderVignette",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41-42 'World optics only: original RenderEventHandler:215-239,250-255,287-363.'",
@@ -8389,7 +8411,9 @@
           "oracle thaumcraft/client/lib/RenderEventHandler.java:199-248 blockHighlight, the aspect tags, the note text and the architect overlay",
           "oracle thaumcraft/client/lib/RenderEventHandler.java:778-812 the vignette of the original",
           "native common/src/main/java/thaumcraft/client/ThaumcraftGogglesClient.java:41-42 the world optics of the original",
-          "native common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java:48 the golem bell markers"
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGolemClient.java:48 the golem bell markers",
+          "REMAINING DIFFERENCE: the scanned block overlay of the original (oracle RenderEventHandler.java:252-268) and the OptiFine shader group driver are not reproduced; the wand radial was replaced by the GuiFocusSelect screen on purpose",
+          "the truetyper font load of the original renderOverlay is dead code, because the field is never used"
         ],
         "notes": [
           "Split into purpose-specific native clients; the aspect-tag world overlay, the note text, the golem-bell markers and the warp vignette are ported.",
@@ -8494,7 +8518,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/lib/UtilsFX.java:1-924 the static client drawing helper library (drawTag, drawTexturedQuad, renderFacingQuad/Strip, renderQuad*, drawCustomTooltip, drawFloatyLine, getGuiX/Y/ZLevel, getParticleTexture ...)",
           "native common/src/main/java/thaumcraft/client/renderers/VisNetRender.java:62-80 the native owner of the facing quad/strip, the billboard and the beam draws, with 'Distinct original UtilsFX153-191 facing-QUAD UV order'",
@@ -8508,7 +8532,9 @@
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileWandPedestalRenderer.java:61-79 the drain line of the wand pedestal with the original speed -0.02, drawn in the space of its own block",
           "oracle thaumcraft/client/renderers/entity/RenderCultist.java:83-163 the cultist has its own copy of the body: the ordinary alpha blend (770, 771), the depth write and the constant alpha 0.8f",
           "native common/src/main/java/thaumcraft/client/renderers/entity/RenderCultist.java:71-95 the cultist link line through the shared helper, with the original colour 0x110011, the original speed -0.03 and the original width 0.25",
-          "native common/src/main/java/thaumcraft/client/fx/FloatyLine.java:49-60 the two original bodies of the line, the library one and the cultist one"
+          "native common/src/main/java/thaumcraft/client/fx/FloatyLine.java:49-60 the two original bodies of the line, the library one and the cultist one",
+          "REMAINING DIFFERENCE: the curve of the renderQuad helper of the original is the linear one of the native port and not the eased one; the two bodies of the floaty line and the drawTag of the original are reproduced (native FloatyLine.java:38-116, TileBannerRenderer.java:80)",
+          "the original shootFire is the only user of FXScorch and the oracle tree has no caller of it, so the helper is dead code in the original"
         ],
         "notes": [
           "The helper library was replaced by VisNetRender plus per-renderer implementations of drawTag, drawFloatyLine and the aspect icons.",
@@ -17501,14 +17527,17 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a6-content",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:38-104 renders the jar liquid, the aspect label and the node-jar animation",
           "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java (90 lines) renders the jar liquid and the label",
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 animates the node jar for one second after a wand hit",
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:92-100 the node jar grows to three times its size for one second after a wand hit",
           "oracle thaumcraft/client/renderers/tile/TileJarRenderer.java:76-90 the crooked label rotation of the original",
-          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:36-44 the crooked label of the original"
+          "native common/src/main/java/thaumcraft/client/renderers/tile/TileJarRenderer.java:36-44 the crooked label of the original",
+          "the node jar and the brain jar now have their own block entity renderers: the stored node glows in the node jar (native TileJarNodeRenderer.java, TileNodeRenderer.renderJarNode) and the brain turns to look at the closest orb or player in the brain jar (native TileJarBrainRenderer.java)",
+          "the one second growth of the node jar is dead code in the original: oracle TileJarRenderer.java:107-115 applies GL11.glScalef after every draw call of that renderer and pops the matrix immediately, so the scale never reaches a vertex; the native tree therefore does not grow the node either",
+          "REMAINING DIFFERENCE: the item form of the node jar and of the filled jar (oracle ItemJarNodeRenderer, ItemJarFilledRenderer) is still the ordinary jar model of the native tree"
         ],
         "notes": [
           "the native has no node-jar sparkle animation because the native node jar never receives the wand hit (see the report)",
@@ -17699,7 +17728,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2devices",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:1 the 1.7 renderer draws the item mirror, the essentia mirror and the linked view",
           "native client/renderers/tile/TileMirrorRenderer.java:43 the native renderer draws the item and the essentia mirror",
@@ -17708,7 +17737,9 @@
           "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:563-626 the original draws the pane of the unlinked and of the linked mirror and the block icon of the mirror",
           "native client/renderers/tile/TileMirrorRenderer.java:39 the native renderer draws the pane of the unlinked and of the linked mirror with the offset 0.02+instability and the six turns of the original",
           "native client/renderers/models/ModelTunnelField.java:24 the native tunnel keeps the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence",
-          "native client/renderers/models/ModelTunnelField.java:36 the native tunnel is an approximation: the view dependent texture generation of the original has no equivalent in the 1.21.1 shader pipeline and the additive blend of the inner layers is the translucent pass"
+          "native client/renderers/models/ModelTunnelField.java:36 the native tunnel is an approximation: the view dependent texture generation of the original has no equivalent in the 1.21.1 shader pipeline and the additive blend of the inner layers is the translucent pass",
+          "REMAINING DIFFERENCE: the view dependent tunnel of the original (oracle TileMirrorRenderer.java:52-554, the fixed function GL11.glTexGen texture coordinate generation and the hand written projection matrix) has no equivalent in the 1.21.1 shader pipeline, and the additive blend of the inner layers is the translucent pass of the native",
+          "everything else of the renderer is the original: the pane of the unlinked and of the linked mirror, the offset of the unstable mirror, the brightness and the turn of the six facings, the sixteen layers, the rotation (i*i*4321+i*9)*2, the fade 1/(16-i+1), the two original textures and the original Random(31100L) colour sequence (native ModelTunnelField.java:24,36)"
         ],
         "notes": [
           "The 1.7 renderer became a 1.21.1 block entity renderer for the two mirror kinds; the pane, the offset of the unstable mirror, the brightness and the turns are the original ones.",
@@ -18234,7 +18265,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2devices",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:25 the 1.7 renderer draws the retained thaumatorium.obj model",
           "native client/renderers/models/ModelThaumatorium.java:16 the native OBJ loader documents that the original model is that asset",
@@ -18242,7 +18273,10 @@
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:44-73 the 1.7 renderer draws the retained textures/models/thaumatorium.obj with textures/models/thaumatorium.png and the turn of the facing",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:74-100 the original cycles the output of one of the possible recipes of the machine above it, one recipe every forty ticks",
           "native client/renderers/models/ModelThaumatorium.java:23 the native OBJ loader reads the retained asset and is never referenced",
-          "native common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java:322 the native machine is programmed with a job list and holds no set of possible recipes"
+          "native common/src/main/java/thaumcraft/common/tiles/TileThaumatorium.java:322 the native machine is programmed with a job list and holds no set of possible recipes",
+          "REMAINING DIFFERENCE: the retained OBJ is still not rendered: the native draws the plain orientable block model (assets/thaumcraft/models/block/thaumatorium.json) and its OBJ loader (native ModelThaumatorium.java:23-61) stays unreferenced",
+          "the exact pose was derived from the retained asset and can be applied in one step: the OBJ spans x -0.5..0.5, y -0.5..0.5 and z 0.0..2.0, so the original translate (x+0.5, y, z+0.5) and glRotatef(90,-1,0,0) become pose.translate(0.5,0,0.5) and Axis.XP.rotationDegrees(-90) in a block entity renderer, followed by the facing rotation around Z: NORTH 270, SOUTH 90, EAST 180, WEST 0 degrees; the two machine blocks would then have to become RenderShape.INVISIBLE because the OBJ already covers both blocks",
+          "the cycling output preview cannot be reproduced: the original shows the output of one of the possible recipes of the machine (tile.recipeHash) and the native machine is programmed with a job list that holds no such set (native TileThaumatorium.java:322)"
         ],
         "notes": [
           "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered and the native OBJ loader is never referenced.",
@@ -28049,7 +28083,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2devices",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/common/entities/EntityItemGrate.java:26 the item may not stay inside the metal device grate",
           "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:49 setGrateTest(...) installs the grate predicate",
@@ -28060,7 +28094,9 @@
           "oracle thaumcraft/common/entities/EntityItemGrate.java:28-36 the original reports the metal device of the fifth and the sixth metadata as a solid block, so the item is pushed out of the grate",
           "the overridden vanilla method is func_145771_j(double,double,double); the 1.12.2 MCP names call the same SRG name Entity.pushOutOfBlocks, so the semantics of the override are the original ones",
           "native common/src/main/java/thaumcraft/common/entities/EntityItemGrate.java:49 the native tree installs the grate test of the original",
-          "oracle 1.7.10 vanilla Entity.func_145771_j: there is no readable 1.7.10 vanilla source in this environment, so the exact vanilla push out cannot be compared"
+          "oracle 1.7.10 vanilla Entity.func_145771_j: there is no readable 1.7.10 vanilla source in this environment, so the exact vanilla push out cannot be compared",
+          "REMAINING DIFFERENCE: the exact 1.7.10 vanilla push out arithmetic of the overridden method func_145771_j(double,double,double) cannot be compared in this environment, because there is no readable 1.7.10 vanilla source here; the semantics of the override are proven by the 1.12.2 MCP name of the same SRG name, Entity.pushOutOfBlocks",
+          "the native installs the grate test of the original (native EntityItemGrate.java:49) and pushes the item out of the grate with its own arithmetic (native EntityItemGrate.java:57-89)"
         ],
         "notes": [
           "The 1.7 entity became a 1.21.1 ItemEntity subclass; the grate test is installed and the item leaves the filter.",
@@ -41348,8 +41384,8 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3clientfx",
         "evidence": [
           "oracle thaumcraft/common/lib/network/fx/PacketFXBlockSparkle.java:1 the 1.7 simple impl message that shows a sparkle at a block",
           "native common/src/main/java/thaumcraft/common/lib/network/VisNetFxNetworking.java:56 the native port uses one validated custom payload per effect family",
@@ -41369,7 +41405,19 @@
           "oracle thaumcraft/common/items/wands/WandManager.java:244,245,420,795 the wand sends the sparkle with the colour -9999",
           "oracle thaumcraft/common/entities/monster/boss/EntityEldritchWarden.java:234 the warden sends the sparkle with the colour 8388736",
           "oracle thaumcraft/common/lib/events/ServerTickEventsFML.java:154 the server tick sends the sparkle with the colour 12632575",
-          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:94 the native flux scrubber removes the flux block but sends no sparkle, because the transport needs a payload in common/lib/network/**, which this wave must not touch"
+          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java:94 the native flux scrubber removes the flux block but sends no sparkle, because the transport needs a payload in common/lib/network/**, which this wave must not touch",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockSparkleFxPayload.java the S2C payload of the original packet: the dimension, the block and the raw colour including the special -9999",
+          "native common/src/main/java/thaumcraft/common/lib/network/BlockSparkleFxNetworking.java:49-59 the original TargetPoint radius of thirty two blocks around the effect",
+          "native common/src/main/java/thaumcraft/client/fx/particles/BlockSparkleParticle.java the original FXGeneric of the block sparkle: the frames 112..120, the life 5+random(8)+random(10), the alpha 0.9, the scale 0.7+random*0.4 of the tenth and the additive blend of the original layer two",
+          "native common/src/main/java/thaumcraft/common/tiles/TileFluxScrubber.java the flux scrubber sends the original magenta 0xDD00FF of the removed flux block (oracle TileFluxScrubber.java:100)",
+          "native common/src/main/java/thaumcraft/common/lib/world/OuterLandsBossRooms.java the eldritch lock sends the original dark violet 0x400040 for every removed field block (oracle TileEldritchLock.java:130)",
+          "native common/src/main/java/thaumcraft/common/lib/world/WardingCasts.java the warding focus sends the original orange 16556032 on the ward and on the restore (oracle ItemFocusWarding.java:137,151)",
+          "native common/src/main/java/thaumcraft/common/items/wands/WandManager.java the wand sends the original random grey -9999 when it builds the thaumonomicon (oracle WandManager.java:420)",
+          "native common/src/main/java/thaumcraft/common/lib/ThaumatoriumFormation.java the wand sends the original random grey -9999 on both halves of the new thaumatorium (oracle WandManager.java:244,245)",
+          "native common/src/main/java/thaumcraft/common/lib/AdvancedFurnaceFormation.java the wand sends the original random grey -9999 over the whole advanced furnace volume (oracle WandManager.java:793-800)",
+          "native common/src/main/java/thaumcraft/common/entities/monster/EntityEldritchWarden.java the warden sends the original violet 0x800080 for the seven field blocks of ten that do not draw the arc (oracle EntityEldritchWarden.java:231-234)",
+          "native common/src/main/java/thaumcraft/common/lib/world/TradeSwaps.java the server tick sends the original pale blue 0xC0C0FF on the swapped block (oracle ServerTickEventsFML.java:154)",
+          "test common/src/test/java/thaumcraft/client/fx/BlockSparkleParityTest.java the original colour rule, the random grey, the jitter, the frames, the alpha and the thirty two block radius"
         ],
         "notes": [
           "The 1.7 simple impl message became 1.21.1 custom payloads; the client half of the block sparkle exists twice (the growth lamp and the infusion).",

@@ -32,6 +32,10 @@ public final class GuiResearchBrowser extends Screen {
     private final List<Tab> tabs = new ArrayList<>();
     private String category = thaumcraft.client.lib.ResearchNotifications.selectedCategory();
     private static final ResourceLocation HIGHLIGHT = texture("textures/misc/particles.png");
+    /** The original forbidden marker is drawn from the node sheet. */
+    private static final ResourceLocation NODES = texture("textures/misc/nodes.png");
+    /** The original node sheet is 2048x2048 with thirty two frames and thirty two strips. */
+    private static final int NODE_CELL = 64;
     private int left, top, panelWidth, panelHeight, graphLeft, graphTop, graphWidth, graphHeight;
     private double panX, panY;
     private record Node(ResearchDefinition research, int x, int y) {}
@@ -95,6 +99,10 @@ public final class GuiResearchBrowser extends Screen {
             boolean unlocked = completed.contains(node.research.key());
             boolean available = node.research.hasPrerequisites(completed);
             int frameX = badgeFrame(node.research, purchases(node.research));
+            // Original GuiResearchBrowser:366,789-802 - a research with warp above zero shows the
+            // forbidden marker: the animated tainted strip of the node sheet, eighty pixels wide,
+            // in the original dark violet 0x440055 with the alpha 0.66.
+            forbidden(graphics, node.research, node.x + 11, node.y + 11);
             blend();
             graphics.blit(FRAME, node.x - 2, node.y - 2, frameX, 230, 26, 26, 256, 256);
             // Original GuiResearchBrowser:400-402 draws the corner brackets of a
@@ -148,6 +156,23 @@ public final class GuiResearchBrowser extends Screen {
             if (!selected) graphics.blit(FRAME, tab.x(), tab.y(), 200, 232, 24, 24, 256, 256);
         }
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+
+    /**
+     * Original GuiResearchBrowser:789-802 ({@code drawForbidden}): the animated quad strip of the
+     * tainted node strip, eighty pixels wide, in the original colour 0x440055 with the alpha
+     * {@code 0.66}. The frame runs backwards over the thirty two frames of the sheet.
+     */
+    private void forbidden(GuiGraphics graphics, ResearchDefinition research, int centreX, int centreY) {
+        if (research.warp() <= 0) return;
+        int frames = 32, strip = 5, size = 80;
+        int part = minecraft.player == null ? 0 : minecraft.player.tickCount % frames;
+        int frame = frames - 1 - part;
+        blend();
+        graphics.setColor(0x44 / 255F, 0x00 / 255F, 0x55 / 255F, 168F / 255F);
+        graphics.blit(NODES, centreX - size / 2, centreY - size / 2,
+                frame * NODE_CELL, strip * NODE_CELL, size, size, 2048, 2048);
+        graphics.setColor(1, 1, 1, 1);
     }
 
     /**

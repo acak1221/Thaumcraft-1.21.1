@@ -198,12 +198,22 @@ public final class GuiFocusSelect extends Screen {
         graphics.renderOutline(centerX - 10, centerY - 10, 20, 20, 0xFF86729B);
         if (!equipped.isEmpty()) graphics.renderItem(equipped, centerX - 8, centerY - 8);
         super.render(graphics, mouseX, mouseY, delta);
-        Component selected = selectedIndex >= 0 ? entryMessage(choices.get(selectedIndex))
-                : Component.translatable(choices.isEmpty() ? "tc.port.focus.empty" : "tc.port.focus.choose");
+        // The centre line names the focused focus and nothing else. The original
+        // radial draws no centre text at all (oracle
+        // thaumcraft/client/lib/REHWandHandler.java:185-295): it names the hovered
+        // focus in the tooltip that it draws once at the mouse (oracle
+        // REHWandHandler.java:287-289). The port adds one line, and that line may
+        // only carry the focused focus: a hover-dependent placeholder would be
+        // left behind by the render pass without a hover and would overlap the
+        // name line in the same frame (the client smoke renders the radial a
+        // second time with a scripted hover point).
+        int focused = selectedIndex >= 0 && selectedIndex < choices.size() ? selectedIndex : -1;
+        Component selected = centreLine(focused >= 0 ? entryMessage(choices.get(focused)) : null,
+                choices.size());
         // Keep selector feedback clear of vanilla's held-name/armor/hotbar HUD
         // at the normal viewport instead of drawing two labels over that HUD.
-        int infoY = Math.max(40, Math.min(height - 108, centerY + Math.round(radius * 1.4F) + 16));
-        centered(graphics, selected, infoY, 0xFFE8D8B4);
+        int infoY = centreLineY(height, centerY, radius);
+        if (selected != null) centered(graphics, selected, infoY, 0xFFE8D8B4);
         centered(graphics, Component.translatable("tc.port.focus.help",
                 ThaumcraftFocusClient.CHANGE_FOCUS.getTranslatedKeyMessage()), infoY + 12, 0xFFC8BBCF);
         int hover = choiceAt(mouseX, mouseY);
@@ -220,7 +230,42 @@ public final class GuiFocusSelect extends Screen {
     }
 
     private void centered(GuiGraphics graphics, Component text, int y, int color) {
-        graphics.drawCenteredString(font, font.plainSubstrByWidth(text.getString(), Math.max(1, width - 16)), centerX, y, color);
+        String label = font.plainSubstrByWidth(text.getString(), Math.max(1, width - 16));
+        // One line, one string, one draw, at the expression the original uses for
+        // its centred text (oracle thaumcraft/client/gui/GuiResearchRecipe.java:452-453
+        // draws the string at x - fr.getStringWidth(text) / 2).
+        graphics.drawString(font, label, centredOffset(centerX, font.width(label)), y, color);
+    }
+
+    /** The x of a centred line: {@code centre - font.width(text) / 2}. */
+    static int centredOffset(int centre, int textWidth) {
+        return centre - textWidth / 2;
+    }
+
+    /**
+     * The one line the radial may draw in its centre.
+     *
+     * <p>The original radial (oracle {@code thaumcraft/client/lib/REHWandHandler.java:185-295})
+     * draws no centre text at all: it names the hovered focus in the tooltip it
+     * draws at the mouse (oracle {@code REHWandHandler.java:287-289}). The port adds
+     * one line that names the focused focus, and that line may only carry the focused
+     * focus. A placeholder that depends on the hover would survive a second render
+     * pass of the screen and would overlap the name line.</p>
+     *
+     * @param focused the name of the focused focus, or null when none is focused
+     * @param choiceCount the number of eligible foci
+     * @return the line to draw, or null when there is nothing to name
+     */
+    static Component centreLine(Component focused, int choiceCount) {
+        if (focused != null) return focused;
+        // The empty inventory is not a hover state: that message is the same in
+        // every render pass and therefore never collides with itself.
+        return choiceCount == 0 ? Component.translatable("tc.port.focus.empty") : null;
+    }
+
+    /** The y of the centre line: below the ring and inside the screen. */
+    static int centreLineY(int screenHeight, int centreY, float radius) {
+        return Math.max(40, Math.min(screenHeight - 108, centreY + Math.round(radius * 1.4F) + 16));
     }
 
     private void drawRing(GuiGraphics graphics, ResourceLocation texture, float diameter, float angle) {

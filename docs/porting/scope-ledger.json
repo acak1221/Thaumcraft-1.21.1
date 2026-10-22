@@ -29482,19 +29482,27 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:20-34 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:44-47 the drop at the first adjacent marked block that is not an inventory and not the home",
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:48-69 the drop with the motion of the original and the pickup delay of ten",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:79-88 the native drop of the Empty golem",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2130-2135 the first adjacent marked block, the home of the golem excluded"
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:30-44 the goal has no delay gate: it needs the cargo, an idle navigator and a marked block next to the golem that is no inventory and that is not the home",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:46-48 the goal continues while its counter of two hundred is positive",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyDrop.java:58-79 the drop with the motion of the original and the pickup delay of ten",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:446-465 the native AIEmptyDrop: the condition, the drop and the counter of two hundred",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2131-2138 the first adjacent world target, never the home of the golem",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals"
         ],
-        "notes": [
-          "Fixed in this wave: the native dropped the cargo of the Empty golem at the home of the golem as well; the original excludes it (AIEmptyDrop:49).",
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the drop goal are reproduced: no five tick cadence, the adjacent marked block that is not an inventory, the exclusion of the home, the motion of the original and the pickup delay of ten."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "76c175934cd1177d7964bbbd9d231accd887abefb5ef4a939a118851dd024627",
           "legacy": "c723d3f6203cd5e19ba7d51fdcf32bee98acba3d66e445138ad3a488a865d0cd"
@@ -29533,17 +29541,25 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java:39-83 the goal needs the cargo and the five tick cadence, then the nearest container with room inside the range of the golem and outside the home, and the first marked block that is not an inventory as the fallback",
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java:85-110 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:286-300 the native destination of the Empty route, the inventories first and the first marked block as the fallback",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:318-368 the route goal with the budget of 200 and the detour"
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java:49-93 the route needs the cargo, the five tick cadence and a marked container with room inside the range of the golem that is not the home, and falls back to the first marked block that is no inventory",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyGoto.java:95-120 the budget of two hundred ticks and the random detour of two and one with a budget of twenty",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:611-700 the native route of the Empty core: the destination search, the budget of two hundred and the detour",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the route goal are reproduced: the five tick cadence, the nearest container with room inside the range of the golem, the exclusion of the home, the first marked block that is not an inventory as the fallback without a range and the budgets of 200 and 20."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "bdc495f5fe9731081a054187d89550dc1a0d377e4d16e10990f23c44264acc1a",
           "legacy": "78ff2a20212e37706b618beb0853eecd73de492ba6d16f2132f9dc4fda148565"
@@ -29582,18 +29598,30 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:31-33 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:40-67 the place into an adjacent marked container of the matching colour, with the double chest",
-          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:90-130 the placement and the five tick chest window",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:167-189 the native places the cargo into an adjacent marked container",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2273-2278 the placement at a marked container of the Empty golem"
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:41-77 the goal has no delay gate: it needs the cargo, an idle navigator and a marked container next to the golem that takes it",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:79-81 the goal continues while its counter of two hundred is positive: a transfer that placed only part of the cargo holds the whole ladder of the core for ten seconds",
+          "oracle thaumcraft/common/entities/ai/inventory/AIEmptyPlace.java:100-140 the placement, the counter of two hundred and the five tick chest window",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:408-443 the native AIEmptyPlace: the condition, the placement, the counter of two hundred and the chest window",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:69-78 the original opens the chest of a transfer and closes it again when the goal stops",
+          "oracle thaumcraft/common/config/Config.java:475,871 the switch golemChestInteract of the original, true by default",
+          "official Mojang 1.7.10 client.jar net.minecraft.tileentity.TileEntityChest the open and the close of the chest play random.chestopen and random.chestclosed at the volume 0.5 and the pitch 0.9 to 1.0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java:35-63 the chest open and the chest close of the native, with the volume and the pitch of the original"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original, which has no equivalent for a mob in 1.21.1. The observable rules of the place goal are reproduced, including the missing five tick cadence."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "e81f022945b30f5b1769421aeaf93cc9120600572047cd033d45899e24be1ae1",
           "legacy": "24add3708615e088f0540100ecc769d04b80fa1e0c78d8ae22650648332386b2"
@@ -29632,19 +29660,26 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:52-90 the goal needs no cargo, the five tick cadence, a wanted item and a container with the goods",
-          "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:91-117 the nearest container with the goods inside the range of the golem and outside the home",
-          "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:124-145 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:131-165 the native picks the first missing exemplar with a supply and its nearest source",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:318-368 the route goal with the budget of 200 and the detour",
-          "native common/src/main/java/thaumcraft/common/lib/golems/GolemRouteRules.java:26-83 the cadence, the budgets and the detour of the original as pure functions"
+          "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:52-118 the route needs no cargo, the five tick cadence and a marked container with the goods, and it takes the nearest one inside the range of the golem that is not the home",
+          "oracle thaumcraft/common/entities/ai/inventory/AIFillGoto.java:120-145 the budget of two hundred ticks and the random detour of two and one with a budget of twenty",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:611-700 the native route of the Fill core: the destination search, the budget of two hundred and the detour",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemRouteRules.java:53-68 the budget of two hundred, the detour of two and one and its budget of twenty",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the route goal are reproduced: the five tick cadence, the nearest source inside the range of the golem, the exclusion of the home, the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "d7a89b13d91651a350ff745a15bc70dbecdc08a3c7bbd1d091d54b2992341903",
           "legacy": "b6842a2669be7e58cb449f1fe519830983d048bf918ffc435ebd19fa0f99f02f"
@@ -29683,17 +29718,30 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:38-41 the goal needs no cargo, a watched item, an idle navigator and a wanted item, and it has NO five tick cadence",
-          "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:42-78 the take from an adjacent marked container of the matching colour, with the amount of the carry room",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:116-130 the native takes the wanted amount from an adjacent marked container",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2189-2234 the take of the original with the amount of the carry room"
+          "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:38-41 the goal has no delay gate: it needs no cargo, a watched item, an idle navigator and a filter",
+          "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:47-75 the goal takes the goods out of a marked container next to the golem and sets its counters to two hundred and five",
+          "oracle thaumcraft/common/entities/ai/inventory/AIFillTake.java:81-83 the goal continues while its counter of two hundred is positive and the navigator runs or the chest window lasts",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:362-405 the native AIFillTake: the condition, the extraction, the counters and the cleared watch",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:69-78 the original opens the chest of a transfer and closes it again when the goal stops",
+          "oracle thaumcraft/common/config/Config.java:475,871 the switch golemChestInteract of the original, true by default",
+          "official Mojang 1.7.10 client.jar net.minecraft.tileentity.TileEntityChest the open and the close of the chest play random.chestopen and random.chestclosed at the volume 0.5 and the pitch 0.9 to 1.0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java:35-63 the chest open and the chest close of the native, with the volume and the pitch of the original"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the take goal are reproduced: no five tick cadence, the adjacent marked container, the colour of the slot, the amount of the carry room and the five tick chest window."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "7a4e02464a30e03bccb8feee5a6c310dfd846a4badfc8d7272e6072d3e6b8644",
           "legacy": "7181ffc087d13da182527b46f6b20c24afe45d184edf575c5f893d9ed47b44db"
@@ -29732,17 +29780,27 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:37-47 the goal needs the cargo, an idle navigator and the squared distance of five to the home, and it has NO five tick cadence",
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:71-90 the drop at the home with the motion of the original and the pickup delay of ten",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2161-2186 the drop at the home of the Fill golem",
-          "native common/src/main/java/thaumcraft/common/lib/utils/DeferredItemDrops.java:423-452 the motion of the original and the pickup delay of ten"
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:37-48 the goal has no delay gate: it needs the cargo, an idle navigator, the squared distance of five to the home and a home that is no inventory",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:50-52 the goal continues while its counter of two hundred is positive",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeDrop.java:71-89 the drop with the motion of the original and the pickup delay of ten",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:338-356 the native AIHomeDrop: the condition, the drop and the counter of two hundred",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2131-2138,2163-2188 the world throw at the home and the motion of the original",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the drop goal are reproduced: no five tick cadence, the idle navigator, the squared distance of five to the home, the home must not be an inventory, the motion of the original and the pickup delay of ten."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "5996f4f43a27635fb7b3f1c4667a40371d8196d45da0181631927996b36e8e1a",
           "legacy": "98f00ba457151caf07394cc8cd7c47ffcc1fbada2a37c0ac9e1f282be2ea4a80"
@@ -29781,18 +29839,32 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:35-39 the goal needs the cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
           "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:44-61 the goal places the cargo into the home container of the golem, with the double chest",
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:85-120 the placement and the five tick chest window",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2261-2272 the placement of the cargo into the home inventory",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:108-115 the Fill route places the cargo at the home"
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:65-67 the goal continues while its counter of two hundred is positive and the chest window of five ticks lasts",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:85-120 the placement, the counter of two hundred and the five tick chest window",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:308-331 the native AIHomePlace: the condition, the placement, the counter of two hundred and the chest window of five ticks",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2263-2273 the placement of the cargo into the home inventory",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:69-78 the original opens the chest of a transfer and closes it again when the goal stops",
+          "oracle thaumcraft/common/config/Config.java:475,871 the switch golemChestInteract of the original, true by default",
+          "official Mojang 1.7.10 client.jar net.minecraft.tileentity.TileEntityChest the open and the close of the chest play random.chestopen and random.chestclosed at the volume 0.5 and the pitch 0.9 to 1.0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java:35-63 the chest open and the chest close of the native, with the volume and the pitch of the original"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction: the original opens the chest of the transfer for five ticks (Config.golemChestInteract), which has no equivalent for a mob in 1.21.1. The five tick window itself is reproduced (GolemRouteRules.CHEST_WINDOW)."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "e22f59fd7c7af7dfe9326db371de832583066c93d715933eec199aa514c72b8f",
           "legacy": "1bd2903438789dd11884f4bdcdf03f2335b51acde956034f25ef89471fd1dc79"
@@ -29831,20 +29903,32 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:269-341 the original registers five goals per core with the numbers 0 to 4, all with the mutex bits 3",
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:37-48 the goal needs the cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:49-59 the Empty, the Use and the Sorting core replace the cargo when no destination is left, the Fill core never does (getItemsNeeded returns null for it)",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:167-214 the Empty route replaces the cargo at the home when no destination accepts it",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:216-262 the Sorting route replaces the cargo when it cannot be delivered"
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:37-48 the goal needs the cargo, the five tick cadence, an idle navigator, the squared distance of five to the home and an item that is on timeout",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:49-59 the goal asks the core whether a destination exists, and the Fill core never replaces its cargo",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:448-471 getItemsNeeded returns null for the Fill core, so the goal of the Fill core never fires",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:72-74 the goal continues while it still wants to run or the chest window of five ticks lasts",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeReplace.java:92-127 the placement of the cargo into the home and the five tick chest window",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:275-305 the native AIHomeReplace: the condition, the core switch that leaves the Fill core out and the placement into the home",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:69-78 the original opens the chest of a transfer and closes it again when the goal stops",
+          "oracle thaumcraft/common/config/Config.java:475,871 the switch golemChestInteract of the original, true by default",
+          "official Mojang 1.7.10 client.jar net.minecraft.tileentity.TileEntityChest the open and the close of the chest play random.chestopen and random.chestclosed at the volume 0.5 and the pitch 0.9 to 1.0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java:35-63 the chest open and the chest close of the native, with the volume and the pitch of the original"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure. The original registers five selector entries per core (the replace 0, the place 1, the drop 2, the take 3 and the goto 4) that exclude each other with the mutex bits 3; the native has one route goal per core (the goto) and performs the other four actions in its own server tick, in the order of the original.",
-          "The observable rules of the replace goal are reproduced: the cargo, the five tick cadence, the idle navigator, the squared distance of five to the home and the rule that the Fill core never replaces (the original's getItemsNeeded returns null for the Fill core, oracle GolemHelper:448-471).",
-          "REMAINING DIFFERENCE: the original's goal keeps the mutex of the ladder for up to 200 ticks when a transfer only placed part of the cargo, so the ladder is blocked for ten seconds; the native retries at the next decision tick."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "4ab17d4086902c5a245253e68b836164519d4cdbc960c5f6886726d5c63ae60c",
           "legacy": "b9887398045386b93603150a0748e1291ba2689e4ec218f57a3883cb300e23f1"
@@ -29883,17 +29967,31 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:27-31 the goal needs no cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:32-70 the take of the wanted item out of the home container of the golem",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:190-214 the native take of the Empty route out of the home",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2189-2234 the take of the original with the amount of the carry room"
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:37-46 the goal has no cargo, the five tick cadence, an idle navigator and the squared distance of five to the home",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:47-105 the goal takes the goods the home needs, or the first good of the home when the core names none",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTake.java:108-110 the goal continues while the chest window of five ticks lasts; it has no counter of two hundred",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:468-517 the native AIHomeTake: the condition, the first extractable slot of the home and the chest window",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2191-2244 the extraction from the home",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:69-78 the original opens the chest of a transfer and closes it again when the goal stops",
+          "oracle thaumcraft/common/config/Config.java:475,871 the switch golemChestInteract of the original, true by default",
+          "official Mojang 1.7.10 client.jar net.minecraft.tileentity.TileEntityChest the open and the close of the chest play random.chestopen and random.chestclosed at the volume 0.5 and the pitch 0.9 to 1.0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java:35-63 the chest open and the chest close of the native, with the volume and the pitch of the original"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original, which has no equivalent for a mob in 1.21.1. The observable rules of the take goal are reproduced, including the five tick cadence and the squared distance of five to the home."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "8c3cca460c9f7a65f2ec5b6afa4f3e98e26feaa3c6b7df88dfe5e96c6c11c3ff",
           "legacy": "6f7826318136da31ff8e58d5ba368a6c3ee05536896f964c130788a66630744f"
@@ -29932,15 +30030,30 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTakeSorting.java the take of the Sorting golem out of the home, with the face visible order of the slots",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:244-262 the native take of the Sorting route in the face visible order of the home"
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTakeSorting.java:38-71 the goal has no cargo, the five tick cadence, an idle navigator and the squared distance of five to the home, and it reads the goods the core needs",
+          "oracle thaumcraft/common/entities/golems/GolemHelper.java:658-686 the goods of the home are read in the face visible order of the slots",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomeTakeSorting.java:73-75 the goal continues while its counter of two hundred is positive",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:558-608 the native AIHomeTakeSorting: the condition, the face visible order of the home and the counters",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:69-78 the original opens the chest of a transfer and closes it again when the goal stops",
+          "oracle thaumcraft/common/config/Config.java:475,871 the switch golemChestInteract of the original, true by default",
+          "official Mojang 1.7.10 client.jar net.minecraft.tileentity.TileEntityChest the open and the close of the chest play random.chestopen and random.chestclosed at the volume 0.5 and the pitch 0.9 to 1.0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java:35-63 the chest open and the chest close of the native, with the volume and the pitch of the original"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original. The observable rules of the take goal are reproduced: the five tick cadence, the squared distance of five to the home and the face visible order of the slots of the home."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "38c3742be0849793e513ca76626f0ba4a6f617db277207bebf9360ab30881553",
           "legacy": "4490b5574a611391b53fd2d75205bf9a0c65acac5ec843717a4b5c898e78ee48"
@@ -30040,17 +30153,25 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java:39-77 the goal needs the cargo and the five tick cadence, then the nearest marked container that holds the item and has room, inside the range of the golem and outside the home",
-          "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java:79-104 the budget of 200 ticks and the random detour of 2 and 1 with a budget of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:286-300 the native destination of the Sorting route, the inventories only and no world target fallback",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2118-2125 the marked container of the Sorting golem, the range of the golem"
+          "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java:49-87 the route needs the cargo, the five tick cadence and a marked container that already holds the item and has room, inside the range of the golem and not the home; it has no world target fallback",
+          "oracle thaumcraft/common/entities/ai/inventory/AISortingGoto.java:89-114 the budget of two hundred ticks and the random detour of two and one with a budget of twenty",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:611-700 the native route of the Sorting core: the seeded destination search, the budget of two hundred and the detour",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries). The observable rules of the route goal are reproduced: the five tick cadence, the nearest marked container that holds the item and has room, the range of the golem, the exclusion of the home and the absence of a world target fallback."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "39ee8c450753ac2e4de59e6af4bd32e07eada06200c717333b8a64d39f944479",
           "legacy": "505552c17e329eced7f0978aaa8206100c92b7765d431f62c157af65a8bf5edd"
@@ -30089,17 +30210,30 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:31-33 the goal needs the cargo and an idle navigator, and it has NO five tick cadence",
-          "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:40-64 the place into an adjacent marked container that already holds the same item",
-          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:227-235 the native places the cargo into an adjacent marked container with the seed",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2273-2278 the placement at a marked container of the Sorting golem"
+          "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:41-74 the goal has no delay gate: it needs the cargo, an idle navigator and a marked container next to the golem that already holds the item",
+          "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:76-78 the goal continues while its counter of two hundred is positive",
+          "oracle thaumcraft/common/entities/ai/inventory/AISortingPlace.java:97-137 the placement, the counter of two hundred and the five tick chest window",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:521-556 the native AISortingPlace: the seeded condition, the placement, the counter of two hundred and the chest window",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:270-277 the Fill core of the original registered five selector entries: AIHomeReplace 0, AIHomePlace 1, AIHomeDrop 2, AIFillTake 3, AIFillGoto 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:278-285 the Empty core of the original registered five selector entries: AIHomeReplace 0, AIEmptyPlace 1, AIEmptyDrop 2, AIEmptyGoto 3, AIHomeTake 4",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:335-341 the Sorting core of the original registered four selector entries: AIHomeReplace 0, AISortingPlace 1, AISortingGoto 3, AIHomeTakeSorting 4",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0, so the bits OVERLAP and the numbers are not compared for equality",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and its bitwise mutual exclusion test",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:63 the bits three of the original are the flags MOVE and LOOK of the 1.21.1 selector",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:88-103 the table of the original's ladder: every entry took the mutex bits three",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the native installs the same entries with the same numbers, in the order of the original's registration",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:223-241 every entry of the ladder is a Goal with the two exclusive flags MOVE and LOOK, so the entries of a core exclude each other exactly as the bits three of the original did",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:225-227 the counters count and countChest of the original's entries",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:76 the hold of the ladder after a partial transfer: two hundred ticks, the original's counter of the place and drop goals",
+          "oracle thaumcraft/common/entities/ai/inventory/AIHomePlace.java:69-78 the original opens the chest of a transfer and closes it again when the goal stops",
+          "oracle thaumcraft/common/config/Config.java:475,871 the switch golemChestInteract of the original, true by default",
+          "official Mojang 1.7.10 client.jar net.minecraft.tileentity.TileEntityChest the open and the close of the chest play random.chestopen and random.chestclosed at the volume 0.5 and the pitch 0.9 to 1.0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/GolemChestInteraction.java:35-63 the chest open and the chest close of the native, with the volume and the pitch of the original"
         ],
-        "notes": [
-          "REMAINING DIFFERENCE: the structure (one route goal per core and a server tick, not five selector entries) and the chest interaction of the original. The observable rules of the place goal are reproduced, including the seed rule (the container must already hold the item) and the missing five tick cadence."
-        ],
+        "notes": [],
         "reviewed_sha256": {
           "original": "bae70d5b2563321828c9a43bf600a1939a158d2c3e855694b5b1e175e3d909b3",
           "legacy": "cb4f8d1a905e74440b0ff10cdb625ae1ebc906a3d2b0fd3ba931f040497eedd6"
@@ -30647,18 +30781,18 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w2golems",
+        "owner": "agent-w3golems",
         "evidence": [
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:265-351 the goal list of the original with its numbers",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:246-264 the health and the damage of the golem",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:355-384 the carry limit, the fluid limit and the speed",
-          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:1088-1100 the armour with the cap of 20",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:801-900 the original goal numbers in one place",
-          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:2103-2125 the marked containers of the original, the range of the golem and not of the home"
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:266-345 the original registered the goals of every core with the numbers the native publishes",
+          "oracle thaumcraft/common/entities/golems/EntityGolemBase.java:346-351 the shared goals of every core follow the goals of the core",
+          "official Mojang 1.7.10 client.jar net.minecraft.entity.ai.EntityAITasks func_75777_a the mutex test of the original is (mutexA & mutexB) == 0",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:802-901 the numbers of the original, one place",
+          "native common/src/main/java/thaumcraft/common/entities/golems/EntityGolemBase.java:966-998 the native installs the goals of the core before the shared goals, exactly as the original",
+          "native common/src/main/java/thaumcraft/common/entities/golems/InventoryGolemGoals.java:68-91 the five selector entries of the Fill, the Empty and the Sorting core",
+          "native common/src/main/java/thaumcraft/common/lib/golems/GolemLadderRules.java:37-63 the mutex bits of the original and the 1.21.1 flags that replace them"
         ],
         "notes": [
-          "Fixed in this wave: the native added the distance of the home to the bound of a marked container, which is no bound of the original (oracle GolemHelper.getMarkedContainers:54-64 has no range at all; the range of the original is the golem's own).",
-          "REMAINING DIFFERENCE: the structure of the Fill, Empty and Sorting ladder (one route goal per core and a server tick, not five selector entries), the fluid set of the Decanting and the Alchemy golem and the Use core, which performs the default use only."
+          "REMAINING DIFFERENCE of the fluid set: the original's Decanting and Alchemy golem take any registered fluid and any marked IEssentiaTransport, the native takes source water and a marked jar or reservoir. The native common module has no loader independent fluid handler or essentia transport API yet."
         ],
         "reviewed_sha256": {
           "original": "0446c56bc884499b9663bb6cf579abfd8d5be0c9f6277323215cd29b255c5d4b",

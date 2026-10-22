@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import thaumcraft.client.renderers.models.ModelTunnelField;
 import thaumcraft.common.blocks.BlockMirror;
 import thaumcraft.common.tiles.TileMirror;
 import thaumcraft.common.tiles.TileMirrorEssentia;
@@ -31,7 +30,6 @@ public final class TileMirrorRenderer<T extends BlockEntity> implements BlockEnt
     /** The original texture of the pane of a linked mirror. */
     public static final ResourceLocation PANE_TRANSPARENT = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/blocks/mirrorpanetrans.png");
 
-    private final ModelTunnelField tunnel = new ModelTunnelField();
     private final java.util.Random random = new java.util.Random();
 
     public TileMirrorRenderer(BlockEntityRendererProvider.Context context) {}
@@ -54,7 +52,7 @@ public final class TileMirrorRenderer<T extends BlockEntity> implements BlockEnt
             // face opposite to the facing of the mirror.
             pose.pushPose();
             try {
-                tunnel.renderFace(pose, buffers, facing.getOpposite(), 1.0F, light, overlay);
+                LinkedMirrorField.render(pose, buffers, tile.getBlockPos(), facing.getOpposite());
             } finally {
                 pose.popPose();
             }

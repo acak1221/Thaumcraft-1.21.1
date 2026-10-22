@@ -26,6 +26,9 @@ import thaumcraft.common.config.ThaumcraftNodeDevices;
 public final class ThaumcraftFabricClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
         CoreShaderRegistrationCallback.EVENT.register(context -> context.register(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "linked_mirror"),
+                DefaultVertexFormat.POSITION_TEX_COLOR, thaumcraft.client.renderers.tile.LinkedMirrorField::setShader));
+        CoreShaderRegistrationCallback.EVENT.register(context -> context.register(
                 net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("thaumcraft", "monster_lit_particle"),
                 DefaultVertexFormat.PARTICLE, thaumcraft.client.fx.particles.MonsterSpriteParticle::setLitShader));
         CoreShaderRegistrationCallback.EVENT.register(context -> context.register(

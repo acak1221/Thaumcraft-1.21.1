@@ -251,6 +251,16 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
      */
     @Override public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         super.animateTick(state, level, pos, random);
+        if (variant(state) == EldritchBlockRules.ELDRITCH_LOCK) {
+            // Original BlockEldritch:289-302 - the counting eldritch lock throws a spark of the
+            // size 0.5 with the colour 0.65+random*0.1/1/1 and the alpha 0.8.
+            if (!(level instanceof net.minecraft.client.multiplayer.ClientLevel client)) return;
+            if (!(level.getBlockEntity(pos) instanceof thaumcraft.common.tiles.TileEldritchLock lock) || lock.count < 0) return;
+            thaumcraft.client.fx.particles.ShockSparkParticle.spark(client,
+                    pos.getX() + client.random.nextFloat(), pos.getY() + client.random.nextFloat(),
+                    pos.getZ() + client.random.nextFloat(), .5F, .65F + client.random.nextFloat() * .1F, 1F, 1F, .8F);
+            return;
+        }
         if (variant(state) != EldritchBlockRules.ELDRITCH_RUNED) return;
         if (!(level instanceof net.minecraft.client.multiplayer.ClientLevel client)) return;
         if (!RuneEffects.randomUpdate(random)) return;

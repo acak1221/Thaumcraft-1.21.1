@@ -88,9 +88,14 @@ class WarpPostChainTest {
 
     @Test void thePortedOriginalProgramsKeepTheirOriginalPassOrderAndUniforms() throws Exception {
         // Original blurtc.json: two blur passes, Radius 10, the x axis and then the y axis.
+        //
+        // The program is NOT the modern vanilla "box_blur": Mojang's 1.7.10 blur.fsh weights a
+        // sample by (1 - r/Radius)^2, while 1.21.1's box_blur uses a different kernel. The port
+        // therefore ships the original program as thaumcraft_blur (GLSL150, same weights) and names
+        // it in the chain. See the assertion on the weights below.
         JsonObject blur = json("assets/thaumcraft/shaders/post/warp_blurred.json");
         List<String> blurPasses = passNames(blur);
-        assertEquals(List.of("box_blur", "box_blur"), blurPasses);
+        assertEquals(List.of("thaumcraft_blur", "thaumcraft_blur"), blurPasses);
         JsonArray blurPass = blur.getAsJsonArray("passes").get(0).getAsJsonObject().getAsJsonArray("uniforms");
         assertEquals("BlurDir", blurPass.get(0).getAsJsonObject().get("name").getAsString());
         assertEquals(1.0D, blurPass.get(0).getAsJsonObject().getAsJsonArray("values").get(0).getAsDouble());
@@ -100,6 +105,15 @@ class WarpPostChainTest {
         JsonArray blurSecond = blur.getAsJsonArray("passes").get(1).getAsJsonObject().getAsJsonArray("uniforms");
         assertEquals(0.0D, blurSecond.get(0).getAsJsonObject().getAsJsonArray("values").get(0).getAsDouble());
         assertEquals(1.0D, blurSecond.get(0).getAsJsonObject().getAsJsonArray("values").get(1).getAsDouble());
+        // The kernel itself: Mojang 1.7.10 blur.fsh weights a sample by (1 - r/Radius)^2, normalised
+        // by the sum. A "box_blur" substitution would be uniform weights and is NOT the original.
+        String kernel = new String(getClass().getClassLoader()
+                .getResourceAsStream("assets/minecraft/shaders/program/thaumcraft_blur.fsh").readAllBytes(),
+                StandardCharsets.UTF_8);
+        assertTrue(kernel.contains("abs(1.0 - r / Radius)"),
+                "the blur kernel must be the 1.7.10 squared ramp, not a uniform box");
+        assertTrue(kernel.contains("strength * strength"), "the 1.7.10 weight is squared");
+        assertTrue(kernel.contains("blurred.rgb / totalStrength"), "the weights are normalised by their sum");
 
         // Original desaturatetc.json: color_convolve with Saturation 0.8, then blit.
         JsonObject gaze = json("assets/thaumcraft/shaders/post/warp_death_gaze.json");

@@ -125,8 +125,18 @@ public final class DungeonRooms {
         MIND_SPIDER
     }
 
+    /**
+     * The home area of a spawned entity.
+     *
+     * <p>Oracle {@code thaumcraft/common/entities/monster/EntityEldritchGuardian.java} and
+     * {@code thaumcraft/common/lib/world/dim/GenKeyRoom.java:110} - the guardian of the key room
+     * keeps the centre of its room as its home with a radius of sixteen.</p>
+     */
+    public record Home(int x, int y, int z, int radius) {
+    }
+
     /** One entity spawn. */
-    public record Spawn(int x, int y, int z, SpawnKind kind, int variant, int count, boolean champion) {
+    public record Spawn(int x, int y, int z, SpawnKind kind, int variant, int count, boolean champion, Home home) {
     }
 
     /** The world queries the original room code performs. */
@@ -565,7 +575,7 @@ public final class DungeonRooms {
                             out.placements.add(new Placement(x + 8 + w, y + 4 + h, z + 8 + j, Kind.WEB, 0, -1));
                         }
                         out.placements.add(new Placement(x + 8, y + 4, z + 8, Kind.MOB_SPAWNER, 0, -1));
-                        out.spawns.add(new Spawn(x + 8, y + 4, z + 8, SpawnKind.MIND_SPIDER, 0, 1, false));
+                        out.spawns.add(new Spawn(x + 8, y + 4, z + 8, SpawnKind.MIND_SPIDER, 0, 1, false, null));
                     }
                 }
             }
@@ -822,13 +832,14 @@ public final class DungeonRooms {
         }
         connections(out, view, worldRandom, cx, cz, y, cell, 3, true, true);
         out.placements.add(new Placement(x + 8, y + 2, z + 8, Kind.ELDRITCH, 3, -1));
-        out.spawns.add(new Spawn(x + 8, y + 3, z + 8, SpawnKind.PERMANENT_ITEM, 2, 1, false));
+        out.spawns.add(new Spawn(x + 8, y + 3, z + 8, SpawnKind.PERMANENT_ITEM, 2, 1, false, null));
         int guardians = OuterLandsRules.keyRoomGuardians(difficulty);
         for (int i = 0; i < guardians; ++i) {
             int offsetX = (1 + worldRandom.nextInt(3)) * (worldRandom.nextInt(3) - 1);
             int offsetZ = (1 + worldRandom.nextInt(3)) * (worldRandom.nextInt(3) - 1);
+            // Oracle GenKeyRoom:110 - the guardian keeps the centre of the room as its home.
             out.spawns.add(new Spawn(x + 8 + offsetX, y + 2, z + 8 + offsetZ, SpawnKind.ELDRITCH_GUARDIAN, 0, 1,
-                    OuterLandsRules.keyRoomChampion(difficulty, i)));
+                    OuterLandsRules.keyRoomChampion(difficulty, i), new Home(x + 8, y + 2, z + 8, 16)));
         }
     }
 

@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -175,10 +174,17 @@ public final class BlockCustomPlant extends BushBlock implements OriginalPistonP
         @Override protected boolean mustSurvive() { return true; }
 
         /**
-         * Original BlockCustomPlantItem:56 - the plant announces itself with the step sound of
-         * its own block. The pitch of the original (0.8) is a property of the 1.7.10 sound
-         * type, 1.21.1 has no per block sound pitch.
+         * Original BlockCustomPlantItem:56 - the plant announces itself with the <b>break</b>
+         * sound of its own block, with the volume {@code (breakVolume + 1) / 2} and the pitch
+         * {@code breakPitch * 0.8}.
+         *
+         * <p>Forced 1.21.1 change: none. The 1.21.1 {@code BlockItem.place} plays the sound of
+         * {@code getPlaceSound} with exactly the volume {@code (soundType.getVolume() + 1) / 2}
+         * and the pitch {@code soundType.getPitch() * 0.8} of the original, so the sound event
+         * of the original is the break sound of the sound type of the plant.</p>
          */
-        @Override protected SoundEvent getPlaceSound(BlockState state) { return SoundEvents.GRASS_STEP; }
+        @Override protected SoundEvent getPlaceSound(BlockState state) {
+            return state.getSoundType().getBreakSound();
+        }
     }
 }

@@ -167,7 +167,7 @@
         "disposition": "adapt",
         "source_semantics": "different",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/IArchitect.java:18 ArrayList<BlockCoordinates> getArchitectBlocks(ItemStack, World, int, int, int, int, EntityPlayer)",
@@ -1885,7 +1885,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/api/damagesource/DamageSourceIndirectThaumcraftEntity.java:21 public DamageSourceIndirectThaumcraftEntity(String, Entity, Entity)",
@@ -20944,7 +20944,7 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port-ledgerpartial",
         "evidence": [
           "oracle thaumcraft/common/CommonProxy.java the proxy with the research, the knowledge and the client world accessors",
@@ -27622,7 +27622,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-coremisc",
         "evidence": [
           "oracle thaumcraft/common/container/SlotGhostFluid.java the slot of the fluid container",
@@ -37966,7 +37966,7 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "port/basecontent",
         "evidence": [
           "oracle thaumcraft/common/items/relics/ItemSanityChecker.java:16-40 the stack limit 1 and the uncommon rarity",
@@ -45722,7 +45722,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "audit-a5-eldritch",
         "evidence": [
           "oracle thaumcraft/common/lib/world/dim/GenKeyRoom.java:102 the guardian count 2 plus one for normal and one for hard",
@@ -49448,7 +49448,7 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
+        "native_coverage": "parity_verified",
         "owner": "agent-research",
         "evidence": [
           "oracle thaumcraft/common/tiles/TileResearchTable.java:64 public ItemStack[] contents = new ItemStack[2]",

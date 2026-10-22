@@ -27,6 +27,10 @@ public record BlockFxPayload(ResourceLocation dimension, int kind, BlockPos targ
     public static final int ZAP = 1;
     /** The original PacketFXBlockBubble: the crucible bubbles around a block. */
     public static final int BUBBLE = 2;
+    /** The original PacketFXBlockSparkle: the sparkle burst at a block. */
+    public static final int SPARKLE = 3;
+    /** The original colour of the wand, which asks for a random grey. */
+    public static final int RANDOM_GREY = -9999;
 
     public static final Type<BlockFxPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("thaumcraft", "block_fx"));
     public static final StreamCodec<RegistryFriendlyByteBuf, BlockFxPayload> STREAM_CODEC = StreamCodec.of(
@@ -49,11 +53,12 @@ public record BlockFxPayload(ResourceLocation dimension, int kind, BlockPos targ
         Objects.requireNonNull(origin, "origin");
         Objects.requireNonNull(destination, "destination");
         target = target.immutable();
-        if (kind != ARC && kind != ZAP && kind != BUBBLE) throw new IllegalArgumentException("Unknown block effect kind");
+        if (kind != ARC && kind != ZAP && kind != BUBBLE && kind != SPARKLE) throw new IllegalArgumentException("Unknown block effect kind");
         if (kind == ARC && source < 0) throw new IllegalArgumentException("The arc needs a source entity");
         if (kind == ZAP && (origin.distanceToSqr(destination) < 1.0E-6 || !finite(origin) || !finite(destination)))
             throw new IllegalArgumentException("The node bolt needs two different finite points");
         if (kind == BUBBLE && (rgb < 0 || rgb > 0xffffff)) throw new IllegalArgumentException("The bubbles need a valid colour");
+        if (kind == SPARKLE && rgb != RANDOM_GREY && (rgb < 0 || rgb > 0xffffff)) throw new IllegalArgumentException("The sparkle needs a valid colour");
     }
 
     /** The arc lightning of the original PacketFXBlockArc. */
@@ -69,6 +74,11 @@ public record BlockFxPayload(ResourceLocation dimension, int kind, BlockPos targ
     /** The crucible bubbles of the original PacketFXBlockBubble. */
     public static BlockFxPayload bubble(ResourceLocation dimension, BlockPos target, int rgb) {
         return new BlockFxPayload(dimension, BUBBLE, target, -1, Vec3.ZERO, Vec3.ZERO, rgb);
+    }
+
+    /** The sparkle burst of the original PacketFXBlockSparkle. */
+    public static BlockFxPayload sparkle(ResourceLocation dimension, BlockPos target, int rgb) {
+        return new BlockFxPayload(dimension, SPARKLE, target, -1, Vec3.ZERO, Vec3.ZERO, rgb);
     }
 
     @Override public Type<BlockFxPayload> type() { return TYPE; }

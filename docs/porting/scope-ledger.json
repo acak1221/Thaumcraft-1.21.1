@@ -9019,9 +9019,10 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8blocks",
         "evidence": [
+          "2026-10-23 (w8blocks): CLOSED IN CODE. Oracle BlockCustomOreRenderer.java:54-70 is implemented by common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java:35-59 and OreRenderRules.java:3-15: base with ordinary AO, unshaded tinted overlay at Math.max(bb,160), then tinted original-1.7.10-stone inset .005..995 at bb. Correction to BOTH historical labels: FML 1.7.10 conf/fields.csv:4214 maps field_151443_J to anisotropicFiltering, neither fast graphics nor minimal particles. OreAnisotropyMixin.java:20-36 caches actual block-atlas AF on the render thread; AF>1 enables the second pass. Shared vanilla/NeoForge tessellation and Fabric material adapter are wired. Whole common/main javac proof; five JUnit5 tests authored/compile-checked NOT executed; frame criteria and GPU-state adaptation caveat: docs/analysis/2026-10-23-agent-w8blocks.md. No frame acceptance claimed.",
           "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:18-38 the inventory ore: the ore face plus an inset 0.005..0.995 coloured overlay",
           "oracle thaumcraft/client/renderers/block/BlockCustomOreRenderer.java:40-63 the world ore: the coloured overlay is drawn with a minimum brightness of 160 and, in fast graphics, a second pass with the stone texture",
           "native common/src/main/resources/assets/thaumcraft/models/item/cinnabar_ore.json the native ore model",
@@ -9031,7 +9032,7 @@
         "notes": [
           "The ore colour overlay is reproduced through the 1.21.1 tintindex mechanism instead of the manual GL colour.",
           "Deviation: the original's minimum-brightness-160 emissive overlay and the 'fast graphics' second pass with the stone texture are not reproduced by the static native model.",
-          "REMAINING GAP: the minimum brightness 160 of the coloured overlay and the second pass with the stone texture in the fast graphics setting are not reproduced by the static native model."
+          "2026-10-23 (w8blocks): historical missing-pass notes above are superseded by the shared position geometry and anisotropic-filtering bridge. Client frame acceptance remains pending, not an API blocker."
         ],
         "reviewed_sha256": {
           "original": "3f1e8ebf774aa4463f7c90d5d32780406814ed70f9beb924e6887330288e244b"
@@ -9152,9 +9153,10 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a1-client",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8blocks",
         "evidence": [
+          "2026-10-23 (w8blocks): CLOSED IN CODE. Oracle BlockGasRenderer.java:32-65,87-123,140-188,219-267 is consumed by common/src/main/java/thaumcraft/client/renderers/block/GasWorldQuads.java:19-101: nine actual world samples, GasSurfaceRules.corners, full-cube support fallback, centre1 override, density inversion, .001F offsets, still surface/half-span side UVs, per-face brightness and LIGHT .5/1/.8/.6. Foreign -1 quanta=-.109375 and all-negative NaN remain unchanged. No fluid-hook impossibility: an actual position-aware block mesh is accepted by the shared and Fabric terrain paths. Original MaterialTaint is nonliquid, so Forge BlockFluidBase.java:373-381 returns the -1000 still-flow sentinel. Whole-common javac proof; JUnit5 tests authored/compile-checked NOT executed; exact supported goo/gas sloping-frame acceptance in docs/analysis/2026-10-23-agent-w8blocks.md. No inspected frame claimed.",
           "oracle thaumcraft/client/renderers/block/BlockGasRenderer.java:11-15 the LIGHT_Y_NEG/POS, LIGHT_XZ_NEG/POS and RENDER_OFFSET constants",
           "oracle thaumcraft/client/renderers/block/BlockGasRenderer.java:38-48 getFluidHeightForRender, the per-corner height of the flux gas surface",
           "native common/src/main/java/thaumcraft/client/ThaumcraftFluxClient.java:9-13 the flux gas and goo are registered as a plain translucent render type",
@@ -9166,7 +9168,7 @@
           "The flux gas/goo are now plain translucent blocks.",
           "Deviation: the original variable-height fluid surface (per-corner heights, the 0.875 quanta factor and the LIGHT_* shading constants) is not reproduced, so the gas no longer fills to a partial height.",
           "Complete callsite audit: BlockGasRenderer is registered only in ClientProxy.setupBlockRenderers.",
-          "REMAINING GAP: the variable height fluid surface of the original, the per corner heights and the LIGHT_* shading constants, is not reproduced, so the gas no longer fills to a partial height. The 1.21.1 fluid renderer has no per block corner height hook."
+          "2026-10-23 (w8blocks): historical static-model limitation above is superseded by GasWorldQuads; native fluid hooks are unnecessary for this finite-block mesh. Client frame acceptance remains pending."
         ],
         "reviewed_sha256": {
           "original": "cefeaea0a79a3e0f6c7454a0c9d7787284dd246ce4f808e1b7122fe469309b67"
@@ -9580,9 +9582,10 @@
         "disposition": "exclude",
         "source_semantics": "not_applicable",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "port-clientrender",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8blocks",
         "evidence": [
+          "2026-10-23 (w8blocks): CLOSED IN CODE. Oracle BlockTaintRenderer.java:35-65 now has ordinary solid-cube pass0 and white brightness200 translucent overlay pass1 for CRUST/SOIL metadata0/1 only. Shared LegacyBlockQuads.java:63-77 and TaintOverlayChunkLayerMixin route the overlay into the translucent chunk buffer on vanilla/NeoForge; FabricPositionBlockModels routes per-quad materials. TaintFibreWorldQuads moves all former Fabric-only neighbour planes/crosses/overlay to common, with the NeoForge ModelData adapter calling the shared tessellator. The original distinct FIBRES overlay (BlockTaintFibreRenderer.java:64-89) is valid and retained. Whole-common javac proof, tests authored/compile-checked NOT executed, both-loader frame criteria in docs/analysis/2026-10-23-agent-w8blocks.md. No frame acceptance claimed; no missing-ISBRH impossibility claim.",
           "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:13-17 the inventory art uses the per metadata taint icons",
           "oracle thaumcraft/client/renderers/block/BlockTaintRenderer.java:19-63 the world render draws the crust, soil and flesh as cubes and adds the transparent fibre overlay pass to the crust and the soil",
           "native fabric/src/main/java/thaumcraft/fabric/client/FabricTaintFibresModel.java:52-80 the native fibre planes, the crossed stalks and the sparse type zero overlay",
@@ -9594,7 +9597,7 @@
           "REMAINING GAP (client, outside this wave): the 1.7.10 ISBRH has no 1.21.1 equivalent, and the original draws the transparent fibre overlay pass on the taint CRUST and SOIL blocks (metadata zero and one) while the native port draws the overlay on the taint FIBRES block; the cube and the overlay rule itself are reproduced.",
           "The original picks one of three soil textures per metadata, the native uses one cube for all of them.",
           "The client package is outside the editable scope of this wave, so the unit stays partial.",
-          "REMAINING GAP: the original draws the transparent fibre overlay pass on the taint CRUST and SOIL blocks, metadata zero and one, while the native draws the overlay on the taint FIBRES block. The cube and the overlay rule itself are reproduced. The native fibre overlay model also lives in the fabric module only, so the neo forge client has no overlay at all."
+          "2026-10-23 (w8blocks): historical overlay/shared-layer gaps above are superseded. CRUST/SOIL pass1 and supported FIBRES geometry are shared; FabricTaintFibresModel is now registration only. Both-loader frame acceptance remains pending."
         ],
         "reviewed_sha256": {
           "original": "d6be79c5c2969bbb26b6473c921d3b858e7a0c11c93e8745aab1a24b206a4f9e"
@@ -21856,9 +21859,10 @@
         "disposition": "port",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w4devices",
+        "native_coverage": "parity_verified",
+        "owner": "agent-w8blocks",
         "evidence": [
+          "2026-10-23 (w8blocks): CLOSED IN CODE. Oracle BlockCosmeticStairs.java:38-40 delegates side+100 to BlockCosmeticSolid.java:157-162. common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java:42-48,97-111 now remaps every world quad independently to the sprite selected by the actual position and final world-facing direction, retaining stair geometry, culling, UV orientation and normal AO. Both Fabric and NeoForge ModelData paths call this shared implementation. At origin faces are [3,0,1,2,3,0], not six copies of up=0. Placement property remains the static fallback, not the world-face selector. Whole-common javac proof; new explicit six-face JUnit5 assertion authored/compile-checked NOT executed. All-shape/half/facing and piston-destination frame criteria: docs/analysis/2026-10-23-agent-w8blocks.md. No inspected frame claimed.",
           "oracle thaumcraft/common/blocks/BlockCosmeticSolid.java:141-162 the ancient stone of the cosmetic solid takes one of the four textures by the hash of the position",
           "oracle thaumcraft/common/blocks/BlockCosmeticStairs.java:37-40 the icon of the stairs delegates to the cosmetic solid of the metadata eleven",
           "native common/src/main/java/thaumcraft/common/blocks/BlockCosmeticStairs.java:36-52 the native stairs carry the light opacity, the hardness and the effective blast resistance of the original",

@@ -43,7 +43,7 @@ class BlockRendererOracleRulesTest {
         assertEquals(.8F,GasSurfaceRules.sideLight(0));
         assertEquals(.6F,GasSurfaceRules.sideLight(2));
     }
-    @Test void oreUsesPackedLightMaxAndMinimalParticlesNotFastGraphics() {
+    @Test void oreUsesPackedLightMaxAndAnisotropicFilteringNotFastGraphics() {
         // Oracle BlockCustomOreRenderer:63-69.
         assertEquals(160,OreOverlayRules.overlayLight(0));
         assertEquals(0xF00000,OreOverlayRules.overlayLight(0xF00000));

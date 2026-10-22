@@ -3,6 +3,13 @@
 Oracle root: `/home/cyberfox-kali/work/thaumcraft-4.2.3.5-oracle`.
 No Gradle, JUnit or client runs performed by this agent.
 
+| Assigned unit | Before | After (code review/compile, not frames) |
+|---|---|---|
+| BlockCustomOreRenderer | partial | parity_verified |
+| BlockGasRenderer | partial | parity_verified |
+| BlockTaintRenderer | partial | parity_verified |
+| BlockCosmeticStairs | partial | parity_verified |
+
 ## Cosmetic stairs
 
 Oracle `thaumcraft/common/blocks/BlockCosmeticStairs.java:38-40` delegates `side+100`
@@ -12,7 +19,7 @@ unculled interior stair faces, instead of painting all faces with the up-face in
 Shared implementation: `common/src/main/java/thaumcraft/client/renderers/block/PositionBlockModels.java`;
 Fabric registration: `fabric/src/main/java/thaumcraft/fabric/client/FabricPositionBlockModels.java`.
 The position is sampled at rendering, not inferred from the placement property.
-Port references: `PositionBlockModels.java:26-29,37-44,65-83` and
+Port references: `PositionBlockModels.java:26-30,42-48,97-111` and
 `BlockCosmeticStairs.java:117-120,126-129` (paths under `common/src/main/java/thaumcraft`).
 
 Frame acceptance: at `(0,0,0)`, down/up/north/south/west/east use
@@ -27,8 +34,12 @@ draws base, then unshaded coloured overlay at **Math.max(bb,160)**, then (only
 when `field_151443_J > 1`) the coloured stone pass inset `.005..995` at **bb**.
 The ledger's “fast graphics” interpretation is wrong: the FML 1.7.10 MCP mapping
 at <https://raw.githubusercontent.com/MinecraftForge/FML/1.7.10/conf/fields.csv>
-line **4214** maps that field to **anisotropicFiltering**. This is not the mipmap
-level or Fancy/Fast graphics option. `BlockRenderer.java:105-123` does not reset
+line **4214** maps that field to **anisotropicFiltering**. This is neither the
+particle setting (a second incorrect historical claim), mipmap level nor
+Fancy/Fast graphics option. `OreOverlayRules.java:6-16,25-26,43-47` and two old
+test names/comments were corrected; their numerical assertions were not weakened.
+Production now calls that pre-existing pure rule through the cached renderer
+bridge, rather than leaving it orphaned. `BlockRenderer.java:105-123` does not reset
 the overlay colour before the inset stone faces, so the stone remains tinted.
 
 Port: `common/src/main/java/thaumcraft/client/renderers/block/LegacyBlockQuads.java:35-59`
@@ -101,16 +112,28 @@ transparent pass1 for metadata0/1 only. Texture-side arguments are the **opposit
 of the visible face: down/up/north/south/west/east -> `1,0,3,2,5,4`.
 `BlockTaintFibres.java:136-141` chooses blank95%, otherwise one of three sheets.
 
-Port: `LegacyBlockQuads.java:25-29,60-70`,
-`TaintOverlayRules.java:3-8` and
-`common/src/main/java/thaumcraft/client/ThaumcraftTaintBlocksClient.java:16`
-now put the overlay on CRUST/SOIL, with a translucent render layer and the
-original sparse rule. FLESH receives no overlay. The full neighbour-aware fibre
+Port: `LegacyBlockQuads.java:25-29,63-77` and `TaintOverlayRules.java:3-8`
+now put the overlay on CRUST/SOIL with the original sparse rule. FLESH receives
+no overlay. The cube retains its ordinary **solid** layer and normal AO.
+`common/src/main/java/thaumcraft/common/mixin/client/TaintOverlayChunkLayerMixin.java:26-46`
+routes only the overlay into the translucent buffer on vanilla/NeoForge.
+Its insertion point is immediately before the block-local pose is popped:
+vanilla `SectionCompiler.java:80-81`, patched NeoForge `SectionCompiler.java:90-91`,
+checked against both actual jars' bytecode and local-variable tables. These are
+real counterparts, not an ISBRH hard limit. Fabric routes the same shared quads
+by per-quad material in `FabricPositionBlockModels.java:47-60`.
+The full neighbour-aware fibre
 geometry moved from the Fabric-only model to
 `common/src/main/java/thaumcraft/client/renderers/block/TaintFibreWorldQuads.java:19-64`;
-both loaders use it. The obsolete Fabric-only model and its separate bootstrap
-registration were removed after auditing its plane/cross/grass-offset behavior.
-The Fabric adapter now only emits the shared quads.
+both loaders use it. The formerly Fabric-only model was audited and reduced to
+registration-only glue (`fabric/src/main/java/thaumcraft/fabric/client/FabricTaintFibresModel.java:5-15`).
+Its planes/crosses/grass-offset/overlay geometry is no longer loader-specific.
+The existing NeoForge ModelData adapter now delegates to the same shared
+`PositionBlockModels.tesselate` method (`PositionBlockModels.java:74-94`), including
+explicit light for emissive quads and ordinary AO for ore base/stairs.
+The old soil-texture claim was also inaccurate: oracle
+`thaumcraft/common/blocks/BlockTaint.java:85-118` simply selects crust/soil/flesh
+by metadata0/1/2, not three random textures per soil metadata.
 
 Important: the original **also** has a distinct valid overlay on the FIBRES
 block (`BlockTaintFibreRenderer.java:64-89`); that overlay was retained, not
@@ -126,7 +149,7 @@ brightness200 overlay; no free-fibre plane attaches to a taint-family support.
 
 ## Verification and remaining acceptance
 
-- Whole `common/src/main/java`: **1429 Java sources**, `javac --release 21
+- Whole `common/src/main/java`: **1430 Java sources**, `javac --release 21
   -proc:none`, **exit0**, only deprecation/unchecked notes. No Gradle was run.
   Argument file/log: ignored `.tmp/w8-javac.args`, `.tmp/w8-javac.log`.
 - Classpath: actual remapped Minecraft1.21.1 merged jar from
@@ -136,13 +159,26 @@ brightness200 overlay; no free-fibre plane attaches to a taint-family support.
   A **copy** of the vanilla jar was widened for the three checked-in common AW
   entries and Fabric's transitive `BlockEntityType$BlockEntitySupplier` access
   widener. Cached originals were not changed. No source/API stubs were used.
-- FabricPositionBlockModels and the new JUnit source: additional `javac` exit0,
-  using named-remapped Fabric renderer/model-loading/api-base jars.
+- FabricPositionBlockModels, FabricTaintFibresModel, the NeoForge ModelData adapter
+  and all three touched JUnit sources: additional `javac` exit0, using
+  named-remapped Fabric renderer/model-loading/api-base jars and cached NeoForge
+  ModelData. This is source compilation, **not** a NeoForge build or runtime run.
 - New `common/src/test/java/thaumcraft/client/BlockRendererFinalParityTest.java`:
   five JUnit5 tests, original packed light/AF/insets, cube metadata/texture-side,
   negative/NaN/shading fluid rules, and six distinct origin stair-face indices.
   **Authored and compile-checked, NOT executed.** No Block is constructed.
 - Asset verifier initially passed `missing_references: 0`; final results below.
+- Final `convert_assets.py --verify`: **missing_references0**, 518 available atlas
+  sprites. Final `update_scope_ledger.py --check --original-root <oracle>`:
+  **stale_review_fingerprints0**. `git diff --check`: clean.
+- Ledger changed **only the four assigned units**; counts untouched. Coverage:
+  four `partial -> parity_verified`, denoting code closure against the oracle,
+  not inspected-frame acceptance.
 - All four units are implemented against the oracle, not claimed visually
   accepted. Remaining work is leader-run client frame acceptance and integrated
   JUnit/loader runs. No hard API limitation is claimed for these four units.
+  In particular, `javac` cannot establish runtime application of the new
+  SectionCompiler local-capture injection; its target and local ordinals were
+  checked against both actual jars, but real Fabric/NeoForge startup and chunk
+  rebuild acceptance remain required. The AF-enabled atlas bridge likewise has
+  not been observed in a live renderer by this agent.

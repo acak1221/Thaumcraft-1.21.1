@@ -158,8 +158,8 @@ class BlockRenderRulesParityTest {
         assertEquals(240, OreOverlayRules.overlayLight(240));
     }
 
-    @Test void theSecondStonePassBelongsToTheMinimalParticleSetting() {
-        // BlockCustomOreRenderer.java:57 reads field_151443_J = particleSetting.
+    @Test void theSecondStonePassBelongsToAnisotropicFiltering() {
+        // Oracle :65; FML 1.7.10 conf/fields.csv:4214 maps field_151443_J to anisotropicFiltering.
         assertFalse(OreOverlayRules.secondPass(0));
         assertFalse(OreOverlayRules.secondPass(1));
         assertTrue(OreOverlayRules.secondPass(2));

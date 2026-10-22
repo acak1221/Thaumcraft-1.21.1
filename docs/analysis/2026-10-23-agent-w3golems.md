@@ -17,7 +17,7 @@ Sources used:
 
 **No Gradle was run in this worktree.** Every test named below is *authored but not executed*. The
 changed sources were **type-checked** with `javac` against the access-widened 1.21.1 jar of the
-leader's Gradle cache: the whole `common/src/main/java` tree (1361 files) and the whole
+leader's Gradle cache: the whole `common/src/main/java` tree (1364 files) and the whole
 `common/src/test/java` tree compile with **zero errors**.
 
 ---
@@ -99,13 +99,20 @@ the ladder until it stops.**
 
 ### 1.3 The counters of the original's entries
 
-Every entry of the ladder carries two counters, and they are the whole difference between the
+The entries of the ladder carry two counters, and they are the whole difference between the
 original and the port of the previous wave:
 
 | counter | set | lowered | the continuation rule |
 |---|---|---|---|
-| `count` = **200** | `AIEmptyPlace:99`, `AISortingPlace:98`, `AIHomeDrop:72`, `AIFillTake:71`, `AIHomeTakeSorting:96`, `AIFillGoto:140`, `AIEmptyGoto:115`, `AISortingGoto:109` | every tick | `AIEmptyPlace:80` `count > 0 && (shouldExecute() \|\| countChest > 0)` |
-| `countChest` = **5** | the same entries, when a transfer happened | every tick | `AIHomeTake:109` `countChest > 0` (no `count` at all) |
+| `count` = **200** | `AIEmptyPlace:100`, `AISortingPlace:111`, `AIHomeDrop:72`, `AIFillTake:71`, `AIEmptyDrop:60`, `AIHomeTakeSorting:96`, `AIFillGoto:140`, `AIEmptyGoto:115`, `AISortingGoto:109` | every tick | `AIEmptyPlace:80` `count > 0 && (shouldExecute() \|\| countChest > 0)` |
+| `countChest` = **5** | every entry that transfers something | every tick | `AIHomeTake:109` `countChest > 0` (no `count` at all) |
+
+**Not every entry has a `count`.** The oracle's fields are decisive: `AIHomeReplace`
+(`AIHomeReplace.java:29-30`), `AIHomePlace` (`AIHomePlace.java:27-28`) and `AIHomeTake`
+(`AIHomeTake.java:29-30`) declare **no** `count` field, and their continuation is
+`shouldExecute() || countChest > 0` (`:72-74`, `:65-67`, `:108-110`). The counter of two hundred
+exists in `AIEmptyPlace`, `AIEmptyDrop`, `AIHomeDrop`, `AIFillTake`, `AIHomeTakeSorting` and the
+three routes.
 
 A transfer that placed only **part** of the cargo leaves the cargo in the golem, so
 `shouldExecute()` stays true and the entry holds the ladder for the whole **200 ticks** — ten
@@ -252,7 +259,7 @@ TEST OK
 The classpath is the access-widened `minecraft-merged-1.21.1-loom…jar` of the leader's Gradle
 cache (the plain Loom jar does not carry the project's access widener and produces five
 pre-existing access errors), the remapped `architectury` and `fabric-api` artifacts of the leader's
-project, the Minecraft libraries of the Gradle module cache and the JUnit 5 jars. **1361** main
+project, the Minecraft libraries of the Gradle module cache and the JUnit 5 jars. **1364** main
 sources and the whole test tree compile with **zero errors**. No Gradle daemon was started.
 
 ---

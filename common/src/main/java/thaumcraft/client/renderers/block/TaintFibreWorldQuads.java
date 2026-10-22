@@ -29,7 +29,8 @@ public final class TaintFibreWorldQuads {
             PositionBlockModels.box(cube,new float[]{0,0,0,16,16,16},LegacyBlockQuads.sprite(pass==0?"taint_fibres":"taint_over_"+index),pass==0?0:-1,false);
             for(BakedQuad quad:cube)if(quad.getDirection()==side.getOpposite()) {
                 int[] data=quad.getVertices().clone();int axis=side.getAxis()==Direction.Axis.X?0:side.getAxis()==Direction.Axis.Y?1:2;
-                float coordinate=side.getAxisDirection()==Direction.AxisDirection.POSITIVE?(pass==0?.995F:.98F):(pass==0?.005F:.02F);
+                float depth=pass==0?.995F:.98F;
+                float coordinate=side.getAxisDirection()==Direction.AxisDirection.POSITIVE?depth:1F-depth;
                 for(int v=0;v<4;v++)data[v*8+axis]=Float.floatToRawIntBits(coordinate);
                 out.add(new LegacyBlockQuads.LitQuad(new BakedQuad(data,quad.getTintIndex(),quad.getDirection(),quad.getSprite(),false),pass==0?light:200));
             }

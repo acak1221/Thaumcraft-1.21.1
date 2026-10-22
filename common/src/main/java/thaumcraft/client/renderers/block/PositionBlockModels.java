@@ -31,9 +31,14 @@ public final class PositionBlockModels {
     }
 
     public static BakedModel worldModel(BlockAndTintGetter world, BlockPos pos, BlockState state, BakedModel base) {
+        return worldModel(world,pos,state,base,false);
+    }
+
+    /** Platform adapters able to route individual quad materials request both passes. */
+    public static BakedModel worldModel(BlockAndTintGetter world, BlockPos pos, BlockState state, BakedModel base, boolean layered) {
         List<BakedQuad> quads = new ArrayList<>();
         if (LegacyBlockQuads.handles(state)) {
-            quads.addAll(LegacyBlockQuads.quads(world,pos,state,base));
+            quads.addAll(LegacyBlockQuads.quads(world,pos,state,base,layered));
         } else if (state.getBlock() instanceof BlockCosmeticStairs) {
             RandomSource random = RandomSource.create(state.getSeed(pos));
             for (Direction face : Direction.values()) {
@@ -59,6 +64,34 @@ public final class PositionBlockModels {
             }
         }
         return new Geometry(base, List.copyOf(quads));
+    }
+
+    /** Marks an adapter which already routes both cube and overlay to their chunk layers. */
+    public interface LayeredModel {}
+
+    public static BakedModel geometry(BakedModel base,List<BakedQuad> quads) {return new Geometry(base,quads);}
+
+    /** One shared light/pass implementation for vanilla and NeoForge's ModelData overload. */
+    public static boolean tesselate(net.minecraft.client.renderer.block.ModelBlockRenderer renderer,
+            BlockAndTintGetter world,BakedModel base,BlockState state,BlockPos pos,
+            com.mojang.blaze3d.vertex.PoseStack poses,com.mojang.blaze3d.vertex.VertexConsumer vertices,
+            boolean checkSides,RandomSource random,long seed,int overlay) {
+        if(!handles(state)||state.getBlock() instanceof thaumcraft.common.blocks.BlockTaint)return false;
+        var model=worldModel(world,pos,state,base);
+        boolean ao=net.minecraft.client.Minecraft.useAmbientOcclusion()&&state.getLightEmission()==0&&base.useAmbientOcclusion();
+        if(LegacyBlockQuads.handles(state)) {
+            var quads=model.getQuads(state,null,random);
+            if(state.getBlock() instanceof thaumcraft.common.blocks.BlockCustomOre) {
+                var solid=geometry(base,quads.stream().filter(q->!(q instanceof LegacyBlockQuads.LitQuad)).toList());
+                if(ao)renderer.tesselateWithAO(world,solid,state,pos,poses,vertices,checkSides,random,seed,overlay);
+                else renderer.tesselateWithoutAO(world,solid,state,pos,poses,vertices,checkSides,random,seed,overlay);
+                quads=quads.stream().filter(q->q instanceof LegacyBlockQuads.LitQuad).toList();
+            }
+            LegacyBlockQuads.render(world,pos,state,poses,vertices,quads,overlay);
+        } else if(state.getBlock() instanceof BlockCosmeticStairs && ao) {
+            renderer.tesselateWithAO(world,model,state,pos,poses,vertices,checkSides,random,seed,overlay);
+        } else renderer.tesselateWithoutAO(world,model,state,pos,poses,vertices,checkSides,random,seed,overlay);
+        return true;
     }
 
     private static BakedQuad stairQuad(BakedQuad quad, BlockPos pos) {

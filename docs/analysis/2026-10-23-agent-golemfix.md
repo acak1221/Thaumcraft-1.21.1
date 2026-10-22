@@ -41,7 +41,7 @@ $ git merge-base agent/w3golems 61d44d6b   -> 61d44d6b
 $ git merge-base agent/w3rest   61d44d6b   -> 61d44d6b
 ```
 
-The three scenarios were run at the three points on a **clean world**
+The three scenarios were run at the four points on a **clean world**
 (`rm -rf fabric/run-gametest/world` before every run) with the same filter:
 
 | point | commit | result |

@@ -211,6 +211,10 @@ public final class SurvivalProgressionRuntimeChecks {
             new WorldSource("thaumcraft:greatwood_log", "cut from the greatwood tree, oracle WorldGenTreetypes"),
             new WorldSource("thaumcraft:silverwood_log", "cut from the silverwood tree, oracle WorldGenTreetypes"),
             new WorldSource("thaumcraft:knowledge_fragment", "dropped by the glyphed eldritch stone, oracle BlockEldritch:207-214"),
+            new WorldSource("thaumcraft:nugget_beef", "the smelting bonus of the arcane furnace, oracle ConfigRecipes:508 and TileArcaneFurnace:237-259"),
+            new WorldSource("thaumcraft:nugget_chicken", "the smelting bonus of the arcane furnace, oracle ConfigRecipes:507 and TileArcaneFurnace:237-259"),
+            new WorldSource("thaumcraft:nugget_fish", "the smelting bonus of the arcane furnace, oracle ConfigRecipes:510 and TileArcaneFurnace:237-259"),
+            new WorldSource("thaumcraft:nugget_pork", "the smelting bonus of the arcane furnace, oracle ConfigRecipes:509 and TileArcaneFurnace:237-259"),
             new WorldSource("thaumcraft:phial_filled", "filled from a jar of essentia, oracle ItemEssence"),
             new WorldSource("thaumcraft:primordial_pearl", "dropped by an Outer Lands boss, oracle EntityThaumcraftBoss:217"),
             new WorldSource("thaumcraft:shimmerleaf", "grown in the magical forest, oracle WorldGenCustomFlowers"),
@@ -221,16 +225,12 @@ public final class SurvivalProgressionRuntimeChecks {
      * The mod items that no recipe of the port produces and that no world of the
      * port hands to the player either.
      *
-     * <p>Every entry is a real gap with its own reason. The scenario asserts this
-     * exact set, so a fix has to update the list: the gap can never grow and can
-     * never be hidden.</p>
+     * <p>The list is empty: every mod item of the recipe tree is either the
+     * result of a recipe of the port or has a named natural world source. The
+     * scenario asserts this exact set, so a new gap has to be added here: the
+     * gap can never grow and can never be hidden.</p>
      */
-    public static final List<String> KNOWN_GAPS = List.of(
-            "thaumcraft:nugget_beef",
-            "thaumcraft:nugget_chicken",
-            "thaumcraft:nugget_fish",
-            "thaumcraft:nugget_pork"
-    );
+    public static final List<String> KNOWN_GAPS = List.of();
 
     // ---------------------------------------------------------- chain research
 
@@ -323,6 +323,9 @@ public final class SurvivalProgressionRuntimeChecks {
         }
         test.assertValueEqual(String.join(",", open), String.join(",", KNOWN_GAPS),
                 "the mod ingredients of the recipe tree without any source are exactly the documented gap list");
+        test.assertTrue(open.isEmpty(),
+                "the catalogue closes on natural acquisition: no mod ingredient of the recipe tree is without a source, "
+                        + "the open set is " + open);
         test.assertTrue(closed.size() == used.size() - open.size(),
                 "every other mod ingredient of the recipe tree is produced by a recipe or has a natural world source");
         // The cheat sheet of the port may never be a link of the chain.
@@ -539,6 +542,123 @@ public final class SurvivalProgressionRuntimeChecks {
         }
         test.assertTrue(pearl, "the boss of the Outer Lands drops the primordial pearl of the original");
         test.succeed();
+    }
+
+    /**
+     * The arcane furnace is built by a wand and pays the four meat nuggets.
+     *
+     * <p>The arcane furnace is the wand construct of the original event two: the
+     * three by three by three shell of nether bricks, obsidian, lava and one
+     * iron bar becomes the furnace (oracle
+     * {@code thaumcraft/common/items/wands/WandManager.java:332-407}), and the
+     * furnace pays the smelting bonus of the original
+     * ({@code thaumcraft/common/tiles/TileArcaneFurnace.java:237-259}), which is
+     * where the four meat nuggets of the original come from
+     * ({@code thaumcraft/common/config/ConfigRecipes.java:507-510}).</p>
+     *
+     * <p>The scenario builds the shell of the original, forms the furnace with a
+     * real wand and checks the core, the output nozzle, the vis that was paid and
+     * the four nuggets of the original.</p>
+     */
+    public static void arcaneFurnaceIsBuiltByAWandAndPaysTheMeatNuggets(GameTestHelper test) {
+        ServerPlayer player = test.makeMockServerPlayerInLevel();
+        ServerLevel level = test.getLevel();
+        var knowledge = KnowledgeAccess.get(player);
+        knowledge.reset();
+        knowledge.setInitializedAspects(true);
+        // The original INFERNALFURNACE research of ConfigResearch.java:181; the
+        // original dispatch of WandManager.java:718-720 asks for it first.
+        knowledge.addResearch("INFERNALFURNACE");
+        // The shell of the original: the north west bottom corner of the volume.
+        BlockPos base = new BlockPos(1, 2, 1);
+        buildShell(test, base);
+        // The wand of the original with the vis of the construct.
+        ItemStack wand = new ItemStack(ThaumcraftContent.WAND.get());
+        WandData data = new WandData("primal_staff", "gold", Map.of());
+        data = data.withAmount("ignis", 10000).withAmount("terra", 10000);
+        wand.set(ThaumcraftContent.WAND_DATA.get(), data);
+        player.setItemInHand(InteractionHand.MAIN_HAND, wand);
+        // The wand click on the nether brick of the shell.
+        var item = ThaumcraftContent.WAND.get();
+        test.assertTrue(item.useOn(new net.minecraft.world.item.context.UseOnContext(
+                        player, InteractionHand.MAIN_HAND, hit(test.absolutePos(base)))).consumesAction(),
+                "the wand on the shell of the original answers the event two trigger");
+        // The core of the furnace: the original metadata zero block in the middle
+        // of the middle layer (WandManager.java:383 and BlockArcaneFurnace.java:381).
+        BlockPos core = base.offset(1, 1, 1);
+        var coreState = level.getBlockState(test.absolutePos(core));
+        test.assertTrue(coreState.is(thaumcraft.common.config.ThaumcraftLegacyTiles.ARCANE_FURNACE.get()),
+                "the lava of the middle layer became the core of the furnace, got " + coreState);
+        test.assertTrue(coreState.getValue(thaumcraft.common.blocks.BlockArcaneFurnace.VARIANT) == 0,
+                "the core of the furnace is the original metadata zero block");
+        test.assertTrue(level.getBlockEntity(test.absolutePos(core)) instanceof thaumcraft.common.tiles.TileArcaneFurnace,
+                "the core of the furnace has the tile of the original");
+        // The output nozzle: the original metadata ten block, the iron bar of the
+        // middle layer (WandManager.java:386).
+        BlockPos nozzle = base.offset(1, 1, 0);
+        test.assertTrue(level.getBlockState(test.absolutePos(nozzle))
+                        .getBlock() instanceof thaumcraft.common.blocks.BlockArcaneFurnaceNozzle,
+                "the iron bar of the middle layer became the output nozzle of the furnace, got "
+                        + level.getBlockState(test.absolutePos(nozzle)));
+        // The essentia nozzle of the bottom layer: the original metadata five block.
+        BlockPos bottom = base.offset(1, 0, 1);
+        test.assertTrue(level.getBlockState(test.absolutePos(bottom))
+                        .getBlock() instanceof thaumcraft.common.blocks.BlockArcaneFurnace,
+                "the bottom centre of the shell became a furnace block, got "
+                        + level.getBlockState(test.absolutePos(bottom)));
+        // The empty cell of the top layer stays empty (WandManager.java:390).
+        BlockPos top = base.offset(1, 2, 1);
+        test.assertTrue(level.getBlockState(test.absolutePos(top)).isAir(),
+                "the middle of the top layer of the shell stays empty, got "
+                        + level.getBlockState(test.absolutePos(top)));
+        // The original vis: fifty vis of fire and fifty vis of earth
+        // (WandManager.java:341).
+        int paidIgnis = 10000 - ItemWandCasting.getVis(wand, "ignis");
+        int paidTerra = 10000 - ItemWandCasting.getVis(wand, "terra");
+        test.assertTrue(paidIgnis == 5000, "the construct paid the original fifty vis of fire, got " + paidIgnis);
+        test.assertTrue(paidTerra == 5000, "the construct paid the original fifty vis of earth, got " + paidTerra);
+        // The four meat nuggets of the original are the smelting bonus of the
+        // arcane furnace (ConfigRecipes.java:507-510, TileArcaneFurnace.java:237-259).
+        bonus(test, "minecraft:chicken", "thaumcraft:nugget_chicken", "raw chicken");
+        bonus(test, "minecraft:beef", "thaumcraft:nugget_beef", "raw beef");
+        bonus(test, "minecraft:porkchop", "thaumcraft:nugget_pork", "raw pork");
+        bonus(test, "minecraft:cod", "thaumcraft:nugget_fish", "raw fish");
+        test.succeed();
+    }
+
+    /** The shell of the original arcane furnace: oracle WandManager.java:351-372. */
+    private static void buildShell(GameTestHelper test, BlockPos base) {
+        for (int layer = 0; layer < 3; layer++) {
+            for (int dx = 0; dx < 3; dx++) {
+                for (int dz = 0; dz < 3; dz++) {
+                    BlockPos pos = base.offset(dx, 2 - layer, dz);
+                    if (dx == 1 && dz == 1) {
+                        // The middle of the top layer is empty, the middle of the
+                        // middle layer is lava and the middle of the bottom layer
+                        // is obsidian (WandManager.java:353-356).
+                        if (layer == 0) continue;
+                        test.setBlock(pos, layer == 1 ? net.minecraft.world.level.block.Blocks.LAVA
+                                : net.minecraft.world.level.block.Blocks.OBSIDIAN);
+                        continue;
+                    }
+                    if (layer == 1 && dx == 1 && dz == 0) {
+                        // The one iron bar of the middle layer (WandManager.java:357-372).
+                        test.setBlock(pos, net.minecraft.world.level.block.Blocks.IRON_BARS);
+                        continue;
+                    }
+                    boolean corner = (dx == 0 || dx == 2) && (dz == 0 || dz == 2);
+                    test.setBlock(pos, corner ? net.minecraft.world.level.block.Blocks.NETHER_BRICKS
+                            : net.minecraft.world.level.block.Blocks.OBSIDIAN);
+                }
+            }
+        }
+    }
+
+    /** The smelting bonus of the original for one input, oracle ConfigRecipes.java:507-510. */
+    private static void bonus(GameTestHelper test, String input, String output, String label) {
+        var bonus = thaumcraft.api.ThaumcraftApi.getSmeltingBonus(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(input))));
+        test.assertTrue(bonus != null && BuiltInRegistries.ITEM.getKey(bonus.getItem()).toString().equals(output),
+                label + " pays the original bonus " + output + ": " + bonus);
     }
 
     private static net.minecraft.world.phys.BlockHitResult hit(BlockPos absolute) {

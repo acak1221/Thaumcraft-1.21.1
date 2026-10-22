@@ -1691,4 +1691,9 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void survival_boss_loot_is_the_primordial_pearl(GameTestHelper test) {
         thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.bossLootIsThePrimordialPearl(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 300, batch = "survival_progression")
+    public void survival_arcane_furnace_builds_and_pays_the_meat_nuggets(GameTestHelper test) {
+        thaumcraft.common.testing.SurvivalProgressionRuntimeChecks.arcaneFurnaceIsBuiltByAWandAndPaysTheMeatNuggets(test);
+    }
 }

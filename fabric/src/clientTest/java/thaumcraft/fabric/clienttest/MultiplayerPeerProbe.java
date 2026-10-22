@@ -182,6 +182,17 @@ public final class MultiplayerPeerProbe implements ClientModInitializer {
                 pendingArguments = arguments;
                 pendingTicks = 0;
             }
+            case "GIVE" -> {
+                // The peer gives ITSELF the item. The vanilla give command is a
+                // SIGNED command, and the offline-mode server drops a signed
+                // command whose signature does not match its chat chain
+                // SILENTLY, which happens with the command of the OTHER
+                // client far more often than with its own.
+                for (String item : arguments.split(",")) {
+                    if (!item.isBlank()) client.getConnection().sendCommand("give " + playerName + " " + item.trim());
+                }
+                reply("GIVE " + arguments);
+            }
             case "COUNT" -> {
                 pendingToken = "COUNT";
                 pendingArguments = arguments;

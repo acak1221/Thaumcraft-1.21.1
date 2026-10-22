@@ -1609,16 +1609,46 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         return count;
     }
 
-    /** Gives the SECOND client an item and waits until the server confirmed it. */
+    /**
+     * Gives the SECOND client an item and waits until its own inventory has
+     * it.
+     *
+     * <p>The SECOND client runs the give itself: the vanilla give command is
+     * a SIGNED command and the offline-mode server drops a signed command
+     * whose signature does not match its chat chain SILENTLY. That happens
+     * with the command of the OTHER client far more often than with its own,
+     * so the second client is asked to give itself the item.</p>
+     */
     private boolean giveToPeer(Minecraft client, String... itemArguments) {
-        String key = "peer_give_baseline";
-        if (stageData.get(key) == null) stageData.put(key, giveRepliesFor(peerName));
-        int baseline = (Integer) stageData.get(key);
-        if (giveRepliesFor(peerName) - baseline >= itemArguments.length) return true;
-        if (stageTicks % 20 == 0) {
+        String key = "peer_give_sent";
+        if (stageData.get(key) == null) {
+            StringBuilder paths = new StringBuilder();
             for (String argument : itemArguments) {
-                client.getConnection().sendCommand("give " + peerName + " " + argument);
+                if (paths.length() > 0) paths.append(',');
+                paths.append(argument.substring(argument.lastIndexOf(':') + 1).trim().split(" ")[0]);
             }
+            pairCommand("GIVE", paths.toString());
+            stageData.put(key, true);
+            return false;
+        }
+        String held = peerValue("held");
+        boolean complete = held != null;
+        for (String argument : itemArguments) {
+            String path = argument.substring(argument.lastIndexOf(':') + 1).trim().split(" ")[0];
+            if (!held.contains(path)) complete = false;
+        }
+        if (complete) return true;
+        if (stageTicks % 40 == 0) {
+            StringBuilder paths = new StringBuilder();
+            for (String argument : itemArguments) {
+                if (paths.length() > 0) paths.append(',');
+                paths.append(argument.substring(argument.lastIndexOf(':') + 1).trim().split(" ")[0]);
+            }
+            pairCommand("GIVE", paths.toString());
+        }
+        if (stageTicks > 600) {
+            throw new IllegalStateException("The second client never received " + itemArguments[0]
+                    + "; its own inventory holds: " + held);
         }
         return false;
     }

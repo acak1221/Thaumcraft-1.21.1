@@ -30,7 +30,7 @@ public final class TileThaumatoriumRenderer implements BlockEntityRenderer<TileT
         if (tile.getLevel() == null || mc.player == null) return;
         var outputs = tile.previewOutputs();
         int index = ThaumatoriumPose.previewIndex(mc.player.tickCount, outputs.size());
-        if (index < 0) return;
+        if (index < 0 || outputs.get(index).isEmpty()) return;
         pose.pushPose();
         pose.translate(.5 + facing.getStepX() / 1.99F, ThaumatoriumPose.PREVIEW_Y, .5 + facing.getStepZ() / 1.99F);
         pose.mulPose(Axis.YP.rotationDegrees(ThaumatoriumPose.previewYaw(facing)));

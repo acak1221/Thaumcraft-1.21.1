@@ -88,8 +88,8 @@ public final class TileThaumatorium extends BlockEntity implements WorldlyContai
     /** Client preview of the selected formulas, in saved order; independent of catalyst presence. */
     public List<ItemStack> previewOutputs() {
         if (level == null) return List.of();
-        return jobs.stream().map(job -> resolve(job.id())).filter(java.util.Objects::nonNull)
-                .map(recipe -> recipe.getResultItem(level.registryAccess()).copyWithCount(1)).toList();
+        return jobs.stream().map(job -> resolve(job.id()))
+                .map(recipe -> recipe == null ? ItemStack.EMPTY : recipe.getResultItem(level.registryAccess()).copyWithCount(1)).toList();
     }
     public int recipeCapacity() { return maxRecipes; }
     public boolean isHeated() { return heated; }

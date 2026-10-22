@@ -189,6 +189,9 @@ public final class TradeSwaps {
         if (level.getBlockState(job.pos).is(job.target.getBlock()))
             job.target.getBlock().setPlacedBy(level, job.pos, level.getBlockState(job.pos), player, new ItemStack(job.target.getBlock()));
         level.levelEvent(2001, job.pos, Block.getId(job.source));
+        // Original ServerTickEventsFML:154 - the swapped block flashes with the
+        // original pale blue 0xC0C0FF of the PacketFXBlockSparkle.
+        thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(level, job.pos, 0xC0C0FF);
         player.getInventory().setChanged();
         player.inventoryMenu.broadcastChanges();
         return true;

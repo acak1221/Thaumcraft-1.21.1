@@ -168,6 +168,21 @@ public class EntityEldritchGolem extends EntityThaumcraftBoss implements RangedA
                             .65F+level().random.nextFloat()*.1F,1F,fade,fade);
                 --arcing;
             }
+            // Original EntityEldritchGolem:288-300: the headless golem throws a spark of the size
+            // 0.3 in the direction of its head once in twenty ticks, with the colour
+            // 0.65+random*0.1/1/1 and the alpha 0.8.
+            if(isHeadless()&&level() instanceof net.minecraft.client.multiplayer.ClientLevel client) {
+                float yaw=(float)(-yBodyRot*(Math.PI/180D)-Math.PI);
+                float f1=Mth.cos(yaw),f2=Mth.sin(yaw);
+                float f3=-Mth.sin((float)(-getXRot()*(Math.PI/180D))),f4=Mth.cos((float)(-getXRot()*(Math.PI/180D)));
+                double vx=f2*f3,vy=f4,vz=f1*f3;
+                if(level().random.nextInt(20)==0) {
+                    float a=(level().random.nextFloat()-level().random.nextFloat())/2F;
+                    float b=(level().random.nextFloat()-level().random.nextFloat())/2F;
+                    thaumcraft.client.fx.particles.ShockSparkParticle.spark(client,getX()+vx+a,
+                            getY()+getEyeHeight()-.25F,getZ()+vz+b,.3F,.65F+level().random.nextFloat()*.1F,1F,1F,.8F);
+                }
+            }
             return;
         }
         if(isHeadless()&&beamCharge<=0)chargingBeam=true;

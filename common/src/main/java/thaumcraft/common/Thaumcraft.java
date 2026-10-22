@@ -181,6 +181,9 @@ public final class Thaumcraft {
         VisNetFxNetworking.initServer();
         // The original block visual channels: the arc lightning, the node bolt and the crucible bubbles.
         thaumcraft.common.lib.network.BlockFxNetworking.initServer();
+        // The original block sparkle packet: the flux scrubber, the eldritch lock, the warding focus,
+        // the wand, the eldritch warden and the server tick swap.
+        thaumcraft.common.lib.network.BlockSparkleFxNetworking.initServer();
         VisNetHandler.setEffectSink(VisNetFxNetworking::send);
         // Coordinate-only progress survives ordinary release, NOT a change of
         // player instance, dimension, actual death or server lifetime.

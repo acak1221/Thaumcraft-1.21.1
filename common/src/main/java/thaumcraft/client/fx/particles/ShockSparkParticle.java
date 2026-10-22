@@ -17,6 +17,14 @@ public final class ShockSparkParticle extends SingleQuadParticle {
         alpha=.8F;setSize(.01F,.01F);xo=x;yo=y;zo=z;
     }
     @Override public void tick() { xo=x;yo=y;zo=z;if(age++>=lifetime)remove(); }
+    /** The original FXSpark of a caller that sets the colour and the alpha itself. */
+    public static void spark(net.minecraft.client.multiplayer.ClientLevel level,double x,double y,double z,float size,
+                             float red,float green,float blue,float alpha) {
+        var particle=new ShockSparkParticle(level,x,y,z,size);
+        particle.setColor(red,green,blue);
+        particle.setAlpha(alpha);
+        net.minecraft.client.Minecraft.getInstance().particleEngine.add(particle);
+    }
     private float u() { return(int)(age/(float)lifetime*7F)/8F; }
     @Override protected float getU0() { return u()+(flip?.125F:0); }
     @Override protected float getU1() { return u()+(flip?0:.125F); }

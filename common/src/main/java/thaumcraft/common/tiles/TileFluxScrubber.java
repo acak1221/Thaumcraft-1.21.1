@@ -134,6 +134,10 @@ public final class TileFluxScrubber extends BlockEntity implements EssentiaStora
             }
             charges++;
             setChanged();
+            // Original TileFluxScrubber:100 - the removed flux block flashes with the
+            // original magenta 0xDD00FF of the PacketFXBlockSparkle.
+            if (level instanceof net.minecraft.server.level.ServerLevel server)
+                thaumcraft.common.lib.network.BlockSparkleFxNetworking.sendBlockSparkle(server, target, 0xDD00FF);
             return;
         }
     }

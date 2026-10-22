@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.nodes.IRevealer;
 import thaumcraft.common.items.relics.ItemThaumometer;
+import thaumcraft.common.tiles.TileJarNode;
 import thaumcraft.common.tiles.TileNode;
 import thaumcraft.common.tiles.TileNode.NodeModifier;
 
@@ -37,6 +38,13 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
     private static final RenderType FAINT = new NodeRenderType("faint", false, false);
     private static final RenderType ADDITIVE = new NodeRenderType("revealed_additive", true, false);
     private static final RenderType TRANSLUCENT = new NodeRenderType("revealed_translucent", true, true);
+    /** The original node of a node jar keeps the depth test: only the revealed node ignores it. */
+    private static final RenderType ADDITIVE_DEPTH = new NodeRenderType("jar_additive", false, false);
+    private static final RenderType TRANSLUCENT_DEPTH = new NodeRenderType("jar_translucent", false, true);
+    /** The original view distance of a node jar: the same sixty four blocks as a node. */
+    public static final double JAR_VIEW_DISTANCE = 64.0D;
+    /** The original size of the node inside a node jar. */
+    public static final float JAR_NODE_SIZE = .7F;
 
     public TileNodeRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -99,21 +107,58 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
         var aspects = node.getAspects();
         if (!view.revealed() || !view.inRange() || aspects.size() == 0) return;
         var viewer = minecraft.player;
+        if (viewer == null) return;
+        float age = viewer.tickCount + partialTick;
+        float alpha = (float)((view.range() - view.distance()) / view.range());
+        drawNode(minecraft, partialTick, pose, buffers, node.getBlockPos().getX(), aspects,
+                node.getNodeType(), node.getNodeModifier(), alpha, 1F, true, age);
+    }
+
+    /**
+     * The original node inside a node jar.
+     *
+     * <p>Oracle {@code thaumcraft/client/renderers/tile/TileNodeRenderer.java:176-199}: a node jar is
+     * always visible, its node is drawn with the size {@code 0.7f}, the depth test is <em>kept</em>
+     * (only a revealed node ignores it) and the view distance is the same sixty four blocks.</p>
+     *
+     * <p>Oracle {@code thaumcraft/client/renderers/tile/TileJarRenderer.java:54-59}: the node of a
+     * node jar is drawn one tenth of a block below the centre of the block.</p>
+     */
+    public static void renderJarNode(TileJarNode jar, Minecraft minecraft, float partialTick,
+                                     PoseStack pose, MultiBufferSource buffers) {
+        var aspects = jar.getAspects();
+        if (aspects.size() == 0) return;
+        var viewer = minecraft.player;
+        if (viewer == null) return;
+        double distance = viewer.distanceTo(Vec3.atCenterOf(jar.getBlockPos()));
+        if (distance > JAR_VIEW_DISTANCE) return;
+        float age = viewer.tickCount + partialTick;
+        float alpha = (float)((JAR_VIEW_DISTANCE - distance) / JAR_VIEW_DISTANCE);
+        pose.pushPose();
+        // Original TileJarRenderer:56 - the node of the jar is one tenth of a block lower.
+        pose.translate(0, -.1F, 0);
+        drawNode(minecraft, partialTick, pose, buffers, jar.getBlockPos().getX(), aspects,
+                jar.getNodeType(), jar.getNodeModifier(), alpha, JAR_NODE_SIZE, false, age);
+        pose.popPose();
+    }
+
+    /** The shared body of the original {@code renderNode}. */
+    private static void drawNode(Minecraft minecraft, float partialTick, PoseStack pose, MultiBufferSource buffers,
+                                 int blockX, thaumcraft.api.aspects.AspectList aspects, TileNode.NodeType type,
+                                 TileNode.NodeModifier modifier, float alpha, float size, boolean depthIgnore, float age) {
         long now = System.nanoTime();
-        int frame = (int)Math.floorMod(now / 40000000L + node.getBlockPos().getX(), 32L);
+        int frame = (int)Math.floorMod(now / 40000000L + blockX, 32L);
         pose.pushPose();
         pose.translate(.5, .5, .5);
         pose.mulPose(minecraft.gameRenderer.getMainCamera().rotation());
-
-        float age = viewer.tickCount + partialTick;
-        float alpha = (float)((view.range() - view.distance()) / view.range());
-        NodeModifier modifier = node.getNodeModifier();
-        if (modifier == NodeModifier.BRIGHT) alpha *= 1.5f;
-        else if (modifier == NodeModifier.PALE) alpha *= .66f;
-        else if (modifier == NodeModifier.FADING) alpha *= Mth.sin(age / 3) * .25f + .33f;
+        if (modifier == TileNode.NodeModifier.BRIGHT) alpha *= 1.5f;
+        else if (modifier == TileNode.NodeModifier.PALE) alpha *= .66f;
+        else if (modifier == TileNode.NodeModifier.FADING) alpha *= Mth.sin(age / 3) * .25f + .33f;
         float total = 0;
         int count = 0;
         float angle = 0;
+        RenderType additive = depthIgnore ? ADDITIVE : ADDITIVE_DEPTH;
+        RenderType translucent = depthIgnore ? TRANSLUCENT : TRANSLUCENT_DEPTH;
         for (Aspect aspect : aspects.getAspects()) {
             int amount = aspects.getAmount(aspect);
             total += amount;
@@ -124,14 +169,14 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
             if (aspect.getBlend() == 771) opacity *= 1.5f;
             pose.pushPose();
             pose.mulPose(Axis.ZP.rotation(angle));
-            quad(pose, buffers.getBuffer(aspect.getBlend() == 771 ? TRANSLUCENT : ADDITIVE),
-                    scale, opacity, aspect.getColor(), frame, 0);
+            quad(pose, buffers.getBuffer(aspect.getBlend() == 771 ? translucent : additive),
+                    scale * size, opacity, aspect.getColor(), frame, 0);
             pose.popPose();
             ++count;
         }
         // Reserved type rows remain distinguishable in saved/admin nodes;
         // drawing them is NOT an implementation of their gameplay/ecology.
-        int strip = switch (node.getNodeType()) {
+        int strip = switch (type) {
             case NORMAL -> 1;
             case UNSTABLE -> 6;
             case DARK -> 2;
@@ -140,10 +185,10 @@ public final class TileNodeRenderer implements BlockEntityRenderer<TileNode> {
             case HUNGRY -> 3;
         };
         float coreSize = .1f + total / aspects.size() / 150;
-        if (node.getNodeType() == TileNode.NodeType.HUNGRY) coreSize *= .75f;
-        if (node.getNodeType() != TileNode.NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
-        boolean dark = node.getNodeType() == TileNode.NodeType.DARK || node.getNodeType() == TileNode.NodeType.TAINTED;
-        quad(pose, buffers.getBuffer(dark ? TRANSLUCENT : ADDITIVE), coreSize, alpha, 0xffffff, frame, strip);
+        if (type == TileNode.NodeType.HUNGRY) coreSize *= .75f;
+        if (type != TileNode.NodeType.UNSTABLE) pose.mulPose(Axis.ZP.rotation(angle));
+        boolean dark = type == TileNode.NodeType.DARK || type == TileNode.NodeType.TAINTED;
+        quad(pose, buffers.getBuffer(dark ? translucent : additive), coreSize * size, alpha, 0xffffff, frame, strip);
         pose.popPose();
     }
 

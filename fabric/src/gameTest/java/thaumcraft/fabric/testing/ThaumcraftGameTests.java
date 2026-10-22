@@ -549,7 +549,7 @@ public final class ThaumcraftGameTests implements FabricGameTest {
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void magicalFlowersGrowHarvestAndRefine(GameTestHelper test) {
-        PlantRuntimeChecks.run(test);
+        PlantRuntimeChecks.run(test, test.makeMockServerPlayerInLevel());
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

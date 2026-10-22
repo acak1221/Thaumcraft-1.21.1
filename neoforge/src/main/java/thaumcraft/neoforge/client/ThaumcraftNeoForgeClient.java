@@ -19,6 +19,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import thaumcraft.client.ThaumcraftArchitectClient;
 import thaumcraft.client.ThaumcraftExcavationClient;
 import thaumcraft.client.ThaumcraftGogglesClient;
 import thaumcraft.client.ThaumcraftShockClient;

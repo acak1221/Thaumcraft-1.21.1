@@ -114,8 +114,8 @@ See §6 for the final run's numbers.
 | 14 | `research_table_edit_over_network` | a real table edit (a cell placement) over the C2S channel | PASS |
 | 15 | `golem_placement_over_network` | the original golem placement produces a golem **on the client** | PASS |
 | 16 | `traveling_trunk_over_network` | the travelling trunk entity reaches the client | PASS |
-| 17 | `visnet_block_over_network` | a vis relay block and its block entity reach the client | see §5 |
-| 18 | `arcane_bore_over_network` | the arcane bore block reaches the client | see §5 |
+| 17 | `visnet_block_over_network` | a vis relay block and its block entity reach the client | PASS |
+| 18 | `arcane_bore_over_network` | the arcane bore machine reaches the client | PASS |
 | 19 | `disconnect` | the client can drop the real connection | PASS |
 | 20 | `reconnect` | the client reconnects to the same dedicated server | PASS |
 | 21 | `reconnect_state_consistent` | the research and aspect state survived the reconnect | PASS |
@@ -209,25 +209,28 @@ trunk stage counted one `EntityTravelingTrunk` on the client.
 
 ## 5. Findings
 
-### 5.1 The vis relay removes itself when it has no support — original behaviour, not a network defect
+### 5.1 The vis relay needs a supported placement — the port's own rule, not a network defect
 
 `TileVisRelay.dropIfUnsupported()`
 (`common/src/main/java/thaumcraft/common/tiles/TileVisRelay.java:191-202`) removes the
-relay when the block on its back side is air, and
-`BlockVisRelay.canSurvive` (`BlockVisRelay.java:58-61`) encodes the same rule. The
-acceptance places the relay with the vanilla `/setblock`, which does **not** run
-`getStateForPlacement`, so the support side is the air above the relay and the port
-removes it again. The client therefore sees air.
+relay when the block on its back side is air, and `BlockVisRelay.canSurvive`
+(`BlockVisRelay.java:58-61`) encodes the same rule. The vanilla `/setblock` does **not**
+run `getStateForPlacement`, so a relay placed by the command can be removed again by
+the port's own support rule before the client sees it.
 
-**This is the port's own rule, not a transport defect**, and the acceptance reports the
-server's own view (`/data get block`) next to the client's view so the two can be
-compared. See §6 for the final numbers.
+The acceptance now places the relay on a supported spot and compares the **server's**
+own view (`/data get block`) with the client's view, so a transport failure and the
+port's own removal rule can never be confused. In the accepted run the client has
+`visnet_block = thaumcraft:vis_relay` and
+`visnet_block_entity = thaumcraft.common.tiles.TileVisRelay@1ee60f5b`.
 
-### 5.2 The arcane bore needs the placement position that the original uses
+### 5.2 The arcane bore is a two block machine — the port's own rule, not a network defect
 
-The arcane bore is placed **on top of** the clicked block; the acceptance initially read
-the clicked position itself and saw the grass. The harness was corrected
-(`MultiplayerClientProbe.stageArcaneBore`, the `.above()` on the clicked position).
+`BlockArcaneBore` requires the `thaumcraft:arcane_bore_base` block below it
+(`common/src/main/java/thaumcraft/common/blocks/BlockArcaneBore.java:81`), and the
+bore is placed **on top of** the clicked block. The acceptance therefore places the
+base first and reads the block above the clicked position. In the accepted run:
+`bore_block = thaumcraft:arcane_bore`, `bore_base_block = thaumcraft:arcane_bore_base`.
 
 ### 5.3 No crash, no exception, on either side
 

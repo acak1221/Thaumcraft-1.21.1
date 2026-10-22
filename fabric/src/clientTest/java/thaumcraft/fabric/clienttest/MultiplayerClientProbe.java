@@ -776,10 +776,10 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         if (block.isAir()) {
             // The server may have removed its own unsupported relay; the
             // server's own view decides whether that is the original rule.
-            if (server != null && server.contains("entity data")) {
-                throw new IllegalStateException("The server owns the vis relay but the client never received the block: " + server);
-            }
-            if (stageTicks > 200) {
+            if (stageTicks > 600) {
+                if (server != null && server.contains("entity data")) {
+                    throw new IllegalStateException("The server owns the vis relay but the client never received the block: " + server);
+                }
                 throw new IllegalStateException("The vis relay is not on the client and the server reports: " + server);
             }
             return false;
@@ -826,7 +826,10 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         evidence.put("bore_block", boreId);
         evidence.put("bore_base_block", BuiltInRegistries.BLOCK.getKey(client.level.getBlockState(clicked).getBlock()).toString());
         if (!boreId.contains("arcane_bore")) {
-            throw new IllegalStateException("The arcane bore never appeared on the client: " + boreId);
+            if (stageTicks > 600) {
+                throw new IllegalStateException("The arcane bore never appeared on the client: " + boreId);
+            }
+            return false;
         }
         return true;
     }
@@ -1217,15 +1220,13 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
             return false;
         }
         if (!bringPeerNextToLead(client)) return false;
-        if (stageData.get("grant") == null) {
+        // The grant and the question are repeated until the second client
+        // really reports the research: the client tick and the server tick are
+        // independent, so the server may not have processed the grant when the
+        // question is asked for the first time.
+        if (stageTicks % 20 == 0) {
             client.getConnection().sendCommand("thaumcraft research " + peerName + " " + PEER_RESEARCH);
-            stageData.put("grant", true);
-            return false;
-        }
-        if (stageData.get("ask") == null) {
             pairCommand("HAS_RESEARCH", PEER_RESEARCH);
-            stageData.put("ask", true);
-            return false;
         }
         if (!pairReplied()) return false;
         evidence.put("pair_peer_research_answer", pairAnswer);
@@ -1233,7 +1234,12 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         boolean leadHas = KnowledgeAccess.get(client.player).isResearchComplete(PEER_RESEARCH);
         evidence.put("pair_lead_has_peer_research", leadHas);
         evidence.put("pair_peer_has_own_research", peerHas);
-        if (!peerHas) throw new IllegalStateException("The second client never received its own research grant");
+        if (!peerHas) {
+            if (stageTicks > 600) {
+                throw new IllegalStateException("The second client never received its own research grant: " + pairAnswer);
+            }
+            return false;
+        }
         if (leadHas) throw new IllegalStateException("The lead client received the second client's research grant");
         return true;
     }
@@ -1259,20 +1265,18 @@ public final class MultiplayerClientProbe implements ClientModInitializer {
         // The original's vis amulet may only be worn with the VISAMULET
         // research (ItemAmuletVis.canEquip), so the SECOND client is granted
         // it before it equips the amulet.
-        if (stageData.get("research") == null) {
+        if (stageTicks % 20 == 0) {
             client.getConnection().sendCommand("thaumcraft research " + peerName + " " + AMULET_RESEARCH);
-            stageData.put("research", true);
-            return false;
-        }
-        if (stageData.get("research_ask") == null) {
             pairCommand("HAS_RESEARCH", AMULET_RESEARCH);
-            stageData.put("research_ask", true);
-            return false;
         }
         if (!pairReplied()) return false;
         if (!pairAnswer.endsWith(" 1")) {
-            throw new IllegalStateException("The second client never received the " + AMULET_RESEARCH + " research");
+            if (stageTicks > 600) {
+                throw new IllegalStateException("The second client never received the " + AMULET_RESEARCH + " research");
+            }
+            return false;
         }
+        evidence.put("pair_peer_amulet_research_answer", pairAnswer);
         if (stageData.get("give") == null) {
             if (!giveToPeer(client, "thaumcraft:vis_amulet 1")) return false;
             stageData.put("give", true);

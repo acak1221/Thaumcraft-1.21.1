@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
  *
  * <p>Oracle {@code thaumcraft/client/renderers/tile/TileJarRenderer.java:155-175} ({@code renderBrain}):
  * the brain bobs with {@code sin(ticksSinceLevel / 14) * 0.03 + 0.03}, it sits {@code 0.8} below the
- * centre of the content frame, it is turned by the interpolated {@code rota}/{@code rotb} around the Z
- * axis and by minus ninety degrees around the Y axis, and it is drawn with the scale {@code 0.4} on
+ * centre of the content frame, it is turned by the interpolated {@code rota}/{@code rotb} around the Y
+ * axis and by minus ninety degrees around the Y axis as well, and it is drawn with the scale {@code 0.4} on
  * the {@code brain2.png} sheet. The brine of the jar is the {@code jarbrine.png} volume.</p>
  *
  * <p>Oracle {@code thaumcraft/client/renderers/tile/TileJarRenderer.java:60-64}: the content frame

@@ -11,13 +11,22 @@ import net.minecraft.gametest.framework.TestFunction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** Diagnostic selection only; the default run still requires every authored case. */
+/** Default runs require every acceptance case; remote footprint probes are explicit diagnostics. */
 @Mixin(GameTestRegistry.class)
 public abstract class GameTestSelectionMixin {
     @ModifyReturnValue(method="getAllTestFunctions",at=@At("RETURN"))
     private static Collection<TestFunction> thaumcraft$selectDiagnostics(Collection<TestFunction> functions) {
         String filter=System.getProperty("thaumcraft.gameTestFilter","").trim();
-        if(filter.isEmpty())return functions;
+        if(filter.isEmpty()) {
+            // Explicit footprint diagnostics create remote chunks on purpose;
+            // do not increase the memory footprint of ordinary acceptance runs.
+            var acceptance = new ArrayList<TestFunction>();
+            for (var function : functions) {
+                String name = function.testName().toLowerCase(Locale.ROOT);
+                if (!name.endsWith(".regenerationfootprint") && !name.endsWith(".structurecandidatefootprint")) acceptance.add(function);
+            }
+            return List.copyOf(acceptance);
+        }
         var selected=new LinkedHashSet<TestFunction>();
         for(String value:filter.split(",",-1)){
             String name=value.trim().toLowerCase(Locale.ROOT);

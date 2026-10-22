@@ -251,6 +251,21 @@ public final class ThaumcraftGameTests implements FabricGameTest {
     public void regenerationQueueLifecycle(GameTestHelper test) {
         thaumcraft.common.testing.EventLifecycleRuntimeChecks.regenerationQueueLifecycle(test);
     }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 100, batch = "perf_cache_retirement")
+    public void mirrorCacheRetirement(GameTestHelper test) {
+        thaumcraft.common.testing.PerformanceRuntimeChecks.mirrorCacheRetirement(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "perf_chunk_footprint")
+    public void regenerationFootprint(GameTestHelper test) {
+        thaumcraft.common.testing.PerformanceRuntimeChecks.regenerationFootprint(test);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "perf_structure_candidates")
+    public void structureCandidateFootprint(GameTestHelper test) {
+        thaumcraft.common.testing.PerformanceRuntimeChecks.structureCandidateFootprint(test);
+    }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, timeoutTicks = 200, batch = "mound_boundary")
     public void moundBoundaryIsCompleteOrRefused(GameTestHelper test) {
         thaumcraft.common.lib.world.MoundBoundaryRuntimeChecks.run(test);

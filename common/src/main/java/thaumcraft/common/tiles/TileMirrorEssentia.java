@@ -47,6 +47,11 @@ public final class TileMirrorEssentia extends BlockEntity implements IAspectSour
     public boolean isLinked() { return linked; }
     public Direction getLinkedFacing() { return linkedFacing; }
 
+    @Override public void setRemoved() {
+        EssentiaHandler.forgetMirror(this);
+        super.setRemoved();
+    }
+
     /** The link data of the mirror, used by the dropped item. */
     public CompoundTag linkData() {
         CompoundTag tag = new CompoundTag();

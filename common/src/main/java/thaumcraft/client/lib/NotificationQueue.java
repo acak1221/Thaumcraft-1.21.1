@@ -19,6 +19,8 @@ public final class NotificationQueue {
         notifications.add(new Notification(Objects.requireNonNull(text), image, color, now + delay + bonus, now + delay / 4));
     }
     public List<Notification> update(long now) {
+        // The HUD calls this every frame, including when there is nothing to draw.
+        if (notifications.isEmpty()) return List.of();
         var retained = new ArrayList<Notification>();
         boolean first = true;
         for (Notification value : notifications) {

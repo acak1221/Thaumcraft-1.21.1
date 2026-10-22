@@ -6,6 +6,15 @@ import thaumcraft.client.lib.NotificationQueue;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NotificationQueueTest {
+    @Test void idleFramesReuseTheImmutableEmptySnapshot() {
+        var queue = new NotificationQueue(5000);
+        var empty = queue.update(0);
+        for (int frame = 1; frame <= 1000; frame++) assertSame(empty, queue.update(frame));
+        queue.add("first", null, 1, 1001);
+        assertEquals(1, queue.update(1001).size());
+        queue.clear();
+        assertSame(empty, queue.update(1002));
+    }
     @Test void firstOriginalBonusAndQuarterDelayAreIndependentOfFollowingArrival() {
         var queue = new NotificationQueue(5000);
         queue.add("first", null, 0xFFFFFF, 1000);

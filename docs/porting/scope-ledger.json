@@ -7438,8 +7438,8 @@
         "disposition": "adapt",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w3clientfx",
+      "native_coverage": "parity_verified",
+      "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/gui/GuiResearchRecipe.java:25-1313 the research book with all PageType renderers",
           "native common/src/main/java/thaumcraft/client/gui/GuiResearchRecipe.java:31-129 the native book renders text pages and resolved native recipe pages",
@@ -7462,7 +7462,7 @@
         "notes": [
           "The book renders the original text pages and every recipe page whose original recipe key resolves to a native recipe file (250 mapped keys, verified against the packaged data/thaumcraft/recipe tree).",
           "CLOSED in this wave: four of the eight array/smelting pages are rendered again: the BANNERS page (the sixteen banner recipes), the PRIMALARROW page (the six primal arrow recipes), the ORE page (the seven crystal cluster recipes) and the CRUCIBLE smelting page (the six balanced shards). The page cycles through its array once per second, exactly as the original (oracle GuiResearchRecipe:647-655).",
-          "REMAINING DIFFERENCE: the SCEPTRE page (the three sceptre recipes, oracle ConfigResearch:110-144) and the JARLABEL page (the sixteen jar label recipes, oracle ConfigResearch:302-305) still have no renderer. The native data is there - the registered recipe thaumcraft:arcane_sceptre carries the three variants through ArcaneSceptreRecipe.displayInput(rod, cap) and the registered recipe thaumcraft:jar_label_bind binds any filled phial - but the book renderer draws the recipe of the page and not a synthetic input, so a dedicated diagram for these two pages is missing.",
+        "CLOSED w7items source audit: oracle ConfigResearch.java:110-144,302-305 and ConfigRecipes.java:417-425; native common/src/main/java/thaumcraft/client/gui/ThaumcraftRecipeDisplay.java:471-511,559-567,764-850 already renders the three sceptre grids and the synthetic blank-label/filled-phial recipes. The oracle iterates ALL 48 aspects, not sixteen; sceptres use THREE caps. Code parity reviewed; real frames and JUnit execution remain leader acceptance duties (docs/analysis/2026-10-23-agent-w7items.md).",
           "Deviation: the original's per-PageType renderers (aspect page, image page, infusion-enchantment page, the original's own recipe renderers) are replaced by one native recipe renderer."
         ],
         "reviewed_sha256": {
@@ -12233,7 +12233,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "audit-a1-client",
+      "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/renderers/item/ItemBowBoneRenderer.java:22-44 the held-bow transform: scale 2.6666667, rotations -20/90/-60 and the 0.625 inner scale",
           "oracle thaumcraft/client/renderers/item/ItemBowBoneRenderer.java:71-84 the item quad at scale 1.5 with the 50/335 degree rotation and the enchanted glint",
@@ -12247,7 +12247,7 @@
           "The bone bow now uses the vanilla bow item model with the TC4 texture and the three pulling overrides.",
           "Deviation: the original's bespoke held-bow transform (2.6666667 scale and the -20/90/-60 rotations) and the original glint draw are replaced by the vanilla bow pose.",
           "Complete callsite audit: ItemBowBoneRenderer is registered only in ClientProxy.setupItemRenderers.",
-          "REMAINING GAP: the bespoke held bow transform of the original, the scale 2.6666667 and the -20, 90 and -60 rotations, and the original glint draw are replaced by the vanilla bow pose. A 1.21.1 item model cannot carry that transform."
+        "w7items restores oracle ItemBowBoneRenderer.java:48-64,82-88 through common/src/main/java/thaumcraft/client/renderers/item/BoneBowPose.java:11-29 and common/src/main/java/thaumcraft/common/mixin/client/BoneBowHeldPoseMixin.java:21-34, before the native equip matrix. REMAINING DIFFERENCE: oracle :89-119 glint still uses native glint instead of the original texture, RGB .38/.19/.608, SRC_COLOR/ONE blend, .125 texture scale, -50/10 degree rotations and 3000/4873 ms scroll periods. No claim that this is impossible in shaders; stays partial. Held pose needs a leader frame."
         ],
         "reviewed_sha256": {
           "original": "3b30c460fb15da5de8aea555d0fd215c2f7a88489ad4d2aafadbe476aa7f04d6",
@@ -12704,8 +12704,8 @@
         "disposition": "exclude",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-research",
+      "native_coverage": "parity_verified",
+      "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:72-75 public class ItemThaumometerRenderer implements IItemRenderer with the scanner.obj model",
           "oracle thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:98-135 the first-person view model with the player arm",
@@ -12729,7 +12729,7 @@
         "notes": [
           "Excluded as a contract: 1.21.1 removed IItemRenderer/IModelCustom, so the original's public item renderer contract has no target API. The port renders the thaumometer through the 1.21.1 builtin item hook instead.",
           "The native renderer is NOT a plain item model: it draws the three dimensional scanner of the original (the scanner OBJ and the glowing scan screen) and the first person view model with the arm of the player.",
-          "REMAINING DIFFERENCE: the scan readout of the original (oracle ItemThaumometerRenderer:155-259 - the scanned stack, the aspect icons and the name of the target) is not drawn, and the two rotations that follow the swing of the arm of the player (oracle :103-104) are left out, because the arm angles of 1.7.10 (renderArmPitch and renderArmYaw) have no public equivalent in 1.21.1."
+        "CLOSED w7items: oracle ItemThaumometerRenderer.java:101-104 arm lag restored in common/src/main/java/thaumcraft/client/renderers/item/ItemThaumometerRenderer.java:115-119 and ThaumometerArmPose.java:7-8. Vanilla net/minecraft/client/player/LocalPlayer.java:136-139,622-625 exposes xBob/xBobO/yBob/yBobO with the same half-difference update. The existing world-space readout (:87-90,166-190; ThaumometerReadout.java:102-140) supersedes the old readout blocker. Leader screen scale 2.5, YN 248 and corrected lightmap are unchanged. JUnit authored, compile checked, not executed; frames pending."
         ],
         "reviewed_sha256": {
           "original": "9d5454e08e83d70d4f7d287f4aa101aeb6315077a3b262d4ad35bdb3d9756a5e",
@@ -12867,8 +12867,8 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "audit-a9-core",
+      "native_coverage": "parity_verified",
+      "owner": "agent-w7items",
         "evidence": [
           "oracle /home/Acak/work/thaumcraft-4.2.3.5-oracle/thaumcraft/client/renderers/item/ItemWandRenderer.java: the wand item renderer that draws the rod, the cap and the focus",
           "native common/src/main/java/thaumcraft/client/renderers/item/PrimalWandFocusRenderer.java the only native wand item renderer",
@@ -12887,7 +12887,8 @@
           "REMAINING GAP (restated 2026-10-23 (w4wands)): the native wand renderer draws the model without the original's model basis correction (a hundred and eighty degrees about X, oracle ItemWandRenderer:87) and without the original's use pose (:88-113 - the raise of the wand over three ticks, the thirty three degrees of the third person, the ten plus ten degrees of the first person, the sixty degrees of the startup and the WAVE and CHARGE waves of the focus).",
           "The two belong together: the use pose of the original is expressed in the basis that the correction establishes, so it can only be ported once the correction is confirmed by a client frame. The 1.7.10 model space has its Y axis downwards while the 1.21.1 model space has it upwards, so the correction decides which end of the wand is up.",
           "The exact change: apply the correction of a hundred and eighty degrees about X to the native wand renderer and then the original's use pose around the pivot one block above the model, with the numbers of the oracle ItemWandRenderer:88-113 and the elapsed time of the use, which the 1.21.1 LivingEntity.getTicksUsingItem() counts up like the 1.7.10 EntityPlayer.getItemInUseDuration() (MCP stable 12-1.7.10: field_71057_bx).",
-          "Everything else of the unit is at parity: the geometry of the model is the original's, the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus are drawn, and the two loaders call the same renderer."
+        "Everything else of the unit is at parity: the geometry of the model is the original's, the rod, the cap, the cap ring, the bottom cap and the focus cube with the colour of the focus are drawn, and the two loaders call the same renderer.",
+        "CLOSED w7items source audit: oracle ItemWandRenderer.java:51-56,87-113; native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:160-164,241-300 already applies corrected basis and original use rule from WandUsePose.java:48-96. Added common/src/main/java/thaumcraft/common/mixin/client/WandRenderContextMixin.java:20-31 and WandRenderContext.java:11-20 so third-person poses follow the actual wielder rather than Minecraft.player. Three-tick raise, one-block pivot and WAVE/CHARGE constants retained. Runtime mixin application and frames remain leader acceptance, not claimed executed here."
         ],
         "reviewed_sha256": {
           "original": "f2840cfa86a637fdce94f4e9181c9c35b4c47fd565775fdd39fb2d7700264c31",
@@ -17959,7 +17960,7 @@
         "source_semantics": "adapted",
         "callsite_audit": "complete",
         "native_coverage": "partial",
-        "owner": "agent-w4devices",
+      "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileMirrorRenderer.java:52-554 the linked view of the original is drawn with the fixed function GL11.glTexGen texture coordinate generation and a hand written projection matrix",
           "1.21.1 vanilla the render pipeline of the 1.21.1 (net/minecraft/client/renderer/GameRenderer and the RenderType of the renderer) is shader based, the fixed function texture coordinate generation of the 1.7.10 has no counterpart",
@@ -17969,7 +17970,7 @@
         "notes": [
           "The 1.7 renderer became a 1.21.1 block entity renderer for the two mirror kinds; the pane, the offset of the unstable mirror, the brightness and the turns are the original ones.",
           "Open difference: the view dependent texture generation of the original linked view (the fixed function pipeline is gone in 1.21.1) and its additive inner layers are approximated by the native tunnel field; the leader has to compare the frames of a linked mirror.",
-          "AUDITED 2026-10-23 (w4devices): the limitation is a real one. The 1.21.1 renderer draws every quad with a shader of the render pipeline, so the fixed function texture coordinate generation of the original, that makes the tunnel of the linked mirror follow the point of view, has no counterpart; everything else of the renderer is the original."
+        "w7items: fixed-function API absence is real, but does NOT prove shader reproduction impossible. Vanilla assets/minecraft/shaders/core/rendertype_entity_translucent.vsh:8,29-36 copies explicit UV0; there is no glTexGen state. Vanilla rendertype_end_portal.vsh:13-15 and rendertype_end_portal.fsh:39-60 demonstrate view-dependent projected texture coordinates in a shader. Native TileMirrorRenderer.java:57-68 and ModelTunnelField.java:78-122 remain a shrinking/depth-offset quad approximation. REMAINING DIFFERENCE: original eye-linear S/T/R/object-linear Q planes and projection/texture matrices (oracle TileMirrorRenderer.java:85-114 and facing variants) are not reconstructed; Random(31100L) also is not reset on each native face. Existing additive RenderType.eyes is already ONE/ONE, so that old blend blocker is obsolete. Closest-possible reproduction is NOT proven; keep partial."
         ],
         "reviewed_sha256": {
           "original": "ddf1d39957b2b642b7a08d620a0ff5a2d14a84d7415e30efd9a6f0b530d7402c",
@@ -18490,8 +18491,8 @@
         "disposition": "replace",
         "source_semantics": "adapted",
         "callsite_audit": "complete",
-        "native_coverage": "partial",
-        "owner": "agent-w4devices",
+      "native_coverage": "parity_verified",
+      "owner": "agent-w7items",
         "evidence": [
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:25 the 1.7 renderer draws the retained thaumatorium.obj model",
           "oracle thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:44-73 the 1.7 renderer draws the retained textures/models/thaumatorium.obj with textures/models/thaumatorium.png and the turn of the facing",
@@ -18504,7 +18505,7 @@
         "notes": [
           "The 1.7 tile renderer became a block model; the original detailed OBJ geometry is not rendered and the native OBJ loader is never referenced.",
           "Open difference: the retained OBJ is one block wide and two blocks tall, so the native machine could take it, but the two block models would have to be hidden and the leader would have to inspect the frames; the cycling preview cannot be reproduced at all, because the native machine holds no set of possible recipes.",
-          "AUDITED 2026-10-23 (w4devices): the pose of the original was derived again from the oracle and from the retained asset and it is unchanged, and the cycling preview is impossible in the port because the native machine is programmed with a job list and not with the set of the recipes of the original. The unit therefore stays open, and the remaining step of the renderer is the exact pose that is written above."
+        "CLOSED w7items: oracle TileThaumatoriumRenderer.java:53-73,78-99; native common/src/main/java/thaumcraft/client/renderers/tile/TileThaumatoriumRenderer.java:21-62 renders retained OBJ at (.5,0,.5), XP -90, facing Z 270/90/180/0 and output at facing/1.99, Y 1.325, scale .75, cycling player.tickCount/40. TileThaumatorium.java:88-93 exposes ordered selected-job outputs independently of the catalyst; its existing Recipes update tag already syncs that list. BlockThaumatorium.java:39 hides both block shells and ThaumcraftAlchemyClient.java:22-23 registers the BER. The previous claim that the job list prevents a preview was incorrect. Native item geometry is used with the old RenderItem frame-size/origin adaptation. Whole-main javac passed; original-value JUnit authored but not executed; two-block OBJ and preview real-frame acceptance remains pending."
         ],
         "reviewed_sha256": {
           "original": "003001a14e4f2feefb87bdb95034fa9e1f737c9dafffee6688852ee2053229c4",

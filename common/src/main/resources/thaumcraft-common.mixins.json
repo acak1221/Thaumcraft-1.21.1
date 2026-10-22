@@ -79,6 +79,8 @@
   ],
   "client": [
     "client.PositionBlockModelMixin",
+    "client.WandRenderContextMixin",
+    "client.BoneBowHeldPoseMixin",
     "client.OuterLandsDimensionEffectsMixin",
     "client.TableOutlineMixin",
     "client.WandFocusKeyMixin",

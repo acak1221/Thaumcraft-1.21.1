@@ -19,6 +19,8 @@ public final class ThaumcraftAlchemyClient {
         initialized = true;
         RenderTypeRegistry.register(RenderType.cutout(), ThaumcraftAlchemy.CRUCIBLE.get());
         BlockEntityRendererRegistry.register(ThaumcraftAlchemy.CRUCIBLE_BLOCK_ENTITY.get(), TileCrucibleRenderer::new);
+        BlockEntityRendererRegistry.register(thaumcraft.common.config.ThaumcraftThaumatorium.TILE.get(),
+                thaumcraft.client.renderers.tile.TileThaumatoriumRenderer::new);
         TileCrucible.setClientEffects(new TileCrucibleRenderer.Effects());
         // Original TileThaumatorium:221-230 - the vent of the machine.
         TileThaumatorium.setClientEffects(new ThaumatoriumClientEffects());

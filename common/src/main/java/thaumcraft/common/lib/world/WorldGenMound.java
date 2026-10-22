@@ -1,7 +1,6 @@
 package thaumcraft.common.lib.world;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.WorldGenLevel;
@@ -14,12 +13,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.Vec3;
 import thaumcraft.common.config.ThaumcraftEldritchBlocks;
 
 /**
@@ -209,18 +202,9 @@ public final class WorldGenMound extends Feature<NoneFeatureConfiguration> {
      * the same way the hilltop stones of the original do it.
      */
     private static void fillDungeonChest(WorldGenLevel level, ChestBlockEntity chest, RandomSource random) {
-        ServerLevel server = level.getLevel();
-        LootTable table = server.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.SIMPLE_DUNGEON);
-        if (table == LootTable.EMPTY) return;
-        LootParams params = new LootParams.Builder(server)
-                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(chest.getBlockPos()))
-                .withLuck(0.0F)
-                .create(LootContextParamSets.CHEST);
-        int slot = 0;
-        for (var stack : table.getRandomItems(params, random)) {
-            if (slot >= chest.getContainerSize()) return;
-            chest.setItem(slot++, stack);
-        }
+        // Oracle WorldGenMound:2533 - the chest carries the Forge category "dungeonChest" of
+        // the 1.7.10, the list of the vanilla dungeon chest plus the additions of Forge.
+        WorldgenLootHelper.fillDungeonChest(level, chest, random);
     }
 
     /** Oracle {@code WorldGenMound:2539-2544} - the mob of a spawner of the mound. */

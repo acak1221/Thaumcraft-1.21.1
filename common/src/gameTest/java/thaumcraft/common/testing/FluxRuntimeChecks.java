@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
@@ -21,11 +22,16 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.entities.ITaintedMob;
 import thaumcraft.common.blocks.FluxFiniteBlock;
+import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftFlux;
+import thaumcraft.common.config.ThaumcraftTaint;
+import thaumcraft.common.entities.monster.EntityThaumicSlime;
 import thaumcraft.common.lib.potions.FluxEffects;
+import thaumcraft.common.lib.world.BiomeColumns;
 
 /** One native, loader-neutral fixture. No stand-in fluids, injected effects, or mock block states. */
 public final class FluxRuntimeChecks {
@@ -208,15 +214,29 @@ public final class FluxRuntimeChecks {
                 && amount(level, pos.above()) == 1 && mass(level, pos) == 2, "low goo density decays into one real gas quantum, preserving coupled conversion mass");
         tick(level, pos, RandomSource.create(seed(random -> random.nextInt(30) == 0)));
         test.assertTrue(level.getBlockState(pos).isAir() && amount(level, pos.above()) == 1, "last goo quantum dissipates on the original one-in-thirty branch");
+        // Oracle BlockFluxGoo:106-135: the thin cell (the metadata two to five) breeds a size
+        // one slime on its one-in-twenty-five roll and empties the cell; the thick cell breeds
+        // a size two slime and turns into the taint on the one-in-fifty roll.
         for (int amount : new int[] {4, 8}) {
             seal(level, pos);
             put(level, pos, goo, amount);
             air(level, pos.above());
             tick(level, pos, RandomSource.create(seed(random -> random.nextInt(25) == 0)));
-            test.assertTrue(level.getBlockState(pos).is(goo) && amount(level, pos) == amount, "pending real Thaumic Slime branch does not silently consume goo (M11 not complete)");
+            var born = level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(pos).inflate(2));
+            test.assertTrue(level.getBlockState(pos).isAir() && born.size() == 1
+                            && born.getFirst().getSlimeSize() == (amount == 4 ? 1 : 2),
+                    "the original one-in-twenty-five roll empties the cell and breeds the real thaumic slime of its size");
+            born.forEach(Entity::discard);
         }
+        seal(level, pos);
+        put(level, pos, goo, 8);
+        air(level, pos.above());
+        var originalBiome = BiomeColumns.surfaceHolder(level, pos.getX(), pos.getZ());
         tick(level, pos, RandomSource.create(seed(random -> random.nextInt(25) != 0 && random.nextInt(50) == 0)));
-        test.assertTrue(level.getBlockState(pos).is(goo) && amount(level, pos) == 8, "pending taint biome/fibres conversion leaves its resource intact");
+        test.assertTrue(level.getBlockState(pos).is(ThaumcraftTaint.FIBRES.get())
+                        && BiomeColumns.surfaceHolder(level, pos.getX(), pos.getZ()).is(ThaumcraftBiomes.TAINT),
+                "the original one-in-fifty roll of a thick cell turns the cell into the taint fibres and its column into the taint biome");
+        if (originalBiome != null && originalBiome.unwrapKey().isPresent()) BiomeColumns.set(level, pos.getX(), pos.getZ(), originalBiome.unwrapKey().get());
     }
 
     private static void exposureChecks(GameTestHelper test, ServerLevel level, BlockPos pos, ServerPlayer player) {

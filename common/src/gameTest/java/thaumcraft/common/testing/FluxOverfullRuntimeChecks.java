@@ -32,11 +32,16 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.api.entities.ITaintedMob;
 import thaumcraft.common.blocks.FluxFiniteBlock;
+import thaumcraft.common.config.ThaumcraftBiomes;
 import thaumcraft.common.config.ThaumcraftFlux;
+import thaumcraft.common.config.ThaumcraftTaint;
+import thaumcraft.common.entities.monster.EntityThaumicSlime;
 import thaumcraft.common.lib.potions.FluxEffects;
+import thaumcraft.common.lib.world.BiomeColumns;
 import thaumcraft.common.testing.TubeVariantsRuntimeChecks.Fixture;
 
 /** M09b explicit SERVER INPUTS: registered phase states/quantities, eligible
@@ -322,12 +327,27 @@ public final class FluxOverfullRuntimeChecks {
                             && amount(f, f.base.above()) == 1 && mass(f) == metadata + 1,
                     "actual production lower-density missed-spawn branch converts ONE goo unit into gas, not a nested early return");
         }
-        for (Draw[] branch : new Draw[][] {{i(25, 0)}, {i(25, 1), i(50, 0)}, {i(25, 1), i(50, 1)}}) {
-            seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
-            try (var random = new Script(f, branch)) { tick(f, f.base, random.random); random.done("high9 original25/conditional50 RNG, NOT30"); }
-            f.check(amount(f, f.base) == 9 && f.level.getBlockState(f.base.above()).isAir() && mass(f) == 9,
-                    "real M11 slime/taint still explicitly DEFERRED: no vanilla slime, fake entity debit or invented ninth-unit spill");
-        }
+        // Oracle BlockFluxGoo:113-125: a thick cell (the metadata six and above) breeds a
+        // size two slime on its one-in-twenty-five roll and turns into the taint on the
+        // one-in-fifty roll; it never reaches the thirty roll of a thin cell.
+        var originalBiome = BiomeColumns.surfaceHolder(f.level, f.base.getX(), f.base.getZ());
+        seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
+        try (var random = new Script(f, i(25, 0))) { tick(f, f.base, random.random); random.done("thick cell original25 roll, NOT30"); }
+        var born = f.level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(f.base).inflate(2));
+        f.check(f.level.isEmptyBlock(f.base) && born.size() == 1 && born.getFirst().getSlimeSize() == 2,
+                "the original one-in-twenty-five roll of a thick cell empties the cell and breeds the real size two thaumic slime");
+        born.forEach(Entity::discard);
+        seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
+        try (var random = new Script(f, i(25, 1), i(50, 0))) { tick(f, f.base, random.random); random.done("thick cell original25 miss and50 hit, NOT30"); }
+        f.check(f.level.getBlockState(f.base).is(ThaumcraftTaint.FIBRES.get())
+                        && BiomeColumns.surfaceHolder(f.level, f.base.getX(), f.base.getZ()).is(ThaumcraftBiomes.TAINT),
+                "the original one-in-fifty roll of a thick cell turns the cell into the taint fibres and its column into the taint biome");
+        seal(f); put(f, f.base, goo, 9); f.put(f.base.above(), Blocks.AIR);
+        try (var random = new Script(f, i(25, 1), i(50, 1))) { tick(f, f.base, random.random); random.done("thick cell original25 and50 miss, NOT30"); }
+        f.check(amount(f, f.base) == 9 && f.level.getBlockState(f.base.above()).isAir() && mass(f) == 9
+                        && f.level.getEntitiesOfClass(EntityThaumicSlime.class, new AABB(f.base).inflate(2)).isEmpty(),
+                "a thick cell that missed both rolls of the original keeps every unit and breeds nothing");
+        if (originalBiome != null && originalBiome.unwrapKey().isPresent()) BiomeColumns.set(f.level, f.base.getX(), f.base.getZ(), originalBiome.unwrapKey().get());
         seal(f); put(f, f.base, goo, 9);
         try (var random = new Script(f, i(30, 0), b(true))) { tick(f, f.base, random.random); random.done("closed ceiling decay still draws boolean BEFORE failed air test"); }
         f.check(amount(f, f.base) == 8 && f.level.getBlockState(f.base.above()).is(Blocks.STONE) && mass(f) == 8,

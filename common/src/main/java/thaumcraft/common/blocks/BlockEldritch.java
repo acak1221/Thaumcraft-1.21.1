@@ -81,6 +81,7 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
      * is built, because Minecraft builds the state definition inside the block constructor.
      */
     private static final java.util.Map<Integer, Property<Integer>> GROUP_PROPERTIES = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final ThreadLocal<Integer> PENDING_GROUP = new ThreadLocal<>();
 
     private static Property<Integer> groupProperty(int group) {
         return GROUP_PROPERTIES.computeIfAbsent(group, key -> {
@@ -112,6 +113,7 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
      * definition of a block inside the block constructor, before the fields of the block exist.
      */
     private static Property<Integer> pendingProperty(int group) {
+        PENDING_GROUP.set(group);
         Property<Integer> property = groupProperty(group);
         if (property == null) thaumcraft.common.lib.world.FamilyVariant.pending().remove();
         else thaumcraft.common.lib.world.FamilyVariant.pending().set(property);
@@ -120,6 +122,7 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
 
     private BlockEldritch(int group, Property<Integer> property, Properties properties) {
         super(properties);
+        PENDING_GROUP.remove();
         thaumcraft.common.lib.world.FamilyVariant.pending().remove();
         this.group = group;
         this.variants = EldritchBlockRules.eldritchGroupVariants(group);
@@ -143,12 +146,13 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
         Property<?> pending = thaumcraft.common.lib.world.FamilyVariant.pending().get();
         if (pending != null) builder.add(pending);
         // Only the crust group carries the six neighbour flags; the classifier decides by group.
-        if (hostsCrustMask(group)) builder.add(CRUST_NEIGHBOR_MASK);
+        Integer pendingGroup = PENDING_GROUP.get();
+        if (pendingGroup != null && hostsCrustMask(pendingGroup)) builder.add(CRUST_NEIGHBOR_MASK);
     }
 
     /** Whether this group is the eldritch crust, the only group the neighbour mask is baked for. */
     private static boolean hostsCrustMask(int group) {
-        return EldritchBlockRules.eldritchGroupVariants(group).contains(EldritchBlockRules.ELDRITCH_GLOWING_CRUST);
+        return EldritchBlockRules.eldritchGroupVariants(group).stream().anyMatch(v -> v == 4 || v == 5 || v == 6);
     }
 
     /**
@@ -164,7 +168,7 @@ public final class BlockEldritch extends BaseEntityBlock implements StateDepende
             BlockPos neighbour = pos.relative(face);
             // Block.isBlockSolid: the neighbour counts when its material is solid, which is what
             // the original passed to the renderer.
-            if (level.getBlockState(neighbour).isSolidRender(level, neighbour)) {
+            if (level.getBlockState(neighbour).isSolid()) {
                 mask |= 1 << face.get3DDataValue();
             }
         }

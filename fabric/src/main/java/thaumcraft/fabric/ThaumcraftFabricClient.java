@@ -54,6 +54,7 @@ public final class ThaumcraftFabricClient implements ClientModInitializer {
                 thaumcraft.common.config.ThaumcraftEquipment.FORTRESS_LEGGINGS.get());
         thaumcraft.fabric.client.FabricSpaClient.init();
         thaumcraft.fabric.client.FabricTaintFibresModel.init();
+        thaumcraft.fabric.client.FabricPositionBlockModels.init();
         thaumcraft.fabric.client.FabricTravelGearClient.init();
         BuiltinItemRendererRegistry.INSTANCE.register(thaumcraft.common.config.ThaumcraftAdvancedFurnace.FURNACE_ITEM.get(),
                 thaumcraft.client.renderers.tile.TileAlchemyFurnaceAdvancedRenderer::renderItem);

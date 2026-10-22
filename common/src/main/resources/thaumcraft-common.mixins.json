@@ -78,6 +78,7 @@
     "Tc4ChunkRegenerationMarkerMixin"
   ],
   "client": [
+    "client.PositionBlockModelMixin",
     "client.OuterLandsDimensionEffectsMixin",
     "client.TableOutlineMixin",
     "client.WandFocusKeyMixin",

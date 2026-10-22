@@ -38,7 +38,7 @@
   },
   "inventory_provenance": {
     "path": "docs/porting/class-inventory.json",
-    "canonical_json_sha256": "ecb0acd6b3ff4685f970e968602a19d9bfe92632486074c5c8493a8826b97a54",
+    "canonical_json_sha256": "f48ef76cd82a109b4f0cc3b760a9150ac2f64e21375d0515a70ff79ea686d486",
     "hash_policy": "Parsed JSON serialized with sorted keys, UTF-8, no whitespace; includes authored mappings and recorded fingerprints"
   },
   "counts": {
@@ -22549,7 +22549,10 @@
           "oracle thaumcraft/common/blocks/BlockFluidPure.java:70-84 the bubble and the lava pop of the random display tick",
           "native common/src/main/java/thaumcraft/common/blocks/BlockFluidPure.java:99-162 the classic quanta flow of the purifying fluid",
           "native common/src/main/resources/data/minecraft/tags/fluid/water.json the purifying fluid is in the vanilla water tag",
-          "native common/src/test/java/thaumcraft/common/blocks/FluidFamilyParityTest.java the scaled light, the Ward and the water tag are asserted"
+          "native common/src/test/java/thaumcraft/common/blocks/FluidFamilyParityTest.java the scaled light, the Ward and the water tag are asserted",
+          "native common/src/main/java/thaumcraft/client/renderers/fluid/PureFluidRender.java:91 the original Forge Classic corner heights, UV and face shades of the purifying fluid, owned by the shared module",
+          "native fabric/src/main/java/thaumcraft/fabric/client/FabricFluidPureRenderHandler.java:45 the Fabric adapter of the shared fluid geometry",
+          "native neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgePureFluidMixin.java:65 the NeoForge adapter of the very same shared geometry, at the head of the native renderLiquid"
         ],
         "notes": [
           "CLOSED in wave 2: the movement of an entity in the cell is the 1.21.1 engine and not the transplanted 1.7.10 loop, but the deviation is not observable: the purifying fluid is in the vanilla water tag, so the swim, the fall damage and the drowning are the ones of the 1.21.1 water engine, and the original had Material.water as well (oracle BlockFluidPure:43, Material.field_151586_h is Material.water, the readable 1.7.10 reference RenderEventHandler:367). The classic eight quantum flow, the Ward of min(32000, 200000/max(1,floor(sqrt(permanentWarp)))) ticks, the source light eight of the configured luminosity ten and the random display tick with the bubble and the lava pop of the original are reproduced."
@@ -36142,7 +36145,9 @@
           "native common/src/main/java/thaumcraft/common/items/armor/FortressRules.java:6 SET_BASE 0.875, SET_PER_PIECE 0.125, SET_PER_MASK 0.05",
           "native common/src/main/java/thaumcraft/common/lib/MagicWard.java:27-30 DIVISOR 35 and FIRE_DIVISOR 20",
           "oracle thaumcraft/common/items/armor/ItemFortressArmor.java:125-132 the goggles and mask NBT",
-          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:110 FORTRESS_GOGGLES and FORTRESS_MASK components"
+          "native common/src/main/java/thaumcraft/common/config/ThaumcraftEquipment.java:110 FORTRESS_GOGGLES and FORTRESS_MASK components",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:181 renderGearItem draws the original fortress armour; both loaders call it",
+          "native neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgeGearArmorMixin.java:48 the NeoForge armour layer mixin that draws it"
         ],
         "notes": [
           "The 1.7 ISpecialArmor contract has no 1.21 equivalent; the first pass was reproduced as the MagicWard hook with the same ratios, the same set multiplier and the same points of wear.",
@@ -36241,7 +36246,9 @@
           "oracle thaumcraft/common/items/armor/ItemHoverHarness.java:63 the 400 durability, epic rarity",
           "native common/src/main/java/thaumcraft/common/items/armor/ItemHoverHarness.java:34 durability(400), rarity epic",
           "oracle thaumcraft/common/items/armor/ItemHoverHarness.java:106 the 5 percent air and 2 percent other vis discount",
-          "native common/src/main/java/thaumcraft/common/items/armor/ItemHoverHarness.java:37 the same discount"
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemHoverHarness.java:37 the same discount",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:181 renderGearItem draws the original hover harness with its retained OBJ pack; both loaders call it",
+          "native neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgeGearArmorMixin.java:48 the NeoForge armour layer mixin that draws it"
         ],
         "notes": [
           "The jar of fuel, the right click menu and the fuel counter moved into HarnessData and the native hover harness container; the discount and the durability are unchanged."
@@ -36292,7 +36299,10 @@
           "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:148 the 1 percent (boots) and 2 percent vis discount",
           "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:42 the same discount",
           "oracle thaumcraft/common/items/armor/ItemRobeArmor.java:156-163 the water cauldron wash",
-          "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:83 the same wash"
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:83 the same wash",
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemRobeArmor.java:68 armorTint(stack) the original opaque armour tint of a dyed robe, owned by the shared module",
+          "native fabric/src/main/java/thaumcraft/fabric/mixin/client/FabricRobeArmorLayerMixin.java:30 the Fabric redirect of the native DYEABLE check of the armour layer",
+          "native neoforge/src/main/java/thaumcraft/neoforge/client/ThaumcraftNeoForgeClient.java:107 the NeoForge client extension getDefaultDyeColor publishes the very same colour"
         ],
         "notes": [
           "The 1.7 display NBT became the DataComponents.DYED_COLOR component; the durability 400/375/325 (SPECIAL 25 times the vanilla 16/15/13) is preserved.",
@@ -36441,7 +36451,9 @@
           "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes",
           "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java:39 the 5 percent discount, two warp and the durability factor 10",
           "oracle thaumcraft/common/items/armor/ItemVoidRobeArmor.java the armour texture of the void robes",
-          "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes keep the discount, the warp and the durability factor"
+          "native common/src/main/java/thaumcraft/common/items/armor/ItemVoidRobeArmor.java the native void robes keep the discount, the warp and the durability factor",
+          "native common/src/main/java/thaumcraft/client/ThaumcraftGearModelsClient.java:181 renderGearItem draws the original void robe model; both loaders call it",
+          "native neoforge/src/main/java/thaumcraft/neoforge/mixin/client/NeoForgeGearArmorMixin.java:48 the NeoForge armour layer mixin that draws it"
         ],
         "notes": [
           "The worn look is an explicit interim: the native uses the void armour layers, the original ModelRobe is not ported (declared in ThaumcraftEquipment).",

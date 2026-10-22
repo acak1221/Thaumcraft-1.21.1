@@ -7,6 +7,7 @@ logs
 .gradle_home/
 .gradle-fix4/
 # private Gradle homes of the parallel agents
+.gradle-surv/
 .gradle-float/
 .gradle-fix9/
 .gradle-fix4b/
@@ -15,6 +16,7 @@ logs
 .gradle-client2/
 .gradle-mp/
 .gradle-lev/
+.gradle-neo/
 .gradle-arb/
 build/
 out/

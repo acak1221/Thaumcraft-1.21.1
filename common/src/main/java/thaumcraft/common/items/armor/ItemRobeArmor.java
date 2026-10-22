@@ -55,6 +55,20 @@ public class ItemRobeArmor extends ArmorItem implements IRepairable, IRunicArmor
         return stack.getOrDefault(DataComponents.DYED_COLOR, DEFAULT_DYED_COLOR).rgb() & 0xFFFFFF;
     }
 
+    /**
+     * The original armour tint of a dyed robe: the dyed colour, opaque, with the same default
+     * the native armour layer uses for a dyeable layer.
+     *
+     * <p>The Fabric half of the port reaches this value through the DYEABLE check of the native
+     * armour layer ({@code thaumcraft.fabric.mixin.client.FabricRobeArmorLayerMixin}); the
+     * NeoForge half reaches it through the native
+     * {@code IClientItemExtensions#getDefaultDyeColor} of the robe items, because the NeoForge
+     * patch of the armour layer has no DYEABLE check at all.</p>
+     */
+    public static int armorTint(ItemStack stack) {
+        return net.minecraft.util.FastColor.ARGB32.opaque(DyedItemColor.getOrDefault(stack, -6265536));
+    }
+
     public static void setColor(ItemStack stack, int rgb) {
         stack.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb & 0xFFFFFF, false));
     }

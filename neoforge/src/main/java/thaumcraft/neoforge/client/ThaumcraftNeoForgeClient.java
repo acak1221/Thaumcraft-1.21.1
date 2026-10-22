@@ -95,6 +95,9 @@ public final class ThaumcraftNeoForgeClient {
 
     /** The builtin item renderers of the Fabric BuiltinItemRendererRegistry. */
     private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        // The original robe dye in the native armour layer. It is not an item
+        // renderer but the NeoForge native colour hook of the robe items.
+        NeoForgeRobeDye.register(event);
         // The original wand uses the TC4 model, not the vanilla baked item model.
         event.registerItem(renderer(thaumcraft.client.ThaumcraftGearModelsClient::renderWand), ThaumcraftContent.WAND.get());
         // Original ItemThaumometerRenderer: the thaumometer is the three dimensional

@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "thaumcraft.neoforge.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [
+    "NeoForgePureFluidMixin",
+    "NeoForgeGearArmorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

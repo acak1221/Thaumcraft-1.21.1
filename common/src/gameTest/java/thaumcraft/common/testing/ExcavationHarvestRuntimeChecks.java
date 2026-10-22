@@ -4,9 +4,6 @@ import com.mojang.authlib.GameProfile;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.BlockEvent;
 import io.netty.channel.embedded.EmbeddedChannel;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -77,9 +74,9 @@ public final class ExcavationHarvestRuntimeChecks {
 
     public static void run(GameTestHelper test) {
         try (var check = new Check(test);
-             var before = new FabricProbe("BEFORE", check, 1);
-             var canceled = new FabricProbe("CANCELED", check, 2);
-             var after = new FabricProbe("AFTER", check, 3)) {
+             var before = new BreakPhaseProbe(NativeBreakPhases.Phase.BEFORE, check, 1);
+             var canceled = new BreakPhaseProbe(NativeBreakPhases.Phase.CANCELED, check, 2);
+             var after = new BreakPhaseProbe(NativeBreakPhases.Phase.AFTER, check, 3)) {
             check.start();
             check.boundariesAndProtection();
             check.staleAndNested();
@@ -385,39 +382,40 @@ public final class ExcavationHarvestRuntimeChecks {
         }
     }
 
-    /** Fabric has no unregister API. Temporarily decorate its actual native
-     * invoker, calling existing listeners first, then restore the EXACT old
-     * invoker in finally. No permanent listener/phase/framework or production
-     * Fabric dependency. This intentionally fails loudly if Fabric's shape drifts. */
-    private static final class FabricProbe implements AutoCloseable {
-        private final Object event, previous;
-        private final Field invoker;
-        private FabricProbe(String name, Check check, int index) {
-            try {
-                var owner = Class.forName("net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents");
-                event = owner.getField(name).get(null);
-                invoker = event.getClass().getSuperclass().getDeclaredField("invoker"); invoker.setAccessible(true);
-                previous = invoker.get(event);
-                Class<?> callback = Class.forName(owner.getName() + "$" + (index == 1 ? "Before" : index == 2 ? "Canceled" : "After"));
-                invoker.set(event, Proxy.newProxyInstance(callback.getClassLoader(), new Class<?>[]{callback}, (proxy, method, args) -> {
-                    Object original;
-                    try { original = method.invoke(previous, args); }
-                    catch (InvocationTargetException failure) { throw failure.getCause(); }
-                    if (args != null && args.length == 5 && args[0] == check.level && args[1] == check.player && check.target.equals(args[2])) {
-                        check.events[index]++;
-                        if (index == 1) {
-                            if (!Boolean.TRUE.equals(original)) return false;
-                            check.beforeAction.run(); return !check.cancel;
-                        }
-                        if (index == 3) check.afterAction.run();
+    /** The loader's own BEFORE/CANCELED/AFTER phase of one break. The loader owns the
+     * mechanism: Fabric decorates its own event invoker, NeoForge observes its native
+     * {@code BlockEvent.BreakEvent} and its real removal. No loader class is named here. */
+    private static final class BreakPhaseProbe implements AutoCloseable {
+        private final NativeBreakPhases probe;
+        private BreakPhaseProbe(NativeBreakPhases.Phase phase, Check check, int index) {
+            NativeBreakPhases.Listener listener = switch (phase) {
+                case BEFORE -> new NativeBreakPhases.Listener() {
+                    @Override public boolean before(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
+                        if (!observed(check, index, level, player, pos)) return true;
+                        check.beforeAction.run();
+                        return !check.cancel;
                     }
-                    return original;
-                }));
-            } catch (ReflectiveOperationException failure) { throw new IllegalStateException("Fabric native event probe unavailable", failure); }
+                };
+                case CANCELED -> new NativeBreakPhases.Listener() {
+                    @Override public void canceled(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
+                        observed(check, index, level, player, pos);
+                    }
+                };
+                case AFTER -> new NativeBreakPhases.Listener() {
+                    @Override public void after(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
+                        if (!observed(check, index, level, player, pos)) return;
+                        check.afterAction.run();
+                    }
+                };
+            };
+            probe = NativeBreakPhases.Holder.factory().install(check.level, check.player, phase, listener);
         }
-        @Override public void close() {
-            try { invoker.set(event, previous); }
-            catch (IllegalAccessException failure) { throw new IllegalStateException("Could not restore Fabric native event invoker", failure); }
+        /** The exact filter of the original loader event: this level, this player, this cell. */
+        private static boolean observed(Check check, int index, ServerLevel level, ServerPlayer player, BlockPos pos) {
+            if (level != check.level || player != check.player || !check.target.equals(pos)) return false;
+            check.events[index]++;
+            return true;
         }
+        @Override public void close() { probe.close(); }
     }
 }

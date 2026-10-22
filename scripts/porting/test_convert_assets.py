@@ -95,16 +95,24 @@ class FoundationAssetsTest(unittest.TestCase):
                 self.assertRegex(relative, r"^[a-z0-9/._-]+$")
         # Explicit native adapters only. Warp shaders have a separate deterministic
         # GLSL150 conversion; none are bulk-copied into Minecraft's namespace.
-        self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh", "core/monster_lit_particle.json", "core/monster_lit_particle.fsh",
+        # linked_mirror is the projective core shader of the linked mirror: the original used
+        # fixed-function glTexGen, which 1.21.1 does not have, so the projection is a core shader
+        # modelled on vanilla rendertype_end_portal.
+        self.assertEqual({"core/node_stabilizer_bubble.json", "core/node_stabilizer_bubble.fsh",
+                          "core/monster_lit_particle.json", "core/monster_lit_particle.fsh",
+                          "core/linked_mirror.json", "core/linked_mirror.fsh", "core/linked_mirror.vsh",
                           "post/warp_blurred.json", "post/warp_death_gaze.json", "post/warp_hunger.json", "post/warp_sun_scorned.json"},
                          {path.relative_to(converter.ASSETS / "shaders").as_posix()
                           for path in (converter.ASSETS / "shaders").rglob("*") if path.is_file()})
         # 1.21.1 resolves a post program in the DEFAULT namespace only
         # (net.minecraft.client.renderer.EffectInstance), so the three original TC4
         # programs are ported into assets/minecraft/shaders/program and nowhere else.
+        # thaumcraft_blur is the fourth: the original blurtc chain names Mojang's 1.7.10
+        # "blur", whose kernel is NOT the modern box_blur, so its GLSL is ported too.
         self.assertEqual({"thaumcraft_bloom2.fsh", "thaumcraft_bloom2.json", "thaumcraft_bloom_color.fsh",
                           "thaumcraft_bloom_color.json", "thaumcraft_bloom_vertex_base.vsh",
-                          "thaumcraft_color_convolve2.fsh", "thaumcraft_color_convolve2.json"},
+                          "thaumcraft_color_convolve2.fsh", "thaumcraft_color_convolve2.json",
+                          "thaumcraft_blur.fsh", "thaumcraft_blur.json", "thaumcraft_blur_vertex.vsh"},
                          {path.name for path in (converter.RESOURCE_ROOT / "assets/minecraft/shaders/program").glob("*") if path.is_file()})
         self.assertFalse((converter.RESOURCE_ROOT / "assets/minecraft/shaders/post").exists())
         pack = json.loads((converter.RESOURCE_ROOT / "pack.mcmeta").read_text(encoding="utf-8"))

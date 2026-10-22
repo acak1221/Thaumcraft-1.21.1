@@ -55,6 +55,83 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 ORIGINAL_JAR = ROOT / "Thaumcraft-1.7.10-4.2.3.5.jar"
 FALLBACK = ROOT / "thaumcraft_src/assets/minecraft/shaders"
+# The vanilla 1.7.10 ``blur`` program, embedded rather than read from the client JAR.
+#
+# The warp chain needs it because TC4's own blurtc.json names the vanilla OptiFine program,
+# and the TC4 JAR does not carry it. It is embedded so that the conversion stays
+# deterministic and reproducible from this repository alone: a build machine has no
+# Mojang client JAR, and a conversion that silently skips an asset when the JAR is absent
+# would produce different output on different machines.
+#
+# Provenance: assets/minecraft/shaders/program/blur.fsh and blur.json of the official
+# Mojang 1.7.10 client JAR, SHA1 e80d9b3bf5085002218d4be59e668bac718abbc6.
+# Source SHA256: blur.fsh f76a326cbaeeae0b4d5001fbd5d69f381153f8ffa7bc30ece510f0124860c709,
+#                blur.json 47745ace34856c757e998393ba03da524abc158cce6c1462f7daa4ea49853d67
+MOJANG_1710_BLUR_FSH = """#version 120
+
+uniform sampler2D DiffuseSampler;
+
+varying vec2 texCoord;
+varying vec2 oneTexel;
+
+uniform vec2 InSize;
+
+uniform vec2 BlurDir;
+uniform float Radius;
+
+void main() {
+    vec4 blurred = vec4(0.0);
+    float totalStrength = 0.0;
+    for(float r = -Radius; r <= Radius; r += 1.0) {
+        float strength = abs(1.0 - r / Radius);
+        strength = strength * strength;
+        totalStrength = totalStrength + strength;
+        blurred = blurred + texture2D(DiffuseSampler, texCoord + oneTexel * r * BlurDir) * strength;
+    }
+    gl_FragColor = vec4(blurred.rgb / totalStrength, texture2D(DiffuseSampler, texCoord).a);
+}
+"""
+
+# The vanilla 1.7.10 ``sobel.vsh``, which the original blur.json names as its vertex program.
+# Same provenance and the same reason for embedding: SHA256
+# 60b7661feb6305f7bb72a7055493b36cf64290f9b43c8207d451fd1ec7214705.
+MOJANG_1710_SOBEL_VSH = """#version 120
+
+attribute vec4 Position;
+
+uniform mat4 ProjMat;
+uniform vec2 InSize;
+uniform vec2 OutSize;
+
+varying vec2 texCoord;
+varying vec2 oneTexel;
+
+void main(){
+    vec4 outPos = ProjMat * vec4(Position.xy, 0.0, 1.0);
+    gl_Position = vec4(outPos.xy, 0.2, 1.0);
+
+    oneTexel = 1.0 / InSize;
+
+    texCoord = Position.xy / OutSize;
+    texCoord.y = 1.0 - texCoord.y;
+}
+"""
+
+MOJANG_1710_BLUR_JSON = {
+    "blend": {"func": "add", "srcrgb": "one", "dstrgb": "zero"},
+    "vertex": "sobel",
+    "fragment": "blur",
+    "attributes": ["Position"],
+    "samplers": [{"name": "DiffuseSampler"}],
+    "uniforms": [
+        {"name": "ProjMat", "type": "matrix4x4", "count": 16,
+         "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]},
+        {"name": "InSize", "type": "float", "count": 2, "values": [1.0, 1.0]},
+        {"name": "OutSize", "type": "float", "count": 2, "values": [1.0, 1.0]},
+        {"name": "BlurDir", "type": "float", "count": 2, "values": [1.0, 1.0]},
+        {"name": "Radius", "type": "float", "count": 1, "values": [5.0]},
+    ],
+}
 POST_TARGET = ROOT / "common/src/main/resources/assets/thaumcraft/shaders/post"
 PROGRAM_TARGET = ROOT / "common/src/main/resources/assets/minecraft/shaders/program"
 STALE_PROGRAM_DIR = ROOT / "common/src/main/resources/assets/thaumcraft/shaders/program"
@@ -73,10 +150,16 @@ PROGRAMS = {
     "bloomVertexBase": "thaumcraft_bloom_vertex_base",
     "color_convolve2": "thaumcraft_color_convolve2",
 }
-# The original chain passes that name a vanilla OptiFine program.  1.21.1 has no
-# OptiFine ``blur``; the nearest vanilla program is ``box_blur``, which keeps the
-# original Radius and the original two axis pass order.
-VANILLA_PASS = {"blur": "box_blur", "color_convolve": "color_convolve", "blit": "blit"}
+# The original chain passes that name a vanilla OptiFine program.
+#
+# ``blur`` is NOT replaceable by 1.21.1's ``box_blur``. Mojang's 1.7.10 blur.fsh weights
+# a sample by (1 - r/Radius) squared and normalises by the sum of the weights; the modern
+# box_blur uses a different kernel. Naming the vanilla program would silently replace the
+# original warp effect with a different one, so the original GLSL is ported to GLSL 150
+# and shipped as ``thaumcraft_blur`` (see BLUR_PROGRAM below).
+VANILLA_PASS = {"blur": "thaumcraft_blur", "color_convolve": "color_convolve", "blit": "blit"}
+# The ported 1.7.10 program whose source is not in the TC4 jar (it is a vanilla asset).
+BLUR_PROGRAM = "thaumcraft_blur"
 
 
 def read_original(relative: str) -> str | None:
@@ -166,6 +249,15 @@ def main() -> None:
         write(PROGRAM_TARGET / f"{native}.json", json.dumps(description, indent=2) + "\n")
         fragment_source = read_original(f"program/{original}.fsh")
         write(PROGRAM_TARGET / f"{native}.fsh", glsl150(fragment_source, "fsh"))
+
+    # The ported vanilla 1.7.10 blur: the name the chain refers to is not the modern
+    # ``box_blur``, whose kernel differs, so the original GLSL is shipped instead.
+    blur = dict(MOJANG_1710_BLUR_JSON)
+    blur["vertex"] = "thaumcraft_blur_vertex"
+    blur["fragment"] = "thaumcraft_blur"
+    write(PROGRAM_TARGET / "thaumcraft_blur.json", json.dumps(blur, indent=2) + "\n")
+    write(PROGRAM_TARGET / "thaumcraft_blur.fsh", glsl150(MOJANG_1710_BLUR_FSH, "fsh"))
+    write(PROGRAM_TARGET / "thaumcraft_blur_vertex.vsh", glsl150(MOJANG_1710_SOBEL_VSH, "vsh"))
 
     # The shared vertex program of the two bloom programs.
     vertex_source = read_original("program/bloomVertexBase.vsh")

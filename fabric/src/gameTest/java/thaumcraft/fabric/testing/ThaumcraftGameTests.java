@@ -86,6 +86,69 @@ import thaumcraft.common.testing.InfusionComponentPredicateGameTests;
 import thaumcraft.common.testing.BorePistonAspectRuntimeChecks;
 
 public final class ThaumcraftGameTests implements FabricGameTest {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropAspectJar(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.jarRemoval(test, false);
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropVoidJar(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.jarRemoval(test, true);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropHungryChest(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "hungry_chest");
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropPedestal(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "arcane_pedestal");
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropDeconstruction(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "deconstruction_table");
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropWorkbench(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "arcane_workbench");
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropAlchemyFurnace(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "alchemy_furnace");
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropFocalManipulator(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "focal_manipulator");
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropThaumatorium(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.inventoryRemoval(test, "thaumatorium");
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropMagicBoxCreative(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxRemoval(test, "creative");
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropMagicBoxSilk(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxRemoval(test, "silk");
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropMagicBoxExplosion(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxRemoval(test, "explosion");
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropMagicBoxDestroy(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxNonPlayerRemoval(test, false);
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void blockDropMagicBoxSetBlock(GameTestHelper test) {
+        thaumcraft.common.testing.BlockDropRuntimeChecks.magicBoxNonPlayerRemoval(test, true);
+    }
+
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = "mound_rng_isolation")
     public void moundGenerationRandomIsIsolated(GameTestHelper test) {
         thaumcraft.common.lib.world.MoundRandomRuntimeChecks.generationRandomIsIsolated(test);

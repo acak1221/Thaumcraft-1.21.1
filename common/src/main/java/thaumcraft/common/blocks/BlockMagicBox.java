@@ -71,11 +71,11 @@ public final class BlockMagicBox extends BaseEntityBlock {
         return InteractionResult.CONSUME;
     }
 
-    /** BlockMagicBox:64-70 - the box drops its whole content. */
-    @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof TileMagicBox box) {
+    /** Oracle BlockMagicBox:72-75: breakBlock evacuates stock for every removal cause. */
+    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
+        if (!replacement.is(this) && !level.isClientSide && level.getBlockEntity(pos) instanceof TileMagicBox box) {
             box.dropContents(level, pos);
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.onRemove(state, level, pos, replacement, moving);
     }
 }

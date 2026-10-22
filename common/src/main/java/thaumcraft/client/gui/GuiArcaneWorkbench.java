@@ -16,7 +16,7 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 import thaumcraft.common.items.wands.WandData;
 
 /** Original 190x234 workbench art/slot/aspect positions; prices and preview come from the server. */
-public final class GuiArcaneWorkbench extends AbstractContainerScreen<ContainerArcaneWorkbench> {
+public final class GuiArcaneWorkbench extends ThaumcraftContainerScreen<ContainerArcaneWorkbench> {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/gui_arcaneworkbench.png");
     private static final int[][] ASPECT_LOCS = {{72, 21}, {24, 43}, {24, 102}, {72, 124}, {120, 102}, {120, 43}};
 

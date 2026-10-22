@@ -13,7 +13,7 @@ import thaumcraft.common.items.golems.GolemUpgrade;
 
 /** TC4 GuiTravelingTrunk: owner caption at half size, a health bar, the Earth row band and the "stay" mark with its button. The mark
  * is read from the synced trunk, never flipped locally; the click only asks the server (menu button 1) and prints the reply line. */
-public final class GuiTravelingTrunk extends AbstractContainerScreen<ContainerTravelingTrunk> {
+public final class GuiTravelingTrunk extends ThaumcraftContainerScreen<ContainerTravelingTrunk> {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/guitrunkbase.png");
     private static final int CAPTION_COLOR = 0xFFC0A0F0;
 

@@ -14,7 +14,7 @@ import thaumcraft.common.container.ContainerDeconstructionTable;
 import thaumcraft.common.lib.research.DeconstructionRules;
 
 /** Original GUI art, coordinates and countdown; button 1 requests the real server reward. */
-public final class GuiDeconstructionTable extends AbstractContainerScreen<ContainerDeconstructionTable> {
+public final class GuiDeconstructionTable extends ThaumcraftContainerScreen<ContainerDeconstructionTable> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("thaumcraft", "textures/gui/gui_decontable.png");
     private static final SoundEvent CLAIM = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("thaumcraft", "hhoff"));
     public GuiDeconstructionTable(ContainerDeconstructionTable menu, Inventory inventory, Component title) { super(menu, inventory, title); imageWidth = 176; imageHeight = 166; }

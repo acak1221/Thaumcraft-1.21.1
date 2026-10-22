@@ -12,7 +12,7 @@ import thaumcraft.common.entities.monster.EntityPech;
 
 /** Original175x232 GUI and25x25 dice target. Native menu-button networking
  * requests one server trade; the client never generates or publishes rewards. */
-public final class GuiPech extends AbstractContainerScreen<ContainerPech> {
+public final class GuiPech extends ThaumcraftContainerScreen<ContainerPech> {
     private static final ResourceLocation TEXTURE=ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/gui/gui_pech.png");
     public GuiPech(ContainerPech menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=ContainerPech.IMAGE_WIDTH;imageHeight=ContainerPech.IMAGE_HEIGHT;}
     @Override protected void renderLabels(GuiGraphics graphics,int mouseX,int mouseY){}

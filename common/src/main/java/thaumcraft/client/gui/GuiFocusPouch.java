@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.common.container.ContainerFocusPouch;
 
 /** Original175x232 art,18-slot coordinates and locked-hotbar marker. */
-public final class GuiFocusPouch extends AbstractContainerScreen<ContainerFocusPouch> {
+public final class GuiFocusPouch extends ThaumcraftContainerScreen<ContainerFocusPouch> {
     private static final ResourceLocation TEXTURE=ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/gui/gui_focuspouch.png");
     public GuiFocusPouch(ContainerFocusPouch menu,Inventory inventory,Component title){super(menu,inventory,title);imageWidth=175;imageHeight=232;}
     // Original GuiFocusPouch draws the sheet and the locked marker with the

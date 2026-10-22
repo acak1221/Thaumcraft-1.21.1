@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.common.container.ContainerHoverHarness;
 
 /** Original default176x166 art and actual source hotbar marker. */
-public final class GuiHoverHarness extends AbstractContainerScreen<ContainerHoverHarness> {
+public final class GuiHoverHarness extends ThaumcraftContainerScreen<ContainerHoverHarness> {
     private static final ResourceLocation TEXTURE=ResourceLocation.fromNamespaceAndPath("thaumcraft","textures/gui/guihoverharness.png");
     public GuiHoverHarness(ContainerHoverHarness menu,Inventory inventory,Component title) {super(menu,inventory,title);}
     // Original GuiHoverHarness draws the sheet and the locked marker with the

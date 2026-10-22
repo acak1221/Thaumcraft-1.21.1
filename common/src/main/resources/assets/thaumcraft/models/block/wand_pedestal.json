@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "thaumcraft:blocks/pedestal_side",
-    "side": "thaumcraft:blocks/pedestal_side",
-    "top": "thaumcraft:blocks/pedestal_top",
-    "bottom": "thaumcraft:blocks/pedestal_side"
+    "particle": "thaumcraft:blocks/wandpedestal_side",
+    "side": "thaumcraft:blocks/wandpedestal_side",
+    "top": "thaumcraft:blocks/wandpedestal_top",
+    "bottom": "thaumcraft:blocks/pedestal_top"
   },
   "elements": [
     {

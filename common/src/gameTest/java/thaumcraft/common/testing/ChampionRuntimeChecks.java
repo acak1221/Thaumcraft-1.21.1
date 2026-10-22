@@ -236,7 +236,7 @@ public final class ChampionRuntimeChecks {
 
             // The original warded champion: the original promotion gave it thirty health more,
             // double damage and the name of its modifier (oracle EntityUtils.makeChampion:243-254),
-            // the original makeChampion case five gave it half of its maximum health as its ward
+            // the original makeChampion case five gave it half of its base maximum health as its ward
             // (oracle EntityUtils.makeChampion:271-274) and the original modifier regained one
             // point of that ward on every twenty fifth tick (oracle ChampionModWarded:25-30).
             var warded = lane.add(EntityType.SPIDER.create(level));
@@ -247,8 +247,8 @@ public final class ChampionRuntimeChecks {
                     "the warded champion keeps the original thirty health, double damage and name: "
                             + warded.getMaxHealth() + " " + warded.getAttributeValue(Attributes.ATTACK_DAMAGE)
                             + " " + warded.getCustomName());
-            test.assertTrue(Math.abs(warded.getAbsorptionAmount() - 23F) < 1e-4F,
-                    "the warded champion carries the original ward of half of its maximum health: "
+            test.assertTrue(Math.abs(warded.getAbsorptionAmount() - 8F) < 1e-4F,
+                    "the warded champion carries the original ward of half of its base maximum health: "
                             + warded.getAbsorptionAmount());
             // The spent ward: the original modifier regains one point of it on the twenty fifth tick.
             warded.setAbsorptionAmount(0F);

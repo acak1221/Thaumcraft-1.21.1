@@ -136,17 +136,16 @@ class ChampionRulesTest {
         assertEquals(ChampionRules.TIER_NONE, ChampionRules.tierFor(Creeper.class));
     }
 
-    @Test void originalWardedChampionTakesHalfOfItsTotalMaxHealthAsItsWard() {
+    @Test void originalWardedChampionTakesHalfOfItsBaseMaxHealthAsItsWard() {
         // Oracle EntityUtils.makeChampion:271-274 - the ward of the warded champion is half of
-        // the total of the max health attribute, the base of the mob plus the thirty health of
-        // the champion, so a champion of a spider keeps twenty three of ward.
+        // base max health (func_111125_b), excluding the thirty health bonus.
         AttributeInstance health = new AttributeInstance(Attributes.MAX_HEALTH, instance -> {});
         health.setBaseValue(16.0D);
         health.addPermanentModifier(new AttributeModifier(ChampionRules.Adapter.CHAMPION_HEALTH_ID, 30.0D,
                 AttributeModifier.Operation.ADD_VALUE));
         assertEquals(46.0D, health.getValue(), 1.0E-9D);
-        assertEquals(23, ChampionRules.wardedChampionWard(health));
-        // The base health of the mob alone would only be eight.
+        assertEquals(8, ChampionRules.wardedChampionWard(health));
+        // Attribute bonuses must not increase the initial ward or regeneration ceiling.
         assertEquals(8, ChampionWiringRules.wardedChampionWard(health.getBaseValue()));
     }
 

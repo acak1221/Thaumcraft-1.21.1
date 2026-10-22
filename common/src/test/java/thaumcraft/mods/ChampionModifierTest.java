@@ -171,10 +171,10 @@ class ChampionModifierTest {
         assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, true), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
         // The ward is never a heal of the champion.
         assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 20.0f, 0.0f, false), new ScriptedRandom(0.5f, 0)).heal(), 0.0f);
-        // The ceiling of the ward is half of the total maximum health of the champion, so a
-        // champion of a spider with forty six health regenerates its ward up to twenty three.
-        assertEquals(1.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 46.0f, 22.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
-        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 46.0f, 23.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
+        // The adapter supplies base max health: a base16 spider's ceiling is8,
+        // independent of the champion bonus that raises its total max health to46.
+        assertEquals(1.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 16.0f, 7.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
+        assertEquals(0.0f, new ChampionModWarded().performEffect(tick(25, 5.0f, 16.0f, 8.0f, false), new ScriptedRandom(0.5f, 0)).absorption(), 0.0f);
     }
 
     @Test void originalInfestedChampionSpawnsASpiderlingWithFortyPercentChance() {

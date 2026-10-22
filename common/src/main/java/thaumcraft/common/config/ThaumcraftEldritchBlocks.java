@@ -288,9 +288,10 @@ public final class ThaumcraftEldritchBlocks {
             () -> new JarBlock(0, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
 
     public static final RegistrySupplier<JarBlock> JAR_NODE = BLOCKS.register("jar_node",
-            // Original BlockJar:87-90 - the node jar is the same block as the ordinary jar and
-            // emits the same light level 9. The original has no per metadata light override.
-            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> BlockJar.LIGHT)));
+            // Original BlockJar:87-90 and :314-320 - the jar block sets the light value
+            // 0.66, which the 1.7.10 setter stores as (int)(15*0.66) = 9, but the node
+            // jar overrides it with eleven.
+            () -> new JarBlock(1, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3F, 0.0F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 11)));
 
     public static final RegistrySupplier<EtherealBloomBlock> ETHEREAL_BLOOM = BLOCKS.register("ethereal_bloom",
             () -> new EtherealBloomBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
